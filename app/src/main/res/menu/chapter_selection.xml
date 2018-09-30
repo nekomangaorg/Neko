@@ -28,4 +28,7 @@
           android:icon="@drawable/ic_select_all_white_24dp"
           app:showAsAction="ifRoom"/>
 
+    <item android:id="@+id/action_select_between"
+          android:title="@string/select_between"/>
+
 </menu>
