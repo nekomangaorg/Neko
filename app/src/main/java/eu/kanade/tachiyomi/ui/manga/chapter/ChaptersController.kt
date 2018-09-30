@@ -313,6 +313,7 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
             R.id.action_mark_as_unread -> markAsUnread(getSelectedChapters())
             R.id.action_download -> downloadChapters(getSelectedChapters())
             R.id.action_delete -> showDeleteChaptersConfirmationDialog()
+            R.id.action_select_between -> selectBetween()
             else -> return false
         }
         return true
@@ -347,6 +348,27 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
         adapter.selectAll()
         selectedItems.addAll(adapter.items)
         actionMode?.invalidate()
+    }
+
+    private fun selectBetween() {
+        val adapter = adapter ?: return
+        if (selectedItems.size == 2) {
+            val first = adapter.items.indexOf(selectedItems.first())
+            val last = adapter.items.indexOf(selectedItems.last())
+            if (first > last) {
+                selectedItems.clear()
+                selectedItems.addAll(adapter.items.subList(last, first + 1))
+                selectedItems.forEach { adapter.addSelection(adapter.items.indexOf(it)) }
+                adapter.notifyDataSetChanged()
+
+            } else {
+                selectedItems.clear()
+                selectedItems.addAll(adapter.items.subList(first, last + 1))
+                selectedItems.forEach { adapter.addSelection(adapter.items.indexOf(it)) }
+                adapter.notifyDataSetChanged()
+            }
+            actionMode?.invalidate()
+        }
     }
 
     private fun markAsRead(chapters: List<ChapterItem>) {
