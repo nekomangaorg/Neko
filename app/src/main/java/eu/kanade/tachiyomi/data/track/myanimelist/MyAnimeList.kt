@@ -13,8 +13,7 @@ import java.net.URI
 
 class Myanimelist(private val context: Context, id: Int) : TrackService(id) {
 
-    companion object {
-
+    private companion object {
         const val READING = 1
         const val COMPLETED = 2
         const val ON_HOLD = 3
@@ -89,7 +88,7 @@ class Myanimelist(private val context: Context, id: Int) : TrackService(id) {
     }
 
     override fun search(query: String): Observable<List<TrackSearch>> {
-        return api.search(query)
+        return api.search(query, getCSRF())
     }
 
     override fun refresh(track: Track): Observable<Track> {
