@@ -24,6 +24,45 @@ import java.util.zip.GZIPInputStream
 
 class MyanimelistApi(private val client: OkHttpClient) {
 
+    private companion object {
+        const val baseUrl = "https://myanimelist.net"
+        const val baseMangaUrl = "$baseUrl/manga/"
+        const val baseModifyListUrl = "$baseUrl/ownlist/manga"
+
+        const val CSRF = "csrf_token"
+        const val TD = "td"
+        const val FINISHED = "Finished"
+        const val PUBLISHING = "Publishing"
+
+        const val PREFIX_MY = "my:"
+
+        fun mangaUrl(remoteId: Int) = baseMangaUrl + remoteId
+
+        fun Element.searchTitle() = select("strong").text()!!
+
+        fun Element.searchTotalChapters() = if (select(TD)[4].text() == "-") 0 else select(TD)[4].text().toInt()
+
+        fun Element.searchCoverUrl() = select("img")
+                .attr("data-src")
+                .split("\\?")[0]
+                .replace("/r/50x70/", "/")
+
+        fun Element.searchMediaId() = select("div.picSurround")
+                .select("a").attr("id")
+                .replace("sarea", "")
+                .toInt()
+
+        fun Element.searchSummary() = select("div.pt4")
+                .first()
+                .ownText()!!
+
+        fun Element.searchPublishingStatus() = if (select(TD).last().text() == "-") PUBLISHING else FINISHED
+
+        fun Element.searchPublishingType() = select(TD)[2].text()!!
+
+        fun Element.searchStartDate() = select(TD)[6].text()!!
+    }
+
     fun addLibManga(track: Track, csrf: String): Observable<Track> {
         return Observable.defer {
             client.newCall(POST(url = getAddUrl(), body = getMangaPostPayload(track, csrf)))
@@ -40,32 +79,41 @@ class MyanimelistApi(private val client: OkHttpClient) {
         }
     }
 
-    fun search(query: String): Observable<List<TrackSearch>> {
-        return client.newCall(GET(getSearchUrl(query)))
-                .asObservable()
-                .flatMap { response ->
-                    Observable.from(Jsoup.parse(response.consumeBody())
-                            .select("div.js-categories-seasonal.js-block-list.list")
-                            .select("table").select("tbody")
-                            .select("tr").drop(1))
-                }
-                .filter { row ->
-                    row.select(TD)[2].text() != "Novel"
-                }
-                .map { row ->
-                    TrackSearch.create(TrackManager.MYANIMELIST).apply {
-                        title = row.searchTitle()
-                        media_id = row.searchMediaId()
-                        total_chapters = row.searchTotalChapters()
-                        summary = row.searchSummary()
-                        cover_url = row.searchCoverUrl()
-                        tracking_url = mangaUrl(media_id)
-                        publishing_status = row.searchPublishingStatus()
-                        publishing_type = row.searchPublishingType()
-                        start_date = row.searchStartDate()
+    fun search(query: String, csrf: String): Observable<List<TrackSearch>> {
+        return if (query.startsWith(PREFIX_MY)) {
+                val realQuery = query.substring(PREFIX_MY.length).toLowerCase().trim()
+                getList(csrf)
+                        .flatMap { Observable.from(it) }
+                        .filter { realQuery in it.title.toLowerCase() }
+                        .toList()
+        }
+        else {
+            client.newCall(GET(getSearchUrl(query)))
+                    .asObservable()
+                    .flatMap { response ->
+                        Observable.from(Jsoup.parse(response.consumeBody())
+                                .select("div.js-categories-seasonal.js-block-list.list")
+                                .select("table").select("tbody")
+                                .select("tr").drop(1))
                     }
-                }
-                .toList()
+                    .filter { row ->
+                        row.select(TD)[2].text() != "Novel"
+                    }
+                    .map { row ->
+                        TrackSearch.create(TrackManager.MYANIMELIST).apply {
+                            title = row.searchTitle()
+                            media_id = row.searchMediaId()
+                            total_chapters = row.searchTotalChapters()
+                            summary = row.searchSummary()
+                            cover_url = row.searchCoverUrl()
+                            tracking_url = mangaUrl(media_id)
+                            publishing_status = row.searchPublishingStatus()
+                            publishing_type = row.searchPublishingType()
+                            start_date = row.searchStartDate()
+                        }
+                    }
+                    .toList()
+        }
     }
 
     private fun getList(csrf: String): Observable<List<TrackSearch>> {
@@ -228,49 +276,12 @@ class MyanimelistApi(private val client: OkHttpClient) {
         }
     }
 
-    companion object {
-        const val baseUrl = "https://myanimelist.net"
-        private const val baseMangaUrl = "$baseUrl/manga/"
-        private const val baseModifyListUrl = "$baseUrl/ownlist/manga"
-
-        fun mangaUrl(remoteId: Int) = baseMangaUrl + remoteId
-
-        fun Element.searchTitle() = select("strong").text()!!
-
-        fun Element.searchTotalChapters() = if (select(TD)[4].text() == "-") 0 else select(TD)[4].text().toInt()
-
-        fun Element.searchCoverUrl() = select("img")
-                .attr("data-src")
-                .split("\\?")[0]
-                .replace("/r/50x70/", "/")
-
-        fun Element.searchMediaId() = select("div.picSurround")
-                .select("a").attr("id")
-                .replace("sarea", "")
-                .toInt()
-
-        fun Element.searchSummary() = select("div.pt4")
-                .first()
-                .ownText()!!
-
-        fun Element.searchPublishingStatus() = if (select(TD).last().text() == "-") PUBLISHING else FINISHED
-
-        fun Element.searchPublishingType() = select(TD)[2].text()!!
-
-        fun Element.searchStartDate() = select(TD)[6].text()!!
-
-        fun getStatus(status: String) = when (status) {
-            "Reading" -> 1
-            "Completed" -> 2
-            "On-Hold" -> 3
-            "Dropped" -> 4
-            "Plan to Read" -> 6
-            else -> 1
-            }
-
-        const val CSRF = "csrf_token"
-        const val TD = "td"
-        private const val FINISHED = "Finished"
-        private const val PUBLISHING = "Publishing"
+    private fun getStatus(status: String) = when (status) {
+        "Reading" -> 1
+        "Completed" -> 2
+        "On-Hold" -> 3
+        "Dropped" -> 4
+        "Plan to Read" -> 6
+        else -> 1
     }
 }
