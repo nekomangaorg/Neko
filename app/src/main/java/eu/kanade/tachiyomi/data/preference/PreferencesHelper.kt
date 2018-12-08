@@ -47,6 +47,8 @@ class PreferencesHelper(val context: Context) {
 
     fun keepScreenOn() = rxPrefs.getBoolean(Keys.keepScreenOn, true)
 
+    fun skipDupeChapters() = prefs.getBoolean(Keys.skipDupeChapters, false)
+
     fun customBrightness() = rxPrefs.getBoolean(Keys.customBrightness, false)
 
     fun customBrightnessValue() = rxPrefs.getInteger(Keys.customBrightnessValue, 0)

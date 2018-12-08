@@ -83,6 +83,8 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
         }
     }
 
+
+    // TODO: position not set properly
     /**
      * Returns the current position of the given [view] on the adapter.
      */
