@@ -215,11 +215,9 @@ class ReaderPresenter(
     ): Observable<ViewerChapters> {
         return loader.loadChapter(chapter)
             .andThen(Observable.fromCallable {
-                val chapterPos = chapterList.indexOf(chapter)
-
                 ViewerChapters(chapter,
-                        chapterList.getOrNull(chapterPos - 1),
-                        chapterList.getOrNull(chapterPos + 1))
+                        findPreviousChapter(chapter),
+                        findNextChapter(chapter))
             })
             .observeOn(AndroidSchedulers.mainThread())
             .doOnNext { newChapters ->
@@ -231,6 +229,80 @@ class ReaderPresenter(
 
                 viewerChaptersRelay.call(newChapters)
             }
+    }
+
+    private fun findPreviousChapter(chapter: ReaderChapter): ReaderChapter? {
+        return if (preferences.skipDupeChapters()) findNextChapterInDirection(chapter, Direction.Previous)
+            else chapterList.getOrNull(chapterList.indexOf(chapter)-1)
+    }
+
+    private fun findNextChapter(chapter: ReaderChapter): ReaderChapter? {
+        return if (preferences.skipDupeChapters()) findNextChapterInDirection(chapter, Direction.Next)
+            else chapterList.getOrNull(chapterList.indexOf(chapter)+1)
+    }
+
+    /**
+     * Finds first non-duplicate next/previous chapter while attempting to keep same scanlator.
+     * Defaults to first one found if same scanlator cannot be found.
+     */
+    private fun findNextChapterInDirection(currentChapter: ReaderChapter, direction: Direction): ReaderChapter? {
+        var currentChapterPos = chapterList.indexOf(currentChapter)
+        val currentChapterNumber = currentChapter.chapter.chapter_number
+
+        val newChapter = when (direction) {
+            Direction.Previous -> findImmediatePreviousChapter(currentChapterPos, currentChapterNumber)
+            Direction.Next -> findImmediateNextChapter(currentChapterPos, currentChapterNumber)
+        }
+
+        val currentScanlator = currentChapter.chapter.scanlator
+        currentScanlator?.let {
+            currentChapterPos = chapterList.indexOf(newChapter)
+            val newChapterNumber = newChapter?.chapter?.chapter_number
+            var newCandidate = newChapter
+            val step = direction.value
+
+            while (newChapterNumber == newCandidate?.chapter?.chapter_number) {
+                if (newCandidate?.chapter?.scanlator == currentScanlator) return newCandidate
+
+                currentChapterPos += step
+                newCandidate = chapterList.getOrNull(currentChapterPos)
+            }
+        }
+
+        return newChapter
+    }
+
+    /**
+     * returns the first non-duplicate previous chapter
+     */
+    private fun findImmediatePreviousChapter(chapterPos: Int, currentChapterNumber: Float): ReaderChapter? {
+        var currentChapterPos = chapterPos
+        var previousChapter: ReaderChapter?
+
+        do {
+            previousChapter = chapterList.getOrNull(--currentChapterPos)
+        } while (previousChapter != null && previousChapter.chapter.chapter_number >= currentChapterNumber)
+
+        return previousChapter
+    }
+
+    /**
+     * returns the first non-duplicate next chapter
+     */
+    private fun findImmediateNextChapter(chapterPos: Int, currentChapterNumber: Float): ReaderChapter? {
+        var currentChapterPos = chapterPos
+        var nextChapter: ReaderChapter?
+
+        do {
+            nextChapter = chapterList.getOrNull(++currentChapterPos)
+        } while (nextChapter != null && nextChapter.chapter.chapter_number <= currentChapterNumber)
+
+        return nextChapter
+    }
+
+    private enum class Direction(val value: Int) {
+        Previous(-1),
+        Next(1)
     }
 
     /**

@@ -18,6 +18,8 @@ object PreferenceKeys {
     const val fullscreen = "fullscreen"
 
     const val keepScreenOn = "pref_keep_screen_on_key"
+    
+    const val skipDupeChapters = "pref_skip_dupe_chapters_key"
 
     const val customBrightness = "pref_custom_brightness_key"
 
