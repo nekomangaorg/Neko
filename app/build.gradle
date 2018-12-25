@@ -34,12 +34,12 @@ android {
     publishNonDefault true
 
     defaultConfig {
-        applicationId "eu.kanade.tachiyomi"
+        applicationId "eu.kanade.tachiyomi.axiaz"
         minSdkVersion 16
         targetSdkVersion 27
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-        versionCode 38
-        versionName "0.8.0"
+        versionCode 39
+        versionName "1.8.0"
 
         buildConfigField "String", "COMMIT_COUNT", "\"${getCommitCount()}\""
         buildConfigField "String", "COMMIT_SHA", "\"${getGitSha()}\""
@@ -116,11 +116,11 @@ dependencies {
     implementation "com.android.support:support-annotations:$support_library_version"
     implementation "com.android.support:customtabs:$support_library_version"
 
-    implementation 'com.android.support.constraint:constraint-layout:1.1.2'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
 
     implementation 'com.android.support:multidex:1.0.3'
 
-    standardImplementation 'com.google.firebase:firebase-core:11.8.0'
+    standardImplementation 'com.google.firebase:firebase-core:16.0.6'
 
     // ReactiveX
     implementation 'io.reactivex:rxandroid:1.2.1'
@@ -151,11 +151,11 @@ dependencies {
     implementation 'com.github.inorichi:unifile:e9ee588'
 
     // HTML parser
-    implementation 'org.jsoup:jsoup:1.10.2'
+    implementation 'org.jsoup:jsoup:1.11.3'
 
     // Job scheduling
     implementation 'com.evernote:android-job:1.2.5'
-    implementation 'com.google.android.gms:play-services-gcm:11.8.0'
+    implementation 'com.google.android.gms:play-services-gcm:16.0.0'
 
     // Changelog
     implementation 'com.github.gabrielemariotti.changeloglib:changelog:2.1.0'
