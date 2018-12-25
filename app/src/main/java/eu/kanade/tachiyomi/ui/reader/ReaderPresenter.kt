@@ -232,35 +232,36 @@ class ReaderPresenter(
     }
 
     private fun findPreviousChapter(chapter: ReaderChapter): ReaderChapter? {
-        return if (preferences.skipDupeChapters() && chapter.chapter.chapter_number >= 0) findNextChapterInDirection(chapter, Direction.Previous)
+        return if (preferences.skipDupeChapters()) findNextChapterInDirection(chapter, Direction.Previous)
             else chapterList.getOrNull(chapterList.indexOf(chapter)-1)
     }
 
     private fun findNextChapter(chapter: ReaderChapter): ReaderChapter? {
-        return if (preferences.skipDupeChapters() && chapter.chapter.chapter_number >= 0) findNextChapterInDirection(chapter, Direction.Next)
+        return if (preferences.skipDupeChapters()) findNextChapterInDirection(chapter, Direction.Next)
             else chapterList.getOrNull(chapterList.indexOf(chapter)+1)
     }
 
     private fun findNextChapterInDirection(currentChapter: ReaderChapter, direction: Direction): ReaderChapter? {
         var currentChapterPos = chapterList.indexOf(currentChapter)
         val currentChapterNumber = currentChapter.chapter.chapter_number
+        val currentScanlator = currentChapter.chapter.scanlator
+        if (currentChapterNumber < 0 || currentScanlator == null)
+            return chapterList.getOrNull(currentChapterPos + direction.value)
 
         val newChapter = when (direction) {
             Direction.Previous -> findImmediatePreviousChapter(currentChapterPos, currentChapterNumber)
             Direction.Next -> findImmediateNextChapter(currentChapterPos, currentChapterNumber)
         }
 
-        val currentScanlator = currentChapter.chapter.scanlator
-        if (newChapter != null && currentScanlator != null) {
+        newChapter?.let{
             currentChapterPos = chapterList.indexOf(newChapter)
-            val newChapterNumber = newChapter.chapter.chapter_number
-            var newCandidate = newChapter
-            val step = direction.value
+            val newChapterNumber = it.chapter.chapter_number
+            var newCandidate: ReaderChapter? = it
 
             while (newChapterNumber == newCandidate?.chapter?.chapter_number) {
                 if (newCandidate.chapter.scanlator == currentScanlator) return newCandidate
 
-                currentChapterPos += step
+                currentChapterPos += direction.value
                 newCandidate = chapterList.getOrNull(currentChapterPos)
             }
         }
