@@ -110,8 +110,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
      */
     override fun onCreate(savedState: Bundle?) {
         setTheme(when (preferences.readerTheme().getOrDefault()) {
-            0 -> R.style.Theme_Reader_Light
-            else -> R.style.Theme_Reader
+            1 -> R.style.Theme_Reader
+            else -> R.style.Theme_Reader_Light
         })
         super.onCreate(savedState)
         setContentView(R.layout.reader_activity)

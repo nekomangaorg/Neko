@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.reader.viewer.pager
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.graphics.BitmapFactory
 import android.graphics.PointF
 import android.graphics.drawable.Drawable
 import android.net.Uri
@@ -27,19 +28,19 @@ import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import com.github.chrisbanes.photoview.PhotoView
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.glide.GlideApp
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderProgressBar
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerConfig.ZoomType
-import eu.kanade.tachiyomi.util.ImageUtil
-import eu.kanade.tachiyomi.util.dpToPx
-import eu.kanade.tachiyomi.util.gone
-import eu.kanade.tachiyomi.util.visible
+import eu.kanade.tachiyomi.util.*
 import eu.kanade.tachiyomi.widget.ViewPagerAdapter
+import kotlinx.coroutines.experimental.async
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
+import uy.kohesive.injekt.injectLazy
 import java.io.InputStream
 import java.util.concurrent.TimeUnit
 
@@ -98,6 +99,8 @@ class PagerPageHolder(
      * the appropiate image view depending if the image is animated (GIF).
      */
     private var readImageHeaderSubscription: Subscription? = null
+
+    private val preferences by injectLazy<PreferencesHelper>()
 
     init {
         addView(progressBar)
@@ -243,7 +246,22 @@ class PagerPageHolder(
             .observeOn(AndroidSchedulers.mainThread())
             .doOnNext { isAnimated ->
                 if (!isAnimated) {
-                    initSubsamplingImageView().setImage(ImageSource.inputStream(openStream!!))
+                    if (preferences.readerTheme().get() == 2) {
+                        val bytesArray = openStream!!.readBytes()
+
+                        val imageView = initSubsamplingImageView()
+                        val bytesStream = bytesArray.inputStream()
+                        imageView.setImage(ImageSource.inputStream(bytesStream))
+
+                        launchUI {
+                            val backgroundD = async { ImageUtil.autoSetBackground(BitmapFactory.decodeByteArray(bytesArray, 0, bytesArray.size)) }
+                            imageView.background = backgroundD.await()
+                        }
+                        bytesStream.close()
+                    }
+                    else {
+                        initSubsamplingImageView().setImage(ImageSource.inputStream(openStream!!))
+                    }
                 } else {
                     initImageView().setImage(openStream!!)
                 }
