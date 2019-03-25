@@ -2,7 +2,6 @@
 |-------|----------|---------|------------|---------|
 | [![Travis](https://img.shields.io/travis/inorichi/tachiyomi.svg)](https://travis-ci.org/inorichi/tachiyomi) | [![stable release](https://img.shields.io/github/release/inorichi/tachiyomi.svg?maxAge=3600&label=download%20(autoupdate%20included))](https://github.com/inorichi/tachiyomi/releases) | [![latest dev build](https://img.shields.io/badge/download-latest%20build-blue.svg)](http://tachiyomi.kanade.eu/latest) | [![Translation status](https://hosted.weblate.org/widgets/tachiyomi/-/svg-badge.svg)](https://hosted.weblate.org/engage/tachiyomi/?utm_source=widget) | [![Discord](https://img.shields.io/discord/349436576037732353.svg)](https://discord.gg/tachiyomi) |
 
-
 # ![app icon](./.github/readme-images/app-icon.png)Tachiyomi
 Tachiyomi is a free and open source manga reader for Android.
 
