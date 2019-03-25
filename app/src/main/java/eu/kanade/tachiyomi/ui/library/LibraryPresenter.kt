@@ -10,7 +10,6 @@ import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
-import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.HttpSource
@@ -25,9 +24,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.IOException
 import java.io.InputStream
-import java.util.ArrayList
-import java.util.Collections
-import java.util.Comparator
+import java.util.*
 
 /**
  * Class containing library information.
@@ -126,10 +123,6 @@ class LibraryPresenter(
 
             // Filter when there are no downloads.
             if (filterDownloaded) {
-                // Local manga are always downloaded
-                if (item.manga.source == LocalSource.ID) {
-                    return@f true
-                }
                 // Don't bother with directory checking if download count has been set.
                 if (item.downloadCount != -1) {
                     return@f item.downloadCount > 0
@@ -356,11 +349,6 @@ class LibraryPresenter(
      */
     @Throws(IOException::class)
     fun editCoverWithStream(inputStream: InputStream, manga: Manga): Boolean {
-        if (manga.source == LocalSource.ID) {
-            LocalSource.updateCover(context, manga, inputStream)
-            return true
-        }
-
         if (manga.thumbnail_url != null && manga.favorite) {
             coverCache.copyToCache(manga.thumbnail_url!!, inputStream)
             return true

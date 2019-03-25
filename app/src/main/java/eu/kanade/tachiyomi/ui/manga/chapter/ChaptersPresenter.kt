@@ -9,7 +9,6 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
 import eu.kanade.tachiyomi.util.isNullOrUnsubscribed
@@ -21,7 +20,7 @@ import rx.schedulers.Schedulers
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import java.util.Date
+import java.util.*
 
 /**
  * Presenter of [ChaptersController].
@@ -180,7 +179,7 @@ class ChaptersPresenter(
             observable = observable.filter { it.read }
         }
         if (onlyDownloaded()) {
-            observable = observable.filter { it.isDownloaded || it.manga.source == LocalSource.ID }
+            observable = observable.filter { it.isDownloaded }
         }
         if (onlyBookmarked()) {
             observable = observable.filter { it.bookmark }

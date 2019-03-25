@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Application Colors -->
-    <color name="colorPrimary">#54759E</color>
-    <color name="colorPrimaryDark">#435E7E</color>
+    <color name="colorPrimary">#424242</color>
+    <color name="colorPrimaryDark">#1b1b1b</color>
     <!-- Dark Application Colors -->
     <color name="colorDarkPrimary">#212121</color>
     <color name="colorDarkPrimaryDark">#1C1C1D</color>
     <color name="colorAmoledPrimary">@color/md_black_1000</color>
 
     <!-- Light Theme -->
-    <color name="colorAccentLight">@color/md_blue_A400</color>
+    <color name="colorAccentLight">#6d6d6d</color>
     <color name="textColorPrimaryLight">@color/md_black_1000_87</color>
     <color name="textColorSecondaryLight">@color/md_black_1000_54</color>
     <color name="textColorHintLight">@color/md_black_1000_38</color>

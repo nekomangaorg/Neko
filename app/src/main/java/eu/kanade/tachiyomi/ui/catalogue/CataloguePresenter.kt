@@ -4,7 +4,6 @@ import android.os.Bundle
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.source.CatalogueSource
-import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
 import rx.Observable
@@ -98,7 +97,6 @@ class CataloguePresenter(
         return sourceManager.getCatalogueSources()
                 .filter { it.lang in languages }
                 .filterNot { it.id.toString() in hiddenCatalogues }
-                .sortedBy { "(${it.lang}) ${it.name}" } +
-                sourceManager.get(LocalSource.ID) as LocalSource
+                .sortedBy { "(${it.lang}) ${it.name}" }
     }
 }

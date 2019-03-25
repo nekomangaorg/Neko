@@ -4,7 +4,6 @@ import android.view.View
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.kanade.tachiyomi.data.glide.GlideApp
-import eu.kanade.tachiyomi.source.LocalSource
 import kotlinx.android.synthetic.main.catalogue_grid_item.*
 
 /**
@@ -43,7 +42,7 @@ class LibraryGridHolder(
             text = item.downloadCount.toString()
         }
         //set local visibility if its local manga
-        local_text.visibility = if(item.manga.source == LocalSource.ID) View.VISIBLE else View.GONE
+        local_text.visibility =  View.GONE
 
         // Update the cover.
         GlideApp.with(view.context).clear(thumbnail)

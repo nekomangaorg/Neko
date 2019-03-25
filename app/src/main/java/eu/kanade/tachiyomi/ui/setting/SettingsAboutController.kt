@@ -22,8 +22,7 @@ import timber.log.Timber
 import java.text.DateFormat
 import java.text.ParseException
 import java.text.SimpleDateFormat
-import java.util.Locale
-import java.util.TimeZone
+import java.util.*
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 
 
@@ -44,12 +43,7 @@ class SettingsAboutController : SettingsController() {
     override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
         titleRes = R.string.pref_category_about
 
-        switchPreference {
-            key = "acra.enable"
-            titleRes = R.string.pref_enable_acra
-            summaryRes = R.string.pref_acra_summary
-            defaultValue = true
-        }
+
         switchPreference {
             key = Keys.automaticUpdates
             titleRes = R.string.pref_enable_automatic_updates

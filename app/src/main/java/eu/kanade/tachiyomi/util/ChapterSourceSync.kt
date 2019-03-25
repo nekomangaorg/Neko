@@ -54,7 +54,6 @@ fun syncChaptersWithSource(db: DatabaseHelper,
             if (source is HttpSource) {
                 source.prepareNewChapter(sourceChapter, manga)
             }
-
             ChapterRecognition.parseChapterNumber(sourceChapter, manga)
 
             if (shouldUpdateDbChapter(dbChapter, sourceChapter)) {
