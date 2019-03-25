@@ -28,7 +28,6 @@ import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import com.github.chrisbanes.photoview.PhotoView
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.glide.GlideApp
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderProgressBar
@@ -99,8 +98,6 @@ class PagerPageHolder(
      * the appropiate image view depending if the image is animated (GIF).
      */
     private var readImageHeaderSubscription: Subscription? = null
-
-    private val preferences by injectLazy<PreferencesHelper>()
 
     init {
         addView(progressBar)
@@ -246,18 +243,22 @@ class PagerPageHolder(
             .observeOn(AndroidSchedulers.mainThread())
             .doOnNext { isAnimated ->
                 if (!isAnimated) {
-                    if (preferences.readerTheme().get() == 2) {
+                    if (viewer.config.readerTheme == 2) {
                         val bytesArray = openStream!!.readBytes()
 
                         val imageView = initSubsamplingImageView()
-                        val bytesStream = bytesArray.inputStream()
-                        imageView.setImage(ImageSource.inputStream(bytesStream))
+                        if (viewer.config.imageCropBorders) {
+                            val bytesStream = bytesArray.inputStream()
+                            imageView.setImage(ImageSource.inputStream(bytesStream))
+                            bytesStream.close()
+                        }
 
                         launchUI {
-                            val backgroundD = async { ImageUtil.autoSetBackground(BitmapFactory.decodeByteArray(bytesArray, 0, bytesArray.size)) }
-                            imageView.background = backgroundD.await()
+                            val image = async { BitmapFactory.decodeByteArray(bytesArray, 0, bytesArray.size) }
+                            imageView.background = ImageUtil.autoSetBackground(image.await())
+                            if (!viewer.config.imageCropBorders)
+                                imageView.setImage(ImageSource.bitmap(image.await()))
                         }
-                        bytesStream.close()
                     }
                     else {
                         initSubsamplingImageView().setImage(ImageSource.inputStream(openStream!!))
