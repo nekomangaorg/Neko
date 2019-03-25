@@ -4,7 +4,6 @@ import android.app.Application
 import android.os.Bundle
 import android.os.Environment
 import com.jakewharton.rxrelay.BehaviorRelay
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.History
@@ -12,7 +11,6 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
-import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
@@ -511,12 +509,6 @@ class ReaderPresenter(
 
         Observable
                 .fromCallable {
-                    if (manga.source == LocalSource.ID) {
-                        val context = Injekt.get<Application>()
-                        LocalSource.updateCover(context, manga, stream())
-                        R.string.cover_updated
-                        SetAsCoverResult.Success
-                    } else {
                         val thumbUrl = manga.thumbnail_url ?: throw Exception("Image url not found")
                         if (manga.favorite) {
                             coverCache.copyToCache(thumbUrl, stream())
@@ -524,7 +516,6 @@ class ReaderPresenter(
                         } else {
                             SetAsCoverResult.AddToLibraryFirst
                         }
-                    }
                 }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
