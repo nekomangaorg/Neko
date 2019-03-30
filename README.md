@@ -1,5 +1,5 @@
+Unofficial MangaDex
 
-# Download
 [![stable release](https://img.shields.io/github/release/CarlosEsco/MangaDex.svg?maxAge=3600&label=stable)](https://github.com/CarlosEsco/MangaDex/releases)
 
 A free, open source unofficial manga reader for Mangadex and a fork of [Tachiyomi](https://github.com/inorichi/tachiyomi)
