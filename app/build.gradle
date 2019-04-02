@@ -251,7 +251,3 @@ kotlin {
 androidExtensions {
     experimental = true
 }
-
-if (getGradle().getStartParameter().getTaskRequests().toString().contains("Standard")) {
-    apply plugin: 'com.google.gms.google-services'
-}
