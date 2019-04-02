@@ -38,4 +38,4 @@ before_script:
   - chmod +x gradlew
 
 script:
-  - ./gradlew clean build
+  - ./gradlew clean build -x test 
