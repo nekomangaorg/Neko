@@ -124,7 +124,9 @@ dependencies {
     implementation 'com.github.pwittchen:reactivenetwork:0.7.0'
 
     // Network client
-    implementation "com.squareup.okhttp3:okhttp:3.10.0"
+    final okhttp_version = '3.9.1'
+    implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
+    implementation "com.squareup.okhttp3:logging-interceptor:$okhttp_version"
     implementation 'com.squareup.okio:okio:1.14.0'
 
     // REST
@@ -132,6 +134,7 @@ dependencies {
     implementation "com.squareup.retrofit2:retrofit:$retrofit_version"
     implementation "com.squareup.retrofit2:converter-gson:$retrofit_version"
     implementation "com.squareup.retrofit2:adapter-rxjava:$retrofit_version"
+
 
     // JSON
     implementation 'com.google.code.gson:gson:2.8.2'
