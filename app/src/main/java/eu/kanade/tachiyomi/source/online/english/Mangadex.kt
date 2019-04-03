@@ -520,7 +520,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
 
     override fun isLogged(): Boolean {
         val httpUrl = HttpUrl.parse(baseUrl)!!
-        return network.cookies.get(httpUrl).any { it.name() == "mangadex_session" }
+        return network.cookieManager.get(httpUrl).any { it.name() == "mangadex_session" }
     }
 
     override fun login(username: String, password: String): Observable<Boolean> {
