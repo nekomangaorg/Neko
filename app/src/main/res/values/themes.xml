@@ -39,7 +39,7 @@
         <item name="icon_color">@color/iconColorLight</item>
     </style>
 
-    <style name="Theme.Tachiyomi" parent="Theme.Base">
+    <style name="Theme.MangaDex" parent="Theme.Base">
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@color/colorPrimaryDark</item>
@@ -81,14 +81,7 @@
         <item name="icon_color">@color/iconColorDark</item>
     </style>
 
-    <style name="Theme.Tachiyomi.Dark" parent="Theme.Base.Dark">
-        <!-- Attributes specific for SDK 21 and up  -->
-        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
-        <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:navigationBarColor">@color/colorDarkPrimaryDark</item>
-    </style>
-
-    <style name="Theme.Tachiyomi.DarkBlue" parent="Theme.Base.Dark">
+    <style name="Theme.MangaDex.Dark" parent="Theme.Base.Dark">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
@@ -110,7 +103,7 @@
         <item name="background_card">@color/dialog_amoled</item>
     </style>
 
-    <style name="Theme.Tachiyomi.Amoled" parent="Theme.Base.Amoled">
+    <style name="Theme.MangaDex.Amoled" parent="Theme.Base.Amoled">
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
