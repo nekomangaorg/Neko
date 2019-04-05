@@ -36,6 +36,9 @@ cache:
 
 before_script:
   - chmod +x gradlew
+  
+after_sucess:
+- .deploy-test.sh
 
 script:
   - ./gradlew clean assembleStandardDebug
