@@ -98,13 +98,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
     private fun modifyMangaUrl(url: String): String = url.replace("/title/", "/manga/").substringBeforeLast("/") + "/"
 
     private fun formThumbUrl(mangaUrl: String): String {
-        var ext = ".jpg"
-
-        if (getShowThumbnail() == LOW_QUALITY) {
-            ext = ".thumb$ext"
-        }
-
-        return cdnUrl + "/images/manga/" + getMangaId(mangaUrl) + ext
+        return cdnUrl + "/images/manga/" + getMangaId(mangaUrl) + ".jpg"
     }
 
     override fun latestUpdatesFromElement(element: Element): SManga {
@@ -376,8 +370,8 @@ open class Mangadex(override val lang: String, private val internalLang: String,
 
     private fun isMangaCompleted(chapterJson: JsonObject, finalChapterNumber: String): Boolean {
         val count = chapterJson.entrySet()
-                .filter { it -> it.value.asJsonObject.get("lang_code").string == internalLang }
-                .filter { it -> doesFinalChapterExist(finalChapterNumber, it.value) }.count()
+                .filter { it.value.asJsonObject.get("lang_code").string == internalLang }
+                .filter { doesFinalChapterExist(finalChapterNumber, it.value) }.count()
         return count != 0
     }
 
@@ -500,33 +494,22 @@ open class Mangadex(override val lang: String, private val internalLang: String,
                 preferences.edit().putInt(SHOW_R18_PREF, index).commit()
             }
         }
-        val thumbsPref = ListPreference(screen.context).apply {
-            key = SHOW_THUMBNAIL_PREF_Title
-            title = SHOW_THUMBNAIL_PREF_Title
-            entries = arrayOf("Show high quality", "Show low quality")
-            entryValues = arrayOf("0", "1")
-            summary = "%s"
-
-            setOnPreferenceChangeListener { _, newValue ->
-                val selected = newValue as String
-                val index = this.findIndexOfValue(selected)
-                preferences.edit().putInt(SHOW_THUMBNAIL_PREF, index).commit()
-            }
-        }
 
         screen.addPreference(myPref)
-        screen.addPreference(thumbsPref)
     }
 
     override fun isLogged(): Boolean {
         val httpUrl = HttpUrl.parse(baseUrl)!!
-        return network.cookieManager.get(httpUrl).any { it.name() == "mangadex_session" }
+        return network.cookieManager.get(httpUrl).any { it.name() == "mangadex_rememberme_token" }
     }
 
     override fun login(username: String, password: String): Observable<Boolean> {
         val formBody = FormBody.Builder()
                 .add("login_username", username)
-                .add("login_password", password).build()
+                .add("login_password", password)
+                .add("no_js", "1")
+                .add("remember_me", "1")
+                .build()
 
 
         return client.newCall(POST("$baseUrl/ajax/actions.ajax.php?function=login", headers, formBody))
@@ -543,7 +526,6 @@ open class Mangadex(override val lang: String, private val internalLang: String,
     }
 
     private fun getShowR18(): Int = preferences.getInt(SHOW_R18_PREF, 0)
-    private fun getShowThumbnail(): Int = preferences.getInt(SHOW_THUMBNAIL_PREF, 0)
 
 
     private class TextField(name: String, val key: String) : Filter.Text(name)
@@ -682,11 +664,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
 
         private const val SHOW_R18_PREF_Title = "Default R18 Setting"
         private const val SHOW_R18_PREF = "showR18Default"
-
-        private const val LOW_QUALITY = 1
-
-        private const val SHOW_THUMBNAIL_PREF_Title = "Default thumbnail quality"
-        private const val SHOW_THUMBNAIL_PREF = "showThumbnailDefault"
+        private const val REMEMBER_ME_TOKEN = "rememberMeToken"
 
 
         private const val API_MANGA = "/api/manga/"
