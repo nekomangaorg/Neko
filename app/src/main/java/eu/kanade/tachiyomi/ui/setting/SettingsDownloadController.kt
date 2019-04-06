@@ -5,7 +5,6 @@ import android.app.Dialog
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.support.v4.content.ContextCompat
@@ -143,18 +142,11 @@ class SettingsDownloadController : SettingsController() {
 
     fun customDirectorySelected(currentDir: String) {
 
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            startActivityForResult(preferences.context.getFilePicker(currentDir), DOWNLOAD_DIR_PRE_L)
-        } else {
-            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
-            try {
-                startActivityForResult(intent, DOWNLOAD_DIR_L)
-            } catch (e: ActivityNotFoundException) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    startActivityForResult(preferences.context.getFilePicker(currentDir), DOWNLOAD_DIR_L)
-                }
-            }
-
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
+        try {
+            startActivityForResult(intent, DOWNLOAD_DIR_L)
+        } catch (e: ActivityNotFoundException) {
+                startActivityForResult(preferences.context.getFilePicker(currentDir), DOWNLOAD_DIR_L)
         }
     }
 

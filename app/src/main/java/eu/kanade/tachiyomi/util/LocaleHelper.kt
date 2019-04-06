@@ -90,7 +90,7 @@ object LocaleHelper {
      * Updates the app's language to an activity.
      */
     fun updateConfiguration(wrapper: ContextThemeWrapper) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1 && appLocale != null) {
+        if (appLocale != null) {
             val config = Configuration(preferences.context.resources.configuration)
             config.setLocale(appLocale)
             wrapper.applyOverrideConfiguration(config)

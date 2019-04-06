@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.widget
 import android.animation.ObjectAnimator
 import android.animation.StateListAnimator
 import android.content.Context
-import android.os.Build
 import android.support.design.R
 import android.support.design.widget.AppBarLayout
 import android.util.AttributeSet
@@ -16,19 +15,14 @@ class ElevationAppBarLayout @JvmOverloads constructor(
     private var origStateAnimator: StateListAnimator? = null
 
     init {
-        if (Build.VERSION.SDK_INT >= 21) {
             origStateAnimator = stateListAnimator
-        }
     }
 
     fun enableElevation() {
-        if (Build.VERSION.SDK_INT >= 21) {
             stateListAnimator = origStateAnimator
-        }
     }
 
     fun disableElevation() {
-        if (Build.VERSION.SDK_INT >= 21) {
             stateListAnimator = StateListAnimator().apply {
                 val objAnimator = ObjectAnimator.ofFloat(this, "elevation", 0f)
 
@@ -42,7 +36,6 @@ class ElevationAppBarLayout @JvmOverloads constructor(
                 // Disabled state
                 addState(IntArray(0), objAnimator)
             }
-        }
     }
 
 }

@@ -106,19 +106,12 @@ class SettingsBackupController : SettingsController() {
                 onClick {
                     val currentDir = preferences.backupsDirectory().getOrDefault()
                     try{
-                        val intent = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-                        // Custom dir selected, open directory selector
-                        preferences.context.getFilePicker(currentDir)
-                        } else {
-                          Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
-                        }
+                        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
 
                         startActivityForResult(intent, CODE_BACKUP_DIR)
                     } catch (e: ActivityNotFoundException){
                         //Fall back to custom picker on error
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
                             startActivityForResult(preferences.context.getFilePicker(currentDir), CODE_BACKUP_DIR)
-                        }
                     }
 
                 }
@@ -155,24 +148,16 @@ class SettingsBackupController : SettingsController() {
                 val uri = data.data
 
                 // Get UriPermission so it's possible to write files post kitkat.
-                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
                     val flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or
                             Intent.FLAG_GRANT_WRITE_URI_PERMISSION
 
                     activity.contentResolver.takePersistableUriPermission(uri, flags)
-                }
 
                 // Set backup Uri.
                 preferences.backupsDirectory().set(uri.toString())
             }
             CODE_BACKUP_CREATE -> if (data != null && resultCode == Activity.RESULT_OK) {
                 val activity = activity ?: return
-                val uri = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-                    val dir = data.data.path
-                    val file = File(dir, Backup.getDefaultFilename())
-
-                    Uri.fromFile(file)
-                } else {
                     val uri = data.data
                     val flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or
                             Intent.FLAG_GRANT_WRITE_URI_PERMISSION
@@ -180,11 +165,10 @@ class SettingsBackupController : SettingsController() {
                     activity.contentResolver.takePersistableUriPermission(uri, flags)
                     val file = UniFile.fromUri(activity, uri)
 
-                    file.uri
-                }
+                    val fileUri = file.uri
 
                 CreatingBackupDialog().showDialog(router, TAG_CREATING_BACKUP_DIALOG)
-                BackupCreateService.makeBackup(activity, uri, backupFlags)
+                BackupCreateService.makeBackup(activity, fileUri, backupFlags)
             }
             CODE_BACKUP_RESTORE -> if (data != null && resultCode == Activity.RESULT_OK) {
                 val uri = data.data
@@ -202,15 +186,11 @@ class SettingsBackupController : SettingsController() {
 
         try {
             // If API is lower than Lollipop use custom picker
-            val intent = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-                preferences.context.getFilePicker(currentDir)
-            } else {
-                // Use Androids build in file creator
+            val intent =
                 Intent(Intent.ACTION_CREATE_DOCUMENT)
                     .addCategory(Intent.CATEGORY_OPENABLE)
                     .setType("application/*")
                     .putExtra(Intent.EXTRA_TITLE, Backup.getDefaultFilename())
-            }
 
             startActivityForResult(intent, CODE_BACKUP_CREATE)
         } catch (e: ActivityNotFoundException) {

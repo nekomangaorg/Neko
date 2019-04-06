@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.util
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.os.Environment
 import android.support.v4.content.ContextCompat
 import android.support.v4.os.EnvironmentCompat
@@ -44,13 +43,6 @@ object DiskUtil {
                     }
                 }
 
-        if (Build.VERSION.SDK_INT < 21) {
-            val extStorages = System.getenv("SECONDARY_STORAGE")
-            if (extStorages != null) {
-                directories += extStorages.split(":").map(::File)
-            }
-        }
-
         return directories
     }
 
@@ -65,12 +57,7 @@ object DiskUtil {
      * Scans the given file so that it can be shown in gallery apps, for example.
      */
     fun scanMedia(context: Context, uri: Uri) {
-        val action = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
-            Intent.ACTION_MEDIA_MOUNTED
-        } else {
-            Intent.ACTION_MEDIA_SCANNER_SCAN_FILE
-        }
-        val mediaScanIntent = Intent(action)
+        val mediaScanIntent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
         mediaScanIntent.data = uri
         context.sendBroadcast(mediaScanIntent)
     }

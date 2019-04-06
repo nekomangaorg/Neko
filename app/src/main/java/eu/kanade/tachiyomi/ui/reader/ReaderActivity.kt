@@ -21,9 +21,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.base.activity.BaseRxActivity
-import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.AddToLibraryFirst
-import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.Error
-import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.Success
+import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.*
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
@@ -634,11 +632,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
          */
         private fun setFullscreen(enabled: Boolean) {
             systemUi = if (enabled) {
-                val level = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                    SystemUiHelper.LEVEL_IMMERSIVE
-                } else {
-                    SystemUiHelper.LEVEL_HIDE_STATUS_BAR
-                }
+                val level = SystemUiHelper.LEVEL_HIDE_STATUS_BAR
                 val flags = SystemUiHelper.FLAG_IMMERSIVE_STICKY or
                         SystemUiHelper.FLAG_LAYOUT_IN_SCREEN_OLDER_DEVICES
 

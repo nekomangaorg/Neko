@@ -2,14 +2,11 @@ package eu.kanade.tachiyomi.widget
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
-import android.annotation.TargetApi
 import android.content.Context
-import android.os.Build
 import android.util.AttributeSet
 import android.view.View
 import android.view.ViewAnimationUtils
 
-@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 class RevealAnimationView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
         View(context, attrs) {
 
@@ -21,7 +18,6 @@ class RevealAnimationView @JvmOverloads constructor(context: Context, attrs: Att
      * @param initialRadius size of radius of animation
      */
     fun hideRevealEffect(centerX: Int, centerY: Int, initialRadius: Int) {
-        if (Build.VERSION.SDK_INT >= 21) {
 
             // Make the view visible.
             this.visibility = View.VISIBLE
@@ -42,7 +38,6 @@ class RevealAnimationView @JvmOverloads constructor(context: Context, attrs: Att
             })
 
             anim.start()
-        }
     }
 
     /**
@@ -55,7 +50,6 @@ class RevealAnimationView @JvmOverloads constructor(context: Context, attrs: Att
      * @return sdk version lower then 21
      */
     fun showRevealEffect(centerX: Int, centerY: Int, listener: Animator.AnimatorListener): Boolean {
-        if (Build.VERSION.SDK_INT >= 21) {
 
             this.visibility = View.VISIBLE
 
@@ -72,8 +66,5 @@ class RevealAnimationView @JvmOverloads constructor(context: Context, attrs: Att
             anim.start()
             return true
         }
-        return false
-    }
-
 
 }
