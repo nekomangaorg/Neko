@@ -23,11 +23,11 @@
     <color name="backgroundLight">@color/md_grey_50</color>
     <color name="dialogLight">@color/md_white_1000</color>
 
-    <color name="selectorColorLight">@color/md_blue_A400_38</color>
+    <color name="selectorColorLight">#707070</color>
     <color name="iconColorLight">@color/md_black_1000_54</color>
 
     <!-- Dark Theme -->
-    <color name="colorAccentDark">#3399FF</color>
+    <color name="colorAccentDark">#9e9e9e</color>
     <color name="textColorPrimaryDark">@color/md_white_1000</color>
     <color name="textColorSecondaryDark">@color/md_white_1000_70</color>
     <color name="textColorHintDark">@color/md_white_1000_50</color>
@@ -40,7 +40,7 @@
     <color name="dialogDark">@color/colorDarkPrimary</color>
     <color name="dialog_amoled">@color/colorDarkPrimaryDark</color>
 
-    <color name="selectorColorDark">@color/md_blue_A200_50</color>
+    <color name="selectorColorDark">#707070</color>
     <color name="iconColorDark">@color/md_white_1000_54</color>
 
     <!-- Reader Theme -->
