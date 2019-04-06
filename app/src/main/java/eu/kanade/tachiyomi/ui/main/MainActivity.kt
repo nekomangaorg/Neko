@@ -49,8 +49,8 @@ class MainActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(when (preferences.theme()) {
-            2 -> R.style.Theme_MangaDex_Amoled
-            3 -> R.style.Theme_MangaDex_Dark
+            2 -> R.style.Theme_MangaDex_Dark
+            3 -> R.style.Theme_MangaDex_Amoled
             else -> R.style.Theme_MangaDex
         })
         super.onCreate(savedInstanceState)
