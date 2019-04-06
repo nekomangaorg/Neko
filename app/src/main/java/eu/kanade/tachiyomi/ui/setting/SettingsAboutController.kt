@@ -64,18 +64,10 @@ class SettingsAboutController : SettingsController() {
                 isVisible = false
             }
         }
-        preference {
-            title = "Discord"
-            val url = "https://discord.gg/tachiyomi"
-            summary = url
-            onClick {
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                startActivity(intent)
-            }
-        }
+
         preference {
             title = "Github"
-            val url = "https://github.com/inorichi/tachiyomi"
+            val url = "https://github.com/CarlosEsco/MangaDex"
             summary = url
             onClick {
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
