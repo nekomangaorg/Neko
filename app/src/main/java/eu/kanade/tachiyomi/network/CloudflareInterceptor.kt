@@ -6,7 +6,6 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.webkit.WebResourceResponse
-import android.webkit.WebSettings
 import android.webkit.WebView
 import eu.kanade.tachiyomi.util.WebViewClientCompat
 import okhttp3.Interceptor
@@ -22,22 +21,8 @@ class CloudflareInterceptor(private val context: Context) : Interceptor {
 
     private val handler = Handler(Looper.getMainLooper())
 
-    /**
-     * When this is called, it initializes the WebView if it wasn't already. We use this to avoid
-     * blocking the main thread too much. If used too often we could consider moving it to the
-     * Application class.
-     */
-    private val initWebView by lazy {
-        if (Build.VERSION.SDK_INT >= 17) {
-            WebSettings.getDefaultUserAgent(context)
-        } else {
-            null
-        }
-    }
-
     @Synchronized
     override fun intercept(chain: Interceptor.Chain): Response {
-        initWebView
 
         val response = chain.proceed(chain.request())
 
