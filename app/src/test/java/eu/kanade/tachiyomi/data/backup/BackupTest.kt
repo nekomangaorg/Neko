@@ -389,7 +389,7 @@ class BackupTest {
         val track = TrackImpl()
         track.title = manga.title
         track.manga_id = manga.id!!
-        track.remote_id = 1
+        track.media_id = 1
         track.sync_id = 1
         return track
     }
