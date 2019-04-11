@@ -5,7 +5,6 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'com.github.zellius.shortcut-helper'
-apply from: "$project.rootDir/script-git-version.gradle"
 
 shortcutHelper.filePath = './shortcuts.xml'
 
@@ -72,13 +71,13 @@ android {
         standard {
             buildConfigField "boolean", "INCLUDE_UPDATER", "true"
             dimension "default"
-            versionCode gitVersionCode
-            versionName gitVersionName
+            versionCode 3
+            versionName "1.0.3"
         }
         dev {
             resConfigs "en", "xxhdpi"
             dimension "default"
-            versionCode gitVersionCodeTime
+            versionCode 1
             versionName "-${getCommitCount()}"
         }
     }
