@@ -56,7 +56,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
             }.build()!!
 
     override fun headersBuilder() = Headers.Builder().apply {
-        add("User-Agent", "Tachiyomi " + System.getProperty("http.agent"))
+        add("User-Agent", "Tachiyomi/MangaDex " + System.getProperty("http.agent"))
         add("X-Requested-With", "XMLHttpRequest")
     }
 
