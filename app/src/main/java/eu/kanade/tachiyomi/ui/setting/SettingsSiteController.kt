@@ -30,7 +30,6 @@ class SettingsSiteController : SettingsController(), SourceLoginDialog.Listener 
         }
 
         val sourcePreference = LoginCheckBoxPreference(context, sources[0] ).apply {
-            val id = source.id.toString()
             title = "MangaDex Login"
             key = getSourceKey(source.id)
             setOnLoginClickListener {

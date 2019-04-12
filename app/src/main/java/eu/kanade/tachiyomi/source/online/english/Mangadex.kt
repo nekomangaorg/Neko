@@ -35,7 +35,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
 
     private val preferences: PreferencesHelper by injectLazy()
 
-    private fun clientBuilder(): OkHttpClient = clientBuilder(preferences.r18())
+    private fun clientBuilder(): OkHttpClient = clientBuilder(preferences.r18().toInt())
 
     private fun clientBuilder(r18Toggle: Int): OkHttpClient = network.cloudflareClient.newBuilder()
             .connectTimeout(10, TimeUnit.SECONDS)
