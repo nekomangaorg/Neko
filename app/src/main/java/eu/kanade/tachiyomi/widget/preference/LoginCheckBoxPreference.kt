@@ -2,7 +2,7 @@ package eu.kanade.tachiyomi.widget.preference
 
 import android.content.Context
 import android.graphics.Color
-import android.support.v7.preference.CheckBoxPreference
+import android.support.v7.preference.Preference
 import android.support.v7.preference.PreferenceViewHolder
 import android.util.AttributeSet
 import android.view.View
@@ -17,7 +17,7 @@ class LoginCheckBoxPreference @JvmOverloads constructor(
         context: Context,
         val source: HttpSource,
         attrs: AttributeSet? = null
-) : CheckBoxPreference(context, attrs) {
+) : Preference(context, attrs) {
 
     init {
         layoutResource = R.layout.pref_item_source
@@ -27,6 +27,9 @@ class LoginCheckBoxPreference @JvmOverloads constructor(
 
     override fun onBindViewHolder(holder: PreferenceViewHolder) {
         super.onBindViewHolder(holder)
+        holder.itemView.setOnClickListener {
+            onLoginClick()
+        }
         val loginFrame = holder.itemView.login_frame
         if (source is LoginSource) {
             val tint = if (source.isLogged())
