@@ -37,11 +37,11 @@
         android:enabled="true"
         android:icon="@drawable/sc_explore_48dp"
         android:shortcutDisabledMessage="@string/app_not_available"
-        android:shortcutId="show_catalogues"
-        android:shortcutLongLabel="@string/label_catalogues"
-        android:shortcutShortLabel="@string/label_catalogues">
+        android:shortcutId="show_browse"
+        android:shortcutLongLabel="@string/label_browse"
+        android:shortcutShortLabel="@string/label_browse">
         <intent
-            android:action="eu.kanade.tachiyomi.SHOW_CATALOGUES"
+            android:action="eu.kanade.tachiyomi.SHOW_BROWSE"
             android:targetClass="eu.kanade.tachiyomi.ui.main.MainActivity" />
     </shortcut>
 </shortcuts>

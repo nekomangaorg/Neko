@@ -63,4 +63,13 @@
         app:pb_textError="@string/invalid_login"
         app:pb_textProgress="@string/loading"/>
 
+    <Button
+        android:id="@+id/login_captcha"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="Check for Captcha"
+        android:textColor="@android:color/white"
+       />
+
 </LinearLayout>

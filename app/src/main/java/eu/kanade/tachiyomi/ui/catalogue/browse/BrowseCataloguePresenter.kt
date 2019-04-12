@@ -100,7 +100,7 @@ open class BrowseCataloguePresenter(
         sourceFilters = source.getFilterList()
 
         if (savedState != null) {
-            query = savedState.getString(::query.name, "")
+            query = savedState.getString("queryKey", "")
         }
 
         add(prefs.catalogueAsList().asObservable()
@@ -110,7 +110,7 @@ open class BrowseCataloguePresenter(
     }
 
     override fun onSave(state: Bundle) {
-        state.putString(::query.name, query)
+        state.putString("queryKey", query)
         super.onSave(state)
     }
 

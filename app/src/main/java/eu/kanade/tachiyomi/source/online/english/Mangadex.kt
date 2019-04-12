@@ -1,18 +1,14 @@
 package eu.kanade.tachiyomi.source.online.english
 
-import android.app.Application
-import android.content.SharedPreferences
-import android.support.v7.preference.ListPreference
-import android.support.v7.preference.PreferenceScreen
 import com.github.salomonbrys.kotson.*
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.POST
 import eu.kanade.tachiyomi.network.asObservable
 import eu.kanade.tachiyomi.network.asObservableSuccess
-import eu.kanade.tachiyomi.source.ConfigurableSource
 import eu.kanade.tachiyomi.source.model.*
 import eu.kanade.tachiyomi.source.online.LoginSource
 import eu.kanade.tachiyomi.source.online.ParsedHttpSource
@@ -21,13 +17,13 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import rx.Observable
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
+import uy.kohesive.injekt.injectLazy
 import java.net.URLEncoder
 import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.collections.set
 
-open class Mangadex(override val lang: String, private val internalLang: String, private val langCode: Int) : ConfigurableSource, LoginSource, ParsedHttpSource() {
+open class Mangadex(override val lang: String, private val internalLang: String, private val langCode: Int) : LoginSource, ParsedHttpSource() {
 
     override val name = "MangaDex"
 
@@ -37,11 +33,9 @@ open class Mangadex(override val lang: String, private val internalLang: String,
 
     override val supportsLatest = true
 
-    private val preferences: SharedPreferences by lazy {
-        Injekt.get<Application>().getSharedPreferences("source_$id", 0x0000)
-    }
+    private val preferences: PreferencesHelper by injectLazy()
 
-    private fun clientBuilder(): OkHttpClient = clientBuilder(getShowR18())
+    private fun clientBuilder(): OkHttpClient = clientBuilder(preferences.r18())
 
     private fun clientBuilder(r18Toggle: Int): OkHttpClient = network.cloudflareClient.newBuilder()
             .connectTimeout(10, TimeUnit.SECONDS)
@@ -138,7 +132,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
     override fun fetchSearchManga(page: Int, query: String, filters: FilterList): Observable<MangasPage> {
         return if (query.startsWith(PREFIX_ID_SEARCH)) {
             val realQuery = query.removePrefix(PREFIX_ID_SEARCH)
-            client.newCall(searchMangaByIdRequest(realQuery))
+            clientBuilder().newCall(searchMangaByIdRequest(realQuery))
                     .asObservableSuccess()
                     .map { response ->
                         val details = mangaDetailsParse(response)
@@ -478,26 +472,6 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         return baseUrl + attr
     }
 
-    override fun setupPreferenceScreen(screen: PreferenceScreen) {
-        val myPref = ListPreference(screen.context).apply {
-            key = SHOW_R18_PREF_Title
-            title = SHOW_R18_PREF_Title
-
-            title = SHOW_R18_PREF_Title
-            entries = arrayOf("Show No R18+", "Show All", "Show Only R18+")
-            entryValues = arrayOf("0", "1", "2")
-            summary = "%s"
-
-            setOnPreferenceChangeListener { _, newValue ->
-                val selected = newValue as String
-                val index = this.findIndexOfValue(selected)
-                preferences.edit().putInt(SHOW_R18_PREF, index).commit()
-            }
-        }
-
-        screen.addPreference(myPref)
-    }
-
     override fun isLogged(): Boolean {
         val httpUrl = HttpUrl.parse(baseUrl)!!
         return network.cookieManager.get(httpUrl).any { it.name() == "mangadex_rememberme_token" }
@@ -512,7 +486,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
                 .build()
 
 
-        return client.newCall(POST("$baseUrl/ajax/actions.ajax.php?function=login", headers, formBody))
+        return clientBuilder().newCall(POST("$baseUrl/ajax/actions.ajax.php?function=login", headers, formBody))
                 .asObservable()
                 .map { isAuthenticationSuccessful(it) }
     }
@@ -524,8 +498,6 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         }
         return false
     }
-
-    private fun getShowR18(): Int = preferences.getInt(SHOW_R18_PREF, 0)
 
 
     private class TextField(name: String, val key: String) : Filter.Text(name)
@@ -544,7 +516,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
             sortables.map { it.first }.toTypedArray(),
             Filter.Sort.Selection(0, true))
 
-    private class OriginalLanguage : Filter.Select<String>("Original Language", SOURCE_LANG_LIST.map { it -> it.first }.toTypedArray())
+    private class OriginalLanguage : Filter.Select<String>("Original Language", SOURCE_LANG_LIST.map { it.first }.toTypedArray())
 
     override fun getFilterList() = FilterList(
             TextField("Author", "author"),
@@ -661,10 +633,6 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         private const val NO_R18 = 0
         private const val ALL = 1
         private const val ONLY_R18 = 2
-
-        private const val SHOW_R18_PREF_Title = "Default R18 Setting"
-        private const val SHOW_R18_PREF = "showR18Default"
-        private const val REMEMBER_ME_TOKEN = "rememberMeToken"
 
 
         private const val API_MANGA = "/api/manga/"

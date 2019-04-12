@@ -30,7 +30,7 @@ class AppModule(val app: Application) : InjektModule {
 
         addSingletonFactory { NetworkHelper(app) }
 
-        addSingletonFactory { SourceManager(app) }
+        addSingletonFactory { SourceManager() }
 
         addSingletonFactory { DownloadManager(app) }
 

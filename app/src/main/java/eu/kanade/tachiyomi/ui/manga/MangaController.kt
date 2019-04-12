@@ -44,7 +44,7 @@ class MangaController : RxController, TabbedController {
     }) {
         this.manga = manga
         if (manga != null) {
-            source = Injekt.get<SourceManager>().getOrStub(manga.source)
+            source = Injekt.get<SourceManager>().getSource(manga.source)
         }
     }
 

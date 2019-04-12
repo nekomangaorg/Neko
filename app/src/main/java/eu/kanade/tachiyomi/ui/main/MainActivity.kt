@@ -13,25 +13,35 @@ import com.bluelinelabs.conductor.*
 import eu.kanade.tachiyomi.Migrations
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.source.CatalogueSource
+import eu.kanade.tachiyomi.source.Source
+import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.source.online.HttpSource
+import eu.kanade.tachiyomi.source.online.LoginSource
+import eu.kanade.tachiyomi.source.online.english.Mangadex
 import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
 import eu.kanade.tachiyomi.ui.base.controller.*
-import eu.kanade.tachiyomi.ui.catalogue.CatalogueController
-import eu.kanade.tachiyomi.ui.catalogue.global_search.CatalogueSearchController
+import eu.kanade.tachiyomi.ui.catalogue.browse.BrowseCatalogueController
 import eu.kanade.tachiyomi.ui.download.DownloadController
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.ui.recent_updates.RecentChaptersController
 import eu.kanade.tachiyomi.ui.recently_read.RecentlyReadController
 import eu.kanade.tachiyomi.ui.setting.SettingsMainController
+import eu.kanade.tachiyomi.widget.preference.SourceLoginDialog
 import kotlinx.android.synthetic.main.main_activity.*
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
 
-class MainActivity : BaseActivity() {
+class MainActivity : BaseActivity(),  SourceLoginDialog.Listener {
 
     private lateinit var router: Router
 
     val preferences: PreferencesHelper by injectLazy()
+
+    val source : LoginSource by lazy { Injekt.get<SourceManager>().getSources()[0] as LoginSource }
 
     private var drawerArrow: DrawerArrowDrawable? = null
 
@@ -81,7 +91,15 @@ class MainActivity : BaseActivity() {
                     R.id.nav_drawer_library -> setRoot(LibraryController(), id)
                     R.id.nav_drawer_recent_updates -> setRoot(RecentChaptersController(), id)
                     R.id.nav_drawer_recently_read -> setRoot(RecentlyReadController(), id)
-                    R.id.nav_drawer_catalogues -> setRoot(CatalogueController(), id)
+                    R.id.nav_drawer_browse -> {
+                        val browseCatalogueController = BrowseCatalogueController(source as CatalogueSource)
+                        setRoot(browseCatalogueController, id)
+                        if (!source.isLogged()) {
+                            val dialog = SourceLoginDialog(source)
+                            dialog.targetController = browseCatalogueController
+                            dialog.showDialog(router)
+                        }
+                    }
                     R.id.nav_drawer_downloads -> {
                         router.pushController(DownloadController().withFadeTransaction())
                     }
@@ -136,6 +154,19 @@ class MainActivity : BaseActivity() {
         }
     }
 
+    /**
+     * Called when login dialog is closed, refreshes the adapter.
+     *
+     * @param source clicked item containing source information.
+     */
+    override fun loginDialogClosed(source: LoginSource) {
+        if (source.isLogged()) {
+            router.popCurrentController()
+            R.id.nav_drawer_browse
+            setRoot(BrowseCatalogueController(source as CatalogueSource),R.id.nav_drawer_browse)
+        }
+    }
+
     override fun onNewIntent(intent: Intent) {
         if (!handleIntentAction(intent)) {
             super.onNewIntent(intent)
@@ -147,7 +178,7 @@ class MainActivity : BaseActivity() {
             SHORTCUT_LIBRARY -> setSelectedDrawerItem(R.id.nav_drawer_library)
             SHORTCUT_RECENTLY_UPDATED -> setSelectedDrawerItem(R.id.nav_drawer_recent_updates)
             SHORTCUT_RECENTLY_READ -> setSelectedDrawerItem(R.id.nav_drawer_recently_read)
-            SHORTCUT_CATALOGUES -> setSelectedDrawerItem(R.id.nav_drawer_catalogues)
+            SHORTCUT_CATALOGUES -> setSelectedDrawerItem(R.id.nav_drawer_browse)
             SHORTCUT_MANGA -> {
                 val extras = intent.extras ?: return false
                 router.setRoot(RouterTransaction.with(MangaController(extras)))
@@ -161,10 +192,10 @@ class MainActivity : BaseActivity() {
                 //If the intent match the "standard" Android search intent
                 // or the Google-specific search intent (triggered by saying or typing "search *query* on *Tachiyomi*" in Google Search/Google Assistant)
 
-                setSelectedDrawerItem(R.id.nav_drawer_catalogues)
+                setSelectedDrawerItem(R.id.nav_drawer_browse)
                 //Get the search query provided in extras, and if not null, perform a global search with it.
                 intent.getStringExtra(SearchManager.QUERY)?.also { query ->
-                    router.pushController(CatalogueSearchController(query).withFadeTransaction())
+                    router.pushController(BrowseCatalogueController(source as CatalogueSource).withFadeTransaction())
                 }
             }
             else -> return false
@@ -248,7 +279,7 @@ class MainActivity : BaseActivity() {
         const val SHORTCUT_LIBRARY = "eu.kanade.tachiyomi.SHOW_LIBRARY"
         const val SHORTCUT_RECENTLY_UPDATED = "eu.kanade.tachiyomi.SHOW_RECENTLY_UPDATED"
         const val SHORTCUT_RECENTLY_READ = "eu.kanade.tachiyomi.SHOW_RECENTLY_READ"
-        const val SHORTCUT_CATALOGUES = "eu.kanade.tachiyomi.SHOW_CATALOGUES"
+        const val SHORTCUT_CATALOGUES = "eu.kanade.tachiyomi.SHOW_BROWSE"
         const val SHORTCUT_DOWNLOADS = "eu.kanade.tachiyomi.SHOW_DOWNLOADS"
         const val SHORTCUT_MANGA = "eu.kanade.tachiyomi.SHOW_MANGA"
     }

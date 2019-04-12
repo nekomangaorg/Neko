@@ -194,7 +194,7 @@ class ReaderPresenter(
         this.manga = manga
         if (chapterId == -1L) chapterId = initialChapterId
 
-        val source = sourceManager.getOrStub(manga.source)
+        val source = sourceManager.getSource(manga.source)
         loader = ChapterLoader(downloadManager, manga, source)
 
         Observable.just(manga).subscribeLatestCache(ReaderActivity::setManga)

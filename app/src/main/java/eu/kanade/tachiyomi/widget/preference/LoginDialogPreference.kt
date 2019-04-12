@@ -10,10 +10,17 @@ import com.bluelinelabs.conductor.ControllerChangeType
 import com.dd.processbutton.iml.ActionProcessButton
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.source.online.HttpSource
+import eu.kanade.tachiyomi.source.online.LoginSource
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
+import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
+import eu.kanade.tachiyomi.ui.manga.info.MangaWebViewController
 import eu.kanade.tachiyomi.widget.SimpleTextWatcher
 import kotlinx.android.synthetic.main.pref_account_login.view.*
 import rx.Subscription
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
 abstract class LoginDialogPreference(bundle: Bundle? = null) : DialogController(bundle) {
@@ -37,6 +44,8 @@ abstract class LoginDialogPreference(bundle: Bundle? = null) : DialogController(
     }
 
     fun onViewCreated(view: View) {
+        val source = Injekt.get<SourceManager>().get(args.getLong("key")) as LoginSource?
+
         v = view.apply {
             show_password.setOnCheckedChangeListener { _, isChecked ->
                 if (isChecked)
@@ -47,6 +56,15 @@ abstract class LoginDialogPreference(bundle: Bundle? = null) : DialogController(
 
             login.setMode(ActionProcessButton.Mode.ENDLESS)
             login.setOnClickListener { checkLogin() }
+            if(source != null && source is HttpSource){
+                login_captcha.setOnClickListener {
+                    router.pushController(MangaWebViewController(source.id, source.baseUrl)
+                            .withFadeTransaction())
+                }
+            } else{
+                login_captcha.visibility =View.GONE
+            }
+
 
             setCredentialsOnView(this)
 

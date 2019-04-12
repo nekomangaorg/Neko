@@ -37,7 +37,6 @@ import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
-import eu.kanade.tachiyomi.ui.catalogue.global_search.CatalogueSearchController
 import eu.kanade.tachiyomi.ui.library.ChangeMangaCategoriesDialog
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaController
@@ -51,7 +50,7 @@ import kotlinx.android.synthetic.main.manga_info_controller.*
 import uy.kohesive.injekt.injectLazy
 import java.text.DateFormat
 import java.text.DecimalFormat
-import java.util.Date
+import java.util.*
 
 /**
  * Fragment that shows manga information.
@@ -94,25 +93,25 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
             copyToClipboard(view.context.getString(R.string.title), manga_full_title.text.toString())
         }
 
-        manga_full_title.clicks().subscribeUntilDestroy {
-            performGlobalSearch(manga_full_title.text.toString())
-        }
+        /*manga_full_title.clicks().subscribeUntilDestroy {
+           performGlobalSearch(manga_full_title.text.toString())
+        }*/
 
         manga_artist.longClicks().subscribeUntilDestroy {
             copyToClipboard(manga_artist_label.text.toString(), manga_artist.text.toString())
         }
 
-        manga_artist.clicks().subscribeUntilDestroy {
+       /* manga_artist.clicks().subscribeUntilDestroy {
             performGlobalSearch(manga_artist.text.toString())
-        }
+        }*/
 
         manga_author.longClicks().subscribeUntilDestroy {
             copyToClipboard(manga_author.text.toString(), manga_author.text.toString())
         }
 
-        manga_author.clicks().subscribeUntilDestroy {
+       /* manga_author.clicks().subscribeUntilDestroy {
             performGlobalSearch(manga_author.text.toString())
-        }
+        }*/
 
         manga_summary.longClicks().subscribeUntilDestroy {
             copyToClipboard(view.context.getString(R.string.description), manga_summary.text.toString())
@@ -502,16 +501,6 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
 
         activity.toast(view.context.getString(R.string.copied_to_clipboard, content.truncateCenter(20)),
                 Toast.LENGTH_SHORT)
-    }
-
-    /**
-     * Perform a global search using the provided query.
-     *
-     * @param query the search query to pass to the search controller
-     */
-    fun performGlobalSearch(query: String) {
-        val router = parentController?.router ?: return
-        router.pushController(CatalogueSearchController(query).withFadeTransaction())
     }
 
     /**

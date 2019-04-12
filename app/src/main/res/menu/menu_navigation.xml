@@ -16,9 +16,10 @@
             android:icon="@drawable/ic_glasses_black_24dp"
             android:title="@string/label_recent_manga"/>
         <item
-            android:id="@+id/nav_drawer_catalogues"
+            android:id="@+id/nav_drawer_browse"
             android:icon="@drawable/ic_explore_black_24dp"
-            android:title="@string/label_catalogues" />
+            android:title="@string/label_browse" />
+
         <item
             android:id="@+id/nav_drawer_downloads"
             android:icon="@drawable/ic_file_download_black_24dp"

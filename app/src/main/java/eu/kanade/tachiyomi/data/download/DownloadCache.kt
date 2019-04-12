@@ -121,7 +121,7 @@ class DownloadCache(
      * Renews the downloads cache.
      */
     private fun renew() {
-        val onlineSources = sourceManager.getOnlineSources()
+        val onlineSources = sourceManager.getSources()
 
         val sourceDirs = rootDir.dir.listFiles()
                 .orEmpty()

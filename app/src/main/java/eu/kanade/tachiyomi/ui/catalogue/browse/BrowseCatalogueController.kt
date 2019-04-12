@@ -47,7 +47,9 @@ open class BrowseCatalogueController(bundle: Bundle) :
 
     constructor(source: CatalogueSource) : this(Bundle().apply {
         putLong(SOURCE_ID_KEY, source.id)
-    })
+        putString(QUERY_NAME_KEY, "One Piece")
+    }
+    )
 
     /**
      * Preferences helper.
@@ -507,6 +509,7 @@ open class BrowseCatalogueController(bundle: Bundle) :
 
     protected companion object {
         const val SOURCE_ID_KEY = "sourceId"
+        const val QUERY_NAME_KEY = "queryKey"
     }
 
 }
