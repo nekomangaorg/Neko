@@ -4,10 +4,8 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.graphics.PointF
-import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.net.Uri
-import android.support.v4.graphics.ColorUtils
 import android.view.GestureDetector
 import android.view.Gravity
 import android.view.MotionEvent
@@ -249,31 +247,13 @@ class PagerPageHolder(
                         val bytesArray = openStream!!.readBytes()
 
                         val imageView = initSubsamplingImageView()
-                        if (viewer.config.imageCropBorders) {
-                            val bytesStream = bytesArray.inputStream()
-                            imageView.setImage(ImageSource.inputStream(bytesStream))
-                            bytesStream.close()
-                        }
+                        val bytesStream = bytesArray.inputStream()
+                        imageView.setImage(ImageSource.inputStream(bytesStream))
+                        bytesStream.close()
 
                         launchUI {
                             val image = async { BitmapFactory.decodeByteArray(bytesArray, 0, bytesArray.size) }
-                            val bg = ImageUtil.autoSetBackground(image.await())
-                            imageView.background = bg
-                            if (!viewer.config.imageCropBorders) {
-                                if (bg is ColorDrawable) {
-                                    val array = FloatArray(3)
-                                    ColorUtils.colorToHSL(bg.color, array)
-                                    if (array[1] < 0.2) {
-                                        val bytesStream = bytesArray.inputStream()
-                                        imageView.setImage(ImageSource.inputStream(bytesStream))
-                                        bytesStream.close()
-                                    }
-                                    else
-                                        imageView.setImage(ImageSource.bitmap(image.await()))
-                                }
-                                else
-                                    imageView.setImage(ImageSource.bitmap(image.await()))
-                            }
+                            imageView.background = ImageUtil.autoSetBackground(image.await())
                         }
                     }
                     else {

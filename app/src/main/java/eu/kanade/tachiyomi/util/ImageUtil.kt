@@ -62,6 +62,8 @@ object ImageUtil {
         val right = image.width - left
         val midX = image.width / 2
         val midY = image.height / 2
+        val offsetX = (image.width * 0.01).toInt()
+        val offsetY = (image.height * 0.01).toInt()
         val topLeftIsDark = isDark(image.getPixel(left, top))
         val topRightIsDark = isDark(image.getPixel(right, top))
         val midLeftIsDark = isDark(image.getPixel(left, midY))
@@ -87,32 +89,43 @@ object ImageUtil {
                 isWhite(image.getPixel(right, bot)).toInt() > 2)
             darkBG = false
 
+        var blackPixel = when {
+            topLeftIsDark -> image.getPixel(left, top)
+            topRightIsDark -> image.getPixel(right, top)
+            botLeftIsDark -> image.getPixel(left, bot)
+            else -> image.getPixel(right, bot)
+        }
+
         var overallWhitePixels = 0
         var overallBlackPixels = 0
-        outer@ for (x in intArrayOf(left, right)) {
+        outer@ for (x in intArrayOf(left, left - offsetX, right, right + offsetX)) {
             var whitePixelsStreak = 0
             var whitePixels = 0
             var blackPixelsStreak = 0
             var blackPixels = 0
             var blackStreak = false
             var whiteStrak = false
+            val notOffset = x == left || x == right
             for (y in (0 until image.height step image.height / 25)) {
                 val pixel = image.getPixel(x, y)
+                val pixelOff = image.getPixel(x + (if (x == left) -offsetX else offsetX), y)
                 if (isWhite(pixel)) {
                     blackPixelsStreak = 0
                     whitePixelsStreak++
                     whitePixels++
-                    overallWhitePixels++
+                    if (notOffset)
+                        overallWhitePixels++
                     if (whitePixelsStreak > 14) {
                         whiteStrak = true
                     }
                 } else {
                     whitePixelsStreak = 0
-                    if (isDark(pixel)) {
+                    if (isDark(pixel) && isDark(pixelOff)) {
                         blackPixels++
-                        overallBlackPixels++
+                        if (notOffset)
+                            overallBlackPixels++
                         blackPixelsStreak++
-                        if (blackPixelsStreak > 14) {
+                        if (blackPixelsStreak >= 14) {
                             blackStreak = true
                         }
                     } else {
@@ -122,19 +135,34 @@ object ImageUtil {
             }
             when {
                 blackPixels > 22 -> {
-                    darkBG = true; overallWhitePixels = 0; break@outer
+                    if (x == right || x == right + offsetX)
+                        blackPixel = when {
+                            topRightIsDark -> image.getPixel(right, top)
+                            botRightIsDark -> image.getPixel(right, bot)
+                            else -> blackPixel
+                        }
+                    darkBG = true;
+                    overallWhitePixels = 0;
+                    break@outer
                 }
-                blackStreak -> darkBG = true
+                blackStreak -> {
+                    darkBG = true
+                    if (x == right || x == right + offsetX)
+                        blackPixel = when {
+                            topRightIsDark -> image.getPixel(right, top)
+                            botRightIsDark -> image.getPixel(right, bot)
+                            else -> blackPixel
+                        }
+                    if (blackPixels > 18) {
+                        overallWhitePixels = 0;
+                        break@outer
+                    }
+                }
                 whiteStrak || whitePixels > 22 -> darkBG = false
             }
         }
 
-        val blackPixel = when {
-            topLeftIsDark -> image.getPixel(left, top)
-            topRightIsDark -> image.getPixel(right, top)
-            botLeftIsDark -> image.getPixel(left, bot)
-            else -> image.getPixel(right, bot)
-        }
+
         if (overallWhitePixels > 9 && overallWhitePixels > overallBlackPixels) {
             darkBG = false
         }
@@ -151,7 +179,9 @@ object ImageUtil {
         if (topLeftIsDark && topRightIsDark && (topMidIsDark || overallBlackPixels > 9))
             return GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,
                     intArrayOf(blackPixel, blackPixel, Color.WHITE, Color.WHITE))
-        else if (botLeftIsDark && botRightIsDark && (isDark(image.getPixel(midX, bot)) || overallBlackPixels > 9))
+        else if (botLeftIsDark && botRightIsDark
+                && isDark(image.getPixel(left - offsetX, bot)) && isDark(image.getPixel(right + offsetX, bot))
+                && (isDark(image.getPixel(midX, bot)) || overallBlackPixels > 9))
             return GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,
                     intArrayOf(Color.WHITE, Color.WHITE, blackPixel, blackPixel))
         return ColorDrawable(Color.WHITE)
