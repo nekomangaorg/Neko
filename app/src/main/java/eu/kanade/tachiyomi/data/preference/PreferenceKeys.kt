@@ -15,6 +15,8 @@ object PreferenceKeys {
 
     const val showPageNumber = "pref_show_page_number_key"
 
+    const val trueColor = "pref_true_color_key"
+
     const val fullscreen = "fullscreen"
 
     const val keepScreenOn = "pref_keep_screen_on_key"
@@ -104,6 +106,8 @@ object PreferenceKeys {
     const val lang = "app_language"
 
     const val defaultCategory = "default_category"
+
+    const val skipRead = "skip_read"
 
     const val downloadBadge = "display_download_badge"
 
