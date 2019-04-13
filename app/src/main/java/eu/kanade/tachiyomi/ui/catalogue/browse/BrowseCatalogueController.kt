@@ -53,7 +53,6 @@ open class BrowseCatalogueController(bundle: Bundle) :
 
     constructor(source: Source) : this(Bundle().apply {
         putLong(SOURCE_ID_KEY, source.id)
-        putString(QUERY_NAME_KEY, "One Piece")
     }
     )
 

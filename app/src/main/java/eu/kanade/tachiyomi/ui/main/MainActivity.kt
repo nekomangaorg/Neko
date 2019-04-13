@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.ui.main
 
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
-import android.app.SearchManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
@@ -219,20 +218,7 @@ class MainActivity : BaseActivity(),  SourceLoginDialog.Listener {
                     setSelectedDrawerItem(R.id.nav_drawer_downloads)
                 }
             }
-            Intent.ACTION_SEARCH, "com.google.android.gms.actions.SEARCH_ACTION" -> {
-                //If the intent match the "standard" Android search intent
-                // or the Google-specific search intent (triggered by saying or typing "search *query* on *Tachiyomi*" in Google Search/Google Assistant)
-
-                setSelectedDrawerItem(R.id.nav_drawer_browse)
-                //Get the search query provided in extras, and if not null, perform a global search with it.
-                val query = intent.getStringExtra(SearchManager.QUERY)
-                if (query != null && !query.isEmpty()) {
-                    if (router.backstackSize > 1) {
-                        router.popToRoot()
-                    }
-                    router.pushController(BrowseCatalogueController(query).withFadeTransaction())
-                }
-            }
+           
             else -> return false
         }
         return true
