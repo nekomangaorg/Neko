@@ -244,16 +244,23 @@ class PagerPageHolder(
             .doOnNext { isAnimated ->
                 if (!isAnimated) {
                     if (viewer.config.readerTheme == 2) {
-                        val bytesArray = openStream!!.readBytes()
-
                         val imageView = initSubsamplingImageView()
-                        val bytesStream = bytesArray.inputStream()
-                        imageView.setImage(ImageSource.inputStream(bytesStream))
-                        bytesStream.close()
+                        if (page.bg != null) {
+                            imageView.setImage(ImageSource.inputStream(openStream!!))
+                            imageView.background = page.bg
+                        }
+                        // if the user switches to automatic when pages are already cached, the bg needs to be loaded
+                        else {
+                            val bytesArray = openStream!!.readBytes()
+                            val bytesStream = bytesArray.inputStream()
+                            imageView.setImage(ImageSource.inputStream(bytesStream))
+                            bytesStream.close()
 
-                        launchUI {
-                            val image = async { BitmapFactory.decodeByteArray(bytesArray, 0, bytesArray.size) }
-                            imageView.background = ImageUtil.autoSetBackground(image.await())
+                            launchUI {
+                                val image = async { BitmapFactory.decodeByteArray(bytesArray, 0, bytesArray.size) }
+                                imageView.background = ImageUtil.autoSetBackground(image.await())
+                                page.bg = imageView.background
+                            }
                         }
                     }
                     else {

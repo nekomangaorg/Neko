@@ -98,7 +98,7 @@ object ImageUtil {
 
         var overallWhitePixels = 0
         var overallBlackPixels = 0
-        outer@ for (x in intArrayOf(left, left - offsetX, right, right + offsetX)) {
+        outer@ for (x in intArrayOf(left, right, left - offsetX, right + offsetX)) {
             var whitePixelsStreak = 0
             var whitePixels = 0
             var blackPixelsStreak = 0
