@@ -32,9 +32,7 @@ open class App : Application() {
 
     override fun attachBaseContext(base: Context) {
         super.attachBaseContext(base)
-        if (BuildConfig.DEBUG) {
-            MultiDex.install(this)
-        }
+        MultiDex.install(this)
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
