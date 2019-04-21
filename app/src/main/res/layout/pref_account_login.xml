@@ -52,6 +52,20 @@
         android:layout_marginTop="10dp"
         android:text="@string/show_password"/>
 
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/two_factor"/>
+
+    <EditText
+        android:id="@+id/twoFactor"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        />
+
     <com.dd.processbutton.iml.ActionProcessButton
         android:id="@+id/login"
         android:layout_width="match_parent"
