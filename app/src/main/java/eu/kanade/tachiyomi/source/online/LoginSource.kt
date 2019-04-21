@@ -8,7 +8,7 @@ interface LoginSource : Source {
 
     fun isLogged(): Boolean
 
-    fun login(username: String, password: String): Observable<Boolean>
+    fun login(username: String, password: String, twoFactorCode : String = ""): Observable<Boolean>
 
     fun isAuthenticationSuccessful(response: Response): Boolean
 

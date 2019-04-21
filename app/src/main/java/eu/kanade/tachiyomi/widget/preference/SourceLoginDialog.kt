@@ -33,8 +33,7 @@ class SourceLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle) 
                 return
 
             login.progress = 1
-
-            requestSubscription = source.login(username.text.toString(), password.text.toString())
+            requestSubscription = source.login(username.text.toString(), password.text.toString(), twoFactor.text.toString())
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe({ logged ->

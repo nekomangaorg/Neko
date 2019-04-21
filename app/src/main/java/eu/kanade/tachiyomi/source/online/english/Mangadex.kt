@@ -25,6 +25,7 @@ import kotlin.collections.set
 
 open class Mangadex(override val lang: String, private val internalLang: String, private val langCode: Int) : LoginSource, ParsedHttpSource() {
 
+
     override val name = "MangaDex"
 
     override val baseUrl = "https://mangadex.org"
@@ -477,16 +478,18 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         return network.cookieManager.get(httpUrl).any { it.name() == "mangadex_rememberme_token" }
     }
 
-    override fun login(username: String, password: String): Observable<Boolean> {
+    override fun login(username: String, password: String, twoFactorCode: String): Observable<Boolean> {
         val formBody = FormBody.Builder()
                 .add("login_username", username)
                 .add("login_password", password)
                 .add("no_js", "1")
                 .add("remember_me", "1")
-                .build()
 
+        twoFactorCode?.let {
+            formBody.add("two_factor", it)
+        }
 
-        return clientBuilder().newCall(POST("$baseUrl/ajax/actions.ajax.php?function=login", headers, formBody))
+        return clientBuilder().newCall(POST("$baseUrl/ajax/actions.ajax.php?function=login", headers, formBody.build()))
                 .asObservable()
                 .map { isAuthenticationSuccessful(it) }
     }
