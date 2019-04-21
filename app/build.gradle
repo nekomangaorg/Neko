@@ -45,6 +45,7 @@ android {
         buildConfigField "boolean", "INCLUDE_UPDATER", "false"
 
         vectorDrawables.useSupportLibrary = true
+        setProperty("archivesBaseName", "MangaDex")
 
         multiDexEnabled true
 
@@ -66,8 +67,8 @@ android {
         standard {
             buildConfigField "boolean", "INCLUDE_UPDATER", "true"
             dimension "default"
-            versionCode 6
-            versionName "1.0.3.2"
+            versionCode 7
+            versionName "1.0.4"
         }
         dev {
             resConfigs "en", "xxhdpi"
