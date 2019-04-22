@@ -45,7 +45,7 @@ android {
         buildConfigField "boolean", "INCLUDE_UPDATER", "false"
 
         vectorDrawables.useSupportLibrary = true
-        setProperty("archivesBaseName", "MangaDex")
+        setProperty("archivesBaseName", "Neko")
 
         multiDexEnabled true
 
