@@ -1,9 +1,23 @@
-Neko for MangaDex
- [![release](https://img.shields.io/github/release/CarlosEsco/MangaDex.svg?maxAge=3600&label=download%20(autoupdate%20included))](https://github.com/CarlosEsco/MangaDex/releases) 
-[![Build Status](https://travis-ci.org/CarlosEsco/MangaDex.svg?branch=master)](https://travis-ci.org/CarlosEsco/MangaDex)
+# ![app icon](./.github/readme-images/app-icon.png) Neko
+
+| Build | Stable | 
+|-------|----------|
+ | [![Build Status](https://travis-ci.org/CarlosEsco/Neko.svg?branch=master)](https://travis-ci.org/CarlosEsco/Neko) | [![release](https://img.shields.io/github/release/CarlosEsco/Neko.svg?maxAge=3600&label=download%20(autoupdate%20included))](https://github.com/CarlosEsco/Neko/releases) 
+
 
 A free, open source unofficial manga reader for MangaDex and a fork of [Tachiyomi](https://github.com/inorichi/tachiyomi)
 
+## Features
+* Supports login to MangaDex
+* Local reading of downloaded manga
+* [MyAnimeList](https://myanimelist.net/), [AniList](https://anilist.co/),  [Kitsu](https://kitsu.io/explore/anime) and [Shikimori](https://shikimori.org/) support.
+* Categories to organize your library.
+* Schedule updating your library for new chapters.
+* Create backups locally to read offline or to your desired cloud service. 
+
+
+## Download
+Get the app from our [releases page](https://github.com/CarlosEsco/Neko/releases).
 
 
 ## License
