@@ -359,13 +359,14 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         manga.author = mangaJson.get("author").string
         manga.artist = mangaJson.get("artist").string
         val status = mangaJson.get("status").int
+        val tempStatus = parseStatus(status)
         val finalChapterNumber = getFinalChapter(mangaJson)
-        if ((status == 2 || status == 3) && chapterJson != null && isMangaCompleted(chapterJson, finalChapterNumber)) {
+        if ((tempStatus == SManga.PUBLICATION_COMPLETE || tempStatus == SManga.CANCELLED) && chapterJson != null && isMangaCompleted(chapterJson, finalChapterNumber)) {
             manga.status = SManga.COMPLETED
-        } else if (status == 2 && chapterJson != null && isOneshot(chapterJson, finalChapterNumber)) {
+        } else if (tempStatus == SManga.PUBLICATION_COMPLETE && chapterJson != null && isOneshot(chapterJson, finalChapterNumber)) {
             manga.status = SManga.COMPLETED
         } else {
-            manga.status = parseStatus(status)
+            manga.status = tempStatus
         }
 
         val genres = (if (mangaJson.get("hentai").int == 1) listOf("Hentai") else listOf()) +
@@ -497,7 +498,11 @@ open class Mangadex(override val lang: String, private val internalLang: String,
 
     private fun parseStatus(status: Int) = when (status) {
         1 -> SManga.ONGOING
+        2 -> SManga.PUBLICATION_COMPLETE
+        3 -> SManga.CANCELLED
+        4 -> SManga.HIATUS
         else -> SManga.UNKNOWN
+
     }
 
     private fun getImageUrl(attr: String): String {

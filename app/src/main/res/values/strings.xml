@@ -313,6 +313,9 @@
     <string name="ongoing">Ongoing</string>
     <string name="unknown">Unknown</string>
     <string name="licensed">Licensed</string>
+    <string name="hiatus">Hiatus</string>
+    <string name="cancelled">Cancelled</string>
+    <string name="publication_complete">Publication Complete</string>
     <string name="remove_from_library">Remove from library</string>
     <string name="manga_info_full_title_label">Title</string>
     <string name="manga_added_library">Added to library</string>
