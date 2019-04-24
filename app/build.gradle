@@ -67,8 +67,8 @@ android {
         standard {
             buildConfigField "boolean", "INCLUDE_UPDATER", "true"
             dimension "default"
-            versionCode 8
-            versionName "1.0.4.1"
+            versionCode 9
+            versionName "1.0.4.2"
         }
         dev {
             resConfigs "en", "xxhdpi"
