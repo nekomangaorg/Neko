@@ -10,11 +10,11 @@ import eu.kanade.tachiyomi.network.POST
 import eu.kanade.tachiyomi.network.asObservable
 import eu.kanade.tachiyomi.network.asObservableSuccess
 import eu.kanade.tachiyomi.source.model.*
+import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.LoginSource
-import eu.kanade.tachiyomi.source.online.ParsedHttpSource
+import eu.kanade.tachiyomi.util.asJsoup
 import okhttp3.*
 import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import rx.Observable
 import uy.kohesive.injekt.injectLazy
@@ -23,8 +23,7 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.collections.set
 
-open class Mangadex(override val lang: String, private val internalLang: String, private val langCode: Int) : LoginSource, ParsedHttpSource() {
-
+open class Mangadex(override val lang: String, private val internalLang: String, private val langCode: Int) : LoginSource, HttpSource() {
 
     override val name = "MangaDex"
 
@@ -66,9 +65,9 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         "${URLEncoder.encode(it.key, "UTF-8")}=${URLEncoder.encode(it.value, "UTF-8")}"
     }
 
-    override fun popularMangaSelector() = "div.col-lg-6.border-bottom.pl-0.my-1"
+    private fun popularMangaSelector() = "div.col-lg-6.border-bottom.pl-0.my-1"
 
-    override fun latestUpdatesSelector() = "tr a.manga_title"
+    private fun latestUpdatesSelector() = "tr a.manga_title"
 
     override fun popularMangaRequest(page: Int): Request {
         return GET("$baseUrl/titles/0/$page/", headers)
@@ -78,7 +77,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         return GET("$baseUrl/updates/$page", headers)
     }
 
-    override fun popularMangaFromElement(element: Element): SManga {
+    private fun popularMangaFromElement(element: Element): SManga {
         val manga = SManga.create()
         element.select("a.manga_title").first().let {
             val url = modifyMangaUrl(it.attr("href"))
@@ -96,7 +95,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         return cdnUrl + "/images/manga/" + getMangaId(mangaUrl) + ".jpg"
     }
 
-    override fun latestUpdatesFromElement(element: Element): SManga {
+     private fun latestUpdatesFromElement(element: Element): SManga {
         val manga = SManga.create()
         element.let {
             manga.setUrlWithoutDomain(modifyMangaUrl(it.attr("href")))
@@ -108,11 +107,11 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         return manga
     }
 
-    override fun popularMangaNextPageSelector() = ".pagination li:not(.disabled) span[title*=last page]:not(disabled)"
+     private fun popularMangaNextPageSelector() = ".pagination li:not(.disabled) span[title*=last page]:not(disabled)"
 
-    override fun latestUpdatesNextPageSelector() = ".pagination li:not(.disabled) span[title*=last page]:not(disabled)"
+     private fun latestUpdatesNextPageSelector() = ".pagination li:not(.disabled) span[title*=last page]:not(disabled)"
 
-    override fun searchMangaNextPageSelector() = ".pagination li:not(.disabled) span[title*=last page]:not(disabled)"
+     private fun searchMangaNextPageSelector() = ".pagination li:not(.disabled) span[title*=last page]:not(disabled)"
 
     override fun fetchPopularManga(page: Int): Observable<MangasPage> {
         return clientBuilder().newCall(popularMangaRequest(page))
@@ -121,6 +120,25 @@ open class Mangadex(override val lang: String, private val internalLang: String,
                     popularMangaParse(response)
                 }
     }
+    /**
+     * Parses the response from the site and returns a [MangasPage] object.
+     *
+     * @param response the response from the site.
+     */
+    override fun popularMangaParse(response: Response): MangasPage {
+        val document = response.asJsoup()
+
+        val mangas = document.select(popularMangaSelector()).map { element ->
+            popularMangaFromElement(element)
+        }.distinct()
+
+        val hasNextPage = popularMangaNextPageSelector()?.let { selector ->
+            document.select(selector).first()
+        } != null
+
+        return MangasPage(mangas, hasNextPage)
+    }
+
 
     override fun fetchLatestUpdates(page: Int): Observable<MangasPage> {
         return clientBuilder().newCall(latestUpdatesRequest(page))
@@ -128,6 +146,19 @@ open class Mangadex(override val lang: String, private val internalLang: String,
                 .map { response ->
                     latestUpdatesParse(response)
                 }
+    }
+    override fun latestUpdatesParse(response: Response): MangasPage {
+        val document = response.asJsoup()
+
+        val mangas = document.select(latestUpdatesSelector()).map { element ->
+            latestUpdatesFromElement(element)
+        }
+
+        val hasNextPage = latestUpdatesNextPageSelector()?.let { selector ->
+            document.select(selector).first()
+        } != null
+
+        return MangasPage(mangas, hasNextPage)
     }
 
     override fun fetchSearchManga(page: Int, query: String, filters: FilterList): Observable<MangasPage> {
@@ -147,6 +178,19 @@ open class Mangadex(override val lang: String, private val internalLang: String,
                         searchMangaParse(response)
                     }
         }
+    }
+    override fun searchMangaParse(response: Response): MangasPage {
+        val document = response.asJsoup()
+
+        val mangas = document.select(searchMangaSelector()).map { element ->
+            searchMangaFromElement(element)
+        }
+
+        val hasNextPage = searchMangaNextPageSelector()?.let { selector ->
+            document.select(selector).first()
+        } != null
+
+        return MangasPage(mangas, hasNextPage)
     }
 
     private fun getSearchClient(filters: FilterList): OkHttpClient {
@@ -260,9 +304,9 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         return GET(urlToUse, headers)
     }
 
-    override fun searchMangaSelector() = "div.col-lg-6.border-bottom.pl-0.my-1"
+    private fun searchMangaSelector() = "div.col-lg-6.border-bottom.pl-0.my-1"
 
-    override fun searchMangaFromElement(element: Element): SManga {
+    private fun searchMangaFromElement(element: Element): SManga {
         val manga = SManga.create()
 
         element.select("a.manga_title").first().let {
@@ -339,10 +383,6 @@ open class Mangadex(override val lang: String, private val internalLang: String,
                 .replace("[*]", "")
                 .replace("""\[(\w+)[^\]]*](.*?)\[/\1]""".toRegex(), "$2")).text()
     }
-
-    override fun mangaDetailsParse(document: Document) = throw Exception("Not Used")
-
-    override fun chapterListSelector() = ""
 
     override fun fetchChapterList(manga: SManga): Observable<List<SChapter>> {
         return clientBuilder().newCall(apiRequest(manga))
@@ -436,9 +476,6 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         return chapter
     }
 
-    override fun chapterFromElement(element: Element) = throw Exception("Not used")
-
-    override fun pageListParse(document: Document) = throw Exception("Not used")
 
     override fun pageListParse(response: Response): List<Page> {
         val jsonData = response.body()!!.string()
@@ -458,8 +495,6 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         return pages
     }
 
-    override fun imageUrlParse(document: Document): String = ""
-
     private fun parseStatus(status: Int) = when (status) {
         1 -> SManga.ONGOING
         else -> SManga.UNKNOWN
@@ -472,6 +507,8 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         }
         return baseUrl + attr
     }
+
+    override fun imageUrlParse(response: Response): String = ""
 
     override fun isLogged(): Boolean {
         val httpUrl = HttpUrl.parse(baseUrl)!!
