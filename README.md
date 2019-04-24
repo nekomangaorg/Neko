@@ -7,6 +7,9 @@
 
 A free, open source unofficial manga reader for MangaDex and a fork of [Tachiyomi](https://github.com/inorichi/tachiyomi)
 
+## Goal
+Using Tachiyomi as a base to add MangaDex specific features
+
 ## Features
 * Supports login to MangaDex
 * Local reading of downloaded manga
