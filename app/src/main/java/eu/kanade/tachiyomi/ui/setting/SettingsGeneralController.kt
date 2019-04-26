@@ -12,7 +12,6 @@ import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
-import eu.kanade.tachiyomi.util.LocaleHelper
 import kotlinx.android.synthetic.main.pref_library_columns.view.*
 import rx.Observable
 import uy.kohesive.injekt.Injekt
@@ -26,29 +25,6 @@ class SettingsGeneralController : SettingsController() {
     override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
         titleRes = R.string.pref_category_general
 
-        listPreference {
-            key = Keys.lang
-            titleRes = R.string.pref_language
-            entryValues = arrayOf("", "ar", "bg", "bn", "ca", "cs", "de", "el", "en-US", "en-GB",
-            "es", "fr", "hi", "hu", "in", "it", "ja", "ko", "lv", "ms", "nb-rNO", "nl", "pl", "pt",
-            "pt-BR", "ro", "ru", "sr", "sv", "th", "tr", "uk", "vi", "zh-rCN")
-            entries = entryValues.map { value ->
-                val locale = LocaleHelper.getLocaleFromString(value.toString())
-                locale?.getDisplayName(locale)?.capitalize() ?:
-                        context.getString(R.string.system_default)
-            }.toTypedArray()
-            defaultValue = ""
-            summary = "%s"
-
-            onChange { newValue ->
-                val activity = activity ?: return@onChange false
-                val app = activity.application
-                LocaleHelper.changeLocale(newValue.toString())
-                LocaleHelper.updateConfiguration(app, app.resources.configuration)
-                activity.recreate()
-                true
-            }
-        }
         intListPreference {
             key = Keys.theme
             titleRes = R.string.pref_theme
@@ -78,8 +54,8 @@ class SettingsGeneralController : SettingsController() {
 
             Observable.combineLatest(
                     preferences.portraitColumns().asObservable(),
-                    preferences.landscapeColumns().asObservable(),
-                    { portraitCols, landscapeCols -> Pair(portraitCols, landscapeCols) })
+                    preferences.landscapeColumns().asObservable()
+            ) { portraitCols, landscapeCols -> Pair(portraitCols, landscapeCols) }
                     .subscribeUntilDestroy { (portraitCols, landscapeCols) ->
                         val portrait = getColumnValue(portraitCols)
                         val landscape = getColumnValue(landscapeCols)

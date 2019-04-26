@@ -117,7 +117,7 @@ class DownloadProvider(private val context: Context) {
      * @param chapter the chapter to query.
      */
     fun getChapterDirName(chapter: Chapter): String {
-        return DiskUtil.buildValidFilename(chapter.name)
+        return DiskUtil.buildValidFilename(chapter.name + " - " +chapter.url.substringAfterLast("/") )
     }
 
 }

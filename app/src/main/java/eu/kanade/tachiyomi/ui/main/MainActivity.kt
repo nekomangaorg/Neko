@@ -59,9 +59,9 @@ class MainActivity : BaseActivity(),  SourceLoginDialog.Listener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(when (preferences.theme()) {
-            2 -> R.style.Theme_MangaDex_Dark
-            3 -> R.style.Theme_MangaDex_Amoled
-            else -> R.style.Theme_MangaDex
+            2 -> R.style.Theme_Neko_Dark
+            3 -> R.style.Theme_Neko_Amoled
+            else -> R.style.Theme_Neko
         })
         super.onCreate(savedInstanceState)
 

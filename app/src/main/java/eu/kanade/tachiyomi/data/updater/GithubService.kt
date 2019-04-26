@@ -27,7 +27,7 @@ interface GithubService {
         }
     }
 
-    @GET("/repos/CarlosEsco/MangaDex/releases/latest")
+    @GET("/repos/CarlosEsco/Neko/releases/latest")
     fun getLatestVersion(): Observable<GithubRelease>
 
 }

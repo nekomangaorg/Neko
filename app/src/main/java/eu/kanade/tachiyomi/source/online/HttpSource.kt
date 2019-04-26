@@ -12,7 +12,6 @@ import okhttp3.Request
 import okhttp3.Response
 import rx.Observable
 import uy.kohesive.injekt.injectLazy
-import java.lang.Exception
 import java.net.URI
 import java.net.URISyntaxException
 import java.security.MessageDigest
@@ -204,15 +203,12 @@ abstract class HttpSource : CatalogueSource {
      * @param manga the manga to look for chapters.
      */
     override fun fetchChapterList(manga: SManga): Observable<List<SChapter>> {
-        if (manga.status != SManga.LICENSED) {
-            return client.newCall(chapterListRequest(manga))
+        return client.newCall(chapterListRequest(manga))
                     .asObservableSuccess()
                     .map { response ->
                         chapterListParse(response)
                     }
-        } else {
-            return Observable.error(Exception("Licensed - No chapters to show"))
-        }
+
     }
 
     /**

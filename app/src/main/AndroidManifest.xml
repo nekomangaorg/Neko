@@ -20,7 +20,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:label="@string/app_name"
         android:largeHeap="true"
-        android:theme="@style/Theme.MangaDex">
+        android:theme="@style/Theme.BrandedLaunch">
         <activity
             android:name=".ui.main.MainActivity"
             android:launchMode="singleTop">
@@ -58,8 +58,8 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.setting.ShikomoriLoginActivity"
-            android:label="Shikomori">
+            android:name=".ui.setting.ShikimoriLoginActivity"
+            android:label="Shikimori">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 

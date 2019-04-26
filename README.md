@@ -17,7 +17,6 @@ Need info? Check the [Wiki](https://github.com/CarlosEsco/Neko/wiki)
  | For [Feature Request](https://github.com/CarlosEsco/Neko/issues/new?assignees=&labels=Feature+Request&template=feature_request.md&title=%5BFeature+Request%5D)
  | Check [our project Board](https://github.com/CarlosEsco/Neko/projects/1)
  
-
  [![Travis (.org) branch](https://img.shields.io/travis/CarlosEsco/Neko/master.svg?style=for-the-badge)](https://travis-ci.org/CarlosEsco/Neko) 
  [![release](https://img.shields.io/github/release/CarlosEsco/Neko.svg?maxAge=3600&style=for-the-badge&label=download%20(autoupdate%20included))](https://github.com/CarlosEsco/Neko/releases)
  [![Stars](https://img.shields.io/github/stars/CarlosEsco/Neko.svg?style=for-the-badge)](https://github.com/CarlosEsco/Neko/releases)
@@ -29,19 +28,17 @@ Need info? Check the [Wiki](https://github.com/CarlosEsco/Neko/wiki)
 <img src="./.github/readme-images/screenshots.png" align="center" />
 
 ## Goal:
-Using Tachiyomi as a base to add MangaDex specific features
+Using Tachiyomi as a base to add MangaDex specific features.
 
 ## Features:
 * Supports login to MangaDex
 * Local reading of downloaded manga
-* [MyAnimeList](https://myanimelist.net/), [AniList](https://anilist.co/),  [Kitsu](https://kitsu.io/explore/anime) and [Shikimori](https://shikimori.org/) support.
+* [MyAnimeList](https://myanimelist.net/), [AniList](https://anilist.co/), [Kitsu](https://kitsu.io/explore/anime) and [Shikimori](https://shikimori.org/) support.
 * Schedule updating your library for new chapters.
 * Create backups locally to read offline or to your desired cloud service. 
 
-
 ## Download
 Get the app from our [releases page](https://github.com/CarlosEsco/Neko/releases).
-
 
 ## License
 
