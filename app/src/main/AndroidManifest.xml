@@ -54,7 +54,7 @@
 
                 <data
                     android:host="anilist-auth"
-                    android:scheme="tachiyomi" />
+                    android:scheme="neko"/>
             </intent-filter>
         </activity>
         <activity

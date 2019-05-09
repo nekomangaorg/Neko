@@ -2,22 +2,24 @@ package eu.kanade.tachiyomi.ui.setting
 
 import android.content.Intent
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
 import android.view.Gravity.CENTER
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.FrameLayout
 import android.widget.ProgressBar
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.track.TrackManager
+import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 import uy.kohesive.injekt.injectLazy
 
-class AnilistLoginActivity : AppCompatActivity() {
+class AnilistLoginActivity : BaseActivity() {
 
     private val trackManager: TrackManager by injectLazy()
 
     override fun onCreate(savedState: Bundle?) {
+        setTheme(R.style.Theme_Neko)
         super.onCreate(savedState)
 
         val view = ProgressBar(this)

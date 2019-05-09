@@ -12,7 +12,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
 import rx.Observable
-import java.util.Calendar
+import java.util.*
 
 
 class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
@@ -267,8 +267,7 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
 
 
     companion object {
-        private const val clientId = "385"
-        private const val clientUrl = "tachiyomi://anilist-auth"
+        private const val clientId = "1984"
         private const val apiUrl = "https://graphql.anilist.co/"
         private const val baseUrl = "https://anilist.co/api/v2/"
         private const val baseMangaUrl = "https://anilist.co/manga/"
