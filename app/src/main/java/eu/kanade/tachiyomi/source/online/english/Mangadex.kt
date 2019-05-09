@@ -41,10 +41,11 @@ open class Mangadex(override val lang: String, private val internalLang: String,
             .connectTimeout(10, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .addNetworkInterceptor { chain ->
+                val originalCookies = chain.request().header("Cookie") ?: ""
                 val newReq = chain
                         .request()
                         .newBuilder()
-                        .addHeader("Cookie", cookiesHeader(r18Toggle, langCode))
+                        .header("Cookie", "$originalCookies; ${cookiesHeader(r18Toggle, langCode)}")
                         .build()
                 chain.proceed(newReq)
             }.build()!!
@@ -70,11 +71,11 @@ open class Mangadex(override val lang: String, private val internalLang: String,
     private fun latestUpdatesSelector() = "tr a.manga_title"
 
     override fun popularMangaRequest(page: Int): Request {
-        return GET("$baseUrl/titles/0/$page/", headers)
+        return GET("$baseUrl/titles/0/$page/", headersBuilder().build())
     }
 
     override fun latestUpdatesRequest(page: Int): Request {
-        return GET("$baseUrl/updates/$page", headers)
+        return GET("$baseUrl/updates/$page", headersBuilder().build())
     }
 
     private fun popularMangaFromElement(element: Element): SManga {
@@ -301,7 +302,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
             urlToUse += "&tags_exc=" + genresToExclude.joinToString(",")
         }
 
-        return GET(urlToUse, headers)
+        return GET(urlToUse, headersBuilder().build())
     }
 
     private fun searchMangaSelector() = "div.col-lg-6.border-bottom.pl-0.my-1"
