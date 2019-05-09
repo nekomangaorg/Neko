@@ -297,8 +297,8 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:atg_borderStrokeWidth="1dp"
             app:atg_backgroundColor="@android:color/transparent"
-            app:atg_borderColor="@color/md_blue_A400"
-            app:atg_textColor="@color/md_blue_A400" />
+            app:atg_borderColor="@color/colorAccentDark"
+            app:atg_textColor="@color/colorAccentDark"/>
 
     </android.support.constraint.ConstraintLayout>
 

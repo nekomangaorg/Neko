@@ -250,8 +250,8 @@
                     app:layout_constraintRight_toRightOf="parent"
                     app:atg_borderStrokeWidth="1dp"
                     app:atg_backgroundColor="@android:color/transparent"
-                    app:atg_borderColor="@color/md_blue_A400"
-                    app:atg_textColor="@color/md_blue_A400"
+                    app:atg_borderColor="@color/colorAccentDark"
+                    app:atg_textColor="@color/colorAccentDark"
                     android:layout_marginRight="64dp"/>
 
 
