@@ -41,8 +41,6 @@ class LibraryListHolder(
             visibility = if (item.downloadCount > 0) View.VISIBLE else View.GONE
             text = "${item.downloadCount}"
         }
-        //show local text badge if local manga
-        local_text.visibility = View.GONE
 
         // Create thumbnail onclick to simulate long click
         thumbnail.setOnClickListener {
