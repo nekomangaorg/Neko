@@ -7,6 +7,7 @@ import android.view.Gravity.CENTER
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.FrameLayout
 import android.widget.ProgressBar
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import rx.android.schedulers.AndroidSchedulers
@@ -18,6 +19,7 @@ class ShikimoriLoginActivity : AppCompatActivity() {
     private val trackManager: TrackManager by injectLazy()
 
     override fun onCreate(savedState: Bundle?) {
+        setTheme(R.style.Theme_Neko)
         super.onCreate(savedState)
 
         val view = ProgressBar(this)
