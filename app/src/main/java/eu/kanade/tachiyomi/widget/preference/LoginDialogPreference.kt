@@ -62,7 +62,9 @@ abstract class LoginDialogPreference(bundle: Bundle? = null) : DialogController(
                             .withFadeTransaction())
                 }
             } else{
-                login_captcha.visibility =View.GONE
+                login_captcha.visibility = View.GONE
+                two_factor_static.visibility = View.GONE
+                two_factor_edit.visibility = View.GONE
             }
 
 

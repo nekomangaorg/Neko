@@ -53,14 +53,14 @@
         android:text="@string/show_password"/>
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/two_factor_static"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:text="@string/two_factor"/>
 
     <EditText
-        android:id="@+id/twoFactor"
+        android:id="@+id/two_factor_edit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
