@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.source.online.english
 
-import android.os.SystemClock
 import com.github.salomonbrys.kotson.*
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
@@ -36,49 +35,14 @@ open class Mangadex(override val lang: String, private val internalLang: String,
 
     private val preferences: PreferencesHelper by injectLazy()
 
-    private val requestsPerSecond = 4
-    private val lastRequests = ArrayList<Long>(requestsPerSecond)
-    private val rateLimitInterceptor = Interceptor {
-        synchronized(this) {
-            val now = SystemClock.elapsedRealtime()
-            val waitTime = if (lastRequests.size < requestsPerSecond) {
-                0
-            } else {
-                val oldestReq = lastRequests[0]
-                val newestReq = lastRequests[requestsPerSecond - 1]
-
-                if (newestReq - oldestReq > 1000) {
-                    0
-                } else {
-                    oldestReq + 1000 - now // Remaining time for the next second
-                }
-            }
-
-            if (lastRequests.size == requestsPerSecond) {
-                lastRequests.removeAt(0)
-            }
-            if (waitTime > 0) {
-                lastRequests.add(now + waitTime)
-                Thread.sleep(waitTime) // Sleep inside synchronized to pause queued requests
-            } else {
-                lastRequests.add(now)
-            }
-        }
-
-        it.proceed(it.request())
-    }
-
     override val client: OkHttpClient = network.cloudflareClient.newBuilder()
-            .addNetworkInterceptor(rateLimitInterceptor)
             .build()
-
 
     private fun clientBuilder(): OkHttpClient = clientBuilder(preferences.r18().toInt())
 
     private fun clientBuilder(r18Toggle: Int): OkHttpClient = network.cloudflareClient.newBuilder()
             .connectTimeout(10, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
-            .addNetworkInterceptor(rateLimitInterceptor)
             .addNetworkInterceptor { chain ->
                 val originalCookies = chain.request().header("Cookie") ?: ""
                 val newReq = chain
