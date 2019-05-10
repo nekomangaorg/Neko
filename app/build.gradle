@@ -93,6 +93,7 @@ android {
 
 }
 
+
 dependencies {
 
     // Modified dependencies
@@ -100,7 +101,7 @@ dependencies {
     implementation 'com.github.inorichi:junrar-android:634c1f5'
 
     // Android support library
-    final support_library_version = '27.0.2'
+    final support_library_version = '27.1.1'
     implementation "com.android.support:support-v4:$support_library_version"
     implementation "com.android.support:appcompat-v7:$support_library_version"
     implementation "com.android.support:cardview-v7:$support_library_version"
@@ -147,6 +148,10 @@ dependencies {
 
     // HTML parser
     implementation 'org.jsoup:jsoup:1.10.2'
+
+    //Icons
+    implementation "com.mikepenz:iconics-core:3.0.4"
+    implementation 'com.mikepenz:community-material-typeface:3.5.95.1@aar'
 
     // Job scheduling
     implementation 'com.evernote:android-job:1.2.5'
