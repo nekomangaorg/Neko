@@ -1,12 +1,15 @@
 package eu.kanade.tachiyomi.ui.category
 
 import android.support.design.widget.Snackbar
+import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.view.ActionMode
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.*
 import com.jakewharton.rxbinding.view.clicks
+import com.mikepenz.google_material_typeface_library.GoogleMaterial
+import com.mikepenz.iconics.IconicsDrawable
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.SelectableAdapter
 import eu.davidea.flexibleadapter.helpers.UndoHelper
@@ -77,6 +80,7 @@ class CategoryController : NucleusController<CategoryPresenter>(),
         recycler.layoutManager = LinearLayoutManager(view.context)
         recycler.setHasFixedSize(true)
         recycler.adapter = adapter
+        fab.setImageDrawable(IconicsDrawable(view.context).icon(GoogleMaterial.Icon.gmd_add).sizeDp(24).color(ContextCompat.getColor(view.context, R.color.md_white_1000)))
         adapter?.isHandleDragEnabled = true
         adapter?.isPermanentDelete = false
 
