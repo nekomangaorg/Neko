@@ -115,9 +115,9 @@ class LibraryNavigationView @JvmOverloads constructor(context: Context, attrs: A
 
         private val unread = Item.MultiSort(R.string.action_filter_unread, this)
 
-        private val source = Item.MultiSort(R.string.manga_info_source_label, this)
+        private val dateAdded = Item.MultiSort(R.string.manga_info_date_added_label, this)
 
-        override val items = listOf(alphabetically, lastRead, lastUpdated, unread, total, source)
+        override val items = listOf(alphabetically, lastRead, lastUpdated, unread, total, dateAdded)
 
         override val header = Item.Header(R.string.action_sort)
 
@@ -133,7 +133,7 @@ class LibraryNavigationView @JvmOverloads constructor(context: Context, attrs: A
             lastUpdated.state = if (sorting == LibrarySort.LAST_UPDATED) order else SORT_NONE
             unread.state = if (sorting == LibrarySort.UNREAD) order else SORT_NONE
             total.state = if (sorting == LibrarySort.TOTAL) order else SORT_NONE
-            source.state = if (sorting == LibrarySort.SOURCE) order else SORT_NONE
+            dateAdded.state = if (sorting == LibrarySort.DATE_ADDED) order else SORT_NONE
         }
 
         override fun onItemClicked(item: Item) {
@@ -154,10 +154,10 @@ class LibraryNavigationView @JvmOverloads constructor(context: Context, attrs: A
                 lastUpdated -> LibrarySort.LAST_UPDATED
                 unread -> LibrarySort.UNREAD
                 total -> LibrarySort.TOTAL
-                source -> LibrarySort.SOURCE
+                dateAdded -> LibrarySort.DATE_ADDED
                 else -> throw Exception("Unknown sorting")
             })
-            preferences.librarySortingAscending().set(if (item.state == SORT_ASC) true else false)
+            preferences.librarySortingAscending().set(item.state == SORT_ASC)
 
             item.group.items.forEach { adapter.notifyItemChanged(it) }
         }

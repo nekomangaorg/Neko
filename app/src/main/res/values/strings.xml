@@ -333,7 +333,7 @@
     <string name="manga_info_last_chapter_label">Last chapter</string>
     <string name="manga_info_latest_data_label">Updated</string>
     <string name="manga_info_status_label">Status</string>
-    <string name="manga_info_source_label">Source</string>
+    <string name="manga_info_date_added_label">Date added</string>
     <string name="manga_info_genres_label">Genres</string>
     <string name="circular_icon">Circular icon</string>
     <string name="rounded_icon">Rounded icon</string>

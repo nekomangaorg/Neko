@@ -186,17 +186,14 @@ class LibraryPresenter(
                     manga1LastRead.compareTo(manga2LastRead)
                 }
                 LibrarySort.LAST_UPDATED -> i2.manga.last_update.compareTo(i1.manga.last_update)
+                LibrarySort.DATE_ADDED -> i2.manga.date_added.compareTo(i1.manga.date_added)
                 LibrarySort.UNREAD -> i1.manga.unread.compareTo(i2.manga.unread)
                 LibrarySort.TOTAL -> {
                     val manga1TotalChapter = totalChapterManga[i1.manga.id!!] ?: 0
                     val mange2TotalChapter = totalChapterManga[i2.manga.id!!] ?: 0
                     manga1TotalChapter.compareTo(mange2TotalChapter)
                 }
-                LibrarySort.SOURCE -> {
-                    val source1Name = sourceManager.getSource(i1.manga.source).name
-                    val source2Name = sourceManager.getSource(i2.manga.source).name
-                    source1Name.compareTo(source2Name)
-                }
+              
                 else -> throw Exception("Unknown sorting mode")
             }
         }
