@@ -1,16 +1,16 @@
 package eu.kanade.tachiyomi.widget.preference
 
 import android.content.Context
-import android.graphics.Color
+import android.support.v4.content.ContextCompat
 import android.support.v7.preference.Preference
 import android.support.v7.preference.PreferenceViewHolder
 import android.util.AttributeSet
 import android.view.View
+import com.mikepenz.community_material_typeface_library.CommunityMaterial
+import com.mikepenz.iconics.IconicsDrawable
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.LoginSource
-import eu.kanade.tachiyomi.util.getResourceColor
-import eu.kanade.tachiyomi.util.setVectorCompat
 import kotlinx.android.synthetic.main.pref_item_source.view.*
 
 class LoginCheckBoxPreference @JvmOverloads constructor(
@@ -32,12 +32,12 @@ class LoginCheckBoxPreference @JvmOverloads constructor(
         }
         val loginFrame = holder.itemView.login_frame
         if (source is LoginSource) {
-            val tint = if (source.isLogged())
-                Color.argb(255, 76, 175, 80)
+            val color = if (source.isLogged())
+                ContextCompat.getColor(context, R.color.material_green_500)
             else
-                context.getResourceColor(android.R.attr.textColorSecondary)
+                ContextCompat.getColor(context, R.color.material_blue_grey_300)
 
-            holder.itemView.login.setVectorCompat(R.drawable.ic_account_circle_black_24dp, tint)
+            holder.itemView.login.setImageDrawable(IconicsDrawable(context).icon(CommunityMaterial.Icon.cmd_account_circle).sizeDp(24).color(color))
 
             loginFrame.visibility = View.VISIBLE
             loginFrame.setOnClickListener {
@@ -53,7 +53,7 @@ class LoginCheckBoxPreference @JvmOverloads constructor(
     }
 
     // Make method public
-    override public fun notifyChanged() {
+    public override fun notifyChanged() {
         super.notifyChanged()
     }
 
