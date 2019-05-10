@@ -33,8 +33,7 @@ import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 import java.io.File
 import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -214,6 +213,11 @@ class BackupRestoreService : Service() {
                     mangasJson
                 }
                 .flatMap { Observable.from(it) }
+                .filter {
+                    val manga = backupManager.parser.fromJson<MangaImpl>(it.asJsonObject.get(MANGA))
+                    val source = backupManager.sourceManager.getNullableSource(manga.source)
+                    source != null
+                }
                 .concatMap {
                     val obj = it.asJsonObject
                     val manga = backupManager.parser.fromJson<MangaImpl>(obj.get(MANGA))
@@ -266,7 +270,7 @@ class BackupRestoreService : Service() {
     private fun writeErrorLog(): File {
         try {
             if (errors.isNotEmpty()) {
-                val destFile = File(externalCacheDir, "tachiyomi_restore.log")
+                val destFile = File(externalCacheDir, "neko_restore.log")
                 val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.getDefault())
 
                 destFile.bufferedWriter().use { out ->

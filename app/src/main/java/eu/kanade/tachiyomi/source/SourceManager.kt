@@ -16,6 +16,9 @@ open class SourceManager {
     }
     fun getSource(sourceKey: Long): Source = sourcesMap[sourceKey]!!
 
+    fun getNullableSource(sourceKey: Long): Source? = sourcesMap[sourceKey]
+
+
     fun getSources() = sourcesMap.values.toList()
 
 }
