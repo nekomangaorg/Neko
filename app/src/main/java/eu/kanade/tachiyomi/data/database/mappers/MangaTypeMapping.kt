@@ -14,11 +14,13 @@ import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_ARTIST
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_AUTHOR
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_CHAPTER_FLAGS
+import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_DATE_ADDED
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_DESCRIPTION
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_FAVORITE
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_GENRE
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_ID
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_INITIALIZED
+import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_LANG_FLAG
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_LAST_UPDATE
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_SOURCE
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_STATUS
@@ -46,18 +48,20 @@ class MangaPutResolver : DefaultPutResolver<Manga>() {
             .whereArgs(obj.id)
             .build()
 
-    override fun mapToContentValues(obj: Manga) = ContentValues(15).apply {
+    override fun mapToContentValues(obj: Manga) = ContentValues(16).apply {
         put(COL_ID, obj.id)
         put(COL_SOURCE, obj.source)
         put(COL_URL, obj.url)
         put(COL_ARTIST, obj.artist)
         put(COL_AUTHOR, obj.author)
         put(COL_DESCRIPTION, obj.description)
+        put(COL_LANG_FLAG, obj.lang_flag)
         put(COL_GENRE, obj.genre)
         put(COL_TITLE, obj.title)
         put(COL_STATUS, obj.status)
         put(COL_THUMBNAIL_URL, obj.thumbnail_url)
         put(COL_FAVORITE, obj.favorite)
+        put(COL_DATE_ADDED, obj.date_added)
         put(COL_LAST_UPDATE, obj.last_update)
         put(COL_INITIALIZED, obj.initialized)
         put(COL_VIEWER, obj.viewer)
@@ -74,6 +78,8 @@ interface BaseMangaGetResolver {
         author = cursor.getString(cursor.getColumnIndex(COL_AUTHOR))
         description = cursor.getString(cursor.getColumnIndex(COL_DESCRIPTION))
         genre = cursor.getString(cursor.getColumnIndex(COL_GENRE))
+        lang_flag = cursor.getString(cursor.getColumnIndex(COL_LANG_FLAG))
+        date_added = cursor.getLong(cursor.getColumnIndex(COL_DATE_ADDED))
         title = cursor.getString(cursor.getColumnIndex(COL_TITLE))
         status = cursor.getInt(cursor.getColumnIndex(COL_STATUS))
         thumbnail_url = cursor.getString(cursor.getColumnIndex(COL_THUMBNAIL_URL))

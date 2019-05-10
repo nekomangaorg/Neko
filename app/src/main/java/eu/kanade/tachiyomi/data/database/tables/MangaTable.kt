@@ -28,6 +28,10 @@ object MangaTable {
 
     const val COL_LAST_UPDATE = "last_update"
 
+    const val COL_LANG_FLAG = "lang_flag"
+
+    const val COL_DATE_ADDED = "date_added"
+
     const val COL_INITIALIZED = "initialized"
 
     const val COL_VIEWER = "viewer"
@@ -46,11 +50,13 @@ object MangaTable {
             $COL_ARTIST TEXT,
             $COL_AUTHOR TEXT,
             $COL_DESCRIPTION TEXT,
+            $COL_LANG_FLAG TEXT,
             $COL_GENRE TEXT,
             $COL_TITLE TEXT NOT NULL,
             $COL_STATUS INTEGER NOT NULL,
             $COL_THUMBNAIL_URL TEXT,
             $COL_FAVORITE INTEGER NOT NULL,
+            $COL_DATE_ADDED LONG,
             $COL_LAST_UPDATE LONG,
             $COL_INITIALIZED BOOLEAN NOT NULL,
             $COL_VIEWER INTEGER NOT NULL,
@@ -63,4 +69,11 @@ object MangaTable {
     val createLibraryIndexQuery: String
         get() = "CREATE INDEX library_${COL_FAVORITE}_index ON $TABLE($COL_FAVORITE) " +
                 "WHERE $COL_FAVORITE = 1"
+
+    val addLangFlagCol: String
+        get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_LANG_FLAG} TEXT DEFAULT NULL"
+
+    val addDateAddedCol: String
+        get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_DATE_ADDED} LONG DEFAULT 0"
+
 }

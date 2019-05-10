@@ -16,6 +16,8 @@ interface SManga : Serializable {
 
     var genre: String?
 
+    var lang_flag: String?
+
     var status: Int
 
     var thumbnail_url: String?
@@ -31,6 +33,9 @@ interface SManga : Serializable {
 
         if (other.description != null)
             description = other.description
+
+        if (other.lang_flag != null)
+            lang_flag = other.lang_flag
 
         if (other.genre != null)
             genre = other.genre

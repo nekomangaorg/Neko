@@ -362,6 +362,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         manga.description = cleanString(mangaJson.get("description").string)
         manga.author = mangaJson.get("author").string
         manga.artist = mangaJson.get("artist").string
+        manga.lang_flag = mangaJson.get("lang_flag").string
         val status = mangaJson.get("status").int
         val tempStatus = parseStatus(status)
         val finalChapterNumber = getFinalChapter(mangaJson)

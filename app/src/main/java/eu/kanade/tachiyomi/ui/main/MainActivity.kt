@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.main
 
 import android.animation.ObjectAnimator
 import android.app.SearchManager
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
@@ -10,15 +11,13 @@ import android.support.v4.widget.DrawerLayout
 import android.support.v7.graphics.drawable.DrawerArrowDrawable
 import android.view.ViewGroup
 import com.bluelinelabs.conductor.*
+import com.mikepenz.iconics.context.IconicsContextWrapper
 import eu.kanade.tachiyomi.Migrations
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.CatalogueSource
-import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.LoginSource
-import eu.kanade.tachiyomi.source.online.english.Mangadex
 import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
 import eu.kanade.tachiyomi.ui.base.controller.*
 import eu.kanade.tachiyomi.ui.catalogue.browse.BrowseCatalogueController
@@ -56,6 +55,10 @@ class MainActivity : BaseActivity(),  SourceLoginDialog.Listener {
     }
 
     lateinit var tabAnimator: TabsAnimator
+
+    protected override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(IconicsContextWrapper.wrap(newBase))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(when (preferences.theme()) {

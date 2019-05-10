@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.data.database.models
 
 open class MangaImpl : Manga {
 
+
     override var id: Long? = null
 
     override var source: Long = -1
@@ -18,6 +19,8 @@ open class MangaImpl : Manga {
 
     override var genre: String? = null
 
+    override var lang_flag: String? = null
+
     override var status: Int = 0
 
     override var thumbnail_url: String? = null
@@ -25,6 +28,8 @@ open class MangaImpl : Manga {
     override var favorite: Boolean = false
 
     override var last_update: Long = 0
+
+    override var date_added: Long = 0
 
     override var initialized: Boolean = false
 

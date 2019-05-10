@@ -24,6 +24,7 @@ import rx.subjects.PublishSubject
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.util.*
 
 /**
  * Presenter of [BrowseCatalogueController].
@@ -255,6 +256,9 @@ open class BrowseCataloguePresenter(
         manga.favorite = !manga.favorite
         if (!manga.favorite) {
             coverCache.deleteFromCache(manga.thumbnail_url)
+            manga.date_added = 0
+        } else {
+            manga.date_added = Date().time
         }
         db.insertManga(manga).executeAsBlocking()
     }
