@@ -136,7 +136,7 @@ class BackupManager(val context: Context, version: Int = CURRENT_VERSION) {
 
                 // Delete older backups
                 val numberOfBackups = numberOfBackups()
-                val backupRegex = Regex("""tachiyomi_\d+-\d+-\d+_\d+-\d+.json""")
+                val backupRegex = Regex("""neko_\d+-\d+-\d+_\d+-\d+.json""")
                 dir.listFiles { _, filename -> backupRegex.matches(filename) }
                         .orEmpty()
                         .sortedByDescending { it.name }
