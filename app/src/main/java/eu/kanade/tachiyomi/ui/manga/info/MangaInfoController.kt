@@ -7,6 +7,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
@@ -23,6 +24,8 @@ import com.bumptech.glide.request.transition.Transition
 import com.jakewharton.rxbinding.support.v4.widget.refreshes
 import com.jakewharton.rxbinding.view.clicks
 import com.jakewharton.rxbinding.view.longClicks
+import com.mikepenz.community_material_typeface_library.CommunityMaterial
+import com.mikepenz.iconics.IconicsDrawable
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -149,7 +152,7 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
     fun onNextManga(manga: Manga, source: Source) {
         if (manga.initialized) {
             // Update view.
-            setMangaInfo(manga, source)
+            setMangaInfo(manga)
 
         } else {
             // Initialize manga.
@@ -163,7 +166,7 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
      * @param manga manga object containing information about manga.
      * @param source the source of the manga.
      */
-    private fun setMangaInfo(manga: Manga, source: Source?) {
+    private fun setMangaInfo(manga: Manga) {
         val view = view ?: return
 
         //update full title TextView.
@@ -187,13 +190,14 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
             manga.author
         }
 
-        // If manga source is known update source TextView.
-        manga_source.text = if (source == null) {
-            view.context.getString(R.string.unknown)
-        } else {
-            source.toString()
+        // If manga lang flag is known
+        manga_lang_flag.visibility = View.VISIBLE
+        when (manga.lang_flag?.toLowerCase()) {
+            "cn" -> manga_lang_flag.setImageResource(R.drawable.ic_flag_china);
+            "kr" -> manga_lang_flag.setImageResource(R.drawable.ic_flag_korea);
+            "jp" -> manga_lang_flag.setImageResource(R.drawable.ic_flag_japan);
+            else -> manga_lang_flag.visibility = View.GONE
         }
-
         // Update genres list
         if (manga.genre.isNullOrBlank().not()) {
             manga_genres_tags.setTags(manga.genre?.split(", "))
@@ -330,10 +334,13 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
     private fun setFavoriteDrawable(isFavorite: Boolean) {
         // Set the Favorite drawable to the correct one.
         // Border drawable if false, filled drawable if true.
-        fab_favorite?.setImageResource(if (isFavorite)
-            R.drawable.ic_bookmark_white_24dp
-        else
-            R.drawable.ic_add_to_library_24dp)
+
+        fab_favorite?.setImageDrawable(
+                if (isFavorite) {
+                    IconicsDrawable(applicationContext).icon(CommunityMaterial.Icon2.cmd_heart).color(Color.WHITE).sizeDp(24)
+                } else {
+                    IconicsDrawable(applicationContext).icon(CommunityMaterial.Icon2.cmd_heart_outline).color(Color.WHITE).sizeDp(24)
+                })
     }
 
     /**
