@@ -635,7 +635,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
          */
         private fun setFullscreen(enabled: Boolean) {
             systemUi = if (enabled) {
-                val level = SystemUiHelper.LEVEL_HIDE_STATUS_BAR
+                val level = SystemUiHelper.LEVEL_IMMERSIVE
                 val flags = SystemUiHelper.FLAG_IMMERSIVE_STICKY or
                         SystemUiHelper.FLAG_LAYOUT_IN_SCREEN_OLDER_DEVICES
 
@@ -696,11 +696,11 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
          */
         private fun setCustomBrightnessValue(value: Int) {
             // Calculate and set reader brightness.
-            val readerBrightness = if (value > 0) {
-                value / 100f
-            } else if (value < 0) {
-                0.01f
-            } else WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
+            val readerBrightness = when {
+                value > 0 -> value / 100f
+                value < 0 -> 0.01f
+                else -> WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
+            }
 
             window.attributes = window.attributes.apply { screenBrightness = readerBrightness }
 
