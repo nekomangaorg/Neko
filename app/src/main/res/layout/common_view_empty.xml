@@ -7,8 +7,8 @@
 
     <android.support.v7.widget.AppCompatImageView
         android:id="@+id/image_view"
-        android:layout_width="128dp"
-        android:layout_height="128dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"/>
 
     <TextView

@@ -3,12 +3,13 @@ package eu.kanade.tachiyomi.widget
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.support.annotation.CallSuper
-import android.support.graphics.drawable.VectorDrawableCompat
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
 import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
+import com.mikepenz.community_material_typeface_library.CommunityMaterial
+import com.mikepenz.iconics.IconicsDrawable
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.getResourceColor
 
@@ -66,17 +67,6 @@ open class ExtendedNavigationView @JvmOverloads constructor(
              */
             abstract fun getStateDrawable(context: Context): Drawable?
 
-            /**
-             * Creates a vector tinted with the accent color.
-             *
-             * @param context any context.
-             * @param resId the vector resource to load and tint
-             */
-            fun tintVector(context: Context, resId: Int): Drawable {
-                return VectorDrawableCompat.create(context.resources, resId, context.theme)!!.apply {
-                    setTint(context.getResourceColor(R.attr.colorAccent))
-                }
-            }
         }
 
         /**
@@ -99,9 +89,11 @@ open class ExtendedNavigationView @JvmOverloads constructor(
 
             override fun getStateDrawable(context: Context): Drawable? {
                 return when (state) {
-                    SORT_ASC -> tintVector(context, R.drawable.ic_arrow_up_white_32dp)
-                    SORT_DESC -> tintVector(context, R.drawable.ic_arrow_down_white_32dp)
-                    SORT_NONE -> ContextCompat.getDrawable(context, R.drawable.empty_drawable_32dp)
+                    SORT_ASC -> IconicsDrawable(context).icon(CommunityMaterial.Icon.cmd_arrow_up)
+                            .sizeDp(16).color(context.getResourceColor(R.attr.colorAccent))
+                    SORT_DESC -> IconicsDrawable(context).icon(CommunityMaterial.Icon.cmd_arrow_down)
+                            .sizeDp(16).color(context.getResourceColor(R.attr.colorAccent))
+                    SORT_NONE -> ContextCompat.getDrawable(context, R.drawable.empty_drawable_16dp)
                     else -> null
                 }
             }

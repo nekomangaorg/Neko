@@ -1,8 +1,8 @@
 package eu.kanade.tachiyomi.ui.setting
 
-import android.support.graphics.drawable.VectorDrawableCompat
-import android.support.v4.graphics.drawable.DrawableCompat
+import android.graphics.drawable.Drawable
 import android.support.v7.preference.*
+import com.mikepenz.iconics.IconicsDrawable
 import eu.kanade.tachiyomi.widget.preference.IntListPreference
 
 @DslMarker
@@ -81,17 +81,17 @@ var Preference.titleRes: Int
     get() = 0 // set only
     set(value) { setTitle(value) }
 
-var Preference.iconRes: Int
-    get() = 0 // set only
-    set(value) { icon = VectorDrawableCompat.create(context.resources, value, context.theme) }
+
+var Preference.iconDrawable: Drawable
+    get() = IconicsDrawable(context) // set only
+    set(value) {
+        icon = value
+    }
 
 var Preference.summaryRes: Int
     get() = 0 // set only
     set(value) { setSummary(value) }
 
-var Preference.iconTint: Int
-    get() = 0 // set only
-    set(value) { DrawableCompat.setTint(icon, value) }
 
 var ListPreference.entriesRes: Array<Int>
     get() = emptyArray() // set only

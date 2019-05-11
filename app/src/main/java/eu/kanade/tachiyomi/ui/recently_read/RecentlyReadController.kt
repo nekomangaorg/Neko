@@ -4,6 +4,7 @@ import android.support.v7.widget.LinearLayoutManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.mikepenz.community_material_typeface_library.CommunityMaterial
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.History
@@ -78,7 +79,7 @@ class RecentlyReadController : NucleusController<RecentlyReadPresenter>(),
         if (size > 0) {
             empty_view.hide()
         } else {
-            empty_view.show(R.drawable.ic_glasses_black_128dp, R.string.information_no_recent_manga)
+            empty_view.show(CommunityMaterial.Icon.cmd_glasses, R.string.information_no_recent_manga)
         }
     }
 

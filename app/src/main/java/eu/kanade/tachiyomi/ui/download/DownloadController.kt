@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.download
 
 import android.support.v7.widget.LinearLayoutManager
 import android.view.*
+import com.mikepenz.community_material_typeface_library.CommunityMaterial
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.download.model.Download
@@ -237,8 +238,7 @@ class DownloadController : NucleusController<DownloadPresenter>() {
      */
     private fun setInformationView() {
         if (presenter.downloadQueue.isEmpty()) {
-            empty_view?.show(R.drawable.ic_file_download_black_128dp,
-                    R.string.information_no_downloads)
+            empty_view?.show(CommunityMaterial.Icon.cmd_download, R.string.information_no_downloads)
         } else {
             empty_view?.hide()
         }

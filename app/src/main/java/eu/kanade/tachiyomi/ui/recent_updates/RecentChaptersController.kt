@@ -7,6 +7,7 @@ import android.support.v7.widget.LinearLayoutManager
 import android.view.*
 import com.jakewharton.rxbinding.support.v4.widget.refreshes
 import com.jakewharton.rxbinding.support.v7.widget.scrollStateChanges
+import com.mikepenz.community_material_typeface_library.CommunityMaterial
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.SelectableAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
@@ -178,7 +179,7 @@ class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
         if (size > 0) {
             empty_view?.hide()
         } else {
-            empty_view?.show(R.drawable.ic_update_black_128dp, R.string.information_no_recent)
+            empty_view?.show(CommunityMaterial.Icon2.cmd_update, R.string.information_no_recent)
         }
     }
 

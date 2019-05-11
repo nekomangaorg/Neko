@@ -1,9 +1,10 @@
 package eu.kanade.tachiyomi.ui.catalogue.filter
 
-import android.support.graphics.drawable.VectorDrawableCompat
 import android.support.v4.content.ContextCompat
 import android.view.View
 import android.widget.CheckedTextView
+import com.mikepenz.community_material_typeface_library.CommunityMaterial
+import com.mikepenz.iconics.IconicsDrawable
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.AbstractSectionableItem
 import eu.davidea.viewholders.FlexibleViewHolder
@@ -33,11 +34,11 @@ class SortItem(val name: String, val group: SortGroup) : AbstractSectionableItem
         val i = filter.values.indexOf(name)
 
         fun getIcon() = when (filter.state) {
-            Filter.Sort.Selection(i, false) -> VectorDrawableCompat.create(view.resources, R.drawable.ic_arrow_down_white_32dp, null)
-                    ?.apply { setTint(view.context.getResourceColor(R.attr.colorAccent)) }
-            Filter.Sort.Selection(i, true) -> VectorDrawableCompat.create(view.resources, R.drawable.ic_arrow_up_white_32dp, null)
-                    ?.apply { setTint(view.context.getResourceColor(R.attr.colorAccent)) }
-            else -> ContextCompat.getDrawable(view.context, R.drawable.empty_drawable_32dp)
+            Filter.Sort.Selection(i, false) -> IconicsDrawable(view.context).icon(CommunityMaterial.Icon.cmd_arrow_down)
+                    .sizeDp(16).color(view.context.getResourceColor(R.attr.colorAccent))
+            Filter.Sort.Selection(i, true) -> IconicsDrawable(view.context).icon(CommunityMaterial.Icon.cmd_arrow_up)
+                    .sizeDp(16).color(view.context.getResourceColor(R.attr.colorAccent))
+            else -> ContextCompat.getDrawable(view.context, R.drawable.empty_drawable_16dp)
         }
 
         view.setCompoundDrawablesWithIntrinsicBounds(getIcon(), null, null, null)

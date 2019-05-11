@@ -19,6 +19,7 @@ import com.jakewharton.rxbinding.support.v4.view.pageSelections
 import com.jakewharton.rxbinding.support.v7.widget.queryTextChanges
 import com.jakewharton.rxrelay.BehaviorRelay
 import com.jakewharton.rxrelay.PublishRelay
+import com.mikepenz.community_material_typeface_library.CommunityMaterial
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -223,7 +224,7 @@ class LibraryController(
         if (mangaMap.isNotEmpty()) {
             empty_view.hide()
         } else {
-            empty_view.show(R.drawable.ic_book_black_128dp, R.string.information_empty_library)
+            empty_view.show(CommunityMaterial.Icon.cmd_book, R.string.information_empty_library)
         }
 
         // Get the current active category.

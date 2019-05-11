@@ -4,9 +4,10 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.View
 import android.widget.RelativeLayout
+import com.mikepenz.iconics.IconicsDrawable
+import com.mikepenz.iconics.typeface.IIcon
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.getResourceColor
-import eu.kanade.tachiyomi.util.setVectorCompat
 import kotlinx.android.synthetic.main.common_view_empty.view.*
 
 class EmptyView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
@@ -28,8 +29,8 @@ class EmptyView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
      * @param drawable icon of information view
      * @param textResource text of information view
      */
-    fun show(drawable: Int, textResource: Int) {
-        image_view.setVectorCompat(drawable, context.getResourceColor(android.R.attr.textColorHint))
+    fun show(icon: IIcon, textResource: Int) {
+        image_view.setImageDrawable(IconicsDrawable(context).icon(icon).sizeDp(96).color(context.getResourceColor(android.R.attr.textColorHint)))
         text_label.text = context.getString(textResource)
         this.visibility = View.VISIBLE
     }

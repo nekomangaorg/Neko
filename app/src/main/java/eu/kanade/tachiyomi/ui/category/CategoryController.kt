@@ -8,7 +8,7 @@ import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.*
 import com.jakewharton.rxbinding.view.clicks
-import com.mikepenz.google_material_typeface_library.GoogleMaterial
+import com.mikepenz.community_material_typeface_library.CommunityMaterial
 import com.mikepenz.iconics.IconicsDrawable
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.SelectableAdapter
@@ -80,7 +80,7 @@ class CategoryController : NucleusController<CategoryPresenter>(),
         recycler.layoutManager = LinearLayoutManager(view.context)
         recycler.setHasFixedSize(true)
         recycler.adapter = adapter
-        fab.setImageDrawable(IconicsDrawable(view.context).icon(GoogleMaterial.Icon.gmd_add).sizeDp(24).color(ContextCompat.getColor(view.context, R.color.md_white_1000)))
+        fab.setImageDrawable(IconicsDrawable(view.context).icon(CommunityMaterial.Icon2.cmd_plus).sizeDp(24).color(ContextCompat.getColor(view.context, R.color.md_white_1000)))
         adapter?.isHandleDragEnabled = true
         adapter?.isPermanentDelete = false
 
@@ -118,7 +118,7 @@ class CategoryController : NucleusController<CategoryPresenter>(),
                 selected.forEach { onItemLongClick(categories.indexOf(it)) }
             }
         } else {
-            empty_view.show(R.drawable.ic_shape_black_128dp, R.string.information_empty_category)
+            empty_view.show(CommunityMaterial.Icon2.cmd_shape, R.string.information_empty_category)
         }
     }
 
