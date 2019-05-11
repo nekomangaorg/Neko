@@ -9,7 +9,6 @@ import eu.kanade.tachiyomi.data.backup.BackupCreatorJob
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.updater.UpdaterJob
-import eu.kanade.tachiyomi.util.LocaleHelper
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.InjektScope
@@ -27,7 +26,6 @@ open class App : Application() {
         setupJobManager()
         setupNotificationChannels()
 
-        LocaleHelper.updateConfiguration(this, resources.configuration)
     }
 
     override fun attachBaseContext(base: Context) {
@@ -37,7 +35,6 @@ open class App : Application() {
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        LocaleHelper.updateConfiguration(this, newConfig, true)
     }
 
     protected open fun setupJobManager() {
