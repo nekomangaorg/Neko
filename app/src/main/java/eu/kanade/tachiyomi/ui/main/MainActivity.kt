@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.main
 
 import android.animation.ObjectAnimator
+import android.annotation.SuppressLint
 import android.app.SearchManager
 import android.content.Context
 import android.content.Intent
@@ -11,7 +12,10 @@ import android.support.v4.widget.DrawerLayout
 import android.support.v7.graphics.drawable.DrawerArrowDrawable
 import android.view.ViewGroup
 import com.bluelinelabs.conductor.*
+import com.mikepenz.community_material_typeface_library.CommunityMaterial
+import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.context.IconicsContextWrapper
+import com.mikepenz.iconics.typeface.IIcon
 import eu.kanade.tachiyomi.Migrations
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -56,7 +60,8 @@ class MainActivity : BaseActivity(),  SourceLoginDialog.Listener {
 
     lateinit var tabAnimator: TabsAnimator
 
-    protected override fun attachBaseContext(newBase: Context) {
+    override fun attachBaseContext(newBase: Context) {
+        //needed for Iconics
         super.attachBaseContext(IconicsContextWrapper.wrap(newBase))
     }
 
@@ -85,6 +90,13 @@ class MainActivity : BaseActivity(),  SourceLoginDialog.Listener {
         tabAnimator = TabsAnimator(tabs)
 
         // Set behavior of Navigation drawer
+        addIconToMenu(R.id.nav_drawer_library, CommunityMaterial.Icon2.cmd_library)
+        addIconToMenu(R.id.nav_drawer_recent_updates, CommunityMaterial.Icon2.cmd_update)
+        addIconToMenu(R.id.nav_drawer_recently_read, CommunityMaterial.Icon.cmd_glasses)
+        addIconToMenu(R.id.nav_drawer_browse, CommunityMaterial.Icon.cmd_compass_outline)
+        addIconToMenu(R.id.nav_drawer_downloads, CommunityMaterial.Icon.cmd_download)
+        addIconToMenu(R.id.nav_drawer_settings, CommunityMaterial.Icon2.cmd_settings)
+
         nav_view.setNavigationItemSelectedListener { item ->
             val id = item.itemId
 
@@ -155,6 +167,12 @@ class MainActivity : BaseActivity(),  SourceLoginDialog.Listener {
                 ChangelogDialogController().showDialog(router)
             }
         }
+    }
+
+    private fun addIconToMenu(nav_drawer_library: Int, icon: IIcon) {
+        //no size or color needed since navigation drawer dictates it
+        nav_view.menu.findItem(nav_drawer_library).icon = IconicsDrawable(this).icon(icon)
+
     }
 
     /**
@@ -234,6 +252,7 @@ class MainActivity : BaseActivity(),  SourceLoginDialog.Listener {
         router.setRoot(controller.withFadeTransaction().tag(id.toString()))
     }
 
+    @SuppressLint("ObjectAnimatorBinding")
     private fun syncActivityViewWithController(to: Controller?, from: Controller? = null) {
         if (from is DialogController || to is DialogController) {
             return
