@@ -4,13 +4,17 @@
 
     <item
         android:id="@+id/action_custom_filter"
-        android:icon="@drawable/ic_brightness_4_white_24dp"
+        app:ico_icon="cmd_brightness_6"
+        app:ico_color="@color/md_white_1000"
+        app:ico_size="20dp"
         android:title="@string/custom_filter"
         app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/action_settings"
-        android:icon="@drawable/ic_settings_white_24dp"
+        app:ico_icon="cmd-settings"
+        app:ico_color="@color/md_white_1000"
+        app:ico_size="20dp"
         android:title="@string/label_settings"
         app:showAsAction="ifRoom"
         />

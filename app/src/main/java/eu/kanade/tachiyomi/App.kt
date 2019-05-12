@@ -5,6 +5,8 @@ import android.content.Context
 import android.content.res.Configuration
 import android.support.multidex.MultiDex
 import com.evernote.android.job.JobManager
+import com.mikepenz.community_material_typeface_library.CommunityMaterial
+import com.mikepenz.iconics.Iconics
 import eu.kanade.tachiyomi.data.backup.BackupCreatorJob
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.notification.Notifications
@@ -25,6 +27,9 @@ open class App : Application() {
 
         setupJobManager()
         setupNotificationChannels()
+
+        Iconics.init(applicationContext)
+        Iconics.registerFont(CommunityMaterial())
 
     }
 

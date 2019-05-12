@@ -15,6 +15,7 @@ import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.SeekBar
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
+import com.mikepenz.iconics.utils.IconicsMenuInflaterUtil
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -176,7 +177,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
      * Called when the options menu of the toolbar is being created. It adds our custom menu.
      */
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.reader, menu)
+        IconicsMenuInflaterUtil.inflate(menuInflater, this, R.menu.reader, menu)
         return true
     }
 
