@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.view.View
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.base.holder.BaseViewHolder
+import eu.kanade.tachiyomi.util.setVectorCompat
 import kotlinx.android.synthetic.main.track_item.*
 
 class TrackHolder(view: View, adapter: TrackAdapter) : BaseViewHolder(view) {
@@ -21,7 +22,7 @@ class TrackHolder(view: View, adapter: TrackAdapter) : BaseViewHolder(view) {
     @Suppress("DEPRECATION")
     fun bind(item: TrackItem) {
         val track = item.track
-        track_logo.setImageResource(item.service.getLogo())
+        track_logo.setVectorCompat(item.service.getLogo())
         logo_container.setBackgroundColor(item.service.getLogoColor())
         if (track != null) {
             track_title.setTextAppearance(itemView.context, R.style.TextAppearance_Regular_Body1_Secondary)
