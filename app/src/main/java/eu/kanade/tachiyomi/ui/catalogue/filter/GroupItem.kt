@@ -1,15 +1,17 @@
 package eu.kanade.tachiyomi.ui.catalogue.filter
 
+import android.graphics.Color
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
+import com.mikepenz.community_material_typeface_library.CommunityMaterial
+import com.mikepenz.iconics.IconicsDrawable
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.AbstractExpandableHeaderItem
 import eu.davidea.flexibleadapter.items.ISectionable
 import eu.davidea.viewholders.ExpandableViewHolder
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.model.Filter
-import eu.kanade.tachiyomi.util.setVectorCompat
 
 class GroupItem(val filter: Filter.Group<*>) : AbstractExpandableHeaderItem<GroupItem.Holder, ISectionable<*, *>>() {
 
@@ -32,10 +34,12 @@ class GroupItem(val filter: Filter.Group<*>) : AbstractExpandableHeaderItem<Grou
     override fun bindViewHolder(adapter: FlexibleAdapter<*>, holder: Holder, position: Int, payloads: List<Any?>?) {
         holder.title.text = filter.name
 
-        holder.icon.setVectorCompat(if (isExpanded)
-            R.drawable.ic_expand_more_white_24dp
+        val icon = if (isExpanded)
+            CommunityMaterial.Icon.cmd_chevron_down
         else
-            R.drawable.ic_chevron_right_white_24dp)
+            CommunityMaterial.Icon.cmd_chevron_right
+
+        holder.icon.setImageDrawable(IconicsDrawable(holder.contentView.context).icon(icon).color(Color.WHITE).sizeDp(16))
 
         holder.itemView.setOnClickListener(holder)
 
