@@ -1,13 +1,14 @@
 package eu.kanade.tachiyomi.widget
 
 import android.graphics.drawable.Drawable
-import android.support.graphics.drawable.VectorDrawableCompat
 import android.view.View
 import android.widget.ImageView
 import android.widget.ImageView.ScaleType
 import com.bumptech.glide.request.target.ImageViewTarget
 import com.bumptech.glide.request.transition.Transition
-import eu.kanade.tachiyomi.R
+import com.mikepenz.community_material_typeface_library.CommunityMaterial
+import com.mikepenz.iconics.IconicsDrawable
+import com.mikepenz.iconics.typeface.IIcon
 import eu.kanade.tachiyomi.util.getResourceColor
 import eu.kanade.tachiyomi.util.gone
 import eu.kanade.tachiyomi.util.visible
@@ -23,7 +24,7 @@ import eu.kanade.tachiyomi.util.visible
  */
 class StateImageViewTarget(view: ImageView,
                            val progress: View? = null,
-                           val errorDrawableRes: Int = R.drawable.ic_broken_image_grey_24dp,
+                           val errorIconic: IIcon = CommunityMaterial.Icon2.cmd_image_broken,
                            val errorScaleType: ScaleType = ScaleType.CENTER) :
 
         ImageViewTarget<Drawable>(view) {
@@ -45,9 +46,8 @@ class StateImageViewTarget(view: ImageView,
         progress?.gone()
         view.scaleType = errorScaleType
 
-        val vector = VectorDrawableCompat.create(view.context.resources, errorDrawableRes, null)
-        vector?.setTint(view.context.getResourceColor(android.R.attr.textColorSecondary))
-        view.setImageDrawable(vector)
+        view.setImageDrawable(IconicsDrawable(view.context).icon(errorIconic).sizeDp(24)
+                .color(view.context.getResourceColor(android.R.attr.textColorSecondary)))
     }
 
     override fun onLoadCleared(placeholder: Drawable?) {
