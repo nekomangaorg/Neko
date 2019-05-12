@@ -24,8 +24,7 @@
                 android:id="@+id/track_logo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                tools:src="@drawable/tracker-mal"/>
+                android:layout_gravity="center"/>
 
         </FrameLayout>
 

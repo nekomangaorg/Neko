@@ -68,7 +68,7 @@
 
                 <data
                     android:host="shikimori-auth"
-                    android:scheme="tachiyomi" />
+                    android:scheme="neko"/>
             </intent-filter>
         </activity>
 
