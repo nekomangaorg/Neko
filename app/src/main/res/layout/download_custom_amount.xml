@@ -12,17 +12,19 @@
         android:layout_height="match_parent"
         android:background="?selectable_list_drawable"
         android:padding="8dp"
-        android:tint="?colorAccent"
-        app:srcCompat="@drawable/ic_chevron_left_double_black_24dp" />
+        app:ico_icon="cmd_chevron_double_left"
+        app:ico_color="?colorAccent"
+        app:ico_size="24dp"/>
 
     <android.support.v7.widget.AppCompatImageButton
         android:id="@+id/btn_decrease"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:background="?selectable_list_drawable"
-        android:tint="?colorAccent"
         android:padding="8dp"
-        app:srcCompat="@drawable/ic_chevron_left_black_24dp" />
+        app:ico_icon="cmd_chevron_left"
+        app:ico_color="?colorAccent"
+        app:ico_size="24dp"/>
 
     <EditText
         android:id="@+id/myNumber"
@@ -39,9 +41,10 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:background="?selectable_list_drawable"
-        android:tint="?colorAccent"
         android:padding="8dp"
-        app:srcCompat="@drawable/ic_chevron_right_black_24dp" />
+        app:ico_icon="cmd_chevron_right"
+        app:ico_color="?colorAccent"
+        app:ico_size="24dp"/>
 
     <android.support.v7.widget.AppCompatImageButton
         android:id="@+id/btn_increase_10"
@@ -50,6 +53,8 @@
         android:background="?selectable_list_drawable"
         android:tint="?colorAccent"
         android:padding="8dp"
-        app:srcCompat="@drawable/ic_chevron_right_double_black_24dp" />
+        app:ico_icon="cmd_chevron_double_right"
+        app:ico_color="?colorAccent"
+        app:ico_size="24dp"/>
 
 </LinearLayout>
