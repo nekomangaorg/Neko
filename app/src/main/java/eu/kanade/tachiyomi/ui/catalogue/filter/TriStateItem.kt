@@ -1,9 +1,11 @@
 package eu.kanade.tachiyomi.ui.catalogue.filter
 
+import android.graphics.drawable.Drawable
 import android.support.design.R
-import android.support.graphics.drawable.VectorDrawableCompat
 import android.view.View
 import android.widget.CheckedTextView
+import com.mikepenz.community_material_typeface_library.CommunityMaterial
+import com.mikepenz.iconics.IconicsDrawable
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.AbstractFlexibleItem
 import eu.davidea.viewholders.FlexibleViewHolder
@@ -30,19 +32,22 @@ open class TriStateItem(val filter: Filter.TriState) : AbstractFlexibleItem<TriS
         val view = holder.text
         view.text = filter.name
 
-        fun getIcon() = VectorDrawableCompat.create(view.resources, when (filter.state) {
-            Filter.TriState.STATE_IGNORE -> TR.drawable.ic_check_box_outline_blank_24dp
-            Filter.TriState.STATE_INCLUDE -> TR.drawable.ic_check_box_24dp
-            Filter.TriState.STATE_EXCLUDE -> TR.drawable.ic_check_box_x_24dp
-            else -> throw Exception("Unknown state")
-        }, null)?.apply {
+        fun getIcon(): Drawable {
+            val icon = when (filter.state) {
+                Filter.TriState.STATE_INCLUDE -> CommunityMaterial.Icon.cmd_check_box_outline
+                Filter.TriState.STATE_EXCLUDE -> CommunityMaterial.Icon.cmd_close_box_outline
+                else -> CommunityMaterial.Icon.cmd_checkbox_blank_outline
+            }
             val color = if (filter.state == Filter.TriState.STATE_INCLUDE)
-                R.attr.colorAccent
+                view.context.getResourceColor(R.attr.colorAccent)
             else
-                android.R.attr.textColorSecondary
+                view.context.getResourceColor(android.R.attr.textColorSecondary)
 
-            setTint(view.context.getResourceColor(color))
+            return IconicsDrawable(view.context).icon(icon).sizeDp(18).color(color)
         }
+
+
+
 
         view.setCompoundDrawablesWithIntrinsicBounds(getIcon(), null, null, null)
         holder.itemView.setOnClickListener {
