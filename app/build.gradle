@@ -150,7 +150,8 @@ dependencies {
     implementation 'org.jsoup:jsoup:1.10.2'
 
     //Icons
-    implementation "com.mikepenz:iconics-core:3.0.4"
+    implementation "com.mikepenz:iconics-core:3.0.4@aar"
+    implementation "com.mikepenz:iconics-views:3.0.4@aar"
     implementation 'com.mikepenz:community-material-typeface:3.5.95.1@aar'
 
     // Job scheduling

@@ -209,13 +209,13 @@
         app:max_seek="100"
         app:min_seek="-75" />
 
-    <android.support.v7.widget.AppCompatImageView
+    <com.mikepenz.iconics.view.IconicsImageView
         android:id="@+id/txt_brightness_seekbar_icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
         android:textAppearance="@style/TextAppearance.Regular.SubHeading.Secondary"
-        android:tint="?android:attr/textColorSecondary"
-        app:srcCompat="@drawable/ic_brightness_5_black_24dp"
+        app:iiv_icon="cmd_brightness_5"
+        app:iiv_color="?android:attr/textColorSecondary"
         app:layout_constraintTop_toTopOf="@id/brightness_seekbar"
         app:layout_constraintBottom_toBottomOf="@id/brightness_seekbar"
         app:layout_constraintLeft_toLeftOf="parent"/>
