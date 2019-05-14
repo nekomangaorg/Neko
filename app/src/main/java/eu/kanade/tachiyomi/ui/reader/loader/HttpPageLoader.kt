@@ -217,11 +217,13 @@ class HttpPageLoader(
                 }
             }
             .doOnNext {
-                page.stream = { chapterCache.getImageFile(imageUrl).inputStream() }
                 if (preferences.readerTheme().get() == 2) {
-                    val image = BitmapFactory.decodeStream(chapterCache.getImageFile(imageUrl).inputStream())
+                    val stream = chapterCache.getImageFile(imageUrl).inputStream()
+                    val image = BitmapFactory.decodeStream(stream)
                     page.bg = ImageUtil.autoSetBackground(image)
+                    stream.close()
                 }
+                page.stream = { chapterCache.getImageFile(imageUrl).inputStream() }
                 page.status = Page.READY
             }
             .doOnError { page.status = Page.ERROR }
