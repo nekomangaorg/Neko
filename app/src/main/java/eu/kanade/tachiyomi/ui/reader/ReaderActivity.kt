@@ -15,6 +15,8 @@ import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.SeekBar
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
+import com.mikepenz.community_material_typeface_library.CommunityMaterial
+import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.utils.IconicsMenuInflaterUtil
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
@@ -239,6 +241,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
                 }
             }
         })
+        left_chapter.setImageDrawable(IconicsDrawable(applicationContext).icon(CommunityMaterial.Icon2.cmd_skip_previous).color(Color.WHITE).sizeDp(18))
+
         left_chapter.setOnClickListener {
             if (viewer != null) {
                 if (viewer is R2LPagerViewer)
@@ -247,6 +251,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
                     loadPreviousChapter()
             }
         }
+        right_chapter.setImageDrawable(IconicsDrawable(applicationContext).icon(CommunityMaterial.Icon2.cmd_skip_next).color(Color.WHITE).sizeDp(18))
         right_chapter.setOnClickListener {
             if (viewer != null) {
                 if (viewer is R2LPagerViewer)

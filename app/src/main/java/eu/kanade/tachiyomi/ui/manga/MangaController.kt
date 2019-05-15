@@ -1,9 +1,9 @@
 package eu.kanade.tachiyomi.ui.manga
 
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+import android.graphics.Color
 import android.os.Bundle
 import android.support.design.widget.TabLayout
-import android.support.graphics.drawable.VectorDrawableCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,6 +16,8 @@ import com.bluelinelabs.conductor.RouterTransaction
 import com.bluelinelabs.conductor.support.RouterPagerAdapter
 import com.jakewharton.rxrelay.BehaviorRelay
 import com.jakewharton.rxrelay.PublishRelay
+import com.mikepenz.community_material_typeface_library.CommunityMaterial
+import com.mikepenz.iconics.IconicsDrawable
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -34,7 +36,7 @@ import kotlinx.android.synthetic.main.manga_controller.*
 import rx.Subscription
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import java.util.Date
+import java.util.*
 
 class MangaController : RxController, TabbedController {
 
@@ -137,13 +139,13 @@ class MangaController : RxController, TabbedController {
     private fun setTrackingIconInternal(visible: Boolean) {
         val tab = activity?.tabs?.getTabAt(TRACK_CONTROLLER) ?: return
         val drawable = if (visible)
-            VectorDrawableCompat.create(resources!!, R.drawable.ic_done_white_18dp, null)
+            IconicsDrawable(applicationContext).icon(CommunityMaterial.Icon.cmd_check).color(Color.WHITE).sizeDp(12)
         else null
 
         val view = tabField.get(tab) as LinearLayout
         val textView = view.getChildAt(1) as TextView
         textView.setCompoundDrawablesWithIntrinsicBounds(null, null, drawable, null)
-        textView.compoundDrawablePadding = if (visible) 4 else 0
+        textView.compoundDrawablePadding = if (visible) 8 else 0
     }
 
     private inner class MangaDetailAdapter : RouterPagerAdapter(this@MangaController) {

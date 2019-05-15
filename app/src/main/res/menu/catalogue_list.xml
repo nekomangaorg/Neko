@@ -5,14 +5,18 @@
     <item
         android:id="@+id/action_search"
         android:title="@string/action_search"
-        android:icon="@drawable/ic_search_white_24dp"
+        app:ico_icon="cmd_magnify"
+        app:ico_size="20dp"
+        app:ico_color="@color/md_white_1000"
         app:showAsAction="collapseActionView|ifRoom"
         app:actionViewClass="android.support.v7.widget.SearchView"/>
 
     <item
         android:id="@+id/action_set_filter"
         android:title="@string/action_set_filter"
-        android:icon="@drawable/ic_filter_list_white_24dp"
+        app:ico_icon="cmd_filter_variant"
+        app:ico_size="20dp"
+        app:ico_color="@color/md_white_1000"
         app:showAsAction="ifRoom"/>
 
     <item

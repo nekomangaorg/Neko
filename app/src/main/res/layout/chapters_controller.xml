@@ -49,7 +49,6 @@
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
         style="@style/Theme.Widget.FAB"
-        app:layout_anchor="@id/recycler"
-        app:srcCompat="@drawable/ic_play_arrow_white_24dp"/>
+        app:layout_anchor="@id/recycler"/>
 
 </android.support.design.widget.CoordinatorLayout>

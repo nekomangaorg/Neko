@@ -1,8 +1,10 @@
 package eu.kanade.tachiyomi.ui.download
 
+import android.graphics.Color
 import android.support.v7.widget.LinearLayoutManager
 import android.view.*
 import com.mikepenz.community_material_typeface_library.CommunityMaterial
+import com.mikepenz.iconics.IconicsDrawable
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.download.model.Download
@@ -96,12 +98,17 @@ class DownloadController : NucleusController<DownloadPresenter>() {
     override fun onPrepareOptionsMenu(menu: Menu) {
         // Set start button visibility.
         menu.findItem(R.id.start_queue).isVisible = !isRunning && !presenter.downloadQueue.isEmpty()
+        menu.findItem(R.id.start_queue).icon = IconicsDrawable(applicationContext)
+                .icon(CommunityMaterial.Icon2.cmd_play).color(Color.WHITE).sizeDp(18)
 
         // Set pause button visibility.
         menu.findItem(R.id.pause_queue).isVisible = isRunning
-
+        menu.findItem(R.id.pause_queue).icon = IconicsDrawable(applicationContext)
+                .icon(CommunityMaterial.Icon2.cmd_pause).color(Color.WHITE).sizeDp(18)
         // Set clear button visibility.
         menu.findItem(R.id.clear_queue).isVisible = !presenter.downloadQueue.isEmpty()
+        menu.findItem(R.id.clear_queue).icon = IconicsDrawable(applicationContext)
+                .icon(CommunityMaterial.Icon2.cmd_notification_clear_all).color(Color.WHITE).sizeDp(20)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

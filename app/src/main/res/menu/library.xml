@@ -5,20 +5,26 @@
 
     <item
         android:id="@+id/action_search"
-        android:icon="@drawable/ic_search_white_24dp"
+        app:ico_icon="cmd_magnify"
+        app:ico_size="20dp"
+        app:ico_color="@color/md_white_1000"
         android:title="@string/action_search"
         app:actionViewClass="android.support.v7.widget.SearchView"
         app:showAsAction="collapseActionView|ifRoom"/>
 
     <item
         android:id="@+id/action_filter"
-        android:icon="@drawable/ic_filter_list_white_24dp"
+        app:ico_icon="cmd_filter_variant"
+        app:ico_size="20dp"
+        app:ico_color="@color/md_white_1000"
         android:title="@string/action_filter"
         app:showAsAction="ifRoom"/>
 
     <item
         android:id="@+id/action_update_library"
-        android:icon="@drawable/ic_refresh_white_24dp"
+        app:ico_icon="cmd_refresh"
+        app:ico_size="20dp"
+        app:ico_color="@color/md_white_1000"
         android:title="@string/action_update_library"
         app:showAsAction="ifRoom"/>
 

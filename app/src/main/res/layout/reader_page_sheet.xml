@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:background="?android:colorBackground"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    tools:ignore="MissingPrefix">
 
     <LinearLayout
         android:id="@+id/set_as_cover_layout"
@@ -21,10 +22,10 @@
         android:foreground="?attr/selectableItemBackground">
 
         <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            app:srcCompat="@drawable/ic_image_black_24dp"
-            android:tint="@color/md_white_1000_54"/>
+            android:id="@+id/set_as_cover_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            />
 
         <TextView
             android:layout_width="match_parent"
@@ -49,9 +50,9 @@
         android:foreground="?attr/selectableItemBackground">
 
         <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            app:srcCompat="@drawable/ic_share_grey_24dp"/>
+            android:id="@+id/share_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
 
         <TextView
             android:layout_width="match_parent"
@@ -75,12 +76,10 @@
         android:focusable="true"
         android:foreground="?attr/selectableItemBackground">
 
-        <android.support.v7.widget.AppCompatImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            app:ico_color="@color/md_white_1000_54"
-            app:ico_icon="cmd_download"
-            app:ico_size="24dp"/>
+        <ImageView
+            android:id="@+id/save_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
 
         <TextView
             android:layout_width="match_parent"

@@ -128,6 +128,7 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.manga_info, menu)
+        menu.findItem(R.id.action_share).icon = IconicsDrawable(applicationContext).icon(CommunityMaterial.Icon2.cmd_share_variant).sizeDp(18).color(Color.WHITE)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -337,9 +338,9 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
 
         fab_favorite?.setImageDrawable(
                 if (isFavorite) {
-                    IconicsDrawable(applicationContext).icon(CommunityMaterial.Icon2.cmd_heart).color(Color.WHITE).sizeDp(24)
+                    IconicsDrawable(applicationContext).icon(CommunityMaterial.Icon2.cmd_heart).color(Color.WHITE).sizeDp(20)
                 } else {
-                    IconicsDrawable(applicationContext).icon(CommunityMaterial.Icon2.cmd_heart_outline).color(Color.WHITE).sizeDp(24)
+                    IconicsDrawable(applicationContext).icon(CommunityMaterial.Icon2.cmd_heart_outline).color(Color.WHITE).sizeDp(20)
                 })
     }
 

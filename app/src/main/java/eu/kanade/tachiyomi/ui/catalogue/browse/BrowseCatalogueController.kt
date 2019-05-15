@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.catalogue.browse
 
 import android.content.res.Configuration
+import android.graphics.Color
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v4.widget.DrawerLayout
@@ -9,6 +10,9 @@ import android.view.*
 import com.afollestad.materialdialogs.MaterialDialog
 import com.f2prateek.rx.preferences.Preference
 import com.jakewharton.rxbinding.support.v7.widget.queryTextChangeEvents
+import com.mikepenz.community_material_typeface_library.CommunityMaterial
+import com.mikepenz.iconics.IconicsDrawable
+import com.mikepenz.iconics.utils.IconicsMenuInflaterUtil
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
@@ -209,7 +213,7 @@ open class BrowseCatalogueController(bundle: Bundle) :
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.catalogue_list, menu)
+        IconicsMenuInflaterUtil.inflate(inflater, applicationContext, R.menu.catalogue_list, menu)
 
         // Initialize search menu
         menu.findItem(R.id.action_search).apply {
@@ -256,10 +260,10 @@ open class BrowseCatalogueController(bundle: Bundle) :
         // Show next display mode
         menu.findItem(R.id.action_display_mode).apply {
             val icon = if (presenter.isListMode)
-                R.drawable.ic_view_module_white_24dp
+                CommunityMaterial.Icon2.cmd_view_module
             else
-                R.drawable.ic_view_list_white_24dp
-            setIcon(icon)
+                CommunityMaterial.Icon2.cmd_view_list
+            setIcon(IconicsDrawable(applicationContext).icon(icon).color(Color.WHITE).sizeDp(20))
         }
     }
 

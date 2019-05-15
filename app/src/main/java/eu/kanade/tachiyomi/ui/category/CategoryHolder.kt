@@ -1,8 +1,11 @@
 package eu.kanade.tachiyomi.ui.category
 
 import android.view.View
+import com.mikepenz.community_material_typeface_library.CommunityMaterial
+import com.mikepenz.iconics.IconicsDrawable
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
+import eu.kanade.tachiyomi.util.getResourceColor
 import eu.kanade.tachiyomi.util.getRound
 import kotlinx.android.synthetic.main.categories_item.*
 
@@ -37,6 +40,7 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleVie
         itemView.post {
             image.setImageDrawable(image.getRound(category.name.take(1).toUpperCase(),false))
         }
+        reorder.setImageDrawable(IconicsDrawable(contentView.context).icon(CommunityMaterial.Icon2.cmd_reorder_horizontal).sizeDp(18).color(contentView.context.getResourceColor(android.R.attr.textColorPrimary)))
     }
 
     /**

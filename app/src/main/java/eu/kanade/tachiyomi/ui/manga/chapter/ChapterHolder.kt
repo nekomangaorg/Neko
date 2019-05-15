@@ -2,13 +2,14 @@ package eu.kanade.tachiyomi.ui.manga.chapter
 
 import android.view.View
 import android.widget.PopupMenu
+import com.mikepenz.community_material_typeface_library.CommunityMaterial
+import com.mikepenz.iconics.IconicsDrawable
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.getResourceColor
 import eu.kanade.tachiyomi.util.gone
-import eu.kanade.tachiyomi.util.setVectorCompat
 import kotlinx.android.synthetic.main.chapters_item.*
 import java.util.*
 
@@ -36,8 +37,9 @@ class ChapterHolder(
         }
 
         // Set the correct drawable for dropdown and update the tint to match theme.
-        chapter_menu.setVectorCompat(R.drawable.ic_more_vert_black_24dp, view.context.getResourceColor(R.attr.icon_color))
-
+        // Set the correct drawable for dropdown and update the tint to match theme.
+        chapter_menu.setImageDrawable(IconicsDrawable(view.context).icon(CommunityMaterial.Icon.cmd_dots_vertical)
+                .sizeDp(18).color(view.context.getResourceColor(R.attr.icon_color)))
         // Set correct text color
         chapter_title.setTextColor(if (chapter.read) adapter.readColor else adapter.unreadColor)
         if (chapter.bookmark) chapter_title.setTextColor(adapter.bookmarkedColor)

@@ -5,6 +5,7 @@ import android.animation.AnimatorListenerAdapter
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Color
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.view.ActionMode
@@ -13,6 +14,8 @@ import android.support.v7.widget.LinearLayoutManager
 import android.view.*
 import com.jakewharton.rxbinding.support.v4.widget.refreshes
 import com.jakewharton.rxbinding.view.clicks
+import com.mikepenz.community_material_typeface_library.CommunityMaterial
+import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.utils.IconicsMenuInflaterUtil
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.SelectableAdapter
@@ -85,6 +88,10 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
 
         swipe_refresh.refreshes().subscribeUntilDestroy { fetchChaptersFromSource() }
 
+        fab.setImageDrawable(
+                IconicsDrawable(applicationContext).icon(CommunityMaterial.Icon2.cmd_play).color(Color.WHITE).sizeDp(20)
+        )
+
         fab.clicks().subscribeUntilDestroy {
             val item = presenter.getNextUnreadChapter()
             if (item != null) {
@@ -125,7 +132,7 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.chapters, menu)
+        IconicsMenuInflaterUtil.inflate(inflater, applicationContext, R.menu.chapters, menu)
     }
 
     override fun onPrepareOptionsMenu(menu: Menu) {
@@ -135,6 +142,10 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
         val menuFilterDownloaded = menu.findItem(R.id.action_filter_downloaded)
         val menuFilterBookmarked = menu.findItem(R.id.action_filter_bookmarked)
 
+
+        menu.findItem(R.id.action_sort).icon = IconicsDrawable(applicationContext).icon(CommunityMaterial.Icon2.cmd_sort_numeric)
+                .sizeDp(20).color(Color.WHITE)
+
         // Set correct checkbox values.
         menuFilterRead.isChecked = presenter.onlyRead()
         menuFilterUnread.isChecked = presenter.onlyUnread()
@@ -142,10 +153,10 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
         menuFilterBookmarked.isChecked = presenter.onlyBookmarked()
 
         if (presenter.onlyRead())
-            //Disable unread filter option if read filter is enabled.
+        //Disable unread filter option if read filter is enabled.
             menuFilterUnread.isEnabled = false
         if (presenter.onlyUnread())
-            //Disable read filter option if unread filter is enabled.
+        //Disable read filter option if unread filter is enabled.
             menuFilterRead.isEnabled = false
     }
 
@@ -360,10 +371,10 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
                 first = last.also { last = first }
             }
 
-                selectedItems.clear()
-                selectedItems.addAll(adapter.items.subList(first, last + 1))
-                selectedItems.forEach { adapter.addSelection(adapter.items.indexOf(it)) }
-                adapter.notifyDataSetChanged()
+            selectedItems.clear()
+            selectedItems.addAll(adapter.items.subList(first, last + 1))
+            selectedItems.forEach { adapter.addSelection(adapter.items.indexOf(it)) }
+            adapter.notifyDataSetChanged()
 
             actionMode?.invalidate()
         }
