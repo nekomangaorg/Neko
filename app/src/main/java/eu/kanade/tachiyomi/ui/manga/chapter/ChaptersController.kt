@@ -13,6 +13,7 @@ import android.support.v7.widget.LinearLayoutManager
 import android.view.*
 import com.jakewharton.rxbinding.support.v4.widget.refreshes
 import com.jakewharton.rxbinding.view.clicks
+import com.mikepenz.iconics.utils.IconicsMenuInflaterUtil
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.SelectableAdapter
 import eu.kanade.tachiyomi.R
@@ -289,7 +290,7 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
     }
 
     override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
-        mode.menuInflater.inflate(R.menu.chapter_selection, menu)
+        IconicsMenuInflaterUtil.inflate(mode.menuInflater, applicationContext, R.menu.chapter_selection, menu)
         adapter?.mode = SelectableAdapter.Mode.MULTI
         return true
     }

@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.ui.category
 
 import android.support.design.widget.Snackbar
-import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.view.ActionMode
 import android.support.v7.widget.LinearLayoutManager
@@ -9,7 +8,7 @@ import android.support.v7.widget.RecyclerView
 import android.view.*
 import com.jakewharton.rxbinding.view.clicks
 import com.mikepenz.community_material_typeface_library.CommunityMaterial
-import com.mikepenz.iconics.IconicsDrawable
+import com.mikepenz.iconics.utils.IconicsMenuInflaterUtil
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.SelectableAdapter
 import eu.davidea.flexibleadapter.helpers.UndoHelper
@@ -80,7 +79,6 @@ class CategoryController : NucleusController<CategoryPresenter>(),
         recycler.layoutManager = LinearLayoutManager(view.context)
         recycler.setHasFixedSize(true)
         recycler.adapter = adapter
-        fab.setImageDrawable(IconicsDrawable(view.context).icon(CommunityMaterial.Icon2.cmd_plus).sizeDp(24).color(ContextCompat.getColor(view.context, R.color.md_white_1000)))
         adapter?.isHandleDragEnabled = true
         adapter?.isPermanentDelete = false
 
@@ -133,7 +131,7 @@ class CategoryController : NucleusController<CategoryPresenter>(),
      */
     override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
         // Inflate menu.
-        mode.menuInflater.inflate(R.menu.category_selection, menu)
+        IconicsMenuInflaterUtil.inflate(mode.menuInflater, applicationContext, R.menu.category_selection, menu)
         // Enable adapter multi selection.
         adapter?.mode = SelectableAdapter.Mode.MULTI
         return true

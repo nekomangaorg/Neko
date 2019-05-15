@@ -20,6 +20,7 @@ import com.jakewharton.rxbinding.support.v7.widget.queryTextChanges
 import com.jakewharton.rxrelay.BehaviorRelay
 import com.jakewharton.rxrelay.PublishRelay
 import com.mikepenz.community_material_typeface_library.CommunityMaterial
+import com.mikepenz.iconics.utils.IconicsMenuInflaterUtil
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -375,7 +376,7 @@ class LibraryController(
     }
 
     override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
-        mode.menuInflater.inflate(R.menu.library_selection, menu)
+        IconicsMenuInflaterUtil.inflate(mode.menuInflater, applicationContext, R.menu.library_selection, menu)
         return true
     }
 

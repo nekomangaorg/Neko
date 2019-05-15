@@ -8,6 +8,7 @@ import android.view.*
 import com.jakewharton.rxbinding.support.v4.widget.refreshes
 import com.jakewharton.rxbinding.support.v7.widget.scrollStateChanges
 import com.mikepenz.community_material_typeface_library.CommunityMaterial
+import com.mikepenz.iconics.utils.IconicsMenuInflaterUtil
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.SelectableAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
@@ -288,7 +289,7 @@ class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
      * @param menu menu object of ActionMode
      */
     override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
-        mode.menuInflater.inflate(R.menu.chapter_recent_selection, menu)
+        IconicsMenuInflaterUtil.inflate(mode.menuInflater, applicationContext, R.menu.chapter_recent_selection, menu)
         adapter?.mode = SelectableAdapter.Mode.MULTI
         return true
     }
