@@ -9,7 +9,6 @@ import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.source.CatalogueSource
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Filter
 import eu.kanade.tachiyomi.source.model.FilterList
@@ -40,7 +39,7 @@ open class BrowseCataloguePresenter(
     /**
      * Selected source.
      */
-    val source = sourceManager.get(sourceId) as CatalogueSource
+    val source = sourceManager.get(sourceId)!!
 
     /**
      * Query from the view.

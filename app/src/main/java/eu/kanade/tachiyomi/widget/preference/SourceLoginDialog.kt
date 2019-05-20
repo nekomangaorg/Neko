@@ -5,7 +5,6 @@ import android.view.View
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.source.online.LoginSource
 import eu.kanade.tachiyomi.util.toast
 import kotlinx.android.synthetic.main.pref_account_login.view.*
 import rx.android.schedulers.AndroidSchedulers
@@ -15,7 +14,7 @@ import uy.kohesive.injekt.api.get
 
 class SourceLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle) {
 
-    private val source = Injekt.get<SourceManager>().get(args.getLong("key")) as LoginSource
+    val source: Source by lazy { Injekt.get<SourceManager>().getSources()[0] }
 
     constructor(source: Source) : this(Bundle().apply { putLong("key", source.id) })
 
@@ -62,7 +61,7 @@ class SourceLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle) 
     }
 
     interface Listener {
-        fun loginDialogClosed(source: LoginSource)
+        fun loginDialogClosed(source: Source)
     }
 
 }

@@ -4,7 +4,7 @@ import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.asObservableSuccess
 import eu.kanade.tachiyomi.network.newCallWithProgress
-import eu.kanade.tachiyomi.source.CatalogueSource
+import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.*
 import okhttp3.Headers
 import okhttp3.OkHttpClient
@@ -19,7 +19,7 @@ import java.security.MessageDigest
 /**
  * A simple implementation for sources from a website.
  */
-abstract class HttpSource : CatalogueSource {
+abstract class HttpSource : Source {
 
     /**
      * Network service.

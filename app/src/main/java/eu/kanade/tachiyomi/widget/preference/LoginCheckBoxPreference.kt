@@ -10,7 +10,6 @@ import com.mikepenz.community_material_typeface_library.CommunityMaterial
 import com.mikepenz.iconics.IconicsDrawable
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.online.HttpSource
-import eu.kanade.tachiyomi.source.online.LoginSource
 import kotlinx.android.synthetic.main.pref_item_source.view.*
 
 class LoginCheckBoxPreference @JvmOverloads constructor(
@@ -31,21 +30,18 @@ class LoginCheckBoxPreference @JvmOverloads constructor(
             onLoginClick()
         }
         val loginFrame = holder.itemView.login_frame
-        if (source is LoginSource) {
-            val color = if (source.isLogged())
-                ContextCompat.getColor(context, R.color.material_green_500)
-            else
-                ContextCompat.getColor(context, R.color.material_blue_grey_300)
+        val color = if (source.isLogged())
+            ContextCompat.getColor(context, R.color.material_green_500)
+        else
+            ContextCompat.getColor(context, R.color.material_blue_grey_300)
 
-            holder.itemView.login.setImageDrawable(IconicsDrawable(context).icon(CommunityMaterial.Icon.cmd_account_circle).sizeDp(24).color(color))
+        holder.itemView.login.setImageDrawable(IconicsDrawable(context).icon(CommunityMaterial.Icon.cmd_account_circle).sizeDp(24).color(color))
 
-            loginFrame.visibility = View.VISIBLE
-            loginFrame.setOnClickListener {
-                onLoginClick()
-            }
-        } else {
-            loginFrame.visibility = View.GONE
+        loginFrame.visibility = View.VISIBLE
+        loginFrame.setOnClickListener {
+            onLoginClick()
         }
+
     }
 
     fun setOnLoginClickListener(block: () -> Unit) {

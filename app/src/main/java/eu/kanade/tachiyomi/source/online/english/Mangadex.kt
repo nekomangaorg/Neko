@@ -11,7 +11,6 @@ import eu.kanade.tachiyomi.network.asObservable
 import eu.kanade.tachiyomi.network.asObservableSuccess
 import eu.kanade.tachiyomi.source.model.*
 import eu.kanade.tachiyomi.source.online.HttpSource
-import eu.kanade.tachiyomi.source.online.LoginSource
 import eu.kanade.tachiyomi.util.asJsoup
 import okhttp3.*
 import org.jsoup.Jsoup
@@ -23,7 +22,7 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.collections.set
 
-open class Mangadex(override val lang: String, private val internalLang: String, private val langCode: Int) : LoginSource, HttpSource() {
+open class Mangadex(override val lang: String, private val internalLang: String, private val langCode: Int) : HttpSource() {
 
     override val name = "MangaDex"
 

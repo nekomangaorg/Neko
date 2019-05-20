@@ -1,8 +1,7 @@
 package eu.kanade.tachiyomi.source
 
-import eu.kanade.tachiyomi.source.model.Page
-import eu.kanade.tachiyomi.source.model.SChapter
-import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.model.*
+import okhttp3.Response
 import rx.Observable
 
 /**
@@ -19,6 +18,45 @@ interface Source {
      * Name of the source.
      */
     val name: String
+
+
+    /**
+     * An ISO 639-1 compliant language code (two letters in lower case).
+     */
+    val lang: String
+
+    /**
+     * Whether the source has support for latest updates.
+     */
+    val supportsLatest: Boolean
+
+    /**
+     * Returns an observable containing a page with a list of manga.
+     *
+     * @param page the page number to retrieve.
+     */
+    fun fetchPopularManga(page: Int): Observable<MangasPage>
+
+    /**
+     * Returns an observable containing a page with a list of manga.
+     *
+     * @param page the page number to retrieve.
+     * @param query the search query.
+     * @param filters the list of filters to apply.
+     */
+    fun fetchSearchManga(page: Int, query: String, filters: FilterList): Observable<MangasPage>
+
+    /**
+     * Returns an observable containing a page with a list of latest manga updates.
+     *
+     * @param page the page number to retrieve.
+     */
+    fun fetchLatestUpdates(page: Int): Observable<MangasPage>
+
+    /**
+     * Returns the list of filters for the source.
+     */
+    fun getFilterList(): FilterList
 
     /**
      * Returns an observable with the updated details for a manga.
@@ -40,5 +78,11 @@ interface Source {
      * @param chapter the chapter.
      */
     fun fetchPageList(chapter: SChapter): Observable<List<Page>>
+
+    fun isLogged(): Boolean
+
+    fun login(username: String, password: String, twoFactorCode: String = ""): Observable<Boolean>
+
+    fun isAuthenticationSuccessful(response: Response): Boolean
 
 }

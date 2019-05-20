@@ -12,7 +12,6 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
-import eu.kanade.tachiyomi.source.online.LoginSource
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.manga.info.MangaWebViewController
@@ -44,7 +43,7 @@ abstract class LoginDialogPreference(bundle: Bundle? = null) : DialogController(
     }
 
     fun onViewCreated(view: View) {
-        val source = Injekt.get<SourceManager>().get(args.getLong("key")) as LoginSource?
+        val source = Injekt.get<SourceManager>().get(args.getLong("key"))
 
         v = view.apply {
             show_password.setOnCheckedChangeListener { _, isChecked ->

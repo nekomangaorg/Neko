@@ -19,9 +19,8 @@ import com.mikepenz.iconics.typeface.IIcon
 import eu.kanade.tachiyomi.Migrations
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.source.CatalogueSource
+import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.source.online.LoginSource
 import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
 import eu.kanade.tachiyomi.ui.base.controller.*
 import eu.kanade.tachiyomi.ui.catalogue.browse.BrowseCatalogueController
@@ -44,7 +43,7 @@ class MainActivity : BaseActivity(),  SourceLoginDialog.Listener {
 
     val preferences: PreferencesHelper by injectLazy()
 
-    val source : LoginSource by lazy { Injekt.get<SourceManager>().getSources()[0] as LoginSource }
+    val source: Source by lazy { Injekt.get<SourceManager>().getSources()[0] }
 
     private var drawerArrow: DrawerArrowDrawable? = null
 
@@ -107,7 +106,7 @@ class MainActivity : BaseActivity(),  SourceLoginDialog.Listener {
                     R.id.nav_drawer_recent_updates -> setRoot(RecentChaptersController(), id)
                     R.id.nav_drawer_recently_read -> setRoot(RecentlyReadController(), id)
                     R.id.nav_drawer_browse -> {
-                        val browseCatalogueController = BrowseCatalogueController(source as CatalogueSource)
+                        val browseCatalogueController = BrowseCatalogueController(source)
                         setRoot(browseCatalogueController, id)
                         if (!source.isLogged()) {
                             val dialog = SourceLoginDialog(source)
@@ -180,11 +179,11 @@ class MainActivity : BaseActivity(),  SourceLoginDialog.Listener {
      *
      * @param source clicked item containing source information.
      */
-    override fun loginDialogClosed(source: LoginSource) {
+    override fun loginDialogClosed(source: Source) {
         if (source.isLogged()) {
             router.popCurrentController()
             R.id.nav_drawer_browse
-            setRoot(BrowseCatalogueController(source as CatalogueSource),R.id.nav_drawer_browse)
+            setRoot(BrowseCatalogueController(source), R.id.nav_drawer_browse)
         }
     }
 
@@ -216,7 +215,7 @@ class MainActivity : BaseActivity(),  SourceLoginDialog.Listener {
                 setSelectedDrawerItem(R.id.nav_drawer_browse)
                 //Get the search query provided in extras, and if not null, perform a global search with it.
                 intent.getStringExtra(SearchManager.QUERY)?.also { query ->
-                    router.pushController(BrowseCatalogueController(source as CatalogueSource).withFadeTransaction())
+                    router.pushController(BrowseCatalogueController(source).withFadeTransaction())
                 }
             }
             else -> return false

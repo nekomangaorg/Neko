@@ -19,7 +19,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.source.CatalogueSource
+import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
@@ -51,7 +51,7 @@ open class BrowseCatalogueController(bundle: Bundle) :
         FlexibleAdapter.EndlessScrollListener,
         ChangeMangaCategoriesDialog.Listener {
 
-    constructor(source: CatalogueSource) : this(Bundle().apply {
+    constructor(source: Source) : this(Bundle().apply {
         putLong(SOURCE_ID_KEY, source.id)
         putString(QUERY_NAME_KEY, "One Piece")
     }

@@ -6,7 +6,6 @@ import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
-import eu.kanade.tachiyomi.source.online.LoginSource
 import eu.kanade.tachiyomi.widget.preference.LoginCheckBoxPreference
 import eu.kanade.tachiyomi.widget.preference.LoginPreference
 import eu.kanade.tachiyomi.widget.preference.SourceLoginDialog
@@ -43,7 +42,8 @@ class SettingsSiteController : SettingsController(), SourceLoginDialog.Listener 
 
 
     }
-    override fun loginDialogClosed(source: LoginSource) {
+
+    override fun loginDialogClosed(source: Source) {
         val pref = findPreference(getSourceKey(source.id)) as? LoginCheckBoxPreference
         pref?.notifyChanged()
     }

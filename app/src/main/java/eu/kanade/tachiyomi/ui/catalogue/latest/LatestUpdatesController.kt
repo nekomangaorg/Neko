@@ -5,7 +5,7 @@ import android.support.v4.widget.DrawerLayout
 import android.view.Menu
 import android.view.ViewGroup
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.source.CatalogueSource
+import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.ui.catalogue.browse.BrowseCatalogueController
 import eu.kanade.tachiyomi.ui.catalogue.browse.BrowseCataloguePresenter
 
@@ -14,7 +14,7 @@ import eu.kanade.tachiyomi.ui.catalogue.browse.BrowseCataloguePresenter
  */
 class LatestUpdatesController(bundle: Bundle) : BrowseCatalogueController(bundle) {
 
-    constructor(source: CatalogueSource) : this(Bundle().apply {
+    constructor(source: Source) : this(Bundle().apply {
         putLong(SOURCE_ID_KEY, source.id)
     })
 
