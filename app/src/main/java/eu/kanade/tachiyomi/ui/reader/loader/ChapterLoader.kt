@@ -67,8 +67,7 @@ class ChapterLoader(
         val isDownloaded = downloadManager.isChapterDownloaded(chapter.chapter, manga, true)
         return when {
             isDownloaded -> DownloadPageLoader(chapter, manga, source, downloadManager)
-            source is HttpSource -> HttpPageLoader(chapter, source)
-            else -> error("Loader not implemented")
+            else -> HttpPageLoader(chapter, source as HttpSource)
         }
     }
 
