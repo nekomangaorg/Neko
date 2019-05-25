@@ -285,6 +285,7 @@ class Downloader(
                 // If the page list threw, it will resume here
                 .onErrorReturn { error ->
                     download.status = Download.ERROR
+                    tmpDir.delete()
                     notifier.onError(error.message, download.chapter.name)
                     download
                 }
@@ -407,6 +408,9 @@ class Downloader(
         if (download.status == Download.DOWNLOADED) {
             tmpDir.renameTo(dirname)
             cache.addChapter(dirname, mangaDir, download.manga)
+        } else {
+            //delete the temp directory
+            tmpDir.delete()
         }
     }
 
