@@ -84,6 +84,7 @@ class MangaInfoPresenter(
                     manga.initialized = true
                     db.insertManga(manga).executeAsBlocking()
                     manga
+                    coverCache.deleteFromCache(manga.thumbnail_url)
                 }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

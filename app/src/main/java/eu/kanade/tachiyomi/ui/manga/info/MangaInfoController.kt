@@ -225,6 +225,12 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         // Set the favorite drawable to the correct one.
         setFavoriteDrawable(manga.favorite)
 
+        setCover(manga)
+
+    }
+
+    private fun setCover(manga: Manga) {
+        val view = view ?: return
         // Set cover if it wasn't already.
         if (manga_cover.drawable == null && !manga.thumbnail_url.isNullOrEmpty()) {
             GlideApp.with(view.context)
@@ -349,6 +355,8 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
      */
     private fun fetchMangaFromSource() {
         setRefreshing(true)
+        manga_cover.setImageResource(0)
+        backdrop.setImageResource(0)
         // Call presenter and start fetching manga information
         presenter.fetchMangaFromSource()
     }

@@ -32,6 +32,7 @@ class CoverCache(private val context: Context) {
     fun getCoverFile(thumbnailUrl: String): File {
         return File(cacheDir, DiskUtil.hashKeyForDisk(thumbnailUrl))
     }
+    
 
     /**
      * Copy the given stream to this cache.
