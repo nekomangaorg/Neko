@@ -42,6 +42,7 @@ import eu.kanade.tachiyomi.ui.library.ChangeMangaCategoriesDialog
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.util.getResourceColor
+import eu.kanade.tachiyomi.util.openInBrowser
 import eu.kanade.tachiyomi.util.snack
 import eu.kanade.tachiyomi.util.toast
 import eu.kanade.tachiyomi.util.truncateCenter
@@ -86,6 +87,9 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
 
         // Set onclickListener to toggle favorite when FAB clicked.
         fab_favorite.clicks().subscribeUntilDestroy { onFabClick() }
+
+        // Set onLongClickListener to manage categories when FAB is clicked.
+        fab_favorite.longClicks().subscribeUntilDestroy{ onFabLongClick() }
 
         // Set SwipeRefresh to refresh manga data.
         swipe_refresh.refreshes().subscribeUntilDestroy { fetchMangaFromSource() }
@@ -287,15 +291,7 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         val context = view?.context ?: return
         val source = presenter.source as? HttpSource ?: return
 
-        try {
-            val url = Uri.parse(source.mangaDetailsRequest(presenter.manga).url().toString())
-            val intent = CustomTabsIntent.Builder()
-                    .setToolbarColor(context.getResourceColor(R.attr.colorPrimary))
-                    .build()
-            intent.launchUrl(activity, url)
-        } catch (e: Exception) {
-            context.toast(e.message)
-        }
+        context.openInBrowser(source.mangaDetailsRequest(presenter.manga).url().toString())
     }
 
     private fun openInWebView() {
@@ -404,6 +400,30 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
             activity?.toast(activity?.getString(R.string.manga_added_library))
         } else {
             activity?.toast(activity?.getString(R.string.manga_removed_library))
+        }
+    }
+
+    /**
+     * Called when the fab is long clicked.
+     */
+    private fun onFabLongClick() {
+        val manga = presenter.manga
+        if (!manga.favorite) {
+            toggleFavorite()
+            activity?.toast(activity?.getString(R.string.manga_added_library))
+        }
+        val categories = presenter.getCategories()
+        if (categories.size <= 1) {
+            // default or the one from the user then just add to favorite.
+            presenter.moveMangaToCategory(manga, categories.firstOrNull())
+        } else {
+            val ids = presenter.getMangaCategoryIds(manga)
+            val preselected = ids.mapNotNull { id ->
+                categories.indexOfFirst { it.id == id }.takeIf { it != -1 }
+            }.toTypedArray()
+
+            ChangeMangaCategoriesDialog(this, listOf(manga), categories, preselected)
+                    .showDialog(router)
         }
     }
 
