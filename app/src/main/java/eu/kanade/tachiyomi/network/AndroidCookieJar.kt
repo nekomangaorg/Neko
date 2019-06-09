@@ -38,10 +38,6 @@ class AndroidCookieJar : CookieJar {
         cookies.split(";")
             .map { it.substringBefore("=") }
             .onEach { manager.setCookie(urlString, "$it=;Max-Age=-1") }
-
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            syncManager.sync()
-        }
     }
 
     fun removeAll() {

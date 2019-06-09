@@ -45,6 +45,8 @@ class PreferencesHelper(val context: Context) {
 
     fun r18() = prefs.getString(Keys.showR18, "0")
 
+    fun imageServer() = prefs.getString(Keys.imageServer, "0")
+
 
     fun trueColor() = rxPrefs.getBoolean(Keys.trueColor, false)
 

@@ -272,6 +272,7 @@
 
     <!-- Site specific strings -->
     <string name="pref_site_specific_settings">MangaDex Settings</string>
+    <string name="pref_image_server">Choose image server</string>
     <string name="pref_show_r18_title">Default R18+ Setting</string>
     <string name="pref_show_r18_show">show only R18+</string>
     <string name="pref_show_r18_no">Show No R18+</string>

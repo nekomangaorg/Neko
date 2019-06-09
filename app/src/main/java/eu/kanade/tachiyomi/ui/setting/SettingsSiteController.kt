@@ -19,16 +19,7 @@ class SettingsSiteController : SettingsController(), SourceLoginDialog.Listener 
     override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
         titleRes = R.string.pref_site_specific_settings
 
-        listPreference {
-            key = PreferenceKeys.showR18
-            titleRes = R.string.pref_show_r18_title
-            entriesRes = arrayOf(R.string.pref_show_r18_no, R.string.pref_show_r18_all, R.string.pref_show_r18_show)
-            entryValues = arrayOf("0", "1", "2")
-            summary = "%s"
-
-        }
-
-        val sourcePreference = LoginCheckBoxPreference(context, sources[0] ).apply {
+        val sourcePreference = LoginCheckBoxPreference(context, sources[0]).apply {
             title = "MangaDex Login"
             key = getSourceKey(source.id)
             setOnLoginClickListener {
@@ -41,6 +32,23 @@ class SettingsSiteController : SettingsController(), SourceLoginDialog.Listener 
         preferenceScreen.addPreference(sourcePreference)
 
 
+        listPreference {
+            key = PreferenceKeys.showR18
+            titleRes = R.string.pref_show_r18_title
+            entriesRes = arrayOf(R.string.pref_show_r18_no, R.string.pref_show_r18_all, R.string.pref_show_r18_show)
+            entryValues = arrayOf("0", "1", "2")
+            summary = "%s"
+
+        }
+
+        listPreference {
+            key = PreferenceKeys.imageServer
+            titleRes = R.string.pref_image_server
+            entries = arrayOf("Auto", "North America", "North America 2", "Europe", "Europe 2", "Rest of the World")
+            entryValues = arrayOf("0", "na", "na2", "eu", "eu2", "row")
+            summary = "%s"
+
+        }
     }
 
     override fun loginDialogClosed(source: Source) {

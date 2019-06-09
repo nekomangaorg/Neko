@@ -481,6 +481,11 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         return chapter
     }
 
+    override fun pageListRequest(chapter: SChapter): Request {
+        val server = preferences.imageServer().toString()
+        return GET("$baseUrl${chapter.url}?server=$server")
+    }
+
 
     override fun pageListParse(response: Response): List<Page> {
         val jsonData = response.body()!!.string()

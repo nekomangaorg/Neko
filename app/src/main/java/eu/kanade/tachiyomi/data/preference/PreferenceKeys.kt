@@ -115,6 +115,8 @@ object PreferenceKeys {
 
     const val showR18 = "show_r18"
 
+    const val imageServer = "image_server"
+
     fun sourceUsername(sourceId: Long) = "pref_source_username_$sourceId"
 
     fun sourcePassword(sourceId: Long) = "pref_source_password_$sourceId"
