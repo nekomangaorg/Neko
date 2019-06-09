@@ -472,6 +472,7 @@ open class BrowseCatalogueController(bundle: Bundle) :
      */
     override fun onItemClick(position: Int): Boolean {
         val item = adapter?.getItem(position) as? CatalogueItem ?: return false
+        item.manga.initialized = false
         router.pushController(MangaController(item.manga, true).withFadeTransaction())
 
         return false

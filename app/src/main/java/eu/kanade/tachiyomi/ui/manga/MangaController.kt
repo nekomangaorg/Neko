@@ -95,8 +95,9 @@ class MangaController : RxController, TabbedController {
         manga_pager.offscreenPageLimit = 3
         manga_pager.adapter = adapter
 
-        if (!fromCatalogue)
+        if (!fromCatalogue) {
             manga_pager.currentItem = CHAPTERS_CONTROLLER
+        }
     }
 
     override fun onDestroyView(view: View) {
