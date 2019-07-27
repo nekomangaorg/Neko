@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Base.Theme.AppCompat" parent="@style/Base.V28.Theme.AppCompat"/>
+
+    <style name="Base.Theme.AppCompat.Light" parent="@style/Base.V28.Theme.AppCompat.Light"/>
+
+    <style name="Base.Widget.AppCompat.Toolbar" parent="@style/Base.V28.Widget.AppCompat.Toolbar"/>
+
+    <style name="Base.Widget.Design.AppBarLayout" parent="@style/Base.V28.Widget.Design.AppBarLayout"/>
+
+    <style name="Base.V28.Theme.AppCompat" parent="@style/Base.V23.Theme.AppCompat">
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+    </style>
+
+    <style name="Base.V28.Theme.AppCompat.Light" parent="@style/Base.V23.Theme.AppCompat.Light">
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+    </style>
+
+    <style name="Base.V28.Widget.AppCompat.Toolbar" parent="@style/Base.V7.Widget.AppCompat.Toolbar">
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+    </style>
+
+    <style name="Base.V28.Widget.Design.AppBarLayout" parent="@style/Base.V21.Widget.Design.AppBarLayout">
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+    </style>
+</resources>
