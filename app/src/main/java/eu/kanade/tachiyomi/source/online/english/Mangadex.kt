@@ -116,6 +116,8 @@ open class Mangadex(override val lang: String, private val internalLang: String,
 
      private fun searchMangaNextPageSelector() = ".pagination li:not(.disabled) span[title*=last page]:not(disabled)"
 
+     private fun followsNextPageSelector() = ".pagination li:not(.disabled) span[title*=last page]:not(disabled)"
+
     override fun fetchPopularManga(page: Int): Observable<MangasPage> {
         return clientBuilder().newCall(popularMangaRequest(page))
                 .asObservableSuccess()
@@ -322,6 +324,101 @@ open class Mangadex(override val lang: String, private val internalLang: String,
 
 
         return manga
+    }
+
+    fun fetchFollows(filters: FilterList) = fetchFollows(0, filters)
+
+    private fun fetchFollows(page: Int, filters: FilterList): Observable<List<Pair<SManga, Int>>> {
+        return getFollowsClient(filters).newCall(followsListRequest(page, filters))
+                .asObservable()
+                .map { response ->
+                    followsParse(response)
+                }.flatMap { parsedResponse ->
+                    // TODO I have no idea if this will work properly or if there's a better way
+                    val currentObservable = Observable.just(parsedResponse.first)
+                    if (parsedResponse.second)
+                        currentObservable.mergeWith(fetchFollows(page + 1, filters))
+                    else
+                        currentObservable
+                }
+    }
+
+    fun followsParse(response: Response): Pair<List<Pair<SManga, Int>>, Boolean> { // TODO exit generic hell
+        val document = response.asJsoup()
+
+        val follows = document.select(followSelector()).map { element ->
+            followFromElement(element)
+        }
+
+        val hasNextPage = followsNextPageSelector()?.let { selector ->
+            document.select(selector).first()
+        } != null
+
+        return Pair(follows, hasNextPage)
+    }
+
+    private fun getFollowsClient(filters: FilterList): OkHttpClient { // TODO reuse/rename `getSearchClient()`?
+        filters.forEach { filter ->
+            when (filter) {
+                is R18 -> {
+                    return when (filter.state) {
+                        1 -> clientBuilder(ALL)
+                        2 -> clientBuilder(ONLY_R18)
+                        3 -> clientBuilder(NO_R18)
+                        else -> clientBuilder()
+                    }
+                }
+            }
+        }
+        return clientBuilder()
+    }
+
+    fun followsListRequest(page: Int, filters: FilterList): Request {
+
+        // Format `/follows/manga/$status[/$sort[/$page]]`
+        val url = HttpUrl.parse("$baseUrl/follows/manga/0")!!.newBuilder() // Gets regardless of follow status. TODO add filter?
+                .addQueryParameter("p", page.toString())
+
+        filters.forEach { filter ->
+            when (filter) {
+                is TextField -> url.addQueryParameter(filter.key, filter.state)
+                is SortFilter -> {
+                    if (filter.state != null) {
+                        if (filter.state!!.ascending) {
+                            url.addQueryParameter("s", sortables[filter.state!!.index].second.toString())
+                        } else {
+                            url.addQueryParameter("s", sortables[filter.state!!.index].third.toString())
+                        }
+                    }
+                }
+            }
+        }
+
+
+        return GET(url.toString(), headersBuilder().build())
+    }
+
+    private fun followSelector() = "div.manga-entry"
+
+    private fun followFromElement(element: Element): Pair<SManga, Int> { // TODO can follow status be added to `SManga`?
+        val manga = SManga.create()
+
+        element.select("a.manga_title").first().let {
+            val url = modifyMangaUrl(it.attr("href"))
+            manga.setUrlWithoutDomain(url)
+            manga.title = it.text().trim()
+        }
+
+        manga.thumbnail_url = formThumbUrl(manga.url)
+
+        val followStatus = element
+                .select("button.btn.btn-success.dropdown-toggle:has(span.fas.fa-fw:not(.fa-star))")
+                .first() //Select the first dropdown that doesn't contain a rating element. Note: `:has()` is not currently supported in browsers
+                .text()
+                .trim()
+                .let { FOLLOW_STATUS_LIST.getValue(it) } // TODO: There's probably a better way to convert the value to an `Int` (If even needed)
+
+        return Pair(manga, followStatus)
     }
 
     override fun fetchMangaDetails(manga: SManga): Observable<SManga> {
@@ -716,5 +813,14 @@ open class Mangadex(override val lang: String, private val internalLang: String,
                 Pair("Spanish (LATAM)", "29"),
                 Pair("Thai", "32"),
                 Pair("Filipino", "34"))
+
+        private val FOLLOW_STATUS_LIST =  // TODO Should this be done differently?
+                mapOf(
+                        Pair("Reading", 1),
+                        Pair("Completed", 2),
+                        Pair("On hold", 3),
+                        Pair("Plan to read", 4),
+                        Pair("Dropped", 5),
+                        Pair("Re-reading", 6))
     }
 }
