@@ -68,7 +68,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         "${URLEncoder.encode(it.key, "UTF-8")}=${URLEncoder.encode(it.value, "UTF-8")}"
     }
 
-    private fun popularMangaSelector() = "div.col-lg-6.border-bottom.pl-0.my-1"
+    private fun popularMangaSelector() = "div.manga-entry"
 
     private fun latestUpdatesSelector() = "tr a.manga_title"
 
@@ -307,7 +307,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         return GET(urlToUse, headersBuilder().build())
     }
 
-    private fun searchMangaSelector() = "div.col-lg-6.border-bottom.pl-0.my-1"
+    private fun searchMangaSelector() = "div.manga-entry"
 
     private fun searchMangaFromElement(element: Element): SManga {
         val manga = SManga.create()
