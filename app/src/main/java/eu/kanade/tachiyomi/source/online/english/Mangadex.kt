@@ -397,6 +397,18 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         return manga
     }
 
+    fun removeFollow(mangaID: Int): Observable<Boolean> {
+        return clientBuilder().newCall(GET("$baseUrl/ajax/actions.ajax.php?function=manga_unfollow&id=$mangaID", headers))
+                .asObservable()
+                .map { isAuthenticationSuccessful(it) }
+    }
+
+    fun changeFollowStatus(mangaID: Int, status: Int): Observable<Boolean> {
+        return clientBuilder().newCall(GET("$baseUrl/ajax/actions.ajax.php?function=manga_follow&id=$mangaID&type=$status", headers))
+                .asObservable()
+                .map { isAuthenticationSuccessful(it) }
+    }
+
     override fun fetchMangaDetails(manga: SManga): Observable<SManga> {
         return clientBuilder().newCall(apiRequest(manga))
                 .asObservableSuccess()
