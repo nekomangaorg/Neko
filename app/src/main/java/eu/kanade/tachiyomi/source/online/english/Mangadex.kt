@@ -343,7 +343,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
                 }
     }
 
-    fun followsParse(response: Response): Pair<List<Pair<SManga, Int>>, Boolean> { // TODO exit generic hell
+    protected fun followsParse(response: Response): MangasPage {
         val document = response.asJsoup()
 
         val follows = document.select(followSelector()).map { element ->
@@ -357,7 +357,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         return Pair(follows, hasNextPage)
     }
 
-    fun followsListRequest(page: Int, filters: FilterList): Request {
+    protected fun followsListRequest(page: Int, filters: FilterList): Request {
 
         // Format `/follows/manga/$status[/$sort[/$page]]`
         val url = HttpUrl.parse("$baseUrl/follows/manga/0")!!.newBuilder() // Gets regardless of follow status. TODO add filter?
