@@ -177,7 +177,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
                         MangasPage(listOf(details), false)
                     }
         } else {
-            getSearchClient(filters).newCall(searchMangaRequest(page, query, filters))
+            buildR18Client(filters).newCall(searchMangaRequest(page, query, filters))
                     .asObservableSuccess()
                     .map { response ->
                         searchMangaParse(response)
@@ -198,7 +198,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         return MangasPage(mangas, hasNextPage)
     }
 
-    private fun getSearchClient(filters: FilterList): OkHttpClient {
+    private fun buildR18Client(filters: FilterList): OkHttpClient {
         filters.forEach { filter ->
             when (filter) {
                 is R18 -> {
@@ -329,7 +329,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
     fun fetchFollows(filters: FilterList) = fetchFollows(0, filters)
 
     private fun fetchFollows(page: Int, filters: FilterList): Observable<List<Pair<SManga, Int>>> {
-        return getSearchClient(filters).newCall(followsListRequest(page, filters))
+        return buildR18Client(filters).newCall(followsListRequest(page, filters))
                 .asObservable()
                 .map { response ->
                     followsParse(response)
@@ -360,7 +360,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
     protected fun followsListRequest(page: Int, filters: FilterList): Request {
 
         // Format `/follows/manga/$status[/$sort[/$page]]`
-        val url = HttpUrl.parse("$baseUrl/follows/manga/0")!!.newBuilder() // Gets regardless of follow status. TODO add filter?
+        val url = HttpUrl.parse("$baseUrl/follows/manga/0")!!.newBuilder() // Gets regardless of follow status.
                 .addQueryParameter("p", page.toString())
 
         filters.forEach { filter ->
