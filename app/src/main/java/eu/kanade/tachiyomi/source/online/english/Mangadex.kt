@@ -416,7 +416,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
                 .first() //Select the first dropdown that doesn't contain a rating element. Note: `:has()` is not currently supported in browsers
                 .text()
                 .trim()
-                .let { FOLLOW_STATUS_LIST.getValue(it) } // TODO: There's probably a better way to convert the value to an `Int` (If even needed)
+                .let { FOLLOW_STATUS_LIST.first(pair -> pair.first == it).second) }
 
         return Pair(manga, followStatus)
     }
@@ -814,8 +814,8 @@ open class Mangadex(override val lang: String, private val internalLang: String,
                 Pair("Thai", "32"),
                 Pair("Filipino", "34"))
 
-        private val FOLLOW_STATUS_LIST =  // TODO Should this be done differently?
-                mapOf(
+        private val FOLLOW_STATUS_LIST =
+                listOf(
                         Pair("Reading", 1),
                         Pair("Completed", 2),
                         Pair("On hold", 3),
