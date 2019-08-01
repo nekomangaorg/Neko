@@ -329,7 +329,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
     fun fetchFollows(filters: FilterList) = fetchFollows(0, filters)
 
     private fun fetchFollows(page: Int, filters: FilterList): Observable<List<Pair<SManga, Int>>> {
-        return getFollowsClient(filters).newCall(followsListRequest(page, filters))
+        return getSearchClient(filters).newCall(followsListRequest(page, filters))
                 .asObservable()
                 .map { response ->
                     followsParse(response)
@@ -355,22 +355,6 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         } != null
 
         return Pair(follows, hasNextPage)
-    }
-
-    private fun getFollowsClient(filters: FilterList): OkHttpClient { // TODO reuse/rename `getSearchClient()`?
-        filters.forEach { filter ->
-            when (filter) {
-                is R18 -> {
-                    return when (filter.state) {
-                        1 -> clientBuilder(ALL)
-                        2 -> clientBuilder(ONLY_R18)
-                        3 -> clientBuilder(NO_R18)
-                        else -> clientBuilder()
-                    }
-                }
-            }
-        }
-        return clientBuilder()
     }
 
     fun followsListRequest(page: Int, filters: FilterList): Request {
@@ -416,7 +400,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
                 .first() //Select the first dropdown that doesn't contain a rating element. Note: `:has()` is not currently supported in browsers
                 .text()
                 .trim()
-                .let { FOLLOW_STATUS_LIST.first(pair -> pair.first == it).second) }
+                .let { FOLLOW_STATUS_LIST.first { pair -> pair.first == it }.second }
 
         return Pair(manga, followStatus)
     }
