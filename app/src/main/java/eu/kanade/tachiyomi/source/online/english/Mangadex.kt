@@ -326,8 +326,6 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         return manga
     }
 
-    fun fetchFollows(filters: FilterList) = fetchFollows(0, filters)
-
     private fun fetchFollows(page: Int, filters: FilterList): Observable<MangasPage> {
         return buildR18Client(filters).newCall(followsListRequest(page, filters))
                 .asObservable()
