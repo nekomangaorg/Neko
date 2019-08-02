@@ -328,18 +328,11 @@ open class Mangadex(override val lang: String, private val internalLang: String,
 
     fun fetchFollows(filters: FilterList) = fetchFollows(0, filters)
 
-    private fun fetchFollows(page: Int, filters: FilterList): Observable<List<Pair<SManga, Int>>> {
+    private fun fetchFollows(page: Int, filters: FilterList): Observable<MangasPage> {
         return buildR18Client(filters).newCall(followsListRequest(page, filters))
                 .asObservable()
                 .map { response ->
                     followsParse(response)
-                }.flatMap { parsedResponse ->
-                    // TODO I have no idea if this will work properly or if there's a better way
-                    val currentObservable = Observable.just(parsedResponse.first)
-                    if (parsedResponse.second)
-                        currentObservable.mergeWith(fetchFollows(page + 1, filters))
-                    else
-                        currentObservable
                 }
     }
 
@@ -354,7 +347,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
             document.select(selector).first()
         } != null
 
-        return Pair(follows, hasNextPage)
+        return MangasPage(follows, hasNextPage)
     }
 
     protected fun followsListRequest(page: Int, filters: FilterList): Request {
@@ -384,7 +377,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
 
     private fun followSelector() = "div.manga-entry"
 
-    private fun followFromElement(element: Element): Pair<SManga, Int> { // TODO can follow status be added to `SManga`?
+    private fun followFromElement(element: Element): SManga {
         val manga = SManga.create()
 
         element.select("a.manga_title").first().let {
@@ -395,14 +388,13 @@ open class Mangadex(override val lang: String, private val internalLang: String,
 
         manga.thumbnail_url = formThumbUrl(manga.url)
 
-        val followStatus = element
-                .select("button.btn.btn-success.dropdown-toggle:has(span.fas.fa-fw:not(.fa-star))")
+        manga.follow_status = element.select("button.btn.btn-success.dropdown-toggle:has(span.fas.fa-fw:not(.fa-star))")
                 .first() //Select the first dropdown that doesn't contain a rating element. Note: `:has()` is not currently supported in browsers
                 .text()
                 .trim()
-                .let { FOLLOW_STATUS_LIST.first { pair -> pair.first == it }.second }
+                .let { FOLLOW_STATUS_LIST.first { pair -> pair.first == it }.third }
 
-        return Pair(manga, followStatus)
+        return manga
     }
 
     override fun fetchMangaDetails(manga: SManga): Observable<SManga> {
@@ -800,11 +792,12 @@ open class Mangadex(override val lang: String, private val internalLang: String,
 
         private val FOLLOW_STATUS_LIST =
                 listOf(
-                        Pair("Reading", 1),
-                        Pair("Completed", 2),
-                        Pair("On hold", 3),
-                        Pair("Plan to read", 4),
-                        Pair("Dropped", 5),
-                        Pair("Re-reading", 6))
+                        Triple("Unfollowed", 0, SManga.FollowStatus.UNFOLLOWED),
+                        Triple("Reading", 1, SManga.FollowStatus.READING),
+                        Triple("Completed", 2, SManga.FollowStatus.COMPLETED),
+                        Triple("On hold", 3, SManga.FollowStatus.ON_HOLD),
+                        Triple("Plan to read", 4, SManga.FollowStatus.PLAN_TO_READ),
+                        Triple("Dropped", 5, SManga.FollowStatus.DROPPED),
+                        Triple("Re-reading", 6, SManga.FollowStatus.RE_READING))
     }
 }
