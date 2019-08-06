@@ -396,8 +396,8 @@ open class Mangadex(override val lang: String, private val internalLang: String,
     }
 
 
-    fun changeFollowStatus(manga: SManga): Observable<Boolean>{
-        if (manga.follow_status == SManga.FollowStatus.UNKNOWN) throw IllegalArgumentException("Cannot tell MD server to set an unknown follow status")
+    fun changeFollowStatus(manga: SManga): Observable<Boolean> {
+        manga.follow_status ?: throw IllegalArgumentException("Cannot tell MD server to set an null follow status")
 
         val mangaID = getMangaId(manga.url)
         val status = manga.follow_status.let { FOLLOW_STATUS_LIST.first { pair -> pair.third == it }.second }

@@ -20,7 +20,7 @@ interface SManga : Serializable {
 
     var status: Int
 
-    var follow_status: FollowStatus
+    var follow_status: FollowStatus?
 
     var thumbnail_url: String?
 
@@ -52,7 +52,6 @@ interface SManga : Serializable {
     }
 
     enum class FollowStatus {
-        UNKNOWN,
         UNFOLLOWED,
         READING,
         COMPLETED,

@@ -25,7 +25,7 @@ open class MangaImpl : Manga {
 
     override var status: Int = 0
 
-    override var follow_status: SManga.FollowStatus = SManga.FollowStatus.UNKNOWN
+    override var follow_status: SManga.FollowStatus? = null
 
     override var thumbnail_url: String? = null
 
