@@ -395,6 +395,18 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         return manga
     }
 
+
+    fun changeFollowStatus(manga: SManga): Observable<Boolean>{
+        if (manga.follow_status == SManga.FollowStatus.UNKNOWN) throw IllegalArgumentException("Cannot tell MD server to set an unknown follow status")
+
+        val mangaID = getMangaId(manga.url)
+        val status = manga.follow_status.let { FOLLOW_STATUS_LIST.first { pair -> pair.third == it }.second }
+
+        return clientBuilder().newCall(GET("$baseUrl/ajax/actions.ajax.php?function=manga_follow&id=$mangaID&type=$status", headers))
+                .asObservable()
+                .map { isAuthenticationSuccessful(it) }
+    }
+
     override fun fetchMangaDetails(manga: SManga): Observable<SManga> {
         return clientBuilder().newCall(apiRequest(manga))
                 .asObservableSuccess()
