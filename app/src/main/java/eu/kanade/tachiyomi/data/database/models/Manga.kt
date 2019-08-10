@@ -89,6 +89,19 @@ interface Manga : SManga {
             this.title = title
             this.source = source
         }
+
+        private val FOLLOW_STATUS_LIST = listOf(
+                Pair(0, SManga.FollowStatus.UNFOLLOWED),
+                Pair(1, SManga.FollowStatus.READING),
+                Pair(2, SManga.FollowStatus.COMPLETED),
+                Pair(3, SManga.FollowStatus.ON_HOLD),
+                Pair(4, SManga.FollowStatus.PLAN_TO_READ),
+                Pair(5, SManga.FollowStatus.DROPPED),
+                Pair(6, SManga.FollowStatus.RE_READING))
+
+        fun SManga.FollowStatus.Companion.fromDatabaseInt(x: Int) = FOLLOW_STATUS_LIST.first { it.first == x }.second
+        fun SManga.FollowStatus.Companion.fromDatabaseInt(x: Int?) = FOLLOW_STATUS_LIST.firstOrNull { it.first == x }?.second
+        fun SManga.FollowStatus.toDatabaseInt() = FOLLOW_STATUS_LIST.first { it.second == this }.first
     }
 
 }

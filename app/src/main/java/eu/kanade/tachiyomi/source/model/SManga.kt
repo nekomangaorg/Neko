@@ -59,6 +59,7 @@ interface SManga : Serializable {
         PLAN_TO_READ,
         DROPPED,
         RE_READING;
+        companion object {}
     }
 
     companion object {

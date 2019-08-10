@@ -10,6 +10,7 @@ import eu.kanade.tachiyomi.network.POST
 import eu.kanade.tachiyomi.network.asObservable
 import eu.kanade.tachiyomi.network.asObservableSuccess
 import eu.kanade.tachiyomi.source.model.*
+import eu.kanade.tachiyomi.source.model.SManga.FollowStatus
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.util.asJsoup
 import okhttp3.*
@@ -390,7 +391,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
                 .first() //Select the first dropdown that doesn't contain a rating element. Note: `:has()` is not currently supported in browsers
                 .text()
                 .trim()
-                .let { FOLLOW_STATUS_LIST.first { pair -> pair.first == it }.third }
+                .let { FollowStatus.fromMangadex(it) }
 
         return manga
     }
@@ -400,7 +401,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         manga.follow_status ?: throw IllegalArgumentException("Cannot tell MD server to set an null follow status")
 
         val mangaID = getMangaId(manga.url)
-        val status = manga.follow_status.let { FOLLOW_STATUS_LIST.first { pair -> pair.third == it }.second }
+        val status = manga.follow_status!!.toMangadexInt()
 
         return clientBuilder().newCall(GET("$baseUrl/ajax/actions.ajax.php?function=manga_follow&id=$mangaID&type=$status", headers))
                 .asObservable()
@@ -800,14 +801,18 @@ open class Mangadex(override val lang: String, private val internalLang: String,
                 Pair("Thai", "32"),
                 Pair("Filipino", "34"))
 
-        private val FOLLOW_STATUS_LIST =
-                listOf(
-                        Triple("Unfollowed", 0, SManga.FollowStatus.UNFOLLOWED),
-                        Triple("Reading", 1, SManga.FollowStatus.READING),
-                        Triple("Completed", 2, SManga.FollowStatus.COMPLETED),
-                        Triple("On hold", 3, SManga.FollowStatus.ON_HOLD),
-                        Triple("Plan to read", 4, SManga.FollowStatus.PLAN_TO_READ),
-                        Triple("Dropped", 5, SManga.FollowStatus.DROPPED),
-                        Triple("Re-reading", 6, SManga.FollowStatus.RE_READING))
+        private val FOLLOW_STATUS_LIST = listOf(
+                Triple(0, FollowStatus.UNFOLLOWED, "Unfollowed"),
+                Triple(1, FollowStatus.READING, "Reading"),
+                Triple(2, FollowStatus.COMPLETED, "Completed"),
+                Triple(3, FollowStatus.ON_HOLD, "On hold"),
+                Triple(4, FollowStatus.PLAN_TO_READ, "Plan to read"),
+                Triple(5, FollowStatus.DROPPED, "Dropped"),
+                Triple(6, FollowStatus.RE_READING, "Re-reading"))
+
+        fun FollowStatus.Companion.fromMangadex(x: Int) = FOLLOW_STATUS_LIST.first { it.first == x }.second
+        fun FollowStatus.Companion.fromMangadex(MangadexFollowString: String) = FOLLOW_STATUS_LIST.first { it.third == MangadexFollowString }.second
+        fun FollowStatus.toMangadexInt() = FOLLOW_STATUS_LIST.first { it.second == this }.first
+        fun FollowStatus.toMangadexString() = FOLLOW_STATUS_LIST.first { it.second == this }.third
     }
 }
