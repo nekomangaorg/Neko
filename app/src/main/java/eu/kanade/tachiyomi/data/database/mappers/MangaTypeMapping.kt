@@ -10,6 +10,8 @@ import com.pushtorefresh.storio.sqlite.queries.DeleteQuery
 import com.pushtorefresh.storio.sqlite.queries.InsertQuery
 import com.pushtorefresh.storio.sqlite.queries.UpdateQuery
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.Manga.Companion.fromDatabaseInt
+import eu.kanade.tachiyomi.data.database.models.Manga.Companion.toDatabaseInt
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_ARTIST
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_AUTHOR
@@ -17,6 +19,7 @@ import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_CHAPTER_FLAGS
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_DATE_ADDED
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_DESCRIPTION
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_FAVORITE
+import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_FOLLOW_STATUS
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_GENRE
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_ID
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_INITIALIZED
@@ -29,6 +32,7 @@ import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_TITLE
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_URL
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_VIEWER
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.TABLE
+import eu.kanade.tachiyomi.source.model.SManga.FollowStatus
 
 class MangaTypeMapping : SQLiteTypeMapping<Manga>(
         MangaPutResolver(),
@@ -48,7 +52,7 @@ class MangaPutResolver : DefaultPutResolver<Manga>() {
             .whereArgs(obj.id)
             .build()
 
-    override fun mapToContentValues(obj: Manga) = ContentValues(16).apply {
+    override fun mapToContentValues(obj: Manga) = ContentValues(17).apply {
         put(COL_ID, obj.id)
         put(COL_SOURCE, obj.source)
         put(COL_URL, obj.url)
@@ -66,6 +70,7 @@ class MangaPutResolver : DefaultPutResolver<Manga>() {
         put(COL_INITIALIZED, obj.initialized)
         put(COL_VIEWER, obj.viewer)
         put(COL_CHAPTER_FLAGS, obj.chapter_flags)
+        put(COL_FOLLOW_STATUS, obj.follow_status?.toDatabaseInt())
     }
 }
 
@@ -88,6 +93,7 @@ interface BaseMangaGetResolver {
         initialized = cursor.getInt(cursor.getColumnIndex(COL_INITIALIZED)) == 1
         viewer = cursor.getInt(cursor.getColumnIndex(COL_VIEWER))
         chapter_flags = cursor.getInt(cursor.getColumnIndex(COL_CHAPTER_FLAGS))
+        follow_status = FollowStatus.fromDatabaseInt(cursor.getInt(cursor.getColumnIndex(COL_FOLLOW_STATUS)))
     }
 }
 

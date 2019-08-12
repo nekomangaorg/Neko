@@ -38,6 +38,8 @@ object MangaTable {
 
     const val COL_CHAPTER_FLAGS = "chapter_flags"
 
+    const val COL_FOLLOW_STATUS = "follow_status"
+
     const val COL_UNREAD = "unread"
 
     const val COL_CATEGORY = "category"
@@ -60,7 +62,8 @@ object MangaTable {
             $COL_LAST_UPDATE LONG,
             $COL_INITIALIZED BOOLEAN NOT NULL,
             $COL_VIEWER INTEGER NOT NULL,
-            $COL_CHAPTER_FLAGS INTEGER NOT NULL
+            $COL_CHAPTER_FLAGS INTEGER NOT NULL,
+            $COL_FOLLOW_STATUS INTEGER
             )"""
 
     val createUrlIndexQuery: String
@@ -75,5 +78,8 @@ object MangaTable {
 
     val addDateAddedCol: String
         get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_DATE_ADDED} LONG DEFAULT 0"
+
+    val addFollowStatusCol: String
+        get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_FOLLOW_STATUS} INT DEFAULT NULL"
 
 }
