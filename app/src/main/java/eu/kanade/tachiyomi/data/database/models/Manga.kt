@@ -100,7 +100,6 @@ interface Manga : SManga {
                 Pair(6, SManga.FollowStatus.RE_READING))
 
         fun SManga.FollowStatus.Companion.fromDatabaseInt(x: Int) = FOLLOW_STATUS_LIST.first { it.first == x }.second
-        fun SManga.FollowStatus.Companion.fromDatabaseInt(x: Int?) = FOLLOW_STATUS_LIST.firstOrNull { it.first == x }?.second
         fun SManga.FollowStatus.toDatabaseInt() = FOLLOW_STATUS_LIST.first { it.second == this }.first
     }
 

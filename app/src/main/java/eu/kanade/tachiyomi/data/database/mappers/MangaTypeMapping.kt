@@ -93,7 +93,7 @@ interface BaseMangaGetResolver {
         initialized = cursor.getInt(cursor.getColumnIndex(COL_INITIALIZED)) == 1
         viewer = cursor.getInt(cursor.getColumnIndex(COL_VIEWER))
         chapter_flags = cursor.getInt(cursor.getColumnIndex(COL_CHAPTER_FLAGS))
-        follow_status = FollowStatus.fromDatabaseInt(cursor.getInt(cursor.getColumnIndex(COL_FOLLOW_STATUS)))
+        follow_status = cursor.getInt(cursor.getColumnIndex(COL_FOLLOW_STATUS)).let { FollowStatus.fromDatabaseInt(it) }
     }
 }
 
