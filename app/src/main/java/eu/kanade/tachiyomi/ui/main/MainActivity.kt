@@ -225,8 +225,12 @@ class MainActivity : BaseActivity(),  SourceLoginDialog.Listener {
 
                 setSelectedDrawerItem(R.id.nav_drawer_browse)
                 //Get the search query provided in extras, and if not null, perform a global search with it.
-                intent.getStringExtra(SearchManager.QUERY)?.also { query ->
-                    router.pushController(BrowseCatalogueController(source).withFadeTransaction())
+                val query = intent.getStringExtra(SearchManager.QUERY)
+                if (query != null && !query.isEmpty()) {
+                    if (router.backstackSize > 1) {
+                        router.popToRoot()
+                    }
+                    router.pushController(CatalogueSearchController(query).withFadeTransaction())
                 }
             }
             else -> return false
