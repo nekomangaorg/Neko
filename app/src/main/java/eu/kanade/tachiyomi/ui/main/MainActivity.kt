@@ -230,7 +230,7 @@ class MainActivity : BaseActivity(),  SourceLoginDialog.Listener {
                     if (router.backstackSize > 1) {
                         router.popToRoot()
                     }
-                    router.pushController(CatalogueSearchController(query).withFadeTransaction())
+                    router.pushController(BrowseCatalogueController(query).withFadeTransaction())
                 }
             }
             else -> return false
