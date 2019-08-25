@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.catalogue.latest
+package eu.kanade.tachiyomi.ui.catalogue.follows
 
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.MangasPage
@@ -10,10 +10,10 @@ import rx.schedulers.Schedulers
 /**
  * LatestUpdatesPager inherited from the general Pager.
  */
-class LatestUpdatesPager(val source: Source) : Pager() {
+class FollowsPager(val source: Source) : Pager() {
 
     override fun requestNext(): Observable<MangasPage> {
-        return source.fetchLatestUpdates(currentPage)
+        return source.fetchFollows(currentPage)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnNext { onPageReceived(it) }

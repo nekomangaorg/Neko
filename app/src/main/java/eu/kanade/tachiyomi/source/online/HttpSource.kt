@@ -138,18 +138,6 @@ abstract class HttpSource : Source {
      */
     abstract protected fun searchMangaParse(response: Response): MangasPage
 
-    /**
-     * Returns an observable containing a page with a list of latest manga updates.
-     *
-     * @param page the page number to retrieve.
-     */
-    override fun fetchLatestUpdates(page: Int): Observable<MangasPage> {
-        return client.newCall(latestUpdatesRequest(page))
-                .asObservableSuccess()
-                .map { response ->
-                    latestUpdatesParse(response)
-                }
-    }
 
     /**
      * Returns the request for latest manga given the page.

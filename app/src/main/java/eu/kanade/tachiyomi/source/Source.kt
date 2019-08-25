@@ -47,11 +47,11 @@ interface Source {
     fun fetchSearchManga(page: Int, query: String, filters: FilterList): Observable<MangasPage>
 
     /**
-     * Returns an observable containing a page with a list of latest manga updates.
+     * Returns an observable containing a page with a list of users follows.
      *
      * @param page the page number to retrieve.
      */
-    fun fetchLatestUpdates(page: Int): Observable<MangasPage>
+    fun fetchFollows(page: Int): Observable<MangasPage>
 
     /**
      * Returns the list of filters for the source.

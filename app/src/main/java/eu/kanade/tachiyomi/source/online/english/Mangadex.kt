@@ -146,13 +146,6 @@ open class Mangadex(override val lang: String, private val internalLang: String,
     }
 
 
-    override fun fetchLatestUpdates(page: Int): Observable<MangasPage> {
-        return clientBuilder().newCall(latestUpdatesRequest(page))
-                .asObservableSuccess()
-                .map { response ->
-                    latestUpdatesParse(response)
-                }
-    }
     override fun latestUpdatesParse(response: Response): MangasPage {
         val document = response.asJsoup()
 
@@ -327,15 +320,16 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         return manga
     }
 
-    private fun fetchFollows(page: Int, filters: FilterList): Observable<MangasPage> {
-        return buildR18Client(filters).newCall(followsListRequest(page, filters))
+    public override fun fetchFollows(page: Int): Observable<MangasPage> {
+        return clientBuilder().newCall(followsListRequest(page))
                 .asObservable()
                 .map { response ->
                     followsParse(response)
                 }
     }
 
-    protected fun followsParse(response: Response): MangasPage {
+
+    private fun followsParse(response: Response): MangasPage {
         val document = response.asJsoup()
 
         val follows = document.select(followSelector()).map { element ->
@@ -349,26 +343,26 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         return MangasPage(follows, hasNextPage)
     }
 
-    protected fun followsListRequest(page: Int, filters: FilterList): Request {
+    protected fun followsListRequest(page: Int): Request {
 
         // Format `/follows/manga/$status[/$sort[/$page]]`
         val url = HttpUrl.parse("$baseUrl/follows/manga/0")!!.newBuilder() // Gets regardless of follow status.
                 .addQueryParameter("p", page.toString())
 
-        filters.forEach { filter ->
-            when (filter) {
-                is TextField -> url.addQueryParameter(filter.key, filter.state)
-                is SortFilter -> {
-                    if (filter.state != null) {
-                        if (filter.state!!.ascending) {
-                            url.addQueryParameter("s", sortables[filter.state!!.index].second.toString())
-                        } else {
-                            url.addQueryParameter("s", sortables[filter.state!!.index].third.toString())
-                        }
-                    }
-                }
-            }
-        }
+        /*  filters.forEach { filter ->
+              when (filter) {
+                  is TextField -> url.addQueryParameter(filter.key, filter.state)
+                  is SortFilter -> {
+                      if (filter.state != null) {
+                          if (filter.state!!.ascending) {
+                              url.addQueryParameter("s", sortables[filter.state!!.index].second.toString())
+                          } else {
+                              url.addQueryParameter("s", sortables[filter.state!!.index].third.toString())
+                          }
+                      }
+                  }
+              }*/
+        //}
 
 
         return GET(url.toString(), headersBuilder().build())
