@@ -1,16 +1,16 @@
-package eu.kanade.tachiyomi.ui.catalogue.latest
+package eu.kanade.tachiyomi.ui.catalogue.follows
 
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.ui.catalogue.browse.BrowseCataloguePresenter
 import eu.kanade.tachiyomi.ui.catalogue.browse.Pager
 
 /**
- * Presenter of [LatestUpdatesController]. Inherit BrowseCataloguePresenter.
+ * Presenter of [FollowsController]. Inherit BrowseCataloguePresenter.
  */
-class LatestUpdatesPresenter(sourceId: Long) : BrowseCataloguePresenter(sourceId) {
+class FollowsPresenter(sourceId: Long) : BrowseCataloguePresenter(sourceId) {
 
     override fun createPager(query: String, filters: FilterList): Pager {
-        return LatestUpdatesPager(source)
+        return FollowsPager(source)
     }
 
 }

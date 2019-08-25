@@ -20,6 +20,8 @@ interface SManga : Serializable {
 
     var status: Int
 
+    var follow_status: FollowStatus?
+
     var thumbnail_url: String?
 
     var initialized: Boolean
@@ -47,6 +49,17 @@ interface SManga : Serializable {
 
         if (!initialized)
             initialized = other.initialized
+    }
+
+    enum class FollowStatus {
+        UNFOLLOWED,
+        READING,
+        COMPLETED,
+        ON_HOLD,
+        PLAN_TO_READ,
+        DROPPED,
+        RE_READING;
+        companion object {}
     }
 
     companion object {

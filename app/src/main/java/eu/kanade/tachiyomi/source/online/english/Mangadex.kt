@@ -10,6 +10,7 @@ import eu.kanade.tachiyomi.network.POST
 import eu.kanade.tachiyomi.network.asObservable
 import eu.kanade.tachiyomi.network.asObservableSuccess
 import eu.kanade.tachiyomi.source.model.*
+import eu.kanade.tachiyomi.source.model.SManga.FollowStatus
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.util.asJsoup
 import okhttp3.*
@@ -116,6 +117,8 @@ open class Mangadex(override val lang: String, private val internalLang: String,
 
      private fun searchMangaNextPageSelector() = ".pagination li:not(.disabled) span[title*=last page]:not(disabled)"
 
+     private fun followsNextPageSelector() = ".pagination li:not(.disabled) span[title*=last page]:not(disabled)"
+
     override fun fetchPopularManga(page: Int): Observable<MangasPage> {
         return clientBuilder().newCall(popularMangaRequest(page))
                 .asObservableSuccess()
@@ -143,13 +146,6 @@ open class Mangadex(override val lang: String, private val internalLang: String,
     }
 
 
-    override fun fetchLatestUpdates(page: Int): Observable<MangasPage> {
-        return clientBuilder().newCall(latestUpdatesRequest(page))
-                .asObservableSuccess()
-                .map { response ->
-                    latestUpdatesParse(response)
-                }
-    }
     override fun latestUpdatesParse(response: Response): MangasPage {
         val document = response.asJsoup()
 
@@ -175,7 +171,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
                         MangasPage(listOf(details), false)
                     }
         } else {
-            getSearchClient(filters).newCall(searchMangaRequest(page, query, filters))
+            buildR18Client(filters).newCall(searchMangaRequest(page, query, filters))
                     .asObservableSuccess()
                     .map { response ->
                         searchMangaParse(response)
@@ -196,7 +192,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         return MangasPage(mangas, hasNextPage)
     }
 
-    private fun getSearchClient(filters: FilterList): OkHttpClient {
+    private fun buildR18Client(filters: FilterList): OkHttpClient {
         filters.forEach { filter ->
             when (filter) {
                 is R18 -> {
@@ -322,6 +318,88 @@ open class Mangadex(override val lang: String, private val internalLang: String,
 
 
         return manga
+    }
+
+    public override fun fetchFollows(page: Int): Observable<MangasPage> {
+        return clientBuilder().newCall(followsListRequest(page))
+                .asObservable()
+                .map { response ->
+                    followsParse(response)
+                }
+    }
+
+
+    private fun followsParse(response: Response): MangasPage {
+        val document = response.asJsoup()
+
+        val follows = document.select(followSelector()).map { element ->
+            followFromElement(element)
+        }
+
+        val hasNextPage = followsNextPageSelector()?.let { selector ->
+            document.select(selector).first()
+        } != null
+
+        return MangasPage(follows, hasNextPage)
+    }
+
+    protected fun followsListRequest(page: Int): Request {
+
+        // Format `/follows/manga/$status[/$sort[/$page]]`
+        val url = HttpUrl.parse("$baseUrl/follows/manga/0")!!.newBuilder() // Gets regardless of follow status.
+                .addQueryParameter("p", page.toString())
+
+        /*  filters.forEach { filter ->
+              when (filter) {
+                  is TextField -> url.addQueryParameter(filter.key, filter.state)
+                  is SortFilter -> {
+                      if (filter.state != null) {
+                          if (filter.state!!.ascending) {
+                              url.addQueryParameter("s", sortables[filter.state!!.index].second.toString())
+                          } else {
+                              url.addQueryParameter("s", sortables[filter.state!!.index].third.toString())
+                          }
+                      }
+                  }
+              }*/
+        //}
+
+
+        return GET(url.toString(), headersBuilder().build())
+    }
+
+    private fun followSelector() = "div.manga-entry"
+
+    private fun followFromElement(element: Element): SManga {
+        val manga = SManga.create()
+
+        element.select("a.manga_title").first().let {
+            val url = modifyMangaUrl(it.attr("href"))
+            manga.setUrlWithoutDomain(url)
+            manga.title = it.text().trim()
+        }
+
+        manga.thumbnail_url = formThumbUrl(manga.url)
+
+        manga.follow_status = element.select("button.btn.btn-success.dropdown-toggle:has(span.fas.fa-fw:not(.fa-star))")
+                .first() //Select the first dropdown that doesn't contain a rating element. Note: `:has()` is not currently supported in browsers
+                .text()
+                .trim()
+                .let { FollowStatus.fromMangadex(it) }
+
+        return manga
+    }
+
+
+    fun changeFollowStatus(manga: SManga): Observable<Boolean> {
+        manga.follow_status ?: throw IllegalArgumentException("Cannot tell MD server to set an null follow status")
+
+        val mangaID = getMangaId(manga.url)
+        val status = manga.follow_status!!.toMangadexInt()
+
+        return clientBuilder().newCall(GET("$baseUrl/ajax/actions.ajax.php?function=manga_follow&id=$mangaID&type=$status", headers))
+                .asObservable()
+                .map { isAuthenticationSuccessful(it) }
     }
 
     override fun fetchMangaDetails(manga: SManga): Observable<SManga> {
@@ -716,5 +794,19 @@ open class Mangadex(override val lang: String, private val internalLang: String,
                 Pair("Spanish (LATAM)", "29"),
                 Pair("Thai", "32"),
                 Pair("Filipino", "34"))
+
+        private val FOLLOW_STATUS_LIST = listOf(
+                Triple(0, FollowStatus.UNFOLLOWED, "Unfollowed"),
+                Triple(1, FollowStatus.READING, "Reading"),
+                Triple(2, FollowStatus.COMPLETED, "Completed"),
+                Triple(3, FollowStatus.ON_HOLD, "On hold"),
+                Triple(4, FollowStatus.PLAN_TO_READ, "Plan to read"),
+                Triple(5, FollowStatus.DROPPED, "Dropped"),
+                Triple(6, FollowStatus.RE_READING, "Re-reading"))
+
+        fun FollowStatus.Companion.fromMangadex(x: Int) = FOLLOW_STATUS_LIST.first { it.first == x }.second
+        fun FollowStatus.Companion.fromMangadex(MangadexFollowString: String) = FOLLOW_STATUS_LIST.first { it.third == MangadexFollowString }.second
+        fun FollowStatus.toMangadexInt() = FOLLOW_STATUS_LIST.first { it.second == this }.first
+        fun FollowStatus.toMangadexString() = FOLLOW_STATUS_LIST.first { it.second == this }.third
     }
 }

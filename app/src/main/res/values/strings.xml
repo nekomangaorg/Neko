@@ -16,6 +16,7 @@
     <string name="label_library">My library</string>
     <string name="label_recent_manga">Recently read</string>
     <string name="label_browse">Browse</string>
+    <string name="label_follows">Follows</string>
     <string name="label_latest">Latest</string>
     <string name="label_recent_updates">Library updates</string>
     <string name="label_categories">Categories</string>

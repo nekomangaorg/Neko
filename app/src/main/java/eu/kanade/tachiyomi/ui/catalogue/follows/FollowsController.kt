@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.catalogue.latest
+package eu.kanade.tachiyomi.ui.catalogue.follows
 
 import android.os.Bundle
 import android.support.v4.widget.DrawerLayout
@@ -12,14 +12,14 @@ import eu.kanade.tachiyomi.ui.catalogue.browse.BrowseCataloguePresenter
 /**
  * Controller that shows the latest manga from the catalogue. Inherit [BrowseCatalogueController].
  */
-class LatestUpdatesController(bundle: Bundle) : BrowseCatalogueController(bundle) {
+class FollowsController(bundle: Bundle) : BrowseCatalogueController(bundle) {
 
     constructor(source: Source) : this(Bundle().apply {
         putLong(SOURCE_ID_KEY, source.id)
     })
 
     override fun createPresenter(): BrowseCataloguePresenter {
-        return LatestUpdatesPresenter(args.getLong(SOURCE_ID_KEY))
+        return FollowsPresenter(args.getLong(SOURCE_ID_KEY))
     }
 
     override fun onPrepareOptionsMenu(menu: Menu) {
