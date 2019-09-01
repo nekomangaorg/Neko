@@ -216,11 +216,13 @@
                     app:layout_constraintTop_toBottomOf="@+id/manga_status_label"
                     app:layout_constraintLeft_toLeftOf="parent"/>
 
-                <Spinner
+                <TextView
                     android:id="@+id/follows_spinner"
-                    android:layout_width="wrap_content"
+                    style="@style/TextAppearance.Medium.Body2"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:paddingTop="5dp"
+                    android:paddingStart="5dp"
                     app:layout_constraintLeft_toRightOf="@+id/manga_lang_flag"
                     app:layout_constraintTop_toBottomOf="@+id/manga_status_label" />
 

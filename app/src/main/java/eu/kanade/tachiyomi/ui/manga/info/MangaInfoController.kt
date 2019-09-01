@@ -15,7 +15,6 @@ import android.support.v4.content.pm.ShortcutInfoCompat
 import android.support.v4.content.pm.ShortcutManagerCompat
 import android.support.v4.graphics.drawable.IconCompat
 import android.view.*
-import android.widget.ArrayAdapter
 import android.widget.Toast
 import com.afollestad.materialdialogs.MaterialDialog
 import com.bumptech.glide.load.engine.DiskCacheStrategy
@@ -30,7 +29,6 @@ import com.mikepenz.iconics.IconicsDrawable
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.database.models.Manga.Companion.toDatabaseInt
 import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -124,16 +122,6 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
 
         manga_cover.longClicks().subscribeUntilDestroy {
             copyToClipboard(view.context.getString(R.string.title), presenter.manga.title)
-        }
-        ArrayAdapter.createFromResource(
-                this.applicationContext,
-                R.array.follows_options,
-                android.R.layout.simple_spinner_item
-        ).also { adapter ->
-            // Specify the layout to use when the list of choices appears
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            // Apply the adapter to the spinner
-            follows_spinner.adapter = adapter
         }
     }
 
@@ -233,10 +221,16 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
             else -> R.string.unknown
         })
 
-        manga.follow_status.let {
-            follows_spinner.setSelection(manga.follow_status!!.toDatabaseInt())
-        }
-
+        // Update status TextView.
+        follows_spinner.setText(when (manga.follow_status) {
+            SManga.FollowStatus.COMPLETED -> R.string.follows_completed
+            SManga.FollowStatus.DROPPED -> R.string.follows_dropped
+            SManga.FollowStatus.ON_HOLD -> R.string.follows_on_hold
+            SManga.FollowStatus.PLAN_TO_READ -> R.string.follows_plan_to_read
+            SManga.FollowStatus.READING -> R.string.follows_reading
+            SManga.FollowStatus.RE_READING -> R.string.follows_re_reading
+            else -> R.string.follows_unfollowed
+        })
 
         // Set the favorite drawable to the correct one.
         setFavoriteDrawable(manga.favorite)
