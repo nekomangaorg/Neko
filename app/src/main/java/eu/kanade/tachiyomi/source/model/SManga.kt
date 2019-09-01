@@ -45,6 +45,9 @@ interface SManga : Serializable {
         if (other.thumbnail_url != null)
             thumbnail_url = other.thumbnail_url
 
+        if (other.follow_status != null)
+            follow_status = other.follow_status
+
         status = other.status
 
         if (!initialized)

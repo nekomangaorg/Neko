@@ -337,6 +337,15 @@
     <string name="manga_info_status_label">Status</string>
     <string name="manga_info_date_added_label">Date added</string>
     <string name="manga_info_genres_label">Genres</string>
+    <string name="follows">Follow Status</string>
+    <string name="follows_unfollowed">Unfollowed</string>
+    <string name="follows_reading">Reading</string>
+    <string name="follows_completed">Completed</string>
+    <string name="follows_on_hold">On Hold</string>
+    <string name="follows_plan_to_read">Plan To Read</string>
+    <string name="follows_dropped">Dropped</string>
+    <string name="follows_re_reading">Re Reading</string>
+
     <string name="circular_icon">Circular icon</string>
     <string name="rounded_icon">Rounded icon</string>
     <string name="square_icon">Square icon</string>

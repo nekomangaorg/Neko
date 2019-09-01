@@ -192,6 +192,14 @@
                     app:layout_constraintTop_toBottomOf="@+id/manga_status_label"
                     app:layout_constraintLeft_toLeftOf="parent"/>
 
+                <Spinner
+                    android:id="@+id/follows_spinner"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="5dp"
+                    app:layout_constraintLeft_toRightOf="@+id/manga_lang_flag"
+                    app:layout_constraintTop_toBottomOf="@+id/manga_status_label" />
+
                 <TextView
                     android:id="@+id/manga_summary_label"
                     style="@style/TextAppearance.Medium.Body2"
@@ -199,7 +207,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/description"
                     android:textIsSelectable="false"
-                    app:layout_constraintTop_toBottomOf="@+id/manga_lang_flag"
+                    app:layout_constraintTop_toBottomOf="@+id/follows_spinner"
                     app:layout_constraintLeft_toLeftOf="parent"/>
 
                 <TextView

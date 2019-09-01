@@ -9,11 +9,8 @@
     android:layout_height="match_parent">
 
     <android.support.constraint.ConstraintLayout
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        xmlns:android="http://schemas.android.com/apk/res/android">
+        android:layout_height="match_parent">
 
         <View
             android:id="@+id/guideline"
@@ -58,12 +55,10 @@
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/fab_favorite"
             style="@style/Theme.Widget.FAB"
-            android:layout_marginTop="0dp"
-            android:layout_marginBottom="0dp"
             android:layout_marginRight="8dp"
-            app:layout_constraintTop_toBottomOf="@+id/guideline"
             app:layout_constraintBottom_toTopOf="@+id/guideline"
-            app:layout_constraintRight_toRightOf="parent"/>
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/guideline" />
 
         <android.support.v4.widget.NestedScrollView
             android:id="@+id/info_scrollview"
@@ -221,10 +216,20 @@
                     app:layout_constraintTop_toBottomOf="@+id/manga_status_label"
                     app:layout_constraintLeft_toLeftOf="parent"/>
 
+                <Spinner
+                    android:id="@+id/follows_spinner"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="5dp"
+                    app:layout_constraintLeft_toRightOf="@+id/manga_lang_flag"
+                    app:layout_constraintTop_toBottomOf="@+id/manga_status_label" />
+
 
             </android.support.constraint.ConstraintLayout>
 
+
         </android.support.v4.widget.NestedScrollView>
+
 
         <TextView
             android:id="@+id/manga_summary_label"
@@ -233,13 +238,13 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp"
-            android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:text="@string/description"
-            app:layout_constraintTop_toBottomOf="@+id/guideline"
+            android:textIsSelectable="false"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            android:textIsSelectable="false"/>
+            app:layout_constraintTop_toBottomOf="@+id/guideline" />
 
         <android.support.v4.widget.NestedScrollView
             android:id="@+id/description_scrollview"
@@ -284,6 +289,7 @@
             app:atg_backgroundColor="@android:color/transparent"
             app:atg_borderColor="@color/colorAccentDark"
             app:atg_textColor="@color/colorAccentDark"/>
+
 
     </android.support.constraint.ConstraintLayout>
 
