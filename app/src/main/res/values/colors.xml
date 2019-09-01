@@ -7,6 +7,7 @@
     <color name="colorDarkPrimary">#212121</color>
     <color name="colorDarkPrimaryDark">#1C1C1D</color>
     <color name="colorAmoledPrimary">@color/md_black_1000</color>
+    <color name="mangadex_orange">#F79421</color>
 
     <!-- Light Theme -->
     <color name="colorAccentLight">#6d6d6d</color>

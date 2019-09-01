@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.manga.chapter
 
 import android.content.Context
+import android.support.v4.content.ContextCompat
 import android.view.MenuItem
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.kanade.tachiyomi.R
@@ -22,7 +23,7 @@ class ChaptersAdapter(
 
     val unreadColor = context.getResourceColor(android.R.attr.textColorPrimary)
 
-    val bookmarkedColor = context.getResourceColor(R.attr.colorAccent)
+    val bookmarkedColor = ContextCompat.getColor(context, R.color.mangadex_orange)
 
     val decimalFormat = DecimalFormat("#.###", DecimalFormatSymbols()
             .apply { decimalSeparator = '.' })
