@@ -381,13 +381,27 @@ open class Mangadex(override val lang: String, private val internalLang: String,
 
         manga.thumbnail_url = formThumbUrl(manga.url)
 
-        manga.follow_status = element.select("button.btn.btn-success.dropdown-toggle:has(span.fas.fa-fw:not(.fa-star))")
-                .first() //Select the first dropdown that doesn't contain a rating element. Note: `:has()` is not currently supported in browsers
-                .text()
-                .trim()
-                .let { FollowStatus.fromMangadex(it) }
+        manga.follow_status = getFollowStatusFromElement(element).let { FollowStatus.fromMangadex(it!!) }
 
         return manga
+    }
+
+    private fun getFollowStatusFromElement(element: Element): String? {
+        if (element.select("button.btn.btn-success.dropdown-toggle").size > 0) {
+            return element.select("button.btn.btn-success.dropdown-toggle").first().text().trim()
+        } else if (element.select("button.btn.btn-warning.dropdown-toggle").size > 0) {
+            return element.select("button.btn.btn-warning.dropdown-toggle").first().text().trim()
+        } else if (element.select("button.btn.btn-danger.dropdown-toggle").size > 0) {
+            return element.select("button.btn.btn-danger.dropdown-toggle").first().text().trim()
+        } else if (element.select("button.btn.btn-primary.dropdown-toggle").size > 0) {
+            return element.select("button.btn.btn-primary.dropdown-toggle").first().text().trim()
+        } else if (element.select("button.btn.btn-info.dropdown-toggle").size > 0) {
+            return element.select("button.btn.btn-info.dropdown-toggle").first().text().trim()
+        } else if (element.select("button.btn.btn-secondary.dropdown-toggle").size > 0) {
+            return element.select("button.btn.btn-secondary.dropdown-toggle").first().text().trim()
+        } else {
+            return null
+        }
     }
 
 
