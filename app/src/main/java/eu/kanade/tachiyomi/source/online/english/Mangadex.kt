@@ -387,23 +387,15 @@ open class Mangadex(override val lang: String, private val internalLang: String,
     }
 
     private fun getFollowStatusFromElement(element: Element): String? {
-        if (element.select("button.btn.btn-success.dropdown-toggle").size > 0) {
-            return element.select("button.btn.btn-success.dropdown-toggle").first().text().trim()
-        } else if (element.select("button.btn.btn-warning.dropdown-toggle").size > 0) {
-            return element.select("button.btn.btn-warning.dropdown-toggle").first().text().trim()
-        } else if (element.select("button.btn.btn-danger.dropdown-toggle").size > 0) {
-            return element.select("button.btn.btn-danger.dropdown-toggle").first().text().trim()
-        } else if (element.select("button.btn.btn-primary.dropdown-toggle").size > 0) {
-            return element.select("button.btn.btn-primary.dropdown-toggle").first().text().trim()
-        } else if (element.select("button.btn.btn-info.dropdown-toggle").size > 0) {
-            return element.select("button.btn.btn-info.dropdown-toggle").first().text().trim()
-        } else if (element.select("button.btn.btn-secondary.dropdown-toggle").size > 0) {
-            return element.select("button.btn.btn-secondary.dropdown-toggle").first().text().trim()
-        } else {
-            return null
-        }
-    }
+        val element = element.select("button.btn.btn-success.dropdown-toggle").first()
+                ?: element.select("button.btn.btn-warning.dropdown-toggle").first()
+                ?: element.select("button.btn.btn-danger.dropdown-toggle").first()
+                ?: element.select("button.btn.btn-primary.dropdown-toggle").first()
+                ?: element.select("button.btn.btn-info.dropdown-toggle").first()
+                ?: element.select("button.btn.btn-secondary.dropdown-toggle").first()
 
+        return element?.text()?.trim()
+    }
 
     fun changeFollowStatus(manga: SManga): Observable<Boolean> {
         manga.follow_status ?: throw IllegalArgumentException("Cannot tell MD server to set an null follow status")
