@@ -387,14 +387,19 @@ open class Mangadex(override val lang: String, private val internalLang: String,
     }
 
     private fun getFollowStatusFromElement(element: Element): String? {
-        val element = element.select("button.btn.btn-success.dropdown-toggle").first()
+        var dropdownElement = element.select("button.btn.btn-success.dropdown-toggle").first()
                 ?: element.select("button.btn.btn-warning.dropdown-toggle").first()
                 ?: element.select("button.btn.btn-danger.dropdown-toggle").first()
-                ?: element.select("button.btn.btn-primary.dropdown-toggle").first()
                 ?: element.select("button.btn.btn-info.dropdown-toggle").first()
                 ?: element.select("button.btn.btn-secondary.dropdown-toggle").first()
+                ?: element.select("button.btn.btn-primary.dropdown-toggle").first() //This should be last because it can match the Rating dropdown. The Follow Status dropdown should be what will be returned by `first()` since it should appear earlier in the HTML
 
-        return element?.text()?.trim()
+        if (dropdownElement.select("span.fa-star").first() != null) { // Well, FUCK
+            //Contingency. May not work if the earlier code didn't
+            dropdownElement = element.select("button.btn.btn-success.dropdown-toggle:has(span.fas.fa-fw:not(.fa-star))").first()
+        }
+
+        return dropdownElement?.text()?.trim()
     }
 
     fun changeFollowStatus(manga: SManga): Observable<Boolean> {
