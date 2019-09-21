@@ -14,7 +14,6 @@ import eu.kanade.tachiyomi.source.model.SManga.FollowStatus
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.util.asJsoup
 import okhttp3.*
-import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 import rx.Observable
 import uy.kohesive.injekt.injectLazy
@@ -445,7 +444,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         val json = JsonParser().parse(jsonData).asJsonObject
         val mangaJson = json.getAsJsonObject("manga")
         val chapterJson = json.getAsJsonObject("chapter")
-        manga.title = mangaJson.get("title").string
+        manga.title = cleanString(mangaJson.get("title").string)
         manga.thumbnail_url = cdnUrl + mangaJson.get("cover_url").string
         manga.description = cleanString(mangaJson.get("description").string)
         manga.author = mangaJson.get("author").string
@@ -469,14 +468,18 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         return manga
     }
 
-    // Remove bbcode tags as well as parses any html characters in description or chapter name to actual characters for example &hearts will show a heart
-    private fun cleanString(description: String): String {
-        return Jsoup.parseBodyFragment(description
+    // Remove bbcode tags as well as parses any html characters in description or chapter name to actual characters for example &hearts; will show ♥
+    private fun cleanString(string: String): String {
+        val bbRegex = """\[(\w+)[^]]*](.*?)\[/\1]""".toRegex()
+        var intermediate = string
                 .replace("[list]", "")
                 .replace("[/list]", "")
                 .replace("[*]", "")
-                .replace("""\[(\w+)[^\]]*](.*?)\[/\1]""".toRegex(), "$2")).text()
-    }
+        // Recursively remove nested bbcode
+        while (bbRegex.containsMatchIn(intermediate)) {
+            intermediate = intermediate.replace(bbRegex, "$2")
+        }
+        return Parser.unescapeEntities(intermediate, false)
 
     override fun fetchChapterList(manga: SManga): Observable<List<SChapter>> {
         return clientBuilder().newCall(apiRequest(manga))
