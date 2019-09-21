@@ -15,6 +15,7 @@ import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.util.asJsoup
 import okhttp3.*
 import org.jsoup.nodes.Element
+import org.jsoup.parser.Parser
 import rx.Observable
 import uy.kohesive.injekt.injectLazy
 import java.net.URLEncoder
@@ -480,6 +481,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
             intermediate = intermediate.replace(bbRegex, "$2")
         }
         return Parser.unescapeEntities(intermediate, false)
+    }
 
     override fun fetchChapterList(manga: SManga): Observable<List<SChapter>> {
         return clientBuilder().newCall(apiRequest(manga))
