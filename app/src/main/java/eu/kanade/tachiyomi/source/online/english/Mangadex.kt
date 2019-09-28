@@ -138,7 +138,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
             popularMangaFromElement(element)
         }.distinct()
 
-        val hasNextPage = popularMangaNextPageSelector()?.let { selector ->
+        val hasNextPage = popularMangaNextPageSelector().let { selector ->
             document.select(selector).first()
         } != null
 
@@ -153,7 +153,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
             latestUpdatesFromElement(element)
         }
 
-        val hasNextPage = latestUpdatesNextPageSelector()?.let { selector ->
+        val hasNextPage = latestUpdatesNextPageSelector().let { selector ->
             document.select(selector).first()
         } != null
 
@@ -185,7 +185,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
             searchMangaFromElement(element)
         }
 
-        val hasNextPage = searchMangaNextPageSelector()?.let { selector ->
+        val hasNextPage = searchMangaNextPageSelector().let { selector ->
             document.select(selector).first()
         } != null
 
@@ -320,7 +320,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         return manga
     }
 
-    public override fun fetchFollows(page: Int): Observable<MangasPage> {
+    override fun fetchFollows(page: Int): Observable<MangasPage> {
         return clientBuilder().newCall(followsListRequest(page))
                 .asObservable()
                 .map { response ->
@@ -332,15 +332,22 @@ open class Mangadex(override val lang: String, private val internalLang: String,
     private fun followsParse(response: Response): MangasPage {
         val document = response.asJsoup()
 
-        val follows = document.select(followSelector()).map { element ->
-            followFromElement(element)
-        }
+        val follows = document
+                .select(followSelector())
+                .map { followFromElement(it) }
 
-        val hasNextPage = followsNextPageSelector()?.let { selector ->
-            document.select(selector).first()
-        } != null
+        val hasNextPage = document
+                .select(followsNextPageSelector())
+                .isNotEmpty()
 
-        return MangasPage(follows, hasNextPage)
+        val estimatedTotalFollows = document
+                .select(estimatedTotalFollowsSelector())
+                .text()
+                .split(' ')
+                .last { it.toIntOrNull() is Int } // TODO: Try to deduplicate toInt()
+                .toInt()
+
+        return MangasPage(follows, hasNextPage, estimatedTotalFollows)
     }
 
     protected fun followsListRequest(page: Int): Request {
@@ -369,6 +376,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
     }
 
     private fun followSelector() = "div.manga-entry"
+    private fun estimatedTotalFollowsSelector() = "div.manga-entry:last-of-type + *" // The element immediately following the last follow entry
 
     private fun followFromElement(element: Element): SManga {
         val manga = SManga.create()
@@ -630,7 +638,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
                 .add("no_js", "1")
                 .add("remember_me", "1")
 
-        twoFactorCode?.let {
+        twoFactorCode.let {
             formBody.add("two_factor", it)
         }
 
