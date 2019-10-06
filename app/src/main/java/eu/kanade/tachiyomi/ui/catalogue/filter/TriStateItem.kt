@@ -3,11 +3,13 @@ package eu.kanade.tachiyomi.ui.catalogue.filter
 import android.graphics.drawable.Drawable
 import android.view.View
 import android.widget.CheckedTextView
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.R
 import com.mikepenz.community_material_typeface_library.CommunityMaterial
 import com.mikepenz.iconics.IconicsDrawable
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.AbstractFlexibleItem
+import eu.davidea.flexibleadapter.items.IFlexible
 import eu.davidea.viewholders.FlexibleViewHolder
 import eu.kanade.tachiyomi.source.model.Filter
 import eu.kanade.tachiyomi.util.dpToPx
@@ -24,11 +26,11 @@ open class TriStateItem(val filter: Filter.TriState) : AbstractFlexibleItem<TriS
         return 103
     }
 
-    override fun createViewHolder(view: View, adapter: FlexibleAdapter<*>): Holder {
+    override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): Holder? {
         return Holder(view, adapter)
     }
 
-    override fun bindViewHolder(adapter: FlexibleAdapter<*>, holder: Holder, position: Int, payloads: List<Any?>?) {
+    override fun bindViewHolder(adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>, holder: Holder, position: Int, payloads: MutableList<Any>?) {
         val view = holder.text
         view.text = filter.name
 

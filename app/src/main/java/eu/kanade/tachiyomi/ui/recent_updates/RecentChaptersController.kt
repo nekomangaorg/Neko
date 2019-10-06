@@ -1,10 +1,10 @@
 package eu.kanade.tachiyomi.ui.recent_updates
 
+import android.view.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import android.view.*
 import com.jakewharton.rxbinding.support.v4.widget.refreshes
 import com.jakewharton.rxbinding.support.v7.widget.scrollStateChanges
 import com.mikepenz.community_material_typeface_library.CommunityMaterial
@@ -113,17 +113,17 @@ class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
      * Called when item in list is clicked
      * @param position position of clicked item
      */
-    override fun onItemClick(position: Int): Boolean {
+    override fun onItemClick(view: View, position: Int): Boolean {
         val adapter = adapter ?: return false
 
         // Get item from position
         val item = adapter.getItem(position) as? RecentChapterItem ?: return false
-        if (actionMode != null && adapter.mode == SelectableAdapter.Mode.MULTI) {
+        return if (actionMode != null && adapter.mode == SelectableAdapter.Mode.MULTI) {
             toggleSelection(position)
-            return true
+            true
         } else {
             openChapter(item)
-            return false
+            false
         }
     }
 

@@ -198,11 +198,11 @@ dependencies {
     // UI
     implementation 'com.dmitrymalkovich.android:material-design-dimens:1.4'
     implementation 'com.github.dmytrodanylyk.android-process-button:library:1.0.4'
-    implementation 'eu.davidea:flexible-adapter:5.0.0-rc4'
-    implementation 'eu.davidea:flexible-adapter-ui:1.0.0-b1'
-    implementation 'com.nononsenseapps:filepicker:2.5.2'
+    implementation 'eu.davidea:flexible-adapter:5.1.0'
+    implementation 'eu.davidea:flexible-adapter-ui:1.0.0'
+    implementation 'com.nononsenseapps:filepicker:2.5.2' //switch this to material dialog file picker
     implementation 'com.github.amulyakhare:TextDrawable:558677e'
-    implementation 'com.afollestad.material-dialogs:core:0.9.6.0'
+    implementation 'com.afollestad.material-dialogs:core:0.9.6.0' //needs a potential major rework to upgrade
     implementation 'me.zhanghai.android.systemuihelper:library:1.0.0'
     implementation 'com.nightlynexus.viewstatepageradapter:viewstatepageradapter:1.1.0'
     implementation 'me.gujun.android.taggroup:library:1.4@aar'
@@ -216,7 +216,7 @@ dependencies {
     }
     implementation 'com.github.inorichi:conductor-support-preference:78e2344'
 
-    // RxBindings
+    /// RxBindings
     final rxbindings_version = '1.0.1'
     implementation "com.jakewharton.rxbinding:rxbinding-kotlin:$rxbindings_version"
     implementation "com.jakewharton.rxbinding:rxbinding-appcompat-v7-kotlin:$rxbindings_version"
