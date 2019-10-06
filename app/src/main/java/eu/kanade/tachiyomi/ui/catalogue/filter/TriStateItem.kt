@@ -1,9 +1,9 @@
 package eu.kanade.tachiyomi.ui.catalogue.filter
 
 import android.graphics.drawable.Drawable
-import android.support.design.R
 import android.view.View
 import android.widget.CheckedTextView
+import com.google.android.material.R
 import com.mikepenz.community_material_typeface_library.CommunityMaterial
 import com.mikepenz.iconics.IconicsDrawable
 import eu.davidea.flexibleadapter.FlexibleAdapter

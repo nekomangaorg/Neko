@@ -1,6 +1,6 @@
 package eu.kanade.tachiyomi.ui.catalogue.filter
 
-import android.support.v4.content.ContextCompat
+import androidx.core.content.ContextCompat
 import android.view.View
 import android.widget.CheckedTextView
 import com.mikepenz.community_material_typeface_library.CommunityMaterial

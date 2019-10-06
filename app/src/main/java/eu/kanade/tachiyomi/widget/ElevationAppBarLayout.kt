@@ -3,9 +3,9 @@ package eu.kanade.tachiyomi.widget
 import android.animation.ObjectAnimator
 import android.animation.StateListAnimator
 import android.content.Context
-import android.support.design.R
-import android.support.design.widget.AppBarLayout
 import android.util.AttributeSet
+import com.google.android.material.R
+import com.google.android.material.appbar.AppBarLayout
 
 class ElevationAppBarLayout @JvmOverloads constructor(
         context: Context,

@@ -1,9 +1,9 @@
 package eu.kanade.tachiyomi.ui.catalogue.filter
 
 import android.annotation.SuppressLint
-import android.support.design.R
 import android.view.View
 import android.widget.TextView
+import com.google.android.material.R
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.AbstractHeaderItem
 import eu.davidea.viewholders.FlexibleViewHolder

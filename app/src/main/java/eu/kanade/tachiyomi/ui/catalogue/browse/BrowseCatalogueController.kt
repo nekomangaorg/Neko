@@ -3,12 +3,16 @@ package eu.kanade.tachiyomi.ui.catalogue.browse
 import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Bundle
-import android.support.design.widget.Snackbar
-import android.support.v4.widget.DrawerLayout
-import android.support.v7.widget.*
 import android.view.*
+import androidx.appcompat.widget.SearchView
+import androidx.drawerlayout.widget.DrawerLayout
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.afollestad.materialdialogs.MaterialDialog
 import com.f2prateek.rx.preferences.Preference
+import com.google.android.material.snackbar.Snackbar
 import com.jakewharton.rxbinding.support.v7.widget.queryTextChangeEvents
 import com.mikepenz.community_material_typeface_library.CommunityMaterial
 import com.mikepenz.iconics.IconicsDrawable
@@ -141,13 +145,13 @@ open class BrowseCatalogueController(bundle: Bundle) :
         this.navView = navView
         navView.setFilters(presenter.filterItems)
 
-        drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, Gravity.END)
+        drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, Gravity.RIGHT)
 
         navView.onSearchClicked = {
             val allDefault = presenter.sourceFilters == presenter.source.getFilterList()
             showProgressBar()
             adapter?.clear()
-            drawer.closeDrawer(Gravity.END)
+            drawer.closeDrawer(Gravity.RIGHT)
             presenter.setSourceFilter(if (allDefault) FilterList() else presenter.sourceFilters)
         }
 
@@ -157,7 +161,7 @@ open class BrowseCatalogueController(bundle: Bundle) :
             presenter.sourceFilters = newFilters
             navView.setFilters(presenter.filterItems)
         }
-        return navView
+        return navView as ViewGroup
     }
 
     override fun cleanupSecondaryDrawer(drawer: DrawerLayout) {
@@ -206,7 +210,7 @@ open class BrowseCatalogueController(bundle: Bundle) :
         catalogue_view.addView(recycler, 1)
 
         if (oldPosition != RecyclerView.NO_POSITION) {
-            recycler.layoutManager.scrollToPosition(oldPosition)
+            recycler.layoutManager?.scrollToPosition(oldPosition)
         }
         this.recycler = recycler
     }
@@ -277,7 +281,7 @@ open class BrowseCatalogueController(bundle: Bundle) :
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_display_mode -> swapDisplayMode()
-            R.id.action_set_filter -> navView?.let { activity?.drawer?.openDrawer(Gravity.END) }
+            R.id.action_set_filter -> navView?.let { activity?.drawer?.openDrawer(Gravity.RIGHT) }
             R.id.action_open_in_browser -> openInBrowser()
             R.id.action_open_in_web_view -> openInWebView()
             else -> return super.onOptionsItemSelected(item)

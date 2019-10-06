@@ -1,7 +1,7 @@
 package eu.kanade.tachiyomi.ui.download
 
 import android.graphics.Color
-import android.support.v7.widget.LinearLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import android.view.*
 import com.mikepenz.community_material_typeface_library.CommunityMaterial
 import com.mikepenz.iconics.IconicsDrawable

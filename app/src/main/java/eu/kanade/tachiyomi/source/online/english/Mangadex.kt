@@ -14,6 +14,7 @@ import eu.kanade.tachiyomi.source.model.SManga.FollowStatus
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.util.asJsoup
 import okhttp3.*
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.jsoup.nodes.Element
 import org.jsoup.parser.Parser
 import rx.Observable
@@ -214,7 +215,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         val genresToExclude = mutableListOf<String>()
 
         // Do traditional search
-        val url = HttpUrl.parse("$baseUrl/?page=search")!!.newBuilder()
+        val url = "$baseUrl/?page=search".toHttpUrlOrNull()!!.newBuilder()
                 .addQueryParameter("p", page.toString())
                 .addQueryParameter("title", query.replace(WHITESPACE_REGEX, " "))
 
@@ -353,7 +354,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
     protected fun followsListRequest(page: Int): Request {
 
         // Format `/follows/manga/$status[/$sort[/$page]]`
-        val url = HttpUrl.parse("$baseUrl/follows/manga/0")!!.newBuilder() // Gets regardless of follow status.
+        val url = "$baseUrl/follows/manga/0".toHttpUrlOrNull()!!.newBuilder() // Gets regardless of follow status.
                 .addQueryParameter("p", page.toString())
 
         /*  filters.forEach { filter ->
@@ -449,7 +450,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
 
     override fun mangaDetailsParse(response: Response): SManga {
         val manga = SManga.create()
-        val jsonData = response.body()!!.string()
+        val jsonData = response.body!!.string()
         val json = JsonParser().parse(jsonData).asJsonObject
         val mangaJson = json.getAsJsonObject("manga")
         val chapterJson = json.getAsJsonObject("chapter")
@@ -521,7 +522,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
 
     override fun chapterListParse(response: Response): List<SChapter> {
         val now = Date().time
-        val jsonData = response.body()!!.string()
+        val jsonData = response.body!!.string()
         val json = JsonParser().parse(jsonData).asJsonObject
         val mangaJson = json.getAsJsonObject("manga")
         val status = mangaJson.get("status").int
@@ -590,7 +591,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
 
 
     override fun pageListParse(response: Response): List<Page> {
-        val jsonData = response.body()!!.string()
+        val jsonData = response.body!!.string()
         val json = JsonParser().parse(jsonData).asJsonObject
 
         val pages = mutableListOf<Page>()
@@ -627,8 +628,8 @@ open class Mangadex(override val lang: String, private val internalLang: String,
     override fun imageUrlParse(response: Response): String = ""
 
     override fun isLogged(): Boolean {
-        val httpUrl = HttpUrl.parse(baseUrl)!!
-        return network.cookieManager.get(httpUrl).any { it.name() == "mangadex_rememberme_token" }
+        val httpUrl = baseUrl.toHttpUrlOrNull()!!
+        return network.cookieManager.get(httpUrl).any { it.name == "mangadex_rememberme_token" }
     }
 
     override fun login(username: String, password: String, twoFactorCode: String): Observable<Boolean> {
@@ -649,7 +650,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
 
 
     override fun isAuthenticationSuccessful(response: Response): Boolean {
-        if (response.body()!!.string()!!.isEmpty()) {
+        if (response.body!!.string()!!.isEmpty()) {
             return true
         }
         return false

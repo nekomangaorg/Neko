@@ -11,11 +11,11 @@ import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
-import android.support.v4.content.pm.ShortcutInfoCompat
-import android.support.v4.content.pm.ShortcutManagerCompat
-import android.support.v4.graphics.drawable.IconCompat
 import android.view.*
 import android.widget.Toast
+import androidx.core.content.pm.ShortcutInfoCompat
+import androidx.core.content.pm.ShortcutManagerCompat
+import androidx.core.graphics.drawable.IconCompat
 import com.afollestad.materialdialogs.MaterialDialog
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
@@ -308,14 +308,14 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         val context = view?.context ?: return
         val source = presenter.source as? HttpSource ?: return
 
-        context.openInBrowser(source.mangaDetailsRequest(presenter.manga).url().toString())
+        context.openInBrowser(source.mangaDetailsRequest(presenter.manga).url.toString())
     }
 
     private fun openInWebView() {
         val source = presenter.source as? HttpSource ?: return
 
         val url = try {
-            source.mangaDetailsRequest(presenter.manga).url().toString()
+            source.mangaDetailsRequest(presenter.manga).url.toString()
         } catch (e: Exception) {
             return
         }
@@ -332,7 +332,7 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
 
         val source = presenter.source as? HttpSource ?: return
         try {
-            val url = source.mangaDetailsRequest(presenter.manga).url().toString()
+            val url = source.mangaDetailsRequest(presenter.manga).url.toString()
             val intent = Intent(Intent.ACTION_SEND).apply {
                 type = "text/plain"
                 putExtra(Intent.EXTRA_TEXT, url)
@@ -516,7 +516,7 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         val view = view ?: return
 
         val clipboard = activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        clipboard.primaryClip = ClipData.newPlainText(label, content)
+        clipboard.setPrimaryClip(ClipData.newPlainText(label, content))
 
         activity.toast(view.context.getString(R.string.copied_to_clipboard, content.truncateCenter(20)),
                 Toast.LENGTH_SHORT)

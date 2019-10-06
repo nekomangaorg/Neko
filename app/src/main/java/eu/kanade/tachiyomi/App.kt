@@ -3,7 +3,7 @@ package eu.kanade.tachiyomi
 import android.app.Application
 import android.content.Context
 import android.content.res.Configuration
-import android.support.multidex.MultiDex
+import androidx.multidex.MultiDex
 import com.evernote.android.job.JobManager
 import com.mikepenz.community_material_typeface_library.CommunityMaterial
 import com.mikepenz.iconics.Iconics

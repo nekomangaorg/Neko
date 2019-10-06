@@ -1,7 +1,7 @@
 package eu.kanade.tachiyomi.ui.setting
 
 import android.graphics.drawable.Drawable
-import android.support.v7.preference.*
+import androidx.preference.*
 import com.mikepenz.iconics.IconicsDrawable
 import eu.kanade.tachiyomi.widget.preference.IntListPreference
 

@@ -1,12 +1,12 @@
 package eu.kanade.tachiyomi.ui.reader.viewer.webtoon
 
-import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.WebtoonLayoutManager
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.WebtoonLayoutManager
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
@@ -67,7 +67,8 @@ class WebtoonViewer(val activity: ReaderActivity) : BaseViewer {
         recycler.layoutManager = layoutManager
         recycler.adapter = adapter
         recycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView?, dx: Int, dy: Int) {
+
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 val position = layoutManager.findLastEndVisibleItemPosition()
                 val item = adapter.items.getOrNull(position)
                 if (item != null && currentPage != item) {
@@ -97,7 +98,7 @@ class WebtoonViewer(val activity: ReaderActivity) : BaseViewer {
         }
         recycler.longTapListener = f@ { event ->
             if (activity.menuVisible || config.longTapEnabled) {
-                val child = recycler.findChildViewUnder(event.x, event.y)
+                val child = recycler.findChildViewUnder(event.x, event.y)!!
                 val position = recycler.getChildAdapterPosition(child)
                 val item = adapter.items.getOrNull(position)
                 if (item is ReaderPage) {
