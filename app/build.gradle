@@ -155,19 +155,19 @@ dependencies {
     implementation 'org.jsoup:jsoup:1.10.2'
 
     //Icons
-    implementation "com.mikepenz:iconics-core:3.0.4@aar"
-    implementation "com.mikepenz:iconics-views:3.0.4@aar"
+    implementation "com.mikepenz:iconics-core:3.2.5@aar"
+    implementation "com.mikepenz:iconics-views:3.2.5@aar"
     implementation 'com.mikepenz:community-material-typeface:3.5.95.1@aar'
 
     // Job scheduling
     implementation 'com.evernote:android-job:1.2.5'
-    implementation 'com.google.android.gms:play-services-gcm:11.8.0'
+    implementation 'com.google.android.gms:play-services-gcm:17.0.0'
 
     // Changelog
     implementation 'com.github.gabrielemariotti.changeloglib:changelog:2.1.0'
 
     // Database
-    implementation 'androidx.sqlite:sqlite:2.0.0'
+    implementation 'androidx.sqlite:sqlite:2.0.1'
     implementation 'com.github.inorichi.storio:storio-common:8be19de@aar'
     implementation 'com.github.inorichi.storio:storio-sqlite:8be19de@aar'
     implementation 'io.requery:sqlite-android:3.25.2'
@@ -193,7 +193,7 @@ dependencies {
     implementation 'com.jakewharton.timber:timber:4.7.1'
 
     // Sort
-    implementation 'com.github.gpanther:java-nat-sort:natural-comparator-1.1'
+    //implementation 'com.github.gpanther:java-nat-sort:natural-comparator-1.1'
 
     // UI
     implementation 'com.dmitrymalkovich.android:material-design-dimens:1.4'
