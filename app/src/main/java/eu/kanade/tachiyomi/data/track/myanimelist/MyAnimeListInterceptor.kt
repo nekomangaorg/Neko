@@ -12,7 +12,7 @@ class MyAnimeListInterceptor(private val myanimelist: Myanimelist): Interceptor 
         myanimelist.ensureLoggedIn()
 
         var request = chain.request()
-        request.body()?.let {
+        request.body?.let {
             val contentType = it.contentType().toString()
             val updatedBody = when {
                 contentType.contains("x-www-form-urlencoded") -> updateFormBody(it)

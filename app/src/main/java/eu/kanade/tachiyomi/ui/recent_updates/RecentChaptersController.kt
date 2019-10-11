@@ -1,10 +1,10 @@
 package eu.kanade.tachiyomi.ui.recent_updates
 
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.view.ActionMode
-import android.support.v7.widget.DividerItemDecoration
-import android.support.v7.widget.LinearLayoutManager
 import android.view.*
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.view.ActionMode
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.jakewharton.rxbinding.support.v4.widget.refreshes
 import com.jakewharton.rxbinding.support.v7.widget.scrollStateChanges
 import com.mikepenz.community_material_typeface_library.CommunityMaterial
@@ -113,17 +113,17 @@ class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
      * Called when item in list is clicked
      * @param position position of clicked item
      */
-    override fun onItemClick(position: Int): Boolean {
+    override fun onItemClick(view: View, position: Int): Boolean {
         val adapter = adapter ?: return false
 
         // Get item from position
         val item = adapter.getItem(position) as? RecentChapterItem ?: return false
-        if (actionMode != null && adapter.mode == SelectableAdapter.Mode.MULTI) {
+        return if (actionMode != null && adapter.mode == SelectableAdapter.Mode.MULTI) {
             toggleSelection(position)
-            return true
+            true
         } else {
             openChapter(item)
-            return false
+            false
         }
     }
 
@@ -289,7 +289,7 @@ class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
      * @param menu menu object of ActionMode
      */
     override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
-        IconicsMenuInflaterUtil.inflate(mode.menuInflater, applicationContext, R.menu.chapter_recent_selection, menu)
+        IconicsMenuInflaterUtil.inflate(mode.menuInflater, applicationContext!!, R.menu.chapter_recent_selection, menu)
         adapter?.mode = SelectableAdapter.Mode.MULTI
         return true
     }

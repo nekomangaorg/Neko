@@ -1,6 +1,6 @@
 package eu.kanade.tachiyomi.ui.setting
 
-import android.support.v7.preference.PreferenceScreen
+import androidx.preference.PreferenceScreen
 import com.mikepenz.community_material_typeface_library.CommunityMaterial
 import com.mikepenz.iconics.IconicsDrawable
 import eu.kanade.tachiyomi.R

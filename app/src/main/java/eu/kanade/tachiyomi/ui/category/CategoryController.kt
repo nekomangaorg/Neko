@@ -1,11 +1,11 @@
 package eu.kanade.tachiyomi.ui.category
 
-import android.support.design.widget.Snackbar
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.view.ActionMode
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
 import android.view.*
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.view.ActionMode
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.snackbar.Snackbar
 import com.jakewharton.rxbinding.view.clicks
 import com.mikepenz.community_material_typeface_library.CommunityMaterial
 import com.mikepenz.iconics.utils.IconicsMenuInflaterUtil
@@ -131,7 +131,7 @@ class CategoryController : NucleusController<CategoryPresenter>(),
      */
     override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
         // Inflate menu.
-        IconicsMenuInflaterUtil.inflate(mode.menuInflater, applicationContext, R.menu.category_selection, menu)
+        IconicsMenuInflaterUtil.inflate(mode.menuInflater, applicationContext!!, R.menu.category_selection, menu)
         // Enable adapter multi selection.
         adapter?.mode = SelectableAdapter.Mode.MULTI
         return true
@@ -207,13 +207,13 @@ class CategoryController : NucleusController<CategoryPresenter>(),
      * @param position The position of the clicked item.
      * @return true if this click should enable selection mode.
      */
-    override fun onItemClick(position: Int): Boolean {
+    override fun onItemClick(view: View, position: Int): Boolean {
         // Check if action mode is initialized and selected item exist.
-        if (actionMode != null && position != RecyclerView.NO_POSITION) {
+        return if (actionMode != null && position != RecyclerView.NO_POSITION) {
             toggleSelection(position)
-            return true
+            true
         } else {
-            return false
+            false
         }
     }
 

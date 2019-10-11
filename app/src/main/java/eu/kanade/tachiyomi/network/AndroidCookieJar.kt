@@ -6,17 +6,16 @@ import okhttp3.CookieJar
 import okhttp3.HttpUrl
 
 class AndroidCookieJar : CookieJar {
-
     private val manager = CookieManager.getInstance()
 
-    override fun saveFromResponse(url: HttpUrl, cookies: MutableList<Cookie>) {
+    override fun saveFromResponse(url: HttpUrl, cookies: List<Cookie>) {
         val urlString = url.toString()
 
         for (cookie in cookies) {
             manager.setCookie(urlString, cookie.toString())
         }
     }
-
+    
     override fun loadForRequest(url: HttpUrl): List<Cookie> {
         return get(url)
     }

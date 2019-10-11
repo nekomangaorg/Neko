@@ -9,7 +9,7 @@
         app:ico_size="20dp"
         app:ico_color="@color/md_white_1000"
         android:title="@string/action_search"
-        app:actionViewClass="android.support.v7.widget.SearchView"
+        app:actionViewClass="androidx.appcompat.widget.SearchView"
         app:showAsAction="collapseActionView|ifRoom"/>
 
     <item

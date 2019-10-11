@@ -4,8 +4,8 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Environment
-import android.support.v4.content.ContextCompat
-import android.support.v4.os.EnvironmentCompat
+import androidx.core.content.ContextCompat
+import androidx.core.os.EnvironmentCompat
 import java.io.File
 
 object DiskUtil {

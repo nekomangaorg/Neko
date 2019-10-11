@@ -6,12 +6,12 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Color
-import android.support.design.widget.Snackbar
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.view.ActionMode
-import android.support.v7.widget.DividerItemDecoration
-import android.support.v7.widget.LinearLayoutManager
 import android.view.*
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.view.ActionMode
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.snackbar.Snackbar
 import com.jakewharton.rxbinding.support.v4.widget.refreshes
 import com.jakewharton.rxbinding.view.clicks
 import com.mikepenz.community_material_typeface_library.CommunityMaterial
@@ -89,7 +89,7 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
         swipe_refresh.refreshes().subscribeUntilDestroy { fetchChaptersFromSource() }
 
         fab.setImageDrawable(
-                IconicsDrawable(applicationContext).icon(CommunityMaterial.Icon2.cmd_play).color(Color.WHITE).sizeDp(20)
+                IconicsDrawable(applicationContext!!).icon(CommunityMaterial.Icon2.cmd_play).color(Color.WHITE).sizeDp(20)
         )
 
         fab.clicks().subscribeUntilDestroy {
@@ -132,7 +132,7 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        IconicsMenuInflaterUtil.inflate(inflater, applicationContext, R.menu.chapters, menu)
+        IconicsMenuInflaterUtil.inflate(inflater, applicationContext!!, R.menu.chapters, menu)
     }
 
     override fun onPrepareOptionsMenu(menu: Menu) {
@@ -143,7 +143,7 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
         val menuFilterBookmarked = menu.findItem(R.id.action_filter_bookmarked)
 
 
-        menu.findItem(R.id.action_sort).icon = IconicsDrawable(applicationContext).icon(CommunityMaterial.Icon2.cmd_sort_numeric)
+        menu.findItem(R.id.action_sort).icon = IconicsDrawable(applicationContext!!).icon(CommunityMaterial.Icon2.cmd_sort_numeric)
                 .sizeDp(20).color(Color.WHITE)
 
         // Set correct checkbox values.
@@ -254,15 +254,15 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
         startActivity(intent)
     }
 
-    override fun onItemClick(position: Int): Boolean {
+    override fun onItemClick(view: View, position: Int): Boolean {
         val adapter = adapter ?: return false
         val item = adapter.getItem(position) ?: return false
-        if (actionMode != null && adapter.mode == SelectableAdapter.Mode.MULTI) {
+        return if (actionMode != null && adapter.mode == SelectableAdapter.Mode.MULTI) {
             toggleSelection(position)
-            return true
+            true
         } else {
             openChapter(item.chapter)
-            return false
+            false
         }
     }
 
@@ -301,7 +301,7 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
     }
 
     override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
-        IconicsMenuInflaterUtil.inflate(mode.menuInflater, applicationContext, R.menu.chapter_selection, menu)
+        IconicsMenuInflaterUtil.inflate(mode.menuInflater, applicationContext!!, R.menu.chapter_selection, menu)
         adapter?.mode = SelectableAdapter.Mode.MULTI
         return true
     }
