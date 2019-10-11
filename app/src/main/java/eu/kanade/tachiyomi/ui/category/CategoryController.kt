@@ -131,7 +131,7 @@ class CategoryController : NucleusController<CategoryPresenter>(),
      */
     override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
         // Inflate menu.
-        IconicsMenuInflaterUtil.inflate(mode.menuInflater, applicationContext, R.menu.category_selection, menu)
+        IconicsMenuInflaterUtil.inflate(mode.menuInflater, applicationContext!!, R.menu.category_selection, menu)
         // Enable adapter multi selection.
         adapter?.mode = SelectableAdapter.Mode.MULTI
         return true

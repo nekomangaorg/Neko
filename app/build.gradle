@@ -122,10 +122,10 @@ dependencies {
 
     // ReactiveX
     implementation 'io.reactivex:rxandroid:1.2.1'
-    implementation 'io.reactivex:rxjava:1.3.6'
+    implementation 'io.reactivex:rxjava:1.3.8'
     implementation 'com.jakewharton.rxrelay:rxrelay:1.2.0'
     implementation 'com.f2prateek.rx.preferences:rx-preferences:1.0.2'
-    implementation 'com.github.pwittchen:reactivenetwork:0.7.0'
+    implementation 'com.github.pwittchen:reactivenetwork:0.13.0'
 
     // Network client
     final okhttp_version = '4.2.1'
@@ -144,15 +144,12 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.2'
     implementation 'com.github.salomonbrys.kotson:kotson:2.5.0'
 
-    // JavaScript engine
-    implementation 'com.squareup.duktape:duktape-android:1.2.0'
-
     // Disk
     implementation 'com.jakewharton:disklrucache:2.0.2'
     implementation 'com.github.inorichi:unifile:e9ee588'
 
     // HTML parser
-    implementation 'org.jsoup:jsoup:1.10.2'
+    implementation 'org.jsoup:jsoup:1.12.1'
 
     //Icons
     implementation "com.mikepenz:iconics-core:3.2.5@aar"
@@ -193,7 +190,7 @@ dependencies {
     implementation 'com.jakewharton.timber:timber:4.7.1'
 
     // Sort
-    //implementation 'com.github.gpanther:java-nat-sort:natural-comparator-1.1'
+    implementation 'com.github.gpanther:java-nat-sort:natural-comparator-1.1'
 
     // UI
     implementation 'com.dmitrymalkovich.android:material-design-dimens:1.4'
@@ -207,7 +204,7 @@ dependencies {
     implementation 'com.nightlynexus.viewstatepageradapter:viewstatepageradapter:1.1.0'
     implementation 'me.gujun.android.taggroup:library:1.4@aar'
     implementation 'com.github.chrisbanes:PhotoView:2.3.0'
-    implementation 'com.github.inorichi:DirectionalViewPager:3acc51a'
+    implementation 'com.github.carlosesco:DirectionalViewPager:a844dbca0a'
 
     // Conductor
     implementation 'com.bluelinelabs:conductor:2.1.5'

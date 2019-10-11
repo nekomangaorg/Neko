@@ -289,7 +289,7 @@ class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
      * @param menu menu object of ActionMode
      */
     override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
-        IconicsMenuInflaterUtil.inflate(mode.menuInflater, applicationContext, R.menu.chapter_recent_selection, menu)
+        IconicsMenuInflaterUtil.inflate(mode.menuInflater, applicationContext!!, R.menu.chapter_recent_selection, menu)
         adapter?.mode = SelectableAdapter.Mode.MULTI
         return true
     }

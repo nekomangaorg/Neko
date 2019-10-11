@@ -216,7 +216,7 @@ open class BrowseCatalogueController(bundle: Bundle) :
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        IconicsMenuInflaterUtil.inflate(inflater, applicationContext, R.menu.catalogue_list, menu)
+        IconicsMenuInflaterUtil.inflate(inflater, applicationContext!!, R.menu.catalogue_list, menu)
 
         // Initialize search menu
         menu.findItem(R.id.action_search).apply {
@@ -266,7 +266,7 @@ open class BrowseCatalogueController(bundle: Bundle) :
                 CommunityMaterial.Icon2.cmd_view_module
             else
                 CommunityMaterial.Icon2.cmd_view_list
-            setIcon(IconicsDrawable(applicationContext).icon(icon).color(Color.WHITE).sizeDp(20))
+            setIcon(IconicsDrawable(applicationContext!!).icon(icon).color(Color.WHITE).sizeDp(20))
         }
     }
 

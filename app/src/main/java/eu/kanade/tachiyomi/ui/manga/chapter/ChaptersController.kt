@@ -89,7 +89,7 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
         swipe_refresh.refreshes().subscribeUntilDestroy { fetchChaptersFromSource() }
 
         fab.setImageDrawable(
-                IconicsDrawable(applicationContext).icon(CommunityMaterial.Icon2.cmd_play).color(Color.WHITE).sizeDp(20)
+                IconicsDrawable(applicationContext!!).icon(CommunityMaterial.Icon2.cmd_play).color(Color.WHITE).sizeDp(20)
         )
 
         fab.clicks().subscribeUntilDestroy {
@@ -132,7 +132,7 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        IconicsMenuInflaterUtil.inflate(inflater, applicationContext, R.menu.chapters, menu)
+        IconicsMenuInflaterUtil.inflate(inflater, applicationContext!!, R.menu.chapters, menu)
     }
 
     override fun onPrepareOptionsMenu(menu: Menu) {
@@ -143,7 +143,7 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
         val menuFilterBookmarked = menu.findItem(R.id.action_filter_bookmarked)
 
 
-        menu.findItem(R.id.action_sort).icon = IconicsDrawable(applicationContext).icon(CommunityMaterial.Icon2.cmd_sort_numeric)
+        menu.findItem(R.id.action_sort).icon = IconicsDrawable(applicationContext!!).icon(CommunityMaterial.Icon2.cmd_sort_numeric)
                 .sizeDp(20).color(Color.WHITE)
 
         // Set correct checkbox values.
@@ -301,7 +301,7 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
     }
 
     override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
-        IconicsMenuInflaterUtil.inflate(mode.menuInflater, applicationContext, R.menu.chapter_selection, menu)
+        IconicsMenuInflaterUtil.inflate(mode.menuInflater, applicationContext!!, R.menu.chapter_selection, menu)
         adapter?.mode = SelectableAdapter.Mode.MULTI
         return true
     }

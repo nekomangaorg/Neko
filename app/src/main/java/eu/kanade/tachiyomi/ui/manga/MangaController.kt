@@ -140,7 +140,7 @@ class MangaController : RxController, TabbedController {
     private fun setTrackingIconInternal(visible: Boolean) {
         val tab = activity?.tabs?.getTabAt(TRACK_CONTROLLER) ?: return
         val drawable = if (visible)
-            IconicsDrawable(applicationContext).icon(CommunityMaterial.Icon.cmd_check).color(Color.WHITE).sizeDp(12)
+            IconicsDrawable(applicationContext!!).icon(CommunityMaterial.Icon.cmd_check).color(Color.WHITE).sizeDp(12)
         else null
 
         val view = tabField.get(tab) as LinearLayout
