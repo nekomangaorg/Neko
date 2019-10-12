@@ -125,7 +125,6 @@ class SettingsDownloadController : SettingsController() {
                 val flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or
                         Intent.FLAG_GRANT_WRITE_URI_PERMISSION
 
-                @Suppress("NewApi")
                 context.contentResolver.takePersistableUriPermission(uri!!, flags)
 
                 val file = UniFile.fromUri(context, uri)
