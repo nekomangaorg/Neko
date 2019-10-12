@@ -6,7 +6,6 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
 import androidx.core.content.ContextCompat
 import androidx.preference.PreferenceScreen
 import com.afollestad.materialdialogs.MaterialDialog
@@ -117,7 +116,7 @@ class SettingsDownloadController : SettingsController() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         when (requestCode) {
             DOWNLOAD_DIR_PRE_L -> if (data != null && resultCode == Activity.RESULT_OK) {
-                val uri = Uri.fromFile(File(data.data.path))
+                val uri = Uri.fromFile(File(data.data!!.path!!))
                 preferences.downloadsDirectory().set(uri.toString())
             }
             DOWNLOAD_DIR_L -> if (data != null && resultCode == Activity.RESULT_OK) {
@@ -127,7 +126,7 @@ class SettingsDownloadController : SettingsController() {
                         Intent.FLAG_GRANT_WRITE_URI_PERMISSION
 
                 @Suppress("NewApi")
-                context.contentResolver.takePersistableUriPermission(uri, flags)
+                context.contentResolver.takePersistableUriPermission(uri!!, flags)
 
                 val file = UniFile.fromUri(context, uri)
                 preferences.downloadsDirectory().set(file.uri.toString())
@@ -174,8 +173,9 @@ class SettingsDownloadController : SettingsController() {
                     .build()
         }
 
+        @Suppress("DEPRECATION")
         private fun getExternalDirs(): List<File> {
-            val defaultDir = Environment.getExternalStorageDirectory().absolutePath +
+            val defaultDir = activity!!.getExternalFilesDir(null)!!.absolutePath +
                     File.separator + resources?.getString(R.string.app_name) +
                     File.separator + "downloads"
 
