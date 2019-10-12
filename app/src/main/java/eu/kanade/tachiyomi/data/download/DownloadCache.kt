@@ -34,7 +34,7 @@ class DownloadCache(
      * The interval after which this cache should be invalidated. 1 hour shouldn't cause major
      * issues, as the cache is only used for UI feedback.
      */
-    private val renewInterval = TimeUnit.HOURS.toMillis(1)
+    private val renewInterval = TimeUnit.MINUTES.toMillis(10)
 
     /**
      * The last time the cache was refreshed.
@@ -95,7 +95,7 @@ class DownloadCache(
      */
     fun getDownloadCount(manga: Manga): Int {
         checkRenew()
-
+        
         val sourceDir = rootDir.files[manga.source]
         if (sourceDir != null) {
             val mangaDir = sourceDir.files[provider.getMangaDirName(manga)]
