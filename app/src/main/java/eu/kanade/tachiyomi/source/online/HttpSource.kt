@@ -12,8 +12,6 @@ import okhttp3.Request
 import okhttp3.Response
 import rx.Observable
 import uy.kohesive.injekt.injectLazy
-import java.net.URI
-import java.net.URISyntaxException
 import java.security.MessageDigest
 
 /**
@@ -36,7 +34,9 @@ abstract class HttpSource : Source {
     /**
      * Base url of the website without the trailing slash, like: http://mysite.com
      */
-    abstract val baseUrl: String
+    val baseUrl = "https://mangadex.org"
+
+    override val name = "Mangadex"
 
     /**
      * Version id used to generate the source id. If the site completely changes and urls are
@@ -139,20 +139,6 @@ abstract class HttpSource : Source {
      */
     abstract protected fun searchMangaParse(response: Response): MangasPage
 
-
-    /**
-     * Returns the request for latest manga given the page.
-     *
-     * @param page the page number to retrieve.
-     */
-    abstract protected fun latestUpdatesRequest(page: Int): Request
-
-    /**
-     * Parses the response from the site and returns a [MangasPage] object.
-     *
-     * @param response the response from the site.
-     */
-    abstract protected fun latestUpdatesParse(response: Response): MangasPage
 
     /**
      * Returns an observable with the updated details for a manga. Normally it's not needed to
@@ -296,44 +282,6 @@ abstract class HttpSource : Source {
         return GET(page.imageUrl!!, headers)
     }
 
-    /**
-     * Assigns the url of the chapter without the scheme and domain. It saves some redundancy from
-     * database and the urls could still work after a domain change.
-     *
-     * @param url the full url to the chapter.
-     */
-    fun SChapter.setUrlWithoutDomain(url: String) {
-        this.url = getUrlWithoutDomain(url)
-    }
-
-    /**
-     * Assigns the url of the manga without the scheme and domain. It saves some redundancy from
-     * database and the urls could still work after a domain change.
-     *
-     * @param url the full url to the manga.
-     */
-    fun SManga.setUrlWithoutDomain(url: String) {
-        this.url = getUrlWithoutDomain(url)
-    }
-
-    /**
-     * Returns the url of the given string without the scheme and domain.
-     *
-     * @param orig the full url.
-     */
-    private fun getUrlWithoutDomain(orig: String): String {
-        try {
-            val uri = URI(orig)
-            var out = uri.path
-            if (uri.query != null)
-                out += "?" + uri.query
-            if (uri.fragment != null)
-                out += "#" + uri.fragment
-            return out
-        } catch (e: URISyntaxException) {
-            return orig
-        }
-    }
 
     /**
      * Called before inserting a new chapter into database. Use it if you need to override chapter

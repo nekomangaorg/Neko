@@ -12,7 +12,11 @@ import eu.kanade.tachiyomi.network.asObservableSuccess
 import eu.kanade.tachiyomi.source.model.*
 import eu.kanade.tachiyomi.source.model.SManga.FollowStatus
 import eu.kanade.tachiyomi.source.online.HttpSource
+import eu.kanade.tachiyomi.source.online.english.parsers.FollowsParser
+import eu.kanade.tachiyomi.source.online.english.utils.MdUtil
+import eu.kanade.tachiyomi.source.online.english.utils.MdUtil.Companion.modifyMangaUrl
 import eu.kanade.tachiyomi.util.asJsoup
+import eu.kanade.tachiyomi.util.setUrlWithoutDomain
 import okhttp3.FormBody
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
@@ -29,12 +33,6 @@ import kotlin.collections.set
 
 open class Mangadex(override val lang: String, private val internalLang: String, private val langCode: Int) : HttpSource() {
 
-    override val name = "MangaDex"
-
-    override val baseUrl = "https://mangadex.org"
-
-    private val cdnUrl = "https://cdndex.com"
-
     private val preferences: PreferencesHelper by injectLazy()
 
     private fun clientBuilder(): OkHttpClient = clientBuilder(preferences.r18()!!.toInt())
@@ -50,7 +48,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
                         .header("Cookie", "$originalCookies; ${cookiesHeader(r18Toggle, langCode)}")
                         .build()
                 chain.proceed(newReq)
-            }.build()!!
+            }.build()
 
 
     private fun cookiesHeader(r18Toggle: Int, langCode: Int): String {
@@ -72,10 +70,6 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         return GET("$baseUrl/titles/0/$page/", headersBuilder().build())
     }
 
-    override fun latestUpdatesRequest(page: Int): Request {
-        return GET("$baseUrl/updates/$page", headersBuilder().build())
-    }
-
     private fun popularMangaFromElement(element: Element): SManga {
         val manga = SManga.create()
         element.select("a.manga_title").first().let {
@@ -83,36 +77,26 @@ open class Mangadex(override val lang: String, private val internalLang: String,
             manga.setUrlWithoutDomain(url)
             manga.title = it.text().trim()
         }
-        manga.thumbnail_url = formThumbUrl(manga.url)
+        manga.thumbnail_url = MdUtil.formThumbUrl(manga.url)
 
         return manga
     }
 
-    private fun modifyMangaUrl(url: String): String = url.replace("/title/", "/manga/").substringBeforeLast("/") + "/"
-
-    private fun formThumbUrl(mangaUrl: String): String {
-        return cdnUrl + "/images/manga/" + getMangaId(mangaUrl) + ".jpg"
-    }
-
-     private fun latestUpdatesFromElement(element: Element): SManga {
+    private fun latestUpdatesFromElement(element: Element): SManga {
         val manga = SManga.create()
         element.let {
             manga.setUrlWithoutDomain(modifyMangaUrl(it.attr("href")))
             manga.title = it.text().trim()
 
         }
-        manga.thumbnail_url = formThumbUrl(manga.url)
+        manga.thumbnail_url = MdUtil.formThumbUrl(manga.url)
 
         return manga
     }
 
-     private fun popularMangaNextPageSelector() = ".pagination li:not(.disabled) span[title*=last page]:not(disabled)"
+    private fun popularMangaNextPageSelector() = ".pagination li:not(.disabled) span[title*=last page]:not(disabled)"
 
-     private fun latestUpdatesNextPageSelector() = ".pagination li:not(.disabled) span[title*=last page]:not(disabled)"
-
-     private fun searchMangaNextPageSelector() = ".pagination li:not(.disabled) span[title*=last page]:not(disabled)"
-
-     private fun followsNextPageSelector() = ".pagination li:not(.disabled) span[title*=last page]:not(disabled)"
+    private fun searchMangaNextPageSelector() = ".pagination li:not(.disabled) span[title*=last page]:not(disabled)"
 
     override fun fetchPopularManga(page: Int): Observable<MangasPage> {
         return clientBuilder().newCall(popularMangaRequest(page))
@@ -121,6 +105,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
                     popularMangaParse(response)
                 }
     }
+
     /**
      * Parses the response from the site and returns a [MangasPage] object.
      *
@@ -141,20 +126,6 @@ open class Mangadex(override val lang: String, private val internalLang: String,
     }
 
 
-    override fun latestUpdatesParse(response: Response): MangasPage {
-        val document = response.asJsoup()
-
-        val mangas = document.select(latestUpdatesSelector()).map { element ->
-            latestUpdatesFromElement(element)
-        }
-
-        val hasNextPage = latestUpdatesNextPageSelector().let { selector ->
-            document.select(selector).first()
-        } != null
-
-        return MangasPage(mangas, hasNextPage)
-    }
-
     override fun fetchSearchManga(page: Int, query: String, filters: FilterList): Observable<MangasPage> {
         return if (query.startsWith(PREFIX_ID_SEARCH)) {
             val realQuery = query.removePrefix(PREFIX_ID_SEARCH)
@@ -173,6 +144,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
                     }
         }
     }
+
     override fun searchMangaParse(response: Response): MangasPage {
         val document = response.asJsoup()
 
@@ -309,101 +281,16 @@ open class Mangadex(override val lang: String, private val internalLang: String,
             manga.title = it.text().trim()
         }
 
-        manga.thumbnail_url = formThumbUrl(manga.url)
+        manga.thumbnail_url = MdUtil.formThumbUrl(manga.url)
 
 
         return manga
     }
 
     override fun fetchFollows(page: Int): Observable<MangasPage> {
-        return clientBuilder().newCall(followsListRequest(page))
-                .asObservable()
-                .map { response ->
-                    followsParse(response)
-                }
+        return FollowsParser(clientBuilder(), baseUrl, headers).fetchFollows(page)
     }
 
-
-    private fun followsParse(response: Response): MangasPage {
-        val document = response.asJsoup()
-
-        val follows = document
-                .select(followSelector())
-                .map { followFromElement(it) }
-
-        val hasNextPage = document
-                .select(followsNextPageSelector())
-                .isNotEmpty()
-
-        val estimatedTotalFollows = document
-                .select(estimatedTotalFollowsSelector())
-                .text()
-                .split(' ')
-                .last { it.toIntOrNull() is Int } // TODO: Try to deduplicate toInt()
-                .toInt()
-
-        return MangasPage(follows, hasNextPage, estimatedTotalFollows)
-    }
-
-    protected fun followsListRequest(page: Int): Request {
-
-        // Format `/follows/manga/$status[/$sort[/$page]]`
-        val url = "$baseUrl/follows/manga/0".toHttpUrlOrNull()!!.newBuilder() // Gets regardless of follow status.
-                .addQueryParameter("p", page.toString())
-
-        /*  filters.forEach { filter ->
-              when (filter) {
-                  is TextField -> url.addQueryParameter(filter.key, filter.state)
-                  is SortFilter -> {
-                      if (filter.state != null) {
-                          if (filter.state!!.ascending) {
-                              url.addQueryParameter("s", sortables[filter.state!!.index].second.toString())
-                          } else {
-                              url.addQueryParameter("s", sortables[filter.state!!.index].third.toString())
-                          }
-                      }
-                  }
-              }*/
-        //}
-
-
-        return GET(url.toString(), headersBuilder().build())
-    }
-
-    private fun followSelector() = "div.manga-entry"
-    private fun estimatedTotalFollowsSelector() = "div.manga-entry:last-of-type + *" // The element immediately following the last follow entry
-
-    private fun followFromElement(element: Element): SManga {
-        val manga = SManga.create()
-
-        element.select("a.manga_title").first().let {
-            val url = modifyMangaUrl(it.attr("href"))
-            manga.setUrlWithoutDomain(url)
-            manga.title = it.text().trim()
-        }
-
-        manga.thumbnail_url = formThumbUrl(manga.url)
-
-        manga.follow_status = getFollowStatusFromElement(element).let { FollowStatus.fromMangadex(it!!) }
-
-        return manga
-    }
-
-    private fun getFollowStatusFromElement(element: Element): String? {
-        var dropdownElement = element.select("button.btn.btn-success.dropdown-toggle").first()
-                ?: element.select("button.btn.btn-warning.dropdown-toggle").first()
-                ?: element.select("button.btn.btn-danger.dropdown-toggle").first()
-                ?: element.select("button.btn.btn-info.dropdown-toggle").first()
-                ?: element.select("button.btn.btn-secondary.dropdown-toggle").first()
-                ?: element.select("button.btn.btn-primary.dropdown-toggle").first() //This should be last because it can match the Rating dropdown. The Follow Status dropdown should be what will be returned by `first()` since it should appear earlier in the HTML
-
-        if (dropdownElement.select("span.fa-star").first() != null) { // Well, FUCK
-            //Contingency. May not work if the earlier code didn't
-            dropdownElement = element.select("button.btn.btn-success.dropdown-toggle:has(span.fas.fa-fw:not(.fa-star))").first()
-        }
-
-        return dropdownElement?.text()?.trim()
-    }
 
     fun changeFollowStatus(manga: SManga): Observable<Boolean> {
         manga.follow_status ?: throw IllegalArgumentException("Cannot tell MD server to set an null follow status")
@@ -449,7 +336,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         val mangaJson = json.getAsJsonObject("manga")
         val chapterJson = json.getAsJsonObject("chapter")
         manga.title = cleanString(mangaJson.get("title").string)
-        manga.thumbnail_url = cdnUrl + mangaJson.get("cover_url").string
+        manga.thumbnail_url = MdUtil.cdnUrl + mangaJson.get("cover_url").string
         manga.description = cleanString(mangaJson.get("description").string)
         manga.author = mangaJson.get("author").string
         manga.artist = mangaJson.get("artist").string
@@ -466,7 +353,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         }
 
         val genres = (if (mangaJson.get("hentai").int == 1) listOf("Hentai") else listOf()) +
-                mangaJson.get("genres").asJsonArray.mapNotNull { GENRES.get(it.toString()) }
+                mangaJson.get("genres").asJsonArray.mapNotNull { GENRES[it.toString()] }
         manga.genre = genres.joinToString(", ")
 
         return manga
@@ -547,7 +434,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
             chapterName.add("Ch." + chapterJson.get("chapter").string)
         }
         if (chapterJson.get("title").string.isNotBlank()) {
-            if (!chapterName.isEmpty()) {
+            if (chapterName.isNotEmpty()) {
                 chapterName.add("-")
             }
             chapterName.add(chapterJson.get("title").string)
