@@ -26,11 +26,6 @@ interface Source {
     val lang: String
 
     /**
-     * Whether the source has support for latest updates.
-     */
-    val supportsLatest: Boolean
-
-    /**
      * Returns an observable containing a page with a list of manga.
      *
      * @param page the page number to retrieve.

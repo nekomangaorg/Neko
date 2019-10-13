@@ -13,8 +13,11 @@ import eu.kanade.tachiyomi.source.model.*
 import eu.kanade.tachiyomi.source.model.SManga.FollowStatus
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.util.asJsoup
-import okhttp3.*
+import okhttp3.FormBody
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
 import org.jsoup.nodes.Element
 import org.jsoup.parser.Parser
 import rx.Observable
@@ -32,12 +35,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
 
     private val cdnUrl = "https://cdndex.com"
 
-    override val supportsLatest = true
-
     private val preferences: PreferencesHelper by injectLazy()
-
-    override val client: OkHttpClient = network.cloudflareClient.newBuilder()
-            .build()
 
     private fun clientBuilder(): OkHttpClient = clientBuilder(preferences.r18()!!.toInt())
 
@@ -54,10 +52,6 @@ open class Mangadex(override val lang: String, private val internalLang: String,
                 chain.proceed(newReq)
             }.build()!!
 
-    override fun headersBuilder() = Headers.Builder().apply {
-        add("User-Agent", "Neko/MangaDex Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.131 Safari/537.36")
-        add("X-Requested-With", "XMLHttpRequest")
-    }
 
     private fun cookiesHeader(r18Toggle: Int, langCode: Int): String {
         val cookies = mutableMapOf<String, String>()

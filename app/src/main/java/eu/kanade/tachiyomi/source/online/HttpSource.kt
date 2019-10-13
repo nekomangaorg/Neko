@@ -63,15 +63,16 @@ abstract class HttpSource : Source {
     /**
      * Default network client for doing requests.
      */
-    open val client: OkHttpClient
-        get() = network.client
+    val client: OkHttpClient = network.cloudflareClient.newBuilder().build()
 
     /**
-     * Headers builder for requests. Implementations can override this method for custom headers.
+     * Headers builder for request.
      */
-    open protected fun headersBuilder() = Headers.Builder().apply {
-        add("User-Agent", "Mozilla/5.0 (Windows NT 6.3; WOW64)")
+    protected fun headersBuilder() = Headers.Builder().apply {
+        add("User-Agent", "Neko/MangaDex Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.131 Safari/537.36")
+        add("X-Requested-With", "XMLHttpRequest")
     }
+
 
     /**
      * Visible name of the source.
