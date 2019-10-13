@@ -63,9 +63,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
     }
 
     private fun popularMangaSelector() = "div.manga-entry"
-
-    private fun latestUpdatesSelector() = "tr a.manga_title"
-
+    
     override fun popularMangaRequest(page: Int): Request {
         return GET("$baseUrl/titles/0/$page/", headersBuilder().build())
     }
