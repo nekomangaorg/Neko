@@ -2,8 +2,8 @@ package eu.kanade.tachiyomi.ui.setting
 
 import android.app.Dialog
 import android.os.Bundle
-import androidx.preference.PreferenceScreen
 import android.view.View
+import androidx.preference.PreferenceScreen
 import com.afollestad.materialdialogs.MaterialDialog
 import com.bluelinelabs.conductor.RouterTransaction
 import com.bluelinelabs.conductor.changehandler.FadeChangeHandler
@@ -68,6 +68,12 @@ class SettingsAdvancedController : SettingsController() {
             summaryRes = R.string.pref_refresh_library_tracking_summary
 
             onClick { LibraryUpdateService.start(context, target = Target.TRACKING) }
+        }
+        preference {
+            titleRes = R.string.pref_sync_library_follows
+            summaryRes = R.string.pref_refresh_library_follows_summary
+
+            onClick { LibraryUpdateService.start(context, target = Target.FOLLOW_STATUSES) }
         }
     }
 
