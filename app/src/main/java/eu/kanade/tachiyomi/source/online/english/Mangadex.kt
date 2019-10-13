@@ -10,7 +10,6 @@ import eu.kanade.tachiyomi.network.POST
 import eu.kanade.tachiyomi.network.asObservable
 import eu.kanade.tachiyomi.network.asObservableSuccess
 import eu.kanade.tachiyomi.source.model.*
-import eu.kanade.tachiyomi.source.model.SManga.FollowStatus
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.english.parsers.FollowsParser
 import eu.kanade.tachiyomi.source.online.english.utils.MdUtil
@@ -63,7 +62,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
     }
 
     private fun popularMangaSelector() = "div.manga-entry"
-    
+
     override fun popularMangaRequest(page: Int): Request {
         return GET("$baseUrl/titles/0/$page/", headersBuilder().build())
     }
@@ -291,14 +290,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
 
 
     fun changeFollowStatus(manga: SManga): Observable<Boolean> {
-        manga.follow_status ?: throw IllegalArgumentException("Cannot tell MD server to set an null follow status")
-
-        val mangaID = getMangaId(manga.url)
-        val status = manga.follow_status!!.toMangadexInt()
-
-        return clientBuilder().newCall(GET("$baseUrl/ajax/actions.ajax.php?function=manga_follow&id=$mangaID&type=$status", headers))
-                .asObservable()
-                .map { isAuthenticationSuccessful(it) }
+        return FollowsParser(clientBuilder(), baseUrl, headers).changeFollowStatus(manga)
     }
 
     override fun fetchMangaDetails(manga: SManga): Observable<SManga> {
@@ -699,18 +691,5 @@ open class Mangadex(override val lang: String, private val internalLang: String,
                 Pair("Thai", "32"),
                 Pair("Filipino", "34"))
 
-        private val FOLLOW_STATUS_LIST = listOf(
-                Triple(0, FollowStatus.UNFOLLOWED, "Unfollowed"),
-                Triple(1, FollowStatus.READING, "Reading"),
-                Triple(2, FollowStatus.COMPLETED, "Completed"),
-                Triple(3, FollowStatus.ON_HOLD, "On hold"),
-                Triple(4, FollowStatus.PLAN_TO_READ, "Plan to read"),
-                Triple(5, FollowStatus.DROPPED, "Dropped"),
-                Triple(6, FollowStatus.RE_READING, "Re-reading"))
-
-        fun FollowStatus.Companion.fromMangadex(x: Int) = FOLLOW_STATUS_LIST.first { it.first == x }.second
-        fun FollowStatus.Companion.fromMangadex(MangadexFollowString: String) = FOLLOW_STATUS_LIST.first { it.third == MangadexFollowString }.second
-        fun FollowStatus.toMangadexInt() = FOLLOW_STATUS_LIST.first { it.second == this }.first
-        fun FollowStatus.toMangadexString() = FOLLOW_STATUS_LIST.first { it.second == this }.third
     }
 }

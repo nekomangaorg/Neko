@@ -4,8 +4,8 @@ import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.asObservable
 import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.online.english.Mangadex.Companion.fromMangadex
 import eu.kanade.tachiyomi.source.online.english.utils.MdUtil
+import eu.kanade.tachiyomi.source.online.english.utils.MdUtil.Companion.getMangaId
 import eu.kanade.tachiyomi.util.asJsoup
 import eu.kanade.tachiyomi.util.setUrlWithoutDomain
 import okhttp3.Headers
@@ -88,10 +88,35 @@ class FollowsParser(val client: OkHttpClient, val baseUrl: String, val headers: 
         return dropdownElement?.text()?.trim()
     }
 
+
+    fun changeFollowStatus(manga: SManga): Observable<Boolean> {
+        manga.follow_status ?: throw IllegalArgumentException("Cannot tell MD server to set an null follow status")
+
+        val mangaID = getMangaId(manga.url)
+        val status = manga.follow_status!!.toMangadexInt()
+
+        return client.newCall(GET("$baseUrl/ajax/actions.ajax.php?function=manga_follow&id=$mangaID&type=$status", headers))
+                .asObservable()
+                .map { it.body!!.string().isEmpty() }
+    }
+
+
     companion object {
         val followSelector = "div.manga-entry"
         val estimatedTotalFollowsSelector = "div.manga-entry:last-of-type + *" // The element immediately following the last follow entry
         val followsNextPageSelector = ".pagination li:not(.disabled) span[title*=last page]:not(disabled)"
+        private val FOLLOW_STATUS_LIST = listOf(
+                Triple(0, SManga.FollowStatus.UNFOLLOWED, "Unfollowed"),
+                Triple(1, SManga.FollowStatus.READING, "Reading"),
+                Triple(2, SManga.FollowStatus.COMPLETED, "Completed"),
+                Triple(3, SManga.FollowStatus.ON_HOLD, "On hold"),
+                Triple(4, SManga.FollowStatus.PLAN_TO_READ, "Plan to read"),
+                Triple(5, SManga.FollowStatus.DROPPED, "Dropped"),
+                Triple(6, SManga.FollowStatus.RE_READING, "Re-reading"))
 
+        fun SManga.FollowStatus.Companion.fromMangadex(x: Int) = FOLLOW_STATUS_LIST.first { it.first == x }.second
+        fun SManga.FollowStatus.Companion.fromMangadex(MangadexFollowString: String) = FOLLOW_STATUS_LIST.first { it.third == MangadexFollowString }.second
+        fun SManga.FollowStatus.toMangadexInt() = FOLLOW_STATUS_LIST.first { it.second == this }.first
+        fun SManga.FollowStatus.toMangadexString() = FOLLOW_STATUS_LIST.first { it.second == this }.third
     }
 }
