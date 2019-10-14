@@ -78,34 +78,7 @@ abstract class HttpSource : Source {
      * Visible name of the source.
      */
     override fun toString() = "$name (${lang.toUpperCase()})"
-
-    /**
-     * Returns an observable containing a page with a list of manga. Normally it's not needed to
-     * override this method.
-     *
-     * @param page the page number to retrieve.
-     */
-    override fun fetchPopularManga(page: Int): Observable<MangasPage> {
-        return client.newCall(popularMangaRequest(page))
-                .asObservableSuccess()
-                .map { response ->
-                    popularMangaParse(response)
-                }
-    }
-
-    /**
-     * Returns the request for the popular manga given the page.
-     *
-     * @param page the page number to retrieve.
-     */
-    abstract protected fun popularMangaRequest(page: Int): Request
-
-    /**
-     * Parses the response from the site and returns a [MangasPage] object.
-     *
-     * @param response the response from the site.
-     */
-    abstract protected fun popularMangaParse(response: Response): MangasPage
+    
 
     /**
      * Returns an observable containing a page with a list of manga. Normally it's not needed to

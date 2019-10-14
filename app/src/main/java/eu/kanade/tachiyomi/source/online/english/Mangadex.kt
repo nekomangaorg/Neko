@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.network.asObservableSuccess
 import eu.kanade.tachiyomi.source.model.*
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.english.parsers.FollowsParser
+import eu.kanade.tachiyomi.source.online.english.parsers.PopularParser
 import eu.kanade.tachiyomi.source.online.english.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.english.utils.MdUtil.Companion.modifyMangaUrl
 import eu.kanade.tachiyomi.util.asJsoup
@@ -61,65 +62,12 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         "${URLEncoder.encode(it.key, "UTF-8")}=${URLEncoder.encode(it.value, "UTF-8")}"
     }
 
-    private fun popularMangaSelector() = "div.manga-entry"
-
-    override fun popularMangaRequest(page: Int): Request {
-        return GET("$baseUrl/titles/0/$page/", headersBuilder().build())
-    }
-
-    private fun popularMangaFromElement(element: Element): SManga {
-        val manga = SManga.create()
-        element.select("a.manga_title").first().let {
-            val url = modifyMangaUrl(it.attr("href"))
-            manga.setUrlWithoutDomain(url)
-            manga.title = it.text().trim()
-        }
-        manga.thumbnail_url = MdUtil.formThumbUrl(manga.url)
-
-        return manga
-    }
-
-    private fun latestUpdatesFromElement(element: Element): SManga {
-        val manga = SManga.create()
-        element.let {
-            manga.setUrlWithoutDomain(modifyMangaUrl(it.attr("href")))
-            manga.title = it.text().trim()
-
-        }
-        manga.thumbnail_url = MdUtil.formThumbUrl(manga.url)
-
-        return manga
-    }
-
-    private fun popularMangaNextPageSelector() = ".pagination li:not(.disabled) span[title*=last page]:not(disabled)"
-
+    
     private fun searchMangaNextPageSelector() = ".pagination li:not(.disabled) span[title*=last page]:not(disabled)"
 
     override fun fetchPopularManga(page: Int): Observable<MangasPage> {
-        return clientBuilder().newCall(popularMangaRequest(page))
-                .asObservableSuccess()
-                .map { response ->
-                    popularMangaParse(response)
-                }
-    }
+        return PopularParser(clientBuilder(), baseUrl, headers).fetchPopularManga(page)
 
-    /**
-     * Parses the response from the site and returns a [MangasPage] object.
-     *
-     * @param response the response from the site.
-     */
-    override fun popularMangaParse(response: Response): MangasPage {
-        val document = response.asJsoup()
-
-        val mangas = document.select(popularMangaSelector()).map { element ->
-            popularMangaFromElement(element)
-        }.distinct()
-
-        val hasNextPage = popularMangaNextPageSelector().let { selector ->
-            document.select(selector).first()
-        } != null
-
-        return MangasPage(mangas, hasNextPage)
     }
 
 
