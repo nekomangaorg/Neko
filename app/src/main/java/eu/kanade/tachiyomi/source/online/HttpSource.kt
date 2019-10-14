@@ -84,39 +84,11 @@ abstract class HttpSource : Source {
     override fun toString() = "$name (${lang.toUpperCase()})"
 
 
-    /**
-     * Returns an observable with the page list for a chapter.
-     *
-     * @param chapter the chapter whose page list has to be fetched.
-     */
-    override fun fetchPageList(chapter: SChapter): Observable<List<Page>> {
-        return client.newCall(pageListRequest(chapter))
-                .asObservableSuccess()
-                .map { response ->
-                    pageListParse(response)
-                }
-    }
-
+    //used to get the manga url instead of the api manga url
     open fun mangaDetailsRequest(manga: SManga): Request {
         return GET(baseUrl + manga.url, headers)
     }
 
-    /**
-     * Returns the request for getting the page list. Override only if it's needed to override the
-     * url, send different headers or request method like POST.
-     *
-     * @param chapter the chapter whose page list has to be fetched.
-     */
-    open protected fun pageListRequest(chapter: SChapter): Request {
-        return GET(baseUrl + chapter.url, headers)
-    }
-
-    /**
-     * Parses the response from the site and returns a list of pages.
-     *
-     * @param response the response from the site.
-     */
-    abstract protected fun pageListParse(response: Response): List<Page>
 
     /**
      * Returns an observable with the page containing the source url of the image. If there's any
@@ -125,27 +97,12 @@ abstract class HttpSource : Source {
      * @param page the page whose source image has to be fetched.
      */
     open fun fetchImageUrl(page: Page): Observable<String> {
-        return client.newCall(imageUrlRequest(page))
+        return client.newCall(GET(page.imageUrl!!, headers))
                 .asObservableSuccess()
-                .map { imageUrlParse(it) }
+                .map { "" }
     }
 
-    /**
-     * Returns the request for getting the url to the source image. Override only if it's needed to
-     * override the url, send different headers or request method like POST.
-     *
-     * @param page the chapter whose page list has to be fetched
-     */
-    open protected fun imageUrlRequest(page: Page): Request {
-        return GET(page.url, headers)
-    }
 
-    /**
-     * Parses the response from the site and returns the absolute url to the source image.
-     *
-     * @param response the response from the site.
-     */
-    abstract protected fun imageUrlParse(response: Response): String
 
     /**
      * Returns an observable with the response of the source image.
@@ -153,20 +110,10 @@ abstract class HttpSource : Source {
      * @param page the page whose source image has to be downloaded.
      */
     fun fetchImage(page: Page): Observable<Response> {
-        return client.newCallWithProgress(imageRequest(page), page)
+        return client.newCallWithProgress(GET(page.imageUrl!!, headers), page)
                 .asObservableSuccess()
     }
-
-    /**
-     * Returns the request for getting the source image. Override only if it's needed to override
-     * the url, send different headers or request method like POST.
-     *
-     * @param page the chapter whose page list has to be fetched
-     */
-    open protected fun imageRequest(page: Page): Request {
-        return GET(page.imageUrl!!, headers)
-    }
-
+    
 
     /**
      * Called before inserting a new chapter into database. Use it if you need to override chapter

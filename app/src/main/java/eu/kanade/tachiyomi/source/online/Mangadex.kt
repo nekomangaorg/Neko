@@ -1,9 +1,6 @@
 package eu.kanade.tachiyomi.source.online
 
-import com.github.salomonbrys.kotson.string
-import com.google.gson.JsonParser
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.POST
 import eu.kanade.tachiyomi.network.asObservable
 import eu.kanade.tachiyomi.source.model.*
@@ -11,8 +8,6 @@ import eu.kanade.tachiyomi.source.online.handlers.*
 import okhttp3.FormBody
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.Response
 import rx.Observable
 import uy.kohesive.injekt.injectLazy
 import java.net.URLEncoder
@@ -96,42 +91,11 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         return MangaHandler(clientBuilder(), headers, internalLang).fetchChapterList(manga)
     }
 
-
-    override fun pageListRequest(chapter: SChapter): Request {
-        val server = preferences.imageServer().toString()
-        return GET("$baseUrl${chapter.url}?server=$server")
+    override fun fetchPageList(chapter: SChapter): Observable<List<Page>> {
+        return PageHandler(client, preferences.imageServer().toString()).fetchPageList(chapter)
     }
 
-
-    override fun pageListParse(response: Response): List<Page> {
-        val jsonData = response.body!!.string()
-        val json = JsonParser().parse(jsonData).asJsonObject
-
-        val pages = mutableListOf<Page>()
-
-        val hash = json.get("hash").string
-        val pageArray = json.getAsJsonArray("page_array")
-        val server = json.get("server").string
-
-        pageArray.forEach {
-            val url = "$server$hash/${it.asString}"
-            pages.add(Page(pages.size, "", getImageUrl(url)))
-        }
-
-        return pages
-    }
-
-
-    private fun getImageUrl(attr: String): String {
-        // Some images are hosted elsewhere
-        if (attr.startsWith("http")) {
-            return attr
-        }
-        return baseUrl + attr
-    }
-
-    override fun imageUrlParse(response: Response): String = ""
-
+    
     override fun isLogged(): Boolean {
         val httpUrl = baseUrl.toHttpUrlOrNull()!!
         return network.cookieManager.get(httpUrl).any { it.name == "mangadex_rememberme_token" }

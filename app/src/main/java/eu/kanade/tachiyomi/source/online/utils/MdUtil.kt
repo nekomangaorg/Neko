@@ -40,5 +40,13 @@ class MdUtil {
             }
             return Parser.unescapeEntities(intermediate, false)
         }
+
+        fun getImageUrl(attr: String): String {
+            // Some images are hosted elsewhere
+            if (attr.startsWith("http")) {
+                return attr
+            }
+            return baseUrl + attr
+        }
     }
 }
