@@ -5,7 +5,11 @@ import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.asObservableSuccess
 import eu.kanade.tachiyomi.network.newCallWithProgress
 import eu.kanade.tachiyomi.source.Source
-import eu.kanade.tachiyomi.source.model.*
+import eu.kanade.tachiyomi.source.model.FilterList
+import eu.kanade.tachiyomi.source.model.Page
+import eu.kanade.tachiyomi.source.model.SChapter
+import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import okhttp3.Headers
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -34,7 +38,7 @@ abstract class HttpSource : Source {
     /**
      * Base url of the website without the trailing slash, like: http://mysite.com
      */
-    val baseUrl = "https://mangadex.org"
+    val baseUrl = MdUtil.baseUrl
 
     override val name = "Mangadex"
 
@@ -78,103 +82,7 @@ abstract class HttpSource : Source {
      * Visible name of the source.
      */
     override fun toString() = "$name (${lang.toUpperCase()})"
-    
 
-    /**
-     * Returns an observable containing a page with a list of manga. Normally it's not needed to
-     * override this method.
-     *
-     * @param page the page number to retrieve.
-     * @param query the search query.
-     * @param filters the list of filters to apply.
-     */
-    override fun fetchSearchManga(page: Int, query: String, filters: FilterList): Observable<MangasPage> {
-        return client.newCall(searchMangaRequest(page, query, filters))
-                .asObservableSuccess()
-                .map { response ->
-                    searchMangaParse(response)
-                }
-    }
-
-    /**
-     * Returns the request for the search manga given the page.
-     *
-     * @param page the page number to retrieve.
-     * @param query the search query.
-     * @param filters the list of filters to apply.
-     */
-    abstract protected fun searchMangaRequest(page: Int, query: String, filters: FilterList): Request
-
-    /**
-     * Parses the response from the site and returns a [MangasPage] object.
-     *
-     * @param response the response from the site.
-     */
-    abstract protected fun searchMangaParse(response: Response): MangasPage
-
-
-    /**
-     * Returns an observable with the updated details for a manga. Normally it's not needed to
-     * override this method.
-     *
-     * @param manga the manga to be updated.
-     */
-    override fun fetchMangaDetails(manga: SManga): Observable<SManga> {
-        return client.newCall(mangaDetailsRequest(manga))
-                .asObservableSuccess()
-                .map { response ->
-                    mangaDetailsParse(response).apply { initialized = true }
-                }
-    }
-
-    /**
-     * Returns the request for the details of a manga. Override only if it's needed to change the
-     * url, send different headers or request method like POST.
-     *
-     * @param manga the manga to be updated.
-     */
-    open fun mangaDetailsRequest(manga: SManga): Request {
-        return GET(baseUrl + manga.url, headers)
-    }
-
-    /**
-     * Parses the response from the site and returns the details of a manga.
-     *
-     * @param response the response from the site.
-     */
-    abstract protected fun mangaDetailsParse(response: Response): SManga
-
-    /**
-     * Returns an observable with the updated chapter list for a manga. Normally it's not needed to
-     * override this method.  If a manga is licensed an empty chapter list observable is returned
-     *
-     * @param manga the manga to look for chapters.
-     */
-    override fun fetchChapterList(manga: SManga): Observable<List<SChapter>> {
-        return client.newCall(chapterListRequest(manga))
-                    .asObservableSuccess()
-                    .map { response ->
-                        chapterListParse(response)
-                    }
-
-    }
-
-    /**
-     * Returns the request for updating the chapter list. Override only if it's needed to override
-     * the url, send different headers or request method like POST.
-     *
-     * @param manga the manga to look for chapters.
-     */
-    open protected fun chapterListRequest(manga: SManga): Request {
-        return GET(baseUrl + manga.url, headers)
-    }
-
-    /**
-     * Parses the response from the site and returns a list of chapters.
-     *
-     * @param response the response from the site.
-     */
-    abstract protected fun chapterListParse(response: Response): List<SChapter>
 
     /**
      * Returns an observable with the page list for a chapter.
@@ -187,6 +95,10 @@ abstract class HttpSource : Source {
                 .map { response ->
                     pageListParse(response)
                 }
+    }
+
+    open fun mangaDetailsRequest(manga: SManga): Request {
+        return GET(baseUrl + manga.url, headers)
     }
 
     /**

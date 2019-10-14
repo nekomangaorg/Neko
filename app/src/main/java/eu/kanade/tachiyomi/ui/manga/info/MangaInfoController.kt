@@ -144,7 +144,7 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
     /**
      * Check if manga is initialized.
      * If true update view with manga information,
-     * if false fetch manga information
+     * if false fetchFollows manga information
      *
      * @param manga  manga object containing information about manga.
      * @param source the source of the manga.

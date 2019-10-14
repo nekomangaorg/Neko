@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.source
 
 import eu.kanade.tachiyomi.source.model.*
-import okhttp3.Response
 import rx.Observable
 
 /**
@@ -77,7 +76,5 @@ interface Source {
     fun isLogged(): Boolean
 
     fun login(username: String, password: String, twoFactorCode: String = ""): Observable<Boolean>
-
-    fun isAuthenticationSuccessful(response: Response): Boolean
 
 }

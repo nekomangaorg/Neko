@@ -1,10 +1,10 @@
-package eu.kanade.tachiyomi.source.online.english.parsers
+package eu.kanade.tachiyomi.source.online.handlers
 
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.asObservableSuccess
 import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.online.english.utils.MdUtil
+import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.asJsoup
 import eu.kanade.tachiyomi.util.setUrlWithoutDomain
 import okhttp3.Headers
@@ -14,7 +14,7 @@ import okhttp3.Response
 import org.jsoup.nodes.Element
 import rx.Observable
 
-class PopularParser(val client: OkHttpClient, val baseUrl: String, private val headers: Headers) {
+class PopularHandler(val client: OkHttpClient, private val headers: Headers) {
 
 
     fun fetchPopularManga(page: Int): Observable<MangasPage> {
@@ -26,7 +26,7 @@ class PopularParser(val client: OkHttpClient, val baseUrl: String, private val h
     }
 
     private fun popularMangaRequest(page: Int): Request {
-        return GET("$baseUrl/titles/0/$page/", headers)
+        return GET("${MdUtil.baseUrl}/titles/0/$page/", headers)
     }
 
     private fun popularMangaParse(response: Response): MangasPage {

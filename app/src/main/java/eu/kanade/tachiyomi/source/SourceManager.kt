@@ -1,6 +1,6 @@
 package eu.kanade.tachiyomi.source
 
-import eu.kanade.tachiyomi.source.online.english.Mangadex
+import eu.kanade.tachiyomi.source.online.Mangadex
 
 /**
  *Currently hardcoded to always return the same English [Mangadex] instance

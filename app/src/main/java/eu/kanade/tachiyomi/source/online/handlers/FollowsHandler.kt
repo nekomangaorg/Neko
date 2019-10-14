@@ -1,11 +1,12 @@
-package eu.kanade.tachiyomi.source.online.english.parsers
+package eu.kanade.tachiyomi.source.online.handlers
 
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.asObservable
 import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.online.english.utils.MdUtil
-import eu.kanade.tachiyomi.source.online.english.utils.MdUtil.Companion.getMangaId
+import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import eu.kanade.tachiyomi.source.online.utils.MdUtil.Companion.baseUrl
+import eu.kanade.tachiyomi.source.online.utils.MdUtil.Companion.getMangaId
 import eu.kanade.tachiyomi.util.asJsoup
 import eu.kanade.tachiyomi.util.setUrlWithoutDomain
 import okhttp3.Headers
@@ -16,7 +17,7 @@ import okhttp3.Response
 import org.jsoup.nodes.Element
 import rx.Observable
 
-class FollowsParser(val client: OkHttpClient, val baseUrl: String, val headers: Headers) {
+class FollowsHandler(val client: OkHttpClient, val headers: Headers) {
 
     fun fetchFollows(page: Int): Observable<MangasPage> {
         return client.newCall(followsListRequest(page))
@@ -47,10 +48,10 @@ class FollowsParser(val client: OkHttpClient, val baseUrl: String, val headers: 
         return MangasPage(follows, hasNextPage, estimatedTotalFollows)
     }
 
-    protected fun followsListRequest(page: Int): Request {
+    private fun followsListRequest(page: Int): Request {
 
         // Format `/follows/manga/$status[/$sort[/$page]]`
-        val url = "$baseUrl/follows/manga/0".toHttpUrlOrNull()!!.newBuilder() // Gets regardless of follow status.
+        val url = "${MdUtil.baseUrl}/follows/manga/0".toHttpUrlOrNull()!!.newBuilder() // Gets regardless of follow status.
                 .addQueryParameter("p", page.toString())
 
         return GET(url.toString(), headers)
@@ -102,9 +103,9 @@ class FollowsParser(val client: OkHttpClient, val baseUrl: String, val headers: 
 
 
     companion object {
-        val followSelector = "div.manga-entry"
-        val estimatedTotalFollowsSelector = "div.manga-entry:last-of-type + *" // The element immediately following the last follow entry
-        val followsNextPageSelector = ".pagination li:not(.disabled) span[title*=last page]:not(disabled)"
+        const val followSelector = "div.manga-entry"
+        const val estimatedTotalFollowsSelector = "div.manga-entry:last-of-type + *" // The element immediately following the last follow entry
+        const val followsNextPageSelector = ".pagination li:not(.disabled) span[title*=last page]:not(disabled)"
         private val FOLLOW_STATUS_LIST = listOf(
                 Triple(0, SManga.FollowStatus.UNFOLLOWED, "Unfollowed"),
                 Triple(1, SManga.FollowStatus.READING, "Reading"),

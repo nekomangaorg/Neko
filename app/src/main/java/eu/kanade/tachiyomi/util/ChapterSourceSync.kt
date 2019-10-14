@@ -102,7 +102,7 @@ fun syncChaptersWithSource(db: DatabaseHelper,
         }
 
         if (!toAdd.isEmpty()) {
-            // Set the date fetch for new items in reverse order to allow another sorting method.
+            // Set the date fetchFollows for new items in reverse order to allow another sorting method.
             // Sources MUST return the chapters from most to less recent, which is common.
             var now = Date().time
 

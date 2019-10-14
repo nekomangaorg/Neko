@@ -169,7 +169,7 @@ class ReaderPresenter(
 
     /**
      * Initializes this presenter with the given [mangaId] and [initialChapterId]. This method will
-     * fetch the manga from the database and initialize the initial chapter.
+     * fetchFollows the manga from the database and initialize the initial chapter.
      */
     fun init(mangaId: Long, initialChapterId: Long) {
         if (!needsInit()) return
