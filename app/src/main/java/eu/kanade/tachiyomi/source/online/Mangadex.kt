@@ -92,10 +92,10 @@ open class Mangadex(override val lang: String, private val internalLang: String,
     }
 
     override fun fetchPageList(chapter: SChapter): Observable<List<Page>> {
-        return PageHandler(client, preferences.imageServer().toString()).fetchPageList(chapter)
+        return PageHandler(client, headers, preferences.imageServer().toString()).fetchPageList(chapter)
     }
 
-    
+
     override fun isLogged(): Boolean {
         val httpUrl = baseUrl.toHttpUrlOrNull()!!
         return network.cookieManager.get(httpUrl).any { it.name == "mangadex_rememberme_token" }
