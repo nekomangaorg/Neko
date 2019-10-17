@@ -14,9 +14,7 @@ import rx.schedulers.Schedulers
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import java.util.Calendar
-import java.util.Date
-import java.util.TreeMap
+import java.util.*
 
 class RecentChaptersPresenter(
         val preferences: PreferencesHelper = Injekt.get(),
@@ -149,9 +147,8 @@ class RecentChaptersPresenter(
         val chapters = items.map { it.chapter }
         chapters.forEach {
             it.read = read
-            if (!read) {
-                it.last_page_read = 0
-            }
+            it.last_page_read = 0
+
         }
 
         Observable.fromCallable { db.updateChaptersProgress(chapters).executeAsBlocking() }

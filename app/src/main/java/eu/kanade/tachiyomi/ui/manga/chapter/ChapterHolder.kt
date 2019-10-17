@@ -61,7 +61,7 @@ class ChapterHolder(
             chapter_title.maxLines = 1
         }
 
-        chapter_pages.text = if (!chapter.read && chapter.last_page_read > 0) {
+        chapter_pages.text = if (chapter.last_page_read > 1) {
             itemView.context.getString(R.string.chapter_progress, chapter.last_page_read + 1)
         } else {
             ""

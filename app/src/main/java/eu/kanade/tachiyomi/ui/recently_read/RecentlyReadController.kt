@@ -1,9 +1,9 @@
 package eu.kanade.tachiyomi.ui.recently_read
 
-import androidx.recyclerview.widget.LinearLayoutManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.mikepenz.community_material_typeface_library.CommunityMaterial
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.kanade.tachiyomi.R
@@ -86,13 +86,17 @@ class RecentlyReadController : NucleusController<RecentlyReadPresenter>(),
     override fun onResumeClick(position: Int) {
         val activity = activity ?: return
         val (manga, chapter, _) = adapter?.getItem(position)?.mch ?: return
-
-        val nextChapter = presenter.getNextChapter(chapter, manga)
-        if (nextChapter != null) {
-            val intent = ReaderActivity.newIntent(activity, manga, nextChapter)
+        if (chapter.last_page_read != 0) {
+            val intent = ReaderActivity.newIntent(activity, manga, chapter)
             startActivity(intent)
         } else {
-            activity.toast(R.string.no_next_chapter)
+            val nextChapter = presenter.getNextChapter(chapter, manga)
+            if (nextChapter != null) {
+                val intent = ReaderActivity.newIntent(activity, manga, nextChapter)
+                startActivity(intent)
+            } else {
+                activity.toast(R.string.no_next_chapter)
+            }
         }
     }
 

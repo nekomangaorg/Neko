@@ -233,9 +233,8 @@ class ChaptersPresenter(
         Observable.from(selectedChapters)
                 .doOnNext { chapter ->
                     chapter.read = read
-                    if (!read) {
-                        chapter.last_page_read = 0
-                    }
+                    chapter.last_page_read = 0
+
                 }
                 .toList()
                 .flatMap { db.updateChaptersProgress(it).asRxObservable() }
