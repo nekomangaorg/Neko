@@ -361,7 +361,7 @@ class LibraryUpdateService(
 
         val source = sourceManager.getMangadex()
         val pager = FollowsPager(source)
-
+        pager.results()
         // Emit each manga and update it sequentially.
 
         return Observable.from(pager)

@@ -24,4 +24,12 @@ class ApiChapterParser {
 
         return pages
     }
+
+    fun externalParse(response: Response): String {
+        val jsonData = response.body!!.string()
+        val json = JsonParser().parse(jsonData).asJsonObject
+        val external = json.get("external").string
+        return external.substringAfterLast("/")
+    }
+
 }

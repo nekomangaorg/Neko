@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.online.handlers.MangaPlusHandler
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import okhttp3.Headers
 import okhttp3.OkHttpClient
@@ -27,6 +28,7 @@ abstract class HttpSource : Source {
      * Network service.
      */
     protected val network: NetworkHelper by injectLazy()
+
 
 //    /**
 //     * Preferences that a source may need.
@@ -97,6 +99,11 @@ abstract class HttpSource : Source {
      * @param page the page whose source image has to be fetched.
      */
     open fun fetchImageUrl(page: Page): Observable<String> {
+        if (page.imageUrl!!.contains("mangaplus", true)) {
+            return MangaPlusHandler(client).client.newCall(GET(page.imageUrl!!, headers))
+                    .asObservableSuccess()
+                    .map { "" }
+        }
         return client.newCall(GET(page.imageUrl!!, headers))
                 .asObservableSuccess()
                 .map { "" }
@@ -110,6 +117,10 @@ abstract class HttpSource : Source {
      * @param page the page whose source image has to be downloaded.
      */
     fun fetchImage(page: Page): Observable<Response> {
+        if (page.imageUrl!!.contains("mangaplus", true)) {
+            return MangaPlusHandler(client).client.newCall(GET(page.imageUrl!!, headers))
+                    .asObservableSuccess()
+        }
         return client.newCallWithProgress(GET(page.imageUrl!!, headers), page)
                 .asObservableSuccess()
     }

@@ -4,6 +4,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
+apply plugin: 'kotlinx-serialization'
 apply plugin: 'com.github.zellius.shortcut-helper'
 
 shortcutHelper.filePath = './shortcuts.xml'
@@ -144,6 +145,9 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.2'
     implementation 'com.github.salomonbrys.kotson:kotson:2.5.0'
 
+    // Serialization
+    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.13.0'
+    
     // Disk
     implementation 'com.jakewharton:disklrucache:2.0.2'
     implementation 'com.github.inorichi:unifile:e9ee588'
@@ -244,6 +248,8 @@ buildscript {
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlin_version"
+
     }
 }
 
