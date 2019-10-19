@@ -28,7 +28,6 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.HttpSource
-import eu.kanade.tachiyomi.ui.catalogue.follows.FollowsPager
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.*
 import rx.Observable
@@ -325,7 +324,7 @@ class LibraryUpdateService(
                 }
     }
 
-    fun downloadChapters(manga: Manga, chapters: List<Chapter>) {
+    private fun downloadChapters(manga: Manga, chapters: List<Chapter>) {
         // we need to get the chapters from the db so we have chapter ids
         val mangaChapters = db.getChapters(manga).executeAsBlocking()
         val dbChapters = chapters.map {
@@ -354,38 +353,39 @@ class LibraryUpdateService(
      *
      * @return an observable delivering the progress of each update.
      */
-    fun updateFollowStatuses(): Observable<SManga?> {
+    private fun updateFollowStatuses(): Observable<SManga?> {
+        return Observable.just(null)
         // Initialize the variables holding the progress of the updates.
-        val count = AtomicInteger(0)
-        val estimatedTotalFollowedManga = AtomicInteger(-1)
+        /*   val count = AtomicInteger(0)
+           val estimatedTotalFollowedManga = AtomicInteger(-1)
 
-        val source = sourceManager.getMangadex()
-        val pager = FollowsPager(source)
-        pager.results()
-        // Emit each manga and update it sequentially.
+           val source = sourceManager.getMangadex()
+           val pager = FollowsPager(source)
+           pager.results()
+           // Emit each manga and update it sequentially.
 
-        return Observable.from(pager)
-                // Expand extract Mangas from MangaPages
-                .concatMap {
-                    it.estimatedTotalSeries
-                            ?.let { it1 -> estimatedTotalFollowedManga.set(it1) } // Update estimate
-                            ?: estimatedTotalFollowedManga.compareAndSet(-1, -1) // Don't overwrite if there's no estimate
-                    Observable.from(it.mangas)
-                }
-                // Notify manga that will update.
-                .doOnNext { showProgressNotification(it, count.andIncrement, estimatedTotalFollowedManga.get()) }
-                // Update the details of the manga.
-                .map<SManga> { networkManga ->
-                    db.getManga(networkManga.url, source.id)
-                            .executeAsBlocking()
-                            ?.let { dbManga ->
-                                dbManga.copyFrom(networkManga)
-                                db.insertManga(dbManga).executeAsBlocking()
-                                dbManga
-                            }
-                }.doOnCompleted {
-                    cancelProgressNotification()
-                }
+           return Observable.from(pager)
+                   // Expand extract Mangas from MangaPages
+                   .concatMap {
+                       it.estimatedTotalSeries
+                               ?.let { it1 -> estimatedTotalFollowedManga.set(it1) } // Update estimate
+                               ?: estimatedTotalFollowedManga.compareAndSet(-1, -1) // Don't overwrite if there's no estimate
+                       Observable.from(it.mangas)
+                   }
+                   // Notify manga that will update.
+                   .doOnNext { showProgressNotification(it, count.andIncrement, estimatedTotalFollowedManga.get()) }
+                   // Update the details of the manga.
+                   .map<SManga> { networkManga ->
+                       db.getManga(networkManga.url, source.id)
+                               .executeAsBlocking()
+                               ?.let { dbManga ->
+                                   dbManga.copyFrom(networkManga)
+                                   db.insertManga(dbManga).executeAsBlocking()
+                                   dbManga
+                               }
+                   }.doOnCompleted {
+                       cancelProgressNotification()
+                   }*/
     }
 
     /**
