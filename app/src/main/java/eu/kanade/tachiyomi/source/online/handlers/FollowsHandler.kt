@@ -4,17 +4,17 @@ import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.asObservable
 import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.online.handlers.serializers.FollowsPageResult
+import eu.kanade.tachiyomi.source.online.handlers.serializers.Result
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.MdUtil.Companion.baseUrl
 import eu.kanade.tachiyomi.source.online.utils.MdUtil.Companion.getMangaId
-import eu.kanade.tachiyomi.util.asJsoup
-import eu.kanade.tachiyomi.util.setUrlWithoutDomain
+import kotlinx.serialization.json.Json
 import okhttp3.Headers
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
-import org.jsoup.nodes.Element
 import rx.Observable
 
 class FollowsHandler(val client: OkHttpClient, val headers: Headers) {
@@ -28,67 +28,33 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers) {
     }
 
     private fun followsParse(response: Response): MangasPage {
-        val document = response.asJsoup()
+        val followsPageResult = Json.parse(FollowsPageResult.serializer(), response.body!!.string())
 
-        val follows = document
-                .select(followSelector)
-                .map { followFromElement(it) }
+        if (followsPageResult.result.isEmpty()) {
+            return MangasPage(mutableListOf(), false)
+        }
+        val follows = followsPageResult.result.map {
+            followFromElement(it)
+        }
 
-        val hasNextPage = document
-                .select(followsNextPageSelector)
-                .isNotEmpty()
-
-        val estimatedTotalFollows = document
-                .select(estimatedTotalFollowsSelector)
-                .text()
-                .split(' ')
-                .last { it.toIntOrNull() is Int } // TODO: Try to deduplicate toInt()
-                .toInt()
-
-        return MangasPage(follows, hasNextPage, estimatedTotalFollows)
+        return MangasPage(follows, true)
     }
 
     private fun followsListRequest(page: Int): Request {
 
-        // Format `/follows/manga/$status[/$sort[/$page]]`
-        val url = "${MdUtil.baseUrl}/follows/manga/0".toHttpUrlOrNull()!!.newBuilder() // Gets regardless of follow status.
-                .addQueryParameter("p", page.toString())
+        val url = "${MdUtil.baseUrl}$followsAllApi".toHttpUrlOrNull()!!.newBuilder()
+                .addQueryParameter("page", page.toString())
 
         return GET(url.toString(), headers)
     }
 
-    private fun followFromElement(element: Element): SManga {
+    private fun followFromElement(result: Result): SManga {
         val manga = SManga.create()
-
-        element.select("a.manga_title").first().let {
-            val url = MdUtil.modifyMangaUrl(it.attr("href"))
-            manga.setUrlWithoutDomain(url)
-            manga.title = it.text().trim()
-        }
-
-        manga.thumbnail_url = MdUtil.formThumbUrl(manga.url)
-
-        manga.follow_status = getFollowStatusFromElement(element).let { SManga.FollowStatus.fromMangadex(it!!) }
-
+        manga.title = ""
+        manga.url = "/title/${result.manga_id}"
+        manga.follow_status = SManga.FollowStatus.fromMangadex(result.follow_type)
         return manga
     }
-
-    private fun getFollowStatusFromElement(element: Element): String? {
-        var dropdownElement = element.select("button.btn.btn-success.dropdown-toggle").first()
-                ?: element.select("button.btn.btn-warning.dropdown-toggle").first()
-                ?: element.select("button.btn.btn-danger.dropdown-toggle").first()
-                ?: element.select("button.btn.btn-info.dropdown-toggle").first()
-                ?: element.select("button.btn.btn-secondary.dropdown-toggle").first()
-                ?: element.select("button.btn.btn-primary.dropdown-toggle").first() //This should be last because it can match the Rating dropdown. The Follow Status dropdown should be what will be returned by `first()` since it should appear earlier in the HTML
-
-        if (dropdownElement.select("span.fa-star").first() != null) { // Well, FUCK
-            //Contingency. May not work if the earlier code didn't
-            dropdownElement = element.select("button.btn.btn-success.dropdown-toggle:has(span.fas.fa-fw:not(.fa-star))").first()
-        }
-
-        return dropdownElement?.text()?.trim()
-    }
-
 
     fun changeFollowStatus(manga: SManga): Observable<Boolean> {
         manga.follow_status ?: throw IllegalArgumentException("Cannot tell MD server to set an null follow status")
@@ -103,6 +69,7 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers) {
 
 
     companion object {
+        const val followsAllApi = "/api/?type=manga_follows"
         const val followSelector = "div.manga-entry"
         const val estimatedTotalFollowsSelector = "div.manga-entry:last-of-type + *" // The element immediately following the last follow entry
         const val followsNextPageSelector = ".pagination li:not(.disabled) span[title*=last page]:not(disabled)"
