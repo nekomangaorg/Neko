@@ -30,6 +30,9 @@ import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.*
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import rx.Observable
 import rx.Subscription
 import rx.schedulers.Schedulers
@@ -97,6 +100,7 @@ class LibraryUpdateService(
     enum class Target {
         CHAPTERS, // Manga chapters
         FOLLOW_STATUSES, // Manga follow status
+        SYNC_FOLLOWS, //Manga in reading, rereading
         DETAILS,  // Manga metadata
         TRACKING  // Tracking metadata
     }
@@ -207,21 +211,34 @@ class LibraryUpdateService(
         val mangaList = getMangaToUpdate(intent, target)
                 .sortedWith(relevanceRanking())
 
+        val handler = CoroutineExceptionHandler { _, exception ->
+            Timber.e(exception)
+            stopSelf(startId)
+        }
         // Update either chapter list or manga details.
-        when (target) {
-            Target.CHAPTERS -> updateChapterList(mangaList)
-            Target.FOLLOW_STATUSES -> updateFollowStatuses()
-            Target.DETAILS -> updateDetails(mangaList)
-            Target.TRACKING -> updateTrackings(mangaList)
-        }.subscribeOn(Schedulers.io())
-                .subscribe({
-                }, {
-                    Timber.e(it)
-                    stopSelf(startId)
-                }, {
-                    stopSelf(startId)
-                })
+        if (target == Target.FOLLOW_STATUSES) {
+            GlobalScope.launch(handler) {
+                syncFollowsStatus()
+            }.invokeOnCompletion { stopSelf(startId) }
+        } else if (target == Target.SYNC_FOLLOWS) {
+            GlobalScope.launch(handler) {
+                syncFollows()
+            }.invokeOnCompletion { stopSelf(startId) }
+        } else {
+            when (target) {
+                Target.CHAPTERS -> updateChapterList(mangaList)
+                Target.DETAILS -> updateDetails(mangaList)
+                else -> updateTrackings(mangaList)
+            }.subscribeOn(Schedulers.io())
+                    .subscribe({
+                    }, {
+                        Timber.e(it)
+                        stopSelf(startId)
+                    }, {
+                        stopSelf(startId)
+                    })
 
+        }
         return Service.START_REDELIVER_INTENT
     }
 
@@ -342,7 +359,7 @@ class LibraryUpdateService(
      * @return a pair of the inserted and removed chapters.
      */
     fun updateManga(manga: Manga): Observable<Pair<List<Chapter>, List<Chapter>>> {
-        val source = sourceManager.get(manga.source) as? HttpSource ?: return Observable.empty()
+        val source = sourceManager.getMangadex() as? HttpSource ?: return Observable.empty()
         return source.fetchChapterList(manga)
                 .map { syncChaptersWithSource(db, it, manga, source) }
     }
@@ -350,43 +367,49 @@ class LibraryUpdateService(
     /**
      * Method that updates the FollowStatus of the given list of manga. It's called in a background
      * thread, so it's safe to do heavy operations or network calls here.
-     *
-     * @return an observable delivering the progress of each update.
      */
-    private fun updateFollowStatuses(): Observable<SManga?> {
-        return Observable.just(null)
-        // Initialize the variables holding the progress of the updates.
-        /*   val count = AtomicInteger(0)
-           val estimatedTotalFollowedManga = AtomicInteger(-1)
+    private suspend fun syncFollows() {
+        val count = AtomicInteger(0)
+        val listManga = sourceManager.getMangadex().fetchAllFollows()
+        //filter all follows from Mangadex and only add reading or rereading manga to library
+        listManga.filter { it ->
+            it.follow_status == SManga.FollowStatus.RE_READING || it.follow_status == SManga.FollowStatus.READING
+        }
+                .forEach { networkManga ->
+                    showProgressNotification(networkManga, count.andIncrement, listManga.size)
 
-           val source = sourceManager.getMangadex()
-           val pager = FollowsPager(source)
-           pager.results()
-           // Emit each manga and update it sequentially.
+                    var dbManga = db.getManga(networkManga.url, sourceManager.getMangadex().id)
+                            .executeAsBlocking()
+                    if (dbManga == null) {
+                        dbManga = Manga.Companion.create(sourceManager.getMangadex().id)
+                        dbManga.favorite = true
+                    }
 
-           return Observable.from(pager)
-                   // Expand extract Mangas from MangaPages
-                   .concatMap {
-                       it.estimatedTotalSeries
-                               ?.let { it1 -> estimatedTotalFollowedManga.set(it1) } // Update estimate
-                               ?: estimatedTotalFollowedManga.compareAndSet(-1, -1) // Don't overwrite if there's no estimate
-                       Observable.from(it.mangas)
-                   }
-                   // Notify manga that will update.
-                   .doOnNext { showProgressNotification(it, count.andIncrement, estimatedTotalFollowedManga.get()) }
-                   // Update the details of the manga.
-                   .map<SManga> { networkManga ->
-                       db.getManga(networkManga.url, source.id)
-                               .executeAsBlocking()
-                               ?.let { dbManga ->
-                                   dbManga.copyFrom(networkManga)
-                                   db.insertManga(dbManga).executeAsBlocking()
-                                   dbManga
-                               }
-                   }.doOnCompleted {
-                       cancelProgressNotification()
-                   }*/
+                    dbManga.copyFrom(networkManga)
+                    db.insertManga(dbManga).executeAsBlocking()
+
+                }
+        cancelProgressNotification()
     }
+
+    /**
+     * Method that updates the syncs reading and rereading manga into neko library
+     */
+    private suspend fun syncFollowsStatus() {
+        val count = AtomicInteger(0)
+        val listManga = sourceManager.getMangadex().fetchAllFollows()
+        listManga.forEach { networkManga ->
+            showProgressNotification(networkManga, count.andIncrement, listManga.size)
+            db.getManga(networkManga.url, sourceManager.getMangadex().id)
+                    .executeAsBlocking()
+                    ?.let {
+                        it.copyFrom(networkManga)
+                        db.insertManga(it).executeAsBlocking()
+                    }
+        }
+        cancelProgressNotification()
+    }
+
 
     /**
      * Method that updates the details of the given list of manga. It's called in a background

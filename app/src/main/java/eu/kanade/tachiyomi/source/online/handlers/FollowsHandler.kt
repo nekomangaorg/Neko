@@ -9,6 +9,8 @@ import eu.kanade.tachiyomi.source.online.handlers.serializers.Result
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.MdUtil.Companion.baseUrl
 import eu.kanade.tachiyomi.source.online.utils.MdUtil.Companion.getMangaId
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import okhttp3.Headers
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
@@ -67,12 +69,28 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers) {
                 .map { it.body!!.string().isEmpty() }
     }
 
+    suspend fun fetchAllFollows(): List<SManga> {
+        return withContext(Dispatchers.IO) {
+            val listManga = mutableListOf<SManga>()
+            loop@ for (i in 1..10000) {
+                val response = client.newCall(followsListRequest(i))
+                        .execute()
+                val mangasPage = followsParse(response)
+
+                if (mangasPage.mangas.isNotEmpty()) {
+                    listManga.addAll(mangasPage.mangas)
+                }
+                if (!mangasPage.hasNextPage) {
+                    break@loop
+                }
+            }
+            listManga
+        }
+    }
+
 
     companion object {
         const val followsAllApi = "/api/?type=manga_follows"
-        const val followSelector = "div.manga-entry"
-        const val estimatedTotalFollowsSelector = "div.manga-entry:last-of-type + *" // The element immediately following the last follow entry
-        const val followsNextPageSelector = ".pagination li:not(.disabled) span[title*=last page]:not(disabled)"
         private val FOLLOW_STATUS_LIST = listOf(
                 Triple(0, SManga.FollowStatus.UNFOLLOWED, "Unfollowed"),
                 Triple(1, SManga.FollowStatus.READING, "Reading"),

@@ -48,6 +48,13 @@ interface Source {
     fun fetchFollows(page: Int): Observable<MangasPage>
 
     /**
+     * Returns a list of all Follows retrieved by Coroutines
+     *
+     * @param SManga all smanga found for user
+     */
+    suspend fun fetchAllFollows(): List<SManga>
+
+    /**
      * Returns the list of filters for the source.
      */
     fun getFilterList(): FilterList

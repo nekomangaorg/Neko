@@ -95,6 +95,10 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         return PageHandler(client, headers, preferences.imageServer().toString()).fetchPageList(chapter)
     }
 
+    override suspend fun fetchAllFollows(): List<SManga> {
+        return FollowsHandler(clientBuilder(), headers).fetchAllFollows()
+    }
+
 
     override fun isLogged(): Boolean {
         val httpUrl = baseUrl.toHttpUrlOrNull()!!
