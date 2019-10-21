@@ -6,9 +6,11 @@ import android.widget.ImageView
 import android.widget.ImageView.ScaleType
 import com.bumptech.glide.request.target.ImageViewTarget
 import com.bumptech.glide.request.transition.Transition
-import com.mikepenz.community_material_typeface_library.CommunityMaterial
+import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.typeface.IIcon
+import com.mikepenz.iconics.utils.colorInt
+import com.mikepenz.iconics.utils.sizeDp
 import eu.kanade.tachiyomi.util.getResourceColor
 import eu.kanade.tachiyomi.util.gone
 import eu.kanade.tachiyomi.util.visible
@@ -46,8 +48,9 @@ class StateImageViewTarget(view: ImageView,
         progress?.gone()
         view.scaleType = errorScaleType
 
-        view.setImageDrawable(IconicsDrawable(view.context).icon(errorIconic).sizeDp(24)
-                .color(view.context.getResourceColor(android.R.attr.textColorSecondary)))
+        view.setImageDrawable(IconicsDrawable(view.context)
+                .icon(errorIconic).sizeDp(24)
+                .colorInt(view.context.getResourceColor(android.R.attr.textColorSecondary)))
     }
 
     override fun onLoadCleared(placeholder: Drawable?) {

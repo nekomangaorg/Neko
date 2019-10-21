@@ -14,9 +14,11 @@ import com.afollestad.materialdialogs.MaterialDialog
 import com.f2prateek.rx.preferences.Preference
 import com.google.android.material.snackbar.Snackbar
 import com.jakewharton.rxbinding.support.v7.widget.queryTextChangeEvents
-import com.mikepenz.community_material_typeface_library.CommunityMaterial
 import com.mikepenz.iconics.IconicsDrawable
+import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.utils.IconicsMenuInflaterUtil
+import com.mikepenz.iconics.utils.colorInt
+import com.mikepenz.iconics.utils.sizeDp
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
@@ -266,7 +268,8 @@ open class BrowseCatalogueController(bundle: Bundle) :
                 CommunityMaterial.Icon2.cmd_view_module
             else
                 CommunityMaterial.Icon2.cmd_view_list
-            setIcon(IconicsDrawable(applicationContext!!).icon(icon).color(Color.WHITE).sizeDp(20))
+            setIcon(IconicsDrawable(applicationContext!!)
+                    .icon(icon).colorInt(Color.WHITE).sizeDp(20))
         }
     }
 

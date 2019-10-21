@@ -8,8 +8,10 @@ import android.view.ViewGroup
 import androidx.annotation.CallSuper
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
-import com.mikepenz.community_material_typeface_library.CommunityMaterial
+import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.IconicsDrawable
+import com.mikepenz.iconics.utils.colorInt
+import com.mikepenz.iconics.utils.sizeDp
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.getResourceColor
 
@@ -90,9 +92,9 @@ open class ExtendedNavigationView @JvmOverloads constructor(
             override fun getStateDrawable(context: Context): Drawable? {
                 return when (state) {
                     SORT_ASC -> IconicsDrawable(context).icon(CommunityMaterial.Icon.cmd_arrow_up)
-                            .sizeDp(16).color(context.getResourceColor(R.attr.colorAccent))
+                            .sizeDp(16).colorInt(context.getResourceColor(R.attr.colorAccent))
                     SORT_DESC -> IconicsDrawable(context).icon(CommunityMaterial.Icon.cmd_arrow_down)
-                            .sizeDp(16).color(context.getResourceColor(R.attr.colorAccent))
+                            .sizeDp(16).colorInt(context.getResourceColor(R.attr.colorAccent))
                     SORT_NONE -> ContextCompat.getDrawable(context, R.drawable.empty_drawable_16dp)
                     else -> null
                 }

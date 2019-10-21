@@ -5,8 +5,10 @@ import android.view.View
 import android.widget.CheckedTextView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.R
-import com.mikepenz.community_material_typeface_library.CommunityMaterial
 import com.mikepenz.iconics.IconicsDrawable
+import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
+import com.mikepenz.iconics.utils.colorInt
+import com.mikepenz.iconics.utils.sizeDp
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.AbstractFlexibleItem
 import eu.davidea.flexibleadapter.items.IFlexible
@@ -45,7 +47,7 @@ open class TriStateItem(val filter: Filter.TriState) : AbstractFlexibleItem<TriS
             else
                 view.context.getResourceColor(android.R.attr.textColorSecondary)
 
-            return IconicsDrawable(view.context).icon(icon).sizeDp(18).color(color)
+            return IconicsDrawable(view.context).icon(icon).sizeDp(18).colorInt(color)
         }
 
 

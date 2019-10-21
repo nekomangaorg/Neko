@@ -16,8 +16,10 @@ import com.bluelinelabs.conductor.support.RouterPagerAdapter
 import com.google.android.material.tabs.TabLayout
 import com.jakewharton.rxrelay.BehaviorRelay
 import com.jakewharton.rxrelay.PublishRelay
-import com.mikepenz.community_material_typeface_library.CommunityMaterial
+import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.IconicsDrawable
+import com.mikepenz.iconics.utils.colorInt
+import com.mikepenz.iconics.utils.sizeDp
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -140,7 +142,10 @@ class MangaController : RxController, TabbedController {
     private fun setTrackingIconInternal(visible: Boolean) {
         val tab = activity?.tabs?.getTabAt(TRACK_CONTROLLER) ?: return
         val drawable = if (visible)
-            IconicsDrawable(applicationContext!!).icon(CommunityMaterial.Icon.cmd_check).color(Color.WHITE).sizeDp(12)
+            IconicsDrawable(applicationContext!!)
+                    .icon(CommunityMaterial.Icon.cmd_check)
+                    .colorInt(Color.WHITE)
+                    .sizeDp(12)
         else null
 
         val view = tabField.get(tab) as LinearLayout

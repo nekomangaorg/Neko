@@ -156,9 +156,9 @@ dependencies {
     implementation 'org.jsoup:jsoup:1.12.1'
 
     //Icons
-    implementation "com.mikepenz:iconics-core:3.2.5@aar"
-    implementation "com.mikepenz:iconics-views:3.2.5@aar"
-    implementation 'com.mikepenz:community-material-typeface:3.5.95.1@aar'
+    implementation "com.mikepenz:iconics-core:4.0.1@aar"
+    implementation "com.mikepenz:iconics-views:4.0.1@aar"
+    implementation 'com.mikepenz:community-material-typeface:3.5.95.1-kotlin@aar'
 
     // Job scheduling
     implementation 'com.evernote:android-job:1.2.5'
