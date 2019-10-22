@@ -6,8 +6,10 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceViewHolder
 import android.util.AttributeSet
 import android.view.View
-import com.mikepenz.community_material_typeface_library.CommunityMaterial
+import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.IconicsDrawable
+import com.mikepenz.iconics.utils.colorInt
+import com.mikepenz.iconics.utils.sizeDp
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.online.HttpSource
 import kotlinx.android.synthetic.main.pref_item_source.view.*
@@ -35,7 +37,11 @@ class LoginCheckBoxPreference @JvmOverloads constructor(
         else
             ContextCompat.getColor(context, R.color.material_blue_grey_300)
 
-        holder.itemView.login.setImageDrawable(IconicsDrawable(context).icon(CommunityMaterial.Icon.cmd_account_circle).sizeDp(24).color(color))
+        holder.itemView.login
+                .setImageDrawable(IconicsDrawable(context)
+                        .icon(CommunityMaterial.Icon.cmd_account_circle)
+                        .sizeDp(24)
+                        .colorInt(color))
 
         loginFrame.visibility = View.VISIBLE
         loginFrame.setOnClickListener {

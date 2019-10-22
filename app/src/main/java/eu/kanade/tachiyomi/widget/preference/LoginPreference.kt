@@ -5,8 +5,10 @@ import androidx.core.content.ContextCompat
 import androidx.preference.Preference
 import androidx.preference.PreferenceViewHolder
 import android.util.AttributeSet
-import com.mikepenz.community_material_typeface_library.CommunityMaterial
+import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.IconicsDrawable
+import com.mikepenz.iconics.utils.colorInt
+import com.mikepenz.iconics.utils.sizeDp
 import eu.kanade.tachiyomi.R
 import kotlinx.android.synthetic.main.pref_widget_imageview.view.*
 
@@ -25,7 +27,9 @@ class LoginPreference @JvmOverloads constructor(context: Context, attrs: Attribu
             holder.itemView.image_view.setImageResource(android.R.color.transparent)
         } else {
             holder.itemView.image_view.setImageDrawable(IconicsDrawable(context)
-                    .icon(CommunityMaterial.Icon.cmd_check).color(ContextCompat.getColor(context, R.color.md_green_500)).sizeDp(20))
+                    .icon(CommunityMaterial.Icon.cmd_check)
+                    .colorInt(ContextCompat.getColor(context, R.color.md_green_500))
+                    .sizeDp(20))
 
         }
     }

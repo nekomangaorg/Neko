@@ -6,8 +6,10 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import android.view.View
 import android.view.ViewGroup
 import com.afollestad.materialdialogs.MaterialDialog
-import com.mikepenz.community_material_typeface_library.CommunityMaterial
+import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.IconicsDrawable
+import com.mikepenz.iconics.utils.colorInt
+import com.mikepenz.iconics.utils.sizeDp
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
@@ -43,13 +45,13 @@ class ReaderPageSheet(
     }
 
     override fun setContentView(view: View?) {
-        super.setContentView(view)
+        super.setContentView(view!!)
         set_as_cover_image.setImageDrawable(IconicsDrawable(context).icon(CommunityMaterial.Icon2.cmd_image)
-                .color(Color.GRAY).sizeDp(20))
+                .colorInt(Color.GRAY).sizeDp(20))
         share_image.setImageDrawable(IconicsDrawable(context).icon(CommunityMaterial.Icon2.cmd_share_variant)
-                .color(Color.GRAY).sizeDp(20))
+                .colorInt(Color.GRAY).sizeDp(20))
         save_image.setImageDrawable(IconicsDrawable(context).icon(CommunityMaterial.Icon.cmd_download)
-                .color(Color.GRAY).sizeDp(20))
+                .colorInt(Color.GRAY).sizeDp(20))
     }
 
     /**

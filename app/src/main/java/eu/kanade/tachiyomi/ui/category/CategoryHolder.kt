@@ -1,8 +1,10 @@
 package eu.kanade.tachiyomi.ui.category
 
 import android.view.View
-import com.mikepenz.community_material_typeface_library.CommunityMaterial
 import com.mikepenz.iconics.IconicsDrawable
+import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
+import com.mikepenz.iconics.utils.colorInt
+import com.mikepenz.iconics.utils.sizeDp
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.getResourceColor
@@ -38,9 +40,12 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleVie
 
         // Update circle letter image.
         itemView.post {
-            image.setImageDrawable(image.getRound(category.name.take(1).toUpperCase(),false))
+            image.setImageDrawable(image.getRound(category.name.take(1).toUpperCase(), false))
         }
-        reorder.setImageDrawable(IconicsDrawable(contentView.context).icon(CommunityMaterial.Icon2.cmd_reorder_horizontal).sizeDp(18).color(contentView.context.getResourceColor(android.R.attr.textColorPrimary)))
+        reorder.setImageDrawable(IconicsDrawable(contentView.context)
+                .icon(CommunityMaterial.Icon2.cmd_reorder_horizontal)
+                .sizeDp(18)
+                .colorInt(contentView.context.getResourceColor(android.R.attr.textColorPrimary)))
     }
 
     /**

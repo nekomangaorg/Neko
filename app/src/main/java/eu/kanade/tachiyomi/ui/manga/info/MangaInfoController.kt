@@ -24,8 +24,10 @@ import com.bumptech.glide.request.transition.Transition
 import com.jakewharton.rxbinding.support.v4.widget.refreshes
 import com.jakewharton.rxbinding.view.clicks
 import com.jakewharton.rxbinding.view.longClicks
-import com.mikepenz.community_material_typeface_library.CommunityMaterial
+import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.IconicsDrawable
+import com.mikepenz.iconics.utils.colorInt
+import com.mikepenz.iconics.utils.sizeDp
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -102,17 +104,17 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
             copyToClipboard(manga_artist_label.text.toString(), manga_artist.text.toString())
         }
 
-       /* manga_artist.clicks().subscribeUntilDestroy {
-            performGlobalSearch(manga_artist.text.toString())
-        }*/
+        /* manga_artist.clicks().subscribeUntilDestroy {
+             performGlobalSearch(manga_artist.text.toString())
+         }*/
 
         manga_author.longClicks().subscribeUntilDestroy {
             copyToClipboard(manga_author.text.toString(), manga_author.text.toString())
         }
 
-       /* manga_author.clicks().subscribeUntilDestroy {
-            performGlobalSearch(manga_author.text.toString())
-        }*/
+        /* manga_author.clicks().subscribeUntilDestroy {
+             performGlobalSearch(manga_author.text.toString())
+         }*/
 
         manga_summary.longClicks().subscribeUntilDestroy {
             copyToClipboard(view.context.getString(R.string.description), manga_summary.text.toString())
@@ -127,7 +129,11 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.manga_info, menu)
-        menu.findItem(R.id.action_share).icon = IconicsDrawable(applicationContext!!).icon(CommunityMaterial.Icon2.cmd_share_variant).sizeDp(18).color(Color.WHITE)
+        menu.findItem(R.id.action_share).icon =
+                IconicsDrawable(applicationContext!!)
+                        .icon(CommunityMaterial.Icon2.cmd_share_variant)
+                        .sizeDp(18)
+                        .colorInt(Color.WHITE)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -321,7 +327,7 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         }
 
         parentController?.router?.pushController(MangaWebViewController(source.id, url)
-            .withFadeTransaction())
+                .withFadeTransaction())
     }
 
     /**
@@ -354,9 +360,15 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
 
         fab_favorite?.setImageDrawable(
                 if (isFavorite) {
-                    IconicsDrawable(applicationContext!!).icon(CommunityMaterial.Icon2.cmd_heart).color(Color.WHITE).sizeDp(20)
+                    IconicsDrawable(applicationContext!!)
+                            .icon(CommunityMaterial.Icon2.cmd_heart)
+                            .colorInt(Color.WHITE)
+                            .sizeDp(20)
                 } else {
-                    IconicsDrawable(applicationContext!!).icon(CommunityMaterial.Icon2.cmd_heart_outline).color(Color.WHITE).sizeDp(20)
+                    IconicsDrawable(applicationContext!!)
+                            .icon(CommunityMaterial.Icon2.cmd_heart_outline)
+                            .colorInt(Color.WHITE)
+                            .sizeDp(20)
                 })
     }
 

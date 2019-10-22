@@ -2,8 +2,10 @@ package eu.kanade.tachiyomi.ui.manga.chapter
 
 import android.view.View
 import android.widget.PopupMenu
-import com.mikepenz.community_material_typeface_library.CommunityMaterial
+import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.IconicsDrawable
+import com.mikepenz.iconics.utils.colorInt
+import com.mikepenz.iconics.utils.sizeDp
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.model.Download
@@ -39,7 +41,7 @@ class ChapterHolder(
         // Set the correct drawable for dropdown and update the tint to match theme.
         // Set the correct drawable for dropdown and update the tint to match theme.
         chapter_menu.setImageDrawable(IconicsDrawable(view.context).icon(CommunityMaterial.Icon.cmd_dots_vertical)
-                .sizeDp(18).color(view.context.getResourceColor(R.attr.icon_color)))
+                .sizeDp(18).colorInt(view.context.getResourceColor(R.attr.icon_color)))
         // Set correct text color
         chapter_title.setTextColor(if (chapter.read) adapter.readColor else adapter.unreadColor)
         if (chapter.bookmark) chapter_title.setTextColor(adapter.bookmarkedColor)

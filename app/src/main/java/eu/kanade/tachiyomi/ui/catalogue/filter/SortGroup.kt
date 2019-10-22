@@ -3,8 +3,10 @@ package eu.kanade.tachiyomi.ui.catalogue.filter
 import android.graphics.Color
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
-import com.mikepenz.community_material_typeface_library.CommunityMaterial
 import com.mikepenz.iconics.IconicsDrawable
+import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
+import com.mikepenz.iconics.utils.colorInt
+import com.mikepenz.iconics.utils.sizeDp
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.AbstractExpandableHeaderItem
 import eu.davidea.flexibleadapter.items.IFlexible
@@ -38,7 +40,10 @@ class SortGroup(val filter: Filter.Sort) : AbstractExpandableHeaderItem<SortGrou
         else
             CommunityMaterial.Icon.cmd_chevron_right
 
-        holder.icon.setImageDrawable(IconicsDrawable(holder.contentView.context).icon(icon).color(Color.WHITE).sizeDp(16))
+        holder.icon
+                .setImageDrawable(IconicsDrawable(holder.contentView.context)
+                        .icon(icon)
+                        .colorInt(Color.WHITE).sizeDp(16))
 
         holder.itemView.setOnClickListener(holder)
 

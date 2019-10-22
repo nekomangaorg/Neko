@@ -4,8 +4,10 @@ import android.view.View
 import android.widget.CheckedTextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
-import com.mikepenz.community_material_typeface_library.CommunityMaterial
 import com.mikepenz.iconics.IconicsDrawable
+import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
+import com.mikepenz.iconics.utils.colorInt
+import com.mikepenz.iconics.utils.sizeDp
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.AbstractSectionableItem
 import eu.davidea.flexibleadapter.items.IFlexible
@@ -37,9 +39,9 @@ class SortItem(val name: String, val group: SortGroup) : AbstractSectionableItem
 
         fun getIcon() = when (filter.state) {
             Filter.Sort.Selection(i, false) -> IconicsDrawable(view.context).icon(CommunityMaterial.Icon.cmd_arrow_down)
-                    .sizeDp(16).color(view.context.getResourceColor(R.attr.colorAccent))
+                    .sizeDp(16).colorInt(view.context.getResourceColor(R.attr.colorAccent))
             Filter.Sort.Selection(i, true) -> IconicsDrawable(view.context).icon(CommunityMaterial.Icon.cmd_arrow_up)
-                    .sizeDp(16).color(view.context.getResourceColor(R.attr.colorAccent))
+                    .sizeDp(16).colorInt(view.context.getResourceColor(R.attr.colorAccent))
             else -> ContextCompat.getDrawable(view.context, R.drawable.empty_drawable_16dp)
         }
 

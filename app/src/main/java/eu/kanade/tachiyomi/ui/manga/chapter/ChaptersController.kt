@@ -14,9 +14,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import com.jakewharton.rxbinding.support.v4.widget.refreshes
 import com.jakewharton.rxbinding.view.clicks
-import com.mikepenz.community_material_typeface_library.CommunityMaterial
+import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.utils.IconicsMenuInflaterUtil
+import com.mikepenz.iconics.utils.colorInt
+import com.mikepenz.iconics.utils.sizeDp
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.SelectableAdapter
 import eu.kanade.tachiyomi.R
@@ -89,7 +91,10 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
         swipe_refresh.refreshes().subscribeUntilDestroy { fetchChaptersFromSource() }
 
         fab.setImageDrawable(
-                IconicsDrawable(applicationContext!!).icon(CommunityMaterial.Icon2.cmd_play).color(Color.WHITE).sizeDp(20)
+                IconicsDrawable(applicationContext!!)
+                        .icon(CommunityMaterial.Icon2.cmd_play)
+                        .colorInt(Color.WHITE)
+                        .sizeDp(20)
         )
 
         fab.clicks().subscribeUntilDestroy {
@@ -144,7 +149,7 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
 
 
         menu.findItem(R.id.action_sort).icon = IconicsDrawable(applicationContext!!).icon(CommunityMaterial.Icon2.cmd_sort_numeric)
-                .sizeDp(20).color(Color.WHITE)
+                .sizeDp(20).colorInt(Color.WHITE)
 
         // Set correct checkbox values.
         menuFilterRead.isChecked = presenter.onlyRead()
