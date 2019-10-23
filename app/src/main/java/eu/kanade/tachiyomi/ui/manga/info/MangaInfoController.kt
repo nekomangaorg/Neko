@@ -378,7 +378,8 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
     private fun fetchMangaFromSource() {
         setRefreshing(true)
         manga_cover.setImageResource(0)
-        backdrop.setImageResource(0)
+        // Use safe-call since the backdrop view does not exist when in landscape mode
+        backdrop?.setImageResource(0)
         // Call presenter and start fetching manga information
         presenter.fetchMangaFromSource()
     }
