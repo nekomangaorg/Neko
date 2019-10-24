@@ -178,13 +178,14 @@ object ImageUtil {
             darkBG = false
         if (topIsBlackStreak && bottomIsBlackStreak)
             darkBG = true
+        val whiteColor = android.R.attr.colorBackground
         if (darkBG) {
             if (isWhite(image.getPixel(left, bot)) && isWhite(image.getPixel(right, bot)))
                 return GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,
-                        intArrayOf(blackPixel, blackPixel, Color.WHITE, Color.WHITE))
+                        intArrayOf(blackPixel, blackPixel, whiteColor, whiteColor))
             else if (isWhite(image.getPixel(left, top)) && isWhite(image.getPixel(right, top)))
                 return GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,
-                        intArrayOf(Color.WHITE, Color.WHITE, blackPixel, blackPixel))
+                        intArrayOf(whiteColor, whiteColor, blackPixel, blackPixel))
             else
                 return ColorDrawable(blackPixel)
         }
@@ -192,13 +193,13 @@ object ImageUtil {
                         && isDark(image.getPixel(left - offsetX, top)) && isDark(image.getPixel(right + offsetX, top))
                         && (topMidIsDark || overallBlackPixels > 9)))
             return GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,
-                    intArrayOf(blackPixel, blackPixel, Color.WHITE, Color.WHITE))
+                    intArrayOf(blackPixel, blackPixel, whiteColor, whiteColor))
         else if (bottomIsBlackStreak || (botLeftIsDark && botRightIsDark
                         && isDark(image.getPixel(left - offsetX, bot)) && isDark(image.getPixel(right + offsetX, bot))
                         && (isDark(image.getPixel(midX, bot)) || overallBlackPixels > 9)))
             return GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,
-                    intArrayOf(Color.WHITE, Color.WHITE, blackPixel, blackPixel))
-        return ColorDrawable(Color.WHITE)
+                    intArrayOf(whiteColor, whiteColor, blackPixel, blackPixel))
+        return ColorDrawable(whiteColor)
     }
 
     fun Boolean.toInt() = if (this) 1 else 0

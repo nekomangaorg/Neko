@@ -3,12 +3,18 @@ package eu.kanade.tachiyomi.ui.main
 import android.animation.ObjectAnimator
 import android.app.SearchManager
 import android.content.Intent
+import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Bundle
 import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
+import android.support.v7.app.AppCompatDelegate
+import android.support.v7.app.AppCompatDelegate.*
 import android.support.v7.graphics.drawable.DrawerArrowDrawable
+import android.view.View
 import android.view.ViewGroup
+import android.view.WindowInsets
+import android.widget.LinearLayout
 import com.bluelinelabs.conductor.*
 import eu.kanade.tachiyomi.Migrations
 import eu.kanade.tachiyomi.R
@@ -50,10 +56,14 @@ class MainActivity : BaseActivity() {
     lateinit var tabAnimator: TabsAnimator
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        setDefaultNightMode(when (preferences.theme()) {
+            1 -> MODE_NIGHT_NO
+            2, 3, 4 -> MODE_NIGHT_YES
+            else -> MODE_NIGHT_FOLLOW_SYSTEM
+        })
         setTheme(when (preferences.theme()) {
-            2 -> R.style.Theme_Tachiyomi_Dark
-            3 -> R.style.Theme_Tachiyomi_Amoled
-            4 -> R.style.Theme_Tachiyomi_DarkBlue
+            3, 6 -> R.style.Theme_Tachiyomi_Amoled
+            4, 7 -> R.style.Theme_Tachiyomi_DarkBlue
             else -> R.style.Theme_Tachiyomi
         })
         super.onCreate(savedInstanceState)
@@ -63,7 +73,7 @@ class MainActivity : BaseActivity() {
             finish()
             return
         }
-
+        //AppCompatDelegate.setDefaultNightMode(MODE_NIGHT_NO)
         setContentView(R.layout.main_activity)
 
         setSupportActionBar(toolbar)
@@ -102,6 +112,15 @@ class MainActivity : BaseActivity() {
         }
 
         val container: ViewGroup = findViewById(R.id.controller_container)
+
+        val content: LinearLayout = findViewById(R.id.main_content)
+        container.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
+          View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
+          View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+        content.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
+          View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
+          View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+        content.setOnApplyWindowInsetsListener(NoopWindowInsetsListener)
 
         router = Conductor.attachRouter(this, container, savedInstanceState)
         if (!router.hasRootController()) {
@@ -279,4 +298,18 @@ class MainActivity : BaseActivity() {
         private const val URL_HELP = "https://github.com/inorichi/tachiyomi/wiki"
     }
 
+}
+
+object NoopWindowInsetsListener : View.OnApplyWindowInsetsListener {
+    override fun onApplyWindowInsets(v: View, insets: WindowInsets): WindowInsets {
+        v.setPadding(0,insets.systemWindowInsetTop,0,0)
+        return insets
+    }
+}
+
+object NoopWindowInsetsListener2 : View.OnApplyWindowInsetsListener {
+    override fun onApplyWindowInsets(v: View, insets: WindowInsets): WindowInsets {
+        v.setPadding(0,0,0,insets.systemWindowInsetBottom)
+        return insets
+    }
 }

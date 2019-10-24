@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <style name="Theme.Base" parent="Theme.AppCompat.DayNight.NoActionBar">
+    <item name="colorPrimary">@color/colorDarkPrimary</item>
+    <item name="colorPrimaryDark">@color/colorDarkPrimaryDark</item>
+    <item name="colorAccent">@color/colorAccentDark</item>
+    <item name="android:textColorPrimary">@color/textColorPrimaryDark</item>
+    <item name="android:textColorSecondary">@color/textColorSecondaryDark</item>
+    <item name="android:textColorHint">@color/textColorHintDark</item>
+    <item name="android:textColorPrimaryInverse">@color/textColorPrimaryLight</item>
+    <item name="android:textColorSecondaryInverse">@color/textColorSecondaryLight</item>
+    <item name="android:textColorHintInverse">@color/textColorHintLight</item>
+    <item name="android:colorBackground">@color/backgroundDark</item>
+    <item name="android:listSelector">?colorAccent</item>
+    <item name="android:divider">@color/dividerDark</item>
+    <item name="android:listDivider">@drawable/line_divider_dark</item>
+
+    <!-- Themes -->
+    <item name="windowActionModeOverlay">true</item>
+    <item name="actionBarTheme">@style/ThemeOverlay.AppCompat.Dark.ActionBar</item>
+    <item name="actionBarPopupTheme">@style/ThemeOverlay.AppCompat</item>
+    <item name="preferenceTheme">@style/PreferenceThemeOverlay.Material</item>
+    <item name="md_background_color">@color/dialogDark</item>
+    <item name="alertDialogTheme">@style/Theme.AlertDialog.Dark</item>
+
+
+    <!-- Custom Attributes-->
+    <item name="navigation_view_theme">@style/Theme.Widget.NavigationView.Dark</item>
+    <item name="selectable_list_drawable">@drawable/list_item_selector_dark</item>
+    <item name="selectable_library_drawable">@drawable/library_item_selector_dark</item>
+    <item name="text_color_primary">@color/textColorPrimaryDark</item>
+    <item name="background_card">@color/dialogDark</item>
+    <item name="icon_color">@color/iconColorDark</item>
+
+    <!-- Attributes specific for SDK 21 and up  -->
+    <item name="android:statusBarColor">@android:color/transparent</item>
+    <item name="android:navigationBarColor">@color/colorDarkPrimaryDark</item>
+  </style>
+
+  <style name="Theme.Tachiyomi" parent="Theme.Base">
+    <!-- Attributes specific for SDK 21 and up  -->
+    <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+    <item name="android:statusBarColor">@android:color/transparent</item>
+    <item name="android:navigationBarColor">@color/colorDarkPrimaryDark</item>
+  </style>
+
+  <style name="Theme.Base.Reader.Light" parent="Theme.Base">
+    <item name="colorPrimary">@color/colorDarkPrimary</item>
+    <item name="colorPrimaryDark">@color/colorDarkPrimaryDark</item>
+    <item name="android:colorBackground">@color/backgroundDark</item>
+  </style>
+
+  <style name="Theme.Tachiyomi.DarkBlue" parent="Theme.Base">
+    <item name="colorPrimary">@color/colorPrimary</item>
+    <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+  </style>
+
+  <!--==============-->
+  <!-- Amoled Theme -->
+  <!--==============-->
+  <style name="Theme.Base.Amoled" parent="Theme.Base">
+    <item name="colorPrimary">@color/colorAmoledPrimary</item>
+    <item name="colorPrimaryDark">@color/colorAmoledPrimary</item>
+    <item name="android:colorBackground">@color/md_black_1000</item>
+
+    <!-- Custom Attributes-->
+    <item name="selectable_list_drawable">@drawable/list_item_selector_amoled</item>
+    <item name="selectable_library_drawable">@drawable/library_item_selector_amoled</item>
+    <item name="background_card">@color/dialog_amoled</item>
+  </style>
+</resources>

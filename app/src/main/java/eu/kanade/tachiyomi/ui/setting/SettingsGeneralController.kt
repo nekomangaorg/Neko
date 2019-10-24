@@ -1,8 +1,10 @@
 package eu.kanade.tachiyomi.ui.setting
 
 import android.app.Dialog
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import android.support.v7.app.AppCompatDelegate
 import android.support.v7.preference.PreferenceScreen
 import android.view.View
 import com.afollestad.materialdialogs.MaterialDialog
@@ -53,12 +55,18 @@ class SettingsGeneralController : SettingsController() {
             key = Keys.theme
             titleRes = R.string.pref_theme
             entriesRes = arrayOf(R.string.light_theme, R.string.dark_theme,
-                    R.string.amoled_theme, R.string.darkblue_theme)
-            entryValues = arrayOf("1", "2", "3", "4")
-            defaultValue = "1"
+                  R.string.amoled_theme, R.string.darkblue_theme,
+                  R.string.system_theme, R.string.system_amoled_theme, R.string.system_darkblue_theme)
+            entryValues = arrayOf("1", "2", "3", "4", "5", "6", "7")
+            defaultValue = "5"
             summary = "%s"
 
-            onChange {
+            onChange {newValue ->
+                AppCompatDelegate.setDefaultNightMode(when (newValue) {
+                    "1" -> AppCompatDelegate.MODE_NIGHT_NO
+                    "2", "3", "4" -> AppCompatDelegate.MODE_NIGHT_YES
+                    else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+                })
                 activity?.recreate()
                 true
             }

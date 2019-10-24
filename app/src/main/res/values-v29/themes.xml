@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <!-- values-v29/themes.xml -->
+  <style name="Theme.Tachiyomi" parent="Theme.Base">
+    <!-- Attributes specific for SDK 21 and up  -->
+    <item name="android:statusBarColor">@android:color/transparent</item>
+    <item name="android:navigationBarColor">@android:color/transparent</item>
+  </style>
+
+  <style name="Theme.Tachiyomi.DarkBlue" parent="Theme.Base">
+    <item name="colorPrimary">@color/colorPrimary</item>
+    <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+
+    <!-- Attributes specific for SDK 21 and up  -->
+    <item name="android:statusBarColor">@android:color/transparent</item>
+    <item name="android:navigationBarColor">@android:color/transparent</item>
+  </style>
+
+  <!--==============-->
+  <!-- Amoled Theme -->
+  <!--==============-->
+  <style name="Theme.Tachiyomi.Amoled" parent="Theme.Base.Amoled">
+    <!-- Attributes specific for SDK 21 and up  -->
+    <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+    <item name="android:statusBarColor">@android:color/transparent</item>
+    <item name="android:navigationBarColor">@android:color/transparent</item>
+  </style>
+</resources>
