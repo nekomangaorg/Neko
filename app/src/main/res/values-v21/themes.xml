@@ -7,7 +7,7 @@
         <!-- Attributes specific for SDK 21 and up  -->
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:navigationBarColor">@color/colorPrimaryDark</item>
+        <item name="android:navigationBarColor">@color/colorPrimary</item>
     </style>
 
     <style name="Theme.Tachiyomi.DarkBlue" parent="Theme.Base">
