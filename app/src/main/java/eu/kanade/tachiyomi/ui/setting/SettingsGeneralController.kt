@@ -61,12 +61,7 @@ class SettingsGeneralController : SettingsController() {
             defaultValue = "5"
             summary = "%s"
 
-            onChange {newValue ->
-                AppCompatDelegate.setDefaultNightMode(when (newValue) {
-                    "1" -> AppCompatDelegate.MODE_NIGHT_NO
-                    "2", "3", "4" -> AppCompatDelegate.MODE_NIGHT_YES
-                    else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-                })
+            onChange {
                 activity?.recreate()
                 true
             }

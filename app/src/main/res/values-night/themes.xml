@@ -16,7 +16,6 @@
     <item name="android:listDivider">@drawable/line_divider_dark</item>
 
     <!-- Themes -->
-    <item name="windowActionModeOverlay">true</item>
     <item name="actionBarTheme">@style/ThemeOverlay.AppCompat.Dark.ActionBar</item>
     <item name="actionBarPopupTheme">@style/ThemeOverlay.AppCompat</item>
     <item name="preferenceTheme">@style/PreferenceThemeOverlay.Material</item>
