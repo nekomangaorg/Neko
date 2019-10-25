@@ -13,6 +13,8 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
+import eu.kanade.tachiyomi.ui.main.doOnApplyWindowInsets
+import eu.kanade.tachiyomi.ui.main.updatePaddingRelative
 import eu.kanade.tachiyomi.util.inflate
 import eu.kanade.tachiyomi.util.plusAssign
 import eu.kanade.tachiyomi.util.toast
@@ -87,6 +89,9 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
                 swipe_refresh.isEnabled = firstPos <= 0
             }
         })
+        recycler.doOnApplyWindowInsets { v, insets, padding ->
+            v.updatePaddingRelative(bottom = padding.bottom + insets.systemWindowInsetBottom)
+        }
 
         // Double the distance required to trigger sync
         swipe_refresh.setDistanceToTriggerSync((2 * 64 * resources.displayMetrics.density).toInt())

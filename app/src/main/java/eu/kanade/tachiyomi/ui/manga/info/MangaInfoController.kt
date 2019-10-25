@@ -40,6 +40,8 @@ import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.catalogue.global_search.CatalogueSearchController
 import eu.kanade.tachiyomi.ui.library.ChangeMangaCategoriesDialog
 import eu.kanade.tachiyomi.ui.main.MainActivity
+import eu.kanade.tachiyomi.ui.main.doOnApplyWindowInsets
+import eu.kanade.tachiyomi.ui.main.updatePaddingRelative
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.util.getResourceColor
 import eu.kanade.tachiyomi.util.openInBrowser
@@ -128,6 +130,11 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
             copyToClipboard(view.context.getString(R.string.title), presenter.manga.title)
         }
 
+        view.doOnApplyWindowInsets { v, insets, padding ->
+            v.updatePaddingRelative(
+              bottom = padding.bottom + insets.systemWindowInsetBottom
+            )
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

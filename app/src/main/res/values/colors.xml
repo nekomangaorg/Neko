@@ -2,10 +2,10 @@
 <resources>
     <!-- Application Colors -->
     <color name="colorPrimary">#54759E</color>
-    <color name="colorPrimaryDark">#435E7E</color>
+    <color name="colorPrimaryDark">#54759E</color>
     <!-- Dark Application Colors -->
     <color name="colorDarkPrimary">#212121</color>
-    <color name="colorDarkPrimaryDark">#1C1C1D</color>
+    <color name="colorDarkPrimaryDark">#212121</color>
     <color name="colorAmoledPrimary">@color/md_black_1000</color>
 
     <!-- Light Theme -->

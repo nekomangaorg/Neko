@@ -6,7 +6,11 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Bundle
+import android.support.annotation.Px
+import android.support.annotation.RequiresApi
 import android.support.v4.view.GravityCompat
+import android.support.v4.view.ViewCompat
+import android.support.v4.view.WindowInsetsCompat
 import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.AppCompatDelegate
 import android.support.v7.app.AppCompatDelegate.*
@@ -307,7 +311,8 @@ class MainActivity : BaseActivity() {
 
 object NoopWindowInsetsListener : View.OnApplyWindowInsetsListener {
     override fun onApplyWindowInsets(v: View, insets: WindowInsets): WindowInsets {
-        v.setPadding(0,insets.systemWindowInsetTop,0,0)
+        v.setPadding(insets.systemWindowInsetLeft,insets.systemWindowInsetTop,insets.systemWindowInsetRight,0)
+        //insets.consumeSystemWindowInsets()
         return insets
     }
 }
@@ -315,6 +320,71 @@ object NoopWindowInsetsListener : View.OnApplyWindowInsetsListener {
 object NoopWindowInsetsListener2 : View.OnApplyWindowInsetsListener {
     override fun onApplyWindowInsets(v: View, insets: WindowInsets): WindowInsets {
         v.setPadding(0,0,0,insets.systemWindowInsetBottom)
+        insets.consumeSystemWindowInsets()
         return insets
     }
+}
+
+fun View.doOnApplyWindowInsets(f: (View, WindowInsetsCompat, ViewPaddingState) -> Unit) {
+    // Create a snapshot of the view's padding state
+    val paddingState = createStateForView(this)
+    ViewCompat.setOnApplyWindowInsetsListener(this) { v, insets ->
+        f(v, insets, paddingState)
+        insets
+    }
+    requestApplyInsetsWhenAttached()
+}
+
+fun View.requestApplyInsetsWhenAttached() {
+    if (isAttachedToWindow) {
+        requestApplyInsets()
+    } else {
+        addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
+            override fun onViewAttachedToWindow(v: View) {
+                v.requestApplyInsets()
+            }
+
+            override fun onViewDetachedFromWindow(v: View) = Unit
+        })
+    }
+}
+
+inline fun <reified T : ViewGroup.LayoutParams> View.updateLayoutParams(block: T.() -> Unit) {
+    val params = layoutParams as T
+    block(params)
+    layoutParams = params
+}
+
+inline val View.marginBottom: Int
+    get() = (layoutParams as? ViewGroup.MarginLayoutParams)?.bottomMargin ?: 0
+
+inline fun View.updatePadding(
+  @Px left: Int = paddingLeft,
+  @Px top: Int = paddingTop,
+  @Px right: Int = paddingRight,
+  @Px bottom: Int = paddingBottom
+) {
+    setPadding(left, top, right, bottom)
+}
+
+private fun createStateForView(view: View) = ViewPaddingState(view.paddingLeft,
+  view.paddingTop, view.paddingRight, view.paddingBottom, view.paddingStart, view.paddingEnd)
+
+data class ViewPaddingState(
+  val left: Int,
+  val top: Int,
+  val right: Int,
+  val bottom: Int,
+  val start: Int,
+  val end: Int
+)
+
+@RequiresApi(17)
+inline fun View.updatePaddingRelative(
+  @Px start: Int = paddingStart,
+  @Px top: Int = paddingTop,
+  @Px end: Int = paddingEnd,
+  @Px bottom: Int = paddingBottom
+) {
+    setPaddingRelative(start, top, end, bottom)
 }

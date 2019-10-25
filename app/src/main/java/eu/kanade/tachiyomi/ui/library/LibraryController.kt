@@ -31,10 +31,14 @@ import eu.kanade.tachiyomi.ui.base.controller.TabbedController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.category.CategoryController
 import eu.kanade.tachiyomi.ui.main.MainActivity
+import eu.kanade.tachiyomi.ui.main.doOnApplyWindowInsets
+import eu.kanade.tachiyomi.ui.main.updateLayoutParams
+import eu.kanade.tachiyomi.ui.main.updatePaddingRelative
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.ui.migration.MigrationController
 import eu.kanade.tachiyomi.util.inflate
 import eu.kanade.tachiyomi.util.toast
+import kotlinx.android.synthetic.main.chapters_controller.*
 import kotlinx.android.synthetic.main.library_controller.*
 import kotlinx.android.synthetic.main.main_activity.*
 import rx.Subscription
@@ -187,7 +191,12 @@ class LibraryController(
                 is LibraryNavigationView.BadgeGroup -> onDownloadBadgeChanged()
             }
         }
-
+        view.doOnApplyWindowInsets { v, insets, padding ->
+            v.updatePaddingRelative(
+              bottom = padding.bottom + insets.systemWindowInsetBottom,
+              top = padding.top + insets.systemWindowInsetTop
+            )
+        }
         return view
     }
 

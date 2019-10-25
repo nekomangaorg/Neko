@@ -21,6 +21,12 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.base.controller.popControllerWithTag
+import eu.kanade.tachiyomi.ui.main.NoopWindowInsetsListener2
+import eu.kanade.tachiyomi.ui.main.doOnApplyWindowInsets
+import eu.kanade.tachiyomi.ui.main.marginBottom
+import eu.kanade.tachiyomi.ui.main.updateLayoutParams
+import eu.kanade.tachiyomi.ui.main.updatePadding
+import eu.kanade.tachiyomi.ui.main.updatePaddingRelative
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.getCoordinates
@@ -82,6 +88,17 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
         recycler.setHasFixedSize(true)
         adapter?.fastScroller = fast_scroller
 
+        val fabBaseMarginBottom = fab?.marginBottom ?: 0
+        recycler.doOnApplyWindowInsets { v, insets, padding ->
+            v.updatePaddingRelative(bottom = padding.bottom + insets.systemWindowInsetBottom)
+            fab?.updateLayoutParams<ViewGroup.MarginLayoutParams>  {
+                bottomMargin = fabBaseMarginBottom + insets.systemWindowInsetBottom
+            }
+            fast_scroller?.updateLayoutParams<ViewGroup.MarginLayoutParams>  {
+                bottomMargin = insets.systemWindowInsetBottom
+            }
+        }
+        //fast_scroller.setOnApplyWindowInsetsListener(NoopWindowInsetsListener2)
         swipe_refresh.refreshes().subscribeUntilDestroy { fetchChaptersFromSource() }
 
         fab.clicks().subscribeUntilDestroy {

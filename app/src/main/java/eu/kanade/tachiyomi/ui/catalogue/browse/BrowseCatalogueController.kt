@@ -22,6 +22,8 @@ import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.base.controller.SecondaryDrawerController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.library.ChangeMangaCategoriesDialog
+import eu.kanade.tachiyomi.ui.main.doOnApplyWindowInsets
+import eu.kanade.tachiyomi.ui.main.updatePaddingRelative
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.ui.manga.info.MangaWebViewController
 import eu.kanade.tachiyomi.util.*
@@ -151,6 +153,13 @@ open class BrowseCatalogueController(bundle: Bundle) :
             val newFilters = presenter.source.getFilterList()
             presenter.sourceFilters = newFilters
             navView.setFilters(presenter.filterItems)
+        }
+
+        navView.doOnApplyWindowInsets { v, insets, padding ->
+            v.updatePaddingRelative(
+              bottom = padding.bottom + insets.systemWindowInsetBottom,
+              top = padding.top + insets.systemWindowInsetTop
+            )
         }
         return navView
     }

@@ -47,7 +47,7 @@
   <!--==============-->
   <!-- Amoled Theme -->
   <!--==============-->
-  <style name="Theme.Base.Amoled" parent="Theme.Base">
+  <style name="Theme.Tachiyomi.Amoled" parent="Theme.Base">
     <item name="colorPrimary">@color/colorAmoledPrimary</item>
     <item name="colorPrimaryDark">@color/colorAmoledPrimary</item>
     <item name="android:colorBackground">@color/md_black_1000</item>

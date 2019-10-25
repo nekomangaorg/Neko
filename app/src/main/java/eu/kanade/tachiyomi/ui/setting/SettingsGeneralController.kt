@@ -61,7 +61,18 @@ class SettingsGeneralController : SettingsController() {
             defaultValue = "5"
             summary = "%s"
 
-            onChange {
+            onChange {newValue ->
+              val activity = activity ?: return@onChange false
+              val app = activity.application
+              AppCompatDelegate.setDefaultNightMode(when (newValue) {
+                "1" -> AppCompatDelegate.MODE_NIGHT_NO
+                "2", "3", "4" -> AppCompatDelegate.MODE_NIGHT_YES
+                else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+              })
+              //LocaleHelper.changeLocale(newValue.toString())
+              //LocaleHelper.updateConfiguration(app, app.resources.configuration)
+              //activity?.recreate()
+
                 activity?.recreate()
                 true
             }
