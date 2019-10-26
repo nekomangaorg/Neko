@@ -6,6 +6,7 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import androidx.core.content.ContextCompat
 import androidx.preference.PreferenceScreen
 import com.afollestad.materialdialogs.MaterialDialog
@@ -172,9 +173,8 @@ class SettingsDownloadController : SettingsController() {
                     .build()
         }
 
-        @Suppress("DEPRECATION")
         private fun getExternalDirs(): List<File> {
-            val defaultDir = activity!!.getExternalFilesDir(null)!!.absolutePath +
+            val defaultDir = Environment.getExternalStorageDirectory().absolutePath +
                     File.separator + resources?.getString(R.string.app_name) +
                     File.separator + "downloads"
 
