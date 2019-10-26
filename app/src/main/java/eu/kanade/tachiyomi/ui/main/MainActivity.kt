@@ -5,7 +5,9 @@ import android.app.SearchManager
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
+import android.support.annotation.NonNull
 import android.support.annotation.Px
 import android.support.annotation.RequiresApi
 import android.support.v4.view.GravityCompat
@@ -120,6 +122,12 @@ class MainActivity : BaseActivity() {
             true
         }
 
+        nav_view.doOnApplyWindowInsets { v, insets, padding ->
+            v.updatePaddingRelative(
+              start = padding.left + insets.systemWindowInsetLeft
+            )
+        }
+
         val container: ViewGroup = findViewById(R.id.controller_container)
 
         val content: LinearLayout = findViewById(R.id.main_content)
@@ -130,6 +138,10 @@ class MainActivity : BaseActivity() {
           View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
           View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
         content.setOnApplyWindowInsetsListener(NoopWindowInsetsListener)
+        val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+        if (Build.VERSION.SDK_INT >= 26 && currentNightMode == Configuration.UI_MODE_NIGHT_NO) {
+            content.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+        }
 
         router = Conductor.attachRouter(this, container, savedInstanceState)
         if (!router.hasRootController()) {
@@ -319,16 +331,17 @@ object NoopWindowInsetsListener : View.OnApplyWindowInsetsListener {
 
 object NoopWindowInsetsListener2 : View.OnApplyWindowInsetsListener {
     override fun onApplyWindowInsets(v: View, insets: WindowInsets): WindowInsets {
-        v.setPadding(0,0,0,insets.systemWindowInsetBottom)
+        v.setPadding(0,0,0,insets
+            .systemWindowInsetBottom)
         insets.consumeSystemWindowInsets()
         return insets
     }
 }
 
-fun View.doOnApplyWindowInsets(f: (View, WindowInsetsCompat, ViewPaddingState) -> Unit) {
+fun View.doOnApplyWindowInsets(f: (View, WindowInsets, ViewPaddingState) -> Unit) {
     // Create a snapshot of the view's padding state
     val paddingState = createStateForView(this)
-    ViewCompat.setOnApplyWindowInsetsListener(this) { v, insets ->
+    setOnApplyWindowInsetsListener { v, insets ->
         f(v, insets, paddingState)
         insets
     }

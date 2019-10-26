@@ -98,7 +98,6 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
                 bottomMargin = insets.systemWindowInsetBottom
             }
         }
-        //fast_scroller.setOnApplyWindowInsetsListener(NoopWindowInsetsListener2)
         swipe_refresh.refreshes().subscribeUntilDestroy { fetchChaptersFromSource() }
 
         fab.clicks().subscribeUntilDestroy {

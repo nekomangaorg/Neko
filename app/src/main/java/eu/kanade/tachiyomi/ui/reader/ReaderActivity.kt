@@ -21,6 +21,9 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.base.activity.BaseRxActivity
+import eu.kanade.tachiyomi.ui.main.doOnApplyWindowInsets
+import eu.kanade.tachiyomi.ui.main.updateLayoutParams
+import eu.kanade.tachiyomi.ui.main.updatePaddingRelative
 import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.AddToLibraryFirst
 import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.Error
 import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.Success
@@ -136,6 +139,16 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
 
         config = ReaderConfig()
         initializeMenu()
+        val container: ViewGroup = findViewById(R.id.reader_container)
+        val readerBHeight = reader_menu_bottom.layoutParams.height
+        container.doOnApplyWindowInsets { _, insets, padding ->
+            val bottomInset = insets.mandatorySystemGestureInsets.bottom - insets
+                .systemWindowInsetBottom
+            reader_menu_bottom.updateLayoutParams<ViewGroup.MarginLayoutParams>  {
+                height = readerBHeight + bottomInset
+            }
+            reader_menu_bottom.updatePaddingRelative(bottom = padding.bottom + bottomInset)
+        }
     }
 
     /**

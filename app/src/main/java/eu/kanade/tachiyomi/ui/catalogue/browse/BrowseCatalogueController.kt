@@ -22,6 +22,7 @@ import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.base.controller.SecondaryDrawerController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.library.ChangeMangaCategoriesDialog
+import eu.kanade.tachiyomi.ui.library.HeightTopWindowInsetsListener
 import eu.kanade.tachiyomi.ui.main.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.ui.main.updatePaddingRelative
 import eu.kanade.tachiyomi.ui.manga.MangaController
@@ -154,9 +155,10 @@ open class BrowseCatalogueController(bundle: Bundle) :
             presenter.sourceFilters = newFilters
             navView.setFilters(presenter.filterItems)
         }
-
+        val statusScrim = navView.findViewById(R.id.status_bar_scrim) as View
+        statusScrim.setOnApplyWindowInsetsListener(HeightTopWindowInsetsListener)
         navView.doOnApplyWindowInsets { v, insets, padding ->
-            v.updatePaddingRelative(
+            navView.recycler.updatePaddingRelative(
               bottom = padding.bottom + insets.systemWindowInsetBottom,
               top = padding.top + insets.systemWindowInsetTop
             )

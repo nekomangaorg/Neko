@@ -32,7 +32,7 @@ open class SimpleNavigationView @JvmOverloads constructor(
     /**
      * Recycler view containing all the items.
      */
-    protected val recycler = RecyclerView(context)
+    val recycler = RecyclerView(context)
 
     init {
         // Custom attributes
@@ -57,6 +57,7 @@ open class SimpleNavigationView @JvmOverloads constructor(
         a.recycle()
 
         recycler.layoutManager = LinearLayoutManager(context)
+        recycler.clipToPadding = false
     }
 
     /**

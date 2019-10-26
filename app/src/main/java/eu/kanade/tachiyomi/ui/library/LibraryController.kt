@@ -191,10 +191,16 @@ class LibraryController(
                 is LibraryNavigationView.BadgeGroup -> onDownloadBadgeChanged()
             }
         }
+
+        drawer.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
+          View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
+          View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+        val statusScrim = view.findViewById(R.id.status_bar_scrim) as View
+        statusScrim.setOnApplyWindowInsetsListener(HeightTopWindowInsetsListener)
         view.doOnApplyWindowInsets { v, insets, padding ->
-            v.updatePaddingRelative(
-              bottom = padding.bottom + insets.systemWindowInsetBottom,
-              top = padding.top + insets.systemWindowInsetTop
+            view.recycler.updatePaddingRelative(
+              bottom = view.recycler.bottom + insets.systemWindowInsetBottom,
+              top = view.recycler.top + insets.systemWindowInsetTop
             )
         }
         return view
@@ -529,4 +535,16 @@ class LibraryController(
         const val REQUEST_IMAGE_OPEN = 101
     }
 
+}
+
+object HeightTopWindowInsetsListener : View.OnApplyWindowInsetsListener {
+    override fun onApplyWindowInsets(v: View, insets: WindowInsets): WindowInsets {
+        val topInset = insets.systemWindowInsetTop
+        v.setPadding(0,topInset,0,0)
+        if (v.layoutParams.height != topInset) {
+            v.layoutParams.height = topInset
+            v.requestLayout()
+        }
+        return insets
+    }
 }
