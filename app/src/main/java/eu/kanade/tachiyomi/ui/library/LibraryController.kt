@@ -33,11 +33,13 @@ import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.category.CategoryController
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.doOnApplyWindowInsets
+import eu.kanade.tachiyomi.ui.main.marginBottom
 import eu.kanade.tachiyomi.ui.main.updateLayoutParams
 import eu.kanade.tachiyomi.ui.main.updatePaddingRelative
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.ui.migration.MigrationController
 import eu.kanade.tachiyomi.util.inflate
+import eu.kanade.tachiyomi.util.marginTop
 import eu.kanade.tachiyomi.util.toast
 import kotlinx.android.synthetic.main.chapters_controller.*
 import kotlinx.android.synthetic.main.library_controller.*
@@ -200,8 +202,8 @@ class LibraryController(
         statusScrim.setOnApplyWindowInsetsListener(HeightTopWindowInsetsListener)
         view.doOnApplyWindowInsets { v, insets, padding ->
             view.recycler.updatePaddingRelative(
-              bottom = view.recycler.bottom + insets.systemWindowInsetBottom,
-              top = view.recycler.top + insets.systemWindowInsetTop
+              bottom = view.recycler.marginBottom + insets.systemWindowInsetBottom,
+              top = view.recycler.marginTop + insets.systemWindowInsetTop
             )
         }
         return view

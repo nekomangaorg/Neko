@@ -210,7 +210,9 @@ open class BrowseCatalogueController(bundle: Bundle) :
         recycler.adapter = adapter
 
         catalogue_view.addView(recycler, 1)
-
+        recycler.doOnApplyWindowInsets { v, insets, padding ->
+            v.updatePaddingRelative(bottom = padding.bottom + insets.systemWindowInsetBottom)
+        }
         if (oldPosition != RecyclerView.NO_POSITION) {
             recycler.layoutManager?.scrollToPosition(oldPosition)
         }
@@ -366,6 +368,9 @@ open class BrowseCatalogueController(bundle: Bundle) :
                 }
                 presenter.requestNext()
             }
+        }
+        snack?.view?.doOnApplyWindowInsets { v, _, padding ->
+            v.setPadding(padding.left,0,padding.right,0)
         }
     }
 

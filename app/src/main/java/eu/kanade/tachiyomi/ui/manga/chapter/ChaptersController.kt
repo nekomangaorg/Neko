@@ -381,10 +381,14 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
         destroyActionModeIfNeeded()
         presenter.downloadChapters(chapters)
         if (view != null && !presenter.manga.favorite) {
-            recycler?.snack(view.context.getString(R.string.snack_add_to_library), Snackbar.LENGTH_INDEFINITE) {
+            val snack = view.snack(view.context.getString(R.string.snack_add_to_library), Snackbar
+                .LENGTH_INDEFINITE) {
                 setAction(R.string.action_add) {
                     presenter.addToLibrary()
                 }
+            }
+            snack.view.doOnApplyWindowInsets { v, _, padding ->
+                v.setPadding(padding.left,0,padding.right,0)
             }
         }
     }

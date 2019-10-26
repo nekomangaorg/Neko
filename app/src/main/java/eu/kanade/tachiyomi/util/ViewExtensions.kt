@@ -94,3 +94,6 @@ fun View.getRound(text: String, random : Boolean = true): TextDrawable {
             .endConfig()
             .buildRound(text, if (random) ColorGenerator.MATERIAL.randomColor else ColorGenerator.MATERIAL.getColor(text))
 }
+
+inline val View.marginTop: Int
+    get() = (layoutParams as? ViewGroup.MarginLayoutParams)?.topMargin ?: 0
