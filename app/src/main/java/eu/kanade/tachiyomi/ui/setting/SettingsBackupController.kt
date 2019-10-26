@@ -158,7 +158,7 @@ class SettingsBackupController : SettingsController() {
                 if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
                     val flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or
                             Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-
+                    if (uri != null)
                     activity.contentResolver.takePersistableUriPermission(uri, flags)
                 }
 
@@ -168,7 +168,7 @@ class SettingsBackupController : SettingsController() {
             CODE_BACKUP_CREATE -> if (data != null && resultCode == Activity.RESULT_OK) {
                 val activity = activity ?: return
                 val uri = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-                    val dir = data.data.path
+                    val dir = data.data?.path
                     val file = File(dir, Backup.getDefaultFilename())
 
                     Uri.fromFile(file)
@@ -177,6 +177,7 @@ class SettingsBackupController : SettingsController() {
                     val flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or
                             Intent.FLAG_GRANT_WRITE_URI_PERMISSION
 
+                    if (uri != null)
                     activity.contentResolver.takePersistableUriPermission(uri, flags)
                     val file = UniFile.fromUri(activity, uri)
 
@@ -188,7 +189,8 @@ class SettingsBackupController : SettingsController() {
             }
             CODE_BACKUP_RESTORE -> if (data != null && resultCode == Activity.RESULT_OK) {
                 val uri = data.data
-                RestoreBackupDialog(uri).showDialog(router)
+                if (uri != null)
+                    RestoreBackupDialog(uri).showDialog(router)
             }
         }
     }
@@ -311,7 +313,7 @@ class SettingsBackupController : SettingsController() {
                         val context = applicationContext
                         if (context != null) {
                             RestoringBackupDialog().showDialog(router, TAG_RESTORING_BACKUP_DIALOG)
-                            BackupRestoreService.start(context, args.getParcelable(KEY_URI))
+                            BackupRestoreService.start(context, args.getParcelable(KEY_URI)!!)
                         }
                     }
                     .build()
@@ -385,7 +387,7 @@ class SettingsBackupController : SettingsController() {
                     .negativeText(R.string.action_open_log)
                     .onNegative { _, _ ->
                         val context = applicationContext ?: return@onNegative
-                        if (!path.isEmpty()) {
+                        if (!path!!.isEmpty()) {
                             val destFile = File(path, file)
                             val uri = destFile.getUriCompat(context)
                             val sendIntent = Intent(Intent.ACTION_VIEW).apply {

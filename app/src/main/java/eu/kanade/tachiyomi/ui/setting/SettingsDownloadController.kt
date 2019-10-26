@@ -118,8 +118,8 @@ class SettingsDownloadController : SettingsController() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         when (requestCode) {
             DOWNLOAD_DIR_PRE_L -> if (data != null && resultCode == Activity.RESULT_OK) {
-                val uri = Uri.fromFile(File(data.data.path))
-                preferences.downloadsDirectory().set(uri.toString())
+                val uri = Uri.fromFile(File(data.data?.path))
+                preferences.downloadsDirectory().set(uri?.toString() ?: "")
             }
             DOWNLOAD_DIR_L -> if (data != null && resultCode == Activity.RESULT_OK) {
                 val context = applicationContext ?: return
@@ -128,7 +128,8 @@ class SettingsDownloadController : SettingsController() {
                         Intent.FLAG_GRANT_WRITE_URI_PERMISSION
 
                 @Suppress("NewApi")
-                context.contentResolver.takePersistableUriPermission(uri, flags)
+                if (uri != null)
+                    context.contentResolver.takePersistableUriPermission(uri, flags)
 
                 val file = UniFile.fromUri(context, uri)
                 preferences.downloadsDirectory().set(file.uri.toString())

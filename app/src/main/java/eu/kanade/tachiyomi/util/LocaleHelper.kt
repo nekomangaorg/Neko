@@ -30,7 +30,7 @@ object LocaleHelper {
     /**
      * The application's locale. When it's null, the system locale is used.
      */
-    private var appLocale = getLocaleFromString(preferences.lang())
+    private var appLocale = getLocaleFromString(preferences.lang() ?: "")
 
     /**
      * The currently applied locale. Used to avoid losing the selected language after a non locale
@@ -136,9 +136,9 @@ object LocaleHelper {
     private fun updateConfigLocale(config: Configuration, locale: Locale): Configuration {
         val newConfig = Configuration(config)
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-            newConfig.locale = locale
+            newConfig.setLocale(locale)
         } else {
-            newConfig.locales = LocaleList(locale)
+            newConfig.setLocales(LocaleList(locale))
         }
         return newConfig
     }

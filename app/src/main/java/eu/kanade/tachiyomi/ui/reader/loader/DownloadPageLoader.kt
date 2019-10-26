@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.reader.loader
 
 import android.app.Application
+import android.net.Uri
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.source.Source
@@ -9,6 +10,7 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import rx.Observable
 import uy.kohesive.injekt.injectLazy
+import java.io.InputStream
 
 /**
  * Loader used to load a chapter from the downloaded chapters.
@@ -33,7 +35,7 @@ class DownloadPageLoader(
             .map { pages ->
                 pages.map { page ->
                     ReaderPage(page.index, page.url, page.imageUrl, {
-                        context.contentResolver.openInputStream(page.uri)
+                        context.contentResolver.openInputStream(page.uri ?: Uri.EMPTY)!!
                     }).apply {
                         status = Page.READY
                     }

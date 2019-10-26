@@ -47,7 +47,7 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
     }
 
     override fun createPresenter(): ExtensionDetailsPresenter {
-        return ExtensionDetailsPresenter(args.getString(PKGNAME_KEY))
+        return ExtensionDetailsPresenter(args.getString(PKGNAME_KEY)!!)
     }
 
     override fun getTitle(): String? {
