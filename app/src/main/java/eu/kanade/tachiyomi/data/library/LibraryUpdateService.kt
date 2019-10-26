@@ -31,8 +31,6 @@ import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.*
 import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import rx.Observable
 import rx.Subscription
 import rx.schedulers.Schedulers
@@ -216,15 +214,15 @@ class LibraryUpdateService(
             stopSelf(startId)
         }
         // Update either chapter list or manga details.
-        if (target == Target.FOLLOW_STATUSES) {
-            GlobalScope.launch(handler) {
-                syncFollowsStatus()
-            }.invokeOnCompletion { stopSelf(startId) }
-        } else if (target == Target.SYNC_FOLLOWS) {
-            GlobalScope.launch(handler) {
-                syncFollows()
-            }.invokeOnCompletion { stopSelf(startId) }
-        } else {
+        /* if (target == Target.FOLLOW_STATUSES) {
+             GlobalScope.launch(handler) {
+                 syncFollowsStatus()
+             }.invokeOnCompletion { stopSelf(startId) }
+         } else if (target == Target.SYNC_FOLLOWS) {
+             GlobalScope.launch(handler) {
+                 syncFollows()
+             }.invokeOnCompletion { stopSelf(startId) }
+         } else {*/
             when (target) {
                 Target.CHAPTERS -> updateChapterList(mangaList)
                 Target.DETAILS -> updateDetails(mangaList)
@@ -238,7 +236,7 @@ class LibraryUpdateService(
                         stopSelf(startId)
                     })
 
-        }
+        //}
         return Service.START_REDELIVER_INTENT
     }
 
@@ -381,11 +379,11 @@ class LibraryUpdateService(
                     var dbManga = db.getManga(networkManga.url, sourceManager.getMangadex().id)
                             .executeAsBlocking()
                     if (dbManga == null) {
-                        dbManga = Manga.Companion.create(sourceManager.getMangadex().id)
-                        dbManga.favorite = true
+                        dbManga = Manga.create(networkManga.url, networkManga.title, sourceManager.getMangadex().id)
                     }
 
                     dbManga.copyFrom(networkManga)
+                    dbManga.favorite = true
                     db.insertManga(dbManga).executeAsBlocking()
 
                 }

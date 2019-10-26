@@ -27,7 +27,14 @@ interface SManga : Serializable {
     var initialized: Boolean
 
     fun copyFrom(other: SManga) {
-        
+
+        if (url?.isEmpty()) {
+            url = other.url
+        }
+        if (title?.isEmpty()) {
+            title = other.title
+        }
+
         if (other.author != null)
             author = other.author
 

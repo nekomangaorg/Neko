@@ -69,12 +69,12 @@ class SettingsAdvancedController : SettingsController() {
 
             onClick { LibraryUpdateService.start(context, target = Target.TRACKING) }
         }
-        preference {
-            titleRes = R.string.pref_sync_library_follows
-            summaryRes = R.string.pref_refresh_library_follows_summary
+        /*  preference {
+              titleRes = R.string.pref_sync_library_follows
+              summaryRes = R.string.pref_refresh_library_follows_summary
 
-            onClick { LibraryUpdateService.start(context, target = Target.SYNC_FOLLOWS) }
-        }
+              onClick { LibraryUpdateService.start(context, target = Target.SYNC_FOLLOWS) }
+          }*/
     }
 
     private fun clearChapterCache() {
