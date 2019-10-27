@@ -21,9 +21,6 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.base.activity.BaseRxActivity
-import eu.kanade.tachiyomi.ui.main.doOnApplyWindowInsets
-import eu.kanade.tachiyomi.ui.main.updateLayoutParams
-import eu.kanade.tachiyomi.ui.main.updatePaddingRelative
 import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.AddToLibraryFirst
 import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.Error
 import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.Success

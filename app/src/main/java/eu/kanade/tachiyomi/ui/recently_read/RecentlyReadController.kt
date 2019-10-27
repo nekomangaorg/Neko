@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
+import eu.kanade.tachiyomi.util.RecyclerWindowInsetsListener
 import eu.kanade.tachiyomi.util.toast
 import kotlinx.android.synthetic.main.recently_read_controller.*
 
@@ -58,6 +59,7 @@ class RecentlyReadController : NucleusController<RecentlyReadPresenter>(),
         adapter = RecentlyReadAdapter(this@RecentlyReadController)
         recycler.setHasFixedSize(true)
         recycler.adapter = adapter
+        recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
     }
 
     override fun onDestroyView(view: View) {

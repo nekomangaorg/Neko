@@ -11,6 +11,7 @@ import eu.kanade.tachiyomi.source.CatalogueSource
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.manga.MangaController
+import eu.kanade.tachiyomi.util.RecyclerWindowInsetsListener
 import kotlinx.android.synthetic.main.catalogue_global_search_controller.*
 
 /**
@@ -133,6 +134,7 @@ open class CatalogueSearchController(
         // Create recycler and set adapter.
         recycler.layoutManager = LinearLayoutManager(view.context)
         recycler.adapter = adapter
+        recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
     }
 
     override fun onDestroyView(view: View) {

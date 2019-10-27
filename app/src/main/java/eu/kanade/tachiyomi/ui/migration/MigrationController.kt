@@ -15,6 +15,7 @@ import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.base.controller.popControllerWithTag
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
+import eu.kanade.tachiyomi.util.RecyclerWindowInsetsListener
 import kotlinx.android.synthetic.main.migration_controller.*
 
 class MigrationController : NucleusController<MigrationPresenter>(),
@@ -43,6 +44,7 @@ class MigrationController : NucleusController<MigrationPresenter>(),
         adapter = FlexibleAdapter(null, this)
         migration_recycler.layoutManager = LinearLayoutManager(view.context)
         migration_recycler.adapter = adapter
+        migration_recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
     }
 
     override fun onDestroyView(view: View) {

@@ -21,17 +21,9 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.base.controller.popControllerWithTag
-import eu.kanade.tachiyomi.ui.main.NoopWindowInsetsListener2
-import eu.kanade.tachiyomi.ui.main.doOnApplyWindowInsets
-import eu.kanade.tachiyomi.ui.main.marginBottom
-import eu.kanade.tachiyomi.ui.main.updateLayoutParams
-import eu.kanade.tachiyomi.ui.main.updatePadding
-import eu.kanade.tachiyomi.ui.main.updatePaddingRelative
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
-import eu.kanade.tachiyomi.util.getCoordinates
-import eu.kanade.tachiyomi.util.snack
-import eu.kanade.tachiyomi.util.toast
+import eu.kanade.tachiyomi.util.*
 import kotlinx.android.synthetic.main.chapters_controller.*
 import timber.log.Timber
 

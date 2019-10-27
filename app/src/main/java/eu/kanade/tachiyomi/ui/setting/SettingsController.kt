@@ -15,6 +15,9 @@ import com.bluelinelabs.conductor.ControllerChangeType
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
+import eu.kanade.tachiyomi.util.RecyclerWindowInsetsListener
+import eu.kanade.tachiyomi.util.doOnApplyWindowInsets
+import eu.kanade.tachiyomi.util.updatePaddingRelative
 import rx.Observable
 import rx.Subscription
 import rx.subscriptions.CompositeSubscription
@@ -32,7 +35,9 @@ abstract class SettingsController : PreferenceController() {
         if (untilDestroySubscriptions.isUnsubscribed) {
             untilDestroySubscriptions = CompositeSubscription()
         }
-        return super.onCreateView(inflater, container, savedInstanceState)
+        val view = super.onCreateView(inflater, container, savedInstanceState)
+        listView.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
+        return view
     }
 
     override fun onDestroyView(view: View) {

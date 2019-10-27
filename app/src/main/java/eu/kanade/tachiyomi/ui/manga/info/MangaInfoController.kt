@@ -40,14 +40,8 @@ import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.catalogue.global_search.CatalogueSearchController
 import eu.kanade.tachiyomi.ui.library.ChangeMangaCategoriesDialog
 import eu.kanade.tachiyomi.ui.main.MainActivity
-import eu.kanade.tachiyomi.ui.main.doOnApplyWindowInsets
-import eu.kanade.tachiyomi.ui.main.updatePaddingRelative
 import eu.kanade.tachiyomi.ui.manga.MangaController
-import eu.kanade.tachiyomi.util.getResourceColor
-import eu.kanade.tachiyomi.util.openInBrowser
-import eu.kanade.tachiyomi.util.snack
-import eu.kanade.tachiyomi.util.toast
-import eu.kanade.tachiyomi.util.truncateCenter
+import eu.kanade.tachiyomi.util.*
 import jp.wasabeef.glide.transformations.CropSquareTransformation
 import jp.wasabeef.glide.transformations.MaskTransformation
 import kotlinx.android.synthetic.main.manga_info_controller.*

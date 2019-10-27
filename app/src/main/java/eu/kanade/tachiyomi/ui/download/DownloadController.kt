@@ -7,6 +7,7 @@ import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
+import eu.kanade.tachiyomi.util.RecyclerWindowInsetsListener
 import kotlinx.android.synthetic.main.download_controller.*
 import rx.Observable
 import rx.Subscription
@@ -64,6 +65,7 @@ class DownloadController : NucleusController<DownloadPresenter>() {
         // Set the layout manager for the recycler and fixed size.
         recycler.layoutManager = LinearLayoutManager(view.context)
         recycler.setHasFixedSize(true)
+        recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
 
         // Suscribe to changes
         DownloadService.runningRelay

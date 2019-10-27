@@ -10,6 +10,7 @@
         android:layout_height="match_parent"
         android:id="@+id/recycler"
         android:choiceMode="multipleChoice"
+        android:clipToPadding="false"
         tools:listitem="@layout/categories_item"
         />
 

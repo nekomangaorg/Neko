@@ -13,7 +13,11 @@ import eu.davidea.flexibleadapter.helpers.UndoHelper
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
+import eu.kanade.tachiyomi.util.doOnApplyWindowInsets
+import eu.kanade.tachiyomi.util.marginBottom
 import eu.kanade.tachiyomi.util.toast
+import eu.kanade.tachiyomi.util.updateLayoutParams
+import eu.kanade.tachiyomi.util.updatePaddingRelative
 import kotlinx.android.synthetic.main.categories_controller.*
 
 /**
@@ -82,6 +86,14 @@ class CategoryController : NucleusController<CategoryPresenter>(),
 
         fab.clicks().subscribeUntilDestroy {
             CategoryCreateDialog(this@CategoryController).showDialog(router, null)
+        }
+
+        val fabBaseMarginBottom = fab?.marginBottom ?: 0
+        recycler.doOnApplyWindowInsets { v, insets, padding ->
+            v.updatePaddingRelative(bottom = padding.bottom + insets.systemWindowInsetBottom)
+            fab?.updateLayoutParams<ViewGroup.MarginLayoutParams>  {
+                bottomMargin = fabBaseMarginBottom + insets.systemWindowInsetBottom
+            }
         }
     }
 

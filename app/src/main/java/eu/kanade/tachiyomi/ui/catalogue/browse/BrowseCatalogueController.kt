@@ -23,13 +23,12 @@ import eu.kanade.tachiyomi.ui.base.controller.SecondaryDrawerController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.library.ChangeMangaCategoriesDialog
 import eu.kanade.tachiyomi.ui.library.HeightTopWindowInsetsListener
-import eu.kanade.tachiyomi.ui.main.doOnApplyWindowInsets
-import eu.kanade.tachiyomi.ui.main.updatePaddingRelative
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.ui.manga.info.MangaWebViewController
 import eu.kanade.tachiyomi.util.*
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import kotlinx.android.synthetic.main.catalogue_controller.*
+import kotlinx.android.synthetic.main.categories_item.view.*
 import kotlinx.android.synthetic.main.main_activity.*
 import rx.Observable
 import rx.Subscription
@@ -155,13 +154,22 @@ open class BrowseCatalogueController(bundle: Bundle) :
             presenter.sourceFilters = newFilters
             navView.setFilters(presenter.filterItems)
         }
+        drawer.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
+            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
+            View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+
         val statusScrim = navView.findViewById(R.id.status_bar_scrim) as View
         statusScrim.setOnApplyWindowInsetsListener(HeightTopWindowInsetsListener)
+        val titleView = navView.findViewById(R.id.title_background) as View
+        val titleMarginTop = titleView.marginTop
         navView.doOnApplyWindowInsets { v, insets, padding ->
-            navView.recycler.updatePaddingRelative(
-              bottom = padding.bottom + insets.systemWindowInsetBottom,
-              top = padding.top + insets.systemWindowInsetTop
+            v.updatePaddingRelative(
+                bottom = padding.bottom + insets.systemWindowInsetBottom,
+                end = padding.right + insets.systemWindowInsetRight
             )
+            titleView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                topMargin = titleMarginTop + insets.systemWindowInsetTop
+            }
         }
         return navView
     }

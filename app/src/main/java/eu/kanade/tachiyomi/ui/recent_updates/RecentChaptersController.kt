@@ -19,6 +19,7 @@ import eu.kanade.tachiyomi.ui.base.controller.popControllerWithTag
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
+import eu.kanade.tachiyomi.util.RecyclerWindowInsetsListener
 import eu.kanade.tachiyomi.util.toast
 import kotlinx.android.synthetic.main.recent_chapters_controller.*
 import timber.log.Timber
@@ -90,6 +91,7 @@ class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
             // It can be a very long operation, so we disable swipe refresh and show a toast.
             swipe_refresh.isRefreshing = false
         }
+        recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
     }
 
     override fun onDestroyView(view: View) {

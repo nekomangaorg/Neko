@@ -11,6 +11,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
+import eu.kanade.tachiyomi.util.RecyclerWindowInsetsListener
 import kotlinx.android.synthetic.main.extension_controller.*
 
 
@@ -58,6 +59,7 @@ open class ExtensionController : NucleusController<ExtensionPresenter>(),
         ext_recycler.layoutManager = LinearLayoutManager(view.context)
         ext_recycler.adapter = adapter
         ext_recycler.addItemDecoration(ExtensionDividerItemDecoration(view.context))
+        ext_recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
     }
 
     override fun onDestroyView(view: View) {

@@ -13,11 +13,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
-import eu.kanade.tachiyomi.ui.main.doOnApplyWindowInsets
-import eu.kanade.tachiyomi.ui.main.updatePaddingRelative
-import eu.kanade.tachiyomi.util.inflate
-import eu.kanade.tachiyomi.util.plusAssign
-import eu.kanade.tachiyomi.util.toast
+import eu.kanade.tachiyomi.util.*
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import kotlinx.android.synthetic.main.library_category.view.*
 import rx.subscriptions.CompositeSubscription

@@ -15,6 +15,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:descendantFocusability="blocksDescendants"
+            android:clipToPadding="false"
             tools:listitem="@layout/recent_chapters_item"/>
 
         <eu.kanade.tachiyomi.widget.EmptyView
