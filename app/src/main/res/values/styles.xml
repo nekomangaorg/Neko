@@ -35,12 +35,11 @@
     <!--==============-->
     <!--NavigationView-->
     <!--==============-->
-    <style name="Theme.Widget.NavigationView" />
-
-    <style name="Theme.Widget.NavigationView.Dark">
-        <item name="colorControlHighlight">@color/md_grey_900</item>
-        <item name="colorPrimary">?colorAccent</item>
+    <style name="Theme.Widget.NavigationView">
+        <item name="colorControlHighlight">@color/drawerHighlight</item>
+        <item name="colorPrimary">@color/drawerPrimary</item>
     </style>
+
 
     <!--===============-->
     <!--Text Appearance-->

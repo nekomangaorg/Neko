@@ -139,8 +139,9 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         val container: ViewGroup = findViewById(R.id.reader_container)
         val readerBHeight = reader_menu_bottom.layoutParams.height
         container.doOnApplyWindowInsets { _, insets, padding ->
-            val bottomInset = insets.mandatorySystemGestureInsets.bottom - insets
-                .systemWindowInsetBottom
+            val bottomInset = if (Build.VERSION.SDK_INT >= 29)
+                (insets.mandatorySystemGestureInsets.bottom - insets.systemWindowInsetBottom)
+                else 0
             reader_menu_bottom.updateLayoutParams<ViewGroup.MarginLayoutParams>  {
                 height = readerBHeight + bottomInset
             }

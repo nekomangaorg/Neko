@@ -25,7 +25,7 @@
 
 
     <!-- Custom Attributes-->
-    <item name="navigation_view_theme">@style/Theme.Widget.NavigationView.Dark</item>
+    <item name="navigation_view_theme">@style/Theme.Widget.NavigationView</item>
     <item name="selectable_list_drawable">@drawable/list_item_selector_dark</item>
     <item name="selectable_library_drawable">@drawable/library_item_selector_dark</item>
     <item name="text_color_primary">@color/textColorPrimaryDark</item>
@@ -33,13 +33,13 @@
     <item name="icon_color">@color/iconColorDark</item>
   </style>
 
-  <style name="Theme.Base.Reader.Light" parent="Theme.Base">
+  <style name="Theme.Base.Reader.Light" parent="Theme.Tachiyomi">
     <item name="colorPrimary">@color/colorDarkPrimary</item>
     <item name="colorPrimaryDark">@color/colorDarkPrimaryDark</item>
     <item name="android:colorBackground">@color/backgroundDark</item>
   </style>
 
-  <style name="Theme.Tachiyomi.DarkBlue" parent="Theme.Base">
+  <style name="Theme.Tachiyomi.DarkBlue" parent="Theme.Tachiyomi">
     <item name="colorPrimary">@color/colorPrimary</item>
     <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
   </style>
@@ -47,7 +47,7 @@
   <!--==============-->
   <!-- Amoled Theme -->
   <!--==============-->
-  <style name="Theme.Tachiyomi.Amoled" parent="Theme.Base">
+  <style name="Theme.Tachiyomi.Amoled" parent="Theme.Tachiyomi">
     <item name="colorPrimary">@color/colorAmoledPrimary</item>
     <item name="colorPrimaryDark">@color/colorAmoledPrimary</item>
     <item name="android:colorBackground">@color/md_black_1000</item>

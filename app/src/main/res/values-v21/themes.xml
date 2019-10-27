@@ -7,26 +7,7 @@
         <!-- Attributes specific for SDK 21 and up  -->
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:navigationBarColor">@color/colorPrimary</item>
-    </style>
-
-    <style name="Theme.Tachiyomi.DarkBlue" parent="Theme.Base">
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-
-        <!-- Attributes specific for SDK 21 and up  -->
-        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
-        <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:navigationBarColor">@color/colorDarkPrimaryDark</item>
-    </style>
-
-    <!--==============-->
-    <!-- Amoled Theme -->
-    <!--==============-->
-    <style name="Theme.Tachiyomi.Amoled" parent="Theme.Base">
-        <!-- Attributes specific for SDK 21 and up  -->
-        <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@color/oldNavBarBackground</item>
     </style>
 
     <!--==============-->

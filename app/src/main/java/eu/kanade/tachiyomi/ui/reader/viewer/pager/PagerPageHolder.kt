@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory
 import android.graphics.PointF
 import android.graphics.drawable.Drawable
 import android.net.Uri
+import android.os.Build
 import android.view.GestureDetector
 import android.view.Gravity
 import android.view.MotionEvent
@@ -347,7 +348,8 @@ class PagerPageHolder(
             })
         }
         addView(subsamplingImageView)
-        subsamplingImageView?.isForceDarkAllowed = false
+        if (Build.VERSION.SDK_INT >= 29)
+            subsamplingImageView?.isForceDarkAllowed = false
         return subsamplingImageView!!
     }
 
