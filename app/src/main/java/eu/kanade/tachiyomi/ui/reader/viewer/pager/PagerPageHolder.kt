@@ -347,6 +347,7 @@ class PagerPageHolder(
             })
         }
         addView(subsamplingImageView)
+        subsamplingImageView?.isForceDarkAllowed = false
         return subsamplingImageView!!
     }
 

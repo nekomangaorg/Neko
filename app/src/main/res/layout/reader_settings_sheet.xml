@@ -8,7 +8,8 @@
     android:background="?android:colorBackground"
     android:clipToPadding="false"
     android:orientation="vertical"
-    android:padding="@dimen/material_component_dialogs_padding_around_content_area">
+    android:padding="@dimen/material_component_dialogs_padding_around_content_area"
+    android:forceDarkAllowed="false">
 
     <!-- General preferences -->
 
