@@ -65,11 +65,6 @@ class MainActivity : BaseActivity() {
     lateinit var tabAnimator: TabsAnimator
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        /*delegate.setLocalNightMode(when (preferences.theme()) {
-            1 -> MODE_NIGHT_NO
-            2, 3, 4 -> MODE_NIGHT_YES
-            else -> MODE_NIGHT_FOLLOW_SYSTEM
-        })*/
         setDefaultNightMode(when (preferences.theme()) {
             1 -> MODE_NIGHT_NO
             2, 3, 4 -> MODE_NIGHT_YES

@@ -56,23 +56,12 @@ class SettingsGeneralController : SettingsController() {
             titleRes = R.string.pref_theme
             entriesRes = arrayOf(R.string.light_theme, R.string.dark_theme,
                   R.string.amoled_theme, R.string.darkblue_theme,
-                  R.string.system_theme, R.string.system_amoled_theme, R.string.system_darkblue_theme)
+                  R.string.system_default, R.string.system_amoled_theme, R.string.system_darkblue_theme)
             entryValues = arrayOf("1", "2", "3", "4", "5", "6", "7")
             defaultValue = "5"
             summary = "%s"
 
-            onChange {newValue ->
-              val activity = activity ?: return@onChange false
-              val app = activity.application
-              AppCompatDelegate.setDefaultNightMode(when (newValue) {
-                "1" -> AppCompatDelegate.MODE_NIGHT_NO
-                "2", "3", "4" -> AppCompatDelegate.MODE_NIGHT_YES
-                else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-              })
-              //LocaleHelper.changeLocale(newValue.toString())
-              //LocaleHelper.updateConfiguration(app, app.resources.configuration)
-              //activity?.recreate()
-
+            onChange { newValue ->
                 activity?.recreate()
                 true
             }

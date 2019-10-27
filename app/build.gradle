@@ -60,6 +60,9 @@ android {
             versionNameSuffix "-${getCommitCount()}"
             applicationIdSuffix ".debug"
         }
+        release {
+            applicationIdSuffix = '.j2k'
+        }
     }
 
     flavorDimensions "default"

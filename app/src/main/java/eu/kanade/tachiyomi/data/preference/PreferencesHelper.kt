@@ -33,7 +33,7 @@ class PreferencesHelper(val context: Context) {
 
     fun clear() = prefs.edit().clear().apply()
 
-    fun theme() = prefs.getInt(Keys.theme, 1)
+    fun theme() = prefs.getInt(Keys.theme, 5)
 
     fun rotation() = rxPrefs.getInteger(Keys.rotation, 1)
 
@@ -65,7 +65,7 @@ class PreferencesHelper(val context: Context) {
 
     fun zoomStart() = rxPrefs.getInteger(Keys.zoomStart, 1)
 
-    fun readerTheme() = rxPrefs.getInteger(Keys.readerTheme, 0)
+    fun readerTheme() = rxPrefs.getInteger(Keys.readerTheme, 2)
 
     fun cropBorders() = rxPrefs.getBoolean(Keys.cropBorders, false)
 

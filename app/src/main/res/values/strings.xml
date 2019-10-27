@@ -143,7 +143,6 @@
     <string name="dark_theme">Dark theme</string>
     <string name="amoled_theme">AMOLED theme</string>
     <string name="darkblue_theme">Dark blue</string>
-    <string name="system_theme">System default</string>
     <string name="system_amoled_theme">System default (AMOLED)</string>
     <string name="system_darkblue_theme">System default (Dark blue)</string>
     <string name="pref_start_screen">Start screen</string>
