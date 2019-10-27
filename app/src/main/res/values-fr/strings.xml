@@ -479,4 +479,7 @@ Assurez-vous que vous êtes connecté à des sources qui le demande avant de com
     <string name="label_help">Aide</string>
     <string name="pref_library_update_prioritization">Ordre de mise à jour de la librairie</string>
     <string name="pref_library_update_prioritization_summary">Sélectionnez l\'ordre auquel Tachiyomi doit vérifier les mises à jour</string>
+    <string name="system_theme">Par défaut système</string>
+    <string name="system_darkblue_theme">Par défaut système (Bleu foncé)</string>
+    <string name="system_amoled_theme">Par défaut système (AMOLED)</string>
 </resources>

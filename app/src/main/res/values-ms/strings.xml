@@ -447,4 +447,7 @@
     <string name="filter_mode_screen">Skrin</string>
     <string name="filter_mode_lighten">Dodge / Lighten</string>
     <string name="filter_mode_darken">Burn / Darken</string>
+    <string name="system_theme">Tetapan sistem</string>
+    <string name="system_darkblue_theme">Tetapan sistem (Biru gelap)</string>
+    <string name="system_amoled_theme">Tetapan sistem (AMOLED)</string>
 </resources>

@@ -445,4 +445,7 @@
     <string name="filter_mode_lighten">닷지 / 밝게하기</string>
     <string name="filter_mode_darken">번 / 어둡게하기</string>
     <string name="label_help">도움</string>
+    <string name="system_theme">시스템 기본값</string>
+    <string name="system_darkblue_theme">시스템 기본값 (다크 블루)</string>
+    <string name="system_amoled_theme">시스템 기본값 (AMOLED)</string>
 </resources>

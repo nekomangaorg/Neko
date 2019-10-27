@@ -93,4 +93,5 @@
     <string name="pref_reader_theme">สีพื้นหลัง</string>
     <string name="white_background">ขาว</string>
     <string name="black_background">ดำ</string>
+    <string name="system_theme">ค่าเริ่มต้นของระบบ</string>
 </resources>

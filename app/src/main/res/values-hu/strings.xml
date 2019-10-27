@@ -172,4 +172,7 @@
     <string name="ext_preferences">Beállítások</string>
     <string name="darkblue_theme">Sötétkék</string>
     <string name="all_lang">Összes</string>
+    <string name="system_theme">Rendszer alapértelmezése</string>
+    <string name="system_darkblue_theme">Rendszer alapértelmezése (Sötétkék)</string>
+    <string name="system_amoled_theme">Rendszer alapértelmezése (AMOLED)</string>
 </resources>

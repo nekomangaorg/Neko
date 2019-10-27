@@ -444,4 +444,7 @@
     <string name="pref_read_with_long_tap">Dialog prin apasare lunga</string>
     <string name="reader_pull_up_for_more_options">Trage în sus pentru mai multe opțiuni</string>
     <string name="label_help">Ajutor</string>
+    <string name="system_theme">Prestabilită de sistem</string>
+    <string name="system_darkblue_theme">Prestabilită de sistem (Albastru închis)</string>
+    <string name="system_amoled_theme">Prestabilită de sistem (AMOLED)</string>
 </resources>

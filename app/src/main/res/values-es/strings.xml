@@ -476,4 +476,7 @@ También asegúrese de haber iniciado sesión en las fuentes que lo requieren an
     <string name="label_help">Ayuda</string>
     <string name="pref_library_update_prioritization">Orden de actualización de la biblioteca</string>
     <string name="pref_library_update_prioritization_summary">Selecciona el orden en el que Tachiyomi buscará actualizaciones</string>
+    <string name="system_theme">Predefinido del sistema</string>
+    <string name="system_darkblue_theme">Predefinido del sistema (Azul oscuro)</string>
+    <string name="system_amoled_theme">Predefinido del sistema (AMOLED)</string>
 </resources>

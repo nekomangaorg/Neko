@@ -500,4 +500,7 @@
     <string name="channel_common">Thường gặp</string>
     <string name="channel_library">Thư viện</string>
     <string name="channel_downloader">Trình tải xuống</string>
+    <string name="system_theme">Mặc định hệ thống</string>
+    <string name="system_darkblue_theme">Mặc định hệ thống (Xanh đậm)</string>
+    <string name="system_amoled_theme">Mặc định hệ thống (AMOLED)</string>
 </resources>

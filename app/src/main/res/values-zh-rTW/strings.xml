@@ -385,4 +385,7 @@
     <string name="transition_finished">已閱畢：</string>
     <string name="transition_next">下一章：</string>
     <string name="notification_new_chapters">發現新章節</string>
+    <string name="system_theme">系统默认</string>
+    <string name="system_darkblue_theme">系统默认 (深色帶藍)</string>
+    <string name="system_amoled_theme">系统默认 (全黑)</string>
 </resources>
