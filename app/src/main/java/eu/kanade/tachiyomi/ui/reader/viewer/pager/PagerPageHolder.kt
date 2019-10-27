@@ -35,7 +35,7 @@ import eu.kanade.tachiyomi.ui.reader.viewer.ReaderProgressBar
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerConfig.ZoomType
 import eu.kanade.tachiyomi.util.*
 import eu.kanade.tachiyomi.widget.ViewPagerAdapter
-import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.async
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
@@ -258,8 +258,10 @@ class PagerPageHolder(
                             bytesStream.close()
 
                             launchUI {
-                                val image = async { BitmapFactory.decodeByteArray(bytesArray, 0, bytesArray.size) }
-                                imageView.background = ImageUtil.autoSetBackground(image.await())
+                                val image = async { BitmapFactory.decodeByteArray(bytesArray, 0,
+                                    bytesArray.size) }
+                                imageView.background = ImageUtil.autoSetBackground(image
+                                    .await())
                                 page.bg = imageView.background
                             }
                         }

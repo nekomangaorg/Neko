@@ -11,7 +11,7 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerConfig
 import eu.kanade.tachiyomi.util.ImageUtil
 import eu.kanade.tachiyomi.util.plusAssign
-import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.async
 import rx.Completable
 import rx.Observable
 import rx.schedulers.Schedulers

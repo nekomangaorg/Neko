@@ -23,6 +23,7 @@ import eu.kanade.tachiyomi.source.online.LoginSource
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.setting.preferenceCategory
 import eu.kanade.tachiyomi.util.LocaleHelper
+import eu.kanade.tachiyomi.util.RecyclerWindowInsetsListener
 import eu.kanade.tachiyomi.widget.preference.LoginPreference
 import eu.kanade.tachiyomi.widget.preference.SourceLoginDialog
 import kotlinx.android.synthetic.main.extension_detail_controller.*
@@ -90,6 +91,7 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
         extension_prefs_recycler.layoutManager = LinearLayoutManager(context)
         extension_prefs_recycler.adapter = PreferenceGroupAdapter(screen)
         extension_prefs_recycler.addItemDecoration(DividerItemDecoration(context, VERTICAL))
+        extension_prefs_recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
 
         if (screen.preferenceCount == 0) {
             extension_prefs_empty_view.show(R.drawable.ic_no_settings,
