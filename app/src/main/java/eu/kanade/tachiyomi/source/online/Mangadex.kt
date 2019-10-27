@@ -92,7 +92,9 @@ open class Mangadex(override val lang: String, private val internalLang: String,
     }
 
     override fun fetchPageList(chapter: SChapter): Observable<List<Page>> {
-        return PageHandler(client, headers, preferences.imageServer().toString()).fetchPageList(chapter)
+        val imageServer = preferences.imageServer().takeIf { it in SERVER_PREF_ENTRY_VALUES }
+                ?: SERVER_PREF_ENTRY_VALUES.first()
+        return PageHandler(client, headers, imageServer).fetchPageList(chapter)
     }
 
     override suspend fun fetchAllFollows(): List<SManga> {
@@ -132,6 +134,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         private const val ALL = 1
         private const val ONLY_R18 = 2
 
-
+        val SERVER_PREF_ENTRIES = arrayOf("Automatic", "NA/EU 1", "NA/EU 2", "Rest of the world")
+        val SERVER_PREF_ENTRY_VALUES = arrayOf("0", "na", "na2", "row")
     }
 }
