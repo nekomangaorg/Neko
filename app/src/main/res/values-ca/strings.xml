@@ -201,4 +201,7 @@
     <string name="pref_download_only_over_wifi">Baixades només amb WIFI</string>
     <string name="pref_remove_after_marked_as_read">Eliminar quan es marqui com llegit</string>
     <string name="pref_remove_after_read">Eliminar després de llegir</string>
+    <string name="system_theme">Per defecte del sistema</string>
+    <string name="system_darkblue_theme">Per defecte del sistema (Blau fosc)</string>
+    <string name="system_amoled_theme">Per defecte del sistema (AMOLED)</string>
 </resources>

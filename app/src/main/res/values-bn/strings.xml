@@ -126,6 +126,9 @@
     <string name="light_theme">প্রধান থিম</string>
     <string name="dark_theme">কালো থিম</string>
     <string name="amoled_theme">এমোলেড থিম</string>
+    <string name="system_theme">সিস্টেমের ডিফল্ট</string>
+    <string name="system_amoled_theme">সিস্টেমের ডিফল্ট (এমোলেড)</string>
+    <string name="system_darkblue_theme">সিস্টেমের ডিফল্ট (কালো থিম)</string>
     <string name="pref_start_screen">আরম্ভ স্ক্রিন</string>
     <string name="pref_language">ভাষা</string>
     <string name="system_default">প্রথম অবস্থা</string>

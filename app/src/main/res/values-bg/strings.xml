@@ -106,6 +106,11 @@
     <string name="pref_theme">Тема на приложението</string>
     <string name="light_theme">Главна тема</string>
     <string name="dark_theme">Тъмна тема</string>
+    <string name="darkblue_theme">Тъмно син</string>
+    <string name="amoled_theme">AMOLED тема</string>
+    <string name="system_theme">Система по подразбиране</string>
+    <string name="system_amoled_theme">Система по подразбиране (AMOLED)</string>
+    <string name="system_darkblue_theme">Система по подразбиране(Тъмно син)</string>
     <string name="pref_start_screen">Начален екран</string>
     <string name="pref_language">Език</string>
     <string name="system_default">По подразбиране</string>
@@ -351,7 +356,6 @@
     <string name="short_recent_updates">Обновления</string>
     <string name="update_weekly">Ежеседмично</string>
     <string name="update_monthly">Ежемесечно</string>
-    <string name="amoled_theme">AMOLED тема</string>
     <string name="default_category">Категория по подразбиране</string>
     <string name="default_category_summary">Питай всеки път</string>
     <string name="pref_crop_borders">Изрязвай границите</string>
@@ -467,7 +471,6 @@
     <string name="transition_no_previous">Няма предишна глава</string>
     <string name="transition_pages_loading">Зареждане на страниците…</string>
     <string name="transition_pages_error">"Неуспешно зареждане на страници: %1$s "</string>
-    <string name="darkblue_theme">Тъмно син</string>
     <string name="pref_read_with_long_tap">Показване на прозорец след натискане</string>
     <string name="reader_pull_up_for_more_options">Издърпайте за допълнително опции</string>
 </resources>

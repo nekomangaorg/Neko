@@ -56,7 +56,7 @@ class SettingsGeneralController : SettingsController() {
             titleRes = R.string.pref_theme
             entriesRes = arrayOf(R.string.light_theme, R.string.dark_theme,
                   R.string.amoled_theme, R.string.darkblue_theme,
-                  R.string.system_default, R.string.system_amoled_theme, R.string.system_darkblue_theme)
+                  R.string.system_theme, R.string.system_amoled_theme, R.string.system_darkblue_theme)
             entryValues = arrayOf("1", "2", "3", "4", "5", "6", "7")
             defaultValue = "5"
             summary = "%s"
