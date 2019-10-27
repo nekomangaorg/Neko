@@ -314,7 +314,7 @@ class MainActivity : BaseActivity() {
         const val INTENT_SEARCH_QUERY = "query"
         const val INTENT_SEARCH_FILTER = "filter"
 
-        private const val URL_HELP = "https://github.com/inorichi/tachiyomi/wiki"
+        private const val URL_HELP = "https://tachiyomi.org/help/"
     }
 
 }
