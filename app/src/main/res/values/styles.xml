@@ -146,6 +146,15 @@
         <item name="layout_behavior">eu.kanade.tachiyomi.widget.FABAnimationUpDown</item>
     </style>
 
+    <style name="Theme.Widget.FABFixed">
+        <item name="android:layout_height">@dimen/fab_size</item>
+        <item name="android:layout_width">@dimen/fab_size</item>
+        <item name="android:layout_gravity">bottom|end</item>
+        <item name="android:layout_margin">@dimen/fab_margin</item>
+        <item name="android:scaleType">fitCenter</item>
+        <item name="android:tint">@color/md_white_1000</item>
+    </style>
+
     <style name="Theme.Widget.CardView" parent="CardView">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>

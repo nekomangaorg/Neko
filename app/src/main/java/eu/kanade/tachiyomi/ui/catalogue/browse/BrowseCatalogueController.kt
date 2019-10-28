@@ -375,9 +375,6 @@ open class BrowseCatalogueController(bundle: Bundle) :
                 presenter.requestNext()
             }
         }
-        snack?.view?.doOnApplyWindowInsets { v, _, padding ->
-            v.setPadding(padding.left,0,padding.right,0)
-        }
     }
 
     /**

@@ -6,12 +6,12 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.support.customtabs.CustomTabsIntent
+import android.support.design.widget.Snackbar
 import android.support.v4.content.pm.ShortcutInfoCompat
 import android.support.v4.content.pm.ShortcutManagerCompat
 import android.support.v4.graphics.drawable.IconCompat
@@ -49,6 +49,7 @@ import uy.kohesive.injekt.injectLazy
 import java.text.DateFormat
 import java.text.DecimalFormat
 import java.util.Date
+import kotlin.math.max
 
 /**
  * Fragment that shows manga information.
@@ -62,6 +63,13 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
      * Preferences helper.
      */
     private val preferences: PreferencesHelper by injectLazy()
+
+    /**
+     * Snackbar containing an error message when a request fails.
+     */
+    private var snack: Snackbar? = null
+
+    private var container:View? = null
 
     init {
         setHasOptionsMenu(true)
@@ -85,7 +93,7 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         fab_favorite.clicks().subscribeUntilDestroy { onFabClick() }
 
         // Set onLongClickListener to manage categories when FAB is clicked.
-        fab_favorite.longClicks().subscribeUntilDestroy{ onFabLongClick() }
+        fab_favorite.longClicks().subscribeUntilDestroy { onFabLongClick() }
 
         // Set SwipeRefresh to refresh manga data.
         swipe_refresh.refreshes().subscribeUntilDestroy { fetchMangaFromSource() }
@@ -123,10 +131,24 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         manga_cover.longClicks().subscribeUntilDestroy {
             copyToClipboard(view.context.getString(R.string.title), presenter.manga.title)
         }
-
-        view.doOnApplyWindowInsets { v, insets, padding ->
+        container = (view as ViewGroup).findViewById(R.id.manga_info_layout) as? View
+        val bottomM = manga_genres_tags.marginBottom
+        val fabBaseMarginBottom = fab_favorite.marginBottom
+        container?.doOnApplyWindowInsets { v, insets, padding ->
+            if (resources?.configuration?.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                fab_favorite?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    bottomMargin = fabBaseMarginBottom + insets.systemWindowInsetBottom
+                }
+            }
+            else {
+                manga_genres_tags?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    bottomMargin = bottomM + +insets.systemWindowInsetBottom
+                }
+            }
+        }
+        info_scrollview.doOnApplyWindowInsets { v, insets, padding ->
             v.updatePaddingRelative(
-              bottom = padding.bottom + insets.systemWindowInsetBottom
+                bottom = max(padding.bottom, insets.systemWindowInsetBottom)
             )
         }
     }
@@ -245,6 +267,7 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
 
     override fun onDestroyView(view: View) {
         manga_genres_tags.setOnTagClickListener(null)
+        snack?.dismiss()
         super.onDestroyView(view)
     }
 
@@ -273,16 +296,7 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
      * Toggles the favorite status and asks for confirmation to delete downloaded chapters.
      */
     private fun toggleFavorite() {
-        val view = view
-
-        val isNowFavorite = presenter.toggleFavorite()
-        if (view != null && !isNowFavorite && presenter.hasDownloads()) {
-            view.snack(view.context.getString(R.string.delete_downloads_for_manga)) {
-                setAction(R.string.action_delete) {
-                    presenter.deleteDownloads()
-                }
-            }
-        }
+        presenter.toggleFavorite()
     }
 
     /**
@@ -398,9 +412,33 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
                             .showDialog(router)
                 }
             }
-            activity?.toast(activity?.getString(R.string.manga_added_library))
+            showAddedSnack()
         } else {
-            activity?.toast(activity?.getString(R.string.manga_removed_library))
+            showRemovedSnack()
+        }
+    }
+
+    private fun showAddedSnack() {
+        val view = container
+        snack?.dismiss()
+        snack = view?.snack(view.context.getString(R.string.manga_added_library), Snackbar
+        .LENGTH_SHORT)
+    }
+
+    private fun showRemovedSnack() {
+        val view = container
+        val hasDownloads = presenter.hasDownloads()
+        snack?.dismiss()
+        if (view != null) {
+            val message = view.context.getString(R.string.manga_removed_library) +
+                          (if (hasDownloads) "\n" + view.context.getString(R.string
+                              .delete_downloads_for_manga) else "")
+            snack = view.snack(message, (if (hasDownloads) Snackbar.LENGTH_INDEFINITE
+                else Snackbar.LENGTH_SHORT)) {
+                    if (hasDownloads) setAction(R.string.action_delete) {
+                        presenter.deleteDownloads()
+                    }
+                }
         }
     }
 
@@ -411,7 +449,7 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         val manga = presenter.manga
         if (!manga.favorite) {
             toggleFavorite()
-            activity?.toast(activity?.getString(R.string.manga_added_library))
+            showAddedSnack()
         }
         val categories = presenter.getCategories()
         if (categories.size <= 1) {

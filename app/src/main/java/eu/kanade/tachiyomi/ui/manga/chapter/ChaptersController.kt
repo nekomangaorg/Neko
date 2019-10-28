@@ -379,9 +379,6 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
                     presenter.addToLibrary()
                 }
             }
-            snack.view.doOnApplyWindowInsets { v, _, padding ->
-                v.setPadding(padding.left,0,padding.right,0)
-            }
         }
     }
 

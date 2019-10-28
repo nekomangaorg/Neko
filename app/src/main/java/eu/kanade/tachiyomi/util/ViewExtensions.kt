@@ -36,7 +36,8 @@ fun View.getCoordinates() = Point((left + right) / 2, (top + bottom) / 2)
  * @param length the duration of the snack.
  * @param f a function to execute in the snack, allowing for example to define a custom action.
  */
-inline fun View.snack(message: String, length: Int = Snackbar.LENGTH_LONG, f: Snackbar.() -> Unit): Snackbar {
+fun View.snack(message: String, length: Int = Snackbar.LENGTH_LONG, f: (Snackbar.() ->
+Unit)? = null): Snackbar {
     val snack = Snackbar.make(this, message, length)
     val textView: TextView = snack.view.findViewById(android.support.design.R.id.snackbar_text)
     textView.setTextColor(Color.WHITE)
@@ -44,7 +45,12 @@ inline fun View.snack(message: String, length: Int = Snackbar.LENGTH_LONG, f: Sn
         Build.VERSION.SDK_INT >= 23 -> snack.config(context, rootWindowInsets.systemWindowInsetBottom)
         else -> snack.config(context)
     }
-    snack.f()
+    if (f != null) {
+        snack.f()
+    }
+    snack.view.doOnApplyWindowInsets { v, _, padding ->
+        v.setPadding(padding.left,0,padding.right,0)
+    }
     snack.show()
     return snack
 }
@@ -53,7 +59,6 @@ fun Snackbar.config(context: Context, bottomMargin: Int = 0) {
     val params = this.view.layoutParams as ViewGroup.MarginLayoutParams
     params.setMargins(12, 12, 12, 12 + bottomMargin)
     this.view.layoutParams = params
-
     this.view.background = context.getDrawable(R.drawable.bg_snackbar)
 
     ViewCompat.setElevation(this.view, 6f)
