@@ -33,9 +33,11 @@
     <item name="icon_color">@color/iconColorDark</item>
   </style>
 
-  <style name="Theme.Base.Reader.Light" parent="Theme.Tachiyomi">
+  <style name="Theme.Base.Reader" parent="Theme.Base">
+    <item name="android:statusBarColor">?colorPrimaryDark</item>
+    <item name="android:navigationBarColor">?colorPrimaryDark</item>
     <item name="colorPrimary">@color/colorDarkPrimary</item>
-    <item name="colorPrimaryDark">@color/colorDarkPrimaryDark</item>
+    <item name="colorPrimaryDark">@color/colorDarkPrimary</item>
     <item name="android:colorBackground">@color/backgroundDark</item>
   </style>
 

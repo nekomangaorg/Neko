@@ -351,8 +351,6 @@ class PagerPageHolder(
             })
         }
         addView(subsamplingImageView)
-        if (Build.VERSION.SDK_INT >= 29)
-            subsamplingImageView?.isForceDarkAllowed = false
         return subsamplingImageView!!
     }
 

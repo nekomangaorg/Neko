@@ -10,9 +10,11 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+import android.support.design.widget.BottomSheetDialog
 import android.view.*
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
+import android.widget.LinearLayout
 import android.widget.SeekBar
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import eu.kanade.tachiyomi.R
@@ -36,6 +38,7 @@ import eu.kanade.tachiyomi.util.*
 import eu.kanade.tachiyomi.widget.SimpleAnimationListener
 import eu.kanade.tachiyomi.widget.SimpleSeekBarListener
 import kotlinx.android.synthetic.main.reader_activity.*
+import kotlinx.android.synthetic.main.reader_activity.toolbar
 import me.zhanghai.android.systemuihelper.SystemUiHelper
 import nucleus.factory.RequiresPresenter
 import rx.Observable
@@ -87,6 +90,11 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
     private var config: ReaderConfig? = null
 
     /**
+     * Current Bottom Sheet on display, used to dismiss
+     */
+    private var bottomSheet: BottomSheetDialog? = null
+
+    /**
      * Progress dialog used when switching chapters from the menu buttons.
      */
     @Suppress("DEPRECATION")
@@ -112,8 +120,9 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
      */
     override fun onCreate(savedState: Bundle?) {
         setTheme(when (preferences.readerTheme().getOrDefault()) {
-            1 -> R.style.Theme_Reader
-            else -> R.style.Theme_Reader_Light
+            0 -> R.style.Theme_Base_Reader_Light
+            1 -> R.style.Theme_Base_Reader_Dark
+            else -> R.style.Theme_Base_Reader
         })
         super.onCreate(savedState)
         setContentView(R.layout.reader_activity)
@@ -136,17 +145,6 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
 
         config = ReaderConfig()
         initializeMenu()
-        val container: ViewGroup = findViewById(R.id.reader_container)
-        val readerBHeight = reader_menu_bottom.layoutParams.height
-        container.doOnApplyWindowInsets { _, insets, padding ->
-            val bottomInset = if (Build.VERSION.SDK_INT >= 29)
-                (insets.mandatorySystemGestureInsets.bottom - insets.systemWindowInsetBottom)
-                else 0
-            reader_menu_bottom.updateLayoutParams<ViewGroup.MarginLayoutParams>  {
-                height = readerBHeight + bottomInset
-            }
-            reader_menu_bottom.updatePaddingRelative(bottom = padding.bottom + bottomInset)
-        }
     }
 
     /**
@@ -158,6 +156,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         viewer = null
         config?.destroy()
         config = null
+        bottomSheet?.dismiss()
+        bottomSheet = null
         progressDialog?.dismiss()
         progressDialog = null
     }
@@ -198,11 +198,12 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
      * entries.
      */
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.action_settings -> ReaderSettingsSheet(this).show()
-            R.id.action_custom_filter -> ReaderColorFilterSheet(this).show()
+        bottomSheet = when (item.itemId) {
+            R.id.action_settings -> ReaderSettingsSheet(this)
+            R.id.action_custom_filter -> ReaderColorFilterSheet(this)
             else -> return super.onOptionsItemSelected(item)
         }
+        bottomSheet?.show()
         return true
     }
 
@@ -286,15 +287,11 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
                 val toolbarAnimation = AnimationUtils.loadAnimation(this, R.anim.enter_from_top)
                 toolbarAnimation.setAnimationListener(object : SimpleAnimationListener() {
                     override fun onAnimationStart(animation: Animation) {
-                        // Fix status bar being translucent the first time it's opened.
-                        if (Build.VERSION.SDK_INT >= 21) {
                             window.addFlags(
                                     WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-                        }
                     }
                 })
                 toolbar.startAnimation(toolbarAnimation)
-
                 val bottomAnimation = AnimationUtils.loadAnimation(this, R.anim.enter_from_bottom)
                 reader_menu_bottom.startAnimation(bottomAnimation)
             }

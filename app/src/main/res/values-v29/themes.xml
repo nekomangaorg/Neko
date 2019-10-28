@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
   <!-- values-v29/themes.xml -->
   <style name="Theme.Tachiyomi" parent="Theme.Base">
-    <!-- Attributes specific for SDK 21 and up  -->
     <item name="android:statusBarColor">@android:color/transparent</item>
     <item name="android:navigationBarColor">@android:color/transparent</item>
   </style>

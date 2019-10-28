@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.reader.viewer.pager
 
 import android.annotation.SuppressLint
 import android.graphics.Typeface
+import android.os.Build
 import android.support.v7.widget.AppCompatTextView
 import android.text.SpannableStringBuilder
 import android.text.Spanned
@@ -18,6 +19,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.util.dpToPx
+import eu.kanade.tachiyomi.util.getResourceColor
 import eu.kanade.tachiyomi.widget.ViewPagerAdapter
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
@@ -46,6 +48,8 @@ class PagerTransitionHolder(
      * Text view used to display the text of the current and next/prev chapters.
      */
     private var textView = TextView(context).apply {
+        //if (Build.VERSION.SDK_INT >= 23)
+        //setTextColor(context.getResourceColor(R.attr.))
         wrapContent()
     }
 
