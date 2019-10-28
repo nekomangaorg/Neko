@@ -25,13 +25,11 @@ class PageIndicatorTextView(
 
     override fun onDraw(canvas: Canvas) {
         setTextColor(strokeColor)
-        //textColorField.set(this, strokeColor)
         paint.strokeWidth = 4f
         paint.style = Paint.Style.STROKE
         super.onDraw(canvas)
 
         setTextColor(fillColor)
-        //textColorField.set(this, fillColor)
         paint.strokeWidth = 0f
         paint.style = Paint.Style.FILL
         super.onDraw(canvas)
@@ -51,13 +49,5 @@ class PageIndicatorTextView(
         }
 
         super.setText(finalText, TextView.BufferType.SPANNABLE)
-    }
-
-    private companion object {
-        // We need to use reflection to set the text color instead of using [setTextColor],
-        // otherwise the view is invalidated inside [onDraw] and there's an infinite loop
-       /* val textColorField = TextView::class.java.getDeclaredField("mCurTextColor").apply {
-            isAccessible = true
-        }!!*/
     }
 }
