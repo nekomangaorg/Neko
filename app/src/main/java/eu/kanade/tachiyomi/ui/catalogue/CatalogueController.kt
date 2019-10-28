@@ -22,6 +22,7 @@ import eu.kanade.tachiyomi.ui.catalogue.browse.BrowseCatalogueController
 import eu.kanade.tachiyomi.ui.catalogue.global_search.CatalogueSearchController
 import eu.kanade.tachiyomi.ui.catalogue.latest.LatestUpdatesController
 import eu.kanade.tachiyomi.ui.setting.SettingsSourcesController
+import eu.kanade.tachiyomi.util.RecyclerWindowInsetsListener
 import eu.kanade.tachiyomi.widget.preference.SourceLoginDialog
 import kotlinx.android.synthetic.main.catalogue_main_controller.*
 import uy.kohesive.injekt.Injekt
@@ -101,6 +102,7 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
         recycler.layoutManager = LinearLayoutManager(view.context)
         recycler.adapter = adapter
         recycler.addItemDecoration(SourceDividerItemDecoration(view.context))
+        recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
 
         requestPermissionsSafe(arrayOf(WRITE_EXTERNAL_STORAGE), 301)
     }

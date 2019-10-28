@@ -218,9 +218,7 @@ open class BrowseCatalogueController(bundle: Bundle) :
         recycler.adapter = adapter
 
         catalogue_view.addView(recycler, 1)
-        recycler.doOnApplyWindowInsets { v, insets, padding ->
-            v.updatePaddingRelative(bottom = padding.bottom + insets.systemWindowInsetBottom)
-        }
+        recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
         if (oldPosition != RecyclerView.NO_POSITION) {
             recycler.layoutManager?.scrollToPosition(oldPosition)
         }

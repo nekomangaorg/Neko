@@ -29,7 +29,7 @@
     <item name="selectable_list_drawable">@drawable/list_item_selector_dark</item>
     <item name="selectable_library_drawable">@drawable/library_item_selector_dark</item>
     <item name="text_color_primary">@color/textColorPrimaryDark</item>
-    <item name="background_card">@color/dialogDark</item>
+    <item name="background_card">@color/cardBackground</item>
     <item name="icon_color">@color/iconColorDark</item>
   </style>
 
