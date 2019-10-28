@@ -11,6 +11,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.manga.MangaController
+import eu.kanade.tachiyomi.util.RecyclerWindowInsetsListener
 import eu.kanade.tachiyomi.util.toast
 import kotlinx.android.synthetic.main.track_controller.*
 import timber.log.Timber
@@ -44,6 +45,7 @@ class TrackController : NucleusController<TrackPresenter>(),
         with(view) {
             track_recycler.layoutManager = LinearLayoutManager(context)
             track_recycler.adapter = adapter
+            track_recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
             swipe_refresh.isEnabled = false
             swipe_refresh.refreshes().subscribeUntilDestroy { presenter.refresh() }
         }

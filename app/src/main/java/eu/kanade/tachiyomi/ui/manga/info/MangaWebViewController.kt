@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.manga.info
 
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,7 +10,11 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
+import eu.kanade.tachiyomi.util.RecyclerWindowInsetsListener
 import eu.kanade.tachiyomi.util.WebViewClientCompat
+import eu.kanade.tachiyomi.util.doOnApplyWindowInsets
+import eu.kanade.tachiyomi.util.marginBottom
+import eu.kanade.tachiyomi.util.updateLayoutParams
 import uy.kohesive.injekt.injectLazy
 
 class MangaWebViewController(bundle: Bundle? = null) : BaseController(bundle) {
@@ -36,6 +41,14 @@ class MangaWebViewController(bundle: Bundle? = null) : BaseController(bundle) {
             override fun shouldOverrideUrlCompat(view: WebView, url: String): Boolean {
                 view.loadUrl(url)
                 return true
+            }
+        }
+        val marginB = view.marginBottom
+        view.doOnApplyWindowInsets{ v, insets, _ ->
+            val bottomInset = if (Build.VERSION.SDK_INT >= 29) insets.tappableElementInsets.bottom
+            else insets.systemWindowInsetBottom
+            v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                bottomMargin = marginB + bottomInset
             }
         }
         web.settings.javaScriptEnabled = true
