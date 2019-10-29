@@ -458,7 +458,7 @@ class ReaderPresenter(
         notifier.onClear()
 
         // Pictures directory.
-        val destDir = File(Environment.getExternalStorageDirectory().absolutePath +
+        val destDir = File(Environment.getExternalStorageDirectory()!!.absolutePath +
                 File.separator + Environment.DIRECTORY_PICTURES +
                 File.separator + "Tachiyomi")
 

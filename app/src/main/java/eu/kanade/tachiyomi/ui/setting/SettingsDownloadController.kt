@@ -174,7 +174,7 @@ class SettingsDownloadController : SettingsController() {
         }
 
         private fun getExternalDirs(): List<File> {
-            val defaultDir = Environment.getExternalStorageDirectory().absolutePath +
+            val defaultDir = Environment.getExternalStorageDirectory()!!.absolutePath +
                     File.separator + resources?.getString(R.string.app_name) +
                     File.separator + "downloads"
 
