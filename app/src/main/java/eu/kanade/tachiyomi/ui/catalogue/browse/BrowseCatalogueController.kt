@@ -2,10 +2,11 @@ package eu.kanade.tachiyomi.ui.catalogue.browse
 
 import android.content.res.Configuration
 import android.os.Bundle
-import android.support.design.widget.Snackbar
-import android.support.v4.widget.DrawerLayout
-import android.support.v7.widget.*
+import com.google.android.material.snackbar.Snackbar
+import androidx.drawerlayout.widget.DrawerLayout
+import androidx.appcompat.widget.*
 import android.view.*
+import androidx.core.view.GravityCompat
 import com.afollestad.materialdialogs.MaterialDialog
 import com.f2prateek.rx.preferences.Preference
 import com.jakewharton.rxbinding.support.v7.widget.queryTextChangeEvents
@@ -76,7 +77,7 @@ open class BrowseCatalogueController(bundle: Bundle) :
     /**
      * Recycler view with the list of results.
      */
-    private var recycler: RecyclerView? = null
+    private var recycler: androidx.recyclerview.widget.RecyclerView? = null
 
     /**
      * Subscription for the search view.
@@ -132,19 +133,19 @@ open class BrowseCatalogueController(bundle: Bundle) :
         super.onDestroyView(view)
     }
 
-    override fun createSecondaryDrawer(drawer: DrawerLayout): ViewGroup? {
+    override fun createSecondaryDrawer(drawer: androidx.drawerlayout.widget.DrawerLayout): ViewGroup? {
         // Inflate and prepare drawer
         val navView = drawer.inflate(R.layout.catalogue_drawer) as CatalogueNavigationView
         this.navView = navView
         navView.setFilters(presenter.filterItems)
 
-        drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, Gravity.END)
+        drawer.setDrawerLockMode(androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_UNLOCKED, GravityCompat.END)
 
         navView.onSearchClicked = {
             val allDefault = presenter.sourceFilters == presenter.source.getFilterList()
             showProgressBar()
             adapter?.clear()
-            drawer.closeDrawer(Gravity.END)
+            drawer.closeDrawer(GravityCompat.END)
             presenter.setSourceFilter(if (allDefault) FilterList() else presenter.sourceFilters)
         }
 
@@ -174,27 +175,27 @@ open class BrowseCatalogueController(bundle: Bundle) :
         return navView
     }
 
-    override fun cleanupSecondaryDrawer(drawer: DrawerLayout) {
+    override fun cleanupSecondaryDrawer(drawer: androidx.drawerlayout.widget.DrawerLayout) {
         navView = null
     }
 
     private fun setupRecycler(view: View) {
         numColumnsSubscription?.unsubscribe()
 
-        var oldPosition = RecyclerView.NO_POSITION
+        var oldPosition = androidx.recyclerview.widget.RecyclerView.NO_POSITION
         val oldRecycler = catalogue_view?.getChildAt(1)
-        if (oldRecycler is RecyclerView) {
-            oldPosition = (oldRecycler.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+        if (oldRecycler is androidx.recyclerview.widget.RecyclerView) {
+            oldPosition = (oldRecycler.layoutManager as androidx.recyclerview.widget.LinearLayoutManager).findFirstVisibleItemPosition()
             oldRecycler.adapter = null
 
             catalogue_view?.removeView(oldRecycler)
         }
 
         val recycler = if (presenter.isListMode) {
-            RecyclerView(view.context).apply {
+            androidx.recyclerview.widget.RecyclerView(view.context).apply {
                 id = R.id.recycler
-                layoutManager = LinearLayoutManager(context)
-                addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
+                layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
+                addItemDecoration(androidx.recyclerview.widget.DividerItemDecoration(context, androidx.recyclerview.widget.DividerItemDecoration.VERTICAL))
             }
         } else {
             (catalogue_view.inflate(R.layout.catalogue_recycler_autofit) as AutofitRecyclerView).apply {
@@ -204,7 +205,7 @@ open class BrowseCatalogueController(bundle: Bundle) :
                         // Set again the adapter to recalculate the covers height
                         .subscribe { adapter = this@BrowseCatalogueController.adapter }
 
-                (layoutManager as GridLayoutManager).spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
+                (layoutManager as androidx.recyclerview.widget.GridLayoutManager).spanSizeLookup = object : androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup() {
                     override fun getSpanSize(position: Int): Int {
                         return when (adapter?.getItemViewType(position)) {
                             R.layout.catalogue_grid_item, null -> 1
@@ -219,7 +220,7 @@ open class BrowseCatalogueController(bundle: Bundle) :
 
         catalogue_view.addView(recycler, 1)
         recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
-        if (oldPosition != RecyclerView.NO_POSITION) {
+        if (oldPosition != androidx.recyclerview.widget.RecyclerView.NO_POSITION) {
             recycler.layoutManager?.scrollToPosition(oldPosition)
         }
         this.recycler = recycler
@@ -291,7 +292,7 @@ open class BrowseCatalogueController(bundle: Bundle) :
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_display_mode -> swapDisplayMode()
-            R.id.action_set_filter -> navView?.let { activity?.drawer?.openDrawer(Gravity.END) }
+            R.id.action_set_filter -> navView?.let { activity?.drawer?.openDrawer(GravityCompat.END) }
             R.id.action_open_in_browser -> openInBrowser()
             R.id.action_open_in_web_view -> openInWebView()
             else -> return super.onOptionsItemSelected(item)
@@ -483,7 +484,7 @@ open class BrowseCatalogueController(bundle: Bundle) :
      * @param position the position of the element clicked.
      * @return true if the item should be selected, false otherwise.
      */
-    override fun onItemClick(position: Int): Boolean {
+    override fun onItemClick(view: View?, position: Int): Boolean {
         val item = adapter?.getItem(position) as? CatalogueItem ?: return false
         router.pushController(MangaController(item.manga, true).withFadeTransaction())
 

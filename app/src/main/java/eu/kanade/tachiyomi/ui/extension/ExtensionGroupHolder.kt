@@ -5,8 +5,10 @@ import android.view.View
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import kotlinx.android.synthetic.main.extension_card_header.title
+import androidx.recyclerview.widget.RecyclerView
+import eu.davidea.flexibleadapter.items.IFlexible
 
-class ExtensionGroupHolder(view: View, adapter: FlexibleAdapter<*>) :
+class ExtensionGroupHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>) :
         BaseFlexibleViewHolder(view, adapter) {
 
     @SuppressLint("SetTextI18n")

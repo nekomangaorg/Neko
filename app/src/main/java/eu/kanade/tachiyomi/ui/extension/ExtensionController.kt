@@ -1,7 +1,7 @@
 package eu.kanade.tachiyomi.ui.extension
 
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.SearchView
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.appcompat.widget.SearchView
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -64,7 +64,7 @@ open class ExtensionController : NucleusController<ExtensionPresenter>(),
         // Initialize adapter, scroll listener and recycler views
         adapter = ExtensionAdapter(this)
         // Create recycler and set adapter.
-        ext_recycler.layoutManager = LinearLayoutManager(view.context)
+        ext_recycler.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(view.context)
         ext_recycler.adapter = adapter
         ext_recycler.addItemDecoration(ExtensionDividerItemDecoration(view.context))
         ext_recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
@@ -118,7 +118,7 @@ open class ExtensionController : NucleusController<ExtensionPresenter>(),
         searchItem.fixExpand()
     }
 
-    override fun onItemClick(position: Int): Boolean {
+    override fun onItemClick(view: View?, position: Int): Boolean {
         val extension = (adapter?.getItem(position) as? ExtensionItem)?.extension ?: return false
         if (extension is Extension.Installed) {
             openDetails(extension)

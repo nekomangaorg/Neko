@@ -3,11 +3,11 @@ package eu.kanade.tachiyomi.ui.extension
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
-import android.support.v7.preference.*
-import android.support.v7.preference.internal.AbstractMultiSelectListPreference
-import android.support.v7.widget.DividerItemDecoration
-import android.support.v7.widget.DividerItemDecoration.VERTICAL
-import android.support.v7.widget.LinearLayoutManager
+import androidx.preference.*
+import androidx.preference.MultiSelectListPreference
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.DividerItemDecoration.VERTICAL
+import androidx.recyclerview.widget.LinearLayoutManager
 import android.util.TypedValue
 import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
@@ -21,6 +21,7 @@ import eu.kanade.tachiyomi.source.ConfigurableSource
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.online.LoginSource
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
+import eu.kanade.tachiyomi.ui.setting.preference
 import eu.kanade.tachiyomi.ui.setting.preferenceCategory
 import eu.kanade.tachiyomi.util.LocaleHelper
 import eu.kanade.tachiyomi.util.RecyclerWindowInsetsListener
@@ -80,17 +81,18 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
 
         val multiSource = extension.sources.size > 1
 
-        for (source in extension.sources) {
+        /*for (source in extension.sources) {
             if (source is ConfigurableSource) {
                 addPreferencesForSource(screen, source, multiSource)
             }
-        }
+        }*/
 
         manager.setPreferences(screen)
 
-        extension_prefs_recycler.layoutManager = LinearLayoutManager(context)
+        extension_prefs_recycler.layoutManager =
+            androidx.recyclerview.widget.LinearLayoutManager(context)
         extension_prefs_recycler.adapter = PreferenceGroupAdapter(screen)
-        extension_prefs_recycler.addItemDecoration(DividerItemDecoration(context, VERTICAL))
+        extension_prefs_recycler.addItemDecoration(androidx.recyclerview.widget.DividerItemDecoration(context, VERTICAL))
         extension_prefs_recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
 
         if (screen.preferenceCount == 0) {
@@ -167,7 +169,7 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
                     .newInstance(preference.getKey())
             is ListPreference -> ListPreferenceDialogController
                     .newInstance(preference.getKey())
-            is AbstractMultiSelectListPreference -> MultiSelectListPreferenceDialogController
+            is MultiSelectListPreference -> MultiSelectListPreferenceDialogController
                     .newInstance(preference.getKey())
             else -> throw IllegalArgumentException("Tried to display dialog for unknown " +
                     "preference type. Did you forget to override onDisplayPreferenceDialog()?")
@@ -176,8 +178,8 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
         f.showDialog(router)
     }
 
-    override fun findPreference(key: CharSequence?): Preference {
-        return preferenceScreen!!.getPreference(lastOpenPreferencePosition!!)
+     override fun <T : Preference> findPreference(key: CharSequence): T? {
+         return preferenceScreen!!.findPreference(key)
     }
 
     override fun loginDialogClosed(source: LoginSource) {

@@ -1,6 +1,6 @@
 package eu.kanade.tachiyomi.ui.download
 
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView
 import android.view.ViewGroup
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.model.Download
@@ -11,7 +11,7 @@ import eu.kanade.tachiyomi.util.inflate
  *
  * @param context the context of the fragment containing this adapter.
  */
-class DownloadAdapter : RecyclerView.Adapter<DownloadHolder>() {
+class DownloadAdapter : androidx.recyclerview.widget.RecyclerView.Adapter<DownloadHolder>() {
 
     private var items = emptyList<Download>()
 

@@ -7,6 +7,8 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.model.Download
+import androidx.recyclerview.widget.RecyclerView
+import eu.davidea.flexibleadapter.items.IFlexible
 
 class RecentChapterItem(val chapter: Chapter, val manga: Manga, header: DateItem) :
         AbstractSectionableItem<RecentChapterHolder, DateItem>(header) {
@@ -26,14 +28,14 @@ class RecentChapterItem(val chapter: Chapter, val manga: Manga, header: DateItem
         return R.layout.recent_chapters_item
     }
 
-    override fun createViewHolder(view: View, adapter: FlexibleAdapter<*>): RecentChapterHolder {
+    override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): RecentChapterHolder {
         return RecentChapterHolder(view , adapter as RecentChaptersAdapter)
     }
 
-    override fun bindViewHolder(adapter: FlexibleAdapter<*>,
+    override fun bindViewHolder(adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
                                 holder: RecentChapterHolder,
                                 position: Int,
-                                payloads: List<Any?>?) {
+                                payloads: MutableList<Any?>?) {
 
         holder.bind(this)
     }

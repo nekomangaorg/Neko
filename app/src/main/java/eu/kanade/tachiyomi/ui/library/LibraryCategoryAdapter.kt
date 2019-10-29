@@ -2,6 +2,8 @@ package eu.kanade.tachiyomi.ui.library
 
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.kanade.tachiyomi.data.database.models.Manga
+import androidx.recyclerview.widget.RecyclerView
+import eu.davidea.flexibleadapter.items.IFlexible
 
 /**
  * Adapter storing a list of manga in a certain category.
@@ -38,7 +40,11 @@ class LibraryCategoryAdapter(view: LibraryCategoryView) :
     }
 
     fun performFilter() {
-        updateDataSet(mangas.filter { it.filter(searchText) })
+        var s = getFilter(String::class.java)
+        if (s == null) {
+            s = ""
+        }
+        updateDataSet(mangas.filter { it.filter(s) })
     }
 
 }

@@ -3,6 +3,8 @@ package eu.kanade.tachiyomi.ui.library
 import android.view.View
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
+import androidx.recyclerview.widget.RecyclerView
+import eu.davidea.flexibleadapter.items.IFlexible
 
 /**
  * Generic class used to hold the displayed data of a manga in the library.
@@ -13,7 +15,7 @@ import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 
 abstract class LibraryHolder(
         view: View,
-        adapter: FlexibleAdapter<*>
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>
 ) : BaseFlexibleViewHolder(view, adapter) {
 
     /**

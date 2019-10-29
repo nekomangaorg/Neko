@@ -2,6 +2,8 @@ package eu.kanade.tachiyomi.util
 
 import okio.BufferedSource
 import okio.Okio
+import okio.buffer
+import okio.sink
 import java.io.File
 import java.io.OutputStream
 
@@ -31,7 +33,7 @@ fun BufferedSource.saveTo(file: File) {
  */
 fun BufferedSource.saveTo(stream: OutputStream) {
     use { input ->
-        Okio.buffer(Okio.sink(stream)).use {
+        stream.sink().buffer().use {
             it.writeAll(input)
             it.flush()
         }

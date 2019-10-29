@@ -1,8 +1,8 @@
 @file:Suppress("PackageDirectoryMismatch")
 
-package android.support.v7.widget
+package androidx.recyclerview.widget
 
-import android.support.v7.widget.RecyclerView.NO_POSITION
+import androidx.recyclerview.widget.RecyclerView.NO_POSITION
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 
 /**
@@ -27,7 +27,7 @@ class WebtoonLayoutManager(activity: ReaderActivity) : LinearLayoutManager(activ
     /**
      * Returns the custom extra layout space.
      */
-    override fun getExtraLayoutSpace(state: RecyclerView.State): Int {
+    override fun getExtraLayoutSpace(state: androidx.recyclerview.widget.RecyclerView.State): Int {
         return extraLayoutSpace
     }
 
@@ -37,7 +37,7 @@ class WebtoonLayoutManager(activity: ReaderActivity) : LinearLayoutManager(activ
     fun findLastEndVisibleItemPosition(): Int {
         ensureLayoutState()
         @ViewBoundsCheck.ViewBounds val preferredBoundsFlag =
-                (ViewBoundsCheck.FLAG_CVE_LT_PVE or ViewBoundsCheck.FLAG_CVE_EQ_PVE)
+            (androidx.recyclerview.widget.ViewBoundsCheck.FLAG_CVE_LT_PVE or androidx.recyclerview.widget.ViewBoundsCheck.FLAG_CVE_EQ_PVE)
 
         val fromIndex = childCount - 1
         val toIndex = -1

@@ -7,16 +7,16 @@ import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
-import android.support.annotation.NonNull
-import android.support.annotation.Px
-import android.support.annotation.RequiresApi
-import android.support.v4.view.GravityCompat
-import android.support.v4.view.ViewCompat
-import android.support.v4.view.WindowInsetsCompat
-import android.support.v4.widget.DrawerLayout
-import android.support.v7.app.AppCompatDelegate
-import android.support.v7.app.AppCompatDelegate.*
-import android.support.v7.graphics.drawable.DrawerArrowDrawable
+import androidx.annotation.NonNull
+import androidx.annotation.Px
+import androidx.annotation.RequiresApi
+import androidx.core.view.GravityCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.drawerlayout.widget.DrawerLayout
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.appcompat.app.AppCompatDelegate.*
+import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsets
@@ -265,9 +265,9 @@ class MainActivity : BaseActivity() {
 
         val showHamburger = router.backstackSize == 1
         if (showHamburger) {
-            drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
+            drawer.setDrawerLockMode(androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_UNLOCKED)
         } else {
-            drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
+            drawer.setDrawerLockMode(androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
         }
 
         ObjectAnimator.ofFloat(drawerArrow, "progress", if (showHamburger) 0f else 1f).start()

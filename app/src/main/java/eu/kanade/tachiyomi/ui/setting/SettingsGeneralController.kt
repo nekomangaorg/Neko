@@ -4,8 +4,8 @@ import android.app.Dialog
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
-import android.support.v7.app.AppCompatDelegate
-import android.support.v7.preference.PreferenceScreen
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.preference.PreferenceScreen
 import android.view.View
 import com.afollestad.materialdialogs.MaterialDialog
 import eu.kanade.tachiyomi.R

@@ -2,13 +2,13 @@ package eu.kanade.tachiyomi.widget
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.support.design.R
-import android.support.design.internal.ScrimInsetsFrameLayout
-import android.support.design.widget.TextInputLayout
-import android.support.v4.view.ViewCompat
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.TintTypedArray
+import com.google.android.material.R
+import com.google.android.material.internal.ScrimInsetsFrameLayout
+import com.google.android.material.textfield.TextInputLayout
+import androidx.core.view.ViewCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.appcompat.widget.TintTypedArray
 import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
@@ -17,7 +17,7 @@ import eu.kanade.tachiyomi.util.inflate
 import eu.kanade.tachiyomi.R as TR
 
 @Suppress("LeakingThis")
-@SuppressLint("PrivateResource")
+@SuppressLint("PrivateResource", "RestrictedApi")
 open class SimpleNavigationView @JvmOverloads constructor(
         context: Context,
         attrs: AttributeSet? = null,
@@ -32,7 +32,7 @@ open class SimpleNavigationView @JvmOverloads constructor(
     /**
      * Recycler view containing all the items.
      */
-    val recycler = RecyclerView(context)
+    val recycler = androidx.recyclerview.widget.RecyclerView(context)
 
     init {
         // Custom attributes
@@ -56,7 +56,7 @@ open class SimpleNavigationView @JvmOverloads constructor(
 
         a.recycle()
 
-        recycler.layoutManager = LinearLayoutManager(context)
+        recycler.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
         recycler.clipToPadding = false
     }
 
@@ -78,7 +78,7 @@ open class SimpleNavigationView @JvmOverloads constructor(
     /**
      * Base view holder.
      */
-    abstract class Holder(view: View) : RecyclerView.ViewHolder(view)
+    abstract class Holder(view: View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(view)
 
     /**
      * Separator view holder.

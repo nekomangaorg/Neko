@@ -7,11 +7,11 @@ import android.graphics.Color
 import android.graphics.Point
 import android.graphics.Typeface
 import android.os.Build
-import android.support.annotation.Px
-import android.support.annotation.RequiresApi
-import android.support.design.widget.Snackbar
-import android.support.v4.view.ViewCompat
-import android.support.v4.view.WindowInsetsCompat
+import androidx.annotation.Px
+import androidx.annotation.RequiresApi
+import com.google.android.material.snackbar.Snackbar
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
@@ -39,7 +39,7 @@ fun View.getCoordinates() = Point((left + right) / 2, (top + bottom) / 2)
 fun View.snack(message: String, length: Int = Snackbar.LENGTH_LONG, f: (Snackbar.() ->
 Unit)? = null): Snackbar {
     val snack = Snackbar.make(this, message, length)
-    val textView: TextView = snack.view.findViewById(android.support.design.R.id.snackbar_text)
+    val textView: TextView = snack.view.findViewById(com.google.android.material.R.id.snackbar_text)
     textView.setTextColor(Color.WHITE)
     when {
         Build.VERSION.SDK_INT >= 23 -> snack.config(context, rootWindowInsets.systemWindowInsetBottom)

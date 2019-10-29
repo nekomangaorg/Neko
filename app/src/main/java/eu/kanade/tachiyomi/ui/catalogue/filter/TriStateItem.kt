@@ -1,7 +1,7 @@
 package eu.kanade.tachiyomi.ui.catalogue.filter
 
-import android.support.design.R
-import android.support.graphics.drawable.VectorDrawableCompat
+import com.google.android.material.R
+import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import android.view.View
 import android.widget.CheckedTextView
 import eu.davidea.flexibleadapter.FlexibleAdapter
@@ -11,6 +11,8 @@ import eu.kanade.tachiyomi.source.model.Filter
 import eu.kanade.tachiyomi.util.dpToPx
 import eu.kanade.tachiyomi.util.getResourceColor
 import eu.kanade.tachiyomi.R as TR
+import androidx.recyclerview.widget.RecyclerView
+import eu.davidea.flexibleadapter.items.IFlexible
 
 open class TriStateItem(val filter: Filter.TriState) : AbstractFlexibleItem<TriStateItem.Holder>() {
 
@@ -22,11 +24,11 @@ open class TriStateItem(val filter: Filter.TriState) : AbstractFlexibleItem<TriS
         return 103
     }
 
-    override fun createViewHolder(view: View, adapter: FlexibleAdapter<*>): Holder {
+    override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): Holder {
         return Holder(view, adapter)
     }
 
-    override fun bindViewHolder(adapter: FlexibleAdapter<*>, holder: Holder, position: Int, payloads: List<Any?>?) {
+    override fun bindViewHolder(adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>, holder: Holder, position: Int, payloads: MutableList<Any?>?) {
         val view = holder.text
         view.text = filter.name
 
@@ -61,7 +63,7 @@ open class TriStateItem(val filter: Filter.TriState) : AbstractFlexibleItem<TriS
         return filter.hashCode()
     }
 
-    class Holder(view: View, adapter: FlexibleAdapter<*>) : FlexibleViewHolder(view, adapter) {
+    class Holder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>) : FlexibleViewHolder(view, adapter) {
 
         val text: CheckedTextView = itemView.findViewById(TR.id.nav_view_item)
 

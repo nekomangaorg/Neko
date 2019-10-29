@@ -4,6 +4,8 @@ import android.view.View
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
+import androidx.recyclerview.widget.RecyclerView
+import eu.davidea.flexibleadapter.items.IFlexible
 
 /**
  * Generic class used to hold the displayed data of a manga in the catalogue.
@@ -11,7 +13,7 @@ import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
  * @param view the inflated view for this holder.
  * @param adapter the adapter handling this holder.
  */
-abstract class CatalogueHolder(view: View, adapter: FlexibleAdapter<*>) :
+abstract class CatalogueHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>) :
         BaseFlexibleViewHolder(view, adapter) {
 
     /**

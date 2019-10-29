@@ -1,9 +1,10 @@
 package eu.kanade.tachiyomi.ui.library
 
 import android.content.Context
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import android.util.AttributeSet
+import android.view.View
 import android.widget.FrameLayout
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.SelectableAdapter
@@ -46,7 +47,7 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
     /**
      * Recycler view of the list of manga.
      */
-    private lateinit var recycler: RecyclerView
+    private lateinit var recycler: androidx.recyclerview.widget.RecyclerView
 
     /**
      * Adapter to hold the manga in this category.
@@ -62,8 +63,8 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
         this.controller = controller
 
         recycler = if (preferences.libraryAsList().getOrDefault()) {
-            (swipe_refresh.inflate(R.layout.library_list_recycler) as RecyclerView).apply {
-                layoutManager = LinearLayoutManager(context)
+            (swipe_refresh.inflate(R.layout.library_list_recycler) as androidx.recyclerview.widget.RecyclerView).apply {
+                layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
             }
         } else {
             (swipe_refresh.inflate(R.layout.library_grid_recycler) as AutofitRecyclerView).apply {
@@ -77,10 +78,10 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
         recycler.adapter = adapter
         swipe_refresh.addView(recycler)
 
-        recycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrollStateChanged(recycler: RecyclerView, newState: Int) {
+        recycler.addOnScrollListener(object : androidx.recyclerview.widget.RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recycler: androidx.recyclerview.widget.RecyclerView, newState: Int) {
                 // Disable swipe refresh when view is not at the top
-                val firstPos = (recycler.layoutManager as LinearLayoutManager)
+                val firstPos = (recycler.layoutManager as androidx.recyclerview.widget.LinearLayoutManager)
                         .findFirstCompletelyVisibleItemPosition()
                 swipe_refresh.isEnabled = firstPos <= 0
             }
@@ -111,7 +112,7 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
         }
 
         subscriptions += controller.searchRelay
-                .doOnNext { adapter.searchText = it }
+                .doOnNext { adapter.setFilter(it) }
                 .skip(1)
                 .subscribe { adapter.performFilter() }
 
@@ -202,7 +203,7 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
      * @param position the position of the element clicked.
      * @return true if the item should be selected, false otherwise.
      */
-    override fun onItemClick(position: Int): Boolean {
+    override fun onItemClick(view: View?, position: Int): Boolean {
         // If the action mode is created and the position is valid, toggle the selection.
         val item = adapter.getItem(position) ?: return false
         if (adapter.mode == SelectableAdapter.Mode.MULTI) {

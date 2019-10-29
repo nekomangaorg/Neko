@@ -1,10 +1,10 @@
 package eu.kanade.tachiyomi.ui.category
 
-import android.support.design.widget.Snackbar
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.view.ActionMode
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
+import com.google.android.material.snackbar.Snackbar
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.view.ActionMode
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import android.view.*
 import com.jakewharton.rxbinding.view.clicks
 import eu.davidea.flexibleadapter.FlexibleAdapter
@@ -78,7 +78,7 @@ class CategoryController : NucleusController<CategoryPresenter>(),
         super.onViewCreated(view)
 
         adapter = CategoryAdapter(this@CategoryController)
-        recycler.layoutManager = LinearLayoutManager(view.context)
+        recycler.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(view.context)
         recycler.setHasFixedSize(true)
         recycler.adapter = adapter
         adapter?.isHandleDragEnabled = true
@@ -217,9 +217,9 @@ class CategoryController : NucleusController<CategoryPresenter>(),
      * @param position The position of the clicked item.
      * @return true if this click should enable selection mode.
      */
-    override fun onItemClick(position: Int): Boolean {
+    override fun onItemClick(view: View?, position: Int): Boolean {
         // Check if action mode is initialized and selected item exist.
-        if (actionMode != null && position != RecyclerView.NO_POSITION) {
+        if (actionMode != null && position != androidx.recyclerview.widget.RecyclerView.NO_POSITION) {
             toggleSelection(position)
             return true
         } else {

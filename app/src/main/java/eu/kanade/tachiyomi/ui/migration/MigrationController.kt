@@ -2,7 +2,7 @@ package eu.kanade.tachiyomi.ui.migration
 
 import android.app.Dialog
 import android.os.Bundle
-import android.support.v7.widget.LinearLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -42,7 +42,8 @@ class MigrationController : NucleusController<MigrationPresenter>(),
         super.onViewCreated(view)
 
         adapter = FlexibleAdapter(null, this)
-        migration_recycler.layoutManager = LinearLayoutManager(view.context)
+        migration_recycler.layoutManager =
+            androidx.recyclerview.widget.LinearLayoutManager(view.context)
         migration_recycler.adapter = adapter
         migration_recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
     }
@@ -93,7 +94,7 @@ class MigrationController : NucleusController<MigrationPresenter>(),
         }
     }
 
-    override fun onItemClick(position: Int): Boolean {
+    override fun onItemClick(view: View?, position: Int): Boolean {
         val item = adapter?.getItem(position) ?: return false
 
         if (item is MangaItem) {
@@ -108,7 +109,7 @@ class MigrationController : NucleusController<MigrationPresenter>(),
     }
 
     override fun onSelectClick(position: Int) {
-        onItemClick(position)
+        onItemClick(view, position)
     }
 
     fun migrateManga(prevManga: Manga, manga: Manga) {

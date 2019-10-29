@@ -12,6 +12,8 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import kotlinx.android.synthetic.main.catalogue_grid_item.view.*
+import androidx.recyclerview.widget.RecyclerView
+import eu.davidea.flexibleadapter.items.IFlexible
 
 class CatalogueItem(val manga: Manga, private val catalogueAsList: Preference<Boolean>) :
         AbstractFlexibleItem<CatalogueHolder>() {
@@ -23,7 +25,7 @@ class CatalogueItem(val manga: Manga, private val catalogueAsList: Preference<Bo
             R.layout.catalogue_grid_item
     }
 
-    override fun createViewHolder(view: View, adapter: FlexibleAdapter<*>): CatalogueHolder {
+    override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): CatalogueHolder {
         val parent = adapter.recyclerView
         return if (parent is AutofitRecyclerView) {
             view.apply {
@@ -38,10 +40,10 @@ class CatalogueItem(val manga: Manga, private val catalogueAsList: Preference<Bo
         }
     }
 
-    override fun bindViewHolder(adapter: FlexibleAdapter<*>,
+    override fun bindViewHolder(adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
                                 holder: CatalogueHolder,
                                 position: Int,
-                                payloads: List<Any?>?) {
+                                payloads: MutableList<Any?>?) {
 
         holder.onSetValues(manga)
     }

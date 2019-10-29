@@ -1,6 +1,6 @@
 package eu.kanade.tachiyomi.ui.download
 
-import android.support.v7.widget.LinearLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import android.view.*
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.DownloadService
@@ -63,7 +63,7 @@ class DownloadController : NucleusController<DownloadPresenter>() {
         recycler.adapter = adapter
 
         // Set the layout manager for the recycler and fixed size.
-        recycler.layoutManager = LinearLayoutManager(view.context)
+        recycler.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(view.context)
         recycler.setHasFixedSize(true)
         recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
 

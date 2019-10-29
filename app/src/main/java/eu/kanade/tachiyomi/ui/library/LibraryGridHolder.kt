@@ -6,6 +6,8 @@ import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.source.LocalSource
 import kotlinx.android.synthetic.main.catalogue_grid_item.*
+import androidx.recyclerview.widget.RecyclerView
+import eu.davidea.flexibleadapter.items.IFlexible
 
 /**
  * Class used to hold the displayed data of a manga in the library, like the cover or the title.
@@ -18,7 +20,7 @@ import kotlinx.android.synthetic.main.catalogue_grid_item.*
  */
 class LibraryGridHolder(
         private val view: View,
-        private val adapter: FlexibleAdapter<*>
+        private val adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>
 
 ) : LibraryHolder(view, adapter) {
 
