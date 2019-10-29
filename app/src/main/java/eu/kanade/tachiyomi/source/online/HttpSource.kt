@@ -42,7 +42,7 @@ abstract class HttpSource : Source {
      */
     val baseUrl = MdUtil.baseUrl
 
-    override val name = "Mangadex"
+    override val name = "MangaDex"
 
     /**
      * Version id used to generate the source id. If the site completely changes and urls are
