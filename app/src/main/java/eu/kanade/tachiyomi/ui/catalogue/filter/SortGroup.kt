@@ -45,7 +45,7 @@ class SortGroup(val filter: Filter.Sort) : AbstractExpandableHeaderItem<SortGrou
                         .icon(icon)
                         .colorInt(Color.WHITE).sizeDp(16))
 
-        holder.itemView.setOnClickListener(holder)
+        holder.contentView.setOnClickListener(holder)
 
     }
 
