@@ -49,7 +49,7 @@ class GroupItem(val filter: Filter.Group<*>) : AbstractExpandableHeaderItem<Grou
                         .colorInt(Color.WHITE)
                         .sizeDp(16))
 
-        holder.itemView.setOnClickListener(holder)
+        holder.contentView.setOnClickListener(holder)
 
     }
 

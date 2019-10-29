@@ -6,6 +6,7 @@ import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
+import eu.kanade.tachiyomi.source.online.Mangadex
 import eu.kanade.tachiyomi.widget.preference.LoginCheckBoxPreference
 import eu.kanade.tachiyomi.widget.preference.LoginPreference
 import eu.kanade.tachiyomi.widget.preference.SourceLoginDialog
@@ -44,8 +45,8 @@ class SettingsSiteController : SettingsController(), SourceLoginDialog.Listener 
         listPreference {
             key = PreferenceKeys.imageServer
             titleRes = R.string.pref_image_server
-            entries = arrayOf("Auto", "North America", "North America 2", "Europe", "Europe 2", "Rest of the World")
-            entryValues = arrayOf("0", "na", "na2", "eu", "eu2", "row")
+            entries = Mangadex.SERVER_PREF_ENTRIES
+            entryValues = Mangadex.SERVER_PREF_ENTRY_VALUES
             summary = "%s"
 
         }
