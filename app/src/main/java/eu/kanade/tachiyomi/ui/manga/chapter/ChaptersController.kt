@@ -5,12 +5,15 @@ import android.animation.AnimatorListenerAdapter
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
+import android.os.Build
 import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import android.view.*
+import androidx.coordinatorlayout.widget.CoordinatorLayout
+import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.jakewharton.rxbinding.support.v4.widget.refreshes
 import com.jakewharton.rxbinding.view.clicks
 import eu.davidea.flexibleadapter.FlexibleAdapter
@@ -26,6 +29,11 @@ import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.*
 import kotlinx.android.synthetic.main.chapters_controller.*
 import timber.log.Timber
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import android.content.Context
+import android.util.AttributeSet
+import androidx.core.view.ViewCompat
+import kotlin.math.*
 
 class ChaptersController : NucleusController<ChaptersPresenter>(),
         ActionMode.Callback,
@@ -48,6 +56,7 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
      */
     private var actionMode: ActionMode? = null
 
+    private var snack:Snackbar? = null
     /**
      * Selected items. Used to restore selections after a rotation.
      */
@@ -83,6 +92,11 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
         val fabBaseMarginBottom = fab?.marginBottom ?: 0
         recycler.doOnApplyWindowInsets { v, insets, padding ->
             v.updatePaddingRelative(bottom = padding.bottom + insets.systemWindowInsetBottom)
+            //if (snack == null) {
+                //fab?.translationY = -insets.systemWindowInsetBottom.toFloat()
+            /*}
+            else
+                fab?.translationY = 0f*/
             fab?.updateLayoutParams<ViewGroup.MarginLayoutParams>  {
                 bottomMargin = fabBaseMarginBottom + insets.systemWindowInsetBottom
             }
@@ -108,7 +122,14 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
                     openChapter(item.chapter)
                 }
             } else {
-                view.context.toast(R.string.no_next_chapter)
+                snack = view.snack(R.string.no_next_chapter, Snackbar.LENGTH_LONG) {
+                    addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
+                        override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+                            super.onDismissed(transientBottomBar, event)
+                            if (snack == transientBottomBar) snack = null
+                        }
+                    })
+                }
             }
         }
     }
@@ -373,11 +394,17 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
         destroyActionModeIfNeeded()
         presenter.downloadChapters(chapters)
         if (view != null && !presenter.manga.favorite) {
-            val snack = view.snack(view.context.getString(R.string.snack_add_to_library), Snackbar
+            snack = view.snack(view.context.getString(R.string.snack_add_to_library), Snackbar
                 .LENGTH_INDEFINITE) {
                 setAction(R.string.action_add) {
                     presenter.addToLibrary()
                 }
+                addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
+                    override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+                        super.onDismissed(transientBottomBar, event)
+                        if (snack == transientBottomBar) snack = null
+                    }
+                })
             }
         }
     }
@@ -492,4 +519,8 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
             downloadChapters(chaptersToDownload)
         }
     }
+}
+
+class ShrinkBehavior(context: Context, attrs: AttributeSet) :
+    CoordinatorLayout.Behavior<FloatingActionButton>(context, attrs) {
 }

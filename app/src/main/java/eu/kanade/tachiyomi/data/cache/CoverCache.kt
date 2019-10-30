@@ -79,14 +79,12 @@ class CoverCache(private val context: Context) {
         // Check if url is empty.
         if (thumbnailUrl.isNullOrEmpty()) return
         launchUI {
-            if (delayBy > 0) {
-                delay(delayBy)
-                if (manga.favorite) cancel()
+            delay(delayBy)
+            if (!manga.favorite) {
+                // Remove file.
+                val file = getCoverFile(thumbnailUrl)
+                if (file.exists()) file.delete()
             }
-            // Remove file.
-            val file = getCoverFile(thumbnailUrl)
-            if (file.exists())
-                file.delete()
         }
     }
 

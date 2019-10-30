@@ -5,6 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:clipToPadding="false"
     android:orientation="vertical">
 
     <eu.kanade.tachiyomi.widget.RevealAnimationView
@@ -12,6 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="?attr/colorAccent"
+        android:clipToPadding="false"
         android:elevation="5dp"
         android:visibility="invisible"/>
 
@@ -20,6 +22,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/toolbar_bottom"
+        android:clipToPadding="false"
         android:orientation="vertical">
 
         <androidx.recyclerview.widget.RecyclerView
@@ -37,8 +40,6 @@
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <eu.davidea.fastscroller.FastScroller
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/fast_scroller"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
@@ -51,6 +52,7 @@
         android:id="@+id/fab"
         style="@style/Theme.Widget.FAB"
         app:layout_anchor="@id/recycler"
+        app:layout_anchorGravity="bottom|right|end"
         app:srcCompat="@drawable/ic_play_arrow_white_24dp"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -421,7 +421,7 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
     private fun showAddedSnack() {
         val view = container
         snack?.dismiss()
-        snack = view?.snack(view.context.getString(R.string.manga_added_library), Snackbar.LENGTH_SHORT)
+        snack = view?.snack(view.context.getString(R.string.manga_added_library))
     }
 
     private fun showRemovedSnack() {

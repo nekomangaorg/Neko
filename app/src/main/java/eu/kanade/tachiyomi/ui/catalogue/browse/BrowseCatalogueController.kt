@@ -516,7 +516,7 @@ open class BrowseCatalogueController(bundle: Bundle) :
         } else {
             addManga(manga, position)
             snack =
-                catalogue_view?.snack(activity.getString(R.string.manga_added_library), Snackbar.LENGTH_SHORT)
+                catalogue_view?.snack(activity.getString(R.string.manga_added_library))
         }
     }
 

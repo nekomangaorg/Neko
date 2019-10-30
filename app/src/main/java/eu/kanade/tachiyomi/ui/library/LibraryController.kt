@@ -157,13 +157,6 @@ class LibraryController(
         if (selectedMangas.isNotEmpty()) {
             createActionModeIfNeeded()
         }
-        view.doOnApplyWindowInsets { view, insets, psdding ->
-            val contextView = activity?.window?.decorView?.findViewById<View>(R.id.action_mode_bar)
-            if (Build.VERSION.SDK_INT >= 23) contextView?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                leftMargin = view.rootWindowInsets.systemWindowInsetLeft
-                rightMargin = view.rootWindowInsets.systemWindowInsetRight
-            }
-        }
     }
 
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {

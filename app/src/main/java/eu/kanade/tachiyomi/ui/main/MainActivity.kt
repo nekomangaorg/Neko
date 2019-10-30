@@ -44,6 +44,7 @@ import eu.kanade.tachiyomi.util.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.marginBottom
 import eu.kanade.tachiyomi.util.marginTop
 import eu.kanade.tachiyomi.util.openInBrowser
+import eu.kanade.tachiyomi.util.updateLayoutParams
 import eu.kanade.tachiyomi.util.updatePadding
 import eu.kanade.tachiyomi.util.updatePaddingRelative
 import kotlinx.android.synthetic.main.chapters_controller.view.*
@@ -153,7 +154,11 @@ class MainActivity : BaseActivity() {
 
         val drawerContainer: FrameLayout = findViewById(R.id.drawer_container)
         drawerContainer.setOnApplyWindowInsetsListener { v, insets ->
-
+            val contextView = window?.decorView?.findViewById<View>(R.id.action_mode_bar)
+            contextView?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                leftMargin = insets.systemWindowInsetLeft
+                rightMargin = insets.systemWindowInsetRight
+            }
             // Consume any horizontal insets and pad all content in. There's not much we can do
             // with horizontal insets
             v.updatePadding(

@@ -95,7 +95,7 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
         swipe_refresh.setOnRefreshListener {
             if (!LibraryUpdateService.isRunning(context)) {
                 LibraryUpdateService.start(context, category)
-                context.toast(R.string.updating_category)
+                swipe_refresh.snack(R.string.updating_category)
             }
             // It can be a very long operation, so we disable swipe refresh and show a toast.
             swipe_refresh.isRefreshing = false

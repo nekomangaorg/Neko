@@ -17,6 +17,7 @@ import android.view.ViewGroup
 import android.view.Window
 import android.view.WindowInsets
 import android.widget.TextView
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import com.amulyakhare.textdrawable.TextDrawable
 import com.amulyakhare.textdrawable.util.ColorGenerator
 import eu.kanade.tachiyomi.R
@@ -36,28 +37,45 @@ fun View.getCoordinates() = Point((left + right) / 2, (top + bottom) / 2)
  * @param length the duration of the snack.
  * @param f a function to execute in the snack, allowing for example to define a custom action.
  */
-fun View.snack(message: String, length: Int = Snackbar.LENGTH_LONG, f: (Snackbar.() ->
+fun View.snack(message: String, length: Int = Snackbar.LENGTH_SHORT, f: (Snackbar.() ->
 Unit)? = null): Snackbar {
     val snack = Snackbar.make(this, message, length)
     val textView: TextView = snack.view.findViewById(com.google.android.material.R.id.snackbar_text)
     textView.setTextColor(context.getResourceColor(android.R.attr.textColorPrimaryInverse))
     when {
-        Build.VERSION.SDK_INT >= 23 -> snack.config(context, rootWindowInsets.systemWindowInsetBottom)
+        Build.VERSION.SDK_INT >= 23 ->  {
+            val leftM = if (this is CoordinatorLayout) 0 else rootWindowInsets.systemWindowInsetLeft
+            val rightM = if (this is CoordinatorLayout) 0
+            else rootWindowInsets.systemWindowInsetRight
+                snack.config(context, rootWindowInsets
+                .systemWindowInsetBottom, rightM, leftM)
+        }
         else -> snack.config(context)
     }
     if (f != null) {
         snack.f()
     }
-    snack.view.doOnApplyWindowInsets { v, _, padding ->
-        v.setPadding(padding.left,0,padding.right,0)
+    snack.view.doOnApplyWindowInsets { v, insets, padding ->
+        //v.setPadding(padding.left, 0, padding.right, 0)
+        v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            if (Build.VERSION.SDK_INT < 23) {
+                bottomMargin = 12 + insets.systemWindowInsetBottom
+            }
+        }
     }
     snack.show()
     return snack
 }
 
-fun Snackbar.config(context: Context, bottomMargin: Int = 0) {
+fun View.snack(resource: Int, length: Int = Snackbar.LENGTH_SHORT, f: (Snackbar.() ->
+Unit)? = null): Snackbar {
+    return snack(context.getString(resource), length, f)
+}
+
+fun Snackbar.config(context: Context, bottomMargin: Int = 0, rightMargin: Int = 0, leftMargin:
+Int = 0) {
     val params = this.view.layoutParams as ViewGroup.MarginLayoutParams
-    params.setMargins(12, 12, 12, 12 + bottomMargin)
+    params.setMargins(12 + leftMargin, 12, 12 + rightMargin, 12 + bottomMargin)
     this.view.layoutParams = params
     this.view.background = context.getDrawable(R.drawable.bg_snackbar)
 
