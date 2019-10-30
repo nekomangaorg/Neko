@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import com.google.android.material.tabs.TabLayout
 import androidx.core.graphics.drawable.DrawableCompat
@@ -12,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.SearchView
 import android.view.*
+import androidx.appcompat.widget.ActionBarContextView
 import androidx.core.view.GravityCompat
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
@@ -155,6 +157,13 @@ class LibraryController(
         if (selectedMangas.isNotEmpty()) {
             createActionModeIfNeeded()
         }
+        view.doOnApplyWindowInsets { view, insets, psdding ->
+            val contextView = activity?.window?.decorView?.findViewById<View>(R.id.action_mode_bar)
+            if (Build.VERSION.SDK_INT >= 23) contextView?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                leftMargin = view.rootWindowInsets.systemWindowInsetLeft
+                rightMargin = view.rootWindowInsets.systemWindowInsetRight
+            }
+        }
     }
 
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
@@ -197,8 +206,7 @@ class LibraryController(
         view.doOnApplyWindowInsets { v, insets, padding ->
             view.recycler.updatePaddingRelative(
                 bottom = view.recycler.marginBottom + insets.systemWindowInsetBottom,
-                top = view.recycler.marginTop + insets.systemWindowInsetTop,
-                end = view.recycler.marginRight + insets.systemWindowInsetRight
+                top = view.recycler.marginTop + insets.systemWindowInsetTop
             )
         }
         return view

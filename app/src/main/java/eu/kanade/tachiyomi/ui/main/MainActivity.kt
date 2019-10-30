@@ -20,6 +20,8 @@ import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsets
+import android.view.WindowManager
+import android.widget.FrameLayout
 import android.widget.LinearLayout
 import com.bluelinelabs.conductor.*
 import eu.kanade.tachiyomi.Migrations
@@ -31,6 +33,7 @@ import eu.kanade.tachiyomi.ui.catalogue.CatalogueController
 import eu.kanade.tachiyomi.ui.catalogue.global_search.CatalogueSearchController
 import eu.kanade.tachiyomi.ui.download.DownloadController
 import eu.kanade.tachiyomi.ui.extension.ExtensionController
+import eu.kanade.tachiyomi.ui.library.HeightTopWindowInsetsListener
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.ui.recent_updates.RecentChaptersController
@@ -38,8 +41,12 @@ import eu.kanade.tachiyomi.ui.recently_read.RecentlyReadController
 import eu.kanade.tachiyomi.ui.setting.SettingsMainController
 import eu.kanade.tachiyomi.util.NoopWindowInsetsListener
 import eu.kanade.tachiyomi.util.doOnApplyWindowInsets
+import eu.kanade.tachiyomi.util.marginBottom
+import eu.kanade.tachiyomi.util.marginTop
 import eu.kanade.tachiyomi.util.openInBrowser
+import eu.kanade.tachiyomi.util.updatePadding
 import eu.kanade.tachiyomi.util.updatePaddingRelative
+import kotlinx.android.synthetic.main.chapters_controller.view.*
 import kotlinx.android.synthetic.main.main_activity.*
 import uy.kohesive.injekt.injectLazy
 
@@ -120,25 +127,43 @@ class MainActivity : BaseActivity() {
             true
         }
 
-        nav_view.doOnApplyWindowInsets { v, insets, padding ->
+        /*nav_view.doOnApplyWindowInsets { v, insets, padding ->
             v.updatePaddingRelative(
               start = padding.left + insets.systemWindowInsetLeft
             )
-        }
+        }*/
 
         val container: ViewGroup = findViewById(R.id.controller_container)
 
         val content: LinearLayout = findViewById(R.id.main_content)
-        container.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
-          View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
-          View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
         content.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
           View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
           View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+        nav_view.doOnApplyWindowInsets { v, insets, padding ->
+            v.updatePaddingRelative(
+                bottom = v.marginBottom,
+                top = v.marginTop
+            )
+        }
         content.setOnApplyWindowInsetsListener(NoopWindowInsetsListener)
         val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
         if (Build.VERSION.SDK_INT >= 26 && currentNightMode == Configuration.UI_MODE_NIGHT_NO) {
             content.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+        }
+
+        val drawerContainer: FrameLayout = findViewById(R.id.drawer_container)
+        drawerContainer.setOnApplyWindowInsetsListener { v, insets ->
+
+            // Consume any horizontal insets and pad all content in. There's not much we can do
+            // with horizontal insets
+            v.updatePadding(
+                left = insets.systemWindowInsetLeft,
+                right = insets.systemWindowInsetRight
+            )
+            insets.replaceSystemWindowInsets(
+                0, insets.systemWindowInsetTop,
+                0, insets.systemWindowInsetBottom
+            )
         }
 
         router = Conductor.attachRouter(this, container, savedInstanceState)
