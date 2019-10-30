@@ -158,6 +158,26 @@ class Downloader(
     }
 
     /**
+     * Removes everything from the queue for a certain manga
+     *
+     * @param isNotification value that determines if status is set (needed for view updates)
+     */
+    fun clearQueue(manga: Manga, isNotification: Boolean = false) {
+        //Needed to update the chapter view
+        if (isNotification) {
+            queue
+                .filter { it.status == Download.QUEUE && it.manga.id == manga.id }
+                .forEach { it.status = Download.NOT_DOWNLOADED }
+        }
+        queue.remove(manga)
+        if (queue.isEmpty()) {
+            DownloadService.stop(context)
+            stop()
+        }
+        notifier.dismiss()
+    }
+
+    /**
      * Prepares the subscriptions to start downloading.
      */
     private fun initializeSubscriptions() {

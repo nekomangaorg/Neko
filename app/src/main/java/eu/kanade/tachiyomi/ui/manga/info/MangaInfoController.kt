@@ -421,24 +421,18 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
     private fun showAddedSnack() {
         val view = container
         snack?.dismiss()
-        snack = view?.snack(view.context.getString(R.string.manga_added_library), Snackbar
-        .LENGTH_SHORT)
+        snack = view?.snack(view.context.getString(R.string.manga_added_library), Snackbar.LENGTH_SHORT)
     }
 
     private fun showRemovedSnack() {
         val view = container
-        val hasDownloads = presenter.hasDownloads()
         snack?.dismiss()
         if (view != null) {
-            val message = view.context.getString(R.string.manga_removed_library) +
-                          (if (hasDownloads) "\n" + view.context.getString(R.string
-                              .delete_downloads_for_manga) else "")
-            snack = view.snack(message, (if (hasDownloads) Snackbar.LENGTH_INDEFINITE
-                else Snackbar.LENGTH_SHORT)) {
-                    if (hasDownloads) setAction(R.string.action_delete) {
-                        presenter.deleteDownloads()
-                    }
+            snack = view.snack(view.context.getString(R.string.manga_removed_library), 5000) {
+                setAction(R.string.action_undo) {
+                    presenter.setFavorite(true)
                 }
+            }
         }
     }
 

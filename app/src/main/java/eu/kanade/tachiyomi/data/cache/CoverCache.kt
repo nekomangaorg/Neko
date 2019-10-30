@@ -1,7 +1,11 @@
 package eu.kanade.tachiyomi.data.cache
 
 import android.content.Context
+import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.util.DiskUtil
+import eu.kanade.tachiyomi.util.launchUI
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
@@ -60,8 +64,30 @@ class CoverCache(private val context: Context) {
             return false
 
         // Remove file.
-        val file = getCoverFile(thumbnailUrl!!)
+        val file = getCoverFile(thumbnailUrl)
         return file.exists() && file.delete()
+    }
+
+    /**
+     * Delete the cover file from the cache.
+     *
+     * @param thumbnailUrl the thumbnail url.
+     * @return status of deletion.
+     */
+    fun deleteFromCache(manga: Manga, delayBy:Long) {
+        val thumbnailUrl = manga.thumbnail_url
+        // Check if url is empty.
+        if (thumbnailUrl.isNullOrEmpty()) return
+        launchUI {
+            if (delayBy > 0) {
+                delay(delayBy)
+                if (manga.favorite) cancel()
+            }
+            // Remove file.
+            val file = getCoverFile(thumbnailUrl)
+            if (file.exists())
+                file.delete()
+        }
     }
 
 }

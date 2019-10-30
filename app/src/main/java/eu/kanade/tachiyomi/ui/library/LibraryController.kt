@@ -8,11 +8,11 @@ import android.net.Uri
 import android.os.Bundle
 import com.google.android.material.tabs.TabLayout
 import androidx.core.graphics.drawable.DrawableCompat
-import androidx.drawerlayout.widget.DrawerLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.SearchView
 import android.view.*
+import androidx.core.view.GravityCompat
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
 import com.f2prateek.rx.preferences.Preference
@@ -177,7 +177,8 @@ class LibraryController(
     override fun createSecondaryDrawer(drawer: androidx.drawerlayout.widget.DrawerLayout): ViewGroup {
         val view = drawer.inflate(R.layout.library_drawer) as LibraryNavigationView
         navView = view
-        drawer.setDrawerLockMode(androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_UNLOCKED, Gravity.END)
+        drawer.setDrawerLockMode(androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_UNLOCKED,
+            GravityCompat.END)
 
         navView?.onGroupClicked = { group ->
             when (group) {
@@ -365,7 +366,7 @@ class LibraryController(
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_filter -> {
-                navView?.let { activity?.drawer?.openDrawer(Gravity.END) }
+                navView?.let { activity?.drawer?.openDrawer(GravityCompat.END) }
             }
             R.id.action_update_library -> {
                 activity?.let { LibraryUpdateService.start(it) }
@@ -413,7 +414,7 @@ class LibraryController(
                 destroyActionModeIfNeeded()
             }
             R.id.action_move_to_category -> showChangeMangaCategoriesDialog()
-            R.id.action_delete -> showDeleteMangaDialog()
+            R.id.action_delete -> deleteMangasFromLibrary()
             else -> return false
         }
         return true
@@ -470,8 +471,15 @@ class LibraryController(
                 .showDialog(router)
     }
 
-    private fun showDeleteMangaDialog() {
-        DeleteLibraryMangasDialog(this, selectedMangas.toList()).showDialog(router)
+    private fun deleteMangasFromLibrary() {
+        val mangas = selectedMangas.toList()
+        presenter.removeMangaFromLibrary(mangas, true)
+        destroyActionModeIfNeeded()
+        view?.snack(activity?.getString(R.string.remove_from_library) ?: "", 5000)  {
+            setAction(R.string.action_undo) {
+                presenter.addMangas(mangas)
+            }
+        }
     }
 
     override fun updateCategoriesForMangas(mangas: List<Manga>, categories: List<Category>) {

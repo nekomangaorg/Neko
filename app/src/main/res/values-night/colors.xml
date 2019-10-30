@@ -3,5 +3,6 @@
     <color name="drawerHighlight">@color/md_white_1000_12</color>
     <color name="drawerPrimary">@color/colorAccentDark</color>
     <color name="oldNavBarBackground">#B3000000</color>
+    <color name="snackbarBackground">#FFFFFF</color>
     <color name="cardBackground">@color/colorDarkPrimary</color>
 </resources>

@@ -101,32 +101,19 @@ class MangaInfoPresenter(
     fun toggleFavorite(): Boolean {
         manga.favorite = !manga.favorite
         if (!manga.favorite) {
-            coverCache.deleteFromCache(manga.thumbnail_url)
+            coverCache.deleteFromCache(manga, 5000)
+            downloadManager.deleteManga(manga, source, 5000)
         }
         db.insertManga(manga).executeAsBlocking()
         sendMangaToView()
         return manga.favorite
     }
 
-    private fun setFavorite(favorite: Boolean) {
+    fun setFavorite(favorite: Boolean) {
         if (manga.favorite == favorite) {
             return
         }
         toggleFavorite()
-    }
-
-    /**
-     * Returns true if the manga has any downloads.
-     */
-    fun hasDownloads(): Boolean {
-        return downloadManager.getDownloadCount(manga) > 0
-    }
-
-    /**
-     * Deletes all the downloads for the manga.
-     */
-    fun deleteDownloads() {
-        downloadManager.deleteManga(manga, source)
     }
 
     /**

@@ -40,7 +40,7 @@ fun View.snack(message: String, length: Int = Snackbar.LENGTH_LONG, f: (Snackbar
 Unit)? = null): Snackbar {
     val snack = Snackbar.make(this, message, length)
     val textView: TextView = snack.view.findViewById(com.google.android.material.R.id.snackbar_text)
-    textView.setTextColor(Color.WHITE)
+    textView.setTextColor(context.getResourceColor(android.R.attr.textColorPrimaryInverse))
     when {
         Build.VERSION.SDK_INT >= 23 -> snack.config(context, rootWindowInsets.systemWindowInsetBottom)
         else -> snack.config(context)

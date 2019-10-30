@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
+import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.CatalogueSource
 import eu.kanade.tachiyomi.source.SourceManager
@@ -254,7 +255,9 @@ open class BrowseCataloguePresenter(
     fun changeMangaFavorite(manga: Manga) {
         manga.favorite = !manga.favorite
         if (!manga.favorite) {
-            coverCache.deleteFromCache(manga.thumbnail_url)
+            coverCache.deleteFromCache(manga, 5000)
+            val downloadManager: DownloadManager = Injekt.get()
+            downloadManager.deleteManga(manga,source,5000)
         }
         db.insertManga(manga).executeAsBlocking()
     }

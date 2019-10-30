@@ -222,16 +222,13 @@ class LibraryPresenter(
      * @return an observable of the categories and its manga.
      */
     private fun getLibraryObservable(): Observable<Library> {
-        return Observable.combineLatest(getCategoriesObservable(), getLibraryMangasObservable(),
-                { dbCategories, libraryManga ->
-                    val categories = if (libraryManga.containsKey(0))
-                        arrayListOf(Category.createDefault()) + dbCategories
-                    else
-                        dbCategories
+        return Observable.combineLatest(getCategoriesObservable(), getLibraryMangasObservable()) { dbCategories, libraryManga ->
+            val categories = if (libraryManga.containsKey(0)) arrayListOf(Category.createDefault()) + dbCategories
+            else dbCategories
 
-                    this.categories = categories
-                    Library(categories, libraryManga)
-                })
+            this.categories = categories
+            Library(categories, libraryManga)
+        }
     }
 
     /**
@@ -316,17 +313,28 @@ class LibraryPresenter(
 
         Observable.fromCallable {
             mangaToDelete.forEach { manga ->
-                coverCache.deleteFromCache(manga.thumbnail_url)
+                coverCache.deleteFromCache(manga, 5000)
                 if (deleteChapters) {
                     val source = sourceManager.get(manga.source) as? HttpSource
                     if (source != null) {
-                        downloadManager.deleteManga(manga, source)
+                        downloadManager.deleteManga(manga, source, 5000)
                     }
                 }
             }
         }
                 .subscribeOn(Schedulers.io())
                 .subscribe()
+    }
+
+    fun addMangas(mangas: List<Manga>) {
+        val mangaToAdd = mangas.distinctBy { it.id }
+        mangaToAdd.forEach { it.favorite = true }
+
+        Observable.fromCallable { db.insertMangas(mangaToAdd).executeAsBlocking() }
+            .onErrorResumeNext { Observable.empty() }
+            .subscribeOn(Schedulers.io())
+            .subscribe()
+        mangaToAdd.forEach { db.insertManga(it).executeAsBlocking() }
     }
 
     /**

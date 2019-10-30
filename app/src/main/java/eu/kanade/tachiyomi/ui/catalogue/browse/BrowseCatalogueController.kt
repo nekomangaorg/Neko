@@ -503,38 +503,40 @@ open class BrowseCatalogueController(bundle: Bundle) :
     override fun onItemLongClick(position: Int) {
         val activity = activity ?: return
         val manga = (adapter?.getItem(position) as? CatalogueItem?)?.manga ?: return
+        snack?.dismiss()
         if (manga.favorite) {
-            MaterialDialog.Builder(activity)
-                    .items(activity.getString(R.string.remove_from_library))
-                    .itemsCallback { _, _, which, _ ->
-                        when (which) {
-                            0 -> {
-                                presenter.changeMangaFavorite(manga)
-                                adapter?.notifyItemChanged(position)
-                                activity?.toast(activity?.getString(R.string.manga_removed_library))
-                            }
-                        }
-                    }.show()
-        } else {
             presenter.changeMangaFavorite(manga)
             adapter?.notifyItemChanged(position)
+            snack =
+                catalogue_view?.snack(activity.getString(R.string.manga_removed_library), 5000) {
+                    setAction(R.string.action_undo) {
+                        if (!manga.favorite) addManga(manga, position)
+                    }
+                }
+        } else {
+            addManga(manga, position)
+            snack =
+                catalogue_view?.snack(activity.getString(R.string.manga_added_library), Snackbar.LENGTH_SHORT)
+        }
+    }
 
-            val categories = presenter.getCategories()
-            val defaultCategory = categories.find { it.id == preferences.defaultCategory() }
-            if (defaultCategory != null) {
-                presenter.moveMangaToCategory(manga, defaultCategory)
-            } else if (categories.size <= 1) { // default or the one from the user
-                presenter.moveMangaToCategory(manga, categories.firstOrNull())
-            } else {
-                val ids = presenter.getMangaCategoryIds(manga)
-                val preselected = ids.mapNotNull { id ->
-                    categories.indexOfFirst { it.id == id }.takeIf { it != -1 }
-                }.toTypedArray()
+    private fun addManga(manga: Manga, position: Int) {
+        presenter.changeMangaFavorite(manga)
+        adapter?.notifyItemChanged(position)
 
-                ChangeMangaCategoriesDialog(this, listOf(manga), categories, preselected)
-                        .showDialog(router)
-            }
-            activity?.toast(activity?.getString(R.string.manga_added_library))
+        val categories = presenter.getCategories()
+        val defaultCategory = categories.find { it.id == preferences.defaultCategory() }
+        if (defaultCategory != null) {
+            presenter.moveMangaToCategory(manga, defaultCategory)
+        } else if (categories.size <= 1) { // default or the one from the user
+            presenter.moveMangaToCategory(manga, categories.firstOrNull())
+        } else {
+            val ids = presenter.getMangaCategoryIds(manga)
+            val preselected = ids.mapNotNull { id ->
+                categories.indexOfFirst { it.id == id }.takeIf { it != -1 }
+            }.toTypedArray()
+
+            ChangeMangaCategoriesDialog(this, listOf(manga), categories, preselected).showDialog(router)
         }
 
     }
