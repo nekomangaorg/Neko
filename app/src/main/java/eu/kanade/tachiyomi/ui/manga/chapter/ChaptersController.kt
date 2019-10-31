@@ -121,7 +121,7 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
                 if (!reveal_view.showRevealEffect(coordinates.x, coordinates.y, revealAnimationListener)) {
                     openChapter(item.chapter)
                 }
-            } else {
+            } else if (snack == null || snack?.getText() != view.context.getString(R.string.no_next_chapter)) {
                 snack = view.snack(R.string.no_next_chapter, Snackbar.LENGTH_LONG) {
                     addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
                         override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {

@@ -11,7 +11,6 @@ import androidx.interpolator.view.animation.FastOutSlowInInterpolator
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import eu.kanade.tachiyomi.R
-import timber.log.Timber
 import kotlin.math.min
 
 @Suppress("unused", "UNUSED_PARAMETER")
@@ -68,7 +67,6 @@ class FABAnimationUpDown @JvmOverloads constructor(ctx: Context, attrs: Attribut
         for (i in 0 until dependencies.size) {
             val view = dependencies[i]
             if (view is Snackbar.SnackbarLayout) {
-                Timber.d("snack y: ${view.translationY}")
                 minOffset = min(minOffset, view.translationY - view.height)
             }
         }
