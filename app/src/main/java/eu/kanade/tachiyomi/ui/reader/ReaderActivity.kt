@@ -39,6 +39,9 @@ import eu.kanade.tachiyomi.widget.SimpleAnimationListener
 import eu.kanade.tachiyomi.widget.SimpleSeekBarListener
 import kotlinx.android.synthetic.main.reader_activity.*
 import kotlinx.android.synthetic.main.reader_activity.toolbar
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import me.zhanghai.android.systemuihelper.SystemUiHelper
 import nucleus.factory.RequiresPresenter
 import rx.Observable
@@ -55,7 +58,8 @@ import java.util.concurrent.TimeUnit
  * viewers, to which calls from the presenter or UI events are delegated.
  */
 @RequiresPresenter(ReaderPresenter::class)
-class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
+class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
+    SystemUiHelper.OnVisibilityChangeListener {
 
     /**
      * Preferences helper.
@@ -79,6 +83,13 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
     var menuVisible = false
         private set
 
+    /**
+     * Whether the menu should stay visible.
+     */
+    var menuStickyVisible = false
+        private set
+
+    private var coroutine: Job? = null
     /**
      * System UI helper to hide status & navigation bar on all different API levels.
      */
@@ -192,6 +203,9 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
         if (hasFocus) {
+            if (menuStickyVisible)
+                setMenuVisibility(false)
+            else
             setMenuVisibility(menuVisible, animate = false)
         }
     }
@@ -209,6 +223,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
      * entries.
      */
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        coroutine?.cancel()
         bottomSheet = when (item.itemId) {
             R.id.action_settings -> ReaderSettingsSheet(this)
             R.id.action_custom_filter -> ReaderColorFilterSheet(this)
@@ -282,6 +297,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
 
         // Set initial visibility
         setMenuVisibility(menuVisible)
+        if (!menuVisible)
+            reader_menu_bottom.visibility = View.GONE
     }
 
     /**
@@ -290,19 +307,21 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
      */
     private fun setMenuVisibility(visible: Boolean, animate: Boolean = true) {
         menuVisible = visible
+        coroutine?.cancel()
         if (visible) {
             systemUi?.show()
             reader_menu.visibility = View.VISIBLE
-
+            reader_menu_bottom.visibility = View.VISIBLE
             if (animate) {
-                val toolbarAnimation = AnimationUtils.loadAnimation(this, R.anim.enter_from_top)
-                toolbarAnimation.setAnimationListener(object : SimpleAnimationListener() {
-                    override fun onAnimationStart(animation: Animation) {
-                            window.addFlags(
-                                    WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-                    }
-                })
-                toolbar.startAnimation(toolbarAnimation)
+                if (!menuStickyVisible) {
+                    val toolbarAnimation = AnimationUtils.loadAnimation(this, R.anim.enter_from_top)
+                    toolbarAnimation.setAnimationListener(object : SimpleAnimationListener() {
+                        override fun onAnimationStart(animation: Animation) {
+                            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+                        }
+                    })
+                    toolbar.startAnimation(toolbarAnimation)
+                }
                 val bottomAnimation = AnimationUtils.loadAnimation(this, R.anim.enter_from_bottom)
                 reader_menu_bottom.startAnimation(bottomAnimation)
             }
@@ -317,11 +336,13 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
                     }
                 })
                 toolbar.startAnimation(toolbarAnimation)
-
-                val bottomAnimation = AnimationUtils.loadAnimation(this, R.anim.exit_to_bottom)
-                reader_menu_bottom.startAnimation(bottomAnimation)
+                if (reader_menu_bottom.visibility != View.GONE) {
+                    val bottomAnimation = AnimationUtils.loadAnimation(this, R.anim.exit_to_bottom)
+                    reader_menu_bottom.startAnimation(bottomAnimation)
+                }
             }
         }
+        menuStickyVisible = false
     }
 
     /**
@@ -540,6 +561,35 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         })
     }
 
+    override fun onVisibilityChange(visible: Boolean) {
+        if (visible && !menuStickyVisible && !menuVisible) {
+            menuStickyVisible = visible
+            if (visible) {
+                coroutine = launchUI {
+                    delay(2000)
+                    setMenuVisibility(false)
+                    menuStickyVisible = false
+                }
+                reader_menu_bottom.visibility = View.GONE
+                reader_menu.visibility = View.VISIBLE
+                val toolbarAnimation = AnimationUtils.loadAnimation(this, R.anim.enter_from_top)
+                toolbarAnimation.setAnimationListener(object : SimpleAnimationListener() {
+                    override fun onAnimationStart(animation: Animation) {
+                        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+                    }
+                })
+                toolbar.startAnimation(toolbarAnimation)
+                /*val bottomAnimation = AnimationUtils.loadAnimation(this, R.anim
+                .enter_from_bottom)
+                reader_menu_bottom.startAnimation(bottomAnimation)*/
+            }
+        }
+        else {
+            coroutine?.cancel()
+        }
+    }
+
+
     /**
      * Class that handles the user preferences of the reader.
      */
@@ -656,15 +706,10 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
          */
         private fun setFullscreen(enabled: Boolean) {
             systemUi = if (enabled) {
-                val level = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                    SystemUiHelper.LEVEL_IMMERSIVE
-                } else {
-                    SystemUiHelper.LEVEL_HIDE_STATUS_BAR
-                }
-                val flags = SystemUiHelper.FLAG_IMMERSIVE_STICKY or
-                        SystemUiHelper.FLAG_LAYOUT_IN_SCREEN_OLDER_DEVICES
+                val level = SystemUiHelper.LEVEL_IMMERSIVE
+                val flags = SystemUiHelper.FLAG_LAYOUT_IN_SCREEN_OLDER_DEVICES
 
-                SystemUiHelper(this@ReaderActivity, level, flags)
+                SystemUiHelper(this@ReaderActivity, level, flags, this@ReaderActivity)
             } else {
                 null
             }
