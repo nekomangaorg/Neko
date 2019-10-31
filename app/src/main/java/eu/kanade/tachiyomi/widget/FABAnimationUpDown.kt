@@ -1,15 +1,17 @@
 package eu.kanade.tachiyomi.widget
 
 import android.content.Context
-import com.google.android.material.floatingactionbutton.FloatingActionButton
-import androidx.interpolator.view.animation.FastOutSlowInInterpolator
+import android.graphics.Rect
 import android.util.AttributeSet
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.interpolator.view.animation.FastOutSlowInInterpolator
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import eu.kanade.tachiyomi.R
+import timber.log.Timber
 import kotlin.math.min
 
 @Suppress("unused", "UNUSED_PARAMETER")
@@ -53,18 +55,10 @@ class FABAnimationUpDown @JvmOverloads constructor(ctx: Context, attrs: Attribut
         button.startAnimation(inAnimation)
     }
 
-
-    override fun layoutDependsOn(parent: CoordinatorLayout, child: FloatingActionButton, dependency: View): Boolean {
-        return dependency is Snackbar.SnackbarLayout
-    }
-
     override fun onDependentViewChanged(parent: CoordinatorLayout, child: FloatingActionButton, dependency: View): Boolean {
         val translationY = getFabTranslationYForSnackbar(parent, child)
-        val percentComplete = -translationY / dependency.height
-        val scaleFactor = 1 - percentComplete
-
-        child.translationY = -translationY
-        return false
+        child.translationY = translationY
+        return true
     }
 
     private fun getFabTranslationYForSnackbar(parent: CoordinatorLayout, fab:
@@ -74,9 +68,15 @@ class FABAnimationUpDown @JvmOverloads constructor(ctx: Context, attrs: Attribut
         for (i in 0 until dependencies.size) {
             val view = dependencies[i]
             if (view is Snackbar.SnackbarLayout) {
+                Timber.d("snack y: ${view.translationY}")
                 minOffset = min(minOffset, view.translationY - view.height)
             }
         }
         return minOffset
+    }
+
+    override fun getInsetDodgeRect(parent: CoordinatorLayout, child: FloatingActionButton, rect: Rect): Boolean {
+        rect.set(child.left, child.top + 100, child.right, child.bottom - 1000)
+        return true
     }
 }

@@ -82,6 +82,11 @@ Int = 0) {
     ViewCompat.setElevation(this.view, 6f)
 }
 
+fun Snackbar.getText(): CharSequence {
+    val textView: TextView = view.findViewById(com.google.android.material.R.id.snackbar_text)
+    return textView.text
+}
+
 inline fun View.visible() {
     visibility = View.VISIBLE
 }

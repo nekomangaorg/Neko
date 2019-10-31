@@ -476,7 +476,7 @@ class LibraryController(
         val mangas = selectedMangas.toList()
         presenter.removeMangaFromLibrary(mangas, true)
         destroyActionModeIfNeeded()
-        view?.snack(activity?.getString(R.string.remove_from_library) ?: "", 5000)  {
+        view?.snack(activity?.getString(R.string.manga_removed_library) ?: "", 5000)  {
             setAction(R.string.action_undo) {
                 presenter.addMangas(mangas)
             }

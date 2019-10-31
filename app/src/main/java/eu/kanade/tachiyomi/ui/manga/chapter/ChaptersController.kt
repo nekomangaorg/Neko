@@ -393,19 +393,19 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
         val view = view
         destroyActionModeIfNeeded()
         presenter.downloadChapters(chapters)
-        if (view != null && !presenter.manga.favorite) {
-            snack = view.snack(view.context.getString(R.string.snack_add_to_library), Snackbar
-                .LENGTH_INDEFINITE) {
-                setAction(R.string.action_add) {
-                    presenter.addToLibrary()
-                }
-                addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
-                    override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
-                        super.onDismissed(transientBottomBar, event)
-                        if (snack == transientBottomBar) snack = null
+        if (view != null && !presenter.manga.favorite && (snack == null || snack?.getText() != view.context.getString(R.string.snack_add_to_library))) {
+            snack =
+                view.snack(view.context.getString(R.string.snack_add_to_library), Snackbar.LENGTH_INDEFINITE) {
+                    setAction(R.string.action_add) {
+                        presenter.addToLibrary()
                     }
-                })
-            }
+                    addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
+                        override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+                            super.onDismissed(transientBottomBar, event)
+                            if (snack == transientBottomBar) snack = null
+                        }
+                    })
+                }
         }
     }
 
