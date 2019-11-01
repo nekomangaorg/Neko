@@ -31,6 +31,8 @@ import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.*
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import rx.Observable
 import rx.Subscription
 import rx.schedulers.Schedulers
@@ -97,6 +99,7 @@ class LibraryUpdateService(
      */
     enum class Target {
         CHAPTERS, // Manga chapters
+        CLEANUP, // Clean up downloads
         FOLLOW_STATUSES, // Manga follow status
         SYNC_FOLLOWS, //Manga in reading, rereading
         DETAILS,  // Manga metadata
@@ -223,6 +226,11 @@ class LibraryUpdateService(
                  syncFollows()
              }.invokeOnCompletion { stopSelf(startId) }
          } else {*/
+        if (target == Target.CLEANUP) {
+            GlobalScope.launch(handler) {
+                cleanupDownloads()
+            }.invokeOnCompletion { stopSelf(startId) }
+        } else {
             when (target) {
                 Target.CHAPTERS -> updateChapterList(mangaList)
                 Target.DETAILS -> updateDetails(mangaList)
@@ -236,7 +244,7 @@ class LibraryUpdateService(
                         stopSelf(startId)
                     })
 
-        //}
+        }
         return Service.START_REDELIVER_INTENT
     }
 
@@ -360,6 +368,14 @@ class LibraryUpdateService(
         val source = sourceManager.getMangadex() as? HttpSource ?: return Observable.empty()
         return source.fetchChapterList(manga)
                 .map { syncChaptersWithSource(db, it, manga, source) }
+    }
+
+    private suspend fun cleanupDownloads() {
+        val mangaList = db.getMangas().executeAsBlocking()
+        for (manga in mangaList) {
+            val chapterList = db.getChapters(manga).executeAsBlocking()
+            downloadManager.cleanupChapters(chapterList, manga, sourceManager.getMangadex())
+        }
     }
 
     /**
