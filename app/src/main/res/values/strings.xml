@@ -50,7 +50,7 @@
     <string name="action_remove_bookmark">Remove bookmark</string>
     <string name="action_delete">Delete</string>
     <string name="action_update">Update</string>
-    <string name="action_update_library">Update library</string>
+    <string name="action_update_library">Updating library</string>
     <string name="action_edit">Edit</string>
     <string name="action_add">Add</string>
     <string name="action_add_category">Add category</string>
