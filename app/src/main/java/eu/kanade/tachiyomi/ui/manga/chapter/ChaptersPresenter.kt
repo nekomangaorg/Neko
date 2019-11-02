@@ -223,7 +223,7 @@ class ChaptersPresenter(
      */
     fun getNextUnreadChapter(): ChapterItem? {
         return chapters.sortedByDescending { it.source_order }.find { !it.read }
-    }
+}
 
     /**
      * Mark the selected chapter list as read/unread.

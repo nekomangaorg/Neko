@@ -24,7 +24,6 @@ object Notifications {
      */
     const val CHANNEL_LIBRARY = "library_channel"
     const val ID_LIBRARY_PROGRESS = 101
-    const val ID_LIBRARY_RESULT = 102
 
     /**
      * Notification channel and ids used by the downloader.
@@ -32,6 +31,12 @@ object Notifications {
     const val CHANNEL_DOWNLOADER = "downloader_channel"
     const val ID_DOWNLOAD_CHAPTER = 201
     const val ID_DOWNLOAD_CHAPTER_ERROR = 202
+
+    /**
+     * Notification channel and ids used by the library updater.
+     */
+    const val CHANNEL_NEW_CHAPTERS = "new_chapters_channel"
+    const val ID_NEW_CHAPTERS = 301
 
     /**
      * Creates the notification channels introduced in Android Oreo.
@@ -44,10 +49,16 @@ object Notifications {
         val channels = listOf(
                 NotificationChannel(CHANNEL_COMMON, context.getString(R.string.channel_common),
                         NotificationManager.IMPORTANCE_LOW),
-                NotificationChannel(CHANNEL_LIBRARY, context.getString(R.string.channel_library),
-                        NotificationManager.IMPORTANCE_LOW),
+                NotificationChannel(CHANNEL_LIBRARY, context.getString(R.string.channel_library_updates),
+                        NotificationManager.IMPORTANCE_LOW).apply {
+                    setShowBadge(false)
+                },
                 NotificationChannel(CHANNEL_DOWNLOADER, context.getString(R.string.channel_downloader),
-                        NotificationManager.IMPORTANCE_LOW)
+                    NotificationManager.IMPORTANCE_LOW).apply {
+                    setShowBadge(false)
+                },
+                NotificationChannel(CHANNEL_NEW_CHAPTERS, context.getString(R.string.channel_new_chapters),
+                    NotificationManager.IMPORTANCE_DEFAULT)
         )
         context.notificationManager.createNotificationChannels(channels)
     }

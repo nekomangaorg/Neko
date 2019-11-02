@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.data.notification
 
+import android.app.Notification
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -101,17 +102,19 @@ class NotificationReceiver : BroadcastReceiver() {
      * @param chapterId id of chapter
      */
     internal fun openChapter(context: Context, mangaId: Long, chapterId: Long) {
+        dismissNotification(context, Notifications.ID_NEW_CHAPTERS)
         val db = DatabaseHelper(context)
         val manga = db.getManga(mangaId).executeAsBlocking()
         val chapter = db.getChapter(chapterId).executeAsBlocking()
-
+        val it = Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
+        context.sendBroadcast(it)
         if (manga != null && chapter != null) {
             val intent = ReaderActivity.newIntent(context, manga, chapter).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
             }
             context.startActivity(intent)
         } else {
-            context.toast(context.getString(R.string.chapter_error))
+            context.toast(context.getString(R.string.no_next_chapter))
         }
     }
 

@@ -29,6 +29,8 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.main.MainActivity
+import eu.kanade.tachiyomi.ui.reader.ReaderActivity
+import eu.kanade.tachiyomi.ui.recent_updates.RecentChapterItem
 import eu.kanade.tachiyomi.util.*
 import rx.Observable
 import rx.Subscription
@@ -88,6 +90,7 @@ class LibraryUpdateService(
             .setLargeIcon(notificationBitmap)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
+            .setColor(getResourceColor(R.attr.colorAccent))
             .addAction(R.drawable.ic_clear_grey_24dp_img, getString(android.R.string.cancel), cancelIntent)
     }
 
@@ -444,7 +447,7 @@ class LibraryUpdateService(
         // Append new chapters from a previous, existing notification
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             val previousNotification = notificationManager.activeNotifications
-                    .find { it.id == Notifications.ID_LIBRARY_RESULT }
+                    .find { it.id == Notifications.ID_NEW_CHAPTERS }
 
             if (previousNotification != null) {
                 val oldUpdates = previousNotification.notification.extras
@@ -456,16 +459,28 @@ class LibraryUpdateService(
             }
         }
 
-        notificationManager.notify(Notifications.ID_LIBRARY_RESULT, notification(Notifications.CHANNEL_LIBRARY) {
+        notificationManager.notify(Notifications.ID_NEW_CHAPTERS, notification(Notifications.CHANNEL_NEW_CHAPTERS) {
             setSmallIcon(R.drawable.ic_book_white_24dp)
             setLargeIcon(notificationBitmap)
             setContentTitle(getString(R.string.notification_new_chapters))
+            color = getResourceColor(R.attr.colorAccent)
             if (newUpdates.size > 1) {
                 setContentText(getString(R.string.notification_new_chapters_text, newUpdates.size))
                 setStyle(NotificationCompat.BigTextStyle().bigText(newUpdates.joinToString("\n")))
                 setNumber(newUpdates.size)
             } else {
+                val onlyManga = updates.first()
+                val id = onlyManga.id ?: 0
                 setContentText(newUpdates.first())
+
+                val context = applicationContext
+                val db = DatabaseHelper(context)
+                val chapters = db.getChapters(onlyManga).executeAsBlocking()
+                val chapter = chapters.sortedByDescending { it.source_order }.find { !it.read }
+                if (chapter != null) {
+                    addAction(R.drawable.ic_in_library_24dp, getString(R.string.action_start_reading),
+                        NotificationReceiver.openChapterPendingBroadcast(context, onlyManga, chapter))
+                }
             }
             priority = NotificationCompat.PRIORITY_HIGH
             setContentIntent(getNotificationIntent())

@@ -8,6 +8,7 @@ import com.evernote.android.job.JobManager
 import com.evernote.android.job.JobRequest
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.notification.Notifications
+import eu.kanade.tachiyomi.util.getResourceColor
 import eu.kanade.tachiyomi.util.notificationManager
 
 class UpdaterJob : Job() {
@@ -27,6 +28,7 @@ class UpdaterJob : Job() {
                             setContentTitle(context.getString(R.string.app_name))
                             setContentText(context.getString(R.string.update_check_notification_update_available))
                             setSmallIcon(android.R.drawable.stat_sys_download_done)
+                            color = context.getResourceColor(R.attr.colorAccent)
                             // Download action
                             addAction(android.R.drawable.stat_sys_download_done,
                                     context.getString(R.string.action_download),

@@ -10,6 +10,7 @@ import eu.kanade.tachiyomi.data.notification.NotificationHandler
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.util.chop
+import eu.kanade.tachiyomi.util.getResourceColor
 import eu.kanade.tachiyomi.util.notificationManager
 import java.util.regex.Pattern
 
@@ -214,9 +215,11 @@ internal class DownloadNotifier(private val context: Context) {
             setContentTitle(chapter ?: context.getString(R.string.download_notifier_downloader_title))
             setContentText(error ?: context.getString(R.string.download_notifier_unkown_error))
             setSmallIcon(android.R.drawable.stat_sys_warning)
+            setCategory(NotificationCompat.CATEGORY_ERROR)
             clearActions()
-            setAutoCancel(false)
+            setAutoCancel(true)
             setContentIntent(NotificationHandler.openDownloadManagerPendingActivity(context))
+            color = context.getResourceColor(R.attr.colorAccent)
             setProgress(0, 0, false)
         }
         notification.show(Notifications.ID_DOWNLOAD_CHAPTER_ERROR)

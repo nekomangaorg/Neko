@@ -137,6 +137,9 @@ class MainActivity : BaseActivity() {
         val container: ViewGroup = findViewById(R.id.controller_container)
 
         val content: LinearLayout = findViewById(R.id.main_content)
+        container.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
+            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
+            View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
         content.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
           View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
           View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
