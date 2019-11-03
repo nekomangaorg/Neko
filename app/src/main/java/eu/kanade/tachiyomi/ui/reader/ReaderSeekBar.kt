@@ -20,6 +20,8 @@ class ReaderSeekBar @JvmOverloads constructor(
      * Whether the seekbar should draw from right to left.
      */
     var isRTL = false
+    private val boundingBox: Rect = Rect()
+    private val exclusions = listOf(boundingBox)
 
     /**
      * Draws the seekbar, translating the canvas if using a right to left reader.
@@ -42,5 +44,15 @@ class ReaderSeekBar @JvmOverloads constructor(
             event.setLocation(width - event.x, event.y)
         }
         return super.onTouchEvent(event)
+    }
+
+    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
+        super.onLayout(changed, left, top, right, bottom)
+        if (Build.VERSION.SDK_INT >= 29) {
+            if (changed) {
+                boundingBox.set(left, top, right, bottom)
+                systemGestureExclusionRects = exclusions
+            }
+        }
     }
 }

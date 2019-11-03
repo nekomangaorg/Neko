@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.data.notification
 import android.app.Notification
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
+import android.content.ClipData
 import android.content.Context
 import android.content.Intent
 import android.os.Handler
@@ -86,12 +87,16 @@ class NotificationReceiver : BroadcastReceiver() {
             val uri = File(path).getUriCompat(context)
             putExtra(Intent.EXTRA_STREAM, uri)
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
+            clipData = ClipData.newRawUri(null, uri)
             type = "image/*"
         }
-        // Dismiss notification
-        dismissNotification(context, notificationId)
+        // Close Navigation Shade
+        context.sendBroadcast(Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS))
         // Launch share activity
-        context.startActivity(intent)
+        val shareIntent = Intent.createChooser(intent, context.getString(R.string
+            .action_share))
+        shareIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
+        context.startActivity(shareIntent)
     }
 
     /**
@@ -106,8 +111,7 @@ class NotificationReceiver : BroadcastReceiver() {
         val db = DatabaseHelper(context)
         val manga = db.getManga(mangaId).executeAsBlocking()
         val chapter = db.getChapter(chapterId).executeAsBlocking()
-        val it = Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
-        context.sendBroadcast(it)
+        context.sendBroadcast(Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS))
         if (manga != null && chapter != null) {
             val intent = ReaderActivity.newIntent(context, manga, chapter).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP

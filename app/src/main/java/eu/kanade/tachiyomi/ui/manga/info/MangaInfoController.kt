@@ -20,6 +20,7 @@ import android.widget.Toast
 import com.afollestad.materialdialogs.MaterialDialog
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.target.SimpleTarget
 import com.bumptech.glide.request.transition.Transition
 import com.jakewharton.rxbinding.support.v4.widget.refreshes
@@ -46,6 +47,7 @@ import jp.wasabeef.glide.transformations.CropSquareTransformation
 import jp.wasabeef.glide.transformations.MaskTransformation
 import kotlinx.android.synthetic.main.manga_info_controller.*
 import uy.kohesive.injekt.injectLazy
+import java.io.File
 import java.text.DateFormat
 import java.text.DecimalFormat
 import java.util.Date
@@ -161,7 +163,7 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         when (item.itemId) {
             R.id.action_open_in_browser -> openInBrowser()
             R.id.action_open_in_web_view -> openInWebView()
-            R.id.action_share -> shareManga()
+            R.id.action_share -> prepareToShareManga()
             R.id.action_add_to_home_screen -> addToHomeScreen()
             else -> return super.onOptionsItemSelected(item)
         }
@@ -325,15 +327,40 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
     /**
      * Called to run Intent with [Intent.ACTION_SEND], which show share dialog.
      */
-    private fun shareManga() {
+    private fun prepareToShareManga() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+            GlideApp.with(activity!!).asBitmap().load(presenter.manga).into(object :
+                CustomTarget<Bitmap>() {
+                override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+                    presenter.shareManga(resource)
+                }
+                override fun onLoadCleared(placeholder: Drawable?) {}
+
+                override fun onLoadFailed(errorDrawable: Drawable?) {
+                    shareManga()
+                }
+            })
+        else shareManga()
+    }
+
+    /**
+     * Called to run Intent with [Intent.ACTION_SEND], which show share dialog.
+     */
+    fun shareManga(cover: File? = null) {
         val context = view?.context ?: return
 
         val source = presenter.source as? HttpSource ?: return
+        val stream = cover?.getUriCompat(context)
         try {
             val url = source.mangaDetailsRequest(presenter.manga).url.toString()
             val intent = Intent(Intent.ACTION_SEND).apply {
-                type = "text/plain"
+                type = "text/*"
                 putExtra(Intent.EXTRA_TEXT, url)
+                putExtra(Intent.EXTRA_TITLE, presenter.manga.title)
+                flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                if (stream != null) {
+                    clipData = ClipData.newRawUri(null, stream)
+                }
             }
             startActivity(Intent.createChooser(intent, context.getString(R.string.action_share)))
         } catch (e: Exception) {
@@ -523,10 +550,12 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
                         3 -> centerCrop().transform(MaskTransformation(R.drawable.mask_star))
                     }
                 }
-                .into(object : SimpleTarget<Bitmap>(96, 96) {
+                .into(object : CustomTarget<Bitmap>(96, 96) {
                     override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
                         createShortcut(resource)
                     }
+
+                    override fun onLoadCleared(placeholder: Drawable?) { }
 
                     override fun onLoadFailed(errorDrawable: Drawable?) {
                         activity?.toast(R.string.icon_creation_fail)

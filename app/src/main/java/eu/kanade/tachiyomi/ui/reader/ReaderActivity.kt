@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.reader
 
 import android.annotation.SuppressLint
 import android.app.ProgressDialog
+import android.content.ClipData
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
@@ -156,17 +157,6 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
 
         config = ReaderConfig()
         initializeMenu()
-        val container: ViewGroup = findViewById(R.id.reader_container)
-        val readerBHeight = reader_menu_bottom.layoutParams.height
-        container.doOnApplyWindowInsets { _, insets, padding ->
-            val bottomInset = if (Build.VERSION.SDK_INT >= 29)
-                (insets.mandatorySystemGestureInsets.bottom - insets.systemWindowInsetBottom)
-            else 0
-            reader_menu_bottom.updateLayoutParams<ViewGroup.MarginLayoutParams>  {
-                height = readerBHeight + bottomInset
-            }
-            reader_menu_bottom.updatePaddingRelative(bottom = padding.bottom + bottomInset)
-        }
     }
 
     /**
@@ -312,6 +302,9 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
             systemUi?.show()
             reader_menu.visibility = View.VISIBLE
             reader_menu_bottom.visibility = View.VISIBLE
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                window.navigationBarColor = getResourceColor(R.attr.colorPrimaryDark)
+            }
             if (animate) {
                 if (!menuStickyVisible) {
                     val toolbarAnimation = AnimationUtils.loadAnimation(this, R.anim.enter_from_top)
@@ -513,6 +506,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
         val intent = Intent(Intent.ACTION_SEND).apply {
             putExtra(Intent.EXTRA_STREAM, stream)
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
+            clipData = ClipData.newRawUri(null, stream)
             type = "image/*"
         }
         startActivity(Intent.createChooser(intent, getString(R.string.action_share)))
@@ -570,6 +564,9 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
                     setMenuVisibility(false)
                     menuStickyVisible = false
                 }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    window.navigationBarColor = getColor(android.R.color.transparent)
+                }
                 reader_menu_bottom.visibility = View.GONE
                 reader_menu.visibility = View.VISIBLE
                 val toolbarAnimation = AnimationUtils.loadAnimation(this, R.anim.enter_from_top)
@@ -579,9 +576,6 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
                     }
                 })
                 toolbar.startAnimation(toolbarAnimation)
-                /*val bottomAnimation = AnimationUtils.loadAnimation(this, R.anim
-                .enter_from_bottom)
-                reader_menu_bottom.startAnimation(bottomAnimation)*/
             }
         }
         else {

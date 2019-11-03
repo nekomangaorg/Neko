@@ -1,5 +1,7 @@
 package eu.kanade.tachiyomi.ui.manga.info
 
+import android.app.Application
+import android.graphics.Bitmap
 import android.os.Bundle
 import com.jakewharton.rxrelay.BehaviorRelay
 import com.jakewharton.rxrelay.PublishRelay
@@ -11,6 +13,8 @@ import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
+import eu.kanade.tachiyomi.util.DiskUtil
+import eu.kanade.tachiyomi.util.ImageUtil
 import eu.kanade.tachiyomi.util.isNullOrUnsubscribed
 import rx.Observable
 import rx.Subscription
@@ -18,6 +22,11 @@ import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.InputStream
+import java.io.OutputStream
 import java.util.*
 
 /**
@@ -114,6 +123,35 @@ class MangaInfoPresenter(
             return
         }
         toggleFavorite()
+    }
+
+    fun shareManga(cover:Bitmap) {
+        val context = Injekt.get<Application>()
+
+        val destDir = File(context.cacheDir, "shared_image")
+
+        Observable.fromCallable { destDir.deleteRecursively() } // Keep only the last shared file
+            .map { saveImage(cover, destDir, manga) }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeFirst(
+                { view, file -> view.shareManga(file) },
+                { view, error -> view.shareManga() }
+            )
+    }
+
+    private fun saveImage(cover:Bitmap, directory: File, manga: Manga): File? {
+        directory.mkdirs()
+
+        // Build destination file.
+        val filename = DiskUtil.buildValidFilename("${manga.title} - Cover.jpg")
+
+        val destFile = File(directory, filename)
+        val stream: OutputStream = FileOutputStream(destFile)
+        cover.compress(Bitmap.CompressFormat.JPEG,75,stream)
+        stream.flush()
+        stream.close()
+        return destFile
     }
 
     /**
