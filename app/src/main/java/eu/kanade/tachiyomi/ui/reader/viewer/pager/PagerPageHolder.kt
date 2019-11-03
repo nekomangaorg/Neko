@@ -271,7 +271,10 @@ class PagerPageHolder(
                         initSubsamplingImageView().setImage(ImageSource.inputStream(openStream!!))
                     }
                 } else {
-                    initImageView().setImage(openStream!!)
+                    val imageView = initImageView()
+                    imageView.setImage(openStream!!)
+                    if (viewer.config.readerTheme == 2 && page.bg != null)
+                        imageView.background = page.bg
                 }
             }
             // Keep the Rx stream alive to close the input stream only when unsubscribed

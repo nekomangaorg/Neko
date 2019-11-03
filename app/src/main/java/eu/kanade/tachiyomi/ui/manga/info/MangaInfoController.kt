@@ -332,7 +332,7 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
      * Called to run Intent with [Intent.ACTION_SEND], which show share dialog.
      */
     private fun prepareToShareManga() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && manga_cover.drawable != null)
             GlideApp.with(activity!!).asBitmap().load(presenter.manga).into(object :
                 CustomTarget<Bitmap>() {
                 override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {

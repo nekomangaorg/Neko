@@ -55,7 +55,7 @@ object ImageUtil {
 
     fun autoSetBackground(image: Bitmap): Drawable {
         if (image.width < 50 || image.height < 50)
-            return ColorDrawable(Color.WHITE)
+            return ColorDrawable(android.R.attr.colorBackground)
         val top = 5
         val bot = image.height - 5
         val left = (image.width * 0.0275).toInt()
