@@ -134,9 +134,9 @@ class MangaInfoPresenter(
     }
 
     /**
-     * Get the default, and user categories.
+     * Get user categories.
      *
-     * @return List of categories, default plus user categories
+     * @return List of categories, not including the default category
      */
     fun getCategories(): List<Category> {
         return db.getCategories().executeAsBlocking()

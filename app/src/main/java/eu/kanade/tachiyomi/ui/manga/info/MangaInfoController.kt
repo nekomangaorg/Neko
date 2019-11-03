@@ -92,6 +92,9 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         // Set onclickListener to toggle favorite when FAB clicked.
         fab_favorite.clicks().subscribeUntilDestroy { onFabClick() }
 
+        // Set onLongClickListener to manage categories when FAB is clicked.
+        fab_favorite.longClicks().subscribeUntilDestroy{ onFabLongClick() }
+
         // Set SwipeRefresh to refresh manga data.
         swipe_refresh.refreshes().subscribeUntilDestroy { fetchMangaFromSource() }
 
@@ -153,7 +156,7 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
     /**
      * Check if manga is initialized.
      * If true update view with manga information,
-     * if false fetchFollows manga information
+     * if false fetch manga information
      *
      * @param manga  manga object containing information about manga.
      * @param source the source of the manga.
@@ -420,15 +423,12 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         toggleFavorite()
         if (manga.favorite) {
             val categories = presenter.getCategories()
-            val defaultCategory = categories.find { it.id == preferences.defaultCategory() }
-            // If a default category has been set, place the manga there.
-            // If there are no categories defined, place the manga in the default one.
-            // If there is at least one category defined, ask the user where the manga should go.
-            // See issues #885 and #1022.
+            val defaultCategoryId = preferences.defaultCategory()
+            val defaultCategory = categories.find { it.id == defaultCategoryId }
             when {
                 defaultCategory != null -> presenter.moveMangaToCategory(manga, defaultCategory)
-                categories.isEmpty() ->
-                    presenter.moveMangaToCategory(manga, categories.firstOrNull())
+                defaultCategoryId == 0 || categories.isEmpty() -> // 'Default' or no category
+                    presenter.moveMangaToCategory(manga, null)
                 else -> {
                     val ids = presenter.getMangaCategoryIds(manga)
                     val preselected = ids.mapNotNull { id ->
@@ -442,6 +442,30 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
             activity?.toast(activity?.getString(R.string.manga_added_library))
         } else {
             activity?.toast(activity?.getString(R.string.manga_removed_library))
+        }
+    }
+
+    /**
+     * Called when the fab is long clicked.
+     */
+    private fun onFabLongClick() {
+        val manga = presenter.manga
+        if (!manga.favorite) {
+            toggleFavorite()
+            activity?.toast(activity?.getString(R.string.manga_added_library))
+        }
+        val categories = presenter.getCategories()
+        if (categories.isEmpty()) {
+            // no categories exist, display a message about adding categories
+            activity?.toast(activity?.getString(R.string.action_add_category))
+        } else {
+            val ids = presenter.getMangaCategoryIds(manga)
+            val preselected = ids.mapNotNull { id ->
+                categories.indexOfFirst { it.id == id }.takeIf { it != -1 }
+            }.toTypedArray()
+
+            ChangeMangaCategoriesDialog(this, listOf(manga), categories, preselected)
+                    .showDialog(router)
         }
     }
 
