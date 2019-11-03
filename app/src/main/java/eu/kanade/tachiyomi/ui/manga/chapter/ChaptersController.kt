@@ -36,7 +36,7 @@ import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.RecyclerView
 import kotlin.math.*
 
-class ChaptersController : NucleusController<ChaptersPresenter>(),
+class ChaptersController() : NucleusController<ChaptersPresenter>(),
         ActionMode.Callback,
         FlexibleAdapter.OnItemClickListener,
         FlexibleAdapter.OnItemLongClickListener,
@@ -46,6 +46,10 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
         DownloadChaptersDialog.Listener,
         DownloadCustomChaptersDialog.Listener,
         DeleteChaptersDialog.Listener {
+
+    constructor(startY: Float?) : this() {
+        this.startingChapterYPos = startY
+    }
 
     /**
      * Adapter containing a list of chapters.
@@ -69,6 +73,7 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
         setHasOptionsMenu(true)
         setOptionsMenuHidden(true)
     }
+    var startingChapterYPos:Float? = null
 
     override fun createPresenter(): ChaptersPresenter {
         val ctrl = parentController as MangaController
@@ -233,11 +238,15 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
     }
 
     private fun scrollToUnread() {
+        if (adapter?.items.isNullOrEmpty()) return
         if (scrollToUnread) {
             val index = presenter.getFirstUnreadIndex()
-            val centerOfScreen = recycler.height / 2 - 96
-            (recycler.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(index,
-                centerOfScreen)
+            val centerOfScreen =
+                if (startingChapterYPos != null) startingChapterYPos!!.toInt() - recycler.top - 96
+                else recycler.height / 2 - 96
+            (recycler.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
+                index, centerOfScreen
+            )
         }
         scrollToUnread = false
     }

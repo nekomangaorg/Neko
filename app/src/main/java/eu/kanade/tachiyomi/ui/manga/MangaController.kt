@@ -48,6 +48,17 @@ class MangaController : RxController, TabbedController {
         }
     }
 
+    constructor(manga: Manga?, startY:Float?) : super(Bundle().apply {
+        putLong(MANGA_EXTRA, manga?.id ?: 0)
+        putBoolean(FROM_CATALOGUE_EXTRA, false)
+    }) {
+        this.manga = manga
+        startingChapterYPos = startY
+        if (manga != null) {
+            source = Injekt.get<SourceManager>().getOrStub(manga.source)
+        }
+    }
+
     constructor(mangaId: Long) : this(
             Injekt.get<DatabaseHelper>().getManga(mangaId).executeAsBlocking())
 
@@ -59,6 +70,8 @@ class MangaController : RxController, TabbedController {
 
     var source: Source? = null
         private set
+
+    var startingChapterYPos:Float? = null
 
     private var adapter: MangaDetailAdapter? = null
 
@@ -164,7 +177,7 @@ class MangaController : RxController, TabbedController {
             if (!router.hasRootController()) {
                 val controller = when (position) {
                     INFO_CONTROLLER -> MangaInfoController()
-                    CHAPTERS_CONTROLLER -> ChaptersController()
+                    CHAPTERS_CONTROLLER -> ChaptersController(startingChapterYPos)
                     TRACK_CONTROLLER -> TrackController()
                     else -> error("Wrong position $position")
                 }

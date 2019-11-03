@@ -428,11 +428,11 @@ class LibraryController(
         actionMode = null
     }
 
-    fun openManga(manga: Manga) {
+    fun openManga(manga: Manga, startY: Float?) {
         // Notify the presenter a manga is being opened.
         presenter.onOpenManga()
 
-        router.pushController(MangaController(manga).withFadeTransaction())
+        router.pushController(MangaController(manga, startY).withFadeTransaction())
     }
 
     /**

@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import android.util.AttributeSet
+import android.view.MotionEvent
 import android.view.View
 import android.widget.FrameLayout
 import eu.davidea.flexibleadapter.FlexibleAdapter
@@ -58,6 +59,8 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
      * Subscriptions while the view is bound.
      */
     private var subscriptions = CompositeSubscription()
+
+    private var lastTouchUpY = 0f
 
     fun onCreate(controller: LibraryController) {
         this.controller = controller
@@ -210,9 +213,16 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
             toggleSelection(position)
             return true
         } else {
-            openManga(item.manga)
+            openManga(item.manga, lastTouchUpY)
             return false
         }
+    }
+
+    override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
+        when (ev?.action) {
+            MotionEvent.ACTION_UP -> lastTouchUpY = ev?.y
+        }
+        return super.dispatchTouchEvent(ev)
     }
 
     /**
@@ -230,8 +240,8 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
      *
      * @param manga the manga to open.
      */
-    private fun openManga(manga: Manga) {
-        controller.openManga(manga)
+    private fun openManga(manga: Manga, startY:Float?) {
+        controller.openManga(manga, startY)
     }
 
     /**
