@@ -33,6 +33,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import android.content.Context
 import android.util.AttributeSet
 import androidx.core.view.ViewCompat
+import androidx.recyclerview.widget.RecyclerView
 import kotlin.math.*
 
 class ChaptersController : NucleusController<ChaptersPresenter>(),
@@ -50,6 +51,8 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
      * Adapter containing a list of chapters.
      */
     private var adapter: ChaptersAdapter? = null
+
+    private var scrollToUnread = true
 
     /**
      * Action mode for multiple selection.
@@ -84,19 +87,14 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
         adapter = ChaptersAdapter(this, view.context)
 
         recycler.adapter = adapter
-        recycler.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(view.context)
-        recycler.addItemDecoration(androidx.recyclerview.widget.DividerItemDecoration(view.context, androidx.recyclerview.widget.DividerItemDecoration.VERTICAL))
+        recycler.layoutManager = LinearLayoutManager(view.context)
+        recycler.addItemDecoration(DividerItemDecoration(view.context, DividerItemDecoration.VERTICAL))
         recycler.setHasFixedSize(true)
         adapter?.fastScroller = fast_scroller
 
         val fabBaseMarginBottom = fab?.marginBottom ?: 0
         recycler.doOnApplyWindowInsets { v, insets, padding ->
             v.updatePaddingRelative(bottom = padding.bottom + insets.systemWindowInsetBottom)
-            //if (snack == null) {
-                //fab?.translationY = -insets.systemWindowInsetBottom.toFloat()
-            /*}
-            else
-                fab?.translationY = 0f*/
             fab?.updateLayoutParams<ViewGroup.MarginLayoutParams>  {
                 bottomMargin = fabBaseMarginBottom + insets.systemWindowInsetBottom
             }
@@ -213,8 +211,9 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
     fun onNextChapters(chapters: List<ChapterItem>) {
         // If the list is empty, fetch chapters from source if the conditions are met
         // We use presenter chapters instead because they are always unfiltered
-        if (presenter.chapters.isEmpty())
+        if (presenter.chapters.isEmpty()) {
             initialFetchChapters()
+        }
 
         val adapter = adapter ?: return
         adapter.updateDataSet(chapters)
@@ -230,7 +229,17 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
             }
             actionMode?.invalidate()
         }
+        scrollToUnread()
+    }
 
+    private fun scrollToUnread() {
+        if (scrollToUnread) {
+            val index = presenter.getFirstUnreadIndex()
+            val centerOfScreen = recycler.height / 2 - 96
+            (recycler.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(index,
+                centerOfScreen)
+        }
+        scrollToUnread = false
     }
 
     private fun initialFetchChapters() {
@@ -519,8 +528,4 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
             downloadChapters(chaptersToDownload)
         }
     }
-}
-
-class ShrinkBehavior(context: Context, attrs: AttributeSet) :
-    CoordinatorLayout.Behavior<FloatingActionButton>(context, attrs) {
 }

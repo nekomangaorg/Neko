@@ -7,6 +7,8 @@
     <color name="drawerPrimary">@color/colorPrimary</color>
     <color name="cardBackground">#FFFFFF</color>
     <color name="snackbarBackground">#323232</color>
+    <color name="dialogBackground">@color/md_white_1000</color>
+    <color name="rippleColor">@color/md_black_1000_12</color>
     <!-- Dark Application Colors -->
     <color name="colorDarkPrimary">#212121</color>
     <color name="colorDarkPrimaryDark">#212121</color>
@@ -37,7 +39,7 @@
     <color name="textColorSecondaryDark">@color/md_white_1000_70</color>
     <color name="textColorHintDark">@color/md_white_1000_50</color>
     <color name="dividerDark">@android:color/transparent</color>
-    <color name="rippleColorDark">@color/md_white_1000_20</color>-
+    <color name="rippleColorDark">@color/md_white_1000_20</color>
 
     <color name="statusBarDark">@color/md_black_1000</color>
     <color name="appBarDark">@color/md_grey_900</color>
