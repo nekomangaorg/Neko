@@ -174,10 +174,11 @@ class MangaController : RxController, TabbedController {
         }
 
         override fun configureRouter(router: Router, position: Int) {
+            val touchOffset = if (activity?.tabs?.height == 0) 144f else 0f
             if (!router.hasRootController()) {
                 val controller = when (position) {
                     INFO_CONTROLLER -> MangaInfoController()
-                    CHAPTERS_CONTROLLER -> ChaptersController(startingChapterYPos)
+                    CHAPTERS_CONTROLLER -> ChaptersController(startingChapterYPos?.minus(touchOffset))
                     TRACK_CONTROLLER -> TrackController()
                     else -> error("Wrong position $position")
                 }
