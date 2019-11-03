@@ -63,6 +63,9 @@ Unit)? = null): Snackbar {
             }
         }
     }
+    else {
+        snack.view.doOnApplyWindowInsets { _,_,_ -> }
+    }
     snack.show()
     return snack
 }
