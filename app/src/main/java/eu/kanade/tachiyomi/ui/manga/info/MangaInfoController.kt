@@ -101,7 +101,8 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         swipe_refresh.refreshes().subscribeUntilDestroy { fetchMangaFromSource() }
 
         manga_full_title.longClicks().subscribeUntilDestroy {
-            copyToClipboard(view.context.getString(R.string.title), manga_full_title.text.toString())
+            copyToClipboard(view.context.getString(R.string.title), manga_full_title.text
+                .toString(), R.string.manga_info_full_title_label)
         }
 
         manga_full_title.clicks().subscribeUntilDestroy {
@@ -109,7 +110,8 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         }
 
         manga_artist.longClicks().subscribeUntilDestroy {
-            copyToClipboard(manga_artist_label.text.toString(), manga_artist.text.toString())
+            copyToClipboard(manga_artist_label.text.toString(), manga_artist.text.toString(), R
+                .string.manga_info_artist_label)
         }
 
         manga_artist.clicks().subscribeUntilDestroy {
@@ -117,7 +119,8 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         }
 
         manga_author.longClicks().subscribeUntilDestroy {
-            copyToClipboard(manga_author.text.toString(), manga_author.text.toString())
+            copyToClipboard(manga_author.text.toString(), manga_author.text.toString(), R.string
+                .manga_info_author_label)
         }
 
         manga_author.clicks().subscribeUntilDestroy {
@@ -125,13 +128,14 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         }
 
         manga_summary.longClicks().subscribeUntilDestroy {
-            copyToClipboard(view.context.getString(R.string.description), manga_summary.text.toString())
+            copyToClipboard(view.context.getString(R.string.description), manga_summary.text
+                .toString(), R.string.description)
         }
 
         //manga_genres_tags.setOnTagClickListener { tag -> performGlobalSearch(tag) }
 
         manga_cover.longClicks().subscribeUntilDestroy {
-            copyToClipboard(view.context.getString(R.string.title), presenter.manga.title)
+            copyToClipboard(view.context.getString(R.string.title), presenter.manga.title, R.string.manga_info_full_title_label)
         }
         container = (view as ViewGroup).findViewById(R.id.manga_info_layout) as? View
         val bottomM = manga_genres_tags.marginBottom
@@ -569,7 +573,7 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
      * @param label Label to show to the user describing the content
      * @param content the actual text to copy to the board
      */
-    private fun copyToClipboard(label: String, content: String) {
+    private fun copyToClipboard(label: String, content: String, resId: Int) {
         if (content.isBlank()) return
 
         val activity = activity ?: return
@@ -578,8 +582,8 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         val clipboard = activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         clipboard.setPrimaryClip(ClipData.newPlainText(label, content))
 
-        activity.toast(view.context.getString(R.string.copied_to_clipboard, content.truncateCenter(20)),
-                Toast.LENGTH_SHORT)
+        snack = container?.snack(view.context.getString(R.string.copied_to_clipboard, view.context
+            .getString(resId)))
     }
 
     /**

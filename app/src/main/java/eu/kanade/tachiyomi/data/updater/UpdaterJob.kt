@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.data.updater
 import android.app.PendingIntent
 import android.content.Intent
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import com.evernote.android.job.Job
 import com.evernote.android.job.JobManager
 import com.evernote.android.job.JobRequest
@@ -28,7 +29,7 @@ class UpdaterJob : Job() {
                             setContentTitle(context.getString(R.string.app_name))
                             setContentText(context.getString(R.string.update_check_notification_update_available))
                             setSmallIcon(android.R.drawable.stat_sys_download_done)
-                            color = context.getResourceColor(R.attr.colorAccent)
+                            color = ContextCompat.getColor(context, R.color.colorAccentLight)
                             // Download action
                             addAction(android.R.drawable.stat_sys_download_done,
                                     context.getString(R.string.action_download),

@@ -40,7 +40,7 @@
         <item name="icon_color">@color/iconColorLight</item>
 
         <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:navigationBarColor">@color/colorPrimary</item>
+        <item name="android:navigationBarColor">#B3000000</item>
     </style>
 
     <style name="Theme.Tachiyomi" parent="Theme.Base"/>

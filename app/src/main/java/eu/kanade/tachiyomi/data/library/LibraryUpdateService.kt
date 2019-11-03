@@ -10,6 +10,7 @@ import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
@@ -90,7 +91,7 @@ class LibraryUpdateService(
             .setLargeIcon(notificationBitmap)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
-            .setColor(getResourceColor(R.attr.colorAccent))
+            .setColor(ContextCompat.getColor(this, R.color.colorAccentLight))
             .addAction(R.drawable.ic_clear_grey_24dp_img, getString(android.R.string.cancel), cancelIntent)
     }
 
@@ -463,7 +464,7 @@ class LibraryUpdateService(
             setSmallIcon(R.drawable.ic_book_white_24dp)
             setLargeIcon(notificationBitmap)
             setContentTitle(getString(R.string.notification_new_chapters))
-            color = getResourceColor(R.attr.colorAccent)
+            color = ContextCompat.getColor(applicationContext, R.color.colorAccentLight)
             if (newUpdates.size > 1) {
                 setContentText(getString(R.string.notification_new_chapters_text, newUpdates.size))
                 setStyle(NotificationCompat.BigTextStyle().bigText(newUpdates.joinToString("\n")))

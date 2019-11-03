@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.data.updater
 import android.content.Context
 import android.net.Uri
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.notification.NotificationHandler
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
@@ -96,7 +97,7 @@ internal class UpdaterNotifier(private val context: Context) {
             setSmallIcon(android.R.drawable.stat_sys_warning)
             setOnlyAlertOnce(false)
             setProgress(0, 0, false)
-            color = context.getResourceColor(R.attr.colorAccent)
+            color = ContextCompat.getColor(context, R.color.colorAccentLight)
             // Retry action
             addAction(R.drawable.ic_refresh_grey_24dp_img,
                     context.getString(R.string.action_retry),

@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.data.download
 import android.content.Context
 import android.graphics.BitmapFactory
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.download.model.DownloadQueue
@@ -219,7 +220,7 @@ internal class DownloadNotifier(private val context: Context) {
             clearActions()
             setAutoCancel(true)
             setContentIntent(NotificationHandler.openDownloadManagerPendingActivity(context))
-            color = context.getResourceColor(R.attr.colorAccent)
+            color = ContextCompat.getColor(context, R.color.colorAccentLight)
             setProgress(0, 0, false)
         }
         notification.show(Notifications.ID_DOWNLOAD_CHAPTER_ERROR)

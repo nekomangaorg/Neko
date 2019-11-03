@@ -55,10 +55,10 @@ Unit)? = null): Snackbar {
     if (f != null) {
         snack.f()
     }
-    snack.view.doOnApplyWindowInsets { v, insets, padding ->
-        //v.setPadding(padding.left, 0, padding.right, 0)
-        v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-            if (Build.VERSION.SDK_INT < 23) {
+    if (Build.VERSION.SDK_INT < 23) {
+        val view = if (this !is CoordinatorLayout) this else snack.view
+        view.doOnApplyWindowInsets { _, insets, _ ->
+            snack.view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 bottomMargin = 12 + insets.systemWindowInsetBottom
             }
         }
