@@ -480,7 +480,8 @@ class LibraryUpdateService(
                 val chapter = chapters.sortedByDescending { it.source_order }.find { !it.read }
                 if (chapter != null) {
                     addAction(R.drawable.ic_in_library_24dp, getString(R.string.action_start_reading),
-                        NotificationReceiver.openChapterPendingBroadcast(context, onlyManga, chapter))
+                        NotificationReceiver.openChapterPendingBroadcast(context, onlyManga,
+                            chapter, Notifications.ID_NEW_CHAPTERS))
                 }
             }
             priority = NotificationCompat.PRIORITY_HIGH

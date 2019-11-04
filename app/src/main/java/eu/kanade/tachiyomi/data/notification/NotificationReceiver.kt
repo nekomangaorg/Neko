@@ -1,12 +1,17 @@
 package eu.kanade.tachiyomi.data.notification
 
+import android.app.Activity
+import android.app.KeyguardManager
 import android.app.Notification
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.ClipData
 import android.content.Context
 import android.content.Intent
+import android.os.Build
+import android.os.Bundle
 import android.os.Handler
+import androidx.appcompat.app.AppCompatActivity
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
@@ -82,6 +87,7 @@ class NotificationReceiver : BroadcastReceiver() {
      * @param notificationId id of notification
      */
     private fun shareImage(context: Context, path: String, notificationId: Int) {
+        val km = context.getSystemService(Activity.KEYGUARD_SERVICE) as KeyguardManager
         // Create intent
         val intent = Intent(Intent.ACTION_SEND).apply {
             val uri = File(path).getUriCompat(context)
@@ -91,12 +97,7 @@ class NotificationReceiver : BroadcastReceiver() {
             type = "image/*"
         }
         // Close Navigation Shade
-        context.sendBroadcast(Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS))
-        // Launch share activity
-        val shareIntent = Intent.createChooser(intent, context.getString(R.string
-            .action_share))
-        shareIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
-        context.startActivity(shareIntent)
+
     }
 
     /**
@@ -262,12 +263,17 @@ class NotificationReceiver : BroadcastReceiver() {
          * @return [PendingIntent]
          */
         internal fun shareImagePendingBroadcast(context: Context, path: String, notificationId: Int): PendingIntent {
-            val intent = Intent(context, NotificationReceiver::class.java).apply {
-                action = ACTION_SHARE_IMAGE
-                putExtra(EXTRA_FILE_LOCATION, path)
-                putExtra(EXTRA_NOTIFICATION_ID, notificationId)
+            //val shareIntent = ShareStartingActivity.newIntent(context, path)
+            val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                val uri = File(path).getUriCompat(context)
+                putExtra(Intent.EXTRA_STREAM, uri)
+                flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                clipData = ClipData.newRawUri(null, uri)
+                type = "image/*"
             }
-            return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+            //val shareIntent2 = Intent.createChooser(shareIntent, context.getString(R.string.action_share))
+            return PendingIntent.getActivity(context, 0, shareIntent, PendingIntent
+                .FLAG_CANCEL_CURRENT)
         }
 
         /**
@@ -294,13 +300,10 @@ class NotificationReceiver : BroadcastReceiver() {
          * @param manga manga of chapter
          * @param chapter chapter that needs to be opened
          */
-        internal fun openChapterPendingBroadcast(context: Context, manga: Manga, chapter: Chapter): PendingIntent {
-            val intent = Intent(context, NotificationReceiver::class.java).apply {
-                action = ACTION_OPEN_CHAPTER
-                putExtra(EXTRA_MANGA_ID, manga.id)
-                putExtra(EXTRA_CHAPTER_ID, chapter.id)
-            }
-            return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        internal fun openChapterPendingBroadcast(context: Context, manga: Manga, chapter:
+        Chapter, notificationId: Int): PendingIntent {
+            val newIntent = ReaderActivity.newIntent(context, manga, chapter, notificationId)
+            return PendingIntent.getActivity(context, 0, newIntent, PendingIntent.FLAG_UPDATE_CURRENT)
         }
 
         /**

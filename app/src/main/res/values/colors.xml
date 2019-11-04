@@ -9,6 +9,7 @@
     <color name="snackbarBackground">#323232</color>
     <color name="dialogBackground">@color/md_white_1000</color>
     <color name="rippleColor">@color/md_black_1000_12</color>
+    <color name="colorAccent">@color/md_blue_A400</color>
     <!-- Dark Application Colors -->
     <color name="colorDarkPrimary">#212121</color>
     <color name="colorDarkPrimaryDark">#212121</color>

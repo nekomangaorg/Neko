@@ -21,6 +21,7 @@ import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.base.activity.BaseRxActivity
@@ -119,10 +120,13 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
         const val VERTICAL = 3
         const val WEBTOON = 4
 
-        fun newIntent(context: Context, manga: Manga, chapter: Chapter): Intent {
+        fun newIntent(context: Context, manga: Manga, chapter: Chapter, notificationId:Int? =
+            null):
+            Intent {
             val intent = Intent(context, ReaderActivity::class.java)
             intent.putExtra("manga", manga.id)
             intent.putExtra("chapter", chapter.id)
+            intent.putExtra("notificationId", notificationId)
             return intent
         }
     }
@@ -142,6 +146,10 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
         if (presenter.needsInit()) {
             val manga = intent.extras!!.getLong("manga", -1)
             val chapter = intent.extras!!.getLong("chapter", -1)
+            val notificationId = intent.extras!!.getInt("notificationId", -1)
+            if (notificationId > 0) {
+                applicationContext.notificationManager.cancel(notificationId)
+            }
 
             if (manga == -1L || chapter == -1L) {
                 finish()
