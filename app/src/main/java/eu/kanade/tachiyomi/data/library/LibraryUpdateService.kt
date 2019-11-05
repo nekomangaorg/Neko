@@ -20,6 +20,7 @@ import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadService
+import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.data.library.LibraryUpdateRanker.rankingScheme
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService.Companion.start
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
@@ -31,14 +32,18 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.main.MainActivity
-import eu.kanade.tachiyomi.util.*
+import eu.kanade.tachiyomi.util.chop
+import eu.kanade.tachiyomi.util.isServiceRunning
+import eu.kanade.tachiyomi.util.notification
+import eu.kanade.tachiyomi.util.notificationManager
+import eu.kanade.tachiyomi.util.syncChaptersWithSource
 import rx.Observable
 import rx.Subscription
 import rx.schedulers.Schedulers
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import java.util.*
+import java.util.ArrayList
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
@@ -449,9 +454,14 @@ class LibraryUpdateService(
             val chapter = it.second
             notifications.add(Pair(notification(Notifications.CHANNEL_NEW_CHAPTERS) {
                 setSmallIcon(R.drawable.ic_book_white_24dp)
-                setLargeIcon(notificationBitmap)
+                try {
+                    val icon = GlideApp.with(this@LibraryUpdateService)
+                        .asBitmap().load(manga).centerCrop().circleCrop().submit().get()
+                    setLargeIcon(icon)
+                }
+                catch (e: Exception) { }
                 setContentTitle(manga.title.chop(45))
-                color = ContextCompat.getColor(applicationContext, R.color.colorAccentLight)
+                color = ContextCompat.getColor(this@LibraryUpdateService, R.color.colorAccentLight)
                 setContentText(chapter.name)
                 priority = NotificationCompat.PRIORITY_HIGH
                 setGroup(Notifications.GROUP_NEW_CHAPTERS)
