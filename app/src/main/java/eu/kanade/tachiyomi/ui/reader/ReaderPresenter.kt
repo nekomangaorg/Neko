@@ -185,6 +185,15 @@ class ReaderPresenter(
                 }, ReaderActivity::setInitialChapterError)
     }
 
+    fun init(mangaId: Long, chapterUrl: String) {
+        if (!needsInit()) return
+        val context = Injekt.get<Application>()
+        val db = DatabaseHelper(context)
+        val chapterId = db.getChapter(chapterUrl).executeAsBlocking()?.id
+        if (chapterId != null)
+            init(mangaId, chapterId)
+    }
+
     /**
      * Initializes this presenter with the given [manga] and [initialChapterId]. This method will
      * set the chapter loader, view subscriptions and trigger an initial load.

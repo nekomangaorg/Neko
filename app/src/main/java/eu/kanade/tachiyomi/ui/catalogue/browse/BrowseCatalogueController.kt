@@ -508,15 +508,14 @@ open class BrowseCatalogueController(bundle: Bundle) :
             presenter.changeMangaFavorite(manga)
             adapter?.notifyItemChanged(position)
             snack =
-                catalogue_view?.snack(activity.getString(R.string.manga_removed_library), 5000) {
+                catalouge_layout?.snack(R.string.manga_removed_library, 5000) {
                     setAction(R.string.action_undo) {
                         if (!manga.favorite) addManga(manga, position)
                     }
                 }
         } else {
             addManga(manga, position)
-            snack =
-                catalogue_view?.snack(activity.getString(R.string.manga_added_library))
+            snack = catalouge_layout?.snack(R.string.manga_added_library)
         }
     }
 

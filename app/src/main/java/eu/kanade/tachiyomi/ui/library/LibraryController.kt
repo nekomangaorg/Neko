@@ -18,6 +18,7 @@ import androidx.core.view.GravityCompat
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
 import com.f2prateek.rx.preferences.Preference
+import com.google.android.material.snackbar.Snackbar
 import com.jakewharton.rxbinding.support.v4.view.pageSelections
 import com.jakewharton.rxbinding.support.v7.widget.queryTextChanges
 import com.jakewharton.rxrelay.BehaviorRelay
@@ -121,6 +122,8 @@ class LibraryController(
 
     private var searchViewSubscription: Subscription? = null
 
+    var snack: Snackbar? = null
+
     init {
         setHasOptionsMenu(true)
         retainViewMode = RetainViewMode.RETAIN_DETACH
@@ -174,6 +177,12 @@ class LibraryController(
         tabsVisibilitySubscription?.unsubscribe()
         tabsVisibilitySubscription = null
         super.onDestroyView(view)
+    }
+
+    override fun onDetach(view: View) {
+        snack?.dismiss()
+        snack = null
+        super.onDetach(view)
     }
 
     override fun createSecondaryDrawer(drawer: androidx.drawerlayout.widget.DrawerLayout): ViewGroup {
@@ -476,7 +485,8 @@ class LibraryController(
         val mangas = selectedMangas.toList()
         presenter.removeMangaFromLibrary(mangas, true)
         destroyActionModeIfNeeded()
-        view?.snack(activity?.getString(R.string.manga_removed_library) ?: "", 5000)  {
+        snack?.dismiss()
+        snack = view?.snack(activity?.getString(R.string.manga_removed_library) ?: "", 5000)  {
             setAction(R.string.action_undo) {
                 presenter.addMangas(mangas)
             }

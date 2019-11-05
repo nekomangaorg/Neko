@@ -19,6 +19,7 @@ import android.widget.LinearLayout
 import android.widget.SeekBar
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.notification.Notifications
@@ -120,13 +121,13 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
         const val VERTICAL = 3
         const val WEBTOON = 4
 
-        fun newIntent(context: Context, manga: Manga, chapter: Chapter, notificationId:Int? =
-            null):
+        fun newIntent(context: Context, manga: Manga, chapter: Chapter):
             Intent {
             val intent = Intent(context, ReaderActivity::class.java)
             intent.putExtra("manga", manga.id)
             intent.putExtra("chapter", chapter.id)
-            intent.putExtra("notificationId", notificationId)
+            intent.putExtra("chapterUrl", chapter.url)
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
             return intent
         }
     }
@@ -146,17 +147,14 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
         if (presenter.needsInit()) {
             val manga = intent.extras!!.getLong("manga", -1)
             val chapter = intent.extras!!.getLong("chapter", -1)
-            val notificationId = intent.extras!!.getInt("notificationId", -1)
-            if (notificationId > 0) {
-                applicationContext.notificationManager.cancel(notificationId)
-            }
-
-            if (manga == -1L || chapter == -1L) {
+            val chapterUrl = intent.extras!!.getString("chapterUrl", "")
+            if (manga == -1L || chapterUrl == "" && chapter == -1L) {
                 finish()
                 return
             }
 
-            presenter.init(manga, chapter)
+            if (chapterUrl.isEmpty()) presenter.init(manga, chapter)
+            else presenter.init(manga, chapterUrl)
         }
 
         if (savedState != null) {

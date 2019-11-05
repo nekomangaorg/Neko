@@ -7,6 +7,7 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import android.widget.FrameLayout
+import com.google.android.material.snackbar.Snackbar
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.SelectableAdapter
 import eu.kanade.tachiyomi.R
@@ -98,7 +99,8 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
         swipe_refresh.setOnRefreshListener {
             if (!LibraryUpdateService.isRunning(context)) {
                 LibraryUpdateService.start(context, category)
-                swipe_refresh.snack(R.string.updating_category)
+                controller.snack?.dismiss()
+                controller.snack = swipe_refresh.snack(R.string.updating_category)
             }
             // It can be a very long operation, so we disable swipe refresh and show a toast.
             swipe_refresh.isRefreshing = false

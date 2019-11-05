@@ -11,7 +11,6 @@ import eu.kanade.tachiyomi.data.notification.NotificationHandler
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.util.chop
-import eu.kanade.tachiyomi.util.getResourceColor
 import eu.kanade.tachiyomi.util.notificationManager
 import java.util.regex.Pattern
 
@@ -170,8 +169,8 @@ internal class DownloadNotifier(private val context: Context) {
             setSmallIcon(android.R.drawable.stat_sys_download_done)
             setAutoCancel(true)
             clearActions()
-            setContentIntent(NotificationReceiver.openChapterPendingBroadcast(context, download
-                .manga, download.chapter, Notifications.ID_DOWNLOAD_CHAPTER))
+            setContentIntent(NotificationReceiver.openChapterPendingActivity(context, download
+                .manga, download.chapter))
             setProgress(0, 0, false)
         }
 
