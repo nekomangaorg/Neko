@@ -10,6 +10,8 @@ import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
@@ -290,7 +292,7 @@ class LibraryUpdateService(
         // Initialize the variables holding the progress of the updates.
         val count = AtomicInteger(0)
         // List containing new updates
-        val newUpdates = ArrayList<Manga>()
+        val newUpdates = ArrayList<Pair<Manga, Chapter>>()
         // list containing failed updates
         val failedUpdates = ArrayList<Manga>()
         // List containing categories that get included in downloads.
@@ -323,7 +325,7 @@ class LibraryUpdateService(
                                 }
                             }
                             // Convert to the manga that contains new chapters.
-                            .map { manga }
+                            .map { Pair(manga, (it.first.minBy { ch -> ch.chapter_number }!!)) }
                 }
                 // Add manga with new chapters to the list.
                 .doOnNext { manga ->
@@ -345,6 +347,7 @@ class LibraryUpdateService(
 
                     cancelProgressNotification()
                 }
+                .map { manga -> manga.first }
     }
 
     private fun downloadChapters(manga: Manga, chapters: List<Chapter>) {
@@ -513,39 +516,49 @@ class LibraryUpdateService(
      *
      * @param updates a list of manga with new updates.
      */
-    private fun showResultNotification(updates: List<Manga>) {
-        val newUpdates = updates.map { it.title.chop(45) }.toMutableSet()
-
-        // Append new chapters from a previous, existing notification
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val previousNotification = notificationManager.activeNotifications
-                    .find { it.id == Notifications.ID_LIBRARY_RESULT }
-
-            if (previousNotification != null) {
-                val oldUpdates = previousNotification.notification.extras
-                        .getString(Notification.EXTRA_BIG_TEXT)
-
-                if (!oldUpdates.isNullOrEmpty()) {
-                    newUpdates += oldUpdates.split("\n")
-                }
-            }
+    private fun showResultNotification(updates: List<Pair<Manga, Chapter>>) {
+        val notifications = ArrayList<Pair<Notification, Int>>()
+        updates.forEach {
+            val manga = it.first
+            val chapter = it.second
+            notifications.add(Pair(notification(Notifications.CHANNEL_NEW_CHAPTERS) {
+                setSmallIcon(R.drawable.ic_book_white_24dp)
+                setLargeIcon(notificationBitmap)
+                setContentTitle(manga.title.chop(45))
+                color = ContextCompat.getColor(applicationContext, R.color.colorAccentLight)
+                setContentText(chapter.name)
+                priority = NotificationCompat.PRIORITY_HIGH
+                setGroup(Notifications.GROUP_NEW_CHAPTERS)
+                setContentIntent(
+                    NotificationReceiver.openChapterPendingActivity(
+                        this@LibraryUpdateService, manga, chapter
+                    )
+                )
+                setAutoCancel(true)
+            }, manga.id.hashCode()))
         }
 
-        notificationManager.notify(Notifications.ID_LIBRARY_RESULT, notification(Notifications.CHANNEL_LIBRARY) {
-            setSmallIcon(R.drawable.ic_book_white_24dp)
-            setLargeIcon(notificationBitmap)
-            setContentTitle(getString(R.string.notification_new_chapters))
-            if (newUpdates.size > 1) {
-                setContentText(getString(R.string.notification_new_chapters_text, newUpdates.size))
-                setStyle(NotificationCompat.BigTextStyle().bigText(newUpdates.joinToString("\n")))
-                setNumber(newUpdates.size)
-            } else {
-                setContentText(newUpdates.first())
+        NotificationManagerCompat.from(this).apply {
+            notifications.forEach {
+                notify(it.second, it.first)
             }
-            priority = NotificationCompat.PRIORITY_HIGH
-            setContentIntent(getNotificationIntent())
-            setAutoCancel(true)
-        })
+
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N || notificationManager
+                    .activeNotifications.find { it.groupKey == Notifications.GROUP_NEW_CHAPTERS } == null) {
+                notify(Notifications.ID_NEW_CHAPTERS, notification(Notifications.CHANNEL_NEW_CHAPTERS) {
+                    setSmallIcon(R.drawable.ic_book_white_24dp)
+                    setLargeIcon(notificationBitmap)
+                    setContentTitle(getString(R.string.notification_new_chapters))
+                    color = ContextCompat.getColor(applicationContext, R.color.colorAccentLight)
+                    setContentText(getString(R.string.notification_new_chapters_text, updates.size))
+                    priority = NotificationCompat.PRIORITY_HIGH
+                    setGroup(Notifications.GROUP_NEW_CHAPTERS)
+                    setGroupSummary(true)
+                    setContentIntent(getNotificationIntent())
+                    setAutoCancel(true)
+                })
+            }
+        }
     }
 
     /**

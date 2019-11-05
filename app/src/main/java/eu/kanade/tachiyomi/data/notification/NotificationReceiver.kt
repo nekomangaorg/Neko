@@ -287,13 +287,11 @@ class NotificationReceiver : BroadcastReceiver() {
          * @param manga manga of chapter
          * @param chapter chapter that needs to be opened
          */
-        internal fun openChapterPendingBroadcast(context: Context, manga: Manga, chapter: Chapter): PendingIntent {
-            val intent = Intent(context, NotificationReceiver::class.java).apply {
-                action = ACTION_OPEN_CHAPTER
-                putExtra(EXTRA_MANGA_ID, manga.id)
-                putExtra(EXTRA_CHAPTER_ID, chapter.id)
-            }
-            return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        internal fun openChapterPendingActivity(context: Context, manga: Manga, chapter:
+        Chapter): PendingIntent {
+            val newIntent = ReaderActivity.newIntent(context, manga, chapter)
+            return PendingIntent.getActivity(context, manga.id.hashCode(), newIntent, PendingIntent
+                .FLAG_UPDATE_CURRENT)
         }
 
         /**

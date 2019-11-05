@@ -24,7 +24,8 @@ class MangaWebViewController(bundle: Bundle? = null) : BaseController(bundle) {
     })
 
     override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
-        return inflater.inflate(R.layout.manga_info_web_controller, container, false)
+        return WebView(applicationContext)// inflater.inflate(R.layout.manga_info_web_controller, container,
+        // false)
     }
 
     override fun onViewCreated(view: View) {
