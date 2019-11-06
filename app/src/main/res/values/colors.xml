@@ -32,7 +32,7 @@
     <color name="textColorPrimaryDark">@color/md_white_1000</color>
     <color name="textColorSecondaryDark">@color/md_white_1000_70</color>
     <color name="textColorHintDark">@color/md_white_1000_50</color>
-    <color name="dividerDark">@android:color/transparent</color>
+    <color name="dividerDark">@color/md_black_1000_38</color>
     <color name="rippleColorDark">@color/md_white_1000_20</color>-
 
     <color name="statusBarDark">@color/md_black_1000</color>
@@ -40,6 +40,7 @@
     <color name="backgroundDark">@color/colorDarkPrimaryDark</color>
     <color name="dialogDark">@color/colorDarkPrimary</color>
     <color name="dialog_amoled">@color/colorDarkPrimaryDark</color>
+    <color name="dividerAmoled">@color/md_white_1000_12</color>
 
     <color name="selectorColorDark">#707070</color>
     <color name="iconColorDark">@color/md_white_1000_54</color>

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:clickable="true"
     android:orientation="vertical">
     <LinearLayout
@@ -52,7 +52,7 @@
             style="@style/Theme.Widget.Button.Borderless"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight="2"
             android:text="@string/action_reset"/>
 
         <Button
@@ -60,7 +60,27 @@
             style="@style/Theme.Widget.Button.Colored"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight="2"
             android:text="@string/action_search"/>
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:elevation="8dp"
+            android:background="?android:attr/divider"/>
+
+        <com.mikepenz.iconics.view.IconicsImageButton
+            android:id="@+id/random_manga_btn"
+            app:iiv_color="?attr/icon_color"
+            app:iiv_icon="cmd-book-open-page-variant"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:padding="10dp"
+            android:background="@null"
+            android:layout_gravity="center_vertical"
+            />
     </LinearLayout>
 </LinearLayout>

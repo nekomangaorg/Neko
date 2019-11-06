@@ -20,11 +20,6 @@ class MangaHandler(val client: OkHttpClient, val headers: Headers, val lang: Str
                 }
     }
 
-    private fun apiRequest(manga: SManga): Request {
-        return GET(MdUtil.baseUrl + MdUtil.apiManga + MdUtil.getMangaId(manga.url), headers)
-    }
-
-
     fun fetchChapterList(manga: SManga): Observable<List<SChapter>> {
         return client.newCall(apiRequest(manga))
                 .asObservableSuccess()
@@ -34,6 +29,21 @@ class MangaHandler(val client: OkHttpClient, val headers: Headers, val lang: Str
                 }
     }
 
+    fun fetchRandomMangaId() : Observable<String>{
+        return client.newCall(randomMangaRequest())
+                .asObservableSuccess()
+                .map {response ->
+                    ApiMangaParser(lang).randomMangaIdParse(response)
+                }
+    }
+
+    private fun randomMangaRequest(): Request{
+        return GET(MdUtil.baseUrl + MdUtil.randMangaPage)
+    }
+
+    private fun apiRequest(manga: SManga): Request {
+        return GET(MdUtil.baseUrl + MdUtil.apiManga + MdUtil.getMangaId(manga.url), headers)
+    }
 
     companion object {
 

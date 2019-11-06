@@ -28,6 +28,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.online.HttpSource
+import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.base.controller.SecondaryDrawerController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
@@ -45,6 +46,7 @@ import rx.subscriptions.Subscriptions
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 import java.util.concurrent.TimeUnit
+import kotlin.random.Random
 
 /**
  * Controller to manage the catalogues available in the app.
@@ -162,6 +164,13 @@ open class BrowseCatalogueController(bundle: Bundle) :
             val newFilters = presenter.source.getFilterList()
             presenter.sourceFilters = newFilters
             navView.setFilters(presenter.filterItems)
+        }
+
+        navView.onRandomClicked = {
+            showProgressBar()
+            adapter?.clear()
+            drawer.closeDrawer(Gravity.RIGHT)
+            presenter.searchRandomManga()
         }
         return navView as ViewGroup
     }
