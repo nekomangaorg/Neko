@@ -6,6 +6,7 @@ class MdUtil {
     companion object {
         const val cdnUrl = "https://cdndex.com"
         const val baseUrl = "https://mangadex.org"
+        const val randMangaPage = "/manga/"
         const val apiManga = "/api/manga/"
         const val apiChapter = "/api/chapter/"
 

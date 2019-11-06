@@ -8,6 +8,8 @@ import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.POST
 import eu.kanade.tachiyomi.network.asObservable
 import eu.kanade.tachiyomi.network.asObservableSuccess
+import eu.kanade.tachiyomi.util.consumeBody
+import eu.kanade.tachiyomi.util.consumeXmlBody
 import eu.kanade.tachiyomi.util.selectInt
 import eu.kanade.tachiyomi.util.selectText
 import okhttp3.FormBody
@@ -15,16 +17,12 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
-import okhttp3.Response
 import org.json.JSONObject
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import org.jsoup.parser.Parser
 import rx.Observable
-import java.io.BufferedReader
-import java.io.InputStreamReader
-import java.util.zip.GZIPInputStream
 
 
 class MyanimelistApi(private val client: OkHttpClient, interceptor: MyAnimeListInterceptor) {
@@ -173,26 +171,6 @@ class MyanimelistApi(private val client: OkHttpClient, interceptor: MyAnimeListI
                 .map { response ->
                     Jsoup.parse(response.consumeXmlBody(), "", Parser.xmlParser())
                 }
-    }
-
-    private fun Response.consumeBody(): String? {
-        use {
-            if (it.code != 200) throw Exception("HTTP error ${it.code}")
-            return it.body?.string()
-        }
-    }
-
-    private fun Response.consumeXmlBody(): String? {
-        use { res ->
-            if (res.code != 200) throw Exception("Export list error")
-            BufferedReader(InputStreamReader(GZIPInputStream(res.body?.source()?.inputStream()))).use { reader ->
-                val sb = StringBuilder()
-                reader.forEachLine { line ->
-                    sb.append(line)
-                }
-                return sb.toString()
-            }
-        }
     }
 
     companion object {

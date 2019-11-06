@@ -7,7 +7,9 @@ import com.google.gson.JsonParser
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import eu.kanade.tachiyomi.util.consumeBody
 import okhttp3.Response
+import org.jsoup.Jsoup
 import java.util.*
 
 class ApiMangaParser(val lang: String) {
@@ -64,6 +66,16 @@ class ApiMangaParser(val lang: String) {
         } else {
             false
         }
+    }
+
+    /**
+     * Parse for the random manga id from the [MdUtil.randMangaPage] response.
+     */
+    fun randomMangaIdParse(response : Response) : String{
+        val randMangaUrl = Jsoup.parse(response.consumeBody())
+                .select("link[rel=canonical]")
+                .attr("href")
+        return MdUtil.getMangaId(randMangaUrl)
     }
 
     fun chapterListParse(response: Response): List<SChapter> {

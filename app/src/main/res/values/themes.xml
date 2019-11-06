@@ -96,6 +96,8 @@
         <item name="colorPrimary">@color/colorAmoledPrimary</item>
         <item name="colorPrimaryDark">@color/colorAmoledPrimary</item>
         <item name="android:colorBackground">@color/md_black_1000</item>
+        <item name="android:divider">@color/dividerAmoled</item>
+
 
         <!-- Custom Attributes-->
         <item name="selectable_list_drawable">@drawable/list_item_selector_amoled</item>

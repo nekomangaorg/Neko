@@ -13,6 +13,8 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Filter
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.online.Mangadex
+import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
 import eu.kanade.tachiyomi.ui.catalogue.filter.*
 import rx.Observable
@@ -374,6 +376,32 @@ open class BrowseCataloguePresenter(
         } else {
             changeMangaFavorite(manga)
         }
+    }
+
+    /**
+     * Search for manga based off of a random manga id by utilizing the [query] and the [restartPager].
+     */
+    fun searchRandomManga() {
+        (source as? Mangadex)?.apply {
+            fetchRandomMangaId()
+                    .observeOn(Schedulers.io())
+                    .subscribeOn(Schedulers.io())
+                    .subscribe { randMangaId ->
+                        // Query string, e.g. "id:350"
+                        restartPager("${SearchHandler.PREFIX_ID_SEARCH}$randMangaId")
+                        // Clear search query so user can browse all manga again when they hit the Search button
+                        clearQuery()
+                    }
+        }
+    }
+
+    /**
+     * Clear the search [query].
+     *
+     * @see searchRandomManga
+     */
+    private fun clearQuery() {
+        query = ""
     }
 
 }

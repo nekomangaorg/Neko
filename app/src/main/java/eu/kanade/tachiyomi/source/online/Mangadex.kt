@@ -45,18 +45,6 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         "${URLEncoder.encode(it.key, "UTF-8")}=${URLEncoder.encode(it.value, "UTF-8")}"
     }
 
-
-    override fun fetchPopularManga(page: Int): Observable<MangasPage> {
-        return PopularHandler(clientBuilder(), headers).fetchPopularManga(page)
-
-    }
-
-
-    override fun fetchSearchManga(page: Int, query: String, filters: FilterList): Observable<MangasPage> {
-        return SearchHandler(buildR18Client(filters), headers, internalLang).fetchSearchManga(page, query, filters)
-
-    }
-
     private fun buildR18Client(filters: FilterList): OkHttpClient {
         filters.forEach { filter ->
             when (filter) {
@@ -73,14 +61,26 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         return clientBuilder()
     }
 
+    fun changeFollowStatus(manga: SManga): Observable<Boolean> {
+        return FollowsHandler(clientBuilder(), headers).changeFollowStatus(manga)
+    }
+
+    fun fetchRandomMangaId() : Observable<String>{
+        return MangaHandler(clientBuilder(), headers, internalLang).fetchRandomMangaId()
+    }
+
+    override fun fetchPopularManga(page: Int): Observable<MangasPage> {
+        return PopularHandler(clientBuilder(), headers).fetchPopularManga(page)
+
+    }
+
+    override fun fetchSearchManga(page: Int, query: String, filters: FilterList): Observable<MangasPage> {
+        return SearchHandler(buildR18Client(filters), headers, internalLang).fetchSearchManga(page, query, filters)
+
+    }
 
     override fun fetchFollows(page: Int): Observable<MangasPage> {
         return FollowsHandler(clientBuilder(), headers).fetchFollows(page)
-    }
-
-
-    fun changeFollowStatus(manga: SManga): Observable<Boolean> {
-        return FollowsHandler(clientBuilder(), headers).changeFollowStatus(manga)
     }
 
     override fun fetchMangaDetails(manga: SManga): Observable<SManga> {
