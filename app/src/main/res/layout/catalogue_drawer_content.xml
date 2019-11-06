@@ -52,7 +52,7 @@
             style="@style/Theme.Widget.Button.Borderless"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="2"
+            android:layout_weight="3"
             android:text="@string/action_reset"/>
 
         <Button
@@ -60,7 +60,7 @@
             style="@style/Theme.Widget.Button.Colored"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="2"
+            android:layout_weight="3"
             android:text="@string/action_search"/>
 
         <View
@@ -74,11 +74,11 @@
         <com.mikepenz.iconics.view.IconicsImageButton
             android:id="@+id/random_manga_btn"
             app:iiv_color="?attr/icon_color"
-            app:iiv_icon="cmd-book-open-page-variant"
+            app:iiv_icon="cmd-shuffle-variant"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:padding="10dp"
+            android:padding="4dp"
             android:background="@null"
             android:layout_gravity="center_vertical"
             />
