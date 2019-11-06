@@ -26,6 +26,7 @@ import android.widget.LinearLayout
 import com.bluelinelabs.conductor.*
 import eu.kanade.tachiyomi.Migrations
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
 import eu.kanade.tachiyomi.ui.base.controller.*
@@ -221,6 +222,10 @@ class MainActivity : BaseActivity() {
     }
 
     private fun handleIntentAction(intent: Intent): Boolean {
+        val notificationId = intent.getIntExtra("notificationId", -1)
+        if (notificationId > -1) NotificationReceiver.dismissNotification(
+            applicationContext, notificationId, intent.getStringExtra("groupId")
+        )
         when (intent.action) {
             SHORTCUT_LIBRARY -> setSelectedDrawerItem(R.id.nav_drawer_library)
             SHORTCUT_RECENTLY_UPDATED -> setSelectedDrawerItem(R.id.nav_drawer_recent_updates)

@@ -311,7 +311,7 @@ class LibraryUpdateService(
                                 }
                             }
                             // Convert to the manga that contains new chapters.
-                            .map { Pair(manga, (it.first.minBy { ch -> ch.chapter_number }!!)) }
+                            .map { Pair(manga, (it.first.maxBy { ch -> ch.source_order }!!)) }
                 }
                 // Add manga with new chapters to the list.
                 .doOnNext { manga ->
@@ -470,6 +470,12 @@ class LibraryUpdateService(
                         this@LibraryUpdateService, manga, chapter
                     )
                 )
+                addAction(R.drawable.ic_in_library_24dp, getString(R.string.action_mark_as_read),
+                    NotificationReceiver.markAsReadPendingBroadcast(this@LibraryUpdateService,
+                        manga, chapter, Notifications.GROUP_NEW_CHAPTERS))
+                addAction(R.drawable.ic_glasses_black_24dp, getString(R.string.action_view_chapters),
+                    NotificationReceiver.openChapterPendingActivity(this@LibraryUpdateService,
+                        manga, Notifications.GROUP_NEW_CHAPTERS))
                 setAutoCancel(true)
             }, manga.id.hashCode()))
         }

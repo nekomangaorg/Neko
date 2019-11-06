@@ -1,6 +1,9 @@
 package eu.kanade.tachiyomi.ui.manga
 
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+import android.app.NotificationManager
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import com.google.android.material.tabs.TabLayout
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
@@ -19,6 +22,7 @@ import com.jakewharton.rxrelay.PublishRelay
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
@@ -62,8 +66,13 @@ class MangaController : RxController, TabbedController {
     constructor(mangaId: Long) : this(
             Injekt.get<DatabaseHelper>().getManga(mangaId).executeAsBlocking())
 
-    @Suppress("unused")
-    constructor(bundle: Bundle) : this(bundle.getLong(MANGA_EXTRA))
+    constructor(bundle: Bundle) : this(bundle.getLong(MANGA_EXTRA)) {
+        val notificationId = bundle.getInt("notificationId", -1)
+        val context = applicationContext ?: return
+        if (notificationId > -1) NotificationReceiver.dismissNotification(
+            context, notificationId, bundle.getString("groupId", "")
+        )
+    }
 
     var manga: Manga? = null
         private set

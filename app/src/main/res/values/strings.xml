@@ -62,7 +62,7 @@
     <string name="action_sort_down">Sort down</string>
     <string name="action_show_downloaded">Downloaded</string>
     <string name="action_next_unread">Next unread</string>
-    <string name="action_start_reading">Start Reading</string>
+    <string name="action_view_chapters">View chapters</string>
     <string name="action_start">Start</string>
     <string name="action_stop">Stop</string>
     <string name="action_pause">Pause</string>
