@@ -7,8 +7,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import com.jakewharton.rxbinding.view.clicks
+import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.utils.IconicsMenuInflaterUtil
+import com.mikepenz.iconics.utils.colorInt
+import com.mikepenz.iconics.utils.sizeDp
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.SelectableAdapter
 import eu.davidea.flexibleadapter.helpers.UndoHelper
@@ -81,6 +84,10 @@ class CategoryController : NucleusController<CategoryPresenter>(),
         recycler.adapter = adapter
         adapter?.isHandleDragEnabled = true
         adapter?.isPermanentDelete = false
+
+        fab.setImageDrawable(IconicsDrawable(applicationContext!!, CommunityMaterial.Icon2.cmd_plus)
+                .colorInt(R.color.md_white_1000)
+                .sizeDp(18))
 
         fab.clicks().subscribeUntilDestroy {
             CategoryCreateDialog(this@CategoryController).showDialog(router, null)
