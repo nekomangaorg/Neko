@@ -4,10 +4,10 @@ import com.github.salomonbrys.kotson.*
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import eu.kanade.tachiyomi.network.consumeBody
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
-import eu.kanade.tachiyomi.util.consumeBody
 import okhttp3.Response
 import org.jsoup.Jsoup
 import java.util.*

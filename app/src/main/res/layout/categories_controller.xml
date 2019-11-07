@@ -13,11 +13,9 @@
         tools:listitem="@layout/categories_item"
         />
 
+    <!--Fab icon set programmatically-->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
-        app:ico_icon="cmd_plus"
-        app:ico_color="@color/md_white_1000"
-        app:ico_size="18dp"
         app:layout_anchor="@id/recycler"
         style="@style/Theme.Widget.FAB"/>
 
