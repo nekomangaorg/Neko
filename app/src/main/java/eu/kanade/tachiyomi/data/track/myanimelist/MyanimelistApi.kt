@@ -4,12 +4,7 @@ import android.net.Uri
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
-import eu.kanade.tachiyomi.network.GET
-import eu.kanade.tachiyomi.network.POST
-import eu.kanade.tachiyomi.network.asObservable
-import eu.kanade.tachiyomi.network.asObservableSuccess
-import eu.kanade.tachiyomi.util.consumeBody
-import eu.kanade.tachiyomi.util.consumeXmlBody
+import eu.kanade.tachiyomi.network.*
 import eu.kanade.tachiyomi.util.selectInt
 import eu.kanade.tachiyomi.util.selectText
 import okhttp3.FormBody
