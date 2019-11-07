@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.ui.migration
 
 import android.app.Dialog
 import android.os.Bundle
-import androidx.recyclerview.widget.LinearLayoutManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,7 +19,8 @@ import kotlinx.android.synthetic.main.migration_controller.*
 
 class MigrationController : NucleusController<MigrationPresenter>(),
         FlexibleAdapter.OnItemClickListener,
-        SourceAdapter.OnSelectClickListener {
+        SourceAdapter.OnSelectClickListener,
+        MigrationInterface {
 
     private var adapter: FlexibleAdapter<IFlexible<*>>? = null
 
@@ -36,6 +36,13 @@ class MigrationController : NucleusController<MigrationPresenter>(),
 
     override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
         return inflater.inflate(R.layout.migration_controller, container, false)
+    }
+
+    fun searchController(manga:Manga): SearchController {
+        val controller = SearchController(manga)
+        controller.targetController = this
+
+        return controller
     }
 
     override fun onViewCreated(view: View) {
@@ -112,12 +119,9 @@ class MigrationController : NucleusController<MigrationPresenter>(),
         onItemClick(view, position)
     }
 
-    fun migrateManga(prevManga: Manga, manga: Manga) {
-        presenter.migrateManga(prevManga, manga, replace = true)
-    }
-
-    fun copyManga(prevManga: Manga, manga: Manga) {
-        presenter.migrateManga(prevManga, manga, replace = false)
+    override fun migrateManga(prevManga: Manga, manga: Manga, replace: Boolean): Manga? {
+        presenter.migrateManga(prevManga, manga, replace)
+        return null
     }
 
     class LoadingController : DialogController() {
@@ -135,4 +139,8 @@ class MigrationController : NucleusController<MigrationPresenter>(),
         const val LOADING_DIALOG_TAG = "LoadingDialog"
     }
 
+}
+
+interface MigrationInterface {
+    fun migrateManga(prevManga: Manga, manga: Manga, replace: Boolean): Manga?
 }

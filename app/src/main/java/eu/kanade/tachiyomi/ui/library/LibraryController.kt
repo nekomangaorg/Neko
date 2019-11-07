@@ -5,20 +5,24 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import com.google.android.material.tabs.TabLayout
-import androidx.core.graphics.drawable.DrawableCompat
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
+import android.view.WindowInsets
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.SearchView
-import android.view.*
-import androidx.appcompat.widget.ActionBarContextView
+import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.GravityCompat
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
 import com.f2prateek.rx.preferences.Preference
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.tabs.TabLayout
 import com.jakewharton.rxbinding.support.v4.view.pageSelections
 import com.jakewharton.rxbinding.support.v7.widget.queryTextChanges
 import com.jakewharton.rxrelay.BehaviorRelay
@@ -37,7 +41,15 @@ import eu.kanade.tachiyomi.ui.category.CategoryController
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.ui.migration.MigrationController
-import eu.kanade.tachiyomi.util.*
+import eu.kanade.tachiyomi.ui.migration.MigrationInterface
+import eu.kanade.tachiyomi.ui.migration.SearchController
+import eu.kanade.tachiyomi.util.doOnApplyWindowInsets
+import eu.kanade.tachiyomi.util.inflate
+import eu.kanade.tachiyomi.util.marginBottom
+import eu.kanade.tachiyomi.util.marginTop
+import eu.kanade.tachiyomi.util.snack
+import eu.kanade.tachiyomi.util.toast
+import eu.kanade.tachiyomi.util.updatePaddingRelative
 import kotlinx.android.synthetic.main.library_controller.*
 import kotlinx.android.synthetic.main.main_activity.*
 import rx.Subscription
@@ -45,7 +57,6 @@ import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.IOException
-
 
 class LibraryController(
         bundle: Bundle? = null,
@@ -55,7 +66,8 @@ class LibraryController(
         SecondaryDrawerController,
         ActionMode.Callback,
         ChangeMangaCategoriesDialog.Listener,
-        DeleteLibraryMangasDialog.Listener {
+        DeleteLibraryMangasDialog.Listener,
+        MigrationInterface {
 
     /**
      * Position of the active category.
@@ -78,6 +90,11 @@ class LibraryController(
      */
     val selectedMangas = mutableSetOf<Manga>()
 
+    /**
+     * Current mangas to move.
+     */
+    private var migratingMangas = mutableSetOf<Manga>()
+
     private var selectedCoverManga: Manga? = null
 
     /**
@@ -94,6 +111,11 @@ class LibraryController(
      * Relay to notify the library's viewpager for updates.
      */
     val libraryMangaRelay: BehaviorRelay<LibraryMangaEvent> = BehaviorRelay.create()
+
+    /**
+     * Relay to notify the library's viewpager to select all manga
+     */
+    val selectAllRelay: PublishRelay<Int> = PublishRelay.create()
 
     /**
      * Number of manga per row in grid mode.
@@ -425,9 +447,34 @@ class LibraryController(
             }
             R.id.action_move_to_category -> showChangeMangaCategoriesDialog()
             R.id.action_delete -> deleteMangasFromLibrary()
+            R.id.action_select_all -> {
+                adapter?.categories?.getOrNull(library_pager.currentItem)?.id?.let {
+                    selectAllRelay.call(it)
+                }
+            }
+            R.id.action_migrate -> startMangaMigration()
             else -> return false
         }
         return true
+    }
+
+    override fun migrateManga(prevManga: Manga, manga: Manga, replace: Boolean): Manga? {
+        presenter.migrateManga(prevManga, manga, replace = replace)
+        val nextManga = migratingMangas.firstOrNull() ?: return null
+        migratingMangas.remove(nextManga)
+        return nextManga
+    }
+
+    private fun startMangaMigration() {
+        migratingMangas.clear()
+        migratingMangas.addAll(selectedMangas)
+        destroyActionModeIfNeeded()
+        val manga = migratingMangas.firstOrNull() ?: return
+        val searchController = SearchController(manga)
+        searchController.totalProgress = migratingMangas.size
+        searchController.targetController = this
+        router.pushController(searchController.withFadeTransaction())
+        migratingMangas.remove(manga)
     }
 
     override fun onDestroyActionMode(mode: ActionMode?) {
