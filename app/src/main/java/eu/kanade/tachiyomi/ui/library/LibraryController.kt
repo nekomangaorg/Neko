@@ -45,7 +45,6 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.IOException
 
-
 class LibraryController(
         bundle: Bundle? = null,
         private val preferences: PreferencesHelper = Injekt.get()
@@ -93,6 +92,11 @@ class LibraryController(
      * Relay to notify the library's viewpager for updates.
      */
     val libraryMangaRelay: BehaviorRelay<LibraryMangaEvent> = BehaviorRelay.create()
+
+    /**
+     * Relay to notify the library's viewpager to select all manga
+     */
+    val selectAllRelay: PublishRelay<Int> = PublishRelay.create()
 
     /**
      * Number of manga per row in grid mode.
@@ -179,7 +183,7 @@ class LibraryController(
     override fun createSecondaryDrawer(drawer: DrawerLayout): ViewGroup {
         val view = drawer.inflate(R.layout.library_drawer) as LibraryNavigationView
         navView = view
-        drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, Gravity.RIGHT)
+        drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, GravityCompat.END)
 
         navView?.onGroupClicked = { group ->
             when (group) {
@@ -401,6 +405,11 @@ class LibraryController(
             }
             R.id.action_move_to_category -> showChangeMangaCategoriesDialog()
             R.id.action_delete -> showDeleteMangaDialog()
+            R.id.action_select_all -> {
+                adapter?.categories?.getOrNull(library_pager.currentItem)?.id?.let {
+                    selectAllRelay.call(it)
+                }
+            }
             else -> return false
         }
         return true
