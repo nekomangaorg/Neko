@@ -153,7 +153,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
                 return
             }
 
-            if (chapterUrl.isEmpty()) presenter.init(manga, chapter)
+            if (chapter > -1) presenter.init(manga, chapter)
             else presenter.init(manga, chapterUrl)
         }
 

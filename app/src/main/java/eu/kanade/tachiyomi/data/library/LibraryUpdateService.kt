@@ -456,7 +456,8 @@ class LibraryUpdateService(
                 setSmallIcon(R.drawable.ic_book_white_24dp)
                 try {
                     val icon = GlideApp.with(this@LibraryUpdateService)
-                        .asBitmap().load(manga).centerCrop().circleCrop().submit().get()
+                        .asBitmap().load(manga).dontTransform().centerCrop().circleCrop()
+                        .override(256, 256).submit().get()
                     setLargeIcon(icon)
                 }
                 catch (e: Exception) { }
