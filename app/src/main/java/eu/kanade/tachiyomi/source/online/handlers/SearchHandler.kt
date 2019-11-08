@@ -53,8 +53,7 @@ class SearchHandler(val client: OkHttpClient, private val headers: Headers, val 
 
     private fun searchMangaRequest(page: Int, query: String, filters: FilterList): Request {
 
-        val genresToInclude = mutableListOf<String>()
-        val genresToExclude = mutableListOf<String>()
+        val tags = mutableListOf<String>()
 
         // Do traditional search
         val url = "${MdUtil.baseUrl}/?page=search".toHttpUrlOrNull()!!.newBuilder()
@@ -89,36 +88,36 @@ class SearchHandler(val client: OkHttpClient, private val headers: Headers, val 
                 is FilterHandler.ContentList -> {
                     filter.state.forEach { content ->
                         if (content.isExcluded()) {
-                            genresToExclude.add(content.id)
+                            tags.add("-${content.id}")
                         } else if (content.isIncluded()) {
-                            genresToInclude.add(content.id)
+                            tags.add(content.id)
                         }
                     }
                 }
                 is FilterHandler.FormatList -> {
                     filter.state.forEach { format ->
                         if (format.isExcluded()) {
-                            genresToExclude.add(format.id)
+                            tags.add("-${format.id}")
                         } else if (format.isIncluded()) {
-                            genresToInclude.add(format.id)
+                            tags.add(format.id)
                         }
                     }
                 }
                 is FilterHandler.GenreList -> {
                     filter.state.forEach { genre ->
                         if (genre.isExcluded()) {
-                            genresToExclude.add(genre.id)
+                            tags.add("-${genre.id}")
                         } else if (genre.isIncluded()) {
-                            genresToInclude.add(genre.id)
+                            tags.add(genre.id)
                         }
                     }
                 }
                 is FilterHandler.ThemeList -> {
                     filter.state.forEach { theme ->
                         if (theme.isExcluded()) {
-                            genresToExclude.add(theme.id)
+                            tags.add("-${theme.id}")
                         } else if (theme.isIncluded()) {
-                            genresToInclude.add(theme.id)
+                            tags.add(theme.id)
                         }
                     }
                 }
@@ -135,11 +134,8 @@ class SearchHandler(val client: OkHttpClient, private val headers: Headers, val 
         }
         // Manually append genres list to avoid commas being encoded
         var urlToUse = url.toString()
-        if (genresToInclude.isNotEmpty()) {
-            urlToUse += "&tags_inc=" + genresToInclude.joinToString(",")
-        }
-        if (genresToExclude.isNotEmpty()) {
-            urlToUse += "&tags_exc=" + genresToExclude.joinToString(",")
+        if (tags.isNotEmpty()) {
+            urlToUse += "&tags=" + tags.joinToString(",")
         }
 
         return GET(urlToUse, headers)
