@@ -6,7 +6,6 @@ import android.graphics.BitmapFactory
 import android.graphics.PointF
 import android.graphics.drawable.Drawable
 import android.net.Uri
-import android.os.Build
 import android.view.GestureDetector
 import android.view.Gravity
 import android.view.MotionEvent
@@ -34,14 +33,18 @@ import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderProgressBar
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerConfig.ZoomType
-import eu.kanade.tachiyomi.util.*
+import eu.kanade.tachiyomi.util.ImageUtil
+import eu.kanade.tachiyomi.util.dpToPx
+import eu.kanade.tachiyomi.util.gone
+import eu.kanade.tachiyomi.util.launchUI
+import eu.kanade.tachiyomi.util.visible
 import eu.kanade.tachiyomi.widget.ViewPagerAdapter
-import kotlinx.coroutines.async
+import kotlinx.coroutines.Dispatchers.Default
+import kotlinx.coroutines.withContext
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
-import uy.kohesive.injekt.injectLazy
 import java.io.InputStream
 import java.util.concurrent.TimeUnit
 
@@ -259,10 +262,7 @@ class PagerPageHolder(
                             bytesStream.close()
 
                             launchUI {
-                                val image = async { BitmapFactory.decodeByteArray(bytesArray, 0,
-                                    bytesArray.size) }
-                                imageView.background = ImageUtil.autoSetBackground(image
-                                    .await())
+                                imageView.background = setBG(bytesArray)
                                 page.bg = imageView.background
                             }
                         }
@@ -281,6 +281,14 @@ class PagerPageHolder(
             .flatMap { Observable.never<Unit>() }
             .doOnUnsubscribe { openStream?.close() }
             .subscribe({}, {})
+    }
+
+    private suspend fun setBG(bytesArray: ByteArray): Drawable {
+        return withContext(Default) {
+            ImageUtil.autoSetBackground(BitmapFactory.decodeByteArray(
+                bytesArray, 0, bytesArray.size
+            ))
+        }
     }
 
     /**
