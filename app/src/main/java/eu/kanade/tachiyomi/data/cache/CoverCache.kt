@@ -67,25 +67,4 @@ class CoverCache(private val context: Context) {
         val file = getCoverFile(thumbnailUrl)
         return file.exists() && file.delete()
     }
-
-    /**
-     * Delete the cover file from the cache.
-     *
-     * @param thumbnailUrl the thumbnail url.
-     * @return status of deletion.
-     */
-    fun deleteFromCache(manga: Manga, delayBy:Long) {
-        val thumbnailUrl = manga.thumbnail_url
-        // Check if url is empty.
-        if (thumbnailUrl.isNullOrEmpty()) return
-        launchUI {
-            delay(delayBy)
-            if (!manga.favorite) {
-                // Remove file.
-                val file = getCoverFile(thumbnailUrl)
-                if (file.exists()) file.delete()
-            }
-        }
-    }
-
 }

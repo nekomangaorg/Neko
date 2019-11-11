@@ -11,18 +11,22 @@ import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
-import com.google.android.material.snackbar.Snackbar
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
-import android.view.*
-import android.widget.Toast
 import com.afollestad.materialdialogs.MaterialDialog
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.target.CustomTarget
-import com.bumptech.glide.request.target.SimpleTarget
 import com.bumptech.glide.request.transition.Transition
+import com.google.android.material.snackbar.BaseTransientBottomBar
+import com.google.android.material.snackbar.Snackbar
 import com.jakewharton.rxbinding.support.v4.widget.refreshes
 import com.jakewharton.rxbinding.view.clicks
 import com.jakewharton.rxbinding.view.longClicks
@@ -42,7 +46,14 @@ import eu.kanade.tachiyomi.ui.catalogue.global_search.CatalogueSearchController
 import eu.kanade.tachiyomi.ui.library.ChangeMangaCategoriesDialog
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaController
-import eu.kanade.tachiyomi.util.*
+import eu.kanade.tachiyomi.util.doOnApplyWindowInsets
+import eu.kanade.tachiyomi.util.getUriCompat
+import eu.kanade.tachiyomi.util.marginBottom
+import eu.kanade.tachiyomi.util.openInBrowser
+import eu.kanade.tachiyomi.util.snack
+import eu.kanade.tachiyomi.util.toast
+import eu.kanade.tachiyomi.util.updateLayoutParams
+import eu.kanade.tachiyomi.util.updatePaddingRelative
 import jp.wasabeef.glide.transformations.CropSquareTransformation
 import jp.wasabeef.glide.transformations.MaskTransformation
 import kotlinx.android.synthetic.main.manga_info_controller.*
@@ -460,11 +471,19 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         val view = container
         snack?.dismiss()
         if (view != null) {
-            snack = view.snack(view.context.getString(R.string.manga_removed_library), 5000) {
+            snack = view.snack(view.context.getString(R.string.manga_removed_library), Snackbar.LENGTH_INDEFINITE) {
                 setAction(R.string.action_undo) {
                     presenter.setFavorite(true)
                 }
+                addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
+                    override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+                        super.onDismissed(transientBottomBar, event)
+                        if (!presenter.manga.favorite)
+                            presenter.confirmDeletion()
+                    }
+                })
             }
+            (activity as? MainActivity)?.setUndoSnackBar(snack, fab_favorite)
         }
     }
 
@@ -480,7 +499,7 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         val categories = presenter.getCategories()
         if (categories.isEmpty()) {
             // no categories exist, display a message about adding categories
-            activity?.toast(activity?.getString(R.string.action_add_category))
+            snack = container?.snack(R.string.action_add_category)
         } else {
             val ids = presenter.getMangaCategoryIds(manga)
             val preselected = ids.mapNotNull { id ->

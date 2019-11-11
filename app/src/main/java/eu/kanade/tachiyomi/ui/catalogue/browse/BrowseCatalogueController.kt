@@ -9,6 +9,7 @@ import android.view.*
 import androidx.core.view.GravityCompat
 import com.afollestad.materialdialogs.MaterialDialog
 import com.f2prateek.rx.preferences.Preference
+import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.jakewharton.rxbinding.support.v7.widget.queryTextChangeEvents
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
@@ -24,6 +25,7 @@ import eu.kanade.tachiyomi.ui.base.controller.SecondaryDrawerController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.library.ChangeMangaCategoriesDialog
 import eu.kanade.tachiyomi.ui.library.HeightTopWindowInsetsListener
+import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.ui.manga.info.MangaWebViewController
 import eu.kanade.tachiyomi.util.*
@@ -501,18 +503,23 @@ open class BrowseCatalogueController(bundle: Bundle) :
      * @param position the position of the element clicked.
      */
     override fun onItemLongClick(position: Int) {
-        val activity = activity ?: return
         val manga = (adapter?.getItem(position) as? CatalogueItem?)?.manga ?: return
         snack?.dismiss()
         if (manga.favorite) {
             presenter.changeMangaFavorite(manga)
             adapter?.notifyItemChanged(position)
-            snack =
-                catalouge_layout?.snack(R.string.manga_removed_library, 5000) {
-                    setAction(R.string.action_undo) {
-                        if (!manga.favorite) addManga(manga, position)
-                    }
+            snack = catalouge_layout?.snack(R.string.manga_removed_library, Snackbar.LENGTH_INDEFINITE) {
+                setAction(R.string.action_undo) {
+                    if (!manga.favorite) addManga(manga, position)
                 }
+                addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
+                    override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+                        super.onDismissed(transientBottomBar, event)
+                        if (!manga.favorite) presenter.confirmDeletion(manga)
+                    }
+                })
+            }
+            (activity as? MainActivity)?.setUndoSnackBar(snack)
         } else {
             addManga(manga, position)
             snack = catalouge_layout?.snack(R.string.manga_added_library)

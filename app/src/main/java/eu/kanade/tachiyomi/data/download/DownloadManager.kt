@@ -190,22 +190,6 @@ class DownloadManager(context: Context) {
         cache.removeManga(manga)
     }
 
-
-    /**
-     * Deletes the directory of a downloaded manga.
-     *
-     * @param manga the manga to delete.
-     * @param source the source of the manga.
-     */
-    fun deleteManga(manga: Manga, source: Source, delayBy: Long) {
-        launchUI {
-            delay(delayBy)
-            if (!manga.favorite) {
-                deleteManga(manga, source)
-            }
-        }
-    }
-
     /**
      * Adds a list of chapters to be deleted later.
      *

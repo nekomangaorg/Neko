@@ -109,13 +109,14 @@ class MangaInfoPresenter(
      */
     fun toggleFavorite(): Boolean {
         manga.favorite = !manga.favorite
-        if (!manga.favorite) {
-            coverCache.deleteFromCache(manga, 5000)
-            downloadManager.deleteManga(manga, source, 5000)
-        }
         db.insertManga(manga).executeAsBlocking()
         sendMangaToView()
         return manga.favorite
+    }
+
+    fun confirmDeletion() {
+        coverCache.deleteFromCache(manga.thumbnail_url)
+        downloadManager.deleteManga(manga, source)
     }
 
     fun setFavorite(favorite: Boolean) {

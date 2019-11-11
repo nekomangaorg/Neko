@@ -1,22 +1,20 @@
 package eu.kanade.tachiyomi.ui.manga
 
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-import android.app.NotificationManager
-import android.content.Context
-import android.content.Intent
+import android.app.Activity
 import android.os.Bundle
-import com.google.android.material.tabs.TabLayout
-import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
 import com.bluelinelabs.conductor.Router
 import com.bluelinelabs.conductor.RouterTransaction
 import com.bluelinelabs.conductor.support.RouterPagerAdapter
+import com.google.android.material.tabs.TabLayout
 import com.jakewharton.rxrelay.BehaviorRelay
 import com.jakewharton.rxrelay.PublishRelay
 import eu.kanade.tachiyomi.R
@@ -42,7 +40,10 @@ import java.util.Date
 
 class MangaController : RxController, TabbedController {
 
-    constructor(manga: Manga?, fromCatalogue: Boolean = false) : super(Bundle().apply {
+    constructor(manga: Manga?, fromCatalogue: Boolean = false, fromExtension: Boolean = false) :
+        super
+        (Bundle()
+        .apply {
         putLong(MANGA_EXTRA, manga?.id ?: 0)
         putBoolean(FROM_CATALOGUE_EXTRA, fromCatalogue)
     }) {
@@ -50,6 +51,7 @@ class MangaController : RxController, TabbedController {
         if (manga != null) {
             source = Injekt.get<SourceManager>().getOrStub(manga.source)
         }
+        backClosesApp = fromExtension
     }
 
     constructor(manga: Manga?, startY:Float?) : super(Bundle().apply {
@@ -74,10 +76,30 @@ class MangaController : RxController, TabbedController {
         )
     }
 
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        backClosesApp = false
+        super.onRestoreInstanceState(savedInstanceState)
+    }
+
+    override fun onActivityResumed(activity: Activity) {
+        backClosesApp = false
+        super.onActivityResumed(activity)
+    }
+
+    override fun handleBack(): Boolean {
+        return if (backClosesApp) {
+            activity?.finishAffinity()
+            true
+        } else super.handleBack()
+    }
+
     var manga: Manga? = null
         private set
 
     var source: Source? = null
+        private set
+
+    var backClosesApp = false
         private set
 
     var startingChapterYPos:Float? = null

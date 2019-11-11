@@ -64,7 +64,7 @@ class NotificationReceiver : BroadcastReceiver() {
             ACTION_DELETE_IMAGE -> deleteImage(context, intent.getStringExtra(EXTRA_FILE_LOCATION),
                     intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1))
             // Cancel library update and dismiss notification
-            ACTION_CANCEL_LIBRARY_UPDATE -> cancelLibraryUpdate(context, Notifications.ID_LIBRARY_PROGRESS)
+            ACTION_CANCEL_LIBRARY_UPDATE -> cancelLibraryUpdate(context)
             // Open reader activity
             ACTION_OPEN_CHAPTER -> {
                 openChapter(context, intent.getLongExtra(EXTRA_MANGA_ID, -1),
@@ -76,7 +76,8 @@ class NotificationReceiver : BroadcastReceiver() {
                     context, notificationId, intent.getStringExtra(EXTRA_GROUP_ID)
                 )
                 val url = intent.getStringExtra(EXTRA_CHAPTER_URL) ?: return
-                markAsRead(url)
+                val mangaId = intent.getLongExtra(EXTRA_MANGA_ID, -1)
+                markAsRead(url, mangaId)
             }
         }
     }
@@ -157,9 +158,9 @@ class NotificationReceiver : BroadcastReceiver() {
      * @param context context of application
      * @param notificationId id of notification
      */
-    private fun cancelLibraryUpdate(context: Context, notificationId: Int) {
+    private fun cancelLibraryUpdate(context: Context) {
         LibraryUpdateService.stop(context)
-        Handler().post { dismissNotification(context, notificationId) }
+        Handler().post { dismissNotification(context, Notifications.ID_LIBRARY_PROGRESS) }
     }
 
     /**
@@ -168,9 +169,9 @@ class NotificationReceiver : BroadcastReceiver() {
      * @param context context of application
      * @param notificationId id of notification
      */
-    private fun markAsRead(chapterUrl: String) {
+    private fun markAsRead(chapterUrl: String, mangaaId: Long) {
         val db: DatabaseHelper = Injekt.get()
-        val chapter = db.getChapter(chapterUrl).executeAsBlocking() ?: return
+        val chapter = db.getChapter(chapterUrl, mangaaId).executeAsBlocking() ?: return
         chapter.read = true
         db.updateChapterProgress(chapter).executeAsBlocking()
         val preferences: PreferencesHelper = Injekt.get()
@@ -398,6 +399,7 @@ class NotificationReceiver : BroadcastReceiver() {
             val newIntent = Intent(context, NotificationReceiver::class.java).apply {
                 action = ACTION_MARK_AS_READ
                 putExtra(EXTRA_CHAPTER_URL, chapter.url)
+                putExtra(EXTRA_MANGA_ID, manga.id)
                 putExtra(EXTRA_NOTIFICATION_ID, manga.id.hashCode())
                 putExtra(EXTRA_GROUP_ID, groupId)
             }

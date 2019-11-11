@@ -34,6 +34,7 @@ import android.content.Context
 import android.util.AttributeSet
 import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.RecyclerView
+import eu.kanade.tachiyomi.ui.main.MainActivity
 import kotlin.math.*
 
 class ChaptersController() : NucleusController<ChaptersPresenter>(),
@@ -411,19 +412,20 @@ class ChaptersController() : NucleusController<ChaptersPresenter>(),
         val view = view
         destroyActionModeIfNeeded()
         presenter.downloadChapters(chapters)
-        if (view != null && !presenter.manga.favorite && (snack == null || snack?.getText() != view.context.getString(R.string.snack_add_to_library))) {
-            snack =
-                view.snack(view.context.getString(R.string.snack_add_to_library), Snackbar.LENGTH_INDEFINITE) {
-                    setAction(R.string.action_add) {
-                        presenter.addToLibrary()
-                    }
-                    addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
-                        override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
-                            super.onDismissed(transientBottomBar, event)
-                            if (snack == transientBottomBar) snack = null
-                        }
-                    })
+        if (view != null && !presenter.manga.favorite && (snack == null ||
+                snack?.getText() != view.context.getString(R.string.snack_add_to_library))) {
+            snack = view.snack(view.context.getString(R.string.snack_add_to_library), Snackbar.LENGTH_INDEFINITE) {
+                setAction(R.string.action_add) {
+                    presenter.addToLibrary()
                 }
+                addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
+                    override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+                        super.onDismissed(transientBottomBar, event)
+                        if (snack == transientBottomBar) snack = null
+                    }
+                })
+            }
+            (activity as? MainActivity)?.setUndoSnackBar(snack)
         }
     }
 

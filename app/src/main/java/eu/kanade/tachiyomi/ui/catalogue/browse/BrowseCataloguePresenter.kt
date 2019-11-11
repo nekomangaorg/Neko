@@ -254,12 +254,13 @@ open class BrowseCataloguePresenter(
      */
     fun changeMangaFavorite(manga: Manga) {
         manga.favorite = !manga.favorite
-        if (!manga.favorite) {
-            coverCache.deleteFromCache(manga, 5000)
-            val downloadManager: DownloadManager = Injekt.get()
-            downloadManager.deleteManga(manga,source,5000)
-        }
         db.insertManga(manga).executeAsBlocking()
+    }
+
+    fun confirmDeletion(manga: Manga) {
+        coverCache.deleteFromCache(manga.thumbnail_url)
+        val downloadManager: DownloadManager = Injekt.get()
+        downloadManager.deleteManga(manga,source)
     }
 
     /**

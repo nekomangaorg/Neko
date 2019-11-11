@@ -5,25 +5,19 @@ import android.app.SearchManager
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
+import android.graphics.Rect
 import android.os.Build
 import android.os.Bundle
-import androidx.annotation.NonNull
-import androidx.annotation.Px
-import androidx.annotation.RequiresApi
+import android.view.MotionEvent
 import androidx.core.view.GravityCompat
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.drawerlayout.widget.DrawerLayout
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.app.AppCompatDelegate.*
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowInsets
-import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import com.bluelinelabs.conductor.*
+import com.google.android.material.snackbar.Snackbar
 import eu.kanade.tachiyomi.Migrations
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
@@ -34,7 +28,6 @@ import eu.kanade.tachiyomi.ui.catalogue.CatalogueController
 import eu.kanade.tachiyomi.ui.catalogue.global_search.CatalogueSearchController
 import eu.kanade.tachiyomi.ui.download.DownloadController
 import eu.kanade.tachiyomi.ui.extension.ExtensionController
-import eu.kanade.tachiyomi.ui.library.HeightTopWindowInsetsListener
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.ui.recent_updates.RecentChaptersController
@@ -42,16 +35,16 @@ import eu.kanade.tachiyomi.ui.recently_read.RecentlyReadController
 import eu.kanade.tachiyomi.ui.setting.SettingsMainController
 import eu.kanade.tachiyomi.util.NoopWindowInsetsListener
 import eu.kanade.tachiyomi.util.doOnApplyWindowInsets
+import eu.kanade.tachiyomi.util.launchUI
 import eu.kanade.tachiyomi.util.marginBottom
 import eu.kanade.tachiyomi.util.marginTop
 import eu.kanade.tachiyomi.util.openInBrowser
 import eu.kanade.tachiyomi.util.updateLayoutParams
 import eu.kanade.tachiyomi.util.updatePadding
 import eu.kanade.tachiyomi.util.updatePaddingRelative
-import kotlinx.android.synthetic.main.chapters_controller.view.*
 import kotlinx.android.synthetic.main.main_activity.*
+import kotlinx.coroutines.delay
 import uy.kohesive.injekt.injectLazy
-
 
 class MainActivity : BaseActivity() {
 
@@ -62,6 +55,25 @@ class MainActivity : BaseActivity() {
     private var drawerArrow: DrawerArrowDrawable? = null
 
     private var secondaryDrawer: ViewGroup? = null
+
+    private var snackBar:Snackbar? = null
+    var extraRectForUndo:Rect? = null
+    private var canDismissSnackBar = false
+
+    fun setUndoSnackBar(snackBar: Snackbar?, extraViewToCheck: View? = null) {
+        this.snackBar = snackBar
+        canDismissSnackBar = false
+        launchUI {
+            delay(1000)
+            canDismissSnackBar = true
+        }
+        if (extraViewToCheck != null) {
+            extraRectForUndo = Rect()
+            extraViewToCheck.getGlobalVisibleRect(extraRectForUndo)
+        }
+        else
+            extraRectForUndo = null
+    }
 
     private val startScreenId by lazy {
         when (preferences.startScreen()) {
@@ -294,6 +306,28 @@ class MainActivity : BaseActivity() {
 
     private fun setRoot(controller: Controller, id: Int) {
         router.setRoot(controller.withFadeTransaction().tag(id.toString()))
+    }
+
+    override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
+        if (ev?.action == MotionEvent.ACTION_DOWN) {
+            if (snackBar != null && snackBar!!.isShown) {
+                val sRect = Rect()
+                snackBar!!.view.getGlobalVisibleRect(sRect)
+
+                //This way the snackbar will only be dismissed if
+                //the user clicks outside it.
+                if (canDismissSnackBar && !sRect.contains(ev.x.toInt(), ev.y.toInt())
+                    && (extraRectForUndo == null ||
+                        !extraRectForUndo!!.contains(ev.x.toInt(), ev.y.toInt()))) {
+                    snackBar?.dismiss()
+                    snackBar = null
+                    extraRectForUndo = null
+                }
+            }
+            else if (snackBar != null)
+                snackBar = null
+        }
+        return super.dispatchTouchEvent(ev)
     }
 
     private fun syncActivityViewWithController(to: Controller?, from: Controller? = null) {

@@ -21,6 +21,7 @@ import androidx.core.view.GravityCompat
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
 import com.f2prateek.rx.preferences.Preference
+import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 import com.jakewharton.rxbinding.support.v4.view.pageSelections
@@ -66,7 +67,6 @@ class LibraryController(
         SecondaryDrawerController,
         ActionMode.Callback,
         ChangeMangaCategoriesDialog.Listener,
-        DeleteLibraryMangasDialog.Listener,
         MigrationInterface {
 
     /**
@@ -530,23 +530,28 @@ class LibraryController(
 
     private fun deleteMangasFromLibrary() {
         val mangas = selectedMangas.toList()
-        presenter.removeMangaFromLibrary(mangas, true)
+        presenter.removeMangaFromLibrary(mangas)
         destroyActionModeIfNeeded()
         snack?.dismiss()
-        snack = view?.snack(activity?.getString(R.string.manga_removed_library) ?: "", 5000)  {
+        snack = view?.snack(activity?.getString(R.string.manga_removed_library) ?: "", Snackbar.LENGTH_INDEFINITE)  {
+            var undoing = false
             setAction(R.string.action_undo) {
                 presenter.addMangas(mangas)
+                undoing = true
             }
+            addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
+                override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+                    super.onDismissed(transientBottomBar, event)
+                    if (!undoing)
+                        presenter.confirmDeletion(mangas)
+                }
+            })
         }
+        (activity as? MainActivity)?.setUndoSnackBar(snack)
     }
 
     override fun updateCategoriesForMangas(mangas: List<Manga>, categories: List<Category>) {
         presenter.moveMangasToCategories(categories, mangas)
-        destroyActionModeIfNeeded()
-    }
-
-    override fun deleteMangasFromLibrary(mangas: List<Manga>, deleteChapters: Boolean) {
-        presenter.removeMangaFromLibrary(mangas, deleteChapters)
         destroyActionModeIfNeeded()
     }
 

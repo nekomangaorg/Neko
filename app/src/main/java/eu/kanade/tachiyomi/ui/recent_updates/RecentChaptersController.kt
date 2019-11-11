@@ -89,7 +89,7 @@ class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
         swipe_refresh.refreshes().subscribeUntilDestroy {
             if (!LibraryUpdateService.isRunning(view.context)) {
                 LibraryUpdateService.start(view.context)
-                view.snack(R.string.action_update_library)
+                view.snack(R.string.updating_library)
             }
             // It can be a very long operation, so we disable swipe refresh and show a snackbar.
             swipe_refresh.isRefreshing = false

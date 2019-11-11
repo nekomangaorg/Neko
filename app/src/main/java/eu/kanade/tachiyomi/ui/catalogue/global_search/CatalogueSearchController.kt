@@ -171,12 +171,29 @@ open class CatalogueSearchController(
         return null
     }
 
+    override fun handleBack(): Boolean {
+        return if (extensionFilter != null) {
+            activity?.finishAffinity()
+            true
+        } else super.handleBack()
+    }
+
     /**
      * Add search result to adapter.
      *
      * @param searchResult result of search.
      */
     fun setItems(searchResult: List<CatalogueSearchItem>) {
+        if (extensionFilter != null) {
+            val results = searchResult.first().results
+            if (results != null && results.size == 1) {
+                val manga = results.first().manga
+                router.pushController(MangaController(manga,true,fromExtension = true)
+                    .withFadeTransaction()
+                )
+                return
+            }
+        }
         adapter?.updateDataSet(searchResult)
     }
 

@@ -305,7 +305,7 @@ class LibraryPresenter(
      * @param mangas the list of manga to delete.
      * @param deleteChapters whether to also delete downloaded chapters.
      */
-    fun removeMangaFromLibrary(mangas: List<Manga>, deleteChapters: Boolean) {
+    fun removeMangaFromLibrary(mangas: List<Manga>) {
         // Create a set of the list
         val mangaToDelete = mangas.distinctBy { it.id }
         mangaToDelete.forEach { it.favorite = false }
@@ -314,20 +314,18 @@ class LibraryPresenter(
                 .onErrorResumeNext { Observable.empty() }
                 .subscribeOn(Schedulers.io())
                 .subscribe()
+    }
 
+    fun confirmDeletion(mangas: List<Manga>) {
         Observable.fromCallable {
+            val mangaToDelete = mangas.distinctBy { it.id }
             mangaToDelete.forEach { manga ->
-                coverCache.deleteFromCache(manga, 5000)
-                if (deleteChapters) {
-                    val source = sourceManager.get(manga.source) as? HttpSource
-                    if (source != null) {
-                        downloadManager.deleteManga(manga, source, 5000)
-                    }
-                }
+                coverCache.deleteFromCache(manga.thumbnail_url)
+                val source = sourceManager.get(manga.source) as? HttpSource
+                if (source != null)
+                    downloadManager.deleteManga(manga, source)
             }
-        }
-                .subscribeOn(Schedulers.io())
-                .subscribe()
+        }.subscribeOn(Schedulers.io()).subscribe()
     }
 
     fun addMangas(mangas: List<Manga>) {
