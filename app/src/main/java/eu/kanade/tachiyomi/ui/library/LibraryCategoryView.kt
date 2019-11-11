@@ -232,7 +232,7 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
 
     override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
         when (ev?.action) {
-            MotionEvent.ACTION_UP -> lastTouchUpY = ev?.y
+            MotionEvent.ACTION_UP -> lastTouchUpY = ev.y
         }
         return super.dispatchTouchEvent(ev)
     }

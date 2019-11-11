@@ -16,6 +16,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.LinearLayout
+import androidx.core.graphics.ColorUtils
 import com.bluelinelabs.conductor.*
 import com.google.android.material.snackbar.Snackbar
 import eu.kanade.tachiyomi.Migrations
@@ -33,8 +34,8 @@ import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.ui.recent_updates.RecentChaptersController
 import eu.kanade.tachiyomi.ui.recently_read.RecentlyReadController
 import eu.kanade.tachiyomi.ui.setting.SettingsMainController
-import eu.kanade.tachiyomi.util.NoopWindowInsetsListener
 import eu.kanade.tachiyomi.util.doOnApplyWindowInsets
+import eu.kanade.tachiyomi.util.getResourceColor
 import eu.kanade.tachiyomi.util.launchUI
 import eu.kanade.tachiyomi.util.marginBottom
 import eu.kanade.tachiyomi.util.marginTop
@@ -141,12 +142,6 @@ class MainActivity : BaseActivity() {
             true
         }
 
-        /*nav_view.doOnApplyWindowInsets { v, insets, padding ->
-            v.updatePaddingRelative(
-              start = padding.left + insets.systemWindowInsetLeft
-            )
-        }*/
-
         val container: ViewGroup = findViewById(R.id.controller_container)
 
         val content: LinearLayout = findViewById(R.id.main_content)
@@ -156,13 +151,32 @@ class MainActivity : BaseActivity() {
         content.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
           View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
           View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-        nav_view.doOnApplyWindowInsets { v, insets, padding ->
+        nav_view.doOnApplyWindowInsets { v, _, _ ->
             v.updatePaddingRelative(
                 bottom = v.marginBottom,
                 top = v.marginTop
             )
         }
-        content.setOnApplyWindowInsetsListener(NoopWindowInsetsListener)
+        content.setOnApplyWindowInsetsListener { v, insets ->
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M &&
+                    (v.rootWindowInsets.systemWindowInsetLeft > 0 ||
+                        v.rootWindowInsets.systemWindowInsetRight > 0))
+                    window.navigationBarColor = Color.BLACK
+                else window.navigationBarColor = Color.argb(179, 0, 0, 0)
+            } else if (v.rootWindowInsets.systemWindowInsetLeft > 0
+                || v.rootWindowInsets.systemWindowInsetRight > 0) {
+                window.navigationBarColor =
+                    v.context.getResourceColor(android.R.attr.colorBackground)
+            } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q
+                || insets.tappableElementInsets.bottom > 0) {
+                window.navigationBarColor = ColorUtils.setAlphaComponent(
+                    v.context.getResourceColor(android.R.attr.colorBackground), 179)
+            } else window.navigationBarColor = getColor(android.R.color.transparent)
+            v.setPadding(insets.systemWindowInsetLeft, insets.systemWindowInsetTop,
+                insets.systemWindowInsetRight, 0)
+            insets
+        }
         val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
         if (Build.VERSION.SDK_INT >= 26 && currentNightMode == Configuration.UI_MODE_NIGHT_NO) {
             content.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR

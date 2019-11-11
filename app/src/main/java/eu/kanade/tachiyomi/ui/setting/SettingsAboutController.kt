@@ -174,7 +174,7 @@ class SettingsAboutController : SettingsController() {
         try {
             val inputDf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'", Locale.US)
             inputDf.timeZone = TimeZone.getTimeZone("UTC")
-            val date = inputDf.parse(BuildConfig.BUILD_TIME)
+            val date = inputDf.parse(BuildConfig.BUILD_TIME) ?: return BuildConfig.BUILD_TIME
 
             val outputDf = DateFormat.getDateTimeInstance(
                     DateFormat.MEDIUM, DateFormat.SHORT, Locale.getDefault())

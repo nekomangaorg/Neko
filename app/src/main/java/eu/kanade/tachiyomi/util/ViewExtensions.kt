@@ -136,14 +136,6 @@ inline val View.marginRight: Int
 inline val View.marginLeft: Int
     get() = (layoutParams as? ViewGroup.MarginLayoutParams)?.leftMargin ?: 0
 
-object NoopWindowInsetsListener : View.OnApplyWindowInsetsListener {
-    override fun onApplyWindowInsets(v: View, insets: WindowInsets): WindowInsets {
-        v.setPadding(insets.systemWindowInsetLeft,insets.systemWindowInsetTop,insets.systemWindowInsetRight,0)
-        //insets.consumeSystemWindowInsets()
-        return insets
-    }
-}
-
 object RecyclerWindowInsetsListener : View.OnApplyWindowInsetsListener {
     override fun onApplyWindowInsets(v: View, insets: WindowInsets): WindowInsets {
         v.setPadding(0,0,0,insets.systemWindowInsetBottom)
