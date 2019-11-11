@@ -16,6 +16,7 @@ import com.jakewharton.rxbinding.support.v4.widget.refreshes
 import com.jakewharton.rxbinding.view.clicks
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.IconicsDrawable
+import com.mikepenz.iconics.IconicsSize
 import com.mikepenz.iconics.utils.IconicsMenuInflaterUtil
 import com.mikepenz.iconics.utils.colorInt
 import com.mikepenz.iconics.utils.sizeDp
@@ -95,6 +96,7 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
                         .icon(CommunityMaterial.Icon2.cmd_play)
                         .colorInt(Color.WHITE)
                         .sizeDp(20)
+                        .iconOffsetX(IconicsSize.dp(2))
         )
 
         fab.clicks().subscribeUntilDestroy {
