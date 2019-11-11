@@ -53,6 +53,7 @@ import kotlinx.android.synthetic.main.manga_info_controller.*
 import uy.kohesive.injekt.injectLazy
 import java.text.DateFormat
 import java.text.DecimalFormat
+import java.text.SimpleDateFormat
 import java.util.*
 
 /**
@@ -67,6 +68,8 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
      * Preferences helper.
      */
     private val preferences: PreferencesHelper by injectLazy()
+
+    private val dateFormat: SimpleDateFormat = SimpleDateFormat("yyyy-MM-dd")
 
     init {
         setHasOptionsMenu(true)
@@ -285,7 +288,7 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
 
     fun setLastUpdateDate(date: Date) {
         if (date.time != 0L) {
-            manga_last_update?.text = DateFormat.getDateInstance(DateFormat.SHORT).format(date)
+            manga_last_update?.text = dateFormat.format(date)
         } else {
             manga_last_update?.text = resources?.getString(R.string.unknown)
         }

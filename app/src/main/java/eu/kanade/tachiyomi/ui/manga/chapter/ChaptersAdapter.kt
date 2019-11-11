@@ -6,9 +6,9 @@ import android.view.MenuItem
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.getResourceColor
-import java.text.DateFormat
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
+import java.text.SimpleDateFormat
 
 class ChaptersAdapter(
         controller: ChaptersController,
@@ -28,7 +28,7 @@ class ChaptersAdapter(
     val decimalFormat = DecimalFormat("#.###", DecimalFormatSymbols()
             .apply { decimalSeparator = '.' })
 
-    val dateFormat: DateFormat = DateFormat.getDateInstance(DateFormat.SHORT)
+    val dateFormat: SimpleDateFormat = SimpleDateFormat("yyyy-MM-dd")
 
     override fun updateDataSet(items: List<ChapterItem>?) {
         this.items = items ?: emptyList()
