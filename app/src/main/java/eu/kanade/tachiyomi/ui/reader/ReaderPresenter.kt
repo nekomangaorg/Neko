@@ -82,20 +82,7 @@ class ReaderPresenter(
      */
     private val chapterList by lazy {
         val manga = manga!!
-        val dbChapters = db.getChapters(manga).executeAsBlocking().map { ch ->
-            // Create the model object.
-            val model = ChapterItem(ch, manga)
-
-            // Find an active download for this chapter.
-            val download = downloadManager.queue.find { it.chapter.id == ch.id }
-
-            if (download != null) {
-                // If there's an active download, assign it.
-                model.download = download
-            }
-
-            model
-        }
+        val dbChapters = db.getChapters(manga).executeAsBlocking().map { ChapterItem(it, manga) }
 
         val selectedChapter = dbChapters.find { it.id == chapterId }
                 ?: error("Requested chapter of id $chapterId not found in chapter list")
