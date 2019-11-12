@@ -87,28 +87,39 @@ class ReaderPresenter(
         val selectedChapter = dbChapters.find { it.id == chapterId }
                 ?: error("Requested chapter of id $chapterId not found in chapter list")
 
-        val chaptersForReader = dbChapters.filter {
-            var shouldInclude = true
-
-            // Local chapter list filter overrides global 'skip read' in preferences.
-            when (manga.readFilter) {
-                Manga.SHOW_READ -> if (!it.read) shouldInclude = false
-                Manga.SHOW_UNREAD -> if (it.read) shouldInclude = false
-                else -> if (preferences.skipRead()) {
-                    if (it.read) shouldInclude = false
+        val chaptersForReader = dbChapters
+                .filter {
+                    if (preferences.skipRead()) {
+                        !it.read
+                    } else {
+                        true
+                    }
                 }
-            }
+                .filter {
+                    var shouldInclude = true
 
-            if (manga.downloadedFilter == Manga.SHOW_DOWNLOADED && !downloadManager.isChapterDownloaded(it.chapter, manga)) {
-                shouldInclude = false
-            }
+                    when (manga.readFilter) {
+                        Manga.SHOW_READ -> if (!it.read) {
+                            shouldInclude = false
+                        }
+                        Manga.SHOW_UNREAD -> if (it.read) {
+                            shouldInclude = false
+                        }
+                    }
 
-            if (manga.bookmarkedFilter == Manga.SHOW_BOOKMARKED && !it.bookmark) {
-                shouldInclude = false
-            }
+                    if (manga.downloadedFilter == Manga.SHOW_DOWNLOADED &&
+                        !downloadManager.isChapterDownloaded(it.chapter, manga)) {
+                        shouldInclude = false
+                    }
 
-            shouldInclude
-        }.map { it.chapter }.toMutableList()
+                    if (manga.bookmarkedFilter == Manga.SHOW_BOOKMARKED && !it.bookmark) {
+                        shouldInclude = false
+                    }
+
+                    shouldInclude
+                }
+                .map { it.chapter }
+                .toMutableList()
         val find = chaptersForReader.find { it.id == chapterId }
         if (find == null) {
             chaptersForReader.add(selectedChapter)
