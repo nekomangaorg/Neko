@@ -3,8 +3,6 @@ package eu.kanade.tachiyomi.ui.category
 import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import android.view.*
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.jakewharton.rxbinding.view.clicks
@@ -14,6 +12,7 @@ import eu.davidea.flexibleadapter.helpers.UndoHelper
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
+import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.marginBottom
 import eu.kanade.tachiyomi.util.snack
@@ -47,7 +46,7 @@ class CategoryController : NucleusController<CategoryPresenter>(),
     /**
      * Undo helper used for restoring a deleted category.
      */
-    private var undoHelper: Snackbar? = null
+    private var snack: Snackbar? = null
 
     /**
      * Creates the presenter for this controller. Not to be manually called.
@@ -106,9 +105,9 @@ class CategoryController : NucleusController<CategoryPresenter>(),
      */
     override fun onDestroyView(view: View) {
         // Manually call callback to delete categories if required
-        undoHelper?.dismiss()
+        snack?.dismiss()
         confirmDelete()
-        undoHelper = null
+        snack = null
         actionMode = null
         adapter = null
         super.onDestroyView(view)
@@ -181,24 +180,22 @@ class CategoryController : NucleusController<CategoryPresenter>(),
 
         when (item.itemId) {
             R.id.action_delete -> {
-                //undoHelper = UndoHelper(adapter, this)
-                // undoHelper?.start(adapter.selectedPositions, view!!,
-                // R.string.snack_categories_deleted, R.string.action_undo, 3000)
                 adapter.removeItems(adapter.selectedPositions)
-                undoHelper = view?.snack(R.string.snack_categories_deleted, 3000) {
-                    var undoing = false
-                    setAction(R.string.action_undo) {
-                        adapter.restoreDeletedItems()
-                        undoing = true
-                    }
-                    addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
-                        override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
-                            super.onDismissed(transientBottomBar, event)
-                            if (!undoing)
-                                confirmDelete()
+                snack =
+                    view?.snack(R.string.snack_categories_deleted, Snackbar.LENGTH_INDEFINITE) {
+                        var undoing = false
+                        setAction(R.string.action_undo) {
+                            adapter.restoreDeletedItems()
+                            undoing = true
                         }
-                    })
-                }
+                        addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
+                            override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+                                super.onDismissed(transientBottomBar, event)
+                                if (!undoing) confirmDelete()
+                            }
+                        })
+                    }
+                (activity as? MainActivity)?.setUndoSnackBar(snack)
                 mode.finish()
             }
             R.id.action_edit -> {
@@ -299,7 +296,7 @@ class CategoryController : NucleusController<CategoryPresenter>(),
      */
     override fun onActionCanceled(action: Int, positions: MutableList<Int>?) {
         adapter?.restoreDeletedItems()
-        undoHelper = null
+        snack = null
     }
 
     /**
@@ -311,13 +308,13 @@ class CategoryController : NucleusController<CategoryPresenter>(),
     override fun onActionConfirmed(action: Int, event: Int) {
         val adapter = adapter ?: return
         presenter.deleteCategories(adapter.deletedItems.map { it.category })
-        undoHelper = null
+        snack = null
     }
 
     fun confirmDelete() {
         val adapter = adapter ?: return
         presenter.deleteCategories(adapter.deletedItems.map { it.category })
-        undoHelper = null
+        snack = null
     }
 
     /**
