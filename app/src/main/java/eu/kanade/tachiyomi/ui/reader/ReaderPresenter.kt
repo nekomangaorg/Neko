@@ -96,27 +96,32 @@ class ReaderPresenter(
                     }
                 }
                 .filter {
-                    var shouldInclude = true
+                    if (preferences.skipHidden()) {
+                        var shouldInclude = true
 
-                    when (manga.readFilter) {
-                        Manga.SHOW_READ -> if (!it.read) {
+                        when (manga.readFilter) {
+                            Manga.SHOW_READ -> if (!it.read) {
+                                shouldInclude = false
+                            }
+                            Manga.SHOW_UNREAD -> if (it.read) {
+                                shouldInclude = false
+                            }
+                        }
+
+                        if (manga.downloadedFilter == Manga.SHOW_DOWNLOADED &&
+                                !downloadManager.isChapterDownloaded(it.chapter, manga)) {
                             shouldInclude = false
                         }
-                        Manga.SHOW_UNREAD -> if (it.read) {
+
+                        if (manga.bookmarkedFilter == Manga.SHOW_BOOKMARKED && !it.bookmark) {
                             shouldInclude = false
                         }
-                    }
 
-                    if (manga.downloadedFilter == Manga.SHOW_DOWNLOADED &&
-                        !downloadManager.isChapterDownloaded(it.chapter, manga)) {
-                        shouldInclude = false
+                        shouldInclude
                     }
-
-                    if (manga.bookmarkedFilter == Manga.SHOW_BOOKMARKED && !it.bookmark) {
-                        shouldInclude = false
+                    else {
+                        true
                     }
-
-                    shouldInclude
                 }
                 .map { it.chapter }
                 .toMutableList()
