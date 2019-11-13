@@ -111,6 +111,8 @@ object PreferenceKeys {
 
     const val skipRead = "skip_read"
 
+    const val skipHidden = "skip_hidden"
+
     const val downloadBadge = "display_download_badge"
 
     const val showR18 = "show_r18"

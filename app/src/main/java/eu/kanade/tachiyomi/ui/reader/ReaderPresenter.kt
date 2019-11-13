@@ -14,6 +14,7 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
+import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
 import eu.kanade.tachiyomi.ui.reader.loader.ChapterLoader
 import eu.kanade.tachiyomi.ui.reader.loader.DownloadPageLoader
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
@@ -81,22 +82,53 @@ class ReaderPresenter(
      */
     private val chapterList by lazy {
         val manga = manga!!
-        val dbChapters = db.getChapters(manga).executeAsBlocking()
+        val dbChapters = db.getChapters(manga).executeAsBlocking().map { ChapterItem(it, manga) }
 
         val selectedChapter = dbChapters.find { it.id == chapterId }
                 ?: error("Requested chapter of id $chapterId not found in chapter list")
 
-        val chaptersForReader =
-                if (preferences.skipRead()) {
-                    var list = dbChapters.filter { it -> !it.read }.toMutableList()
-                    val find = list.find { it.id == chapterId }
-                    if (find == null) {
-                        list.add(selectedChapter)
+        val chaptersForReader = dbChapters
+                .filter {
+                    if (preferences.skipRead()) {
+                        !it.read
+                    } else {
+                        true
                     }
-                    list
-                } else {
-                    dbChapters
                 }
+                .filter {
+                    if (preferences.skipHidden()) {
+                        var shouldInclude = true
+
+                        when (manga.readFilter) {
+                            Manga.SHOW_READ -> if (!it.read) {
+                                shouldInclude = false
+                            }
+                            Manga.SHOW_UNREAD -> if (it.read) {
+                                shouldInclude = false
+                            }
+                        }
+
+                        if (manga.downloadedFilter == Manga.SHOW_DOWNLOADED &&
+                                !downloadManager.isChapterDownloaded(it.chapter, manga)) {
+                            shouldInclude = false
+                        }
+
+                        if (manga.bookmarkedFilter == Manga.SHOW_BOOKMARKED && !it.bookmark) {
+                            shouldInclude = false
+                        }
+
+                        shouldInclude
+                    }
+                    else {
+                        true
+                    }
+                }
+                .map { it.chapter }
+                .toMutableList()
+        val find = chaptersForReader.find { it.id == chapterId }
+        if (find == null) {
+            chaptersForReader.add(selectedChapter)
+        }
 
         when (manga.sorting) {
             Manga.SORTING_SOURCE -> ChapterLoadBySource().get(chaptersForReader)

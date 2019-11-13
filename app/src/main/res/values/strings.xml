@@ -165,6 +165,7 @@
     <string name="filter_mode_darken">Burn / Darken</string>
     <string name="pref_keep_screen_on">Keep screen on</string>
     <string name="pref_skip_read_chapters">Skip chapters marked read</string>
+    <string name="pref_skip_hidden_chapters">Skip chapters hidden by filters</string>
     <string name="pref_reader_navigation">Navigation</string>
     <string name="pref_read_with_volume_keys">Volume keys</string>
     <string name="pref_read_with_volume_keys_inverted">Invert volume keys</string>
