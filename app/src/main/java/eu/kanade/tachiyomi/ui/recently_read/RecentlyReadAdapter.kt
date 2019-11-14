@@ -43,6 +43,6 @@ class RecentlyReadAdapter(controller: RecentlyReadController)
     }
 
     interface OnCoverClickListener {
-        fun onCoverClick(position: Int)
+        fun onCoverClick(position: Int, lastTouchY: Float)
     }
 }

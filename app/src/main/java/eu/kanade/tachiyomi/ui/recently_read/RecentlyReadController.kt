@@ -102,9 +102,9 @@ class RecentlyReadController : NucleusController<RecentlyReadPresenter>(),
         RemoveHistoryDialog(this, manga, history).showDialog(router)
     }
 
-    override fun onCoverClick(position: Int) {
+    override fun onCoverClick(position: Int, lastTouchY: Float) {
         val manga = adapter?.getItem(position)?.mch?.manga ?: return
-        router.pushController(MangaController(manga).withFadeTransaction())
+        router.pushController(MangaController(manga, lastTouchY).withFadeTransaction())
     }
 
     override fun removeHistory(manga: Manga, history: History, all: Boolean) {
