@@ -75,9 +75,9 @@ class NotificationReceiver : BroadcastReceiver() {
                 if (notificationId > -1) dismissNotification(
                     context, notificationId, intent.getStringExtra(EXTRA_GROUP_ID)
                 )
-                val url = intent.getStringExtra(EXTRA_CHAPTER_URL) ?: return
+                val urls = intent.getStringArrayExtra(EXTRA_CHAPTER_URL) ?: return
                 val mangaId = intent.getLongExtra(EXTRA_MANGA_ID, -1)
-                markAsRead(url, mangaId)
+                markAsRead(urls, mangaId)
             }
         }
     }
@@ -169,18 +169,19 @@ class NotificationReceiver : BroadcastReceiver() {
      * @param context context of application
      * @param notificationId id of notification
      */
-    private fun markAsRead(chapterUrl: String, mangaaId: Long) {
+    private fun markAsRead(chapterUrls: Array<String>, mangaId: Long) {
         val db: DatabaseHelper = Injekt.get()
-        val chapter = db.getChapter(chapterUrl, mangaaId).executeAsBlocking() ?: return
-        chapter.read = true
-        db.updateChapterProgress(chapter).executeAsBlocking()
-        val preferences: PreferencesHelper = Injekt.get()
-        if (preferences.removeAfterMarkedAsRead()) {
-            val mangaId = chapter.manga_id ?: return
-            val manga = db.getManga(mangaId).executeAsBlocking() ?: return
-            val sourceManager: SourceManager = Injekt.get()
-            val source = sourceManager.get(manga.source) ?: return
-            downloadManager.deleteChapters(listOf(chapter), manga, source)
+        chapterUrls.forEach {
+            val chapter = db.getChapter(it, mangaId).executeAsBlocking() ?: return
+            chapter.read = true
+            db.updateChapterProgress(chapter).executeAsBlocking()
+            val preferences: PreferencesHelper = Injekt.get()
+            if (preferences.removeAfterMarkedAsRead()) {
+                val manga = db.getManga(mangaId).executeAsBlocking() ?: return
+                val sourceManager: SourceManager = Injekt.get()
+                val source = sourceManager.get(manga.source) ?: return
+                downloadManager.deleteChapters(listOf(chapter), manga, source)
+            }
         }
     }
 
@@ -393,12 +394,12 @@ class NotificationReceiver : BroadcastReceiver() {
          * @param context context of application
          * @param manga manga of chapter
          */
-        internal fun markAsReadPendingBroadcast(context: Context, manga: Manga, chapter:
-            Chapter, groupId: String):
+        internal fun markAsReadPendingBroadcast(context: Context, manga: Manga, chapters:
+            Array<Chapter>, groupId: String):
             PendingIntent {
             val newIntent = Intent(context, NotificationReceiver::class.java).apply {
                 action = ACTION_MARK_AS_READ
-                putExtra(EXTRA_CHAPTER_URL, chapter.url)
+                putExtra(EXTRA_CHAPTER_URL, chapters.map { it.url }.toTypedArray())
                 putExtra(EXTRA_MANGA_ID, manga.id)
                 putExtra(EXTRA_NOTIFICATION_ID, manga.id.hashCode())
                 putExtra(EXTRA_GROUP_ID, groupId)

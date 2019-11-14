@@ -278,7 +278,7 @@ class LibraryUpdateService(
         // Initialize the variables holding the progress of the updates.
         val count = AtomicInteger(0)
         // List containing new updates
-        val newUpdates = ArrayList<Pair<Manga, Chapter>>()
+        val newUpdates = ArrayList<Pair<Manga, Array<Chapter>>>()
         // list containing failed updates
         val failedUpdates = ArrayList<Manga>()
         // List containing categories that get included in downloads.
@@ -311,7 +311,8 @@ class LibraryUpdateService(
                                 }
                             }
                             // Convert to the manga that contains new chapters.
-                            .map { Pair(manga, (it.first.maxBy { ch -> ch.source_order }!!)) }
+                            .map { Pair(manga, (it.first.sortedByDescending { ch -> ch
+                                .source_order }.toTypedArray())) }
                 }
                 // Add manga with new chapters to the list.
                 .doOnNext { manga ->
@@ -447,13 +448,15 @@ class LibraryUpdateService(
      *
      * @param updates a list of manga with new updates.
      */
-    private fun showResultNotification(updates: List<Pair<Manga, Chapter>>) {
+    private fun showResultNotification(updates: List<Pair<Manga, Array<Chapter>>>) {
         val notifications = ArrayList<Pair<Notification, Int>>()
         updates.forEach {
             val manga = it.first
-            val chapter = it.second
+            val chapters = it.second
+            val chapterNames = chapters.map { chapter -> chapter.name.chop(45) }.toSet()
+            NotificationReceiver.dismissNotification(this, manga.id.hashCode())
             notifications.add(Pair(notification(Notifications.CHANNEL_NEW_CHAPTERS) {
-                setSmallIcon(R.drawable.ic_book_white_24dp)
+                setSmallIcon(R.drawable.ic_tachiyomi_icon)
                 try {
                     val icon = GlideApp.with(this@LibraryUpdateService)
                         .asBitmap().load(manga).dontTransform().centerCrop().circleCrop()
@@ -463,18 +466,21 @@ class LibraryUpdateService(
                 catch (e: Exception) { }
                 setContentTitle(manga.title.chop(45))
                 color = ContextCompat.getColor(this@LibraryUpdateService, R.color.colorAccentLight)
-                setContentText(chapter.name)
+                setContentText(chapterNames.first())
+                setStyle(NotificationCompat.BigTextStyle().bigText(chapterNames.joinToString("\n")))
                 priority = NotificationCompat.PRIORITY_HIGH
                 setGroup(Notifications.GROUP_NEW_CHAPTERS)
                 setContentIntent(
                     NotificationReceiver.openChapterPendingActivity(
-                        this@LibraryUpdateService, manga, chapter
+                        this@LibraryUpdateService, manga, chapters.first()
                     )
                 )
-                addAction(R.drawable.ic_in_library_24dp, getString(R.string.action_mark_as_read),
+                addAction(R.drawable.ic_glasses_black_24dp, getString(
+                    if (chapters.size > 1) R.string.action_mark_all_as_read else R.string
+                        .action_mark_as_read),
                     NotificationReceiver.markAsReadPendingBroadcast(this@LibraryUpdateService,
-                        manga, chapter, Notifications.GROUP_NEW_CHAPTERS))
-                addAction(R.drawable.ic_glasses_black_24dp, getString(R.string.action_view_chapters),
+                        manga, chapters, Notifications.GROUP_NEW_CHAPTERS))
+                addAction(R.drawable.ic_book_white_24dp, getString(R.string.action_view_chapters),
                     NotificationReceiver.openChapterPendingActivity(this@LibraryUpdateService,
                         manga, Notifications.GROUP_NEW_CHAPTERS))
                 setAutoCancel(true)
@@ -489,7 +495,7 @@ class LibraryUpdateService(
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N || notificationManager
                     .activeNotifications.find { it.groupKey == Notifications.GROUP_NEW_CHAPTERS } == null) {
                 notify(Notifications.ID_NEW_CHAPTERS, notification(Notifications.CHANNEL_NEW_CHAPTERS) {
-                    setSmallIcon(R.drawable.ic_book_white_24dp)
+                    setSmallIcon(R.drawable.ic_tachiyomi_icon)
                     setLargeIcon(notificationBitmap)
                     setContentTitle(getString(R.string.notification_new_chapters))
                     color = ContextCompat.getColor(applicationContext, R.color.colorAccentLight)
