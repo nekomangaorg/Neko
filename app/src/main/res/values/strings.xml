@@ -22,6 +22,8 @@
     <string name="label_selected">Selected: %1$d</string>
     <string name="label_backup">Backup</string>
     <string name="label_migration">Source migration</string>
+    <string name="label_hide_title">Hide title</string>
+    <string name="label_show_title">Show title</string>
     <string name="label_extensions">Extensions</string>
     <string name="label_extension_info">Extension info</string>
     <string name="label_help">Help</string>

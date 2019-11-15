@@ -38,6 +38,8 @@ object MangaTable {
 
     const val COL_CATEGORY = "category"
 
+    const val COL_HIDE_TITLE = "hideTitle"
+
     val createTableQuery: String
         get() = """CREATE TABLE $TABLE(
             $COL_ID INTEGER NOT NULL PRIMARY KEY,
@@ -54,6 +56,7 @@ object MangaTable {
             $COL_LAST_UPDATE LONG,
             $COL_INITIALIZED BOOLEAN NOT NULL,
             $COL_VIEWER INTEGER NOT NULL,
+            $COL_HIDE_TITLE INTEGER NOT NULL,
             $COL_CHAPTER_FLAGS INTEGER NOT NULL
             )"""
 
@@ -63,4 +66,7 @@ object MangaTable {
     val createLibraryIndexQuery: String
         get() = "CREATE INDEX library_${COL_FAVORITE}_index ON $TABLE($COL_FAVORITE) " +
                 "WHERE $COL_FAVORITE = 1"
+
+    val addHideTitle: String
+        get() = "ALTER TABLE $TABLE ADD COLUMN $COL_HIDE_TITLE INTEGER DEFAULT 0"
 }

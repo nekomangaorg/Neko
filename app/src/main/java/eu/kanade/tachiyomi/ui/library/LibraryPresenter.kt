@@ -5,6 +5,7 @@ import com.jakewharton.rxrelay.BehaviorRelay
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
+import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.download.DownloadManager
@@ -370,6 +371,15 @@ class LibraryPresenter(
             .observeOn(AndroidSchedulers.mainThread())
             //.doOnUnsubscribe { state = state.copy(isReplacingManga = false) }
             .subscribe()
+    }
+
+    fun hideShowTitle(mangas: List<Manga>, hide: Boolean) {
+        mangas.forEach { it.hide_title = hide }
+        db.inTransaction {
+            mangas.forEach {
+                db.updateMangaHideTitle(it).executeAsBlocking()
+            }
+        }
     }
 
     private fun migrateMangaInternal(source: Source, sourceChapters: List<SChapter>,

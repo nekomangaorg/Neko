@@ -76,16 +76,6 @@ class MangaController : RxController, TabbedController {
         )
     }
 
-    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        backClosesApp = false
-        super.onRestoreInstanceState(savedInstanceState)
-    }
-
-    override fun onActivityResumed(activity: Activity) {
-        backClosesApp = false
-        super.onActivityResumed(activity)
-    }
-
     override fun handleBack(): Boolean {
         return if (backClosesApp) {
             activity?.finishAffinity()
@@ -99,8 +89,7 @@ class MangaController : RxController, TabbedController {
     var source: Source? = null
         private set
 
-    var backClosesApp = false
-        private set
+    private var backClosesApp = false
 
     var startingChapterYPos:Float? = null
 

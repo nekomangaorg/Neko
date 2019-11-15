@@ -30,6 +30,7 @@ import com.jakewharton.rxrelay.BehaviorRelay
 import com.jakewharton.rxrelay.PublishRelay
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
+import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -435,6 +436,15 @@ class LibraryController(
         } else {
             mode.title = resources?.getString(R.string.label_selected, count)
             menu.findItem(R.id.action_edit_cover)?.isVisible = count == 1
+            menu.findItem(R.id.action_hide_title)?.isVisible =
+                !preferences.libraryAsList().getOrDefault()
+            if (!preferences.libraryAsList().getOrDefault()) {
+                val showAll =
+                    (selectedMangas.filter { (it as? LibraryManga)?.hide_title == true }).size == selectedMangas.size
+                menu.findItem(R.id.action_hide_title)?.title = activity?.getString(
+                    if (showAll) R.string.label_show_title else R.string.label_hide_title
+                )
+            }
         }
         return false
     }
@@ -453,6 +463,12 @@ class LibraryController(
                 }
             }
             R.id.action_migrate -> startMangaMigration()
+            R.id.action_hide_title -> {
+                val showAll = (selectedMangas.filter { (it as? LibraryManga)?.hide_title == true }
+                    ).size == selectedMangas.size
+                presenter.hideShowTitle(selectedMangas.toList(), !showAll)
+                destroyActionModeIfNeeded()
+            }
             else -> return false
         }
         return true

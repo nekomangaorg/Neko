@@ -67,8 +67,8 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
         this.controller = controller
 
         recycler = if (preferences.libraryAsList().getOrDefault()) {
-            (swipe_refresh.inflate(R.layout.library_list_recycler) as androidx.recyclerview.widget.RecyclerView).apply {
-                layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
+            (swipe_refresh.inflate(R.layout.library_list_recycler) as RecyclerView).apply {
+                layoutManager = LinearLayoutManager(context)
             }
         } else {
             (swipe_refresh.inflate(R.layout.library_grid_recycler) as AutofitRecyclerView).apply {

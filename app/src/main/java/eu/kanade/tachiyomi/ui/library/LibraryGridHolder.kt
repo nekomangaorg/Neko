@@ -32,7 +32,11 @@ class LibraryGridHolder(
      */
     override fun onSetValues(item: LibraryItem) {
         // Update the title of the manga.
-        title.text = item.manga.title
+        with(title) {
+            visibility = if (item.manga.hide_title) View.GONE else View.VISIBLE
+            text = item.manga.title
+        }
+        gradient.visibility = if (item.manga.hide_title) View.GONE else View.VISIBLE
 
         // Update the unread count and its visibility.
         with(unread_text) {
