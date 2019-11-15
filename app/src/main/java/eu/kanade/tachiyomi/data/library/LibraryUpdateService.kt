@@ -467,7 +467,11 @@ class LibraryUpdateService(
                 setContentTitle(manga.title.chop(45))
                 color = ContextCompat.getColor(this@LibraryUpdateService, R.color.colorAccentLight)
                 setContentText(chapterNames.first())
-                setStyle(NotificationCompat.BigTextStyle().bigText(chapterNames.joinToString("\n")))
+                setStyle(NotificationCompat.BigTextStyle().bigText(
+                    if (chapterNames.size > 5) {
+                        "${chapterNames.take(4).joinToString(", ")}, " +
+                            getString(R.string.notification_and_n_more, (chapterNames.size - 4))
+                    } else chapterNames.joinToString(", ")))
                 priority = NotificationCompat.PRIORITY_HIGH
                 setGroup(Notifications.GROUP_NEW_CHAPTERS)
                 setContentIntent(

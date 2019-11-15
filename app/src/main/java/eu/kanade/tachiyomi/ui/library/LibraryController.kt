@@ -466,8 +466,7 @@ class LibraryController(
     }
 
     private fun startMangaMigration() {
-        migratingMangas.clear()
-        migratingMangas.addAll(selectedMangas)
+        migratingMangas = selectedMangas.distinctBy { it.id }.toMutableSet()
         destroyActionModeIfNeeded()
         val manga = migratingMangas.firstOrNull() ?: return
         val searchController = SearchController(manga)
