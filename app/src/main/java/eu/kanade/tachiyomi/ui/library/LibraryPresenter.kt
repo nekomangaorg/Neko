@@ -190,7 +190,7 @@ class LibraryPresenter(
 
         val sortFn: (LibraryItem, LibraryItem) -> Int = { i1, i2 ->
             when (sortingMode) {
-                LibrarySort.ALPHA -> i1.manga.title.compareTo(i2.manga.title, true)
+                LibrarySort.ALPHA -> i1.manga.title.removeArticles().compareTo(i2.manga.title.removeArticles(), true)
                 LibrarySort.LAST_READ -> {
                     // Get index of manga, set equal to list if size unknown.
                     val manga1LastRead = lastReadManga[i1.manga.id!!] ?: lastReadManga.size
@@ -219,6 +219,10 @@ class LibraryPresenter(
             Collections.reverseOrder(sortFn)
 
         return map.mapValues { entry -> entry.value.sortedWith(comparator) }
+    }
+
+    fun String.removeArticles(): String {
+        return this.replace(Regex("^(an|a|the) ", RegexOption.IGNORE_CASE), "")
     }
 
     /**

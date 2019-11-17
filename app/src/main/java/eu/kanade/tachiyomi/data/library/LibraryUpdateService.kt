@@ -479,9 +479,7 @@ class LibraryUpdateService(
                         this@LibraryUpdateService, manga, chapters.first()
                     )
                 )
-                addAction(R.drawable.ic_glasses_black_24dp, getString(
-                    if (chapters.size > 1) R.string.action_mark_all_as_read else R.string
-                        .action_mark_as_read),
+                addAction(R.drawable.ic_glasses_black_24dp, getString(R.string.action_mark_as_read),
                     NotificationReceiver.markAsReadPendingBroadcast(this@LibraryUpdateService,
                         manga, chapters, Notifications.GROUP_NEW_CHAPTERS))
                 addAction(R.drawable.ic_book_white_24dp, getString(R.string.action_view_chapters),
