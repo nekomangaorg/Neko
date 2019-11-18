@@ -58,7 +58,7 @@ class MainActivity : BaseActivity() {
     private var secondaryDrawer: ViewGroup? = null
 
     private var snackBar:Snackbar? = null
-    var extraRectForUndo:Rect? = null
+    var extraViewForUndo:View? = null
     private var canDismissSnackBar = false
 
     fun setUndoSnackBar(snackBar: Snackbar?, extraViewToCheck: View? = null) {
@@ -68,12 +68,7 @@ class MainActivity : BaseActivity() {
             delay(1000)
             canDismissSnackBar = true
         }
-        if (extraViewToCheck != null) {
-            extraRectForUndo = Rect()
-            extraViewToCheck.getGlobalVisibleRect(extraRectForUndo)
-        }
-        else
-            extraRectForUndo = null
+        extraViewForUndo = extraViewToCheck
     }
 
     private val startScreenId by lazy {
@@ -340,18 +335,22 @@ class MainActivity : BaseActivity() {
                 val sRect = Rect()
                 snackBar!!.view.getGlobalVisibleRect(sRect)
 
+                val extRect:Rect? = if (extraViewForUndo != null) Rect() else null
+                extraViewForUndo?.getGlobalVisibleRect(extRect)
                 //This way the snackbar will only be dismissed if
                 //the user clicks outside it.
                 if (canDismissSnackBar && !sRect.contains(ev.x.toInt(), ev.y.toInt())
-                    && (extraRectForUndo == null ||
-                        !extraRectForUndo!!.contains(ev.x.toInt(), ev.y.toInt()))) {
+                    && (extRect == null ||
+                        !extRect.contains(ev.x.toInt(), ev.y.toInt()))) {
                     snackBar?.dismiss()
                     snackBar = null
-                    extraRectForUndo = null
+                    extraViewForUndo = null
                 }
             }
-            else if (snackBar != null)
+            else if (snackBar != null) {
                 snackBar = null
+                extraViewForUndo = null
+            }
         }
         return super.dispatchTouchEvent(ev)
     }
