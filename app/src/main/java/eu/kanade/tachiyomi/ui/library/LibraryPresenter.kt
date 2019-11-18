@@ -190,24 +190,27 @@ class LibraryPresenter(
 
         val sortFn: (LibraryItem, LibraryItem) -> Int = { i1, i2 ->
             when (sortingMode) {
-                LibrarySort.ALPHA -> i1.manga.title.removeArticles().compareTo(i2.manga.title.removeArticles(), true)
+                LibrarySort.ALPHA -> sortAlphabetical(i1, i2)
                 LibrarySort.LAST_READ -> {
                     // Get index of manga, set equal to list if size unknown.
                     val manga1LastRead = lastReadManga[i1.manga.id!!] ?: lastReadManga.size
                     val manga2LastRead = lastReadManga[i2.manga.id!!] ?: lastReadManga.size
-                    manga1LastRead.compareTo(manga2LastRead)
+                    val mangaCompare = manga1LastRead.compareTo(manga2LastRead)
+                    if (mangaCompare == 0) sortAlphabetical(i1, i2) else mangaCompare
                 }
                 LibrarySort.LAST_UPDATED -> i2.manga.last_update.compareTo(i1.manga.last_update)
                 LibrarySort.UNREAD -> i1.manga.unread.compareTo(i2.manga.unread)
                 LibrarySort.TOTAL -> {
                     val manga1TotalChapter = totalChapterManga[i1.manga.id!!] ?: 0
                     val mange2TotalChapter = totalChapterManga[i2.manga.id!!] ?: 0
-                    manga1TotalChapter.compareTo(mange2TotalChapter)
+                    val mangaCompare = manga1TotalChapter.compareTo(mange2TotalChapter)
+                    if (mangaCompare == 0) sortAlphabetical(i1, i2) else mangaCompare
                 }
                 LibrarySort.SOURCE -> {
                     val source1Name = sourceManager.getOrStub(i1.manga.source).name
                     val source2Name = sourceManager.getOrStub(i2.manga.source).name
-                    source1Name.compareTo(source2Name)
+                    val mangaCompare = source1Name.compareTo(source2Name)
+                    if (mangaCompare == 0) sortAlphabetical(i1, i2) else mangaCompare
                 }
                 else -> throw Exception("Unknown sorting mode")
             }
@@ -219,6 +222,10 @@ class LibraryPresenter(
             Collections.reverseOrder(sortFn)
 
         return map.mapValues { entry -> entry.value.sortedWith(comparator) }
+    }
+
+    fun sortAlphabetical(i1: LibraryItem, i2: LibraryItem): Int {
+        return i1.manga.title.removeArticles().compareTo(i2.manga.title.removeArticles(), true)
     }
 
     fun String.removeArticles(): String {

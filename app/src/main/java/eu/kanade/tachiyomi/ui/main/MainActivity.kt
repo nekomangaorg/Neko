@@ -158,21 +158,33 @@ class MainActivity : BaseActivity() {
             )
         }
         content.setOnApplyWindowInsetsListener { v, insets ->
+            window.navigationBarColor =
+            // if the os does not support light nav bar and is portrait, draw a dark translucent
+            // nav bar
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M &&
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
                     (v.rootWindowInsets.systemWindowInsetLeft > 0 ||
                         v.rootWindowInsets.systemWindowInsetRight > 0))
-                    window.navigationBarColor = Color.BLACK
-                else window.navigationBarColor = Color.argb(179, 0, 0, 0)
-            } else if (v.rootWindowInsets.systemWindowInsetLeft > 0
+                    // For lollipop, draw opaque nav bar
+                    Color.BLACK
+                else Color.argb(179, 0, 0, 0)
+            }
+            // if the android q+ device has gesture nav, transparent nav bar
+            else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
+                && (v.rootWindowInsets.systemWindowInsetBottom != v.rootWindowInsets
+                .tappableElementInsets.bottom)) {
+                getColor(android.R.color.transparent)
+            }
+            // if in landscape with 2/3 button mode, fully opaque nav bar
+            else if (v.rootWindowInsets.systemWindowInsetLeft > 0
                 || v.rootWindowInsets.systemWindowInsetRight > 0) {
-                window.navigationBarColor =
-                    v.context.getResourceColor(android.R.attr.colorBackground)
-            } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q
-                || insets.tappableElementInsets.bottom > 0) {
-                window.navigationBarColor = ColorUtils.setAlphaComponent(
+                v.context.getResourceColor(android.R.attr.colorBackground)
+            }
+            // if in portrait with 2/3 button mode, translucent nav bar
+            else {
+                ColorUtils.setAlphaComponent(
                     v.context.getResourceColor(android.R.attr.colorBackground), 179)
-            } else window.navigationBarColor = getColor(android.R.color.transparent)
+            }
             v.setPadding(insets.systemWindowInsetLeft, insets.systemWindowInsetTop,
                 insets.systemWindowInsetRight, 0)
             insets

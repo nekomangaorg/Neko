@@ -403,6 +403,7 @@ class LibraryController(
             }
             R.id.action_update_library -> {
                 activity?.let { LibraryUpdateService.start(it) }
+                snack = view?.snack(R.string.updating_library)
             }
             R.id.action_edit_categories -> {
                 router.pushController(CategoryController().withFadeTransaction())
