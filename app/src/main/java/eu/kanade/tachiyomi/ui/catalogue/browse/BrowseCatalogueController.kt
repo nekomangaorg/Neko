@@ -2,14 +2,18 @@ package eu.kanade.tachiyomi.ui.catalogue.browse
 
 import android.content.res.Configuration
 import android.os.Bundle
-import com.google.android.material.snackbar.Snackbar
-import androidx.drawerlayout.widget.DrawerLayout
-import androidx.appcompat.widget.*
-import android.view.*
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
+import androidx.appcompat.widget.SearchView
 import androidx.core.view.GravityCompat
-import com.afollestad.materialdialogs.MaterialDialog
+import androidx.drawerlayout.widget.DrawerLayout
 import com.f2prateek.rx.preferences.Preference
 import com.google.android.material.snackbar.BaseTransientBottomBar
+import com.google.android.material.snackbar.Snackbar
 import com.jakewharton.rxbinding.support.v7.widget.queryTextChangeEvents
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
@@ -27,11 +31,20 @@ import eu.kanade.tachiyomi.ui.library.ChangeMangaCategoriesDialog
 import eu.kanade.tachiyomi.ui.library.HeightTopWindowInsetsListener
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaController
-import eu.kanade.tachiyomi.ui.manga.info.MangaWebViewController
-import eu.kanade.tachiyomi.util.*
+import eu.kanade.tachiyomi.ui.manga.info.WebViewActivity
+import eu.kanade.tachiyomi.util.RecyclerWindowInsetsListener
+import eu.kanade.tachiyomi.util.connectivityManager
+import eu.kanade.tachiyomi.util.doOnApplyWindowInsets
+import eu.kanade.tachiyomi.util.gone
+import eu.kanade.tachiyomi.util.inflate
+import eu.kanade.tachiyomi.util.marginTop
+import eu.kanade.tachiyomi.util.openInBrowser
+import eu.kanade.tachiyomi.util.snack
+import eu.kanade.tachiyomi.util.updateLayoutParams
+import eu.kanade.tachiyomi.util.updatePaddingRelative
+import eu.kanade.tachiyomi.util.visible
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import kotlinx.android.synthetic.main.catalogue_controller.*
-import kotlinx.android.synthetic.main.categories_item.view.*
 import kotlinx.android.synthetic.main.main_activity.*
 import rx.Observable
 import rx.Subscription
@@ -310,9 +323,10 @@ open class BrowseCatalogueController(bundle: Bundle) :
 
     private fun openInWebView() {
         val source = presenter.source as? HttpSource ?: return
-
-        router.pushController(MangaWebViewController(source.id, source.baseUrl)
-                .withFadeTransaction())
+        val activity = activity ?: return
+        val intent = WebViewActivity.newIntent(activity, source.id, source.baseUrl, presenter
+            .source.name)
+        startActivity(intent)
     }
 
     /**

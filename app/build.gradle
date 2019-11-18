@@ -124,7 +124,7 @@ dependencies {
 
     implementation 'androidx.multidex:multidex:2.0.1'
 
-    standardImplementation 'com.google.firebase:firebase-core:11.8.0'
+    standardImplementation 'com.google.firebase:firebase-core:17.2.1'
 
     // ReactiveX
     implementation 'io.reactivex:rxandroid:1.2.1'

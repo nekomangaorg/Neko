@@ -178,12 +178,12 @@ class MainActivity : BaseActivity() {
             // if in landscape with 2/3 button mode, fully opaque nav bar
             else if (v.rootWindowInsets.systemWindowInsetLeft > 0
                 || v.rootWindowInsets.systemWindowInsetRight > 0) {
-                v.context.getResourceColor(android.R.attr.colorBackground)
+                getResourceColor(android.R.attr.colorBackground)
             }
             // if in portrait with 2/3 button mode, translucent nav bar
             else {
                 ColorUtils.setAlphaComponent(
-                    v.context.getResourceColor(android.R.attr.colorBackground), 179)
+                    getResourceColor(android.R.attr.colorBackground), 179)
             }
             v.setPadding(insets.systemWindowInsetLeft, insets.systemWindowInsetTop,
                 insets.systemWindowInsetRight, 0)

@@ -335,8 +335,9 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
             return
         }
 
-        parentController?.router?.pushController(MangaWebViewController(source.id, url)
-            .withFadeTransaction())
+        val activity = activity ?: return
+        val intent = WebViewActivity.newIntent(activity, source.id, url, presenter.manga.title)
+        startActivity(intent)
     }
 
     /**
