@@ -16,7 +16,7 @@ Features of Tachiyomi include:
 * Create backups locally to read offline or to your desired cloud service 
 
 Plus some new features in this fork such as:
-* Android 10 Dark Theme support: You can have tachiyomi follow the system theme as well as customize which dark theme to use for dark mode
+* Android 10 Dark Theme support: You can have Tachiyomi follow the system theme as well as customize which dark theme to use for dark mode
 * Android 10 edge to edge support (and a translucent nav bar for older versions): no more small ugly bar for the gesture navigation
 * Automatic background based on manga page: For those that like having a white background to match the content, this will automatically set the background to match for moments such as a flashback section of a manga
 * [Richer New chapters notifications](https://raw.githubusercontent.com/Jays2Kings/tachiyomi/master/.github/readme-images/new%20notifcations%20collasped.png): Now as a group of notifications, [expanding out to show more information](https://raw.githubusercontent.com/Jays2Kings/tachiyomi/master/.github/readme-images/new%20notifcations.png) about the new chapters (like chapter name and manga cover). Tapping on it will bring you right into the chapter or expand it to mark it as read or view all chapters
@@ -25,7 +25,6 @@ Plus some new features in this fork such as:
 * Notification separation of updating library and new chapters
 * [Share sheets upgrade for Android 10](https://raw.githubusercontent.com/Jays2Kings/tachiyomi/master/.github/readme-images/share%20menu.png)
 * Reader seekbar overrides switch app gesture in Android 10, so no more accidents for that
-* When opening a manga from library, the first unread chapter will be where you tapped on screen
 * Option to hide manga titles in grid view
 * Android X Support
 
