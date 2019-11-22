@@ -6,11 +6,11 @@
 # ![app icon](./.github/readme-images/app-icon.png)Tachiyomi
 Tachiyomi is a free and open source manga reader for Android.
 
-![screenshots of app](./.github/readme-images/screens.png)
+![screenshots of app](./.github/readme-images/theming-screenshots.gif)
 
 ## Features
 
-Features include:
+Features of Tachiyomi include:
 * Online reading from sources such as KissManga, MangaDex, [and more](https://github.com/inorichi/tachiyomi-extensions)
 * Local reading of downloaded manga
 * Configurable reader with multiple viewers, reading directions and other settings
@@ -20,8 +20,22 @@ Features include:
 * Schedule updating your library for new chapters
 * Create backups locally to read offline or to your desired cloud service 
 
+Plus some new features in this fork such as:
+* Android 10 Dark Theme support: You can have tachiyomi follow the system theme as well as customize which dark theme to use for dark mode
+* Android 10 edge to edge support (and a translucent nav bar for older versions): no more small ugly bar for the gesture navigation
+* Automatic background based on manga page: For those that like having a white background to match the content, this will automatically set the background to match for moments such as a flashback section of a manga
+* [Richer New chapters notifications](https://raw.githubusercontent.com/Jays2Kings/tachiyomi/master/.github/readme-images/new%20notifcations%20collasped.png): Now as a group of notifications, [expanding out to show more information](https://raw.githubusercontent.com/Jays2Kings/tachiyomi/master/.github/readme-images/new%20notifcations.png) about the new chapters (like chapter name and manga cover). Tapping on it will bring you right into the chapter or expand it to mark it as read or view all chapters
+* [New material snackbar](https://raw.githubusercontent.com/Jays2Kings/tachiyomi/master/.github/readme-images/material%20snackbar.png): Removing manga now auto deletes chapters and has an undo button in case you change your mind
+* Multi Source Migration from library
+* Notification separation of updating library and new chapters
+* [Share sheets upgrade for Android 10](https://raw.githubusercontent.com/Jays2Kings/tachiyomi/master/.github/readme-images/share%20menu.png)
+* Reader seekbar overrides switch app gesture in Android 10, so no more accidents for that
+* When opening a manga from library, the first unread chapter will be where you tapped on screen
+* Option to hide manga titles in grid view
+* Android X Support
+
 ## Download
-Get the app from our [releases page](https://github.com/inorichi/tachiyomi/releases).
+Get the app from our [releases page](https://github.com/jays2kings/tachiyomi/releases).
 
 If you want to try new features before they get to the stable release, you can download the dev version [here](http://tachiyomi.kanade.eu/latest).
 
