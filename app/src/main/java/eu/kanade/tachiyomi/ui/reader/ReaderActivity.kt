@@ -202,7 +202,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
             if (menuStickyVisible)
                 setMenuVisibility(false)
             else
-            setMenuVisibility(menuVisible, animate = false)
+                setMenuVisibility(menuVisible, animate = false)
         }
     }
 
@@ -303,7 +303,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
      */
     private fun setMenuVisibility(visible: Boolean, animate: Boolean = true) {
         menuVisible = visible
-        coroutine?.cancel()
+        if (visible) coroutine?.cancel()
         if (visible) {
             systemUi?.show()
             reader_menu.visibility = View.VISIBLE
@@ -340,6 +340,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
                     reader_menu_bottom.startAnimation(bottomAnimation)
                 }
             }
+            else
+                reader_menu.visibility = View.GONE
         }
         menuStickyVisible = false
     }
@@ -567,8 +569,10 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
             if (visible) {
                 coroutine = launchUI {
                     delay(2000)
-                    setMenuVisibility(false)
-                    menuStickyVisible = false
+                    if (systemUi?.isShowing == true) {
+                        menuStickyVisible = false
+                        setMenuVisibility(false)
+                    }
                 }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     window.navigationBarColor = getColor(android.R.color.transparent)
@@ -585,6 +589,9 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
             }
         }
         else {
+            if (menuStickyVisible && !menuVisible) {
+                setMenuVisibility(false, animate = false)
+            }
             coroutine?.cancel()
         }
     }
