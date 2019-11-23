@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.widget
 
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.Rect
 import android.util.AttributeSet
 import android.view.View
@@ -55,9 +56,15 @@ class FABAnimationUpDown @JvmOverloads constructor(ctx: Context, attrs: Attribut
     }
 
     override fun onDependentViewChanged(parent: CoordinatorLayout, child: FloatingActionButton, dependency: View): Boolean {
+        if (isTablet(child.context)) return true
         val translationY = getFabTranslationYForSnackbar(parent, child)
         child.translationY = translationY
         return true
+    }
+
+    private fun isTablet(context: Context): Boolean {
+        return (context.resources.configuration.screenLayout and Configuration
+            .SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_LARGE
     }
 
     private fun getFabTranslationYForSnackbar(parent: CoordinatorLayout, fab:

@@ -151,10 +151,14 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         container = (view as ViewGroup).findViewById(R.id.manga_info_layout) as? View
         val bottomM = manga_genres_tags.marginBottom
         val fabBaseMarginBottom = fab_favorite.marginBottom
+        val manga_coverMarginBottom = fab_favorite.marginBottom
         container?.doOnApplyWindowInsets { v, insets, padding ->
             if (resources?.configuration?.orientation == Configuration.ORIENTATION_LANDSCAPE) {
                 fab_favorite?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                     bottomMargin = fabBaseMarginBottom + insets.systemWindowInsetBottom
+                }
+                manga_cover?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    bottomMargin = manga_coverMarginBottom + insets.systemWindowInsetBottom
                 }
             }
             else {
