@@ -26,7 +26,7 @@ Plus some new features in this fork such as:
 * [Share sheets upgrade for Android 10](https://raw.githubusercontent.com/Jays2Kings/tachiyomi/master/.github/readme-images/share%20menu.png)
 * Reader seekbar overrides switch app gesture in Android 10, so no more accidents for that
 * Option to hide manga titles in grid view
-* Android X Support
+* Android X Support (**Becasue of this change needed for Android 10 features, extension preferences are currently disabled**)
 
 ## Download
 Get the app from our [releases page](https://github.com/jays2kings/tachiyomi/releases).
