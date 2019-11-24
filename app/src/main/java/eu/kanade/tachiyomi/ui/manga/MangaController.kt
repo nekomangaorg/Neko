@@ -72,7 +72,7 @@ class MangaController : RxController, TabbedController {
         val notificationId = bundle.getInt("notificationId", -1)
         val context = applicationContext ?: return
         if (notificationId > -1) NotificationReceiver.dismissNotification(
-            context, notificationId, bundle.getString("groupId", "")
+            context, notificationId, bundle.getInt("groupId", 0)
         )
     }
 

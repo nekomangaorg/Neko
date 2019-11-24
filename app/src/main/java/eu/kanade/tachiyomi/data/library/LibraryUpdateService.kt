@@ -454,7 +454,6 @@ class LibraryUpdateService(
             val manga = it.first
             val chapters = it.second
             val chapterNames = chapters.map { chapter -> chapter.name.chop(45) }.toSet()
-            NotificationReceiver.dismissNotification(this, manga.id.hashCode())
             notifications.add(Pair(notification(Notifications.CHANNEL_NEW_CHAPTERS) {
                 setSmallIcon(R.drawable.ic_tachiyomi_icon)
                 try {
@@ -481,10 +480,10 @@ class LibraryUpdateService(
                 )
                 addAction(R.drawable.ic_glasses_black_24dp, getString(R.string.action_mark_as_read),
                     NotificationReceiver.markAsReadPendingBroadcast(this@LibraryUpdateService,
-                        manga, chapters, Notifications.GROUP_NEW_CHAPTERS))
+                        manga, chapters, Notifications.ID_NEW_CHAPTERS))
                 addAction(R.drawable.ic_book_white_24dp, getString(R.string.action_view_chapters),
                     NotificationReceiver.openChapterPendingActivity(this@LibraryUpdateService,
-                        manga, Notifications.GROUP_NEW_CHAPTERS))
+                        manga, Notifications.ID_NEW_CHAPTERS))
                 setAutoCancel(true)
             }, manga.id.hashCode()))
         }
@@ -494,21 +493,18 @@ class LibraryUpdateService(
                 notify(it.second, it.first)
             }
 
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N || notificationManager
-                    .activeNotifications.find { it.groupKey == Notifications.GROUP_NEW_CHAPTERS } == null) {
-                notify(Notifications.ID_NEW_CHAPTERS, notification(Notifications.CHANNEL_NEW_CHAPTERS) {
-                    setSmallIcon(R.drawable.ic_tachiyomi_icon)
-                    setLargeIcon(notificationBitmap)
-                    setContentTitle(getString(R.string.notification_new_chapters))
-                    color = ContextCompat.getColor(applicationContext, R.color.colorAccentLight)
-                    setContentText(getString(R.string.notification_new_chapters_text, updates.size))
-                    priority = NotificationCompat.PRIORITY_HIGH
-                    setGroup(Notifications.GROUP_NEW_CHAPTERS)
-                    setGroupSummary(true)
-                    setContentIntent(getNotificationIntent())
-                    setAutoCancel(true)
-                })
-            }
+            notify(Notifications.ID_NEW_CHAPTERS, notification(Notifications.CHANNEL_NEW_CHAPTERS) {
+                setSmallIcon(R.drawable.ic_tachiyomi_icon)
+                setLargeIcon(notificationBitmap)
+                setContentTitle(getString(R.string.notification_new_chapters))
+                color = ContextCompat.getColor(applicationContext, R.color.colorAccentLight)
+                setContentText(getString(R.string.notification_new_chapters_text, updates.size))
+                priority = NotificationCompat.PRIORITY_HIGH
+                setGroup(Notifications.GROUP_NEW_CHAPTERS)
+                setGroupSummary(true)
+                setContentIntent(getNotificationIntent())
+                setAutoCancel(true)
+            })
         }
     }
 

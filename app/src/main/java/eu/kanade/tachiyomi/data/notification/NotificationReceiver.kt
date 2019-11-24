@@ -73,7 +73,7 @@ class NotificationReceiver : BroadcastReceiver() {
             ACTION_MARK_AS_READ -> {
                 val notificationId = intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
                 if (notificationId > -1) dismissNotification(
-                    context, notificationId, intent.getStringExtra(EXTRA_GROUP_ID)
+                    context, notificationId, intent.getIntExtra(EXTRA_GROUP_ID, 0)
                 )
                 val urls = intent.getStringArrayExtra(EXTRA_CHAPTER_URL) ?: return
                 val mangaId = intent.getLongExtra(EXTRA_MANGA_ID, -1)
@@ -304,16 +304,23 @@ class NotificationReceiver : BroadcastReceiver() {
          * @param notificationId id of notification
          * @return [PendingIntent]
          */
-        internal fun dismissNotification(context: Context, notificationId: Int, groupId: String?
-        = null) {
-            context.notificationManager.cancel(notificationId)
-            if (groupId != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                val notifications = context.notificationManager.activeNotifications.filter { it
-                    .groupKey.contains(groupId) }
-                if (notifications.size == 1) {
-                    context.notificationManager.cancel(notifications.first().id)
+        internal fun dismissNotification(context: Context, notificationId: Int, groupId: Int? =
+            null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                val groupKey = context.notificationManager.activeNotifications.find {
+                    it.id == notificationId
+                }?.groupKey
+                if (groupId != null && groupId != 0 && groupKey != null && groupKey.isNotEmpty()) {
+                    val notifications = context.notificationManager.activeNotifications.filter {
+                        it.groupKey == groupKey
+                    }
+                    if (notifications.size == 2) {
+                        context.notificationManager.cancel(groupId)
+                        return
+                    }
                 }
             }
+            context.notificationManager.cancel(notificationId)
         }
 
         /**
@@ -375,7 +382,7 @@ class NotificationReceiver : BroadcastReceiver() {
          * @param context context of application
          * @param manga manga of chapter
          */
-        internal fun openChapterPendingActivity(context: Context, manga: Manga, groupId: String):
+        internal fun openChapterPendingActivity(context: Context, manga: Manga, groupId: Int):
             PendingIntent {
             val newIntent =
                 Intent(context, MainActivity::class.java).setAction(MainActivity.SHORTCUT_MANGA)
@@ -395,7 +402,7 @@ class NotificationReceiver : BroadcastReceiver() {
          * @param manga manga of chapter
          */
         internal fun markAsReadPendingBroadcast(context: Context, manga: Manga, chapters:
-            Array<Chapter>, groupId: String):
+            Array<Chapter>, groupId: Int):
             PendingIntent {
             val newIntent = Intent(context, NotificationReceiver::class.java).apply {
                 action = ACTION_MARK_AS_READ
