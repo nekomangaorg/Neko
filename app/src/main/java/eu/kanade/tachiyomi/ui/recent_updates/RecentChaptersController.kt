@@ -72,9 +72,9 @@ class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
         super.onViewCreated(view)
         view.context.notificationManager.cancel(Notifications.ID_NEW_CHAPTERS)
         // Init RecyclerView and adapter
-        val layoutManager = androidx.recyclerview.widget.LinearLayoutManager(view.context)
+        val layoutManager = LinearLayoutManager(view.context)
         recycler.layoutManager = layoutManager
-        recycler.addItemDecoration(androidx.recyclerview.widget.DividerItemDecoration(view.context, androidx.recyclerview.widget.DividerItemDecoration.VERTICAL))
+        recycler.addItemDecoration(DividerItemDecoration(view.context, DividerItemDecoration.VERTICAL))
         recycler.setHasFixedSize(true)
         adapter = RecentChaptersAdapter(this@RecentChaptersController)
         recycler.adapter = adapter
