@@ -56,7 +56,15 @@ class LibraryItem(val manga: LibraryManga, private val libraryAsList: Preference
      */
     override fun filter(constraint: String): Boolean {
         return manga.title.contains(constraint, true) ||
-                (manga.author?.contains(constraint, true) ?: false)
+            (manga.author?.contains(constraint, true) ?: false) ||
+            (if (constraint.startsWith("-"))
+                manga.genre?.split(", ")?.find {
+                    it.toLowerCase() == constraint.substringAfter("-").toLowerCase()
+                }                   == null
+                    else
+                manga.genre?.split(", ")?.find {
+                    it.toLowerCase() == constraint.toLowerCase() } != null
+                )
     }
 
     override fun equals(other: Any?): Boolean {
