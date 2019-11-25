@@ -44,6 +44,7 @@ import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.catalogue.global_search.CatalogueSearchController
 import eu.kanade.tachiyomi.ui.library.ChangeMangaCategoriesDialog
+import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.util.doOnApplyWindowInsets
@@ -143,7 +144,7 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
                 .toString(), R.string.description)
         }
 
-        //manga_genres_tags.setOnTagClickListener { tag -> performGlobalSearch(tag) }
+        manga_genres_tags.setOnTagClickListener { tag -> performLocalSearch(tag) }
 
         manga_cover.longClicks().subscribeUntilDestroy {
             copyToClipboard(view.context.getString(R.string.title), presenter.manga.title, R.string.manga_info_full_title_label)
@@ -616,9 +617,23 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
      *
      * @param query the search query to pass to the search controller
      */
-    fun performGlobalSearch(query: String) {
+    private fun performGlobalSearch(query: String) {
         val router = parentController?.router ?: return
         router.pushController(CatalogueSearchController(query).withFadeTransaction())
+    }
+
+    /**
+     * Perform a local search using the provided query.
+     *
+     * @param query the search query to pass to the library controller
+     */
+    private fun performLocalSearch(query: String) {
+        val router = parentController?.router ?: return
+        val firstController = router.backstack.first()?.controller()
+        if (firstController is LibraryController && router.backstack.size == 2) {
+            router.handleBack()
+            firstController.search(query)
+        }
     }
 
     /**
