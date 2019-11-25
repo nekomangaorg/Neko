@@ -32,9 +32,6 @@ Plus some new features in this fork such as:
 * Filter out your library by searching for tags (ex. "Comedy" or "Slice of Life") or exclude mangas by a tag (ex. "-Shounen" or "-Romance"). Tapping on these tags also performs a local search
 * Android X Support (**Becasue of this change needed for Android 10 features, extension preferences are currently disabled**)
 
-## Download
-Get the app from our [releases page](https://github.com/jays2kings/tachiyomi/releases).
-
 ## Issues, Feature Requests and Contributing
 
 Please make sure to read the full guidelines. Your issue may be closed without warning if you do not.
