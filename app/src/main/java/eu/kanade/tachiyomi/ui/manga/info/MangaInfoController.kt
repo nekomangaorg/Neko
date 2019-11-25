@@ -19,7 +19,7 @@ import androidx.core.graphics.drawable.IconCompat
 import com.afollestad.materialdialogs.MaterialDialog
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
-import com.bumptech.glide.request.target.SimpleTarget
+import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import com.jakewharton.rxbinding.support.v4.widget.refreshes
 import com.jakewharton.rxbinding.view.clicks
@@ -41,6 +41,7 @@ import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.library.ChangeMangaCategoriesDialog
+import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.util.openInBrowser
@@ -126,7 +127,7 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
             copyToClipboard(view.context.getString(R.string.description), manga_summary.text.toString())
         }
 
-        //manga_genres_tags.setOnTagClickListener { tag -> performGlobalSearch(tag) }
+        manga_genres_tags.setOnTagClickListener { tag -> performLocalSearch(tag) }
 
         manga_cover.longClicks().subscribeUntilDestroy {
             copyToClipboard(view.context.getString(R.string.title), presenter.manga.title)
@@ -532,10 +533,12 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
                         3 -> centerCrop().transform(MaskTransformation(R.drawable.mask_star))
                     }
                 }
-                .into(object : SimpleTarget<Bitmap>(96, 96) {
+                .into(object : CustomTarget<Bitmap>(96, 96) {
                     override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
                         createShortcut(resource)
                     }
+
+                    override fun onLoadCleared(placeholder: Drawable?) { }
 
                     override fun onLoadFailed(errorDrawable: Drawable?) {
                         activity?.toast(R.string.icon_creation_fail)
@@ -560,6 +563,20 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
 
         activity.toast(view.context.getString(R.string.copied_to_clipboard, content.truncateCenter(20)),
                 Toast.LENGTH_SHORT)
+    }
+
+    /**
+     * Perform a local search using the provided query.
+     *
+     * @param query the search query to pass to the library controller
+     */
+    private fun performLocalSearch(query: String) {
+        val router = parentController?.router ?: return
+        val firstController = router.backstack.first()?.controller()
+        if (firstController is LibraryController && router.backstack.size == 2) {
+            router.handleBack()
+            firstController.search(query)
+        }
     }
 
     /**

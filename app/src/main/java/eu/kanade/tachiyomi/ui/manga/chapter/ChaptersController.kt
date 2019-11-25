@@ -201,10 +201,11 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
     }
 
     fun onNextChapters(chapters: List<ChapterItem>) {
-        // If the list is empty, fetchFollows chapters from source if the conditions are met
+        // If the list is empty, fetch chapters from source if the conditions are met
         // We use presenter chapters instead because they are always unfiltered
-        if (presenter.chapters.isEmpty())
+        if (presenter.chapters.isEmpty()) {
             initialFetchChapters()
+        }
 
         val adapter = adapter ?: return
         adapter.updateDataSet(chapters)
@@ -224,7 +225,7 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
     }
 
     private fun initialFetchChapters() {
-        // Only fetchFollows if this view is from the catalog and it hasn't requested previously
+        // Only fetch if this view is from the catalog and it hasn't requested previously
         if ((parentController as MangaController).fromCatalogue && !presenter.hasRequested) {
             fetchChaptersFromSource()
         }

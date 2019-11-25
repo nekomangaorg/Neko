@@ -346,6 +346,10 @@ class LibraryController(
         searchItem.fixExpand()
     }
 
+    fun search(query:String) {
+        this.query = query
+    }
+
     override fun onPrepareOptionsMenu(menu: Menu) {
         val navView = navView ?: return
 
