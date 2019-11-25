@@ -476,7 +476,9 @@ class LibraryController(
     }
 
     override fun migrateManga(prevManga: Manga, manga: Manga, replace: Boolean): Manga? {
-        presenter.migrateManga(prevManga, manga, replace = replace)
+        if (manga.id != prevManga.id) {
+            presenter.migrateManga(prevManga, manga, replace = replace)
+        }
         val nextManga = migratingMangas.firstOrNull() ?: return null
         migratingMangas.remove(nextManga)
         return nextManga

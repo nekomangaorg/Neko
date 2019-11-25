@@ -42,6 +42,7 @@
     <string name="action_sort_last_read">Last read</string>
     <string name="action_sort_last_updated">Last updated</string>
     <string name="action_search">Search</string>
+    <string name="action_skip_manga">Skip manga</string>
     <string name="action_global_search">Global search</string>
     <string name="action_select_all">Select all</string>
     <string name="action_mark_as_read">Mark as read</string>

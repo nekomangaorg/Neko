@@ -49,7 +49,7 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
     /**
      * Recycler view of the list of manga.
      */
-    private lateinit var recycler: androidx.recyclerview.widget.RecyclerView
+    private lateinit var recycler: RecyclerView
 
     /**
      * Adapter to hold the manga in this category.
@@ -82,8 +82,8 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
         recycler.adapter = adapter
         swipe_refresh.addView(recycler)
 
-        recycler.addOnScrollListener(object : androidx.recyclerview.widget.RecyclerView.OnScrollListener() {
-            override fun onScrollStateChanged(recycler: androidx.recyclerview.widget.RecyclerView, newState: Int) {
+        recycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recycler: RecyclerView, newState: Int) {
                 // Disable swipe refresh when view is not at the top
                 val firstPos = (recycler.layoutManager as androidx.recyclerview.widget.LinearLayoutManager)
                         .findFirstCompletelyVisibleItemPosition()
