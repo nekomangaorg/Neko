@@ -7,12 +7,14 @@ class FilterHandler {
 
     class TextField(name: String, val key: String) : Filter.Text(name)
     class Tag(val id: String, name: String) : Filter.TriState(name)
+    class Switch(val id: String, name: String) : Filter.CheckBox(name)
     class ContentList(contents: List<Tag>) : Filter.Group<Tag>("Content", contents)
     class FormatList(formats: List<Tag>) : Filter.Group<Tag>("Format", formats)
     class GenreList(genres: List<Tag>) : Filter.Group<Tag>("Genres", genres)
+    class PublicationStatusList(statuses: List<Switch>) : Filter.Group<Switch>("Publication Status", statuses)
+    class DemographicList(demographics: List<Switch>) : Filter.Group<Switch>("Demographic", demographics)
+
     class R18 : Filter.Select<String>("R18+", arrayOf("Default", "Show all", "Show only", "Show none"))
-    class Demographic : Filter.Select<String>("Demographic", arrayOf("All", "Shounen", "Shoujo", "Seinen", "Josei"))
-    class PublicationStatus : Filter.Select<String>("Publication status", arrayOf("All", "Ongoing", "Completed", "Cancelled", "Hiatus"))
     class ThemeList(themes: List<Tag>) : Filter.Group<Tag>("Themes", themes)
     class TagInclusionMode : Filter.Select<String>("Tag inclusion mode", arrayOf("All (and)", "Any (or)"), 0)
     class TagExclusionMode : Filter.Select<String>("Tag exclusion mode", arrayOf("All (and)", "Any (or)"), 1)
@@ -28,8 +30,8 @@ class FilterHandler {
             TextField("Artist", "artist"),
             R18(),
             SortFilter(),
-            Demographic(),
-            PublicationStatus(),
+            DemographicList(demographics),
+            PublicationStatusList(publicationStatus),
             OriginalLanguage(),
             ContentList(contentType),
             FormatList(formats),
@@ -41,6 +43,18 @@ class FilterHandler {
 
 
     companion object {
+        val demographics = listOf(
+                Switch("1", "Shounen"),
+                Switch("2", "Shoujo"),
+                Switch("3", "Seinen"),
+                Switch("4", "Josei")
+        )
+        val publicationStatus = listOf(
+                Switch("1", "Ongoing"),
+                Switch("2", "Completed"),
+                Switch("3", "Cancelled"),
+                Switch("4", "Hiatus")
+        )
         val sortables = listOf(
                 Triple("Update date", 0, 1),
                 Triple("Alphabetically", 2, 3),

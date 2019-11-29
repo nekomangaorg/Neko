@@ -54,6 +54,8 @@ class SearchHandler(val client: OkHttpClient, private val headers: Headers, val 
     private fun searchMangaRequest(page: Int, query: String, filters: FilterList): Request {
 
         val tags = mutableListOf<String>()
+        val statuses = mutableListOf<String>()
+        val demographics = mutableListOf<String>()
 
         // Do traditional search
         val url = "${MdUtil.baseUrl}/?page=search".toHttpUrlOrNull()!!.newBuilder()
@@ -63,14 +65,18 @@ class SearchHandler(val client: OkHttpClient, private val headers: Headers, val 
         filters.forEach { filter ->
             when (filter) {
                 is FilterHandler.TextField -> url.addQueryParameter(filter.key, filter.state)
-                is FilterHandler.Demographic -> {
-                    if (filter.state != 0) {
-                        url.addQueryParameter("demo_id", filter.state.toString())
+                is FilterHandler.DemographicList -> {
+                    filter.state.forEach { demographic ->
+                        if (demographic.state) {
+                            demographics.add(demographic.id)
+                        }
                     }
                 }
-                is FilterHandler.PublicationStatus -> {
-                    if (filter.state != 0) {
-                        url.addQueryParameter("status_id", filter.state.toString())
+                is FilterHandler.PublicationStatusList -> {
+                    filter.state.forEach { status ->
+                        if (status.state) {
+                            statuses.add(status.id)
+                        }
                     }
                 }
                 is FilterHandler.OriginalLanguage -> {
@@ -134,6 +140,12 @@ class SearchHandler(val client: OkHttpClient, private val headers: Headers, val 
         }
         // Manually append genres list to avoid commas being encoded
         var urlToUse = url.toString()
+        if (demographics.isNotEmpty()) {
+            urlToUse += "&demos=" + demographics.joinToString(",")
+        }
+        if (statuses.isNotEmpty()) {
+            urlToUse += "&statuses=" + statuses.joinToString(",")
+        }
         if (tags.isNotEmpty()) {
             urlToUse += "&tags=" + tags.joinToString(",")
         }
