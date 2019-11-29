@@ -16,8 +16,9 @@ class FilterHandler {
 
     class R18 : Filter.Select<String>("R18+", arrayOf("Default", "Show all", "Show only", "Show none"))
     class ThemeList(themes: List<Tag>) : Filter.Group<Tag>("Themes", themes)
-    class TagInclusionMode : Filter.Select<String>("Tag inclusion mode", arrayOf("All (and)", "Any (or)"), 0)
-    class TagExclusionMode : Filter.Select<String>("Tag exclusion mode", arrayOf("All (and)", "Any (or)"), 1)
+    class TagInclusionMode : Filter.Select<String>("Tag inclusion", arrayOf("All (and)", "Any (or)"), 0)
+    class TagExclusionMode : Filter.Select<String>("Tag exclusion", arrayOf("All (and)", "Any (or)"), 1)
+
 
     class SortFilter : Filter.Sort("Sort",
             sortables.map { it.first }.toTypedArray(),
