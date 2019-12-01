@@ -2,11 +2,13 @@ package eu.kanade.tachiyomi.ui.reader.viewer.webtoon
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.res.Resources
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import androidx.appcompat.widget.AppCompatButton
 import androidx.appcompat.widget.AppCompatImageView
 import android.view.Gravity
+import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
@@ -110,7 +112,7 @@ class WebtoonPageHolder(
     private var readImageHeaderSubscription: Subscription? = null
 
     init {
-        frame.layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
+        refreshLayoutParams()
     }
 
     /**
@@ -119,6 +121,15 @@ class WebtoonPageHolder(
     fun bind(page: ReaderPage) {
         this.page = page
         observeStatus()
+        refreshLayoutParams()
+    }
+
+    private fun refreshLayoutParams() {
+        frame.layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply {
+            val margin = Resources.getSystem().displayMetrics.widthPixels * viewer.config.marginRatio
+            marginEnd = margin.toInt()
+            marginStart = margin.toInt()
+        }
     }
 
     /**
