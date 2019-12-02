@@ -38,6 +38,10 @@ inline fun PreferenceGroup.intListPreference(block: (@DSL IntListPreference).() 
     return initThenAdd(IntListPreference(context), block).also(::initDialog)
 }
 
+inline fun PreferenceGroup.floatListPreference(block: (@DSL FloatListPreference).() -> Unit): FloatListPreference {
+    return initThenAdd(FloatListPreference(context), block).also(::initDialog)
+}
+
 inline fun PreferenceGroup.multiSelectListPreference(block: (@DSL MultiSelectListPreference).() -> Unit): MultiSelectListPreference {
     return initThenAdd(MultiSelectListPreference(context), block).also(::initDialog)
 }
