@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.network.asObservableSuccess
 import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
@@ -18,7 +19,7 @@ import java.util.Calendar
 class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
 
     private val parser = JsonParser()
-    private val jsonMime = MediaType.parse("application/json; charset=utf-8")
+    private val jsonMime = "application/json; charset=utf-8".toMediaTypeOrNull()
     private val authClient = client.newBuilder().addInterceptor(interceptor).build()
 
 
@@ -45,7 +46,7 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
         return authClient.newCall(request)
                 .asObservableSuccess()
                 .map { netResponse ->
-                    val responseBody = netResponse.body()?.string().orEmpty()
+                    val responseBody = netResponse.body?.string().orEmpty()
                     netResponse.close()
                     if (responseBody.isEmpty()) {
                         throw Exception("Null Response")
@@ -128,7 +129,7 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
         return authClient.newCall(request)
                 .asObservableSuccess()
                 .map { netResponse ->
-                    val responseBody = netResponse.body()?.string().orEmpty()
+                    val responseBody = netResponse.body?.string().orEmpty()
                     if (responseBody.isEmpty()) {
                         throw Exception("Null Response")
                     }
@@ -189,7 +190,7 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
         return authClient.newCall(request)
                 .asObservableSuccess()
                 .map { netResponse ->
-                    val responseBody = netResponse.body()?.string().orEmpty()
+                    val responseBody = netResponse.body?.string().orEmpty()
                     if (responseBody.isEmpty()) {
                         throw Exception("Null Response")
                     }
@@ -235,7 +236,7 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
         return authClient.newCall(request)
                 .asObservableSuccess()
                 .map { netResponse ->
-                    val responseBody = netResponse.body()?.string().orEmpty()
+                    val responseBody = netResponse.body?.string().orEmpty()
                     if (responseBody.isEmpty()) {
                         throw Exception("Null Response")
                     }

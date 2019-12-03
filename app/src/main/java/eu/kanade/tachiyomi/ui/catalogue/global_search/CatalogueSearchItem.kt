@@ -5,6 +5,8 @@ import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.AbstractFlexibleItem
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.CatalogueSource
+import androidx.recyclerview.widget.RecyclerView
+import eu.davidea.flexibleadapter.items.IFlexible
 
 /**
  * Item that contains search result information.
@@ -30,15 +32,15 @@ class CatalogueSearchItem(val source: CatalogueSource, val results: List<Catalog
      *
      * @return holder of view.
      */
-    override fun createViewHolder(view: View, adapter: FlexibleAdapter<*>): CatalogueSearchHolder {
+    override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): CatalogueSearchHolder {
         return CatalogueSearchHolder(view, adapter as CatalogueSearchAdapter)
     }
 
     /**
      * Bind item to view.
      */
-    override fun bindViewHolder(adapter: FlexibleAdapter<*>, holder: CatalogueSearchHolder,
-                                position: Int, payloads: List<Any?>?) {
+    override fun bindViewHolder(adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>, holder: CatalogueSearchHolder,
+                                position: Int, payloads: MutableList<Any?>?) {
         holder.bind(this)
     }
 

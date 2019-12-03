@@ -439,4 +439,7 @@
     <string name="label_help">Помощь</string>
     <string name="pref_library_update_prioritization_summary">Выберите порядок, в котором Tachiyomi проверяет наличие обновлений</string>
     <string name="pref_library_update_prioritization">Порядок обновления библиотеки</string>
+    <string name="system_theme">Системный</string>
+    <string name="system_darkblue_theme">Системный (Темно-синяя тема)</string>
+    <string name="system_amoled_theme">Системный (AMOLED)</string>
 </resources>

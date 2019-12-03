@@ -447,4 +447,7 @@
     <string name="label_help">Agiudu</string>
     <string name="pref_library_update_prioritization">Òrdine de agiornamentu de sa biblioteca</string>
     <string name="pref_library_update_prioritization_summary">Ischerta s\'òrdine chi Tachiyomi at a impreare pro sos agiornamentos</string>
+    <string name="system_theme">Predefinida de su sistema</string>
+    <string name="system_darkblue_theme">Predefinida de su sistema (Biaitu iscuru)</string>
+    <string name="system_amoled_theme">Predefinida de su sistema (AMOLED)</string>
 </resources>

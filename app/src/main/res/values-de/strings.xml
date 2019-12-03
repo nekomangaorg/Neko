@@ -445,4 +445,7 @@
     <string name="label_help">Hilfe</string>
     <string name="pref_library_update_prioritization">Reihenfolge der Bibliotheksaktualisierung</string>
     <string name="pref_library_update_prioritization_summary">Bestimme die Reihenfolge in der Tachiyomi nach Updates sucht</string>
+    <string name="system_theme">Systemstandard</string>
+    <string name="system_darkblue_theme">Systemstandard (Dunkelblau)</string>
+    <string name="system_amoled_theme">Systemstandard (AMOLED)</string>
 </resources>

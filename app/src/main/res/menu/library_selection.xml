@@ -18,4 +18,21 @@
           android:icon="@drawable/ic_delete_white_24dp"
           app:showAsAction="ifRoom"/>
 
+    <item android:id="@+id/action_select_all"
+        android:title="@string/action_select_all"
+        android:icon="@drawable/ic_select_all_white_24dp"
+        app:showAsAction="ifRoom"/>
+
+    <item
+        android:id="@+id/action_migrate"
+        android:icon="@drawable/baseline_swap_calls_white_24"
+        android:title="@string/label_migration"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_hide_title"
+        android:icon="@drawable/baseline_swap_calls_white_24"
+        android:title="@string/label_hide_title"
+        app:showAsAction="never" />
+
 </menu>

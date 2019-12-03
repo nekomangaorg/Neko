@@ -5,6 +5,8 @@ import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.AbstractFlexibleItem
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.MangaChapterHistory
+import androidx.recyclerview.widget.RecyclerView
+import eu.davidea.flexibleadapter.items.IFlexible
 
 class RecentlyReadItem(val mch: MangaChapterHistory) : AbstractFlexibleItem<RecentlyReadHolder>() {
 
@@ -12,14 +14,14 @@ class RecentlyReadItem(val mch: MangaChapterHistory) : AbstractFlexibleItem<Rece
         return R.layout.recently_read_item
     }
 
-    override fun createViewHolder(view: View, adapter: FlexibleAdapter<*>): RecentlyReadHolder {
+    override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): RecentlyReadHolder {
         return RecentlyReadHolder(view, adapter as RecentlyReadAdapter)
     }
 
-    override fun bindViewHolder(adapter: FlexibleAdapter<*>,
+    override fun bindViewHolder(adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
                                 holder: RecentlyReadHolder,
                                 position: Int,
-                                payloads: List<Any?>?) {
+                                payloads: MutableList<Any?>?) {
 
         holder.bind(mch)
     }

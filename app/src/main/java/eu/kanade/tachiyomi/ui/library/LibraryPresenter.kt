@@ -5,18 +5,23 @@ import com.jakewharton.rxrelay.BehaviorRelay
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
+import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.source.LocalSource
+import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
+import eu.kanade.tachiyomi.ui.migration.MigrationFlags
 import eu.kanade.tachiyomi.util.combineLatest
 import eu.kanade.tachiyomi.util.isNullOrUnsubscribed
+import eu.kanade.tachiyomi.util.syncChaptersWithSource
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
@@ -185,24 +190,27 @@ class LibraryPresenter(
 
         val sortFn: (LibraryItem, LibraryItem) -> Int = { i1, i2 ->
             when (sortingMode) {
-                LibrarySort.ALPHA -> i1.manga.title.compareTo(i2.manga.title, true)
+                LibrarySort.ALPHA -> sortAlphabetical(i1, i2)
                 LibrarySort.LAST_READ -> {
                     // Get index of manga, set equal to list if size unknown.
                     val manga1LastRead = lastReadManga[i1.manga.id!!] ?: lastReadManga.size
                     val manga2LastRead = lastReadManga[i2.manga.id!!] ?: lastReadManga.size
-                    manga1LastRead.compareTo(manga2LastRead)
+                    val mangaCompare = manga1LastRead.compareTo(manga2LastRead)
+                    if (mangaCompare == 0) sortAlphabetical(i1, i2) else mangaCompare
                 }
                 LibrarySort.LAST_UPDATED -> i2.manga.last_update.compareTo(i1.manga.last_update)
                 LibrarySort.UNREAD -> i1.manga.unread.compareTo(i2.manga.unread)
                 LibrarySort.TOTAL -> {
                     val manga1TotalChapter = totalChapterManga[i1.manga.id!!] ?: 0
                     val mange2TotalChapter = totalChapterManga[i2.manga.id!!] ?: 0
-                    manga1TotalChapter.compareTo(mange2TotalChapter)
+                    val mangaCompare = manga1TotalChapter.compareTo(mange2TotalChapter)
+                    if (mangaCompare == 0) sortAlphabetical(i1, i2) else mangaCompare
                 }
                 LibrarySort.SOURCE -> {
                     val source1Name = sourceManager.getOrStub(i1.manga.source).name
                     val source2Name = sourceManager.getOrStub(i2.manga.source).name
-                    source1Name.compareTo(source2Name)
+                    val mangaCompare = source1Name.compareTo(source2Name)
+                    if (mangaCompare == 0) sortAlphabetical(i1, i2) else mangaCompare
                 }
                 else -> throw Exception("Unknown sorting mode")
             }
@@ -216,22 +224,27 @@ class LibraryPresenter(
         return map.mapValues { entry -> entry.value.sortedWith(comparator) }
     }
 
+    fun sortAlphabetical(i1: LibraryItem, i2: LibraryItem): Int {
+        return i1.manga.title.removeArticles().compareTo(i2.manga.title.removeArticles(), true)
+    }
+
+    fun String.removeArticles(): String {
+        return this.replace(Regex("^(an|a|the) ", RegexOption.IGNORE_CASE), "")
+    }
+
     /**
      * Get the categories and all its manga from the database.
      *
      * @return an observable of the categories and its manga.
      */
     private fun getLibraryObservable(): Observable<Library> {
-        return Observable.combineLatest(getCategoriesObservable(), getLibraryMangasObservable(),
-                { dbCategories, libraryManga ->
-                    val categories = if (libraryManga.containsKey(0))
-                        arrayListOf(Category.createDefault()) + dbCategories
-                    else
-                        dbCategories
+        return Observable.combineLatest(getCategoriesObservable(), getLibraryMangasObservable()) { dbCategories, libraryManga ->
+            val categories = if (libraryManga.containsKey(0)) arrayListOf(Category.createDefault()) + dbCategories
+            else dbCategories
 
-                    this.categories = categories
-                    Library(categories, libraryManga)
-                })
+            this.categories = categories
+            Library(categories, libraryManga)
+        }
     }
 
     /**
@@ -304,7 +317,7 @@ class LibraryPresenter(
      * @param mangas the list of manga to delete.
      * @param deleteChapters whether to also delete downloaded chapters.
      */
-    fun removeMangaFromLibrary(mangas: List<Manga>, deleteChapters: Boolean) {
+    fun removeMangaFromLibrary(mangas: List<Manga>) {
         // Create a set of the list
         val mangaToDelete = mangas.distinctBy { it.id }
         mangaToDelete.forEach { it.favorite = false }
@@ -313,20 +326,29 @@ class LibraryPresenter(
                 .onErrorResumeNext { Observable.empty() }
                 .subscribeOn(Schedulers.io())
                 .subscribe()
+    }
 
+    fun confirmDeletion(mangas: List<Manga>) {
         Observable.fromCallable {
+            val mangaToDelete = mangas.distinctBy { it.id }
             mangaToDelete.forEach { manga ->
                 coverCache.deleteFromCache(manga.thumbnail_url)
-                if (deleteChapters) {
-                    val source = sourceManager.get(manga.source) as? HttpSource
-                    if (source != null) {
-                        downloadManager.deleteManga(manga, source)
-                    }
-                }
+                val source = sourceManager.get(manga.source) as? HttpSource
+                if (source != null)
+                    downloadManager.deleteManga(manga, source)
             }
-        }
-                .subscribeOn(Schedulers.io())
-                .subscribe()
+        }.subscribeOn(Schedulers.io()).subscribe()
+    }
+
+    fun addMangas(mangas: List<Manga>) {
+        val mangaToAdd = mangas.distinctBy { it.id }
+        mangaToAdd.forEach { it.favorite = true }
+
+        Observable.fromCallable { db.insertMangas(mangaToAdd).executeAsBlocking() }
+            .onErrorResumeNext { Observable.empty() }
+            .subscribeOn(Schedulers.io())
+            .subscribe()
+        mangaToAdd.forEach { db.insertManga(it).executeAsBlocking() }
     }
 
     /**
@@ -345,6 +367,88 @@ class LibraryPresenter(
         }
 
         db.setMangaCategories(mc, mangas)
+    }
+
+    fun migrateManga(prevManga: Manga, manga: Manga, replace: Boolean) {
+        val source = sourceManager.get(manga.source) ?: return
+
+        //state = state.copy(isReplacingManga = true)
+
+        Observable.defer { source.fetchChapterList(manga) }
+            .onErrorReturn { emptyList() }
+            .doOnNext { migrateMangaInternal(source, it, prevManga, manga, replace) }
+            .onErrorReturn { emptyList() }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            //.doOnUnsubscribe { state = state.copy(isReplacingManga = false) }
+            .subscribe()
+    }
+
+    fun hideShowTitle(mangas: List<Manga>, hide: Boolean) {
+        mangas.forEach { it.hide_title = hide }
+        db.inTransaction {
+            mangas.forEach {
+                db.updateMangaHideTitle(it).executeAsBlocking()
+            }
+        }
+    }
+
+    private fun migrateMangaInternal(source: Source, sourceChapters: List<SChapter>,
+        prevManga: Manga, manga: Manga, replace: Boolean) {
+
+        val flags = preferences.migrateFlags().getOrDefault()
+        val migrateChapters = MigrationFlags.hasChapters(flags)
+        val migrateCategories = MigrationFlags.hasCategories(flags)
+        val migrateTracks = MigrationFlags.hasTracks(flags)
+
+        db.inTransaction {
+            // Update chapters read
+            if (migrateChapters) {
+                try {
+                    syncChaptersWithSource(db, sourceChapters, manga, source)
+                } catch (e: Exception) {
+                    // Worst case, chapters won't be synced
+                }
+
+                val prevMangaChapters = db.getChapters(prevManga).executeAsBlocking()
+                val maxChapterRead =
+                    prevMangaChapters.filter { it.read }.maxBy { it.chapter_number }?.chapter_number
+                if (maxChapterRead != null) {
+                    val dbChapters = db.getChapters(manga).executeAsBlocking()
+                    for (chapter in dbChapters) {
+                        if (chapter.isRecognizedNumber && chapter.chapter_number <= maxChapterRead) {
+                            chapter.read = true
+                        }
+                    }
+                    db.insertChapters(dbChapters).executeAsBlocking()
+                }
+            }
+            // Update categories
+            if (migrateCategories) {
+                val categories = db.getCategoriesForManga(prevManga).executeAsBlocking()
+                val mangaCategories = categories.map { MangaCategory.create(manga, it) }
+                db.setMangaCategories(mangaCategories, listOf(manga))
+            }
+            // Update track
+            if (migrateTracks) {
+                val tracks = db.getTracks(prevManga).executeAsBlocking()
+                for (track in tracks) {
+                    track.id = null
+                    track.manga_id = manga.id!!
+                }
+                db.insertTracks(tracks).executeAsBlocking()
+            }
+            // Update favorite status
+            if (replace) {
+                prevManga.favorite = false
+                db.updateMangaFavorite(prevManga).executeAsBlocking()
+            }
+            manga.favorite = true
+            db.updateMangaFavorite(manga).executeAsBlocking()
+
+            // SearchPresenter#networkToLocalManga may have updated the manga title, so ensure db gets updated title
+            db.updateMangaTitle(manga).executeAsBlocking()
+        }
     }
 
     /**

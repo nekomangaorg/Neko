@@ -1,7 +1,7 @@
 package eu.kanade.tachiyomi.ui.setting
 
 import android.os.Build
-import android.support.v7.preference.PreferenceScreen
+import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 
@@ -50,8 +50,8 @@ class SettingsReaderController : SettingsController() {
         intListPreference {
             key = Keys.readerTheme
             titleRes = R.string.pref_reader_theme
-            entriesRes = arrayOf(R.string.white_background, R.string.black_background)
-            entryValues = arrayOf("0", "1")
+            entriesRes = arrayOf(R.string.white_background, R.string.black_background, R.string.zoom_start_automatic)
+            entryValues = arrayOf("0", "1", "2")
             defaultValue = "0"
             summary = "%s"
         }
@@ -87,7 +87,7 @@ class SettingsReaderController : SettingsController() {
             switchPreference {
                 key = Keys.trueColor
                 titleRes = R.string.pref_true_color
-                defaultValue = false
+                defaultValue = true
             }
         }
         preferenceCategory {

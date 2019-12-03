@@ -2,7 +2,7 @@ package eu.kanade.tachiyomi.ui.manga.track
 
 import android.content.Intent
 import android.net.Uri
-import android.support.v7.widget.LinearLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,6 +11,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.manga.MangaController
+import eu.kanade.tachiyomi.util.RecyclerWindowInsetsListener
 import eu.kanade.tachiyomi.util.toast
 import kotlinx.android.synthetic.main.track_controller.*
 import timber.log.Timber
@@ -42,8 +43,9 @@ class TrackController : NucleusController<TrackPresenter>(),
 
         adapter = TrackAdapter(this)
         with(view) {
-            track_recycler.layoutManager = LinearLayoutManager(context)
+            track_recycler.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
             track_recycler.adapter = adapter
+            track_recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
             swipe_refresh.isEnabled = false
             swipe_refresh.refreshes().subscribeUntilDestroy { presenter.refresh() }
         }

@@ -1,9 +1,9 @@
 package eu.kanade.tachiyomi.ui.recent_updates
 
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.view.ActionMode
-import android.support.v7.widget.DividerItemDecoration
-import android.support.v7.widget.LinearLayoutManager
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.view.ActionMode
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
 import android.view.*
 import com.jakewharton.rxbinding.support.v4.widget.refreshes
 import com.jakewharton.rxbinding.support.v7.widget.scrollStateChanges
@@ -13,12 +13,16 @@ import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
+import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.ui.base.controller.NoToolbarElevationController
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.base.controller.popControllerWithTag
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
+import eu.kanade.tachiyomi.util.RecyclerWindowInsetsListener
+import eu.kanade.tachiyomi.util.notificationManager
+import eu.kanade.tachiyomi.util.snack
 import eu.kanade.tachiyomi.util.toast
 import kotlinx.android.synthetic.main.recent_chapters_controller.*
 import timber.log.Timber
@@ -66,7 +70,7 @@ class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
      */
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
-
+        view.context.notificationManager.cancel(Notifications.ID_NEW_CHAPTERS)
         // Init RecyclerView and adapter
         val layoutManager = LinearLayoutManager(view.context)
         recycler.layoutManager = layoutManager
@@ -85,11 +89,12 @@ class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
         swipe_refresh.refreshes().subscribeUntilDestroy {
             if (!LibraryUpdateService.isRunning(view.context)) {
                 LibraryUpdateService.start(view.context)
-                view.context.toast(R.string.action_update_library)
+                view.snack(R.string.updating_library)
             }
-            // It can be a very long operation, so we disable swipe refresh and show a toast.
+            // It can be a very long operation, so we disable swipe refresh and show a snackbar.
             swipe_refresh.isRefreshing = false
         }
+        recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
     }
 
     override fun onDestroyView(view: View) {
@@ -111,7 +116,7 @@ class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
      * Called when item in list is clicked
      * @param position position of clicked item
      */
-    override fun onItemClick(position: Int): Boolean {
+    override fun onItemClick(view: View?, position: Int): Boolean {
         val adapter = adapter ?: return false
 
         // Get item from position

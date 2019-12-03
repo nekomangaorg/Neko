@@ -8,8 +8,8 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
-import android.support.v4.content.ContextCompat
-import android.support.v7.preference.PreferenceScreen
+import androidx.core.content.ContextCompat
+import androidx.preference.PreferenceScreen
 import com.afollestad.materialdialogs.MaterialDialog
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.R
@@ -118,8 +118,8 @@ class SettingsDownloadController : SettingsController() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         when (requestCode) {
             DOWNLOAD_DIR_PRE_L -> if (data != null && resultCode == Activity.RESULT_OK) {
-                val uri = Uri.fromFile(File(data.data.path))
-                preferences.downloadsDirectory().set(uri.toString())
+                val uri = Uri.fromFile(File(data.data?.path))
+                preferences.downloadsDirectory().set(uri?.toString() ?: "")
             }
             DOWNLOAD_DIR_L -> if (data != null && resultCode == Activity.RESULT_OK) {
                 val context = applicationContext ?: return
@@ -128,7 +128,8 @@ class SettingsDownloadController : SettingsController() {
                         Intent.FLAG_GRANT_WRITE_URI_PERMISSION
 
                 @Suppress("NewApi")
-                context.contentResolver.takePersistableUriPermission(uri, flags)
+                if (uri != null)
+                    context.contentResolver.takePersistableUriPermission(uri, flags)
 
                 val file = UniFile.fromUri(context, uri)
                 preferences.downloadsDirectory().set(file.uri.toString())

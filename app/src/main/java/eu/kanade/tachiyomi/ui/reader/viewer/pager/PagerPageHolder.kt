@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.reader.viewer.pager
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.graphics.BitmapFactory
 import android.graphics.PointF
 import android.graphics.drawable.Drawable
 import android.net.Uri
@@ -35,8 +36,11 @@ import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerConfig.ZoomType
 import eu.kanade.tachiyomi.util.ImageUtil
 import eu.kanade.tachiyomi.util.dpToPx
 import eu.kanade.tachiyomi.util.gone
+import eu.kanade.tachiyomi.util.launchUI
 import eu.kanade.tachiyomi.util.visible
 import eu.kanade.tachiyomi.widget.ViewPagerAdapter
+import kotlinx.coroutines.Dispatchers.Default
+import kotlinx.coroutines.withContext
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
@@ -244,15 +248,47 @@ class PagerPageHolder(
             .observeOn(AndroidSchedulers.mainThread())
             .doOnNext { isAnimated ->
                 if (!isAnimated) {
-                    initSubsamplingImageView().setImage(ImageSource.inputStream(openStream!!))
+                    if (viewer.config.readerTheme == 2) {
+                        val imageView = initSubsamplingImageView()
+                        if (page.bg != null) {
+                            imageView.setImage(ImageSource.inputStream(openStream!!))
+                            imageView.background = page.bg
+                        }
+                        // if the user switches to automatic when pages are already cached, the bg needs to be loaded
+                        else {
+                            val bytesArray = openStream!!.readBytes()
+                            val bytesStream = bytesArray.inputStream()
+                            imageView.setImage(ImageSource.inputStream(bytesStream))
+                            bytesStream.close()
+
+                            launchUI {
+                                imageView.background = setBG(bytesArray)
+                                page.bg = imageView.background
+                            }
+                        }
+                    }
+                    else {
+                        initSubsamplingImageView().setImage(ImageSource.inputStream(openStream!!))
+                    }
                 } else {
-                    initImageView().setImage(openStream!!)
+                    val imageView = initImageView()
+                    imageView.setImage(openStream!!)
+                    if (viewer.config.readerTheme == 2 && page.bg != null)
+                        imageView.background = page.bg
                 }
             }
             // Keep the Rx stream alive to close the input stream only when unsubscribed
             .flatMap { Observable.never<Unit>() }
             .doOnUnsubscribe { openStream?.close() }
             .subscribe({}, {})
+    }
+
+    private suspend fun setBG(bytesArray: ByteArray): Drawable {
+        return withContext(Default) {
+            ImageUtil.autoSetBackground(BitmapFactory.decodeByteArray(
+                bytesArray, 0, bytesArray.size
+            ))
+        }
     }
 
     /**

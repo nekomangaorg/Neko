@@ -12,7 +12,7 @@
             </item>
 
             <item>
-                <color android:color="@color/dialogDark"/>
+                <color android:color="@color/colorDarkPrimary"/>
             </item>
         </selector>
     </item>

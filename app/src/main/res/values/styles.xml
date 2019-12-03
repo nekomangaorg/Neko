@@ -35,12 +35,11 @@
     <!--==============-->
     <!--NavigationView-->
     <!--==============-->
-    <style name="Theme.Widget.NavigationView" />
-
-    <style name="Theme.Widget.NavigationView.Dark">
-        <item name="colorControlHighlight">@color/md_grey_900</item>
-        <item name="colorPrimary">?colorAccent</item>
+    <style name="Theme.Widget.NavigationView">
+        <item name="colorControlHighlight">@color/drawerHighlight</item>
+        <item name="colorPrimary">@color/drawerPrimary</item>
     </style>
+
 
     <!--===============-->
     <!--Text Appearance-->
@@ -145,6 +144,17 @@
         <item name="layout_anchorGravity">bottom|right|end</item>
         <item name="android:tint">@color/md_white_1000</item>
         <item name="layout_behavior">eu.kanade.tachiyomi.widget.FABAnimationUpDown</item>
+    </style>
+
+    <style name="Theme.Widget.FABFixed">
+        <item name="android:layout_height">@dimen/fab_size</item>
+        <item name="android:layout_width">@dimen/fab_size</item>
+        <item name="android:layout_gravity">bottom|end</item>
+        <item name="android:layout_margin">@dimen/fab_margin</item>
+        <item name="android:scaleType">fitCenter</item>
+        <item name="layout_anchorGravity">bottom|right|end</item>
+        <item name="android:tint">@color/md_white_1000</item>
+        <item name="layout_behavior">eu.kanade.tachiyomi.widget.FABMoveBehaviour</item>
     </style>
 
     <style name="Theme.Widget.CardView" parent="CardView">

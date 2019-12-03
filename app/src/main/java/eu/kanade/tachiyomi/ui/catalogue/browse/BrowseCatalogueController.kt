@@ -2,12 +2,18 @@ package eu.kanade.tachiyomi.ui.catalogue.browse
 
 import android.content.res.Configuration
 import android.os.Bundle
-import android.support.design.widget.Snackbar
-import android.support.v4.widget.DrawerLayout
-import android.support.v7.widget.*
-import android.view.*
-import com.afollestad.materialdialogs.MaterialDialog
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
+import androidx.appcompat.widget.SearchView
+import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
 import com.f2prateek.rx.preferences.Preference
+import com.google.android.material.snackbar.BaseTransientBottomBar
+import com.google.android.material.snackbar.Snackbar
 import com.jakewharton.rxbinding.support.v7.widget.queryTextChangeEvents
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
@@ -22,9 +28,21 @@ import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.base.controller.SecondaryDrawerController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.library.ChangeMangaCategoriesDialog
+import eu.kanade.tachiyomi.ui.library.HeightTopWindowInsetsListener
+import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaController
-import eu.kanade.tachiyomi.ui.manga.info.MangaWebViewController
-import eu.kanade.tachiyomi.util.*
+import eu.kanade.tachiyomi.ui.manga.info.WebViewActivity
+import eu.kanade.tachiyomi.util.RecyclerWindowInsetsListener
+import eu.kanade.tachiyomi.util.connectivityManager
+import eu.kanade.tachiyomi.util.doOnApplyWindowInsets
+import eu.kanade.tachiyomi.util.gone
+import eu.kanade.tachiyomi.util.inflate
+import eu.kanade.tachiyomi.util.marginTop
+import eu.kanade.tachiyomi.util.openInBrowser
+import eu.kanade.tachiyomi.util.snack
+import eu.kanade.tachiyomi.util.updateLayoutParams
+import eu.kanade.tachiyomi.util.updatePaddingRelative
+import eu.kanade.tachiyomi.util.visible
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import kotlinx.android.synthetic.main.catalogue_controller.*
 import kotlinx.android.synthetic.main.main_activity.*
@@ -74,7 +92,7 @@ open class BrowseCatalogueController(bundle: Bundle) :
     /**
      * Recycler view with the list of results.
      */
-    private var recycler: RecyclerView? = null
+    private var recycler: androidx.recyclerview.widget.RecyclerView? = null
 
     /**
      * Subscription for the search view.
@@ -130,19 +148,19 @@ open class BrowseCatalogueController(bundle: Bundle) :
         super.onDestroyView(view)
     }
 
-    override fun createSecondaryDrawer(drawer: DrawerLayout): ViewGroup? {
+    override fun createSecondaryDrawer(drawer: androidx.drawerlayout.widget.DrawerLayout): ViewGroup? {
         // Inflate and prepare drawer
         val navView = drawer.inflate(R.layout.catalogue_drawer) as CatalogueNavigationView
         this.navView = navView
         navView.setFilters(presenter.filterItems)
 
-        drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, Gravity.END)
+        drawer.setDrawerLockMode(androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_UNLOCKED, GravityCompat.END)
 
         navView.onSearchClicked = {
             val allDefault = presenter.sourceFilters == presenter.source.getFilterList()
             showProgressBar()
             adapter?.clear()
-            drawer.closeDrawer(Gravity.END)
+            drawer.closeDrawer(GravityCompat.END)
             presenter.setSourceFilter(if (allDefault) FilterList() else presenter.sourceFilters)
         }
 
@@ -152,30 +170,47 @@ open class BrowseCatalogueController(bundle: Bundle) :
             presenter.sourceFilters = newFilters
             navView.setFilters(presenter.filterItems)
         }
+        drawer.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
+            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
+            View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+
+        val statusScrim = navView.findViewById(R.id.status_bar_scrim) as View
+        statusScrim.setOnApplyWindowInsetsListener(HeightTopWindowInsetsListener)
+        val titleView = navView.findViewById(R.id.title_background) as View
+        val titleMarginTop = titleView.marginTop
+        navView.doOnApplyWindowInsets { v, insets, padding ->
+            v.updatePaddingRelative(
+                bottom = padding.bottom + insets.systemWindowInsetBottom,
+                end = padding.right + insets.systemWindowInsetRight
+            )
+            titleView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                topMargin = titleMarginTop + insets.systemWindowInsetTop
+            }
+        }
         return navView
     }
 
-    override fun cleanupSecondaryDrawer(drawer: DrawerLayout) {
+    override fun cleanupSecondaryDrawer(drawer: androidx.drawerlayout.widget.DrawerLayout) {
         navView = null
     }
 
     private fun setupRecycler(view: View) {
         numColumnsSubscription?.unsubscribe()
 
-        var oldPosition = RecyclerView.NO_POSITION
+        var oldPosition = androidx.recyclerview.widget.RecyclerView.NO_POSITION
         val oldRecycler = catalogue_view?.getChildAt(1)
-        if (oldRecycler is RecyclerView) {
-            oldPosition = (oldRecycler.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+        if (oldRecycler is androidx.recyclerview.widget.RecyclerView) {
+            oldPosition = (oldRecycler.layoutManager as androidx.recyclerview.widget.LinearLayoutManager).findFirstVisibleItemPosition()
             oldRecycler.adapter = null
 
             catalogue_view?.removeView(oldRecycler)
         }
 
         val recycler = if (presenter.isListMode) {
-            RecyclerView(view.context).apply {
+            androidx.recyclerview.widget.RecyclerView(view.context).apply {
                 id = R.id.recycler
-                layoutManager = LinearLayoutManager(context)
-                addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
+                layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
+                addItemDecoration(androidx.recyclerview.widget.DividerItemDecoration(context, androidx.recyclerview.widget.DividerItemDecoration.VERTICAL))
             }
         } else {
             (catalogue_view.inflate(R.layout.catalogue_recycler_autofit) as AutofitRecyclerView).apply {
@@ -185,7 +220,7 @@ open class BrowseCatalogueController(bundle: Bundle) :
                         // Set again the adapter to recalculate the covers height
                         .subscribe { adapter = this@BrowseCatalogueController.adapter }
 
-                (layoutManager as GridLayoutManager).spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
+                (layoutManager as androidx.recyclerview.widget.GridLayoutManager).spanSizeLookup = object : androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup() {
                     override fun getSpanSize(position: Int): Int {
                         return when (adapter?.getItemViewType(position)) {
                             R.layout.catalogue_grid_item, null -> 1
@@ -199,9 +234,9 @@ open class BrowseCatalogueController(bundle: Bundle) :
         recycler.adapter = adapter
 
         catalogue_view.addView(recycler, 1)
-
-        if (oldPosition != RecyclerView.NO_POSITION) {
-            recycler.layoutManager.scrollToPosition(oldPosition)
+        recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
+        if (oldPosition != androidx.recyclerview.widget.RecyclerView.NO_POSITION) {
+            recycler.layoutManager?.scrollToPosition(oldPosition)
         }
         this.recycler = recycler
     }
@@ -272,7 +307,7 @@ open class BrowseCatalogueController(bundle: Bundle) :
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_display_mode -> swapDisplayMode()
-            R.id.action_set_filter -> navView?.let { activity?.drawer?.openDrawer(Gravity.END) }
+            R.id.action_set_filter -> navView?.let { activity?.drawer?.openDrawer(GravityCompat.END) }
             R.id.action_open_in_browser -> openInBrowser()
             R.id.action_open_in_web_view -> openInWebView()
             else -> return super.onOptionsItemSelected(item)
@@ -288,9 +323,10 @@ open class BrowseCatalogueController(bundle: Bundle) :
 
     private fun openInWebView() {
         val source = presenter.source as? HttpSource ?: return
-
-        router.pushController(MangaWebViewController(source.id, source.baseUrl)
-                .withFadeTransaction())
+        val activity = activity ?: return
+        val intent = WebViewActivity.newIntent(activity, source.id, source.baseUrl, presenter
+            .source.name)
+        startActivity(intent)
     }
 
     /**
@@ -344,7 +380,7 @@ open class BrowseCatalogueController(bundle: Bundle) :
         val message = if (error is NoResultsException) "No results found" else (error.message ?: "")
 
         snack?.dismiss()
-        snack = catalogue_view?.snack(message, Snackbar.LENGTH_INDEFINITE) {
+        snack = catalouge_layout?.snack(message, Snackbar.LENGTH_INDEFINITE) {
             setAction(R.string.action_retry) {
                 // If not the first page, show bottom progress bar.
                 if (adapter.mainItemCount > 0) {
@@ -464,7 +500,7 @@ open class BrowseCatalogueController(bundle: Bundle) :
      * @param position the position of the element clicked.
      * @return true if the item should be selected, false otherwise.
      */
-    override fun onItemClick(position: Int): Boolean {
+    override fun onItemClick(view: View?, position: Int): Boolean {
         val item = adapter?.getItem(position) as? CatalogueItem ?: return false
         router.pushController(MangaController(item.manga, true).withFadeTransaction())
 
@@ -481,31 +517,41 @@ open class BrowseCatalogueController(bundle: Bundle) :
      * @param position the position of the element clicked.
      */
     override fun onItemLongClick(position: Int) {
-        val activity = activity ?: return
         val manga = (adapter?.getItem(position) as? CatalogueItem?)?.manga ?: return
+        snack?.dismiss()
         if (manga.favorite) {
-            MaterialDialog.Builder(activity)
-                    .items(activity.getString(R.string.remove_from_library))
-                    .itemsCallback { _, _, which, _ ->
-                        when (which) {
-                            0 -> {
-                                presenter.changeMangaFavorite(manga)
-                                adapter?.notifyItemChanged(position)
-                                activity?.toast(activity?.getString(R.string.manga_removed_library))
-                            }
-                        }
-                    }.show()
-        } else {
             presenter.changeMangaFavorite(manga)
             adapter?.notifyItemChanged(position)
+            snack = catalouge_layout?.snack(R.string.manga_removed_library, Snackbar.LENGTH_INDEFINITE) {
+                setAction(R.string.action_undo) {
+                    if (!manga.favorite) addManga(manga, position)
+                }
+                addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
+                    override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+                        super.onDismissed(transientBottomBar, event)
+                        if (!manga.favorite) presenter.confirmDeletion(manga)
+                    }
+                })
+            }
+            (activity as? MainActivity)?.setUndoSnackBar(snack)
+        } else {
+            addManga(manga, position)
+            snack = catalouge_layout?.snack(R.string.manga_added_library)
+        }
+    }
 
-            val categories = presenter.getCategories()
-            val defaultCategory = categories.find { it.id == preferences.defaultCategory() }
-            if (defaultCategory != null) {
-                presenter.moveMangaToCategory(manga, defaultCategory)
-            } else if (categories.size <= 1) { // default or the one from the user
-                presenter.moveMangaToCategory(manga, categories.firstOrNull())
-            } else {
+    private fun addManga(manga: Manga, position: Int) {
+        presenter.changeMangaFavorite(manga)
+        adapter?.notifyItemChanged(position)
+
+        val categories = presenter.getCategories()
+        val defaultCategoryId = preferences.defaultCategory()
+        val defaultCategory = categories.find { it.id == defaultCategoryId }
+        when {
+            defaultCategory != null -> presenter.moveMangaToCategory(manga, defaultCategory)
+            defaultCategoryId == 0 || categories.isEmpty() -> // 'Default' or no category
+                presenter.moveMangaToCategory(manga, null)
+            else -> {
                 val ids = presenter.getMangaCategoryIds(manga)
                 val preselected = ids.mapNotNull { id ->
                     categories.indexOfFirst { it.id == id }.takeIf { it != -1 }
@@ -514,9 +560,7 @@ open class BrowseCatalogueController(bundle: Bundle) :
                 ChangeMangaCategoriesDialog(this, listOf(manga), categories, preselected)
                         .showDialog(router)
             }
-            activity?.toast(activity?.getString(R.string.manga_added_library))
         }
-
     }
 
     /**

@@ -1,6 +1,6 @@
 package eu.kanade.tachiyomi.ui.catalogue.global_search
 
-import android.support.v7.widget.LinearLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import android.view.View
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -29,7 +29,8 @@ class CatalogueSearchHolder(view: View, val adapter: CatalogueSearchAdapter) :
 
     init {
         // Set layout horizontal.
-        recycler.layoutManager = LinearLayoutManager(view.context, LinearLayoutManager.HORIZONTAL, false)
+        recycler.layoutManager =
+            androidx.recyclerview.widget.LinearLayoutManager(view.context, androidx.recyclerview.widget.LinearLayoutManager.HORIZONTAL, false)
         recycler.adapter = mangaAdapter
     }
 

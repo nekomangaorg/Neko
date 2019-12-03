@@ -9,6 +9,9 @@ import eu.kanade.tachiyomi.data.download.model.DownloadQueue
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Page
+import eu.kanade.tachiyomi.util.launchNow
+import eu.kanade.tachiyomi.util.launchUI
+import kotlinx.coroutines.delay
 import rx.Observable
 import uy.kohesive.injekt.injectLazy
 
@@ -181,6 +184,7 @@ class DownloadManager(context: Context) {
      * @param source the source of the manga.
      */
     fun deleteManga(manga: Manga, source: Source) {
+        downloader.clearQueue(manga, true)
         queue.remove(manga)
         provider.findMangaDir(manga, source)?.delete()
         cache.removeManga(manga)

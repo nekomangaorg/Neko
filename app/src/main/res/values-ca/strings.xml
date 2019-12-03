@@ -198,6 +198,9 @@
     <string name="color_filter_g_value">G</string>
     <string name="color_filter_b_value">B</string>
     <string name="color_filter_a_value">A</string>
+    <string name="system_theme">Per defecte del sistema</string>
+    <string name="system_darkblue_theme">Per defecte del sistema (Blau fosc)</string>
+    <string name="system_amoled_theme">Per defecte del sistema (AMOLED)</string>
     <string name="pref_download_directory">Directori de descàrregues</string>
     <string name="pref_download_only_over_wifi">Descarrega només amb WIFI</string>
     <string name="pref_remove_after_marked_as_read">Elimina quan es marqui com a llegit</string>

@@ -6,20 +6,20 @@
     android:gravity="center"
     android:orientation="horizontal">
 
-    <android.support.v7.widget.AppCompatImageButton
+    <androidx.appcompat.widget.AppCompatImageButton
         android:id="@+id/btn_decrease_10"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:background="?selectable_list_drawable"
+        android:background="@drawable/dialog_selector"
         android:padding="8dp"
         android:tint="?colorAccent"
         app:srcCompat="@drawable/ic_chevron_left_double_black_24dp" />
 
-    <android.support.v7.widget.AppCompatImageButton
+    <androidx.appcompat.widget.AppCompatImageButton
         android:id="@+id/btn_decrease"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:background="?selectable_list_drawable"
+        android:background="@drawable/dialog_selector"
         android:tint="?colorAccent"
         android:padding="8dp"
         app:srcCompat="@drawable/ic_chevron_left_black_24dp" />
@@ -34,20 +34,20 @@
         android:layout_width="wrap_content" />
 
 
-    <android.support.v7.widget.AppCompatImageButton
+    <androidx.appcompat.widget.AppCompatImageButton
         android:id="@+id/btn_increase"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:background="?selectable_list_drawable"
+        android:background="@drawable/dialog_selector"
         android:tint="?colorAccent"
         android:padding="8dp"
         app:srcCompat="@drawable/ic_chevron_right_black_24dp" />
 
-    <android.support.v7.widget.AppCompatImageButton
+    <androidx.appcompat.widget.AppCompatImageButton
         android:id="@+id/btn_increase_10"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:background="?selectable_list_drawable"
+        android:background="@drawable/dialog_selector"
         android:tint="?colorAccent"
         android:padding="8dp"
         app:srcCompat="@drawable/ic_chevron_right_double_black_24dp" />

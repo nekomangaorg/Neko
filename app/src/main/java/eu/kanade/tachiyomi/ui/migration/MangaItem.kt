@@ -5,6 +5,8 @@ import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.AbstractFlexibleItem
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
+import androidx.recyclerview.widget.RecyclerView
+import eu.davidea.flexibleadapter.items.IFlexible
 
 class MangaItem(val manga: Manga) : AbstractFlexibleItem<MangaHolder>() {
 
@@ -12,14 +14,14 @@ class MangaItem(val manga: Manga) : AbstractFlexibleItem<MangaHolder>() {
         return R.layout.catalogue_list_item
     }
 
-    override fun createViewHolder(view: View, adapter: FlexibleAdapter<*>): MangaHolder {
+    override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): MangaHolder {
         return MangaHolder(view, adapter)
     }
 
-    override fun bindViewHolder(adapter: FlexibleAdapter<*>,
+    override fun bindViewHolder(adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
                                 holder: MangaHolder,
                                 position: Int,
-                                payloads: List<Any?>?) {
+                                payloads: MutableList<Any?>?) {
 
         holder.bind(this)
     }

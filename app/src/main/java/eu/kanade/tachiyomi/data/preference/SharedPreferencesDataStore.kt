@@ -1,7 +1,7 @@
 package eu.kanade.tachiyomi.data.preference
 
 import android.content.SharedPreferences
-import android.support.v7.preference.PreferenceDataStore
+import androidx.preference.PreferenceDataStore
 
 class SharedPreferencesDataStore(private val prefs: SharedPreferences) : PreferenceDataStore() {
 
@@ -46,7 +46,7 @@ class SharedPreferencesDataStore(private val prefs: SharedPreferences) : Prefere
     }
 
     override fun getStringSet(key: String?, defValues: MutableSet<String>?): MutableSet<String> {
-        return prefs.getStringSet(key, defValues)
+        return prefs.getStringSet(key, defValues)!!
     }
 
     override fun putStringSet(key: String?, values: MutableSet<String>?) {

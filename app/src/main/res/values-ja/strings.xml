@@ -209,4 +209,7 @@
     <string name="show_password">パスワードを表示</string>
     <string name="login">ログイン</string>
     <string name="login_success">ログイン成功</string>
+    <string name="system_theme">システム標準</string>
+    <string name="system_darkblue_theme">システム標準 (ダークブルー)</string>
+    <string name="system_amoled_theme">システム標準 (AMOLED)</string>
 </resources>

@@ -339,4 +339,7 @@
     <string name="download_custom">Preuzmi određeno</string>
     <string name="download_all">Preuzmi sve</string>
     <string name="download_unread">Preuzmi nepročitano</string>
+    <string name="system_theme">Podrazumevani sistem</string>
+    <string name="system_darkblue_theme">Podrazumevani sistem (Tamno plava)</string>
+    <string name="system_amoled_theme">Podrazumevani sistem (AMOLED)</string>
 </resources>

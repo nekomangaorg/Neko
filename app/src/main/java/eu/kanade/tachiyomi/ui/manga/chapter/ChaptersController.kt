@@ -5,12 +5,15 @@ import android.animation.AnimatorListenerAdapter
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
-import android.support.design.widget.Snackbar
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.view.ActionMode
-import android.support.v7.widget.DividerItemDecoration
-import android.support.v7.widget.LinearLayoutManager
+import android.os.Build
+import com.google.android.material.snackbar.Snackbar
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.view.ActionMode
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
 import android.view.*
+import androidx.coordinatorlayout.widget.CoordinatorLayout
+import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.jakewharton.rxbinding.support.v4.widget.refreshes
 import com.jakewharton.rxbinding.view.clicks
 import eu.davidea.flexibleadapter.FlexibleAdapter
@@ -23,13 +26,18 @@ import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.base.controller.popControllerWithTag
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
-import eu.kanade.tachiyomi.util.getCoordinates
-import eu.kanade.tachiyomi.util.snack
-import eu.kanade.tachiyomi.util.toast
+import eu.kanade.tachiyomi.util.*
 import kotlinx.android.synthetic.main.chapters_controller.*
 import timber.log.Timber
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import android.content.Context
+import android.util.AttributeSet
+import androidx.core.view.ViewCompat
+import androidx.recyclerview.widget.RecyclerView
+import eu.kanade.tachiyomi.ui.main.MainActivity
+import kotlin.math.*
 
-class ChaptersController : NucleusController<ChaptersPresenter>(),
+class ChaptersController() : NucleusController<ChaptersPresenter>(),
         ActionMode.Callback,
         FlexibleAdapter.OnItemClickListener,
         FlexibleAdapter.OnItemLongClickListener,
@@ -40,16 +48,23 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
         DownloadCustomChaptersDialog.Listener,
         DeleteChaptersDialog.Listener {
 
+    constructor(startY: Float?) : this() {
+        this.startingChapterYPos = startY
+    }
+
     /**
      * Adapter containing a list of chapters.
      */
     private var adapter: ChaptersAdapter? = null
+
+    private var scrollToUnread = true
 
     /**
      * Action mode for multiple selection.
      */
     private var actionMode: ActionMode? = null
 
+    private var snack:Snackbar? = null
     /**
      * Selected items. Used to restore selections after a rotation.
      */
@@ -59,6 +74,7 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
         setHasOptionsMenu(true)
         setOptionsMenuHidden(true)
     }
+    var startingChapterYPos:Float? = null
 
     override fun createPresenter(): ChaptersPresenter {
         val ctrl = parentController as MangaController
@@ -82,6 +98,16 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
         recycler.setHasFixedSize(true)
         adapter?.fastScroller = fast_scroller
 
+        val fabBaseMarginBottom = fab?.marginBottom ?: 0
+        recycler.doOnApplyWindowInsets { v, insets, padding ->
+            v.updatePaddingRelative(bottom = padding.bottom + insets.systemWindowInsetBottom)
+            fab?.updateLayoutParams<ViewGroup.MarginLayoutParams>  {
+                bottomMargin = fabBaseMarginBottom + insets.systemWindowInsetBottom
+            }
+            fast_scroller?.updateLayoutParams<ViewGroup.MarginLayoutParams>  {
+                bottomMargin = insets.systemWindowInsetBottom
+            }
+        }
         swipe_refresh.refreshes().subscribeUntilDestroy { fetchChaptersFromSource() }
 
         fab.clicks().subscribeUntilDestroy {
@@ -99,8 +125,15 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
                 if (!reveal_view.showRevealEffect(coordinates.x, coordinates.y, revealAnimationListener)) {
                     openChapter(item.chapter)
                 }
-            } else {
-                view.context.toast(R.string.no_next_chapter)
+            } else if (snack == null || snack?.getText() != view.context.getString(R.string.no_next_chapter)) {
+                snack = view.snack(R.string.no_next_chapter, Snackbar.LENGTH_LONG) {
+                    addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
+                        override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+                            super.onDismissed(transientBottomBar, event)
+                            if (snack == transientBottomBar) snack = null
+                        }
+                    })
+                }
             }
         }
     }
@@ -184,8 +217,9 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
     fun onNextChapters(chapters: List<ChapterItem>) {
         // If the list is empty, fetch chapters from source if the conditions are met
         // We use presenter chapters instead because they are always unfiltered
-        if (presenter.chapters.isEmpty())
+        if (presenter.chapters.isEmpty()) {
             initialFetchChapters()
+        }
 
         val adapter = adapter ?: return
         adapter.updateDataSet(chapters)
@@ -201,7 +235,21 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
             }
             actionMode?.invalidate()
         }
+        scrollToUnread()
+    }
 
+    private fun scrollToUnread() {
+        if (adapter?.items.isNullOrEmpty()) return
+        if (scrollToUnread) {
+            val index = presenter.getFirstUnreadIndex()
+            val centerOfScreen =
+                if (startingChapterYPos != null) startingChapterYPos!!.toInt() - recycler.top - 96
+                else recycler.height / 2 - 96
+            (recycler.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
+                index, centerOfScreen
+            )
+        }
+        scrollToUnread = false
     }
 
     private fun initialFetchChapters() {
@@ -242,7 +290,7 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
         startActivity(intent)
     }
 
-    override fun onItemClick(position: Int): Boolean {
+    override fun onItemClick(view: View?, position: Int): Boolean {
         val adapter = adapter ?: return false
         val item = adapter.getItem(position) ?: return false
         if (actionMode != null && adapter.mode == SelectableAdapter.Mode.MULTI) {
@@ -325,6 +373,11 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
         actionMode = null
     }
 
+    override fun onDetach(view: View) {
+        destroyActionModeIfNeeded()
+        super.onDetach(view)
+    }
+
     override fun onMenuItemClick(position: Int, item: MenuItem) {
         val chapter = adapter?.getItem(position) ?: return
         val chapters = listOf(chapter)
@@ -364,12 +417,20 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
         val view = view
         destroyActionModeIfNeeded()
         presenter.downloadChapters(chapters)
-        if (view != null && !presenter.manga.favorite) {
-            recycler?.snack(view.context.getString(R.string.snack_add_to_library), Snackbar.LENGTH_INDEFINITE) {
+        if (view != null && !presenter.manga.favorite && (snack == null ||
+                snack?.getText() != view.context.getString(R.string.snack_add_to_library))) {
+            snack = view.snack(view.context.getString(R.string.snack_add_to_library), Snackbar.LENGTH_INDEFINITE) {
                 setAction(R.string.action_add) {
                     presenter.addToLibrary()
                 }
+                addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
+                    override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+                        super.onDismissed(transientBottomBar, event)
+                        if (snack == transientBottomBar) snack = null
+                    }
+                })
             }
+            (activity as? MainActivity)?.setUndoSnackBar(snack)
         }
     }
 

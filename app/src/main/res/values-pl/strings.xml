@@ -446,4 +446,7 @@ Nie znaleziono źródła %1$s</string>
     <string name="label_help">Pomoc</string>
     <string name="pref_library_update_prioritization">Kolejność aktualizacji biblioteki</string>
     <string name="pref_library_update_prioritization_summary">Ustaw kolejność, w jakiej Tachiyomi ma sprawdzać aktualizacje</string>
+    <string name="system_theme">Systemowy</string>
+    <string name="system_darkblue_theme">Systemowy (Ciemny niebieski)</string>
+    <string name="system_amoled_theme">Systemowy (AMOLED)</string>
 </resources>

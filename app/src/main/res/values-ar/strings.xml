@@ -116,6 +116,10 @@
     <string name="pref_theme">سمة التطبيق</string>
     <string name="light_theme">السمة الرئيسية</string>
     <string name="dark_theme">السمة الليلية</string>
+    <string name="darkblue_theme">أزرق غامق</string>
+    <string name="system_theme">النظام الافتراضي</string>
+    <string name="system_amoled_theme">النظام الافتراضي (AMOLED)</string>
+    <string name="system_darkblue_theme">النظام الافتراضي (أزرق غامق)</string>
     <string name="amoled_theme">سمة شاشات AMOLED</string>
     <string name="pref_start_screen">شاشة البداية</string>
     <string name="pref_language">اللغة</string>
@@ -424,7 +428,6 @@
     <string name="copy">نسخ</string>
     <string name="migrating">الترحيل…</string>
     <string name="information_empty_category">لا توجد لديك أي فئات. اضغط زر اﻹضافة لإنشاء واحد لتنظيم المكتبة الخاصة بك.</string>
-    <string name="darkblue_theme">أزرق غامق</string>
     <string name="transition_finished">تمَّ الانتهاء من:</string>
     <string name="transition_current">الحالي:</string>
     <string name="transition_next">التّالي:</string>

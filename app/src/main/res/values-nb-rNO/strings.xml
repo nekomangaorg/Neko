@@ -447,4 +447,7 @@
     <string name="filter_mode_darken">Brenn / mørkere</string>
     <string name="pref_library_update_prioritization">Rekkefølge for biblioteksoppdatering</string>
     <string name="pref_library_update_prioritization_summary">Velg rekkefølgen Tachiyomi ser etter oppdateringer</string>
+    <string name="system_theme">Systemforvalg</string>
+    <string name="system_darkblue_theme">Systemforvalg (Mørkeblå)</string>
+    <string name="system_amoled_theme">Systemforvalg (AMOLED)</string>
 </resources>

@@ -447,4 +447,7 @@
     <string name="label_help">Yardım</string>
     <string name="pref_library_update_prioritization">Kitaplık güncelleme sırası</string>
     <string name="pref_library_update_prioritization_summary">Tachiyomi\'nin güncelleme denetleme sırasını seçin</string>
+    <string name="system_theme">Sistem öntanımlı</string>
+    <string name="system_darkblue_theme">Sistem öntanımlı (Koyu mavi)</string>
+    <string name="system_amoled_theme">Sistem öntanımlı (AMOLED)</string>
 </resources>

@@ -445,4 +445,7 @@
     <string name="label_help">Bantuan</string>
     <string name="pref_library_update_prioritization">Urutan perbarui perpustakaan</string>
     <string name="pref_library_update_prioritization_summary">Pilih urutan perpustakaan yang akan Tachiyomi perbarui terlebih dahulu</string>
+    <string name="system_theme">Bawaan sistem</string>
+    <string name="system_darkblue_theme">Bawaan sistem (Biru gelap)</string>
+    <string name="system_amoled_theme">Bawaan sistem (AMOLED)</string>
 </resources>

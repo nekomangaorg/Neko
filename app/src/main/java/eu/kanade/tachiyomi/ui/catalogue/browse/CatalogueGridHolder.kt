@@ -7,6 +7,8 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.widget.StateImageViewTarget
 import kotlinx.android.synthetic.main.catalogue_grid_item.*
+import androidx.recyclerview.widget.RecyclerView
+import eu.davidea.flexibleadapter.items.IFlexible
 
 /**
  * Class used to hold the displayed data of a manga in the catalogue, like the cover or the title.
@@ -16,7 +18,7 @@ import kotlinx.android.synthetic.main.catalogue_grid_item.*
  * @param adapter the adapter handling this holder.
  * @constructor creates a new catalogue holder.
  */
-class CatalogueGridHolder(private val view: View, private val adapter: FlexibleAdapter<*>) :
+class CatalogueGridHolder(private val view: View, private val adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>) :
         CatalogueHolder(view, adapter) {
 
     /**

@@ -91,6 +91,22 @@ class DownloadPendingDeleter(context: Context) {
     }
 
     /**
+     * Returns the list of chapters to be deleted grouped by its manga.
+     *
+     * Note: the returned list of manga and chapters only contain basic information needed by the
+     * downloader, so don't use them for anything else.
+     */
+    @Synchronized
+    fun getPendingChapters(manga: Manga): List<Chapter>? {
+        val entries = decodeAll()
+        prefs.edit().clear().apply()
+        lastAddedEntry = null
+
+        val entry = entries.find { it.manga.id == manga.id }
+        return entry?.chapters?.map { it.toModel() }
+    }
+
+    /**
      * Decodes all the chapters from preferences.
      */
     private fun decodeAll(): List<Entry> {

@@ -5,5 +5,10 @@
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
     android:layout_gravity="end"
-    android:fitsSystemWindows="false"/>
-
+    android:fitsSystemWindows="true">
+    <View
+      android:id="@+id/status_bar_scrim"
+      android:layout_width="match_parent"
+      android:layout_height="0dp"
+      android:background="?attr/colorPrimary" />
+</eu.kanade.tachiyomi.ui.catalogue.browse.CatalogueNavigationView>

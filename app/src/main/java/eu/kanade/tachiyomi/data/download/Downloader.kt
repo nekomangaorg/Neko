@@ -14,7 +14,7 @@ import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.fetchAllImageUrlsFromPageList
 import eu.kanade.tachiyomi.util.*
-import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.async
 import okhttp3.Response
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
@@ -154,6 +154,26 @@ class Downloader(
                     .forEach { it.status = Download.NOT_DOWNLOADED }
         }
         queue.clear()
+        notifier.dismiss()
+    }
+
+    /**
+     * Removes everything from the queue for a certain manga
+     *
+     * @param isNotification value that determines if status is set (needed for view updates)
+     */
+    fun clearQueue(manga: Manga, isNotification: Boolean = false) {
+        //Needed to update the chapter view
+        if (isNotification) {
+            queue
+                .filter { it.status == Download.QUEUE && it.manga.id == manga.id }
+                .forEach { it.status = Download.NOT_DOWNLOADED }
+        }
+        queue.remove(manga)
+        if (queue.isEmpty()) {
+            DownloadService.stop(context)
+            stop()
+        }
         notifier.dismiss()
     }
 
@@ -351,7 +371,7 @@ class Downloader(
                 .map { response ->
                     val file = tmpDir.createFile("$filename.tmp")
                     try {
-                        response.body()!!.source().saveTo(file.openOutputStream())
+                        response.body!!.source().saveTo(file.openOutputStream())
                         val extension = getImageExtension(response, file)
                         file.renameTo("$filename.$extension")
                     } catch (e: Exception) {
@@ -374,7 +394,7 @@ class Downloader(
      */
     private fun getImageExtension(response: Response, file: UniFile): String {
         // Read content type if available.
-        val mime = response.body()?.contentType()?.let { ct -> "${ct.type()}/${ct.subtype()}" }
+        val mime = response.body?.contentType()?.let { ct -> "${ct.type}/${ct.subtype}" }
             // Else guess from the uri.
             ?: context.contentResolver.getType(file.uri)
             // Else read magic numbers.

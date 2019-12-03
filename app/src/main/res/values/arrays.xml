@@ -25,6 +25,7 @@
     <string-array name="reader_themes">
         <item>@string/white_background</item>
         <item>@string/black_background</item>
+        <item>@string/auto_background</item>
     </string-array>
 
     <string-array name="reader_themes_values">

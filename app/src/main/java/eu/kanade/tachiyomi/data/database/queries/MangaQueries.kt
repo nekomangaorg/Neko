@@ -82,6 +82,11 @@ interface MangaQueries : DbProvider {
             .withPutResolver(MangaViewerPutResolver())
             .prepare()
 
+    fun updateMangaHideTitle(manga: Manga) = db.put()
+        .`object`(manga)
+        .withPutResolver(MangaHideTitlePutResolver())
+        .prepare()
+
     fun updateMangaTitle(manga: Manga) = db.put()
             .`object`(manga)
             .withPutResolver(MangaTitlePutResolver())

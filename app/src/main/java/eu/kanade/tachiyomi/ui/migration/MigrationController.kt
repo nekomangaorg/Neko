@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.ui.migration
 
 import android.app.Dialog
 import android.os.Bundle
-import android.support.v7.widget.LinearLayoutManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,11 +14,13 @@ import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.base.controller.popControllerWithTag
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
+import eu.kanade.tachiyomi.util.RecyclerWindowInsetsListener
 import kotlinx.android.synthetic.main.migration_controller.*
 
 class MigrationController : NucleusController<MigrationPresenter>(),
         FlexibleAdapter.OnItemClickListener,
-        SourceAdapter.OnSelectClickListener {
+        SourceAdapter.OnSelectClickListener,
+        MigrationInterface {
 
     private var adapter: FlexibleAdapter<IFlexible<*>>? = null
 
@@ -37,12 +38,21 @@ class MigrationController : NucleusController<MigrationPresenter>(),
         return inflater.inflate(R.layout.migration_controller, container, false)
     }
 
+    fun searchController(manga:Manga): SearchController {
+        val controller = SearchController(manga)
+        controller.targetController = this
+
+        return controller
+    }
+
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
 
         adapter = FlexibleAdapter(null, this)
-        migration_recycler.layoutManager = LinearLayoutManager(view.context)
+        migration_recycler.layoutManager =
+            androidx.recyclerview.widget.LinearLayoutManager(view.context)
         migration_recycler.adapter = adapter
+        migration_recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
     }
 
     override fun onDestroyView(view: View) {
@@ -91,7 +101,7 @@ class MigrationController : NucleusController<MigrationPresenter>(),
         }
     }
 
-    override fun onItemClick(position: Int): Boolean {
+    override fun onItemClick(view: View?, position: Int): Boolean {
         val item = adapter?.getItem(position) ?: return false
 
         if (item is MangaItem) {
@@ -106,15 +116,12 @@ class MigrationController : NucleusController<MigrationPresenter>(),
     }
 
     override fun onSelectClick(position: Int) {
-        onItemClick(position)
+        onItemClick(view, position)
     }
 
-    fun migrateManga(prevManga: Manga, manga: Manga) {
-        presenter.migrateManga(prevManga, manga, replace = true)
-    }
-
-    fun copyManga(prevManga: Manga, manga: Manga) {
-        presenter.migrateManga(prevManga, manga, replace = false)
+    override fun migrateManga(prevManga: Manga, manga: Manga, replace: Boolean): Manga? {
+        presenter.migrateManga(prevManga, manga, replace)
+        return null
     }
 
     class LoadingController : DialogController() {
@@ -132,4 +139,8 @@ class MigrationController : NucleusController<MigrationPresenter>(),
         const val LOADING_DIALOG_TAG = "LoadingDialog"
     }
 
+}
+
+interface MigrationInterface {
+    fun migrateManga(prevManga: Manga, manga: Manga, replace: Boolean): Manga?
 }

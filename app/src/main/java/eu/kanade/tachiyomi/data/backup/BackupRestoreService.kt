@@ -160,9 +160,9 @@ class BackupRestoreService : Service() {
      * @return the start value of the command.
      */
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (intent == null) return Service.START_NOT_STICKY
+        if (intent == null) return START_NOT_STICKY
 
-        val uri = intent.getParcelableExtra<Uri>(BackupConst.EXTRA_URI)
+        val uri = intent.getParcelableExtra<Uri>(BackupConst.EXTRA_URI) ?: return START_NOT_STICKY
 
         // Unsubscribe from any previous subscription if needed.
         subscription?.unsubscribe()
@@ -175,7 +175,7 @@ class BackupRestoreService : Service() {
                 .subscribeOn(Schedulers.from(executor))
                 .subscribe()
 
-        return Service.START_NOT_STICKY
+        return START_NOT_STICKY
     }
 
     /**
@@ -189,7 +189,7 @@ class BackupRestoreService : Service() {
 
         return Observable.just(Unit)
                 .map {
-                    val reader = JsonReader(contentResolver.openInputStream(uri).bufferedReader())
+                    val reader = JsonReader(contentResolver.openInputStream(uri)!!.bufferedReader())
                     val json = JsonParser().parse(reader).asJsonObject
 
                     // Get parser version

@@ -447,4 +447,7 @@
     <string name="channel_common">Karaniwan</string>
     <string name="channel_library">Aklatan</string>
     <string name="channel_downloader">Tagapag-download</string>
+    <string name="system_theme">Default ng sistema</string>
+    <string name="system_darkblue_theme">Default ng sistema (Madilim na bughaw)</string>
+    <string name="system_amoled_theme">Default ng sistema (AMOLED)</string>
 </resources>

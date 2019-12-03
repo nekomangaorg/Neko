@@ -1,5 +1,7 @@
 package eu.kanade.tachiyomi.data.database.models
 
+import eu.kanade.tachiyomi.source.model.SManga
+
 open class MangaImpl : Manga {
 
     override var id: Long? = null
@@ -31,6 +33,14 @@ open class MangaImpl : Manga {
     override var viewer: Int = 0
 
     override var chapter_flags: Int = 0
+
+    override var hide_title: Boolean = false
+
+    override fun copyFrom(other: SManga) {
+        if (other is MangaImpl && (other as MangaImpl)::title.isInitialized && other.title != title)
+            title = other.title
+        super.copyFrom(other)
+    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

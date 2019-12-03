@@ -4,23 +4,33 @@ import android.app.Activity
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
-import android.support.design.widget.TabLayout
-import android.support.v4.graphics.drawable.DrawableCompat
-import android.support.v4.widget.DrawerLayout
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.view.ActionMode
-import android.support.v7.widget.SearchView
-import android.view.*
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
+import android.view.WindowInsets
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.view.ActionMode
+import androidx.appcompat.widget.SearchView
+import androidx.core.graphics.drawable.DrawableCompat
+import androidx.core.view.GravityCompat
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
 import com.f2prateek.rx.preferences.Preference
+import com.google.android.material.snackbar.BaseTransientBottomBar
+import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.tabs.TabLayout
 import com.jakewharton.rxbinding.support.v4.view.pageSelections
 import com.jakewharton.rxbinding.support.v7.widget.queryTextChanges
 import com.jakewharton.rxrelay.BehaviorRelay
 import com.jakewharton.rxrelay.PublishRelay
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
+import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -33,8 +43,15 @@ import eu.kanade.tachiyomi.ui.category.CategoryController
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.ui.migration.MigrationController
+import eu.kanade.tachiyomi.ui.migration.MigrationInterface
+import eu.kanade.tachiyomi.ui.migration.SearchController
+import eu.kanade.tachiyomi.util.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.inflate
+import eu.kanade.tachiyomi.util.marginBottom
+import eu.kanade.tachiyomi.util.marginTop
+import eu.kanade.tachiyomi.util.snack
 import eu.kanade.tachiyomi.util.toast
+import eu.kanade.tachiyomi.util.updatePaddingRelative
 import kotlinx.android.synthetic.main.library_controller.*
 import kotlinx.android.synthetic.main.main_activity.*
 import rx.Subscription
@@ -42,7 +59,6 @@ import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.IOException
-
 
 class LibraryController(
         bundle: Bundle? = null,
@@ -52,7 +68,7 @@ class LibraryController(
         SecondaryDrawerController,
         ActionMode.Callback,
         ChangeMangaCategoriesDialog.Listener,
-        DeleteLibraryMangasDialog.Listener {
+        MigrationInterface {
 
     /**
      * Position of the active category.
@@ -75,6 +91,11 @@ class LibraryController(
      */
     val selectedMangas = mutableSetOf<Manga>()
 
+    /**
+     * Current mangas to move.
+     */
+    private var migratingMangas = mutableSetOf<Manga>()
+
     private var selectedCoverManga: Manga? = null
 
     /**
@@ -91,6 +112,11 @@ class LibraryController(
      * Relay to notify the library's viewpager for updates.
      */
     val libraryMangaRelay: BehaviorRelay<LibraryMangaEvent> = BehaviorRelay.create()
+
+    /**
+     * Relay to notify the library's viewpager to select all manga
+     */
+    val selectAllRelay: PublishRelay<Int> = PublishRelay.create()
 
     /**
      * Number of manga per row in grid mode.
@@ -111,13 +137,15 @@ class LibraryController(
     /**
      * Drawer listener to allow swipe only for closing the drawer.
      */
-    private var drawerListener: DrawerLayout.DrawerListener? = null
+    private var drawerListener: androidx.drawerlayout.widget.DrawerLayout.DrawerListener? = null
 
     private var tabsVisibilityRelay: BehaviorRelay<Boolean> = BehaviorRelay.create(false)
 
     private var tabsVisibilitySubscription: Subscription? = null
 
     private var searchViewSubscription: Subscription? = null
+
+    var snack: Snackbar? = null
 
     init {
         setHasOptionsMenu(true)
@@ -174,10 +202,17 @@ class LibraryController(
         super.onDestroyView(view)
     }
 
-    override fun createSecondaryDrawer(drawer: DrawerLayout): ViewGroup {
+    override fun onDetach(view: View) {
+        snack?.dismiss()
+        snack = null
+        super.onDetach(view)
+    }
+
+    override fun createSecondaryDrawer(drawer: androidx.drawerlayout.widget.DrawerLayout): ViewGroup {
         val view = drawer.inflate(R.layout.library_drawer) as LibraryNavigationView
         navView = view
-        drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, Gravity.END)
+        drawer.setDrawerLockMode(androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_UNLOCKED,
+            GravityCompat.END)
 
         navView?.onGroupClicked = { group ->
             when (group) {
@@ -188,10 +223,21 @@ class LibraryController(
             }
         }
 
+        drawer.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
+          View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
+          View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+        val statusScrim = view.findViewById(R.id.status_bar_scrim) as View
+        statusScrim.setOnApplyWindowInsetsListener(HeightTopWindowInsetsListener)
+        view.doOnApplyWindowInsets { _, insets, _ ->
+            view.recycler.updatePaddingRelative(
+                bottom = view.recycler.marginBottom + insets.systemWindowInsetBottom,
+                top = view.recycler.marginTop + insets.systemWindowInsetTop
+            )
+        }
         return view
     }
 
-    override fun cleanupSecondaryDrawer(drawer: DrawerLayout) {
+    override fun cleanupSecondaryDrawer(drawer: androidx.drawerlayout.widget.DrawerLayout) {
         navView = null
     }
 
@@ -340,6 +386,10 @@ class LibraryController(
         searchItem.fixExpand()
     }
 
+    fun search(query:String) {
+        this.query = query
+    }
+
     override fun onPrepareOptionsMenu(menu: Menu) {
         val navView = navView ?: return
 
@@ -353,10 +403,11 @@ class LibraryController(
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_filter -> {
-                navView?.let { activity?.drawer?.openDrawer(Gravity.END) }
+                navView?.let { activity?.drawer?.openDrawer(GravityCompat.END) }
             }
             R.id.action_update_library -> {
                 activity?.let { LibraryUpdateService.start(it) }
+                snack = view?.snack(R.string.updating_library)
             }
             R.id.action_edit_categories -> {
                 router.pushController(CategoryController().withFadeTransaction())
@@ -390,6 +441,15 @@ class LibraryController(
         } else {
             mode.title = resources?.getString(R.string.label_selected, count)
             menu.findItem(R.id.action_edit_cover)?.isVisible = count == 1
+            menu.findItem(R.id.action_hide_title)?.isVisible =
+                !preferences.libraryAsList().getOrDefault()
+            if (!preferences.libraryAsList().getOrDefault()) {
+                val showAll =
+                    (selectedMangas.filter { (it as? LibraryManga)?.hide_title == true }).size == selectedMangas.size
+                menu.findItem(R.id.action_hide_title)?.title = activity?.getString(
+                    if (showAll) R.string.label_show_title else R.string.label_hide_title
+                )
+            }
         }
         return false
     }
@@ -401,10 +461,42 @@ class LibraryController(
                 destroyActionModeIfNeeded()
             }
             R.id.action_move_to_category -> showChangeMangaCategoriesDialog()
-            R.id.action_delete -> showDeleteMangaDialog()
+            R.id.action_delete -> deleteMangasFromLibrary()
+            R.id.action_select_all -> {
+                adapter?.categories?.getOrNull(library_pager.currentItem)?.id?.let {
+                    selectAllRelay.call(it)
+                }
+            }
+            R.id.action_migrate -> startMangaMigration()
+            R.id.action_hide_title -> {
+                val showAll = (selectedMangas.filter { (it as? LibraryManga)?.hide_title == true }
+                    ).size == selectedMangas.size
+                presenter.hideShowTitle(selectedMangas.toList(), !showAll)
+                destroyActionModeIfNeeded()
+            }
             else -> return false
         }
         return true
+    }
+
+    override fun migrateManga(prevManga: Manga, manga: Manga, replace: Boolean): Manga? {
+        if (manga.id != prevManga.id) {
+            presenter.migrateManga(prevManga, manga, replace = replace)
+        }
+        val nextManga = migratingMangas.firstOrNull() ?: return null
+        migratingMangas.remove(nextManga)
+        return nextManga
+    }
+
+    private fun startMangaMigration() {
+        migratingMangas = selectedMangas.distinctBy { it.id }.toMutableSet()
+        destroyActionModeIfNeeded()
+        val manga = migratingMangas.firstOrNull() ?: return
+        val searchController = SearchController(manga)
+        searchController.totalProgress = migratingMangas.size
+        searchController.targetController = this
+        router.pushController(searchController.withFadeTransaction())
+        migratingMangas.remove(manga)
     }
 
     override fun onDestroyActionMode(mode: ActionMode?) {
@@ -414,11 +506,11 @@ class LibraryController(
         actionMode = null
     }
 
-    fun openManga(manga: Manga) {
+    fun openManga(manga: Manga, startY: Float?) {
         // Notify the presenter a manga is being opened.
         presenter.onOpenManga()
 
-        router.pushController(MangaController(manga).withFadeTransaction())
+        router.pushController(MangaController(manga, startY).withFadeTransaction())
     }
 
     /**
@@ -458,17 +550,30 @@ class LibraryController(
                 .showDialog(router)
     }
 
-    private fun showDeleteMangaDialog() {
-        DeleteLibraryMangasDialog(this, selectedMangas.toList()).showDialog(router)
+    private fun deleteMangasFromLibrary() {
+        val mangas = selectedMangas.toList()
+        presenter.removeMangaFromLibrary(mangas)
+        destroyActionModeIfNeeded()
+        snack?.dismiss()
+        snack = view?.snack(activity?.getString(R.string.manga_removed_library) ?: "", Snackbar.LENGTH_INDEFINITE)  {
+            var undoing = false
+            setAction(R.string.action_undo) {
+                presenter.addMangas(mangas)
+                undoing = true
+            }
+            addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
+                override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+                    super.onDismissed(transientBottomBar, event)
+                    if (!undoing)
+                        presenter.confirmDeletion(mangas)
+                }
+            })
+        }
+        (activity as? MainActivity)?.setUndoSnackBar(snack)
     }
 
     override fun updateCategoriesForMangas(mangas: List<Manga>, categories: List<Category>) {
         presenter.moveMangasToCategories(categories, mangas)
-        destroyActionModeIfNeeded()
-    }
-
-    override fun deleteMangasFromLibrary(mangas: List<Manga>, deleteChapters: Boolean) {
-        presenter.removeMangaFromLibrary(mangas, deleteChapters)
         destroyActionModeIfNeeded()
     }
 
@@ -497,9 +602,9 @@ class LibraryController(
 
             try {
                 // Get the file's input stream from the incoming Intent
-                activity.contentResolver.openInputStream(data.data).use {
+                activity.contentResolver.openInputStream(data.data ?: Uri.EMPTY).use {
                     // Update cover to selected file, show error if something went wrong
-                    if (presenter.editCoverWithStream(it, manga)) {
+                    if (it != null && presenter.editCoverWithStream(it, manga)) {
                         // TODO refresh cover
                     } else {
                         activity.toast(R.string.notification_cover_update_failed)
@@ -520,4 +625,16 @@ class LibraryController(
         const val REQUEST_IMAGE_OPEN = 101
     }
 
+}
+
+object HeightTopWindowInsetsListener : View.OnApplyWindowInsetsListener {
+    override fun onApplyWindowInsets(v: View, insets: WindowInsets): WindowInsets {
+        val topInset = insets.systemWindowInsetTop
+        v.setPadding(0,topInset,0,0)
+        if (v.layoutParams.height != topInset) {
+            v.layoutParams.height = topInset
+            v.requestLayout()
+        }
+        return insets
+    }
 }

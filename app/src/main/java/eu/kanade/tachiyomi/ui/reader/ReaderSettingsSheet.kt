@@ -1,8 +1,8 @@
 package eu.kanade.tachiyomi.ui.reader
 
 import android.os.Bundle
-import android.support.design.widget.BottomSheetDialog
-import android.support.v4.widget.NestedScrollView
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import androidx.core.widget.NestedScrollView
 import android.widget.CompoundButton
 import android.widget.Spinner
 import com.f2prateek.rx.preferences.Preference
@@ -58,7 +58,7 @@ class ReaderSettingsSheet(private val activity: ReaderActivity) : BottomSheetDia
         viewer.setSelection(activity.presenter.manga?.viewer ?: 0, false)
 
         rotation_mode.bindToPreference(preferences.rotation(), 1)
-        background_color.bindToPreference(preferences.readerTheme())
+        background_color.bindToPreference(preferences.readerTheme(), 0, true)
         show_page_number.bindToPreference(preferences.showPageNumber())
         fullscreen.bindToPreference(preferences.fullscreen())
         keepscreen.bindToPreference(preferences.keepScreenOn())
@@ -95,9 +95,13 @@ class ReaderSettingsSheet(private val activity: ReaderActivity) : BottomSheetDia
     /**
      * Binds a spinner to an int preference with an optional offset for the value.
      */
-    private fun Spinner.bindToPreference(pref: Preference<Int>, offset: Int = 0) {
+    private fun Spinner.bindToPreference(pref: Preference<Int>, offset: Int = 0, shouldDismiss:
+    Boolean
+    = false) {
         onItemSelectedListener = IgnoreFirstSpinnerListener { position ->
             pref.set(position + offset)
+            if (shouldDismiss)
+                dismiss()
         }
         setSelection(pref.getOrDefault() - offset, false)
     }

@@ -39,7 +39,7 @@ object Migrations {
                 if (oldDir.exists()) {
                     val destDir = context.getExternalFilesDir("covers")
                     if (destDir != null) {
-                        oldDir.listFiles().forEach {
+                        oldDir.listFiles()?.forEach {
                             it.renameTo(File(destDir, it.name))
                         }
                     }

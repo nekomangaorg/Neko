@@ -2,12 +2,17 @@ package eu.kanade.tachiyomi.ui.migration
 
 import android.app.Dialog
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import com.afollestad.materialdialogs.MaterialDialog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
+import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.catalogue.global_search.CatalogueSearchController
 import eu.kanade.tachiyomi.ui.catalogue.global_search.CatalogueSearchPresenter
 import uy.kohesive.injekt.injectLazy
@@ -17,6 +22,16 @@ class SearchController(
 ) : CatalogueSearchController(manga?.title) {
 
     private var newManga: Manga? = null
+    private var progress = 1
+    var totalProgress = 0
+
+    override fun getTitle(): String? {
+        if (totalProgress > 1) {
+            return "($progress/$totalProgress) ${super.getTitle()}"
+        }
+        else
+            return super.getTitle()
+    }
 
     override fun createPresenter(): CatalogueSearchPresenter {
         return SearchPresenter(initialQuery, manga!!)
@@ -34,22 +49,52 @@ class SearchController(
         newManga = savedInstanceState.getSerializable(::newManga.name) as? Manga
     }
 
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        if (totalProgress > 1) {
+            val menuItem = menu.add(Menu.NONE, 1, Menu.NONE, R.string.action_skip_manga)
+            menuItem.icon = VectorDrawableCompat.create(resources!!, R.drawable
+                .baseline_skip_next_white_24, null)
+            menuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
+        }
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            1 -> {
+                newManga = manga
+                migrateManga()
+            }
+        }
+        return true
+    }
+
     fun migrateManga() {
-        val target = targetController as? MigrationController ?: return
+        val target = targetController as? MigrationInterface ?: return
         val manga = manga ?: return
         val newManga = newManga ?: return
 
-        router.popController(this)
-        target.migrateManga(manga, newManga)
+        val nextManga = target.migrateManga(manga, newManga, true)
+        replaceWithNewSearchController(nextManga)
     }
 
     fun copyManga() {
-        val target = targetController as? MigrationController ?: return
+        val target = targetController as? MigrationInterface ?: return
         val manga = manga ?: return
         val newManga = newManga ?: return
 
-        router.popController(this)
-        target.copyManga(manga, newManga)
+        val nextManga = target.migrateManga(manga, newManga, false)
+        replaceWithNewSearchController(nextManga)
+    }
+
+    private fun replaceWithNewSearchController(manga: Manga?) {
+        if (manga != null) {
+            //router.popCurrentController()
+            val searchController = SearchController(manga)
+            searchController.targetController = targetController
+            searchController.progress = progress + 1
+            searchController.totalProgress = totalProgress
+            router.replaceTopController(searchController.withFadeTransaction())
+        } else router.popController(this)
     }
 
     override fun onMangaClick(manga: Manga) {
@@ -77,14 +122,13 @@ class SearchController(
                     .content(R.string.migration_dialog_what_to_include)
                     .items(MigrationFlags.titles.map { resources?.getString(it) })
                     .alwaysCallMultiChoiceCallback()
-                    .itemsCallbackMultiChoice(preselected.toTypedArray(), { _, positions, _ ->
+                    .itemsCallbackMultiChoice(preselected.toTypedArray()) { _, positions, _ ->
                         // Save current settings for the next time
                         val newValue = MigrationFlags.getFlagsFromPositions(positions)
                         preferences.migrateFlags().set(newValue)
 
                         true
-                    })
-                    .positiveText(R.string.migrate)
+                    }.positiveText(R.string.migrate)
                     .negativeText(R.string.copy)
                     .neutralText(android.R.string.cancel)
                     .onPositive { _, _ ->

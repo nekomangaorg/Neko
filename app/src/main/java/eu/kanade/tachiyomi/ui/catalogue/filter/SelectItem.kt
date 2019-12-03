@@ -10,6 +10,8 @@ import eu.davidea.viewholders.FlexibleViewHolder
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.model.Filter
 import eu.kanade.tachiyomi.widget.IgnoreFirstSpinnerListener
+import androidx.recyclerview.widget.RecyclerView
+import eu.davidea.flexibleadapter.items.IFlexible
 
 open class SelectItem(val filter: Filter.Select<*>) : AbstractFlexibleItem<SelectItem.Holder>() {
 
@@ -17,11 +19,11 @@ open class SelectItem(val filter: Filter.Select<*>) : AbstractFlexibleItem<Selec
         return R.layout.navigation_view_spinner
     }
 
-    override fun createViewHolder(view: View, adapter: FlexibleAdapter<*>): Holder {
+    override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): Holder {
         return Holder(view, adapter)
     }
 
-    override fun bindViewHolder(adapter: FlexibleAdapter<*>, holder: Holder, position: Int, payloads: List<Any?>?) {
+    override fun bindViewHolder(adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>, holder: Holder, position: Int, payloads: MutableList<Any?>?) {
         holder.text.text = filter.name + ": "
 
         val spinner = holder.spinner
@@ -46,7 +48,7 @@ open class SelectItem(val filter: Filter.Select<*>) : AbstractFlexibleItem<Selec
         return filter.hashCode()
     }
 
-    class Holder(view: View, adapter: FlexibleAdapter<*>) : FlexibleViewHolder(view, adapter) {
+    class Holder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>) : FlexibleViewHolder(view, adapter) {
 
         val text: TextView = itemView.findViewById(R.id.nav_view_item_text)
         val spinner: Spinner = itemView.findViewById(R.id.nav_view_item)

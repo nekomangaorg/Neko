@@ -1,11 +1,17 @@
 package eu.kanade.tachiyomi.ui.reader.loader
 
+import android.graphics.BitmapFactory
 import eu.kanade.tachiyomi.data.cache.ChapterCache
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
+import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerConfig
+import eu.kanade.tachiyomi.util.ImageUtil
 import eu.kanade.tachiyomi.util.plusAssign
+import kotlinx.coroutines.async
 import rx.Completable
 import rx.Observable
 import rx.schedulers.Schedulers
@@ -15,6 +21,7 @@ import rx.subscriptions.CompositeSubscription
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import uy.kohesive.injekt.injectLazy
 import java.util.concurrent.PriorityBlockingQueue
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -36,6 +43,11 @@ class HttpPageLoader(
      * Current active subscriptions.
      */
     private val subscriptions = CompositeSubscription()
+
+    /**
+     * Preferences helper.
+     */
+    private val preferences by injectLazy<PreferencesHelper>()
 
     init {
         subscriptions += Observable.defer { Observable.just(queue.take().page) }
@@ -205,6 +217,12 @@ class HttpPageLoader(
                 }
             }
             .doOnNext {
+                if (preferences.readerTheme().get() == 2) {
+                    val stream = chapterCache.getImageFile(imageUrl).inputStream()
+                    val image = BitmapFactory.decodeStream(stream)
+                    page.bg = ImageUtil.autoSetBackground(image)
+                    stream.close()
+                }
                 page.stream = { chapterCache.getImageFile(imageUrl).inputStream() }
                 page.status = Page.READY
             }

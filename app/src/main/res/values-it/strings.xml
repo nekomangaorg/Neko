@@ -480,4 +480,7 @@
     <string name="label_help">Aiuto</string>
     <string name="pref_library_update_prioritization">Ordine di aggiornamento della libreria</string>
     <string name="pref_library_update_prioritization_summary">Seleziona l\'ordine in cui vuoi che Tachiyomi controlli gli aggiornamenti</string>
+    <string name="system_theme">Predefinita di sistema</string>
+    <string name="system_darkblue_theme">Predefinita di sistema (Blu scuro)</string>
+    <string name="system_amoled_theme">Predefinita di sistema (AMOLED)</string>
 </resources>

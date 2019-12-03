@@ -1,24 +1,26 @@
 package eu.kanade.tachiyomi.ui.manga
 
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+import android.app.Activity
 import android.os.Bundle
-import android.support.design.widget.TabLayout
-import android.support.graphics.drawable.VectorDrawableCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
 import com.bluelinelabs.conductor.Router
 import com.bluelinelabs.conductor.RouterTransaction
 import com.bluelinelabs.conductor.support.RouterPagerAdapter
+import com.google.android.material.tabs.TabLayout
 import com.jakewharton.rxrelay.BehaviorRelay
 import com.jakewharton.rxrelay.PublishRelay
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
@@ -38,11 +40,26 @@ import java.util.Date
 
 class MangaController : RxController, TabbedController {
 
-    constructor(manga: Manga?, fromCatalogue: Boolean = false) : super(Bundle().apply {
+    constructor(manga: Manga?, fromCatalogue: Boolean = false, fromExtension: Boolean = false) :
+        super
+        (Bundle()
+        .apply {
         putLong(MANGA_EXTRA, manga?.id ?: 0)
         putBoolean(FROM_CATALOGUE_EXTRA, fromCatalogue)
     }) {
         this.manga = manga
+        if (manga != null) {
+            source = Injekt.get<SourceManager>().getOrStub(manga.source)
+        }
+        backClosesApp = fromExtension
+    }
+
+    constructor(manga: Manga?, startY:Float?) : super(Bundle().apply {
+        putLong(MANGA_EXTRA, manga?.id ?: 0)
+        putBoolean(FROM_CATALOGUE_EXTRA, false)
+    }) {
+        this.manga = manga
+        startingChapterYPos = startY
         if (manga != null) {
             source = Injekt.get<SourceManager>().getOrStub(manga.source)
         }
@@ -51,14 +68,30 @@ class MangaController : RxController, TabbedController {
     constructor(mangaId: Long) : this(
             Injekt.get<DatabaseHelper>().getManga(mangaId).executeAsBlocking())
 
-    @Suppress("unused")
-    constructor(bundle: Bundle) : this(bundle.getLong(MANGA_EXTRA))
+    constructor(bundle: Bundle) : this(bundle.getLong(MANGA_EXTRA)) {
+        val notificationId = bundle.getInt("notificationId", -1)
+        val context = applicationContext ?: return
+        if (notificationId > -1) NotificationReceiver.dismissNotification(
+            context, notificationId, bundle.getInt("groupId", 0)
+        )
+    }
+
+    override fun handleBack(): Boolean {
+        return if (backClosesApp) {
+            activity?.finishAffinity()
+            true
+        } else super.handleBack()
+    }
 
     var manga: Manga? = null
         private set
 
     var source: Source? = null
         private set
+
+    private var backClosesApp = false
+
+    var startingChapterYPos:Float? = null
 
     private var adapter: MangaDetailAdapter? = null
 
@@ -161,10 +194,11 @@ class MangaController : RxController, TabbedController {
         }
 
         override fun configureRouter(router: Router, position: Int) {
+            val touchOffset = if (activity?.tabs?.height == 0) 144f else 0f
             if (!router.hasRootController()) {
                 val controller = when (position) {
                     INFO_CONTROLLER -> MangaInfoController()
-                    CHAPTERS_CONTROLLER -> ChaptersController()
+                    CHAPTERS_CONTROLLER -> ChaptersController(startingChapterYPos?.minus(touchOffset))
                     TRACK_CONTROLLER -> TrackController()
                     else -> error("Wrong position $position")
                 }
@@ -187,7 +221,7 @@ class MangaController : RxController, TabbedController {
         const val CHAPTERS_CONTROLLER = 1
         const val TRACK_CONTROLLER = 2
 
-        private val tabField = TabLayout.Tab::class.java.getDeclaredField("mView")
+        private val tabField = TabLayout.Tab::class.java.getDeclaredField("view")
                 .apply { isAccessible = true }
     }
 

@@ -1,16 +1,22 @@
 package eu.kanade.tachiyomi.widget
 
 import android.content.Context
-import android.support.design.widget.FloatingActionButton
-import android.support.v4.view.animation.FastOutSlowInInterpolator
+import android.content.res.Configuration
+import android.graphics.Rect
 import android.util.AttributeSet
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
+import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.interpolator.view.animation.FastOutSlowInInterpolator
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.snackbar.Snackbar
 import eu.kanade.tachiyomi.R
+import kotlin.math.min
 
 @Suppress("unused", "UNUSED_PARAMETER")
-class FABAnimationUpDown @JvmOverloads constructor(ctx: Context, attrs: AttributeSet? = null) : FABAnimationBase() {
+class FABAnimationUpDown @JvmOverloads constructor(ctx: Context, attrs: AttributeSet? = null) :
+    FABAnimationBase() {
 
     private val INTERPOLATOR = FastOutSlowInInterpolator()
 
@@ -47,5 +53,35 @@ class FABAnimationUpDown @JvmOverloads constructor(ctx: Context, attrs: Attribut
     override fun animateIn(button: FloatingActionButton) {
         button.visibility = View.VISIBLE
         button.startAnimation(inAnimation)
+    }
+
+    override fun onDependentViewChanged(parent: CoordinatorLayout, child: FloatingActionButton, dependency: View): Boolean {
+        if (isTablet(child.context)) return true
+        val translationY = getFabTranslationYForSnackbar(parent, child)
+        child.translationY = translationY
+        return true
+    }
+
+    private fun isTablet(context: Context): Boolean {
+        return (context.resources.configuration.screenLayout and Configuration
+            .SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_LARGE
+    }
+
+    private fun getFabTranslationYForSnackbar(parent: CoordinatorLayout, fab:
+    FloatingActionButton): Float {
+        var minOffset = 0f
+        val dependencies = parent.getDependencies(fab)
+        for (i in 0 until dependencies.size) {
+            val view = dependencies[i]
+            if (view is Snackbar.SnackbarLayout) {
+                minOffset = min(minOffset, view.translationY - view.height)
+            }
+        }
+        return minOffset
+    }
+
+    override fun getInsetDodgeRect(parent: CoordinatorLayout, child: FloatingActionButton, rect: Rect): Boolean {
+        rect.set(child.left, child.top + 100, child.right, child.bottom - 1000)
+        return true
     }
 }

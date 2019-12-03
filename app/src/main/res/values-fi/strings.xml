@@ -447,4 +447,7 @@
     <string name="label_help">Apu</string>
     <string name="pref_library_update_prioritization">Kirjaston päivitys järjestys</string>
     <string name="pref_library_update_prioritization_summary">Valitse järjestys jossa päivitykset tarkistetaan</string>
+    <string name="system_theme">Järjestelmän oletus</string>
+    <string name="system_darkblue_theme">Järjestelmän oletus (Tumman sininen)</string>
+    <string name="system_amoled_theme">Järjestelmän oletus (AMOLED)</string>
 </resources>

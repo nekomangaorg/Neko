@@ -1,11 +1,10 @@
 package eu.kanade.tachiyomi.ui.category
 
-import android.support.design.widget.Snackbar
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.view.ActionMode
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
+import com.google.android.material.snackbar.Snackbar
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.view.ActionMode
 import android.view.*
+import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.jakewharton.rxbinding.view.clicks
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.SelectableAdapter
@@ -13,7 +12,13 @@ import eu.davidea.flexibleadapter.helpers.UndoHelper
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
+import eu.kanade.tachiyomi.ui.main.MainActivity
+import eu.kanade.tachiyomi.util.doOnApplyWindowInsets
+import eu.kanade.tachiyomi.util.marginBottom
+import eu.kanade.tachiyomi.util.snack
 import eu.kanade.tachiyomi.util.toast
+import eu.kanade.tachiyomi.util.updateLayoutParams
+import eu.kanade.tachiyomi.util.updatePaddingRelative
 import kotlinx.android.synthetic.main.categories_controller.*
 
 /**
@@ -41,7 +46,7 @@ class CategoryController : NucleusController<CategoryPresenter>(),
     /**
      * Undo helper used for restoring a deleted category.
      */
-    private var undoHelper: UndoHelper? = null
+    private var snack: Snackbar? = null
 
     /**
      * Creates the presenter for this controller. Not to be manually called.
@@ -74,7 +79,7 @@ class CategoryController : NucleusController<CategoryPresenter>(),
         super.onViewCreated(view)
 
         adapter = CategoryAdapter(this@CategoryController)
-        recycler.layoutManager = LinearLayoutManager(view.context)
+        recycler.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(view.context)
         recycler.setHasFixedSize(true)
         recycler.adapter = adapter
         adapter?.isHandleDragEnabled = true
@@ -82,6 +87,14 @@ class CategoryController : NucleusController<CategoryPresenter>(),
 
         fab.clicks().subscribeUntilDestroy {
             CategoryCreateDialog(this@CategoryController).showDialog(router, null)
+        }
+
+        val fabBaseMarginBottom = fab?.marginBottom ?: 0
+        recycler.doOnApplyWindowInsets { v, insets, padding ->
+            v.updatePaddingRelative(bottom = padding.bottom + insets.systemWindowInsetBottom)
+            fab?.updateLayoutParams<ViewGroup.MarginLayoutParams>  {
+                bottomMargin = fabBaseMarginBottom + insets.systemWindowInsetBottom
+            }
         }
     }
 
@@ -92,8 +105,9 @@ class CategoryController : NucleusController<CategoryPresenter>(),
      */
     override fun onDestroyView(view: View) {
         // Manually call callback to delete categories if required
-        undoHelper?.onDeleteConfirmed(Snackbar.Callback.DISMISS_EVENT_MANUAL)
-        undoHelper = null
+        snack?.dismiss()
+        confirmDelete()
+        snack = null
         actionMode = null
         adapter = null
         super.onDestroyView(view)
@@ -166,10 +180,22 @@ class CategoryController : NucleusController<CategoryPresenter>(),
 
         when (item.itemId) {
             R.id.action_delete -> {
-                undoHelper = UndoHelper(adapter, this)
-                undoHelper?.start(adapter.selectedPositions, view!!,
-                        R.string.snack_categories_deleted, R.string.action_undo, 3000)
-
+                adapter.removeItems(adapter.selectedPositions)
+                snack =
+                    view?.snack(R.string.snack_categories_deleted, Snackbar.LENGTH_INDEFINITE) {
+                        var undoing = false
+                        setAction(R.string.action_undo) {
+                            adapter.restoreDeletedItems()
+                            undoing = true
+                        }
+                        addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
+                            override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+                                super.onDismissed(transientBottomBar, event)
+                                if (!undoing) confirmDelete()
+                            }
+                        })
+                    }
+                (activity as? MainActivity)?.setUndoSnackBar(snack)
                 mode.finish()
             }
             R.id.action_edit -> {
@@ -205,9 +231,9 @@ class CategoryController : NucleusController<CategoryPresenter>(),
      * @param position The position of the clicked item.
      * @return true if this click should enable selection mode.
      */
-    override fun onItemClick(position: Int): Boolean {
+    override fun onItemClick(view: View?, position: Int): Boolean {
         // Check if action mode is initialized and selected item exist.
-        if (actionMode != null && position != RecyclerView.NO_POSITION) {
+        if (actionMode != null && position != androidx.recyclerview.widget.RecyclerView.NO_POSITION) {
             toggleSelection(position)
             return true
         } else {
@@ -270,7 +296,7 @@ class CategoryController : NucleusController<CategoryPresenter>(),
      */
     override fun onActionCanceled(action: Int, positions: MutableList<Int>?) {
         adapter?.restoreDeletedItems()
-        undoHelper = null
+        snack = null
     }
 
     /**
@@ -282,7 +308,13 @@ class CategoryController : NucleusController<CategoryPresenter>(),
     override fun onActionConfirmed(action: Int, event: Int) {
         val adapter = adapter ?: return
         presenter.deleteCategories(adapter.deletedItems.map { it.category })
-        undoHelper = null
+        snack = null
+    }
+
+    fun confirmDelete() {
+        val adapter = adapter ?: return
+        presenter.deleteCategories(adapter.deletedItems.map { it.category })
+        snack = null
     }
 
     /**

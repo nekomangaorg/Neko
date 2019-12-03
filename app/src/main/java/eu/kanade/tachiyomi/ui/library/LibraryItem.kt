@@ -13,9 +13,11 @@ import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import kotlinx.android.synthetic.main.catalogue_grid_item.view.*
+import androidx.recyclerview.widget.RecyclerView
+import eu.davidea.flexibleadapter.items.IFlexible
 
 class LibraryItem(val manga: LibraryManga, private val libraryAsList: Preference<Boolean>) :
-        AbstractFlexibleItem<LibraryHolder>(), IFilterable {
+        AbstractFlexibleItem<LibraryHolder>(), IFilterable<String> {
 
     var downloadCount = -1
 
@@ -26,7 +28,7 @@ class LibraryItem(val manga: LibraryManga, private val libraryAsList: Preference
             R.layout.catalogue_grid_item
     }
 
-    override fun createViewHolder(view: View, adapter: FlexibleAdapter<*>): LibraryHolder {
+    override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): LibraryHolder {
         val parent = adapter.recyclerView
         return if (parent is AutofitRecyclerView) {
             view.apply {
@@ -41,10 +43,10 @@ class LibraryItem(val manga: LibraryManga, private val libraryAsList: Preference
         }
     }
 
-    override fun bindViewHolder(adapter: FlexibleAdapter<*>,
+    override fun bindViewHolder(adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
                                 holder: LibraryHolder,
                                 position: Int,
-                                payloads: List<Any?>?) {
+                                payloads: MutableList<Any?>?) {
 
         holder.onSetValues(this)
     }
@@ -57,7 +59,15 @@ class LibraryItem(val manga: LibraryManga, private val libraryAsList: Preference
      */
     override fun filter(constraint: String): Boolean {
         return manga.title.contains(constraint, true) ||
-                (manga.author?.contains(constraint, true) ?: false)
+            (manga.author?.contains(constraint, true) ?: false) ||
+            (if (constraint.startsWith("-"))
+                manga.genre?.split(", ")?.find {
+                    it.toLowerCase() == constraint.substringAfter("-").toLowerCase()
+                }                   == null
+                    else
+                manga.genre?.split(", ")?.find {
+                    it.toLowerCase() == constraint.toLowerCase() } != null
+                )
     }
 
     override fun equals(other: Any?): Boolean {

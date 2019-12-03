@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.reader
 
 import android.annotation.SuppressLint
 import android.app.ProgressDialog
+import android.content.ClipData
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
@@ -10,14 +11,19 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import android.view.*
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
+import android.widget.LinearLayout
 import android.widget.SeekBar
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.notification.NotificationReceiver
+import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.base.activity.BaseRxActivity
@@ -36,6 +42,10 @@ import eu.kanade.tachiyomi.util.*
 import eu.kanade.tachiyomi.widget.SimpleAnimationListener
 import eu.kanade.tachiyomi.widget.SimpleSeekBarListener
 import kotlinx.android.synthetic.main.reader_activity.*
+import kotlinx.android.synthetic.main.reader_activity.toolbar
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import me.zhanghai.android.systemuihelper.SystemUiHelper
 import nucleus.factory.RequiresPresenter
 import rx.Observable
@@ -52,7 +62,8 @@ import java.util.concurrent.TimeUnit
  * viewers, to which calls from the presenter or UI events are delegated.
  */
 @RequiresPresenter(ReaderPresenter::class)
-class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
+class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
+    SystemUiHelper.OnVisibilityChangeListener {
 
     /**
      * Preferences helper.
@@ -77,6 +88,13 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         private set
 
     /**
+     * Whether the menu should stay visible.
+     */
+    var menuStickyVisible = false
+        private set
+
+    private var coroutine: Job? = null
+    /**
      * System UI helper to hide status & navigation bar on all different API levels.
      */
     private var systemUi: SystemUiHelper? = null
@@ -85,6 +103,11 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
      * Configuration at reader level, like background color or forced orientation.
      */
     private var config: ReaderConfig? = null
+
+    /**
+     * Current Bottom Sheet on display, used to dismiss
+     */
+    private var bottomSheet: BottomSheetDialog? = null
 
     /**
      * Progress dialog used when switching chapters from the menu buttons.
@@ -99,10 +122,13 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         const val VERTICAL = 3
         const val WEBTOON = 4
 
-        fun newIntent(context: Context, manga: Manga, chapter: Chapter): Intent {
+        fun newIntent(context: Context, manga: Manga, chapter: Chapter):
+            Intent {
             val intent = Intent(context, ReaderActivity::class.java)
             intent.putExtra("manga", manga.id)
             intent.putExtra("chapter", chapter.id)
+            intent.putExtra("chapterUrl", chapter.url)
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
             return intent
         }
     }
@@ -112,22 +138,24 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
      */
     override fun onCreate(savedState: Bundle?) {
         setTheme(when (preferences.readerTheme().getOrDefault()) {
-            0 -> R.style.Theme_Reader_Light
-            else -> R.style.Theme_Reader
+            0 -> R.style.Theme_Base_Reader_Light
+            1 -> R.style.Theme_Base_Reader_Dark
+            else -> R.style.Theme_Base_Reader
         })
         super.onCreate(savedState)
         setContentView(R.layout.reader_activity)
 
         if (presenter.needsInit()) {
-            val manga = intent.extras.getLong("manga", -1)
-            val chapter = intent.extras.getLong("chapter", -1)
-
-            if (manga == -1L || chapter == -1L) {
+            val manga = intent.extras!!.getLong("manga", -1)
+            val chapter = intent.extras!!.getLong("chapter", -1)
+            val chapterUrl = intent.extras!!.getString("chapterUrl", "")
+            if (manga == -1L || chapterUrl == "" && chapter == -1L) {
                 finish()
                 return
             }
-
-            presenter.init(manga, chapter)
+            NotificationReceiver.dismissNotification(this, manga.hashCode(), Notifications.ID_NEW_CHAPTERS)
+            if (chapter > -1) presenter.init(manga, chapter)
+            else presenter.init(manga, chapterUrl)
         }
 
         if (savedState != null) {
@@ -147,6 +175,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         viewer = null
         config?.destroy()
         config = null
+        bottomSheet?.dismiss()
+        bottomSheet = null
         progressDialog?.dismiss()
         progressDialog = null
     }
@@ -170,7 +200,10 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
         if (hasFocus) {
-            setMenuVisibility(menuVisible, animate = false)
+            if (menuStickyVisible)
+                setMenuVisibility(false)
+            else
+                setMenuVisibility(menuVisible, animate = false)
         }
     }
 
@@ -187,11 +220,13 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
      * entries.
      */
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.action_settings -> ReaderSettingsSheet(this).show()
-            R.id.action_custom_filter -> ReaderColorFilterSheet(this).show()
+        coroutine?.cancel()
+        bottomSheet = when (item.itemId) {
+            R.id.action_settings -> ReaderSettingsSheet(this)
+            R.id.action_custom_filter -> ReaderColorFilterSheet(this)
             else -> return super.onOptionsItemSelected(item)
         }
+        bottomSheet?.show()
         return true
     }
 
@@ -259,6 +294,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
 
         // Set initial visibility
         setMenuVisibility(menuVisible)
+        if (!menuVisible)
+            reader_menu_bottom.visibility = View.GONE
     }
 
     /**
@@ -267,23 +304,24 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
      */
     private fun setMenuVisibility(visible: Boolean, animate: Boolean = true) {
         menuVisible = visible
+        if (visible) coroutine?.cancel()
         if (visible) {
             systemUi?.show()
             reader_menu.visibility = View.VISIBLE
-
+            reader_menu_bottom.visibility = View.VISIBLE
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                window.navigationBarColor = getResourceColor(R.attr.colorPrimaryDark)
+            }
             if (animate) {
-                val toolbarAnimation = AnimationUtils.loadAnimation(this, R.anim.enter_from_top)
-                toolbarAnimation.setAnimationListener(object : SimpleAnimationListener() {
-                    override fun onAnimationStart(animation: Animation) {
-                        // Fix status bar being translucent the first time it's opened.
-                        if (Build.VERSION.SDK_INT >= 21) {
-                            window.addFlags(
-                                    WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+                if (!menuStickyVisible) {
+                    val toolbarAnimation = AnimationUtils.loadAnimation(this, R.anim.enter_from_top)
+                    toolbarAnimation.setAnimationListener(object : SimpleAnimationListener() {
+                        override fun onAnimationStart(animation: Animation) {
+                            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
                         }
-                    }
-                })
-                toolbar.startAnimation(toolbarAnimation)
-
+                    })
+                    toolbar.startAnimation(toolbarAnimation)
+                }
                 val bottomAnimation = AnimationUtils.loadAnimation(this, R.anim.enter_from_bottom)
                 reader_menu_bottom.startAnimation(bottomAnimation)
             }
@@ -298,11 +336,15 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
                     }
                 })
                 toolbar.startAnimation(toolbarAnimation)
-
-                val bottomAnimation = AnimationUtils.loadAnimation(this, R.anim.exit_to_bottom)
-                reader_menu_bottom.startAnimation(bottomAnimation)
+                if (reader_menu_bottom.visibility != View.GONE) {
+                    val bottomAnimation = AnimationUtils.loadAnimation(this, R.anim.exit_to_bottom)
+                    reader_menu_bottom.startAnimation(bottomAnimation)
+                }
             }
+            else
+                reader_menu.visibility = View.GONE
         }
+        menuStickyVisible = false
     }
 
     /**
@@ -473,6 +515,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         val intent = Intent(Intent.ACTION_SEND).apply {
             putExtra(Intent.EXTRA_STREAM, stream)
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
+            clipData = ClipData.newRawUri(null, stream)
             type = "image/*"
         }
         startActivity(Intent.createChooser(intent, getString(R.string.action_share)))
@@ -520,6 +563,40 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
             Error -> R.string.notification_cover_update_failed
         })
     }
+
+    override fun onVisibilityChange(visible: Boolean) {
+        if (visible && !menuStickyVisible && !menuVisible) {
+            menuStickyVisible = visible
+            if (visible) {
+                coroutine = launchUI {
+                    delay(2000)
+                    if (systemUi?.isShowing == true) {
+                        menuStickyVisible = false
+                        setMenuVisibility(false)
+                    }
+                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    window.navigationBarColor = getColor(android.R.color.transparent)
+                }
+                reader_menu_bottom.visibility = View.GONE
+                reader_menu.visibility = View.VISIBLE
+                val toolbarAnimation = AnimationUtils.loadAnimation(this, R.anim.enter_from_top)
+                toolbarAnimation.setAnimationListener(object : SimpleAnimationListener() {
+                    override fun onAnimationStart(animation: Animation) {
+                        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+                    }
+                })
+                toolbar.startAnimation(toolbarAnimation)
+            }
+        }
+        else {
+            if (menuStickyVisible && !menuVisible) {
+                setMenuVisibility(false, animate = false)
+            }
+            coroutine?.cancel()
+        }
+    }
+
 
     /**
      * Class that handles the user preferences of the reader.
@@ -637,15 +714,10 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
          */
         private fun setFullscreen(enabled: Boolean) {
             systemUi = if (enabled) {
-                val level = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                    SystemUiHelper.LEVEL_IMMERSIVE
-                } else {
-                    SystemUiHelper.LEVEL_HIDE_STATUS_BAR
-                }
-                val flags = SystemUiHelper.FLAG_IMMERSIVE_STICKY or
-                        SystemUiHelper.FLAG_LAYOUT_IN_SCREEN_OLDER_DEVICES
+                val level = SystemUiHelper.LEVEL_IMMERSIVE
+                val flags = SystemUiHelper.FLAG_LAYOUT_IN_SCREEN_OLDER_DEVICES
 
-                SystemUiHelper(this@ReaderActivity, level, flags)
+                SystemUiHelper(this@ReaderActivity, level, flags, this@ReaderActivity)
             } else {
                 null
             }

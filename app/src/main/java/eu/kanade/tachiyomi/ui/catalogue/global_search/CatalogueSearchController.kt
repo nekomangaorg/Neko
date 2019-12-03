@@ -1,8 +1,8 @@
 package eu.kanade.tachiyomi.ui.catalogue.global_search
 
 import android.os.Bundle
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.SearchView
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.appcompat.widget.SearchView
 import android.view.*
 import com.jakewharton.rxbinding.support.v7.widget.queryTextChangeEvents
 import eu.kanade.tachiyomi.R
@@ -11,6 +11,7 @@ import eu.kanade.tachiyomi.source.CatalogueSource
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.manga.MangaController
+import eu.kanade.tachiyomi.util.RecyclerWindowInsetsListener
 import kotlinx.android.synthetic.main.catalogue_global_search_controller.*
 
 /**
@@ -131,8 +132,9 @@ open class CatalogueSearchController(
         adapter = CatalogueSearchAdapter(this)
 
         // Create recycler and set adapter.
-        recycler.layoutManager = LinearLayoutManager(view.context)
+        recycler.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(view.context)
         recycler.adapter = adapter
+        recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
     }
 
     override fun onDestroyView(view: View) {
@@ -169,12 +171,29 @@ open class CatalogueSearchController(
         return null
     }
 
+    override fun handleBack(): Boolean {
+        return if (extensionFilter != null) {
+            activity?.finishAffinity()
+            true
+        } else super.handleBack()
+    }
+
     /**
      * Add search result to adapter.
      *
      * @param searchResult result of search.
      */
     fun setItems(searchResult: List<CatalogueSearchItem>) {
+        if (extensionFilter != null) {
+            val results = searchResult.first().results
+            if (results != null && results.size == 1) {
+                val manga = results.first().manga
+                router.pushController(MangaController(manga,true,fromExtension = true)
+                    .withFadeTransaction()
+                )
+                return
+            }
+        }
         adapter?.updateDataSet(searchResult)
     }
 
