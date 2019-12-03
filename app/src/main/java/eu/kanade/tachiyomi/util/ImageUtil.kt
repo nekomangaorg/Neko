@@ -151,8 +151,8 @@ object ImageUtil {
                             botRightIsDark -> image.getPixel(right, bot)
                             else -> blackPixel
                         }
-                    darkBG = true;
-                    overallWhitePixels = 0;
+                    darkBG = true
+                    overallWhitePixels = 0
                     break@outer
                 }
                 blackStreak -> {
@@ -164,7 +164,7 @@ object ImageUtil {
                             else -> blackPixel
                         }
                     if (blackPixels > 18) {
-                        overallWhitePixels = 0;
+                        overallWhitePixels = 0
                         break@outer
                     }
                 }
@@ -180,14 +180,11 @@ object ImageUtil {
             darkBG = true
         val whiteColor = android.R.attr.colorBackground
         if (darkBG) {
-            if (isWhite(image.getPixel(left, bot)) && isWhite(image.getPixel(right, bot)))
-                return GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,
-                        intArrayOf(blackPixel, blackPixel, whiteColor, whiteColor))
-            else if (isWhite(image.getPixel(left, top)) && isWhite(image.getPixel(right, top)))
-                return GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,
-                        intArrayOf(whiteColor, whiteColor, blackPixel, blackPixel))
-            else
-                return ColorDrawable(blackPixel)
+            return if (isWhite(image.getPixel(left, bot)) && isWhite(image.getPixel(right, bot))) GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,
+                intArrayOf(blackPixel, blackPixel, whiteColor, whiteColor))
+            else if (isWhite(image.getPixel(left, top)) && isWhite(image.getPixel(right, top))) GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,
+                intArrayOf(whiteColor, whiteColor, blackPixel, blackPixel))
+            else ColorDrawable(blackPixel)
         }
         if (topIsBlackStreak || (topLeftIsDark && topRightIsDark
                         && isDark(image.getPixel(left - offsetX, top)) && isDark(image.getPixel(right + offsetX, top))
