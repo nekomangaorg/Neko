@@ -101,6 +101,25 @@ open class ExtendedNavigationView @JvmOverloads constructor(
             }
 
         }
+
+        class TriStateGroup(resId: Int, group: Group) : MultiStateGroup(resId, group) {
+
+            companion object {
+                const val STATE_IGNORE = 0
+                const val STATE_INCLUDE = 1
+                const val STATE_EXCLUDE = 2
+            }
+
+            override fun getStateDrawable(context: Context): Drawable? {
+                return when(state) {
+                    STATE_INCLUDE -> tintVector(context, R.drawable.ic_check_box_24dp)
+                    STATE_EXCLUDE -> tintVector(context, R.drawable.ic_check_box_x_24dp,
+                        android.R.attr.textColorSecondary)
+                    else -> tintVector(context, R.drawable.ic_check_box_outline_blank_24dp,
+                        android.R.attr.textColorSecondary)
+                }
+            }
+        }
     }
 
     /**

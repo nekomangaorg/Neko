@@ -13,6 +13,8 @@ import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.HttpSource
+import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_EXCLUDE
+import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_INCLUDE
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
 import eu.kanade.tachiyomi.util.combineLatest
 import eu.kanade.tachiyomi.util.isNullOrUnsubscribed
@@ -113,22 +115,21 @@ class LibraryPresenter(
 
         val filterFn: (LibraryItem) -> Boolean = f@ { item ->
             // Filter when there isn't unread chapters.
-            if (filterUnread && item.manga.unread == 0) {
-                return@f false
-            }
+            if (filterUnread == STATE_INCLUDE && item.manga.unread == 0) return@f false
+            if (filterUnread == STATE_EXCLUDE && item.manga.unread > 0) return@f false
 
-            if (filterCompleted && item.manga.status != SManga.COMPLETED) {
+            if (filterCompleted == STATE_INCLUDE && item.manga.status != SManga.COMPLETED)
                 return@f false
-            }
+            if (filterCompleted == STATE_EXCLUDE && item.manga.status == SManga.COMPLETED)
+                return@f false
 
             // Filter when there are no downloads.
-            if (filterDownloaded) {
-                // Don't bother with directory checking if download count has been set.
-                if (item.downloadCount != -1) {
-                    return@f item.downloadCount > 0
+            if (filterDownloaded != STATE_IGNORE) {
+                val isDownloaded = when {
+                    item.downloadCount != -1 -> item.downloadCount > 0
+                    else -> downloadManager.getDownloadCount(item.manga) > 0
                 }
-
-                return@f downloadManager.getDownloadCount(item.manga) > 0
+                return@f if (filterDownloaded == STATE_INCLUDE) isDownloaded else !isDownloaded
             }
             true
         }
@@ -178,12 +179,13 @@ class LibraryPresenter(
 
         val sortFn: (LibraryItem, LibraryItem) -> Int = { i1, i2 ->
             when (sortingMode) {
-                LibrarySort.ALPHA -> i1.manga.title.compareTo(i2.manga.title, true)
+                LibrarySort.ALPHA -> sortAlphabetical(i1, i2)
                 LibrarySort.LAST_READ -> {
                     // Get index of manga, set equal to list if size unknown.
                     val manga1LastRead = lastReadManga[i1.manga.id!!] ?: lastReadManga.size
                     val manga2LastRead = lastReadManga[i2.manga.id!!] ?: lastReadManga.size
-                    manga1LastRead.compareTo(manga2LastRead)
+                    val mangaCompare = manga1LastRead.compareTo(manga2LastRead)
+                    if (mangaCompare == 0) sortAlphabetical(i1, i2) else mangaCompare
                 }
                 LibrarySort.LAST_UPDATED -> i2.manga.last_update.compareTo(i1.manga.last_update)
                 LibrarySort.DATE_ADDED -> i2.manga.date_added.compareTo(i1.manga.date_added)
@@ -191,9 +193,10 @@ class LibraryPresenter(
                 LibrarySort.TOTAL -> {
                     val manga1TotalChapter = totalChapterManga[i1.manga.id!!] ?: 0
                     val mange2TotalChapter = totalChapterManga[i2.manga.id!!] ?: 0
-                    manga1TotalChapter.compareTo(mange2TotalChapter)
+                    val mangaCompare = manga1TotalChapter.compareTo(mange2TotalChapter)
+                    if (mangaCompare == 0) sortAlphabetical(i1, i2) else mangaCompare
                 }
-              
+
                 else -> throw Exception("Unknown sorting mode")
             }
         }
@@ -206,22 +209,27 @@ class LibraryPresenter(
         return map.mapValues { entry -> entry.value.sortedWith(comparator) }
     }
 
+    fun sortAlphabetical(i1: LibraryItem, i2: LibraryItem): Int {
+        return i1.manga.title.removeArticles().compareTo(i2.manga.title.removeArticles(), true)
+    }
+
+    fun String.removeArticles(): String {
+        return this.replace(Regex("^(an|a|the) ", RegexOption.IGNORE_CASE), "")
+    }
+
     /**
      * Get the categories and all its manga from the database.
      *
      * @return an observable of the categories and its manga.
      */
     private fun getLibraryObservable(): Observable<Library> {
-        return Observable.combineLatest(getCategoriesObservable(), getLibraryMangasObservable(),
-                { dbCategories, libraryManga ->
-                    val categories = if (libraryManga.containsKey(0))
-                        arrayListOf(Category.createDefault()) + dbCategories
-                    else
-                        dbCategories
+        return Observable.combineLatest(getCategoriesObservable(), getLibraryMangasObservable()) { dbCategories, libraryManga ->
+            val categories = if (libraryManga.containsKey(0)) arrayListOf(Category.createDefault()) + dbCategories
+            else dbCategories
 
-                    this.categories = categories
-                    Library(categories, libraryManga)
-                })
+            this.categories = categories
+            Library(categories, libraryManga)
+        }
     }
 
     /**
