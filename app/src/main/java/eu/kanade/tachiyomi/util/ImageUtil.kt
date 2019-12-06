@@ -93,7 +93,8 @@ object ImageUtil {
             topLeftIsDark -> image.getPixel(left, top)
             topRightIsDark -> image.getPixel(right, top)
             botLeftIsDark -> image.getPixel(left, bot)
-            else -> image.getPixel(right, bot)
+            botRightIsDark -> image.getPixel(right, bot)
+            else -> android.R.attr.colorBackground
         }
 
         var overallWhitePixels = 0
