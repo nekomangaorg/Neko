@@ -316,6 +316,7 @@ class ChaptersController() : NucleusController<ChaptersPresenter>(),
             else -> setSelection(position)
         }
         lastClickPosition = position
+        adapter?.notifyDataSetChanged()
     }
 
     // SELECTIONS & ACTION MODE
@@ -324,6 +325,7 @@ class ChaptersController() : NucleusController<ChaptersPresenter>(),
         val adapter = adapter ?: return
         val item = adapter.getItem(position) ?: return
         adapter.toggleSelection(position)
+        adapter.notifyDataSetChanged()
         if (adapter.isSelected(position)) {
             selectedItems.add(item)
         } else {
