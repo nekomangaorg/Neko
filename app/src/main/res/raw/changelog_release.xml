@@ -1,5 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <changelog bulletedList="true">
+    <changelogversion versionName="v0.9.1" changeDate="">
+        <changelogtext>Range Select for Library and Chapters: long Press on an item
+            then long press on another to select everything in between</changelogtext>
+        <changelogtext>Tap on top or bottom of a webtoon to scroll up and down
+            (tapping the sides still works too)</changelogtext>
+        <changelogtext>Tri-State Filters on library</changelogtext>
+        <changelogtext>Fixes to white background sometimes in auto dark mode</changelogtext>
+    </changelogversion>
+
+    <changelogversion versionName="v0.9.0" changeDate="">
+        <changelogtext>Android 10 Dark Theme support: You can have Tachiyomi follow the system
+            theme as well as customize which dark theme to use for dark mode</changelogtext>
+        <changelogtext>Android 10 edge to edge support (and a translucent nav bar for older
+            versions): no more small ugly bar for the gesture navigation</changelogtext>
+        <changelogtext>Automatic background based on manga page: For those that like having a
+            white background to match the content, this will automatically set the background to
+            match for moments such as a flashback section of a manga</changelogtext>
+        <changelogtext>Richer New chapters notifications: Now as a group of notifications,
+            expanding out to show more information about the new chapters (like chapter name and
+            manga cover). Tapping on it will bring you right into the chapter or expand it to
+            mark it as read or view all chapters</changelogtext>
+        <changelogtext>New material snackbar: Removing manga now auto deletes chapters and has an
+            undo button in case you change your mind</changelogtext>
+        <changelogtext>Multi Source Migration from library</changelogtext>
+        <changelogtext>Notification separation of updating library and new chapters</changelogtext>
+        <changelogtext>Share sheets upgrade for Android 10</changelogtext>
+        <changelogtext>Reader seekbar overrides switch app gesture in Android 10, so no more
+            accidents for that</changelogtext>
+        <changelogtext>Option to hide manga titles in grid view</changelogtext>
+        <changelogtext>Filter out your library by searching for tags (ex. "Comedy" or "Slice of
+            Life") or exclude mangas by a tag (ex. "-Shounen" or "-Romance"). Tapping on these
+            tags also performs a local search</changelogtext>
+        <changelogtext>Android X Support</changelogtext>
+    </changelogversion>
+
     <changelogversion versionName="v0.8.4" changeDate="">
         <changelogtext>All the internal sources have been removed. They now need to be
             installed as an extension.</changelogtext>
