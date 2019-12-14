@@ -465,12 +465,12 @@ class LibraryUpdateService(
                 catch (e: Exception) { }
                 setContentTitle(manga.title.chop(45))
                 color = ContextCompat.getColor(this@LibraryUpdateService, R.color.colorAccentLight)
-                setContentText(chapterNames.first())
-                setStyle(NotificationCompat.BigTextStyle().bigText(
-                    if (chapterNames.size > 5) {
-                        "${chapterNames.take(4).joinToString(", ")}, " +
-                            getString(R.string.notification_and_n_more, (chapterNames.size - 4))
-                    } else chapterNames.joinToString(", ")))
+                val chaptersNames = if (chapterNames.size > 5) {
+                    "${chapterNames.take(4).joinToString(", ")}, " +
+                        getString(R.string.notification_and_n_more, (chapterNames.size - 4))
+                } else chapterNames.joinToString(", ")
+                setContentText(chaptersNames)
+                setStyle(NotificationCompat.BigTextStyle().bigText(chaptersNames))
                 priority = NotificationCompat.PRIORITY_HIGH
                 setGroup(Notifications.GROUP_NEW_CHAPTERS)
                 setContentIntent(
@@ -498,7 +498,15 @@ class LibraryUpdateService(
                 setLargeIcon(notificationBitmap)
                 setContentTitle(getString(R.string.notification_new_chapters))
                 color = ContextCompat.getColor(applicationContext, R.color.colorAccentLight)
-                setContentText(getString(R.string.notification_new_chapters_text, updates.size))
+                if (updates.size > 1) {
+                    setContentText(getString(R.string.notification_new_chapters_text, updates.size))
+                    setStyle(NotificationCompat.BigTextStyle().bigText(updates.joinToString("\n") {
+                        it.first.title.chop(45)
+                    }))
+                }
+                else {
+                    setContentText(updates.first().first.title.chop(45))
+                }
                 priority = NotificationCompat.PRIORITY_HIGH
                 setGroup(Notifications.GROUP_NEW_CHAPTERS)
                 setGroupSummary(true)

@@ -23,6 +23,7 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.*
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.Source
+import eu.kanade.tachiyomi.source.SourceNotFoundException
 import eu.kanade.tachiyomi.util.chop
 import eu.kanade.tachiyomi.util.isServiceRunning
 import eu.kanade.tachiyomi.util.sendLocalBroadcast
@@ -103,6 +104,17 @@ class BackupRestoreService : Service() {
      * List containing errors
      */
     private val errors = mutableListOf<Pair<Date, String>>()
+
+    /**
+     * List containing distinct errors
+     */
+    private val errorsMini = mutableListOf<String>()
+
+
+    /**
+     * List containing missing sources
+     */
+    private val sourcesMissing = mutableListOf<Long>()
 
     /**
      * Backup manager
@@ -203,6 +215,7 @@ class BackupRestoreService : Service() {
                     restoreAmount = mangasJson.size() + 1 // +1 for categories
                     restoreProgress = 0
                     errors.clear()
+                    errorsMini.clear()
 
                     // Restore categories
                     json.get(CATEGORIES)?.let {
@@ -243,6 +256,14 @@ class BackupRestoreService : Service() {
                         putExtra(BackupConst.EXTRA_ERRORS, errors.size)
                         putExtra(BackupConst.EXTRA_ERROR_FILE_PATH, logFile.parent)
                         putExtra(BackupConst.EXTRA_ERROR_FILE, logFile.name)
+                        val sourceMissingCount = sourcesMissing.distinct().size
+                        val sourceErrors = getString(R.string.sources_missing, sourceMissingCount)
+                        val otherErrors = errorsMini.distinct().joinToString("\n")
+                        putExtra(BackupConst.EXTRA_MINI_ERROR,
+                            if (sourceMissingCount > 0) sourceErrors + "\n" + otherErrors
+                            else otherErrors
+                            )
+                        putExtra(BackupConst.EXTRA_ERRORS, errors.size)
                         putExtra(BackupConst.ACTION, BackupConst.ACTION_RESTORE_COMPLETED_DIALOG)
                     }
                     sendLocalBroadcast(completeIntent)
@@ -323,6 +344,12 @@ class BackupRestoreService : Service() {
         return backupManager.restoreMangaFetchObservable(source, manga)
                 .onErrorReturn {
                     errors.add(Date() to "${manga.title} - ${it.message}")
+                    if (it is SourceNotFoundException) {
+                        sourcesMissing.add(it.id)
+                    }
+                    else {
+                        errorsMini.add(it.message ?: "")
+                    }
                     manga
                 }
                 .filter { it.id != null }
@@ -395,6 +422,7 @@ class BackupRestoreService : Service() {
                 // If there's any error, return empty update and continue.
                 .onErrorReturn {
                     errors.add(Date() to "${manga.title} - ${it.message}")
+                    errorsMini.add(it.message ?: "")
                     Pair(emptyList(), emptyList())
                 }
     }
@@ -414,10 +442,13 @@ class BackupRestoreService : Service() {
                                 .doOnNext { db.insertTrack(it).executeAsBlocking() }
                                 .onErrorReturn {
                                     errors.add(Date() to "${manga.title} - ${it.message}")
+                                    errorsMini.add(it.message ?: "")
                                     track
                                 }
                     } else {
-                        errors.add(Date() to "${manga.title} - ${service?.name} not logged in")
+                        val notLoggedIn = getString(R.string.not_logged_into, service?.name)
+                        errors.add(Date() to "${manga.title} - $notLoggedIn")
+                        errorsMini.add(notLoggedIn)
                         Observable.empty()
                     }
                 }

@@ -360,11 +360,13 @@ class SettingsBackupController : SettingsController() {
     }
 
     class RestoredBackupDialog(bundle: Bundle? = null) : DialogController(bundle) {
-        constructor(time: Long, errorCount: Int, path: String, file: String) : this(Bundle().apply {
+        constructor(time: Long, errorCount: Int, path: String, file: String, errors: String) : this
+            (Bundle().apply {
             putLong(KEY_TIME, time)
             putInt(KEY_ERROR_COUNT, errorCount)
             putString(KEY_PATH, path)
             putString(KEY_FILE, file)
+            putString(KEY_MINI_ERRORS, errors)
         })
 
         override fun onCreateDialog(savedViewState: Bundle?): Dialog {
@@ -373,16 +375,22 @@ class SettingsBackupController : SettingsController() {
             val errors = args.getInt(KEY_ERROR_COUNT)
             val path = args.getString(KEY_PATH)
             val file = args.getString(KEY_FILE)
+            val miniErrors = args.getString(KEY_MINI_ERRORS)
             val timeString = String.format("%02d min, %02d sec",
                     TimeUnit.MILLISECONDS.toMinutes(time),
                     TimeUnit.MILLISECONDS.toSeconds(time) - TimeUnit.MINUTES.toSeconds(
                             TimeUnit.MILLISECONDS.toMinutes(time))
             )
 
+            var errorString = activity.getString(R.string.restore_completed_content, timeString,
+                if (errors > 0) "$errors" else activity.getString(android.R.string
+                    .no))
+            if (errors > 0)
+                errorString = errorString.trimEnd('.') + ":"
+
             return MaterialDialog.Builder(activity)
                     .title(R.string.restore_completed)
-                    .content(activity.getString(R.string.restore_completed_content, timeString,
-                            if (errors > 0) "$errors" else activity.getString(android.R.string.no)))
+                    .content("$errorString\n$miniErrors")
                     .positiveText(R.string.action_close)
                     .negativeText(R.string.action_open_log)
                     .onNegative { _, _ ->
@@ -408,6 +416,7 @@ class SettingsBackupController : SettingsController() {
             const val KEY_ERROR_COUNT = "RestoredBackupDialog.errors"
             const val KEY_PATH = "RestoredBackupDialog.path"
             const val KEY_FILE = "RestoredBackupDialog.file"
+            const val KEY_MINI_ERRORS = "RestoredBackupDialog.miniErrors"
         }
     }
 
@@ -432,8 +441,9 @@ class SettingsBackupController : SettingsController() {
                     val errors = intent.getIntExtra(BackupConst.EXTRA_ERRORS, 0)
                     val path = intent.getStringExtra(BackupConst.EXTRA_ERROR_FILE_PATH)
                     val file = intent.getStringExtra(BackupConst.EXTRA_ERROR_FILE)
+                    val miniErrors = intent.getStringExtra(BackupConst.EXTRA_MINI_ERROR)
                     if (errors > 0) {
-                        RestoredBackupDialog(time, errors, path, file).showDialog(router)
+                        RestoredBackupDialog(time, errors, path, file, miniErrors).showDialog(router)
                     }
                 }
                 BackupConst.ACTION_ERROR_BACKUP_DIALOG -> {

@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <changelog bulletedList="true">
+    <changelogversion versionName="v0.9.2" changeDate="">
+        <changelogtext>Fixes notification text when there are multiple chapters</changelogtext>
+        <changelogtext>Simplified errors now show after restoring a backup on the popup dialog</changelogtext>
+        <changelogtext>Fixed last updated sorting being in a jumbled order after restoring (Note:
+            if the list is still jumbled after restore, refersh your library)</changelogtext>
+        <changelogtext>Fixed notifcations not expanding on older devices</changelogtext>
+    </changelogversion>
+
     <changelogversion versionName="v0.9.1" changeDate="">
         <changelogtext>Range Select for Library and Chapters: long Press on an item
             then long press on another to select everything in between</changelogtext>
