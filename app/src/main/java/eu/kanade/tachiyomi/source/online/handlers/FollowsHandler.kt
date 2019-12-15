@@ -52,7 +52,7 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers) {
 
     private fun followFromElement(result: Result): SManga {
         val manga = SManga.create()
-        manga.title = ""
+        manga.title = result.title
         manga.thumbnail_url = "${MdUtil.cdnUrl}/images/manga/${result.manga_id}.jpg"
         manga.url = "/manga/${result.manga_id}/"
         manga.follow_status = SManga.FollowStatus.fromMangadex(result.follow_type)
