@@ -9,6 +9,7 @@ data class FollowsPageResult(
 
 @Serializable
 data class Result(
+        val title: String,
         val chapter: String,
         val follow_type: Int,
         val manga_id: Int,

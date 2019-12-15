@@ -30,7 +30,7 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers) {
     }
 
     private fun followsParse(response: Response): MangasPage {
-        val followsPageResult = Json.parse(FollowsPageResult.serializer(), response.body!!.string())
+        val followsPageResult = Json.nonstrict.parse(FollowsPageResult.serializer(), response.body!!.string())
 
         if (followsPageResult.result.isEmpty()) {
             return MangasPage(mutableListOf(), false)
