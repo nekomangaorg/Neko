@@ -31,6 +31,8 @@
     <item name="text_color_primary">@color/textColorPrimaryDark</item>
     <item name="background_card">@color/cardBackground</item>
     <item name="icon_color">@color/iconColorDark</item>
+    <item name="snackbar_background">@color/snackbarBackground</item>
+    <item name="snackbar_text">@color/textColorPrimaryLight</item>
     <item name="android:navigationBarColor">@color/oldNavBarBackground</item>
   </style>
 
@@ -54,6 +56,8 @@
     <item name="colorPrimary">@color/colorAmoledPrimary</item>
     <item name="colorPrimaryDark">@color/colorAmoledPrimary</item>
     <item name="android:colorBackground">@color/md_black_1000</item>
+    <item name="snackbar_background">@color/trueSnackbarBackground</item>
+    <item name="snackbar_text">@color/textColorPrimaryDark</item>
 
     <!-- Custom Attributes-->
     <item name="selectable_list_drawable">@drawable/list_item_selector_amoled</item>

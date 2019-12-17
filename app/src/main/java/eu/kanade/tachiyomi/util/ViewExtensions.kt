@@ -41,7 +41,7 @@ fun View.snack(message: String, length: Int = Snackbar.LENGTH_SHORT, f: (Snackba
 Unit)? = null): Snackbar {
     val snack = Snackbar.make(this, message, length)
     val textView: TextView = snack.view.findViewById(com.google.android.material.R.id.snackbar_text)
-    textView.setTextColor(context.getResourceColor(android.R.attr.textColorPrimaryInverse))
+    textView.setTextColor(context.getResourceColor(R.attr.snackbar_text))
     when {
         Build.VERSION.SDK_INT >= 23 ->  {
             val leftM = if (this is CoordinatorLayout) 0 else rootWindowInsets.systemWindowInsetLeft
