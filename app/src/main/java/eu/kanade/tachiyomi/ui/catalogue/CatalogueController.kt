@@ -1,9 +1,13 @@
 package eu.kanade.tachiyomi.ui.catalogue
 
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-import androidx.recyclerview.widget.LinearLayoutManager
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import androidx.appcompat.widget.SearchView
-import android.view.*
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
 import com.bluelinelabs.conductor.RouterTransaction
@@ -194,7 +198,7 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
                 .subscribeUntilDestroy { performGlobalSearch(it.queryText().toString()) }
     }
 
-    fun performGlobalSearch(query: String){
+    private fun performGlobalSearch(query: String){
         router.pushController(CatalogueSearchController(query).withFadeTransaction())
     }
 

@@ -98,6 +98,8 @@ class PreferencesHelper(val context: Context) {
 
     fun enabledLanguages() = rxPrefs.getStringSet(Keys.enabledLanguages, setOf("en", Locale.getDefault().language))
 
+    fun sourceSorting() = rxPrefs.getInteger(Keys.sourcesSort, 0)
+
     fun sourceUsername(source: Source) = prefs.getString(Keys.sourceUsername(source.id), "")
 
     fun sourcePassword(source: Source) = prefs.getString(Keys.sourcePassword(source.id), "")

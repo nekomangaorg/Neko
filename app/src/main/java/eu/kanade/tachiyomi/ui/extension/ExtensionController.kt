@@ -81,7 +81,7 @@ open class ExtensionController : NucleusController<ExtensionPresenter>(),
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.action_settings -> {
+            R.id.action_filter -> {
                 router.pushController((RouterTransaction.with(SettingsExtensionsController()))
                     .popChangeHandler(SettingsExtensionsFadeChangeHandler())
                     .pushChangeHandler(FadeChangeHandler()))
