@@ -176,6 +176,12 @@ class PreferencesHelper(val context: Context) {
 
     fun skipRead() = prefs.getBoolean(Keys.skipRead, false)
 
+    fun useBiometrics() = rxPrefs.getBoolean(Keys.useBiometrics, false)
+
+    fun lockAfter() = rxPrefs.getInteger(Keys.lockAfter, 0)
+
+    fun lastUnlock() = rxPrefs.getLong(Keys.lastUnlock, 0)
+
     fun migrateFlags() = rxPrefs.getInteger("migrate_flags", Int.MAX_VALUE)
 
     fun trustedSignatures() = rxPrefs.getStringSet("trusted_signatures", emptySet())

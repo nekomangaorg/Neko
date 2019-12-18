@@ -16,6 +16,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.LinearLayout
+import androidx.biometric.BiometricManager
 import androidx.core.graphics.ColorUtils
 import com.bluelinelabs.conductor.*
 import com.google.android.material.snackbar.Snackbar
@@ -23,6 +24,7 @@ import eu.kanade.tachiyomi.Migrations
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
 import eu.kanade.tachiyomi.ui.base.controller.*
 import eu.kanade.tachiyomi.ui.catalogue.CatalogueController
@@ -46,6 +48,7 @@ import eu.kanade.tachiyomi.util.updatePaddingRelative
 import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.coroutines.delay
 import uy.kohesive.injekt.injectLazy
+import java.util.Date
 
 class MainActivity : BaseActivity() {
 
@@ -60,7 +63,6 @@ class MainActivity : BaseActivity() {
     private var snackBar:Snackbar? = null
     var extraViewForUndo:View? = null
     private var canDismissSnackBar = false
-
     fun setUndoSnackBar(snackBar: Snackbar?, extraViewToCheck: View? = null) {
         this.snackBar = snackBar
         canDismissSnackBar = false
@@ -248,6 +250,22 @@ class MainActivity : BaseActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        val useBiometrics = preferences.useBiometrics().getOrDefault()
+        if (useBiometrics && BiometricManager.from(this)
+                .canAuthenticate() == BiometricManager.BIOMETRIC_SUCCESS) {
+            if (!unlocked && (preferences.lockAfter().getOrDefault() <= 0 || Date().time >=
+                    preferences.lastUnlock().getOrDefault() + 60 * 1000 * preferences.lockAfter().getOrDefault())) {
+                val intent = Intent(this, BiometricActivity::class.java)
+                startActivity(intent)
+                this.overridePendingTransition(0, 0)
+            }
+        }
+        else if (useBiometrics)
+            preferences.useBiometrics().set(false)
+    }
+
     override fun onNewIntent(intent: Intent) {
         if (!handleIntentAction(intent)) {
             super.onNewIntent(intent)
@@ -314,6 +332,7 @@ class MainActivity : BaseActivity() {
         } else if (backstackSize == 1 && router.getControllerWithTag("$startScreenId") == null) {
             setSelectedDrawerItem(startScreenId)
         } else if (backstackSize == 1 || !router.handleBack()) {
+            unlocked = false
             super.onBackPressed()
         }
     }
@@ -412,6 +431,8 @@ class MainActivity : BaseActivity() {
         const val INTENT_SEARCH_FILTER = "filter"
 
         private const val URL_HELP = "https://tachiyomi.org/help/"
+
+        var unlocked = false
     }
 
 }

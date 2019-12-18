@@ -11,15 +11,19 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
-import com.google.android.material.bottomsheet.BottomSheetDialog
-import android.view.*
+import android.view.KeyEvent
+import android.view.Menu
+import android.view.MenuItem
+import android.view.MotionEvent
+import android.view.View
+import android.view.WindowManager
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
-import android.widget.LinearLayout
 import android.widget.SeekBar
+import androidx.biometric.BiometricManager
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
@@ -27,6 +31,8 @@ import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.base.activity.BaseRxActivity
+import eu.kanade.tachiyomi.ui.main.BiometricActivity
+import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.AddToLibraryFirst
 import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.Error
 import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.Success
@@ -38,12 +44,17 @@ import eu.kanade.tachiyomi.ui.reader.viewer.pager.L2RPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.R2LPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.VerticalPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
-import eu.kanade.tachiyomi.util.*
+import eu.kanade.tachiyomi.util.GLUtil
+import eu.kanade.tachiyomi.util.getResourceColor
+import eu.kanade.tachiyomi.util.getUriCompat
+import eu.kanade.tachiyomi.util.gone
+import eu.kanade.tachiyomi.util.launchUI
+import eu.kanade.tachiyomi.util.plusAssign
+import eu.kanade.tachiyomi.util.toast
+import eu.kanade.tachiyomi.util.visible
 import eu.kanade.tachiyomi.widget.SimpleAnimationListener
 import eu.kanade.tachiyomi.widget.SimpleSeekBarListener
 import kotlinx.android.synthetic.main.reader_activity.*
-import kotlinx.android.synthetic.main.reader_activity.toolbar
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import me.zhanghai.android.systemuihelper.SystemUiHelper
@@ -55,6 +66,7 @@ import rx.subscriptions.CompositeSubscription
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 import java.io.File
+import java.util.Date
 import java.util.concurrent.TimeUnit
 
 /**
@@ -504,6 +516,23 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
      */
     fun shareImage(page: ReaderPage) {
         presenter.shareImage(page)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val useBiometrics = preferences.useBiometrics().getOrDefault()
+        if (useBiometrics && BiometricManager.from(this)
+                .canAuthenticate() == BiometricManager.BIOMETRIC_SUCCESS) {
+            if (!MainActivity.unlocked && (preferences.lockAfter().getOrDefault() <= 0 || Date()
+                    .time >=
+                    preferences.lastUnlock().getOrDefault() + 60 * 1000 * preferences.lockAfter().getOrDefault())) {
+                val intent = Intent(this, BiometricActivity::class.java)
+                startActivity(intent)
+                this.overridePendingTransition(0, 0)
+            }
+        }
+        else if (useBiometrics)
+            preferences.useBiometrics().set(false)
     }
 
     /**

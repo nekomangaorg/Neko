@@ -117,6 +117,12 @@ object PreferenceKeys {
 
     const val downloadBadge = "display_download_badge"
 
+    const val useBiometrics = "use_biometrics"
+
+    const val lockAfter = "lock_after"
+
+    const val lastUnlock = "last_unlock"
+
     @Deprecated("Use the preferences of the source")
     fun sourceUsername(sourceId: Long) = "pref_source_username_$sourceId"
 

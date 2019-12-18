@@ -51,6 +51,8 @@
             android:name=".ui.manga.info.WebViewActivity"
             android:configChanges="uiMode|orientation|screenSize"/>
         <activity
+            android:name=".ui.main.BiometricActivity" />
+        <activity
             android:name=".widget.CustomLayoutPickerActivity"
             android:label="@string/app_name"
             android:theme="@style/FilePickerTheme" />
