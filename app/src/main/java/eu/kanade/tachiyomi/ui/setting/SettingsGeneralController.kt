@@ -5,6 +5,8 @@ import android.os.Bundle
 import android.os.Handler
 import androidx.preference.PreferenceScreen
 import android.view.View
+import androidx.biometric.BiometricManager
+import androidx.preference.PreferenceScreen
 import com.afollestad.materialdialogs.MaterialDialog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -154,6 +156,36 @@ class SettingsGeneralController : SettingsController() {
                     it.id == (newValue as String).toInt()
                 }?.name ?: context.getString(R.string.default_category_summary)
                 true
+            }
+        }
+        val biometricManager = BiometricManager.from(context)
+        if (biometricManager.canAuthenticate() == BiometricManager.BIOMETRIC_SUCCESS) {
+            var preference:IntListPreference? = null
+            switchPreference {
+                key = Keys.useBiometrics
+                titleRes = R.string.lock_with_biometrics
+                defaultValue = false
+
+                onChange {
+                    preference?.isVisible = it as Boolean
+                    true
+                }
+            }
+            preference = intListPreference {
+                key = Keys.lockAfter
+                titleRes = R.string.lock_when_idle
+                isVisible = preferences.useBiometrics().getOrDefault()
+                val values = arrayOf("0", "2", "5", "10", "20", "30", "60", "90", "120", "-1")
+                entries = values.map {
+                    when (it) {
+                        "0" -> context.getString(R.string.lock_always)
+                        "-1" -> context.getString(R.string.lock_never)
+                        else -> context.getString(R.string.lock_after_mins, it)
+                    }
+                }.toTypedArray()
+                entryValues = values
+                defaultValue = "0"
+                summary = "%s"
             }
         }
     }

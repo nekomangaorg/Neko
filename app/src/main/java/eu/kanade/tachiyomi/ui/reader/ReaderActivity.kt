@@ -8,12 +8,14 @@ import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.hardware.biometrics.BiometricManager
 import android.os.Build
 import android.os.Bundle
 import android.view.*
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.SeekBar
+import androidx.biometric.BiometricManager
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.IconicsDrawable
@@ -27,6 +29,11 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.base.activity.BaseRxActivity
 import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.*
+import eu.kanade.tachiyomi.ui.main.BiometricActivity
+import eu.kanade.tachiyomi.ui.main.MainActivity
+import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.AddToLibraryFirst
+import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.Error
+import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.Success
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
@@ -48,6 +55,7 @@ import rx.subscriptions.CompositeSubscription
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 import java.io.File
+import java.util.Date
 import java.util.concurrent.TimeUnit
 
 /**
@@ -475,6 +483,23 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
      */
     fun shareImage(page: ReaderPage) {
         presenter.shareImage(page)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val useBiometrics = preferences.useBiometrics().getOrDefault()
+        if (useBiometrics && BiometricManager.from(this)
+                .canAuthenticate() == BiometricManager.BIOMETRIC_SUCCESS) {
+            if (!MainActivity.unlocked && (preferences.lockAfter().getOrDefault() <= 0 || Date()
+                    .time >=
+                    preferences.lastUnlock().getOrDefault() + 60 * 1000 * preferences.lockAfter().getOrDefault())) {
+                val intent = Intent(this, BiometricActivity::class.java)
+                startActivity(intent)
+                this.overridePendingTransition(0, 0)
+            }
+        }
+        else if (useBiometrics)
+            preferences.useBiometrics().set(false)
     }
 
     /**

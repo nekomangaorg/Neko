@@ -7,6 +7,10 @@ import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.view.ViewGroup
+import android.widget.FrameLayout
+import android.widget.LinearLayout
+import androidx.biometric.BiometricManager
+import androidx.core.graphics.ColorUtils
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
@@ -20,6 +24,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
 import eu.kanade.tachiyomi.ui.base.controller.*
 import eu.kanade.tachiyomi.ui.catalogue.browse.BrowseCatalogueController
@@ -35,6 +40,7 @@ import kotlinx.android.synthetic.main.main_activity.*
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
+import java.util.Date
 
 
 class MainActivity : BaseActivity(),  SourceLoginDialog.Listener {
@@ -178,6 +184,22 @@ class MainActivity : BaseActivity(),  SourceLoginDialog.Listener {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        val useBiometrics = preferences.useBiometrics().getOrDefault()
+        if (useBiometrics && BiometricManager.from(this)
+                .canAuthenticate() == BiometricManager.BIOMETRIC_SUCCESS) {
+            if (!unlocked && (preferences.lockAfter().getOrDefault() <= 0 || Date().time >=
+                    preferences.lastUnlock().getOrDefault() + 60 * 1000 * preferences.lockAfter().getOrDefault())) {
+                val intent = Intent(this, BiometricActivity::class.java)
+                startActivity(intent)
+                this.overridePendingTransition(0, 0)
+            }
+        }
+        else if (useBiometrics)
+            preferences.useBiometrics().set(false)
+    }
+
     private fun addIconToMenu(nav_drawer_library: Int, icon: IIcon) {
         //no size or color needed since navigation drawer dictates it
         nav_view.menu.findItem(nav_drawer_library).icon = IconicsDrawable(this).icon(icon)
@@ -218,7 +240,7 @@ class MainActivity : BaseActivity(),  SourceLoginDialog.Listener {
                     setSelectedDrawerItem(R.id.nav_drawer_downloads)
                 }
             }
-           
+
             else -> return false
         }
         return true
@@ -237,6 +259,7 @@ class MainActivity : BaseActivity(),  SourceLoginDialog.Listener {
         } else if (backstackSize == 1 && router.getControllerWithTag("$startScreenId") == null) {
             setSelectedDrawerItem(startScreenId)
         } else if (backstackSize == 1 || !router.handleBack()) {
+            unlocked = false
             super.onBackPressed()
         }
     }
@@ -304,6 +327,7 @@ class MainActivity : BaseActivity(),  SourceLoginDialog.Listener {
         const val SHORTCUT_CATALOGUES = "eu.kanade.tachiyomi.SHOW_BROWSE"
         const val SHORTCUT_DOWNLOADS = "eu.kanade.tachiyomi.SHOW_DOWNLOADS"
         const val SHORTCUT_MANGA = "eu.kanade.tachiyomi.SHOW_MANGA"
+        var unlocked = false
     }
 
 }

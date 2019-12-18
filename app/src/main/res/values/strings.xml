@@ -21,8 +21,7 @@
     <string name="label_recent_updates">Library updates</string>
     <string name="label_categories">Categories</string>
     <string name="label_selected">Selected: %1$d</string>
-
-
+    <string name="unlock_library">Unlock to access Library</string>
 
 
     <!-- Actions -->
@@ -145,6 +144,13 @@
     <string name="system_default">System default</string>
     <string name="default_category">Default category</string>
     <string name="default_category_summary">Always ask</string>
+    <string name="lock_with_biometrics">Lock with biometrics</string>
+    <string name="lock_when_idle">Lock when idle</string>
+    <string name="lock_always">Always</string>
+    <string name="lock_never">Never</string>
+    <string name="lock_after_mins">After %1$s minutes</string>
+
+    <!-- Extension section -->
     <string name="all_lang">All</string>
       <!-- Reader section -->
     <string name="pref_fullscreen">Fullscreen</string>

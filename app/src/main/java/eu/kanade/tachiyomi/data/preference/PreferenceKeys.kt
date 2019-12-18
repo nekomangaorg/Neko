@@ -115,6 +115,13 @@ object PreferenceKeys {
 
     const val downloadBadge = "display_download_badge"
 
+    const val useBiometrics = "use_biometrics"
+
+    const val lockAfter = "lock_after"
+
+    const val lastUnlock = "last_unlock"
+
+    @Deprecated("Use the preferences of the source")
     const val showR18 = "show_r18"
 
     const val imageServer = "image_server"
