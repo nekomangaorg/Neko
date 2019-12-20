@@ -2,17 +2,25 @@ package eu.kanade.tachiyomi.ui.extension
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
-import androidx.preference.*
-import androidx.preference.MultiSelectListPreference
-import androidx.recyclerview.widget.DividerItemDecoration
-import androidx.recyclerview.widget.DividerItemDecoration.VERTICAL
-import androidx.recyclerview.widget.LinearLayoutManager
 import android.util.TypedValue
 import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.preference.DialogPreference
+import androidx.preference.EditTextPreference
+import androidx.preference.EditTextPreferenceDialogController
+import androidx.preference.ListPreference
+import androidx.preference.ListPreferenceDialogController
+import androidx.preference.MultiSelectListPreference
+import androidx.preference.MultiSelectListPreferenceDialogController
+import androidx.preference.Preference
+import androidx.preference.PreferenceGroupAdapter
+import androidx.preference.PreferenceManager
+import androidx.preference.PreferenceScreen
+import androidx.recyclerview.widget.DividerItemDecoration.VERTICAL
 import com.jakewharton.rxbinding.view.clicks
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.EmptyPreferenceDataStore
@@ -21,7 +29,6 @@ import eu.kanade.tachiyomi.source.ConfigurableSource
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.online.LoginSource
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
-import eu.kanade.tachiyomi.ui.setting.preference
 import eu.kanade.tachiyomi.ui.setting.preferenceCategory
 import eu.kanade.tachiyomi.util.LocaleHelper
 import eu.kanade.tachiyomi.util.RecyclerWindowInsetsListener
@@ -76,16 +83,16 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
         val manager = PreferenceManager(themedContext)
         manager.preferenceDataStore = EmptyPreferenceDataStore()
         manager.onDisplayPreferenceDialogListener = this
-        val screen = manager.createPreferenceScreen(themedContext)
+        val screen = manager.createPreferenceScreen(context)
         preferenceScreen = screen
 
         val multiSource = extension.sources.size > 1
 
-        /*for (source in extension.sources) {
+        for (source in extension.sources) {
             if (source is ConfigurableSource) {
                 addPreferencesForSource(screen, source, multiSource)
             }
-        }*/
+        }
 
         manager.setPreferences(screen)
 
@@ -123,7 +130,7 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
     private fun addPreferencesForSource(screen: PreferenceScreen, source: Source, multiSource: Boolean) {
         val context = screen.context
 
-        // TODO 
+        // TODO
         val dataStore = SharedPreferencesDataStore(/*if (source is HttpSource) {
             source.preferences
         } else {*/
@@ -137,16 +144,74 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
                 }
             }
 
-            val newScreen = screen.preferenceManager.createPreferenceScreen(context)
-            source.setupPreferenceScreen(newScreen)
+            //val newScreen = screen.preferenceManager.createPreferenceScreen(context)
+            if (source.name == "MangaDex") {
+                val prefs = setupMangaDex("source_${source
+                    .id}", context.getSharedPreferences("source_${source
+                .id}", Context.MODE_PRIVATE))
 
-            for (i in 0 until newScreen.preferenceCount) {
-                val pref = newScreen.getPreference(i)
-                pref.preferenceDataStore = dataStore
-                pref.order = Int.MAX_VALUE // reset to default order
-                screen.addPreference(pref)
+                for (pref in prefs) {
+                    pref.preferenceDataStore = dataStore
+                    pref.order = Int.MAX_VALUE // reset to default order
+                    screen.addPreference(pref)
+                }
             }
         }
+    }
+
+    private fun setupMangaDex(id: String, preferences: SharedPreferences): List<Preference> {
+        val showR18PrefTitle = "Default R18 Setting"
+        val showR18Pref = "showR18Default"
+        val showThumbnailPrefTitle = "Default thumbnail quality"
+        val showThumbnailPref = "showThumbnailDefault"
+        val serverPrefTitle = "Image server"
+        val serverPrefI = "imageServer"
+        val serverPrefEntries = arrayOf("Automatic", "NA/EU 1", "NA/EU 2", "Rest of the world")
+        val serverPrefEntriesValue = arrayOf("0", "na", "na2", "row")
+        var prefs = mutableListOf<Preference>()
+        prefs.add(ListPreference(applicationContext).apply {
+            key = "$id.$showR18PrefTitle"
+            title = showR18Pref
+
+            title = showR18PrefTitle
+            entries = arrayOf("Show No R18+", "Show All", "Show Only R18+")
+            entryValues = arrayOf("0", "1", "2")
+            summary = "%s"
+
+            setOnPreferenceChangeListener { _, newValue ->
+                val selected = newValue as String
+                val index = this.findIndexOfValue(selected)
+                preferences.edit().putInt(showR18Pref, index).commit()
+            }
+        })
+        prefs.add(ListPreference(applicationContext).apply {
+            key = "$id.$showThumbnailPrefTitle"
+            title = showThumbnailPrefTitle
+            entries = arrayOf("Show high quality", "Show low quality")
+            entryValues = arrayOf("0", "1")
+            summary = "%s"
+
+            setOnPreferenceChangeListener { _, newValue ->
+                val selected = newValue as String
+                val index = this.findIndexOfValue(selected)
+                preferences.edit().putInt(showThumbnailPref, index).commit()
+            }
+        })
+        prefs.add(ListPreference(applicationContext).apply {
+            key = "$id.$serverPrefTitle"
+            title = serverPrefTitle
+            entries = serverPrefEntries
+            entryValues = serverPrefEntriesValue
+            summary = "%s"
+
+            setOnPreferenceChangeListener { _, newValue ->
+                val selected = newValue as String
+                val index = this.findIndexOfValue(selected)
+                val entry = entryValues[index] as String
+                preferences.edit().putString(serverPrefI, entry).commit()
+            }
+        })
+        return prefs
     }
 
     private fun getPreferenceThemeContext(): Context {

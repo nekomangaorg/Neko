@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <changelog bulletedList="true">
+    <changelogversion versionName="v0.9.35" changeDate="">
+        <changelogtext>Fixed crash when disabling all sources in a language before disabling any
+            sources</changelogtext>
+        <changelogtext>Added back MangaDex Extension Preferences</changelogtext>
+    </changelogversion>
+
 	<changelogversion versionName="v0.9.3" changeDate="">
         <changelogtext>Lock Tachiyomi using your fingerprint/Biometrics</changelogtext>
         <changelogtext>Added search/sorting/mass enable/disable to catalouge sources</changelogtext>
