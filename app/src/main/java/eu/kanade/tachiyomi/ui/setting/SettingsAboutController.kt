@@ -4,8 +4,8 @@ import android.app.Dialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import androidx.preference.PreferenceScreen
 import android.view.View
+import androidx.preference.PreferenceScreen
 import com.afollestad.materialdialogs.MaterialDialog
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
@@ -137,14 +137,14 @@ class SettingsAboutController : SettingsController() {
         override fun onCreateDialog(savedViewState: Bundle?): Dialog {
             return MaterialDialog.Builder(activity!!)
                     .title(R.string.update_check_title)
-                    .content(args.getString(BODY_KEY))
+                    .content(args.getString(BODY_KEY)!!)
                     .positiveText(R.string.update_check_confirm)
                     .negativeText(R.string.update_check_ignore)
                     .onPositive { _, _ ->
                         val appContext = applicationContext
                         if (appContext != null) {
                             // Start download
-                            val url = args.getString(URL_KEY)
+                            val url = args.getString(URL_KEY)!!
                             UpdaterService.downloadUpdate(appContext, url)
                         }
                     }

@@ -8,8 +8,8 @@ import android.view.ViewGroup
 import androidx.annotation.CallSuper
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
-import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.IconicsDrawable
+import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.utils.colorInt
 import com.mikepenz.iconics.utils.sizeDp
 import eu.kanade.tachiyomi.R
@@ -111,12 +111,13 @@ open class ExtendedNavigationView @JvmOverloads constructor(
             }
 
             override fun getStateDrawable(context: Context): Drawable? {
-                return when(state) {
-                    STATE_INCLUDE -> tintVector(context, R.drawable.ic_check_box_24dp)
-                    STATE_EXCLUDE -> tintVector(context, R.drawable.ic_check_box_x_24dp,
-                        android.R.attr.textColorSecondary)
-                    else -> tintVector(context, R.drawable.ic_check_box_outline_blank_24dp,
-                        android.R.attr.textColorSecondary)
+                return when (state) {
+                    STATE_INCLUDE -> IconicsDrawable(context).icon(CommunityMaterial.Icon.cmd_check_box_outline)
+                            .sizeDp(16).colorInt(context.getResourceColor(R.attr.colorAccent))
+                    STATE_EXCLUDE -> IconicsDrawable(context).icon(CommunityMaterial.Icon.cmd_close_box_outline)
+                            .sizeDp(16).colorInt(context.getResourceColor(android.R.attr.textColorSecondary))
+                    else -> IconicsDrawable(context).icon(CommunityMaterial.Icon.cmd_checkbox_blank_outline)
+                            .sizeDp(16).colorInt(context.getResourceColor(android.R.attr.textColorSecondary))
                 }
             }
         }
