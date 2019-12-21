@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.ui.setting
 import android.app.Dialog
 import android.os.Bundle
 import android.os.Handler
-import androidx.preference.PreferenceScreen
 import android.view.View
 import androidx.biometric.BiometricManager
 import androidx.preference.PreferenceScreen
@@ -15,6 +14,7 @@ import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
+import eu.kanade.tachiyomi.widget.preference.IntListPreference
 import kotlinx.android.synthetic.main.pref_library_columns.view.*
 import rx.Observable
 import uy.kohesive.injekt.Injekt
@@ -160,7 +160,7 @@ class SettingsGeneralController : SettingsController() {
         }
         val biometricManager = BiometricManager.from(context)
         if (biometricManager.canAuthenticate() == BiometricManager.BIOMETRIC_SUCCESS) {
-            var preference:IntListPreference? = null
+            var preference: IntListPreference? = null
             switchPreference {
                 key = Keys.useBiometrics
                 titleRes = R.string.lock_with_biometrics
