@@ -7,24 +7,21 @@ import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.view.ViewGroup
-import android.widget.FrameLayout
-import android.widget.LinearLayout
-import androidx.biometric.BiometricManager
-import androidx.core.graphics.ColorUtils
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
+import androidx.biometric.BiometricManager
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import com.bluelinelabs.conductor.*
-import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.context.IconicsContextWrapper
 import com.mikepenz.iconics.typeface.IIcon
+import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import eu.kanade.tachiyomi.Migrations
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
 import eu.kanade.tachiyomi.ui.base.controller.*
 import eu.kanade.tachiyomi.ui.catalogue.browse.BrowseCatalogueController
@@ -40,7 +37,7 @@ import kotlinx.android.synthetic.main.main_activity.*
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
-import java.util.Date
+import java.util.*
 
 
 class MainActivity : BaseActivity(),  SourceLoginDialog.Listener {
@@ -114,20 +111,24 @@ class MainActivity : BaseActivity(),  SourceLoginDialog.Listener {
                     R.id.nav_drawer_recently_read -> setRoot(RecentlyReadController(), id)
                     R.id.nav_drawer_browse -> {
                         val browseCatalogueController = BrowseCatalogueController(source)
-                        setRoot(browseCatalogueController, id)
                         if (!source.isLogged()) {
                             val dialog = SourceLoginDialog(source)
                             dialog.targetController = browseCatalogueController
                             dialog.showDialog(router)
+                            nav_view.menu.getItem(0).isChecked = true
+                        }else{
+                            setRoot(browseCatalogueController, id)
                         }
                     }
                     R.id.nav_drawer_follows -> {
-                        val latestUpdatesController = FollowsController(source)
-                        setRoot(latestUpdatesController, id)
+                            val latestUpdatesController = FollowsController(source)
                         if (!source.isLogged()) {
                             val dialog = SourceLoginDialog(source)
                             dialog.targetController = latestUpdatesController
                             dialog.showDialog(router)
+                            nav_view.menu.getItem(0).isChecked = true
+                        }else{
+                            setRoot(latestUpdatesController, id)
                         }
                     }
                     R.id.nav_drawer_downloads -> {
