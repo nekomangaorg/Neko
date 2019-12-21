@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.SearchView
 import androidx.core.graphics.drawable.DrawableCompat
+import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
