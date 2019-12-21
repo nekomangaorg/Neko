@@ -31,6 +31,11 @@ Plus some new features in this fork such as:
 * Option to hide manga titles in grid view
 * Filter out your library by searching for tags (ex. "Comedy" or "Slice of Life") or exclude mangas by a tag (ex. "-Shounen" or "-Romance"). Tapping on these tags also performs a local search
 * Android X Support (**Becasue of this change needed for Android 10 features, extension preferences are currently disabled**)
+* Tri-State Filters on library
+* Filter extensions based on your locale
+* Webview Navigation
+* Fingerprint/Biometrics lock
+* Range Select for Library and Chapters: long Press on an item then long press on another to select everything in between
 
 ## Issues, Feature Requests and Contributing
 
