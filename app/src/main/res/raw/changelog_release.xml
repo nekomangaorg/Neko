@@ -3,6 +3,7 @@
     <changelogversion versionName="v0.9.4" changeDate="">
         <changelogtext>Automatically check for updates for installed extensions (Enable it by
             going to Extensions -> Overflow menu -> Auto-check for updates)</changelogtext>
+		<changelogtext>Reorder downloads in queue</changelogtext>
         <changelogtext>New Icon!</changelogtext>
     </changelogversion>
 
