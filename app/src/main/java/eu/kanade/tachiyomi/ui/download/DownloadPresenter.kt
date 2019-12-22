@@ -32,7 +32,7 @@ class DownloadPresenter : BasePresenter<DownloadController>() {
 
         downloadQueue.getUpdatedObservable()
                 .observeOn(AndroidSchedulers.mainThread())
-                .map { ArrayList(it) }
+                .map { it.map(::DownloadItem) }
                 .subscribeLatestCache(DownloadController::onNextDownloads) { _, error ->
                     Timber.e(error)
                 }
@@ -60,6 +60,10 @@ class DownloadPresenter : BasePresenter<DownloadController>() {
      */
     fun clearQueue() {
         downloadManager.clearQueue()
+    }
+
+    fun reorder(downloads: List<Download>) {
+        downloadManager.reorderQueue(downloads)
     }
 
 }

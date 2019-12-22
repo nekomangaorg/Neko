@@ -13,6 +13,12 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.util.*
+import eu.kanade.tachiyomi.util.ImageUtil
+import eu.kanade.tachiyomi.util.RetryWithDelay
+import eu.kanade.tachiyomi.util.launchNow
+import eu.kanade.tachiyomi.util.launchUI
+import eu.kanade.tachiyomi.util.plusAssign
+import eu.kanade.tachiyomi.util.saveTo
 import kotlinx.coroutines.async
 import okhttp3.Response
 import rx.Observable
@@ -93,7 +99,7 @@ class Downloader(
     fun start(): Boolean {
         if (isRunning || queue.isEmpty())
             return false
-
+        notifier.paused = false
         if (!subscriptions.hasSubscriptions())
             initializeSubscriptions()
 
@@ -157,13 +163,32 @@ class Downloader(
     }
 
     /**
+     * Removes everything from the queue for a certain manga
+     *
+     * @param isNotification value that determines if status is set (needed for view updates)
+     */
+    fun clearQueue(manga: Manga, isNotification: Boolean = false) {
+        //Needed to update the chapter view
+        if (isNotification) {
+            queue
+                .filter { it.status == Download.QUEUE && it.manga.id == manga.id }
+                .forEach { it.status = Download.NOT_DOWNLOADED }
+        }
+        queue.remove(manga)
+        if (queue.isEmpty()) {
+            DownloadService.stop(context)
+            stop()
+        }
+        notifier.dismiss()
+    }
+
+    /**
      * Prepares the subscriptions to start downloading.
      */
     private fun initializeSubscriptions() {
         if (isRunning) return
         isRunning = true
         runningRelay.call(true)
-
         subscriptions.clear()
 
         subscriptions += downloadsRelay.concatMapIterable { it }
