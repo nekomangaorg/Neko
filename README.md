@@ -4,7 +4,7 @@ Tachiyomi is a free and open source manga reader for Android.
 ![screenshots of app](./.github/readme-images/theming-screenshots.gif)
 
 ## Newest Release
-[v0.9.35](https://github.com/Jays2Kings/tachiyomi/releases)
+[v0.9.4](https://github.com/Jays2Kings/tachiyomi/releases)
 
 ## Features
 
@@ -36,6 +36,7 @@ Plus some new features in this fork such as:
 * Webview Navigation
 * Fingerprint/Biometrics lock
 * Range Select for Library and Chapters: long Press on an item then long press on another to select everything in between
+* Automatically check for extensions
 
 ## Issues, Feature Requests and Contributing
 
