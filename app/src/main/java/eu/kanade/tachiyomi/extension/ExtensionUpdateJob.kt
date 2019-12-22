@@ -11,6 +11,7 @@ import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.util.notification
 import rx.Observable
+import rx.Subscription
 import rx.schedulers.Schedulers
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
@@ -19,47 +20,16 @@ import java.util.concurrent.TimeUnit
 
 class ExtensionUpdateJob : Job() {
 
+    var subscription:Subscription? = null
+
     override fun onRunJob(params: Params): Result {
         val extensionManager: ExtensionManager = Injekt.get()
         extensionManager.findAvailableExtensions()
-        /*return extensionManager.getInstalledExtensionsObservable()
-            .map { list ->
-                val pendingUpdates = list.filter { it.hasUpdate }
-                if (pendingUpdates.isNotEmpty()) {
-                    val names = pendingUpdates.map { it.name }
 
-                    NotificationManagerCompat.from(context).apply {
-                        notify(Notifications.ID_UPDATES_TO_EXTS,
-                            context.notification(Notifications.CHANNEL_UPDATES_TO_EXTS) {
-                                setContentTitle(
-                                    context.getString(
-                                        R.string.update_check_notification_ext_updates, names.size
-                                    )
-                                )
-                                val extNames = if (names.size > 5) {
-                                    "${names.take(4).joinToString(", ")}, " + context.getString(
-                                        R.string.notification_and_n_more, (names.size - 4)
-                                    )
-                                } else names.joinToString(", ")
-                                setContentText(extNames)
-                                setSmallIcon(R.drawable.ic_extension_update)
-                                color = ContextCompat.getColor(context, R.color.colorAccentLight)
-                                setContentIntent(
-                                    NotificationReceiver.openExtensionsPendingActivity(
-                                        context
-                                    )
-                                )
-                                setAutoCancel(true)
-                            })
-                    }
-                }
-                Result.SUCCESS
-            }
-            .onErrorReturn { Result.FAILURE }
-            // Sadly, the task needs to be synchronous.
-            .toBlocking()
-            .single()*/
-        Observable.defer {
+        subscription?.unsubscribe()
+
+        // Update favorite manga. Destroy service when completed or in case of an error.
+        subscription = Observable.defer {
             extensionManager.getInstalledExtensionsObservable().map { list ->
                 val pendingUpdates = list.filter { it.hasUpdate }
                 if (pendingUpdates.isNotEmpty()) {
@@ -89,8 +59,9 @@ class ExtensionUpdateJob : Job() {
                             })
                     }
                 }
+                subscription?.unsubscribe()
                 Result.SUCCESS
-            }.onErrorReturn { Result.FAILURE }
+            }
         }.subscribeOn(Schedulers.io())
             .subscribe({
             }, {
@@ -99,51 +70,6 @@ class ExtensionUpdateJob : Job() {
             })
         return Result.SUCCESS
     }
-
-    /*fun runStuff(context: Context)  {
-        val extensionManager: ExtensionManager = Injekt.get()
-        extensionManager.findAvailableExtensions()
-        Observable.defer {
-            extensionManager.getInstalledExtensionsObservable().map { list ->
-                val pendingUpdates = list.filter { it.hasUpdate }
-                if (pendingUpdates.isNotEmpty()) {
-                    val names = pendingUpdates.map { it.name }
-                    NotificationManagerCompat.from(context).apply {
-                        notify(Notifications.ID_UPDATES_TO_EXTS,
-                            context.notification(Notifications.CHANNEL_UPDATES_TO_EXTS) {
-                                setContentTitle(
-                                    context.getString(
-                                        R.string.update_check_notification_ext_updates, names.size
-                                    )
-                                )
-                                val extNames = if (names.size > 5) {
-                                    "${names.take(4).joinToString(", ")}, " + context.getString(
-                                        R.string.notification_and_n_more, (names.size - 4)
-                                    )
-                                } else names.joinToString(", ")
-                                setContentText(extNames)
-                                setSmallIcon(R.drawable.ic_extension_update)
-                                color = ContextCompat.getColor(context, R.color.colorAccentLight)
-                                setContentIntent(
-                                    NotificationReceiver.openExtensionsPendingActivity(
-                                        context
-                                    )
-                                )
-                                setAutoCancel(true)
-                            })
-                    }
-                }
-                Result.SUCCESS
-            }.onErrorReturn { Result.FAILURE }
-        }.subscribeOn(Schedulers.io())
-            .subscribe({
-            }, {
-                Timber.e(it)
-            }, {
-            })
-    }*/
-
-
 
     companion object {
         const val TAG = "ExtensionUpdate"

@@ -5,13 +5,11 @@ import com.hippo.unifile.UniFile
 import com.jakewharton.rxrelay.BehaviorRelay
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.download.model.DownloadQueue
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Page
-import eu.kanade.tachiyomi.util.launchNow
-import eu.kanade.tachiyomi.util.launchUI
-import kotlinx.coroutines.delay
 import rx.Observable
 import uy.kohesive.injekt.injectLazy
 
@@ -94,6 +92,19 @@ class DownloadManager(context: Context) {
     fun clearQueue(isNotification: Boolean = false) {
         downloader.clearQueue(isNotification)
     }
+
+    /**
+     * Reorders the download queue.
+     *
+     * @param downloads value to set the download queue to
+     */
+    fun reorderQueue(downloads: List<Download>) {
+        downloader.pause()
+        downloader.queue.clear()
+        downloader.queue.addAll(downloads)
+        downloader.start()
+    }
+
 
     /**
      * Tells the downloader to enqueue the given list of chapters.
