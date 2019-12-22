@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.util.concurrent.TimeUnit
 
 class BackupCreatorJob : Job() {
 
@@ -25,10 +26,11 @@ class BackupCreatorJob : Job() {
 
         fun setupTask(prefInterval: Int? = null) {
             val preferences = Injekt.get<PreferencesHelper>()
-            val interval = prefInterval ?: preferences.backupInterval().getOrDefault()
+            val interval = (prefInterval ?: preferences.backupInterval().getOrDefault()).toLong()
             if (interval > 0) {
                 JobRequest.Builder(TAG)
-                        .setPeriodic(interval * 60 * 60 * 1000L, 10 * 60 * 1000)
+                        .setPeriodic(TimeUnit.HOURS.toMillis(interval), TimeUnit.MINUTES.toMillis
+                            (10))
                         .setUpdateCurrent(true)
                         .build()
                         .schedule()

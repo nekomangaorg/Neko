@@ -14,4 +14,11 @@
         android:icon="@drawable/ic_filter_list_white_24dp"
         app:showAsAction="always"/>
 
+    <item
+        android:id="@+id/action_auto_check"
+        android:title="@string/action_auto_check_extensions"
+        android:icon="@drawable/ic_filter_list_white_24dp"
+        android:checkable="true"
+        app:showAsAction="never"/>
+
 </menu>

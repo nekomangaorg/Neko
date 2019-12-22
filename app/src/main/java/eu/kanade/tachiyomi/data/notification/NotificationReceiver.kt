@@ -396,6 +396,21 @@ class NotificationReceiver : BroadcastReceiver() {
         }
 
         /**
+         * Returns [PendingIntent] that opens the extensions controller,
+         *
+         * @param context context of application
+         * @param manga manga of chapter
+         */
+        internal fun openExtensionsPendingActivity(context: Context): PendingIntent {
+            val newIntent =
+                Intent(context, MainActivity::class.java).setAction(MainActivity.SHORTCUT_EXTENSIONS)
+                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            return PendingIntent.getActivity(
+                context, 0, newIntent, PendingIntent.FLAG_UPDATE_CURRENT
+            )
+        }
+
+        /**
          * Returns [PendingIntent] that marks a chapter as read and deletes it if preferred
          *
          * @param context context of application

@@ -16,12 +16,16 @@ import com.jakewharton.rxbinding.support.v7.widget.queryTextChanges
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.preference.getOrDefault
+import eu.kanade.tachiyomi.extension.ExtensionUpdateJob
 import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.util.RecyclerWindowInsetsListener
 import kotlinx.android.synthetic.main.extension_controller.*
-
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 
 /**
  * Controller to manage the catalogues available in the app.
@@ -86,6 +90,16 @@ open class ExtensionController : NucleusController<ExtensionPresenter>(),
                     .popChangeHandler(SettingsExtensionsFadeChangeHandler())
                     .pushChangeHandler(FadeChangeHandler()))
             }
+            R.id.action_auto_check -> {
+                item.isChecked = !item.isChecked
+                val preferences:PreferencesHelper = Injekt.get()
+                preferences.automaticExtUpdates().set(item.isChecked)
+
+                if (item.isChecked)
+                    ExtensionUpdateJob.setupTask()
+                else
+                    ExtensionUpdateJob.cancelTask()
+            }
             else -> return super.onOptionsItemSelected(item)
         }
         return true
@@ -139,6 +153,10 @@ open class ExtensionController : NucleusController<ExtensionPresenter>(),
 
         // Fixes problem with the overflow icon showing up in lieu of search
         searchItem.fixExpand()
+
+        val autoItem = menu.findItem(R.id.action_auto_check)
+        val preferences:PreferencesHelper = Injekt.get()
+        autoItem.isChecked = preferences.automaticExtUpdates().getOrDefault()
     }
 
     override fun onItemClick(view: View?, position: Int): Boolean {

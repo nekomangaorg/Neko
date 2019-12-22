@@ -15,6 +15,7 @@ import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.updater.UpdaterJob
+import eu.kanade.tachiyomi.extension.ExtensionUpdateJob
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.LocaleHelper
 import org.acra.ACRA
@@ -79,6 +80,7 @@ open class App : Application(), LifecycleObserver {
                     LibraryUpdateJob.TAG -> LibraryUpdateJob()
                     UpdaterJob.TAG -> UpdaterJob()
                     BackupCreatorJob.TAG -> BackupCreatorJob()
+                    ExtensionUpdateJob.TAG -> ExtensionUpdateJob()
                     else -> null
                 }
             }

@@ -38,6 +38,11 @@ object Notifications {
     const val CHANNEL_NEW_CHAPTERS = "new_chapters_channel"
     const val ID_NEW_CHAPTERS = -301
     const val GROUP_NEW_CHAPTERS = "eu.kanade.tachiyomi.NEW_CHAPTERS"
+    /**
+     * Notification channel and ids used by the library updater.
+     */
+    const val CHANNEL_UPDATES_TO_EXTS = "updates_ext_channel"
+    const val ID_UPDATES_TO_EXTS = -401
 
     /**
      * Creates the notification channels introduced in Android Oreo.
@@ -48,18 +53,31 @@ object Notifications {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
 
         val channels = listOf(
-                NotificationChannel(CHANNEL_COMMON, context.getString(R.string.channel_common),
-                        NotificationManager.IMPORTANCE_LOW),
-                NotificationChannel(CHANNEL_LIBRARY, context.getString(R.string.channel_library_updates),
-                        NotificationManager.IMPORTANCE_LOW).apply {
-                    setShowBadge(false)
-                },
-                NotificationChannel(CHANNEL_DOWNLOADER, context.getString(R.string.channel_downloader),
-                    NotificationManager.IMPORTANCE_LOW).apply {
-                    setShowBadge(false)
-                },
-                NotificationChannel(CHANNEL_NEW_CHAPTERS, context.getString(R.string.channel_new_chapters),
-                    NotificationManager.IMPORTANCE_DEFAULT)
+            NotificationChannel(
+                CHANNEL_COMMON,
+                context.getString(R.string.channel_common),
+                NotificationManager.IMPORTANCE_LOW
+            ), NotificationChannel(
+                CHANNEL_LIBRARY,
+                context.getString(R.string.channel_library_updates),
+                NotificationManager.IMPORTANCE_LOW
+            ).apply {
+                setShowBadge(false)
+            }, NotificationChannel(
+                CHANNEL_DOWNLOADER,
+                context.getString(R.string.channel_downloader),
+                NotificationManager.IMPORTANCE_LOW
+            ).apply {
+                setShowBadge(false)
+            }, NotificationChannel(
+                CHANNEL_UPDATES_TO_EXTS,
+                context.getString(R.string.channel_ext_updates),
+                NotificationManager.IMPORTANCE_DEFAULT
+            ), NotificationChannel(
+                CHANNEL_NEW_CHAPTERS,
+                context.getString(R.string.channel_new_chapters),
+                NotificationManager.IMPORTANCE_DEFAULT
+            )
         )
         context.notificationManager.createNotificationChannels(channels)
     }

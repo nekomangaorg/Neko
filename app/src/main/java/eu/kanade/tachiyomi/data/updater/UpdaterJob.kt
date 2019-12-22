@@ -9,8 +9,8 @@ import com.evernote.android.job.JobManager
 import com.evernote.android.job.JobRequest
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.notification.Notifications
-import eu.kanade.tachiyomi.util.getResourceColor
 import eu.kanade.tachiyomi.util.notificationManager
+import java.util.concurrent.TimeUnit
 
 class UpdaterJob : Job() {
 
@@ -54,7 +54,7 @@ class UpdaterJob : Job() {
 
         fun setupTask() {
             JobRequest.Builder(TAG)
-                    .setPeriodic(24 * 60 * 60 * 1000, 60 * 60 * 1000)
+                    .setPeriodic(TimeUnit.DAYS.toMillis(1), TimeUnit.HOURS.toMillis(1))
                     .setRequiredNetworkType(JobRequest.NetworkType.CONNECTED)
                     .setRequirementsEnforced(true)
                     .setUpdateCurrent(true)
