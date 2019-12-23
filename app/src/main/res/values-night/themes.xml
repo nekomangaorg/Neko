@@ -22,6 +22,7 @@
     <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
     <item name="md_background_color">@color/dialogDark</item>
     <item name="alertDialogTheme">@style/Theme.AlertDialog.Dark</item>
+    <item name="android:statusBarColor">@android:color/transparent</item>
 
 
     <!-- Custom Attributes-->

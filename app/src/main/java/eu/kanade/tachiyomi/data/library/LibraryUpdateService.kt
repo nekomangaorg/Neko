@@ -453,7 +453,7 @@ class LibraryUpdateService(
         updates.forEach {
             val manga = it.first
             val chapters = it.second
-            val chapterNames = chapters.map { chapter -> chapter.name.chop(45) }.toSet()
+            val chapterNames = chapters.map { chapter -> chapter.name }.toSet()
             notifications.add(Pair(notification(Notifications.CHANNEL_NEW_CHAPTERS) {
                 setSmallIcon(R.drawable.ic_tachiyomi_icon)
                 try {
@@ -463,7 +463,7 @@ class LibraryUpdateService(
                     setLargeIcon(icon)
                 }
                 catch (e: Exception) { }
-                setContentTitle(manga.title.chop(45))
+                setContentTitle(manga.title)
                 color = ContextCompat.getColor(this@LibraryUpdateService, R.color.colorAccentLight)
                 val chaptersNames = if (chapterNames.size > 5) {
                     "${chapterNames.take(4).joinToString(", ")}, " +

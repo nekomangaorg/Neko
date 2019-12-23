@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <changelog bulletedList="true">
+    <changelogversion versionName="v0.9.41" changeDate="">
+        <changelogtext>Fixed status bar not being transparent for dark themes on Android Pie and
+            under</changelogtext>
+        <changelogtext>Manga/Chapter titles are not longer truncated on notifications</changelogtext>
+    </changelogversion>
+
     <changelogversion versionName="v0.9.4" changeDate="">
         <changelogtext>Automatically check for updates for installed extensions (Enable it by
             going to Extensions -> Overflow menu -> Auto-check for updates)</changelogtext>
