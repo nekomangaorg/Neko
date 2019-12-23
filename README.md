@@ -36,7 +36,7 @@ Plus some new features in this fork such as:
 * Webview Navigation
 * Fingerprint/Biometrics lock
 * Range Select for Library and Chapters: long Press on an item then long press on another to select everything in between
-* Automatically check for extensions
+* Automatically checks for extension updates
 
 ## Issues, Feature Requests and Contributing
 
