@@ -1,12 +1,5 @@
 package eu.kanade.tachiyomi.ui.download
 
-import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
-import android.view.View
-import android.view.ViewGroup
-import androidx.recyclerview.widget.LinearLayoutManager
 import android.graphics.Color
 import android.view.*
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -23,7 +16,7 @@ import kotlinx.android.synthetic.main.download_controller.*
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
-import java.util.HashMap
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 /**
