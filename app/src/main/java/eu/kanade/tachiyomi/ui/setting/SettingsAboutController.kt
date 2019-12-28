@@ -73,6 +73,7 @@ class SettingsAboutController : SettingsController() {
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
                 startActivity(intent)
             }
+            isIconSpaceReserved = true
         }
         preference {
             titleRes = R.string.version
@@ -84,6 +85,7 @@ class SettingsAboutController : SettingsController() {
             if (isUpdaterEnabled) {
                 onClick { checkVersion() }
             }
+            isIconSpaceReserved = true
         }
         preference {
             titleRes = R.string.build_time
