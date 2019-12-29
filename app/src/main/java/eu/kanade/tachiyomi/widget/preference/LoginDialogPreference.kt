@@ -33,7 +33,7 @@ abstract class LoginDialogPreference(bundle: Bundle? = null) : DialogController(
 
     override fun onCreateDialog(savedState: Bundle?): Dialog {
         val dialog = MaterialDialog.Builder(activity!!)
-                .customView(R.layout.pref_account_login, false)
+                .customView(R.layout.pref_account_login, true)
                 .negativeText(android.R.string.cancel)
                 .build()
 
