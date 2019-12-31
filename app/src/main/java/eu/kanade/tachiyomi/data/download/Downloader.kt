@@ -13,12 +13,7 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.util.*
-import eu.kanade.tachiyomi.util.ImageUtil
-import eu.kanade.tachiyomi.util.RetryWithDelay
-import eu.kanade.tachiyomi.util.launchNow
 import eu.kanade.tachiyomi.util.launchUI
-import eu.kanade.tachiyomi.util.plusAssign
-import eu.kanade.tachiyomi.util.saveTo
 import kotlinx.coroutines.async
 import okhttp3.Response
 import rx.Observable
@@ -143,6 +138,8 @@ class Downloader(
                 .forEach { it.status = Download.QUEUE }
         notifier.paused = true
     }
+
+    fun isPaused() = !isRunning
 
     /**
      * Removes everything from the queue.

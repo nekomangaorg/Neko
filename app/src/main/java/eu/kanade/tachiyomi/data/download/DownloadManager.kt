@@ -99,10 +99,13 @@ class DownloadManager(context: Context) {
      * @param downloads value to set the download queue to
      */
     fun reorderQueue(downloads: List<Download>) {
+        val wasPaused  = downloader.isPaused()
         downloader.pause()
         downloader.queue.clear()
         downloader.queue.addAll(downloads)
+        if(!wasPaused){
         downloader.start()
+        }
     }
 
 
