@@ -15,10 +15,24 @@ class DownloadAdapter(controller: DownloadController) : FlexibleAdapter<Download
      */
     val onItemReleaseListener: OnItemReleaseListener = controller
 
+    /**
+     * Listener called when an item of the list is deleted.
+     */
+    val onItemDeleteListener: OnItemDeleteListener = controller
+
+
     interface OnItemReleaseListener {
         /**
          * Called when an item of the list is released.
          */
         fun onItemReleased(position: Int)
     }
+
+    interface OnItemDeleteListener {
+        /**
+         * Called when an item of the list is has delete clicked
+         */
+        fun onItemDeleted(position: Int)
+    }
+
 }

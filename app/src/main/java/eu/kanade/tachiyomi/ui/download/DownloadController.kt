@@ -7,6 +7,7 @@ import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.utils.colorInt
 import com.mikepenz.iconics.utils.sizeDp
+import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.download.model.Download
@@ -24,7 +25,7 @@ import java.util.concurrent.TimeUnit
  * Uses R.layout.fragment_download_queue.
  */
 class DownloadController : NucleusController<DownloadPresenter>(),
-    DownloadAdapter.OnItemReleaseListener {
+    DownloadAdapter.OnItemReleaseListener, DownloadAdapter.OnItemDeleteListener,  FlexibleAdapter.OnItemClickListener {
 
     /**
      * Adapter containing the active downloads.
@@ -267,6 +268,20 @@ class DownloadController : NucleusController<DownloadPresenter>(),
         val adapter = adapter ?: return
         val downloads = (0 until adapter.itemCount).mapNotNull { adapter.getItem(it)?.download }
         presenter.reorder(downloads)
+    }
+    override fun onItemDeleted(position: Int) {
+        val adapter = adapter ?: return
+        val downloads = (0 until adapter.itemCount).filter { it -> it != position }.mapNotNull { adapter.getItem(it)?.download }
+        presenter.reorder(downloads)
+    }
+
+    override fun onItemClick(view: View?, position: Int): Boolean {
+        if(view?.id == R.id.remove_download  && adapter != null) {
+            val adapter = adapter!!
+            val downloads = (0 until adapter.itemCount).filter { it -> it != position }.mapNotNull { adapter.getItem(it)?.download }
+            presenter.reorder(downloads)
+        }
+    return true
     }
 
 }

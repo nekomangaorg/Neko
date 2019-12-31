@@ -11,11 +11,6 @@ import eu.kanade.tachiyomi.data.download.model.Download
 class DownloadItem(val download: Download) : AbstractFlexibleItem<DownloadHolder>() {
 
     /**
-     * Whether this item is currently selected.
-     */
-    var isSelected = false
-
-    /**
      * Returns the layout resource for this item.
      */
     override fun getLayoutRes(): Int {

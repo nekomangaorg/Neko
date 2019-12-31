@@ -11,6 +11,7 @@ import androidx.multidex.MultiDex
 import com.evernote.android.job.JobManager
 import com.mikepenz.iconics.Iconics
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
+import com.mikepenz.iconics.typeface.library.googlematerial.GoogleMaterial
 import eu.kanade.tachiyomi.data.backup.BackupCreatorJob
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.notification.Notifications
@@ -38,6 +39,7 @@ open class App : Application(), LifecycleObserver {
 
         Iconics.init(applicationContext)
         Iconics.registerFont(CommunityMaterial)
+        Iconics.registerFont(GoogleMaterial)
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
 
     }
