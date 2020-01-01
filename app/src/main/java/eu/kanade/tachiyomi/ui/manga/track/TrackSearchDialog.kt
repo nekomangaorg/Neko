@@ -4,6 +4,7 @@ import android.app.Dialog
 import android.os.Bundle
 import android.view.View
 import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.customview.customView
 import com.jakewharton.rxbinding.widget.itemClicks
 import com.jakewharton.rxbinding.widget.textChanges
 import eu.kanade.tachiyomi.R
@@ -51,12 +52,11 @@ class TrackSearchDialog : DialogController {
     }
 
     override fun onCreateDialog(savedState: Bundle?): Dialog {
-        val dialog = MaterialDialog.Builder(activity!!)
-                .customView(R.layout.track_search_dialog, false)
-                .positiveText(android.R.string.ok)
-                .negativeText(android.R.string.cancel)
-                .onPositive { _, _ -> onPositiveButtonClick() }
-                .build()
+        val dialog = MaterialDialog(activity!!)
+                .customView(viewRes = R.layout.track_search_dialog, scrollable = false)
+                .negativeButton(android.R.string.cancel)
+                .positiveButton(android.R.string.ok) { onPositiveButtonClick() }
+
 
         if (subscriptions.isUnsubscribed) {
             subscriptions = CompositeSubscription()

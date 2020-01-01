@@ -137,12 +137,11 @@ class SettingsAboutController : SettingsController() {
         })
 
         override fun onCreateDialog(savedViewState: Bundle?): Dialog {
-            return MaterialDialog.Builder(activity!!)
+            return MaterialDialog(activity!!)
                     .title(R.string.update_check_title)
-                    .content(args.getString(BODY_KEY)!!)
-                    .positiveText(R.string.update_check_confirm)
-                    .negativeText(R.string.update_check_ignore)
-                    .onPositive { _, _ ->
+                    .message(text = args.getString(BODY_KEY)!!)
+                    .negativeButton(R.string.update_check_ignore)
+                    .positiveButton(R.string.update_check_confirm) {
                         val appContext = applicationContext
                         if (appContext != null) {
                             // Start download
@@ -150,7 +149,6 @@ class SettingsAboutController : SettingsController() {
                             UpdaterService.downloadUpdate(appContext, url)
                         }
                     }
-                    .build()
         }
 
         private companion object {

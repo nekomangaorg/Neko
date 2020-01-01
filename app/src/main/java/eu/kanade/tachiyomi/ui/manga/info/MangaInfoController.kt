@@ -17,6 +17,7 @@ import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
 import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.list.listItemsSingleChoice
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.target.CustomTarget
@@ -24,8 +25,8 @@ import com.bumptech.glide.request.transition.Transition
 import com.jakewharton.rxbinding.support.v4.widget.refreshes
 import com.jakewharton.rxbinding.view.clicks
 import com.jakewharton.rxbinding.view.longClicks
-import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.IconicsDrawable
+import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.utils.colorInt
 import com.mikepenz.iconics.utils.sizeDp
 import eu.kanade.tachiyomi.R
@@ -52,7 +53,6 @@ import jp.wasabeef.glide.transformations.CropSquareTransformation
 import jp.wasabeef.glide.transformations.MaskTransformation
 import kotlinx.android.synthetic.main.manga_info_controller.*
 import uy.kohesive.injekt.injectLazy
-import java.text.DateFormat
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.*
@@ -94,7 +94,7 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         fab_favorite.clicks().subscribeUntilDestroy { onFabClick() }
 
         // Set onLongClickListener to manage categories when FAB is clicked.
-        fab_favorite.longClicks().subscribeUntilDestroy{ onFabLongClick() }
+        fab_favorite.longClicks().subscribeUntilDestroy { onFabLongClick() }
 
         // Set SwipeRefresh to refresh manga data.
         swipe_refresh.refreshes().subscribeUntilDestroy { fetchMangaFromSource() }
@@ -502,14 +502,13 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
                     R.string.square_icon,
                     R.string.star_icon)
 
-            return MaterialDialog.Builder(activity!!)
+            return MaterialDialog(activity!!)
                     .title(R.string.icon_shape)
-                    .negativeText(android.R.string.cancel)
-                    .items(modes.map { activity?.getString(it) })
-                    .itemsCallback { _, _, i, _ ->
-                        (targetController as? MangaInfoController)?.createShortcutForShape(i)
+                    .negativeButton(android.R.string.cancel)
+                    .listItemsSingleChoice(items = modes.map { activity?.getString(it) as CharSequence })
+                    { dialog, position, text ->
+                        (targetController as? MangaInfoController)?.createShortcutForShape(position)
                     }
-                    .build()
         }
     }
 
@@ -538,7 +537,7 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
                         createShortcut(resource)
                     }
 
-                    override fun onLoadCleared(placeholder: Drawable?) { }
+                    override fun onLoadCleared(placeholder: Drawable?) {}
 
                     override fun onLoadFailed(errorDrawable: Drawable?) {
                         activity?.toast(R.string.icon_creation_fail)

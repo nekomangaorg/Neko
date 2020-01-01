@@ -505,17 +505,15 @@ open class BrowseCatalogueController(bundle: Bundle) :
         val activity = activity ?: return
         val manga = (adapter?.getItem(position) as? CatalogueItem?)?.manga ?: return
         if (manga.favorite) {
-            MaterialDialog.Builder(activity)
-                    .items(activity.getString(R.string.remove_from_library))
-                    .itemsCallback { _, _, which, _ ->
-                        when (which) {
-                            0 -> {
-                                presenter.changeMangaFavorite(manga)
-                                adapter?.notifyItemChanged(position)
-                                activity?.toast(activity?.getString(R.string.manga_removed_library))
-                            }
-                        }
-                    }.show()
+            MaterialDialog(activity).show {
+                message(R.string.remove_from_library)
+                positiveButton(android.R.string.ok) {
+                    presenter.changeMangaFavorite(manga)
+                    adapter?.notifyItemChanged(position)
+                    activity.toast(activity.getString(R.string.manga_removed_library))
+                }
+                negativeButton(android.R.string.cancel)
+            }
         } else {
             presenter.changeMangaFavorite(manga)
             adapter?.notifyItemChanged(position)

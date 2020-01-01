@@ -15,14 +15,13 @@ class DeleteChaptersDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
     }
 
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
-        return MaterialDialog.Builder(activity!!)
-                .content(R.string.confirm_delete_chapters)
-                .positiveText(android.R.string.yes)
-                .negativeText(android.R.string.no)
-                .onPositive { _, _ ->
-                    (targetController as? Listener)?.deleteChapters()
-                }
-                .show()
+        return MaterialDialog(activity!!).show {
+            message(R.string.confirm_delete_chapters)
+            negativeButton(android.R.string.no)
+            positiveButton(android.R.string.yes) {
+                (targetController as? Listener)?.deleteChapters()
+            }
+        }
     }
 
     interface Listener {

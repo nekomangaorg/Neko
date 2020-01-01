@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.text.method.PasswordTransformationMethod
 import android.view.View
 import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.customview.customView
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
 import eu.kanade.tachiyomi.R
@@ -28,10 +29,9 @@ abstract class LoginDialogPreference(bundle: Bundle? = null) : DialogController(
     var requestSubscription: Subscription? = null
 
     override fun onCreateDialog(savedState: Bundle?): Dialog {
-        val dialog = MaterialDialog.Builder(activity!!)
-                .customView(R.layout.pref_account_login, true)
-                .negativeText(android.R.string.cancel)
-                .build()
+        val dialog = MaterialDialog(activity!!)
+                .customView(viewRes = R.layout.pref_account_login, scrollable = true)
+                .negativeButton(android.R.string.cancel)
 
         onViewCreated(dialog.view)
 

@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.category
 import android.app.Dialog
 import android.os.Bundle
 import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.input.input
 import com.bluelinelabs.conductor.Controller
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
@@ -34,15 +35,14 @@ class CategoryRenameDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
      * @return a new dialog instance.
      */
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
-        return MaterialDialog.Builder(activity!!)
+        return MaterialDialog(activity!!)
                 .title(R.string.action_rename_category)
-                .negativeText(android.R.string.cancel)
-                .alwaysCallInputCallback()
-                .input(resources!!.getString(R.string.name), currentName, false, { _, input ->
-                    currentName = input.toString()
-                })
-                .onPositive { _, _ -> onPositive() }
-                .build()
+                .negativeButton(android.R.string.cancel)
+                .positiveButton(android.R.string.ok)
+                .input(hintRes = R.string.name, prefill = currentName) { _, input ->
+                    onPositive(input.toString())
+                }
+
     }
 
     /**
@@ -68,11 +68,11 @@ class CategoryRenameDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
     /**
      * Called when the positive button of the dialog is clicked.
      */
-    private fun onPositive() {
+    private fun onPositive(newName: String) {
         val target = targetController as? Listener ?: return
         val category = category ?: return
 
-        target.renameCategory(category, currentName)
+        target.renameCategory(category, newName)
     }
 
     interface Listener {

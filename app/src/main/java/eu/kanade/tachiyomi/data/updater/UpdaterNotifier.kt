@@ -78,7 +78,7 @@ internal class UpdaterNotifier(private val context: Context) {
                     NotificationHandler.installApkPendingActivity(context, uri))
             // Cancel action
             addAction(R.drawable.ic_clear_grey_24dp_img,
-                    context.getString(R.string.action_cancel),
+                    context.getString(android.R.string.cancel),
                     NotificationReceiver.dismissNotificationPendingBroadcast(context, Notifications.ID_UPDATER))
         }
         notification.show()
@@ -101,7 +101,7 @@ internal class UpdaterNotifier(private val context: Context) {
                     UpdaterService.downloadApkPendingService(context, url))
             // Cancel action
             addAction(R.drawable.ic_clear_grey_24dp_img,
-                    context.getString(R.string.action_cancel),
+                    context.getString(android.R.string.cancel),
                     NotificationReceiver.dismissNotificationPendingBroadcast(context, Notifications.ID_UPDATER))
         }
         notification.show(Notifications.ID_UPDATER)

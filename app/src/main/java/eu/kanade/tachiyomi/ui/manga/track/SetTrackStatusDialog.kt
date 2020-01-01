@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.manga.track
 import android.app.Dialog
 import android.os.Bundle
 import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.list.listItemsSingleChoice
 import com.bluelinelabs.conductor.Controller
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Track
@@ -36,15 +37,13 @@ class SetTrackStatusDialog<T> : DialogController
         val statusString = statusList.mapNotNull { item.service.getStatus(it) }
         val selectedIndex = statusList.indexOf(item.track?.status)
 
-        return MaterialDialog.Builder(activity!!)
+        return MaterialDialog(activity!!)
                 .title(R.string.status)
-                .negativeText(android.R.string.cancel)
-                .items(statusString)
-                .itemsCallbackSingleChoice(selectedIndex, { _, _, i, _ ->
-                    (targetController as? Listener)?.setStatus(item, i)
-                    true
-                })
-                .build()
+                .negativeButton(android.R.string.cancel)
+                .listItemsSingleChoice(items = statusString, initialSelection = selectedIndex)
+                { _, position, _ ->
+                    (targetController as? Listener)?.setStatus(item, position)
+                }
     }
 
     interface Listener {
