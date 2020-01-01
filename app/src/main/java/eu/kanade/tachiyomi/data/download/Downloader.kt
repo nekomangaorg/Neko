@@ -76,7 +76,8 @@ class Downloader(
     /**
      * Whether the downloader is running.
      */
-    @Volatile private var isRunning: Boolean = false
+    @Volatile
+    private var isRunning: Boolean = false
 
     init {
         launchNow {
@@ -168,8 +169,8 @@ class Downloader(
         //Needed to update the chapter view
         if (isNotification) {
             queue
-                .filter { it.status == Download.QUEUE && it.manga.id == manga.id }
-                .forEach { it.status = Download.NOT_DOWNLOADED }
+                    .filter { it.status == Download.QUEUE && it.manga.id == manga.id }
+                    .forEach { it.status = Download.NOT_DOWNLOADED }
         }
         queue.remove(manga)
         if (queue.isEmpty()) {
@@ -192,7 +193,8 @@ class Downloader(
                 .concatMap { downloadChapter(it).subscribeOn(Schedulers.io()) }
                 .onBackpressureBuffer()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ completeDownload(it)
+                .subscribe({
+                    completeDownload(it)
                 }, { error ->
                     DownloadService.stop(context)
                     Timber.e(error)
@@ -221,6 +223,7 @@ class Downloader(
     fun queueChapters(manga: Manga, chapters: List<Chapter>, autoStart: Boolean) = launchUI {
         val source = sourceManager.get(manga.source) as? HttpSource ?: return@launchUI
 
+        val wasQueueEmpty = queue.isEmpty()
         // Called in background thread, the operation can be slow with SAF.
         val chaptersWithoutDir = async {
             val mangaDir = provider.findMangaDir(manga, source)
@@ -253,7 +256,7 @@ class Downloader(
             }
 
             // Start downloader if needed
-            if (autoStart) {
+            if (autoStart && wasQueueEmpty) {
                 DownloadService.start(this@Downloader.context)
             }
         }
@@ -397,10 +400,10 @@ class Downloader(
     private fun getImageExtension(response: Response, file: UniFile): String {
         // Read content type if available.
         val mime = response.body?.contentType()?.let { ct -> "${ct.type}/${ct.subtype}" }
-            // Else guess from the uri.
-            ?: context.contentResolver.getType(file.uri)
-            // Else read magic numbers.
-            ?: ImageUtil.findImageType { file.openInputStream() }?.mime
+        // Else guess from the uri.
+                ?: context.contentResolver.getType(file.uri)
+                // Else read magic numbers.
+                ?: ImageUtil.findImageType { file.openInputStream() }?.mime
 
         return MimeTypeMap.getSingleton().getExtensionFromMimeType(mime) ?: "jpg"
     }
