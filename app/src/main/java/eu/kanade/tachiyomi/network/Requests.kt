@@ -30,3 +30,19 @@ fun POST(url: String,
             .cacheControl(cache)
             .build()
 }
+
+fun POSTWithCookie(url: String,
+                   cookieName: String,
+                   cookieValue: String,
+                   headers: Headers = DEFAULT_HEADERS,
+                   body: RequestBody = DEFAULT_BODY,
+                   cache: CacheControl = DEFAULT_CACHE_CONTROL): Request {
+
+    return Request.Builder()
+            .url(url)
+            .post(body)
+            .headers(headers)
+            .cacheControl(cache)
+            .addHeader(cookieName, cookieValue)
+            .build()
+}

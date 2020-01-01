@@ -83,7 +83,7 @@ abstract class HttpSource : Source {
     /**
      * Visible name of the source.
      */
-    override fun toString() = "$name (${lang.toUpperCase()})"
+    override fun toString() = name
 
 
     //used to get the manga url instead of the api manga url

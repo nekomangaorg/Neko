@@ -98,6 +98,7 @@
     <!-- Operations -->
     <string name="deleting">Deleting…</string>
     <string name="loading">Loading…</string>
+    <string name="processing">Processing…</string>
 
     <!-- Shortcuts-->
     <string name="app_not_available">Application not available</string>
@@ -298,10 +299,12 @@
     <string name="login_title">Login for %1$s</string>
     <string name="username">Username</string>
     <string name="password">Password</string>
-    <string name="two_factor">2FA Code (leave blank if not enabled)</string>
+    <string name="two_factor">2FA Code</string>
     <string name="show_password">Show password</string>
     <string name="login">Login</string>
+    <string name="logout">Logout</string>
     <string name="login_success">Login successful</string>
+    <string name="logout_success">Logout successful</string>
     <string name="invalid_login">Login error</string>
     <string name="unknown_error">Unknown error</string>
 

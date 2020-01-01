@@ -84,4 +84,7 @@ interface Source {
 
     fun login(username: String, password: String, twoFactorCode: String = ""): Observable<Boolean>
 
+    fun logout(): Observable<Boolean>
+
+
 }

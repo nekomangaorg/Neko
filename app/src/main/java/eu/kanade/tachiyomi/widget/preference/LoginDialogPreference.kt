@@ -7,14 +7,10 @@ import android.view.View
 import com.afollestad.materialdialogs.MaterialDialog
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
-import com.dd.processbutton.iml.ActionProcessButton
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
-import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
-import eu.kanade.tachiyomi.ui.manga.info.MangaWebViewController
 import eu.kanade.tachiyomi.widget.SimpleTextWatcher
 import kotlinx.android.synthetic.main.pref_account_login.view.*
 import rx.Subscription
@@ -52,20 +48,18 @@ abstract class LoginDialogPreference(bundle: Bundle? = null) : DialogController(
                 else
                     password.transformationMethod = PasswordTransformationMethod()
             }
-
-            login.setMode(ActionProcessButton.Mode.ENDLESS)
             login.setOnClickListener { checkLogin() }
-            if(source != null && source is HttpSource){
-                login_captcha.setOnClickListener {
-                    router.pushController(MangaWebViewController(source.id, source.baseUrl)
-                            .withFadeTransaction())
-                }
-            } else{
-                login_captcha.visibility = View.GONE
-                two_factor_static.visibility = View.GONE
-                two_factor_edit.visibility = View.GONE
-            }
+            logout?.setOnClickListener { logout() }
+            two_factor_check?.setOnCheckedChangeListener { _, isChecked ->
+                if (isChecked) {
+                    two_factor_edit.visibility = View.VISIBLE
+                    two_factor_static.visibility = View.VISIBLE
+                } else {
+                    two_factor_edit.visibility = View.GONE
+                    two_factor_static.visibility = View.GONE
 
+                }
+            }
 
             setCredentialsOnView(this)
 
@@ -96,5 +90,7 @@ abstract class LoginDialogPreference(bundle: Bundle? = null) : DialogController(
     protected abstract fun checkLogin()
 
     protected abstract fun setCredentialsOnView(view: View)
+
+    protected abstract fun logout()
 
 }

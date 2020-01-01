@@ -12,9 +12,9 @@ import rx.schedulers.Schedulers
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class SourceLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle) {
+class MangadexLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle) {
 
-    val source: Source by lazy { Injekt.get<SourceManager>().getSources()[0] }
+    val source: Source by lazy { Injekt.get<SourceManager>().getMangadex() }
 
     constructor(source: Source) : this(Bundle().apply { putLong("key", source.id) })
 
@@ -22,6 +22,27 @@ class SourceLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle) 
         dialog_title.text = context.getString(R.string.login_title, source.toString())
         username.setText(preferences.sourceUsername(source))
         password.setText(preferences.sourcePassword(source))
+    }
+
+    override fun logout() {
+        requestSubscription?.unsubscribe()
+        v?.apply {
+            requestSubscription = source.logout()
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe({ loggedOut ->
+                        if (loggedOut) {
+                            preferences.setSourceCredentials(source, "", "")
+                            context.toast(R.string.logout_success)
+                        } else {
+                            login.progress = -1
+                        }
+                    }, { error ->
+                        login.progress = -1
+                        login.setText(R.string.unknown_error)
+                        error.message?.let { context.toast(it) }
+                    })
+        }
     }
 
     override fun checkLogin() {

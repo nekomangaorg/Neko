@@ -9,11 +9,11 @@ import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.Mangadex
 import eu.kanade.tachiyomi.widget.preference.LoginCheckBoxPreference
 import eu.kanade.tachiyomi.widget.preference.LoginPreference
-import eu.kanade.tachiyomi.widget.preference.SourceLoginDialog
+import eu.kanade.tachiyomi.widget.preference.MangadexLoginDialog
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class SettingsSiteController : SettingsController(), SourceLoginDialog.Listener {
+class SettingsSiteController : SettingsController(), MangadexLoginDialog.Listener {
 
     private val sources by lazy { Injekt.get<SourceManager>().getSources() as List<HttpSource> }
 
@@ -24,7 +24,7 @@ class SettingsSiteController : SettingsController(), SourceLoginDialog.Listener 
             title = "MangaDex Login"
             key = getSourceKey(source.id)
             setOnLoginClickListener {
-                val dialog = SourceLoginDialog(source)
+                val dialog = MangadexLoginDialog(source)
                 dialog.targetController = this@SettingsSiteController
                 dialog.showDialog(router)
             }

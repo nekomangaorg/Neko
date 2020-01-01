@@ -1,7 +1,9 @@
 package eu.kanade.tachiyomi.widget.preference
 
+import android.app.Dialog
 import android.os.Bundle
 import android.view.View
+import com.afollestad.materialdialogs.MaterialDialog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
@@ -18,11 +20,24 @@ class TrackLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle) {
 
     constructor(service: TrackService) : this(Bundle().apply { putInt("key", service.id) })
 
+    override fun onCreateDialog(savedState: Bundle?): Dialog {
+        val dialog = MaterialDialog.Builder(activity!!)
+                .customView(R.layout.pref_tracker_login, true)
+                .negativeText(android.R.string.cancel)
+                .build()
+
+        onViewCreated(dialog.view)
+
+        return dialog
+    }
+
     override fun setCredentialsOnView(view: View) = with(view) {
         dialog_title.text = context.getString(R.string.login_title, service.name)
         username.setText(service.getUsername())
         password.setText(service.getPassword())
     }
+
+    override fun logout() = throw Exception("Not Used")
 
     override fun checkLogin() {
         requestSubscription?.unsubscribe()

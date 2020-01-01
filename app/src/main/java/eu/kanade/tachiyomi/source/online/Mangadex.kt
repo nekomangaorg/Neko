@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.source.online
 
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.POST
+import eu.kanade.tachiyomi.network.POSTWithCookie
 import eu.kanade.tachiyomi.network.asObservable
 import eu.kanade.tachiyomi.source.model.*
 import eu.kanade.tachiyomi.source.online.handlers.*
@@ -104,7 +105,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
 
     override fun isLogged(): Boolean {
         val httpUrl = baseUrl.toHttpUrlOrNull()!!
-        return network.cookieManager.get(httpUrl).any { it.name == "mangadex_rememberme_token" }
+        return network.cookieManager.get(httpUrl).any { it.name == REMEMBER_ME }
     }
 
     override fun login(username: String, password: String, twoFactorCode: String): Observable<Boolean> {
@@ -123,6 +124,20 @@ open class Mangadex(override val lang: String, private val internalLang: String,
                 .map { it.body!!.string().isEmpty() }
     }
 
+    override fun logout(): Observable<Boolean> {
+   //https://mangadex.org/ajax/actions.ajax.php?function=logout
+        val httpUrl = baseUrl.toHttpUrlOrNull()!!
+        val cookie = network.cookieManager.get(httpUrl).find { it.name == REMEMBER_ME }
+        val token = cookie?.value
+        if(token.isNullOrEmpty()){
+            return Observable.just(true)
+        }
+
+        return clientBuilder().newCall(POSTWithCookie("$baseUrl/ajax/actions.ajax.php?function=logout", REMEMBER_ME, token, headers))
+                .asObservable()
+                .map { it.body!!.string().isEmpty() }
+    }
+
     override fun getFilterList(): FilterList {
         return FilterHandler().getFilterList()
     }
@@ -133,6 +148,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         private const val NO_R18 = 0
         private const val ALL = 1
         private const val ONLY_R18 = 2
+        private const val REMEMBER_ME = "mangadex_rememberme_token"
 
         val SERVER_PREF_ENTRIES = arrayOf("Automatic", "NA/EU 1", "NA/EU 2", "Rest of the world")
         val SERVER_PREF_ENTRY_VALUES = arrayOf("0", "na", "na2", "row")

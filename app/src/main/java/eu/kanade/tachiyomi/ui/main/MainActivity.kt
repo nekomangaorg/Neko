@@ -32,7 +32,7 @@ import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.ui.recent_updates.RecentChaptersController
 import eu.kanade.tachiyomi.ui.recently_read.RecentlyReadController
 import eu.kanade.tachiyomi.ui.setting.SettingsMainController
-import eu.kanade.tachiyomi.widget.preference.SourceLoginDialog
+import eu.kanade.tachiyomi.widget.preference.MangadexLoginDialog
 import kotlinx.android.synthetic.main.main_activity.*
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -40,7 +40,7 @@ import uy.kohesive.injekt.injectLazy
 import java.util.*
 
 
-class MainActivity : BaseActivity(),  SourceLoginDialog.Listener {
+class MainActivity : BaseActivity(),  MangadexLoginDialog.Listener {
 
     private lateinit var router: Router
 
@@ -112,7 +112,7 @@ class MainActivity : BaseActivity(),  SourceLoginDialog.Listener {
                     R.id.nav_drawer_browse -> {
                         val browseCatalogueController = BrowseCatalogueController(source)
                         if (!source.isLogged()) {
-                            val dialog = SourceLoginDialog(source)
+                            val dialog = MangadexLoginDialog(source)
                             dialog.targetController = browseCatalogueController
                             dialog.showDialog(router)
                             nav_view.menu.getItem(0).isChecked = true
@@ -123,7 +123,7 @@ class MainActivity : BaseActivity(),  SourceLoginDialog.Listener {
                     R.id.nav_drawer_follows -> {
                             val latestUpdatesController = FollowsController(source)
                         if (!source.isLogged()) {
-                            val dialog = SourceLoginDialog(source)
+                            val dialog = MangadexLoginDialog(source)
                             dialog.targetController = latestUpdatesController
                             dialog.showDialog(router)
                             nav_view.menu.getItem(0).isChecked = true
