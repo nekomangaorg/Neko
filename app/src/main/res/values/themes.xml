@@ -38,6 +38,9 @@
 
         <item name="background_card">@color/dialogLight</item>
         <item name="icon_color">@color/iconColorLight</item>
+
+        <item name="md_corner_radius">16dp</item>
+
     </style>
 
     <style name="Theme.Neko" parent="Theme.Base">
@@ -48,7 +51,7 @@
         <item name="md_color_title">@color/colorPrimary</item>
         <item name="md_color_content">@color/colorPrimary</item>
         <item name="md_color_button_text">@color/colorPrimary</item>
-        <item name="md_background_color">@color/md_white_1000</item>
+        <item name="md_background_color">@color/dialogLight</item>
         <item name="md_corner_radius">16dp</item>
     </style>
 
@@ -85,6 +88,9 @@
         <item name="text_color_primary">@color/textColorPrimaryDark</item>
         <item name="background_card">@color/dialogDark</item>
         <item name="icon_color">@color/iconColorDark</item>
+
+        <item name="md_corner_radius">16dp</item>
+
     </style>
 
     <style name="Theme.Neko.Dark" parent="Theme.Base.Dark">
@@ -128,7 +134,6 @@
         <item name="md_color_content">@color/textColorPrimaryDark</item>
         <item name="md_color_button_text">@color/textColorPrimaryDark</item>
         <item name="md_background_color">@color/dialog_amoled</item>
-        <item name="md_corner_radius">16dp</item>
     </style>
 
     <!--==============-->
