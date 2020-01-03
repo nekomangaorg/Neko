@@ -37,6 +37,23 @@ Using Tachiyomi as a base to add MangaDex specific features.
 * Schedule updating your library for new chapters.
 * Create backups locally to read offline or to your desired cloud service. 
 
+* features compared to standard tachiyomi
+Built in login with 2FA support
+Different theme
+Minor UI changes
+- flags for source language in manga info page
+- select chapters between option
+- all the mangadex statuses
+- sort library by date added
+- view mdlist follows
+- reorder and delete downloads in download queue
+-  ability skip chapters that are hidden or read
+- manga covers update when a manga info update is triggered
+- tri state filter when filtering in library
+- ability to lock with biometrics
+-  Filter out your library by searching for tags (ex. "Comedy" or "Slice of Life") or exclude mangas by a tag (ex. "-Shounen" or "-Romance"). Tapping on these tags also performs a local search
+- range select chapters with select between
+
 ## Download
 Get the app from our [releases page](https://github.com/CarlosEsco/Neko/releases).
 
