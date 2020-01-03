@@ -184,6 +184,8 @@ class PreferencesHelper(val context: Context) {
 
     fun lastUnlock() = rxPrefs.getLong(Keys.lastUnlock, 0)
 
+    fun removeArticles() = rxPrefs.getBoolean(Keys.removeArticles, false)
+
     fun migrateFlags() = rxPrefs.getInteger("migrate_flags", Int.MAX_VALUE)
 
     fun trustedSignatures() = rxPrefs.getStringSet("trusted_signatures", emptySet())

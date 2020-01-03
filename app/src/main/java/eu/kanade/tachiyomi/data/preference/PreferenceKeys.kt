@@ -125,6 +125,8 @@ object PreferenceKeys {
 
     const val lastUnlock = "last_unlock"
 
+    const val removeArticles = "remove_articles"
+
     @Deprecated("Use the preferences of the source")
     fun sourceUsername(sourceId: Long) = "pref_source_username_$sourceId"
 

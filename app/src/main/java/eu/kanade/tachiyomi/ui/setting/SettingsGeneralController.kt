@@ -199,6 +199,14 @@ class SettingsGeneralController : SettingsController() {
                 true
             }
         }
+
+        switchPreference {
+            key = Keys.removeArticles
+            titleRes = R.string.pref_remove_articles
+            summaryRes = R.string.pref_remove_articles_summary
+            defaultValue = false
+        }
+
         val biometricManager = BiometricManager.from(context)
         if (biometricManager.canAuthenticate() == BiometricManager.BIOMETRIC_SUCCESS) {
             var preference:IntListPreference? = null

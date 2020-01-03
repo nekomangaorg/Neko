@@ -5,7 +5,6 @@ import com.jakewharton.rxrelay.BehaviorRelay
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
-import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.download.DownloadManager
@@ -17,14 +16,14 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.HttpSource
-import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_EXCLUDE
-import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_INCLUDE
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
 import eu.kanade.tachiyomi.ui.migration.MigrationFlags
 import eu.kanade.tachiyomi.util.combineLatest
 import eu.kanade.tachiyomi.util.isNullOrUnsubscribed
 import eu.kanade.tachiyomi.util.syncChaptersWithSource
+import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_EXCLUDE
 import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_IGNORE
+import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_INCLUDE
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
@@ -223,11 +222,13 @@ class LibraryPresenter(
         return map.mapValues { entry -> entry.value.sortedWith(comparator) }
     }
 
-    fun sortAlphabetical(i1: LibraryItem, i2: LibraryItem): Int {
-        return i1.manga.title.removeArticles().compareTo(i2.manga.title.removeArticles(), true)
+    private fun sortAlphabetical(i1: LibraryItem, i2: LibraryItem): Int {
+        return if (preferences.removeArticles().getOrDefault())
+            i1.manga.title.removeArticles().compareTo(i2.manga.title.removeArticles(), true)
+        else i1.manga.title.compareTo(i2.manga.title, true)
     }
 
-    fun String.removeArticles(): String {
+    private fun String.removeArticles(): String {
         return this.replace(Regex("^(an|a|the) ", RegexOption.IGNORE_CASE), "")
     }
 
