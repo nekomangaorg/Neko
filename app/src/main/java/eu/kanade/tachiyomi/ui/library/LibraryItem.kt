@@ -4,17 +4,17 @@ import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.widget.FrameLayout
+import androidx.recyclerview.widget.RecyclerView
 import com.f2prateek.rx.preferences.Preference
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.AbstractFlexibleItem
 import eu.davidea.flexibleadapter.items.IFilterable
+import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import kotlinx.android.synthetic.main.catalogue_grid_item.view.*
-import androidx.recyclerview.widget.RecyclerView
-import eu.davidea.flexibleadapter.items.IFlexible
 
 class LibraryItem(val manga: LibraryManga, private val libraryAsList: Preference<Boolean>) :
         AbstractFlexibleItem<LibraryHolder>(), IFilterable<String> {
@@ -60,14 +60,21 @@ class LibraryItem(val manga: LibraryManga, private val libraryAsList: Preference
     override fun filter(constraint: String): Boolean {
         return manga.title.contains(constraint, true) ||
             (manga.author?.contains(constraint, true) ?: false) ||
-            (if (constraint.startsWith("-"))
-                manga.genre?.split(", ")?.find {
-                    it.toLowerCase() == constraint.substringAfter("-").toLowerCase()
-                }                   == null
-                    else
-                manga.genre?.split(", ")?.find {
-                    it.toLowerCase() == constraint.toLowerCase() } != null
-                )
+            if (constraint.contains(",")) {
+                val genres = manga.genre?.split(", ")
+                constraint.split(",").all { containsGenre(it.trim(), genres) }
+            }
+           else containsGenre(constraint, manga.genre?.split(", "))
+    }
+
+    private fun containsGenre(tag: String, genres: List<String>?): Boolean {
+        return if (tag.startsWith("-"))
+            genres?.find {
+                it.trim().toLowerCase() == tag.substringAfter("-").toLowerCase()
+            }                   == null
+        else
+            genres?.find {
+                it.trim().toLowerCase() == tag.toLowerCase() } != null
     }
 
     override fun equals(other: Any?): Boolean {
