@@ -1,8 +1,12 @@
 package eu.kanade.tachiyomi.ui.library
 
+import android.util.TypedValue
 import android.view.View
+import androidx.core.content.res.ResourcesCompat
+import cn.nekocode.badge.BadgeDrawable
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import eu.davidea.flexibleadapter.FlexibleAdapter
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.glide.GlideApp
 import kotlinx.android.synthetic.main.catalogue_list_item.*
 
@@ -32,14 +36,23 @@ class LibraryListHolder(
         title.text = item.manga.title
 
         // Update the unread count and its visibility.
+        val unreadCount = (if (item.manga.unread > 0) item.manga.unread else "").toString()
+        val downloadCount = (if (item.downloadCount > 0) item.downloadCount else "").toString()
+
+        // Update the unread count and its visibility.
         with(unread_text) {
-            visibility = if (item.manga.unread > 0) View.VISIBLE else View.GONE
-            text = item.manga.unread.toString()
-        }
-        // Update the download count and its visibility.
-        with(download_text) {
-            visibility = if (item.downloadCount > 0) View.VISIBLE else View.GONE
-            text = "${item.downloadCount}"
+            visibility = if (item.manga.unread > 0 || item.downloadCount > 0) View.VISIBLE else View.GONE
+
+            val badge = BadgeDrawable.Builder()
+                    .type(BadgeDrawable.TYPE_WITH_TWO_TEXT_COMPLEMENTARY)
+                    .badgeColor(ResourcesCompat.getColor(resources, R.color.colorPrimary, null))
+                    .text1(unreadCount)
+                    .text2(downloadCount)
+                    .padding(10f,10f,10f,10f,10f)
+                    .textSize(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16f, resources.displayMetrics))
+                    .textColor(ResourcesCompat.getColor(resources, R.color.md_white_1000, null))
+                    .build()
+            text = badge.toSpannable()
         }
 
         // Create thumbnail onclick to simulate long click

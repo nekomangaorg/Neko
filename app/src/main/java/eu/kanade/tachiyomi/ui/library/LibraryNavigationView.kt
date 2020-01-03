@@ -5,14 +5,13 @@ import android.util.AttributeSet
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
-import eu.kanade.tachiyomi.ui.catalogue.filter.TriStateItem
 import eu.kanade.tachiyomi.widget.ExtendedNavigationView
 import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.MultiSort.Companion.SORT_ASC
 import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.MultiSort.Companion.SORT_DESC
 import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.MultiSort.Companion.SORT_NONE
+import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_EXCLUDE
 import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_IGNORE
 import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_INCLUDE
-import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_EXCLUDE
 import uy.kohesive.injekt.injectLazy
 
 /**
@@ -29,7 +28,7 @@ class LibraryNavigationView @JvmOverloads constructor(context: Context, attrs: A
     /**
      * List of groups shown in the view.
      */
-    private val groups = listOf(FilterGroup(), SortGroup(), DisplayGroup(), BadgeGroup())
+    private val groups = listOf(FilterGroup(), SortGroup(), DisplayGroup())
 
     /**
      * Adapter instance.
@@ -176,23 +175,6 @@ class LibraryNavigationView @JvmOverloads constructor(context: Context, attrs: A
             item.group.items.forEach { adapter.notifyItemChanged(it) }
         }
 
-    }
-
-    inner class BadgeGroup : Group {
-        private val downloadBadge = Item.CheckboxGroup(R.string.action_display_download_badge, this)
-        override val header = null
-        override val footer = null
-        override val items = listOf(downloadBadge)
-        override fun initModels() {
-            downloadBadge.checked = preferences.downloadBadge().getOrDefault()
-        }
-
-        override fun onItemClicked(item: Item) {
-            item as Item.CheckboxGroup
-            item.checked = !item.checked
-            preferences.downloadBadge().set((item.checked))
-            adapter.notifyItemChanged(item)
-        }
     }
 
     /**
