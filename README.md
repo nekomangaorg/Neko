@@ -29,7 +29,7 @@ Plus some new features in this fork such as:
 * [Share sheets upgrade for Android 10](https://raw.githubusercontent.com/Jays2Kings/tachiyomi/master/.github/readme-images/share%20menu.png)
 * Reader seekbar overrides switch app gesture in Android 10, so no more accidents for that
 * Option to hide manga titles in grid view
-* Filter out your library by searching for tags (ex. "Comedy" or "Slice of Life") or exclude mangas by a tag (ex. "-Shounen" or "-Romance"). Tapping on these tags also performs a local search
+* Filter out your library by searching for tags (ex. "Comedy" or "Slice of Life") or exclude mangas by a tag (ex. "-Shounen" or "-Romance"). Tapping on these tags also performs a local search. You can also search multiple tags (ex. "Romance, -Harem, Comedy")
 * Android X Support (**Becasue of this change needed for Android 10 features, extension preferences are currently disabled for all extensions except Mangadex**)
 * Tri-State Filters on library
 * Filter extensions based on your locale
