@@ -151,7 +151,7 @@ class SettingsDownloadController : SettingsController() {
             val selectedIndex = externalDirs.map(File::toString).indexOfFirst { it in currentDir }
 
             return MaterialDialog(activity)
-                    .listItemsSingleChoice(items = externalDirs.map { it.path })
+                    .listItemsSingleChoice(items = externalDirs.map { it.path }, initialSelection = selectedIndex)
                     {_, pos, text->
                         val target = targetController as? SettingsDownloadController
                         if (pos == externalDirs.lastIndex) {
