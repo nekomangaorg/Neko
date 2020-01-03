@@ -7,6 +7,10 @@ import android.content.IntentFilter
 import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.extension.model.LoadResult
 import eu.kanade.tachiyomi.util.launchNow
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
 
 /**
  * Broadcast receiver that listens for the system's packages installed, updated or removed, and only
@@ -90,7 +94,7 @@ internal class ExtensionInstallReceiver(private val listener: Listener) :
     private suspend fun getExtensionFromIntent(context: Context, intent: Intent?): LoadResult {
         val pkgName = getPackageNameFromIntent(intent) ?:
                 return LoadResult.Error("Package name not found")
-        return ExtensionLoader.loadExtensionFromPkgName(context, pkgName)
+        return GlobalScope.async(Dispatchers.Default, CoroutineStart.DEFAULT, { ExtensionLoader.loadExtensionFromPkgName(context, pkgName) }).await()
     }
 
     /**

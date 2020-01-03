@@ -13,6 +13,7 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.fetchAllImageUrlsFromPageList
+import eu.kanade.tachiyomi.util.DiskUtil
 import eu.kanade.tachiyomi.util.ImageUtil
 import eu.kanade.tachiyomi.util.RetryWithDelay
 import eu.kanade.tachiyomi.util.launchNow
@@ -431,6 +432,8 @@ class Downloader(
         if (download.status == Download.DOWNLOADED) {
             tmpDir.renameTo(dirname)
             cache.addChapter(dirname, mangaDir, download.manga)
+
+            DiskUtil.createNoMediaFile(tmpDir, context)
         }
     }
 

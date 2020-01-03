@@ -9,7 +9,7 @@ import kotlinx.coroutines.launch
 import kotlin.coroutines.EmptyCoroutineContext
 
 fun launchUI(block: suspend CoroutineScope.() -> Unit): Job =
-    GlobalScope.launch(Dispatchers.Main,CoroutineStart.DEFAULT,block)
+    GlobalScope.launch(Dispatchers.Main, CoroutineStart.DEFAULT, block)
 
 fun launchNow(block: suspend CoroutineScope.() -> Unit): Job =
-    GlobalScope.launch(Dispatchers.Main,CoroutineStart.UNDISPATCHED,block)
+    GlobalScope.launch(Dispatchers.Main, CoroutineStart.UNDISPATCHED, block)

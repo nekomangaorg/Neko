@@ -50,6 +50,7 @@ class PagerTransitionHolder(
     private var textView = TextView(context).apply {
         //if (Build.VERSION.SDK_INT >= 23)
         //setTextColor(context.getResourceColor(R.attr.))
+        textSize = 17.5F
         wrapContent()
     }
 

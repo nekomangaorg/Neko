@@ -213,7 +213,6 @@ class MangaController : RxController, TabbedController {
     }
 
     companion object {
-
         const val FROM_CATALOGUE_EXTRA = "from_catalogue"
         const val MANGA_EXTRA = "manga"
 
@@ -224,6 +223,5 @@ class MangaController : RxController, TabbedController {
         private val tabField = TabLayout.Tab::class.java.getDeclaredField("view")
                 .apply { isAccessible = true }
     }
-
 
 }

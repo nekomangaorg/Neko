@@ -19,8 +19,8 @@ class CatalogueSearchAdapter(val controller: CatalogueSearchController) :
      */
     private var bundle = Bundle()
 
-    override fun onBindViewHolder(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder, position: Int) {
-        super.onBindViewHolder(holder, position)
+    override fun onBindViewHolder(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder, position: Int, payloads: List<Any?>) {
+        super.onBindViewHolder(holder, position, payloads)
         restoreHolderState(holder)
     }
 

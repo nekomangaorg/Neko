@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import kotlinx.android.synthetic.main.catalogue_main_controller_card.*
 import androidx.recyclerview.widget.RecyclerView
 import eu.davidea.flexibleadapter.items.IFlexible
+import kotlinx.android.synthetic.main.catalogue_main_controller_card.title
 
 /**
  * Item that contains the selection header.
@@ -38,7 +39,7 @@ class SelectionHeader : AbstractHeaderItem<SelectionHeader.Holder>() {
 
     class Holder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>) : BaseFlexibleViewHolder(view, adapter) {
         init {
-            title.text = "Please select a source to migrate from"
+            title.text = view.context.getString(R.string.migration_selection_prompt)
         }
     }
 

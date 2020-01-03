@@ -11,6 +11,9 @@ import android.view.ViewGroup
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.f2prateek.rx.preferences.Preference
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
@@ -207,10 +210,11 @@ open class BrowseCatalogueController(bundle: Bundle) :
         }
 
         val recycler = if (presenter.isListMode) {
-            androidx.recyclerview.widget.RecyclerView(view.context).apply {
+            RecyclerView(view.context).apply {
                 id = R.id.recycler
-                layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
-                addItemDecoration(androidx.recyclerview.widget.DividerItemDecoration(context, androidx.recyclerview.widget.DividerItemDecoration.VERTICAL))
+                layoutManager = LinearLayoutManager(context)
+                layoutParams = RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+                addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
             }
         } else {
             (catalogue_view.inflate(R.layout.catalogue_recycler_autofit) as AutofitRecyclerView).apply {
@@ -377,9 +381,8 @@ open class BrowseCatalogueController(bundle: Bundle) :
         adapter.onLoadMoreComplete(null)
         hideProgressBar()
 
-        val message = if (error is NoResultsException) "No results found" else (error.message ?: "")
-
         snack?.dismiss()
+        val message = if (error is NoResultsException) catalogue_view.context.getString(R.string.no_results_found) else (error.message ?: "")
         snack = catalouge_layout?.snack(message, Snackbar.LENGTH_INDEFINITE) {
             setAction(R.string.action_retry) {
                 // If not the first page, show bottom progress bar.
@@ -388,8 +391,8 @@ open class BrowseCatalogueController(bundle: Bundle) :
                     adapter.addScrollableFooterWithDelay(item, 0, true)
                 } else {
                     showProgressBar()
-                }
                 presenter.requestNext()
+                }
             }
         }
     }
