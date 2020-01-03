@@ -212,7 +212,7 @@ class SettingsBackupController : SettingsController() {
             return MaterialDialog(activity)
                     .title(R.string.pref_create_backup)
                     .message(R.string.backup_choice)
-                    .listItemsMultiChoice(items = options, disabledIndices = intArrayOf(0)) { _, positions, _ ->
+                    .listItemsMultiChoice(items = options, disabledIndices = intArrayOf(0), initialSelection = intArrayOf(0)) { _, positions, _ ->
                         var flags = 0
                         for (i in 1 until positions.size) {
                             when (positions[i]) {
