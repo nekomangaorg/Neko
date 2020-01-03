@@ -5,15 +5,18 @@ import android.animation.AnimatorListenerAdapter
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
-import android.os.Build
-import com.google.android.material.snackbar.Snackbar
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import android.view.*
-import androidx.coordinatorlayout.widget.CoordinatorLayout
 import com.google.android.material.snackbar.BaseTransientBottomBar
+import com.google.android.material.snackbar.Snackbar
 import com.jakewharton.rxbinding.support.v4.widget.refreshes
 import com.jakewharton.rxbinding.view.clicks
 import eu.davidea.flexibleadapter.FlexibleAdapter
@@ -24,18 +27,19 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.base.controller.popControllerWithTag
+import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
-import eu.kanade.tachiyomi.util.*
+import eu.kanade.tachiyomi.util.doOnApplyWindowInsets
+import eu.kanade.tachiyomi.util.getCoordinates
+import eu.kanade.tachiyomi.util.getText
+import eu.kanade.tachiyomi.util.marginBottom
+import eu.kanade.tachiyomi.util.snack
+import eu.kanade.tachiyomi.util.toast
+import eu.kanade.tachiyomi.util.updateLayoutParams
+import eu.kanade.tachiyomi.util.updatePaddingRelative
 import kotlinx.android.synthetic.main.chapters_controller.*
 import timber.log.Timber
-import com.google.android.material.floatingactionbutton.FloatingActionButton
-import android.content.Context
-import android.util.AttributeSet
-import androidx.core.view.ViewCompat
-import androidx.recyclerview.widget.RecyclerView
-import eu.kanade.tachiyomi.ui.main.MainActivity
-import kotlin.math.*
 
 class ChaptersController() : NucleusController<ChaptersPresenter>(),
         ActionMode.Callback,
@@ -102,13 +106,16 @@ class ChaptersController() : NucleusController<ChaptersPresenter>(),
 
         val fabBaseMarginBottom = fab?.marginBottom ?: 0
         recycler.doOnApplyWindowInsets { v, insets, padding ->
-            v.updatePaddingRelative(bottom = padding.bottom + insets.systemWindowInsetBottom)
+
             fab?.updateLayoutParams<ViewGroup.MarginLayoutParams>  {
                 bottomMargin = fabBaseMarginBottom + insets.systemWindowInsetBottom
             }
             fast_scroller?.updateLayoutParams<ViewGroup.MarginLayoutParams>  {
                 bottomMargin = insets.systemWindowInsetBottom
             }
+            // offset the recycler by the fab's inset + some inset on top
+            v.updatePaddingRelative(bottom = padding.bottom + (fab?.marginBottom ?: 0) +
+                fabBaseMarginBottom + (fab?.height ?: 0))
         }
         swipe_refresh.refreshes().subscribeUntilDestroy { fetchChaptersFromSource() }
 

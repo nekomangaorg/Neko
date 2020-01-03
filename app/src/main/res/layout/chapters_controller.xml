@@ -50,7 +50,7 @@
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
-        style="@style/Theme.Widget.FAB"
+        style="@style/Theme.Widget.FABFixed"
         app:layout_anchor="@id/recycler"
         app:layout_anchorGravity="bottom|right|end"
         app:srcCompat="@drawable/ic_play_arrow_white_24dp"/>
