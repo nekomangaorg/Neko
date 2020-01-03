@@ -19,7 +19,7 @@ class MangadexLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle
     constructor(source: Source) : this(Bundle().apply { putLong("key", source.id) })
 
     override fun setCredentialsOnView(view: View) = with(view) {
-        dialog_title.text = context.getString(R.string.login_title, source.toString())
+        dialog_title.text = context.getString(R.string.login_title, source.name)
         username.setText(preferences.sourceUsername(source))
         password.setText(preferences.sourcePassword(source))
     }

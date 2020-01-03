@@ -48,7 +48,7 @@ class LibraryListHolder(
                     .badgeColor(ResourcesCompat.getColor(resources, R.color.colorPrimary, null))
                     .text1(unreadCount)
                     .text2(downloadCount)
-                    .padding(10f,10f,10f,10f,10f)
+                    .padding(10f, 10f, 10f, 10f, 10f)
                     .textSize(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16f, resources.displayMetrics))
                     .textColor(ResourcesCompat.getColor(resources, R.color.md_white_1000, null))
                     .build()

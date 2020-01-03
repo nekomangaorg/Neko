@@ -228,6 +228,7 @@ dependencies {
     implementation "com.jakewharton.rxbinding:rxbinding-support-v4-kotlin:$rxbindings_version"
     implementation "com.jakewharton.rxbinding:rxbinding-recyclerview-v7-kotlin:$rxbindings_version"
 
+    //badge library
     implementation "com.github.nekocode:Badge:2.1"
 
     // Tests
