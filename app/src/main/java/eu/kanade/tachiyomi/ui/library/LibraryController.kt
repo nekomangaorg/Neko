@@ -190,6 +190,7 @@ class LibraryController(
                 is LibraryNavigationView.FilterGroup -> onFilterChanged()
                 is LibraryNavigationView.SortGroup -> onSortChanged()
                 is LibraryNavigationView.DisplayGroup -> reattachAdapter()
+                is LibraryNavigationView.BadgeGroup -> onDownloadBadgeChanged()
             }
         }
 
@@ -275,6 +276,10 @@ class LibraryController(
     private fun onFilterChanged() {
         presenter.requestFilterUpdate()
         activity?.invalidateOptionsMenu()
+    }
+
+    private fun onDownloadBadgeChanged() {
+        presenter.requestDownloadBadgesUpdate()
     }
 
     /**

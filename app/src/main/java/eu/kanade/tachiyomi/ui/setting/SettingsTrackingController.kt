@@ -44,7 +44,7 @@ class SettingsTrackingController : SettingsController(),
                             .setToolbarColor(context.getResourceColor(R.attr.colorPrimary))
                             .build()
                     tabsIntent.intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
-                    tabsIntent.launchUrl(activity!!, AnilistApi.authUrl())
+                    tabsIntent.launchUrl(activity, AnilistApi.authUrl())
                 }
             }
             trackPreference(trackManager.kitsu) {
@@ -60,7 +60,7 @@ class SettingsTrackingController : SettingsController(),
                             .setToolbarColor(context.getResourceColor(R.attr.colorPrimary))
                             .build()
                     tabsIntent.intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
-                    tabsIntent.launchUrl(activity!!, ShikimoriApi.authUrl())
+                    tabsIntent.launchUrl(activity, ShikimoriApi.authUrl())
                 }
             }
         }

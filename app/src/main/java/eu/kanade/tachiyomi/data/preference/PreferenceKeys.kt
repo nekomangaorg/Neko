@@ -113,6 +113,8 @@ object PreferenceKeys {
 
     const val skipHidden = "skip_hidden"
 
+    const val downloadBadge = "display_download_badge"
+
     const val useBiometrics = "use_biometrics"
 
     const val lockAfter = "lock_after"

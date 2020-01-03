@@ -13,12 +13,12 @@ import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.HttpSource
+import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_EXCLUDE
+import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_INCLUDE
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
 import eu.kanade.tachiyomi.util.combineLatest
 import eu.kanade.tachiyomi.util.isNullOrUnsubscribed
-import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_EXCLUDE
 import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_IGNORE
-import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_INCLUDE
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
@@ -144,6 +144,16 @@ class LibraryPresenter(
      * @param map the map of manga.
      */
     private fun setDownloadCount(map: LibraryMap) {
+        if (!preferences.downloadBadge().getOrDefault()) {
+            // Unset download count if the preference is not enabled.
+            for ((_, itemList) in map) {
+                for (item in itemList) {
+                    item.downloadCount = -1
+                }
+            }
+            return
+        }
+
         for ((_, itemList) in map) {
             for (item in itemList) {
                 item.downloadCount = downloadManager.getDownloadCount(item.manga)
@@ -251,6 +261,13 @@ class LibraryPresenter(
      */
     fun requestFilterUpdate() {
         filterTriggerRelay.call(Unit)
+    }
+
+    /**
+     * Requests the library to have download badges added.
+     */
+    fun requestDownloadBadgesUpdate() {
+        downloadTriggerRelay.call(Unit)
     }
 
     /**

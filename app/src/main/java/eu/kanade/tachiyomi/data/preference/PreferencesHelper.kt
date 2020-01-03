@@ -151,6 +151,8 @@ class PreferencesHelper(val context: Context) {
 
     fun libraryAsList() = rxPrefs.getBoolean(Keys.libraryAsList, false)
 
+    fun downloadBadge() = rxPrefs.getBoolean(Keys.downloadBadge, false)
+
     fun filterDownloaded() = rxPrefs.getInteger(Keys.filterDownloaded, 0)
 
     fun filterUnread() = rxPrefs.getInteger(Keys.filterUnread, 0)
