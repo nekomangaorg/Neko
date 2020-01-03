@@ -76,7 +76,7 @@ android {
         standard {
             buildConfigField "boolean", "INCLUDE_UPDATER", "true"
             dimension "default"
-            versionCode 29
+            versionCode 30
             versionName "1.4.3"
         }
         dev {
