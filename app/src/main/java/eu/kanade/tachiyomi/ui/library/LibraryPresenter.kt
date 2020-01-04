@@ -201,12 +201,9 @@ class LibraryPresenter(
     }
 
     fun sortAlphabetical(i1: LibraryItem, i2: LibraryItem): Int {
-        return i1.manga.title.removeArticles().compareTo(i2.manga.title.removeArticles(), true)
+        return i1.manga.title.compareTo(i2.manga.title, true)
     }
 
-    fun String.removeArticles(): String {
-        return this.replace(Regex("^(an|a|the) ", RegexOption.IGNORE_CASE), "")
-    }
 
     /**
      * Get the categories and all its manga from the database.
