@@ -5,7 +5,6 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.ui.base.holder.SlicedHolder
 import eu.kanade.tachiyomi.util.getRound
-import eu.kanade.tachiyomi.util.gone
 import io.github.mthli.slice.Slice
 import kotlinx.android.synthetic.main.catalogue_main_controller_card_item.*
 
@@ -21,10 +20,13 @@ class SourceHolder(view: View, override val adapter: SourceAdapter) :
         get() = card
 
     init {
-        source_latest.gone()
+        source_latest.text = "Auto"
         source_browse.setText(R.string.select)
         source_browse.setOnClickListener {
             adapter.selectClickListener?.onSelectClick(adapterPosition)
+        }
+        source_latest.setOnClickListener {
+            adapter.autoClickListener?.onAutoClick(adapterPosition)
         }
     }
 

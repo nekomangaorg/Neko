@@ -45,6 +45,7 @@ import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.ui.migration.MigrationController
 import eu.kanade.tachiyomi.ui.migration.MigrationInterface
 import eu.kanade.tachiyomi.ui.migration.SearchController
+import eu.kanade.tachiyomi.ui.migration.manga.design.MigrationDesignController
 import eu.kanade.tachiyomi.util.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.inflate
 import eu.kanade.tachiyomi.util.marginBottom
@@ -467,7 +468,13 @@ class LibraryController(
                     selectAllRelay.call(it)
                 }
             }
-            R.id.action_migrate -> startMangaMigration()
+            R.id.action_migrate -> {
+                router.pushController(
+                    MigrationDesignController.create(
+                        selectedMangas.mapNotNull { it.id }
+                    ).withFadeTransaction())
+                destroyActionModeIfNeeded()
+            } //startMangaMigration()
             R.id.action_hide_title -> {
                 val showAll = (selectedMangas.filter { (it as? LibraryManga)?.hide_title == true }
                     ).size == selectedMangas.size

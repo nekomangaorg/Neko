@@ -33,6 +33,18 @@ class SourceAdapter(val controller: MigrationController) :
         fun onSelectClick(position: Int)
     }
 
+    /**
+     * Listener for auto item clicks.
+     */
+    val autoClickListener: OnAutoClickListener? = controller
+
+    /**
+     * Listener which should be called when user clicks select.
+     */
+    interface OnAutoClickListener {
+        fun onAutoClick(position: Int)
+    }
+
     override fun updateDataSet(items: MutableList<IFlexible<*>>?) {
         if (this.items !== items) {
             this.items = items

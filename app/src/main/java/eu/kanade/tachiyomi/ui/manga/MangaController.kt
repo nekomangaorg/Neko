@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.ui.manga
 
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-import android.app.Activity
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -27,6 +26,7 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.base.controller.RxController
 import eu.kanade.tachiyomi.ui.base.controller.TabbedController
 import eu.kanade.tachiyomi.ui.base.controller.requestPermissionsSafe
+import eu.kanade.tachiyomi.ui.catalogue.CatalogueController
 import eu.kanade.tachiyomi.ui.manga.chapter.ChaptersController
 import eu.kanade.tachiyomi.ui.manga.info.MangaInfoController
 import eu.kanade.tachiyomi.ui.manga.track.TrackController
@@ -39,6 +39,21 @@ import uy.kohesive.injekt.api.get
 import java.util.Date
 
 class MangaController : RxController, TabbedController {
+
+    constructor(manga: Manga?,
+        fromCatalogue: Boolean = false,
+        smartSearchConfig: CatalogueController.SmartSearchConfig? = null,
+        update: Boolean = false) : super(Bundle().apply {
+        putLong(MANGA_EXTRA, manga?.id ?: 0)
+        putBoolean(FROM_CATALOGUE_EXTRA, fromCatalogue)
+        putParcelable(SMART_SEARCH_CONFIG_EXTRA, smartSearchConfig)
+        putBoolean(UPDATE_EXTRA, update)
+    }) {
+        this.manga = manga
+        if (manga != null) {
+            source = Injekt.get<SourceManager>().getOrStub(manga.source)
+        }
+    }
 
     constructor(manga: Manga?, fromCatalogue: Boolean = false, fromExtension: Boolean = false) :
         super
@@ -213,6 +228,10 @@ class MangaController : RxController, TabbedController {
     }
 
     companion object {
+
+        const val UPDATE_EXTRA = "update"
+        const val SMART_SEARCH_CONFIG_EXTRA = "smartSearchConfig"
+
         const val FROM_CATALOGUE_EXTRA = "from_catalogue"
         const val MANGA_EXTRA = "manga"
 

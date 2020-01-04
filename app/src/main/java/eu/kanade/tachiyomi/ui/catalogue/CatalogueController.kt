@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.catalogue
 
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -28,6 +29,7 @@ import eu.kanade.tachiyomi.ui.catalogue.latest.LatestUpdatesController
 import eu.kanade.tachiyomi.ui.setting.SettingsSourcesController
 import eu.kanade.tachiyomi.util.RecyclerWindowInsetsListener
 import eu.kanade.tachiyomi.widget.preference.SourceLoginDialog
+import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.catalogue_main_controller.*
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -239,4 +241,7 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
     }
 
     class SettingsSourcesFadeChangeHandler : FadeChangeHandler()
+
+    @Parcelize
+    data class SmartSearchConfig(val origTitle: String, val origMangaId: Long) : Parcelable
 }

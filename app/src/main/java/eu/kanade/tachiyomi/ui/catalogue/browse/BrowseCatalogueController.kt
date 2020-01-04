@@ -30,6 +30,7 @@ import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.base.controller.SecondaryDrawerController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
+import eu.kanade.tachiyomi.ui.catalogue.CatalogueController
 import eu.kanade.tachiyomi.ui.library.ChangeMangaCategoriesDialog
 import eu.kanade.tachiyomi.ui.library.HeightTopWindowInsetsListener
 import eu.kanade.tachiyomi.ui.main.MainActivity
@@ -67,6 +68,18 @@ open class BrowseCatalogueController(bundle: Bundle) :
         FlexibleAdapter.OnItemLongClickListener,
         FlexibleAdapter.EndlessScrollListener,
         ChangeMangaCategoriesDialog.Listener {
+
+    constructor(source: CatalogueSource,
+        searchQuery: String? = null,
+        smartSearchConfig: CatalogueController.SmartSearchConfig? = null) : this(Bundle().apply {
+        putLong(SOURCE_ID_KEY, source.id)
+
+        if(searchQuery != null)
+            putString(SEARCH_QUERY_KEY, searchQuery)
+
+        if (smartSearchConfig != null)
+            putParcelable(SMART_SEARCH_CONFIG_KEY, smartSearchConfig)
+    })
 
     constructor(source: CatalogueSource) : this(Bundle().apply {
         putLong(SOURCE_ID_KEY, source.id)
@@ -579,6 +592,9 @@ open class BrowseCatalogueController(bundle: Bundle) :
 
     protected companion object {
         const val SOURCE_ID_KEY = "sourceId"
+
+        const val SEARCH_QUERY_KEY = "searchQuery"
+        const val SMART_SEARCH_CONFIG_KEY = "smartSearchConfig"
     }
 
 }
