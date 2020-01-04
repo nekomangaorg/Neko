@@ -4,6 +4,7 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationProcessItem
 import eu.kanade.tachiyomi.util.DeferredField
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -30,5 +31,10 @@ class MigratingManga(private val db: DatabaseHelper,
 
     suspend fun mangaSource(): Source {
         return sourceManager.getOrStub(manga()?.source ?: -1)
+    }
+
+    fun toModal(): MigrationProcessItem {
+        // Create the model object.
+        return MigrationProcessItem(this)
     }
 }

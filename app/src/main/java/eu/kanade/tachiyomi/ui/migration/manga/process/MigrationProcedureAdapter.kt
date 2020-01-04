@@ -4,7 +4,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.viewpager.widget.PagerAdapter
 import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.google.gson.Gson
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -40,7 +39,6 @@ class MigrationProcedureAdapter(val controller: MigrationProcedureController,
                                 val migratingManga: List<MigratingManga>,
                                 override val coroutineContext: CoroutineContext) : PagerAdapter(), CoroutineScope {
     private val db: DatabaseHelper by injectLazy()
-    private val gson: Gson by injectLazy()
     private val sourceManager: SourceManager by injectLazy()
 
     override fun isViewFromObject(p0: View, p1: Any): Boolean {
@@ -55,7 +53,7 @@ class MigrationProcedureAdapter(val controller: MigrationProcedureController,
         container.addView(view)
 
         view.skip_migration.setOnClickListener {
-            controller.nextMigration()
+            //controller.nextMigration()
         }
 
         val viewTag = ViewTag(coroutineContext)
@@ -81,26 +79,26 @@ class MigrationProcedureAdapter(val controller: MigrationProcedureController,
     }
 
     suspend fun performMigration(manga: MigratingManga) {
-        if(!manga.searchResult.initialized) {
-            return
-        }
+            if(!manga.searchResult.initialized) {
+                return
+            }
 
-        val toMangaObj = db.getManga(manga.searchResult.get() ?: return).executeAsBlocking() ?: return
+            val toMangaObj = db.getManga(manga.searchResult.get() ?: return).executeAsBlocking() ?: return
 
-        withContext(Dispatchers.IO) {
-            migrateMangaInternal(
+            withContext(Dispatchers.IO) {
+                migrateMangaInternal(
                     manga.manga() ?: return@withContext,
                     toMangaObj,
-                    !(controller.config?.copy ?: false)
-            )
-        }
+                    false
+                )
+            }
     }
 
     private fun migrateMangaInternal(prevManga: Manga,
                                      manga: Manga,
                                      replace: Boolean) {
         val config = controller.config ?: return
-        db.inTransaction {
+        //db.inTransaction {
             // Update chapters read
             if (MigrationFlags.hasChapters(controller.config.migrationFlags)) {
                 val prevMangaChapters = db.getChapters(prevManga).executeAsBlocking()
@@ -141,7 +139,7 @@ class MigrationProcedureAdapter(val controller: MigrationProcedureController,
 
             // SearchPresenter#networkToLocalManga may have updated the manga title, so ensure db gets updated title
             db.updateMangaTitle(manga).executeAsBlocking()
-        }
+        //}
     }
 
     fun View.setupView(tag: ViewTag, migratingManga: MigratingManga) {

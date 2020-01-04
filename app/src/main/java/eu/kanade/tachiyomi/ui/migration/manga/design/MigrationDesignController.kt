@@ -14,7 +14,7 @@ import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.migration.MigrationFlags
-import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationProcedureController
+import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationListController
 import eu.kanade.tachiyomi.util.gone
 import eu.kanade.tachiyomi.util.visible
 import exh.ui.migration.manga.process.MigrationProcedureConfig
@@ -60,10 +60,6 @@ class MigrationDesignController(bundle: Bundle? = null) : BaseController(bundle)
             use_smart_search.toggle()
         }
 
-        copy_manga_desc.setOnClickListener {
-            copy_manga.toggle()
-        }
-
         extra_search_param_desc.setOnClickListener {
             extra_search_param.toggle()
         }
@@ -93,7 +89,7 @@ class MigrationDesignController(bundle: Bundle? = null) : BaseController(bundle)
             if(mig_categories.isChecked) flags = flags or MigrationFlags.TRACK
 
             router.replaceTopController(
-                MigrationProcedureController.create(
+                MigrationListController.create(
                     MigrationProcedureConfig(
                             config.toList(),
                             ourAdapter.items.filter {
@@ -102,7 +98,6 @@ class MigrationDesignController(bundle: Bundle? = null) : BaseController(bundle)
                             useSourceWithMostChapters = prioritize_chapter_count.isChecked,
                             enableLenientSearch = use_smart_search.isChecked,
                             migrationFlags = flags,
-                            copy = copy_manga.isChecked,
                             extraSearchParams = if(extra_search_param.isChecked && extra_search_param_text.text.isNotBlank()) {
                                 extra_search_param_text.text.toString()
                             } else null

@@ -150,8 +150,7 @@ class MigrationProcedureController(bundle: Bundle? = null) : BaseController(bund
                                async {
                                    sourceSemaphore.withPermit {
                                        try {
-                                           val searchResult = if (config?.enableLenientSearch ==
-                                               true) {
+                                           val searchResult = if (config.enableLenientSearch) {
                                                smartSearchEngine.smartSearch(source, mangaObj.title)
                                            } else {
                                                smartSearchEngine.normalSearch(source, mangaObj.title)
