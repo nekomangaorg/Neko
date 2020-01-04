@@ -29,8 +29,9 @@ class DownloadChaptersDialog<T>(bundle: Bundle? = null) : DialogController(bundl
 
         return MaterialDialog(activity)
                 .negativeButton(android.R.string.cancel)
-                .listItems(items = choices){ _, position, _ ->
+                .listItems(items = choices){ dialog, position, _ ->
                     (targetController as? Listener)?.downloadChapters(position)
+                    dialog.dismiss()
                 }
     }
 
