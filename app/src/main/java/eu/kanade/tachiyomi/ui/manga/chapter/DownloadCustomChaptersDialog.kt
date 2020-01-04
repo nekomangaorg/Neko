@@ -58,7 +58,7 @@ class DownloadCustomChaptersDialog<T> : DialogController
         // when positive dialog is pressed call custom listener.
         return MaterialDialog(activity)
                 .title(R.string.custom_download)
-                .customView(view = view, scrollable = true)
+                .customView(view = view, scrollable = false)
                 .negativeButton(android.R.string.cancel)
                 .positiveButton(android.R.string.ok){
                     (targetController as? Listener)?.downloadCustomChapters(view.amount)

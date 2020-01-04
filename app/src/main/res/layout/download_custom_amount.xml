@@ -6,55 +6,54 @@
     android:gravity="center"
     android:orientation="horizontal">
 
-    <androidx.appcompat.widget.AppCompatImageButton
+    <com.mikepenz.iconics.view.IconicsImageView
         android:id="@+id/btn_decrease_10"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:background="?selectable_list_drawable"
-        android:padding="8dp"
-        app:ico_icon="cmd_chevron_double_left"
-        app:ico_color="?colorAccent"
-        app:ico_size="24dp"/>
+        android:padding="16dp"
+        app:iiv_color="?colorAccent"
+        app:iiv_icon="cmd_chevron_double_left"
+        app:iiv_size="18dp" />
 
-    <androidx.appcompat.widget.AppCompatImageButton
+    <com.mikepenz.iconics.view.IconicsImageView
         android:id="@+id/btn_decrease"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:background="?selectable_list_drawable"
-        android:padding="8dp"
-        app:ico_icon="cmd_chevron_left"
-        app:ico_color="?colorAccent"
-        app:ico_size="24dp"/>
+        android:padding="16dp"
+        app:iiv_color="?colorAccent"
+        app:iiv_icon="cmd_chevron_left"
+        app:iiv_size="18dp" />
 
     <EditText
         android:id="@+id/myNumber"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:digits="0123456789"
         android:inputType="number"
-        android:layout_height="wrap_content"
-        android:textStyle="bold"
-        android:padding="8dp"
-        android:layout_width="wrap_content" />
+        android:padding="16dp"
+        android:textStyle="bold" />
 
 
-    <androidx.appcompat.widget.AppCompatImageButton
+    <com.mikepenz.iconics.view.IconicsImageView
         android:id="@+id/btn_increase"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:background="?selectable_list_drawable"
-        android:padding="8dp"
-        app:ico_icon="cmd_chevron_right"
-        app:ico_color="?colorAccent"
-        app:ico_size="24dp"/>
+        android:padding="16dp"
+        app:iiv_color="?colorAccent"
+        app:iiv_icon="cmd_chevron_right"
+        app:iiv_size="18dp" />
 
-    <androidx.appcompat.widget.AppCompatImageButton
+    <com.mikepenz.iconics.view.IconicsImageView
         android:id="@+id/btn_increase_10"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:background="?selectable_list_drawable"
-        android:tint="?colorAccent"
-        android:padding="8dp"
-        app:ico_icon="cmd_chevron_double_right"
-        app:ico_color="?colorAccent"
-        app:ico_size="24dp"/>
+        android:padding="16dp"
+        app:iiv_color="?colorAccent"
+        app:iiv_icon="cmd_chevron_double_right"
+        app:iiv_size="18dp" />
 
 </LinearLayout>
