@@ -42,7 +42,7 @@ class MigrationProcessItem(val manga: MigratingManga) :
     }
 
     override fun hashCode(): Int {
-        return manga.mangaId.hashCode()
+        return manga.mangaId.toInt()
     }
 
 }
