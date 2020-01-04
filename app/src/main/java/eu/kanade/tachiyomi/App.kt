@@ -20,9 +20,11 @@ import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.updater.UpdaterJob
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import org.acra.ACRA
+import org.acra.ReportField
 import org.acra.annotation.AcraCore
-import org.acra.annotation.AcraMailSender
+import org.acra.annotation.AcraHttpSender
 import org.acra.data.StringFormat
+import org.acra.sender.HttpSender
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.InjektScope
@@ -33,9 +35,14 @@ import uy.kohesive.injekt.registry.default.DefaultRegistrar
 @AcraCore(
         buildConfigClass = BuildConfig::class,
         reportFormat = StringFormat.JSON,
-        excludeMatchingSharedPreferencesKeys = arrayOf(".*username.*", ".*password.*", ".*token.*")
+        excludeMatchingSharedPreferencesKeys = arrayOf(".*username.*", ".*password.*", ".*token.*"),
+        reportContent = arrayOf(ReportField.ANDROID_VERSION, ReportField.APP_VERSION_CODE, ReportField.APP_VERSION_NAME,
+                ReportField.PACKAGE_NAME, ReportField.REPORT_ID, ReportField.STACK_TRACE, ReportField.USER_APP_START_DATE, ReportField.USER_CRASH_DATE)
 )
-@AcraMailSender(mailTo = "")
+@AcraHttpSender(
+        uri = "https://collector.tracepot.com/0ebf5ef8",
+        httpMethod = HttpSender.Method.PUT
+)
 
 open class App : Application(), LifecycleObserver {
 
