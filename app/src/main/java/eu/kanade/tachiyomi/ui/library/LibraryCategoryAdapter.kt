@@ -1,11 +1,11 @@
 package eu.kanade.tachiyomi.ui.library
 
 import eu.davidea.flexibleadapter.FlexibleAdapter
-import eu.kanade.tachiyomi.data.database.models.Manga
-import androidx.recyclerview.widget.RecyclerView
-import eu.davidea.flexibleadapter.SelectableAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
+import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.ui.category.CategoryAdapter
+import java.util.*
+
 
 /**
  * Adapter storing a list of manga in a certain category.
@@ -49,6 +49,17 @@ class LibraryCategoryAdapter(view: LibraryCategoryView) :
             s = ""
         }
         updateDataSet(mangas.filter { it.filter(s) })
+    }
+
+    override fun onCreateBubbleText(position: Int): String {
+        return if (position < scrollableHeaders.size) {
+            "Top"
+        } else if (position >= itemCount - scrollableFooters.size) {
+            "Bottom"
+        } else { // Get and show the first character
+            val iFlexible: IFlexible<*>? = getItem(position)
+            (iFlexible as LibraryItem).manga.title.substring(0, 1).toUpperCase(Locale.US)
+        }
     }
 
 }
