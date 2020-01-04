@@ -19,11 +19,23 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.updater.UpdaterJob
 import eu.kanade.tachiyomi.ui.main.MainActivity
+import org.acra.ACRA
+import org.acra.annotation.AcraCore
+import org.acra.annotation.AcraMailSender
+import org.acra.data.StringFormat
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.InjektScope
 import uy.kohesive.injekt.injectLazy
 import uy.kohesive.injekt.registry.default.DefaultRegistrar
+
+
+@AcraCore(
+        buildConfigClass = BuildConfig::class,
+        reportFormat = StringFormat.JSON,
+        excludeMatchingSharedPreferencesKeys = arrayOf(".*username.*", ".*password.*", ".*token.*")
+)
+@AcraMailSender(mailTo = "")
 
 open class App : Application(), LifecycleObserver {
 
@@ -56,6 +68,7 @@ open class App : Application(), LifecycleObserver {
     override fun attachBaseContext(base: Context) {
         super.attachBaseContext(base)
         MultiDex.install(this)
+        setupAcra()
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -81,4 +94,7 @@ open class App : Application(), LifecycleObserver {
         Notifications.createChannels(this)
     }
 
+    protected open fun setupAcra() {
+        ACRA.init(this)
+    }
 }
