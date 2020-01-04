@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.ui.main
 
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
-import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
@@ -13,7 +12,6 @@ import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import com.bluelinelabs.conductor.*
 import com.mikepenz.iconics.IconicsDrawable
-import com.mikepenz.iconics.context.IconicsContextWrapper
 import com.mikepenz.iconics.typeface.IIcon
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import eu.kanade.tachiyomi.Migrations
@@ -61,11 +59,6 @@ class MainActivity : BaseActivity(),  MangadexLoginDialog.Listener {
     }
 
     lateinit var tabAnimator: TabsAnimator
-
-    override fun attachBaseContext(newBase: Context) {
-        //needed for Iconics
-        super.attachBaseContext(IconicsContextWrapper.wrap(newBase))
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(when (preferences.theme()) {
