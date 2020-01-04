@@ -229,7 +229,7 @@ class Downloader(
      */
     fun queueChapters(manga: Manga, chapters: List<Chapter>, autoStart: Boolean) = launchUI {
         val source = sourceManager.get(manga.source) as? HttpSource ?: return@launchUI
-
+        val wasEmpty = queue.isEmpty()
         // Called in background thread, the operation can be slow with SAF.
         val chaptersWithoutDir = async {
             chapters
@@ -258,7 +258,7 @@ class Downloader(
             }
 
             // Start downloader if needed
-            if (autoStart) {
+            if (autoStart && wasEmpty) {
                 DownloadService.start(this@Downloader.context)
             }
         }
