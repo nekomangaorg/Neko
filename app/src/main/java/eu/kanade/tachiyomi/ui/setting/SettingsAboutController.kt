@@ -49,26 +49,6 @@ class SettingsAboutController : SettingsController() {
             summaryRes = R.string.pref_acra_summary
             defaultValue = true
         }
-        switchPreference {
-            key = Keys.automaticUpdates
-            titleRes = R.string.pref_enable_automatic_updates
-            summaryRes = R.string.pref_enable_automatic_updates_summary
-            defaultValue = false
-
-            if (isUpdaterEnabled) {
-                onChange { newValue ->
-                    val checked = newValue as Boolean
-                    if (checked) {
-                        UpdaterJob.setupTask()
-                    } else {
-                        UpdaterJob.cancelTask()
-                    }
-                    true
-                }
-            } else {
-                isVisible = false
-            }
-        }
         preference {
             title = "Discord"
             val url = "https://discord.gg/tachiyomi"

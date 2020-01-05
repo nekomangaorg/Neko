@@ -56,8 +56,6 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
         setHasOptionsMenu(true)
     }
 
-    private var titleText = "Migrate manga"
-
     private var adapter: MigrationProcessAdapter? = null
 
     override val coroutineContext: CoroutineContext = Job() + Dispatchers.Default
@@ -78,11 +76,12 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
         return inflater.inflate(R.layout.migration_list_controller, container, false)
     }
 
-    override fun getTitle(): String {
-        return titleText
+    override fun getTitle(): String? {
+        return resources?.getString(R.string.migration)
     }
 
     override fun onViewCreated(view: View) {
+
         super.onViewCreated(view)
         setTitle()
         val config = this.config ?: return
