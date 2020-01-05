@@ -12,8 +12,6 @@ import eu.davidea.viewholders.FlexibleViewHolder
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.model.Filter
 import eu.kanade.tachiyomi.widget.IgnoreFirstSpinnerListener
-import androidx.recyclerview.widget.RecyclerView
-import eu.davidea.flexibleadapter.items.IFlexible
 
 open class SelectItem(val filter: Filter.Select<*>) : AbstractFlexibleItem<SelectItem.Holder>() {
 

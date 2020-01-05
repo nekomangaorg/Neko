@@ -8,9 +8,6 @@ import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import kotlinx.android.synthetic.main.catalogue_main_controller_card.*
-import androidx.recyclerview.widget.RecyclerView
-import eu.davidea.flexibleadapter.items.IFlexible
-import kotlinx.android.synthetic.main.catalogue_main_controller_card.title
 
 /**
  * Item that contains the selection header.

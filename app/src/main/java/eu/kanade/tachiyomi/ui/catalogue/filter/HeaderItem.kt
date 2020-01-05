@@ -10,8 +10,6 @@ import eu.davidea.flexibleadapter.items.AbstractHeaderItem
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.davidea.viewholders.FlexibleViewHolder
 import eu.kanade.tachiyomi.source.model.Filter
-import androidx.recyclerview.widget.RecyclerView
-import eu.davidea.flexibleadapter.items.IFlexible
 
 class HeaderItem(val filter: Filter.Header) : AbstractHeaderItem<HeaderItem.Holder>() {
 

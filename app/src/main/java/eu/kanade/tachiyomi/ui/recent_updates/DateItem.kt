@@ -9,9 +9,7 @@ import eu.davidea.flexibleadapter.items.AbstractHeaderItem
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.davidea.viewholders.FlexibleViewHolder
 import eu.kanade.tachiyomi.R
-import java.util.*
-import androidx.recyclerview.widget.RecyclerView
-import eu.davidea.flexibleadapter.items.IFlexible
+import java.util.Date
 
 class DateItem(val date: Date) : AbstractHeaderItem<DateItem.Holder>() {
 

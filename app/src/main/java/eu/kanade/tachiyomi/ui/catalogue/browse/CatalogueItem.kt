@@ -14,8 +14,6 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import kotlinx.android.synthetic.main.catalogue_grid_item.view.*
-import androidx.recyclerview.widget.RecyclerView
-import eu.davidea.flexibleadapter.items.IFlexible
 
 class CatalogueItem(val manga: Manga, private val catalogueAsList: Preference<Boolean>) :
         AbstractFlexibleItem<CatalogueHolder>() {

@@ -9,8 +9,6 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.model.Download
-import androidx.recyclerview.widget.RecyclerView
-import eu.davidea.flexibleadapter.items.IFlexible
 
 class ChapterItem(val chapter: Chapter, val manga: Manga) : AbstractFlexibleItem<ChapterHolder>(),
         Chapter by chapter {

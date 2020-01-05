@@ -1,10 +1,10 @@
 package eu.kanade.tachiyomi.ui.catalogue.filter
 
-import com.google.android.material.R
-import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import android.view.View
 import android.widget.CheckedTextView
 import androidx.recyclerview.widget.RecyclerView
+import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
+import com.google.android.material.R
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.AbstractFlexibleItem
 import eu.davidea.flexibleadapter.items.IFlexible
@@ -13,8 +13,6 @@ import eu.kanade.tachiyomi.source.model.Filter
 import eu.kanade.tachiyomi.util.dpToPx
 import eu.kanade.tachiyomi.util.getResourceColor
 import eu.kanade.tachiyomi.R as TR
-import androidx.recyclerview.widget.RecyclerView
-import eu.davidea.flexibleadapter.items.IFlexible
 
 open class TriStateItem(val filter: Filter.TriState) : AbstractFlexibleItem<TriStateItem.Holder>() {
 
