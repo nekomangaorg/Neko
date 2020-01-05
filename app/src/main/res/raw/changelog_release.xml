@@ -4,6 +4,7 @@
 		<changelogtext>Mass/Automatic Source Migration</changelogtext>
 		<changelogtext>Fix single tag searching + multi tag searching by commas (ie. "Romance, -Harem, Comedy")</changelogtext>
 		<changelogtext>Chapters FAB no longer hides</changelogtext>
+		<changelogtext>Added setting to ignore articles when sorting alphabetically</changelogtext>
 		<changelogtext>Downloaded chapters names now use scantalors names</changelogtext>
 		<changelogtext>Fixed reordering downloads restarting the progress</changelogtext>
 		<changelogtext>(From dev) Auto attempt a login refresh once if MAL returns http 400</changelogtext>
