@@ -20,6 +20,7 @@ import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadService
+import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.data.library.LibraryUpdateRanker.Companion.relevanceRanking
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService.Companion.start
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
@@ -89,11 +90,12 @@ class LibraryUpdateService(
      */
     private val progressNotification by lazy { NotificationCompat.Builder(this, Notifications.CHANNEL_LIBRARY)
             .setContentTitle(getString(R.string.app_name))
-            .setSmallIcon(R.drawable.ic_refresh_white_24dp_img)
+            .setSmallIcon(R.drawable.ic_refresh_grey)
             .setLargeIcon(notificationBitmap)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
-            .addAction(R.drawable.ic_clear_grey_24dp_img, getString(android.R.string.cancel), cancelIntent)
+            .setColor(ContextCompat.getColor(this, R.color.colorPrimary))
+            .addAction(R.drawable.ic_clear_grey, getString(android.R.string.cancel), cancelIntent)
     }
 
     /**
@@ -292,7 +294,7 @@ class LibraryUpdateService(
         // Initialize the variables holding the progress of the updates.
         val count = AtomicInteger(0)
         // List containing new updates
-        val newUpdates = ArrayList<Pair<Manga, Chapter>>()
+        val newUpdates = ArrayList<Pair<Manga, Array<Chapter>>>()
         // list containing failed updates
         val failedUpdates = ArrayList<Manga>()
         // List containing categories that get included in downloads.
@@ -325,7 +327,8 @@ class LibraryUpdateService(
                                 }
                             }
                             // Convert to the manga that contains new chapters.
-                            .map { Pair(manga, (it.first.minBy { ch -> ch.chapter_number }!!)) }
+                            .map { Pair(manga, (it.first.sortedByDescending { ch -> ch
+                                .source_order }.toTypedArray())) }
                 }
                 // Add manga with new chapters to the list.
                 .doOnNext { manga ->
@@ -516,24 +519,37 @@ class LibraryUpdateService(
      *
      * @param updates a list of manga with new updates.
      */
-    private fun showResultNotification(updates: List<Pair<Manga, Chapter>>) {
+    private fun showResultNotification(updates: List<Pair<Manga, Array<Chapter>>>) {
         val notifications = ArrayList<Pair<Notification, Int>>()
         updates.forEach {
             val manga = it.first
-            val chapter = it.second
+            val chapters = it.second
+            val chapterNames = chapters.map { chapter -> chapter.name }.toSet()
             notifications.add(Pair(notification(Notifications.CHANNEL_NEW_CHAPTERS) {
-                setSmallIcon(R.drawable.ic_book_white_24dp)
-                setLargeIcon(notificationBitmap)
-                setContentTitle(manga.title.chop(45))
-                color = ContextCompat.getColor(applicationContext, R.color.colorAccentLight)
-                setContentText(chapter.name)
+                setSmallIcon(R.drawable.ic_neko_notification)
+                try {
+                    val icon = GlideApp.with(this@LibraryUpdateService)
+                        .asBitmap().load(manga).dontTransform().centerCrop().circleCrop()
+                        .override(256, 256).submit().get()
+                    setLargeIcon(icon)
+                }
+                catch (e: Exception) { }
+                setContentTitle(manga.title)
+                color = ContextCompat.getColor(this@LibraryUpdateService, R.color.colorPrimary)
+                val chaptersNames = if (chapterNames.size > 5) {
+                    "${chapterNames.take(4).joinToString("\n")}\n" +
+                        getString(R.string.notification_and_n_more, (chapterNames.size - 4))
+                } else chapterNames.joinToString("\n ")
+                setContentText(chaptersNames)
+                setStyle(NotificationCompat.BigTextStyle().bigText(chaptersNames))
                 priority = NotificationCompat.PRIORITY_HIGH
                 setGroup(Notifications.GROUP_NEW_CHAPTERS)
                 setContentIntent(
-                    NotificationReceiver.openChapterPendingActivity(
-                        this@LibraryUpdateService, manga, chapter
+                        NotificationReceiver.openChapterPendingActivity( this@LibraryUpdateService, manga, chapters.first())
                     )
-                )
+                addAction(R.drawable.ic_list_grey, getString(R.string.action_view_chapters),
+                        NotificationReceiver.openChapterPendingActivity(this@LibraryUpdateService,
+                                manga, Notifications.ID_NEW_CHAPTERS))
                 setAutoCancel(true)
             }, manga.id.hashCode()))
         }
@@ -543,21 +559,26 @@ class LibraryUpdateService(
                 notify(it.second, it.first)
             }
 
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N || notificationManager
-                    .activeNotifications.find { it.groupKey == Notifications.GROUP_NEW_CHAPTERS } == null) {
-                notify(Notifications.ID_NEW_CHAPTERS, notification(Notifications.CHANNEL_NEW_CHAPTERS) {
-                    setSmallIcon(R.drawable.ic_book_white_24dp)
-                    setLargeIcon(notificationBitmap)
-                    setContentTitle(getString(R.string.notification_new_chapters))
-                    color = ContextCompat.getColor(applicationContext, R.color.colorAccentLight)
+            notify(Notifications.ID_NEW_CHAPTERS, notification(Notifications.CHANNEL_NEW_CHAPTERS) {
+                setSmallIcon(R.drawable.ic_neko_notification)
+                setLargeIcon(notificationBitmap)
+                setContentTitle(getString(R.string.notification_new_chapters))
+                color = ContextCompat.getColor(applicationContext, R.color.colorPrimary)
+                if (updates.size > 1) {
                     setContentText(getString(R.string.notification_new_chapters_text, updates.size))
-                    priority = NotificationCompat.PRIORITY_HIGH
-                    setGroup(Notifications.GROUP_NEW_CHAPTERS)
-                    setGroupSummary(true)
-                    setContentIntent(getNotificationIntent())
-                    setAutoCancel(true)
-                })
-            }
+                    setStyle(NotificationCompat.BigTextStyle().bigText(updates.joinToString("\n") {
+                        it.first.title.chop(45)
+                    }))
+                }
+                else {
+                    setContentText(updates.first().first.title.chop(45))
+                }
+                priority = NotificationCompat.PRIORITY_HIGH
+                setGroup(Notifications.GROUP_NEW_CHAPTERS)
+                setGroupSummary(true)
+                setContentIntent(getNotificationIntent())
+                setAutoCancel(true)
+            })
         }
     }
 

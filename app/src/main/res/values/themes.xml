@@ -162,12 +162,5 @@
     </style>
 
 
-    <!--===============-->
-    <!-- Launch Screen -->
-    <!--===============-->
-    <style name="Theme.BrandedLaunch">
-        <item name="android:windowBackground">@drawable/branded_logo</item>
-    </style>
-
 
 </resources>

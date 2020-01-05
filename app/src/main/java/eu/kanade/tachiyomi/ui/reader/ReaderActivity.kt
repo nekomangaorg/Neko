@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.reader
 
 import android.annotation.SuppressLint
 import android.app.ProgressDialog
+import android.content.ClipData
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
@@ -24,6 +25,8 @@ import com.mikepenz.iconics.utils.sizeDp
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.notification.NotificationReceiver
+import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.base.activity.BaseRxActivity
@@ -110,6 +113,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
             val intent = Intent(context, ReaderActivity::class.java)
             intent.putExtra("manga", manga.id)
             intent.putExtra("chapter", chapter.id)
+            intent.putExtra("chapterUrl", chapter.url)
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
             return intent
         }
     }
@@ -128,13 +133,14 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         if (presenter.needsInit()) {
             val manga = intent.extras!!.getLong("manga", -1)
             val chapter = intent.extras!!.getLong("chapter", -1)
-
-            if (manga == -1L || chapter == -1L) {
+            val chapterUrl = intent.extras!!.getString("chapterUrl", "")
+            if (manga == -1L || chapterUrl == "" && chapter == -1L) {
                 finish()
                 return
             }
-
-            presenter.init(manga, chapter)
+            NotificationReceiver.dismissNotification(this, manga.hashCode(), Notifications.ID_NEW_CHAPTERS)
+            if (chapter > -1) presenter.init(manga, chapter)
+            else presenter.init(manga, chapterUrl)
         }
 
         if (savedState != null) {
@@ -507,6 +513,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         val intent = Intent(Intent.ACTION_SEND).apply {
             putExtra(Intent.EXTRA_STREAM, stream)
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
+            clipData = ClipData.newRawUri(null, stream)
             type = "image/*"
         }
         startActivity(Intent.createChooser(intent, getString(R.string.action_share)))

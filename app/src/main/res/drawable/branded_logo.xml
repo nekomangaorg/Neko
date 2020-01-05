@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android"
-            android:opacity="opaque">
-    <item android:drawable="@color/md_black_1000"/>
-    <item
-            android:drawable="@drawable/ic_neko"
-            android:gravity="center"/>
-    />
-</layer-list>
