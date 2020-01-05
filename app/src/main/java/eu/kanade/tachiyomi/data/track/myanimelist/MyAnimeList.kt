@@ -11,7 +11,6 @@ import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import rx.Completable
 import rx.Observable
-import java.lang.Exception
 
 class Myanimelist(private val context: Context, id: Int) : TrackService(id) {
 

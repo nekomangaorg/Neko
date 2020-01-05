@@ -4,5 +4,5 @@ import androidx.preference.PreferenceScreen
 
 interface ConfigurableSource : Source {
 
-        fun setupPreferenceScreen(screen: PreferenceScreen)
+    fun setupPreferenceScreen(screen: PreferenceScreen)
 }

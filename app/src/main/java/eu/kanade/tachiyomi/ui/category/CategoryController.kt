@@ -3,6 +3,8 @@ package eu.kanade.tachiyomi.ui.category
 import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import android.view.*
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.jakewharton.rxbinding.view.clicks

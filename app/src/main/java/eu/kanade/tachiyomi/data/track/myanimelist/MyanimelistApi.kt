@@ -264,7 +264,7 @@ class MyanimelistApi(private val client: OkHttpClient, interceptor: MyAnimeListI
                     .put("score", track.score)
                     .put("num_read_chapters", track.last_chapter_read)
 
-            return body.toString().toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
+            return RequestBody.create("application/json; charset=utf-8".toMediaTypeOrNull(), body.toString())
         }
 
         private fun Element.searchTitle() = select("strong").text()!!

@@ -187,8 +187,8 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
         f.showDialog(router)
     }
 
-     override fun <T : Preference> findPreference(key: CharSequence): T? {
-         return preferenceScreen!!.findPreference(key)
+    override fun <T : Preference> findPreference(key: CharSequence): T? {
+        return preferenceScreen!!.findPreference(key)
     }
 
     override fun loginDialogClosed(source: LoginSource) {

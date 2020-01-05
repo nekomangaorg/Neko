@@ -3,8 +3,10 @@ package eu.kanade.tachiyomi.ui.recent_updates
 import android.text.format.DateUtils
 import android.view.View
 import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.AbstractHeaderItem
+import eu.davidea.flexibleadapter.items.IFlexible
 import eu.davidea.viewholders.FlexibleViewHolder
 import eu.kanade.tachiyomi.R
 import java.util.*

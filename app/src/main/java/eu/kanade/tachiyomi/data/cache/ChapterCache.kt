@@ -172,7 +172,7 @@ class ChapterCache(private val context: Context) {
 
     /**
      * Add image to cache.
-     * 
+     *
      * @param imageUrl url of image.
      * @param response http response from page.
      * @throws IOException image error.

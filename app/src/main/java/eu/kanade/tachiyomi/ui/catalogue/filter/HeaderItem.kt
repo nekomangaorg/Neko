@@ -4,8 +4,10 @@ import android.annotation.SuppressLint
 import com.google.android.material.R
 import android.view.View
 import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.AbstractHeaderItem
+import eu.davidea.flexibleadapter.items.IFlexible
 import eu.davidea.viewholders.FlexibleViewHolder
 import eu.kanade.tachiyomi.source.model.Filter
 import androidx.recyclerview.widget.RecyclerView

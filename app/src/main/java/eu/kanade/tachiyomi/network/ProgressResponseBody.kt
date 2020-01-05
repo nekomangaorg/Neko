@@ -25,7 +25,7 @@ class ProgressResponseBody(private val responseBody: ResponseBody, private val p
 
     private fun source(source: Source): Source {
         return object : ForwardingSource(source) {
-            internal var totalBytesRead = 0L
+            var totalBytesRead = 0L
 
             @Throws(IOException::class)
             override fun read(sink: Buffer, byteCount: Long): Long {

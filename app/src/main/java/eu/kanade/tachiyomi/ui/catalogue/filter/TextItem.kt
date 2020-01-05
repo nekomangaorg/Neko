@@ -3,8 +3,10 @@ package eu.kanade.tachiyomi.ui.catalogue.filter
 import com.google.android.material.textfield.TextInputLayout
 import android.view.View
 import android.widget.EditText
+import androidx.recyclerview.widget.RecyclerView
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.AbstractFlexibleItem
+import eu.davidea.flexibleadapter.items.IFlexible
 import eu.davidea.viewholders.FlexibleViewHolder
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.model.Filter

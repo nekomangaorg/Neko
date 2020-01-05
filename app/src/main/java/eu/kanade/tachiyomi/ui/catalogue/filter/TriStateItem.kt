@@ -4,8 +4,10 @@ import com.google.android.material.R
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import android.view.View
 import android.widget.CheckedTextView
+import androidx.recyclerview.widget.RecyclerView
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.AbstractFlexibleItem
+import eu.davidea.flexibleadapter.items.IFlexible
 import eu.davidea.viewholders.FlexibleViewHolder
 import eu.kanade.tachiyomi.source.model.Filter
 import eu.kanade.tachiyomi.util.dpToPx
