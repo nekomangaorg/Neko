@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <changelog bulletedList="true">
 	<changelogversion versionName="v0.9.5" changeDate="">
-		<changelogtext>Mass/Auto-Migration</changelogtext>
-		<changelogtext>Chapters FAB is no longer hides</changelogtext>
+		<changelogtext>Mass/Automatic Source Migration</changelogtext>
 		<changelogtext>Fix single tag searching + multi tag searching by commas (ie. "Romance, -Harem, Comedy")</changelogtext>
-		<changelogtext>Download chapters names now use scantalors names</changelogtext>
+		<changelogtext>Chapters FAB no longer hides</changelogtext>
+		<changelogtext>Downloaded chapters names now use scantalors names</changelogtext>
 		<changelogtext>Fixed reordering downloads restarting the progress</changelogtext>
 		<changelogtext>(From dev) Auto attempt a login refresh once if MAL returns http 400</changelogtext>
 		<changelogtext>(From dev) Increase default text size of the transition chapter page</changelogtext>
