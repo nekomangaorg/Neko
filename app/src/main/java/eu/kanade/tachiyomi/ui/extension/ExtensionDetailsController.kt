@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.ui.extension
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.ContextThemeWrapper
@@ -144,74 +143,19 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
                 }
             }
 
-            //val newScreen = screen.preferenceManager.createPreferenceScreen(context)
-            if (source.name == "MangaDex") {
-                val prefs = setupMangaDex("source_${source
-                    .id}", context.getSharedPreferences("source_${source
-                .id}", Context.MODE_PRIVATE))
+            val newScreen = screen.preferenceManager.createPreferenceScreen(context)
+            source.setupPreferenceScreen(newScreen)
 
-                for (pref in prefs) {
-                    pref.preferenceDataStore = dataStore
-                    pref.order = Int.MAX_VALUE // reset to default order
-                    screen.addPreference(pref)
-                }
+            // Reparent the preferences
+            while (newScreen.preferenceCount != 0) {
+                val pref = newScreen.getPreference(0)
+                pref.preferenceDataStore = dataStore
+                pref.order = Int.MAX_VALUE // reset to default order
+
+                newScreen.removePreference(pref)
+                screen.addPreference(pref)
             }
         }
-    }
-
-    private fun setupMangaDex(id: String, preferences: SharedPreferences): List<Preference> {
-        val showR18PrefTitle = "Default R18 Setting"
-        val showR18Pref = "showR18Default"
-        val showThumbnailPrefTitle = "Default thumbnail quality"
-        val showThumbnailPref = "showThumbnailDefault"
-        val serverPrefTitle = "Image server"
-        val serverPrefI = "imageServer"
-        val serverPrefEntries = arrayOf("Automatic", "NA/EU 1", "NA/EU 2", "Rest of the world")
-        val serverPrefEntriesValue = arrayOf("0", "na", "na2", "row")
-        var prefs = mutableListOf<Preference>()
-        prefs.add(ListPreference(applicationContext).apply {
-            key = "$id.$showR18PrefTitle"
-            title = showR18Pref
-
-            title = showR18PrefTitle
-            entries = arrayOf("Show No R18+", "Show All", "Show Only R18+")
-            entryValues = arrayOf("0", "1", "2")
-            summary = "%s"
-
-            setOnPreferenceChangeListener { _, newValue ->
-                val selected = newValue as String
-                val index = this.findIndexOfValue(selected)
-                preferences.edit().putInt(showR18Pref, index).commit()
-            }
-        })
-        prefs.add(ListPreference(applicationContext).apply {
-            key = "$id.$showThumbnailPrefTitle"
-            title = showThumbnailPrefTitle
-            entries = arrayOf("Show high quality", "Show low quality")
-            entryValues = arrayOf("0", "1")
-            summary = "%s"
-
-            setOnPreferenceChangeListener { _, newValue ->
-                val selected = newValue as String
-                val index = this.findIndexOfValue(selected)
-                preferences.edit().putInt(showThumbnailPref, index).commit()
-            }
-        })
-        prefs.add(ListPreference(applicationContext).apply {
-            key = "$id.$serverPrefTitle"
-            title = serverPrefTitle
-            entries = serverPrefEntries
-            entryValues = serverPrefEntriesValue
-            summary = "%s"
-
-            setOnPreferenceChangeListener { _, newValue ->
-                val selected = newValue as String
-                val index = this.findIndexOfValue(selected)
-                val entry = entryValues[index] as String
-                preferences.edit().putString(serverPrefI, entry).commit()
-            }
-        })
-        return prefs
     }
 
     private fun getPreferenceThemeContext(): Context {

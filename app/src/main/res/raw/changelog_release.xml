@@ -9,6 +9,8 @@
 		<changelogtext>(From dev) Auto attempt a login refresh once if MAL returns http 400</changelogtext>
 		<changelogtext>(From dev) Increase default text size of the transition chapter page</changelogtext>
 		<changelogtext>(From dev) Add .nomedia file in each chapter download folder</changelogtext>
+        <changelogtext>Hard coded Mangadex extension removed, please update your
+            extensions to access their preferences</changelogtext>
 	</changelogversion>
 
     <changelogversion versionName="v0.9.41" changeDate="">

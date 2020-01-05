@@ -349,7 +349,7 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    private fun setSelectedDrawerItem(itemId: Int) {
+    fun setSelectedDrawerItem(itemId: Int) {
         if (!isFinishing) {
             nav_view.setCheckedItem(itemId)
             nav_view.menu.performIdentifierAction(itemId, 0)
