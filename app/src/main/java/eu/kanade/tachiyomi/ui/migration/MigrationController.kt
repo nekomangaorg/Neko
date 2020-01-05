@@ -17,7 +17,7 @@ import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.base.controller.popControllerWithTag
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
-import eu.kanade.tachiyomi.ui.migration.manga.design.MigrationDesignController
+import eu.kanade.tachiyomi.ui.migration.manga.design.PreMigrationController
 import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationListController
 import eu.kanade.tachiyomi.util.RecyclerWindowInsetsListener
 import eu.kanade.tachiyomi.util.await
@@ -147,7 +147,7 @@ class MigrationController : NucleusController<MigrationPresenter>(),
                             MigrationProcedureConfig( sourceMangas, null)
                         )
                     }
-                    else { MigrationDesignController.create(sourceMangas) }
+                    else { PreMigrationController.create(sourceMangas) }
                     .withFadeTransaction())
             }
         }

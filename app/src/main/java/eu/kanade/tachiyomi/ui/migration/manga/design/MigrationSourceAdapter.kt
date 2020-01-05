@@ -6,10 +6,10 @@ import eu.kanade.tachiyomi.source.SourceManager
 import uy.kohesive.injekt.injectLazy
 
 class MigrationSourceAdapter(var items: List<MigrationSourceItem>,
-                             val controller: MigrationDesignController
+                             val controllerPre: PreMigrationController
 ): FlexibleAdapter<MigrationSourceItem>(
         items,
-        controller,
+        controllerPre,
         true
 ) {
     override fun onSaveInstanceState(outState: Bundle) {
