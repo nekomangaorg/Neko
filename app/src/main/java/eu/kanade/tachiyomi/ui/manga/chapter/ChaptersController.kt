@@ -440,7 +440,10 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
         presenter.deleteChapters(chapters)
     }
 
-    fun onChaptersDeleted() {
+    fun onChaptersDeleted(chapters: List<ChapterItem>) {
+        chapters.forEach {
+            adapter?.updateItem(it)
+        }
         adapter?.notifyDataSetChanged()
     }
 
