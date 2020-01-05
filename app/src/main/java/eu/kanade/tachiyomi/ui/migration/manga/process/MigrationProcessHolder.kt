@@ -156,7 +156,8 @@ class MigrationProcessHolder(
             manga_last_chapter_label.text = context.getString(R.string.latest_x,
                 DecimalFormat("#.#").format(latestChapter))
         } else {
-            manga_last_chapter_label.setText(R.string.unknown)
+            manga_last_chapter_label.text = context.getString(R.string.latest_x,
+                context.getString(R.string.unknown))
         }
     }
 
