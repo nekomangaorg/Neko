@@ -223,7 +223,7 @@ class ChaptersPresenter(
      */
     fun getNextUnreadChapter(): ChapterItem? {
         return chapters.sortedByDescending { it.source_order }.find { !it.read }
-}
+    }
 
     /**
      * Mark the selected chapter list as read/unread.
@@ -278,7 +278,7 @@ class ChaptersPresenter(
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeFirst({ view, _ ->
-                    view.onChaptersDeleted()
+                    view.onChaptersDeleted(chapters)
                 }, ChaptersController::onChaptersDeletedError)
     }
 
