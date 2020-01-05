@@ -27,6 +27,12 @@ class SettingsMainController : SettingsController() {
             onClick { navigateTo(SettingsGeneralController()) }
         }
         preference {
+            iconRes = R.drawable.ic_in_library_24dp
+            iconTint = tintColor
+            titleRes = R.string.pref_category_library
+            onClick { navigateTo(SettingsLibraryController()) }
+        }
+        preference {
             iconDrawable =
                     IconicsDrawable(context)
                             .icon(CommunityMaterial.Icon.cmd_google_chrome)

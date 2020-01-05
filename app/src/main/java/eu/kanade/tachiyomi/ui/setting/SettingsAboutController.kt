@@ -43,28 +43,15 @@ class SettingsAboutController : SettingsController() {
     override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
         titleRes = R.string.pref_category_about
 
-
-        switchPreference {
-            key = Keys.automaticUpdates
-            titleRes = R.string.pref_enable_automatic_updates
-            summaryRes = R.string.pref_enable_automatic_updates_summary
-            defaultValue = false
-
-            if (isUpdaterEnabled) {
-                onChange { newValue ->
-                    val checked = newValue as Boolean
-                    if (checked) {
-                        UpdaterJob.setupTask()
-                    } else {
-                        UpdaterJob.cancelTask()
-                    }
-                    true
-                }
-            } else {
-                isVisible = false
+        preference {
+            title = "Discord"
+            val url = "https://discord.gg/tachiyomi"
+            summary = url
+            onClick {
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                startActivity(intent)
             }
         }
-
         preference {
             title = "Github"
             val url = "https://github.com/CarlosEsco/Neko"
