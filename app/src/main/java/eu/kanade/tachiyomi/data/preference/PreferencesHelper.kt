@@ -3,7 +3,7 @@ package eu.kanade.tachiyomi.data.preference
 import android.content.Context
 import android.net.Uri
 import android.os.Environment
-import android.preference.PreferenceManager
+import androidx.preference.PreferenceManager
 import com.f2prateek.rx.preferences.Preference
 import com.f2prateek.rx.preferences.RxSharedPreferences
 import eu.kanade.tachiyomi.R
@@ -189,6 +189,14 @@ class PreferencesHelper(val context: Context) {
     fun migrateFlags() = rxPrefs.getInteger("migrate_flags", Int.MAX_VALUE)
 
     fun trustedSignatures() = rxPrefs.getStringSet("trusted_signatures", emptySet())
+
+    fun migrationSources() = rxPrefs.getString("migrate_sources", "")
+
+    fun smartMigration() = rxPrefs.getBoolean("smart_migrate", false)
+
+    fun useSourceWithMost() = rxPrefs.getBoolean("use_source_with_most", false)
+
+    fun skipPreMigration() = rxPrefs.getBoolean(Keys.skipPreMigration, false)
 
     fun upgradeFilters() {
         val filterDl = rxPrefs.getBoolean(Keys.filterDownloaded, false).getOrDefault()

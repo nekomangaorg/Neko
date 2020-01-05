@@ -11,14 +11,18 @@ import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.base.controller.popControllerWithTag
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.migration.manga.design.MigrationDesignController
+import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationListController
 import eu.kanade.tachiyomi.util.RecyclerWindowInsetsListener
 import eu.kanade.tachiyomi.util.await
 import eu.kanade.tachiyomi.util.launchUI
+import exh.ui.migration.manga.process.MigrationProcedureConfig
 import kotlinx.android.synthetic.main.migration_controller.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -137,7 +141,14 @@ class MigrationController : NucleusController<MigrationPresenter>(),
                 Schedulers.io())
             val sourceMangas = manga.asSequence().filter { it.source == item.source.id }.map { it.id!! }.toList()
             withContext(Dispatchers.Main) {
-                router.pushController(MigrationDesignController.create(sourceMangas).withFadeTransaction())
+                router.pushController(
+                    if (Injekt.get<PreferencesHelper>().skipPreMigration().getOrDefault()) {
+                        MigrationListController.create(
+                            MigrationProcedureConfig( sourceMangas, null)
+                        )
+                    }
+                    else { MigrationDesignController.create(sourceMangas) }
+                    .withFadeTransaction())
             }
         }
     }

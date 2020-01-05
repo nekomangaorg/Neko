@@ -200,6 +200,16 @@ class SettingsGeneralController : SettingsController() {
             }
         }
 
+        if (preferences.skipPreMigration().getOrDefault() || preferences.migrationSources()
+                .getOrDefault().isNotEmpty()) {
+            switchPreference {
+                key = Keys.skipPreMigration
+                titleRes = R.string.pref_skip_pre_migration
+                summaryRes = R.string.pref_skip_pre_migration_summary
+                defaultValue = false
+            }
+        }
+
         switchPreference {
             key = Keys.removeArticles
             titleRes = R.string.pref_remove_articles

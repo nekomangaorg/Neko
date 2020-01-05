@@ -8,7 +8,7 @@ import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.getRound
 import kotlinx.android.synthetic.main.migration_source_item.*
 
-class MigrationSourceHolder(view: View, val adapter: FlexibleAdapter<MigrationSourceItem>):
+class MigrationSourceHolder(view: View, val adapter: MigrationSourceAdapter):
         BaseFlexibleViewHolder(view, adapter) {
     init {
         setDragHandleView(reorder)
@@ -32,6 +32,16 @@ class MigrationSourceHolder(view: View, val adapter: FlexibleAdapter<MigrationSo
             image.alpha = DISABLED_ALPHA
             title.paintFlags = title.paintFlags or STRIKE_THRU_TEXT_FLAG
         }
+    }
+
+    /**
+     * Called when an item is released.
+     *
+     * @param position The position of the released item.
+     */
+    override fun onItemReleased(position: Int) {
+        super.onItemReleased(position)
+        adapter.updateItems()
     }
 
     companion object {

@@ -123,7 +123,7 @@ class MigrationProcedureController(bundle: Bundle? = null) : BaseController(bund
     }
 
     suspend fun runMigrations(mangas: List<MigratingManga>) {
-        val sources = config?.targetSourceIds?.mapNotNull { sourceManager.get(it) as?
+      /*  val sources = config?.targetSourceIds?.mapNotNull { sourceManager.get(it) as?
             CatalogueSource } ?: return
 
         for(manga in mangas) {
@@ -231,7 +231,7 @@ class MigrationProcedureController(bundle: Bundle? = null) : BaseController(bund
 
                 manga.searchResult.initialize(result?.id)
             }
-        }
+        }*/
     }
 
     override fun onDestroy() {

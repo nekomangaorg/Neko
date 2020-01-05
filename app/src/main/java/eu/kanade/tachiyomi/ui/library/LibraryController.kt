@@ -46,6 +46,7 @@ import eu.kanade.tachiyomi.ui.migration.MigrationController
 import eu.kanade.tachiyomi.ui.migration.MigrationInterface
 import eu.kanade.tachiyomi.ui.migration.SearchController
 import eu.kanade.tachiyomi.ui.migration.manga.design.MigrationDesignController
+import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationListController
 import eu.kanade.tachiyomi.util.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.inflate
 import eu.kanade.tachiyomi.util.marginBottom
@@ -53,6 +54,7 @@ import eu.kanade.tachiyomi.util.marginTop
 import eu.kanade.tachiyomi.util.snack
 import eu.kanade.tachiyomi.util.toast
 import eu.kanade.tachiyomi.util.updatePaddingRelative
+import exh.ui.migration.manga.process.MigrationProcedureConfig
 import kotlinx.android.synthetic.main.library_controller.*
 import kotlinx.android.synthetic.main.main_activity.*
 import rx.Subscription
@@ -470,11 +472,18 @@ class LibraryController(
             }
             R.id.action_migrate -> {
                 router.pushController(
-                    MigrationDesignController.create(
-                        selectedMangas.mapNotNull { it.id }
-                    ).withFadeTransaction())
+                    if (preferences.skipPreMigration().getOrDefault()) {
+                        MigrationListController.create(
+                            MigrationProcedureConfig(
+                                selectedMangas.mapNotNull { it.id },null)
+                        )
+                    }
+                    else {
+                        MigrationDesignController.create( selectedMangas.mapNotNull { it.id } )
+                    }
+                   .withFadeTransaction())
                 destroyActionModeIfNeeded()
-            } //startMangaMigration()
+            }
             R.id.action_hide_title -> {
                 val showAll = (selectedMangas.filter { (it as? LibraryManga)?.hide_title == true }
                     ).size == selectedMangas.size
@@ -494,18 +503,7 @@ class LibraryController(
         migratingMangas.remove(nextManga)
         return nextManga
     }
-
-    private fun startMangaMigration() {
-        migratingMangas = selectedMangas.distinctBy { it.id }.toMutableSet()
-        destroyActionModeIfNeeded()
-        val manga = migratingMangas.firstOrNull() ?: return
-        val searchController = SearchController(manga)
-        searchController.totalProgress = migratingMangas.size
-        searchController.targetController = this
-        router.pushController(searchController.withFadeTransaction())
-        migratingMangas.remove(manga)
-    }
-
+    
     override fun onDestroyActionMode(mode: ActionMode?) {
         // Clear all the manga selections and notify child views.
         selectedMangas.clear()

@@ -6,7 +6,6 @@ import android.text.Html
 import com.afollestad.materialdialogs.MaterialDialog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
@@ -17,8 +16,6 @@ class MetadataFetchDialog {
     val db: DatabaseHelper by injectLazy()
 
     val sourceManager: SourceManager by injectLazy()
-
-    val preferenceHelper: PreferencesHelper by injectLazy()
 
     fun show(context: Activity) {
         //Too lazy to actually deal with orientation changes

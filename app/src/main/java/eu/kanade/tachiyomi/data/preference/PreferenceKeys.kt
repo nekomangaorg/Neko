@@ -127,6 +127,8 @@ object PreferenceKeys {
 
     const val removeArticles = "remove_articles"
 
+    const val skipPreMigration = "skip_pre_migration"
+
     @Deprecated("Use the preferences of the source")
     fun sourceUsername(sourceId: Long) = "pref_source_username_$sourceId"
 

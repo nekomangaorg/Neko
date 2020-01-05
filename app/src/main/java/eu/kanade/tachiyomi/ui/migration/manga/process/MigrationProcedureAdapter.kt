@@ -100,7 +100,7 @@ class MigrationProcedureAdapter(val controller: MigrationProcedureController,
         val config = controller.config ?: return
         //db.inTransaction {
             // Update chapters read
-            if (MigrationFlags.hasChapters(controller.config.migrationFlags)) {
+           /* if (MigrationFlags.hasChapters(controller.config.migrationFlags)) {
                 val prevMangaChapters = db.getChapters(prevManga).executeAsBlocking()
                 val maxChapterRead = prevMangaChapters.filter { it.read }
                         .maxBy { it.chapter_number }?.chapter_number
@@ -139,7 +139,7 @@ class MigrationProcedureAdapter(val controller: MigrationProcedureController,
 
             // SearchPresenter#networkToLocalManga may have updated the manga title, so ensure db gets updated title
             db.updateMangaTitle(manga).executeAsBlocking()
-        //}
+        //}*/
     }
 
     fun View.setupView(tag: ViewTag, migratingManga: MigratingManga) {
