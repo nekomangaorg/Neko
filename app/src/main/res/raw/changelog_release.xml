@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <changelog bulletedList="true">
+	<changelogversion versionName="v0.9.5" changeDate="">
+		<changelogtext>Mass/Auto-Migration</changelogtext>
+		<changelogtext>Chapters FAB is no longer hides</changelogtext>
+		<changelogtext>Fix single tag searching + multi tag searching by commas (ie. "Romance, -Harem, Comedy")</changelogtext>
+		<changelogtext>Download chapters names now use scantalors names</changelogtext>
+		<changelogtext>Fixed reordering downloads restarting the progress</changelogtext>
+		<changelogtext>(From dev) Auto attempt a login refresh once if MAL returns http 400</changelogtext>
+		<changelogtext>(From dev) Increase default text size of the transition chapter page</changelogtext>
+		<changelogtext>(From dev) Add .nomedia file in each chapter download folder</changelogtext>
+	</changelogversion>
+
     <changelogversion versionName="v0.9.41" changeDate="">
         <changelogtext>Fixed status bar not being transparent for dark themes on Android Pie and
             under</changelogtext>
@@ -64,7 +75,7 @@
             accidents for that</changelogtext>
         <changelogtext>Option to hide manga titles in grid view</changelogtext>
         <changelogtext>Filter out your library by searching for tags (ex. "Comedy" or "Slice of
-            Life") or exclude mangas by a tag (ex. "-Shounen" or "-Romance"). Tapping on these
+            Life") or exclude manga by a tag (ex. "-Shounen" or "-Romance"). Tapping on these
             tags also performs a local search</changelogtext>
         <changelogtext>Android X Support</changelogtext>
     </changelogversion>
