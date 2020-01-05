@@ -45,12 +45,10 @@ class MigrationProcessAdapter(
         if (allMangasDone()) menuItemListener.enableButtons()
     }
 
-    fun allMangasDone() = (items.all { it.manga.searchResult.initialized || !it.manga.migrationJob
-        .isActive } && items.any { it.manga
-        .searchResult.content != null })
+    fun allMangasDone() = (items.all { it.manga.migrationStatus != MigrationStatus
+        .RUNNUNG } && items.any {  it.manga.migrationStatus == MigrationStatus.MANGA_FOUND })
 
-    fun mangasSkipped() = (items.count { (!it.manga.searchResult.initialized || it.manga
-        .searchResult.content == null) })
+    fun mangasSkipped() = (items.count { it.manga.migrationStatus == MigrationStatus.MANGA_NOT_FOUND })
 
     suspend fun performMigrations(copy: Boolean) {
         withContext(Dispatchers.IO) {

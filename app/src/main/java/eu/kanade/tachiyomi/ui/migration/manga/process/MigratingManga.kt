@@ -21,6 +21,8 @@ class MigratingManga(private val db: DatabaseHelper,
 
     val migrationJob = parentContext + SupervisorJob() + Dispatchers.Default
 
+    var migrationStatus:Int = MigrationStatus.RUNNUNG
+
     @Volatile
     private var manga: Manga? = null
     suspend fun manga(): Manga? {
@@ -35,5 +37,13 @@ class MigratingManga(private val db: DatabaseHelper,
     fun toModal(): MigrationProcessItem {
         // Create the model object.
         return MigrationProcessItem(this)
+    }
+}
+
+class MigrationStatus {
+    companion object {
+        val RUNNUNG = 0
+        val MANGA_FOUND = 1
+        val MANGA_NOT_FOUND = 2
     }
 }

@@ -10,7 +10,6 @@ import eu.kanade.tachiyomi.R
 class MigrationProcessItem(val manga: MigratingManga) :
     AbstractFlexibleItem<MigrationProcessHolder>() {
 
-    var holder:MigrationProcessHolder? = null
     override fun getLayoutRes(): Int {
         return R.layout.migration_process_item
     }
@@ -23,8 +22,6 @@ class MigrationProcessItem(val manga: MigratingManga) :
         holder: MigrationProcessHolder,
         position: Int,
         payloads: MutableList<Any?>?) {
-
-        this.holder = holder
         holder.bind(this)
     }
 
@@ -34,10 +31,6 @@ class MigrationProcessItem(val manga: MigratingManga) :
             return manga.mangaId == other.manga.mangaId
         }
         return false
-    }
-
-    fun showSpinner() {
-        holder?.showSpinner()
     }
 
     override fun hashCode(): Int {
