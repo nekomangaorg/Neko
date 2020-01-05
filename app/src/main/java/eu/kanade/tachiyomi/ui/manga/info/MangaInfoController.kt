@@ -45,14 +45,12 @@ import eu.kanade.tachiyomi.ui.library.ChangeMangaCategoriesDialog
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaController
-import eu.kanade.tachiyomi.util.openInBrowser
-import eu.kanade.tachiyomi.util.snack
-import eu.kanade.tachiyomi.util.toast
-import eu.kanade.tachiyomi.util.truncateCenter
+import eu.kanade.tachiyomi.util.*
 import jp.wasabeef.glide.transformations.CropSquareTransformation
 import jp.wasabeef.glide.transformations.MaskTransformation
 import kotlinx.android.synthetic.main.manga_info_controller.*
 import uy.kohesive.injekt.injectLazy
+import java.io.File
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.*
@@ -147,7 +145,7 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         when (item.itemId) {
             R.id.action_open_in_browser -> openInBrowser()
             R.id.action_open_in_web_view -> openInWebView()
-            R.id.action_share -> shareManga()
+            R.id.action_share -> prepareToShareManga()
             R.id.action_add_to_home_screen -> addToHomeScreen()
             else -> return super.onOptionsItemSelected(item)
         }
@@ -205,7 +203,7 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
 
         // If manga lang flag is known
         manga_lang_flag.visibility = View.VISIBLE
-        when (manga.lang_flag?.toLowerCase()) {
+        when (manga.lang_flag?.toLowerCase(Locale.US)) {
             "cn" -> manga_lang_flag.setImageResource(R.drawable.ic_flag_china);
             "kr" -> manga_lang_flag.setImageResource(R.drawable.ic_flag_korea);
             "jp" -> manga_lang_flag.setImageResource(R.drawable.ic_flag_japan);
@@ -340,15 +338,40 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
     /**
      * Called to run Intent with [Intent.ACTION_SEND], which show share dialog.
      */
-    private fun shareManga() {
+    private fun prepareToShareManga() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && manga_cover.drawable != null)
+            GlideApp.with(activity!!).asBitmap().load(presenter.manga).into(object :
+                    CustomTarget<Bitmap>() {
+                override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+                    presenter.shareManga(resource)
+                }
+                override fun onLoadCleared(placeholder: Drawable?) {}
+
+                override fun onLoadFailed(errorDrawable: Drawable?) {
+                    shareManga()
+                }
+            })
+        else shareManga()
+    }
+
+    /**
+     * Called to run Intent with [Intent.ACTION_SEND], which show share dialog.
+     */
+    fun shareManga(cover: File? = null) {
         val context = view?.context ?: return
 
         val source = presenter.source as? HttpSource ?: return
+        val stream = cover?.getUriCompat(context)
         try {
             val url = source.mangaDetailsRequest(presenter.manga).url.toString()
             val intent = Intent(Intent.ACTION_SEND).apply {
-                type = "text/plain"
+                type = "text/*"
                 putExtra(Intent.EXTRA_TEXT, url)
+                putExtra(Intent.EXTRA_TITLE, presenter.manga.title)
+                flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                if (stream != null) {
+                    clipData = ClipData.newRawUri(null, stream)
+                }
             }
             startActivity(Intent.createChooser(intent, context.getString(R.string.action_share)))
         } catch (e: Exception) {
