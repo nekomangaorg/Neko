@@ -53,6 +53,8 @@ object PreferenceKeys {
 
     const val marginRatioWebtoon = "margin_ratio_webtoon"
 
+    const val marginBetweenPagesWebtoon = "margin_between_pages_webtoon"
+
     const val portraitColumns = "pref_library_columns_portrait_key"
 
     const val landscapeColumns = "pref_library_columns_landscape_key"

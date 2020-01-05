@@ -240,6 +240,15 @@
         android:textColor="?android:attr/textColorSecondary"
         app:layout_constraintTop_toBottomOf="@id/webtoon_prefs" />
 
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/margin_between_webtoon"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/pref_reader_margin_between"
+        android:textColor="?android:attr/textColorSecondary"
+        app:layout_constraintTop_toBottomOf="@id/crop_borders_webtoon" />
+
     <TextView
         android:id="@+id/margin_ratio_text"
         android:layout_width="0dp"
@@ -249,7 +258,7 @@
         app:layout_constraintRight_toLeftOf="@id/verticalcenter"
         app:layout_constraintBaseline_toBaselineOf="@id/margin_ratio_webtoon"/>
 
-    <android.support.v7.widget.AppCompatSpinner
+    <androidx.appcompat.widget.AppCompatSpinner
         android:id="@+id/margin_ratio_webtoon"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -257,7 +266,7 @@
         android:entries="@array/webtoon_margin_ratio"
         app:layout_constraintLeft_toRightOf="@id/verticalcenter"
         app:layout_constraintRight_toRightOf="@id/spinner_end"
-        app:layout_constraintTop_toBottomOf="@id/crop_borders_webtoon"/>
+        app:layout_constraintTop_toBottomOf="@id/margin_between_webtoon"/>
 
     <!-- Groups of preferences -->
 

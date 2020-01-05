@@ -182,6 +182,8 @@
     <string name="pref_read_with_long_tap">Long tap dialog</string>
     <string name="pref_reader_theme">Background color</string>
     <string name="pref_reader_margin">Margin ratio</string>
+    <string name="pref_reader_margin_between">Margin Between Pages</string>
+
     <string name="white_background">White</string>
     <string name="black_background">Black</string>
     <string name="pref_viewer_type">Default viewer</string>

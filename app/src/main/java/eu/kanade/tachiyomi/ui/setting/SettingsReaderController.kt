@@ -118,6 +118,12 @@ class SettingsReaderController : SettingsController() {
                 defaultValue = false
             }
 
+            switchPreference {
+                key = Keys.marginBetweenPagesWebtoon
+                titleRes = R.string.pref_reader_margin_between
+                defaultValue = false
+            }
+
             floatListPreference {
                 key = Keys.marginRatioWebtoon
                 titleRes = R.string.pref_reader_margin

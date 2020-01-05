@@ -37,6 +37,9 @@ class WebtoonConfig(preferences: PreferencesHelper = Injekt.get()) {
     var marginRatio = 0f
         private set
 
+    var marginBetweenPagesWebtoon = false
+        private set
+
     init {
         preferences.readWithTapping()
             .register({ tappingEnabled = it })
@@ -58,6 +61,9 @@ class WebtoonConfig(preferences: PreferencesHelper = Injekt.get()) {
 
         preferences.marginRatioWebtoon()
             .register({ marginRatio = it }, { imagePropertyChangedListener?.invoke() })
+
+        preferences.marginBetweenPagesWebtoon()
+                .register({ marginBetweenPagesWebtoon = it }, { imagePropertyChangedListener?.invoke() })
     }
 
     fun unsubscribe() {

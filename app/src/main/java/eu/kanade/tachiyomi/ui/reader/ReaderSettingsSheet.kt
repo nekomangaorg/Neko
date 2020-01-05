@@ -1,11 +1,12 @@
 package eu.kanade.tachiyomi.ui.reader
 
 import android.os.Bundle
-import com.google.android.material.bottomsheet.BottomSheetDialog
-import androidx.core.widget.NestedScrollView
 import android.widget.CompoundButton
 import android.widget.Spinner
+import androidx.annotation.ArrayRes
+import androidx.core.widget.NestedScrollView
 import com.f2prateek.rx.preferences.Preference
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
@@ -82,7 +83,9 @@ class ReaderSettingsSheet(private val activity: ReaderActivity) : BottomSheetDia
     private fun initWebtoonPreferences() {
         webtoon_prefs_group.visible()
         crop_borders_webtoon.bindToPreference(preferences.cropBordersWebtoon())
+        margin_between_webtoon.bindToPreference(preferences.marginBetweenPagesWebtoon())
         margin_ratio_webtoon.bindToFloatPreference(preferences.marginRatioWebtoon(), R.array.webtoon_margin_ratio_values)
+
     }
 
     /**
