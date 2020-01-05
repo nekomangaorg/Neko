@@ -119,7 +119,6 @@ object PreferenceKeys {
 
     const val lastUnlock = "last_unlock"
 
-    @Deprecated("Use the preferences of the source")
     const val showR18 = "show_r18"
 
     const val imageServer = "image_server"

@@ -1,8 +1,8 @@
 package eu.kanade.tachiyomi.ui.setting
 
 import androidx.preference.PreferenceScreen
-import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.IconicsDrawable
+import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.utils.colorInt
 import com.mikepenz.iconics.utils.sizeDp
 import eu.kanade.tachiyomi.R
@@ -27,8 +27,9 @@ class SettingsMainController : SettingsController() {
             onClick { navigateTo(SettingsGeneralController()) }
         }
         preference {
-            iconRes = R.drawable.ic_in_library_24dp
-            iconTint = tintColor
+        iconDrawable= IconicsDrawable(context).icon(CommunityMaterial.Icon2.cmd_library)
+                .colorInt(tintColor)
+                .sizeDp(size)
             titleRes = R.string.pref_category_library
             onClick { navigateTo(SettingsLibraryController()) }
         }
