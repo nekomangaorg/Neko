@@ -18,8 +18,8 @@ import eu.kanade.tachiyomi.util.invisible
 import eu.kanade.tachiyomi.util.launchUI
 import eu.kanade.tachiyomi.util.setVectorCompat
 import eu.kanade.tachiyomi.util.visible
-import kotlinx.android.synthetic.main.migration_new_manga_card.view.*
-import kotlinx.android.synthetic.main.migration_new_process_item.*
+import kotlinx.android.synthetic.main.migration_manga_card.view.*
+import kotlinx.android.synthetic.main.migration_process_item.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.injectLazy
@@ -123,6 +123,7 @@ class MigrationProcessHolder(
         manga_chapters.text = ""
         manga_chapters.gone()
         manga_last_chapter_label.text = ""
+        migration_manga_card_to.setOnClickListener(null)
     }
 
     private fun View.attachManga(manga: Manga, source: Source) {

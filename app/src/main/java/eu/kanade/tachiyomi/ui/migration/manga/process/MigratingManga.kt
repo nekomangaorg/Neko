@@ -1,10 +1,9 @@
-package exh.ui.migration.manga.process
+package eu.kanade.tachiyomi.ui.migration.manga.process
 
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationProcessItem
 import eu.kanade.tachiyomi.util.DeferredField
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob

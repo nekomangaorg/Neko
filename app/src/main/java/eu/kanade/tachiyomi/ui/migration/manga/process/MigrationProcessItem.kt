@@ -6,14 +6,13 @@ import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.AbstractFlexibleItem
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
-import exh.ui.migration.manga.process.MigratingManga
 
 class MigrationProcessItem(val manga: MigratingManga) :
     AbstractFlexibleItem<MigrationProcessHolder>() {
 
     var holder:MigrationProcessHolder? = null
     override fun getLayoutRes(): Int {
-        return R.layout.migration_new_process_item
+        return R.layout.migration_process_item
     }
 
     override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): MigrationProcessHolder {

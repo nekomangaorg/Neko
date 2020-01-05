@@ -6,7 +6,6 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.CatalogueSource
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.ui.smartsearch.SmartSearchPresenter
 import eu.kanade.tachiyomi.util.await
 import info.debatty.java.stringsimilarity.NormalizedLevenshtein
 import kotlinx.coroutines.CoroutineScope
@@ -44,7 +43,7 @@ class SmartSearchEngine(parentContext: CoroutineContext,
                     searchResults.mangas.map {
                         val cleanedMangaTitle = cleanSmartSearchTitle(it.title)
                         val normalizedDistance = normalizedLevenshtein.similarity(cleanedTitle, cleanedMangaTitle)
-                        SmartSearchPresenter.SearchEntry(it, normalizedDistance)
+                        SearchEntry(it, normalizedDistance)
                     }.filter { (_, normalizedDistance) ->
                         normalizedDistance >= MIN_SMART_ELIGIBLE_THRESHOLD
                     }
@@ -64,7 +63,7 @@ class SmartSearchEngine(parentContext: CoroutineContext,
 
             searchResults.mangas.map {
                 val normalizedDistance = normalizedLevenshtein.similarity(title, it.title)
-                SmartSearchPresenter.SearchEntry(it, normalizedDistance)
+                SearchEntry(it, normalizedDistance)
             }.filter { (_, normalizedDistance) ->
                 normalizedDistance >= MIN_NORMAL_ELIGIBLE_THRESHOLD
             }
@@ -190,3 +189,5 @@ class SmartSearchEngine(parentContext: CoroutineContext,
         private val consecutiveSpacesRegex = Regex(" +")
     }
 }
+
+data class SearchEntry(val manga: SManga, val dist: Double)

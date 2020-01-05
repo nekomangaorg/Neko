@@ -44,9 +44,9 @@ import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.ui.migration.MigrationController
 import eu.kanade.tachiyomi.ui.migration.MigrationInterface
-import eu.kanade.tachiyomi.ui.migration.SearchController
 import eu.kanade.tachiyomi.ui.migration.manga.design.MigrationDesignController
 import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationListController
+import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationProcedureConfig
 import eu.kanade.tachiyomi.util.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.inflate
 import eu.kanade.tachiyomi.util.marginBottom
@@ -54,7 +54,6 @@ import eu.kanade.tachiyomi.util.marginTop
 import eu.kanade.tachiyomi.util.snack
 import eu.kanade.tachiyomi.util.toast
 import eu.kanade.tachiyomi.util.updatePaddingRelative
-import exh.ui.migration.manga.process.MigrationProcedureConfig
 import kotlinx.android.synthetic.main.library_controller.*
 import kotlinx.android.synthetic.main.main_activity.*
 import rx.Subscription
@@ -503,7 +502,7 @@ class LibraryController(
         migratingMangas.remove(nextManga)
         return nextManga
     }
-    
+
     override fun onDestroyActionMode(mode: ActionMode?) {
         // Clear all the manga selections and notify child views.
         selectedMangas.clear()

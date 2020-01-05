@@ -22,7 +22,7 @@ import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationListController
 import eu.kanade.tachiyomi.util.RecyclerWindowInsetsListener
 import eu.kanade.tachiyomi.util.await
 import eu.kanade.tachiyomi.util.launchUI
-import exh.ui.migration.manga.process.MigrationProcedureConfig
+import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationProcedureConfig
 import kotlinx.android.synthetic.main.migration_controller.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

@@ -31,8 +31,6 @@ import eu.kanade.tachiyomi.util.await
 import eu.kanade.tachiyomi.util.launchUI
 import eu.kanade.tachiyomi.util.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.toast
-import exh.ui.migration.manga.process.MigratingManga
-import exh.ui.migration.manga.process.MigrationProcedureConfig
 import kotlinx.android.synthetic.main.chapters_controller.*
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
