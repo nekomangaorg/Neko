@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.RecyclerView
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewGroup
 import android.widget.FrameLayout
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.SelectableAdapter
@@ -19,6 +20,7 @@ import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.category.CategoryAdapter
 import eu.kanade.tachiyomi.util.*
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
+import kotlinx.android.synthetic.main.chapters_controller.*
 import kotlinx.android.synthetic.main.library_category.view.*
 import rx.subscriptions.CompositeSubscription
 import uy.kohesive.injekt.injectLazy
@@ -91,13 +93,17 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
         recycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recycler: RecyclerView, newState: Int) {
                 // Disable swipe refresh when view is not at the top
-                val firstPos = (recycler.layoutManager as androidx.recyclerview.widget.LinearLayoutManager)
+                val firstPos = (recycler.layoutManager as LinearLayoutManager)
                         .findFirstCompletelyVisibleItemPosition()
                 swipe_refresh.isEnabled = firstPos <= 0
             }
         })
         recycler.doOnApplyWindowInsets { v, insets, padding ->
             v.updatePaddingRelative(bottom = padding.bottom + insets.systemWindowInsetBottom)
+
+            fast_scroller?.updateLayoutParams<ViewGroup.MarginLayoutParams>  {
+                bottomMargin = insets.systemWindowInsetBottom
+            }
         }
 
         // Double the distance required to trigger sync

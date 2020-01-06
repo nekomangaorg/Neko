@@ -193,8 +193,6 @@ class PreferencesHelper(val context: Context) {
 
     fun migrationSources() = rxPrefs.getString("migrate_sources", "")
 
-    fun smartMigration() = rxPrefs.getBoolean("smart_migrate", false)
-
     fun useSourceWithMost() = rxPrefs.getBoolean("use_source_with_most", false)
 
     fun skipPreMigration() = rxPrefs.getBoolean(Keys.skipPreMigration, false)

@@ -24,7 +24,6 @@ import kotlinx.android.synthetic.main.migration_bottom_sheet.extra_search_param_
 import kotlinx.android.synthetic.main.migration_bottom_sheet.mig_categories
 import kotlinx.android.synthetic.main.migration_bottom_sheet.mig_chapters
 import kotlinx.android.synthetic.main.migration_bottom_sheet.mig_tracking
-import kotlinx.android.synthetic.main.migration_bottom_sheet.use_smart_search
 import uy.kohesive.injekt.injectLazy
 
 class MigrationBottomSheetDialog(activity: Activity, theme: Int, private val listener:
@@ -59,7 +58,7 @@ StartMigrationListener) :
         fab.setOnClickListener {
             preferences.skipPreMigration().set(skip_step.isChecked)
             listener.startMigration(
-                if (use_smart_search.isChecked && extra_search_param_text.text.isNotBlank())
+                if (extra_search_param.isChecked && extra_search_param_text.text.isNotBlank())
                     extra_search_param_text.text.toString() else null)
             dismiss()
         }
@@ -79,7 +78,6 @@ StartMigrationListener) :
         mig_categories.setOnCheckedChangeListener { _, _ -> setFlags() }
         mig_tracking.setOnCheckedChangeListener { _, _ -> setFlags() }
 
-        use_smart_search.bindToPreference(preferences.smartMigration())
         extra_search_param_text.gone()
         extra_search_param.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {

@@ -25,7 +25,7 @@ class SmartSearchEngine(parentContext: CoroutineContext,
 
     private val normalizedLevenshtein = NormalizedLevenshtein()
 
-    suspend fun smartSearch(source: CatalogueSource, title: String): SManga? {
+    /*suspend fun smartSearch(source: CatalogueSource, title: String): SManga? {
         val cleanedTitle = cleanSmartSearchTitle(title)
 
         val queries = getSmartSearchQueries(cleanedTitle)
@@ -52,7 +52,7 @@ class SmartSearchEngine(parentContext: CoroutineContext,
         }
 
         return eligibleManga.maxBy { it.dist }?.manga
-    }
+    }*/
 
     suspend fun normalSearch(source: CatalogueSource, title: String): SManga? {
         val eligibleManga = supervisorScope {
@@ -74,52 +74,6 @@ class SmartSearchEngine(parentContext: CoroutineContext,
 
         return eligibleManga.maxBy { it.dist }?.manga
     }
-
-    private fun getSmartSearchQueries(cleanedTitle: String): List<String> {
-        val splitCleanedTitle = cleanedTitle.split(" ")
-        val splitSortedByLargest = splitCleanedTitle.sortedByDescending { it.length }
-
-        if(splitCleanedTitle.isEmpty()) {
-            return emptyList()
-        }
-
-        // Search cleaned title
-        // Search two largest words
-        // Search largest word
-        // Search first two words
-        // Search first word
-
-        val searchQueries = listOf(
-            listOf(cleanedTitle),
-            splitSortedByLargest.take(2),
-            splitSortedByLargest.take(1),
-            splitCleanedTitle.take(2),
-            splitCleanedTitle.take(1)
-        )
-
-        return searchQueries.map {
-            it.joinToString(" ").trim()
-        }.distinct()
-    }
-
-    private fun cleanSmartSearchTitle(title: String): String {
-        val preTitle = title.toLowerCase()
-
-        // Remove text in brackets
-        var cleanedTitle = removeTextInBrackets(preTitle, true)
-        if(cleanedTitle.length <= 5) { // Title is suspiciously short, try parsing it backwards
-            cleanedTitle = removeTextInBrackets(preTitle, false)
-        }
-
-        // Strip non-special characters
-        cleanedTitle = cleanedTitle.replace(titleRegex, " ")
-
-        // Strip splitters and consecutive spaces
-        cleanedTitle = cleanedTitle.trim().replace(" - ", " ").replace(consecutiveSpacesRegex, " ").trim()
-
-        return cleanedTitle
-    }
-
     private fun removeTextInBrackets(text: String, readForward: Boolean): String {
         val bracketPairs = listOf(
             '(' to ')',

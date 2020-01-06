@@ -122,7 +122,6 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
 
     suspend fun runMigrations(mangas: List<MigratingManga>) {
         val useSourceWithMost = preferences.useSourceWithMost().getOrDefault()
-        val useSmartSearch = preferences.smartMigration().getOrDefault()
 
         val sources = preferences.migrationSources().getOrDefault().split("/").mapNotNull {
             val value = it.toLongOrNull() ?: return
@@ -152,11 +151,10 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
                                 async {
                                     sourceSemaphore.withPermit {
                                         try {
-                                            val searchResult = if (useSmartSearch) {
+                                           /* val searchResult = if (useSmartSearch) {
                                                 smartSearchEngine.smartSearch(source, mangaObj.title)
-                                            } else {
-                                                smartSearchEngine.normalSearch(source, mangaObj.title)
-                                            }
+                                            } else {*/
+                                            val searchResult = smartSearchEngine.normalSearch(source, mangaObj.title)
 
                                             if(searchResult != null) {
                                                 val localManga = smartSearchEngine.networkToLocalManga(searchResult, source.id)
@@ -185,11 +183,8 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
                         } else {
                             validSources.forEachIndexed { index, source ->
                                 val searchResult = try {
-                                    val searchResult = if (useSmartSearch) {
-                                        smartSearchEngine.smartSearch(source, mangaObj.title)
-                                    } else {
-                                        smartSearchEngine.normalSearch(source, mangaObj.title)
-                                    }
+                                    val searchResult =  smartSearchEngine.normalSearch(source,
+                                        mangaObj.title)
 
                                     if (searchResult != null) {
                                         val localManga = smartSearchEngine.networkToLocalManga(searchResult, source.id)
