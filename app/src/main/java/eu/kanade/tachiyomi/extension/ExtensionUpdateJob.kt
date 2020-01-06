@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.extension
 
 
+import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.evernote.android.job.Job
@@ -11,7 +12,6 @@ import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.util.notification
 import rx.Observable
-import rx.Subscription
 import rx.schedulers.Schedulers
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
@@ -20,16 +20,12 @@ import java.util.concurrent.TimeUnit
 
 class ExtensionUpdateJob : Job() {
 
-    var subscription:Subscription? = null
-
     override fun onRunJob(params: Params): Result {
         val extensionManager: ExtensionManager = Injekt.get()
         extensionManager.findAvailableExtensions()
 
-        subscription?.unsubscribe()
-
         // Update favorite manga. Destroy service when completed or in case of an error.
-        subscription = Observable.defer {
+        Observable.defer {
             extensionManager.getInstalledExtensionsObservable().map { list ->
                 val pendingUpdates = list.filter { it.hasUpdate }
                 if (pendingUpdates.isNotEmpty()) {
@@ -48,6 +44,7 @@ class ExtensionUpdateJob : Job() {
                                     )
                                 } else names.joinToString(", ")
                                 setContentText(extNames)
+                                setStyle(NotificationCompat.BigTextStyle().bigText(extNames))
                                 setSmallIcon(R.drawable.ic_extension_update)
                                 color = ContextCompat.getColor(context, R.color.colorAccentLight)
                                 setContentIntent(
@@ -59,7 +56,6 @@ class ExtensionUpdateJob : Job() {
                             })
                     }
                 }
-                subscription?.unsubscribe()
                 Result.SUCCESS
             }
         }.subscribeOn(Schedulers.io())
