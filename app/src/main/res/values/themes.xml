@@ -138,7 +138,7 @@
     <!-- Launch Screen -->
     <!--===============-->
     <style name="Theme.BrandedLaunch">
-        <item name="android:windowBackground">@drawable/branded_logo</item>
+        <item name="android:windowBackground">@mipmap/ic_launcher</item>
     </style>
 
 

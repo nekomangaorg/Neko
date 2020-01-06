@@ -18,7 +18,7 @@
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
             android:theme="?attr/actionBarTheme"
-            app:navigationIcon="@drawable/baseline_close_white_24"/>
+            app:navigationIcon="@drawable/ic_close_white_24dp"/>
 
         <WebView
             android:id="@+id/webview"

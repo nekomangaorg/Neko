@@ -51,7 +51,7 @@ class MigrationProcessHolder(
 
             migration_menu.setVectorCompat(R.drawable.ic_more_vert_black_24dp, view.context
                  .getResourceColor(R.attr.icon_color))
-            skip_manga.setVectorCompat(R.drawable.baseline_close_24, view.context.getResourceColor(R
+            skip_manga.setVectorCompat(R.drawable.ic_close_white_24dp, view.context.getResourceColor(R
                 .attr.icon_color))
             migration_menu.invisible()
             skip_manga.visible()

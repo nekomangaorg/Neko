@@ -455,7 +455,7 @@ class LibraryUpdateService(
             val chapters = it.second
             val chapterNames = chapters.map { chapter -> chapter.name }.toSet()
             notifications.add(Pair(notification(Notifications.CHANNEL_NEW_CHAPTERS) {
-                setSmallIcon(R.drawable.ic_tachiyomi_icon)
+                setSmallIcon(R.drawable.ic_tachi)
                 try {
                     val icon = GlideApp.with(this@LibraryUpdateService)
                         .asBitmap().load(manga).dontTransform().centerCrop().circleCrop()
@@ -494,7 +494,7 @@ class LibraryUpdateService(
             }
 
             notify(Notifications.ID_NEW_CHAPTERS, notification(Notifications.CHANNEL_NEW_CHAPTERS) {
-                setSmallIcon(R.drawable.ic_tachiyomi_icon)
+                setSmallIcon(R.drawable.ic_tachi)
                 setLargeIcon(notificationBitmap)
                 setContentTitle(getString(R.string.notification_new_chapters))
                 color = ContextCompat.getColor(applicationContext, R.color.colorAccentLight)

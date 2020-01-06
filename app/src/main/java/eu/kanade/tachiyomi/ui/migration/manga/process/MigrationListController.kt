@@ -17,7 +17,6 @@ import com.afollestad.materialdialogs.MaterialDialog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.smartsearch.SmartSearchEngine
@@ -366,7 +365,7 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
 
         if (adapter?.itemCount == 1) {
             menuMigrate.icon = VectorDrawableCompat.create(
-                resources!!, R.drawable.ic_done, null
+                resources!!, R.drawable.ic_done_white_24dp, null
             )
         }
         val translucentWhite = ColorUtils.setAlphaComponent(Color.WHITE, 127)
@@ -377,12 +376,12 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        val itemsCount = adapter?.itemCount ?: 0
-        val mangasSkipped = adapter?.mangasSkipped() ?: 0
+        val totalManga = adapter?.itemCount ?: 0
+        val mangaSkipped = adapter?.mangasSkipped() ?: 0
         when (item.itemId) {
-            R.id.action_copy_manga -> MigrationMangaDialog(this, true, itemsCount, mangasSkipped)
+            R.id.action_copy_manga -> MigrationMangaDialog(this, true, totalManga, mangaSkipped)
                 .showDialog(router)
-            R.id.action_migrate_manga -> MigrationMangaDialog(this, false, itemsCount, mangasSkipped)
+            R.id.action_migrate_manga -> MigrationMangaDialog(this, false, totalManga, mangaSkipped)
                 .showDialog(router)
             else -> return super.onOptionsItemSelected(item)
         }
