@@ -1,1 +1,1 @@
-include ':app', ':j2k-preference'
+include ':app'
