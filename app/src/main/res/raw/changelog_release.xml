@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <changelog bulletedList="true">
+	<changelogversion versionName="v0.9.55" changeDate="">
+		<changelogtext>Drag &amp; Drop support in Library</changelogtext>
+		<changelogtext>Optimizations for the auto-migration, should now find alternative titles for mangas</changelogtext>
+		<changelogtext>Fast scrolling in library</changelogtext>
+		<changelogtext>(From dev) faster loading when scrubbing the reader's seekbar</changelogtext>
+		<changelogtext>Barely smaller app size</changelogtext>
+		<changelogtext>Fix extension notifcation sometimes not showing</changelogtext>
+	</changelogversion>
+
 	<changelogversion versionName="v0.9.5" changeDate="">
 		<changelogtext>Mass/Automatic Source Migration</changelogtext>
 		<changelogtext>Fix single tag searching + multi tag searching by commas (ie. "Romance, -Harem, Comedy")</changelogtext>

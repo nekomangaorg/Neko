@@ -98,6 +98,7 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
                 swipe_refresh.isEnabled = firstPos <= 0
             }
         })
+        fast_scroller?.gone()
         recycler.doOnApplyWindowInsets { v, insets, padding ->
             v.updatePaddingRelative(bottom = padding.bottom + insets.systemWindowInsetBottom)
 
