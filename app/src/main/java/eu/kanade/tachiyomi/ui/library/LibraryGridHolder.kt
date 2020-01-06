@@ -20,7 +20,7 @@ import eu.davidea.flexibleadapter.items.IFlexible
  */
 class LibraryGridHolder(
         private val view: View,
-        private val adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>
 
 ) : LibraryHolder(view, adapter) {
 

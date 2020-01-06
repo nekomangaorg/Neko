@@ -18,7 +18,7 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
         /**
          * Version of the database.
          */
-        const val DATABASE_VERSION = 9
+        const val DATABASE_VERSION = 10
     }
 
     override fun onCreate(db: SupportSQLiteDatabase) = with(db) {
@@ -69,6 +69,9 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
         }
         if (oldVersion < 9) {
             db.execSQL(MangaTable.addHideTitle)
+        }
+        if (oldVersion < 10) {
+            db.execSQL(CategoryTable.addMangaOrder)
         }
     }
 

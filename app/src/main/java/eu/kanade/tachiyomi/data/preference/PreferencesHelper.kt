@@ -7,6 +7,7 @@ import androidx.preference.PreferenceManager
 import com.f2prateek.rx.preferences.Preference
 import com.f2prateek.rx.preferences.RxSharedPreferences
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.source.Source
 import java.io.File
@@ -197,6 +198,8 @@ class PreferencesHelper(val context: Context) {
     fun useSourceWithMost() = rxPrefs.getBoolean("use_source_with_most", false)
 
     fun skipPreMigration() = rxPrefs.getBoolean(Keys.skipPreMigration, false)
+
+    fun defaultMangaOrder() = rxPrefs.getString("default_manga_order", "")
 
     fun upgradeFilters() {
         val filterDl = rxPrefs.getBoolean(Keys.filterDownloaded, false).getOrDefault()

@@ -26,6 +26,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 import com.jakewharton.rxbinding.support.v4.view.pageSelections
 import com.jakewharton.rxbinding.support.v7.widget.queryTextChanges
+import com.jakewharton.rxbinding.view.visible
 import com.jakewharton.rxrelay.BehaviorRelay
 import com.jakewharton.rxrelay.PublishRelay
 import eu.kanade.tachiyomi.R
@@ -119,6 +120,11 @@ class LibraryController(
      * Relay to notify the library's viewpager to select all manga
      */
     val selectAllRelay: PublishRelay<Int> = PublishRelay.create()
+
+    /**
+     * Relay to notify the library's viewpager to reotagnize all
+     */
+    val reorganizeRelay: PublishRelay<Pair<Int, Int>> = PublishRelay.create()
 
     /**
      * Number of manga per row in grid mode.
@@ -328,6 +334,7 @@ class LibraryController(
      * Called when the sorting mode is changed.
      */
     private fun onSortChanged() {
+        activity?.invalidateOptionsMenu()
         presenter.requestSortUpdate()
     }
 
@@ -363,6 +370,9 @@ class LibraryController(
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.library, menu)
+
+        val reorganizeItem = menu.findItem(R.id.action_reorganize)
+        reorganizeItem.isVisible = preferences.librarySortingMode().getOrDefault() == LibrarySort.DRAG_AND_DROP
 
         val searchItem = menu.findItem(R.id.action_search)
         val searchView = searchItem.actionView as SearchView
@@ -417,10 +427,20 @@ class LibraryController(
             R.id.action_source_migration -> {
                 router.pushController(MigrationController().withFadeTransaction())
             }
+            R.id.action_alpha_asc -> reOrder(1)
+            R.id.action_alpha_dsc -> reOrder(2)
+            R.id.action_update_asc -> reOrder(3)
+            R.id.action_update_dsc -> reOrder(4)
             else -> return super.onOptionsItemSelected(item)
         }
 
         return true
+    }
+
+    private fun reOrder(type: Int) {
+        adapter?.categories?.getOrNull(library_pager.currentItem)?.id?.let {
+            reorganizeRelay.call(it to type)
+        }
     }
 
     /**

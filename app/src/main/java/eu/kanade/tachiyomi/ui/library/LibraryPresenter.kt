@@ -20,6 +20,7 @@ import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
 import eu.kanade.tachiyomi.ui.migration.MigrationFlags
 import eu.kanade.tachiyomi.util.combineLatest
 import eu.kanade.tachiyomi.util.isNullOrUnsubscribed
+import eu.kanade.tachiyomi.util.removeArticles
 import eu.kanade.tachiyomi.util.syncChaptersWithSource
 import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_EXCLUDE
 import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_IGNORE
@@ -210,6 +211,9 @@ class LibraryPresenter(
                     val mangaCompare = source1Name.compareTo(source2Name)
                     if (mangaCompare == 0) sortAlphabetical(i1, i2) else mangaCompare
                 }
+                LibrarySort.DRAG_AND_DROP -> {
+                    0
+                }
                 else -> throw Exception("Unknown sorting mode")
             }
         }
@@ -226,10 +230,6 @@ class LibraryPresenter(
         return if (preferences.removeArticles().getOrDefault())
             i1.manga.title.removeArticles().compareTo(i2.manga.title.removeArticles(), true)
         else i1.manga.title.compareTo(i2.manga.title, true)
-    }
-
-    private fun String.removeArticles(): String {
-        return this.replace(Regex("^(an|a|the) ", RegexOption.IGNORE_CASE), "")
     }
 
     /**
