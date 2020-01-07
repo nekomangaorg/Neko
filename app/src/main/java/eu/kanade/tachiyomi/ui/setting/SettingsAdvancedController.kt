@@ -75,12 +75,6 @@ class SettingsAdvancedController : SettingsController() {
 
             onClick { LibraryUpdateService.start(context, target = Target.CLEANUP) }
         }
-        /*  preference {
-              titleRes = R.string.pref_sync_library_follows
-              summaryRes = R.string.pref_refresh_library_follows_summary
-
-              onClick { LibraryUpdateService.start(context, target = Target.SYNC_FOLLOWS) }
-          }*/
     }
 
     private fun clearChapterCache() {

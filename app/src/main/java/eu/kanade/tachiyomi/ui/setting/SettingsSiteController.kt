@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.setting
 
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
@@ -49,6 +50,12 @@ class SettingsSiteController : SettingsController(), MangadexLoginDialog.Listene
             entryValues = Mangadex.SERVER_PREF_ENTRY_VALUES
             summary = "%s"
 
+        }
+        preference {
+            titleRes = R.string.pref_sync_library_follows
+            summaryRes = R.string.pref_refresh_library_follows_summary
+
+            onClick { LibraryUpdateService.start(context, target = LibraryUpdateService.Target.SYNC_FOLLOWS) }
         }
     }
 

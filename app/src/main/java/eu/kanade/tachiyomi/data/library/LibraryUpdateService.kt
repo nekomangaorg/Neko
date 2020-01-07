@@ -88,14 +88,15 @@ class LibraryUpdateService(
     /**
      * Cached progress notification to avoid creating a lot.
      */
-    private val progressNotification by lazy { NotificationCompat.Builder(this, Notifications.CHANNEL_LIBRARY)
-            .setContentTitle(getString(R.string.app_name))
-            .setSmallIcon(R.drawable.ic_refresh_grey)
-            .setLargeIcon(notificationBitmap)
-            .setOngoing(true)
-            .setOnlyAlertOnce(true)
-            .setColor(ContextCompat.getColor(this, R.color.colorPrimary))
-            .addAction(R.drawable.ic_clear_grey, getString(android.R.string.cancel), cancelIntent)
+    private val progressNotification by lazy {
+        NotificationCompat.Builder(this, Notifications.CHANNEL_LIBRARY)
+                .setContentTitle(getString(R.string.app_name))
+                .setSmallIcon(R.drawable.ic_refresh_grey)
+                .setLargeIcon(notificationBitmap)
+                .setOngoing(true)
+                .setOnlyAlertOnce(true)
+                .setColor(ContextCompat.getColor(this, R.color.colorPrimary))
+                .addAction(R.drawable.ic_clear_grey, getString(android.R.string.cancel), cancelIntent)
     }
 
     /**
@@ -221,16 +222,15 @@ class LibraryUpdateService(
             stopSelf(startId)
         }
         // Update either chapter list or manga details.
-        /* if (target == Target.FOLLOW_STATUSES) {
-             GlobalScope.launch(handler) {
-                 syncFollowsStatus()
-             }.invokeOnCompletion { stopSelf(startId) }
-         } else if (target == Target.SYNC_FOLLOWS) {
-             GlobalScope.launch(handler) {
-                 syncFollows()
-             }.invokeOnCompletion { stopSelf(startId) }
-         } else {*/
-        if (target == Target.CLEANUP) {
+        if (target == Target.FOLLOW_STATUSES) {
+            GlobalScope.launch(handler) {
+                syncFollowsStatus()
+            }.invokeOnCompletion { stopSelf(startId) }
+        } else if (target == Target.SYNC_FOLLOWS) {
+            GlobalScope.launch(handler) {
+                syncFollows()
+            }.invokeOnCompletion { stopSelf(startId) }
+        } else if (target == Target.CLEANUP) {
             GlobalScope.launch(handler) {
                 cleanupDownloads()
             }.invokeOnCompletion { stopSelf(startId) }
@@ -320,15 +320,19 @@ class LibraryUpdateService(
                             .filter { pair -> pair.first.isNotEmpty() }
                             .doOnNext {
                                 if (downloadNew && (categoriesToDownload.isEmpty() ||
-                                        manga.category in categoriesToDownload)) {
+                                                manga.category in categoriesToDownload)) {
 
                                     downloadChapters(manga, it.first)
                                     hasDownloads = true
                                 }
                             }
                             // Convert to the manga that contains new chapters.
-                            .map { Pair(manga, (it.first.sortedByDescending { ch -> ch
-                                .source_order }.toTypedArray())) }
+                            .map {
+                                Pair(manga, (it.first.sortedByDescending { ch ->
+                                    ch
+                                            .source_order
+                                }.toTypedArray()))
+                            }
                 }
                 // Add manga with new chapters to the list.
                 .doOnNext { manga ->
@@ -529,24 +533,24 @@ class LibraryUpdateService(
                 setSmallIcon(R.drawable.ic_neko_notification)
                 try {
                     val icon = GlideApp.with(this@LibraryUpdateService)
-                        .asBitmap().load(manga).dontTransform().centerCrop().circleCrop()
-                        .override(256, 256).submit().get()
+                            .asBitmap().load(manga).dontTransform().centerCrop().circleCrop()
+                            .override(256, 256).submit().get()
                     setLargeIcon(icon)
+                } catch (e: Exception) {
                 }
-                catch (e: Exception) { }
                 setContentTitle(manga.title)
                 color = ContextCompat.getColor(this@LibraryUpdateService, R.color.colorPrimary)
                 val chaptersNames = if (chapterNames.size > 5) {
                     "${chapterNames.take(4).joinToString("\n")}\n" +
-                        getString(R.string.notification_and_n_more, (chapterNames.size - 4))
+                            getString(R.string.notification_and_n_more, (chapterNames.size - 4))
                 } else chapterNames.joinToString("\n ")
                 setContentText(chaptersNames)
                 setStyle(NotificationCompat.BigTextStyle().bigText(chaptersNames))
                 priority = NotificationCompat.PRIORITY_HIGH
                 setGroup(Notifications.GROUP_NEW_CHAPTERS)
                 setContentIntent(
-                        NotificationReceiver.openChapterPendingActivity( this@LibraryUpdateService, manga, chapters.first())
-                    )
+                        NotificationReceiver.openChapterPendingActivity(this@LibraryUpdateService, manga, chapters.first())
+                )
                 addAction(R.drawable.ic_list_grey, getString(R.string.action_view_chapters),
                         NotificationReceiver.openChapterPendingActivity(this@LibraryUpdateService,
                                 manga, Notifications.ID_NEW_CHAPTERS))
@@ -569,8 +573,7 @@ class LibraryUpdateService(
                     setStyle(NotificationCompat.BigTextStyle().bigText(updates.joinToString("\n") {
                         it.first.title.chop(45)
                     }))
-                }
-                else {
+                } else {
                     setContentText(updates.first().first.title.chop(45))
                 }
                 priority = NotificationCompat.PRIORITY_HIGH
