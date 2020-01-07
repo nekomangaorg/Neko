@@ -27,7 +27,7 @@ import uy.kohesive.injekt.injectLazy
 import uy.kohesive.injekt.registry.default.DefaultRegistrar
 
 @ReportsCrashes(
-        formUri = "http://tachiyomi.kanade.eu/crash_report",
+        formUri = "https://collector.tracepot.com/e90773ff",
         reportType = org.acra.sender.HttpSender.Type.JSON,
         httpMethod = org.acra.sender.HttpSender.Method.PUT,
         buildConfigClass = BuildConfig::class,

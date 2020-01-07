@@ -60,7 +60,7 @@ class SettingsAboutController : SettingsController() {
         }
         preference {
             title = "Github"
-            val url = "https://github.com/Jays2Kings/tachiyomi"
+            val url = "https://github.com/Jays2Kings/tachiyomiJ2K"
             summary = url
             onClick {
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))

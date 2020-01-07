@@ -71,6 +71,7 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
     private var migrationsJob: Job? = null
     private var migratingManga: MutableList<MigratingManga>? = null
     private var selectedPosition:Int? = null
+    private var manaulMigrations = 0
 
     override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
         return inflater.inflate(R.layout.migration_list_controller, container, false)
@@ -263,7 +264,16 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
 
     override fun noMigration() {
         launchUI {
-            activity?.toast(R.string.no_migrations)
+            val res = resources
+            if (res != null) {
+                activity?.toast(
+                    res.getString(
+                        R.string.x_migrations,
+                        if (manaulMigrations == 0) res.getString(R.string.no)
+                        else "$manaulMigrations"
+                    )
+                )
+            }
             router.popCurrentController()
         }
     }
@@ -281,8 +291,14 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
                 }
             }
             R.id.action_skip -> adapter?.removeManga(position)
-            R.id.action_migrate_now -> adapter?.migrateManga(position, false)
-            R.id.action_copy_now -> adapter?.migrateManga(position, true)
+            R.id.action_migrate_now ->  {
+                adapter?.migrateManga(position, false)
+                manaulMigrations++
+            }
+            R.id.action_copy_now -> {
+                adapter?.migrateManga(position, true)
+                manaulMigrations++
+            }
         }
     }
 

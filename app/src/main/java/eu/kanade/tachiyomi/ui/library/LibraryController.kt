@@ -429,8 +429,8 @@ class LibraryController(
             }
             R.id.action_alpha_asc -> reOrder(1)
             R.id.action_alpha_dsc -> reOrder(2)
-            R.id.action_update_asc -> reOrder(3)
-            R.id.action_update_dsc -> reOrder(4)
+            R.id.action_update_dsc -> reOrder(3)
+            R.id.action_update_asc -> reOrder(4)
             else -> return super.onOptionsItemSelected(item)
         }
 

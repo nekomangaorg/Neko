@@ -24,7 +24,6 @@ class ExtensionUpdateJob : Job() {
         val extensionManager: ExtensionManager = Injekt.get()
         extensionManager.findAvailableExtensions()
 
-        // Update favorite manga. Destroy service when completed or in case of an error.
         Observable.defer {
             extensionManager.getInstalledExtensionsObservable().map { list ->
                 val pendingUpdates = list.filter { it.hasUpdate }
@@ -71,8 +70,8 @@ class ExtensionUpdateJob : Job() {
         const val TAG = "ExtensionUpdate"
 
         fun setupTask() {
-            JobRequest.Builder(TAG).setPeriodic(TimeUnit.DAYS.toMillis(1),
-                TimeUnit.HOURS.toMillis(1))
+            JobRequest.Builder(TAG).setPeriodic(TimeUnit.HOURS.toMillis(12),
+                TimeUnit.HOURS.toMillis(2))
                 .setRequiredNetworkType(JobRequest.NetworkType.CONNECTED)
                 .setRequirementsEnforced(true)
                 .setUpdateCurrent(true)
