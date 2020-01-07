@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <changelog bulletedList="true">
+	<changelogversion versionName="v0.9.56" changeDate="">
+		<changelogtext>Rewording a few things</changelogtext>
+		<changelogtext>Extensions Updater checker now checks every 12 hours, you might need to renable this setting to get the new timing</changelogtext>
+		<changelogtext>Fixed reordering drag and drop by last updating being reversed</changelogtext>
+		<changelogtext>Auto Migrations now shows how many manual migrations were made after skipping the rest</changelogtext>
+	</changelogversion>
 	<changelogversion versionName="v0.9.55" changeDate="">
 		<changelogtext>Drag &amp; Drop support in Library</changelogtext>
 		<changelogtext>Optimizations for the auto-migration, should now find alternative titles for mangas</changelogtext>

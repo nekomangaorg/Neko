@@ -4,7 +4,7 @@ Tachiyomi is a free and open source manga reader for Android.
 ![screenshots of app](./.github/readme-images/theming-screenshots.gif)
 
 ## Newest Release
-[v0.9.55](https://github.com/Jays2Kings/tachiyomi/releases)
+[v0.9.56](https://github.com/Jays2Kings/tachiyomi/releases)
 
 ## Features
 
