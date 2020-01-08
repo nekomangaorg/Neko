@@ -32,7 +32,7 @@
     <item
         android:id="@+id/action_hide_title"
         android:icon="@drawable/ic_swap_calls_white_24dp"
-        android:title="@string/label_hide_title"
+        android:title="@string/action_hide_title"
         app:showAsAction="never" />
 
 </menu>

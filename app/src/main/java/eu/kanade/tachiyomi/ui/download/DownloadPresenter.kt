@@ -65,4 +65,9 @@ class DownloadPresenter : BasePresenter<DownloadController>() {
         downloadManager.reorderQueue(downloads)
     }
 
+    fun cancelDownload(download: Download) {
+        downloadManager.deleteChapters(listOf(download.chapter), download.manga,
+            download.source)
+    }
+
 }

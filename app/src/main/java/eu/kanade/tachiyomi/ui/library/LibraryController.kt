@@ -26,7 +26,6 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 import com.jakewharton.rxbinding.support.v4.view.pageSelections
 import com.jakewharton.rxbinding.support.v7.widget.queryTextChanges
-import com.jakewharton.rxbinding.view.visible
 import com.jakewharton.rxrelay.BehaviorRelay
 import com.jakewharton.rxrelay.PublishRelay
 import eu.kanade.tachiyomi.R
@@ -469,7 +468,7 @@ class LibraryController(
                 val showAll =
                     (selectedMangas.filter { (it as? LibraryManga)?.hide_title == true }).size == selectedMangas.size
                 menu.findItem(R.id.action_hide_title)?.title = activity?.getString(
-                    if (showAll) R.string.label_show_title else R.string.label_hide_title
+                    if (showAll) R.string.action_show_title else R.string.action_hide_title
                 )
             }
         }

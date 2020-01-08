@@ -19,4 +19,19 @@
           android:visible="false"
           app:showAsAction="never"/>
 
+    <item
+        android:id="@+id/reorder"
+        android:title="@string/action_reorganize_by"
+        android:visible="false"
+        app:showAsAction="never">
+        <menu>
+            <item
+                android:id="@+id/newest"
+                android:title="@string/action_newest"/>
+            <item
+                android:id="@+id/oldest"
+                android:title="@string/action_oldest"/>
+        </menu>
+    </item>
+
 </menu>

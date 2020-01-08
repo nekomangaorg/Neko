@@ -20,7 +20,7 @@ import uy.kohesive.injekt.injectLazy
  *
  * @param context the application context.
  */
-class DownloadManager(context: Context) {
+class DownloadManager(val context: Context) {
 
     /**
      * The sources manager.
@@ -99,7 +99,12 @@ class DownloadManager(context: Context) {
      * @param downloads value to set the download queue to
      */
     fun reorderQueue(downloads: List<Download>) {
-        val wasPaused  = downloader.isPaused()
+        val wasPaused = isPaused()
+        if (downloads.isEmpty()) {
+            DownloadService.stop(context)
+            downloader.queue.clear()
+            return
+        }
         downloader.pause()
         downloader.queue.clear()
         downloader.queue.addAll(downloads)
@@ -107,6 +112,8 @@ class DownloadManager(context: Context) {
             downloader.start()
         }
     }
+
+    fun isPaused() = downloader.isPaused()
 
 
     /**
@@ -175,7 +182,7 @@ class DownloadManager(context: Context) {
     }
 
     /**
-     * Deletes the directories of a list of downloaded chapters.
+     * Deletes the directories of a list of partially downloaded chapters.
      *
      * @param chapters the list of chapters to delete.
      * @param manga the manga of the chapters.
@@ -183,9 +190,9 @@ class DownloadManager(context: Context) {
      */
     fun deleteChapters(chapters: List<Chapter>, manga: Manga, source: Source) {
         queue.remove(chapters)
-        val chapterDirs = provider.findChapterDirs(chapters, manga, source)
+        val chapterDirs = provider.findChapterDirs(chapters, manga, source) + provider.findTempChapterDirs(chapters, manga, source)
         chapterDirs.forEach { it.delete() }
-        cache.removeChapters(chapters, manga)
+        cache.removeChapters(chapters, manga, source)
         if (cache.getDownloadCount(manga) == 0) { // Delete manga directory if empty
             chapterDirs.firstOrNull()?.parentFile?.delete()
         }

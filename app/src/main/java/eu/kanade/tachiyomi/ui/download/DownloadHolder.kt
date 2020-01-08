@@ -1,9 +1,14 @@
 package eu.kanade.tachiyomi.ui.download
 
 import android.view.View
+import android.widget.PopupMenu
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
+import eu.kanade.tachiyomi.util.getResourceColor
+import eu.kanade.tachiyomi.util.setVectorCompat
 import kotlinx.android.synthetic.main.download_item.*
+import kotlinx.android.synthetic.main.download_item.migration_menu
 
 /**
  * Class used to hold the data of a download.
@@ -12,10 +17,12 @@ import kotlinx.android.synthetic.main.download_item.*
  * @param view the inflated view for this holder.
  * @constructor creates a new download holder.
  */
-class DownloadHolder(view: View, val adapter: DownloadAdapter) : BaseFlexibleViewHolder(view, adapter) {
+class DownloadHolder(private val view: View, val adapter: DownloadAdapter) :
+    BaseFlexibleViewHolder(view, adapter) {
 
     init {
         setDragHandleView(reorder)
+        migration_menu.setOnClickListener { it.post { showPopupMenu(it) } }
     }
 
     private lateinit var download: Download
@@ -44,6 +51,10 @@ class DownloadHolder(view: View, val adapter: DownloadAdapter) : BaseFlexibleVie
             notifyProgress()
             notifyDownloadedPages()
         }
+
+        migration_menu.setVectorCompat(
+            R.drawable.ic_more_vert_black_24dp, view.context
+            .getResourceColor(R.attr.icon_color))
     }
 
 
@@ -68,7 +79,34 @@ class DownloadHolder(view: View, val adapter: DownloadAdapter) : BaseFlexibleVie
 
     override fun onItemReleased(position: Int) {
         super.onItemReleased(position)
-        adapter.onItemReleaseListener.onItemReleased(position)
+        adapter.downloadItemListener.onItemReleased(position)
+    }
+
+
+    private fun showPopupMenu(view: View) {
+        val item = adapter.getItem(adapterPosition) ?: return
+
+        // Create a PopupMenu, giving it the clicked view for an anchor
+        val popup = PopupMenu(view.context, view)
+
+        // Inflate our menu resource into the PopupMenu's Menu
+        popup.menuInflater.inflate(R.menu.download_single, popup.menu)
+
+        val download = item.download
+
+        popup.menu.findItem(R.id.move_to_top).isVisible = adapterPosition != 0
+        popup.menu.findItem(R.id.move_to_bottom).isVisible = adapterPosition != adapter
+            .itemCount - 1
+
+
+        // Set a listener so we are notified if a menu item is clicked
+        popup.setOnMenuItemClickListener { menuItem ->
+            adapter.downloadItemListener.onMenuItemClick(adapterPosition, menuItem)
+            true
+        }
+
+        // Finally show the PopupMenu
+        popup.show()
     }
 
 }

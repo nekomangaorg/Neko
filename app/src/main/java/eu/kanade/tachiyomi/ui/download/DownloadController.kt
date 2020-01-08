@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.model.Page
@@ -17,6 +18,8 @@ import kotlinx.android.synthetic.main.download_controller.*
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.injectLazy
 import java.util.HashMap
 import java.util.concurrent.TimeUnit
 
@@ -25,7 +28,7 @@ import java.util.concurrent.TimeUnit
  * Uses R.layout.fragment_download_queue.
  */
 class DownloadController : NucleusController<DownloadPresenter>(),
-    DownloadAdapter.OnItemReleaseListener {
+    DownloadAdapter.DownloadItemListener {
 
     /**
      * Adapter containing the active downloads.
@@ -110,6 +113,9 @@ class DownloadController : NucleusController<DownloadPresenter>(),
 
         // Set clear button visibility.
         menu.findItem(R.id.clear_queue).isVisible = !presenter.downloadQueue.isEmpty()
+
+        // Set reorder button visibility.
+        menu.findItem(R.id.reorder).isVisible = !presenter.downloadQueue.isEmpty()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -123,6 +129,16 @@ class DownloadController : NucleusController<DownloadPresenter>(),
             R.id.clear_queue -> {
                 DownloadService.stop(context)
                 presenter.clearQueue()
+            }
+            R.id.newest, R.id.oldest -> {
+                val adapter = adapter ?: return false
+                val items = adapter.currentItems.sortedBy { it.download.chapter.date_upload }
+                    .toMutableList()
+                if (item.itemId == R.id.newest)
+                    items.reverse()
+                adapter.updateDataSet(items)
+                val downloads = items.mapNotNull { it.download }
+                presenter.reorder(downloads)
             }
             else -> return super.onOptionsItemSelected(item)
         }
@@ -262,6 +278,38 @@ class DownloadController : NucleusController<DownloadPresenter>(),
         val adapter = adapter ?: return
         val downloads = (0 until adapter.itemCount).mapNotNull { adapter.getItem(it)?.download }
         presenter.reorder(downloads)
+    }
+
+    /**
+     * Called when the menu item of a download is pressed
+     *
+     * @param position The position of the item
+     * @param menuItem The menu Item pressed
+     */
+    override fun onMenuItemClick(position: Int, menuItem: MenuItem) {
+        when (menuItem.itemId) {
+            R.id.move_to_top, R.id.move_to_bottom -> {
+                val items = adapter?.currentItems?.toMutableList() ?: return
+                val item = items[position]
+                items.remove(item)
+                if (menuItem.itemId == R.id.move_to_top)
+                    items.add(0, item)
+                else
+                    items.add(item)
+                adapter?.updateDataSet(items)
+                val downloads = items.mapNotNull { it.download }
+                presenter.reorder(downloads)
+            }
+            R.id.cancel_download -> {
+                val download = adapter?.getItem(position)?.download ?: return
+                presenter.cancelDownload(download)
+
+                adapter?.removeItem(position)
+                val adapter = adapter ?: return
+                val downloads = (0 until adapter.itemCount).mapNotNull { adapter.getItem(it)?.download }
+                presenter.reorder(downloads)
+            }
+        }
     }
 
 }

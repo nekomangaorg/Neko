@@ -96,6 +96,19 @@ class DownloadProvider(private val context: Context) {
     }
 
     /**
+     * Returns a list of downloaded directories for the chapters that exist.
+     *
+     * @param chapters the chapters to query.
+     * @param manga the manga of the chapter.
+     * @param source the source of the chapter.
+     */
+    fun findTempChapterDirs(chapters: List<Chapter>, manga: Manga, source: Source): List<UniFile> {
+        val mangaDir = findMangaDir(manga, source) ?: return emptyList()
+        return chapters.mapNotNull { mangaDir.findFile("${getChapterDirName(it)}_tmp") }
+    }
+
+
+    /**
      * Returns the download directory name for a source.
      *
      * @param source the source to query.
@@ -119,6 +132,16 @@ class DownloadProvider(private val context: Context) {
      * @param chapter the chapter to query.
      */
     fun getChapterDirName(chapter: Chapter): String {
+        return DiskUtil.buildValidFilename("${chapter.id} - ${chapter.name}")
+    }
+
+    /**
+     * Returns the chapter directory name for a chapter (that used the scanlator
+     *
+     * @param chapter the chapter to query.
+     */
+    //TODO: Delete this in due time. N2Self, merging that pr was a mistake
+    private fun getChapterDirNameWithScanlator(chapter: Chapter): String {
         return DiskUtil.buildValidFilename("${chapter.id}_${chapter.scanlator}_${chapter.name}")
     }
 
@@ -129,10 +152,10 @@ class DownloadProvider(private val context: Context) {
      */
     fun getValidChapterDirNames(chapter: Chapter): List<String> {
         return listOf(
-                getChapterDirName(chapter),
-
-                // Legacy chapter directory name used in v0.8.4 and before
-                DiskUtil.buildValidFilename(chapter.name)
+            getChapterDirName(chapter),
+            // Legacy chapter directory name used in v0.8.4 and before
+            getChapterDirNameWithScanlator(chapter),
+            DiskUtil.buildValidFilename(chapter.name)
         )
     }
 

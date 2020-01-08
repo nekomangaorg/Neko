@@ -7,6 +7,7 @@ import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
+import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -203,13 +204,15 @@ class DownloadCache(
      * @param manga the manga of the chapter.
      */
     @Synchronized
-    fun removeChapters(chapters: List<Chapter>, manga: Manga) {
+    fun removeChapters(chapters: List<Chapter>, manga: Manga, source: Source) {
         val sourceDir = rootDir.files[manga.source] ?: return
         val mangaDir = sourceDir.files[provider.getMangaDirName(manga)] ?: return
         for (chapter in chapters) {
-            val chapterDirName = provider.getChapterDirName(chapter)
-            if (chapterDirName in mangaDir.files) {
-                mangaDir.files -= chapterDirName
+            val list = provider.getValidChapterDirNames(chapter)
+            list.forEach {
+                if (it in mangaDir.files) {
+                    mangaDir.files -= it
+                }
             }
         }
     }
