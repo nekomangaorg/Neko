@@ -223,9 +223,9 @@ class LibraryUpdateService(
         }
         // Update either chapter list or manga details.
         if (target == Target.FOLLOW_STATUSES) {
-            GlobalScope.launch(handler) {
+           /* GlobalScope.launch(handler) {
                 syncFollowsStatus()
-            }.invokeOnCompletion { stopSelf(startId) }
+            }.invokeOnCompletion { stopSelf(startId) }*/
         } else if (target == Target.SYNC_FOLLOWS) {
             GlobalScope.launch(handler) {
                 syncFollows()
