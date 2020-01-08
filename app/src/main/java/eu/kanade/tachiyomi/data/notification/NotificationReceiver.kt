@@ -162,8 +162,6 @@ class NotificationReceiver : BroadcastReceiver() {
         // Called to cancel library update.
         private const val ACTION_CANCEL_LIBRARY_UPDATE = "$ID.$NAME.CANCEL_LIBRARY_UPDATE"
 
-        // Called to cancel library update.
-        private const val ACTION_MARK_AS_READ = "$ID.$NAME.MARK_AS_READ"
 
         // Called to open chapter
         private const val ACTION_OPEN_CHAPTER = "$ID.$NAME.ACTION_OPEN_CHAPTER"
