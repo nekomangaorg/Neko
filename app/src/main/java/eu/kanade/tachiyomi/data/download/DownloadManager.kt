@@ -90,6 +90,7 @@ class DownloadManager(val context: Context) {
      * @param isNotification value that determines if status is set (needed for view updates)
      */
     fun clearQueue(isNotification: Boolean = false) {
+        deletePendingDownloads(*downloader.queue.toTypedArray())
         downloader.clearQueue(isNotification)
     }
 
@@ -179,6 +180,19 @@ class DownloadManager(val context: Context) {
      */
     fun getDownloadCount(manga: Manga): Int {
         return cache.getDownloadCount(manga)
+    }
+
+    /**
+     * Calls delete chapter, which deletes temp downloads
+     *  @param downloads list of downloads to cancel
+     */
+    fun deletePendingDownloads(vararg downloads: Download) {
+        val downloadsByManga = downloads.groupBy { it.manga.id }
+        downloadsByManga.map { entry ->
+            val manga = entry.value.first().manga
+            val source = entry.value.first().source
+            deleteChapters(entry.value.map { it.chapter }, manga, source)
+        }
     }
 
     /**

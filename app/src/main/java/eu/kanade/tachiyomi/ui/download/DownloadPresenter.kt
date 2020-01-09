@@ -66,8 +66,7 @@ class DownloadPresenter : BasePresenter<DownloadController>() {
     }
 
     fun cancelDownload(download: Download) {
-        downloadManager.deleteChapters(listOf(download.chapter), download.manga,
-            download.source)
+        downloadManager.deletePendingDownloads(download)
     }
 
 }

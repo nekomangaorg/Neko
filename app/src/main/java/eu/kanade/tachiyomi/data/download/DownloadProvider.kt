@@ -132,16 +132,6 @@ class DownloadProvider(private val context: Context) {
      * @param chapter the chapter to query.
      */
     fun getChapterDirName(chapter: Chapter): String {
-        return DiskUtil.buildValidFilename("${chapter.id} - ${chapter.name}")
-    }
-
-    /**
-     * Returns the chapter directory name for a chapter (that used the scanlator
-     *
-     * @param chapter the chapter to query.
-     */
-    //TODO: Delete this in due time. N2Self, merging that pr was a mistake
-    private fun getChapterDirNameWithScanlator(chapter: Chapter): String {
         return DiskUtil.buildValidFilename("${chapter.id}_${chapter.scanlator}_${chapter.name}")
     }
 
@@ -154,7 +144,6 @@ class DownloadProvider(private val context: Context) {
         return listOf(
             getChapterDirName(chapter),
             // Legacy chapter directory name used in v0.8.4 and before
-            getChapterDirNameWithScanlator(chapter),
             DiskUtil.buildValidFilename(chapter.name)
         )
     }
