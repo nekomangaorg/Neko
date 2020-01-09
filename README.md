@@ -38,6 +38,7 @@ Plus some new features in this fork such as:
 * Automatically checks for extension updates
 * Batch Auto-Source Migration (taken from [TachiyomiEH](https://github.com/NerdNumber9/TachiyomiEH))
 * Drag & Drop Sorting in Library
+* Improved Download queue, including reordering and cancelling downloads
 
 ## Issues, Feature Requests and Contributing
 
