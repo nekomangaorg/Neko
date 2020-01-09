@@ -35,6 +35,7 @@ import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.*
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import rx.Observable
 import rx.Subscription
@@ -70,6 +71,9 @@ class LibraryUpdateService(
      * Subscription where the update is done.
      */
     private var subscription: Subscription? = null
+
+     var job: Job? = null
+
 
     /**
      * Pending intent of action that cancels the library update
@@ -183,6 +187,7 @@ class LibraryUpdateService(
      * lock.
      */
     override fun onDestroy() {
+        job?.cancel()
         subscription?.unsubscribe()
         if (wakeLock.isHeld) {
             wakeLock.release()
@@ -227,19 +232,24 @@ class LibraryUpdateService(
                 syncFollowsStatus()
             }.invokeOnCompletion { stopSelf(startId) }*/
         } else if (target == Target.SYNC_FOLLOWS) {
-            GlobalScope.launch(handler) {
+            job = GlobalScope.launch(handler) {
                 syncFollows()
-            }.invokeOnCompletion { stopSelf(startId) }
+            }
+            job?.invokeOnCompletion { stopSelf(startId) }
         } else if (target == Target.CLEANUP) {
-            GlobalScope.launch(handler) {
+            job  = GlobalScope.launch(handler) {
                 cleanupDownloads()
-            }.invokeOnCompletion { stopSelf(startId) }
+            }
+            job?.invokeOnCompletion { stopSelf(startId) }
         } else {
-            when (target) {
-                Target.CHAPTERS -> updateChapterList(mangaList)
-                Target.DETAILS -> updateDetails(mangaList)
-                else -> updateTrackings(mangaList)
-            }.subscribeOn(Schedulers.io())
+            subscription = Observable
+                    .defer {
+                        when (target) {
+                            Target.CHAPTERS -> updateChapterList(mangaList)
+                            Target.DETAILS -> updateDetails(mangaList)
+                            else -> updateTrackings(mangaList)
+                        }
+                    }.subscribeOn(Schedulers.io())
                     .subscribe({
                     }, {
                         Timber.e(it)
