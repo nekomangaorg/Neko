@@ -204,7 +204,7 @@ class DownloadCache(
      * @param manga the manga of the chapter.
      */
     @Synchronized
-    fun removeChapters(chapters: List<Chapter>, manga: Manga, source: Source) {
+    fun removeChapters(chapters: List<Chapter>, manga: Manga) {
         val sourceDir = rootDir.files[manga.source] ?: return
         val mangaDir = sourceDir.files[provider.getMangaDirName(manga)] ?: return
         for (chapter in chapters) {

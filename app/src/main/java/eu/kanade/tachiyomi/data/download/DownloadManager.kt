@@ -206,7 +206,7 @@ class DownloadManager(val context: Context) {
         queue.remove(chapters)
         val chapterDirs = provider.findChapterDirs(chapters, manga, source) + provider.findTempChapterDirs(chapters, manga, source)
         chapterDirs.forEach { it.delete() }
-        cache.removeChapters(chapters, manga, source)
+        cache.removeChapters(chapters, manga)
         if (cache.getDownloadCount(manga) == 0) { // Delete manga directory if empty
             chapterDirs.firstOrNull()?.parentFile?.delete()
         }
