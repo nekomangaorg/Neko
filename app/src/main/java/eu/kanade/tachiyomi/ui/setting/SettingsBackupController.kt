@@ -241,7 +241,7 @@ class SettingsBackupController : SettingsController() {
             val unifile = UniFile.fromUri(activity, args.getParcelable(KEY_URI))
             return MaterialDialog(activity)
                     .title(R.string.backup_created)
-                    .message(text = activity.getString(R.string.file_saved, unifile.filePath))
+                    .message(text = activity.getString(R.string.file_saved))
                     .positiveButton(R.string.action_close)
                     .negativeButton(R.string.action_export) {
                         val sendIntent = Intent(Intent.ACTION_SEND)
@@ -304,7 +304,7 @@ class SettingsBackupController : SettingsController() {
                             if (errors > 0) "$errors" else activity.getString(android.R.string.no)))
                     .positiveButton(R.string.action_close)
                     .negativeButton(R.string.action_open_log) {
-                        applicationContext?.let{
+                        applicationContext?.let {
                             if (!path!!.isEmpty()) {
                                 val destFile = File(path, file!!)
                                 val uri = destFile.getUriCompat(it)

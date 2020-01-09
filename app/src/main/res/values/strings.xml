@@ -104,7 +104,7 @@
     <string name="short_recent_updates">Updates</string>
 
     <!-- Preferences -->
-      <!-- Subsections -->
+    <!-- Subsections -->
     <string name="pref_category_general">General</string>
     <string name="pref_category_library">Library</string>
     <string name="pref_category_reader">Reader</string>
@@ -114,7 +114,7 @@
     <string name="pref_category_advanced">Advanced</string>
     <string name="pref_category_about">About</string>
 
-      <!-- General section -->
+    <!-- General section -->
     <string name="pref_library_columns">Library manga per row</string>
     <string name="portrait">Portrait</string>
     <string name="landscape">Landscape</string>
@@ -155,7 +155,7 @@
 
     <!-- Extension section -->
     <string name="all_lang">All</string>
-      <!-- Reader section -->
+    <!-- Reader section -->
     <string name="pref_fullscreen">Fullscreen</string>
     <string name="pref_lock_orientation">Lock orientation</string>
     <string name="pref_page_transitions">Page transitions</string>
@@ -225,7 +225,7 @@
     <string name="webtoon_margin_ratio_25">25%</string>
 
 
-      <!-- Downloads section -->
+    <!-- Downloads section -->
     <string name="pref_download_directory">Downloads directory</string>
     <string name="pref_download_only_over_wifi">Only download over Wi-Fi</string>
     <string name="pref_remove_after_marked_as_read">Remove when marked as read</string>
@@ -240,7 +240,7 @@
     <string name="pref_download_new">Download new chapters</string>
     <string name="pref_download_new_categories">Categories to include in download</string>
 
-      <!-- Sync section -->
+    <!-- Sync section -->
     <string name="services">Services</string>
 
     <!-- Backup section -->
@@ -261,12 +261,12 @@
     <string name="error_opening_log">Could not open log</string>
     <string name="restore_completed_content">Restore took %1$s.\n%2$s errors found.</string>
     <string name="backup_restore_content">Restore uses source to fetch data, carrier costs may apply.\nAlso make sure you are properly logged in sources that require so before restoring.</string>
-    <string name="file_saved">File saved at %1$s</string>
+    <string name="file_saved">File saved</string>
     <string name="backup_choice">What do you want to backup?</string>
     <string name="restoring_backup">Restoring backup</string>
     <string name="creating_backup">Creating backup</string>
 
-      <!-- Advanced section -->
+    <!-- Advanced section -->
     <string name="pref_clear_chapter_cache">Clear chapter cache</string>
     <string name="used_cache">Used: %1$s</string>
     <string name="cache_deleted">Cache cleared. %1$d files have been deleted</string>
@@ -531,6 +531,7 @@
     <!-- Notification channels -->
     <string name="channel_common">Common</string>
     <string name="channel_library">Library</string>
+    <string name="channel_backup_restore">Backup/Restore</string>
     <string name="channel_downloader">Downloader</string>
     <string name="channel_new_chapters">New Chapters</string>
 
