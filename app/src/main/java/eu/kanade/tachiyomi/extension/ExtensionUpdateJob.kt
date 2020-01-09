@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.util.notification
 import rx.Observable
+import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
@@ -24,7 +25,6 @@ class ExtensionUpdateJob : Job() {
         val extensionManager: ExtensionManager = Injekt.get()
         extensionManager.findAvailableExtensions()
 
-        Observable.defer {
             extensionManager.getInstalledExtensionsObservable().map { list ->
                 val pendingUpdates = list.filter { it.hasUpdate }
                 if (pendingUpdates.isNotEmpty()) {
@@ -56,8 +56,9 @@ class ExtensionUpdateJob : Job() {
                     }
                 }
                 Result.SUCCESS
-            }
-        }.subscribeOn(Schedulers.io())
+            }.take(1)
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeOn(Schedulers.io())
             .subscribe({
             }, {
                 Timber.e(it)

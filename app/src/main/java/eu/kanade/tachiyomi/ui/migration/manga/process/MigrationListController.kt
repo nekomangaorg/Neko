@@ -14,6 +14,7 @@ import androidx.core.graphics.ColorUtils
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import com.afollestad.materialdialogs.MaterialDialog
+import com.bluelinelabs.conductor.ControllerChangeHandler
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -130,6 +131,13 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
             sourceManager.get(value) as? CatalogueSource }
         if (config == null) return
         for(manga in mangas) {
+            if (migrationsJob?.isCancelled == true) {
+                break
+            }
+            // in case it was removed
+            if (manga.mangaId !in config.mangaIds) {
+                continue
+            }
             if(!manga.searchResult.initialized && manga.migrationJob.isActive) {
                 val mangaObj = manga.manga()
 
@@ -243,7 +251,9 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
 
     override fun updateCount() {
         launchUI {
-            setTitle()
+            if (router.backstack.last().controller() == this@MigrationListController) {
+                setTitle()
+            }
         }
     }
 
@@ -367,6 +377,24 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
             adapter?.performMigrations(true)
             router.popCurrentController()
         }
+    }
+
+    override fun handleBack(): Boolean {
+        activity?.let {
+            MaterialDialog.Builder(it).title(R.string.stop_migration)
+                .positiveText(R.string.yes)
+                .negativeText(R.string.no)
+                .onPositive { _, _ ->
+                    router.popCurrentController()
+                    migrationsJob?.cancel()
+                }
+                .show()
+        }
+        return true
+    }
+
+    override fun onDestroyView(view: View) {
+        super.onDestroyView(view)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
