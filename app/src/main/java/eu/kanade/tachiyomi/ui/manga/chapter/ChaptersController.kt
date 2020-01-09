@@ -61,6 +61,8 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
      */
     private val selectedItems = mutableSetOf<ChapterItem>()
 
+    private var lastClickPosition = -1
+
     init {
         setHasOptionsMenu(true)
         setOptionsMenuHidden(true)
@@ -261,21 +263,31 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
         startActivity(intent)
     }
 
-    override fun onItemClick(view: View, position: Int): Boolean {
+    override fun onItemClick(view: View?, position: Int): Boolean {
         val adapter = adapter ?: return false
         val item = adapter.getItem(position) ?: return false
-        return if (actionMode != null && adapter.mode == SelectableAdapter.Mode.MULTI) {
+        if (actionMode != null && adapter.mode == SelectableAdapter.Mode.MULTI) {
+            lastClickPosition = position
             toggleSelection(position)
-            true
+            return true
         } else {
             openChapter(item.chapter)
-            false
+            return false
         }
     }
 
     override fun onItemLongClick(position: Int) {
         createActionModeIfNeeded()
-        toggleSelection(position)
+        when {
+            lastClickPosition == -1 -> setSelection(position)
+            lastClickPosition > position -> for (i in position until lastClickPosition)
+                setSelection(i)
+            lastClickPosition < position -> for (i in lastClickPosition + 1..position)
+                setSelection(i)
+            else -> setSelection(position)
+        }
+        lastClickPosition = position
+        adapter?.notifyDataSetChanged()
     }
 
     // SELECTIONS & ACTION MODE
@@ -284,12 +296,23 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
         val adapter = adapter ?: return
         val item = adapter.getItem(position) ?: return
         adapter.toggleSelection(position)
+        adapter.notifyDataSetChanged()
         if (adapter.isSelected(position)) {
             selectedItems.add(item)
         } else {
             selectedItems.remove(item)
         }
         actionMode?.invalidate()
+    }
+
+    private fun setSelection(position: Int) {
+        val adapter = adapter ?: return
+        val item = adapter.getItem(position) ?: return
+        if (!adapter.isSelected(position)) {
+            adapter.toggleSelection(position)
+            selectedItems.add(item)
+            actionMode?.invalidate()
+        }
     }
 
     private fun getSelectedChapters(): List<ChapterItem> {
@@ -304,6 +327,7 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
     }
 
     private fun destroyActionModeIfNeeded() {
+        lastClickPosition = -1
         actionMode?.finish()
     }
 
@@ -332,7 +356,6 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
             R.id.action_mark_as_unread -> markAsUnread(getSelectedChapters())
             R.id.action_download -> downloadChapters(getSelectedChapters())
             R.id.action_delete -> showDeleteChaptersConfirmationDialog()
-            R.id.action_select_between -> selectBetween()
             else -> return false
         }
         return true
@@ -343,6 +366,11 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
         adapter?.clearSelection()
         selectedItems.clear()
         actionMode = null
+    }
+
+    override fun onDetach(view: View) {
+        destroyActionModeIfNeeded()
+        super.onDetach(view)
     }
 
     override fun onMenuItemClick(position: Int, item: MenuItem) {
@@ -367,24 +395,6 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
         adapter.selectAll()
         selectedItems.addAll(adapter.items)
         actionMode?.invalidate()
-    }
-
-    private fun selectBetween() {
-        val adapter = adapter ?: return
-        if (selectedItems.size == 2) {
-            var first = adapter.items.indexOf(selectedItems.first())
-            var last = adapter.items.indexOf(selectedItems.last())
-            if (first > last) {
-                first = last.also { last = first }
-            }
-
-            selectedItems.clear()
-            selectedItems.addAll(adapter.items.subList(first, last + 1))
-            selectedItems.forEach { adapter.addSelection(adapter.items.indexOf(it)) }
-            adapter.notifyDataSetChanged()
-
-            actionMode?.invalidate()
-        }
     }
 
     private fun markAsRead(chapters: List<ChapterItem>) {

@@ -10,26 +10,19 @@
           app:ico_color="@color/md_white_1000"
           app:showAsAction="ifRoom"/>
 
+    <item android:id="@+id/action_delete"
+        android:title="@string/action_delete"
+        app:ico_icon="cmd_delete"
+        app:ico_size="20dp"
+        app:ico_color="@color/md_white_1000"
+        app:showAsAction="ifRoom"/>
+
     <item android:id="@+id/action_select_all"
         android:title="@string/action_select_all"
         app:ico_icon="cmd_select_all"
         app:ico_size="20dp"
         app:ico_color="@color/md_white_1000"
         app:showAsAction="ifRoom"/>
-
-    <item android:id="@+id/action_select_between"
-        android:title="@string/select_between"
-        app:ico_icon="cmd_select_place"
-        app:ico_size="20dp"
-        app:ico_color="@color/md_white_1000"
-        app:showAsAction="ifRoom"/>
-
-    <item android:id="@+id/action_delete"
-          android:title="@string/action_delete"
-          app:ico_icon="cmd_delete"
-          app:ico_size="20dp"
-          app:ico_color="@color/md_white_1000"
-          app:showAsAction="ifRoom"/>
 
     <item android:id="@+id/action_mark_as_read"
           android:title="@string/action_mark_as_read"
