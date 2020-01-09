@@ -294,7 +294,7 @@
         android:layout_height="wrap_content"
         android:visibility="gone"
         tools:visibility="visible"
-        app:constraint_referenced_ids="webtoon_prefs,crop_borders_webtoon,margin_ratio_text,margin_ratio_webtoon" />
+        app:constraint_referenced_ids="webtoon_prefs,crop_borders_webtoon,margin_between_webtoon,margin_ratio_text,margin_ratio_webtoon" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/verticalcenter"
