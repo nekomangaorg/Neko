@@ -1,8 +1,7 @@
 package eu.kanade.tachiyomi.data.library
 
-import java.util.Comparator
-
 import eu.kanade.tachiyomi.data.database.models.Manga
+import java.util.*
 
 /**
  * This class will provide various functions to Rank mangas to efficiently schedule mangas to update.
@@ -22,19 +21,6 @@ internal class LibraryUpdateRanker {
             return Comparator { mangaFirst: Manga,
                                 mangaSecond: Manga ->
                 compareValues(mangaSecond.last_update, mangaFirst.last_update)
-            }
-        }
-
-        /**
-         * Provides a total ordering over all the Mangas.
-         *
-         * Order the manga lexicographically.
-         * @return a Comparator that ranks manga lexicographically based on the title.
-         */
-        fun lexicographicRanking(): Comparator<Manga> {
-            return kotlin.Comparator { mangaFirst: Manga,
-                                       mangaSecond: Manga ->
-                compareValues(mangaFirst.title, mangaSecond.title)
             }
         }
     }

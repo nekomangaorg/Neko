@@ -7,6 +7,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.util.concurrent.TimeUnit
 
 class LibraryUpdateJob : Job() {
 
@@ -20,7 +21,8 @@ class LibraryUpdateJob : Job() {
 
         fun setupTask(prefInterval: Int? = null) {
             val preferences = Injekt.get<PreferencesHelper>()
-            val interval = prefInterval ?: preferences.libraryUpdateInterval().getOrDefault()
+            val interval = (prefInterval ?: preferences.libraryUpdateInterval().getOrDefault())
+                .toLong()
             if (interval > 0) {
                 val restrictions = preferences.libraryUpdateRestriction()!!
                 val acRestriction = "ac" in restrictions
@@ -30,7 +32,9 @@ class LibraryUpdateJob : Job() {
                     JobRequest.NetworkType.CONNECTED
 
                 JobRequest.Builder(TAG)
-                        .setPeriodic(interval * 60 * 60 * 1000L, 10 * 60 * 1000)
+                        .setPeriodic(
+                            TimeUnit.HOURS.toMillis(interval), TimeUnit.MINUTES.toMillis
+                                (10))
                         .setRequiredNetworkType(wifiRestriction)
                         .setRequiresCharging(acRestriction)
                         .setRequirementsEnforced(true)
