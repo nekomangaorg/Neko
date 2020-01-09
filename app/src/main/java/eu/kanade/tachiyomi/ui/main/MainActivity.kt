@@ -4,6 +4,7 @@ import android.animation.ObjectAnimator
 import android.app.SearchManager
 import android.content.Intent
 import android.content.res.Configuration
+import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.Rect
 import android.os.Build
@@ -94,16 +95,21 @@ class MainActivity : BaseActivity() {
 
     lateinit var tabAnimator: TabsAnimator
 
+    override fun getTheme(): Resources.Theme {
+        val theme = super.getTheme()
+        theme.applyStyle(when (preferences.theme()) {
+            3, 6 -> R.style.Theme_Tachiyomi_Amoled
+            4, 7 -> R.style.Theme_Tachiyomi_DarkBlue
+            else -> R.style.Theme_Tachiyomi
+        }, true)
+        return theme
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         setDefaultNightMode(when (preferences.theme()) {
             1 -> MODE_NIGHT_NO
             2, 3, 4 -> MODE_NIGHT_YES
             else -> MODE_NIGHT_FOLLOW_SYSTEM
-        })
-        setTheme(when (preferences.theme()) {
-            3, 6 -> R.style.Theme_Tachiyomi_Amoled
-            4, 7 -> R.style.Theme_Tachiyomi_DarkBlue
-            else -> R.style.Theme_Tachiyomi
         })
         super.onCreate(savedInstanceState)
 

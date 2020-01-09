@@ -3,16 +3,19 @@ package eu.kanade.tachiyomi.ui.manga.info
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
+import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+import android.os.PersistableBundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebView
 import android.widget.LinearLayout
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.graphics.ColorUtils
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -49,12 +52,17 @@ class WebViewActivity : BaseActivity() {
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        setTheme(when (preferences.theme()) {
+    override fun getTheme(): Resources.Theme {
+        val theme = super.getTheme()
+        theme.applyStyle(when (preferences.theme()) {
             3, 6 -> R.style.Theme_Tachiyomi_Amoled
             4, 7 -> R.style.Theme_Tachiyomi_DarkBlue
             else -> R.style.Theme_Tachiyomi
-        })
+        }, true)
+        return theme
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.webview_activity)
         title = intent.extras?.getString(TITLE_KEY)
@@ -90,9 +98,9 @@ class WebViewActivity : BaseActivity() {
                 0, insets.systemWindowInsetBottom
             )
         }
-        window.statusBarColor = getResourceColor(R.attr.colorPrimary)
 
         content.setOnApplyWindowInsetsListener { v, insets ->
+            window.statusBarColor = getResourceColor(R.attr.colorPrimary)
             window.navigationBarColor =
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
                     v.context.getResourceColor(android.R.attr.colorPrimary)
@@ -107,11 +115,11 @@ class WebViewActivity : BaseActivity() {
                 }
             v.setPadding(insets.systemWindowInsetLeft, insets.systemWindowInsetTop,
                 insets.systemWindowInsetRight, 0)
+            val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+            if (Build.VERSION.SDK_INT >= 26 && currentNightMode == Configuration.UI_MODE_NIGHT_NO) {
+                content.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+            }
             insets
-        }
-        val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        if (Build.VERSION.SDK_INT >= 26 && currentNightMode == Configuration.UI_MODE_NIGHT_NO) {
-            content.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
         }
 
         if (bundle == null) {
