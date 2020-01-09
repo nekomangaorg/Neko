@@ -159,6 +159,15 @@
     <style name="Theme.Reader.Light" parent="Theme.Base.Reader.Light">
         <item name="android:statusBarColor">?colorPrimaryDark</item>
         <item name="android:navigationBarColor">?colorPrimaryDark</item>
+        <!-- Attributes specific for SDK 16 to SDK 20 -->
+    </style>
+
+
+    <!--===============-->
+    <!-- Launch Screen -->
+    <!--===============-->
+    <style name="Theme.Splash" parent="Theme.Neko">
+        <item name="android:windowBackground">@drawable/splash_background</item>
     </style>
 
 

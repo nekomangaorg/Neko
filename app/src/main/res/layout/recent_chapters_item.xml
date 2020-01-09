@@ -16,7 +16,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:src="@drawable/branded_logo_icon" />
+        tools:src="@drawable/tachiyomi_circle" />
 
     <TextView
         android:id="@+id/manga_title"
