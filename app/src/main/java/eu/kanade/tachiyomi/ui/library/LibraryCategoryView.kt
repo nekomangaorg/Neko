@@ -61,6 +61,8 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
      */
     private var subscriptions = CompositeSubscription()
 
+    private var lastClickPosition = -1
+
     fun onCreate(controller: LibraryController) {
         this.controller = controller
 
@@ -123,14 +125,14 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
                 .subscribe { onSelectionChanged(it) }
 
         subscriptions += controller.selectAllRelay
-            .subscribe {
-                if (it == category.id) {
-                    adapter.currentItems.forEach { item ->
-                        controller.setSelection(item.manga, true)
+                .subscribe {
+                    if (it == category.id) {
+                        adapter.currentItems.forEach { item ->
+                            controller.setSelection(item.manga, true)
+                        }
+                        controller.invalidateActionMode()
                     }
-                    controller.invalidateActionMode()
                 }
-            }
     }
 
     fun onRecycle() {
@@ -183,6 +185,9 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
             }
             is LibrarySelectionEvent.Unselected -> {
                 findAndToggleSelection(event.manga)
+                if (adapter.indexOf(event.manga) != -1) {
+                    lastClickPosition = -1
+                }
                 if (controller.selectedMangas.isEmpty()) {
                     adapter.mode = SelectableAdapter.Mode.SINGLE
                 }
@@ -190,6 +195,7 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
             is LibrarySelectionEvent.Cleared -> {
                 adapter.mode = SelectableAdapter.Mode.SINGLE
                 adapter.clearSelection()
+                lastClickPosition = -1
             }
         }
     }
@@ -213,15 +219,16 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
      * @param position the position of the element clicked.
      * @return true if the item should be selected, false otherwise.
      */
-    override fun onItemClick(view: View, position: Int): Boolean {
+    override fun onItemClick(view: View?, position: Int): Boolean {
         // If the action mode is created and the position is valid, toggle the selection.
         val item = adapter.getItem(position) ?: return false
-        return if (adapter.mode == SelectableAdapter.Mode.MULTI) {
+        if (adapter.mode == SelectableAdapter.Mode.MULTI) {
+            lastClickPosition = position
             toggleSelection(position)
-            true
+            return true
         } else {
             openManga(item.manga)
-            false
+            return false
         }
     }
 
@@ -232,7 +239,15 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
      */
     override fun onItemLongClick(position: Int) {
         controller.createActionModeIfNeeded()
-        toggleSelection(position)
+        when {
+            lastClickPosition == -1 -> setSelection(position)
+            lastClickPosition > position -> for (i in position until lastClickPosition)
+                setSelection(i)
+            lastClickPosition < position -> for (i in lastClickPosition + 1..position)
+                setSelection(i)
+            else -> setSelection(position)
+        }
+        lastClickPosition = position
     }
 
     /**
@@ -253,6 +268,18 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
         val item = adapter.getItem(position) ?: return
 
         controller.setSelection(item.manga, !adapter.isSelected(position))
+        controller.invalidateActionMode()
+    }
+
+    /**
+     * Tells the presenter to set the selection for the given position.
+     *
+     * @param position the position to toggle.
+     */
+    private fun setSelection(position: Int) {
+        val item = adapter.getItem(position) ?: return
+
+        controller.setSelection(item.manga, true)
         controller.invalidateActionMode()
     }
 
