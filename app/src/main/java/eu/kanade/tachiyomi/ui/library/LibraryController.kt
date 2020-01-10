@@ -341,7 +341,7 @@ class LibraryController(
         searchItem.fixExpand()
     }
 
-    fun search(query:String) {
+    fun search(query: String) {
         this.query = query
     }
 

@@ -163,7 +163,7 @@ dependencies {
     implementation "com.mikepenz:iconics-core:4.0.2@aar"
     implementation "com.mikepenz:iconics-views:4.0.2@aar"
     implementation 'com.mikepenz:community-material-typeface:3.5.95.1-kotlin@aar'
-    implementation 'com.mikepenz:google-material-typeface:3.0.1.4.original-kotlin@aar'
+    implementation 'com.mikepenz:material-design-icons-dx-typeface:5.0.1.0-kotlin@aar'
 
 
     // Job scheduling
@@ -216,7 +216,7 @@ dependencies {
 
     // Conductor
     implementation 'com.bluelinelabs:conductor:2.1.5'
-    implementation ("com.bluelinelabs:conductor-support:2.1.5") {
+    implementation("com.bluelinelabs:conductor-support:2.1.5") {
         exclude group: "com.android.support"
     }
     implementation 'com.github.inorichi:conductor-support-preference:a32c357'

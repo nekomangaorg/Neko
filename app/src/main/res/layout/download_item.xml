@@ -84,7 +84,7 @@
         android:layout_gravity="end"
         android:scaleType="center"
         app:iiv_color="@color/md_grey_400"
-        app:iiv_icon="gmd-delete"
+        app:iiv_icon="gmf-delete"
         app:iiv_padding="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit
  * Uses R.layout.fragment_download_queue.
  */
 class DownloadController : NucleusController<DownloadPresenter>(),
-    DownloadAdapter.OnItemReleaseListener, DownloadAdapter.OnItemDeleteListener,  FlexibleAdapter.OnItemClickListener {
+        DownloadAdapter.OnItemReleaseListener, DownloadAdapter.OnItemDeleteListener, FlexibleAdapter.OnItemClickListener {
 
     /**
      * Adapter containing the active downloads.
@@ -269,6 +269,7 @@ class DownloadController : NucleusController<DownloadPresenter>(),
         val downloads = (0 until adapter.itemCount).mapNotNull { adapter.getItem(it)?.download }
         presenter.reorder(downloads)
     }
+
     override fun onItemDeleted(position: Int) {
         val adapter = adapter ?: return
         val downloads = (0 until adapter.itemCount).filter { it -> it != position }.mapNotNull { adapter.getItem(it)?.download }
@@ -276,12 +277,12 @@ class DownloadController : NucleusController<DownloadPresenter>(),
     }
 
     override fun onItemClick(view: View?, position: Int): Boolean {
-        if(view?.id == R.id.remove_download  && adapter != null) {
+        if (view?.id == R.id.remove_download && adapter != null) {
             val adapter = adapter!!
             val downloads = (0 until adapter.itemCount).filter { it -> it != position }.mapNotNull { adapter.getItem(it)?.download }
             presenter.reorder(downloads)
         }
-    return true
+        return true
     }
 
 }

@@ -50,9 +50,6 @@ open class TriStateItem(val filter: Filter.TriState) : AbstractFlexibleItem<TriS
             return IconicsDrawable(view.context).icon(icon).sizeDp(18).colorInt(color)
         }
 
-
-
-
         view.setCompoundDrawablesWithIntrinsicBounds(getIcon(), null, null, null)
         holder.itemView.setOnClickListener {
             filter.state = (filter.state + 1) % 3
