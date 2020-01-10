@@ -32,7 +32,7 @@ class FABMoveBehaviour(context: Context, attrs: AttributeSet) :
         val dependencies = parent.getDependencies(fab)
         for (i in 0 until dependencies.size) {
             val view = dependencies[i]
-            if (view is Snackbar.SnackbarLayout) {
+            if (view is Snackbar.SnackbarLayout && view.isShown) {
                 minOffset = min(minOffset, view.translationY - view.height)
             }
         }

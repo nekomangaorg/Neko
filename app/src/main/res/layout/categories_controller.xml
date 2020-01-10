@@ -20,7 +20,7 @@
         android:id="@+id/fab"
         app:layout_anchor="@id/recycler"
         app:srcCompat="@drawable/ic_add_white_24dp"
-        style="@style/Theme.Widget.FAB"/>
+        style="@style/Theme.Widget.FABFixed"/>
 
     <eu.kanade.tachiyomi.widget.EmptyView
         android:id="@+id/empty_view"

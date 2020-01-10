@@ -21,6 +21,7 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout
 import com.amulyakhare.textdrawable.TextDrawable
 import com.amulyakhare.textdrawable.util.ColorGenerator
 import eu.kanade.tachiyomi.R
+import kotlin.math.min
 
 /**
  * Returns coordinates of view.
@@ -42,7 +43,7 @@ Unit)? = null): Snackbar {
     val snack = Snackbar.make(this, message, length)
     val textView: TextView = snack.view.findViewById(com.google.android.material.R.id.snackbar_text)
     textView.setTextColor(context.getResourceColor(R.attr.snackbar_text))
-    when {
+   /* when {
         Build.VERSION.SDK_INT >= 23 ->  {
             val leftM = if (this is CoordinatorLayout) 0 else rootWindowInsets.systemWindowInsetLeft
             val rightM = if (this is CoordinatorLayout) 0
@@ -51,21 +52,22 @@ Unit)? = null): Snackbar {
                 .systemWindowInsetBottom, rightM, leftM)
         }
         else -> snack.config(context)
-    }
+    }*/
+    snack.config(context)
     if (f != null) {
         snack.f()
     }
-    if (Build.VERSION.SDK_INT < 23) {
+   // if (Build.VERSION.SDK_INT < 23) {
         val view = if (this !is CoordinatorLayout) this else snack.view
         view.doOnApplyWindowInsets { _, insets, _ ->
             snack.view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 bottomMargin = 12 + insets.systemWindowInsetBottom
             }
         }
-    }
+    /*}
     else {
         snack.view.doOnApplyWindowInsets { _,_,_ -> }
-    }
+    }*/
     snack.show()
     return snack
 }

@@ -97,9 +97,6 @@
         <item name="background_card">@color/dialogDark</item>
         <item name="icon_color">@color/iconColorDark</item>
 
-        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
-        <item name="android:statusBarColor">?colorPrimaryDark</item>
-        <item name="android:navigationBarColor">?colorPrimaryDark</item>
     </style>
 
     <style name="Theme.Base.Reader.Light" parent="Theme.AppCompat.Light.NoActionBar">

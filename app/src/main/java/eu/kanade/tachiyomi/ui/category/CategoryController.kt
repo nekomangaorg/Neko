@@ -81,7 +81,7 @@ class CategoryController : NucleusController<CategoryPresenter>(),
         super.onViewCreated(view)
 
         adapter = CategoryAdapter(this@CategoryController)
-        recycler.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(view.context)
+        recycler.layoutManager = LinearLayoutManager(view.context)
         recycler.setHasFixedSize(true)
         recycler.adapter = adapter
         adapter?.isHandleDragEnabled = true
@@ -93,10 +93,13 @@ class CategoryController : NucleusController<CategoryPresenter>(),
 
         val fabBaseMarginBottom = fab?.marginBottom ?: 0
         recycler.doOnApplyWindowInsets { v, insets, padding ->
-            v.updatePaddingRelative(bottom = padding.bottom + insets.systemWindowInsetBottom)
+
             fab?.updateLayoutParams<ViewGroup.MarginLayoutParams>  {
                 bottomMargin = fabBaseMarginBottom + insets.systemWindowInsetBottom
             }
+            // offset the recycler by the fab's inset + some inset on top
+            v.updatePaddingRelative(bottom = padding.bottom + (fab?.marginBottom ?: 0) +
+                fabBaseMarginBottom + (fab?.height ?: 0))
         }
     }
 
