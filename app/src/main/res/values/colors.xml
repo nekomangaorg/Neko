@@ -9,8 +9,6 @@
     <color name="colorAmoledPrimary">@color/md_black_1000</color>
     <color name="mangadex_orange">#F79421</color>
 
-    <color name="colorSplash">#455A64</color>
-
     <!-- Light Theme -->
     <color name="colorAccentLight">#6d6d6d</color>
     <color name="textColorPrimaryLight">@color/md_black_1000_87</color>
