@@ -71,7 +71,7 @@ class CloudflareInterceptor(private val context: Context) : Interceptor {
         val headers = request.headers.toMultimap().mapValues { it.value.getOrNull(0) ?: "" }
 
         handler.post {
-            val view = WebView(context)
+            val view = WebView(context.applicationContext)
             webView = view
             view.settings.javaScriptEnabled = true
             view.settings.userAgentString = request.header("User-Agent")

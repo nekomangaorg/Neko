@@ -8,4 +8,5 @@
     <color name="rippleColor">@color/md_white_1000_20</color>
     <color name="dialogBackground">@color/md_grey_800</color>
     <color name="colorAccent">#3399FF</color>
+    <color name="splashBackground">@color/colorDarkPrimary</color>
 </resources>

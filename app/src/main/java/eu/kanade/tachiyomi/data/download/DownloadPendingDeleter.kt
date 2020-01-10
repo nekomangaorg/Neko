@@ -146,7 +146,8 @@ class DownloadPendingDeleter(context: Context) {
     private data class ChapterEntry(
             val id: Long,
             val url: String,
-            val name: String
+            val name: String,
+            val scanlator: String?
     )
 
     /**
@@ -170,7 +171,7 @@ class DownloadPendingDeleter(context: Context) {
      * Returns a chapter entry from a chapter model.
      */
     private fun Chapter.toEntry(): ChapterEntry {
-        return ChapterEntry(id!!, url, name)
+        return ChapterEntry(id!!, url, name, scanlator)
     }
 
     /**
@@ -188,6 +189,7 @@ class DownloadPendingDeleter(context: Context) {
     private fun ChapterEntry.toModel(): Chapter {
         return Chapter.create().also {
             it.id = id
+            it.scanlator = scanlator
             it.url = url
             it.name = name
         }
