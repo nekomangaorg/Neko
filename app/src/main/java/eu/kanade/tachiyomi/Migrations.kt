@@ -1,10 +1,8 @@
 package eu.kanade.tachiyomi
 
-import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.updater.UpdaterJob
-import java.io.File
 
 object Migrations {
 
@@ -20,7 +18,7 @@ object Migrations {
         if (oldVersion < BuildConfig.VERSION_CODE) {
             preferences.lastVersionCode().set(BuildConfig.VERSION_CODE)
 
-            if (oldVersion == 0) {
+            if (oldVersion < 38) {
                 if (BuildConfig.INCLUDE_UPDATER && preferences.automaticUpdates()) {
                     UpdaterJob.setupTask()
                 }
