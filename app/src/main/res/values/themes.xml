@@ -76,6 +76,10 @@
         <item name="android:divider">@color/dividerDark</item>
         <item name="android:listDivider">@drawable/line_divider_dark</item>
 
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@color/colorDarkPrimaryDark</item>
+
         <!-- Themes -->
         <item name="windowActionModeOverlay">true</item>
         <item name="actionBarTheme">@style/ThemeOverlay.AppCompat.Dark.ActionBar</item>
@@ -139,6 +143,9 @@
     <!--===============-->
     <style name="Theme.BrandedLaunch">
         <item name="android:windowBackground">@mipmap/ic_launcher</item>
+    </style>
+    <style name="Theme.Splash" parent="Theme.Tachiyomi">
+        <item name="android:windowBackground">@drawable/splash_background</item>
     </style>
 
 

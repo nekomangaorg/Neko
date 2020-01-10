@@ -21,7 +21,9 @@ import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
 import com.afollestad.materialdialogs.MaterialDialog
+import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
@@ -240,11 +242,7 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         }
 
         // If manga source is known update source TextView.
-        manga_source.text = if (source == null) {
-            view.context.getString(R.string.unknown)
-        } else {
-            source.toString()
-        }
+        manga_source.text = source?.toString() ?: view.context.getString(R.string.unknown)
 
         // Update genres list
         if (manga.genre.isNullOrBlank().not()) {
@@ -580,17 +578,18 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
                         3 -> centerCrop().transform(MaskTransformation(R.drawable.mask_star))
                     }
                 }
-                .into(object : CustomTarget<Bitmap>(96, 96) {
-                    override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+                .listener(object : RequestListener<Bitmap> {
+                    override fun onResourceReady(resource: Bitmap, model: Any, target: Target<Bitmap>, dataSource: DataSource, isFirstResource: Boolean): Boolean {
                         createShortcut(resource)
+                        return true
                     }
 
-                    override fun onLoadCleared(placeholder: Drawable?) { }
-
-                    override fun onLoadFailed(errorDrawable: Drawable?) {
+                    override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Bitmap>?, isFirstResource: Boolean): Boolean {
                         activity?.toast(R.string.icon_creation_fail)
+                        return true
                     }
                 })
+                .submit()
     }
 
     /**

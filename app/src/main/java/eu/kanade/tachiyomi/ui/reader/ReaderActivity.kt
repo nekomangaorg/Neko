@@ -9,7 +9,6 @@ import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Color
-import android.os.Build
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.Menu
@@ -68,6 +67,7 @@ import uy.kohesive.injekt.injectLazy
 import java.io.File
 import java.util.Date
 import java.util.concurrent.TimeUnit
+import kotlin.math.abs
 
 /**
  * Activity containing the reader of Tachiyomi. This activity is mostly a container of the
@@ -803,18 +803,22 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
          */
         private fun setCustomBrightnessValue(value: Int) {
             // Calculate and set reader brightness.
-            val readerBrightness = if (value > 0) {
-                value / 100f
-            } else if (value < 0) {
-                0.01f
-            } else WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
+            val readerBrightness = when {
+                value > 0 -> {
+                    value / 100f
+                }
+                value < 0 -> {
+                    0.01f
+                }
+                else -> WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
+            }
 
             window.attributes = window.attributes.apply { screenBrightness = readerBrightness }
 
             // Set black overlay visibility.
             if (value < 0) {
                 brightness_overlay.visibility = View.VISIBLE
-                val alpha = (Math.abs(value) * 2.56).toInt()
+                val alpha = (abs(value) * 2.56).toInt()
                 brightness_overlay.setBackgroundColor(Color.argb(alpha, 0, 0, 0))
             } else {
                 brightness_overlay.visibility = View.GONE

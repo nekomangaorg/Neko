@@ -147,7 +147,8 @@ class SearchController(
                         preferences.migrateFlags().set(newValue)
 
                         true
-                    }.positiveText(R.string.migrate)
+                    }
+                    .positiveText(R.string.migrate)
                     .negativeText(R.string.copy)
                     .neutralText(android.R.string.cancel)
                     .onPositive { _, _ ->

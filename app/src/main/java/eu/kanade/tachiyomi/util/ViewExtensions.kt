@@ -113,7 +113,7 @@ inline fun View.visibleIf(block: () -> Boolean) {
  * @param random random color
  */
 fun View.getRound(text: String, random : Boolean = true): TextDrawable {
-    val size = Math.min(this.width, this.height)
+    val size = min(this.width, this.height)
     return TextDrawable.builder()
             .beginConfig()
             .width(size)

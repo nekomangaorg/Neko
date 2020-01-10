@@ -216,7 +216,7 @@ object ImageUtil {
     }
 
     private fun ByteArray.compareWith(magic: ByteArray): Boolean {
-        for (i in 0 until magic.size) {
+        for (i in magic.indices) {
             if (this[i] != magic[i]) return false
         }
         return true
@@ -224,7 +224,7 @@ object ImageUtil {
 
     private fun charByteArrayOf(vararg bytes: Int): ByteArray {
         return ByteArray(bytes.size).apply {
-            for (i in 0 until bytes.size) {
+            for (i in bytes.indices) {
                 set(i, bytes[i].toByte())
             }
         }

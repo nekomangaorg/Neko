@@ -121,7 +121,7 @@
     <string name="loading">Loading…</string>
 
     <!-- Shortcuts-->
-    <string name="app_not_available">Application not available</string>
+    <string name="app_not_available">App not available</string>
     <string name="short_recent_updates">Updates</string>
 
     <!-- Preferences -->
@@ -168,13 +168,14 @@
     <string name="pref_skip_pre_migration">Skip pre-migration</string>
     <string name="pref_skip_pre_migration_summary">Use last saved pre-migration preferences
     and sources to mass migrate</string>
-    <string name="pref_theme">Application theme</string>
-    <string name="light_theme">Main theme</string>
-    <string name="dark_theme">Dark theme</string>
-    <string name="amoled_theme">AMOLED theme</string>
+    <string name="pref_ask_update_manga_sync">Confirm before updating</string>
+    <string name="pref_theme">App theme</string>
+    <string name="light_theme">Light</string>
+    <string name="dark_theme">Dark</string>
+    <string name="amoled_theme">AMOLED dark</string>
     <string name="darkblue_theme">Dark blue</string>
     <string name="system_theme">System default</string>
-    <string name="system_amoled_theme">System default (AMOLED)</string>
+    <string name="system_amoled_theme">System default (AMOLED dark)</string>
     <string name="system_darkblue_theme">System default (Dark blue)</string>
     <string name="pref_start_screen">Start screen</string>
     <string name="pref_language">Language</string>
@@ -202,10 +203,10 @@
     <string name="ext_preferences">Preferences</string>
     <string name="ext_available">Available</string>
     <string name="untrusted_extension">Untrusted extension</string>
-    <string name="untrusted_extension_message">This extension was signed with an untrusted certificate and it wasn\'t activated.\n\nA malicious extension could read any login credentials stored in Tachiyomi or execute arbitrary code.\n\nBy trusting this certificate you accept these risks.</string>
+    <string name="untrusted_extension_message">This extension was signed with an untrusted certificate and wasn\'t activated.\n\nA malicious extension could read any login credentials stored in Tachiyomi or execute arbitrary code.\n\nBy trusting this certificate you accept these risks.</string>
     <string name="ext_version_info">Version: %1$s</string>
     <string name="ext_language_info">Language: %1$s</string>
-    <string name="ext_empty_preferences">There are no preferences to edit for this extension</string>
+    <string name="ext_empty_preferences">No preferences to edit for this extension</string>
 
       <!-- Reader section -->
     <string name="pref_fullscreen">Fullscreen</string>
@@ -304,7 +305,7 @@
     <string name="restore_completed">Restore completed</string>
     <string name="error_opening_log">Could not open log</string>
     <string name="restore_completed_content">Restore took %1$s.\n%2$s errors found.</string>
-    <string name="backup_restore_content">Restore uses source to fetch data, carrier costs may apply.\nAlso make sure you are properly logged in sources that require so before restoring.</string>
+    <string name="backup_restore_content">Restore uses source to fetch data, carrier costs may apply.\n\nMake sure you have installed all necessary extensions and are logged in to sources and tracking services before restoring.</string>
     <string name="file_saved">File saved at %1$s</string>
     <string name="backup_choice">What do you want to backup?</string>
     <string name="restoring_backup">Restoring backup</string>
@@ -331,7 +332,7 @@
     <string name="version">Version</string>
     <string name="build_time">Build time</string>
     <string name="pref_enable_automatic_updates">Check for updates</string>
-    <string name="pref_enable_automatic_updates_summary">Automatically check for application updates</string>
+    <string name="pref_enable_automatic_updates_summary">Automatically check for new app versions</string>
     <!-- ACRA -->
     <string name="pref_enable_acra">Send crash reports</string>
     <string name="pref_acra_summary">Helps fix any bugs. No sensitive data will be sent</string>
@@ -343,8 +344,8 @@
     <string name="password">Password</string>
     <string name="show_password">Show password</string>
     <string name="login">Login</string>
-    <string name="login_success">Login successful</string>
-    <string name="invalid_login">Login error</string>
+    <string name="login_success">Successfully logged in</string>
+    <string name="invalid_login">Could not log in</string>
     <string name="unknown_error">Unknown error</string>
 
     <!-- Library fragment -->
@@ -371,7 +372,7 @@
     <string name="browse">Browse</string>
 
     <!-- Manga activity -->
-    <string name="manga_not_in_db">This manga was removed from the database!</string>
+    <string name="manga_not_in_db">This manga has been removed from the database.</string>
 
     <!-- Manga info fragment -->
     <string name="manga_detail_tab">Info</string>
@@ -391,14 +392,14 @@
     <string name="manga_info_status_label">Status</string>
     <string name="manga_info_source_label">Source</string>
     <string name="manga_info_genres_label">Genres</string>
-    <string name="circular_icon">Circular icon</string>
-    <string name="rounded_icon">Rounded icon</string>
-    <string name="square_icon">Square icon</string>
-    <string name="star_icon">Star icon</string>
+    <string name="circular_icon">Circular</string>
+    <string name="rounded_icon">Rounded</string>
+    <string name="square_icon">Square</string>
+    <string name="star_icon">Star</string>
     <string name="shortcut_title">Shortcut title</string>
     <string name="shortcut_created">Shortcut was added to home screen.</string>
     <string name="icon_shape">Icon shape</string>
-    <string name="icon_creation_fail">Failed to create shortcut!</string>
+    <string name="icon_creation_fail">Could not create shortcut</string>
     <string name="delete_downloads_for_manga">Delete downloaded chapters?</string>
     <string name="copied_to_clipboard">%1$s copied to clipboard</string>
     <string name="source_not_installed">Source not installed: %1$s</string>
@@ -415,7 +416,7 @@
     <string name="chapter_downloading_progress">Downloading (%1$d/%2$d)</string>
     <string name="chapter_error">Error</string>
     <string name="chapter_paused">Paused</string>
-    <string name="fetch_chapters_error">Error while fetching chapters</string>
+    <string name="fetch_chapters_error">Could not fetch chapters</string>
     <string name="show_title">Show title</string>
     <string name="show_chapter_number">Show chapter number</string>
     <string name="sorting_mode">Sorting mode</string>
@@ -424,12 +425,12 @@
     <string name="manga_download">Download</string>
     <string name="custom_download">Download custom amount</string>
     <string name="custom_hint">amount</string>
-    <string name="download_1">Download next chapter</string>
-    <string name="download_5">Download next 5 chapters</string>
-    <string name="download_10">Download next 10 chapters</string>
-    <string name="download_custom">Download custom</string>
-    <string name="download_all">Download all</string>
-    <string name="download_unread">Download unread</string>
+    <string name="download_1">Next chapter</string>
+    <string name="download_5">Next 5 chapters</string>
+    <string name="download_10">Next 10 chapters</string>
+    <string name="download_custom">Custom</string>
+    <string name="download_all">All</string>
+    <string name="download_unread">Unread</string>
     <string name="confirm_delete_chapters">Are you sure you want to delete selected chapters?</string>
     <string name="confirm_migration">Migrate %1$d%2$s manga?</string>
     <string name="confirm_copy">Copy %1$d%2$s manga?</string>
@@ -441,6 +442,7 @@
         migration</string>
     <string name="no_alternatives_found">No Alternatives Found</string>
     <string name="stop_migration">Stop migrating?</string>
+    <string name="invalid_download_dir">Invalid download directory</string>
 
     <!-- Tracking Screen -->
     <string name="manga_tracking_tab">Tracking</string>
@@ -457,7 +459,7 @@
     <string name="track_start_date">Started</string>
     <string name="track_type">Type</string>
     <string name="track_author">Author</string>
-    <string name="url_not_set">Manga url is not set please click title and select manga again</string>
+    <string name="url_not_set">Manga URL not set, please click title and select manga again</string>
 
     <!-- Category activity -->
     <string name="error_category_exists">A category with this name already exists!</string>
@@ -488,7 +490,7 @@
     <string name="no_previous_chapter">Previous chapter not found</string>
     <string name="decode_image_error">The image could not be decoded</string>
     <string name="confirm_update_manga_sync">Update last chapter read in enabled services to %1$d?</string>
-    <string name="confirm_set_image_as_cover">Do you want to set this image as the cover?</string>
+    <string name="confirm_set_image_as_cover">Use this image as cover art?</string>
     <string name="viewer_for_this_series">Viewer for this series</string>
     <string name="transition_finished">Finished:</string>
     <string name="transition_current">Current:</string>
@@ -515,7 +517,7 @@
     <string name="latest_x">Latest: %1$s</string>
 
     <!-- Downloads activity and service -->
-    <string name="download_queue_error">An error occurred while downloading chapters. You can try again in the downloads section</string>
+    <string name="download_queue_error">Could not download chapters. You can try again in the downloads section</string>
 
     <!-- Library update service notifications -->
     <string name="notification_update_progress">Update progress: %1$d/%2$d</string>
@@ -535,16 +537,16 @@
     <string name="file_select_icon">Select shortcut icon</string>
 
     <!--UpdateCheck-->
-    <string name="update_check_title">New update available!</string>
+    <string name="update_check_title">New version available!</string>
     <string name="update_check_confirm">Download</string>
     <string name="update_check_ignore">Ignore</string>
     <string name="update_check_no_new_updates">No new updates available</string>
     <string name="update_check_download_started">Download started</string>
-    <string name="update_check_look_for_updates">Looking for updates</string>
+    <string name="update_check_look_for_updates">Searching for updates…</string>
 
     <!--UpdateCheck Notifications-->
     <string name="update_check_notification_file_download">Download update</string>
-    <string name="update_check_notification_download_in_progress">Download in progress</string>
+    <string name="update_check_notification_download_in_progress">Downloading…</string>
     <string name="update_check_notification_download_complete">Download complete</string>
     <string name="update_check_notification_download_error">Download error</string>
     <string name="update_check_notification_update_available">Update available</string>
@@ -558,16 +560,16 @@
     <string name="information_no_downloads">No downloads</string>
     <string name="information_no_recent">No recent chapters</string>
     <string name="information_no_recent_manga">No recently read manga</string>
-    <string name="information_empty_library">Your library is empty, you can add series to your library from the Catalogues.</string>
+    <string name="information_empty_library">Your library is empty, add series to your library from the catalogues.</string>
     <string name="information_empty_category">You have no categories. Hit the plus button to create one for organizing your library.</string>
 
     <!-- Download Notification -->
     <string name="download_notifier_downloader_title">Downloader</string>
     <string name="download_notifier_title_error">Error</string>
-    <string name="download_notifier_unkown_error">An unexpected error occurred while downloading chapter</string>
+    <string name="download_notifier_unkown_error">Could not download chapter due to unexpected error</string>
     <string name="download_notifier_page_error">A page is missing in directory</string>
-    <string name="download_notifier_page_ready_error">A page is not loaded</string>
-    <string name="download_notifier_text_only_wifi">No wifi connection available</string>
+    <string name="download_notifier_page_ready_error">A page has not been loaded</string>
+    <string name="download_notifier_text_only_wifi">No Wi-Fi connection available</string>
     <string name="download_notifier_no_network">No network connection available</string>
     <string name="download_notifier_download_paused">Download paused</string>
 

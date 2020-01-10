@@ -97,12 +97,15 @@ class LibraryPresenter(
     fun subscribeLibrary() {
         if (librarySubscription.isNullOrUnsubscribed()) {
             librarySubscription = getLibraryObservable()
-                    .combineLatest(downloadTriggerRelay.observeOn(Schedulers.io()),
-                            { lib, _ -> lib.apply { setDownloadCount(mangaMap) } })
-                    .combineLatest(filterTriggerRelay.observeOn(Schedulers.io()),
-                            { lib, _ -> lib.copy(mangaMap = applyFilters(lib.mangaMap)) })
-                    .combineLatest(sortTriggerRelay.observeOn(Schedulers.io()),
-                            { lib, _ -> lib.copy(mangaMap = applySort(lib.mangaMap)) })
+                    .combineLatest(downloadTriggerRelay.observeOn(Schedulers.io())) {
+                        lib, _ -> lib.apply { setDownloadCount(mangaMap) }
+                    }
+                    .combineLatest(filterTriggerRelay.observeOn(Schedulers.io())) {
+                        lib, _ -> lib.copy(mangaMap = applyFilters(lib.mangaMap))
+                    }
+                    .combineLatest(sortTriggerRelay.observeOn(Schedulers.io())) {
+                        lib, _ -> lib.copy(mangaMap = applySort(lib.mangaMap))
+                    }
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeLatestCache({ view, (categories, mangaMap) ->
                         view.onNextLibraryUpdate(categories, mangaMap)
