@@ -23,7 +23,7 @@ object Migrations {
                     UpdaterJob.setupTask()
                 }
             }
-            return true
+            return false
         }
         return false
     }
