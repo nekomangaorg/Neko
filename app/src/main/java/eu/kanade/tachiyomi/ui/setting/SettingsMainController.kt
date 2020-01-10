@@ -20,7 +20,7 @@ class SettingsMainController : SettingsController() {
             onClick { navigateTo(SettingsGeneralController()) }
         }
         preference {
-            iconRes = R.drawable.ic_in_library_24dp
+            iconRes = R.drawable.ic_book_black_24dp
             iconTint = tintColor
             titleRes = R.string.pref_category_library
             onClick { navigateTo(SettingsLibraryController()) }

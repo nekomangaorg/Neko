@@ -69,7 +69,6 @@ class SettingsGeneralController : SettingsController() {
                 true
             }
         }
-
         intListPreference {
             key = Keys.startScreen
             titleRes = R.string.pref_start_screen
