@@ -149,7 +149,7 @@ class ChaptersPresenter(
         hasRequested = true
 
         if (!fetchChaptersSubscription.isNullOrUnsubscribed()) return
-        fetchChaptersSubscription = Observable.defer { source.fetchChapterList(manga) }
+        fetchChaptersSubscription = Observable.defer { source.fetchChapterListObservable(manga) }
                 .subscribeOn(Schedulers.io())
                 .map { syncChaptersWithSource(db, it, manga, source) }
                 .observeOn(AndroidSchedulers.mainThread())
@@ -174,8 +174,7 @@ class ChaptersPresenter(
         var observable = Observable.from(chapters).subscribeOn(Schedulers.io())
         if (onlyUnread()) {
             observable = observable.filter { !it.read }
-        }
-        else if (onlyRead()) {
+        } else if (onlyRead()) {
             observable = observable.filter { it.read }
         }
         if (onlyDownloaded()) {

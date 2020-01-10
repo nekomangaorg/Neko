@@ -66,7 +66,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         return FollowsHandler(clientBuilder(), headers).changeFollowStatus(manga)
     }
 
-    fun fetchRandomMangaId() : Observable<String>{
+    fun fetchRandomMangaId(): Observable<String> {
         return MangaHandler(clientBuilder(), headers, internalLang).fetchRandomMangaId()
     }
 
@@ -84,11 +84,19 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         return FollowsHandler(clientBuilder(), headers).fetchFollows(page)
     }
 
-    override fun fetchMangaDetails(manga: SManga): Observable<SManga> {
+    override fun fetchMangaDetailsObservable(manga: SManga): Observable<SManga> {
+        return MangaHandler(clientBuilder(), headers, internalLang).fetchMangaDetailsObservable(manga)
+    }
+
+    override suspend fun fetchMangaDetails(manga: SManga): SManga {
         return MangaHandler(clientBuilder(), headers, internalLang).fetchMangaDetails(manga)
     }
 
-    override fun fetchChapterList(manga: SManga): Observable<List<SChapter>> {
+    override fun fetchChapterListObservable(manga: SManga): Observable<List<SChapter>> {
+        return MangaHandler(clientBuilder(), headers, internalLang).fetchChapterListObservable(manga)
+    }
+
+    override suspend fun fetchChapterList(manga: SManga): List<SChapter> {
         return MangaHandler(clientBuilder(), headers, internalLang).fetchChapterList(manga)
     }
 
@@ -125,11 +133,11 @@ open class Mangadex(override val lang: String, private val internalLang: String,
     }
 
     override fun logout(): Observable<Boolean> {
-   //https://mangadex.org/ajax/actions.ajax.php?function=logout
+        //https://mangadex.org/ajax/actions.ajax.php?function=logout
         val httpUrl = baseUrl.toHttpUrlOrNull()!!
         val cookie = network.cookieManager.get(httpUrl).find { it.name == REMEMBER_ME }
         val token = cookie?.value
-        if(token.isNullOrEmpty()){
+        if (token.isNullOrEmpty()) {
             return Observable.just(true)
         }
 

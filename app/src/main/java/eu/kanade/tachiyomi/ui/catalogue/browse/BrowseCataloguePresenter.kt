@@ -238,7 +238,7 @@ open class BrowseCataloguePresenter(
      * @return an observable of the manga to initialize
      */
     private fun getMangaDetailsObservable(manga: Manga): Observable<Manga> {
-        return source.fetchMangaDetails(manga)
+        return source.fetchMangaDetailsObservable(manga)
                 .flatMap { networkManga ->
                     manga.copyFrom(networkManga)
                     manga.initialized = true

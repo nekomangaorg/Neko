@@ -262,15 +262,14 @@ class BackupManager(val context: Context, version: Int = CURRENT_VERSION) {
      * @param manga manga that needs updating
      * @return [Observable] that contains manga
      */
-    fun restoreMangaFetchObservable(source: Source, manga: Manga): Observable<Manga> {
-        return source.fetchMangaDetails(manga)
-                .map { networkManga ->
-                    manga.copyFrom(networkManga)
-                    manga.favorite = true
-                    manga.initialized = true
-                    manga.id = insertManga(manga)
-                    manga
-                }
+    suspend fun restoreMangaFetch(source: Source, manga: Manga): Manga {
+        val networkManga = source.fetchMangaDetails(manga)
+        manga.copyFrom(networkManga)
+        manga.favorite = true
+        manga.initialized = true
+        manga.id = insertManga(manga)
+        return manga
+
     }
 
     /**
@@ -280,15 +279,13 @@ class BackupManager(val context: Context, version: Int = CURRENT_VERSION) {
      * @param manga manga that needs updating
      * @return [Observable] that contains manga
      */
-    fun restoreChapterFetchObservable(source: Source, manga: Manga, chapters: List<Chapter>): Observable<Pair<List<Chapter>, List<Chapter>>> {
-        return source.fetchChapterList(manga)
-                .map { syncChaptersWithSource(databaseHelper, it, manga, source) }
-                .doOnNext {
-                    if (it.first.isNotEmpty()) {
-                        chapters.forEach { it.manga_id = manga.id }
-                        insertChapters(chapters)
-                    }
-                }
+    suspend fun restoreChapterFetch(source: Source, manga: Manga, chapters: List<Chapter>) {
+        val fetchChapters = source.fetchChapterList(manga)
+        val syncChaptersWithSource = syncChaptersWithSource(databaseHelper, fetchChapters, manga, source)
+        if (syncChaptersWithSource.first.isNotEmpty()) {
+            chapters.forEach { it.manga_id = manga.id }
+            insertChapters(chapters)
+        }
     }
 
     /**

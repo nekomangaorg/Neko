@@ -84,7 +84,7 @@ class MangaInfoPresenter(
      */
     fun fetchMangaFromSource() {
         if (!fetchMangaSubscription.isNullOrUnsubscribed()) return
-        fetchMangaSubscription = Observable.defer { source.fetchMangaDetails(manga) }
+        fetchMangaSubscription = Observable.defer { source.fetchMangaDetailsObservable(manga) }
                 .map { networkManga ->
                     manga.copyFrom(networkManga)
                     manga.initialized = true
@@ -124,6 +124,7 @@ class MangaInfoPresenter(
         }
         toggleFavorite()
     }
+
     fun shareManga(cover: Bitmap) {
         val context = Injekt.get<Application>()
 
@@ -147,7 +148,7 @@ class MangaInfoPresenter(
 
         val destFile = File(directory, filename)
         val stream: OutputStream = FileOutputStream(destFile)
-        cover.compress(Bitmap.CompressFormat.JPEG,75,stream)
+        cover.compress(Bitmap.CompressFormat.JPEG, 75, stream)
         stream.flush()
         stream.close()
         return destFile

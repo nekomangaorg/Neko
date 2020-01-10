@@ -72,7 +72,7 @@ class LibraryUpdateService(
      */
     private var subscription: Subscription? = null
 
-     var job: Job? = null
+    var job: Job? = null
 
 
     /**
@@ -228,16 +228,16 @@ class LibraryUpdateService(
         }
         // Update either chapter list or manga details.
         if (target == Target.FOLLOW_STATUSES) {
-           /* GlobalScope.launch(handler) {
-                syncFollowsStatus()
-            }.invokeOnCompletion { stopSelf(startId) }*/
+            /* GlobalScope.launch(handler) {
+                 syncFollowsStatus()
+             }.invokeOnCompletion { stopSelf(startId) }*/
         } else if (target == Target.SYNC_FOLLOWS) {
             job = GlobalScope.launch(handler) {
                 syncFollows()
             }
             job?.invokeOnCompletion { stopSelf(startId) }
         } else if (target == Target.CLEANUP) {
-            job  = GlobalScope.launch(handler) {
+            job = GlobalScope.launch(handler) {
                 cleanupDownloads()
             }
             job?.invokeOnCompletion { stopSelf(startId) }
@@ -386,7 +386,7 @@ class LibraryUpdateService(
      */
     fun updateManga(manga: Manga): Observable<Pair<List<Chapter>, List<Chapter>>> {
         val source = sourceManager.getMangadex() as? HttpSource ?: return Observable.empty()
-        return source.fetchChapterList(manga)
+        return source.fetchChapterListObservable(manga)
                 .map { syncChaptersWithSource(db, it, manga, source) }
     }
 
@@ -465,7 +465,7 @@ class LibraryUpdateService(
                     val source = sourceManager.get(manga.source) as? HttpSource
                             ?: return@concatMap Observable.empty<LibraryManga>()
 
-                    source.fetchMangaDetails(manga)
+                    source.fetchMangaDetailsObservable(manga)
                             .map { networkManga ->
                                 manga.copyFrom(networkManga)
                                 db.insertManga(manga).executeAsBlocking()

@@ -64,14 +64,29 @@ interface Source {
      *
      * @param manga the manga to update.
      */
-    fun fetchMangaDetails(manga: SManga): Observable<SManga>
+    fun fetchMangaDetailsObservable(manga: SManga): Observable<SManga>
+
+
+    /**
+     * Returns a updated details for a manga
+     *
+     * @param manga the manga to update.
+     */
+    suspend fun fetchMangaDetails(manga: SManga): SManga
 
     /**
      * Returns an observable with all the available chapters for a manga.
      *
      * @param manga the manga to update.
      */
-    fun fetchChapterList(manga: SManga): Observable<List<SChapter>>
+    fun fetchChapterListObservable(manga: SManga): Observable<List<SChapter>>
+
+    /**
+     * Returns an observable with all the available chapters for a manga.
+     *
+     * @param manga the manga to update.
+     */
+    suspend fun fetchChapterList(manga: SManga): List<SChapter>
 
     /**
      * Returns an observable with the list of pages a chapter has.
@@ -85,6 +100,5 @@ interface Source {
     fun login(username: String, password: String, twoFactorCode: String = ""): Observable<Boolean>
 
     fun logout(): Observable<Boolean>
-
 
 }

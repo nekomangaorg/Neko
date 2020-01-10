@@ -74,7 +74,7 @@ class LibraryUpdateServiceTest {
 
         val sourceChapters = createChapters("/chapter1", "/chapter2")
 
-        `when`(source.fetchChapterList(manga)).thenReturn(Observable.just(sourceChapters))
+        `when`(source.fetchChapterListObservable(manga)).thenReturn(Observable.just(sourceChapters))
 
         service.updateManga(manga).subscribe()
 
@@ -91,9 +91,9 @@ class LibraryUpdateServiceTest {
         val chapters3 = createChapters("/achapter1", "/achapter2")
 
         // One of the updates will fail
-        `when`(source.fetchChapterList(favManga[0])).thenReturn(Observable.just(chapters))
-        `when`(source.fetchChapterList(favManga[1])).thenReturn(Observable.error<List<SChapter>>(Exception()))
-        `when`(source.fetchChapterList(favManga[2])).thenReturn(Observable.just(chapters3))
+        `when`(source.fetchChapterListObservable(favManga[0])).thenReturn(Observable.just(chapters))
+        `when`(source.fetchChapterListObservable(favManga[1])).thenReturn(Observable.error<List<SChapter>>(Exception()))
+        `when`(source.fetchChapterListObservable(favManga[2])).thenReturn(Observable.just(chapters3))
 
         val intent = Intent()
         val target = LibraryUpdateService.Target.CHAPTERS

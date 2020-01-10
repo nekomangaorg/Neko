@@ -14,7 +14,10 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.*
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.fail
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -23,7 +26,6 @@ import org.mockito.Mockito.*
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 import rx.Observable
-import rx.observers.TestSubscriber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.InjektModule
 import uy.kohesive.injekt.api.InjektRegistrar
@@ -166,7 +168,7 @@ class BackupTest {
         assertThat(favoriteManga[0].viewer).isEqualTo(3)
 
         // Update json with all options enabled
-        mangaEntries.add(backupManager.backupMangaObject(manga,1))
+        mangaEntries.add(backupManager.backupMangaObject(manga, 1))
 
         // Change manga in database to default values
         val dbManga = getSingleManga("One Piece")
@@ -178,7 +180,7 @@ class BackupTest {
         assertThat(favoriteManga[0].viewer).isEqualTo(0)
 
         // Restore local manga
-        backupManager.restoreMangaNoFetch(manga,dbManga)
+        backupManager.restoreMangaNoFetch(manga, dbManga)
 
         // Test if restore successful
         favoriteManga = backupManager.databaseHelper.getFavoriteMangas().executeAsBlocking()
@@ -201,13 +203,16 @@ class BackupTest {
         // Restore manga with fetch observable
         val networkManga = getSingleManga("One Piece")
         networkManga.description = "This is a description"
-        `when`(source.fetchMangaDetails(jsonManga)).thenReturn(Observable.just(networkManga))
+        `when`(source.fetchMangaDetailsObservable(jsonManga)).thenReturn(Observable.just(networkManga))
 
-        val obs = backupManager.restoreMangaFetchObservable(source, jsonManga)
-        val testSubscriber = TestSubscriber<Manga>()
-        obs.subscribe(testSubscriber)
+        GlobalScope.launch {
+            try {
+                backupManager.restoreMangaFetch(source, jsonManga)
+            } catch (e: Exception) {
+                fail("Unexpected onError events")
+            }
+        }
 
-        testSubscriber.assertNoErrors()
 
         // Check if restore successful
         val dbCats = backupManager.databaseHelper.getFavoriteMangas().executeAsBlocking()
@@ -231,7 +236,7 @@ class BackupTest {
 
         // Create restore list
         val chapters = ArrayList<Chapter>()
-        for (i in 1..8){
+        for (i in 1..8) {
             val chapter = getSingleChapter("Chapter $i")
             chapter.read = true
             chapters.add(chapter)
@@ -245,14 +250,16 @@ class BackupTest {
         // Create list
         val chaptersRemote = ArrayList<Chapter>()
         (1..10).mapTo(chaptersRemote) { getSingleChapter("Chapter $it") }
-        `when`(source.fetchChapterList(manga)).thenReturn(Observable.just(chaptersRemote))
+        `when`(source.fetchChapterListObservable(manga)).thenReturn(Observable.just(chaptersRemote))
 
         // Call restoreChapterFetchObservable
-        val obs = backupManager.restoreChapterFetchObservable(source, manga, restoredChapters)
-        val testSubscriber = TestSubscriber<Pair<List<Chapter>, List<Chapter>>>()
-        obs.subscribe(testSubscriber)
-
-        testSubscriber.assertNoErrors()
+        GlobalScope.launch {
+            try {
+                backupManager.restoreChapterFetch(source, manga, restoredChapters)
+            } catch (e: Exception) {
+                fail("Unexpected onError events")
+            }
+        }
 
         val dbCats = backupManager.databaseHelper.getChapters(manga).executeAsBlocking()
         assertThat(dbCats).hasSize(10)
@@ -263,7 +270,7 @@ class BackupTest {
      * Test to check if history restore works
      */
     @Test
-    fun restoreHistoryForManga(){
+    fun restoreHistoryForManga() {
         // Initialize json with version 2
         initializeJsonTest(2)
 
@@ -376,7 +383,7 @@ class BackupTest {
         return category
     }
 
-    fun clearDatabase(){
+    fun clearDatabase() {
         db.deleteMangas().executeAsBlocking()
         db.deleteHistory().executeAsBlocking()
     }
