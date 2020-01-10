@@ -77,7 +77,7 @@
         <item name="android:listDivider">@drawable/line_divider_dark</item>
 
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
-        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:statusBarColor">?colorPrimaryDark</item>
         <item name="android:navigationBarColor">@color/colorDarkPrimaryDark</item>
 
         <!-- Themes -->
