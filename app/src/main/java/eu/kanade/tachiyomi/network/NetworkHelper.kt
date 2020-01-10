@@ -17,7 +17,7 @@ class NetworkHelper(context: Context) {
 
     val cookieManager = AndroidCookieJar()
 
-    private val requestsPerSecond = 4
+    private val requestsPerSecond = 3
     private val lastRequests = ArrayList<Long>(requestsPerSecond)
     private val rateLimitInterceptor = Interceptor {
         synchronized(this) {
@@ -51,24 +51,25 @@ class NetworkHelper(context: Context) {
 
 
     val client =
-        if(BuildConfig.DEBUG) {
-            OkHttpClient.Builder()
-                    .cookieJar(cookieManager)
-                    .cache(Cache(cacheDir, cacheSize))
-                    .addNetworkInterceptor(rateLimitInterceptor)
-                    .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
-                    .build()
-        }else {
-            OkHttpClient.Builder()
-                    .cookieJar(cookieManager)
-                    .cache(Cache(cacheDir, cacheSize))
-                    .addNetworkInterceptor(rateLimitInterceptor)
+            if (BuildConfig.DEBUG) {
+                val httpLoggingInterceptor = HttpLoggingInterceptor()
+                OkHttpClient.Builder()
+                        .cookieJar(cookieManager)
+                        .cache(Cache(cacheDir, cacheSize))
+                        .addNetworkInterceptor(rateLimitInterceptor)
+                        .addInterceptor(httpLoggingInterceptor.apply { httpLoggingInterceptor.level = HttpLoggingInterceptor.Level.BODY })
+                        .build()
+            } else {
+                OkHttpClient.Builder()
+                        .cookieJar(cookieManager)
+                        .cache(Cache(cacheDir, cacheSize))
+                        .addNetworkInterceptor(rateLimitInterceptor)
 
-                    .build()
-        }
+                        .build()
+            }
 
-        val cloudflareClient = client.newBuilder()
-                .addInterceptor(CloudflareInterceptor(context))
-                .build()
-    }
+    val cloudflareClient = client.newBuilder()
+            .addInterceptor(CloudflareInterceptor(context))
+            .build()
+}
 
