@@ -9,9 +9,11 @@ import android.graphics.Color
 import android.graphics.Rect
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.WebView
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
@@ -59,7 +61,9 @@ import eu.kanade.tachiyomi.util.updatePadding
 import eu.kanade.tachiyomi.util.updatePaddingRelative
 import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.coroutines.delay
+import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
+import java.lang.Exception
 import java.util.Date
 
 class MainActivity : BaseActivity() {
@@ -106,6 +110,15 @@ class MainActivity : BaseActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Some webview somwewhere breaks night mode, we create a webview to solve this: https://stackoverflow.com/a/45430282
+        if (preferences.theme() in 2..4) {
+            Timber.d("Manually instantiating WebView to avoid night mode issue.");
+            try {
+                WebView(applicationContext)
+            } catch (e: Exception) {
+                Timber.e(e, "Exception when creating webview at start")
+            }
+        }
         setDefaultNightMode(when (preferences.theme()) {
             1 -> MODE_NIGHT_NO
             2, 3, 4 -> MODE_NIGHT_YES
