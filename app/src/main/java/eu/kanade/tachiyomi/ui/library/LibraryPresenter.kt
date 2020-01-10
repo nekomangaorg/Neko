@@ -208,16 +208,10 @@ class LibraryPresenter(
                     val mangaCompare = manga1TotalChapter.compareTo(mange2TotalChapter)
                     if (mangaCompare == 0) sortAlphabetical(i1, i2) else mangaCompare
                 }
-                LibrarySort.SOURCE -> {
-                    val source1Name = sourceManager.getOrStub(i1.manga.source).name
-                    val source2Name = sourceManager.getOrStub(i2.manga.source).name
-                    val mangaCompare = source1Name.compareTo(source2Name)
-                    if (mangaCompare == 0) sortAlphabetical(i1, i2) else mangaCompare
-                }
                 LibrarySort.DRAG_AND_DROP -> {
                     0
                 }
-                else -> throw Exception("Unknown sorting mode")
+                else -> sortAlphabetical(i1, i2)
             }
         }
 

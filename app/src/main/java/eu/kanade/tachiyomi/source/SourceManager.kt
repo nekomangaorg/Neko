@@ -71,6 +71,10 @@ open class SourceManager(private val context: Context) {
             return SourceNotFoundException(context.getString(R.string.source_not_installed, id
                 .toString()), id)
         }
+
+        override fun hashCode(): Int {
+            return id.hashCode()
+        }
     }
 }
 

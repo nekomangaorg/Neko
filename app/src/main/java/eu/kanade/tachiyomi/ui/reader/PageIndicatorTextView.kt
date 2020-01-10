@@ -19,19 +19,8 @@ class PageIndicatorTextView(
         attrs: AttributeSet? = null
 ) : AppCompatTextView(context, attrs) {
 
-    private val fillColor = Color.rgb(235, 235, 235)
-    private val strokeColor = Color.rgb(45, 45, 45)
-
-    override fun onDraw(canvas: Canvas) {
-        setTextColor(strokeColor)
-        paint.strokeWidth = 4f
-        paint.style = Paint.Style.STROKE
-        super.onDraw(canvas)
-
+    init {
         setTextColor(fillColor)
-        paint.strokeWidth = 0f
-        paint.style = Paint.Style.FILL
-        super.onDraw(canvas)
     }
 
     @SuppressLint("SetTextI18n")
@@ -51,5 +40,16 @@ class PageIndicatorTextView(
         }
 
         super.setText(finalText, TextView.BufferType.SPANNABLE)
+    }
+
+    private companion object {
+        private val fillColor = Color.rgb(235, 235, 235)
+        private val strokeColor = Color.rgb(45, 45, 45)
+
+        // A span object with text outlining properties
+        val spanOutline = OutlineSpan(
+            strokeColor = strokeColor,
+            strokeWidth = 4f
+        )
     }
 }

@@ -92,11 +92,6 @@ class LibraryCategoryAdapter(val view: LibraryCategoryView) :
                     else
                         "N/A"
                 }
-                LibrarySort.SOURCE -> {
-                    val sourceId = (iFlexible as LibraryItem).manga.source
-                    val sourceManager:SourceManager by injectLazy()
-                    sourceManager.getOrStub(sourceId).name.substring(0, 1).toUpperCase(Locale.US)
-                }
                 else -> {
                     val title = (iFlexible as LibraryItem).manga.title
                     if (preferences.removeArticles().getOrDefault())

@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.library
 
+import android.annotation.SuppressLint
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
@@ -13,8 +14,10 @@ import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.preference.getOrDefault
+import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import kotlinx.android.synthetic.main.catalogue_grid_item.view.*
+import uy.kohesive.injekt.injectLazy
 
 class LibraryItem(val manga: LibraryManga, private val libraryAsList: Preference<Boolean>) :
         AbstractFlexibleItem<LibraryHolder>(), IFilterable<String> {
@@ -65,8 +68,11 @@ class LibraryItem(val manga: LibraryManga, private val libraryAsList: Preference
      * @return true if the manga should be included, false otherwise.
      */
     override fun filter(constraint: String): Boolean {
+        val sourceManager by injectLazy<SourceManager>()
+        val sourceName = sourceManager.getOrStub(manga.source).name
         return manga.title.contains(constraint, true) ||
             (manga.author?.contains(constraint, true) ?: false) ||
+            sourceName.contains(constraint, true) ||
             if (constraint.contains(",")) {
                 val genres = manga.genre?.split(", ")
                 constraint.split(",").all { containsGenre(it.trim(), genres) }
@@ -74,6 +80,7 @@ class LibraryItem(val manga: LibraryManga, private val libraryAsList: Preference
            else containsGenre(constraint, manga.genre?.split(", "))
     }
 
+    @SuppressLint("DefaultLocale")
     private fun containsGenre(tag: String, genres: List<String>?): Boolean {
         return if (tag.startsWith("-"))
             genres?.find {

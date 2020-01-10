@@ -129,11 +129,9 @@ class LibraryNavigationView @JvmOverloads constructor(context: Context, attrs: A
 
         private val unread = Item.MultiSort(R.string.action_filter_unread, this)
 
-        private val source = Item.MultiSort(R.string.manga_info_source_label, this)
-
         private val dragAndDrop = Item.MultiSort(R.string.action_sort_drag_and_drop, this)
 
-        override val items = listOf(alphabetically, lastRead, lastUpdated, unread, total, source,
+        override val items = listOf(alphabetically, lastRead, lastUpdated, unread, total, 
             dragAndDrop)
 
         override val header = Item.Header(R.string.action_sort)
@@ -150,7 +148,6 @@ class LibraryNavigationView @JvmOverloads constructor(context: Context, attrs: A
             lastUpdated.state = if (sorting == LibrarySort.LAST_UPDATED) order else SORT_NONE
             unread.state = if (sorting == LibrarySort.UNREAD) order else SORT_NONE
             total.state = if (sorting == LibrarySort.TOTAL) order else SORT_NONE
-            source.state = if (sorting == LibrarySort.SOURCE) order else SORT_NONE
             dragAndDrop.state = if (sorting == LibrarySort.DRAG_AND_DROP) order else SORT_NONE
         }
 
@@ -175,9 +172,8 @@ class LibraryNavigationView @JvmOverloads constructor(context: Context, attrs: A
                 lastUpdated -> LibrarySort.LAST_UPDATED
                 unread -> LibrarySort.UNREAD
                 total -> LibrarySort.TOTAL
-                source -> LibrarySort.SOURCE
                 dragAndDrop -> LibrarySort.DRAG_AND_DROP
-                else -> throw Exception("Unknown sorting")
+                else -> LibrarySort.ALPHA
             })
             preferences.librarySortingAscending().set(item.state == SORT_ASC)
 
