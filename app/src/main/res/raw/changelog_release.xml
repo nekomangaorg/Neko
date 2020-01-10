@@ -1,25 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <changelog bulletedList="true">
+    <changelogversion versionName="v0.9.61" changeDate="">
+        <changelogtext>Added splash screen</changelogtext>
+        <changelogtext>Truly fixed the dark theme bug</changelogtext>
+        <changelogtext>Fixed downloads not deleting after reading if the chapter has scanlator
+        </changelogtext>
+        <changelogtext>🦀Manga Rock is Dead🦀, but that shouldn't crash the app when
+            pressing browse</changelogtext>
+    </changelogversion>
+
 	<changelogversion versionName="v0.9.6" changeDate="">
-		<changelogtext>Pending downloads can be move to the top or bottom of the queue with a menu button on the right side, they can also be canceled</changelogtext>
-		<changelogtext>Fixes for the extension updates notification (should be solid now)</changelogtext>
+		<changelogtext>Pending downloads can be move to the top or bottom of the queue with a
+            menu button on the right side, they can also be canceled</changelogtext>
+		<changelogtext>Fixes for the extension updates notification (should be solid
+            now)</changelogtext>
 		<changelogtext>Auto migration now has a prompt before you quit early + fixes</changelogtext>
-		<changelogtext>Fixed dark theme sometimes mixing with the light, bugging out the UI</changelogtext>
-		<changelogtext>Added option to reorder pending downloads by newest or oldest chapter</changelogtext>
-		<changelogtext>Mass Migration now shows progress and total manga in the title</changelogtext>
-		<changelogtext>Fixed the issue where deleted downloads using the old folder format said they weren't (they were)</changelogtext>
+		<changelogtext>Fixed dark theme sometimes mixing with the light, bugging out the
+            UI</changelogtext>
+		<changelogtext>Added option to reorder pending downloads by newest or oldest
+            chapter</changelogtext>
+		<changelogtext>Mass Migration now shows progress and total manga in the
+            title</changelogtext>
+		<changelogtext>Fixed the issue where deleted downloads using the old folder format said
+            they weren't (they were)</changelogtext>
 		<changelogtext>Canceled downloads now delete the temp folder</changelogtext>
-		<changelogtext>Auto Migration source now show their language if multiple languages are enabled</changelogtext>
+		<changelogtext>Auto Migration source now show their language if multiple languages are
+            enabled</changelogtext>
 	</changelogversion>
+
 	<changelogversion versionName="v0.9.56" changeDate="">
 		<changelogtext>Rewording a few things</changelogtext>
-		<changelogtext>Extensions Updater checker now checks every 12 hours, you might need to renable this setting to get the new timing</changelogtext>
+		<changelogtext>Extensions Updater checker now checks every 12 hours, you might need to
+            renable this setting to get the new timing</changelogtext>
 		<changelogtext>Fixed reordering drag and drop by last updating being reversed</changelogtext>
-		<changelogtext>Auto Migrations now shows how many manual migrations were made after skipping the rest</changelogtext>
+		<changelogtext>Auto Migrations now shows how many manual migrations were made after
+            skipping the rest</changelogtext>
 	</changelogversion>
+
 	<changelogversion versionName="v0.9.55" changeDate="">
 		<changelogtext>Drag &amp; Drop support in Library</changelogtext>
-		<changelogtext>Optimizations for the auto-migration, should now find alternative titles for mangas</changelogtext>
+		<changelogtext>Optimizations for the auto-migration, should now find alternative titles
+            for mangas</changelogtext>
 		<changelogtext>Fast scrolling in library</changelogtext>
 		<changelogtext>(From dev) faster loading when scrubbing the reader's seekbar</changelogtext>
 		<changelogtext>Barely smaller app size</changelogtext>
@@ -28,13 +49,16 @@
 
 	<changelogversion versionName="v0.9.5" changeDate="">
 		<changelogtext>Mass/Automatic Source Migration</changelogtext>
-		<changelogtext>Fix single tag searching + multi tag searching by commas (ie. "Romance, -Harem, Comedy")</changelogtext>
+		<changelogtext>Fix single tag searching + multi tag searching by commas (ie. "Romance,
+            -Harem, Comedy")</changelogtext>
 		<changelogtext>Chapters FAB no longer hides</changelogtext>
 		<changelogtext>Added setting to ignore articles when sorting alphabetically</changelogtext>
 		<changelogtext>Downloaded chapters names now use scantalors names</changelogtext>
 		<changelogtext>Fixed reordering downloads restarting the progress</changelogtext>
-		<changelogtext>(From dev) Auto attempt a login refresh once if MAL returns http 400</changelogtext>
-		<changelogtext>(From dev) Increase default text size of the transition chapter page</changelogtext>
+		<changelogtext>(From dev) Auto attempt a login refresh once if MAL returns http
+            400</changelogtext>
+		<changelogtext>(From dev) Increase default text size of the transition chapter
+            page</changelogtext>
 		<changelogtext>(From dev) Add .nomedia file in each chapter download folder</changelogtext>
         <changelogtext>Hard coded Mangadex extension removed, please update your
             extensions to access their preferences</changelogtext>
@@ -62,13 +86,15 @@
 	<changelogversion versionName="v0.9.3" changeDate="">
         <changelogtext>Lock Tachiyomi using your fingerprint/Biometrics</changelogtext>
         <changelogtext>Added search/sorting/mass enable/disable to catalogue sources</changelogtext>
-        <changelogtext>Extensions are now filtered to your locale, with an option to show other languages</changelogtext>
+        <changelogtext>Extensions are now filtered to your locale, with an option to show other
+            languages</changelogtext>
         <changelogtext>Fixed AMOLED theme not having dark snackbar</changelogtext>
     </changelogversion>
 	
     <changelogversion versionName="v0.9.2" changeDate="">
         <changelogtext>Fixes notification text when there are multiple chapters</changelogtext>
-        <changelogtext>Simplified errors now show after restoring a backup on the popup dialog</changelogtext>
+        <changelogtext>Simplified errors now show after restoring a backup on the popup
+            dialog</changelogtext>
         <changelogtext>Fixed last updated sorting being in a jumbled order after restoring (Note:
             if the list is still jumbled after restore, refersh your library)</changelogtext>
         <changelogtext>Fixed notifcations not expanding on older devices</changelogtext>
@@ -116,7 +142,8 @@
             an end to the recent updates to adapt to their changes.</changelogtext>
         <changelogtext>Added an option to open manga details in a WebView. This
             should also help when receiving a captcha confirmation page (usually 403 errors).
-            It can also be used to login with the website, as the app now shares cookies.</changelogtext>
+            It can also be used to login with the website, as the app now shares cookies
+            .</changelogtext>
         <changelogtext>Added a deep link handler that extensions can use to perform
             a search within the app.</changelogtext>
         <changelogtext>Added an option to decode images in ARGB8888 format for
