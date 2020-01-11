@@ -6,7 +6,7 @@
     <color name="drawerHighlight">@color/md_black_1000_12</color>
     <color name="drawerPrimary">@color/colorPrimary</color>
     <color name="cardBackground">#FFFFFF</color>
-    <color name="splashBackground">#455A64</color>
+    <color name="splashBackground">@color/colorPrimary</color>
     <color name="snackbarBackground">#323232</color>
     <color name="trueSnackbarBackground">#323232</color>
     <color name="dialogBackground">@color/md_white_1000</color>
