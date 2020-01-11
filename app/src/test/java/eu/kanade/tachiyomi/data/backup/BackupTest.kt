@@ -203,7 +203,7 @@ class BackupTest {
         // Restore manga with fetch observable
         val networkManga = getSingleManga("One Piece")
         networkManga.description = "This is a description"
-        `when`(source.fetchMangaDetailsObservable(jsonManga)).thenReturn(Observable.just(networkManga))
+        `when`(source.fetchMangaDetails(jsonManga)).thenReturn(Observable.just(networkManga))
 
         GlobalScope.launch {
             try {
@@ -250,7 +250,7 @@ class BackupTest {
         // Create list
         val chaptersRemote = ArrayList<Chapter>()
         (1..10).mapTo(chaptersRemote) { getSingleChapter("Chapter $it") }
-        `when`(source.fetchChapterListObservable(manga)).thenReturn(Observable.just(chaptersRemote))
+        `when`(source.fetchChapterList(manga)).thenReturn(Observable.just(chaptersRemote))
 
         // Call restoreChapterFetchObservable
         GlobalScope.launch {
@@ -396,7 +396,6 @@ class BackupTest {
         val track = TrackImpl()
         track.title = manga.title
         track.manga_id = manga.id!!
-        track.remote_id = 1
         track.sync_id = 1
         return track
     }
