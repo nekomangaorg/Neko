@@ -142,32 +142,13 @@ class RecentlyReadController : NucleusController<RecentlyReadPresenter>(),
     }
 
     override fun removeHistory(manga: Manga, history: History, all: Boolean) {
+        presenter.lastCount = adapter?.itemCount ?: 25
         if (all) {
             // Reset last read of chapter to 0L
             presenter.removeAllFromHistory(manga.id!!)
-            /*val safeAdapter = adapter ?: return
-            val items = (0 until safeAdapter.itemCount).filter {
-                val item = safeAdapter.getItem(it)
-                if (item is RecentlyReadItem)
-                    item.mch.manga.id == manga.id
-
-                else
-                    false
-            }
-            adapter?.removeItems(items)*/
         } else {
             // Remove all chapters belonging to manga from library
             presenter.removeFromHistory(history)
-            /*val safeAdapter = adapter ?: return
-            val item = (0 until safeAdapter.itemCount).find {
-                val item = safeAdapter.getItem(it)
-                if (item is RecentlyReadItem)
-                    item.mch.history == history
-
-                else
-                 false
-            } ?: return
-            adapter?.removeItem(item)*/
         }
     }
 
