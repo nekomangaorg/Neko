@@ -176,8 +176,7 @@ class ChaptersPresenter(
         var observable = Observable.from(chapters).subscribeOn(Schedulers.io())
         if (onlyUnread()) {
             observable = observable.filter { !it.read }
-        }
-        else if (onlyRead()) {
+        } else if (onlyRead()) {
             observable = observable.filter { it.read }
         }
         if (onlyDownloaded()) {

@@ -69,6 +69,13 @@ class SettingsAdvancedController : SettingsController() {
 
             onClick { LibraryUpdateService.start(context, target = Target.TRACKING) }
         }
+        preference {
+            titleRes = R.string.pref_clean_downloads
+
+            summaryRes = R.string.pref_clean_downloads_summary
+
+            onClick { LibraryUpdateService.start(context, target = Target.CLEANUP) }
+        }
     }
 
     private fun clearChapterCache() {

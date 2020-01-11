@@ -288,7 +288,7 @@ class SettingsBackupController : SettingsController() {
                     .onPositive { _, _ ->
                         val context = applicationContext
                         if (context != null) {
-                            RestoringBackupDialog().showDialog(router, TAG_RESTORING_BACKUP_DIALOG)
+                            activity?.toast(R.string.restoring_backup)
                             BackupRestoreService.start(context, args.getParcelable(KEY_URI)!!)
                         }
                     }

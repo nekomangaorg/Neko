@@ -234,7 +234,7 @@
     <string name="restore_completed">S\'ha completat la restauració</string>
     <string name="error_opening_log">No s\'ha pogut obrir el registre</string>
     <string name="restore_completed_content">La restauració ha tardat %1$s.
-\nS\'han produït $2$s errors.</string>
+\nS\'han produït %2$s errors.</string>
     <string name="backup_restore_content">La restauració obté dades de les fonts, poden haver-hi despeses de l\'operador.
 \nAssegureu-vos que heu iniciat la sessió a les fonts en què cal abans de restaurar.</string>
     <string name="file_saved">S\'ha desat el fitxer a %1$s</string>

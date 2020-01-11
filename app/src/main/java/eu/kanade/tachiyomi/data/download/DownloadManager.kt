@@ -213,6 +213,25 @@ class DownloadManager(val context: Context) {
     }
 
     /**
+     * Deletes the directories of chapters that were read or have no match
+     *
+     * @param chapters the list of chapters to delete.
+     * @param manga the manga of the chapters.
+     * @param source the source of the chapters.
+     */
+    fun cleanupChapters(allChapters: List<Chapter>, manga: Manga, source: Source) {
+        val filesWithNoChapter = provider.findUnmatchedChapterDirs(allChapters, manga, source)
+        filesWithNoChapter.forEach { it.delete() }
+        val readChapters = allChapters.filter { it.read }
+        val readChapterDirs = provider.findChapterDirs(readChapters, manga, source)
+        readChapterDirs.forEach { it.delete() }
+        cache.removeChapters(readChapters, manga)
+        if (cache.getDownloadCount(manga) == 0) {
+            provider.findChapterDirs(allChapters, manga, source).firstOrNull()?.parentFile?.delete()// Delete manga directory if empty
+        }
+    }
+
+    /**
      * Deletes the directory of a downloaded manga.
      *
      * @param manga the manga to delete.

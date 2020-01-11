@@ -101,6 +101,26 @@ class DownloadProvider(private val context: Context) {
     }
 
     /**
+     * Returns a list of all files in manga directory
+     *
+     * @param chapters the chapters to query.
+     * @param manga the manga of the chapter.
+     * @param source the source of the chapter.
+     */
+    fun findUnmatchedChapterDirs(chapters: List<Chapter>, manga: Manga, source: Source): List<UniFile> {
+        val mangaDir = findMangaDir(manga, source) ?: return emptyList()
+        return mangaDir.listFiles()!!.asList().filter {
+            chapters.find { chp ->
+                (getValidChapterDirNames(chp) + "${getChapterDirName(chp)}_tmp").any { dir ->
+                    mangaDir.findFile(
+                        dir
+                    ) != null
+                }
+            } == null
+        }
+    }
+
+    /**
      * Returns a list of downloaded directories for the chapters that exist.
      *
      * @param chapters the chapters to query.

@@ -37,6 +37,10 @@ import eu.kanade.tachiyomi.util.isServiceRunning
 import eu.kanade.tachiyomi.util.notification
 import eu.kanade.tachiyomi.util.notificationManager
 import eu.kanade.tachiyomi.util.syncChaptersWithSource
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import rx.Observable
 import rx.Subscription
 import rx.schedulers.Schedulers
@@ -72,6 +76,9 @@ class LibraryUpdateService(
      */
     private var subscription: Subscription? = null
 
+    var job: Job? = null
+
+
     /**
      * Pending intent of action that cancels the library update
      */
@@ -105,7 +112,8 @@ class LibraryUpdateService(
     enum class Target {
         CHAPTERS, // Manga chapters
         DETAILS,  // Manga metadata
-        TRACKING  // Tracking metadata
+        TRACKING,  // Tracking metadata
+        CLEANUP // Clean up downloads
     }
 
     companion object {
@@ -203,37 +211,43 @@ class LibraryUpdateService(
      * @return the start value of the command.
      */
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (intent == null) return Service.START_NOT_STICKY
+        if (intent == null) return START_NOT_STICKY
         val target = intent.getSerializableExtra(KEY_TARGET) as? Target
-                ?: return Service.START_NOT_STICKY
+                ?: return START_NOT_STICKY
 
         // Unsubscribe from any previous subscription if needed.
         subscription?.unsubscribe()
 
+        val selectedScheme = preferences.libraryUpdatePrioritization().getOrDefault()
         // Update favorite manga. Destroy service when completed or in case of an error.
-        subscription = Observable
-                .defer {
-                    val selectedScheme = preferences.libraryUpdatePrioritization().getOrDefault()
-                    val mangaList = getMangaToUpdate(intent, target)
-                            .sortedWith(rankingScheme[selectedScheme])
+        val mangaList = getMangaToUpdate(intent, target)
+                .sortedWith(rankingScheme[selectedScheme])
 
-                    // Update either chapter list or manga details.
-                    when (target) {
-                        Target.CHAPTERS -> updateChapterList(mangaList)
-                        Target.DETAILS -> updateDetails(mangaList)
-                        Target.TRACKING -> updateTrackings(mangaList)
-                    }
+        val handler = CoroutineExceptionHandler { _, exception ->
+            Timber.e(exception)
+            stopSelf(startId)
+        }
+        // Update either chapter list or manga details.
+        if (target == Target.CLEANUP) {
+            job = GlobalScope.launch(handler) {
+                cleanupDownloads()
+            }
+            job?.invokeOnCompletion { stopSelf(startId) }
+        } else {
+            subscription = Observable.defer {
+                when (target) {
+                    Target.CHAPTERS -> updateChapterList(mangaList)
+                    Target.DETAILS -> updateDetails(mangaList)
+                    else -> updateTrackings(mangaList)
                 }
-                .subscribeOn(Schedulers.io())
-                .subscribe({
-                }, {
+            }.subscribeOn(Schedulers.io()).subscribe({}, {
                     Timber.e(it)
                     stopSelf(startId)
                 }, {
                     stopSelf(startId)
                 })
-
-        return Service.START_REDELIVER_INTENT
+        }
+        return START_REDELIVER_INTENT
     }
 
     /**
@@ -334,6 +348,15 @@ class LibraryUpdateService(
                     cancelProgressNotification()
                 }
                 .map { manga -> manga.first }
+    }
+
+    private fun cleanupDownloads() {
+        val mangaList = db.getMangas().executeAsBlocking()
+        for (manga in mangaList) {
+            val chapterList = db.getChapters(manga).executeAsBlocking()
+            val source = sourceManager.getOrStub(manga.source)
+            downloadManager.cleanupChapters(chapterList, manga, source)
+        }
     }
 
     fun downloadChapters(manga: Manga, chapters: List<Chapter>) {
