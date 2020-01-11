@@ -189,7 +189,7 @@
     <string name="lock_always">Always</string>
     <string name="lock_never">Never</string>
     <string name="lock_after_mins">After %1$s minutes</string>
-    <string name="search_hint">Search (title, tags, source)</string>
+    <string name="search_hint">Search title, tags, source</string>
 
     <!-- Extension section -->
     <string name="all_lang">All</string>
@@ -314,6 +314,7 @@
     <string name="file_saved">File saved at %1$s</string>
     <string name="backup_choice">What do you want to backup?</string>
     <string name="restoring_backup">Restoring backup</string>
+    <string name="backup_restoring_progress">Restoring (%1$d/%2$d)</string>
     <string name="creating_backup">Creating backup</string>
     <string name="sources_missing">Sources missing: %1$d</string>
     <string name="x_licensed_manga">%1$d manga are now licensed and could not be restored</string>

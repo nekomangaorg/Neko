@@ -30,6 +30,7 @@ import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.SourceNotFoundException
+import eu.kanade.tachiyomi.util.chop
 import eu.kanade.tachiyomi.util.getUriCompat
 import eu.kanade.tachiyomi.util.isServiceRunning
 import eu.kanade.tachiyomi.util.notificationManager
@@ -116,7 +117,7 @@ class BackupRestoreService : Service() {
         startForeground(Notifications.ID_RESTORE_PROGRESS, progressNotification.build())
         wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).newWakeLock(
                 PowerManager.PARTIAL_WAKE_LOCK, "BackupRestoreService:WakeLock")
-        wakeLock.acquire(10 * 60 * 1000L /*10 minutes*/)
+        wakeLock.acquire()
     }
 
     /**
@@ -363,7 +364,9 @@ class BackupRestoreService : Service() {
      */
     private fun showProgressNotification(current: Int, total: Int, title: String) {
         notificationManager.notify(Notifications.ID_RESTORE_PROGRESS, progressNotification
-                .setContentTitle(title)
+                .setContentTitle(title.chop(30))
+                .setContentText(getString(R.string.backup_restoring_progress, restoreProgress,
+                    totalAmount))
                 .setProgress(total, current, false)
                 .build())
     }
