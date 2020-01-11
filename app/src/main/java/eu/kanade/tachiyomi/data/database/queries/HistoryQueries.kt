@@ -19,8 +19,9 @@ interface HistoryQueries : DbProvider {
     fun insertHistory(history: History) = db.put().`object`(history).prepare()
 
     /**
-     * Returns history of recent manga containing last read chapter
+     * Returns history of recent manga containing last read chapter in 25s
      * @param date recent date range
+     * @offset offset the db by
      */
     fun getRecentManga(date: Date) = db.get()
             .listOfObjects(MangaChapterHistory::class.java)
@@ -31,6 +32,21 @@ interface HistoryQueries : DbProvider {
                     .build())
             .withGetResolver(MangaChapterHistoryGetResolver.INSTANCE)
             .prepare()
+
+    /**
+     * Returns history of recent manga containing last read chapter in 25s
+     * @param date recent date range
+     * @offset offset the db by
+     */
+    fun getRecentMangaLimit(date: Date, limit: Int = 0) = db.get()
+        .listOfObjects(MangaChapterHistory::class.java)
+        .withQuery(RawQuery.builder()
+            .query(getRecentMangasLimitQuery(limit))
+            .args(date.time)
+            .observesTables(HistoryTable.TABLE)
+            .build())
+        .withGetResolver(MangaChapterHistoryGetResolver.INSTANCE)
+        .prepare()
 
     fun getHistoryByMangaId(mangaId: Long) = db.get()
             .listOfObjects(History::class.java)

@@ -7,7 +7,9 @@ import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
 import rx.Observable
+import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
+import rx.schedulers.Schedulers
 import uy.kohesive.injekt.injectLazy
 import java.util.Calendar
 import java.util.Comparator
@@ -24,28 +26,52 @@ class RecentlyReadPresenter : BasePresenter<RecentlyReadController>() {
      * Used to connect to database
      */
     val db: DatabaseHelper by injectLazy()
+    var lastCount = 25
 
     override fun onCreate(savedState: Bundle?) {
         super.onCreate(savedState)
 
+        //pageSubscription?.let { remove(it) }
         // Used to get a list of recently read manga
-        getRecentMangaObservable()
-                .subscribeLatestCache(RecentlyReadController::onNextManga)
+        updateList()
+    }
+
+    fun requestNext(offset: Int) {
+        lastCount = offset
+        getRecentMangaObservable((offset))
+            .subscribeLatestCache({ view, mangas ->
+                view.onNextManga(mangas)
+            }, RecentlyReadController::onAddPageError)
     }
 
     /**
      * Get recent manga observable
      * @return list of history
      */
-    fun getRecentMangaObservable(): Observable<List<RecentlyReadItem>> {
+    private fun getRecentMangaObservable(offset: Int = 0): Observable<List<RecentlyReadItem>> {
         // Set date for recent manga
         val cal = Calendar.getInstance()
         cal.time = Date()
-        cal.add(Calendar.MONTH, -1)
+        cal.add(Calendar.YEAR, -50)
 
-        return db.getRecentManga(cal.time).asRxObservable()
-                .map { recents -> recents.map(::RecentlyReadItem) }
-                .observeOn(AndroidSchedulers.mainThread())
+        return db.getRecentManga(cal.time, offset).asRxObservable()
+            .map { recents -> recents.map(::RecentlyReadItem) }
+            .observeOn(AndroidSchedulers.mainThread())
+    }
+
+    /**
+     * Get recent manga observable
+     * @return list of history
+     */
+    private fun getRecentMangaLimitObservable(offset: Int = 0): Observable<List<RecentlyReadItem>> {
+        // Set date for recent manga
+        val cal = Calendar.getInstance()
+        cal.time = Date()
+        cal.add(Calendar.YEAR, -50)
+
+        return db.getRecentMangaLimit(cal.time, lastCount).asRxObservable()
+            .map { recents -> recents.map(::RecentlyReadItem) }
+            .observeOn(AndroidSchedulers.mainThread())
     }
 
     /**
@@ -54,8 +80,16 @@ class RecentlyReadPresenter : BasePresenter<RecentlyReadController>() {
      */
     fun removeFromHistory(history: History) {
         history.last_read = 0L
-        db.updateHistoryLastRead(history).asRxObservable()
-                .subscribe()
+        db.updateHistoryLastRead(history).executeAsBlocking()
+        updateList()
+    }
+
+
+    fun updateList() {
+        getRecentMangaLimitObservable(lastCount).take(1)
+            .subscribeLatestCache({ view, mangas ->
+                view.onNextManga(mangas, true)
+            }, RecentlyReadController::onAddPageError)
     }
 
     /**
@@ -63,12 +97,10 @@ class RecentlyReadPresenter : BasePresenter<RecentlyReadController>() {
      * @param mangaId id of manga
      */
     fun removeAllFromHistory(mangaId: Long) {
-        db.getHistoryByMangaId(mangaId).asRxSingle()
-                .map { list ->
-                    list.forEach { it.last_read = 0L }
-                    db.updateHistoryLastRead(list).executeAsBlocking()
-                }
-                .subscribe()
+        val history = db.getHistoryByMangaId(mangaId).executeAsBlocking()
+        history.forEach { it.last_read = 0L }
+        db.updateHistoryLastRead(history).executeAsBlocking()
+        updateList()
     }
 
     /**
