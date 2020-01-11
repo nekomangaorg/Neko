@@ -151,10 +151,10 @@ class ChapterCache(private val context: Context) {
      * @return true if in cache otherwise false.
      */
     fun isImageInCache(imageUrl: String): Boolean {
-        try {
-            return diskCache.get(DiskUtil.hashKeyForDisk(imageUrl)) != null
+        return try {
+            diskCache.get(DiskUtil.hashKeyForDisk(imageUrl)) != null
         } catch (e: IOException) {
-            return false
+            false
         }
     }
 

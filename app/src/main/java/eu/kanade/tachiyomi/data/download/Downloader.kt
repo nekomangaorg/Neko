@@ -1,10 +1,12 @@
 package eu.kanade.tachiyomi.data.download
 
 import android.content.Context
+import android.net.Uri
 import android.webkit.MimeTypeMap
 import com.hippo.unifile.UniFile
 import com.jakewharton.rxrelay.BehaviorRelay
 import com.jakewharton.rxrelay.PublishRelay
+import eu.kanade.tachiyomi.data.cache.ChapterCache
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.model.Download
@@ -27,6 +29,7 @@ import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 import rx.subscriptions.CompositeSubscription
 import timber.log.Timber
+import java.io.File
 
 /**
  * This class is the one in charge of downloading chapters.
@@ -338,12 +341,14 @@ class Downloader(
 
         // Try to find the image file.
         val imageFile = tmpDir.listFiles()!!.find { it.name!!.startsWith("$filename.") }
-
+        val cache = ChapterCache(context)
         // If the image is already downloaded, do nothing. Otherwise download from network
-        val pageObservable = if (imageFile != null)
-            Observable.just(imageFile)
-        else
-            downloadImage(page, download.source, tmpDir, filename)
+        val pageObservable = when {
+            imageFile != null -> Observable.just(imageFile)
+            cache.isImageInCache(page.imageUrl!!) ->
+                moveFromCache(page, cache.getImageFile(page.imageUrl!!), tmpDir, filename)
+            else -> downloadImage(page, download.source, tmpDir, filename)
+        }
 
         return pageObservable
                 // When the image is ready, set image path, progress (just in case) and status
@@ -360,6 +365,31 @@ class Downloader(
                     page.status = Page.ERROR
                     page
                 }
+    }
+
+    /**
+     * Returns the observable which takes from the downloaded image from cache
+     *
+     * @param page the page to download.
+     * @param file the file from cache
+     * @param tmpDir the temporary directory of the download.
+     * @param filename the filename of the image.
+     */
+    private fun moveFromCache(page: Page, file: File, tmpDir: UniFile, filename: String):
+        Observable<UniFile> {
+        return Observable.just(file).map {
+            val tmpFile = tmpDir.createFile("$filename.tmp")
+            val inputStream = file.inputStream()
+            inputStream.use { input ->
+                tmpFile.openOutputStream().use { output ->
+                    input.copyTo(output)
+                }
+            }
+            val extension = ImageUtil.findImageType(file.inputStream()) ?: return@map tmpFile
+            tmpFile.renameTo("$filename.${extension.extension}")
+            file.delete()
+            tmpFile
+        }
     }
 
     /**
