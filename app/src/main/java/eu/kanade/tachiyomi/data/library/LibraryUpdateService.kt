@@ -10,6 +10,7 @@ import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationCompat.GROUP_ALERT_SUMMARY
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import eu.kanade.tachiyomi.R
@@ -485,6 +486,7 @@ class LibraryUpdateService(
                     setLargeIcon(icon)
                 }
                 catch (e: Exception) { }
+                setGroupAlertBehavior(GROUP_ALERT_SUMMARY)
                 setContentTitle(manga.title)
                 color = ContextCompat.getColor(this@LibraryUpdateService, R.color.colorAccentLight)
                 val chaptersNames = if (chapterNames.size > 5) {
