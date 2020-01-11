@@ -336,7 +336,8 @@
     <string name="pref_refresh_library_tracking">Refresh tracking metadata</string>
     <string name="pref_refresh_library_tracking_summary">Updates status, score and last chapter read from the tracking services</string>
     <string name="pref_clean_downloads">Clean up downloaded chapters</string>
-    <string name="pref_clean_downloads_summary">Deletes orphaned,tmp, and read chapter folders for entire library for each Manga</string>
+    <string name="pref_clean_downloads_summary">Deletes orphaned, tmp, and read chapter folders
+        for entire library for each Manga</string>
 
       <!-- About section -->
     <string name="version">Version</string>
