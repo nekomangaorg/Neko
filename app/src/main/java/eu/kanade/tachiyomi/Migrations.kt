@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi
 
+import eu.kanade.tachiyomi.data.download.DownloadProvider
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
@@ -60,6 +61,8 @@ object Migrations {
                     }
                 }
             }
+            if (oldVersion < 54)
+                DownloadProvider(context).renameChaapters()
             return true
         }
         return false

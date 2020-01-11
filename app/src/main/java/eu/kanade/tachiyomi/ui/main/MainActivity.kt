@@ -9,7 +9,6 @@ import android.graphics.Color
 import android.graphics.Rect
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -63,7 +62,6 @@ import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.coroutines.delay
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
-import java.lang.Exception
 import java.util.Date
 
 class MainActivity : BaseActivity() {

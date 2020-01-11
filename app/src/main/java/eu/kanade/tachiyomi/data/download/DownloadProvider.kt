@@ -4,11 +4,13 @@ import android.content.Context
 import android.net.Uri
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.source.Source
+import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.util.DiskUtil
 import uy.kohesive.injekt.injectLazy
 
@@ -97,7 +99,37 @@ class DownloadProvider(private val context: Context) {
      */
     fun findChapterDirs(chapters: List<Chapter>, manga: Manga, source: Source): List<UniFile> {
         val mangaDir = findMangaDir(manga, source) ?: return emptyList()
-        return chapters.flatMap { getValidChapterDirNames(it) }.mapNotNull { mangaDir.findFile(it) }
+        return chapters.mapNotNull { chp ->
+            getValidChapterDirNames(chp).mapNotNull { mangaDir.findFile(it) }.firstOrNull()
+        }
+    }
+
+    /**
+     * Renames the chapter folders with id's and removes it + null scanlators
+     *
+     * @param chapters the chapters to query.
+     * @param manga the manga of the chapter.
+     * @param source the source of the chapter.
+     */
+    fun renameChaapters() {
+        val db by injectLazy<DatabaseHelper>()
+        val sourceManager by injectLazy<SourceManager>()
+        val mangas = db.getLibraryMangas().executeAsBlocking()
+        mangas.forEach sfor@{ manga ->
+            val sourceId = manga.source
+            val source = sourceManager.get(sourceId) ?: return@sfor
+            val mangaDir = findMangaDir(manga, source) ?: return@sfor
+            mangaDir.listFiles()?.forEach {
+                val nameSplit = it.name?.split("_")?.toMutableList() ?: return@sfor
+                if (nameSplit.size > 2 && nameSplit.first().first().isDigit()) {
+                    nameSplit.removeAt(0)
+                    val newName = nameSplit.joinToString("_").removePrefix("null_")
+                    it.renameTo(newName)
+                }
+            }
+        }
+        val cache = DownloadCache(context, this, sourceManager)
+        cache.renew()
     }
 
     /**
@@ -157,7 +189,10 @@ class DownloadProvider(private val context: Context) {
      * @param chapter the chapter to query.
      */
     fun getChapterDirName(chapter: Chapter): String {
-        return DiskUtil.buildValidFilename("${chapter.id}_${chapter.scanlator}_${chapter.name}")
+        return DiskUtil.buildValidFilename(
+            if (chapter.scanlator != null) "${chapter.scanlator}_${chapter.name}"
+            else chapter.name
+        )
     }
 
     /**
