@@ -36,6 +36,8 @@ open class MangaImpl : Manga {
 
     override var hide_title: Boolean = false
 
+    var last_cover_fetch: Long = 0
+
     override fun copyFrom(other: SManga) {
         if (other is MangaImpl && (other as MangaImpl)::title.isInitialized && other.title != title)
             title = other.title

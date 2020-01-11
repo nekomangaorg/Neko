@@ -1,13 +1,14 @@
 package eu.kanade.tachiyomi.ui.library
 
 import android.view.View
+import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.signature.ObjectKey
 import eu.davidea.flexibleadapter.FlexibleAdapter
+import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.source.LocalSource
 import kotlinx.android.synthetic.main.catalogue_grid_item.*
-import androidx.recyclerview.widget.RecyclerView
-import eu.davidea.flexibleadapter.items.IFlexible
 
 /**
  * Class used to hold the displayed data of a manga in the library, like the cover or the title.
@@ -56,6 +57,7 @@ class LibraryGridHolder(
         GlideApp.with(view.context)
                 .load(item.manga)
                 .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+                .signature(ObjectKey(item.manga.last_cover_fetch.toString()))
                 .centerCrop()
                 .into(thumbnail)
     }

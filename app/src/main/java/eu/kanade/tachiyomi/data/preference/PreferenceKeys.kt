@@ -129,6 +129,8 @@ object PreferenceKeys {
 
     const val skipPreMigration = "skip_pre_migration"
 
+    const val refreshCoversToo = "refresh_covers_too"
+
     @Deprecated("Use the preferences of the source")
     fun sourceUsername(sourceId: Long) = "pref_source_username_$sourceId"
 

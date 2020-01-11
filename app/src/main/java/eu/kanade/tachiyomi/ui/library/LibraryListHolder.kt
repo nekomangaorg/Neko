@@ -7,6 +7,7 @@ import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.source.LocalSource
 import kotlinx.android.synthetic.main.catalogue_list_item.*
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.signature.ObjectKey
 import eu.davidea.flexibleadapter.items.IFlexible
 
 /**
@@ -58,6 +59,7 @@ class LibraryListHolder(
         GlideApp.with(itemView.context)
                 .load(item.manga)
                 .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+                .signature(ObjectKey(item.manga.last_cover_fetch.toString()))
                 .centerCrop()
                 .circleCrop()
                 .dontAnimate()

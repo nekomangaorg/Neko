@@ -199,6 +199,8 @@ class PreferencesHelper(val context: Context) {
 
     fun defaultMangaOrder() = rxPrefs.getString("default_manga_order", "")
 
+    fun refreshCoversToo() = rxPrefs.getBoolean(Keys.refreshCoversToo, true)
+
     fun upgradeFilters() {
         val filterDl = rxPrefs.getBoolean(Keys.filterDownloaded, false).getOrDefault()
         val filterUn = rxPrefs.getBoolean(Keys.filterUnread, false).getOrDefault()

@@ -170,6 +170,12 @@ class SettingsLibraryController : SettingsController() {
             summaryRes = R.string.pref_remove_articles_summary
             defaultValue = false
         }
+        switchPreference {
+            key = Keys.refreshCoversToo
+            titleRes = R.string.pref_refresh_covers_too
+            summaryRes = R.string.pref_refresh_covers_too_summary
+            defaultValue = true
+        }
     }
 
     class LibraryColumnsDialog : DialogController() {

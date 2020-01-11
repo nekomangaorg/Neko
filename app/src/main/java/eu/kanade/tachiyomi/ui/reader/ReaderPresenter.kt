@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
@@ -530,6 +531,7 @@ class ReaderPresenter(
                         val thumbUrl = manga.thumbnail_url ?: throw Exception("Image url not found")
                         if (manga.favorite) {
                             coverCache.copyToCache(thumbUrl, stream())
+                            (manga as? MangaImpl)?.last_cover_fetch = Date().time
                             SetAsCoverResult.Success
                         } else {
                             SetAsCoverResult.AddToLibraryFirst

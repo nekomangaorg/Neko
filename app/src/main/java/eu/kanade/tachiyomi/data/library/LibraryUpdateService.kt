@@ -14,6 +14,7 @@ import androidx.core.app.NotificationCompat.GROUP_ALERT_SUMMARY
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Chapter
@@ -48,7 +49,9 @@ import rx.schedulers.Schedulers
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import uy.kohesive.injekt.injectLazy
 import java.util.ArrayList
+import java.util.Date
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
@@ -292,7 +295,7 @@ class LibraryUpdateService(
         // Initialize the variables holding the progress of the updates.
         val count = AtomicInteger(0)
         // List containing new updates
-        val newUpdates = ArrayList<Pair<Manga, Array<Chapter>>>()
+        val newUpdates = ArrayList<Pair<LibraryManga, Array<Chapter>>>()
         // list containing failed updates
         val failedUpdates = ArrayList<Manga>()
         // List containing categories that get included in downloads.
@@ -339,6 +342,10 @@ class LibraryUpdateService(
                         showResultNotification(newUpdates)
                         if (downloadNew && hasDownloads) {
                             DownloadService.start(this)
+                        }
+                        if (preferences.refreshCoversToo().getOrDefault()) {
+                            updateDetails(newUpdates.map { it.first }).observeOn(Schedulers.io())
+                                .subscribeOn(Schedulers.io()).subscribe {}
                         }
                     }
 
@@ -393,6 +400,7 @@ class LibraryUpdateService(
     fun updateDetails(mangaToUpdate: List<LibraryManga>): Observable<LibraryManga> {
         // Initialize the variables holding the progress of the updates.
         val count = AtomicInteger(0)
+        val coverCache by injectLazy<CoverCache>()
 
         // Emit each manga and update it sequentially.
         return Observable.from(mangaToUpdate)
@@ -407,6 +415,8 @@ class LibraryUpdateService(
                             .map { networkManga ->
                                 manga.copyFrom(networkManga)
                                 db.insertManga(manga).executeAsBlocking()
+                                coverCache.deleteFromCache(manga.thumbnail_url)
+                                manga.last_cover_fetch = Date().time
                                 manga
                             }
                             .onErrorReturn { manga }

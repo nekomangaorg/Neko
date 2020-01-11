@@ -190,6 +190,9 @@
     <string name="lock_never">Never</string>
     <string name="lock_after_mins">After %1$s minutes</string>
     <string name="search_hint">Search title, tags, source</string>
+    <string name="pref_refresh_covers_too">Automatically refresh covers</string>
+    <string name="pref_refresh_covers_too_summary">Refresh covers in library as well
+        when updating library (overwrites local covers)</string>
 
     <!-- Extension section -->
     <string name="all_lang">All</string>

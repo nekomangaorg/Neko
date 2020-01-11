@@ -7,6 +7,7 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
+import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
@@ -36,6 +37,7 @@ import java.io.InputStream
 import java.util.ArrayList
 import java.util.Collections
 import java.util.Comparator
+import java.util.Date
 
 /**
  * Class containing library information.
@@ -464,6 +466,7 @@ class LibraryPresenter(
 
         if (manga.thumbnail_url != null && manga.favorite) {
             coverCache.copyToCache(manga.thumbnail_url!!, inputStream)
+            (manga as? MangaImpl)?.last_cover_fetch = Date().time
             return true
         }
         return false

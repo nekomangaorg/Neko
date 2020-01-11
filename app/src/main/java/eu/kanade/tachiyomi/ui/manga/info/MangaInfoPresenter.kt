@@ -10,6 +10,7 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
+import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
@@ -92,6 +93,8 @@ class MangaInfoPresenter(
                     manga.copyFrom(networkManga)
                     manga.initialized = true
                     db.insertManga(manga).executeAsBlocking()
+                    coverCache.deleteFromCache(manga.thumbnail_url)
+                    (manga as? MangaImpl)?.last_cover_fetch = Date().time
                     manga
                 }
                 .subscribeOn(Schedulers.io())

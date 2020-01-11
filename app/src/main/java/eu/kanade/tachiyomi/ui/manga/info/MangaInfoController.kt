@@ -28,6 +28,7 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
+import com.bumptech.glide.signature.ObjectKey
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.jakewharton.rxbinding.support.v4.widget.refreshes
@@ -36,6 +37,7 @@ import com.jakewharton.rxbinding.view.longClicks
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -60,6 +62,7 @@ import eu.kanade.tachiyomi.util.updateLayoutParams
 import eu.kanade.tachiyomi.util.updatePaddingRelative
 import jp.wasabeef.glide.transformations.CropSquareTransformation
 import jp.wasabeef.glide.transformations.MaskTransformation
+import kotlinx.android.synthetic.main.catalogue_list_item.*
 import kotlinx.android.synthetic.main.manga_info_controller.*
 import uy.kohesive.injekt.injectLazy
 import java.io.File
@@ -269,17 +272,20 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         setFavoriteDrawable(manga.favorite)
 
         // Set cover if it wasn't already.
-        if (manga_cover.drawable == null && !manga.thumbnail_url.isNullOrEmpty()) {
+        if (!manga.thumbnail_url.isNullOrEmpty()) {
             GlideApp.with(view.context)
                     .load(manga)
                     .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+                    .signature(ObjectKey((manga as MangaImpl).last_cover_fetch.toString()))
                     .centerCrop()
                     .into(manga_cover)
 
             if (backdrop != null) {
+                //GlideApp.with(view.context).clear(backdrop)
                 GlideApp.with(view.context)
                         .load(manga)
                         .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+                        .signature(ObjectKey((manga as MangaImpl).last_cover_fetch.toString()))
                         .centerCrop()
                         .into(backdrop)
             }
