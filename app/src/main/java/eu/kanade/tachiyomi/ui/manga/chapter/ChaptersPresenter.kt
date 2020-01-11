@@ -415,7 +415,10 @@ class ChaptersPresenter(
         return manga.sortDescending()
     }
 
-    fun getFirstUnreadIndex(): Int {
+    fun getFirstUnreadIndex(): Int? {
+        if (!manga.favorite) {
+            return null
+        }
         val index = chapters.sortedByDescending { it.source_order }.indexOfFirst { !it.read }
         return if (sortDescending()) (chapters.size - 1) - index
         else index

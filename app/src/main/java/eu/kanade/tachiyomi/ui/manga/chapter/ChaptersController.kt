@@ -250,7 +250,7 @@ class ChaptersController() : NucleusController<ChaptersPresenter>(),
     private fun scrollToUnread() {
         if (adapter?.items.isNullOrEmpty()) return
         if (scrollToUnread) {
-            val index = presenter.getFirstUnreadIndex()
+            val index = presenter.getFirstUnreadIndex() ?: return
             val centerOfScreen =
                 if (startingChapterYPos != null) startingChapterYPos!!.toInt() - recycler.top - 96
                 else recycler.height / 2 - 96
