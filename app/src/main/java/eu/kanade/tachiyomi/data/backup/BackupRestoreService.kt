@@ -366,6 +366,7 @@ class BackupRestoreService : Service() {
                 .setSmallIcon(R.drawable.ic_neko_notification)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setColor(ContextCompat.getColor(this, R.color.colorPrimary))
+                .setColor(ContextCompat.getColor(this, R.color.colorAccentLight))
         if (errors.size > 0 && !path.isNullOrEmpty() && !file.isNullOrEmpty()) {
             resultNotification.addAction(R.drawable.ic_clear_grey, getString(R.string.notification_action_error_log), getErrorLogIntent(path, file))
         }
