@@ -322,14 +322,20 @@
     <string name="restoring_backup">Restoring backup</string>
     <string name="backup_restoring_progress">Restoring (%1$d/%2$d)</string>
     <string name="creating_backup">Creating backup</string>
-    <string name="sources_missing">Sources missing: %1$d</string>
+    <plurals name="sources_missing">
+        <item quantity="one">%d source missing</item>
+        <item quantity="other">%d sources missing</item>
+    </plurals>
     <string name="x_licensed_manga">%1$d manga are now licensed and could not be restored</string>
     <string name="not_logged_into">Not logged into %1$s</string>
 
       <!-- Advanced section -->
     <string name="pref_clear_chapter_cache">Clear chapter cache</string>
     <string name="used_cache">Used: %1$s</string>
-    <string name="cache_deleted">Cache cleared. %1$d files have been deleted</string>
+    <plurals name="cache_deleted">
+        <item quantity="one">Cache cleared. %d file has been deleted</item>
+        <item quantity="other">Cache cleared. %d files have been deleted</item>
+    </plurals>
     <string name="cache_delete_error">An error occurred while clearing cache</string>
     <string name="pref_clear_cookies">Clear cookies</string>
     <string name="cookies_cleared">Cookies cleared</string>
@@ -538,8 +544,11 @@
     <!-- Library update service notifications -->
     <string name="notification_update_progress">Update progress: %1$d/%2$d</string>
     <string name="notification_new_chapters">New chapters found</string>
-    <string name="notification_new_chapters_text">For %1$d titles</string>
-    <string name="notification_and_n_more">and %1$d more.</string>
+    <plurals name="notification_new_chapters_text">
+        <item quantity="one">For %d titles</item>
+        <item quantity="other">For %d titles</item>
+    </plurals>
+    <string name="notification_and_n_more">and %1$d more chapters.</string>
     <string name="notification_cover_update_failed">Failed to update cover</string>
     <string name="notification_first_add_to_library">Please add the manga to your library before doing this</string>
     <string name="notification_not_connected_to_ac_title">Sync canceled</string>
@@ -568,7 +577,10 @@
     <string name="update_check_notification_download_complete">Download complete</string>
     <string name="update_check_notification_download_error">Download error</string>
     <string name="update_check_notification_update_available">Update available</string>
-    <string name="update_check_notification_ext_updates">%1$d extension updates available</string>
+    <plurals name="update_check_notification_ext_updates">
+        <item quantity="one">%d extension update available</item>
+        <item quantity="other">%d extension updates available</item>
+    </plurals>
 
     <!--Content Description-->
     <string name="description_backdrop">Backdrop image of manga</string>

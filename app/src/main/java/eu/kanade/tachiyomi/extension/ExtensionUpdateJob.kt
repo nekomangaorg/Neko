@@ -33,8 +33,8 @@ class ExtensionUpdateJob : Job() {
                         notify(Notifications.ID_UPDATES_TO_EXTS,
                             context.notification(Notifications.CHANNEL_UPDATES_TO_EXTS) {
                                 setContentTitle(
-                                    context.getString(
-                                        R.string.update_check_notification_ext_updates, names.size
+                                    context.resources.getQuantityText(
+                                        R.plurals.update_check_notification_ext_updates, names.size
                                     )
                                 )
                                 val extNames = if (names.size > 5) {
