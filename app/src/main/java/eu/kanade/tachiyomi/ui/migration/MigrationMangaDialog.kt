@@ -29,7 +29,7 @@ class MigrationMangaDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
             else "")) ?: ""
         return MaterialDialog(activity!!).show {
             message(text = confirmString)
-            positiveButton(android.R.string.yes) {
+            positiveButton(if (copy) R.string.copy else R.string.migrate) {
                 if (copy) (targetController as? MigrationListController)?.copyMangas()
                 else (targetController as? MigrationListController)?.migrateMangas()
             }

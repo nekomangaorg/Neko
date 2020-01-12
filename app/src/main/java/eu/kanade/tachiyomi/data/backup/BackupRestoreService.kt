@@ -383,7 +383,8 @@ class BackupRestoreService : Service() {
             content.add(resources.getQuantityString(R.plurals.sources_missing,
                 sourceMissingCount, sourceMissingCount))
         if (lincensedManga > 0)
-            content.add(getString(R.string.x_licensed_manga, lincensedManga))
+            content.add(resources.getQuantityString(R.plurals.licensed_manga, lincensedManga,
+                lincensedManga))
         val trackingErrors = trackingErrors.distinct()
         if (trackingErrors.isNotEmpty()) {
             val trackingErrorsString = trackingErrors.distinct().joinToString("\n")
