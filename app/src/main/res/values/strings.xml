@@ -188,7 +188,10 @@
     <string name="lock_when_idle">Lock when idle</string>
     <string name="lock_always">Always</string>
     <string name="lock_never">Never</string>
-    <string name="lock_after_mins">After %1$s minutes</string>
+    <plurals name="lock_after_mins">
+        <item quantity="one">After %1$s minutes</item>
+        <item quantity="other">After %1$s minutes</item>
+    </plurals>
     <string name="search_hint">Search title, tags, source</string>
     <string name="pref_refresh_covers_too">Automatically refresh covers</string>
     <string name="pref_refresh_covers_too_summary">Refresh covers in library as well
@@ -578,7 +581,7 @@
     <string name="update_check_notification_download_error">Download error</string>
     <string name="update_check_notification_update_available">Update available</string>
     <plurals name="update_check_notification_ext_updates">
-        <item quantity="one">%d extension update available</item>
+        <item quantity="one">Extension update available</item>
         <item quantity="other">%d extension updates available</item>
     </plurals>
 

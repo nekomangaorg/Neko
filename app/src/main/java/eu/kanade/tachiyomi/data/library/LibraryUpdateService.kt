@@ -533,8 +533,9 @@ class LibraryUpdateService(
                 setContentTitle(getString(R.string.notification_new_chapters))
                 color = ContextCompat.getColor(applicationContext, R.color.colorAccentLight)
                 if (updates.size > 1) {
-                    setContentText(resources.getQuantityText(R.plurals.notification_new_chapters_text,
-                        updates.size))
+                    setContentText(resources.getQuantityString(R.plurals
+                        .notification_new_chapters_text,
+                        updates.size, updates.size))
                     setStyle(NotificationCompat.BigTextStyle().bigText(updates.joinToString("\n") {
                         it.first.title.chop(45)
                     }))

@@ -96,7 +96,8 @@ class SettingsAdvancedController : SettingsController() {
                 }, {
                     activity?.toast(R.string.cache_delete_error)
                 }, {
-                    activity?.toast(resources?.getQuantityString(R.plurals.cache_deleted, deletedFiles))
+                    activity?.toast(resources?.getQuantityString(R.plurals.cache_deleted,
+                        deletedFiles, deletedFiles))
                     findPreference(CLEAR_CACHE_KEY)?.summary =
                             resources?.getString(R.string.used_cache, chapterCache.readableSize)
                 })

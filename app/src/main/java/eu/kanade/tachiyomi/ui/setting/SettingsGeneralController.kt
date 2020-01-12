@@ -121,7 +121,8 @@ class SettingsGeneralController : SettingsController() {
                     when (it) {
                         "0" -> context.getString(R.string.lock_always)
                         "-1" -> context.getString(R.string.lock_never)
-                        else -> context.getString(R.string.lock_after_mins, it)
+                        else -> resources?.getQuantityString(R.plurals.lock_after_mins, it.toInt(),
+                            it)
                     }
                 }.toTypedArray()
                 entryValues = values
