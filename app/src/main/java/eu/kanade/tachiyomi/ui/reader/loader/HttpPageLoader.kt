@@ -231,10 +231,12 @@ class HttpPageLoader(
                 }
             }
             .doOnNext {
-                if (preferences.readerTheme().get() == 2) {
+                val readerTheme = preferences.readerTheme().getOrDefault()
+                if (readerTheme >= 2) {
                     val stream = chapterCache.getImageFile(imageUrl).inputStream()
                     val image = BitmapFactory.decodeStream(stream)
-                    page.bg = ImageUtil.autoSetBackground(image)
+                    page.bg = ImageUtil.autoSetBackground(image, readerTheme == 2)
+                    page.bgAlwaysWhite = readerTheme == 2
                     stream.close()
                 }
                 page.stream = { chapterCache.getImageFile(imageUrl).inputStream() }

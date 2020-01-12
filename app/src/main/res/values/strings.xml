@@ -241,7 +241,8 @@
     <string name="pref_reader_theme">Background color</string>
     <string name="white_background">White</string>
     <string name="black_background">Black</string>
-    <string name="auto_background">Automatic</string>
+    <string name="smart_background">Smart (by page)</string>
+    <string name="smart_theme_background">Smart (by theme)</string>
     <string name="pref_viewer_type">Default viewer</string>
     <string name="default_viewer">Default</string>
     <string name="left_to_right_viewer">Left to right</string>
@@ -274,6 +275,8 @@
     <string name="color_filter_g_value">G</string>
     <string name="color_filter_b_value">B</string>
     <string name="color_filter_a_value">A</string>
+    <string name="reader_theme_smart">Smart (based on page)</string>
+    <string name="reader_theme_smart_theme">Smart (based on page and theme)</string>
 
 
       <!-- Downloads section -->

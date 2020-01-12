@@ -53,9 +53,10 @@ object ImageUtil {
         return null
     }
 
-    fun autoSetBackground(image: Bitmap): Drawable {
+    fun autoSetBackground(image: Bitmap, useWhiteAlways: Boolean): Drawable {
+        val backgroundColor = if (useWhiteAlways) Color.WHITE else android.R.attr.colorBackground
         if (image.width < 50 || image.height < 50)
-            return ColorDrawable(android.R.attr.colorBackground)
+            return ColorDrawable(backgroundColor)
         val top = 5
         val bot = image.height - 5
         val left = (image.width * 0.0275).toInt()
@@ -94,7 +95,7 @@ object ImageUtil {
             topRightIsDark -> image.getPixel(right, top)
             botLeftIsDark -> image.getPixel(left, bot)
             botRightIsDark -> image.getPixel(right, bot)
-            else -> android.R.attr.colorBackground
+            else -> backgroundColor
         }
 
         var overallWhitePixels = 0
@@ -179,25 +180,24 @@ object ImageUtil {
             darkBG = false
         if (topIsBlackStreak && bottomIsBlackStreak)
             darkBG = true
-        val whiteColor = android.R.attr.colorBackground
         if (darkBG) {
             return if (isWhite(image.getPixel(left, bot)) && isWhite(image.getPixel(right, bot))) GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,
-                intArrayOf(blackPixel, blackPixel, whiteColor, whiteColor))
+                intArrayOf(blackPixel, blackPixel, backgroundColor, backgroundColor))
             else if (isWhite(image.getPixel(left, top)) && isWhite(image.getPixel(right, top))) GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,
-                intArrayOf(whiteColor, whiteColor, blackPixel, blackPixel))
+                intArrayOf(backgroundColor, backgroundColor, blackPixel, blackPixel))
             else ColorDrawable(blackPixel)
         }
         if (topIsBlackStreak || (topLeftIsDark && topRightIsDark
                         && isDark(image.getPixel(left - offsetX, top)) && isDark(image.getPixel(right + offsetX, top))
                         && (topMidIsDark || overallBlackPixels > 9)))
             return GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,
-                    intArrayOf(blackPixel, blackPixel, whiteColor, whiteColor))
+                    intArrayOf(blackPixel, blackPixel, backgroundColor, backgroundColor))
         else if (bottomIsBlackStreak || (botLeftIsDark && botRightIsDark
                         && isDark(image.getPixel(left - offsetX, bot)) && isDark(image.getPixel(right + offsetX, bot))
                         && (isDark(image.getPixel(midX, bot)) || overallBlackPixels > 9)))
             return GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,
-                    intArrayOf(whiteColor, whiteColor, blackPixel, blackPixel))
-        return ColorDrawable(whiteColor)
+                    intArrayOf(backgroundColor, backgroundColor, blackPixel, blackPixel))
+        return ColorDrawable(backgroundColor)
     }
 
     fun Boolean.toInt() = if (this) 1 else 0

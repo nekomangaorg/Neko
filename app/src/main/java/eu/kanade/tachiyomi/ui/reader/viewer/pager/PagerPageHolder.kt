@@ -3,7 +3,9 @@ package eu.kanade.tachiyomi.ui.reader.viewer.pager
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.graphics.PointF
+import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.view.GestureDetector
@@ -29,6 +31,8 @@ import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import com.github.chrisbanes.photoview.PhotoView
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.glide.GlideApp
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderProgressBar
@@ -45,6 +49,7 @@ import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
+import uy.kohesive.injekt.injectLazy
 import java.io.InputStream
 import java.util.concurrent.TimeUnit
 
@@ -248,9 +253,10 @@ class PagerPageHolder(
             .observeOn(AndroidSchedulers.mainThread())
             .doOnNext { isAnimated ->
                 if (!isAnimated) {
-                    if (viewer.config.readerTheme == 2) {
+                    if (viewer.config.readerTheme >= 2) {
                         val imageView = initSubsamplingImageView()
-                        if (page.bg != null) {
+                        if (page.bg != null &&
+                            page.bgAlwaysWhite == (viewer.config.readerTheme == 2)) {
                             imageView.setImage(ImageSource.inputStream(openStream!!))
                             imageView.background = page.bg
                         }
@@ -264,6 +270,7 @@ class PagerPageHolder(
                             launchUI {
                                 imageView.background = setBG(bytesArray)
                                 page.bg = imageView.background
+                                page.bgAlwaysWhite = viewer.config.readerTheme == 2
                             }
                         }
                     }
@@ -273,7 +280,7 @@ class PagerPageHolder(
                 } else {
                     val imageView = initImageView()
                     imageView.setImage(openStream!!)
-                    if (viewer.config.readerTheme == 2 && page.bg != null)
+                    if (viewer.config.readerTheme >= 2 && page.bg != null)
                         imageView.background = page.bg
                 }
             }
@@ -285,9 +292,10 @@ class PagerPageHolder(
 
     private suspend fun setBG(bytesArray: ByteArray): Drawable {
         return withContext(Default) {
+            val preferences by injectLazy<PreferencesHelper>()
             ImageUtil.autoSetBackground(BitmapFactory.decodeByteArray(
                 bytesArray, 0, bytesArray.size
-            ))
+            ), preferences.readerTheme().getOrDefault() == 2)
         }
     }
 
