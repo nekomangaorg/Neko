@@ -1,6 +1,7 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
              xmlns:tools="http://schemas.android.com/tools"
-             android:layout_width="match_parent"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:layout_width="match_parent"
              android:layout_height="match_parent"
              android:gravity="center">
 
@@ -12,8 +13,7 @@
         <FrameLayout
             android:id="@+id/viewer_container"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
-        </FrameLayout>
+            android:layout_height="match_parent" />
 
         <ProgressBar
             android:id="@+id/please_wait"
@@ -21,7 +21,7 @@
             android:layout_height="56dp"
             android:layout_gravity="center"
             android:visibility="gone"
-            tools:visibility="visible"/>
+            tools:visibility="visible" />
 
         <eu.kanade.tachiyomi.ui.reader.PageIndicatorTextView
             android:id="@+id/page_number"
@@ -64,8 +64,8 @@
                 android:id="@+id/left_chapter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="@dimen/material_layout_keylines_screen_edge_margin"
                 android:background="?selectableItemBackgroundBorderless"
+                android:padding="@dimen/material_layout_keylines_screen_edge_margin"
                 />
 
             <TextView
@@ -74,9 +74,7 @@
                 android:layout_height="match_parent"
                 android:gravity="center"
                 android:textSize="15sp"
-                android:clickable="true"
-                tools:text="1"
-                android:focusable="true"/>
+                tools:text="1" />
 
             <eu.kanade.tachiyomi.ui.reader.ReaderSeekBar
                 android:id="@+id/page_seekbar"
@@ -90,16 +88,14 @@
                 android:layout_height="match_parent"
                 android:gravity="center"
                 android:textSize="15sp"
-                android:clickable="true"
-                tools:text="15"
-                android:focusable="true"/>
+                tools:text="15" />
 
             <ImageButton
                 android:id="@+id/right_chapter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:background="?selectableItemBackgroundBorderless"
                 android:padding="@dimen/material_layout_keylines_screen_edge_margin"
-                android:background="?selectableItemBackgroundBorderless"/>
 
         </LinearLayout>
 
@@ -109,12 +105,12 @@
         android:id="@+id/brightness_overlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone"/>
+        android:visibility="gone" />
 
     <eu.kanade.tachiyomi.ui.reader.ReaderColorFilterView
         android:id="@+id/color_overlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone"/>
+        android:visibility="gone" />
 
 </FrameLayout>
