@@ -1,8 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <changelog bulletedList="true">
+    <changelogversion versionName="v0.9.69" changeDate="">
+        <changelogtext>Restoring backups is now a notification</changelogtext>
+		<changelogtext>Fixed Recent Read bugs, recently read goes back 50 years</changelogtext>
+		<changelogtext>Group notifications now only make one sound</changelogtext>
+		<changelogtext>New Last Updated (last updated being newest chapter) logic now is set on restore as well</changelogtext>
+		<changelogtext>Using new material dialog boxes</changelogtext>
+		<changelogtext>For unfavorited manga, chapters now start at the top of the list</changelogtext>
+		<changelogtext>Option for smart read bg to be based on the page or based on the app theme</changelogtext>
+		<changelogtext>Splash screen now matches app colors</changelogtext>
+		<changelogtext>Added option in Advanced to cleanup old downloads</changelogtext>
+		<changelogtext>Downloads will now take images from the reader cache, instead of downloading again</changelogtext>
+		<changelogtext>Downloads have been renamed to a more simple format</changelogtext>
+    </changelogversion>
+
     <changelogversion versionName="v0.9.62" changeDate="">
         <changelogtext>Fixed Status Bar in Black reader theme</changelogtext>
     </changelogversion>
+	
     <changelogversion versionName="v0.9.61" changeDate="">
         <changelogtext>Added splash screen</changelogtext>
         <changelogtext>Truly fixed the dark theme bug</changelogtext>
