@@ -215,6 +215,7 @@ internal class DownloadNotifier(private val context: Context) {
         with(notification) {
             setContentTitle(chapter ?: context.getString(R.string.download_notifier_downloader_title))
             setContentText(error ?: context.getString(R.string.download_notifier_unkown_error))
+            setStyle(NotificationCompat.BigTextStyle().bigText(error ?: context.getString(R.string.download_notifier_unkown_error)))
             setSmallIcon(android.R.drawable.stat_sys_warning)
             setCategory(NotificationCompat.CATEGORY_ERROR)
             clearActions()
