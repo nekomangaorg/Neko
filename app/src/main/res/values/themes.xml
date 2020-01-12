@@ -28,7 +28,6 @@
         <item name="actionBarTheme">@style/Theme.ActionBar.Light</item>
         <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
         <item name="alertDialogTheme">@style/Theme.AlertDialog.Light</item>
-        <item name="md_background_color">@color/dialogLight</item>
 
 
         <!-- Custom Attributes-->
@@ -43,6 +42,13 @@
 
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">#B3000000</item>
+
+        <!-- Material Dialog colors -->
+        <item name="md_color_title">@color/textColorPrimaryLight</item>
+        <item name="md_color_content">@color/textColorSecondaryLight</item>
+        <item name="md_color_button_text">@color/colorAccent</item>
+        <item name="md_background_color">@color/dialogLight</item>
+        <item name="md_corner_radius">16dp</item>
     </style>
 
     <style name="Theme.Tachiyomi" parent="Theme.Base"/>

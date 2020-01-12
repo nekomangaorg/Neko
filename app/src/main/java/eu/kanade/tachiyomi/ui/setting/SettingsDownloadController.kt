@@ -10,6 +10,7 @@ import android.os.Environment
 import androidx.core.content.ContextCompat
 import androidx.preference.PreferenceScreen
 import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.list.listItemsSingleChoice
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -147,18 +148,16 @@ class SettingsDownloadController : SettingsController() {
             val externalDirs = getExternalDirs() + File(activity.getString(R.string.custom_dir))
             val selectedIndex = externalDirs.map(File::toString).indexOfFirst { it in currentDir }
 
-            return MaterialDialog.Builder(activity)
-                    .items(externalDirs)
-                    .itemsCallbackSingleChoice(selectedIndex) { _, _, which, text ->
-                        val target = targetController as? SettingsDownloadController
-                        if (which == externalDirs.lastIndex) {
-                            target?.customDirectorySelected(currentDir)
-                        } else {
-                            target?.predefinedDirectorySelected(text.toString())
-                        }
-                        true
+            return MaterialDialog(activity)
+                .listItemsSingleChoice(items = externalDirs.map { it.path }, initialSelection = selectedIndex)
+                {  _, position, text ->
+                    val target = targetController as? SettingsDownloadController
+                    if (position == externalDirs.lastIndex) {
+                        target?.customDirectorySelected(currentDir)
+                    } else {
+                        target?.predefinedDirectorySelected(text.toString())
                     }
-                    .build()
+                }
         }
 
         private fun getExternalDirs(): List<File> {

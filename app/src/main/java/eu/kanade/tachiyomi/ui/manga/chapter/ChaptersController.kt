@@ -491,13 +491,10 @@ class ChaptersController() : NucleusController<ChaptersPresenter>(),
     fun deleteChapters(chapters: List<ChapterItem>) {
         destroyActionModeIfNeeded()
         if (chapters.isEmpty()) return
-
-        DeletingChaptersDialog().showDialog(router)
         presenter.deleteChapters(chapters)
     }
 
     fun onChaptersDeleted(chapters: List<ChapterItem>) {
-        dismissDeletingDialog()
         //this is needed so the downloaded text gets removed from the item
         chapters.forEach {
             adapter?.updateItem(it)
@@ -506,12 +503,7 @@ class ChaptersController() : NucleusController<ChaptersPresenter>(),
     }
 
     fun onChaptersDeletedError(error: Throwable) {
-        dismissDeletingDialog()
         Timber.e(error)
-    }
-
-    private fun dismissDeletingDialog() {
-        router.popControllerWithTag(DeletingChaptersDialog.TAG)
     }
 
     // OVERFLOW MENU DIALOGS

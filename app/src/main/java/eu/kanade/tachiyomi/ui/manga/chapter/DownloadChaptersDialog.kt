@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.manga.chapter
 import android.app.Dialog
 import android.os.Bundle
 import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.list.listItems
 import com.bluelinelabs.conductor.Controller
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
@@ -26,14 +27,13 @@ class DownloadChaptersDialog<T>(bundle: Bundle? = null) : DialogController(bundl
                 R.string.download_all
         ).map { activity.getString(it) }
 
-        return MaterialDialog.Builder(activity)
+        return MaterialDialog(activity)
                 .title(R.string.manga_download)
-                .negativeText(android.R.string.cancel)
-                .items(choices)
-                .itemsCallback { _, _, position, _ ->
+                .negativeButton(android.R.string.cancel)
+                .listItems(items = choices){dialog, position, _ ->
                     (targetController as? Listener)?.downloadChapters(position)
+                    dialog.dismiss()
                 }
-                .build()
     }
 
     interface Listener {

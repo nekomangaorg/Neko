@@ -20,7 +20,6 @@
     <item name="actionBarTheme">@style/ThemeOverlay.AppCompat.Dark.ActionBar</item>
     <item name="actionBarPopupTheme">@style/ThemeOverlay.AppCompat</item>
     <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
-    <item name="md_background_color">@color/dialogDark</item>
     <item name="alertDialogTheme">@style/Theme.AlertDialog.Dark</item>
     <item name="android:statusBarColor">@android:color/transparent</item>
 
@@ -35,6 +34,14 @@
     <item name="snackbar_background">@color/snackbarBackground</item>
     <item name="snackbar_text">@color/textColorPrimaryLight</item>
     <item name="android:navigationBarColor">@color/oldNavBarBackground</item>
+
+
+    <!-- Material Dialog colors -->
+    <item name="md_color_title">@color/textColorPrimaryDark</item>
+    <item name="md_color_content">@color/textColorSecondaryDark</item>
+    <item name="md_color_button_text">@color/colorAccentDark</item>
+    <item name="md_background_color">@color/dialogDark</item>
+    <item name="md_corner_radius">16dp</item>
   </style>
 
   <style name="Theme.Base.Reader" parent="Theme.Base">
@@ -64,5 +71,13 @@
     <item name="selectable_list_drawable">@drawable/list_item_selector_amoled</item>
     <item name="selectable_library_drawable">@drawable/library_item_selector_amoled</item>
     <item name="background_card">@color/dialog_amoled</item>
+
+
+    <!-- Material Dialog colors -->
+    <item name="md_color_title">@color/textColorPrimaryDark</item>
+    <item name="md_color_content">@color/textColorSecondaryDark</item>
+    <item name="md_color_button_text">@color/colorAccentDark</item>
+    <item name="md_background_color">@color/dialog_amoled</item>
+    <item name="md_corner_radius">16dp</item>
   </style>
 </resources>

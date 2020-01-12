@@ -56,8 +56,8 @@ class MigrationPresenter(
                 .distinctUntilChanged { t1, t2 -> t1.isReplacingManga != t2.isReplacingManga }
                 .subscribeLatestCache(MigrationController::render)
 
-        stateRelay.distinctUntilChanged { state -> state.isReplacingManga }
-                .subscribeLatestCache(MigrationController::renderIsReplacingManga)
+       /* stateRelay.distinctUntilChanged { state -> state.isReplacingManga }
+                .subscribeLatestCache(MigrationController::renderIsReplacingManga)*/
     }
 
     fun setSelectedSource(source: Source) {

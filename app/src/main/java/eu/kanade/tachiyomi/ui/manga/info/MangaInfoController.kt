@@ -21,11 +21,9 @@ import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
 import com.afollestad.materialdialogs.MaterialDialog
-import com.bumptech.glide.load.DataSource
+import com.afollestad.materialdialogs.list.listItemsSingleChoice
 import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
-import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import com.bumptech.glide.signature.ObjectKey
@@ -62,7 +60,6 @@ import eu.kanade.tachiyomi.util.updateLayoutParams
 import eu.kanade.tachiyomi.util.updatePaddingRelative
 import jp.wasabeef.glide.transformations.CropSquareTransformation
 import jp.wasabeef.glide.transformations.MaskTransformation
-import kotlinx.android.synthetic.main.catalogue_list_item.*
 import kotlinx.android.synthetic.main.manga_info_controller.*
 import uy.kohesive.injekt.injectLazy
 import java.io.File
@@ -554,14 +551,14 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
                     R.string.square_icon,
                     R.string.star_icon)
 
-            return MaterialDialog.Builder(activity!!)
+            return MaterialDialog(activity!!)
                     .title(R.string.icon_shape)
-                    .negativeText(android.R.string.cancel)
-                    .items(modes.map { activity?.getString(it) })
-                    .itemsCallback { _, _, i, _ ->
+                    .negativeButton(android.R.string.cancel)
+                    .listItemsSingleChoice (
+                    items = modes.map { activity?.getString(it) as CharSequence })
+                    { _, i, _ ->
                         (targetController as? MangaInfoController)?.createShortcutForShape(i)
                     }
-                    .build()
         }
     }
 

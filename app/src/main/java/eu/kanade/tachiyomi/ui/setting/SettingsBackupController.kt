@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.preference.PreferenceScreen
 import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.list.listItemsMultiChoice
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.backup.BackupConst
@@ -168,7 +169,6 @@ class SettingsBackupController : SettingsController() {
 
                 val file = UniFile.fromUri(activity, uri)
 
-                CreatingBackupDialog().showDialog(router, TAG_CREATING_BACKUP_DIALOG)
                 BackupCreateService.makeBackup(activity, file.uri, backupFlags)
             }
             CODE_BACKUP_RESTORE -> if (data != null && resultCode == Activity.RESULT_OK) {
@@ -207,12 +207,12 @@ class SettingsBackupController : SettingsController() {
                     R.string.track, R.string.history)
                     .map { activity.getString(it) }
 
-            return MaterialDialog.Builder(activity)
+            return MaterialDialog(activity)
                     .title(R.string.pref_create_backup)
-                    .content(R.string.backup_choice)
-                    .items(options)
-                    .itemsDisabledIndices(0)
-                    .itemsCallbackMultiChoice(arrayOf(0, 1, 2, 3, 4)) { _, positions, _ ->
+                    .message(R.string.backup_choice)
+                .listItemsMultiChoice(items = options, disabledIndices = intArrayOf(0),
+                    initialSelection = intArrayOf(0))
+                    { _, positions, _ ->
                         var flags = 0
                         for (i in 1 until positions.size) {
                             when (positions[i]) {
@@ -224,27 +224,9 @@ class SettingsBackupController : SettingsController() {
                         }
 
                         (targetController as? SettingsBackupController)?.createBackup(flags)
-                        true
                     }
-                    .positiveText(R.string.action_create)
-                    .negativeText(android.R.string.cancel)
-                    .build()
-        }
-    }
-
-    class CreatingBackupDialog : DialogController() {
-        override fun onCreateDialog(savedViewState: Bundle?): Dialog {
-            return MaterialDialog.Builder(activity!!)
-                    .title(R.string.backup)
-                    .content(R.string.creating_backup)
-                    .progress(true, 0)
-                    .cancelable(false)
-                    .build()
-        }
-
-        override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-            super.onRestoreInstanceState(savedInstanceState)
-            router.popController(this)
+                    .positiveButton(R.string.action_create)
+                    .negativeButton(android.R.string.cancel)
         }
     }
 
@@ -256,18 +238,16 @@ class SettingsBackupController : SettingsController() {
         override fun onCreateDialog(savedViewState: Bundle?): Dialog {
             val activity = activity!!
             val unifile = UniFile.fromUri(activity, args.getParcelable(KEY_URI))
-            return MaterialDialog.Builder(activity)
+            return MaterialDialog(activity)
                     .title(R.string.backup_created)
-                    .content(activity.getString(R.string.file_saved, unifile.filePath))
-                    .positiveText(R.string.action_close)
-                    .negativeText(R.string.action_export)
-                    .onNegative { _, _ ->
+                    .message(R.string.file_saved, unifile.filePath)
+                    .positiveButton(R.string.action_close)
+                    .negativeButton(R.string.action_export) {
                         val sendIntent = Intent(Intent.ACTION_SEND)
                         sendIntent.type = "application/json"
                         sendIntent.putExtra(Intent.EXTRA_STREAM, unifile.uri)
                         startActivity(Intent.createChooser(sendIntent, ""))
                     }
-                    .build()
         }
 
         private companion object {
@@ -281,118 +261,20 @@ class SettingsBackupController : SettingsController() {
         })
 
         override fun onCreateDialog(savedViewState: Bundle?): Dialog {
-            return MaterialDialog.Builder(activity!!)
+            return MaterialDialog(activity!!)
                     .title(R.string.pref_restore_backup)
-                    .content(R.string.backup_restore_content)
-                    .positiveText(R.string.action_restore)
-                    .onPositive { _, _ ->
+                    .message(R.string.backup_restore_content)
+                    .positiveButton(R.string.action_restore) {
                         val context = applicationContext
                         if (context != null) {
                             activity?.toast(R.string.restoring_backup)
                             BackupRestoreService.start(context, args.getParcelable(KEY_URI)!!)
                         }
                     }
-                    .build()
         }
 
         private companion object {
             const val KEY_URI = "RestoreBackupDialog.uri"
-        }
-    }
-
-    class RestoringBackupDialog : DialogController() {
-        private var materialDialog: MaterialDialog? = null
-
-        override fun onCreateDialog(savedViewState: Bundle?): Dialog {
-            return MaterialDialog.Builder(activity!!)
-                    .title(R.string.backup)
-                    .content(R.string.restoring_backup)
-                    .progress(false, 100, true)
-                    .cancelable(false)
-                    .negativeText(R.string.action_stop)
-                    .onNegative { _, _ ->
-                        applicationContext?.let { BackupRestoreService.stop(it) }
-                    }
-                    .build()
-                    .also { materialDialog = it }
-        }
-
-        override fun onDestroyView(view: View) {
-            super.onDestroyView(view)
-            materialDialog = null
-        }
-
-        override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-            super.onRestoreInstanceState(savedInstanceState)
-            router.popController(this)
-        }
-
-        fun updateProgress(content: String?, progress: Int, amount: Int) {
-            val dialog = materialDialog ?: return
-            dialog.setContent(content)
-            dialog.setProgress(progress)
-            dialog.maxProgress = amount
-        }
-    }
-
-    class RestoredBackupDialog(bundle: Bundle? = null) : DialogController(bundle) {
-        constructor(time: Long, errorCount: Int, path: String, file: String, errors: String) : this
-            (Bundle().apply {
-            putLong(KEY_TIME, time)
-            putInt(KEY_ERROR_COUNT, errorCount)
-            putString(KEY_PATH, path)
-            putString(KEY_FILE, file)
-            putString(KEY_MINI_ERRORS, errors)
-        })
-
-        override fun onCreateDialog(savedViewState: Bundle?): Dialog {
-            val activity = activity!!
-            val time = args.getLong(KEY_TIME)
-            val errors = args.getInt(KEY_ERROR_COUNT)
-            val path = args.getString(KEY_PATH)
-            val file = args.getString(KEY_FILE)
-            val miniErrors = args.getString(KEY_MINI_ERRORS)
-            val timeString = String.format("%02d min, %02d sec",
-                    TimeUnit.MILLISECONDS.toMinutes(time),
-                    TimeUnit.MILLISECONDS.toSeconds(time) - TimeUnit.MINUTES.toSeconds(
-                            TimeUnit.MILLISECONDS.toMinutes(time))
-            )
-
-            var errorString = activity.getString(R.string.restore_completed_content, timeString,
-                if (errors > 0) "$errors" else activity.getString(android.R.string
-                    .no))
-            if (errors > 0)
-                errorString = errorString.trimEnd('.') + ":"
-
-            return MaterialDialog.Builder(activity)
-                    .title(R.string.restore_completed)
-                    .content("$errorString\n$miniErrors")
-                    .positiveText(R.string.action_close)
-                    .negativeText(R.string.action_open_log)
-                    .onNegative { _, _ ->
-                        val context = applicationContext ?: return@onNegative
-                        if (!path.isNullOrEmpty()) {
-                            val destFile = File(path, file)
-                            val uri = destFile.getUriCompat(context)
-                            val sendIntent = Intent(Intent.ACTION_VIEW).apply {
-                                setDataAndType(uri, "text/plain")
-                                flags = Intent.FLAG_ACTIVITY_NEW_TASK or
-                                        Intent.FLAG_GRANT_READ_URI_PERMISSION
-                            }
-                            startActivity(sendIntent)
-                        } else {
-                            context.toast(context.getString(R.string.error_opening_log))
-                        }
-                    }
-                    .build()
-        }
-
-        private companion object {
-            const val KEY_TIME = "RestoredBackupDialog.time"
-            const val KEY_ERROR_COUNT = "RestoredBackupDialog.errors"
-            const val KEY_PATH = "RestoredBackupDialog.path"
-            const val KEY_FILE = "RestoredBackupDialog.file"
-            const val KEY_MINI_ERRORS = "RestoredBackupDialog.miniErrors"
         }
     }
 
@@ -403,24 +285,6 @@ class SettingsBackupController : SettingsController() {
                     router.popControllerWithTag(TAG_CREATING_BACKUP_DIALOG)
                     val uri = Uri.parse(intent.getStringExtra(BackupConst.EXTRA_URI))
                     CreatedBackupDialog(uri).showDialog(router)
-                }
-                BackupConst.ACTION_SET_PROGRESS_DIALOG -> {
-                    val progress = intent.getIntExtra(BackupConst.EXTRA_PROGRESS, 0)
-                    val amount = intent.getIntExtra(BackupConst.EXTRA_AMOUNT, 0)
-                    val content = intent.getStringExtra(BackupConst.EXTRA_CONTENT)
-                    (router.getControllerWithTag(TAG_RESTORING_BACKUP_DIALOG)
-                            as? RestoringBackupDialog)?.updateProgress(content, progress, amount)
-                }
-                BackupConst.ACTION_RESTORE_COMPLETED_DIALOG -> {
-                    router.popControllerWithTag(TAG_RESTORING_BACKUP_DIALOG)
-                    val time = intent.getLongExtra(BackupConst.EXTRA_TIME, 0)
-                    val errors = intent.getIntExtra(BackupConst.EXTRA_ERRORS, 0)
-                    val path = intent.getStringExtra(BackupConst.EXTRA_ERROR_FILE_PATH)
-                    val file = intent.getStringExtra(BackupConst.EXTRA_ERROR_FILE)
-                    val miniErrors = intent.getStringExtra(BackupConst.EXTRA_MINI_ERROR)
-                    if (errors > 0) {
-                        RestoredBackupDialog(time, errors, path, file, miniErrors).showDialog(router)
-                    }
                 }
                 BackupConst.ACTION_ERROR_BACKUP_DIALOG -> {
                     router.popControllerWithTag(TAG_CREATING_BACKUP_DIALOG)

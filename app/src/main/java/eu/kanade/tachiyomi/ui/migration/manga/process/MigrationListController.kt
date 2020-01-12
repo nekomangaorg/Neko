@@ -113,16 +113,6 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
         }
     }
 
-    fun migrationFailure() {
-        activity?.let {
-            MaterialDialog.Builder(it)
-                .title("Migration failure")
-                .content("An unknown error occured while migrating this manga!")
-                .positiveText("Ok")
-                .show()
-        }
-    }
-
     suspend fun runMigrations(mangas: List<MigratingManga>) {
         val useSourceWithMost = preferences.useSourceWithMost().getOrDefault()
 
@@ -381,14 +371,14 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
 
     override fun handleBack(): Boolean {
         activity?.let {
-            MaterialDialog.Builder(it).title(R.string.stop_migration)
-                .positiveText(R.string.yes)
-                .negativeText(R.string.no)
-                .onPositive { _, _ ->
+            MaterialDialog(it).show {
+                title(R.string.stop_migration)
+                positiveButton (R.string.yes)  {
                     router.popCurrentController()
                     migrationsJob?.cancel()
                 }
-                .show()
+                negativeButton(R.string.no)
+            }
         }
         return true
     }

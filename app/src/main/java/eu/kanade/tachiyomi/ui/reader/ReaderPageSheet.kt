@@ -44,14 +44,13 @@ class ReaderPageSheet(
     private fun setAsCover() {
         if (page.status != Page.READY) return
 
-        MaterialDialog.Builder(activity)
-            .content(activity.getString(R.string.confirm_set_image_as_cover))
-            .positiveText(android.R.string.yes)
-            .negativeText(android.R.string.no)
-            .onPositive { _, _ ->
+        MaterialDialog(activity)
+            .title(R.string.confirm_set_image_as_cover)
+            .positiveButton(android.R.string.yes) {
                 activity.setAsCover(page)
                 dismiss()
             }
+            .negativeButton(android.R.string.no)
             .show()
     }
 

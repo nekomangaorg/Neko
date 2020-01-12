@@ -7,6 +7,7 @@ import android.view.View
 import androidx.biometric.BiometricManager
 import androidx.preference.PreferenceScreen
 import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.customview.customView
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
@@ -186,16 +187,14 @@ class SettingsLibraryController : SettingsController() {
         private var landscape = preferences.landscapeColumns().getOrDefault()
 
         override fun onCreateDialog(savedViewState: Bundle?): Dialog {
-            val dialog = MaterialDialog.Builder(activity!!)
+            val dialog = MaterialDialog(activity!!)
                 .title(R.string.pref_library_columns)
-                .customView(R.layout.pref_library_columns, false)
-                .positiveText(android.R.string.ok)
-                .negativeText(android.R.string.cancel)
-                .onPositive { _, _ ->
+                .customView(viewRes = R.layout.pref_library_columns, scrollable = false)
+                .positiveButton(android.R.string.ok) {
                     preferences.portraitColumns().set(portrait)
                     preferences.landscapeColumns().set(landscape)
                 }
-                .build()
+                .negativeButton(android.R.string.cancel)
 
             onViewCreated(dialog.view)
             return dialog

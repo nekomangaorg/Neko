@@ -7,6 +7,7 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import androidx.appcompat.widget.SearchView
 import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.list.listItemsMultiChoice
 import com.jakewharton.rxbinding.support.v7.widget.queryTextChangeEvents
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -137,27 +138,20 @@ class SearchController(
 
             val preselected = MigrationFlags.getEnabledFlagsPositions(prefValue)
 
-            return MaterialDialog.Builder(activity!!)
-                    .content(R.string.migration_dialog_what_to_include)
-                    .items(MigrationFlags.titles.map { resources?.getString(it) })
-                    .alwaysCallMultiChoiceCallback()
-                    .itemsCallbackMultiChoice(preselected.toTypedArray()) { _, positions, _ ->
-                        // Save current settings for the next time
-                        val newValue = MigrationFlags.getFlagsFromPositions(positions)
+            return MaterialDialog(activity!!)
+                    .message(R.string.migration_dialog_what_to_include)
+                    .listItemsMultiChoice(items = MigrationFlags.titles.map
+                    { resources?.getString(it) as CharSequence },
+                        initialSelection = preselected.toIntArray()) {  _, positions, _ ->
+                        val newValue = MigrationFlags.getFlagsFromPositions(positions.toTypedArray())
                         preferences.migrateFlags().set(newValue)
-
-                        true
                     }
-                    .positiveText(R.string.migrate)
-                    .negativeText(R.string.copy)
-                    .neutralText(android.R.string.cancel)
-                    .onPositive { _, _ ->
+                    .positiveButton(R.string.migrate) {
                         (targetController as? SearchController)?.migrateManga()
                     }
-                    .onNegative { _, _ ->
+                    .negativeButton(R.string.copy) {
                         (targetController as? SearchController)?.copyManga()
                     }
-                    .build()
         }
 
     }

@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.manga.chapter
 import android.app.Dialog
 import android.os.Bundle
 import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.list.listItemsSingleChoice
 import com.bluelinelabs.conductor.Controller
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -25,15 +26,12 @@ class SetSortingDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
         val choices = intArrayOf(R.string.sort_by_source, R.string.sort_by_number)
                 .map { activity.getString(it) }
 
-        return MaterialDialog.Builder(activity)
+        return MaterialDialog(activity)
                 .title(R.string.sorting_mode)
-                .items(choices)
-                .itemsIds(ids)
-                .itemsCallbackSingleChoice(selectedIndex) { _, itemView, _, _ ->
-                    (targetController as? Listener)?.setSorting(itemView.id)
-                    true
+                .listItemsSingleChoice(items = choices, initialSelection = selectedIndex){
+                        _, position, _ ->
+                    (targetController as? Listener)?.setSorting(ids[position])
                 }
-                .build()
     }
 
     interface Listener {

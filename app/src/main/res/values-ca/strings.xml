@@ -242,7 +242,7 @@
     <string name="restoring_backup">S\'està restaurant la còpia de seguretat</string>
     <string name="creating_backup">S\'està creant la còpia de seguretat</string>
     <string name="pref_clear_chapter_cache">Buida la memòria cau de capítols</string>
-    <string name="used_cache">Ús: $1$s</string>
+    <string name="used_cache">Ús: %1$s</string>
     <string name="cache_deleted">S\'ha buidat la memòria cau. S\'han suprimit %1$d fitxers</string>
     <string name="cache_delete_error">S\'ha produït un error en buidar la memòria cau</string>
     <string name="pref_clear_cookies">Esborra les galetes</string>

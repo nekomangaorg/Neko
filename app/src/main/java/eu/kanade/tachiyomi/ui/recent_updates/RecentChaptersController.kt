@@ -216,14 +216,13 @@ class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
 
     override fun deleteChapters(chaptersToDelete: List<RecentChapterItem>) {
         destroyActionModeIfNeeded()
-        DeletingChaptersDialog().showDialog(router)
         presenter.deleteChapters(chaptersToDelete)
     }
 
     /**
      * Destory [ActionMode] if it's shown
      */
-    fun destroyActionModeIfNeeded() {
+    private fun destroyActionModeIfNeeded() {
         actionMode?.finish()
     }
 
@@ -248,7 +247,6 @@ class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
      * @param chapter selected chapter with manga
      */
     fun deleteChapter(chapter: RecentChapterItem) {
-        DeletingChaptersDialog().showDialog(router)
         presenter.deleteChapters(listOf(chapter))
     }
 
@@ -266,7 +264,6 @@ class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
      * Called when chapters are deleted
      */
     fun onChaptersDeleted() {
-        dismissDeletingDialog()
         adapter?.notifyDataSetChanged()
     }
 
@@ -275,15 +272,7 @@ class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
      * @param error error message
      */
     fun onChaptersDeletedError(error: Throwable) {
-        dismissDeletingDialog()
         Timber.e(error)
-    }
-
-    /**
-     * Called to dismiss deleting dialog
-     */
-    fun dismissDeletingDialog() {
-        router.popControllerWithTag(DeletingChaptersDialog.TAG)
     }
 
     /**

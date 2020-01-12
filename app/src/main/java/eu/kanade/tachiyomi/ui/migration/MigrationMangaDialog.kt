@@ -27,15 +27,13 @@ class MigrationMangaDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
             if (mangaSkipped > 0)
                 " " + applicationContext?.getString(R.string.skipping_x, mangaSkipped) ?: ""
             else "")) ?: ""
-        return MaterialDialog.Builder(activity!!)
-            .content(confirmString)
-            .positiveText(android.R.string.yes)
-            .negativeText(android.R.string.no)
-            .onPositive { _, _ ->
-                if (copy)
-                    (targetController as? MigrationListController)?.copyMangas()
-                else
-                    (targetController as? MigrationListController)?.migrateMangas()
-            }.show()
+        return MaterialDialog(activity!!).show {
+            message(text = confirmString)
+            positiveButton(android.R.string.yes) {
+                if (copy) (targetController as? MigrationListController)?.copyMangas()
+                else (targetController as? MigrationListController)?.migrateMangas()
+            }
+            negativeButton(android.R.string.no)
+        }
     }
 }
