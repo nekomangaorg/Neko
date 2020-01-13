@@ -1,18 +1,26 @@
 package eu.kanade.tachiyomi.extension.api
 
+import android.content.Context
 import com.github.salomonbrys.kotson.fromJson
 import com.github.salomonbrys.kotson.get
 import com.github.salomonbrys.kotson.int
 import com.github.salomonbrys.kotson.string
 import com.google.gson.Gson
 import com.google.gson.JsonArray
+import eu.kanade.tachiyomi.extension.ExtensionManager
 import eu.kanade.tachiyomi.extension.model.Extension
+import eu.kanade.tachiyomi.extension.model.LoadResult
+import eu.kanade.tachiyomi.extension.util.ExtensionLoader
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.asObservableSuccess
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.withContext
 import okhttp3.Response
 import rx.Observable
 import uy.kohesive.injekt.injectLazy
+import java.lang.Exception
 
 internal class ExtensionGithubApi {
 
@@ -29,6 +37,35 @@ internal class ExtensionGithubApi {
 
         return client.newCall(call).asObservableSuccess()
                 .map(::parseResponse)
+    }
+
+    suspend fun checkforUpdates(context: Context): List<Extension.Installed> {
+        return withContext(Dispatchers.IO) {
+            val call = GET("$repoUrl/index.json")
+            val response = client.newCall(call).execute()
+
+            if (response.isSuccessful) {
+                val extensions = parseResponse(response)
+                val extensionsWithUpdate = mutableListOf<Extension.Installed>()
+
+                val installedExtensions = ExtensionLoader.loadExtensions(context)
+                    .filterIsInstance<LoadResult.Success>()
+                    .map { it.extension }
+                val mutInstalledExtensions = installedExtensions.toMutableList()
+                for (installedExt in mutInstalledExtensions) {
+                    val pkgName = installedExt.pkgName
+                    val availableExt = extensions.find { it.pkgName == pkgName } ?: continue
+
+                    val hasUpdate = availableExt.versionCode > installedExt.versionCode
+                    if (hasUpdate) extensionsWithUpdate.add(installedExt)
+                }
+
+                extensionsWithUpdate
+            } else {
+                response.close()
+                throw Exception("Failed to get extensions")
+            }
+        }
     }
 
     private fun parseResponse(response: Response): List<Extension.Available> {

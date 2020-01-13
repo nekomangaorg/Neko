@@ -7,6 +7,7 @@ import android.content.res.Configuration
 import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.Rect
+import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
 import android.view.MotionEvent
@@ -15,6 +16,7 @@ import android.view.ViewGroup
 import android.webkit.WebView
 import android.widget.FrameLayout
 import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
 import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
 import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
@@ -34,6 +36,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
+import eu.kanade.tachiyomi.extension.api.ExtensionGithubApi
 import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.base.controller.NoToolbarElevationController
@@ -51,6 +54,7 @@ import eu.kanade.tachiyomi.ui.recently_read.RecentlyReadController
 import eu.kanade.tachiyomi.ui.setting.SettingsMainController
 import eu.kanade.tachiyomi.util.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.getResourceColor
+import eu.kanade.tachiyomi.util.gone
 import eu.kanade.tachiyomi.util.launchUI
 import eu.kanade.tachiyomi.util.marginBottom
 import eu.kanade.tachiyomi.util.marginTop
@@ -58,11 +62,16 @@ import eu.kanade.tachiyomi.util.openInBrowser
 import eu.kanade.tachiyomi.util.updateLayoutParams
 import eu.kanade.tachiyomi.util.updatePadding
 import eu.kanade.tachiyomi.util.updatePaddingRelative
+import eu.kanade.tachiyomi.util.visible
 import kotlinx.android.synthetic.main.main_activity.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 import java.util.Date
+import java.util.concurrent.TimeUnit
 
 class MainActivity : BaseActivity() {
 
@@ -276,10 +285,32 @@ class MainActivity : BaseActivity() {
                 ChangelogDialogController().showDialog(router)
             }
         }
+        preferences.extensionUpdatesCount().asObservable().subscribe {
+            setExtensionsBadge()
+        }
+        setExtensionsBadge()
+    }
+
+    fun setExtensionsBadge() {
+
+        val extUpdateText: TextView = nav_view.menu.findItem(
+            R.id.nav_drawer_extensions
+        )?.actionView as? TextView ?: return
+
+        val updates = preferences.extensionUpdatesCount().getOrDefault()
+        if (updates > 0) {
+            extUpdateText.text = updates.toString()
+            extUpdateText.visible()
+        }
+        else {
+            extUpdateText.text = null
+            extUpdateText.gone()
+        }
     }
 
     override fun onResume() {
         super.onResume()
+        getExtensionUpdates()
         val useBiometrics = preferences.useBiometrics().getOrDefault()
         if (useBiometrics && BiometricManager.from(this)
                 .canAuthenticate() == BiometricManager.BIOMETRIC_SUCCESS) {
@@ -292,6 +323,21 @@ class MainActivity : BaseActivity() {
         }
         else if (useBiometrics)
             preferences.useBiometrics().set(false)
+    }
+
+
+    private fun getExtensionUpdates() {
+        if (Date().time >= preferences.lastExtCheck().getOrDefault() +
+            TimeUnit.HOURS.toMillis(1)) {
+            GlobalScope.launch(Dispatchers.IO) {
+                val preferences: PreferencesHelper by injectLazy()
+                try {
+                    val pendingUpdates = ExtensionGithubApi().checkforUpdates(this@MainActivity)
+                    preferences.extensionUpdatesCount().set(pendingUpdates.size)
+                    preferences.lastExtCheck().set(Date().time)
+                } catch (e: java.lang.Exception) { }
+            }
+        }
     }
 
     override fun onNewIntent(intent: Intent) {

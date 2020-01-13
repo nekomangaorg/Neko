@@ -566,6 +566,7 @@
         <item quantity="other">For %d titles</item>
     </plurals>
     <string name="notification_and_n_more">and %1$d more chapters.</string>
+    <string name="notification_and_n_more_ext">and %1$d more extensions.</string>
     <string name="notification_cover_update_failed">Failed to update cover</string>
     <string name="notification_first_add_to_library">Please add the manga to your library before doing this</string>
     <string name="notification_not_connected_to_ac_title">Sync canceled</string>

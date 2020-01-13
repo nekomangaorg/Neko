@@ -161,7 +161,7 @@ class ExtensionManager(
     private fun updatedInstalledExtensionsStatuses(availableExtensions: List<Extension.Available>) {
         val mutInstalledExtensions = installedExtensions.toMutableList()
         var changed = false
-
+        var hasUpdateCount = 0
         for ((index, installedExt) in mutInstalledExtensions.withIndex()) {
             val pkgName = installedExt.pkgName
             val availableExt = availableExtensions.find { it.pkgName == pkgName }
@@ -175,6 +175,7 @@ class ExtensionManager(
                 val hasUpdate = availableExt.versionCode > installedExt.versionCode
                 if (installedExt.hasUpdate != hasUpdate) {
                     mutInstalledExtensions[index] = installedExt.copy(hasUpdate = hasUpdate)
+                    hasUpdateCount++
                     changed = true
                 }
             }
@@ -182,6 +183,7 @@ class ExtensionManager(
         if (changed) {
             installedExtensions = mutInstalledExtensions
         }
+        preferences.extensionUpdatesCount().set(installedExtensions.count { it.hasUpdate })
     }
 
     /**
@@ -312,10 +314,12 @@ class ExtensionManager(
 
         override fun onExtensionInstalled(extension: Extension.Installed) {
             registerNewExtension(extension.withUpdateCheck())
+            preferences.extensionUpdatesCount().set(installedExtensions.count { it.hasUpdate })
         }
 
         override fun onExtensionUpdated(extension: Extension.Installed) {
             registerUpdatedExtension(extension.withUpdateCheck())
+            preferences.extensionUpdatesCount().set(installedExtensions.count { it.hasUpdate })
         }
 
         override fun onExtensionUntrusted(extension: Extension.Untrusted) {
@@ -324,6 +328,7 @@ class ExtensionManager(
 
         override fun onPackageUninstalled(pkgName: String) {
             unregisterExtension(pkgName)
+            preferences.extensionUpdatesCount().set(installedExtensions.count { it.hasUpdate })
         }
     }
 

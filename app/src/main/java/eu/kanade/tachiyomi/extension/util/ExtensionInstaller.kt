@@ -82,7 +82,9 @@ internal class ExtensionInstaller(private val context: Context) {
                 // Always notify on main thread
                 .observeOn(AndroidSchedulers.mainThread())
                 // Always remove the download when unsubscribed
-                .doOnUnsubscribe { deleteDownload(pkgName) }
+                .doOnUnsubscribe {
+                    deleteDownload(pkgName)
+                }
     }
 
     /**

@@ -201,6 +201,10 @@ class PreferencesHelper(val context: Context) {
 
     fun refreshCoversToo() = rxPrefs.getBoolean(Keys.refreshCoversToo, true)
 
+    fun extensionUpdatesCount() = rxPrefs.getInteger("ext_updates_count", 0)
+
+    fun lastExtCheck() = rxPrefs.getLong("last_ext_check", 0)
+
     fun upgradeFilters() {
         val filterDl = rxPrefs.getBoolean(Keys.filterDownloaded, false).getOrDefault()
         val filterUn = rxPrefs.getBoolean(Keys.filterUnread, false).getOrDefault()
