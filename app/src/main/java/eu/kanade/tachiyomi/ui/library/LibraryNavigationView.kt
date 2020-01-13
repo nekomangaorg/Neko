@@ -79,7 +79,9 @@ class LibraryNavigationView @JvmOverloads constructor(context: Context, attrs: A
 
         private val completed = Item.TriStateGroup(R.string.completed, this)
 
-        override val items = listOf(downloaded, unread, completed)
+        private val tracked = Item.TriStateGroup(R.string.tracked, this)
+
+        override val items = listOf(downloaded, unread, completed, tracked)
 
         override val header = Item.Header(R.string.action_filter)
 
@@ -90,6 +92,8 @@ class LibraryNavigationView @JvmOverloads constructor(context: Context, attrs: A
                 downloaded.state = preferences.filterDownloaded().getOrDefault()
                 unread.state = preferences.filterUnread().getOrDefault()
                 completed.state = preferences.filterCompleted().getOrDefault()
+                tracked.state = preferences.filterTracked().getOrDefault()
+                tracked
             }
             catch (e: Exception) {
                 preferences.upgradeFilters()
@@ -108,6 +112,7 @@ class LibraryNavigationView @JvmOverloads constructor(context: Context, attrs: A
                 downloaded -> preferences.filterDownloaded().set(item.state)
                 unread -> preferences.filterUnread().set(item.state)
                 completed -> preferences.filterCompleted().set(item.state)
+                tracked -> preferences.filterTracked().set(item.state)
             }
 
             adapter.notifyItemChanged(item)

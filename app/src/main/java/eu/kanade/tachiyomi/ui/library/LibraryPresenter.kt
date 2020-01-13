@@ -11,6 +11,7 @@ import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
+import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
@@ -127,6 +128,8 @@ class LibraryPresenter(
 
         val filterCompleted = preferences.filterCompleted().getOrDefault()
 
+        val filterTracked = preferences.filterTracked().getOrDefault()
+
         val filterFn: (LibraryItem) -> Boolean = f@ { item ->
             // Filter when there isn't unread chapters.
             if (filterUnread == STATE_INCLUDE && item.manga.unread == 0) return@f false
@@ -137,6 +140,12 @@ class LibraryPresenter(
             if (filterCompleted == STATE_EXCLUDE && item.manga.status == SManga.COMPLETED)
                 return@f false
 
+            if (filterTracked != STATE_IGNORE) {
+                val db = Injekt.get<DatabaseHelper>()
+                val tracks = db.getTracks(item.manga).executeAsBlocking().size
+                if (filterTracked == STATE_INCLUDE && tracks == 0) return@f false
+                if (filterTracked == STATE_EXCLUDE && tracks > 0) return@f false
+            }
             // Filter when there are no downloads.
             if (filterDownloaded != STATE_IGNORE) {
                 val isDownloaded = when {

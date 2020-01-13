@@ -176,6 +176,7 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
     fun canDrag(): Boolean {
         val sortingMode = preferences.librarySortingMode().getOrDefault()
         val filterOff = preferences.filterCompleted().getOrDefault() +
+            preferences.filterTracked().getOrDefault() +
             preferences.filterUnread().getOrDefault() +
             preferences.filterCompleted().getOrDefault() == 0
         return sortingMode == LibrarySort.DRAG_AND_DROP && filterOff &&
