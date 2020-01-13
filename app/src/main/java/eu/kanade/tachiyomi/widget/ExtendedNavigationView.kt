@@ -191,7 +191,7 @@ open class ExtendedNavigationView @JvmOverloads constructor(
      * Base adapter for the navigation view. It knows how to create and render every subclass of
      * [Item].
      */
-    abstract inner class Adapter(private val items: List<Item>) : androidx.recyclerview.widget.RecyclerView.Adapter<Holder>() {
+    abstract inner class Adapter(private val items: List<Item>) : RecyclerView.Adapter<Holder>() {
 
         private val onClick = View.OnClickListener {
             val pos = recycler.getChildAdapterPosition(it)

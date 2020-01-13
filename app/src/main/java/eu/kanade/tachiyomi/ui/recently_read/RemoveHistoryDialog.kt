@@ -3,6 +3,8 @@ package eu.kanade.tachiyomi.ui.recently_read
 import android.app.Dialog
 import android.os.Bundle
 import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.checkbox.checkBoxPrompt
+import com.afollestad.materialdialogs.checkbox.isCheckPromptChecked
 import com.afollestad.materialdialogs.customview.customView
 import com.bluelinelabs.conductor.Controller
 import eu.kanade.tachiyomi.R
@@ -27,18 +29,14 @@ class RemoveHistoryDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
         val activity = activity!!
 
-        // Create custom view
-        val dialogCheckboxView = DialogCheckboxView(activity).apply {
-            setDescription(R.string.dialog_with_checkbox_remove_description)
-            setOptionDescription(R.string.dialog_with_checkbox_reset)
-        }
-
         return MaterialDialog(activity)
                 .title(R.string.action_remove)
-                .customView(view = dialogCheckboxView, scrollable = true)
-                .positiveButton(R.string.action_remove) { onPositive(dialogCheckboxView.isChecked
-                    ()) }
+                .message(R.string.dialog_with_checkbox_remove_description)
+                .checkBoxPrompt(res = R.string.dialog_with_checkbox_reset){}
                 .negativeButton(android.R.string.cancel)
+                .positiveButton(R.string.action_remove) {
+                    onPositive(it.isCheckPromptChecked())
+                }
     }
 
     private fun onPositive(checked: Boolean) {
