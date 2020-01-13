@@ -11,7 +11,7 @@ import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 
 class SettingsGeneralController : SettingsController() {
 
-    private val isUpdaterEnabled = !BuildConfig.DEBUG && BuildConfig.INCLUDE_UPDATER
+    private val isUpdaterEnabled = BuildConfig.INCLUDE_UPDATER
 
     override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
         titleRes = R.string.pref_category_general
@@ -30,7 +30,6 @@ class SettingsGeneralController : SettingsController() {
                 true
             }
         }
-
         intListPreference {
             key = Keys.startScreen
             titleRes = R.string.pref_start_screen
@@ -44,7 +43,7 @@ class SettingsGeneralController : SettingsController() {
             key = Keys.automaticUpdates
             titleRes = R.string.pref_enable_automatic_updates
             summaryRes = R.string.pref_enable_automatic_updates_summary
-            defaultValue = false
+            defaultValue = true
 
             if (isUpdaterEnabled) {
                 onChange { newValue ->
@@ -63,7 +62,7 @@ class SettingsGeneralController : SettingsController() {
 
         val biometricManager = BiometricManager.from(context)
         if (biometricManager.canAuthenticate() == BiometricManager.BIOMETRIC_SUCCESS) {
-            var preference: IntListPreference? = null
+            var preference:IntListPreference? = null
             switchPreference {
                 key = Keys.useBiometrics
                 titleRes = R.string.lock_with_biometrics
@@ -83,7 +82,8 @@ class SettingsGeneralController : SettingsController() {
                     when (it) {
                         "0" -> context.getString(R.string.lock_always)
                         "-1" -> context.getString(R.string.lock_never)
-                        else -> context.getString(R.string.lock_after_mins, it)
+                        else -> resources?.getQuantityString(R.plurals.lock_after_mins, it.toInt(),
+                            it)
                     }
                 }.toTypedArray()
                 entryValues = values
