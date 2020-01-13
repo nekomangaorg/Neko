@@ -214,6 +214,17 @@ class DownloadCache(
         }
     }
 
+    fun removeFolders(folders: List<String>, manga: Manga) {
+        val sourceDir = rootDir.files[manga.source] ?: return
+        val mangaDir = sourceDir.files[provider.getMangaDirName(manga)] ?: return
+        for (chapter in folders) {
+            if (chapter in mangaDir.files) {
+                mangaDir.files -= chapter
+            }
+        }
+    }
+
+
     /**
      * Removes a manga that has been deleted from this cache.
      *

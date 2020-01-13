@@ -45,6 +45,7 @@ import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.*
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
@@ -180,7 +181,7 @@ class LibraryUpdateService(
         startForeground(Notifications.ID_LIBRARY_PROGRESS, progressNotification.build())
         wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).newWakeLock(
                 PowerManager.PARTIAL_WAKE_LOCK, "LibraryUpdateService:WakeLock")
-        wakeLock.acquire()
+        wakeLock.acquire(TimeUnit.MINUTES.toMillis(30))
     }
 
     /**
@@ -368,7 +369,7 @@ class LibraryUpdateService(
                 .map { manga -> manga.first }
     }
 
-    private fun downloadChapters(manga: Manga, chapters: List<Chapter>) {
+    fun downloadChapters(manga: Manga, chapters: List<Chapter>) {
         // we need to get the chapters from the db so we have chapter ids
         val mangaChapters = db.getChapters(manga).executeAsBlocking()
         val dbChapters = chapters.map {

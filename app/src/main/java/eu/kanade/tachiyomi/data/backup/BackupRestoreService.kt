@@ -4,6 +4,7 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.icu.util.TimeUnit
 import android.net.Uri
 import android.os.Build
 import android.os.IBinder
@@ -41,7 +42,8 @@ import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 import java.io.File
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Locale
+import java.util.concurrent.TimeUnit
 
 /**
  * Restores backup from json file
@@ -79,6 +81,12 @@ class BackupRestoreService : Service() {
     private val errors = mutableListOf<String>()
 
     /**
+     * List containing distinct errors
+     */
+    private val trackingErrors = mutableListOf<String>()
+
+
+    /**
      * count of cancelled
      */
     private var cancelled = 0
@@ -107,7 +115,7 @@ class BackupRestoreService : Service() {
         startForeground(Notifications.ID_RESTORE_PROGRESS, progressNotification.build())
         wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).newWakeLock(
                 PowerManager.PARTIAL_WAKE_LOCK, "BackupRestoreService:WakeLock")
-        wakeLock.acquire()
+        wakeLock.acquire(java.util.concurrent.TimeUnit.HOURS.toMillis(3))
     }
 
     /**
@@ -136,9 +144,9 @@ class BackupRestoreService : Service() {
      * @return the start value of the command.
      */
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (intent == null) return Service.START_NOT_STICKY
+        if (intent == null) return START_NOT_STICKY
 
-        val uri = intent.getParcelableExtra<Uri>(BackupConst.EXTRA_URI)
+        val uri = intent.getParcelableExtra<Uri>(BackupConst.EXTRA_URI) ?: return START_NOT_STICKY
 
         // Unsubscribe from any previous subscription if needed.
         job?.cancel()
@@ -152,9 +160,16 @@ class BackupRestoreService : Service() {
         }
         job?.invokeOnCompletion { stopSelf(startId) }
 
-        return Service.START_NOT_STICKY
+        return START_NOT_STICKY
     }
 
+    override fun stopService(name: Intent?): Boolean {
+        job?.cancel()
+        if (wakeLock.isHeld) {
+            wakeLock.release()
+        }
+        return super.stopService(name)
+    }
 
     /**
      * Restore a backup json file
@@ -181,11 +196,13 @@ class BackupRestoreService : Service() {
             isMangaDex
 
         }
-        totalAmount = mangasJson.size()
+        // +1 for categories
+        totalAmount = mangasJson.size() + 1
         skippedAmount = mangasJson.size() - mangdexManga.count()
         restoreAmount = mangdexManga.count()
 
         errors.clear()
+        trackingErrors.clear()
         cancelled = 0
         // Restore categories
         restoreCategories(json, backupManager)
@@ -196,8 +213,8 @@ class BackupRestoreService : Service() {
 
         notificationManager.cancel(Notifications.ID_RESTORE_PROGRESS)
 
-        cancelled = errors.count { it -> it.contains("standalonecoroutine", true) }
-        var tmpErrors = errors.filter { it -> !it.contains("standalonecoroutine", true) }
+        cancelled = errors.count { it.contains("cancelled", true) }
+        val tmpErrors = errors.filter { !it.contains("cancelled", true)}
         errors.clear()
         errors.addAll(tmpErrors)
 
@@ -213,9 +230,11 @@ class BackupRestoreService : Service() {
         val element = json.get(CATEGORIES)
         if (element != null) {
             backupManager.restoreCategories(element.asJsonArray)
-            restoreAmount += 1 // add categories to the total count being restored
+            restoreAmount += 1
             restoreProgress += 1
-            showProgressNotification(restoreProgress, restoreAmount, "Categories added")
+            showProgressNotification(restoreProgress, totalAmount, "Categories added")
+        } else {
+            totalAmount -= 1
         }
     }
 
@@ -231,6 +250,12 @@ class BackupRestoreService : Service() {
         val source = backupManager.sourceManager.getMangadex()
 
         try {
+            if (job?.isCancelled == false) {
+                showProgressNotification(restoreProgress, totalAmount, manga.title)
+                restoreProgress += 1
+            } else {
+                throw java.lang.Exception("Job was cancelled")
+            }
             val dbManga = backupManager.getMangaFromDatabase(manga)
             val dbMangaExists = dbManga != null
 
@@ -254,16 +279,11 @@ class BackupRestoreService : Service() {
             backupManager.restoreTrackForManga(manga, tracks)
 
             trackingFetch(manga, tracks)
-
-            restoreProgress += 1
-            showProgressNotification(restoreProgress, restoreAmount, manga.title)
         } catch (e: Exception) {
             Timber.e(e)
+
             errors.add("${manga.title} - ${e.message}")
-
         }
-
-
     }
 
     /**
@@ -283,6 +303,8 @@ class BackupRestoreService : Service() {
                         }
             } else {
                 errors.add("${manga.title} - ${service?.name} not logged in")
+                val notLoggedIn = getString(R.string.not_logged_into, service?.name)
+                trackingErrors.add(notLoggedIn)
             }
         }
     }
@@ -356,6 +378,24 @@ class BackupRestoreService : Service() {
                 getString(R.string.restore_completed_content_3, skippedAmount.toString(), totalAmount.toString()),
                 getString(R.string.restore_completed_content_4, cancelled.toString(), totalAmount.toString())).joinToString("\n")
 
+        val content = mutableListOf(getString(R.string.restore_completed_content, restoreProgress
+            .toString(), errors.size.toString()))
+        val sourceMissingCount = sourcesMissing.distinct().size
+        if (sourceMissingCount > 0)
+            content.add(resources.getQuantityString(R.plurals.sources_missing,
+                sourceMissingCount, sourceMissingCount))
+        if (lincensedManga > 0)
+            content.add(resources.getQuantityString(R.plurals.licensed_manga, lincensedManga,
+                lincensedManga))
+        val trackingErrors = trackingErrors.distinct()
+        if (trackingErrors.isNotEmpty()) {
+            val trackingErrorsString = trackingErrors.distinct().joinToString("\n")
+            content.add(trackingErrorsString)
+        }
+        if (cancelled > 0)
+            content.add(getString(R.string.restore_completed_content_2, cancelled))
+
+        val restoreString = content.joinToString("\n")
 
         val resultNotification = NotificationCompat.Builder(this, Notifications.CHANNEL_RESTORE)
                 .setContentTitle(getString(R.string.restore_completed))
@@ -390,7 +430,7 @@ class BackupRestoreService : Service() {
      *
      */
     private fun getErrorLogIntent(path: String, file: String): PendingIntent {
-        val destFile = File(path, file)
+        val destFile = File(path, file!!)
         val uri = destFile.getUriCompat(applicationContext)
         return NotificationReceiver.openFileExplorerPendingActivity(this@BackupRestoreService, uri)
     }

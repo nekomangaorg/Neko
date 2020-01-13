@@ -3,21 +3,33 @@ package eu.kanade.tachiyomi.ui.setting
 import android.app.Dialog
 import android.os.Bundle
 import androidx.preference.PreferenceScreen
+import android.view.View
+import android.widget.Toast
 import com.afollestad.materialdialogs.MaterialDialog
 import com.bluelinelabs.conductor.RouterTransaction
 import com.bluelinelabs.conductor.changehandler.FadeChangeHandler
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.ChapterCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
+import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService.Target
 import eu.kanade.tachiyomi.network.NetworkHelper
+import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.library.LibraryController
+import eu.kanade.tachiyomi.util.launchUI
 import eu.kanade.tachiyomi.util.toast
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
 class SettingsAdvancedController : SettingsController() {
@@ -73,8 +85,31 @@ class SettingsAdvancedController : SettingsController() {
 
             summaryRes = R.string.pref_clean_downloads_summary
 
-            onClick { LibraryUpdateService.start(context, target = Target.CLEANUP) }
+            onClick { cleanupDownloads() }
         }
+    }
+
+    private fun cleanupDownloads() {
+        if (job?.isActive == true) return
+        activity?.toast(R.string.starting_cleanup)
+        job = GlobalScope.launch(Dispatchers.IO, CoroutineStart.DEFAULT) {
+            val mangaList = db.getMangas().executeAsBlocking()
+            val sourceManager: SourceManager = Injekt.get()
+            val downloadManager: DownloadManager = Injekt.get()
+            var foldersCleared = 0
+            val mdex = sourceManager.getMangadex()
+            for (manga in mangaList) {
+                val chapterList = db.getChapters(manga).executeAsBlocking()
+                foldersCleared += downloadManager.cleanupChapters(chapterList, manga, mdex)
+            }
+            launchUI {
+                val activity = activity ?: return@launchUI
+                val cleanupString = if (foldersCleared == 0) activity.getString(R.string.no_cleanup_done)
+                else resources!!.getQuantityString(R.plurals.cleanup_done, foldersCleared, foldersCleared)
+                activity.toast(cleanupString, Toast.LENGTH_LONG)
+            }
+        }
+
     }
 
     private fun clearChapterCache() {
@@ -95,7 +130,8 @@ class SettingsAdvancedController : SettingsController() {
                 }, {
                     activity?.toast(R.string.cache_delete_error)
                 }, {
-                    activity?.toast(resources?.getString(R.string.cache_deleted, deletedFiles))
+                    activity?.toast(resources?.getQuantityString(R.plurals.cache_deleted,
+                        deletedFiles, deletedFiles))
                     findPreference(CLEAR_CACHE_KEY)?.summary =
                             resources?.getString(R.string.used_cache, chapterCache.readableSize)
                 })
@@ -105,10 +141,10 @@ class SettingsAdvancedController : SettingsController() {
         override fun onCreateDialog(savedViewState: Bundle?): Dialog {
             return MaterialDialog(activity!!)
                     .message(R.string.clear_database_confirmation)
-                    .negativeButton(android.R.string.no)
                     .positiveButton(android.R.string.yes) {
                         (targetController as? SettingsAdvancedController)?.clearDatabase()
                     }
+                    .negativeButton(android.R.string.no)
         }
     }
 
@@ -126,5 +162,7 @@ class SettingsAdvancedController : SettingsController() {
 
     private companion object {
         const val CLEAR_CACHE_KEY = "pref_clear_cache_key"
+
+        private var job: Job? = null
     }
 }
