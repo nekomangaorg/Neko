@@ -142,13 +142,11 @@ class DownloadProvider(private val context: Context) {
     fun findUnmatchedChapterDirs(chapters: List<Chapter>, manga: Manga, source: Source): List<UniFile> {
         val mangaDir = findMangaDir(manga, source) ?: return emptyList()
         return mangaDir.listFiles()!!.asList().filter {
-            chapters.find { chp ->
-                (getValidChapterDirNames(chp) + "${getChapterDirName(chp)}_tmp").any { dir ->
-                    mangaDir.findFile(
-                        dir
-                    ) != null
+            (chapters.find { chp ->
+                getValidChapterDirNames(chp).any { dir ->
+                    mangaDir.findFile(dir) != null
                 }
-            } == null
+            } == null) || it.name?.endsWith("_tmp") == true
         }
     }
 

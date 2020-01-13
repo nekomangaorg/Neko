@@ -40,9 +40,6 @@ import eu.kanade.tachiyomi.util.notification
 import eu.kanade.tachiyomi.util.notificationManager
 import eu.kanade.tachiyomi.util.syncChaptersWithSource
 import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
 import rx.Observable
 import rx.Subscription
 import rx.schedulers.Schedulers
@@ -52,6 +49,7 @@ import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 import java.util.ArrayList
 import java.util.Date
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
@@ -79,8 +77,6 @@ class LibraryUpdateService(
      * Subscription where the update is done.
      */
     private var subscription: Subscription? = null
-
-    var job: Job? = null
 
 
     /**
@@ -116,8 +112,7 @@ class LibraryUpdateService(
     enum class Target {
         CHAPTERS, // Manga chapters
         DETAILS,  // Manga metadata
-        TRACKING,  // Tracking metadata
-        CLEANUP // Clean up downloads
+        TRACKING  // Tracking metadata
     }
 
     companion object {
@@ -184,7 +179,7 @@ class LibraryUpdateService(
         startForeground(Notifications.ID_LIBRARY_PROGRESS, progressNotification.build())
         wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).newWakeLock(
                 PowerManager.PARTIAL_WAKE_LOCK, "LibraryUpdateService:WakeLock")
-        wakeLock.acquire()
+        wakeLock.acquire(TimeUnit.MINUTES.toMillis(30))
     }
 
     /**
@@ -222,22 +217,16 @@ class LibraryUpdateService(
         // Unsubscribe from any previous subscription if needed.
         subscription?.unsubscribe()
 
-        val selectedScheme = preferences.libraryUpdatePrioritization().getOrDefault()
-        // Update favorite manga. Destroy service when completed or in case of an error.
-        val mangaList = getMangaToUpdate(intent, target)
-                .sortedWith(rankingScheme[selectedScheme])
 
         val handler = CoroutineExceptionHandler { _, exception ->
             Timber.e(exception)
             stopSelf(startId)
         }
         // Update either chapter list or manga details.
-        if (target == Target.CLEANUP) {
-            job = GlobalScope.launch(handler) {
-                cleanupDownloads()
-            }
-            job?.invokeOnCompletion { stopSelf(startId) }
-        } else {
+        val selectedScheme = preferences.libraryUpdatePrioritization().getOrDefault()
+            // Update favorite manga. Destroy service when completed or in case of an error.
+            val mangaList = getMangaToUpdate(intent, target)
+                .sortedWith(rankingScheme[selectedScheme])
             subscription = Observable.defer {
                 when (target) {
                     Target.CHAPTERS -> updateChapterList(mangaList)
@@ -250,7 +239,6 @@ class LibraryUpdateService(
                 }, {
                     stopSelf(startId)
                 })
-        }
         return START_REDELIVER_INTENT
     }
 
@@ -360,11 +348,13 @@ class LibraryUpdateService(
 
     private fun cleanupDownloads() {
         val mangaList = db.getMangas().executeAsBlocking()
+        var foldersCleared = 0
         for (manga in mangaList) {
             val chapterList = db.getChapters(manga).executeAsBlocking()
             val source = sourceManager.getOrStub(manga.source)
-            downloadManager.cleanupChapters(chapterList, manga, source)
+            foldersCleared += downloadManager.cleanupChapters(chapterList, manga, source)
         }
+
     }
 
     fun downloadChapters(manga: Manga, chapters: List<Chapter>) {

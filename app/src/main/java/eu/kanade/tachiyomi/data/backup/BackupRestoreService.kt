@@ -43,6 +43,7 @@ import uy.kohesive.injekt.injectLazy
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Locale
+import java.util.concurrent.TimeUnit
 
 /**
  * Restores backup from json file
@@ -117,7 +118,7 @@ class BackupRestoreService : Service() {
         startForeground(Notifications.ID_RESTORE_PROGRESS, progressNotification.build())
         wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).newWakeLock(
                 PowerManager.PARTIAL_WAKE_LOCK, "BackupRestoreService:WakeLock")
-        wakeLock.acquire()
+        wakeLock.acquire(TimeUnit.HOURS.toMillis(3))
     }
 
     /**

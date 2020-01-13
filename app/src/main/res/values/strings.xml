@@ -355,8 +355,15 @@
     <string name="pref_refresh_library_tracking">Refresh tracking metadata</string>
     <string name="pref_refresh_library_tracking_summary">Updates status, score and last chapter read from the tracking services</string>
     <string name="pref_clean_downloads">Clean up downloaded chapters</string>
-        <string name="pref_clean_downloads_summary">Deletes non-existent, partially downloaded,
+    <string name="pref_clean_downloads_summary">Delete non-existent, partially downloaded,
             and read chapter folders</string>
+
+    <string name="starting_cleanup">Starting cleanup</string>
+    <string name="no_cleanup_done">No folders to cleanup</string>
+    <plurals name="cleanup_done">
+        <item quantity="one">Cleanup done. Removed %d folder</item>
+        <item quantity="other">Cleanup done. Removed %d folders</item>
+    </plurals>
 
       <!-- About section -->
     <string name="version">Version</string>
