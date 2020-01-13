@@ -128,8 +128,7 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
         } else {
             SelectableAdapter.Mode.SINGLE
         }
-        val sortingMode = preferences.librarySortingMode().getOrDefault()
-        adapter.isLongPressDragEnabled = sortingMode == LibrarySort.DRAG_AND_DROP
+        adapter.isLongPressDragEnabled = canDrag()
 
         subscriptions += controller.searchRelay
                 .doOnNext { adapter.setFilter(it) }
@@ -174,6 +173,15 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
             }
     }
 
+    fun canDrag(): Boolean {
+        val sortingMode = preferences.librarySortingMode().getOrDefault()
+        val filterOff = preferences.filterCompleted().getOrDefault() +
+            preferences.filterUnread().getOrDefault() +
+            preferences.filterCompleted().getOrDefault() == 0
+        return sortingMode == LibrarySort.DRAG_AND_DROP && filterOff &&
+            adapter.mode != SelectableAdapter.Mode.MULTI
+    }
+
     fun onRecycle() {
         adapter.setItems(emptyList())
         adapter.clearSelection()
@@ -192,10 +200,8 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
      */
     fun onNextLibraryManga(event: LibraryMangaEvent) {
         // Get the manga list for this category.
-
-
         val sortingMode = preferences.librarySortingMode().getOrDefault()
-        adapter.isLongPressDragEnabled = sortingMode == LibrarySort.DRAG_AND_DROP
+        adapter.isLongPressDragEnabled = canDrag()
         var mangaForCategory = event.getMangaForCategory(category).orEmpty()
         if (sortingMode == LibrarySort.DRAG_AND_DROP) {
             if (category.name == "Default")
@@ -238,16 +244,14 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
                 if (adapter.indexOf(event.manga) != -1) lastClickPosition = -1
                 if (controller.selectedMangas.isEmpty()) {
                     adapter.mode = SelectableAdapter.Mode.SINGLE
-                    adapter.isLongPressDragEnabled = preferences.librarySortingMode()
-                        .getOrDefault() == LibrarySort.DRAG_AND_DROP
+                    adapter.isLongPressDragEnabled = canDrag()
                 }
             }
             is LibrarySelectionEvent.Cleared -> {
                 adapter.mode = SelectableAdapter.Mode.SINGLE
                 adapter.clearSelection()
                 lastClickPosition = -1
-                adapter.isLongPressDragEnabled = preferences.librarySortingMode()
-                    .getOrDefault() == LibrarySort.DRAG_AND_DROP
+                adapter.isLongPressDragEnabled = canDrag()
             }
         }
     }

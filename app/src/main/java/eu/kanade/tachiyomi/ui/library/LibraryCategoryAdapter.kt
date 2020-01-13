@@ -64,6 +64,7 @@ class LibraryCategoryAdapter(val view: LibraryCategoryView) :
         if (s == null) {
             s = ""
         }
+        isLongPressDragEnabled = view.canDrag() && s.isNullOrBlank()
         updateDataSet(mangas.filter { it.filter(s) })
     }
 

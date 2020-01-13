@@ -89,6 +89,8 @@ class LibraryController(
      */
     private var query = ""
 
+    private var searchItem:MenuItem? = null
+
     /**
      * Currently selected mangas.
      */
@@ -211,6 +213,7 @@ class LibraryController(
     }
 
     override fun onDetach(view: View) {
+        destroyActionModeIfNeeded()
         snack?.dismiss()
         snack = null
         super.onDetach(view)
@@ -322,6 +325,7 @@ class LibraryController(
      */
     private fun onFilterChanged() {
         presenter.requestFilterUpdate()
+        destroyActionModeIfNeeded()
         activity?.invalidateOptionsMenu()
     }
 
@@ -357,6 +361,7 @@ class LibraryController(
     fun createActionModeIfNeeded() {
         if (actionMode == null) {
             actionMode = (activity as AppCompatActivity).startSupportActionMode(this)
+            searchItem?.collapseActionView()
         }
     }
 
@@ -376,7 +381,9 @@ class LibraryController(
         val searchItem = menu.findItem(R.id.action_search)
         val searchView = searchItem.actionView as SearchView
         searchView.queryHint = resources?.getString(R.string.search_hint)
+        this.searchItem = searchItem
 
+        searchItem.collapseActionView()
         if (!query.isEmpty()) {
             searchItem.expandActionView()
             searchView.setQuery(query, true)

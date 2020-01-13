@@ -82,6 +82,7 @@ class LibraryItem(val manga: LibraryManga, private val libraryAsList: Preference
 
     @SuppressLint("DefaultLocale")
     private fun containsGenre(tag: String, genres: List<String>?): Boolean {
+        if (tag.trim().isEmpty()) return true
         return if (tag.startsWith("-"))
             genres?.find {
                 it.trim().toLowerCase() == tag.substringAfter("-").toLowerCase()
