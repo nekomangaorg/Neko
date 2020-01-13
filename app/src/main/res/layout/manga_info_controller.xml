@@ -22,7 +22,8 @@
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_marginTop="16dp"
-            app:layout_constraintTop_toBottomOf="@+id/manga_cover"/>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/manga_cover" />
 
         <androidx.constraintlayout.widget.Guideline
             android:layout_width="wrap_content"
@@ -301,5 +302,28 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+        <View
+            android:id="@+id/full_backdrop"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="invisible"
+            android:focusable="true"
+            android:alpha="0"
+            android:clickable="true"
+            android:foreground="@color/md_black_1000"
+            tools:background="@color/md_black_1000" />
+
+
+        <ImageView
+            android:id="@+id/manga_cover_full"
+            android:contentDescription="@string/description_cover"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:visibility="invisible"/>
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
 </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
