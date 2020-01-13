@@ -450,4 +450,8 @@
     <string name="system_theme">Sistem öntanımlı</string>
     <string name="system_darkblue_theme">Sistem öntanımlı (Koyu mavi)</string>
     <string name="system_amoled_theme">Sistem öntanımlı (AMOLED)</string>
+    <string name="action_forward">İleri</string>
+    <string name="action_refresh">Yenile</string>
+    <string name="no_results_found">Sonuç bulunmadı</string>
+    <string name="migration_selection_prompt">Taşınılacak bir kaynak seçin</string>
 </resources>

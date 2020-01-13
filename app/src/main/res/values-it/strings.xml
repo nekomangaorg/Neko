@@ -483,4 +483,8 @@
     <string name="system_theme">Predefinita di sistema</string>
     <string name="system_darkblue_theme">Predefinita di sistema (Blu scuro)</string>
     <string name="system_amoled_theme">Predefinita di sistema (AMOLED)</string>
+    <string name="action_forward">Avanti</string>
+    <string name="action_refresh">Ricarica</string>
+    <string name="no_results_found">Nessun risultato trovato</string>
+    <string name="migration_selection_prompt">Seleziona una sorgente da cui migrare</string>
 </resources>

@@ -465,7 +465,6 @@ class ChaptersController() : NucleusController<ChaptersPresenter>(),
         }
     }
 
-
     private fun showDeleteChaptersConfirmationDialog() {
         DeleteChaptersDialog(this).showDialog(router)
     }

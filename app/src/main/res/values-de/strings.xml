@@ -13,7 +13,7 @@
     <string name="label_latest_updates">Neueste Updates</string>
     <string name="label_categories">Kategorien</string>
     <string name="label_selected">Ausgewählt: %1$d</string>
-    <string name="label_backup">Backup</string>
+    <string name="label_backup">Sicherung</string>
     <string name="action_settings">Einstellungen</string>
     <string name="action_filter">Filter</string>
     <string name="action_filter_downloaded">Heruntergeladen</string>
@@ -448,4 +448,8 @@
     <string name="system_theme">Systemstandard</string>
     <string name="system_darkblue_theme">Systemstandard (Dunkelblau)</string>
     <string name="system_amoled_theme">Systemstandard (AMOLED)</string>
+    <string name="action_forward">Vorwärts</string>
+    <string name="action_refresh">Aktualisierung</string>
+    <string name="no_results_found">Keine Ergebnisse gefunden</string>
+    <string name="migration_selection_prompt">Suche eine Quelle zum migrieren aus</string>
 </resources>

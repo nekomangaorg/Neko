@@ -168,7 +168,6 @@
     <string name="pref_library_update_categories">Categories to include in global update</string>
     <string name="all">All</string>
     <string name="pref_library_update_prioritization">Library update order</string>
-    <string name="pref_library_update_prioritization_summary">Select the order in which Tachiyomi checks for update</string>
     <string name="pref_library_update_restriction">Library update restrictions</string>
     <string name="pref_library_update_restriction_summary">Update only when the conditions are met</string>
     <string name="wifi">Wi-Fi</string>
@@ -201,6 +200,7 @@
     <string name="all_lang">All</string>
     <string name="ext_details">Details</string>
     <string name="ext_update">Update</string>
+    <string name="ext_obsolete">Obsolete</string>
     <string name="ext_install">Install</string>
     <string name="ext_pending">Pending</string>
     <string name="ext_downloading">Downloading</string>
@@ -213,6 +213,7 @@
     <string name="ext_available">Available</string>
     <string name="untrusted_extension">Untrusted extension</string>
     <string name="untrusted_extension_message">This extension was signed with an untrusted certificate and wasn\'t activated.\n\nA malicious extension could read any login credentials stored in Tachiyomi or execute arbitrary code.\n\nBy trusting this certificate you accept these risks.</string>
+    <string name="obsolete_extension_message">This extension is no longer available.</string>
     <string name="ext_version_info">Version: %1$s</string>
     <string name="ext_language_info">Language: %1$s</string>
     <string name="ext_empty_preferences">No preferences to edit for this extension</string>

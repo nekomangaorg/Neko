@@ -449,4 +449,6 @@ Nie znaleziono źródła %1$s</string>
     <string name="system_theme">Systemowy</string>
     <string name="system_darkblue_theme">Systemowy (Ciemny niebieski)</string>
     <string name="system_amoled_theme">Systemowy (AMOLED)</string>
+    <string name="action_forward">Dalej</string>
+    <string name="action_refresh">Odśwież</string>
 </resources>

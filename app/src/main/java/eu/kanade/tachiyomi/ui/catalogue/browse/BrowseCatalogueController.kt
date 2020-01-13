@@ -53,7 +53,6 @@ import kotlinx.android.synthetic.main.main_activity.*
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
-import rx.subscriptions.Subscriptions
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 import java.util.concurrent.TimeUnit
@@ -274,6 +273,7 @@ open class BrowseCatalogueController(bundle: Bundle) :
 
             val searchEventsObservable = searchView.queryTextChangeEvents()
                     .skip(1)
+                    .filter { router.backstack.lastOrNull()?.controller() == this@BrowseCatalogueController }
                     .share()
             val writingObservable = searchEventsObservable
                     .filter { !it.isSubmitted }
@@ -284,11 +284,12 @@ open class BrowseCatalogueController(bundle: Bundle) :
             searchViewSubscription?.unsubscribe()
             searchViewSubscription = Observable.merge(writingObservable, submitObservable)
                     .map { it.queryText().toString() }
-                    .distinctUntilChanged()
                     .subscribeUntilDestroy { searchWithQuery(it) }
 
-            untilDestroySubscriptions.add(
-                    Subscriptions.create { if (isActionViewExpanded) collapseActionView() })
+            fixExpand(onCollapse = {
+                searchWithQuery("")
+                true
+            })
         }
 
         // Setup filters button
@@ -355,11 +356,6 @@ open class BrowseCatalogueController(bundle: Bundle) :
         // If text didn't change, do nothing
         if (presenter.query == newQuery)
             return
-
-        // FIXME dirty fix to restore the toolbar buttons after closing search mode.
-        if (newQuery == "") {
-            activity?.invalidateOptionsMenu()
-        }
 
         showProgressBar()
         adapter?.clear()

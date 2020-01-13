@@ -117,10 +117,11 @@ class SettingsLibraryController : SettingsController() {
                         selectedCategories.joinToString { it.name }
                 }
         }
-        intListPreference{
+        intListPreference {
             key = Keys.libraryUpdatePrioritization
             titleRes = R.string.pref_library_update_prioritization
-            // The following arrays are to be lined up with the list rankingScheme in:
+
+            // The following array lines up with the list rankingScheme in:
             // ../../data/library/LibraryUpdateRanker.kt
             entriesRes = arrayOf(
                 R.string.action_sort_alpha,
@@ -138,14 +139,13 @@ class SettingsLibraryController : SettingsController() {
             titleRes = R.string.default_category
 
             val categories = listOf(Category.createDefault()) + dbCategories
-
-            val selectedCategory = categories.find { it.id == preferences.defaultCategory() }
             entries = arrayOf(context.getString(R.string.default_category_summary)) +
                 categories.map { it.name }.toTypedArray()
             entryValues = arrayOf("-1") + categories.map { it.id.toString() }.toTypedArray()
             defaultValue = "-1"
-            summary = selectedCategory?.name ?: context.getString(R.string.default_category_summary)
 
+            val selectedCategory = categories.find { it.id == preferences.defaultCategory() }
+            summary = selectedCategory?.name ?: context.getString(R.string.default_category_summary)
             onChange { newValue ->
                 summary = categories.find {
                     it.id == (newValue as String).toInt()
