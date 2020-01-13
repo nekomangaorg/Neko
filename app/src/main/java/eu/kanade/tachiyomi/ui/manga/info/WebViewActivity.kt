@@ -8,14 +8,12 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
-import android.os.PersistableBundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebView
 import android.widget.LinearLayout
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.graphics.ColorUtils
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -98,6 +96,9 @@ class WebViewActivity : BaseActivity() {
                 0, insets.systemWindowInsetBottom
             )
         }
+        swipe_refresh.setOnRefreshListener {
+            refreshPage()
+        }
 
         content.setOnApplyWindowInsetsListener { v, insets ->
             window.statusBarColor = getResourceColor(R.attr.colorPrimary)
@@ -122,6 +123,8 @@ class WebViewActivity : BaseActivity() {
             insets
         }
 
+        swipe_refresh.isEnabled = false
+
         if (bundle == null) {
             val source = sourceManager.get(intent.extras!!.getLong(SOURCE_KEY)) as? HttpSource ?: return
             val url = intent.extras!!.getString(URL_KEY) ?: return
@@ -136,11 +139,14 @@ class WebViewActivity : BaseActivity() {
                     super.onPageFinished(view, url)
                     invalidateOptionsMenu()
                     title = view?.title
+                    swipe_refresh.isEnabled = true
+                    swipe_refresh?.isRefreshing = false
                 }
 
                 override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                     super.onPageStarted(view, url, favicon)
                     invalidateOptionsMenu()
+                    //swipe_refresh.isEnabled = false
                 }
             }
             val marginB = webview.marginBottom
@@ -159,6 +165,10 @@ class WebViewActivity : BaseActivity() {
         else {
             webview.restoreState(bundle)
         }
+    }
+    private fun refreshPage() {
+        swipe_refresh.isRefreshing = true
+        webview.reload()
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
