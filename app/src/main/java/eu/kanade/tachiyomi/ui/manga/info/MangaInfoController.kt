@@ -40,7 +40,6 @@ import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
-import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.library.ChangeMangaCategoriesDialog
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.main.MainActivity
@@ -347,6 +346,7 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
                 override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
                     presenter.shareManga(resource)
                 }
+
                 override fun onLoadCleared(placeholder: Drawable?) {}
 
                 override fun onLoadFailed(errorDrawable: Drawable?) {
@@ -534,6 +534,7 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
                     { dialog, position, text ->
                         (targetController as? MangaInfoController)?.createShortcutForShape(position)
                     }
+                    .positiveButton(android.R.string.ok)
         }
     }
 

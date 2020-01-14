@@ -44,6 +44,7 @@ class SetTrackStatusDialog<T> : DialogController
                 { _, position, _ ->
                     (targetController as? Listener)?.setStatus(item, position)
                 }
+                .positiveButton(android.R.string.ok)
     }
 
     interface Listener {

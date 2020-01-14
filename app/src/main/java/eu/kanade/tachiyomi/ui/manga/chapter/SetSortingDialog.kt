@@ -28,10 +28,10 @@ class SetSortingDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
 
         return MaterialDialog(activity)
                 .title(R.string.sorting_mode)
-                .listItemsSingleChoice(items = choices, initialSelection = selectedIndex){
-                    _, position, _ ->
+                .listItemsSingleChoice(items = choices, initialSelection = selectedIndex) { _, position, _ ->
                     (targetController as? Listener)?.setSorting(ids[position])
                 }
+                .positiveButton(android.R.string.ok)
     }
 
     interface Listener {

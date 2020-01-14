@@ -136,7 +136,7 @@ class SettingsDownloadController : SettingsController() {
         try {
             startActivityForResult(intent, DOWNLOAD_DIR_L)
         } catch (e: ActivityNotFoundException) {
-                startActivityForResult(preferences.context.getFilePicker(currentDir), DOWNLOAD_DIR_L)
+            startActivityForResult(preferences.context.getFilePicker(currentDir), DOWNLOAD_DIR_L)
         }
     }
 
@@ -152,7 +152,7 @@ class SettingsDownloadController : SettingsController() {
 
             return MaterialDialog(activity)
                     .listItemsSingleChoice(items = externalDirs.map { it.path }, initialSelection = selectedIndex)
-                    {_, pos, text->
+                    { _, pos, text ->
                         val target = targetController as? SettingsDownloadController
                         if (pos == externalDirs.lastIndex) {
                             target?.customDirectorySelected(currentDir)
@@ -160,6 +160,7 @@ class SettingsDownloadController : SettingsController() {
                             target?.predefinedDirectorySelected(text.toString())
                         }
                     }
+                    .positiveButton(android.R.string.ok)
 
         }
 

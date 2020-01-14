@@ -29,9 +29,10 @@ class SetDisplayModeDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
         return MaterialDialog(activity)
                 .title(R.string.action_display_mode)
                 .listItemsSingleChoice(items = choices, initialSelection = selectedIndex)
-                {_, position, text ->
+                { _, position, text ->
                     (targetController as? Listener)?.setDisplayMode(ids[position])
                 }
+                .positiveButton(android.R.string.ok)
     }
 
     interface Listener {
