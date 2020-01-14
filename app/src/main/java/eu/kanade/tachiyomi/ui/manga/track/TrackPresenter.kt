@@ -88,8 +88,8 @@ class TrackPresenter(
                     .flatMap { db.insertTrack(item).asRxObservable() }
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe({ },
-                            { error -> context.toast(error.message) }))
+                    .subscribeFirst({ view, _ -> view.onRefreshDone() },
+                        TrackController::onRefreshError))
         } else {
             db.deleteTrackForManga(manga, service).executeAsBlocking()
         }
