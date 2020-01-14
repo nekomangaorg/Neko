@@ -259,6 +259,7 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
             is LibrarySelectionEvent.Cleared -> {
                 adapter.mode = SelectableAdapter.Mode.SINGLE
                 adapter.clearSelection()
+                adapter.notifyDataSetChanged()
                 lastClickPosition = -1
                 adapter.isLongPressDragEnabled = canDrag()
             }

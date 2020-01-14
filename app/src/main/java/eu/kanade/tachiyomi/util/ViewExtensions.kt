@@ -6,21 +6,22 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.Point
 import android.graphics.Typeface
-import android.os.Build
-import androidx.annotation.Px
-import androidx.annotation.RequiresApi
-import com.google.android.material.snackbar.Snackbar
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import android.view.View
 import android.view.ViewGroup
-import android.view.Window
 import android.view.WindowInsets
 import android.widget.TextView
+import androidx.annotation.Px
+import androidx.annotation.RequiresApi
 import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.view.ViewCompat
+import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.WhichButton
+import com.afollestad.materialdialogs.actions.getActionButton
+import com.afollestad.materialdialogs.actions.hasActionButton
 import com.amulyakhare.textdrawable.TextDrawable
-import com.amulyakhare.textdrawable.util.ColorGenerator
 import eu.kanade.tachiyomi.R
+import com.amulyakhare.textdrawable.util.ColorGenerator
+import com.google.android.material.snackbar.Snackbar
 import kotlin.math.min
 
 /**

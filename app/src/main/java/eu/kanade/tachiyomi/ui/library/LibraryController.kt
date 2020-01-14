@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.library
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
@@ -13,9 +14,11 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsets
+import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.SearchView
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
@@ -88,8 +91,6 @@ class LibraryController(
      * Library search query.
      */
     private var query = ""
-
-    private var searchItem:MenuItem? = null
 
     /**
      * Currently selected mangas.
@@ -361,7 +362,10 @@ class LibraryController(
     fun createActionModeIfNeeded() {
         if (actionMode == null) {
             actionMode = (activity as AppCompatActivity).startSupportActionMode(this)
-            searchItem?.collapseActionView()
+            val view = activity?.window?.currentFocus ?: return
+            val imm = activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as?
+            InputMethodManager ?: return
+            imm.hideSoftInputFromWindow(view.windowToken, 0)
         }
     }
 
@@ -381,7 +385,6 @@ class LibraryController(
         val searchItem = menu.findItem(R.id.action_search)
         val searchView = searchItem.actionView as SearchView
         searchView.queryHint = resources?.getString(R.string.search_hint)
-        this.searchItem = searchItem
 
         searchItem.collapseActionView()
         if (!query.isEmpty()) {
