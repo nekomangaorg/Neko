@@ -30,7 +30,7 @@ class RemoveHistoryDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
         return MaterialDialog(activity)
                 .title(R.string.action_remove)
                 .message(R.string.dialog_with_checkbox_remove_description)
-                .checkBoxPrompt(res = R.string.dialog_with_checkbox_reset){}
+                .checkBoxPrompt(res = R.string.dialog_with_checkbox_reset, isCheckedDefault = true) {}
                 .negativeButton(android.R.string.cancel)
                 .positiveButton(R.string.action_remove) {
                     onPositive(it.isCheckPromptChecked())

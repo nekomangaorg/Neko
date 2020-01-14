@@ -11,7 +11,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 
 class DeleteLibraryMangasDialog<T>(bundle: Bundle? = null) :
-        DialogController(bundle) where T : Controller, T: DeleteLibraryMangasDialog.Listener {
+        DialogController(bundle) where T : Controller, T : DeleteLibraryMangasDialog.Listener {
 
     private var mangas = emptyList<Manga>()
 
@@ -25,8 +25,8 @@ class DeleteLibraryMangasDialog<T>(bundle: Bundle? = null) :
                 .title(R.string.action_remove)
                 .message(R.string.confirm_delete_manga)
                 .negativeButton(android.R.string.no)
-                .checkBoxPrompt(res=R.string.also_delete_chapters){}
-                .positiveButton(android.R.string.yes){
+                .checkBoxPrompt(res = R.string.also_delete_chapters, isCheckedDefault = true) {}
+                .positiveButton(android.R.string.yes) {
                     (targetController as? Listener)?.deleteMangasFromLibrary(mangas, it.isCheckPromptChecked())
                 }
     }

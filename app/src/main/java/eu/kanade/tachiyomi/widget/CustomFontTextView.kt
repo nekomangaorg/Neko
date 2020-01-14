@@ -17,7 +17,7 @@ class CustomFontTextView @JvmOverloads constructor(context: Context, attrs: Attr
         const val PATHWAY_GOTHIC = 0
 
         // Map where typefaces are cached
-        private val typefaces = HashMap<Int, Typeface>(2)
+        private val typefaces = HashMap<Int, Typeface>(1)
     }
 
     init {
