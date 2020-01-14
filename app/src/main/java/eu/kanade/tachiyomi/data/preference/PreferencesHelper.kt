@@ -30,6 +30,10 @@ class PreferencesHelper(val context: Context) {
             File(Environment.getExternalStorageDirectory().absolutePath + File.separator +
                     context.getString(R.string.app_name), "backup"))
 
+    fun getInt(key: String, default: Int?) = rxPrefs.getInteger(key, default)
+    fun getStringPref(key: String, default: String?) = rxPrefs.getString(key, default)
+    fun getStringSet(key: String, default: Set<String>) = rxPrefs.getStringSet(key, default)
+
     fun startScreen() = prefs.getInt(Keys.startScreen, 1)
 
     fun clear() = prefs.edit().clear().apply()

@@ -21,9 +21,8 @@ class SettingsGeneralController : SettingsController() {
             titleRes = R.string.pref_theme
             entriesRes = arrayOf(R.string.light_theme, R.string.dark_theme,
                     R.string.amoled_theme)
-            entryValues = arrayOf("1", "2", "3")
-            defaultValue = "1"
-            summary = "%s"
+            entryValues = 1..3
+            defaultValue = 1
 
             onChange {
                 activity?.recreate()
@@ -35,9 +34,8 @@ class SettingsGeneralController : SettingsController() {
             titleRes = R.string.pref_start_screen
             entriesRes = arrayOf(R.string.label_library, R.string.label_recent_manga,
                 R.string.label_recent_updates)
-            entryValues = arrayOf("1", "2", "3")
-            defaultValue = "1"
-            summary = "%s"
+            entryValues = 1..3
+            defaultValue = 1
         }
         switchPreference {
             key = Keys.automaticUpdates
@@ -62,7 +60,7 @@ class SettingsGeneralController : SettingsController() {
 
         val biometricManager = BiometricManager.from(context)
         if (biometricManager.canAuthenticate() == BiometricManager.BIOMETRIC_SUCCESS) {
-            var preference:IntListPreference? = null
+            var preference:IntListMatPreference? = null
             switchPreference {
                 key = Keys.useBiometrics
                 titleRes = R.string.lock_with_biometrics
@@ -77,18 +75,17 @@ class SettingsGeneralController : SettingsController() {
                 key = Keys.lockAfter
                 titleRes = R.string.lock_when_idle
                 isVisible = preferences.useBiometrics().getOrDefault()
-                val values = arrayOf("0", "2", "5", "10", "20", "30", "60", "90", "120", "-1")
-                entries = values.map {
+                val values = listOf(0, 2, 5, 10, 20, 30, 60, 90, 120, -1)
+                entries = values.mapNotNull {
                     when (it) {
-                        "0" -> context.getString(R.string.lock_always)
-                        "-1" -> context.getString(R.string.lock_never)
+                        0 -> context.getString(R.string.lock_always)
+                        -1 -> context.getString(R.string.lock_never)
                         else -> resources?.getQuantityString(R.plurals.lock_after_mins, it.toInt(),
                             it)
                     }
-                }.toTypedArray()
+                }
                 entryValues = values
-                defaultValue = "0"
-                summary = "%s"
+                defaultValue = 0
             }
         }
     }

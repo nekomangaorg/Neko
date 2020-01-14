@@ -5,6 +5,13 @@ import androidx.preference.*
 import com.mikepenz.iconics.IconicsDrawable
 import eu.kanade.tachiyomi.widget.preference.FloatListPreference
 import eu.kanade.tachiyomi.widget.preference.IntListPreference
+import eu.kanade.tachiyomi.widget.preference.ListMatPreference
+import eu.kanade.tachiyomi.widget.preference.MultiListMatPreference
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
+import uy.kohesive.injekt.injectLazy
+import eu.kanade.tachiyomi.widget.preference.ListMatPreference
+import eu.kanade.tachiyomi.widget.preference.MultiListMatPreference
 
 @DslMarker
 @Target(AnnotationTarget.TYPE)
@@ -30,12 +37,20 @@ inline fun PreferenceGroup.editTextPreference(block: (@DSL EditTextPreference).(
     return initThenAdd(EditTextPreference(context), block).also(::initDialog)
 }
 
-inline fun PreferenceGroup.listPreference(block: (@DSL ListPreference).() -> Unit): ListPreference {
-    return initThenAdd(ListPreference(context), block).also(::initDialog)
+inline fun PreferenceGroup.listPreference(block: (@DSL ListMatPreference).() -> Unit):
+    ListMatPreference {
+    return initThenAdd(ListMatPreference(context), block)
 }
 
-inline fun PreferenceGroup.intListPreference(block: (@DSL IntListPreference).() -> Unit): IntListPreference {
-    return initThenAdd(IntListPreference(context), block).also(::initDialog)
+inline fun PreferenceGroup.intListPreference(block: (@DSL IntListMatPreference).() -> Unit):
+    IntListMatPreference {
+    return initThenAdd(IntListMatPreference(context), block)
+}
+
+inline fun PreferenceGroup.multiSelectListPreferenceMat(block: (@DSL MultiListMatPreference).()
+-> Unit): MultiListMatPreference {
+    return initThenAdd(MultiListMatPreference(context), block)
+
 }
 
 inline fun PreferenceGroup.floatListPreference(block: (@DSL FloatListPreference).() -> Unit): FloatListPreference {
@@ -47,7 +62,9 @@ inline fun PreferenceGroup.multiSelectListPreference(block: (@DSL MultiSelectLis
 }
 
 inline fun PreferenceScreen.preferenceCategory(block: (@DSL PreferenceCategory).() -> Unit): PreferenceCategory {
-    return addThenInit(PreferenceCategory(context), block)
+    return addThenInit(PreferenceCategory(context).apply {
+        isIconSpaceReserved = false
+    }, block)
 }
 
 inline fun PreferenceScreen.preferenceScreen(block: (@DSL PreferenceScreen).() -> Unit): PreferenceScreen {
@@ -65,15 +82,17 @@ fun initDialog(dialogPreference: DialogPreference) {
 inline fun <P : Preference> PreferenceGroup.initThenAdd(p: P, block: P.() -> Unit): P {
     return p.apply {
         block()
-        this.isIconSpaceReserved  = false
-        addPreference(this) }
+        this.isIconSpaceReserved = false
+        addPreference(this)
+    }
 }
 
 inline fun <P : Preference> PreferenceGroup.addThenInit(p: P, block: P.() -> Unit): P {
     return p.apply {
         this.isIconSpaceReserved  = false
         addPreference(this)
-        block() }
+        block()
+    }
 }
 
 inline fun Preference.onClick(crossinline block: () -> Unit) {
@@ -103,11 +122,3 @@ var Preference.summaryRes: Int
     get() = 0 // set only
     set(value) { setSummary(value) }
 
-
-var ListPreference.entriesRes: Array<Int>
-    get() = emptyArray() // set only
-    set(value) { entries = value.map { context.getString(it) }.toTypedArray() }
-
-var MultiSelectListPreference.entriesRes: Array<Int>
-    get() = emptyArray() // set only
-    set(value) { entries = value.map { context.getString(it) }.toTypedArray() }
