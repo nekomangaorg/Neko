@@ -98,7 +98,8 @@ class TrackController : NucleusController<TrackPresenter>(),
 
     override fun onTitleClick(position: Int) {
         val item = adapter?.getItem(position) ?: return
-        TrackSearchDialog(this, item.service).showDialog(router, TAG_SEARCH_CONTROLLER)
+        TrackSearchDialog(this, item.service, item.track != null).showDialog(router,
+            TAG_SEARCH_CONTROLLER)
     }
 
     override fun onStatusClick(position: Int) {

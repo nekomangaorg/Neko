@@ -4,6 +4,8 @@ import android.app.Dialog
 import android.os.Bundle
 import android.view.View
 import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.WhichButton
+import com.afollestad.materialdialogs.actions.setActionButtonEnabled
 import com.afollestad.materialdialogs.customview.customView
 import com.jakewharton.rxbinding.widget.itemClicks
 import com.jakewharton.rxbinding.widget.textChanges
@@ -40,9 +42,13 @@ class TrackSearchDialog : DialogController {
     private val trackController
         get() = targetController as TrackController
 
-    constructor(target: TrackController, service: TrackService) : super(Bundle().apply {
+    private var wasPreviouslyTracked:Boolean = false
+
+    constructor(target: TrackController, service: TrackService, wasTracked:Boolean) : super(Bundle()
+        .apply {
         putInt(KEY_SERVICE, service.id)
     }) {
+        wasPreviouslyTracked = wasTracked
         targetController = target
         this.service = service
     }
@@ -53,10 +59,14 @@ class TrackSearchDialog : DialogController {
     }
 
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
-        val dialog = MaterialDialog(activity!!)
-            .customView(viewRes = R.layout.track_search_dialog, scrollable = false)
-            .negativeButton(android.R.string.cancel)
-            .positiveButton(android.R.string.ok) { onPositiveButtonClick() }
+        val dialog = MaterialDialog(activity!!).apply {
+            customView(viewRes = R.layout.track_search_dialog, scrollable = false)
+            negativeButton(android.R.string.cancel)
+            positiveButton(
+                if (wasPreviouslyTracked) R.string.action_clear
+                else R.string.action_track){ onPositiveButtonClick() }
+            setActionButtonEnabled(WhichButton.POSITIVE, wasPreviouslyTracked)
+        }
 
         if (subscriptions.isUnsubscribed) {
             subscriptions = CompositeSubscription()
@@ -79,6 +89,8 @@ class TrackSearchDialog : DialogController {
 
         subscriptions += view.track_search_list.itemClicks().subscribe { position ->
             selectedItem = adapter.getItem(position)
+            (dialog as? MaterialDialog)?.positiveButton(R.string.action_track)
+            (dialog as? MaterialDialog)?.setActionButtonEnabled(WhichButton.POSITIVE, true)
         }
 
         // Do an initial search based on the manga's title
