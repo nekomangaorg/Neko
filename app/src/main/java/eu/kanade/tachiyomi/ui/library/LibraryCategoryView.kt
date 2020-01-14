@@ -154,21 +154,29 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
         subscriptions += controller.reorganizeRelay
             .subscribe {
                 if (it.first == category.id) {
-                    var items =  when (it.second) {
+                    var items:List<LibraryItem>
+                    if (it.second in 5..6) {
+                        items = adapter.currentItems.toMutableList()
+                        val mangas = controller.selectedMangas
+                        val selectedManga = items.filter { item -> item.manga in mangas }
+                        items.removeAll(selectedManga)
+                        if (it.second == 5) items.addAll(0, selectedManga)
+                        else items.addAll(selectedManga)
+                    }
+                    else {
+                        items = when (it.second) {
                             1, 2 -> adapter.currentItems.sortedBy {
-                                if (preferences.removeArticles().getOrDefault())
-                                    it.manga.title.removeArticles()
-                                else
-                                    it.manga.title
+                                if (preferences.removeArticles().getOrDefault()) it.manga.title.removeArticles()
+                                else it.manga.title
                             }
                             3, 4 -> adapter.currentItems.sortedBy { it.manga.last_update }
-                            else ->  adapter.currentItems.sortedBy { it.manga.title }
+                            else -> adapter.currentItems.sortedBy { it.manga.title }
+                        }
+                        if (it.second % 2 == 0) items = items.reversed()
                     }
-                    if (it.second % 2 == 0)
-                        items = items.reversed()
                     adapter.setItems(items)
                     adapter.notifyDataSetChanged()
-                    onItemReleased(0)
+                    saveDragSort()
                 }
             }
     }
@@ -321,16 +329,19 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
 
     override fun onItemReleased(position: Int) {
         if (adapter.selectedItemCount == 0) {
-            val mangaIds = adapter.currentItems.mapNotNull { it.manga.id }
-            category.mangaOrder = mangaIds
-            val db: DatabaseHelper by injectLazy()
-            if (category.name == "Default")
-                preferences.defaultMangaOrder().set(mangaIds.joinToString("/"))
-            else
-                db.insertCategory(category).asRxObservable().subscribe()
+            saveDragSort()
         }
     }
 
+    private fun saveDragSort() {
+        val mangaIds = adapter.currentItems.mapNotNull { it.manga.id }
+        category.mangaOrder = mangaIds
+        val db: DatabaseHelper by injectLazy()
+        if (category.name == "Default")
+            preferences.defaultMangaOrder().set(mangaIds.joinToString("/"))
+        else
+            db.insertCategory(category).asRxObservable().subscribe()
+    }
     override fun shouldMoveItem(fromPosition: Int, toPosition: Int): Boolean {
         if (adapter.selectedItemCount > 1)
             return false

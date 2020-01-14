@@ -25,14 +25,28 @@
 
     <item
         android:id="@+id/action_migrate"
-        android:icon="@drawable/ic_swap_calls_white_24dp"
         android:title="@string/label_migration"
         app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/action_hide_title"
-        android:icon="@drawable/ic_swap_calls_white_24dp"
         android:title="@string/action_hide_title"
         app:showAsAction="never" />
+
+
+    <item
+        android:id="@+id/action_move_manga"
+        android:title="@string/action_move"
+        app:showAsAction="never"
+        >
+        <menu >
+            <item
+                android:id="@+id/action_to_top"
+                android:title="@string/action_move_to_top" />
+            <item
+                android:id="@+id/action_to_bottom"
+                android:title="@string/action_move_to_bottom" />
+        </menu>
+    </item>
 
 </menu>

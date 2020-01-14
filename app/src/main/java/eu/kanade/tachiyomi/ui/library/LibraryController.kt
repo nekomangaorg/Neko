@@ -147,7 +147,7 @@ class LibraryController(
     /**
      * Drawer listener to allow swipe only for closing the drawer.
      */
-    private var drawerListener: androidx.drawerlayout.widget.DrawerLayout.DrawerListener? = null
+    private var drawerListener: DrawerLayout.DrawerListener? = null
 
     private var tabsVisibilityRelay: BehaviorRelay<Boolean> = BehaviorRelay.create(false)
 
@@ -247,7 +247,7 @@ class LibraryController(
         return view
     }
 
-    override fun cleanupSecondaryDrawer(drawer: androidx.drawerlayout.widget.DrawerLayout) {
+    override fun cleanupSecondaryDrawer(drawer: DrawerLayout) {
         navView = null
     }
 
@@ -473,12 +473,18 @@ class LibraryController(
             menu.findItem(R.id.action_hide_title)?.isVisible =
                 !preferences.libraryAsList().getOrDefault()
             if (!preferences.libraryAsList().getOrDefault()) {
-                val showAll =
-                    (selectedMangas.filter { (it as? LibraryManga)?.hide_title == true }).size == selectedMangas.size
+                val showAll = (selectedMangas.all { (it as? LibraryManga)?.hide_title == true })
                 menu.findItem(R.id.action_hide_title)?.title = activity?.getString(
                     if (showAll) R.string.action_show_title else R.string.action_hide_title
                 )
             }
+            if (preferences.librarySortingMode().getOrDefault() == LibrarySort.DRAG_AND_DROP) {
+                val catId = (selectedMangas.first() as? LibraryManga)?.category
+                val sameCat = (adapter?.categories?.getOrNull(library_pager.currentItem)?.id
+                    == catId) && selectedMangas.all { (it as? LibraryManga)?.category == catId }
+                menu.findItem(R.id.action_move_manga).isVisible = sameCat
+            }
+            else menu.findItem(R.id.action_move_manga).isVisible = false
         }
         return false
     }
@@ -514,6 +520,12 @@ class LibraryController(
                 val showAll = (selectedMangas.filter { (it as? LibraryManga)?.hide_title == true }
                     ).size == selectedMangas.size
                 presenter.hideShowTitle(selectedMangas.toList(), !showAll)
+                destroyActionModeIfNeeded()
+            }
+            R.id.action_to_top, R.id.action_to_bottom -> {
+                adapter?.categories?.getOrNull(library_pager.currentItem)?.id?.let {
+                    reorganizeRelay.call(it to if (item.itemId == R.id.action_to_top) 5 else 6)
+                }
                 destroyActionModeIfNeeded()
             }
             else -> return false
