@@ -40,6 +40,7 @@ class SetTrackStatusDialog<T> : DialogController
         return MaterialDialog(activity!!)
             .title(R.string.status)
             .negativeButton(android.R.string.cancel)
+            .positiveButton(android.R.string.ok)
             .listItemsSingleChoice(items = statusString, initialSelection = selectedIndex)
             { dialog, position, _ ->
                 (targetController as? Listener)?.setStatus(item, position)
