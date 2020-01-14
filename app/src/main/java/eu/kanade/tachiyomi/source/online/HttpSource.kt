@@ -75,7 +75,7 @@ abstract class HttpSource : Source {
      * Headers builder for request.
      */
     protected fun headersBuilder() = Headers.Builder().apply {
-        add("User-Agent", "Neko/MangaDex Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.131 Safari/537.36")
+        add("User-Agent", "Tachiyomi " + System.getProperty("http.agent"))
         add("X-Requested-With", "XMLHttpRequest")
     }
 
@@ -110,7 +110,6 @@ abstract class HttpSource : Source {
     }
 
 
-
     /**
      * Returns an observable with the response of the source image.
      *
@@ -124,7 +123,7 @@ abstract class HttpSource : Source {
         return client.newCallWithProgress(GET(page.imageUrl!!, headers), page)
                 .asObservableSuccess()
     }
-    
+
 
     /**
      * Called before inserting a new chapter into database. Use it if you need to override chapter
