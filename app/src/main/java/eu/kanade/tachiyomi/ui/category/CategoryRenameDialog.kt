@@ -41,7 +41,7 @@ class CategoryRenameDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
                 .input(hintRes = R.string.name, prefill = currentName) { _, input ->
                     currentName = input.toString()
                 }
-                .positiveButton(android.R.string.ok)
+                .positiveButton(android.R.string.ok) { onPositive() }
     }
 
     /**
