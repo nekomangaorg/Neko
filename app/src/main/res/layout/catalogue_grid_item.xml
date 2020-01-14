@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -49,7 +48,7 @@
                 tools:visibility="visible" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <eu.kanade.tachiyomi.widget.PTSansTextView
+        <eu.kanade.tachiyomi.widget.CustomFontTextView
             android:id="@+id/title"
             style="@style/TextAppearance.Regular.Body1.Light"
             android:layout_width="match_parent"
@@ -63,7 +62,8 @@
             android:shadowDx="0"
             android:shadowDy="0"
             android:shadowRadius="4"
-            app:typeface="ptsansNarrowBold"
+            android:textSize="16sp"
+            app:typeface="pathwayGothic"
             tools:text="Sample name" />
 
         <ProgressBar
