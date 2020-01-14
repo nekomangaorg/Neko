@@ -15,9 +15,8 @@ class SettingsReaderController : SettingsController() {
             titleRes = R.string.pref_viewer_type
             entriesRes = arrayOf(R.string.left_to_right_viewer, R.string.right_to_left_viewer,
                     R.string.vertical_viewer, R.string.webtoon_viewer)
-            entryValues = arrayOf("1", "2", "3", "4")
-            defaultValue = "1"
-            summary = "%s"
+            entryRange = 1..4
+            defaultValue = 1
         }
         intListPreference {
             key = Keys.imageScaleType
@@ -25,44 +24,41 @@ class SettingsReaderController : SettingsController() {
             entriesRes = arrayOf(R.string.scale_type_fit_screen, R.string.scale_type_stretch,
                     R.string.scale_type_fit_width, R.string.scale_type_fit_height,
                     R.string.scale_type_original_size, R.string.scale_type_smart_fit)
-            entryValues = arrayOf("1", "2", "3", "4", "5", "6")
-            defaultValue = "1"
-            summary = "%s"
+            entryRange = 1..6
+            defaultValue = 1
         }
         intListPreference {
             key = Keys.zoomStart
             titleRes = R.string.pref_zoom_start
             entriesRes = arrayOf(R.string.zoom_start_automatic, R.string.zoom_start_left,
                     R.string.zoom_start_right, R.string.zoom_start_center)
-            entryValues = arrayOf("1", "2", "3", "4")
-            defaultValue = "1"
-            summary = "%s"
+            entryRange = 1..4
+            defaultValue = 1
         }
         intListPreference {
             key = Keys.rotation
             titleRes = R.string.pref_rotation_type
             entriesRes = arrayOf(R.string.rotation_free, R.string.rotation_lock,
                     R.string.rotation_force_portrait, R.string.rotation_force_landscape)
-            entryValues = arrayOf("1", "2", "3", "4")
-            defaultValue = "1"
-            summary = "%s"
+            entryRange = 1..4
+            defaultValue = 1
         }
         intListPreference {
             key = Keys.readerTheme
             titleRes = R.string.pref_reader_theme
             entriesRes = arrayOf(R.string.white_background, R.string.black_background, R.string
                 .reader_theme_smart, R.string.reader_theme_smart_theme)
-            entryValues = arrayOf("0", "1", "2", "3")
-            defaultValue = "0"
-            summary = "%s"
+            entryRange = 0..3
+            defaultValue = 2
         }
         intListPreference {
             key = Keys.doubleTapAnimationSpeed
             titleRes = R.string.pref_double_tap_anim_speed
-            entries = arrayOf(context.getString(R.string.double_tap_anim_speed_0), context.getString(R.string.double_tap_anim_speed_fast), context.getString(R.string.double_tap_anim_speed_normal))
-            entryValues = arrayOf("1", "250", "500") // using a value of 0 breaks the image viewer, so min is 1
-            defaultValue = "500"
-            summary = "%s"
+            entries = listOf(context.getString(R.string.double_tap_anim_speed_0), context.getString(R
+                .string.double_tap_anim_speed_fast), context.getString(R.string.double_tap_anim_speed_normal))
+            entryValues = listOf(1, 250, 500) // using a value of 0 breaks the image viewer, so
+            // min is 1
+            defaultValue = 500
         }
         switchPreference {
             key = Keys.skipRead

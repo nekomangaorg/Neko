@@ -65,9 +65,8 @@ class SettingsDownloadController : SettingsController() {
                 entriesRes = arrayOf(R.string.disabled, R.string.last_read_chapter,
                         R.string.second_to_last, R.string.third_to_last, R.string.fourth_to_last,
                         R.string.fifth_to_last)
-                entryValues = arrayOf("-1", "0", "1", "2", "3", "4")
-                defaultValue = "-1"
-                summary = "%s"
+                entryRange = -1..4
+                defaultValue = -1
             }
         }
 
@@ -81,11 +80,12 @@ class SettingsDownloadController : SettingsController() {
                 titleRes = R.string.pref_download_new
                 defaultValue = false
             }
-            multiSelectListPreference {
+            multiSelectListPreferenceMat {
                 key = Keys.downloadNewCategories
                 titleRes = R.string.pref_download_new_categories
-                entries = dbCategories.map { it.name }.toTypedArray()
-                entryValues = dbCategories.map { it.id.toString() }.toTypedArray()
+                entries = dbCategories.map { it.name }
+                entryValues = dbCategories.map { it.id.toString() }
+                allSelectionRes = R.string.all
 
                 preferences.downloadNew().asObservable()
                         .subscribeUntilDestroy { isVisible = it }
@@ -96,7 +96,7 @@ class SettingsDownloadController : SettingsController() {
                                     .mapNotNull { id -> dbCategories.find { it.id == id.toInt() } }
                                     .sortedBy { it.order }
 
-                            summary = if (selectedCategories.isEmpty())
+                            customSummary = if (selectedCategories.isEmpty())
                                 resources?.getString(R.string.all)
                             else
                                 selectedCategories.joinToString { it.name }

@@ -4,7 +4,6 @@ import android.app.Dialog
 import android.os.Bundle
 import android.os.Handler
 import android.view.View
-import androidx.biometric.BiometricManager
 import androidx.preference.PreferenceScreen
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.customview.customView
@@ -15,8 +14,6 @@ import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
-import eu.kanade.tachiyomi.util.LocaleHelper
-import eu.kanade.tachiyomi.widget.preference.IntListPreference
 import kotlinx.android.synthetic.main.pref_library_columns.view.*
 import rx.Observable
 import uy.kohesive.injekt.Injekt
@@ -60,27 +57,26 @@ class SettingsLibraryController : SettingsController() {
             entriesRes = arrayOf(R.string.update_never, R.string.update_1hour,
                 R.string.update_2hour, R.string.update_3hour, R.string.update_6hour,
                 R.string.update_12hour, R.string.update_24hour, R.string.update_48hour)
-            entryValues = arrayOf("0", "1", "2", "3", "6", "12", "24", "48")
-            defaultValue = "0"
-            summary = "%s"
+            entryValues = listOf(0, 1, 2, 3, 6, 12, 24, 48)
+            defaultValue = 0
 
             onChange { newValue ->
                 // Always cancel the previous task, it seems that sometimes they are not updated.
                 LibraryUpdateJob.cancelTask()
 
-                val interval = (newValue as String).toInt()
+                val interval = newValue as Int
                 if (interval > 0) {
                     LibraryUpdateJob.setupTask(interval)
                 }
                 true
             }
         }
-        multiSelectListPreference {
+        multiSelectListPreferenceMat {
             key = Keys.libraryUpdateRestriction
             titleRes = R.string.pref_library_update_restriction
             entriesRes = arrayOf(R.string.wifi, R.string.charging)
-            entryValues = arrayOf("wifi", "ac")
-            summaryRes = R.string.pref_library_update_restriction_summary
+            entryValues = listOf("wifi", "ac")
+            customSummartRes = R.string.pref_library_update_restriction_summary
 
             preferences.libraryUpdateInterval().asObservable()
                 .subscribeUntilDestroy { isVisible = it > 0 }
@@ -99,11 +95,12 @@ class SettingsLibraryController : SettingsController() {
 
         val dbCategories = db.getCategories().executeAsBlocking()
 
-        multiSelectListPreference {
+        multiSelectListPreferenceMat {
             key = Keys.libraryUpdateCategories
             titleRes = R.string.pref_library_update_categories
-            entries = dbCategories.map { it.name }.toTypedArray()
-            entryValues = dbCategories.map { it.id.toString() }.toTypedArray()
+            entries = dbCategories.map { it.name }
+            entryValues = dbCategories.map { it.id.toString() }
+            allSelectionRes = R.string.all
 
             preferences.libraryUpdateCategories().asObservable()
                 .subscribeUntilDestroy {
@@ -111,7 +108,7 @@ class SettingsLibraryController : SettingsController() {
                         .mapNotNull { id -> dbCategories.find { it.id == id.toInt() } }
                         .sortedBy { it.order }
 
-                    summary = if (selectedCategories.isEmpty())
+                    customSummary = if (selectedCategories.isEmpty())
                         context.getString(R.string.all)
                     else
                         selectedCategories.joinToString { it.name }
@@ -127,11 +124,8 @@ class SettingsLibraryController : SettingsController() {
                 R.string.action_sort_alpha,
                 R.string.action_sort_last_updated
             )
-            entryValues = arrayOf(
-                "0",
-                "1"
-            )
-            defaultValue = "0"
+            entryRange = 0..1
+            defaultValue = 0
             summaryRes = R.string.pref_library_update_prioritization_summary
         }
         intListPreference {
@@ -139,16 +133,16 @@ class SettingsLibraryController : SettingsController() {
             titleRes = R.string.default_category
 
             val categories = listOf(Category.createDefault()) + dbCategories
-            entries = arrayOf(context.getString(R.string.default_category_summary)) +
+            entries = listOf(context.getString(R.string.default_category_summary)) +
                 categories.map { it.name }.toTypedArray()
-            entryValues = arrayOf("-1") + categories.map { it.id.toString() }.toTypedArray()
+            entryValues = listOf(-1) + categories.mapNotNull { it.id }.toList()
             defaultValue = "-1"
 
             val selectedCategory = categories.find { it.id == preferences.defaultCategory() }
             summary = selectedCategory?.name ?: context.getString(R.string.default_category_summary)
             onChange { newValue ->
                 summary = categories.find {
-                    it.id == (newValue as String).toInt()
+                    it.id == newValue as Int
                 }?.name ?: context.getString(R.string.default_category_summary)
                 true
             }

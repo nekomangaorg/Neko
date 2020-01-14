@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.extension
 
 import android.annotation.SuppressLint
+import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
 import android.util.TypedValue
@@ -31,6 +32,7 @@ import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.setting.preferenceCategory
 import eu.kanade.tachiyomi.util.LocaleHelper
 import eu.kanade.tachiyomi.util.RecyclerWindowInsetsListener
+import eu.kanade.tachiyomi.widget.preference.ListMatPreference
 import eu.kanade.tachiyomi.widget.preference.LoginPreference
 import eu.kanade.tachiyomi.widget.preference.SourceLoginDialog
 import kotlinx.android.synthetic.main.extension_detail_controller.*
@@ -154,6 +156,7 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
             while (newScreen.preferenceCount != 0) {
                 val pref = newScreen.getPreference(0)
                 pref.preferenceDataStore = dataStore
+                pref.fragment = "source_${source.id}"
                 pref.order = Int.MAX_VALUE // reset to default order
 
                 newScreen.removePreference(pref)
@@ -175,6 +178,18 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
 
         lastOpenPreferencePosition = (0 until screen.preferenceCount).indexOfFirst {
             screen.getPreference(it) === preference
+        }
+
+        if (preference is ListPreference) {
+            ListMatPreference(preference.context).apply {
+                key = preference.key
+                sharedPref = preference.fragment
+                otherPref = preference
+                preferenceDataStore = preference.preferenceDataStore
+                entries = preference.entries.mapNotNull { it.toString() }
+                entryValues = preference.entryValues.mapNotNull { it.toString() }
+            }.dialog().show()
+            return
         }
 
         val f = when (preference) {

@@ -22,8 +22,6 @@ import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.base.controller.popControllerWithTag
 import eu.kanade.tachiyomi.ui.base.controller.requestPermissionsSafe
 import eu.kanade.tachiyomi.util.*
-import java.io.File
-import java.util.concurrent.TimeUnit
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 
 class SettingsBackupController : SettingsController() {
@@ -84,15 +82,14 @@ class SettingsBackupController : SettingsController() {
                 entriesRes = arrayOf(R.string.update_never, R.string.update_6hour,
                         R.string.update_12hour, R.string.update_24hour,
                         R.string.update_48hour, R.string.update_weekly)
-                entryValues = arrayOf("0", "6", "12", "24", "48", "168")
-                defaultValue = "0"
-                summary = "%s"
+                entryValues = listOf(0, 6, 12, 24, 48, 168)
+                defaultValue = 0
 
                 onChange { newValue ->
                     // Always cancel the previous task, it seems that sometimes they are not updated
                     BackupCreatorJob.cancelTask()
 
-                    val interval = (newValue as String).toInt()
+                    val interval = newValue as Int
                     if (interval > 0) {
                         BackupCreatorJob.setupTask(interval)
                     }
@@ -123,10 +120,9 @@ class SettingsBackupController : SettingsController() {
             val backupNumber = intListPreference {
                 key = Keys.numberOfBackups
                 titleRes = R.string.pref_backup_slots
-                entries = arrayOf("1", "2", "3", "4", "5")
-                entryValues = entries
-                defaultValue = "1"
-                summary = "%s"
+                entries = listOf("1", "2", "3", "4", "5")
+                entryRange = 1..5
+                defaultValue = 1
             }
 
             preferences.backupInterval().asObservable()
