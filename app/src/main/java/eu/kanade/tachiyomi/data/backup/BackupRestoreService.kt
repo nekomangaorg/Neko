@@ -183,7 +183,7 @@ class BackupRestoreService : Service() {
         }
         totalAmount = mangasJson.size()
         skippedAmount = mangasJson.size() - mangdexManga.count()
-        restoreAmount = mangdexManga.count() + 1
+        restoreAmount = mangdexManga.count()
 
         errors.clear()
         cancelled = 0
@@ -213,10 +213,9 @@ class BackupRestoreService : Service() {
         val element = json.get(CATEGORIES)
         if (element != null) {
             backupManager.restoreCategories(element.asJsonArray)
+            restoreAmount += 1 // add categories to the total count being restored
             restoreProgress += 1
             showProgressNotification(restoreProgress, restoreAmount, "Categories added")
-        } else {
-            restoreAmount -= 1
         }
     }
 
@@ -379,6 +378,8 @@ class BackupRestoreService : Service() {
         val resultNotification = NotificationCompat.Builder(this, Notifications.CHANNEL_RESTORE)
                 .setContentTitle(getString(R.string.restore_error))
                 .setContentText(errorMessage)
+                .setStyle(NotificationCompat.BigTextStyle()
+                        .bigText(errorMessage))
                 .setSmallIcon(R.drawable.ic_error_grey)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setColor(ContextCompat.getColor(this, R.color.md_red_500))
