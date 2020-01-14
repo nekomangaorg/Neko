@@ -153,7 +153,7 @@
     <string name="lock_always">Always</string>
     <string name="lock_never">Never</string>
     <string name="lock_after_mins">After %1$s minutes</string>
-    <string name="search_hint">Search (title, tags, source)</string>
+    <string name="search_hint">Search (title, tags)</string>
 
     <!-- Extension section -->
     <string name="all_lang">All</string>
