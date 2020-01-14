@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
-    android:color="@color/rippleColorDark">
+    android:color="@color/dialog_amoled">
     <item>
         <selector>
             <item android:state_selected="true">
@@ -11,7 +11,7 @@
                 <color android:color="@color/rippleColorDark" />
             </item>
             <item>
-                <color android:color="@color/dialog_amoled" />
+                <color android:color="@color/md_black_1000" />
             </item>
         </selector>
     </item>
