@@ -23,10 +23,10 @@ interface HistoryQueries : DbProvider {
      * @param date recent date range
      * @offset offset the db by
      */
-    fun getRecentManga(date: Date) = db.get()
+    fun getRecentManga(date: Date, offset: Int = 0) = db.get()
             .listOfObjects(MangaChapterHistory::class.java)
             .withQuery(RawQuery.builder()
-                    .query(getRecentMangasQuery())
+                    .query(getRecentMangasQuery(offset))
                     .args(date.time)
                     .observesTables(HistoryTable.TABLE)
                     .build())
@@ -39,14 +39,14 @@ interface HistoryQueries : DbProvider {
      * @offset offset the db by
      */
     fun getRecentMangaLimit(date: Date, limit: Int = 0) = db.get()
-        .listOfObjects(MangaChapterHistory::class.java)
-        .withQuery(RawQuery.builder()
-            .query(getRecentMangasLimitQuery(limit))
-            .args(date.time)
-            .observesTables(HistoryTable.TABLE)
-            .build())
-        .withGetResolver(MangaChapterHistoryGetResolver.INSTANCE)
-        .prepare()
+            .listOfObjects(MangaChapterHistory::class.java)
+            .withQuery(RawQuery.builder()
+                    .query(getRecentMangasLimitQuery(limit))
+                    .args(date.time)
+                    .observesTables(HistoryTable.TABLE)
+                    .build())
+            .withGetResolver(MangaChapterHistoryGetResolver.INSTANCE)
+            .prepare()
 
     fun getHistoryByMangaId(mangaId: Long) = db.get()
             .listOfObjects(History::class.java)

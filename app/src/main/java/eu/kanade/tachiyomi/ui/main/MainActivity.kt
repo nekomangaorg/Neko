@@ -16,7 +16,6 @@ import com.mikepenz.iconics.typeface.IIcon
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import eu.kanade.tachiyomi.Migrations
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
@@ -34,16 +33,13 @@ import eu.kanade.tachiyomi.widget.preference.MangadexLoginDialog
 import kotlinx.android.synthetic.main.main_activity.*
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import uy.kohesive.injekt.injectLazy
 import java.util.*
 
 
-class MainActivity : BaseActivity(),  MangadexLoginDialog.Listener {
+class MainActivity : BaseActivity(), MangadexLoginDialog.Listener {
 
     private lateinit var router: Router
-
-    val preferences: PreferencesHelper by injectLazy()
-
+    
     val source: Source by lazy { Injekt.get<SourceManager>().getSources()[0] }
 
     private var drawerArrow: DrawerArrowDrawable? = null
@@ -61,11 +57,6 @@ class MainActivity : BaseActivity(),  MangadexLoginDialog.Listener {
     lateinit var tabAnimator: TabsAnimator
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        setTheme(when (preferences.theme()) {
-            2 -> R.style.Theme_Neko_Dark
-            3 -> R.style.Theme_Neko_Amoled
-            else -> R.style.Theme_Neko
-        })
         super.onCreate(savedInstanceState)
 
         // Do not let the launcher create a new activity http://stackoverflow.com/questions/16283079
@@ -109,18 +100,18 @@ class MainActivity : BaseActivity(),  MangadexLoginDialog.Listener {
                             dialog.targetController = browseCatalogueController
                             dialog.showDialog(router)
                             nav_view.menu.getItem(0).isChecked = true
-                        }else{
+                        } else {
                             setRoot(browseCatalogueController, id)
                         }
                     }
                     R.id.nav_drawer_follows -> {
-                            val latestUpdatesController = FollowsController(source)
+                        val latestUpdatesController = FollowsController(source)
                         if (!source.isLogged()) {
                             val dialog = MangadexLoginDialog(source)
                             dialog.targetController = latestUpdatesController
                             dialog.showDialog(router)
                             nav_view.menu.getItem(0).isChecked = true
-                        }else{
+                        } else {
                             setRoot(latestUpdatesController, id)
                         }
                     }
@@ -182,15 +173,14 @@ class MainActivity : BaseActivity(),  MangadexLoginDialog.Listener {
         super.onResume()
         val useBiometrics = preferences.useBiometrics().getOrDefault()
         if (useBiometrics && BiometricManager.from(this)
-                .canAuthenticate() == BiometricManager.BIOMETRIC_SUCCESS) {
+                        .canAuthenticate() == BiometricManager.BIOMETRIC_SUCCESS) {
             if (!unlocked && (preferences.lockAfter().getOrDefault() <= 0 || Date().time >=
-                    preferences.lastUnlock().getOrDefault() + 60 * 1000 * preferences.lockAfter().getOrDefault())) {
+                            preferences.lastUnlock().getOrDefault() + 60 * 1000 * preferences.lockAfter().getOrDefault())) {
                 val intent = Intent(this, BiometricActivity::class.java)
                 startActivity(intent)
                 this.overridePendingTransition(0, 0)
             }
-        }
-        else if (useBiometrics)
+        } else if (useBiometrics)
             preferences.useBiometrics().set(false)
     }
 

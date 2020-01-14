@@ -25,6 +25,7 @@ import kotlinx.android.synthetic.main.recently_read_controller.*
  */
 class RecentlyReadController : NucleusController<RecentlyReadPresenter>(),
         FlexibleAdapter.OnUpdateListener,
+        FlexibleAdapter.EndlessScrollListener,
         RecentlyReadAdapter.OnRemoveClickListener,
         RecentlyReadAdapter.OnResumeClickListener,
         RecentlyReadAdapter.OnCoverClickListener,
@@ -35,6 +36,11 @@ class RecentlyReadController : NucleusController<RecentlyReadPresenter>(),
      */
     var adapter: RecentlyReadAdapter? = null
         private set
+
+    /**
+     * Endless loading item.
+     */
+    private var progressItem: ProgressItem? = null
 
     override fun getTitle(): String? {
         return resources?.getString(R.string.label_recent_manga)
@@ -116,28 +122,24 @@ class RecentlyReadController : NucleusController<RecentlyReadPresenter>(),
 
     override fun onResumeClick(position: Int) {
         val activity = activity ?: return
-        val (manga, chapter, _) = adapter?.getItem(position)?.mch ?: return
-        if (chapter.last_page_read != 0) {
-            val intent = ReaderActivity.newIntent(activity, manga, chapter)
+        val (manga, chapter, _) = (adapter?.getItem(position) as? RecentlyReadItem)?.mch ?: return
+
+        val nextChapter = presenter.getNextChapter(chapter, manga)
+        if (nextChapter != null) {
+            val intent = ReaderActivity.newIntent(activity, manga, nextChapter)
             startActivity(intent)
         } else {
-            val nextChapter = presenter.getNextChapter(chapter, manga)
-            if (nextChapter != null) {
-                val intent = ReaderActivity.newIntent(activity, manga, nextChapter)
-                startActivity(intent)
-            } else {
-                activity.toast(R.string.no_next_chapter)
-            }
+            activity.toast(R.string.no_next_chapter)
         }
     }
 
     override fun onRemoveClick(position: Int) {
-        val (manga, _, history) = adapter?.getItem(position)?.mch ?: return
+        val (manga, _, history) = (adapter?.getItem(position) as? RecentlyReadItem)?.mch ?: return
         RemoveHistoryDialog(this, manga, history).showDialog(router)
     }
 
     override fun onCoverClick(position: Int) {
-        val manga = adapter?.getItem(position)?.mch?.manga ?: return
+        val manga = (adapter?.getItem(position) as? RecentlyReadItem)?.mch?.manga ?: return
         router.pushController(MangaController(manga).withFadeTransaction())
     }
 

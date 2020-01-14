@@ -7,13 +7,9 @@ import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
 import rx.Observable
-import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
-import rx.schedulers.Schedulers
 import uy.kohesive.injekt.injectLazy
-import java.util.Calendar
-import java.util.Comparator
-import java.util.Date
+import java.util.*
 
 /**
  * Presenter of RecentlyReadFragment.
@@ -39,9 +35,9 @@ class RecentlyReadPresenter : BasePresenter<RecentlyReadController>() {
     fun requestNext(offset: Int) {
         lastCount = offset
         getRecentMangaObservable((offset))
-            .subscribeLatestCache({ view, mangas ->
-                view.onNextManga(mangas)
-            }, RecentlyReadController::onAddPageError)
+                .subscribeLatestCache({ view, mangas ->
+                    view.onNextManga(mangas)
+                }, RecentlyReadController::onAddPageError)
     }
 
     /**
@@ -55,8 +51,8 @@ class RecentlyReadPresenter : BasePresenter<RecentlyReadController>() {
         cal.add(Calendar.YEAR, -50)
 
         return db.getRecentManga(cal.time, offset).asRxObservable()
-            .map { recents -> recents.map(::RecentlyReadItem) }
-            .observeOn(AndroidSchedulers.mainThread())
+                .map { recents -> recents.map(::RecentlyReadItem) }
+                .observeOn(AndroidSchedulers.mainThread())
     }
 
     /**
@@ -69,9 +65,9 @@ class RecentlyReadPresenter : BasePresenter<RecentlyReadController>() {
         cal.time = Date()
         cal.add(Calendar.YEAR, -50)
 
-        return db.getRecentMangaLimit(cal.time, lastCount).asRxObservable()
-            .map { recents -> recents.map(::RecentlyReadItem) }
-            .observeOn(AndroidSchedulers.mainThread())
+        return db.getRecentMangaLimit(cal.time, offset).asRxObservable()
+                .map { recents -> recents.map(::RecentlyReadItem) }
+                .observeOn(AndroidSchedulers.mainThread())
     }
 
     /**
@@ -87,9 +83,9 @@ class RecentlyReadPresenter : BasePresenter<RecentlyReadController>() {
 
     fun updateList() {
         getRecentMangaLimitObservable(lastCount).take(1)
-            .subscribeLatestCache({ view, mangas ->
-                view.onNextManga(mangas, true)
-            }, RecentlyReadController::onAddPageError)
+                .subscribeLatestCache({ view, mangas ->
+                    view.onNextManga(mangas, true)
+                }, RecentlyReadController::onAddPageError)
     }
 
     /**
@@ -131,8 +127,9 @@ class RecentlyReadPresenter : BasePresenter<RecentlyReadController>() {
 
                 ((currChapterIndex + 1) until chapters.size)
                         .map { chapters[it] }
-                        .firstOrNull { it.chapter_number > chapterNumber &&
-                                it.chapter_number <= chapterNumber + 1
+                        .firstOrNull {
+                            it.chapter_number > chapterNumber &&
+                                    it.chapter_number <= chapterNumber + 1
                         }
             }
             else -> throw NotImplementedError("Unknown sorting method")

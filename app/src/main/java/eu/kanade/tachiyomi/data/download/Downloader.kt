@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.data.download
 
 import android.content.Context
-import android.net.Uri
 import android.webkit.MimeTypeMap
 import com.hippo.unifile.UniFile
 import com.jakewharton.rxrelay.BehaviorRelay
@@ -143,6 +142,9 @@ class Downloader(
         notifier.paused = true
     }
 
+    /**
+     * Check if downloader is paused
+     */
     fun isPaused() = !isRunning
 
     /**
@@ -375,7 +377,7 @@ class Downloader(
      * @param filename the filename of the image.
      */
     private fun moveFromCache(page: Page, file: File, tmpDir: UniFile, filename: String):
-        Observable<UniFile> {
+            Observable<UniFile> {
         return Observable.just(file).map {
             val tmpFile = tmpDir.createFile("$filename.tmp")
             val inputStream = file.inputStream()

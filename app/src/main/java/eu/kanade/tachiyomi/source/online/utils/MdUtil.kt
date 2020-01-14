@@ -4,8 +4,8 @@ import org.jsoup.parser.Parser
 
 class MdUtil {
     companion object {
-        const val cdnUrl = "https://mangadex.cc"//"https://s0.mangadex.org"
-        const val baseUrl = "https://mangadex.cc"//"https://mangadex.org"
+        const val cdnUrl = "https://mangadex.org"//"https://s0.mangadex.org"
+        const val baseUrl = "https://mangadex.org"
         const val randMangaPage = "/manga/"
         const val apiManga = "/api/manga/"
         const val apiChapter = "/api/chapter/"

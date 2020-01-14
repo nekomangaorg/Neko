@@ -295,8 +295,7 @@ class BackupRestoreService : Service() {
         try {
             if (errors.isNotEmpty()) {
                 val destFile = File(externalCacheDir, "neko_restore.log")
-                val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.getDefault())
-
+                SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.getDefault())
                 destFile.bufferedWriter().use { out ->
                     errors.forEach { message ->
                         out.write("$message\n")
@@ -390,7 +389,7 @@ class BackupRestoreService : Service() {
      *
      */
     private fun getErrorLogIntent(path: String, file: String): PendingIntent {
-        val destFile = File(path, file!!)
+        val destFile = File(path, file)
         val uri = destFile.getUriCompat(applicationContext)
         return NotificationReceiver.openFileExplorerPendingActivity(this@BackupRestoreService, uri)
     }

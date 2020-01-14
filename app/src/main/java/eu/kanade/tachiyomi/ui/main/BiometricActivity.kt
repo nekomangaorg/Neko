@@ -3,16 +3,13 @@ package eu.kanade.tachiyomi.ui.main
 import android.os.Bundle
 import androidx.biometric.BiometricPrompt
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
-import uy.kohesive.injekt.injectLazy
-import java.util.Date
+import java.util.*
 import java.util.concurrent.Executors
 
 class BiometricActivity : BaseActivity() {
     val executor = Executors.newSingleThreadExecutor()
 
-    val preferences: PreferencesHelper by injectLazy()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val biometricPrompt = BiometricPrompt(this, executor, object : BiometricPrompt
@@ -37,9 +34,9 @@ class BiometricActivity : BaseActivity() {
         })
 
         val promptInfo = BiometricPrompt.PromptInfo.Builder()
-            .setTitle(getString(R.string.unlock_library))
-            .setNegativeButtonText(getString(android.R.string.cancel))
-            .build()
+                .setTitle(getString(R.string.unlock_library))
+                .setNegativeButtonText(getString(android.R.string.cancel))
+                .build()
 
         biometricPrompt.authenticate(promptInfo)
     }
