@@ -14,6 +14,7 @@ import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.plusAssign
+import kotlinx.android.synthetic.main.track_controller.*
 import kotlinx.android.synthetic.main.track_search_dialog.view.*
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
@@ -134,6 +135,7 @@ class TrackSearchDialog : DialogController {
     }
 
     private fun onPositiveButtonClick() {
+        trackController.swipe_refresh.isRefreshing = true
         trackController.presenter.registerTracking(selectedItem, service)
     }
 
