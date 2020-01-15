@@ -41,10 +41,10 @@
                 android:checkableBehavior="single">
                 <item
                     android:id="@+id/action_alpha_asc"
-                    android:title="@string/action_sort_alpha"/>
+                    android:title="@string/title"/>
                 <item
                     android:id="@+id/action_alpha_dsc"
-                    android:title="@string/action_alpha_reverse"/>
+                    android:title="@string/action_title_reverse"/>
                 <item
                     android:id="@+id/action_update_asc"
                     android:title="@string/action_sort_last_updated"/>
