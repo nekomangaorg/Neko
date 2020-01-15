@@ -339,7 +339,7 @@ class LibraryController(
                     searchRelay.call(query)
                 }
 
-        searchItem.fixExpand()
+        searchItem.fixExpand(onExpand = { invalidateMenuOnExpand() })
     }
 
     fun search(query: String) {
@@ -358,6 +358,7 @@ class LibraryController(
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
+            R.id.action_search -> expandActionViewFromInteraction = true
             R.id.action_filter -> {
                 navView?.let { activity?.drawer?.openDrawer(Gravity.RIGHT) }
             }
