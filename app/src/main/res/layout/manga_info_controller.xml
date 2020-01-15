@@ -313,7 +313,6 @@
             android:foreground="@color/md_black_1000"
             tools:background="@color/md_black_1000" />
 
-
         <ImageView
             android:id="@+id/manga_cover_full"
             android:contentDescription="@string/description_cover"

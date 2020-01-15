@@ -12,13 +12,9 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Bitmap
-import android.graphics.Point
-import android.graphics.Rect
-import android.graphics.RectF
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
-import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -36,14 +32,9 @@ import androidx.transition.TransitionManager
 import androidx.transition.TransitionSet
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.list.listItemsSingleChoice
-import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
-import com.bumptech.glide.load.resource.gif.GifDrawable
-import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.CustomTarget
-import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.request.transition.Transition
 import com.bumptech.glide.signature.ObjectKey
 import com.google.android.material.snackbar.BaseTransientBottomBar
@@ -72,9 +63,6 @@ import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.util.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.getUriCompat
 import eu.kanade.tachiyomi.util.marginBottom
-import eu.kanade.tachiyomi.util.marginLeft
-import eu.kanade.tachiyomi.util.marginRight
-import eu.kanade.tachiyomi.util.marginTop
 import eu.kanade.tachiyomi.util.openInBrowser
 import eu.kanade.tachiyomi.util.snack
 import eu.kanade.tachiyomi.util.toast
@@ -324,7 +312,7 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
                     .load(manga)
                     .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
                     .signature(ObjectKey((manga as MangaImpl).last_cover_fetch.toString()))
-                    .centerCrop()
+                    //.centerCrop()
                     .into(manga_cover)
             if (manga_cover_full != null) {
                 GlideApp.with(view.context).asDrawable().load(manga)
@@ -749,11 +737,14 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         if (setUpFullCover) return
         val expandedImageView = manga_cover_full ?: return
         val thumbView = manga_cover
+        expandedImageView.pivotX = 0f
+        expandedImageView.pivotY = 0f
 
         val layoutParams = expandedImageView.layoutParams
         layoutParams.height = thumbView.height
         layoutParams.width = thumbView.width
         expandedImageView.layoutParams = layoutParams
+        expandedImageView.scaleType = ImageView.ScaleType.FIT_CENTER
         setUpFullCover = thumbView.height > 0
     }
 
@@ -785,15 +776,13 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         fullBackdrop.visibility = View.VISIBLE
 
         // Set the pivot point to 0 to match thumbnail
-        expandedImageView.pivotX = 0f
-        expandedImageView.pivotY = 0f
 
         swipe_refresh.isEnabled = false
 
-        val layoutParams2 = expandedImageView.layoutParams
-        layoutParams2.height = ViewGroup.LayoutParams.MATCH_PARENT
-        layoutParams2.width = ViewGroup.LayoutParams.MATCH_PARENT
-        expandedImageView.layoutParams = layoutParams2
+        val layoutParams = expandedImageView.layoutParams
+        layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
+        layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT
+        expandedImageView.layoutParams = layoutParams
 
         // TransitionSet for the full cover because using animation for this SUCKS
         val transitionSet = TransitionSet()
@@ -814,10 +803,12 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
             addListener(object : AnimatorListenerAdapter() {
 
                 override fun onAnimationEnd(animation: Animator) {
+                    TransitionManager.endTransitions(manga_info_layout)
                     currentAnimator = null
                 }
 
                 override fun onAnimationCancel(animation: Animator) {
+                    TransitionManager.endTransitions(manga_info_layout)
                     currentAnimator = null
                 }
             })
@@ -827,19 +818,19 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         expandedImageView.setOnClickListener {
             currentAnimator?.cancel()
 
-            val layoutParams3 = expandedImageView.layoutParams
-            layoutParams3.height = thumbView.height
-            layoutParams3.width = thumbView.width
-            expandedImageView.layoutParams = layoutParams3
+            val layoutParams = expandedImageView.layoutParams
+            layoutParams.height = thumbView.height
+            layoutParams.width = thumbView.width
+            expandedImageView.layoutParams = layoutParams
 
             // Zoom out back to tc thumbnail
-            val transitionSet2 = TransitionSet()
-            val bound2 = ChangeBounds()
-            transitionSet2.addTransition(bound2)
-            val changeImageTransform2 = ChangeImageTransform()
-            transitionSet2.addTransition(changeImageTransform2)
-            transitionSet2.duration = shortAnimationDuration.toLong()
-            TransitionManager.beginDelayedTransition(manga_info_layout, transitionSet2)
+            val transitionSet = TransitionSet()
+            val bound = ChangeBounds()
+            transitionSet.addTransition(bound)
+            val changeImageTransform = ChangeImageTransform()
+            transitionSet.addTransition(changeImageTransform)
+            transitionSet.duration = shortAnimationDuration.toLong()
+            TransitionManager.beginDelayedTransition(manga_info_layout, transitionSet)
 
             // Animation to remove backdrop and hide the full cover
             currentAnimator = AnimatorSet().apply {
