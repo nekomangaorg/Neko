@@ -200,6 +200,14 @@ class LibraryPresenter(
             var counter = 0
             db.getTotalChapterManga().executeAsBlocking().associate { it.id!! to counter++ }
         }
+        val catListing by lazy {
+            val default = Category.createDefault()
+            val defOrder = preferences.defaultMangaOrder().getOrDefault()
+            if (defOrder.firstOrNull()?.isLetter() == true) default.mangaSort = defOrder.first()
+            else default.mangaOrder = defOrder.split("/").mapNotNull { it.toLongOrNull() }
+            listOf(default) + db.getCategories().executeAsBlocking()
+        }
+
 
         val sortFn: (LibraryItem, LibraryItem) -> Int = { i1, i2 ->
             when (sortingMode) {
@@ -220,9 +228,35 @@ class LibraryPresenter(
                     if (mangaCompare == 0) sortAlphabetical(i1, i2) else mangaCompare
                 }
                 LibrarySort.DRAG_AND_DROP -> {
-                    0
+                    if (i1.manga.category == i2.manga.category) {
+                        val category = catListing.find { it.id == i1.manga.category }
+                        when {
+                            category?.mangaSort != null -> {
+                                when (category.mangaSort) {
+                                    'a' -> sortAlphabetical(i1, i2)
+                                    'b' -> sortAlphabetical(i2, i1)
+                                    'c' -> i2.manga.last_update.compareTo(i1.manga.last_update)
+                                    'd' -> i1.manga.last_update.compareTo(i2.manga.last_update)
+                                    'e' -> i2.manga.unread.compareTo(i1.manga.unread)
+                                    else -> sortAlphabetical(i1, i2)
+                                }
+                            }
+                            category?.mangaOrder?.isEmpty() == false -> {
+                                val order = category.mangaOrder
+                                val index1 = order.indexOf(i1.manga.id!!)
+                                val index2 = order.indexOf(i2.manga.id!!)
+                                when {
+                                    index1 == -1 -> -1
+                                    index2 == -1 -> 1
+                                    else -> index1.compareTo(index2)
+                                }
+                            }
+                            else -> 0
+                        }
+                    }
+                    else 0
                 }
-                else -> sortAlphabetical(i1, i2)
+                else -> 0
             }
         }
 

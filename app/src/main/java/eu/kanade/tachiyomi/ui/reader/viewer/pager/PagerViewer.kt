@@ -68,7 +68,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
         pager.offscreenPageLimit = 1
         pager.id = R.id.reader_pager
         pager.adapter = adapter
-        pager.addOnPageChangeListener(object : androidx.viewpager.widget.ViewPager.SimpleOnPageChangeListener() {
+        pager.addOnPageChangeListener(object : ViewPager.SimpleOnPageChangeListener() {
             override fun onPageSelected(position: Int) {
                 val page = adapter.items.getOrNull(position)
                 if (page != null && currentPage != page) {
@@ -81,7 +81,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
             }
 
             override fun onPageScrollStateChanged(state: Int) {
-                isIdle = state == androidx.viewpager.widget.ViewPager.SCROLL_STATE_IDLE
+                isIdle = state == ViewPager.SCROLL_STATE_IDLE
             }
         })
         pager.tapListener = { event ->

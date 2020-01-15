@@ -156,35 +156,24 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
         subscriptions += controller.reorganizeRelay
             .subscribe {
                 if (it.first == category.id) {
-                    var items:List<LibraryItem>
-                    if (it.second in 5..6) {
-                        items = adapter.currentItems.toMutableList()
+                    if (it.second in -2..-1) {
+                        val items = adapter.currentItems.toMutableList()
                         val mangas = controller.selectedMangas
                         val selectedManga = items.filter { item -> item.manga in mangas }
                         items.removeAll(selectedManga)
-                        if (it.second == 5) items.addAll(0, selectedManga)
+                        if (it.second == -1) items.addAll(0, selectedManga)
                         else items.addAll(selectedManga)
                         adapter.setItems(items)
                         adapter.notifyDataSetChanged()
                         saveDragSort()
                     }
                     else {
-                        items = when (it.second) {
-                            1, 2 -> adapter.currentItems.sortedBy {
-                                if (preferences.removeArticles().getOrDefault()) it.manga.title.removeArticles()
-                                else it.manga.title
-                            }
-                            3, 4 -> adapter.currentItems.sortedBy { it.manga.last_update }
-                            else -> adapter.currentItems.sortedBy { it.manga.title }
-                        }
-                        if (it.second % 2 == 0) items = items.reversed()
-                        adapter.setItems(items)
-                        adapter.notifyDataSetChanged()
                         category.mangaSort = ('a' + (it.second - 1))
                         if (category.name == "Default")
                             preferences.defaultMangaOrder().set(category.mangaSort.toString())
                         else
                             db.insertCategory(category).asRxObservable().subscribe()
+                        controller.enableReorderItems(category)
                     }
                 }
             }
@@ -218,11 +207,8 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
      */
     fun onNextLibraryManga(event: LibraryMangaEvent) {
         // Get the manga list for this category.
-        val sortingMode = preferences.librarySortingMode().getOrDefault()
         adapter.isLongPressDragEnabled = canDrag()
-        var mangaForCategory = event.getMangaForCategory(category).orEmpty()
-        if (sortingMode == LibrarySort.DRAG_AND_DROP)
-            mangaForCategory = sortMangaInDragAnDrop(mangaForCategory)
+        val mangaForCategory = event.getMangaForCategory(category).orEmpty()
 
         // Update the category with its manga.
         adapter.setItems(mangaForCategory)
@@ -235,32 +221,6 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
                     (recycler.findViewHolderForItemId(manga.id!!) as? LibraryHolder)?.toggleActivation()
                 }
             }
-        }
-    }
-
-    fun sortMangaInDragAnDrop(mangaForCategory: List<LibraryItem>): List<LibraryItem> {
-        if (category.name == "Default") {
-            val defOrder = preferences.defaultMangaOrder().getOrDefault()
-            if (defOrder.first().isLetter()) category.mangaSort = defOrder.first()
-            else category.mangaOrder = defOrder.split("/").mapNotNull { it.toLongOrNull() }
-        }
-        return if (category.mangaSort != null) {
-            var mangas = when (category.mangaSort) {
-                'a', 'b' -> mangaForCategory.sortedBy {
-                    if (preferences.removeArticles().getOrDefault()) it.manga.title.removeArticles()
-                    else it.manga.title
-                }
-                'c', 'd' -> mangaForCategory.sortedBy { it.manga.last_update }
-                else -> mangaForCategory.sortedBy { it.manga.title }
-            }
-            if (category.mangaSort == 'b' || category.mangaSort == 'd')
-                mangas = mangas.asReversed()
-            mangas
-
-        } else mangaForCategory.sortedBy {
-            category.mangaOrder.indexOf(
-                it.manga.id
-            )
         }
     }
 
@@ -373,6 +333,8 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
             preferences.defaultMangaOrder().set(mangaIds.joinToString("/"))
         else
             db.insertCategory(category).asRxObservable().subscribe()
+        controller.onSortChanged()
+        controller.enableReorderItems(category)
     }
     override fun shouldMoveItem(fromPosition: Int, toPosition: Int): Boolean {
         if (adapter.selectedItemCount > 1)

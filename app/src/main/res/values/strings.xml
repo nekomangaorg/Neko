@@ -117,6 +117,7 @@
     <string name="action_move_to_top">Move to top</string>
     <string name="action_move_to_bottom">Move to bottom</string>
     <string name="action_track">Track</string>
+    <string name="action_sort_by">Sort category by…</string>
 
     <!-- Operations -->
     <string name="deleting">Deleting…</string>

@@ -22,6 +22,7 @@ import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.viewpager.widget.ViewPager
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
 import com.f2prateek.rx.preferences.Preference
@@ -158,6 +159,8 @@ class LibraryController(
 
     var snack: Snackbar? = null
 
+    private var reorderMenuItem:MenuItem? = null
+
     init {
         setHasOptionsMenu(true)
         retainViewMode = RetainViewMode.RETAIN_DETACH
@@ -185,6 +188,20 @@ class LibraryController(
             activeCategory = it
         }
 
+        library_pager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
+            override fun onPageSelected(position: Int) {
+                enableReorderItems(position)
+            }
+
+            override fun onPageScrolled(
+                position: Int,
+                positionOffset: Float,
+                positionOffsetPixels: Int
+            ) { }
+
+            override fun onPageScrollStateChanged(state: Int) { }
+        })
+
         getColumnsPreferenceForCurrentOrientation().asObservable()
                 .doOnNext { mangaPerRow = it }
                 .skip(1)
@@ -193,6 +210,31 @@ class LibraryController(
 
         if (selectedMangas.isNotEmpty()) {
             createActionModeIfNeeded()
+        }
+    }
+
+    fun enableReorderItems(category: Category) {
+        adapter?.categories?.getOrNull(library_pager.currentItem)?.mangaSort = category.mangaSort
+        enableReorderItems(sortType = category.mangaSort)
+    }
+
+    private fun enableReorderItems(position: Int? = null, sortType: Char? = null) {
+        val pos = position ?: library_pager.currentItem
+        val orderOfCat = sortType ?: adapter?.categories?.getOrNull(pos)?.mangaSort
+        if (reorderMenuItem?.isVisible != true) return
+        val subMenu = reorderMenuItem?.subMenu ?: return
+        if (orderOfCat != null) {
+            subMenu.setGroupCheckable(R.id.reorder_group, true, true)
+            when (orderOfCat) {
+                'a' -> subMenu.findItem(R.id.action_alpha_asc)?.isChecked = true
+                'b' -> subMenu.findItem(R.id.action_alpha_dsc)?.isChecked = true
+                'c' -> subMenu.findItem(R.id.action_update_asc)?.isChecked = true
+                'd' -> subMenu.findItem(R.id.action_update_dsc)?.isChecked = true
+                'e' -> subMenu.findItem(R.id.action_unread)?.isChecked = true
+            }
+        }
+        else {
+            subMenu.setGroupCheckable(R.id.reorder_group, false, false)
         }
     }
 
@@ -337,7 +379,7 @@ class LibraryController(
     /**
      * Called when the sorting mode is changed.
      */
-    private fun onSortChanged() {
+    fun onSortChanged() {
         activity?.invalidateOptionsMenu()
         presenter.requestSortUpdate()
     }
@@ -381,6 +423,8 @@ class LibraryController(
 
         val reorganizeItem = menu.findItem(R.id.action_reorganize)
         reorganizeItem.isVisible = preferences.librarySortingMode().getOrDefault() == LibrarySort.DRAG_AND_DROP
+        reorderMenuItem = reorganizeItem
+        enableReorderItems()
 
         val searchItem = menu.findItem(R.id.action_search)
         val searchView = searchItem.actionView as SearchView
@@ -439,8 +483,9 @@ class LibraryController(
             }
             R.id.action_alpha_asc -> reOrder(1)
             R.id.action_alpha_dsc -> reOrder(2)
-            R.id.action_update_dsc -> reOrder(3)
-            R.id.action_update_asc -> reOrder(4)
+            R.id.action_update_asc -> reOrder(3)
+            R.id.action_update_dsc -> reOrder(4)
+            R.id.action_unread -> reOrder(5)
             else -> return super.onOptionsItemSelected(item)
         }
 
@@ -450,6 +495,7 @@ class LibraryController(
     private fun reOrder(type: Int) {
         adapter?.categories?.getOrNull(library_pager.currentItem)?.id?.let {
             reorganizeRelay.call(it to type)
+            onSortChanged()
         }
     }
 
@@ -527,7 +573,7 @@ class LibraryController(
             }
             R.id.action_to_top, R.id.action_to_bottom -> {
                 adapter?.categories?.getOrNull(library_pager.currentItem)?.id?.let {
-                    reorganizeRelay.call(it to if (item.itemId == R.id.action_to_top) 5 else 6)
+                    reorganizeRelay.call(it to if (item.itemId == R.id.action_to_top) -1 else -2)
                 }
                 destroyActionModeIfNeeded()
             }
