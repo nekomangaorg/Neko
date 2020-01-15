@@ -85,6 +85,7 @@ open class ExtensionController : NucleusController<ExtensionPresenter>(),
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
+            R.id.action_search -> expandActionViewFromInteraction = true
             R.id.action_filter -> {
                 router.pushController((RouterTransaction.with(SettingsExtensionsController()))
                     .popChangeHandler(SettingsExtensionsFadeChangeHandler())
@@ -152,7 +153,7 @@ open class ExtensionController : NucleusController<ExtensionPresenter>(),
             }
 
         // Fixes problem with the overflow icon showing up in lieu of search
-        searchItem.fixExpand()
+        searchItem.fixExpand(onExpand = { invalidateMenuOnExpand() })
 
         val autoItem = menu.findItem(R.id.action_auto_check)
         val preferences:PreferencesHelper = Injekt.get()
