@@ -12,6 +12,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.widget.LinearLayout
 import androidx.core.graphics.ColorUtils
@@ -23,9 +24,11 @@ import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
 import eu.kanade.tachiyomi.util.WebViewClientCompat
 import eu.kanade.tachiyomi.util.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.getResourceColor
+import eu.kanade.tachiyomi.util.invisible
 import eu.kanade.tachiyomi.util.marginBottom
 import eu.kanade.tachiyomi.util.updateLayoutParams
 import eu.kanade.tachiyomi.util.updatePadding
+import eu.kanade.tachiyomi.util.visible
 import kotlinx.android.synthetic.main.webview_activity.*
 import uy.kohesive.injekt.injectLazy
 
@@ -129,6 +132,16 @@ class WebViewActivity : BaseActivity() {
             val source = sourceManager.get(intent.extras!!.getLong(SOURCE_KEY)) as? HttpSource ?: return
             val url = intent.extras!!.getString(URL_KEY) ?: return
             val headers = source.headers.toMultimap().mapValues { it.value.getOrNull(0) ?: "" }
+            webview.webChromeClient = object : WebChromeClient() {
+                override fun onProgressChanged(view: WebView?, newProgress: Int) {
+                    progressBar.visible()
+                    progressBar.progress = newProgress
+                    if (newProgress == 100)
+                        progressBar.invisible()
+                    super.onProgressChanged(view, newProgress)
+                }
+            }
+
             webview.webViewClient = object : WebViewClientCompat() {
                 override fun shouldOverrideUrlCompat(view: WebView, url: String): Boolean {
                     view.loadUrl(url)
