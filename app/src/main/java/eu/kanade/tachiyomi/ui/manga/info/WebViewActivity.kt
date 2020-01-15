@@ -146,7 +146,11 @@ class WebViewActivity : BaseActivity() {
                 override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                     super.onPageStarted(view, url, favicon)
                     invalidateOptionsMenu()
-                    //swipe_refresh.isEnabled = false
+                }
+
+                override fun onPageCommitVisible(view: WebView?, url: String?) {
+                    super.onPageCommitVisible(view, url)
+                    nested_view.scrollTo(0,0)
                 }
             }
             val marginB = webview.marginBottom
