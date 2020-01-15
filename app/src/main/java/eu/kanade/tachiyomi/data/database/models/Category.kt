@@ -14,6 +14,8 @@ interface Category : Serializable {
 
     var mangaOrder:List<Long>
 
+    var mangaSort:Char?
+
     val nameLower: String
         get() = name.toLowerCase()
 

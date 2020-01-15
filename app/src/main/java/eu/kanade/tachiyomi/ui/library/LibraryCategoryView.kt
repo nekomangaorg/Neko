@@ -13,6 +13,7 @@ import eu.davidea.flexibleadapter.SelectableAdapter
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
+import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -45,6 +46,7 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
      */
     private lateinit var controller: LibraryController
 
+    private val db: DatabaseHelper by injectLazy()
     /**
      * Category for this view.
      */
@@ -162,6 +164,9 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
                         items.removeAll(selectedManga)
                         if (it.second == 5) items.addAll(0, selectedManga)
                         else items.addAll(selectedManga)
+                        adapter.setItems(items)
+                        adapter.notifyDataSetChanged()
+                        saveDragSort()
                     }
                     else {
                         items = when (it.second) {
@@ -173,10 +178,14 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
                             else -> adapter.currentItems.sortedBy { it.manga.title }
                         }
                         if (it.second % 2 == 0) items = items.reversed()
+                        adapter.setItems(items)
+                        adapter.notifyDataSetChanged()
+                        category.mangaSort = ('a' + (it.second - 1))
+                        if (category.name == "Default")
+                            preferences.defaultMangaOrder().set(category.mangaSort.toString())
+                        else
+                            db.insertCategory(category).asRxObservable().subscribe()
                     }
-                    adapter.setItems(items)
-                    adapter.notifyDataSetChanged()
-                    saveDragSort()
                 }
             }
     }
@@ -212,13 +221,9 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
         val sortingMode = preferences.librarySortingMode().getOrDefault()
         adapter.isLongPressDragEnabled = canDrag()
         var mangaForCategory = event.getMangaForCategory(category).orEmpty()
-        if (sortingMode == LibrarySort.DRAG_AND_DROP) {
-            if (category.name == "Default")
-                category.mangaOrder = preferences.defaultMangaOrder().getOrDefault().split("/")
-                    .mapNotNull { it.toLongOrNull() }
-            mangaForCategory = mangaForCategory.sortedBy { category.mangaOrder.indexOf(it.manga
-                .id) }
-        }
+        if (sortingMode == LibrarySort.DRAG_AND_DROP)
+            mangaForCategory = sortMangaInDragAnDrop(mangaForCategory)
+
         // Update the category with its manga.
         adapter.setItems(mangaForCategory)
 
@@ -230,6 +235,32 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
                     (recycler.findViewHolderForItemId(manga.id!!) as? LibraryHolder)?.toggleActivation()
                 }
             }
+        }
+    }
+
+    fun sortMangaInDragAnDrop(mangaForCategory: List<LibraryItem>): List<LibraryItem> {
+        if (category.name == "Default") {
+            val defOrder = preferences.defaultMangaOrder().getOrDefault()
+            if (defOrder.first().isLetter()) category.mangaSort = defOrder.first()
+            else category.mangaOrder = defOrder.split("/").mapNotNull { it.toLongOrNull() }
+        }
+        return if (category.mangaSort != null) {
+            var mangas = when (category.mangaSort) {
+                'a', 'b' -> mangaForCategory.sortedBy {
+                    if (preferences.removeArticles().getOrDefault()) it.manga.title.removeArticles()
+                    else it.manga.title
+                }
+                'c', 'd' -> mangaForCategory.sortedBy { it.manga.last_update }
+                else -> mangaForCategory.sortedBy { it.manga.title }
+            }
+            if (category.mangaSort == 'b' || category.mangaSort == 'd')
+                mangas = mangas.asReversed()
+            mangas
+
+        } else mangaForCategory.sortedBy {
+            category.mangaOrder.indexOf(
+                it.manga.id
+            )
         }
     }
 
@@ -336,8 +367,8 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
 
     private fun saveDragSort() {
         val mangaIds = adapter.currentItems.mapNotNull { it.manga.id }
+        category.mangaSort = null
         category.mangaOrder = mangaIds
-        val db: DatabaseHelper by injectLazy()
         if (category.name == "Default")
             preferences.defaultMangaOrder().set(mangaIds.joinToString("/"))
         else
