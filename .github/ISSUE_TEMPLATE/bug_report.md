@@ -1,14 +1,15 @@
 ---
-name: "🐞 Bug report"
+name: "\U0001F41E Bug report"
 about: Report a bug
 title: "[Bug] Write short description here"
-labels: "bug"
+labels: bug
+assignees: ''
 
 ---
 
 ### Device information
 * Tachiyomi version: ?
-* Android version: ?
+* Android phone & version: ?
 
 ## Steps to reproduce
 1. First step
