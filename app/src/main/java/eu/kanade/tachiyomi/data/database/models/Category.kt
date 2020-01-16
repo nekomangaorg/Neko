@@ -1,5 +1,7 @@
 package eu.kanade.tachiyomi.data.database.models
 
+import android.content.Context
+import eu.kanade.tachiyomi.R
 import java.io.Serializable
 
 interface Category : Serializable {
@@ -25,7 +27,10 @@ interface Category : Serializable {
             this.name = name
         }
 
-        fun createDefault(): Category = create("Default").apply { id = 0 }
+        fun createDefault(context: Context): Category = create(context.getString(R.string.default_columns))
+            .apply {
+            id =
+            0 }
     }
 
 }

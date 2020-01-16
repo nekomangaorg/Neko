@@ -71,6 +71,7 @@ open class ListMatPreference @JvmOverloads constructor(context: Context, attrs: 
                 else {
                     prefs.getStringPref(key, defValue).set(value)
                     this@ListMatPreference.summary = this@ListMatPreference.summary
+                    callChangeListener(value)
                 }
                 dismiss()
             }

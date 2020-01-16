@@ -62,31 +62,6 @@ class SettingsGeneralController : SettingsController() {
             entryRange = 1..3
             defaultValue = 1
         }
-
-        /*intListPreference {
-            key = Keys.theme
-            titleRes = R.string.pref_theme
-            entriesRes = arrayOf(R.string.light_theme, R.string.dark_theme,
-                  R.string.amoled_theme, R.string.darkblue_theme,
-                  R.string.system_theme, R.string.system_amoled_theme, R.string.system_darkblue_theme)
-            entryValues = arrayOf("1", "2", "3", "4", "5", "6", "7")
-            defaultValue = "5"
-            summary = "%s"
-
-            onChange { newValue ->
-                activity?.recreate()
-                true
-            }
-        }
-        intListPreference {
-            key = Keys.startScreen
-            titleRes = R.string.pref_start_screen
-            entriesRes = arrayOf(R.string.label_library, R.string.label_recent_manga,
-                R.string.label_recent_updates)
-            entryValues = arrayOf("1", "2", "3")
-            defaultValue = "1"
-            summary = "%s"
-        }*/
         switchPreference {
             key = Keys.automaticUpdates
             titleRes = R.string.pref_enable_automatic_updates

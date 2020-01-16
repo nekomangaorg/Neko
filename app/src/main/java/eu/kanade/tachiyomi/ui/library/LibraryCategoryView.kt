@@ -169,7 +169,7 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
                     }
                     else {
                         category.mangaSort = ('a' + (it.second - 1))
-                        if (category.name == "Default")
+                        if (category.id == 0)
                             preferences.defaultMangaOrder().set(category.mangaSort.toString())
                         else
                             db.insertCategory(category).asRxObservable().subscribe()
@@ -329,7 +329,7 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
         val mangaIds = adapter.currentItems.mapNotNull { it.manga.id }
         category.mangaSort = null
         category.mangaOrder = mangaIds
-        if (category.name == "Default")
+        if (category.id == 0)
             preferences.defaultMangaOrder().set(mangaIds.joinToString("/"))
         else
             db.insertCategory(category).asRxObservable().subscribe()

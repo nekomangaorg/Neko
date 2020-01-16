@@ -14,7 +14,7 @@ class MultiListMatPreference @JvmOverloads constructor(context: Context, attrs: 
     ListMatPreference(context, attrs) {
 
     var allSelectionRes:Int? = null
-    var customSummartRes:Int
+    var customSummaryRes:Int
         get() = 0
         set(value) { customSummary = context.getString(value) }
     var customSummary:String? = null
@@ -53,6 +53,7 @@ class MultiListMatPreference @JvmOverloads constructor(context: Context, attrs: 
                     if (pos.isEmpty()) checkItem(0)
                     else uncheckItem(0)
                 }
+                callChangeListener(positions)
             }
         }
     }

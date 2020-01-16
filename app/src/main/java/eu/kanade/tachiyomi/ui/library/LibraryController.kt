@@ -332,6 +332,9 @@ class LibraryController(
         else
             activeCategory
 
+        categories.find { it.id == 0 }?.let {
+            it.name = resources?.getString(R.string.default_columns) ?: "Default"
+        }
         // Set the categories
         adapter.categories = categories
 

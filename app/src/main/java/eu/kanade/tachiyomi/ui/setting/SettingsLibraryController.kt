@@ -76,7 +76,7 @@ class SettingsLibraryController : SettingsController() {
             titleRes = R.string.pref_library_update_restriction
             entriesRes = arrayOf(R.string.wifi, R.string.charging)
             entryValues = listOf("wifi", "ac")
-            customSummartRes = R.string.pref_library_update_restriction_summary
+            customSummaryRes = R.string.pref_library_update_restriction_summary
 
             preferences.libraryUpdateInterval().asObservable()
                 .subscribeUntilDestroy { isVisible = it > 0 }
@@ -132,7 +132,7 @@ class SettingsLibraryController : SettingsController() {
             key = Keys.defaultCategory
             titleRes = R.string.default_category
 
-            val categories = listOf(Category.createDefault()) + dbCategories
+            val categories = listOf(Category.createDefault(context)) + dbCategories
             entries = listOf(context.getString(R.string.default_category_summary)) +
                 categories.map { it.name }.toTypedArray()
             entryValues = listOf(-1) + categories.mapNotNull { it.id }.toList()
