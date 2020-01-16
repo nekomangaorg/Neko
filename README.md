@@ -4,7 +4,7 @@ Tachiyomi is a free and open source manga reader for Android 5.0 and above.
 ![screenshots of app](./.github/readme-images/theming-screenshots.gif)
 
 ## Newest Release
-[v0.9.69](https://github.com/Jays2Kings/tachiyomi/releases)
+[v0.9.7](https://github.com/Jays2Kings/tachiyomi/releases)
 
 ## Features
 
@@ -41,6 +41,9 @@ Plus some new features in this fork such as:
 * Improved Download queue, including reordering and cancelling downloads
 * Recently Read goes all the way back to the beginning of time
 * Restoring backups in the background (taken from [Neko](https://github.com/CarlosEsco/Neko)
+* Expanding manga thumbnails
+* Automatically check for extension updates
+* More Material Stuff
 
 ## Issues, Feature Requests and Contributing
 

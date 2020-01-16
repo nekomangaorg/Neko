@@ -1,5 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <changelog bulletedList="true">
+    <changelogversion versionName="v0.9.7" changeDate="">
+		<changelogtext>Extensions notifications now perfected</changelogtext>
+		<changelogtext>Extensions are checked every hour in app</changelogtext>
+		<changelogtext>Added badge showing how many updates for extension are pending in the side drawer</changelogtext>
+		<changelogtext>Extensions no longer available show obsolete</changelogtext>
+		<changelogtext>More material dialog boxes, Android 10 uses normal casing on buttons</changelogtext>
+		<changelogtext>Tap on manga thumbnails in info to expand them</changelogtext>
+		<changelogtext>Have different sorting per category in drag &amp; drop</changelogtext>
+		<changelogtext>Filter Library by tracked manga</changelogtext>
+		<changelogtext>Web view now has pull to refresh and progress bar</changelogtext>
+		<changelogtext>Extensions no longer available show up as obsolete</changelogtext>
+		<changelogtext>Sort drag &amp; drop by unread</changelogtext>
+		<changelogtext>Move selected manga to the top or bottom of the list in Drag &amp; Drop</changelogtext>
+		<changelogtext>Web view now hides the top bar when scroll</changelogtext>
+		<changelogtext>Search view in toolbar hides filter/no more duplicates</changelogtext>
+		<changelogtext>Fixed last updated sorting not going by latest chapter upload</changelogtext>
+		<changelogtext>More translations, Default category now honors your language</changelogtext>
+		<changelogtext>Fixes to a few dialog boxes, Drag &amp; Drop, selecting in library</changelogtext>
+		<changelogtext>Fixed double vibration when long pressing in drag &amp; drop mode</changelogtext>
+		<changelogtext>Updating wording in a few places</changelogtext>
+		<changelogtext>Settings -> About -> Build Time now shows you this changelog</changelogtext>
+	</changelogversion>
+	
     <changelogversion versionName="v0.9.69" changeDate="">
         <changelogtext>Restoring backups is now a notification</changelogtext>
 		<changelogtext>Fixed Recent Read bugs, recently read goes back 50 years</changelogtext>

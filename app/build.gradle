@@ -38,8 +38,8 @@ android {
         minSdkVersion 21
         targetSdkVersion 29
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        versionCode 54
-        versionName '0.9.69'
+        versionCode 55
+        versionName '0.9.7'
 
         buildConfigField "String", "COMMIT_COUNT", "\"${getCommitCount()}\""
         buildConfigField "String", "COMMIT_SHA", "\"${getGitSha()}\""
@@ -76,7 +76,6 @@ android {
             dimension "default"
         }
         dev {
-            resConfigs "en", "xxhdpi"
             dimension "default"
         }
     }
