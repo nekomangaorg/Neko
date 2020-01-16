@@ -124,7 +124,7 @@ dependencies {
 
     implementation 'androidx.multidex:multidex:2.0.1'
 
-    standardImplementation 'com.google.firebase:firebase-core:17.2.1'
+    standardImplementation 'com.google.firebase:firebase-core:17.2.2'
 
     final lifecycle_version = "2.1.0"
     implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version"
