@@ -23,6 +23,7 @@ import eu.kanade.tachiyomi.util.*
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import kotlinx.android.synthetic.main.chapters_controller.*
 import kotlinx.android.synthetic.main.library_category.view.*
+import kotlinx.coroutines.delay
 import rx.subscriptions.CompositeSubscription
 import uy.kohesive.injekt.injectLazy
 
@@ -235,6 +236,9 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
             is LibrarySelectionEvent.Selected -> {
                 if (adapter.mode != SelectableAdapter.Mode.MULTI) {
                     adapter.mode = SelectableAdapter.Mode.MULTI
+                }
+                launchUI {
+                    delay(100)
                     adapter.isLongPressDragEnabled = false
                 }
                 findAndToggleSelection(event.manga)
@@ -279,13 +283,13 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
     override fun onItemClick(view: View?, position: Int): Boolean {
         // If the action mode is created and the position is valid, toggle the selection.
         val item = adapter.getItem(position) ?: return false
-        if (adapter.mode == SelectableAdapter.Mode.MULTI) {
+        return if (adapter.mode == SelectableAdapter.Mode.MULTI) {
             lastClickPosition = position
             toggleSelection(position)
-            return true
+            true
         } else {
             openManga(item.manga, lastTouchUpY)
-            return false
+            false
         }
     }
 
@@ -303,7 +307,6 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
      */
     override fun onItemLongClick(position: Int) {
         controller.createActionModeIfNeeded()
-        adapter.isLongPressDragEnabled = false
         when {
             lastClickPosition == -1 -> setSelection(position)
             lastClickPosition > position -> for (i in position until lastClickPosition)
@@ -320,9 +323,7 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
     }
 
     override fun onItemReleased(position: Int) {
-        if (adapter.selectedItemCount == 0) {
-            saveDragSort()
-        }
+        if (adapter.selectedItemCount == 0) saveDragSort()
     }
 
     private fun saveDragSort() {
@@ -346,8 +347,7 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
 
     override fun onActionStateChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
         val position = viewHolder?.adapterPosition ?: return
-        if (actionState == 2)
-            onItemLongClick(position)
+        if (actionState == 2) onItemLongClick(position)
     }
 
     /**
