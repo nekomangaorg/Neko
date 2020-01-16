@@ -60,7 +60,7 @@ class CategoryGetResolver : DefaultGetResolver<Category>() {
         flags = cursor.getInt(cursor.getColumnIndex(COL_FLAGS))
 
         val orderString = cursor.getString(cursor.getColumnIndex(COL_MANGA_ORDER))
-        if (orderString.firstOrNull()?.isLetter() == true) {
+        if (orderString?.firstOrNull()?.isLetter() == true) {
             mangaSort = orderString.first()
             mangaOrder = emptyList()
         }

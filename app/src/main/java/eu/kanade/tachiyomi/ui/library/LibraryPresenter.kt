@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.ui.library
 
 import android.os.Bundle
 import com.jakewharton.rxrelay.BehaviorRelay
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
@@ -12,7 +11,6 @@ import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
-import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
@@ -202,7 +200,7 @@ class LibraryPresenter(
             db.getTotalChapterManga().executeAsBlocking().associate { it.id!! to counter++ }
         }
         val catListing by lazy {
-            val default = Category.createDefault(context)
+            val default = Category.createDefault()
             val defOrder = preferences.defaultMangaOrder().getOrDefault()
             if (defOrder.firstOrNull()?.isLetter() == true) default.mangaSort = defOrder.first()
             else default.mangaOrder = defOrder.split("/").mapNotNull { it.toLongOrNull() }
@@ -286,8 +284,7 @@ class LibraryPresenter(
      */
     private fun getLibraryObservable(): Observable<Library> {
         return Observable.combineLatest(getCategoriesObservable(), getLibraryMangasObservable()) { dbCategories, libraryManga ->
-            val categories = if (libraryManga.containsKey(0)) arrayListOf(Category.createDefault
-                (context.applicationContext)) + dbCategories
+            val categories = if (libraryManga.containsKey(0)) arrayListOf(Category.createDefault()) + dbCategories
             else dbCategories
 
             this.categories = categories

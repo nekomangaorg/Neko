@@ -132,7 +132,7 @@ class SettingsLibraryController : SettingsController() {
             key = Keys.defaultCategory
             titleRes = R.string.default_category
 
-            val categories = listOf(Category.createDefault(context)) + dbCategories
+            val categories = listOf(Category.createDefault()) + dbCategories
             entries = listOf(context.getString(R.string.default_category_summary)) +
                 categories.map { it.name }.toTypedArray()
             entryValues = listOf(-1) + categories.mapNotNull { it.id }.toList()

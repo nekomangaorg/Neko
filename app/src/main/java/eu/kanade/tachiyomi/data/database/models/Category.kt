@@ -27,10 +27,8 @@ interface Category : Serializable {
             this.name = name
         }
 
-        fun createDefault(context: Context): Category = create(context.getString(R.string.default_columns))
-            .apply {
-            id =
-            0 }
+        fun createDefault(): Category = create("Default").apply {
+            id = 0 }
     }
 
 }
