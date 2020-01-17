@@ -41,7 +41,6 @@ import eu.kanade.tachiyomi.util.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.gone
 import eu.kanade.tachiyomi.util.inflate
 import eu.kanade.tachiyomi.util.marginTop
-import eu.kanade.tachiyomi.util.openInBrowser
 import eu.kanade.tachiyomi.util.snack
 import eu.kanade.tachiyomi.util.updateLayoutParams
 import eu.kanade.tachiyomi.util.updatePaddingRelative
@@ -319,7 +318,6 @@ open class BrowseCatalogueController(bundle: Bundle) :
         super.onPrepareOptionsMenu(menu)
 
         val isHttpSource = presenter.source is HttpSource
-        menu.findItem(R.id.action_open_in_browser).isVisible = isHttpSource
         menu.findItem(R.id.action_open_in_web_view).isVisible = isHttpSource
     }
 
@@ -328,17 +326,10 @@ open class BrowseCatalogueController(bundle: Bundle) :
             R.id.action_search -> expandActionViewFromInteraction = true
             R.id.action_display_mode -> swapDisplayMode()
             R.id.action_set_filter -> navView?.let { activity?.drawer?.openDrawer(GravityCompat.END) }
-            R.id.action_open_in_browser -> openInBrowser()
             R.id.action_open_in_web_view -> openInWebView()
             else -> return super.onOptionsItemSelected(item)
         }
         return true
-    }
-
-    private fun openInBrowser() {
-        val source = presenter.source as? HttpSource ?: return
-
-        activity?.openInBrowser(source.baseUrl)
     }
 
     private fun openInWebView() {

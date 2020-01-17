@@ -26,6 +26,8 @@ import eu.kanade.tachiyomi.util.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.getResourceColor
 import eu.kanade.tachiyomi.util.invisible
 import eu.kanade.tachiyomi.util.marginBottom
+import eu.kanade.tachiyomi.util.openInBrowser
+import eu.kanade.tachiyomi.util.toast
 import eu.kanade.tachiyomi.util.updateLayoutParams
 import eu.kanade.tachiyomi.util.updatePadding
 import eu.kanade.tachiyomi.util.visible
@@ -244,8 +246,25 @@ class WebViewActivity : BaseActivity() {
         when (item.itemId) {
             R.id.action_web_back -> webview.goBack()
             R.id.action_web_forward ->  webview.goForward()
-            else -> return super.onOptionsItemSelected(item)
+            R.id.action_web_share -> shareWebpage()
+            R.id.action_web_browser -> openInBrowser()
         }
-        return true
+        return super.onOptionsItemSelected(item)
+    }
+
+    private fun shareWebpage() {
+        try {
+            val intent = Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_TEXT, webview.url)
+            }
+            startActivity(Intent.createChooser(intent, getString(R.string.action_share)))
+        } catch (e: Exception) {
+            toast(e.message)
+        }
+    }
+
+    private fun openInBrowser() {
+        openInBrowser(webview.url)
     }
 }
