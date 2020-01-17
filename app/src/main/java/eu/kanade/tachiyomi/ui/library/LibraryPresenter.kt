@@ -91,12 +91,15 @@ class LibraryPresenter(
     fun subscribeLibrary() {
         if (librarySubscription.isNullOrUnsubscribed()) {
             librarySubscription = getLibraryObservable()
-                    .combineLatest(downloadTriggerRelay.observeOn(Schedulers.io()),
-                            { lib, _ -> lib.apply { setDownloadCount(mangaMap) } })
-                    .combineLatest(filterTriggerRelay.observeOn(Schedulers.io()),
-                            { lib, _ -> lib.copy(mangaMap = applyFilters(lib.mangaMap)) })
-                    .combineLatest(sortTriggerRelay.observeOn(Schedulers.io()),
-                            { lib, _ -> lib.copy(mangaMap = applySort(lib.mangaMap)) })
+                    .combineLatest(downloadTriggerRelay.observeOn(Schedulers.io())) {
+                        lib, _ -> lib.apply { setDownloadCount(mangaMap) }
+                    }
+                    .combineLatest(filterTriggerRelay.observeOn(Schedulers.io())) {
+                        lib, _ -> lib.copy(mangaMap = applyFilters(lib.mangaMap))
+                    }
+                    .combineLatest(sortTriggerRelay.observeOn(Schedulers.io())) {
+                        lib, _ -> lib.copy(mangaMap = applySort(lib.mangaMap))
+                    }
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeLatestCache({ view, (categories, mangaMap) ->
                         view.onNextLibraryUpdate(categories, mangaMap)
@@ -217,7 +220,6 @@ class LibraryPresenter(
     fun sortAlphabetical(i1: LibraryItem, i2: LibraryItem): Int {
         return i1.manga.title.compareTo(i2.manga.title, true)
     }
-
 
     /**
      * Get the categories and all its manga from the database.

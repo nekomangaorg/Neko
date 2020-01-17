@@ -19,6 +19,8 @@ class TrackLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle) {
 
     private val service = Injekt.get<TrackManager>().getService(args.getInt("key"))!!
 
+    override var canLogout = true
+
     constructor(service: TrackService) : this(Bundle().apply { putInt("key", service.id) })
 
     override fun onCreateDialog(savedState: Bundle?): Dialog {
@@ -61,6 +63,13 @@ class TrackLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle) {
                         login.setText(R.string.unknown_error)
                         error.message?.let { context.toast(it) }
                     })
+        }
+    }
+
+    override fun logout() {
+        if (service.isLogged) {
+            service.logout()
+            activity?.toast(R.string.logout_success)
         }
     }
 

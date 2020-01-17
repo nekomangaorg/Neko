@@ -28,15 +28,22 @@ abstract class LoginDialogPreference(bundle: Bundle? = null) : DialogController(
 
     var requestSubscription: Subscription? = null
 
-    override fun onCreateDialog(savedState: Bundle?): Dialog {
-        val dialog = MaterialDialog(activity!!)
-                .customView(viewRes = R.layout.pref_account_login, scrollable = true)
-                .negativeButton(android.R.string.cancel)
+    open var canLogout = false
+
+    override fun onCreateDialog(savedViewState: Bundle?): Dialog {
+        val dialog = MaterialDialog(activity!!).apply {
+            customView(R.layout.pref_account_login, scrollable = false)
+            positiveButton(android.R.string.cancel)
+            if (canLogout) {
+                negativeButton(R.string.logout) { logout() }
+            }
+        }
 
         onViewCreated(dialog.view)
 
         return dialog
     }
+
 
     fun onViewCreated(view: View) {
         val source = Injekt.get<SourceManager>().get(args.getLong("key"))
@@ -91,6 +98,6 @@ abstract class LoginDialogPreference(bundle: Bundle? = null) : DialogController(
 
     protected abstract fun setCredentialsOnView(view: View)
 
-    protected abstract fun logout()
+    open fun logout() { }
 
 }
