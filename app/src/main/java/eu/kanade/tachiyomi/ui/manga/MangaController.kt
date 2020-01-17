@@ -27,12 +27,15 @@ import eu.kanade.tachiyomi.ui.base.controller.RxController
 import eu.kanade.tachiyomi.ui.base.controller.TabbedController
 import eu.kanade.tachiyomi.ui.base.controller.requestPermissionsSafe
 import eu.kanade.tachiyomi.ui.catalogue.CatalogueController
+import eu.kanade.tachiyomi.ui.main.MainActivity
+import eu.kanade.tachiyomi.ui.main.SearchActivity
 import eu.kanade.tachiyomi.ui.manga.chapter.ChaptersController
 import eu.kanade.tachiyomi.ui.manga.info.MangaInfoController
 import eu.kanade.tachiyomi.ui.manga.track.TrackController
 import eu.kanade.tachiyomi.util.toast
 import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.android.synthetic.main.manga_controller.*
+import kotlinx.android.synthetic.main.search_activity.*
 import rx.Subscription
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -66,7 +69,6 @@ class MangaController : RxController, TabbedController {
         if (manga != null) {
             source = Injekt.get<SourceManager>().getOrStub(manga.source)
         }
-        backClosesApp = fromExtension
     }
 
     constructor(manga: Manga?, startY:Float?) : super(Bundle().apply {
@@ -91,20 +93,11 @@ class MangaController : RxController, TabbedController {
         )
     }
 
-    override fun handleBack(): Boolean {
-        return if (backClosesApp) {
-            activity?.finishAffinity()
-            true
-        } else super.handleBack()
-    }
-
     var manga: Manga? = null
         private set
 
     var source: Source? = null
         private set
-
-    private var backClosesApp = false
 
     var startingChapterYPos:Float? = null
 
@@ -153,9 +146,14 @@ class MangaController : RxController, TabbedController {
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
         super.onChangeStarted(handler, type)
         if (type.isEnter) {
-            activity?.tabs?.setupWithViewPager(manga_pager)
+            tabLayout()?.setupWithViewPager(manga_pager)
             trackingIconSubscription = trackingIconRelay.subscribe { setTrackingIconInternal(it) }
         }
+    }
+
+    fun tabLayout():TabLayout? {
+        return if (activity is SearchActivity) activity?.sTabs
+        else activity?.tabs
     }
 
     override fun onChangeEnded(handler: ControllerChangeHandler, type: ControllerChangeType) {
@@ -183,7 +181,7 @@ class MangaController : RxController, TabbedController {
     }
 
     private fun setTrackingIconInternal(visible: Boolean) {
-        val tab = activity?.tabs?.getTabAt(TRACK_CONTROLLER) ?: return
+        val tab = tabLayout()?.getTabAt(TRACK_CONTROLLER) ?: return
         val drawable = if (visible)
             VectorDrawableCompat.create(resources!!, R.drawable.ic_done_white_18dp, null)
         else null
@@ -209,7 +207,7 @@ class MangaController : RxController, TabbedController {
         }
 
         override fun configureRouter(router: Router, position: Int) {
-            val touchOffset = if (activity?.tabs?.height == 0) 144f else 0f
+            val touchOffset = if (tabLayout()?.height == 0) 144f else 0f
             if (!router.hasRootController()) {
                 val controller = when (position) {
                     INFO_CONTROLLER -> MangaInfoController()

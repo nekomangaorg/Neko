@@ -1,9 +1,13 @@
 package eu.kanade.tachiyomi.ui.catalogue.global_search
 
 import android.os.Bundle
-import androidx.recyclerview.widget.LinearLayoutManager
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import androidx.appcompat.widget.SearchView
-import android.view.*
 import com.jakewharton.rxbinding.support.v7.widget.queryTextChangeEvents
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -30,6 +34,8 @@ open class CatalogueSearchController(
      */
     protected var adapter: CatalogueSearchAdapter? = null
 
+    private var customTitle:String? = null
+
     /**
      * Called when controller is initialized.
      */
@@ -54,7 +60,7 @@ open class CatalogueSearchController(
      * @return title.
      */
     override fun getTitle(): String? {
-        return presenter.query
+        return customTitle ?: presenter.query
     }
 
     /**
@@ -100,6 +106,7 @@ open class CatalogueSearchController(
         val searchItem = menu.findItem(R.id.action_search)
         val searchView = searchItem.actionView as SearchView
 
+        searchItem.isVisible = customTitle == null
         searchItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
             override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
                 searchView.onActionViewExpanded() // Required to show the query in the view
@@ -135,6 +142,11 @@ open class CatalogueSearchController(
         recycler.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(view.context)
         recycler.adapter = adapter
         recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
+        if (extensionFilter != null)
+        {
+            customTitle = view.context?.getString(R.string.loading)
+            setTitle()
+        }
     }
 
     override fun onDestroyView(view: View) {
@@ -171,13 +183,6 @@ open class CatalogueSearchController(
         return null
     }
 
-    override fun handleBack(): Boolean {
-        return if (extensionFilter != null) {
-            activity?.finishAffinity()
-            true
-        } else super.handleBack()
-    }
-
     /**
      * Add search result to adapter.
      *
@@ -188,10 +193,15 @@ open class CatalogueSearchController(
             val results = searchResult.first().results
             if (results != null && results.size == 1) {
                 val manga = results.first().manga
-                router.pushController(MangaController(manga,true,fromExtension = true)
+                router.replaceTopController(MangaController(manga,true,fromExtension = true)
                     .withFadeTransaction()
                 )
                 return
+            }
+            else if (results != null) {
+                customTitle = null
+                setTitle()
+                activity?.invalidateOptionsMenu()
             }
         }
         adapter?.updateDataSet(searchResult)

@@ -26,7 +26,6 @@ import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
-import eu.kanade.tachiyomi.ui.base.controller.popControllerWithTag
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
@@ -114,8 +113,9 @@ class ChaptersController() : NucleusController<ChaptersPresenter>(),
                 bottomMargin = insets.systemWindowInsetBottom
             }
             // offset the recycler by the fab's inset + some inset on top
-            v.updatePaddingRelative(bottom = padding.bottom + (fab?.marginBottom ?: 0) +
-                fabBaseMarginBottom + (fab?.height ?: 0))
+            val scale: Float = v.context.resources.displayMetrics.density
+            val pixels = (88 * scale + 0.5f).toInt()
+            v.updatePaddingRelative(bottom = padding.bottom + insets.systemWindowInsetBottom + pixels)
         }
         swipe_refresh.refreshes().subscribeUntilDestroy { fetchChaptersFromSource() }
 

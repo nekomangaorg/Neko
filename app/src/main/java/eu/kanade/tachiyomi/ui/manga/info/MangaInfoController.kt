@@ -749,8 +749,8 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
     }
 
     override fun handleBack(): Boolean {
-        if (manga_cover_full?.visibility == View.VISIBLE && activity?.tabs?.selectedTabPosition
-            == 0)
+        if (manga_cover_full?.visibility == View.VISIBLE &&
+            (parentController as? MangaController)?.tabLayout()?.selectedTabPosition == 0)
         {
             manga_cover_full?.performClick()
             return true

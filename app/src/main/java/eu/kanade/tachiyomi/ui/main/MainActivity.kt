@@ -73,19 +73,22 @@ import uy.kohesive.injekt.injectLazy
 import java.util.Date
 import java.util.concurrent.TimeUnit
 
-class MainActivity : BaseActivity() {
+open class MainActivity : BaseActivity() {
 
-    private lateinit var router: Router
+    protected lateinit var router: Router
 
     val preferences: PreferencesHelper by injectLazy()
 
-    private var drawerArrow: DrawerArrowDrawable? = null
+    protected var drawerArrow: DrawerArrowDrawable? = null
+
+    protected open var trulyGoBack = false
 
     private var secondaryDrawer: ViewGroup? = null
 
     private var snackBar:Snackbar? = null
-    var extraViewForUndo:View? = null
+    private var extraViewForUndo:View? = null
     private var canDismissSnackBar = false
+
     fun setUndoSnackBar(snackBar: Snackbar?, extraViewToCheck: View? = null) {
         this.snackBar = snackBar
         canDismissSnackBar = false
@@ -117,7 +120,8 @@ class MainActivity : BaseActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Some webview somwewhere breaks night mode, we create a webview to solve this: https://stackoverflow.com/a/45430282
+        // Some webview somewwhere breaks night mode, we create a webview to solve this:
+        // https://stackoverflow.com/a/45430282
         if (preferences.theme() in 2..4) {
             Timber.d("Manually instantiating WebView to avoid night mode issue.");
             try {
@@ -132,12 +136,13 @@ class MainActivity : BaseActivity() {
             else -> MODE_NIGHT_FOLLOW_SYSTEM
         })
         super.onCreate(savedInstanceState)
+        if (trulyGoBack) return
 
         // Do not let the launcher create a new activity http://stackoverflow.com/questions/16283079
-        if (!isTaskRoot) {
+       /* if (!isTaskRoot) {
             finish()
             return
-        }
+        }*/
 
         setContentView(R.layout.main_activity)
 
@@ -291,7 +296,7 @@ class MainActivity : BaseActivity() {
         setExtensionsBadge()
     }
 
-    fun setExtensionsBadge() {
+    private fun setExtensionsBadge() {
 
         val extUpdateText: TextView = nav_view.menu.findItem(
             R.id.nav_drawer_extensions
@@ -346,7 +351,7 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    private fun handleIntentAction(intent: Intent): Boolean {
+    protected open fun handleIntentAction(intent: Intent): Boolean {
         val notificationId = intent.getIntExtra("notificationId", -1)
         if (notificationId > -1) NotificationReceiver.dismissNotification(
             applicationContext, notificationId, intent.getIntExtra("groupId", 0)
@@ -401,6 +406,10 @@ class MainActivity : BaseActivity() {
     }
 
     override fun onBackPressed() {
+        if (trulyGoBack) {
+            super.onBackPressed()
+            return
+        }
         val backstackSize = router.backstackSize
         if (drawer.isDrawerOpen(GravityCompat.START) || drawer.isDrawerOpen(GravityCompat.END)) {
             drawer.closeDrawers()
@@ -449,7 +458,7 @@ class MainActivity : BaseActivity() {
         return super.dispatchTouchEvent(ev)
     }
 
-    private fun syncActivityViewWithController(to: Controller?, from: Controller? = null) {
+    protected open fun syncActivityViewWithController(to: Controller?, from: Controller? = null) {
         if (from is DialogController || to is DialogController) {
             return
         }
