@@ -136,6 +136,11 @@ class TrackSearchDialog : DialogController {
         view.progress.visibility = View.INVISIBLE
         view.track_search_list.visibility = View.VISIBLE
         adapter?.setItems(results)
+        if (results.size == 1 && !wasPreviouslyTracked) {
+            selectedItem = adapter?.getItem(0)
+            (dialog as? MaterialDialog)?.positiveButton(R.string.action_track)
+            (dialog as? MaterialDialog)?.setActionButtonEnabled(WhichButton.POSITIVE, true)
+        }
     }
 
     fun onSearchResultsError() {

@@ -76,6 +76,7 @@ android {
             dimension "default"
         }
         dev {
+            resConfigs "en"
             dimension "default"
         }
     }

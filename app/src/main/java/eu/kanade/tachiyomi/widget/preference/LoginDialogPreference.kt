@@ -26,15 +26,23 @@ abstract class LoginDialogPreference(bundle: Bundle? = null) : DialogController(
 
     var requestSubscription: Subscription? = null
 
+    open var canLogout = false
+
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
-        val dialog = MaterialDialog(activity!!)
-                .customView(R.layout.pref_account_login, scrollable = false)
-                .negativeButton(android.R.string.cancel)
+        val dialog = MaterialDialog(activity!!).apply {
+            customView(R.layout.pref_account_login, scrollable = false)
+            positiveButton(android.R.string.cancel)
+            if (canLogout) {
+                negativeButton(R.string.logout) { logout() }
+            }
+        }
 
         onViewCreated(dialog.view)
 
         return dialog
     }
+
+    open fun logout() { }
 
     fun onViewCreated(view: View) {
         v = view.apply {

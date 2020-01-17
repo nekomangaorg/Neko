@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.library
 
 import android.os.Bundle
 import com.jakewharton.rxrelay.BehaviorRelay
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
@@ -11,6 +12,7 @@ import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
+import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
@@ -62,6 +64,7 @@ class LibraryPresenter(
 
     private val context = preferences.context
 
+    private val loggedServices by lazy { Injekt.get<TrackManager>().services.filter { it.isLogged } }
     /**
      * Categories of the library.
      */
@@ -141,9 +144,13 @@ class LibraryPresenter(
 
             if (filterTracked != STATE_IGNORE) {
                 val db = Injekt.get<DatabaseHelper>()
-                val tracks = db.getTracks(item.manga).executeAsBlocking().size
-                if (filterTracked == STATE_INCLUDE && tracks == 0) return@f false
-                if (filterTracked == STATE_EXCLUDE && tracks > 0) return@f false
+                val tracks = db.getTracks(item.manga).executeAsBlocking()
+
+                val trackCount = loggedServices.count { service ->
+                    tracks.any { it.sync_id == service.id }
+                }
+                if (filterTracked == STATE_INCLUDE && trackCount == 0) return@f false
+                if (filterTracked == STATE_EXCLUDE && trackCount > 0) return@f false
             }
             // Filter when there are no downloads.
             if (filterDownloaded != STATE_IGNORE) {
