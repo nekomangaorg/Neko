@@ -60,6 +60,7 @@ import eu.kanade.tachiyomi.ui.library.ChangeMangaCategoriesDialog
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaController
+import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.getUriCompat
 import eu.kanade.tachiyomi.util.marginBottom

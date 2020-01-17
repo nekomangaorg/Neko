@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.manga.info
+package eu.kanade.tachiyomi.ui.webview
 
 import android.content.Context
 import android.content.Intent
