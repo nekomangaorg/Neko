@@ -200,7 +200,7 @@ class LibraryPresenter(
             db.getTotalChapterManga().executeAsBlocking().associate { it.id!! to counter++ }
         }
         val catListing by lazy {
-            val default = Category.createDefault()
+            val default = Category.createDefault(context)
             val defOrder = preferences.defaultMangaOrder().getOrDefault()
             if (defOrder.firstOrNull()?.isLetter() == true) default.mangaSort = defOrder.first()
             else default.mangaOrder = defOrder.split("/").mapNotNull { it.toLongOrNull() }
@@ -284,7 +284,8 @@ class LibraryPresenter(
      */
     private fun getLibraryObservable(): Observable<Library> {
         return Observable.combineLatest(getCategoriesObservable(), getLibraryMangasObservable()) { dbCategories, libraryManga ->
-            val categories = if (libraryManga.containsKey(0)) arrayListOf(Category.createDefault()) + dbCategories
+            val categories = if (libraryManga.containsKey(0)) arrayListOf(Category.createDefault
+                (context)) + dbCategories
             else dbCategories
 
             this.categories = categories
