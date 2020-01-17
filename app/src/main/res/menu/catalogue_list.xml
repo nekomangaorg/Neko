@@ -1,6 +1,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools" tools:context=".CatalogueListActivity">
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".CatalogueListActivity">
 
     <item
         android:id="@+id/action_search"
@@ -22,16 +23,11 @@
     <item
         android:id="@+id/action_display_mode"
         android:title="@string/action_display_mode"
-        app:showAsAction="ifRoom"/>
-
-    <item
-        android:id="@+id/action_open_in_browser"
-        android:title="@string/action_open_in_browser"
-        app:showAsAction="never"/>
+        app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/action_open_in_web_view"
         android:title="@string/action_open_in_web_view"
-        app:showAsAction="never"/>
+        app:showAsAction="never" />
 
 </menu>
