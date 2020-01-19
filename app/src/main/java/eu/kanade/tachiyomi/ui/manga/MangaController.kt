@@ -5,8 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
-import android.widget.TextView
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
@@ -32,9 +30,9 @@ import eu.kanade.tachiyomi.ui.manga.chapter.ChaptersController
 import eu.kanade.tachiyomi.ui.manga.info.MangaInfoController
 import eu.kanade.tachiyomi.ui.manga.track.TrackController
 import eu.kanade.tachiyomi.util.toast
-import kotlinx.android.synthetic.main.main_activity.*
-import kotlinx.android.synthetic.main.manga_controller.*
-import kotlinx.android.synthetic.main.search_activity.*
+import kotlinx.android.synthetic.main.search_activity.sTabs
+import kotlinx.android.synthetic.main.main_activity.tabs
+import kotlinx.android.synthetic.main.manga_controller.manga_pager
 import rx.Subscription
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -190,10 +188,7 @@ class MangaController : RxController, TabbedController {
             VectorDrawableCompat.create(resources!!, R.drawable.ic_done_white_18dp, null)
         else null
 
-        val view = tabField.get(tab) as LinearLayout
-        val textView = view.getChildAt(1) as TextView
-        textView.setCompoundDrawablesWithIntrinsicBounds(null, null, drawable, null)
-        textView.compoundDrawablePadding = if (visible) 4 else 0
+        tab.icon = drawable
     }
 
     private inner class MangaDetailAdapter : RouterPagerAdapter(this@MangaController) {
@@ -240,9 +235,6 @@ class MangaController : RxController, TabbedController {
         const val INFO_CONTROLLER = 0
         const val CHAPTERS_CONTROLLER = 1
         const val TRACK_CONTROLLER = 2
-
-        private val tabField = TabLayout.Tab::class.java.getDeclaredField("view")
-                .apply { isAccessible = true }
     }
 
 }
