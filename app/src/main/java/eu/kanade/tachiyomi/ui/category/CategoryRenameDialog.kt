@@ -38,11 +38,10 @@ class CategoryRenameDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
         return MaterialDialog(activity!!)
                 .title(R.string.action_rename_category)
                 .negativeButton(android.R.string.cancel)
-                .positiveButton(android.R.string.ok)
                 .input(hintRes = R.string.name, prefill = currentName) { _, input ->
-                    onPositive(input.toString())
+                    currentName = input.toString()
                 }
-
+                .positiveButton(android.R.string.ok) { onPositive() }
     }
 
     /**
@@ -68,11 +67,11 @@ class CategoryRenameDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
     /**
      * Called when the positive button of the dialog is clicked.
      */
-    private fun onPositive(newName: String) {
+    private fun onPositive() {
         val target = targetController as? Listener ?: return
         val category = category ?: return
 
-        target.renameCategory(category, newName)
+        target.renameCategory(category, currentName)
     }
 
     interface Listener {
