@@ -14,6 +14,7 @@ import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Comp
 import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_IGNORE
 import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_INCLUDE
 import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
 /**
@@ -84,7 +85,7 @@ class LibraryNavigationView @JvmOverloads constructor(context: Context, attrs: A
 
         override val items = if (Injekt.get<TrackManager>().hasLoggedServices())
             listOf(downloaded, unread, completed, tracked) else listOf(downloaded, unread,
-        completed)
+                completed)
 
         override val header = Item.Header(R.string.action_filter)
 
@@ -96,8 +97,7 @@ class LibraryNavigationView @JvmOverloads constructor(context: Context, attrs: A
                 unread.state = preferences.filterUnread().getOrDefault()
                 completed.state = preferences.filterCompleted().getOrDefault()
                 tracked.state = preferences.filterTracked().getOrDefault()
-            }
-            catch (e: Exception) {
+            } catch (e: Exception) {
                 preferences.upgradeFilters()
             }
         }
@@ -114,6 +114,7 @@ class LibraryNavigationView @JvmOverloads constructor(context: Context, attrs: A
                 downloaded -> preferences.filterDownloaded().set(item.state)
                 unread -> preferences.filterUnread().set(item.state)
                 completed -> preferences.filterCompleted().set(item.state)
+                tracked -> preferences.filterTracked().set(item.state)
             }
 
             adapter.notifyItemChanged(item)

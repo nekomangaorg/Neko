@@ -10,6 +10,7 @@ import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
+import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.HttpSource
@@ -52,6 +53,7 @@ class LibraryPresenter(
 
     private val context = preferences.context
 
+    private val loggedServices by lazy { Injekt.get<TrackManager>().services.filter { it.isLogged } }
     /**
      * Categories of the library.
      */
@@ -114,7 +116,9 @@ class LibraryPresenter(
 
         val filterCompleted = preferences.filterCompleted().getOrDefault()
 
-        val filterFn: (LibraryItem) -> Boolean = f@ { item ->
+        val filterTracked = preferences.filterTracked().getOrDefault()
+
+        val filterFn: (LibraryItem) -> Boolean = f@{ item ->
             // Filter when there isn't unread chapters.
             if (filterUnread == STATE_INCLUDE && item.manga.unread == 0) return@f false
             if (filterUnread == STATE_EXCLUDE && item.manga.unread > 0) return@f false
@@ -124,6 +128,16 @@ class LibraryPresenter(
             if (filterCompleted == STATE_EXCLUDE && item.manga.status == SManga.COMPLETED)
                 return@f false
 
+            if (filterTracked != STATE_IGNORE) {
+                val db = Injekt.get<DatabaseHelper>()
+                val tracks = db.getTracks(item.manga).executeAsBlocking()
+
+                val trackCount = loggedServices.count { service ->
+                    tracks.any { it.sync_id == service.id }
+                }
+                if (filterTracked == STATE_INCLUDE && trackCount == 0) return@f false
+                if (filterTracked == STATE_EXCLUDE && trackCount > 0) return@f false
+            }
             // Filter when there are no downloads.
             if (filterDownloaded != STATE_IGNORE) {
                 val isDownloaded = when {
