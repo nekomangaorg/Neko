@@ -4,7 +4,6 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.icu.util.TimeUnit
 import android.net.Uri
 import android.os.Build
 import android.os.IBinder
@@ -42,8 +41,7 @@ import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 import java.io.File
 import java.text.SimpleDateFormat
-import java.util.Locale
-import java.util.concurrent.TimeUnit
+import java.util.*
 
 /**
  * Restores backup from json file
@@ -214,7 +212,7 @@ class BackupRestoreService : Service() {
         notificationManager.cancel(Notifications.ID_RESTORE_PROGRESS)
 
         cancelled = errors.count { it.contains("cancelled", true) }
-        val tmpErrors = errors.filter { !it.contains("cancelled", true)}
+        val tmpErrors = errors.filter { !it.contains("cancelled", true) }
         errors.clear()
         errors.addAll(tmpErrors)
 
@@ -373,34 +371,31 @@ class BackupRestoreService : Service() {
      */
     private fun showResultNotification(path: String?, file: String?) {
 
-        val content = listOf(getString(R.string.restore_completed_content, restoreProgress.toString()),
-                getString(R.string.restore_completed_content_2, errors.size.toString()),
-                getString(R.string.restore_completed_content_3, skippedAmount.toString(), totalAmount.toString()),
-                getString(R.string.restore_completed_content_4, cancelled.toString(), totalAmount.toString())).joinToString("\n")
+        val content = mutableListOf(getString(R.string.restore_completed_successful, restoreProgress.toString()))
 
-        val content = mutableListOf(getString(R.string.restore_completed_content, restoreProgress
-            .toString(), errors.size.toString()))
-        val sourceMissingCount = sourcesMissing.distinct().size
-        if (sourceMissingCount > 0)
-            content.add(resources.getQuantityString(R.plurals.sources_missing,
-                sourceMissingCount, sourceMissingCount))
-        if (lincensedManga > 0)
-            content.add(resources.getQuantityString(R.plurals.licensed_manga, lincensedManga,
-                lincensedManga))
-        val trackingErrors = trackingErrors.distinct()
+        if (skippedAmount > 0) {
+            content.add(getString(R.string.restore_completed_skipped, skippedAmount.toString(), totalAmount.toString()))
+        }
+
+        if (errors.isNotEmpty()) {
+            content.add(getString(R.string.restore_completed_errors, errors.size.toString()))
+        }
+
         if (trackingErrors.isNotEmpty()) {
             val trackingErrorsString = trackingErrors.distinct().joinToString("\n")
             content.add(trackingErrorsString)
         }
-        if (cancelled > 0)
-            content.add(getString(R.string.restore_completed_content_2, cancelled))
+
+        if (cancelled > 0) {
+            content.add(getString(R.string.restore_completed_cancelled, cancelled.toString(), totalAmount.toString()))
+        }
 
         val restoreString = content.joinToString("\n")
 
         val resultNotification = NotificationCompat.Builder(this, Notifications.CHANNEL_RESTORE)
                 .setContentTitle(getString(R.string.restore_completed))
-                .setContentText(content)
-                .setStyle(NotificationCompat.BigTextStyle().bigText(content))
+                .setContentText(restoreString)
+                .setStyle(NotificationCompat.BigTextStyle().bigText(restoreString))
                 .setSmallIcon(R.drawable.ic_neko_notification)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setColor(ContextCompat.getColor(this, R.color.colorPrimary))

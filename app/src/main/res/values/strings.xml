@@ -262,10 +262,11 @@
     <string name="restore_completed">Restore completed</string>
     <string name="restore_error">Restore error</string>
     <string name="error_opening_log">Could not open log</string>
-    <string name="restore_completed_content">Restore total %1$s</string>
-    <string name="restore_completed_content_2"> %1$s errors found</string>
-    <string name="restore_completed_content_3">%1$s were skipped out of %2$s because they were not Mangadex</string>
-    <string name="restore_completed_content_4"> %1$s were skipped out of %2$s because progress was cancelled </string>
+    <string name="restore_completed_successful">Restored %1$s manga</string>
+    <string name="restore_completed_errors"> %1$s errors found</string>
+    <string name="restore_completed_skipped">%1$s/%2$s skipped because not Mangadex</string>
+    <string name="restore_completed_cancelled"> %1$s/%2$s skipped because progress was cancelled </string>
+    <string name="not_logged_into">Tracking Error: Not logged into %1$s</string>
     <string name="backup_restore_content">Restore uses the network to fetch data, carrier costs may apply.\nAlso make sure you are logged in Mangadex and any trackers before restoring</string>
     <string name="file_saved">File saved as %1$s</string>
     <string name="backup_choice">What do you want to backup?</string>
@@ -276,7 +277,10 @@
     <!-- Advanced section -->
     <string name="pref_clear_chapter_cache">Clear chapter cache</string>
     <string name="used_cache">Used: %1$s</string>
-    <string name="cache_deleted">Cache cleared. %1$d files have been deleted</string>
+    <plurals name="cache_deleted">
+        <item quantity="one">Cache cleared. %d file has been deleted</item>
+        <item quantity="other">Cache cleared. %d files have been deleted</item>
+    </plurals>
     <string name="cache_delete_error">An error occurred while clearing cache</string>
     <string name="pref_clear_cookies">Clear cookies</string>
     <string name="cookies_cleared">Cookies cleared</string>
@@ -302,7 +306,7 @@
         <item quantity="other">Cleanup done. Removed %d folders</item>
     </plurals>
 
-      <!-- About section -->
+    <!-- About section -->
     <string name="version">Version</string>
     <string name="build_time">Build time</string>
     <string name="pref_enable_automatic_updates">Check for updates</string>

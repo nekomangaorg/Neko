@@ -110,7 +110,6 @@ class LibraryUpdateService(
      */
     enum class Target {
         CHAPTERS, // Manga chapters
-        CLEANUP, // Clean up downloads
         FOLLOW_STATUSES, // Manga follow status
         SYNC_FOLLOWS, //Manga in reading, rereading
         DETAILS,  // Manga metadata
@@ -236,11 +235,6 @@ class LibraryUpdateService(
         } else if (target == Target.SYNC_FOLLOWS) {
             job = GlobalScope.launch(handler) {
                 syncFollows()
-            }
-            job?.invokeOnCompletion { stopSelf(startId) }
-        } else if (target == Target.CLEANUP) {
-            job = GlobalScope.launch(handler) {
-                cleanupDownloads()
             }
             job?.invokeOnCompletion { stopSelf(startId) }
         } else {
@@ -549,8 +543,8 @@ class LibraryUpdateService(
                             .override(256, 256).submit().get()
                     setLargeIcon(icon)
                 } catch (e: Exception) {
+                } catch (e: Exception) {
                 }
-                catch (e: Exception) { }
                 setGroupAlertBehavior(GROUP_ALERT_SUMMARY)
                 setContentTitle(manga.title)
                 color = ContextCompat.getColor(this@LibraryUpdateService, R.color.colorPrimary)
