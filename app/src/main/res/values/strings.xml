@@ -152,7 +152,10 @@
     <string name="lock_when_idle">Lock when idle</string>
     <string name="lock_always">Always</string>
     <string name="lock_never">Never</string>
-    <string name="lock_after_mins">After %1$s minutes</string>
+    <plurals name="lock_after_mins">
+        <item quantity="one">After %1$s minutes</item>
+        <item quantity="other">After %1$s minutes</item>
+    </plurals>
     <string name="search_hint">Search (title, tags)</string>
 
     <!-- Extension section -->
