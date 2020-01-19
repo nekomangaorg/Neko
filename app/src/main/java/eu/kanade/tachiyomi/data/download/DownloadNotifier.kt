@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.data.download
 import android.content.Context
 import android.graphics.BitmapFactory
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.download.model.DownloadQueue
@@ -169,7 +170,7 @@ internal class DownloadNotifier(private val context: Context) {
             setAutoCancel(true)
             clearActions()
             setContentIntent(NotificationReceiver.openChapterPendingActivity(context, download
-                .manga, download.chapter))
+                    .manga, download.chapter))
             setProgress(0, 0, false)
         }
 
@@ -216,9 +217,11 @@ internal class DownloadNotifier(private val context: Context) {
             setContentText(error ?: context.getString(R.string.download_notifier_unkown_error))
             setStyle(NotificationCompat.BigTextStyle().bigText(error ?: context.getString(R.string.download_notifier_unkown_error)))
             setSmallIcon(android.R.drawable.stat_sys_warning)
+            setCategory(NotificationCompat.CATEGORY_ERROR)
             clearActions()
-            setAutoCancel(false)
+            setAutoCancel(true)
             setContentIntent(NotificationHandler.openDownloadManagerPendingActivity(context))
+            color = ContextCompat.getColor(context, R.color.colorAccentLight)
             setProgress(0, 0, false)
         }
         notification.show(Notifications.ID_DOWNLOAD_CHAPTER_ERROR)

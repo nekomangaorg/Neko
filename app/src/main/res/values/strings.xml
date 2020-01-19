@@ -94,6 +94,7 @@
     <string name="action_webview_back">Back</string>
     <string name="action_webview_forward">Forward</string>
     <string name="action_webview_refresh">Refresh</string>
+    <string name="action_track">Track</string>
 
     <!-- Operations -->
     <string name="deleting">Deleting…</string>

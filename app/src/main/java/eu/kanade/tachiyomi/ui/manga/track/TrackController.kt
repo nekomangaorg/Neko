@@ -2,10 +2,10 @@ package eu.kanade.tachiyomi.ui.manga.track
 
 import android.content.Intent
 import android.net.Uri
-import androidx.recyclerview.widget.LinearLayoutManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.jakewharton.rxbinding.support.v4.widget.refreshes
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
@@ -96,7 +96,8 @@ class TrackController : NucleusController<TrackPresenter>(),
 
     override fun onTitleClick(position: Int) {
         val item = adapter?.getItem(position) ?: return
-        TrackSearchDialog(this, item.service).showDialog(router, TAG_SEARCH_CONTROLLER)
+        TrackSearchDialog(this, item.service, item.track != null).showDialog(router,
+                TAG_SEARCH_CONTROLLER)
     }
 
     override fun onStatusClick(position: Int) {

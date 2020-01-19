@@ -34,18 +34,18 @@ class SetTrackStatusDialog<T> : DialogController
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
         val item = item
         val statusList = item.service.getStatusList()
-        val statusString = statusList.mapNotNull { item.service.getStatus(it) }
+        val statusString = statusList.map { item.service.getStatus(it) }
         val selectedIndex = statusList.indexOf(item.track?.status)
 
         return MaterialDialog(activity!!)
-            .title(R.string.status)
-            .negativeButton(android.R.string.cancel)
-            .positiveButton(android.R.string.ok)
-            .listItemsSingleChoice(items = statusString, initialSelection = selectedIndex)
-            { dialog, position, _ ->
-                (targetController as? Listener)?.setStatus(item, position)
-                dialog.dismiss()
-            }
+                .title(R.string.status)
+                .negativeButton(android.R.string.cancel)
+                .listItemsSingleChoice(items = statusString, initialSelection = selectedIndex,
+                        waitForPositiveButton = false)
+                { dialog, position, _ ->
+                    (targetController as? Listener)?.setStatus(item, position)
+                    dialog.dismiss()
+                }
     }
 
     interface Listener {
