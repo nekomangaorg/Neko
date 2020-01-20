@@ -25,15 +25,10 @@ abstract class LoginDialogPreference(bundle: Bundle? = null) : DialogController(
 
     var requestSubscription: Subscription? = null
 
-    open var canLogout = false
-
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
         val dialog = MaterialDialog(activity!!).apply {
             customView(R.layout.pref_account_login, scrollable = false)
             positiveButton(android.R.string.cancel)
-            if (canLogout) {
-                negativeButton(R.string.logout) { logout() }
-            }
         }
 
         onViewCreated(dialog.view)
@@ -51,7 +46,6 @@ abstract class LoginDialogPreference(bundle: Bundle? = null) : DialogController(
                     password.transformationMethod = PasswordTransformationMethod()
             }
             login.setOnClickListener { checkLogin() }
-            logout?.setOnClickListener { logout() }
             two_factor_check?.setOnCheckedChangeListener { _, isChecked ->
                 if (isChecked) {
                     two_factor_edit.visibility = View.VISIBLE
@@ -92,7 +86,5 @@ abstract class LoginDialogPreference(bundle: Bundle? = null) : DialogController(
     protected abstract fun checkLogin()
 
     protected abstract fun setCredentialsOnView(view: View)
-
-    open fun logout() {}
-
+    
 }

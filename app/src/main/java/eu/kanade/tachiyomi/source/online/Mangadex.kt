@@ -132,18 +132,20 @@ open class Mangadex(override val lang: String, private val internalLang: String,
                 .map { it.body!!.string().isEmpty() }
     }
 
-    override fun logout(): Observable<Boolean> {
+    override suspend fun logout(): Boolean {
         //https://mangadex.org/ajax/actions.ajax.php?function=logout
         val httpUrl = baseUrl.toHttpUrlOrNull()!!
         val cookie = network.cookieManager.get(httpUrl).find { it.name == REMEMBER_ME }
         val token = cookie?.value
         if (token.isNullOrEmpty()) {
-            return Observable.just(true)
+            return true
+        }
+        val result = clientBuilder().newCall(POSTWithCookie("$baseUrl/ajax/actions.ajax.php?function=logout", REMEMBER_ME, token, headers)).execute()
+        result.body?.string()?.let {
+            return it.contains("success", true)
         }
 
-        return clientBuilder().newCall(POSTWithCookie("$baseUrl/ajax/actions.ajax.php?function=logout", REMEMBER_ME, token, headers))
-                .asObservable()
-                .map { it.body!!.string().isEmpty() }
+        return false
     }
 
     override fun getFilterList(): FilterList {

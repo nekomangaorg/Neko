@@ -24,27 +24,6 @@ class MangadexLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle
         password.setText(preferences.sourcePassword(source))
     }
 
-    override fun logout() {
-        requestSubscription?.unsubscribe()
-        v?.apply {
-            requestSubscription = source.logout()
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe({ loggedOut ->
-                        if (loggedOut) {
-                            preferences.setSourceCredentials(source, "", "")
-                            context.toast(R.string.logout_success)
-                        } else {
-                            login.progress = -1
-                        }
-                    }, { error ->
-                        login.progress = -1
-                        login.setText(R.string.unknown_error)
-                        error.message?.let { context.toast(it) }
-                    })
-        }
-    }
-
     override fun checkLogin() {
         requestSubscription?.unsubscribe()
 
@@ -78,11 +57,11 @@ class MangadexLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle
 
     override fun onDialogClosed() {
         super.onDialogClosed()
-        (targetController as? Listener)?.loginDialogClosed(source)
+        (targetController as? Listener)?.siteLoginDialogClosed(source)
     }
 
     interface Listener {
-        fun loginDialogClosed(source: Source)
+        fun siteLoginDialogClosed(source: Source)
     }
 
 }

@@ -39,7 +39,7 @@ import java.util.*
 class MainActivity : BaseActivity(), MangadexLoginDialog.Listener {
 
     private lateinit var router: Router
-    
+
     val source: Source by lazy { Injekt.get<SourceManager>().getSources()[0] }
 
     private var drawerArrow: DrawerArrowDrawable? = null
@@ -195,7 +195,7 @@ class MainActivity : BaseActivity(), MangadexLoginDialog.Listener {
      *
      * @param source clicked item containing source information.
      */
-    override fun loginDialogClosed(source: Source) {
+    override fun siteLoginDialogClosed(source: Source) {
         if (source.isLogged()) {
             router.popCurrentController()
             R.id.nav_drawer_browse

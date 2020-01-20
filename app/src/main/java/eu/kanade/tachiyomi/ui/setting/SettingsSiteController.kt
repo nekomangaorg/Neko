@@ -9,25 +9,32 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.Mangadex
 import eu.kanade.tachiyomi.widget.preference.LoginCheckBoxPreference
-import eu.kanade.tachiyomi.widget.preference.LoginPreference
 import eu.kanade.tachiyomi.widget.preference.MangadexLoginDialog
+import eu.kanade.tachiyomi.widget.preference.MangadexLogoutDialog
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class SettingsSiteController : SettingsController(), MangadexLoginDialog.Listener {
+class SettingsSiteController : SettingsController(), MangadexLoginDialog.Listener, MangadexLogoutDialog.Listener {
 
-    private val sources by lazy { Injekt.get<SourceManager>().getSources() as List<HttpSource> }
+    private val mdex by lazy { Injekt.get<SourceManager>().getMangadex() as HttpSource }
 
     override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
         titleRes = R.string.pref_site_specific_settings
 
-        val sourcePreference = LoginCheckBoxPreference(context, sources[0]).apply {
-            title = "MangaDex Login"
+        val sourcePreference = LoginCheckBoxPreference(context, mdex).apply {
+            title = mdex.name + " Login"
             key = getSourceKey(source.id)
             setOnLoginClickListener {
-                val dialog = MangadexLoginDialog(source)
-                dialog.targetController = this@SettingsSiteController
-                dialog.showDialog(router)
+                if (mdex.isLogged()) {
+                    val dialog = MangadexLogoutDialog(source)
+                    dialog.targetController = this@SettingsSiteController
+                    dialog.showDialog(router)
+                } else {
+                    val dialog = MangadexLoginDialog(source)
+                    dialog.targetController = this@SettingsSiteController
+                    dialog.showDialog(router)
+                }
+
             }
         }
 
@@ -59,7 +66,12 @@ class SettingsSiteController : SettingsController(), MangadexLoginDialog.Listene
         }
     }
 
-    override fun loginDialogClosed(source: Source) {
+    override fun siteLoginDialogClosed(source: Source) {
+        val pref = findPreference(getSourceKey(source.id)) as? LoginCheckBoxPreference
+        pref?.notifyChanged()
+    }
+
+    override fun siteLogoutDialogClosed(source: Source) {
         val pref = findPreference(getSourceKey(source.id)) as? LoginCheckBoxPreference
         pref?.notifyChanged()
     }
@@ -68,13 +80,5 @@ class SettingsSiteController : SettingsController(), MangadexLoginDialog.Listene
         return "source_$sourceId"
     }
 
-    inline fun PreferenceScreen.mangaDexLogin(
-            source: Source,
-            block: (@DSL LoginPreference).() -> Unit
-    ): LoginPreference {
-        return initThenAdd(LoginPreference(context).apply {
-            key = "source_${source.id}"
-            title = "Login"
-        }, block)
-    }
+
 }

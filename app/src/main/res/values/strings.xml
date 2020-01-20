@@ -336,7 +336,8 @@
     <string name="logout_title">Logout from %1$s?</string>
     <string name="logout">Logout</string>
     <string name="logout_success">You are now logged out</string>
-    <string name="invalid_login">Could not log in</string>
+    <string name="invalid_login">Could not login</string>
+    <string name="invalid_logout">Could not logout</string>
     <string name="unknown_error">Unknown error</string>
 
     <!-- Library fragment -->

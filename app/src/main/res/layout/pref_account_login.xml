@@ -66,13 +66,15 @@
             android:layout_weight="1.0"
             android:text="@string/two_factor" />
     </LinearLayout>
+
     <TextView
         android:id="@+id/two_factor_static"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:visibility="gone"
-        android:text="@string/two_factor"/>
+        android:text="@string/two_factor" />
+
     <EditText
         android:id="@+id/two_factor_edit"
         android:layout_width="match_parent"
@@ -80,36 +82,17 @@
         android:ems="10"
         android:visibility="gone" />
 
-    <LinearLayout
+
+    <com.dd.processbutton.iml.ActionProcessButton
+        android:id="@+id/login"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_marginTop="20dp"
+        android:text="@string/login"
+        android:textColor="@android:color/white"
+        app:pb_textComplete="@string/login_success"
+        app:pb_textError="@string/invalid_login"
+        app:pb_textProgress="@string/processing" />
 
-        <com.dd.processbutton.iml.ActionProcessButton
-            android:id="@+id/logout"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:layout_marginEnd="10dp"
-            android:layout_weight="1.0"
-            android:text="@string/logout"
-            android:textColor="@android:color/white"
-            app:pb_textComplete="@string/logout_success"
-            app:pb_textError="@string/unknown_error"
-            app:pb_textProgress="@string/processing" />
-
-        <com.dd.processbutton.iml.ActionProcessButton
-            android:id="@+id/login"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:layout_weight="1.0"
-            android:text="@string/login"
-            android:textColor="@android:color/white"
-            app:pb_textComplete="@string/login_success"
-            app:pb_textError="@string/invalid_login"
-            app:pb_textProgress="@string/processing" />
-
-    </LinearLayout>
 
 </LinearLayout>

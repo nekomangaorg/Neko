@@ -1,13 +1,13 @@
 package eu.kanade.tachiyomi.widget.preference
 
 import android.content.Context
+import android.util.AttributeSet
+import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.preference.Preference
 import androidx.preference.PreferenceViewHolder
-import android.util.AttributeSet
-import android.view.View
-import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.IconicsDrawable
+import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.utils.colorInt
 import com.mikepenz.iconics.utils.sizeDp
 import eu.kanade.tachiyomi.R
@@ -25,6 +25,7 @@ class LoginCheckBoxPreference @JvmOverloads constructor(
     }
 
     private var onLoginClick: () -> Unit = {}
+
 
     override fun onBindViewHolder(holder: PreferenceViewHolder) {
         super.onBindViewHolder(holder)
