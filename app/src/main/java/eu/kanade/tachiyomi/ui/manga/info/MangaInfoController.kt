@@ -42,7 +42,6 @@ import com.mikepenz.iconics.utils.sizeDp
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -56,20 +55,16 @@ import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
-import eu.kanade.tachiyomi.util.getUriCompat
-import eu.kanade.tachiyomi.util.openInBrowser
-import eu.kanade.tachiyomi.util.snack
-import eu.kanade.tachiyomi.util.toast
+import eu.kanade.tachiyomi.util.*
 import jp.wasabeef.glide.transformations.CropSquareTransformation
 import jp.wasabeef.glide.transformations.MaskTransformation
+import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.android.synthetic.main.manga_info_controller.*
 import uy.kohesive.injekt.injectLazy
 import java.io.File
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.*
-import eu.kanade.tachiyomi.util.*
-import kotlinx.android.synthetic.main.main_activity.*
 
 /**
  * Fragment that shows manga information.
@@ -701,11 +696,14 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         if (setUpFullCover) return
         val expandedImageView = manga_cover_full ?: return
         val thumbView = manga_cover
+        expandedImageView.pivotX = 0f
+        expandedImageView.pivotY = 0f
 
         val layoutParams = expandedImageView.layoutParams
         layoutParams.height = thumbView.height
         layoutParams.width = thumbView.width
         expandedImageView.layoutParams = layoutParams
+        expandedImageView.scaleType = ImageView.ScaleType.FIT_CENTER
         setUpFullCover = thumbView.height > 0
     }
 
@@ -736,15 +734,13 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         fullBackdrop.visibility = View.VISIBLE
 
         // Set the pivot point to 0 to match thumbnail
-        expandedImageView.pivotX = 0f
-        expandedImageView.pivotY = 0f
 
         swipe_refresh.isEnabled = false
 
-        val layoutParams2 = expandedImageView.layoutParams
-        layoutParams2.height = ViewGroup.LayoutParams.MATCH_PARENT
-        layoutParams2.width = ViewGroup.LayoutParams.MATCH_PARENT
-        expandedImageView.layoutParams = layoutParams2
+        val layoutParams = expandedImageView.layoutParams
+        layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
+        layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT
+        expandedImageView.layoutParams = layoutParams
 
         // TransitionSet for the full cover because using animation for this SUCKS
         val transitionSet = TransitionSet()
@@ -765,10 +761,12 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
             addListener(object : AnimatorListenerAdapter() {
 
                 override fun onAnimationEnd(animation: Animator) {
+                    TransitionManager.endTransitions(manga_info_layout)
                     currentAnimator = null
                 }
 
                 override fun onAnimationCancel(animation: Animator) {
+                    TransitionManager.endTransitions(manga_info_layout)
                     currentAnimator = null
                 }
             })
@@ -778,19 +776,19 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         expandedImageView.setOnClickListener {
             currentAnimator?.cancel()
 
-            val layoutParams3 = expandedImageView.layoutParams
-            layoutParams3.height = thumbView.height
-            layoutParams3.width = thumbView.width
-            expandedImageView.layoutParams = layoutParams3
+            val layoutParams = expandedImageView.layoutParams
+            layoutParams.height = thumbView.height
+            layoutParams.width = thumbView.width
+            expandedImageView.layoutParams = layoutParams
 
             // Zoom out back to tc thumbnail
-            val transitionSet2 = TransitionSet()
-            val bound2 = ChangeBounds()
-            transitionSet2.addTransition(bound2)
-            val changeImageTransform2 = ChangeImageTransform()
-            transitionSet2.addTransition(changeImageTransform2)
-            transitionSet2.duration = shortAnimationDuration.toLong()
-            TransitionManager.beginDelayedTransition(manga_info_layout, transitionSet2)
+            val transitionSet = TransitionSet()
+            val bound = ChangeBounds()
+            transitionSet.addTransition(bound)
+            val changeImageTransform = ChangeImageTransform()
+            transitionSet.addTransition(changeImageTransform)
+            transitionSet.duration = shortAnimationDuration.toLong()
+            TransitionManager.beginDelayedTransition(manga_info_layout, transitionSet)
 
             // Animation to remove backdrop and hide the full cover
             currentAnimator = AnimatorSet().apply {
