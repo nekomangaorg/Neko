@@ -69,8 +69,10 @@ class LibraryItem(val manga: LibraryManga, private val libraryAsList: Preference
      */
     override fun filter(constraint: String): Boolean {
         val sourceManager by injectLazy<SourceManager>()
-        val sourceName = sourceManager.getOrStub(manga.source).name
-        return manga.title.contains(constraint, true) ||
+        val sourceName = if (manga.source == 0L) "Local" else
+            sourceManager.getOrStub(manga.source).name
+        return manga.currentTitle().contains(constraint, true) ||
+            manga.originalTitle().contains(constraint, true) ||
             (manga.currentAuthor()?.contains(constraint, true) ?: false) ||
             (manga.currentArtist()?.contains(constraint, true) ?: false) ||
             sourceName.contains(constraint, true) ||
