@@ -10,7 +10,7 @@ class SettingsReaderController : SettingsController() {
     override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
         titleRes = R.string.pref_category_reader
 
-        intListPreference {
+        intListPreference(activity) {
             key = Keys.defaultViewer
             titleRes = R.string.pref_viewer_type
             entriesRes = arrayOf(R.string.left_to_right_viewer, R.string.right_to_left_viewer,
@@ -18,7 +18,7 @@ class SettingsReaderController : SettingsController() {
             entryRange = 1..4
             defaultValue = 1
         }
-        intListPreference {
+        intListPreference(activity) {
             key = Keys.imageScaleType
             titleRes = R.string.pref_image_scale_type
             entriesRes = arrayOf(R.string.scale_type_fit_screen, R.string.scale_type_stretch,
@@ -27,7 +27,7 @@ class SettingsReaderController : SettingsController() {
             entryRange = 1..6
             defaultValue = 1
         }
-        intListPreference {
+        intListPreference(activity) {
             key = Keys.zoomStart
             titleRes = R.string.pref_zoom_start
             entriesRes = arrayOf(R.string.zoom_start_automatic, R.string.zoom_start_left,
@@ -35,7 +35,7 @@ class SettingsReaderController : SettingsController() {
             entryRange = 1..4
             defaultValue = 1
         }
-        intListPreference {
+        intListPreference(activity) {
             key = Keys.rotation
             titleRes = R.string.pref_rotation_type
             entriesRes = arrayOf(R.string.rotation_free, R.string.rotation_lock,
@@ -43,14 +43,14 @@ class SettingsReaderController : SettingsController() {
             entryRange = 1..4
             defaultValue = 1
         }
-        intListPreference {
+        intListPreference(activity) {
             key = Keys.readerTheme
             titleRes = R.string.pref_reader_theme
             entriesRes = arrayOf(R.string.white_background, R.string.black_background)
             entryValues = listOf(0, 1)
             defaultValue = 0
         }
-        intListPreference {
+        intListPreference(activity) {
             key = Keys.doubleTapAnimationSpeed
             titleRes = R.string.pref_double_tap_anim_speed
             entries = listOf(context.getString(R.string.double_tap_anim_speed_0), context.getString(R

@@ -1,11 +1,17 @@
 package eu.kanade.tachiyomi.ui.setting
 
+import android.app.Activity
+import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
+import androidx.core.graphics.drawable.DrawableCompat
 import android.graphics.drawable.Drawable
 import androidx.preference.*
 import com.mikepenz.iconics.IconicsDrawable
 import eu.kanade.tachiyomi.widget.preference.IntListMatPreference
 import eu.kanade.tachiyomi.widget.preference.ListMatPreference
 import eu.kanade.tachiyomi.widget.preference.MultiListMatPreference
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
+import uy.kohesive.injekt.injectLazy
 
 @DslMarker
 @Target(AnnotationTarget.TYPE)
@@ -31,17 +37,20 @@ inline fun PreferenceGroup.editTextPreference(block: (@DSL EditTextPreference).(
     return initThenAdd(EditTextPreference(context), block).also(::initDialog)
 }
 
-inline fun PreferenceGroup.listPreference(block: (@DSL ListMatPreference).() -> Unit):
-        ListMatPreference {
-    return initThenAdd(ListMatPreference(context), block)
+inline fun PreferenceGroup.listPreference(activity: Activity?, block: (@DSL ListMatPreference).()
+-> Unit):
+    ListMatPreference {
+    return initThenAdd(ListMatPreference(activity, context), block)
 }
 
-inline fun PreferenceGroup.intListPreference(block: (@DSL IntListMatPreference).() -> Unit):
-        IntListMatPreference {
-    return initThenAdd(IntListMatPreference(context), block)
+inline fun PreferenceGroup.intListPreference(activity: Activity?, block: (@DSL
+IntListMatPreference).() -> Unit):
+    IntListMatPreference {
+    return initThenAdd(IntListMatPreference(activity, context), block)
 }
 
-inline fun PreferenceGroup.multiSelectListPreferenceMat(block: (@DSL MultiListMatPreference).()
+inline fun PreferenceGroup.multiSelectListPreferenceMat(activity: Activity?, block: (@DSL
+MultiListMatPreference).()
 -> Unit): MultiListMatPreference {
     return initThenAdd(MultiListMatPreference(context), block)
 
@@ -51,9 +60,6 @@ inline fun PreferenceGroup.floatListPreference(block: (@DSL IntListMatPreference
     return initThenAdd(IntListMatPreference(context), block)
 }
 
-inline fun PreferenceGroup.multiSelectListPreference(block: (@DSL MultiSelectListPreference).() -> Unit): MultiSelectListPreference {
-    return initThenAdd(MultiSelectListPreference(context), block).also(::initDialog)
-}
 
 inline fun PreferenceScreen.preferenceCategory(block: (@DSL PreferenceCategory).() -> Unit): PreferenceCategory {
     return addThenInit(PreferenceCategory(context).apply {
@@ -99,15 +105,11 @@ inline fun Preference.onChange(crossinline block: (Any?) -> Boolean) {
 
 var Preference.defaultValue: Any?
     get() = null // set only
-    set(value) {
-        setDefaultValue(value)
-    }
+    set(value) { setDefaultValue(value) }
 
 var Preference.titleRes: Int
     get() = 0 // set only
-    set(value) {
-        setTitle(value)
-    }
+    set(value) { setTitle(value) }
 
 
 var Preference.iconDrawable: Drawable
@@ -118,7 +120,5 @@ var Preference.iconDrawable: Drawable
 
 var Preference.summaryRes: Int
     get() = 0 // set only
-    set(value) {
-        setSummary(value)
-    }
+    set(value) { setSummary(value) }
 
