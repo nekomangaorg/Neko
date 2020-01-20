@@ -444,7 +444,7 @@ class ReaderPresenter(
 
         // Build destination file.
         val filename = DiskUtil.buildValidFilename(
-                "${manga.customTitle()} - ${chapter.name}".take(225)
+                "${manga.currentTitle()} - ${chapter.name}".take(225)
         ) + " - ${page.number}.${type.extension}"
 
         val destFile = File(directory, filename)
@@ -531,7 +531,7 @@ class ReaderPresenter(
                         val thumbUrl = manga.thumbnail_url ?: throw Exception("Image url not found")
                         if (manga.favorite) {
                             coverCache.copyToCache(thumbUrl, stream())
-                            (manga as? MangaImpl)?.last_cover_fetch = Date().time
+                            MangaImpl.setLastCoverFetch(manga.id!!, Date().time)
                             SetAsCoverResult.Success
                         } else {
                             SetAsCoverResult.AddToLibraryFirst

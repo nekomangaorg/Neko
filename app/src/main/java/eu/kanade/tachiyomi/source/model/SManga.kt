@@ -22,28 +22,84 @@ interface SManga : Serializable {
 
     var initialized: Boolean
 
-    fun customTitle(): String {
-        val splitTitle = title.split("▒")
+    fun currentTitle(): String {
+        val splitTitle = title.split(splitter)
         return splitTitle.first()
     }
 
-    fun trueTitle(): String {
-        val splitTitle = title.split("▒")
+    fun originalTitle(): String {
+        val splitTitle = title.split(splitter)
         return splitTitle.last()
+    }
+
+    fun currentGenres(): String? {
+        val splitGenre = genre?.split(splitter) ?: return null
+        return splitGenre.first()
+    }
+
+    fun originalGenres(): String? {
+        val splitGenre = genre?.split(splitter) ?: return null
+        return splitGenre.last()
+    }
+
+    fun currentDesc(): String? {
+        val splitDesc = description?.split(splitter) ?: return null
+        return splitDesc.first()
+    }
+
+    fun originalDesc(): String? {
+        val splitDesc = description?.split(splitter) ?: return null
+        return splitDesc.last()
+    }
+
+    fun currentAuthor(): String? {
+        val splitAuth = author?.split(splitter) ?: return null
+        return splitAuth.first()
+    }
+
+    fun originalAuthor(): String? {
+        val splitAuth = author?.split(splitter) ?: return null
+        return splitAuth.last()
+    }
+
+    fun currentArtist(): String? {
+        val splitArtist = artist?.split(splitter) ?: return null
+        return splitArtist.first()
+    }
+
+    fun originalArtist(): String? {
+        val splitArtist = artist?.split(splitter) ?: return null
+        return splitArtist.last()
     }
 
     fun copyFrom(other: SManga) {
         if (other.author != null)
-            author = other.author
+            author = if (currentAuthor() != originalAuthor()) {
+                val current = currentAuthor()
+                val og = other.author
+                "${current}$splitter${og}"
+            } else other.author
 
         if (other.artist != null)
-            artist = other.artist
+            artist = if (currentArtist() != originalArtist()) {
+                val current = currentArtist()
+                val og = other.artist
+                "${current}$splitter${og}"
+            } else other.artist
 
         if (other.description != null)
-            description = other.description
+            description = if (currentDesc() != originalDesc()) {
+                val current = currentDesc()
+                val og = other.description
+                "${current}$splitter${og}"
+            } else other.description
 
         if (other.genre != null)
-            genre = other.genre
+            genre = if (currentGenres() != originalGenres()) {
+                val current = currentGenres()
+                val og = other.genre
+                "${current}$splitter${og}"
+            } else other.genre
 
         if (other.thumbnail_url != null)
             thumbnail_url = other.thumbnail_url
@@ -59,6 +115,7 @@ interface SManga : Serializable {
         const val ONGOING = 1
         const val COMPLETED = 2
         const val LICENSED = 3
+        const val splitter = "▒ ▒∩▒"
 
         fun create(): SManga {
             return SMangaImpl()

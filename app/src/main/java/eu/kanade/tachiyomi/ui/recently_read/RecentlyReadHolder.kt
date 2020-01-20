@@ -61,7 +61,7 @@ class RecentlyReadHolder(
         val (manga, chapter, history) = item
 
         // Set manga title
-        manga_title.text = manga.customTitle()
+        manga_title.text = manga.currentTitle()
 
         // Set source + chapter title
         val formattedNumber = adapter.decimalFormat.format(chapter.chapter_number.toDouble())

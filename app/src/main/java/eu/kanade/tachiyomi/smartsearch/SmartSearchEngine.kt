@@ -11,7 +11,6 @@ import info.debatty.java.stringsimilarity.NormalizedLevenshtein
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
 import kotlinx.coroutines.supervisorScope
 import rx.schedulers.Schedulers
 import uy.kohesive.injekt.injectLazy
@@ -65,7 +64,7 @@ class SmartSearchEngine(parentContext: CoroutineContext,
                 return@supervisorScope listOf(SearchEntry(searchResults.mangas.first(), 0.0))
 
             searchResults.mangas.map {
-                val normalizedDistance = normalizedLevenshtein.similarity(title, it.trueTitle())
+                val normalizedDistance = normalizedLevenshtein.similarity(title, it.originalTitle())
                 SearchEntry(it, normalizedDistance)
             }.filter { (_, normalizedDistance) ->
                 normalizedDistance >= MIN_NORMAL_ELIGIBLE_THRESHOLD

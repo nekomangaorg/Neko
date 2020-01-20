@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.ui.library
 
 import android.os.Bundle
 import com.jakewharton.rxrelay.BehaviorRelay
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
@@ -280,8 +279,8 @@ class LibraryPresenter(
 
     private fun sortAlphabetical(i1: LibraryItem, i2: LibraryItem): Int {
         return if (preferences.removeArticles().getOrDefault())
-            i1.manga.customTitle().removeArticles().compareTo(i2.manga.customTitle().removeArticles(), true)
-        else i1.manga.customTitle().compareTo(i2.manga.customTitle(), true)
+            i1.manga.currentTitle().removeArticles().compareTo(i2.manga.currentTitle().removeArticles(), true)
+        else i1.manga.currentTitle().compareTo(i2.manga.currentTitle(), true)
     }
 
     /**
@@ -385,6 +384,7 @@ class LibraryPresenter(
         Observable.fromCallable {
             val mangaToDelete = mangas.distinctBy { it.id }
             mangaToDelete.forEach { manga ->
+                db.resetMangaInfo(manga).executeAsBlocking()
                 coverCache.deleteFromCache(manga.thumbnail_url)
                 val source = sourceManager.get(manga.source) as? HttpSource
                 if (source != null)
@@ -503,27 +503,4 @@ class LibraryPresenter(
             db.updateMangaTitle(manga).executeAsBlocking()
         }
     }
-
-    /**
-     * Update cover with local file.
-     *
-     * @param inputStream the new cover.
-     * @param manga the manga edited.
-     * @return true if the cover is updated, false otherwise
-     */
-    @Throws(IOException::class)
-    fun editCoverWithStream(inputStream: InputStream, manga: Manga): Boolean {
-        if (manga.source == LocalSource.ID) {
-            LocalSource.updateCover(context, manga, inputStream)
-            return true
-        }
-
-        if (manga.thumbnail_url != null && manga.favorite) {
-            coverCache.copyToCache(manga.thumbnail_url!!, inputStream)
-            (manga as? MangaImpl)?.last_cover_fetch = Date().time
-            return true
-        }
-        return false
-    }
-
 }

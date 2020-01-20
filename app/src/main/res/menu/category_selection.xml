@@ -5,7 +5,7 @@
 
     <item android:id="@+id/action_edit"
           android:title="@string/action_edit"
-          android:icon="@drawable/ic_create_white_24dp"
+          android:icon="@drawable/ic_edit_white_24dp"
           app:showAsAction="ifRoom"/>
 
     <item android:id="@+id/action_delete"

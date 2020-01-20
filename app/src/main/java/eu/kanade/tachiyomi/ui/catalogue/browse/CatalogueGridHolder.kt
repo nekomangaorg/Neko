@@ -29,7 +29,7 @@ class CatalogueGridHolder(private val view: View, private val adapter: FlexibleA
      */
     override fun onSetValues(manga: Manga) {
         // Set manga title
-        title.text = manga.title
+        title.text = manga.originalTitle()
 
         // Set alpha of thumbnail.
         thumbnail.alpha = if (manga.favorite) 0.3f else 1.0f

@@ -31,7 +31,7 @@ class CatalogueListHolder(private val view: View, adapter: FlexibleAdapter<IFlex
      * @param manga the manga to bind.
      */
     override fun onSetValues(manga: Manga) {
-        title.text = manga.title
+        title.text = manga.originalTitle()
         title.setTextColor(if (manga.favorite) favoriteColor else unfavoriteColor)
 
         setImage(manga)

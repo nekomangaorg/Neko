@@ -16,7 +16,7 @@ class MangaHolder(
 
     fun bind(item: MangaItem) {
         // Update the title of the manga.
-        title.text = item.manga.customTitle()
+        title.text = item.manga.currentTitle()
 
         // Create thumbnail onclick to simulate long click
         thumbnail.setOnClickListener {

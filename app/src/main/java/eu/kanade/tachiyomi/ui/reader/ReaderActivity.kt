@@ -381,7 +381,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
         viewer = newViewer
         viewer_container.addView(newViewer.getView())
 
-        toolbar.title = manga.customTitle()
+        toolbar.title = manga.currentTitle()
 
         page_seekbar.isRTL = newViewer is R2LPagerViewer
 

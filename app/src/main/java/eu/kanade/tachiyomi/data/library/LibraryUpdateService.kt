@@ -20,6 +20,7 @@ import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.glide.GlideApp
@@ -406,7 +407,7 @@ class LibraryUpdateService(
                                 manga.copyFrom(networkManga)
                                 db.insertManga(manga).executeAsBlocking()
                                 coverCache.deleteFromCache(manga.thumbnail_url)
-                                manga.last_cover_fetch = Date().time
+                                MangaImpl.setLastCoverFetch(manga.id!!, Date().time)
                                 manga
                             }
                             .onErrorReturn { manga }
@@ -461,7 +462,7 @@ class LibraryUpdateService(
      */
     private fun showProgressNotification(manga: Manga, current: Int, total: Int) {
         notificationManager.notify(Notifications.ID_LIBRARY_PROGRESS, progressNotification
-                .setContentTitle(manga.customTitle())
+                .setContentTitle(manga.currentTitle())
                 .setProgress(total, current, false)
                 .build())
     }
@@ -487,7 +488,7 @@ class LibraryUpdateService(
                 }
                 catch (e: Exception) { }
                 setGroupAlertBehavior(GROUP_ALERT_SUMMARY)
-                setContentTitle(manga.customTitle())
+                setContentTitle(manga.currentTitle())
                 color = ContextCompat.getColor(this@LibraryUpdateService, R.color.colorAccentLight)
                 val chaptersNames = if (chapterNames.size > 5) {
                     "${chapterNames.take(4).joinToString(", ")}, " +
@@ -527,11 +528,11 @@ class LibraryUpdateService(
                         .notification_new_chapters_text,
                         updates.size, updates.size))
                     setStyle(NotificationCompat.BigTextStyle().bigText(updates.joinToString("\n") {
-                        it.first.customTitle().chop(45)
+                        it.first.currentTitle().chop(45)
                     }))
                 }
                 else {
-                    setContentText(updates.first().first.customTitle().chop(45))
+                    setContentText(updates.first().first.currentTitle().chop(45))
                 }
                 priority = NotificationCompat.PRIORITY_HIGH
                 setGroup(Notifications.GROUP_NEW_CHAPTERS)

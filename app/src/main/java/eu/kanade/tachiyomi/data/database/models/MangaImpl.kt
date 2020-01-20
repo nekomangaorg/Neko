@@ -36,15 +36,12 @@ open class MangaImpl : Manga {
 
     override var hide_title: Boolean = false
 
-    var last_cover_fetch: Long = 0
-
     override fun copyFrom(other: SManga) {
-        if (((other is MangaImpl && (other as MangaImpl)::title.isInitialized)
-                || other !is MangaImpl) && other.title != title) {
-            title = if (customTitle() != trueTitle()) {
-                val customTitle = customTitle()
+        if ((other is MangaImpl && (other as MangaImpl)::title.isInitialized && other.title != title)) {
+            title = if (currentTitle() != originalTitle()) {
+                val customTitle = currentTitle()
                 val trueTitle = other.title
-                "${customTitle}≡§${trueTitle}"
+                "${customTitle}${SManga.splitter}${trueTitle}"
             } else other.title
         }
         super.copyFrom(other)
@@ -62,6 +59,16 @@ open class MangaImpl : Manga {
 
     override fun hashCode(): Int {
         return url.hashCode()
+    }
+
+    companion object {
+        private var lastCoverFetch:MutableMap<Long, Long> = mutableMapOf()
+
+        fun setLastCoverFetch(id: Long, time: Long) {
+            lastCoverFetch[id] = time
+        }
+
+        fun getLastCoverFetch(id: Long) = lastCoverFetch[id] ?: 0
     }
 
 }

@@ -644,5 +644,6 @@
     <string name="use_first_source">Use first source with alternative</string>
     <string name="skip_this_step_next_time">Skip this step next time</string>
     <string name="pre_migration_skip_toast">To show this screen again, go to Settings -> Library.</string>
+    <string name="reset_tags">Reset Tags</string>
 
 </resources>

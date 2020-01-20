@@ -178,7 +178,7 @@ class DownloadProvider(private val context: Context) {
      * @param manga the manga to query.
      */
     fun getMangaDirName(manga: Manga): String {
-        return DiskUtil.buildValidFilename(manga.trueTitle())
+        return DiskUtil.buildValidFilename(manga.originalTitle())
     }
 
     /**

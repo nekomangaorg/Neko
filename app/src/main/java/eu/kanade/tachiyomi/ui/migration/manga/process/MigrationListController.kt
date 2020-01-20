@@ -14,7 +14,6 @@ import androidx.core.graphics.ColorUtils
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import com.afollestad.materialdialogs.MaterialDialog
-import com.bluelinelabs.conductor.ControllerChangeHandler
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -155,7 +154,7 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
                                                 smartSearchEngine.smartSearch(source, mangaObj.title)
                                             } else {*/
                                             val searchResult = smartSearchEngine
-                                                .normalSearch(source, mangaObj.trueTitle())
+                                                .normalSearch(source, mangaObj.originalTitle())
 
                                             if(searchResult != null) {
                                                 val localManga = smartSearchEngine.networkToLocalManga(searchResult, source.id)
@@ -185,7 +184,7 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
                             validSources.forEachIndexed { index, source ->
                                 val searchResult = try {
                                     val searchResult =  smartSearchEngine
-                                        .normalSearch(source, mangaObj.trueTitle())
+                                        .normalSearch(source, mangaObj.originalTitle())
 
                                     if (searchResult != null) {
                                         val localManga = smartSearchEngine.networkToLocalManga(searchResult, source.id)

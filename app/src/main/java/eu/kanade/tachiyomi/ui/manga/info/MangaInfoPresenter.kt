@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.manga.info
 
 import android.app.Application
 import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Bundle
 import com.jakewharton.rxrelay.BehaviorRelay
 import com.jakewharton.rxrelay.PublishRelay
@@ -12,10 +13,11 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.download.DownloadManager
+import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.Source
+import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
 import eu.kanade.tachiyomi.util.DiskUtil
-import eu.kanade.tachiyomi.util.ImageUtil
 import eu.kanade.tachiyomi.util.isNullOrUnsubscribed
 import rx.Observable
 import rx.Subscription
@@ -24,7 +26,6 @@ import rx.schedulers.Schedulers
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File
-import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.InputStream
 import java.io.OutputStream
@@ -94,7 +95,7 @@ class MangaInfoPresenter(
                     manga.initialized = true
                     db.insertManga(manga).executeAsBlocking()
                     coverCache.deleteFromCache(manga.thumbnail_url)
-                    (manga as? MangaImpl)?.last_cover_fetch = Date().time
+                    MangaImpl.setLastCoverFetch(manga.id!!, Date().time)
                     manga
                 }
                 .subscribeOn(Schedulers.io())
@@ -119,6 +120,7 @@ class MangaInfoPresenter(
 
     fun confirmDeletion() {
         coverCache.deleteFromCache(manga.thumbnail_url)
+        db.resetMangaInfo(manga).executeAsBlocking()
         downloadManager.deleteManga(manga, source)
     }
 
@@ -148,7 +150,7 @@ class MangaInfoPresenter(
         directory.mkdirs()
 
         // Build destination file.
-        val filename = DiskUtil.buildValidFilename("${manga.trueTitle()} - Cover.jpg")
+        val filename = DiskUtil.buildValidFilename("${manga.originalTitle()} - Cover.jpg")
 
         val destFile = File(directory, filename)
         val stream: OutputStream = FileOutputStream(destFile)
@@ -197,6 +199,73 @@ class MangaInfoPresenter(
      */
     fun moveMangaToCategory(manga: Manga, category: Category?) {
         moveMangaToCategories(manga, listOfNotNull(category))
+    }
+
+    fun updateManga(title:String?, author:String?, artist: String?, uri: Uri?,
+        description: String?, tags: Array<String>?) {
+        var changed = false
+        if (title.isNullOrBlank() && manga.currentTitle() != manga.originalTitle()) {
+            manga.title = manga.originalTitle()
+            changed = true
+        } else if (!title.isNullOrBlank() && title != manga.currentTitle()) {
+            manga.title = "${title}${SManga.splitter}${manga.originalTitle()}"
+            changed = true
+        }
+
+        if (author.isNullOrBlank() && manga.currentAuthor() != manga.originalAuthor()) {
+            manga.author = manga.originalAuthor()
+            changed = true
+        } else if (!author.isNullOrBlank() && author != manga.currentAuthor()) {
+            manga.author = "${author}${SManga.splitter}${manga.originalAuthor()}"
+            changed = true
+        }
+
+        if (artist.isNullOrBlank() && manga.currentArtist() != manga.currentArtist()) {
+            manga.artist = manga.originalArtist()
+            changed = true
+        } else if (!artist.isNullOrBlank() && artist != manga.currentArtist()) {
+            manga.artist = "${artist}${SManga.splitter}${manga.originalArtist()}"
+            changed = true
+        }
+
+        if (description.isNullOrBlank() && manga.currentDesc() != manga.originalDesc()) {
+            manga.description = manga.originalDesc()
+            changed = true
+        } else if (!description.isNullOrBlank() && description != manga.currentDesc()) {
+            manga.description = "${description}${SManga.splitter}${manga.originalDesc()}"
+            changed = true
+        }
+
+        var tagsString = tags?.joinToString(", ")
+        if (tagsString.isNullOrBlank() && manga.currentGenres() != manga.originalGenres()) {
+            manga.genre = manga.originalGenres()
+            changed = true
+        } else if (!tagsString.isNullOrBlank() && tagsString != manga.currentGenres()) {
+            tagsString = tags?.joinToString(", ") { it.capitalize() }
+            manga.genre = "${tagsString}${SManga.splitter}${manga.originalGenres()}"
+            changed = true
+        }
+
+        if (uri != null) editCoverWithStream(uri)
+
+
+        if (changed) db.updateMangaInfo(manga).executeAsBlocking()
+    }
+
+    private fun editCoverWithStream(uri: Uri): Boolean {
+        val inputStream = downloadManager.context.contentResolver.openInputStream(uri) ?:
+            return false
+        if (manga.source == LocalSource.ID) {
+            LocalSource.updateCover(downloadManager.context, manga, inputStream)
+            return true
+        }
+
+        if (manga.thumbnail_url != null && manga.favorite) {
+            coverCache.copyToCache(manga.thumbnail_url!!, inputStream)
+            MangaImpl.setLastCoverFetch(manga.id!!, Date().time)
+            return true
+        }
+        return false
     }
 
 }

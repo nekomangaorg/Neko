@@ -1,59 +1,53 @@
 package eu.kanade.tachiyomi.ui.manga.info
 
+import android.app.Activity
 import android.app.Dialog
+import android.content.Intent
+import android.graphics.drawable.Drawable
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import android.view.WindowManager
 import com.afollestad.materialdialogs.MaterialDialog
-import com.afollestad.materialdialogs.WhichButton
-import com.afollestad.materialdialogs.actions.setActionButtonEnabled
 import com.afollestad.materialdialogs.customview.customView
-import com.jakewharton.rxbinding.widget.itemClicks
-import com.jakewharton.rxbinding.widget.textChanges
+import com.bluelinelabs.conductor.Router
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.request.target.CustomTarget
+import com.bumptech.glide.request.transition.Transition
+import com.bumptech.glide.signature.ObjectKey
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.database.models.Track
-import eu.kanade.tachiyomi.data.track.TrackManager
-import eu.kanade.tachiyomi.data.track.TrackService
-import eu.kanade.tachiyomi.data.track.model.TrackSearch
+import eu.kanade.tachiyomi.data.database.models.MangaImpl
+import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
-import eu.kanade.tachiyomi.ui.manga.track.TrackController
-import eu.kanade.tachiyomi.ui.manga.track.TrackSearchAdapter
-import eu.kanade.tachiyomi.ui.manga.track.TrackSearchDialog
-import eu.kanade.tachiyomi.util.plusAssign
-import kotlinx.android.synthetic.main.track_controller.*
-import kotlinx.android.synthetic.main.track_search_dialog.view.*
-import rx.Subscription
-import rx.android.schedulers.AndroidSchedulers
-import rx.subscriptions.CompositeSubscription
+import eu.kanade.tachiyomi.ui.library.LibraryController
+import eu.kanade.tachiyomi.util.chop
+import eu.kanade.tachiyomi.util.toast
+import kotlinx.android.synthetic.main.edit_manga_dialog.view.*
+import kotlinx.android.synthetic.main.edit_manga_dialog.view.manga_title
+import me.gujun.android.taggroup.TagGroup
+import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import java.util.concurrent.TimeUnit
+import java.io.IOException
+import java.io.InputStream
 
 class EditMangaDialog : DialogController {
 
     private var dialogView: View? = null
 
-    private var adapter: TrackSearchAdapter? = null
-
-    private var selectedItem: Track? = null
-
     private val manga: Manga
 
-    private var subscriptions = CompositeSubscription()
+    private var customCoverUri:Uri? = null
 
-    private var searchTextSubscription: Subscription? = null
+    private val infoController
+        get() = targetController as MangaInfoController
 
-    private val trackController
-        get() = targetController as TrackController
-
-    private var wasPreviouslyTracked:Boolean = false
-
-    constructor(target: TrackController, manga: Manga, wasTracked:Boolean) : super(Bundle()
+    constructor(target: MangaInfoController, manga: Manga) : super(Bundle()
         .apply {
             putLong(KEY_MANGA, manga.id!!)
         }) {
-        wasPreviouslyTracked = wasTracked
         targetController = target
         this.manga = manga
     }
@@ -64,101 +58,112 @@ class EditMangaDialog : DialogController {
         .executeAsBlocking()!!
     }
 
+    override fun showDialog(router: Router) {
+        super.showDialog(router)
+        dialog?.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN)
+    }
+
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
         val dialog = MaterialDialog(activity!!).apply {
-            customView(viewRes = R.layout.track_search_dialog, scrollable = false)
+            customView(viewRes = R.layout.edit_manga_dialog, scrollable = true)
             negativeButton(android.R.string.cancel)
-            positiveButton(
-                if (wasPreviouslyTracked) R.string.action_clear
-                else R.string.action_track){ onPositiveButtonClick() }
-            setActionButtonEnabled(WhichButton.POSITIVE, wasPreviouslyTracked)
-        }
-
-        if (subscriptions.isUnsubscribed) {
-            subscriptions = CompositeSubscription()
+            positiveButton(R.string.action_save) { onPositiveButtonClick() }
         }
 
         dialogView = dialog.view
         onViewCreated(dialog.view, savedViewState)
-
         return dialog
     }
 
     fun onViewCreated(view: View, savedState: Bundle?) {
-        // Create adapter
-        val adapter = TrackSearchAdapter(view.context)
-        this.adapter = adapter
-        view.track_search_list.adapter = adapter
+        GlideApp.with(view.context)
+            .asDrawable()
+            .load(manga)
+            .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+            .signature(ObjectKey(MangaImpl.getLastCoverFetch(manga.id!!).toString()))
+            .dontAnimate()
+            .into(view.manga_cover)
 
-        // Set listeners
-        selectedItem = null
+        if (manga.currentTitle() != manga.originalTitle())
+            view.manga_title.append(manga.currentTitle())
+        view.manga_title.hint = "${resources?.getString(R.string.title)}: ${manga.originalTitle()}"
 
-        subscriptions += view.track_search_list.itemClicks().subscribe { position ->
-            selectedItem = adapter.getItem(position)
-            (dialog as? MaterialDialog)?.positiveButton(R.string.action_track)
-            (dialog as? MaterialDialog)?.setActionButtonEnabled(WhichButton.POSITIVE, true)
+        if (manga.currentAuthor() != manga.originalAuthor())
+            view.manga_author.append(manga.currentAuthor())
+        if (!manga.originalAuthor().isNullOrBlank())
+            view.manga_author.hint = "${resources?.getString(R.string.manga_info_author_label)}: ${manga.originalAuthor()}"
+
+        if (manga.currentArtist() != manga.originalArtist())
+            view.manga_artist.append(manga.currentArtist())
+        if (!manga.originalArtist().isNullOrBlank())
+        view.manga_artist.hint = "${resources?.getString(R.string.manga_info_artist_label)}: ${manga.originalArtist()}"
+
+        view.cover_layout.setOnClickListener {
+            changeCover()
         }
 
-        // Do an initial search based on the manga's title
-        if (savedState == null) {
-            val title = trackController.presenter.manga.trueTitle()
-            view.track_search.append(title)
-            search(title)
+        if (manga.currentArtist() != manga.originalArtist())
+            view.manga_description.append(manga.currentDesc())
+        if (!manga.originalDesc().isNullOrBlank())
+            view.manga_description.hint = "${resources?.getString(R.string.description)}: ${manga
+            .originalDesc()?.chop(15)}"
+        if (manga.currentGenres().isNullOrBlank().not()) {
+            view.manga_genres_tags.setTags(manga.currentGenres()?.split(", "))
+        }
+        view.reset_tags.setOnClickListener { resetTags() }
+    }
+
+    private fun resetTags() {
+        if (manga.originalGenres().isNullOrBlank() || manga.originalGenres() == "null")
+            dialogView?.manga_genres_tags?.setTags(emptyList())
+        else
+            dialogView?.manga_genres_tags?.setTags(manga.originalGenres()?.split(", "))
+    }
+
+    private fun changeCover() {
+        if (manga.favorite) {
+            val intent = Intent(Intent.ACTION_GET_CONTENT)
+            intent.type = "image/*"
+            startActivityForResult(
+                Intent.createChooser(intent,
+                    resources?.getString(R.string.file_select_cover)),
+                101
+            )
+        } else {
+            activity?.toast(R.string.notification_first_add_to_library)
         }
     }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == 101) {
+            if (data == null || resultCode != Activity.RESULT_OK) return
+            val activity = activity ?: return
+
+            try {
+                // Get the file's input stream from the incoming Intent
+                GlideApp.with(dialogView!!.context)
+                    .load(data.data ?: Uri.EMPTY)
+                    .into(dialogView!!.manga_cover)
+                customCoverUri = data.data
+            } catch (error: IOException) {
+                activity.toast(R.string.notification_cover_update_failed)
+                Timber.e(error)
+            }
+        }
+    }
+
 
     override fun onDestroyView(view: View) {
         super.onDestroyView(view)
-        subscriptions.unsubscribe()
         dialogView = null
-        adapter = null
-    }
-
-    override fun onAttach(view: View) {
-        super.onAttach(view)
-        searchTextSubscription = dialogView!!.track_search.textChanges()
-            .skip(1)
-            .debounce(1, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
-            .map { it.toString() }
-            .filter(String::isNotBlank)
-            .subscribe { search(it) }
-    }
-
-    override fun onDetach(view: View) {
-        super.onDetach(view)
-        searchTextSubscription?.unsubscribe()
-    }
-
-    private fun search(query: String) {
-        val view = dialogView ?: return
-        view.progress.visibility = View.VISIBLE
-        view.track_search_list.visibility = View.INVISIBLE
-        //trackController.presenter.search(query, service)
-    }
-
-    fun onSearchResults(results: List<TrackSearch>) {
-        selectedItem = null
-        val view = dialogView ?: return
-        view.progress.visibility = View.INVISIBLE
-        view.track_search_list.visibility = View.VISIBLE
-        adapter?.setItems(results)
-        if (results.size == 1 && !wasPreviouslyTracked) {
-            selectedItem = adapter?.getItem(0)
-            (dialog as? MaterialDialog)?.positiveButton(R.string.action_track)
-            (dialog as? MaterialDialog)?.setActionButtonEnabled(WhichButton.POSITIVE, true)
-        }
-    }
-
-    fun onSearchResultsError() {
-        val view = dialogView ?: return
-        view.progress.visibility = View.VISIBLE
-        view.track_search_list.visibility = View.INVISIBLE
-        adapter?.setItems(emptyList())
     }
 
     private fun onPositiveButtonClick() {
-        //trackController.swipe_refresh.isRefreshing = true
-        //trackController.presenter.registerTracking(selectedItem, service)
+        infoController.presenter.updateManga(dialogView?.manga_title?.text.toString(),
+            dialogView?.manga_author?.text.toString(), dialogView?.manga_artist?.text.toString(),
+            customCoverUri, dialogView?.manga_description?.text.toString(),
+            dialogView?.manga_genres_tags?.tags)
+        infoController.updateTitle()
     }
 
     private companion object {

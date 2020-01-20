@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <FrameLayout
+        android:id="@+id/cover_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginBottom="10dp">
+
+        <ImageView
+            android:id="@+id/manga_cover"
+            android:layout_width="wrap_content"
+            android:adjustViewBounds="true"
+            android:layout_height="150dp"
+            android:background="@drawable/image_border_background"
+            android:src="@mipmap/ic_launcher"/>
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:layout_gravity="end|bottom"
+            android:layout_marginEnd="4dp"
+            android:layout_marginBottom="4dp">
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_edit_outlined_white_24dp"/>
+        </FrameLayout>
+    </FrameLayout>
+
+    <EditText
+        android:id="@+id/manga_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/title"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:inputType="text"
+        android:maxLines="1"/>
+    <EditText
+        android:id="@+id/manga_author"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/manga_info_author_label"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:inputType="text"
+        android:maxLines="1"/>
+
+    <EditText
+        android:id="@+id/manga_artist"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/manga_info_artist_label"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:inputType="text"
+        android:maxLines="1"/>
+
+    <Button
+        android:id="@+id/reset_tags"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/reset_tags" />
+
+    <me.gujun.android.taggroup.TagGroup
+        android:id="@+id/manga_genres_tags"
+        style="@style/TagGroup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        app:atg_borderStrokeWidth="1dp"
+        app:atg_backgroundColor="@android:color/transparent"
+        app:atg_isAppendMode="true"
+        app:atg_inputHintColor="?android:attr/textColorSecondary"
+        app:atg_inputTextColor="?android:attr/textColorPrimary"
+        app:atg_checkedBackgroundColor="@color/red_error"
+        app:atg_checkedBorderColor="@color/red_error"
+        app:atg_borderColor="@color/md_blue_A400"
+        app:atg_textColor="@color/md_blue_A400" />
+
+    <EditText
+        android:id="@+id/manga_description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/description"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:inputType="text|textMultiLine"
+        android:scrollHorizontally="false"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="?android:attr/divider"/>
+
+</LinearLayout>

@@ -1,25 +1,15 @@
 package eu.kanade.tachiyomi.ui.library
 
-import android.graphics.Color
-import android.text.format.DateUtils
-import androidx.core.content.ContextCompat
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
-import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.category.CategoryAdapter
-import eu.kanade.tachiyomi.util.getResourceColor
 import eu.kanade.tachiyomi.util.removeArticles
 import uy.kohesive.injekt.injectLazy
-import java.text.DateFormat
 import java.text.SimpleDateFormat
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.Year
 import java.util.*
 
 
@@ -94,7 +84,7 @@ class LibraryCategoryAdapter(val view: LibraryCategoryView) :
                         "N/A"
                 }
                 else -> {
-                    val title = (iFlexible as LibraryItem).manga.customTitle()
+                    val title = (iFlexible as LibraryItem).manga.currentTitle()
                     if (preferences.removeArticles().getOrDefault())
                         title.removeArticles().substring(0, 1).toUpperCase(Locale.US)
                     else title.substring(0, 1).toUpperCase(Locale.US)

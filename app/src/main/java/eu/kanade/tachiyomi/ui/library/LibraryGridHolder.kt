@@ -6,9 +6,11 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.signature.ObjectKey
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
+import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.source.LocalSource
 import kotlinx.android.synthetic.main.catalogue_grid_item.*
+import java.util.Date
 
 /**
  * Class used to hold the displayed data of a manga in the library, like the cover or the title.
@@ -35,7 +37,7 @@ class LibraryGridHolder(
         // Update the title of the manga.
         with(title) {
             visibility = if (item.manga.hide_title) View.GONE else View.VISIBLE
-            text = item.manga.customTitle()
+            text = item.manga.currentTitle()
         }
         gradient.visibility = if (item.manga.hide_title) View.GONE else View.VISIBLE
 
@@ -57,7 +59,7 @@ class LibraryGridHolder(
         GlideApp.with(view.context)
                 .load(item.manga)
                 .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
-                .signature(ObjectKey(item.manga.last_cover_fetch.toString()))
+                .signature(ObjectKey(MangaImpl.getLastCoverFetch(item.manga.id!!).toString()))
                 .centerCrop()
                 .into(thumbnail)
     }

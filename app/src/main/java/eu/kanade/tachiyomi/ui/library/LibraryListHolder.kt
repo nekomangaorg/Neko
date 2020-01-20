@@ -9,6 +9,7 @@ import kotlinx.android.synthetic.main.catalogue_list_item.*
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.signature.ObjectKey
 import eu.davidea.flexibleadapter.items.IFlexible
+import eu.kanade.tachiyomi.data.database.models.MangaImpl
 
 /**
  * Class used to hold the displayed data of a manga in the library, like the cover or the title.
@@ -33,7 +34,7 @@ class LibraryListHolder(
      */
     override fun onSetValues(item: LibraryItem) {
         // Update the title of the manga.
-        title.text = item.manga.customTitle()
+        title.text = item.manga.currentTitle()
 
         // Update the unread count and its visibility.
         with(unread_text) {
@@ -59,7 +60,7 @@ class LibraryListHolder(
         GlideApp.with(itemView.context)
                 .load(item.manga)
                 .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
-                .signature(ObjectKey(item.manga.last_cover_fetch.toString()))
+                .signature(ObjectKey(MangaImpl.getLastCoverFetch(item.manga.id!!).toString()))
                 .centerCrop()
                 .circleCrop()
                 .dontAnimate()

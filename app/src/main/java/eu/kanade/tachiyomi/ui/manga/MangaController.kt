@@ -27,7 +27,6 @@ import eu.kanade.tachiyomi.ui.base.controller.RxController
 import eu.kanade.tachiyomi.ui.base.controller.TabbedController
 import eu.kanade.tachiyomi.ui.base.controller.requestPermissionsSafe
 import eu.kanade.tachiyomi.ui.catalogue.CatalogueController
-import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.SearchActivity
 import eu.kanade.tachiyomi.ui.manga.chapter.ChaptersController
 import eu.kanade.tachiyomi.ui.manga.info.MangaInfoController
@@ -116,7 +115,7 @@ class MangaController : RxController, TabbedController {
     private var trackingIconSubscription: Subscription? = null
 
     override fun getTitle(): String? {
-        return manga?.customTitle()
+        return manga?.currentTitle()
     }
 
     override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
@@ -154,6 +153,11 @@ class MangaController : RxController, TabbedController {
     fun tabLayout():TabLayout? {
         return if (activity is SearchActivity) activity?.sTabs
         else activity?.tabs
+    }
+
+    fun updateTitle(manga: Manga) {
+        this.manga?.title = manga.title
+        setTitle()
     }
 
     override fun onChangeEnded(handler: ControllerChangeHandler, type: ControllerChangeType) {

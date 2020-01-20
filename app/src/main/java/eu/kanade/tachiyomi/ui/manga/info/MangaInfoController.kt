@@ -70,8 +70,9 @@ import eu.kanade.tachiyomi.util.updateLayoutParams
 import eu.kanade.tachiyomi.util.updatePaddingRelative
 import jp.wasabeef.glide.transformations.CropSquareTransformation
 import jp.wasabeef.glide.transformations.MaskTransformation
-import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.android.synthetic.main.manga_info_controller.*
+import kotlinx.android.synthetic.main.manga_info_controller.manga_cover
+import kotlinx.android.synthetic.main.manga_info_controller.manga_genres_tags
 import uy.kohesive.injekt.injectLazy
 import java.io.File
 import java.text.DateFormat
@@ -181,7 +182,7 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         shortAnimationDuration = resources?.getInteger(android.R.integer.config_shortAnimTime) ?: 0
 
         manga_cover.longClicks().subscribeUntilDestroy {
-            copyToClipboard(view.context.getString(R.string.title), presenter.manga.customTitle(), R.string
+            copyToClipboard(view.context.getString(R.string.title), presenter.manga.currentTitle(), R.string
                 .manga_info_full_title_label)
         }
         container = (view as ViewGroup).findViewById(R.id.manga_info_layout) as? View
@@ -219,11 +220,14 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.manga_info, menu)
+
+        val editItem = menu.findItem(R.id.action_edit)
+        editItem.isVisible = presenter.manga.favorite
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.action_edit -> { }
+            R.id.action_edit -> EditMangaDialog(this, presenter.manga).showDialog(router)
             R.id.action_open_in_browser -> openInBrowser()
             R.id.action_open_in_web_view -> openInWebView()
             R.id.action_share -> prepareToShareManga()
@@ -262,39 +266,39 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         val view = view ?: return
 
         //update full title TextView.
-        manga_full_title.text = if (manga.customTitle().isBlank()) {
+        manga_full_title.text = if (manga.currentTitle().isBlank()) {
             view.context.getString(R.string.unknown)
         } else {
-            manga.customTitle()
+            manga.currentTitle()
         }
 
         // Update artist TextView.
-        manga_artist.text = if (manga.artist.isNullOrBlank()) {
+        manga_artist.text = if (manga.currentArtist().isNullOrBlank()) {
             view.context.getString(R.string.unknown)
         } else {
-            manga.artist
+            manga.currentArtist()
         }
 
         // Update author TextView.
-        manga_author.text = if (manga.author.isNullOrBlank()) {
+        manga_author.text = if (manga.currentAuthor().isNullOrBlank()) {
             view.context.getString(R.string.unknown)
         } else {
-            manga.author
+            manga.currentAuthor()
         }
 
         // If manga source is known update source TextView.
         manga_source.text = source?.toString() ?: view.context.getString(R.string.unknown)
 
         // Update genres list
-        if (manga.genre.isNullOrBlank().not()) {
-            manga_genres_tags.setTags(manga.genre?.split(", "))
+        if (manga.currentGenres().isNullOrBlank().not()) {
+            manga_genres_tags.setTags(manga.currentGenres()?.split(", "))
         }
 
         // Update description TextView.
-        manga_summary.text = if (manga.description.isNullOrBlank()) {
+        manga_summary.text = if (manga.currentDesc().isNullOrBlank()) {
             view.context.getString(R.string.unknown)
         } else {
-            manga.description
+            manga.currentDesc()
         }
 
         // Update status TextView.
@@ -307,19 +311,20 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
 
         // Set the favorite drawable to the correct one.
         setFavoriteDrawable(manga.favorite)
+        activity?.invalidateOptionsMenu()
 
         // Set cover if it wasn't already.
         if (!manga.thumbnail_url.isNullOrEmpty()) {
             GlideApp.with(view.context)
                     .load(manga)
                     .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
-                    .signature(ObjectKey((manga as MangaImpl).last_cover_fetch.toString()))
+                    .signature(ObjectKey(MangaImpl.getLastCoverFetch(manga.id!!).toString()))
                     //.centerCrop()
                     .into(manga_cover)
             if (manga_cover_full != null) {
                 GlideApp.with(view.context).asDrawable().load(manga)
                     .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
-                    .signature(ObjectKey(manga.last_cover_fetch.toString()))
+                    .signature(ObjectKey(MangaImpl.getLastCoverFetch(manga.id!!).toString()))
                     .override(CustomTarget.SIZE_ORIGINAL, CustomTarget.SIZE_ORIGINAL)
                     .into(object : CustomTarget<Drawable>() {
                     override fun onResourceReady(resource: Drawable,
@@ -336,7 +341,7 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
                 GlideApp.with(view.context)
                         .load(manga)
                         .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
-                        .signature(ObjectKey(manga.last_cover_fetch.toString()))
+                        .signature(ObjectKey(MangaImpl.getLastCoverFetch(manga.id!!).toString()))
                         .centerCrop()
                         .into(backdrop)
             }
@@ -397,7 +402,7 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         }
 
         val activity = activity ?: return
-        val intent = WebViewActivity.newIntent(activity, source.id, url, presenter.manga.trueTitle())
+        val intent = WebViewActivity.newIntent(activity, source.id, url, presenter.manga.originalTitle())
         startActivity(intent)
     }
 
@@ -433,7 +438,7 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
             val intent = Intent(Intent.ACTION_SEND).apply {
                 type = "text/*"
                 putExtra(Intent.EXTRA_TEXT, url)
-                putExtra(Intent.EXTRA_TITLE, presenter.manga.customTitle())
+                putExtra(Intent.EXTRA_TITLE, presenter.manga.currentTitle())
                 flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
                 if (stream != null) {
                     clipData = ClipData.newRawUri(null, stream)
@@ -710,11 +715,11 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
 
         // Check if shortcut placement is supported
         if (ShortcutManagerCompat.isRequestPinShortcutSupported(activity)) {
-            val shortcutId = "manga-shortcut-${presenter.manga.trueTitle()}-${presenter.source.name}"
+            val shortcutId = "manga-shortcut-${presenter.manga.originalTitle()}-${presenter.source.name}"
 
             // Create shortcut info
             val shortcutInfo = ShortcutInfoCompat.Builder(activity, shortcutId)
-                    .setShortLabel(presenter.manga.customTitle())
+                    .setShortLabel(presenter.manga.currentTitle())
                     .setIcon(IconCompat.createWithBitmap(icon))
                     .setIntent(shortcutIntent)
                     .build()
@@ -733,6 +738,11 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
             ShortcutManagerCompat.requestPinShortcut(activity, shortcutInfo,
                     successCallback.intentSender)
         }
+    }
+
+    fun updateTitle() {
+        setMangaInfo(presenter.manga, presenter.source)
+        (parentController as? MangaController)?.updateTitle(presenter.manga)
     }
 
     private fun setFullCoverToThumb() {
