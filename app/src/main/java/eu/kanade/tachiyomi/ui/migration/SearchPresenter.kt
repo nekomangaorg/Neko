@@ -22,11 +22,4 @@ class SearchPresenter(
         //Set the catalogue search item as highlighted if the source matches that of the selected manga
         return CatalogueSearchItem(source, results, source.id == manga.source)
     }
-
-    override fun networkToLocalManga(sManga: SManga, sourceId: Long): Manga {
-        val localManga = super.networkToLocalManga(sManga, sourceId)
-        // For migration, displayed title should always match source rather than local DB
-        localManga.title = sManga.title
-        return localManga
-    }
 }

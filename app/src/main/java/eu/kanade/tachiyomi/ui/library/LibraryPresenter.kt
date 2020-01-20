@@ -280,8 +280,8 @@ class LibraryPresenter(
 
     private fun sortAlphabetical(i1: LibraryItem, i2: LibraryItem): Int {
         return if (preferences.removeArticles().getOrDefault())
-            i1.manga.title.removeArticles().compareTo(i2.manga.title.removeArticles(), true)
-        else i1.manga.title.compareTo(i2.manga.title, true)
+            i1.manga.customTitle().removeArticles().compareTo(i2.manga.customTitle().removeArticles(), true)
+        else i1.manga.customTitle().compareTo(i2.manga.customTitle(), true)
     }
 
     /**

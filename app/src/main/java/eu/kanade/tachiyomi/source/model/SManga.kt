@@ -22,6 +22,16 @@ interface SManga : Serializable {
 
     var initialized: Boolean
 
+    fun customTitle(): String {
+        val splitTitle = title.split("▒")
+        return splitTitle.first()
+    }
+
+    fun trueTitle(): String {
+        val splitTitle = title.split("▒")
+        return splitTitle.last()
+    }
+
     fun copyFrom(other: SManga) {
         if (other.author != null)
             author = other.author

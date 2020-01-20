@@ -132,10 +132,10 @@ class MigrationProcessHolder(
             .centerCrop()
             .into(thumbnail)
 
-        title.text = if (manga.title.isBlank()) {
+        title.text = if (manga.customTitle().isBlank()) {
             view.context.getString(R.string.unknown)
         } else {
-            manga.title
+            manga.customTitle()
         }
 
         gradient.visible()

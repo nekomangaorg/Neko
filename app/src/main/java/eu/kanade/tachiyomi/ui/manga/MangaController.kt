@@ -116,7 +116,7 @@ class MangaController : RxController, TabbedController {
     private var trackingIconSubscription: Subscription? = null
 
     override fun getTitle(): String? {
-        return manga?.title
+        return manga?.customTitle()
     }
 
     override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {

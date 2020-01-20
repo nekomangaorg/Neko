@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.manga.track
+package eu.kanade.tachiyomi.ui.manga.info
 
 import android.app.Dialog
 import android.os.Bundle
@@ -10,11 +10,16 @@ import com.afollestad.materialdialogs.customview.customView
 import com.jakewharton.rxbinding.widget.itemClicks
 import com.jakewharton.rxbinding.widget.textChanges
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.database.DatabaseHelper
+import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
+import eu.kanade.tachiyomi.ui.manga.track.TrackController
+import eu.kanade.tachiyomi.ui.manga.track.TrackSearchAdapter
+import eu.kanade.tachiyomi.ui.manga.track.TrackSearchDialog
 import eu.kanade.tachiyomi.util.plusAssign
 import kotlinx.android.synthetic.main.track_controller.*
 import kotlinx.android.synthetic.main.track_search_dialog.view.*
@@ -25,7 +30,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.concurrent.TimeUnit
 
-class TrackSearchDialog : DialogController {
+class EditMangaDialog : DialogController {
 
     private var dialogView: View? = null
 
@@ -33,7 +38,7 @@ class TrackSearchDialog : DialogController {
 
     private var selectedItem: Track? = null
 
-    private val service: TrackService
+    private val manga: Manga
 
     private var subscriptions = CompositeSubscription()
 
@@ -44,18 +49,19 @@ class TrackSearchDialog : DialogController {
 
     private var wasPreviouslyTracked:Boolean = false
 
-    constructor(target: TrackController, service: TrackService, wasTracked:Boolean) : super(Bundle()
+    constructor(target: TrackController, manga: Manga, wasTracked:Boolean) : super(Bundle()
         .apply {
-        putInt(KEY_SERVICE, service.id)
-    }) {
+            putLong(KEY_MANGA, manga.id!!)
+        }) {
         wasPreviouslyTracked = wasTracked
         targetController = target
-        this.service = service
+        this.manga = manga
     }
 
     @Suppress("unused")
     constructor(bundle: Bundle) : super(bundle) {
-        service = Injekt.get<TrackManager>().getService(bundle.getInt(KEY_SERVICE))!!
+        manga = Injekt.get<DatabaseHelper>().getManga(bundle.getLong(KEY_MANGA))
+        .executeAsBlocking()!!
     }
 
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
@@ -111,11 +117,11 @@ class TrackSearchDialog : DialogController {
     override fun onAttach(view: View) {
         super.onAttach(view)
         searchTextSubscription = dialogView!!.track_search.textChanges()
-                .skip(1)
-                .debounce(1, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
-                .map { it.toString() }
-                .filter(String::isNotBlank)
-                .subscribe { search(it) }
+            .skip(1)
+            .debounce(1, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
+            .map { it.toString() }
+            .filter(String::isNotBlank)
+            .subscribe { search(it) }
     }
 
     override fun onDetach(view: View) {
@@ -127,7 +133,7 @@ class TrackSearchDialog : DialogController {
         val view = dialogView ?: return
         view.progress.visibility = View.VISIBLE
         view.track_search_list.visibility = View.INVISIBLE
-        trackController.presenter.search(query, service)
+        //trackController.presenter.search(query, service)
     }
 
     fun onSearchResults(results: List<TrackSearch>) {
@@ -151,12 +157,12 @@ class TrackSearchDialog : DialogController {
     }
 
     private fun onPositiveButtonClick() {
-        trackController.swipe_refresh.isRefreshing = true
-        trackController.presenter.registerTracking(selectedItem, service)
+        //trackController.swipe_refresh.isRefreshing = true
+        //trackController.presenter.registerTracking(selectedItem, service)
     }
 
     private companion object {
-        const val KEY_SERVICE = "service_id"
+        const val KEY_MANGA = "manga_id"
     }
 
 }

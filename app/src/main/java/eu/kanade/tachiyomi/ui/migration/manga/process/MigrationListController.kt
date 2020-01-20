@@ -154,7 +154,8 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
                                            /* val searchResult = if (useSmartSearch) {
                                                 smartSearchEngine.smartSearch(source, mangaObj.title)
                                             } else {*/
-                                            val searchResult = smartSearchEngine.normalSearch(source, mangaObj.title)
+                                            val searchResult = smartSearchEngine
+                                                .normalSearch(source, mangaObj.trueTitle())
 
                                             if(searchResult != null) {
                                                 val localManga = smartSearchEngine.networkToLocalManga(searchResult, source.id)
@@ -183,8 +184,8 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
                         } else {
                             validSources.forEachIndexed { index, source ->
                                 val searchResult = try {
-                                    val searchResult =  smartSearchEngine.normalSearch(source,
-                                        mangaObj.title)
+                                    val searchResult =  smartSearchEngine
+                                        .normalSearch(source, mangaObj.trueTitle())
 
                                     if (searchResult != null) {
                                         val localManga = smartSearchEngine.networkToLocalManga(searchResult, source.id)

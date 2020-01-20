@@ -461,7 +461,7 @@ class LibraryUpdateService(
      */
     private fun showProgressNotification(manga: Manga, current: Int, total: Int) {
         notificationManager.notify(Notifications.ID_LIBRARY_PROGRESS, progressNotification
-                .setContentTitle(manga.title)
+                .setContentTitle(manga.customTitle())
                 .setProgress(total, current, false)
                 .build())
     }
@@ -487,7 +487,7 @@ class LibraryUpdateService(
                 }
                 catch (e: Exception) { }
                 setGroupAlertBehavior(GROUP_ALERT_SUMMARY)
-                setContentTitle(manga.title)
+                setContentTitle(manga.customTitle())
                 color = ContextCompat.getColor(this@LibraryUpdateService, R.color.colorAccentLight)
                 val chaptersNames = if (chapterNames.size > 5) {
                     "${chapterNames.take(4).joinToString(", ")}, " +
@@ -527,11 +527,11 @@ class LibraryUpdateService(
                         .notification_new_chapters_text,
                         updates.size, updates.size))
                     setStyle(NotificationCompat.BigTextStyle().bigText(updates.joinToString("\n") {
-                        it.first.title.chop(45)
+                        it.first.customTitle().chop(45)
                     }))
                 }
                 else {
-                    setContentText(updates.first().first.title.chop(45))
+                    setContentText(updates.first().first.customTitle().chop(45))
                 }
                 priority = NotificationCompat.PRIORITY_HIGH
                 setGroup(Notifications.GROUP_NEW_CHAPTERS)

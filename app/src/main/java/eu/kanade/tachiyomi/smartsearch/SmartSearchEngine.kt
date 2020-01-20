@@ -65,7 +65,7 @@ class SmartSearchEngine(parentContext: CoroutineContext,
                 return@supervisorScope listOf(SearchEntry(searchResults.mangas.first(), 0.0))
 
             searchResults.mangas.map {
-                val normalizedDistance = normalizedLevenshtein.similarity(title, it.title)
+                val normalizedDistance = normalizedLevenshtein.similarity(title, it.trueTitle())
                 SearchEntry(it, normalizedDistance)
             }.filter { (_, normalizedDistance) ->
                 normalizedDistance >= MIN_NORMAL_ELIGIBLE_THRESHOLD

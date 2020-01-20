@@ -106,7 +106,7 @@ internal class DownloadNotifier(private val context: Context) {
                         NotificationReceiver.pauseDownloadsPendingBroadcast(context))
             }
 
-            val title = download.manga.title.chop(15)
+            val title = download.manga.customTitle().chop(15)
             val quotedTitle = Pattern.quote(title)
             val chapter = download.chapter.name.replaceFirst("$quotedTitle[\\s]*[-]*[\\s]*".toRegex(RegexOption.IGNORE_CASE), "")
             setContentTitle("$title - $chapter".chop(30))
@@ -161,7 +161,7 @@ internal class DownloadNotifier(private val context: Context) {
         }
         // Create notification.
         with(notification) {
-            val title = download.manga.title.chop(15)
+            val title = download.manga.customTitle().chop(15)
             val quotedTitle = Pattern.quote(title)
             val chapter = download.chapter.name.replaceFirst("$quotedTitle[\\s]*[-]*[\\s]*".toRegex(RegexOption.IGNORE_CASE), "")
             setContentTitle("$title - $chapter".chop(30))

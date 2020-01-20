@@ -148,7 +148,7 @@ class MangaInfoPresenter(
         directory.mkdirs()
 
         // Build destination file.
-        val filename = DiskUtil.buildValidFilename("${manga.title} - Cover.jpg")
+        val filename = DiskUtil.buildValidFilename("${manga.trueTitle()} - Cover.jpg")
 
         val destFile = File(directory, filename)
         val stream: OutputStream = FileOutputStream(destFile)

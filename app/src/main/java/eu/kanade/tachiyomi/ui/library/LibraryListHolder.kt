@@ -33,7 +33,7 @@ class LibraryListHolder(
      */
     override fun onSetValues(item: LibraryItem) {
         // Update the title of the manga.
-        title.text = item.manga.title
+        title.text = item.manga.customTitle()
 
         // Update the unread count and its visibility.
         with(unread_text) {

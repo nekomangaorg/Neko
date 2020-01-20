@@ -35,7 +35,7 @@ class LibraryGridHolder(
         // Update the title of the manga.
         with(title) {
             visibility = if (item.manga.hide_title) View.GONE else View.VISIBLE
-            text = item.manga.title
+            text = item.manga.customTitle()
         }
         gradient.visibility = if (item.manga.hide_title) View.GONE else View.VISIBLE
 

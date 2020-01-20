@@ -181,7 +181,8 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         shortAnimationDuration = resources?.getInteger(android.R.integer.config_shortAnimTime) ?: 0
 
         manga_cover.longClicks().subscribeUntilDestroy {
-            copyToClipboard(view.context.getString(R.string.title), presenter.manga.title, R.string.manga_info_full_title_label)
+            copyToClipboard(view.context.getString(R.string.title), presenter.manga.customTitle(), R.string
+                .manga_info_full_title_label)
         }
         container = (view as ViewGroup).findViewById(R.id.manga_info_layout) as? View
         val bottomM = manga_genres_tags.marginBottom
@@ -222,6 +223,7 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
+            R.id.action_edit -> { }
             R.id.action_open_in_browser -> openInBrowser()
             R.id.action_open_in_web_view -> openInWebView()
             R.id.action_share -> prepareToShareManga()
@@ -260,10 +262,10 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         val view = view ?: return
 
         //update full title TextView.
-        manga_full_title.text = if (manga.title.isBlank()) {
+        manga_full_title.text = if (manga.customTitle().isBlank()) {
             view.context.getString(R.string.unknown)
         } else {
-            manga.title
+            manga.customTitle()
         }
 
         // Update artist TextView.
@@ -395,7 +397,7 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         }
 
         val activity = activity ?: return
-        val intent = WebViewActivity.newIntent(activity, source.id, url, presenter.manga.title)
+        val intent = WebViewActivity.newIntent(activity, source.id, url, presenter.manga.trueTitle())
         startActivity(intent)
     }
 
@@ -431,7 +433,7 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
             val intent = Intent(Intent.ACTION_SEND).apply {
                 type = "text/*"
                 putExtra(Intent.EXTRA_TEXT, url)
-                putExtra(Intent.EXTRA_TITLE, presenter.manga.title)
+                putExtra(Intent.EXTRA_TITLE, presenter.manga.customTitle())
                 flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
                 if (stream != null) {
                     clipData = ClipData.newRawUri(null, stream)
@@ -708,11 +710,11 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
 
         // Check if shortcut placement is supported
         if (ShortcutManagerCompat.isRequestPinShortcutSupported(activity)) {
-            val shortcutId = "manga-shortcut-${presenter.manga.title}-${presenter.source.name}"
+            val shortcutId = "manga-shortcut-${presenter.manga.trueTitle()}-${presenter.source.name}"
 
             // Create shortcut info
             val shortcutInfo = ShortcutInfoCompat.Builder(activity, shortcutId)
-                    .setShortLabel(presenter.manga.title)
+                    .setShortLabel(presenter.manga.customTitle())
                     .setIcon(IconCompat.createWithBitmap(icon))
                     .setIntent(shortcutIntent)
                     .build()

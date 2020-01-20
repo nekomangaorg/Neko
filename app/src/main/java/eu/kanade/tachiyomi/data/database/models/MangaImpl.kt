@@ -39,8 +39,14 @@ open class MangaImpl : Manga {
     var last_cover_fetch: Long = 0
 
     override fun copyFrom(other: SManga) {
-        if (other is MangaImpl && (other as MangaImpl)::title.isInitialized && other.title != title)
-            title = other.title
+        if (((other is MangaImpl && (other as MangaImpl)::title.isInitialized)
+                || other !is MangaImpl) && other.title != title) {
+            title = if (customTitle() != trueTitle()) {
+                val customTitle = customTitle()
+                val trueTitle = other.title
+                "${customTitle}≡§${trueTitle}"
+            } else other.title
+        }
         super.copyFrom(other)
     }
 

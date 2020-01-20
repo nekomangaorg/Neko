@@ -94,7 +94,7 @@ class LibraryCategoryAdapter(val view: LibraryCategoryView) :
                         "N/A"
                 }
                 else -> {
-                    val title = (iFlexible as LibraryItem).manga.title
+                    val title = (iFlexible as LibraryItem).manga.customTitle()
                     if (preferences.removeArticles().getOrDefault())
                         title.removeArticles().substring(0, 1).toUpperCase(Locale.US)
                     else title.substring(0, 1).toUpperCase(Locale.US)
