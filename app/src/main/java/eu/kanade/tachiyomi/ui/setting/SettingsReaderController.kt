@@ -120,7 +120,7 @@ class SettingsReaderController : SettingsController() {
                 defaultValue = false
             }
 
-            floatListPreference {
+            intListPreference(activity) {
                 key = Keys.marginRatioWebtoon
                 titleRes = R.string.pref_reader_margin
                 entriesRes = arrayOf(R.string.webtoon_margin_ratio_0,

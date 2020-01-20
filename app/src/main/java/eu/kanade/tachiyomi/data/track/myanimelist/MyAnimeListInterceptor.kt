@@ -7,14 +7,14 @@ import okhttp3.Response
 import okio.Buffer
 import org.json.JSONObject
 
-class MyAnimeListInterceptor(private val myanimelist: Myanimelist): Interceptor {
+class MyAnimeListInterceptor(private val myanimelist: Myanimelist) : Interceptor {
 
     override fun intercept(chain: Interceptor.Chain): Response {
         myanimelist.ensureLoggedIn()
 
         val request = chain.request()
         var response = chain.proceed(updateRequest(request))
-        if (response.code == 400){
+        if (response.code == 400) {
             myanimelist.refreshLogin()
             response = chain.proceed(updateRequest(request))
         }
@@ -45,13 +45,13 @@ class MyAnimeListInterceptor(private val myanimelist: Myanimelist): Interceptor 
         val formString = bodyToString(requestBody)
 
         return RequestBody.create(requestBody.contentType(),
-                "$formString${if (formString.isNotEmpty()) "&" else ""}${MyanimelistApi.CSRF}=${myanimelist.getCSRF()}")
+                "$formString${if (formString.isNotEmpty()) "&" else ""}${MyAnimelistApi.CSRF}=${myanimelist.getCSRF()}")
     }
 
     private fun updateJsonBody(requestBody: RequestBody): RequestBody {
         val jsonString = bodyToString(requestBody)
         val newBody = JSONObject(jsonString)
-                .put(MyanimelistApi.CSRF, myanimelist.getCSRF())
+                .put(MyAnimelistApi.CSRF, myanimelist.getCSRF())
 
         return RequestBody.create(requestBody.contentType(), newBody.toString())
     }

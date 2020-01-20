@@ -38,9 +38,7 @@ class TrackLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle) {
         username.setText(service.getUsername())
         password.setText(service.getPassword())
     }
-
-    override fun logout() = throw Exception("Not Used")
-
+    
     override fun checkLogin() {
         requestSubscription?.unsubscribe()
 

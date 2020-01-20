@@ -76,7 +76,7 @@ class SettingsLibraryController : SettingsController() {
             titleRes = R.string.pref_library_update_restriction
             entriesRes = arrayOf(R.string.wifi, R.string.charging)
             entryValues = listOf("wifi", "ac")
-            customSummartRes = R.string.pref_library_update_restriction_summary
+            customSummaryRes = R.string.pref_library_update_restriction_summary
 
             preferences.libraryUpdateInterval().asObservable()
                     .subscribeUntilDestroy { isVisible = it > 0 }

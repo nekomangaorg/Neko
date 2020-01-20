@@ -20,7 +20,7 @@ import org.jsoup.parser.Parser
 import rx.Observable
 
 
-class MyanimelistApi(private val client: OkHttpClient, interceptor: MyAnimeListInterceptor) {
+class MyAnimelistApi(private val client: OkHttpClient, interceptor: MyAnimeListInterceptor) {
 
     private val authClient = client.newBuilder().addInterceptor(interceptor).build()
 
@@ -31,8 +31,7 @@ class MyanimelistApi(private val client: OkHttpClient, interceptor: MyAnimeListI
                     .flatMap { Observable.from(it) }
                     .filter { it.title.contains(realQuery, true) }
                     .toList()
-        }
-        else {
+        } else {
             client.newCall(GET(searchUrl(query)))
                     .asObservable()
                     .flatMap { response ->
@@ -80,7 +79,7 @@ class MyanimelistApi(private val client: OkHttpClient, interceptor: MyAnimeListI
     fun findLibManga(track: Track): Observable<Track?> {
         return authClient.newCall(GET(url = listEntryUrl(track.media_id)))
                 .asObservable()
-                .map {response ->
+                .map { response ->
                     var libTrack: Track? = null
                     response.use {
                         if (it.priorResponse?.isRedirect != true) {
@@ -152,7 +151,7 @@ class MyanimelistApi(private val client: OkHttpClient, interceptor: MyAnimeListI
     private fun getListUrl(): Observable<String> {
         return authClient.newCall(POST(url = exportListUrl(), body = exportPostBody()))
                 .asObservable()
-                .map {response ->
+                .map { response ->
                     baseUrl + Jsoup.parse(response.consumeBody())
                             .select("div.goodresult")
                             .select("a")
@@ -207,7 +206,7 @@ class MyanimelistApi(private val client: OkHttpClient, interceptor: MyAnimeListI
                 .toString()
 
         private fun addUrl() = Uri.parse(baseModifyListUrl).buildUpon()
-                .appendPath( "add.json")
+                .appendPath("add.json")
                 .toString()
 
         private fun listEntryUrl(mediaId: Int) = Uri.parse(baseModifyListUrl).buildUpon()
@@ -274,6 +273,6 @@ class MyanimelistApi(private val client: OkHttpClient, interceptor: MyAnimeListI
             "Dropped" -> 4
             "Plan to Read" -> 6
             else -> 1
-            }
+        }
     }
 }

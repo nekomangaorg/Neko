@@ -10,13 +10,10 @@ import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.widget.SimpleTextWatcher
 import kotlinx.android.synthetic.main.pref_account_login.view.*
 import rx.Subscription
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
 abstract class LoginDialogPreference(bundle: Bundle? = null) : DialogController(bundle) {
@@ -46,8 +43,6 @@ abstract class LoginDialogPreference(bundle: Bundle? = null) : DialogController(
 
 
     fun onViewCreated(view: View) {
-        val source = Injekt.get<SourceManager>().get(args.getLong("key"))
-
         v = view.apply {
             show_password.setOnCheckedChangeListener { _, isChecked ->
                 if (isChecked)
@@ -98,6 +93,6 @@ abstract class LoginDialogPreference(bundle: Bundle? = null) : DialogController(
 
     protected abstract fun setCredentialsOnView(view: View)
 
-    open fun logout() { }
+    open fun logout() {}
 
 }

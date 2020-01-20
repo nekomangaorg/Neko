@@ -34,7 +34,7 @@ class SettingsSiteController : SettingsController(), MangadexLoginDialog.Listene
         preferenceScreen.addPreference(sourcePreference)
 
 
-        listPreference {
+        listPreference(activity) {
             key = PreferenceKeys.showR18
             titleRes = R.string.pref_show_r18_title
             entriesRes = arrayOf(R.string.pref_show_r18_no, R.string.pref_show_r18_all, R.string.pref_show_r18_show)
@@ -43,7 +43,7 @@ class SettingsSiteController : SettingsController(), MangadexLoginDialog.Listene
 
         }
 
-        listPreference {
+        listPreference(activity) {
             key = PreferenceKeys.imageServer
             titleRes = R.string.pref_image_server
             entries = Mangadex.SERVER_PREF_ENTRIES
