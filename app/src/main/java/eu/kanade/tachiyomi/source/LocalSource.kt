@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.source
 
 import android.content.Context
 import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.model.Filter
@@ -21,6 +22,7 @@ import rx.Observable
 import timber.log.Timber
 import java.io.File
 import java.io.FileInputStream
+import java.io.FileWriter
 import java.io.InputStream
 import java.util.Locale
 import java.util.Scanner
@@ -146,6 +148,42 @@ class LocalSource(private val context: Context) : CatalogueSource {
             manga.status = json["status"]?.asInt ?: manga.status
         }
         return Observable.just(manga)
+    }
+
+    fun updateMangaInfo(manga: SManga) {
+       val directory = getBaseDirectories(context).mapNotNull {  File(it, manga.url) }.find { it
+           .exists() } ?: return
+        val gson = GsonBuilder().setPrettyPrinting().create()
+        val file = File(directory, "info.json")
+        file.writeText(gson.toJson(manga.toJson()))
+    }
+
+    fun SManga.toJson():MangaJson {
+        return MangaJson(title, author, artist, description, genre?.split(", ")?.toTypedArray())
+    }
+
+    data class MangaJson(
+        val title:String,
+        val author:String?,
+        val artist:String?,
+        val description:String?,
+        val genre:Array<String>?
+    ) {
+
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+
+            other as MangaJson
+
+            if (title != other.title) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            return title.hashCode()
+        }
     }
 
     override fun fetchChapterList(manga: SManga): Observable<List<SChapter>> {

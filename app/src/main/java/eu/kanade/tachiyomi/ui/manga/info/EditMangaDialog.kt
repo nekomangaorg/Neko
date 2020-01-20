@@ -20,6 +20,7 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.glide.GlideApp
+import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.util.chop
@@ -83,38 +84,52 @@ class EditMangaDialog : DialogController {
             .signature(ObjectKey(MangaImpl.getLastCoverFetch(manga.id!!).toString()))
             .dontAnimate()
             .into(view.manga_cover)
+        val isLocal = manga.source == LocalSource.ID
 
-        if (manga.currentTitle() != manga.originalTitle())
-            view.manga_title.append(manga.currentTitle())
-        view.manga_title.hint = "${resources?.getString(R.string.title)}: ${manga.originalTitle()}"
+        if (isLocal) {
+            if (manga.title != manga.url)
+                view.manga_title.append(manga.title)
+            view.manga_title.hint = "${resources?.getString(R.string.title)}: ${manga.url}"
+            view.manga_author.append(manga.author ?: "")
+            view.manga_artist.append(manga.artist ?: "")
+            view.manga_description.append(manga.description ?: "")
+            view.manga_genres_tags.setTags(manga.genre?.split(", ") ?: emptyList())
+        }
+        else {
+            if (manga.currentTitle() != manga.originalTitle())
+                view.manga_title.append(manga.currentTitle())
+            view.manga_title.hint = "${resources?.getString(R.string.title)}: ${manga
+                .originalTitle()}"
 
-        if (manga.currentAuthor() != manga.originalAuthor())
-            view.manga_author.append(manga.currentAuthor())
-        if (!manga.originalAuthor().isNullOrBlank())
-            view.manga_author.hint = "${resources?.getString(R.string.manga_info_author_label)}: ${manga.originalAuthor()}"
+            if (manga.currentAuthor() != manga.originalAuthor())
+                view.manga_author.append(manga.currentAuthor())
+            if (!manga.originalAuthor().isNullOrBlank())
+                view.manga_author.hint = "${resources?.getString(R.string
+                    .manga_info_author_label)}: ${manga.originalAuthor()}"
 
-        if (manga.currentArtist() != manga.originalArtist())
-            view.manga_artist.append(manga.currentArtist())
-        if (!manga.originalArtist().isNullOrBlank())
-        view.manga_artist.hint = "${resources?.getString(R.string.manga_info_artist_label)}: ${manga.originalArtist()}"
+            if (manga.currentArtist() != manga.originalArtist())
+                view.manga_artist.append(manga.currentArtist())
+            if (!manga.originalArtist().isNullOrBlank())
+                view.manga_artist.hint = "${resources?.getString(R.string
+                    .manga_info_artist_label)}: ${manga.originalArtist()}"
 
+            if (manga.currentDesc() != manga.originalDesc())
+                view.manga_description.append(manga.currentDesc())
+            if (!manga.originalDesc().isNullOrBlank())
+                view.manga_description.hint = "${resources?.getString(R.string.description)}: ${manga
+                    .originalDesc()?.chop(15)}"
+            if (manga.currentGenres().isNullOrBlank().not()) {
+                view.manga_genres_tags.setTags(manga.currentGenres()?.split(", "))
+            }
+        }
         view.cover_layout.setOnClickListener {
             changeCover()
-        }
-
-        if (manga.currentDesc() != manga.originalDesc())
-            view.manga_description.append(manga.currentDesc())
-        if (!manga.originalDesc().isNullOrBlank())
-            view.manga_description.hint = "${resources?.getString(R.string.description)}: ${manga
-            .originalDesc()?.chop(15)}"
-        if (manga.currentGenres().isNullOrBlank().not()) {
-            view.manga_genres_tags.setTags(manga.currentGenres()?.split(", "))
         }
         view.reset_tags.setOnClickListener { resetTags() }
     }
 
     private fun resetTags() {
-        if (manga.originalGenres().isNullOrBlank())
+        if (manga.originalGenres().isNullOrBlank() || manga.source == LocalSource.ID)
             dialogView?.manga_genres_tags?.setTags(emptyList())
         else
             dialogView?.manga_genres_tags?.setTags(manga.originalGenres()?.split(", "))

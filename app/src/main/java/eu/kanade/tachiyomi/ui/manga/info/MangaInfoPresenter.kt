@@ -203,56 +203,67 @@ class MangaInfoPresenter(
 
     fun updateManga(title:String?, author:String?, artist: String?, uri: Uri?,
         description: String?, tags: Array<String>?) {
-        var changed = false
-        val title = title?.trim()
-        if (title.isNullOrBlank() && manga.currentTitle() != manga.originalTitle()) {
-            manga.title = manga.originalTitle()
-            changed = true
-        } else if (!title.isNullOrBlank() && title != manga.currentTitle()) {
-            manga.title = "${title}${SManga.splitter}${manga.originalTitle()}"
-            changed = true
+        if (manga.source == LocalSource.ID) {
+            manga.title = if (title.isNullOrBlank()) manga.url else title.trim()
+            manga.author = author?.trim()
+            manga.artist = artist?.trim()
+            manga.description = description?.trim()
+            val tagsString = tags?.joinToString(", ") { it.capitalize() }
+            manga.genre = if (tags.isNullOrEmpty()) null else tagsString?.trim()
+            LocalSource(downloadManager.context).updateMangaInfo(manga)
+            db.updateMangaInfo(manga).executeAsBlocking()
         }
+        else {
+            var changed = false
+            val title = title?.trim()
+            if (title.isNullOrBlank() && manga.currentTitle() != manga.originalTitle()) {
+                manga.title = manga.originalTitle()
+                changed = true
+            } else if (!title.isNullOrBlank() && title != manga.currentTitle()) {
+                manga.title = "${title}${SManga.splitter}${manga.originalTitle()}"
+                changed = true
+            }
 
-        val author = author?.trim()
-        if (author.isNullOrBlank() && manga.currentAuthor() != manga.originalAuthor()) {
-            manga.author = manga.originalAuthor()
-            changed = true
-        } else if (!author.isNullOrBlank() && author != manga.currentAuthor()) {
-            manga.author = "${author}${SManga.splitter}${manga.originalAuthor() ?: ""}"
-            changed = true
+            val author = author?.trim()
+            if (author.isNullOrBlank() && manga.currentAuthor() != manga.originalAuthor()) {
+                manga.author = manga.originalAuthor()
+                changed = true
+            } else if (!author.isNullOrBlank() && author != manga.currentAuthor()) {
+                manga.author = "${author}${SManga.splitter}${manga.originalAuthor() ?: ""}"
+                changed = true
+            }
+
+            val artist = artist?.trim()
+            if (artist.isNullOrBlank() && manga.currentArtist() != manga.originalArtist()) {
+                manga.artist = manga.originalArtist()
+                changed = true
+            } else if (!artist.isNullOrBlank() && artist != manga.currentArtist()) {
+                manga.artist = "${artist}${SManga.splitter}${manga.originalArtist() ?: ""}"
+                changed = true
+            }
+
+            val description = description?.trim()
+            if (description.isNullOrBlank() && manga.currentDesc() != manga.originalDesc()) {
+                manga.description = manga.originalDesc()
+                changed = true
+            } else if (!description.isNullOrBlank() && description != manga.currentDesc()) {
+                manga.description = "${description}${SManga.splitter}${manga.originalDesc() ?: ""}"
+                changed = true
+            }
+
+            var tagsString = tags?.joinToString(", ")
+            if (tagsString.isNullOrBlank() && manga.currentGenres() != manga.originalGenres()) {
+                manga.genre = manga.originalGenres()
+                changed = true
+            } else if (!tagsString.isNullOrBlank() && tagsString != manga.currentGenres()) {
+                tagsString = tags?.joinToString(", ") { it.capitalize() }
+                manga.genre = "${tagsString}${SManga.splitter}${manga.originalGenres() ?: ""}"
+                changed = true
+            }
+            if (changed) db.updateMangaInfo(manga).executeAsBlocking()
         }
-
-        val artist = artist?.trim()
-        if (artist.isNullOrBlank() && manga.currentArtist() != manga.currentArtist()) {
-            manga.artist = manga.originalArtist()
-            changed = true
-        } else if (!artist.isNullOrBlank() && artist != manga.currentArtist()) {
-            manga.artist = "${artist}${SManga.splitter}${manga.originalArtist() ?: ""}"
-            changed = true
-        }
-
-        val description = description?.trim()
-        if (description.isNullOrBlank() && manga.currentDesc() != manga.originalDesc()) {
-            manga.description = manga.originalDesc()
-            changed = true
-        } else if (!description.isNullOrBlank() && description != manga.currentDesc()) {
-            manga.description = "${description}${SManga.splitter}${manga.originalDesc() ?: ""}"
-            changed = true
-        }
-
-        var tagsString = tags?.joinToString(", ")
-        if (tagsString.isNullOrBlank() && manga.currentGenres() != manga.originalGenres()) {
-            manga.genre = manga.originalGenres()
-            changed = true
-        } else if (!tagsString.isNullOrBlank() && tagsString != manga.currentGenres()) {
-            tagsString = tags?.joinToString(", ") { it.capitalize() }
-            manga.genre = "${tagsString}${SManga.splitter}${manga.originalGenres() ?: ""}"
-            changed = true
-        }
-
         if (uri != null) editCoverWithStream(uri)
 
-        if (changed) db.updateMangaInfo(manga).executeAsBlocking()
     }
 
     private fun editCoverWithStream(uri: Uri): Boolean {
