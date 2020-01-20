@@ -57,7 +57,7 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
     override fun getLogoColor() = Color.rgb(18, 25, 35)
 
     override fun getStatusList(): List<Int> {
-        return listOf(READING, COMPLETED, PAUSED, DROPPED, PLANNING, REPEATING)
+        return listOf(READING, PLANNING, COMPLETED, REPEATING, PAUSED, DROPPED)
     }
 
     override fun getStatus(status: Int): String = with(context) {
