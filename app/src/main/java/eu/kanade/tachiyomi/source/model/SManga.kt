@@ -32,44 +32,26 @@ interface SManga : Serializable {
         return splitTitle.last()
     }
 
-    fun currentGenres(): String? {
-        val splitGenre = genre?.split(splitter) ?: return null
-        return splitGenre.first()
-    }
+    fun currentGenres() = split(genre, true)
 
-    fun originalGenres(): String? {
-        val splitGenre = genre?.split(splitter) ?: return null
-        return splitGenre.last()
-    }
+    fun originalGenres() = split(genre, false)
 
-    fun currentDesc(): String? {
-        val splitDesc = description?.split(splitter) ?: return null
-        return splitDesc.first()
-    }
+    fun currentDesc() = split(description, true)
 
-    fun originalDesc(): String? {
-        val splitDesc = description?.split(splitter) ?: return null
-        return splitDesc.last()
-    }
+    fun originalDesc() = split(description, false)
 
-    fun currentAuthor(): String? {
-        val splitAuth = author?.split(splitter) ?: return null
-        return splitAuth.first()
-    }
+    fun currentAuthor() = split(author, true)
 
-    fun originalAuthor(): String? {
-        val splitAuth = author?.split(splitter) ?: return null
-        return splitAuth.last()
-    }
+    fun originalAuthor() = split(author, false)
 
-    fun currentArtist(): String? {
-        val splitArtist = artist?.split(splitter) ?: return null
-        return splitArtist.first()
-    }
+    fun currentArtist() = split(artist, true)
 
-    fun originalArtist(): String? {
-        val splitArtist = artist?.split(splitter) ?: return null
-        return splitArtist.last()
+    fun originalArtist() = split(artist, false)
+
+    private fun split(string: String?, first: Boolean):String? {
+        val split = string?.split(splitter) ?: return null
+        val s = if (first) split.first() else split.last()
+        return if (s.isBlank()) null else s
     }
 
     fun copyFrom(other: SManga) {

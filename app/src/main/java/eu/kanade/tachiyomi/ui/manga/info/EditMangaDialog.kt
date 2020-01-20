@@ -102,7 +102,7 @@ class EditMangaDialog : DialogController {
             changeCover()
         }
 
-        if (manga.currentArtist() != manga.originalArtist())
+        if (manga.currentDesc() != manga.originalDesc())
             view.manga_description.append(manga.currentDesc())
         if (!manga.originalDesc().isNullOrBlank())
             view.manga_description.hint = "${resources?.getString(R.string.description)}: ${manga
@@ -114,7 +114,7 @@ class EditMangaDialog : DialogController {
     }
 
     private fun resetTags() {
-        if (manga.originalGenres().isNullOrBlank() || manga.originalGenres() == "null")
+        if (manga.originalGenres().isNullOrBlank())
             dialogView?.manga_genres_tags?.setTags(emptyList())
         else
             dialogView?.manga_genres_tags?.setTags(manga.originalGenres()?.split(", "))

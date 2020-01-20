@@ -204,6 +204,7 @@ class MangaInfoPresenter(
     fun updateManga(title:String?, author:String?, artist: String?, uri: Uri?,
         description: String?, tags: Array<String>?) {
         var changed = false
+        val title = title?.trim()
         if (title.isNullOrBlank() && manga.currentTitle() != manga.originalTitle()) {
             manga.title = manga.originalTitle()
             changed = true
@@ -212,27 +213,30 @@ class MangaInfoPresenter(
             changed = true
         }
 
+        val author = author?.trim()
         if (author.isNullOrBlank() && manga.currentAuthor() != manga.originalAuthor()) {
             manga.author = manga.originalAuthor()
             changed = true
         } else if (!author.isNullOrBlank() && author != manga.currentAuthor()) {
-            manga.author = "${author}${SManga.splitter}${manga.originalAuthor()}"
+            manga.author = "${author}${SManga.splitter}${manga.originalAuthor() ?: ""}"
             changed = true
         }
 
+        val artist = artist?.trim()
         if (artist.isNullOrBlank() && manga.currentArtist() != manga.currentArtist()) {
             manga.artist = manga.originalArtist()
             changed = true
         } else if (!artist.isNullOrBlank() && artist != manga.currentArtist()) {
-            manga.artist = "${artist}${SManga.splitter}${manga.originalArtist()}"
+            manga.artist = "${artist}${SManga.splitter}${manga.originalArtist() ?: ""}"
             changed = true
         }
 
+        val description = description?.trim()
         if (description.isNullOrBlank() && manga.currentDesc() != manga.originalDesc()) {
             manga.description = manga.originalDesc()
             changed = true
         } else if (!description.isNullOrBlank() && description != manga.currentDesc()) {
-            manga.description = "${description}${SManga.splitter}${manga.originalDesc()}"
+            manga.description = "${description}${SManga.splitter}${manga.originalDesc() ?: ""}"
             changed = true
         }
 
@@ -242,12 +246,11 @@ class MangaInfoPresenter(
             changed = true
         } else if (!tagsString.isNullOrBlank() && tagsString != manga.currentGenres()) {
             tagsString = tags?.joinToString(", ") { it.capitalize() }
-            manga.genre = "${tagsString}${SManga.splitter}${manga.originalGenres()}"
+            manga.genre = "${tagsString}${SManga.splitter}${manga.originalGenres() ?: ""}"
             changed = true
         }
 
         if (uri != null) editCoverWithStream(uri)
-
 
         if (changed) db.updateMangaInfo(manga).executeAsBlocking()
     }

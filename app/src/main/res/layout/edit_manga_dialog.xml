@@ -19,6 +19,7 @@
             android:layout_width="wrap_content"
             android:adjustViewBounds="true"
             android:layout_height="150dp"
+            android:contentDescription="@string/description_cover"
             android:background="@drawable/image_border_background"
             android:src="@mipmap/ic_launcher"/>
 
@@ -66,6 +67,16 @@
         android:inputType="text"
         android:maxLines="1"/>
 
+    <EditText
+        android:id="@+id/manga_description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:hint="@string/description"
+        android:inputType="text|textMultiLine"
+        android:scrollHorizontally="false" />
+
     <Button
         android:id="@+id/reset_tags"
         android:layout_width="wrap_content"
@@ -93,16 +104,6 @@
         app:atg_checkedBorderColor="@color/red_error"
         app:atg_borderColor="@color/md_blue_A400"
         app:atg_textColor="@color/md_blue_A400" />
-
-    <EditText
-        android:id="@+id/manga_description"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/description"
-        android:layout_marginEnd="16dp"
-        android:layout_marginStart="16dp"
-        android:inputType="text|textMultiLine"
-        android:scrollHorizontally="false"/>
 
     <View
         android:layout_width="match_parent"

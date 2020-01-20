@@ -293,6 +293,7 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         if (manga.currentGenres().isNullOrBlank().not()) {
             manga_genres_tags.setTags(manga.currentGenres()?.split(", "))
         }
+        else manga_genres_tags.setTags(emptyList())
 
         // Update description TextView.
         manga_summary.text = if (manga.currentDesc().isNullOrBlank()) {
