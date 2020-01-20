@@ -54,6 +54,7 @@ fun syncChaptersWithSource(db: DatabaseHelper,
             if (source is HttpSource) {
                 source.prepareNewChapter(sourceChapter, manga)
             }
+
             ChapterRecognition.parseChapterNumber(sourceChapter, manga)
 
             if (shouldUpdateDbChapter(dbChapter, sourceChapter)) {
@@ -91,7 +92,7 @@ fun syncChaptersWithSource(db: DatabaseHelper,
     db.inTransaction {
         val deletedChapterNumbers = TreeSet<Float>()
         val deletedReadChapterNumbers = TreeSet<Float>()
-        if (!toDelete.isEmpty()) {
+        if (toDelete.isNotEmpty()) {
             for (c in toDelete) {
                 if (c.read) {
                     deletedReadChapterNumbers.add(c.chapter_number)
@@ -101,8 +102,8 @@ fun syncChaptersWithSource(db: DatabaseHelper,
             db.deleteChapters(toDelete).executeAsBlocking()
         }
 
-        if (!toAdd.isEmpty()) {
-            // Set the date fetchFollows for new items in reverse order to allow another sorting method.
+        if (toAdd.isNotEmpty()) {
+            // Set the date fetch for new items in reverse order to allow another sorting method.
             // Sources MUST return the chapters from most to less recent, which is common.
             var now = Date().time
 
@@ -120,17 +121,16 @@ fun syncChaptersWithSource(db: DatabaseHelper,
             db.insertChapters(toAdd).executeAsBlocking()
         }
 
-        if (!toChange.isEmpty()) {
+        if (toChange.isNotEmpty()) {
             db.insertChapters(toChange).executeAsBlocking()
         }
 
         // Fix order in source.
         db.fixChaptersSourceOrder(sourceChapters).executeAsBlocking()
 
-        // Set this manga as updated since chapters were changed
-        val newestChaper = db.getChapters(manga).executeAsBlocking().maxBy { it.date_fetch }
-        val dateFetch = newestChaper?.date_fetch ?: manga.last_update
-        manga.last_update = dateFetch
+        // Set manga's last update time to latest chapter's fetch time if possible
+        val newestChapter = db.getChapters(manga).executeAsBlocking().maxBy { it.date_fetch }
+        manga.last_update = newestChapter?.date_fetch ?: manga.last_update
         db.updateLastUpdated(manga).executeAsBlocking()
     }
     return Pair(toAdd.subtract(readded).toList(), toDelete.subtract(readded).toList())
