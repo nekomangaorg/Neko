@@ -181,7 +181,7 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
         }
 
         if (preference is ListPreference) {
-            ListMatPreference(preference.context).apply {
+            ListMatPreference(activity, preference.context).apply {
                 key = preference.key
                 sharedPref = preference.fragment
                 otherPref = preference

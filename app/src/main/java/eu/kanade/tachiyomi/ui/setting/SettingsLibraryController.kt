@@ -51,7 +51,7 @@ class SettingsLibraryController : SettingsController() {
                         "${context.getString(R.string.landscape)}: $landscape"
                 }
         }
-        intListPreference {
+        intListPreference(activity) {
             key = Keys.libraryUpdateInterval
             titleRes = R.string.pref_library_update_interval
             entriesRes = arrayOf(R.string.update_never, R.string.update_1hour,
@@ -71,7 +71,7 @@ class SettingsLibraryController : SettingsController() {
                 true
             }
         }
-        multiSelectListPreferenceMat {
+        multiSelectListPreferenceMat(activity) {
             key = Keys.libraryUpdateRestriction
             titleRes = R.string.pref_library_update_restriction
             entriesRes = arrayOf(R.string.wifi, R.string.charging)
@@ -95,7 +95,7 @@ class SettingsLibraryController : SettingsController() {
 
         val dbCategories = db.getCategories().executeAsBlocking()
 
-        multiSelectListPreferenceMat {
+        multiSelectListPreferenceMat(activity) {
             key = Keys.libraryUpdateCategories
             titleRes = R.string.pref_library_update_categories
             entries = dbCategories.map { it.name }
@@ -114,7 +114,7 @@ class SettingsLibraryController : SettingsController() {
                         selectedCategories.joinToString { it.name }
                 }
         }
-        intListPreference {
+        intListPreference(activity) {
             key = Keys.libraryUpdatePrioritization
             titleRes = R.string.pref_library_update_prioritization
 
@@ -128,7 +128,7 @@ class SettingsLibraryController : SettingsController() {
             defaultValue = 0
             summaryRes = R.string.pref_library_update_prioritization_summary
         }
-        intListPreference {
+        intListPreference(activity) {
             key = Keys.defaultCategory
             titleRes = R.string.default_category
 

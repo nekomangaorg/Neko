@@ -59,7 +59,7 @@ class SettingsDownloadController : SettingsController() {
                 titleRes = R.string.pref_remove_after_marked_as_read
                 defaultValue = false
             }
-            intListPreference {
+            intListPreference(activity) {
                 key = Keys.removeAfterReadSlots
                 titleRes = R.string.pref_remove_after_read
                 entriesRes = arrayOf(R.string.disabled, R.string.last_read_chapter,
@@ -80,7 +80,7 @@ class SettingsDownloadController : SettingsController() {
                 titleRes = R.string.pref_download_new
                 defaultValue = false
             }
-            multiSelectListPreferenceMat {
+            multiSelectListPreferenceMat(activity) {
                 key = Keys.downloadNewCategories
                 titleRes = R.string.pref_download_new_categories
                 entries = dbCategories.map { it.name }

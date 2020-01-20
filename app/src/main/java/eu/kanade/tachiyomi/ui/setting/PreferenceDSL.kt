@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.setting
 
+import android.app.Activity
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.preference.*
@@ -40,19 +41,22 @@ inline fun PreferenceGroup.editTextPreference(block: (@DSL EditTextPreference).(
     return initThenAdd(EditTextPreference(context), block).also(::initDialog)
 }
 
-inline fun PreferenceGroup.listPreference(block: (@DSL ListMatPreference).() -> Unit):
+inline fun PreferenceGroup.listPreference(activity: Activity?, block: (@DSL ListMatPreference).()
+-> Unit):
     ListMatPreference {
-    return initThenAdd(ListMatPreference(context), block)
+    return initThenAdd(ListMatPreference(activity, context), block)
 }
 
-inline fun PreferenceGroup.intListPreference(block: (@DSL IntListMatPreference).() -> Unit):
+inline fun PreferenceGroup.intListPreference(activity: Activity?, block: (@DSL
+IntListMatPreference).() -> Unit):
     IntListMatPreference {
-    return initThenAdd(IntListMatPreference(context), block)
+    return initThenAdd(IntListMatPreference(activity, context), block)
 }
 
-inline fun PreferenceGroup.multiSelectListPreferenceMat(block: (@DSL MultiListMatPreference).()
+inline fun PreferenceGroup.multiSelectListPreferenceMat(activity: Activity?, block: (@DSL
+MultiListMatPreference).()
 -> Unit): MultiListMatPreference {
-    return initThenAdd(MultiListMatPreference(context), block)
+    return initThenAdd(MultiListMatPreference(activity, context), block)
 }
 
 inline fun PreferenceScreen.preferenceCategory(block: (@DSL PreferenceCategory).() -> Unit): PreferenceCategory {

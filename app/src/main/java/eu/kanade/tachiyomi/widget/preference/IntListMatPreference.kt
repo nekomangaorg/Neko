@@ -1,9 +1,11 @@
 package eu.kanade.tachiyomi.widget.preference
 
+import android.app.Activity
 import android.content.Context
 import android.util.AttributeSet
 import androidx.preference.Preference
 import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.callbacks.onDismiss
 import com.afollestad.materialdialogs.list.listItemsSingleChoice
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
@@ -11,11 +13,11 @@ import eu.kanade.tachiyomi.ui.setting.defaultValue
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class IntListMatPreference @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
+class IntListMatPreference @JvmOverloads constructor(activity: Activity?, context: Context,
+    attrs:
+AttributeSet? =
     null) :
-    Preference(context, attrs) {
-    private val prefs: PreferencesHelper = Injekt.get()
-
+    MatPreference(activity, context, attrs) {
     var entryValues:List<Int> = emptyList()
     var entryRange:IntRange
         get() = 0..0
@@ -36,14 +38,8 @@ class IntListMatPreference @JvmOverloads constructor(context: Context, attrs: At
         else entries[index]
     }
 
-    override fun onClick() {
-        dialog().show()
-    }
-
-    fun dialog(): MaterialDialog {
-        return MaterialDialog(context).apply {
-            title(text = title.toString())
-            negativeButton(android.R.string.cancel)
+    override fun dialog(): MaterialDialog {
+        return super.dialog().apply {
             val default = entryValues.indexOf(prefs.getInt(key, defValue).getOrDefault())
             listItemsSingleChoice(items = entries,
                 waitForPositiveButton = false,

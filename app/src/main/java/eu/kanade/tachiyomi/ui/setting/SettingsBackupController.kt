@@ -76,7 +76,7 @@ class SettingsBackupController : SettingsController() {
         preferenceCategory {
             titleRes = R.string.pref_backup_service_category
 
-            intListPreference {
+            intListPreference(activity) {
                 key = Keys.backupInterval
                 titleRes = R.string.pref_backup_interval
                 entriesRes = arrayOf(R.string.update_never, R.string.update_6hour,
@@ -117,7 +117,7 @@ class SettingsBackupController : SettingsController() {
                             summary = dir.filePath + "/automatic"
                         }
             }
-            val backupNumber = intListPreference {
+            val backupNumber = intListPreference(activity) {
                 key = Keys.numberOfBackups
                 titleRes = R.string.pref_backup_slots
                 entries = listOf("1", "2", "3", "4", "5")

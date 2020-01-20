@@ -17,7 +17,7 @@ class SettingsGeneralController : SettingsController() {
     override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
         titleRes = R.string.pref_category_general
 
-        listPreference {
+        listPreference(activity) {
             key = Keys.lang
             titleRes = R.string.pref_language
             entryValues = listOf("", "ar", "bg", "bn", "ca", "cs", "de", "el", "en-US", "en-GB",
@@ -40,7 +40,7 @@ class SettingsGeneralController : SettingsController() {
                 true
             }
         }
-        intListPreference {
+        intListPreference(activity) {
             key = Keys.theme
             titleRes = R.string.pref_theme
             entriesRes = arrayOf(R.string.light_theme, R.string.dark_theme,
@@ -54,7 +54,7 @@ class SettingsGeneralController : SettingsController() {
                 true
             }
         }
-        intListPreference {
+        intListPreference(activity) {
             key = Keys.startScreen
             titleRes = R.string.pref_start_screen
             entriesRes = arrayOf(R.string.label_library, R.string.label_recent_manga,
@@ -96,7 +96,7 @@ class SettingsGeneralController : SettingsController() {
                     true
                 }
             }
-            preference = intListPreference {
+            preference = intListPreference(activity) {
                 key = Keys.lockAfter
                 titleRes = R.string.lock_when_idle
                 isVisible = preferences.useBiometrics().getOrDefault()
