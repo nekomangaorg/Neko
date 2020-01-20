@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
 import eu.kanade.tachiyomi.network.GET
+import eu.kanade.tachiyomi.network.GETNoCache
 import eu.kanade.tachiyomi.network.asObservableSuccess
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
@@ -59,7 +60,7 @@ class MangaHandler(val client: OkHttpClient, val headers: Headers, val lang: Str
     }
 
     private fun apiRequest(manga: SManga): Request {
-        return GET(MdUtil.baseUrl + MdUtil.apiManga + MdUtil.getMangaId(manga.url), headers)
+        return GETNoCache(MdUtil.baseUrl + MdUtil.apiManga + MdUtil.getMangaId(manga.url), headers)
     }
 
     companion object {
