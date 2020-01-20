@@ -81,7 +81,7 @@ class PreferencesHelper(val context: Context) {
 
     fun cropBordersWebtoon() = rxPrefs.getBoolean(Keys.cropBordersWebtoon, false)
 
-    fun marginRatioWebtoon() = rxPrefs.getFloat(Keys.marginRatioWebtoon, 0f)
+    fun marginRatioWebtoon() = rxPrefs.getInteger(Keys.marginRatioWebtoon, 0)
 
     fun marginBetweenPagesWebtoon() = rxPrefs.getBoolean(Keys.marginBetweenPagesWebtoon, false)
 

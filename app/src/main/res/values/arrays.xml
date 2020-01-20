@@ -62,11 +62,11 @@
     </string-array>
 
     <string-array name="webtoon_margin_ratio_values">
-        <item>0.0</item>
-        <item>0.1</item>
-        <item>0.15</item>
-        <item>0.2</item>
-        <item>0.25</item>
+        <item>0</item>
+        <item>10</item>
+        <item>15</item>
+        <item>20</item>
+        <item>25</item>
     </string-array>
 
     <string-array name="image_scale_type_values">
@@ -98,7 +98,7 @@
         <item>@string/rotation_force_portrait</item>
         <item>@string/rotation_force_landscape</item>
     </string-array>
-    
+
     <string-array name="rotation_type_values">
         <item>1</item>
         <item>2</item>

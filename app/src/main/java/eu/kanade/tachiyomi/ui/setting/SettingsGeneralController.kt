@@ -6,7 +6,7 @@ import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.updater.UpdaterJob
-import eu.kanade.tachiyomi.widget.preference.IntListPreference
+import eu.kanade.tachiyomi.widget.preference.IntListMatPreference
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 
 class SettingsGeneralController : SettingsController() {
@@ -21,7 +21,7 @@ class SettingsGeneralController : SettingsController() {
             titleRes = R.string.pref_theme
             entriesRes = arrayOf(R.string.light_theme, R.string.dark_theme,
                     R.string.amoled_theme)
-            entryValues = 1..3
+            entryValues = listOf(1, 2, 3)
             defaultValue = 1
 
             onChange {
@@ -33,8 +33,8 @@ class SettingsGeneralController : SettingsController() {
             key = Keys.startScreen
             titleRes = R.string.pref_start_screen
             entriesRes = arrayOf(R.string.label_library, R.string.label_recent_manga,
-                R.string.label_recent_updates)
-            entryValues = 1..3
+                    R.string.label_recent_updates)
+            entryValues = listOf(1, 2, 3)
             defaultValue = 1
         }
         switchPreference {
@@ -60,7 +60,7 @@ class SettingsGeneralController : SettingsController() {
 
         val biometricManager = BiometricManager.from(context)
         if (biometricManager.canAuthenticate() == BiometricManager.BIOMETRIC_SUCCESS) {
-            var preference:IntListMatPreference? = null
+            var preference: IntListMatPreference? = null
             switchPreference {
                 key = Keys.useBiometrics
                 titleRes = R.string.lock_with_biometrics
@@ -81,7 +81,7 @@ class SettingsGeneralController : SettingsController() {
                         0 -> context.getString(R.string.lock_always)
                         -1 -> context.getString(R.string.lock_never)
                         else -> resources?.getQuantityString(R.plurals.lock_after_mins, it.toInt(),
-                            it)
+                                it)
                     }
                 }
                 entryValues = values

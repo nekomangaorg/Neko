@@ -38,7 +38,7 @@ class SettingsSiteController : SettingsController(), MangadexLoginDialog.Listene
             key = PreferenceKeys.showR18
             titleRes = R.string.pref_show_r18_title
             entriesRes = arrayOf(R.string.pref_show_r18_no, R.string.pref_show_r18_all, R.string.pref_show_r18_show)
-            entryValues = arrayOf("0", "1", "2")
+            entryValues = listOf("0", "1", "2")
             summary = "%s"
 
         }
@@ -63,6 +63,7 @@ class SettingsSiteController : SettingsController(), MangadexLoginDialog.Listene
         val pref = findPreference(getSourceKey(source.id)) as? LoginCheckBoxPreference
         pref?.notifyChanged()
     }
+
     private fun getSourceKey(sourceId: Long): String {
         return "source_$sourceId"
     }

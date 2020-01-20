@@ -47,14 +47,14 @@ class SettingsReaderController : SettingsController() {
             key = Keys.readerTheme
             titleRes = R.string.pref_reader_theme
             entriesRes = arrayOf(R.string.white_background, R.string.black_background)
-            entryValues = 0..1
-            defaultValue = "0"
+            entryValues = listOf(0, 1)
+            defaultValue = 0
         }
         intListPreference {
             key = Keys.doubleTapAnimationSpeed
             titleRes = R.string.pref_double_tap_anim_speed
             entries = listOf(context.getString(R.string.double_tap_anim_speed_0), context.getString(R
-                .string.double_tap_anim_speed_fast), context.getString(R.string.double_tap_anim_speed_normal))
+                    .string.double_tap_anim_speed_fast), context.getString(R.string.double_tap_anim_speed_normal))
             entryValues = listOf(1, 250, 500) // using a value of 0 breaks the image viewer, so
             // min is 1
             defaultValue = 500
@@ -126,7 +126,7 @@ class SettingsReaderController : SettingsController() {
                 entriesRes = arrayOf(R.string.webtoon_margin_ratio_0,
                         R.string.webtoon_margin_ratio_10, R.string.webtoon_margin_ratio_15,
                         R.string.webtoon_margin_ratio_20, R.string.webtoon_margin_ratio_25)
-                entryValues = arrayOf("0", "0.1", "0.15", "0.2", "0.25")
+                entryValues = listOf(0, 1, 15, 20, 25)
                 defaultValue = "0"
             }
         }
