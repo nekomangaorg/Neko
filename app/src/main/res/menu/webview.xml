@@ -4,21 +4,23 @@
 
     <item
         android:id="@+id/action_web_back"
-        android:icon="@drawable/ic_arrow_back_white"
         android:title="@string/action_webview_back"
         app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/action_web_forward"
-        android:icon="@drawable/ic_arrow_forward_white"
         android:title="@string/action_webview_forward"
         app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/action_web_refresh"
-        android:icon="@drawable/ic_refresh_white"
         android:title="@string/action_webview_refresh"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_web_share"
+        android:title="@string/action_share"
+        app:showAsAction="never" />
 
     <item
         android:id="@+id/action_web_browser"

@@ -9,7 +9,10 @@ import android.view.Menu
 import android.view.MenuItem
 import android.webkit.WebChromeClient
 import android.webkit.WebView
-import androidx.core.graphics.ColorUtils
+import com.mikepenz.iconics.IconicsDrawable
+import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
+import com.mikepenz.iconics.utils.colorInt
+import com.mikepenz.iconics.utils.sizeDp
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
@@ -33,6 +36,8 @@ class WebViewActivity : BaseActivity() {
         window.statusBarColor = getResourceColor(R.attr.colorPrimaryDark)
 
         title = intent.extras?.getString(TITLE_KEY)
+        toolbar.setNavigationIcon(IconicsDrawable(applicationContext!!)
+                .icon(MaterialDesignDx.Icon.gmf_close).colorInt(Color.WHITE).sizeDp(20))
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         toolbar.setNavigationOnClickListener {
@@ -105,9 +110,11 @@ class WebViewActivity : BaseActivity() {
         backItem?.isEnabled = webview.canGoBack()
         forwardItem?.isEnabled = webview.canGoForward()
 
-        val translucentWhite = ColorUtils.setAlphaComponent(Color.WHITE, 127)
-        backItem.icon?.setTint(if (webview.canGoBack()) Color.WHITE else translucentWhite)
-        forwardItem?.icon?.setTint(if (webview.canGoForward()) Color.WHITE else translucentWhite)
+        backItem.setIcon(IconicsDrawable(applicationContext!!)
+                .icon(MaterialDesignDx.Icon.gmf_arrow_back).colorInt(Color.WHITE).sizeDp(20))
+
+        forwardItem.setIcon(IconicsDrawable(applicationContext!!)
+                .icon(MaterialDesignDx.Icon.gmf_arrow_forward).colorInt(Color.WHITE).sizeDp(20))
 
         return super.onPrepareOptionsMenu(menu)
     }
