@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
 import eu.kanade.tachiyomi.network.GET
+import eu.kanade.tachiyomi.network.GETNoCache
 import eu.kanade.tachiyomi.network.asObservableSuccess
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.MangasPage
@@ -169,7 +170,7 @@ class SearchHandler(val client: OkHttpClient, private val headers: Headers, val 
     }
 
     private fun searchMangaByIdRequest(id: String): Request {
-        return GET(MdUtil.baseUrl + MdUtil.apiManga + id, headers)
+        return GETNoCache(MdUtil.baseUrl + MdUtil.apiManga + id, headers)
     }
 
     companion object {
