@@ -57,14 +57,14 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
     override fun getLogoColor() = Color.rgb(18, 25, 35)
 
     override fun getStatusList(): List<Int> {
-        return listOf(READING, COMPLETED, ON_HOLD, DROPPED, PLANNING, REPEATING)
+        return listOf(READING, PLANNING, COMPLETED, REPEATING, ON_HOLD, DROPPED)
     }
 
     override fun getStatus(status: Int): String = with(context) {
         when (status) {
             READING -> getString(R.string.reading)
             COMPLETED -> getString(R.string.completed)
-            ON_HOLD -> getString(R.string.on_hold)
+            ON_HOLD -> getString(R.string.paused)
             DROPPED -> getString(R.string.dropped)
             PLANNING -> getString(R.string.plan_to_read)
             REPEATING -> getString(R.string.repeating)
