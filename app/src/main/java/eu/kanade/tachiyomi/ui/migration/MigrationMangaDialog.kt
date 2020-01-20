@@ -22,10 +22,10 @@ class MigrationMangaDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
     }
 
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
-        val confirmRes = if (copy) R.string.confirm_copy else R.string.confirm_migration
-        val confirmString = applicationContext?.getString(confirmRes, mangaSet, (
-            if (mangaSkipped > 0)
-                " " + applicationContext?.getString(R.string.skipping_x, mangaSkipped) ?: ""
+        val confirmRes = if (copy) R.plurals.confirm_copy else R.plurals.confirm_migration
+        val confirmString = applicationContext?.resources?.getQuantityString(confirmRes, mangaSet,
+            mangaSet, (
+            if (mangaSkipped > 0) " " + applicationContext?.getString(R.string.skipping_x, mangaSkipped)
             else "")) ?: ""
         return MaterialDialog(activity!!).show {
             message(text = confirmString)

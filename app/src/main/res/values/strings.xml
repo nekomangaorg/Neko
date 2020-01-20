@@ -474,8 +474,14 @@
     <string name="download_all">All</string>
     <string name="download_unread">Unread</string>
     <string name="confirm_delete_chapters">Are you sure you want to delete selected chapters?</string>
-    <string name="confirm_migration">Migrate %1$d%2$s manga?</string>
-    <string name="confirm_copy">Copy %1$d%2$s manga?</string>
+    <plurals name="confirm_migration">
+        <item quantity="one">Migrate %1$d%2$s manga?</item>
+        <item quantity="other">Migrate %1$d%2$s manga?</item>
+    </plurals>
+    <plurals name="confirm_copy">
+        <item quantity="one">Copy %1$d%2$s manga?</item>
+        <item quantity="other">Copy %1$d%2$s manga?</item>
+    </plurals>
     <string name="skipping_x">(skipping %1$d)</string>
     <plurals name="manga_migrated">
         <item quantity="one">%d manga migrated</item>
@@ -570,11 +576,17 @@
     <string name="notification_update_progress">Update progress: %1$d/%2$d</string>
     <string name="notification_new_chapters">New chapters found</string>
     <plurals name="notification_new_chapters_text">
-        <item quantity="one">For %d titles</item>
+        <item quantity="one">For %d title</item>
         <item quantity="other">For %d titles</item>
     </plurals>
-    <string name="notification_and_n_more">and %1$d more chapters.</string>
-    <string name="notification_and_n_more_ext">and %1$d more extensions.</string>
+    <plurals name="notification_and_n_more">
+        <item quantity="one">and %1$d more chapter.</item>
+        <item quantity="other">and %1$d more chapters.</item>
+    </plurals>
+    <plurals name="notification_and_n_more_ext">
+        <item quantity="one">and %1$d more extension.</item>
+        <item quantity="other">and %1$d more extensions.</item>
+    </plurals>
     <string name="notification_cover_update_failed">Failed to update cover</string>
     <string name="notification_first_add_to_library">Please add the manga to your library before doing this</string>
     <string name="notification_not_connected_to_ac_title">Sync canceled</string>

@@ -492,7 +492,8 @@ class LibraryUpdateService(
                 color = ContextCompat.getColor(this@LibraryUpdateService, R.color.colorAccentLight)
                 val chaptersNames = if (chapterNames.size > 5) {
                     "${chapterNames.take(4).joinToString(", ")}, " +
-                        getString(R.string.notification_and_n_more, (chapterNames.size - 4))
+                        resources.getQuantityString(R.plurals.notification_and_n_more,
+                            (chapterNames.size - 4), (chapterNames.size - 4))
                 } else chapterNames.joinToString(", ")
                 setContentText(chaptersNames)
                 setStyle(NotificationCompat.BigTextStyle().bigText(chaptersNames))

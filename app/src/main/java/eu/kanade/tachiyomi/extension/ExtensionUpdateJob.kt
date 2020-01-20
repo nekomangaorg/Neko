@@ -42,8 +42,10 @@ class ExtensionUpdateJob : Job() {
                                 )
                             )
                             val extNames = if (names.size > 5) {
-                                "${names.take(4).joinToString(", ")}, " + context.getString(
-                                    R.string.notification_and_n_more, (names.size - 4)
+                                "${names.take(4).joinToString(", ")}, " +
+                                    context.resources.getQuantityString(
+                                    R.plurals.notification_and_n_more_ext,
+                                        (names.size - 4), (names.size - 4)
                                 )
                             } else names.joinToString(", ")
                             setContentText(extNames)
