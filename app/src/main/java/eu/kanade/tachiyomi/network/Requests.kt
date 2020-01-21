@@ -18,17 +18,6 @@ fun GET(url: String,
             .build()
 }
 
-fun GETNoCache(url: String,
-               headers: Headers = DEFAULT_HEADERS,
-               cache: CacheControl = CacheControl.FORCE_NETWORK): Request {
-
-    return Request.Builder()
-            .url(url)
-            .headers(headers)
-            .cacheControl(cache)
-            .build()
-}
-
 fun POST(url: String,
          headers: Headers = DEFAULT_HEADERS,
          body: RequestBody = DEFAULT_BODY,

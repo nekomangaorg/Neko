@@ -1,13 +1,13 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
 import eu.kanade.tachiyomi.network.GET
-import eu.kanade.tachiyomi.network.GETNoCache
 import eu.kanade.tachiyomi.network.asObservableSuccess
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okhttp3.CacheControl
 import okhttp3.Headers
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -60,7 +60,7 @@ class MangaHandler(val client: OkHttpClient, val headers: Headers, val lang: Str
     }
 
     private fun apiRequest(manga: SManga): Request {
-        return GETNoCache(MdUtil.baseUrl + MdUtil.apiManga + MdUtil.getMangaId(manga.url), headers)
+        return GET(MdUtil.baseUrl + MdUtil.apiManga + MdUtil.getMangaId(manga.url), headers, CacheControl.FORCE_NETWORK)
     }
 
     companion object {

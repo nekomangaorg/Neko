@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
 import eu.kanade.tachiyomi.network.GET
-import eu.kanade.tachiyomi.network.GETNoCache
 import eu.kanade.tachiyomi.network.asObservableSuccess
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.MangasPage
@@ -9,11 +8,8 @@ import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.asJsoup
 import eu.kanade.tachiyomi.util.setUrlWithoutDomain
-import okhttp3.Headers
+import okhttp3.*
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.Response
 import org.jsoup.nodes.Element
 import rx.Observable
 
@@ -170,7 +166,7 @@ class SearchHandler(val client: OkHttpClient, private val headers: Headers, val 
     }
 
     private fun searchMangaByIdRequest(id: String): Request {
-        return GETNoCache(MdUtil.baseUrl + MdUtil.apiManga + id, headers)
+        return GET(MdUtil.baseUrl + MdUtil.apiManga + id, headers, CacheControl.FORCE_NETWORK)
     }
 
     companion object {
