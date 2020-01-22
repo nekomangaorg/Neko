@@ -139,10 +139,10 @@ open class MainActivity : BaseActivity() {
         if (trulyGoBack) return
 
         // Do not let the launcher create a new activity http://stackoverflow.com/questions/16283079
-       /* if (!isTaskRoot) {
+        if (!isTaskRoot) {
             finish()
             return
-        }*/
+        }
 
         setContentView(R.layout.main_activity)
 

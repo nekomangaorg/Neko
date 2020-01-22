@@ -70,9 +70,6 @@ class SearchActivity: MainActivity() {
 
         tabAnimator = TabsAnimator(sTabs)
 
-        // Set behavior of Navigation drawer
-        //router.setRoot(controller.withFadeTransaction().tag(id.toString()))
-
         val container: ViewGroup = findViewById(R.id.controller_container)
 
         val content: LinearLayout = findViewById(R.id.main_content)
@@ -171,14 +168,7 @@ class SearchActivity: MainActivity() {
 
     private fun Context.popToRoot() {
         val intent = Intent(this, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK or Intent
-                .FLAG_ACTIVITY_REORDER_TO_FRONT
-
-            action = when (preferences.startScreen()) {
-                2 -> SHORTCUT_RECENTLY_READ
-                3 -> SHORTCUT_RECENTLY_UPDATED
-                else -> SHORTCUT_LIBRARY
-            }
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
         }
         startActivity(intent)
         finishAfterTransition()
