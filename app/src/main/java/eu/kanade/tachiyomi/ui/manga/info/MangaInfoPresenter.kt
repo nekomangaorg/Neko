@@ -13,6 +13,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.download.DownloadManager
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.SManga
@@ -275,6 +276,7 @@ class MangaInfoPresenter(
         }
 
         if (manga.thumbnail_url != null && manga.favorite) {
+            Injekt.get<PreferencesHelper>().refreshCoversToo().set(false)
             coverCache.copyToCache(manga.thumbnail_url!!, inputStream)
             MangaImpl.setLastCoverFetch(manga.id!!, Date().time)
             return true

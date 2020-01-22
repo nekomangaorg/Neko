@@ -3,17 +3,15 @@ package eu.kanade.tachiyomi.ui.manga.info
 import android.app.Activity
 import android.app.Dialog
 import android.content.Intent
-import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.view.WindowManager
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.customview.customView
+import com.afollestad.materialdialogs.internal.main.DialogLayout
 import com.bluelinelabs.conductor.Router
 import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.request.target.CustomTarget
-import com.bumptech.glide.request.transition.Transition
 import com.bumptech.glide.signature.ObjectKey
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -22,17 +20,13 @@ import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
-import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.util.chop
 import eu.kanade.tachiyomi.util.toast
 import kotlinx.android.synthetic.main.edit_manga_dialog.view.*
-import kotlinx.android.synthetic.main.edit_manga_dialog.view.manga_title
-import me.gujun.android.taggroup.TagGroup
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.IOException
-import java.io.InputStream
 
 class EditMangaDialog : DialogController {
 
@@ -59,20 +53,18 @@ class EditMangaDialog : DialogController {
         .executeAsBlocking()!!
     }
 
-    override fun showDialog(router: Router) {
-        super.showDialog(router)
-        dialog?.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN)
-    }
-
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
         val dialog = MaterialDialog(activity!!).apply {
             customView(viewRes = R.layout.edit_manga_dialog, scrollable = true)
             negativeButton(android.R.string.cancel)
             positiveButton(R.string.action_save) { onPositiveButtonClick() }
         }
-
         dialogView = dialog.view
         onViewCreated(dialog.view, savedViewState)
+        dialog.setOnShowListener {
+            val dView = (it as? MaterialDialog)?.view
+            dView?.contentLayout?.scrollView?.scrollTo(0, 0)
+        }
         return dialog
     }
 
@@ -122,6 +114,7 @@ class EditMangaDialog : DialogController {
                 view.manga_genres_tags.setTags(manga.currentGenres()?.split(", "))
             }
         }
+        view.manga_genres_tags.clearFocus()
         view.cover_layout.setOnClickListener {
             changeCover()
         }
