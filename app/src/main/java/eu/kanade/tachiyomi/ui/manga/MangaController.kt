@@ -110,7 +110,19 @@ class MangaController : RxController, TabbedController {
         super.onChangeStarted(handler, type)
         if (type.isEnter) {
             activity?.tabs?.setupWithViewPager(manga_pager)
+            checkInitialTrackState()
             trackingIconSubscription = trackingIconRelay.subscribe { setTrackingIconInternal(it) }
+        }
+    }
+
+    private fun checkInitialTrackState() {
+        val manga = manga ?: return
+        val loggedServices by lazy { Injekt.get<TrackManager>().services.filter { it.isLogged } }
+        val db = Injekt.get<DatabaseHelper>()
+        val tracks = db.getTracks(manga).executeAsBlocking()
+
+        if (loggedServices.any { service -> tracks.any { it.sync_id == service.id } }) {
+            setTrackingIcon(true)
         }
     }
 
