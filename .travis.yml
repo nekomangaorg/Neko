@@ -42,4 +42,4 @@ after_sucess:
 - .deploy-test.sh
 
 script:
-  - ./gradlew clean assembleStandardDebug -Pbuild=devCI
+  - ./gradlew clean assembleDebug
