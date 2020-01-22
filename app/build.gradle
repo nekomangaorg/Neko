@@ -86,6 +86,32 @@ android {
             versionName "-${getCommitCount()}"
         }
     }
+    
+    def build_param = "${build}"
+
+    if (build_param == "devCI") {
+        // Exclude all except mockDebug flavor
+        android.variantFilter { variant ->
+        if (variant.getFlavors().get(0).name != 'mock' || variant.buildType.name != 'debug') {
+            variant.setIgnore(true)
+        }
+    }
+    } else if (build_param == "releaseCI") {
+         // Exclude all except prodRelease flavor
+         android.variantFilter { variant ->
+        if (variant.getFlavors().get(0).name != 'prod' || variant.buildType.name != 'release') {
+            variant.setIgnore(true)
+        }
+        }
+    } else {
+        // Normal local machine dev
+        // Exclude mockRelease as it's not needed.
+         android.variantFilter { variant ->
+        if(variant.buildType.name == 'release' && variant.getFlavors().get(0).name == 'mock') {
+            variant.setIgnore(true)
+        }
+        }
+    }
 
     packagingOptions {
         exclude 'META-INF/DEPENDENCIES'
