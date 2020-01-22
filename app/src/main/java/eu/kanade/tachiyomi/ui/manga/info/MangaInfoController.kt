@@ -55,14 +55,15 @@ import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
+import eu.kanade.tachiyomi.util.getUriCompat
 import eu.kanade.tachiyomi.util.snack
 import eu.kanade.tachiyomi.util.toast
 import eu.kanade.tachiyomi.util.truncateCenter
-import eu.kanade.tachiyomi.util.*
 import jp.wasabeef.glide.transformations.CropSquareTransformation
 import jp.wasabeef.glide.transformations.MaskTransformation
 import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.android.synthetic.main.manga_info_controller.*
+import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 import java.io.File
 import java.text.DecimalFormat
@@ -212,73 +213,77 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
     private fun setMangaInfo(manga: Manga) {
         val view = view ?: return
 
-        //update full title TextView.
-        manga_full_title.text = if (manga.title.isBlank()) {
-            view.context.getString(R.string.unknown)
-        } else {
-            manga.title
+        try {
+            //update full title TextView.
+            manga_full_title.text = if (manga.title.isBlank()) {
+                view.context.getString(R.string.unknown)
+            } else {
+                manga.title
+            }
+
+            // Update artist TextView.
+            manga_artist.text = if (manga.artist.isNullOrBlank()) {
+                view.context.getString(R.string.unknown)
+            } else {
+                manga.artist
+            }
+
+            // Update author TextView.
+            manga_author.text = if (manga.author.isNullOrBlank()) {
+                view.context.getString(R.string.unknown)
+            } else {
+                manga.author
+            }
+
+            // If manga lang flag is known
+            manga_lang_flag.visibility = View.VISIBLE
+            when (manga.lang_flag?.toLowerCase(Locale.US)) {
+                "cn" -> manga_lang_flag.setImageResource(R.drawable.ic_flag_china);
+                "kr" -> manga_lang_flag.setImageResource(R.drawable.ic_flag_korea);
+                "jp" -> manga_lang_flag.setImageResource(R.drawable.ic_flag_japan);
+                else -> manga_lang_flag.visibility = View.GONE
+            }
+            // Update genres list
+            if (manga.genre.isNullOrBlank().not()) {
+                manga_genres_tags.setTags(manga.genre?.split(", "))
+            }
+
+            // Update description TextView.
+            manga_summary.text = if (manga.description.isNullOrBlank()) {
+                view.context.getString(R.string.unknown)
+            } else {
+                manga.description
+            }
+
+            // Update status TextView.
+            manga_status.setText(when (manga.status) {
+                SManga.ONGOING -> R.string.ongoing
+                SManga.COMPLETED -> R.string.completed
+                SManga.LICENSED -> R.string.licensed
+                SManga.PUBLICATION_COMPLETE -> R.string.publication_complete
+                SManga.HIATUS -> R.string.hiatus
+                SManga.CANCELLED -> R.string.cancelled
+                else -> R.string.unknown
+            })
+
+            // Update status TextView.
+            follows_spinner.setText(when (manga.follow_status) {
+                SManga.FollowStatus.COMPLETED -> R.string.follows_completed
+                SManga.FollowStatus.DROPPED -> R.string.follows_dropped
+                SManga.FollowStatus.ON_HOLD -> R.string.follows_on_hold
+                SManga.FollowStatus.PLAN_TO_READ -> R.string.follows_plan_to_read
+                SManga.FollowStatus.READING -> R.string.follows_reading
+                SManga.FollowStatus.RE_READING -> R.string.follows_re_reading
+                else -> R.string.follows_unfollowed
+            })
+
+            // Set the favorite drawable to the correct one.
+            setFavoriteDrawable(manga.favorite)
+
+            setCover(manga)
+        } catch (e: Exception) {
+            Timber.e(e)
         }
-
-        // Update artist TextView.
-        manga_artist.text = if (manga.artist.isNullOrBlank()) {
-            view.context.getString(R.string.unknown)
-        } else {
-            manga.artist
-        }
-
-        // Update author TextView.
-        manga_author.text = if (manga.author.isNullOrBlank()) {
-            view.context.getString(R.string.unknown)
-        } else {
-            manga.author
-        }
-
-        // If manga lang flag is known
-        manga_lang_flag.visibility = View.VISIBLE
-        when (manga.lang_flag?.toLowerCase(Locale.US)) {
-            "cn" -> manga_lang_flag.setImageResource(R.drawable.ic_flag_china);
-            "kr" -> manga_lang_flag.setImageResource(R.drawable.ic_flag_korea);
-            "jp" -> manga_lang_flag.setImageResource(R.drawable.ic_flag_japan);
-            else -> manga_lang_flag.visibility = View.GONE
-        }
-        // Update genres list
-        if (manga.genre.isNullOrBlank().not()) {
-            manga_genres_tags.setTags(manga.genre?.split(", "))
-        }
-
-        // Update description TextView.
-        manga_summary.text = if (manga.description.isNullOrBlank()) {
-            view.context.getString(R.string.unknown)
-        } else {
-            manga.description
-        }
-
-        // Update status TextView.
-        manga_status.setText(when (manga.status) {
-            SManga.ONGOING -> R.string.ongoing
-            SManga.COMPLETED -> R.string.completed
-            SManga.LICENSED -> R.string.licensed
-            SManga.PUBLICATION_COMPLETE -> R.string.publication_complete
-            SManga.HIATUS -> R.string.hiatus
-            SManga.CANCELLED -> R.string.cancelled
-            else -> R.string.unknown
-        })
-
-        // Update status TextView.
-        follows_spinner.setText(when (manga.follow_status) {
-            SManga.FollowStatus.COMPLETED -> R.string.follows_completed
-            SManga.FollowStatus.DROPPED -> R.string.follows_dropped
-            SManga.FollowStatus.ON_HOLD -> R.string.follows_on_hold
-            SManga.FollowStatus.PLAN_TO_READ -> R.string.follows_plan_to_read
-            SManga.FollowStatus.READING -> R.string.follows_reading
-            SManga.FollowStatus.RE_READING -> R.string.follows_re_reading
-            else -> R.string.follows_unfollowed
-        })
-
-        // Set the favorite drawable to the correct one.
-        setFavoriteDrawable(manga.favorite)
-
-        setCover(manga)
 
     }
 
@@ -465,6 +470,7 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
      */
     fun onFetchMangaError(error: Throwable) {
         setRefreshing(false)
+        Timber.e(error)
         activity?.toast(error.message)
     }
 

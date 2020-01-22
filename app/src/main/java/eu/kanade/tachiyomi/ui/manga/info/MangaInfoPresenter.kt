@@ -14,7 +14,7 @@ import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
 import eu.kanade.tachiyomi.util.DiskUtil
-import eu.kanade.tachiyomi.util.isNullOrUnsubscribed
+import kotlinx.coroutines.*
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
@@ -25,6 +25,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
 import java.util.*
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Presenter of MangaInfoFragment.
@@ -40,21 +41,22 @@ class MangaInfoPresenter(
         private val db: DatabaseHelper = Injekt.get(),
         private val downloadManager: DownloadManager = Injekt.get(),
         private val coverCache: CoverCache = Injekt.get()
-) : BasePresenter<MangaInfoController>() {
+) : BasePresenter<MangaInfoController>(), CoroutineScope {
 
     /**
      * Subscription to send the manga to the view.
      */
     private var viewMangaSubscription: Subscription? = null
 
-    /**
-     * Subscription to update the manga from the source.
-     */
-    private var fetchMangaSubscription: Subscription? = null
+    private lateinit var job: Job
+
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.IO + job
 
     override fun onCreate(savedState: Bundle?) {
         super.onCreate(savedState)
-        sendMangaToView()
+
+        job = Job()
 
         // Update chapter count
         chapterCountRelay.observeOn(AndroidSchedulers.mainThread())
@@ -70,34 +72,45 @@ class MangaInfoPresenter(
                 .subscribeLatestCache(MangaInfoController::setLastUpdateDate)
     }
 
+    override fun onTakeView(view: MangaInfoController?) {
+        super.onTakeView(view)
+        sendMangaToView()
+    }
+
     /**
      * Sends the active manga to the view.
      */
     fun sendMangaToView() {
-        viewMangaSubscription?.let { remove(it) }
-        viewMangaSubscription = Observable.just(manga)
-                .subscribeLatestCache({ view, manga -> view.onNextManga(manga, source) })
+        view?.onNextManga(manga, source)
     }
 
     /**
      * Fetch manga information from source.
      */
     fun fetchMangaFromSource() {
-        if (!fetchMangaSubscription.isNullOrUnsubscribed()) return
-        fetchMangaSubscription = Observable.defer { source.fetchMangaDetailsObservable(manga) }
-                .map { networkManga ->
-                    manga.copyFrom(networkManga)
-                    manga.initialized = true
-                    db.insertManga(manga).executeAsBlocking()
-                    manga
-                    coverCache.deleteFromCache(manga.thumbnail_url)
-                }
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnNext { sendMangaToView() }
-                .subscribeFirst({ view, _ ->
-                    view.onFetchMangaDone()
-                }, MangaInfoController::onFetchMangaError)
+
+        job.isActive.let { return@let }
+
+        job = launch(CoroutineExceptionHandler { _, _ -> MangaInfoController::onFetchMangaError })
+        {
+            val networkManga = source.fetchMangaDetails(manga)
+            val fetchMangaFollowStatus = source.fetchMangaFollowStatus(manga)
+            manga.copyFrom(networkManga)
+            manga.follow_status = fetchMangaFollowStatus
+            manga.initialized = true
+            db.insertManga(manga).executeAsBlocking()
+            coverCache.deleteFromCache(manga.thumbnail_url)
+
+            withContext(Dispatchers.Main) {
+                sendMangaToView()
+                view?.onFetchMangaDone()
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        job.cancel()
+        super.onDestroy()
     }
 
     /**

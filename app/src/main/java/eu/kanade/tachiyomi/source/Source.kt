@@ -54,6 +54,11 @@ interface Source {
      */
     suspend fun fetchAllFollows(): List<SManga>
 
+    /**returns the follow status for the single manga
+     *
+     */
+    suspend fun fetchMangaFollowStatus(manga: SManga): SManga.FollowStatus
+
     /**
      * Returns the list of filters for the source.
      */
