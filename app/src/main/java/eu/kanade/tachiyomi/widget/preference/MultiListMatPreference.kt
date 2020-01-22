@@ -21,7 +21,6 @@ class MultiListMatPreference @JvmOverloads constructor(activity: Activity?, cont
         get() = 0
         set(value) { customSummary = context.getString(value) }
     var customSummary:String? = null
-    var positions:IntArray? = null
 
     override fun getSummary(): CharSequence {
         return customSummary ?: super.getSummary()
@@ -29,32 +28,34 @@ class MultiListMatPreference @JvmOverloads constructor(activity: Activity?, cont
 
     @SuppressLint("CheckResult")
     override fun MaterialDialog.setItems() {
+        val set = prefs.getStringSet(key, emptySet()).getOrDefault()
+        var default = set.mapNotNull {
+            if (entryValues.indexOf(it) == -1) null
+            else entryValues.indexOf(it) + if (allSelectionRes != null) 1 else 0 }
+            .toIntArray()
+        if (allSelectionRes != null && default.isEmpty()) default = intArrayOf(0)
+        val items = if (allSelectionRes != null)
+            (listOf(context.getString(allSelectionRes!!)) + entries) else entries
         positiveButton(android.R.string.ok) {
-            var value = positions?.map {
+            val pos = mutableListOf<Int>()
+            for (i in items.indices)
+                if (!(allSelectionRes != null && i == 0) && isItemChecked(i)) pos.add(i)
+            var value = pos.map {
                 entryValues[it - if (allSelectionRes != null) 1 else 0] }?.toSet() ?: emptySet()
             if (allSelectionRes != null && isItemChecked(0)) value = emptySet()
             prefs.getStringSet(key, emptySet()).set(value)
             callChangeListener(value)
             this@MultiListMatPreference.summary = this@MultiListMatPreference.summary
         }
-        val set = prefs.getStringSet(key, emptySet()).getOrDefault()
-        var default = set.map {
-            entryValues.indexOf(it) + if (allSelectionRes != null) 1 else 0 }
-            .toIntArray()
-        if (allSelectionRes != null && default.isEmpty()) default = intArrayOf(0)
-        val items = if (allSelectionRes != null)
-            (listOf(context.getString(allSelectionRes!!)) + entries) else entries
         listItemsMultiChoice(items = items,
             allowEmptySelection = true,
             disabledIndices = if (allSelectionRes != null) intArrayOf(0) else null,
             waitForPositiveButton = false,
             initialSelection = default) { _, pos, _ ->
-            positions = pos
             if (allSelectionRes != null) {
                 if (pos.isEmpty()) checkItem(0)
                 else uncheckItem(0)
             }
-            callChangeListener(positions)
         }
     }
 }
