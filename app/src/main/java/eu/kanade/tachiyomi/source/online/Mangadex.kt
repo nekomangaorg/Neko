@@ -62,8 +62,8 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         return clientBuilder()
     }
 
-    fun changeFollowStatus(manga: SManga): Observable<Boolean> {
-        return FollowsHandler(clientBuilder(), headers).changeFollowStatus(manga)
+    override suspend fun changeFollowStatus(manga: SManga, followStatus: SManga.FollowStatus): Boolean {
+        return FollowsHandler(clientBuilder(), headers).changeFollowStatus(manga, followStatus)
     }
 
     fun fetchRandomMangaId(): Observable<String> {

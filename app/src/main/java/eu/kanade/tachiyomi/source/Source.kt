@@ -60,6 +60,11 @@ interface Source {
     suspend fun fetchMangaFollowStatus(manga: SManga): SManga.FollowStatus
 
     /**
+     * updates the follow status for a manga
+     */
+    suspend fun changeFollowStatus(manga: SManga, followStatus: SManga.FollowStatus): Boolean
+
+    /**
      * Returns the list of filters for the source.
      */
     fun getFilterList(): FilterList

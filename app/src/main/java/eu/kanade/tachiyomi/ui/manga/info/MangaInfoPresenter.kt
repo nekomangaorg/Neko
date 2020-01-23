@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.source.Source
+import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
 import eu.kanade.tachiyomi.util.DiskUtil
 import kotlinx.coroutines.*
@@ -91,6 +92,8 @@ class MangaInfoPresenter(
 
         job.isActive.let { return@let }
 
+        job = Job()
+
         job = launch(CoroutineExceptionHandler { _, _ -> MangaInfoController::onFetchMangaError })
         {
             val networkManga = source.fetchMangaDetails(manga)
@@ -104,6 +107,31 @@ class MangaInfoPresenter(
             withContext(Dispatchers.Main) {
                 sendMangaToView()
                 view?.onFetchMangaDone()
+            }
+        }
+    }
+
+    /**
+     * Fetch manga information from source.
+     */
+    fun updateMangaFollowStatus(position: Int) {
+
+        job.isActive.let { return@let }
+
+        job = Job()
+
+        val followStatus = SManga.FollowStatus.values()[position]
+
+        job = launch(CoroutineExceptionHandler { _, _ -> MangaInfoController::onUpdateFollowsMangaError })
+        {
+
+            val result = source.changeFollowStatus(manga, followStatus)
+            withContext(Dispatchers.Main) {
+                if (result) {
+                    view?.updateFollowsButton(followStatus)
+                } else {
+                    view?.onUpdateFollowsMangaError(Exception("Error Updating Follows"))
+                }
             }
         }
     }

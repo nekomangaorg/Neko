@@ -18,6 +18,7 @@ import android.os.Bundle
 import android.view.*
 import android.view.animation.DecelerateInterpolator
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
@@ -266,16 +267,25 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
                 else -> R.string.unknown
             })
 
-            // Update status TextView.
-            follows_spinner.setText(when (manga.follow_status) {
-                SManga.FollowStatus.COMPLETED -> R.string.follows_completed
-                SManga.FollowStatus.DROPPED -> R.string.follows_dropped
-                SManga.FollowStatus.ON_HOLD -> R.string.follows_on_hold
-                SManga.FollowStatus.PLAN_TO_READ -> R.string.follows_plan_to_read
-                SManga.FollowStatus.READING -> R.string.follows_reading
-                SManga.FollowStatus.RE_READING -> R.string.follows_re_reading
-                else -> R.string.follows_unfollowed
-            })
+
+            updateFollowsButton(manga.follow_status)
+
+            follows_button.setOnClickListener {
+
+                val followsList = resources!!.getStringArray(R.array.follows_options).asList()
+                val initialPosition = followsList.indexOf(follows_button.text)
+                MaterialDialog(activity!!).show {
+                    title(text = "Change Follow Status?")
+                    listItemsSingleChoice(res = R.array.follows_options, initialSelection = initialPosition, waitForPositiveButton = true) { _, index, text ->
+                        if (index != initialPosition) {
+                            switchProgressBar(View.VISIBLE)
+                            presenter.updateMangaFollowStatus(index)
+                        }
+                    }
+                    positiveButton()
+
+                }
+            }
 
             // Set the favorite drawable to the correct one.
             setFavoriteDrawable(manga.favorite)
@@ -285,6 +295,10 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
             Timber.e(e)
         }
 
+    }
+
+    private fun switchProgressBar(visibility: Int) {
+        manga_info_progress_bar?.visibility = visibility
     }
 
     private fun setCover(manga: Manga) {
@@ -463,6 +477,31 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
      */
     fun onFetchMangaDone() {
         setRefreshing(false)
+    }
+
+    fun updateFollowsButton(followStatus: SManga.FollowStatus?) {
+// Update status TextView.
+        val followsRes = when (followStatus) {
+            SManga.FollowStatus.COMPLETED -> R.string.follows_completed
+            SManga.FollowStatus.DROPPED -> R.string.follows_dropped
+            SManga.FollowStatus.ON_HOLD -> R.string.follows_on_hold
+            SManga.FollowStatus.PLAN_TO_READ -> R.string.follows_plan_to_read
+            SManga.FollowStatus.READING -> R.string.follows_reading
+            SManga.FollowStatus.RE_READING -> R.string.follows_re_reading
+            else -> R.string.follows_unfollowed
+        }
+
+        follows_button.text = view?.context?.getString(followsRes)
+        switchProgressBar(View.INVISIBLE)
+    }
+
+    /**
+     * Update swipe refresh to start showing refresh in progress spinner.
+     */
+    fun onUpdateFollowsMangaError(error: Throwable) {
+        Timber.e(error)
+        switchProgressBar(ProgressBar.INVISIBLE)
+        activity?.toast(error.message)
     }
 
     /**
@@ -814,5 +853,6 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
             }
         }
     }
+
 
 }

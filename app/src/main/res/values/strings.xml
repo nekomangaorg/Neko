@@ -562,5 +562,6 @@
     <string name="channel_backup_restore">Restore Backup</string>
     <string name="channel_downloader">Downloader</string>
     <string name="channel_new_chapters">New Chapters</string>
+    <string name="flag">flag</string>
 
 </resources>
