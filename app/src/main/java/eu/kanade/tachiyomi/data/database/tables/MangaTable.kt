@@ -40,6 +40,12 @@ object MangaTable {
 
     const val COL_FOLLOW_STATUS = "follow_status"
 
+    const val COL_ANILIST_ID = "anilist_id"
+
+    const val COL_KITSU_ID = "kitsu_id"
+
+    const val COL_MY_ANIME_LIST_ID = "my_anime_list_id"
+
     const val COL_UNREAD = "unread"
 
     const val COL_CATEGORY = "category"
@@ -53,6 +59,9 @@ object MangaTable {
             $COL_AUTHOR TEXT,
             $COL_DESCRIPTION TEXT,
             $COL_LANG_FLAG TEXT,
+            $COL_ANILIST_ID TEXT,
+            $COL_KITSU_ID TEXT,
+            $COL_MY_ANIME_LIST_ID TEXT,
             $COL_GENRE TEXT,
             $COL_TITLE TEXT NOT NULL,
             $COL_STATUS INTEGER NOT NULL,
@@ -81,5 +90,14 @@ object MangaTable {
 
     val addFollowStatusCol: String
         get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_FOLLOW_STATUS} INT DEFAULT NULL"
+
+    val addAnilistIdCol: String
+        get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_ANILIST_ID} TEXT DEFAULT NULL"
+
+    val addKitsuIdCol: String
+        get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_KITSU_ID} TEXT DEFAULT NULL"
+
+    val addMyAnimeListIdCol: String
+        get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_MY_ANIME_LIST_ID} TEXT DEFAULT NULL"
 
 }

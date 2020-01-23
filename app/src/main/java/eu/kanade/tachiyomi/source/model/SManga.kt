@@ -26,12 +26,18 @@ interface SManga : Serializable {
 
     var initialized: Boolean
 
+    var anilist_id: String?
+
+    var my_anime_list_id: String?
+
+    var kitsu_id: String?
+
     fun copyFrom(other: SManga) {
 
-        if (url?.isEmpty()) {
+        if (url.isEmpty()) {
             url = other.url
         }
-        if (title?.isEmpty()) {
+        if (title.isEmpty()) {
             title = other.title
         }
 
@@ -56,6 +62,15 @@ interface SManga : Serializable {
         if (other.follow_status != null)
             follow_status = other.follow_status
 
+        if (other.anilist_id != null)
+            anilist_id = other.anilist_id
+
+        if (other.kitsu_id != null)
+            kitsu_id = other.kitsu_id
+
+        if (other.my_anime_list_id != null)
+            my_anime_list_id = other.my_anime_list_id
+
         status = other.status
 
         if (!initialized)
@@ -70,6 +85,7 @@ interface SManga : Serializable {
         PLAN_TO_READ,
         DROPPED,
         RE_READING;
+
         companion object {}
     }
 

@@ -13,6 +13,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Manga.Companion.fromDatabaseInt
 import eu.kanade.tachiyomi.data.database.models.Manga.Companion.toDatabaseInt
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
+import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_ANILIST_ID
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_ARTIST
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_AUTHOR
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_CHAPTER_FLAGS
@@ -23,8 +24,10 @@ import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_FOLLOW_STATUS
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_GENRE
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_ID
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_INITIALIZED
+import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_KITSU_ID
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_LANG_FLAG
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_LAST_UPDATE
+import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_MY_ANIME_LIST_ID
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_SOURCE
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_STATUS
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_THUMBNAIL_URL
@@ -71,6 +74,9 @@ class MangaPutResolver : DefaultPutResolver<Manga>() {
         put(COL_VIEWER, obj.viewer)
         put(COL_CHAPTER_FLAGS, obj.chapter_flags)
         put(COL_FOLLOW_STATUS, obj.follow_status?.toDatabaseInt())
+        put(COL_ANILIST_ID, obj.anilist_id)
+        put(COL_KITSU_ID, obj.kitsu_id)
+        put(COL_MY_ANIME_LIST_ID, obj.my_anime_list_id)
     }
 }
 
@@ -84,6 +90,9 @@ interface BaseMangaGetResolver {
         description = cursor.getString(cursor.getColumnIndex(COL_DESCRIPTION))
         genre = cursor.getString(cursor.getColumnIndex(COL_GENRE))
         lang_flag = cursor.getString(cursor.getColumnIndex(COL_LANG_FLAG))
+        anilist_id = cursor.getString(cursor.getColumnIndex(COL_ANILIST_ID))
+        kitsu_id = cursor.getString(cursor.getColumnIndex(COL_KITSU_ID))
+        my_anime_list_id = cursor.getString(cursor.getColumnIndex(COL_MY_ANIME_LIST_ID))
         date_added = cursor.getLong(cursor.getColumnIndex(COL_DATE_ADDED))
         title = cursor.getString(cursor.getColumnIndex(COL_TITLE))
         status = cursor.getInt(cursor.getColumnIndex(COL_STATUS))

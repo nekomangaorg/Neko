@@ -25,6 +25,18 @@ class ApiMangaParser(val lang: String) {
         manga.author = mangaJson.get("author").string
         manga.artist = mangaJson.get("artist").string
         manga.lang_flag = mangaJson.get("lang_flag").string
+        val links = mangaJson.getAsJsonObject("links")
+
+        links?.forEach { key, jsonElement ->
+            if (key.equals("al")) {
+                manga.anilist_id = jsonElement.asString
+            } else if (key.equals("kt")) {
+                manga.kitsu_id = jsonElement.asString
+            } else if (key.equals("mal")) {
+                manga.my_anime_list_id = jsonElement.asString
+            }
+        }
+
         val status = mangaJson.get("status").int
         val tempStatus = parseStatus(status)
         val finalChapterNumber = getFinalChapter(mangaJson)
@@ -71,7 +83,7 @@ class ApiMangaParser(val lang: String) {
     /**
      * Parse for the random manga id from the [MdUtil.randMangaPage] response.
      */
-    fun randomMangaIdParse(response : Response) : String{
+    fun randomMangaIdParse(response: Response): String {
         val randMangaUrl = Jsoup.parse(response.consumeBody())
                 .select("link[rel=canonical]")
                 .attr("href")

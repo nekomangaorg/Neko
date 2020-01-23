@@ -16,6 +16,12 @@ class SMangaImpl : SManga {
 
     override var lang_flag: String? = null
 
+    override var anilist_id: String? = null
+
+    override var kitsu_id: String? = null
+
+    override var my_anime_list_id: String? = null
+
     override var status: Int = 0
 
     override var follow_status: SManga.FollowStatus? = null
