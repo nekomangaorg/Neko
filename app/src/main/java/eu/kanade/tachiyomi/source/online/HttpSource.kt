@@ -69,7 +69,7 @@ abstract class HttpSource : Source {
     /**
      * Default network client for doing requests.
      */
-    val client: OkHttpClient = network.cloudflareClient.newBuilder().build()
+    val client: OkHttpClient = network.client.newBuilder().build()
 
     /**
      * Headers builder for request.
