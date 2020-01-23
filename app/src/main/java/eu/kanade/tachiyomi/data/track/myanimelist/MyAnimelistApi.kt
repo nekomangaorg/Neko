@@ -32,7 +32,8 @@ class MyAnimelistApi(private val client: OkHttpClient, interceptor: MyAnimeListI
                     .filter { it.title.contains(realQuery, true) }
                     .toList()
         } else {
-            client.newCall(GET(searchUrl(query)))
+            val realQuery = query.take(100)
+            client.newCall(GET(searchUrl(realQuery)))
                     .asObservable()
                     .flatMap { response ->
                         Observable.from(Jsoup.parse(response.consumeBody())
