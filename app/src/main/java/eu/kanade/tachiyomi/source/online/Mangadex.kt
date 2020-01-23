@@ -21,7 +21,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
 
     private fun clientBuilder(): OkHttpClient = clientBuilder(preferences.r18()!!.toInt())
 
-    private fun clientBuilder(r18Toggle: Int): OkHttpClient = network.cloudflareClient.newBuilder()
+    private fun clientBuilder(r18Toggle: Int): OkHttpClient = network.client.newBuilder()
             .connectTimeout(10, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .addNetworkInterceptor { chain ->
