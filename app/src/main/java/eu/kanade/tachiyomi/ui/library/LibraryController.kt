@@ -114,11 +114,6 @@ class LibraryController(
      */
     private var navView: LibraryNavigationView? = null
 
-    /**
-     * Drawer listener to allow swipe only for closing the drawer.
-     */
-    private var drawerListener: DrawerLayout.DrawerListener? = null
-
     private var tabsVisibilityRelay: BehaviorRelay<Boolean> = BehaviorRelay.create(false)
 
     private var tabsVisibilitySubscription: Subscription? = null
