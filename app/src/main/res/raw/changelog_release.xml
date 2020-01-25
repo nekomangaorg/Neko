@@ -1,10 +1,123 @@
 <?xml version="1.0" encoding="utf-8"?>
 <changelog bulletedList="true">
-    <changelogversion versionName="v1.0.0" changeDate="">
-        <changelogtext>Initial Release</changelogtext>
-        <changelogtext>Switched branding</changelogtext>
-        <changelogtext>Removed bunch of unneeded code</changelogtext>
-
+    <changelogversion
+        changeDate=""
+        versionName="v1.6">
+        <changelogtext>Add ability to update follow status from manga info page</changelogtext>
+        <changelogtext>Add filter by tracked option in Library</changelogtext>
+        <changelogtext>Add logout for trackers</changelogtext>
+        <changelogtext>Add new logout dialog for mangadex</changelogtext>
+        <changelogtext>Add Change Log back into app</changelogtext>
+        <changelogtext>Add Firebase back for analytics</changelogtext>
+        <changelogtext>Clicking build time will open change log</changelogtext>
+        <changelogtext>Clicking cover in manga info page enlarges cover</changelogtext>
+        <changelogtext>Download Dialog is now a submenu</changelogtext>
+        <changelogtext>Fix amoled dialog color</changelogtext>
+        <changelogtext>Fix blocked groups from mangadex not always being honored</changelogtext>
+        <changelogtext>Fix crash for multichoice preference with all option</changelogtext>
+        <changelogtext>Fix fast scroll bug when opening right side menu</changelogtext>
+        <changelogtext>Fix follow status not showing correctly on manga info</changelogtext>
+        <changelogtext>Fix my animelist title being too long</changelogtext>
+        <changelogtext>Remove cloudflare interceptor</changelogtext>
+        <changelogtext>Start storing tracker ids from mangadex api</changelogtext>
+        <changelogtext>Tweak initial tracker appearance and add remove button</changelogtext>
     </changelogversion>
-
+    <changelogversion
+        changeDate=""
+        versionName="v1.5.4.1">
+        <changelogtext>Switched to Tachiyomi user agent</changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
+        versionName="v1.5.4">
+        <changelogtext>Switched back to .org urls</changelogtext>
+        <changelogtext>fix some dialog bugs where ok button was missing</changelogtext>
+        <changelogtext>fix dialog bug where you couldnt select no category to add to default category</changelogtext>
+        <changelogtext>adjust splashscreen for neko</changelogtext>
+        <changelogtext>use cache to complete downloads</changelogtext>
+        <changelogtext>recently read goes back 50 years</changelogtext>
+        <changelogtext>webview is now an activity</changelogtext>
+        <changelogtext>changed library title font</changelogtext>
+        <changelogtext>tweaked reader seekbar height</changelogtext>
+        <changelogtext>fix browse search focus being removed when deleting the text</changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
+        versionName="v1.5.3">
+        <changelogtext>new notification when restoring a backup</changelogtext>
+        <changelogtext>switched to long press select between like j2k</changelogtext>
+        <changelogtext>new splash screen</changelogtext>
+        <changelogtext>changed some images to webp</changelogtext>
+        <changelogtext>lower rate limit to 3 per a second to help reduce load on mangadex</changelogtext>
+        <changelogtext></changelogtext>
+        <changelogtext></changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
+        versionName="v1.5.2">
+        <changelogtext>fix notification of library update not cancelling</changelogtext>
+        <changelogtext>fix webtoon margin option showing in wrong reader</changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
+        versionName="v1.5.1">
+        <changelogtext>fix reader settings sheet</changelogtext>
+        <changelogtext>fix import follows not cleaning the title</changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
+        versionName="v1.5.0">
+        <changelogtext>Updated domain to .cc since most of the old chapters now work!</changelogtext>
+        <changelogtext>added ability to sync read and reread follows from mangadex into your library</changelogtext>
+        <changelogtext>minor clean up of code</changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
+        versionName="v1.4.8">
+        <changelogtext>Enhanced Notifications for library updates</changelogtext>
+        <changelogtext>android 10 style share images/ share manga page</changelogtext>
+        <changelogtext>split general settings into general and library</changelogtext>
+        <changelogtext>fix bug where marked as read was not updating the DOWNLOADED text</changelogtext>
+        <changelogtext>improved loading speeds when skipping pages in a chapter</changelogtext>
+        <changelogtext>file format changes</changelogtext>
+        <changelogtext>fix bug in custom downloads dialog for amoled</changelogtext>
+        <changelogtext>updated webtoon transition text to match other reader</changelogtext>
+        <changelogtext>added side margins option for webtoon</changelogtext>
+        <changelogtext>added option to put a margin between webtoon pages</changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
+        versionName="v1.4.7">
+        <changelogtext>fix download dialogs</changelogtext>
+        <changelogtext>add multi tag search in library</changelogtext>
+        <changelogtext>removed sorting ignoring article (a the etc)</changelogtext>
+        <changelogtext>add fast scroll with bubble to library</changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
+        versionName="v1.4.6">
+        <changelogtext>send logs when crashing. Only information sent is the following
+            ReportField.ANDROID_VERSION,
+            ReportField.APP_VERSION_CODE,
+            ReportField.APP_VERSION_NAME,
+            ReportField.PACKAGE_NAME,
+            ReportField.REPORT_ID,
+            ReportField.STACK_TRACE,
+            ReportField.USER_APP_START_DATE,
+            ReportField.USER_CRASH_DATE
+        </changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
+        versionName="v1.4.5">
+        <changelogtext>fix crash bug on certain version of android</changelogtext>
+        <changelogtext>fix neko logo not showing in side drawer</changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
+        versionName="v1.4.4">
+        <changelogtext>fixed bug with download folder dialog</changelogtext>
+        <changelogtext>fixed bug with backup dialog</changelogtext>
+        <changelogtext>fixed bug with downloaded files not being found</changelogtext>
+    </changelogversion>
 </changelog>
