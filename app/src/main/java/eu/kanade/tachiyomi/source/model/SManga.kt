@@ -32,6 +32,10 @@ interface SManga : Serializable {
 
     var kitsu_id: String?
 
+    var manga_updates_id: String?
+
+    var anime_planet_id: String?
+
     fun copyFrom(other: SManga) {
 
         if (url.isEmpty()) {
@@ -70,6 +74,12 @@ interface SManga : Serializable {
 
         if (other.my_anime_list_id != null)
             my_anime_list_id = other.my_anime_list_id
+
+        if (other.anime_planet_id != null)
+            anime_planet_id = other.anime_planet_id
+
+        if (other.manga_updates_id != null)
+            manga_updates_id = other.manga_updates_id
 
         status = other.status
 

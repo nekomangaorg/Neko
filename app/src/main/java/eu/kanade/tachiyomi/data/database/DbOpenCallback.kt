@@ -47,6 +47,8 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
             db.execSQL(MangaTable.addAnilistIdCol)
             db.execSQL(MangaTable.addKitsuIdCol)
             db.execSQL(MangaTable.addMyAnimeListIdCol)
+            db.execSQL(MangaTable.addAnimePlanetIdCol)
+            db.execSQL(MangaTable.addMangaUpdatesIdCol)
         }
     }
 

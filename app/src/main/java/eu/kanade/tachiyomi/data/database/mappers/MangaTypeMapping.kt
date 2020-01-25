@@ -14,6 +14,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga.Companion.fromDatabaseInt
 import eu.kanade.tachiyomi.data.database.models.Manga.Companion.toDatabaseInt
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_ANILIST_ID
+import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_ANIME_PLANET_ID
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_ARTIST
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_AUTHOR
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_CHAPTER_FLAGS
@@ -27,6 +28,7 @@ import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_INITIALIZED
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_KITSU_ID
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_LANG_FLAG
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_LAST_UPDATE
+import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_MANGA_UPDATES_ID
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_MY_ANIME_LIST_ID
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_SOURCE
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_STATUS
@@ -77,6 +79,8 @@ class MangaPutResolver : DefaultPutResolver<Manga>() {
         put(COL_ANILIST_ID, obj.anilist_id)
         put(COL_KITSU_ID, obj.kitsu_id)
         put(COL_MY_ANIME_LIST_ID, obj.my_anime_list_id)
+        put(COL_MANGA_UPDATES_ID, obj.manga_updates_id)
+        put(COL_ANIME_PLANET_ID, obj.anime_planet_id)
     }
 }
 
@@ -93,6 +97,8 @@ interface BaseMangaGetResolver {
         anilist_id = cursor.getString(cursor.getColumnIndex(COL_ANILIST_ID))
         kitsu_id = cursor.getString(cursor.getColumnIndex(COL_KITSU_ID))
         my_anime_list_id = cursor.getString(cursor.getColumnIndex(COL_MY_ANIME_LIST_ID))
+        manga_updates_id = cursor.getString(cursor.getColumnIndex(COL_MANGA_UPDATES_ID))
+        anime_planet_id = cursor.getString(cursor.getColumnIndex(COL_ANIME_PLANET_ID))
         date_added = cursor.getLong(cursor.getColumnIndex(COL_DATE_ADDED))
         title = cursor.getString(cursor.getColumnIndex(COL_TITLE))
         status = cursor.getInt(cursor.getColumnIndex(COL_STATUS))

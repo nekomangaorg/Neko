@@ -34,6 +34,10 @@ class ApiMangaParser(val lang: String) {
                 manga.kitsu_id = jsonElement.asString
             } else if (key.equals("mal")) {
                 manga.my_anime_list_id = jsonElement.asString
+            } else if (key.equals("mu")) {
+                manga.manga_updates_id = jsonElement.asString
+            } else if (key.equals("ap")) {
+                manga.anime_planet_id = jsonElement.asString
             }
         }
 

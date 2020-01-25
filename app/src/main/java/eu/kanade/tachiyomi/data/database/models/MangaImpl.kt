@@ -29,6 +29,10 @@ open class MangaImpl : Manga {
 
     override var my_anime_list_id: String? = null
 
+    override var manga_updates_id: String? = null
+
+    override var anime_planet_id: String? = null
+
     override var status: Int = 0
 
     override var follow_status: SManga.FollowStatus? = null

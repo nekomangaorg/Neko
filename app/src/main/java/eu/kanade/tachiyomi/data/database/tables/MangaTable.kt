@@ -46,6 +46,10 @@ object MangaTable {
 
     const val COL_MY_ANIME_LIST_ID = "my_anime_list_id"
 
+    const val COL_MANGA_UPDATES_ID = "manga_updates_id"
+
+    const val COL_ANIME_PLANET_ID = "anime_planet_id"
+
     const val COL_UNREAD = "unread"
 
     const val COL_CATEGORY = "category"
@@ -62,6 +66,8 @@ object MangaTable {
             $COL_ANILIST_ID TEXT,
             $COL_KITSU_ID TEXT,
             $COL_MY_ANIME_LIST_ID TEXT,
+            $COL_ANIME_PLANET_ID TEXT,
+            $COL_MANGA_UPDATES_ID TEXT,
             $COL_GENRE TEXT,
             $COL_TITLE TEXT NOT NULL,
             $COL_STATUS INTEGER NOT NULL,
@@ -99,5 +105,11 @@ object MangaTable {
 
     val addMyAnimeListIdCol: String
         get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_MY_ANIME_LIST_ID} TEXT DEFAULT NULL"
+
+    val addMangaUpdatesIdCol: String
+        get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_MANGA_UPDATES_ID} TEXT DEFAULT NULL"
+
+    val addAnimePlanetIdCol: String
+        get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_ANIME_PLANET_ID} TEXT DEFAULT NULL"
 
 }
