@@ -17,7 +17,6 @@ import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
 import eu.kanade.tachiyomi.util.DiskUtil
 import kotlinx.coroutines.*
 import rx.Observable
-import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 import uy.kohesive.injekt.Injekt
@@ -43,11 +42,6 @@ class MangaInfoPresenter(
         private val downloadManager: DownloadManager = Injekt.get(),
         private val coverCache: CoverCache = Injekt.get()
 ) : BasePresenter<MangaInfoController>(), CoroutineScope {
-
-    /**
-     * Subscription to send the manga to the view.
-     */
-    private var viewMangaSubscription: Subscription? = null
 
     private lateinit var job: Job
 
@@ -96,13 +90,13 @@ class MangaInfoPresenter(
 
         job = launch(CoroutineExceptionHandler { _, _ -> MangaInfoController::onFetchMangaError })
         {
+            coverCache.deleteFromCache(manga.thumbnail_url)
             val networkManga = source.fetchMangaDetails(manga)
             val fetchMangaFollowStatus = source.fetchMangaFollowStatus(manga)
             manga.copyFrom(networkManga)
             manga.follow_status = fetchMangaFollowStatus
             manga.initialized = true
             db.insertManga(manga).executeAsBlocking()
-            coverCache.deleteFromCache(manga.thumbnail_url)
 
             withContext(Dispatchers.Main) {
                 sendMangaToView()
