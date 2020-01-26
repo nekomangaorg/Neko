@@ -91,13 +91,19 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers) {
      */
     suspend fun changeFollowStatus(manga: SManga, followStatus: SManga.FollowStatus): Boolean {
         return withContext(Dispatchers.IO) {
-            manga.follow_status ?: throw IllegalArgumentException("Cannot tell MD server to set an null follow status")
-
             val mangaID = getMangaId(manga.url)
-            val status = followStatus.toMangadexInt()
 
-            val response = client.newCall(GET("$baseUrl/ajax/actions.ajax.php?function=manga_follow&id=$mangaID&type=$status", headers))
-                    .execute()
+            val response: Response =
+                    if (followStatus == SManga.FollowStatus.UNFOLLOWED) {
+                        client.newCall(GET("$baseUrl/ajax/actions.ajax.php?function=manga_unfollow&id=$mangaID&type=$mangaID", headers))
+                                .execute()
+                    } else {
+
+                        val status = followStatus.toMangadexInt()
+                        client.newCall(GET("$baseUrl/ajax/actions.ajax.php?function=manga_follow&id=$mangaID&type=$status", headers))
+                                .execute()
+                    }
+            
             response.body!!.string().isEmpty()
         }
     }
