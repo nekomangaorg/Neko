@@ -85,6 +85,13 @@ interface Source {
     suspend fun fetchMangaDetails(manga: SManga): SManga
 
     /**
+     * Returns a updated details for a manga and the chapter list
+     *
+     * @param manga the manga to update.
+     */
+    suspend fun fetchMangaAndChapterDetails(manga: SManga): Pair<SManga, List<SChapter>>
+
+    /**
      * Returns an observable with all the available chapters for a manga.
      *
      * @param manga the manga to update.

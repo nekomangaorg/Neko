@@ -2,9 +2,8 @@ package eu.kanade.tachiyomi.ui.setting
 
 import android.app.Dialog
 import android.os.Bundle
-import androidx.preference.PreferenceScreen
-import android.view.View
 import android.widget.Toast
+import androidx.preference.PreferenceScreen
 import com.afollestad.materialdialogs.MaterialDialog
 import com.bluelinelabs.conductor.RouterTransaction
 import com.bluelinelabs.conductor.changehandler.FadeChangeHandler
@@ -20,11 +19,7 @@ import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.util.launchUI
 import eu.kanade.tachiyomi.util.toast
-import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
@@ -68,12 +63,7 @@ class SettingsAdvancedController : SettingsController() {
                 ctrl.showDialog(router)
             }
         }
-        preference {
-            titleRes = R.string.pref_refresh_library_metadata
-            summaryRes = R.string.pref_refresh_library_metadata_summary
-
-            onClick { LibraryUpdateService.start(context, target = Target.DETAILS) }
-        }
+     
         preference {
             titleRes = R.string.pref_refresh_library_tracking
             summaryRes = R.string.pref_refresh_library_tracking_summary
@@ -131,7 +121,7 @@ class SettingsAdvancedController : SettingsController() {
                     activity?.toast(R.string.cache_delete_error)
                 }, {
                     activity?.toast(resources?.getQuantityString(R.plurals.cache_deleted,
-                        deletedFiles, deletedFiles))
+                            deletedFiles, deletedFiles))
                     findPreference(CLEAR_CACHE_KEY)?.summary =
                             resources?.getString(R.string.used_cache, chapterCache.readableSize)
                 })

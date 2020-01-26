@@ -15,6 +15,22 @@ import rx.Observable
 
 class MangaHandler(val client: OkHttpClient, val headers: Headers, val lang: String) {
 
+
+    suspend fun fetchMangaAndChapterDetails(manga: SManga): Pair<SManga, List<SChapter>> {
+        return withContext(Dispatchers.IO) {
+            val response = client.newCall(apiRequest(manga)).execute()
+            val parser = ApiMangaParser(lang)
+
+            val jsonData = response.body!!.string()
+            
+            val detailsManga = parser.mangaDetailsParse(jsonData)
+            detailsManga.apply { initialized = true }
+            val chapterList = parser.chapterListParse(jsonData)
+            Pair(detailsManga,
+                    chapterList)
+        }
+    }
+
     suspend fun fetchMangaDetails(manga: SManga): SManga {
         return withContext(Dispatchers.IO) {
             val response = client.newCall(apiRequest(manga)).execute()

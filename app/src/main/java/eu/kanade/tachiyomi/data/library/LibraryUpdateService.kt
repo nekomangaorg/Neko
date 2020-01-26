@@ -14,6 +14,7 @@ import androidx.core.app.NotificationCompat.GROUP_ALERT_SUMMARY
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Chapter
@@ -31,7 +32,6 @@ import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.*
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -61,7 +61,8 @@ class LibraryUpdateService(
         val sourceManager: SourceManager = Injekt.get(),
         val preferences: PreferencesHelper = Injekt.get(),
         val downloadManager: DownloadManager = Injekt.get(),
-        val trackManager: TrackManager = Injekt.get()
+        val trackManager: TrackManager = Injekt.get(),
+        val coverCache: CoverCache = Injekt.get()
 ) : Service() {
 
     /**
@@ -109,10 +110,8 @@ class LibraryUpdateService(
      * Defines what should be updated within a service execution.
      */
     enum class Target {
-        CHAPTERS, // Manga chapters
-        FOLLOW_STATUSES, // Manga follow status
+        CHAPTERS, // Manga meta data and  chapters
         SYNC_FOLLOWS, //Manga in reading, rereading
-        DETAILS,  // Manga metadata
         TRACKING  // Tracking metadata
     }
 
@@ -228,23 +227,21 @@ class LibraryUpdateService(
             stopSelf(startId)
         }
         // Update either chapter list or manga details.
-        if (target == Target.FOLLOW_STATUSES) {
-            /* GlobalScope.launch(handler) {
-                 syncFollowsStatus()
-             }.invokeOnCompletion { stopSelf(startId) }*/
-        } else if (target == Target.SYNC_FOLLOWS) {
+        if (target == Target.SYNC_FOLLOWS) {
             job = GlobalScope.launch(handler) {
                 syncFollows()
+            }
+            job?.invokeOnCompletion { stopSelf(startId) }
+        } else if (target == Target.CHAPTERS) {
+            job = GlobalScope.launch(handler) {
+                updateManga(mangaList)
             }
             job?.invokeOnCompletion { stopSelf(startId) }
         } else {
             subscription = Observable
                     .defer {
-                        when (target) {
-                            Target.CHAPTERS -> updateChapterList(mangaList)
-                            Target.DETAILS -> updateDetails(mangaList)
-                            else -> updateTrackings(mangaList)
-                        }
+                        updateTrackings(mangaList)
+
                     }.subscribeOn(Schedulers.io())
                     .subscribe({
                     }, {
@@ -287,6 +284,7 @@ class LibraryUpdateService(
         return listToUpdate
     }
 
+
     /**
      * Method that updates the given list of manga. It's called in a background thread, so it's safe
      * to do heavy operations or network calls here.
@@ -294,9 +292,8 @@ class LibraryUpdateService(
      * progress.
      *
      * @param mangaToUpdate the list to update
-     * @return an observable delivering the progress of each update.
      */
-    fun updateChapterList(mangaToUpdate: List<LibraryManga>): Observable<LibraryManga> {
+    private suspend fun updateManga(mangaToUpdate: List<LibraryManga>) {
         // Initialize the variables holding the progress of the updates.
         val count = AtomicInteger(0)
         // List containing new updates
@@ -310,57 +307,46 @@ class LibraryUpdateService(
         // Boolean to determine if DownloadManager has downloads
         var hasDownloads = false
 
-        // Emit each manga and update it sequentially.
-        return Observable.from(mangaToUpdate)
-                // Notify manga that will update.
-                .doOnNext { showProgressNotification(it, count.andIncrement, mangaToUpdate.size) }
-                // Update the chapters of the manga.
-                .concatMap { manga ->
-                    updateManga(manga)
-                            // If there's any error, return empty update and continue.
-                            .onErrorReturn {
-                                failedUpdates.add(manga)
-                                Pair(emptyList(), emptyList())
-                            }
-                            // Filter out mangas without new chapters (or failed).
-                            .filter { pair -> pair.first.isNotEmpty() }
-                            .doOnNext {
-                                if (downloadNew && (categoriesToDownload.isEmpty() ||
-                                                manga.category in categoriesToDownload)) {
+        mangaToUpdate.forEach {
+            try {
 
-                                    downloadChapters(manga, it.first)
-                                    hasDownloads = true
-                                }
-                            }
-                            // Convert to the manga that contains new chapters.
-                            .map {
-                                Pair(manga, (it.first.sortedByDescending { ch ->
-                                    ch
-                                            .source_order
-                                }.toTypedArray()))
-                            }
-                }
-                // Add manga with new chapters to the list.
-                .doOnNext { manga ->
-                    // Add to the list
-                    newUpdates.add(manga)
-                }
-                // Notify result of the overall update.
-                .doOnCompleted {
-                    if (newUpdates.isNotEmpty()) {
-                        showResultNotification(newUpdates)
-                        if (downloadNew && hasDownloads) {
-                            DownloadService.start(this)
-                        }
+                showProgressNotification(it, count.andIncrement, mangaToUpdate.size)
+                val pair = updateManga(it)
+
+                // If pair first is empty there are no new manga chapters
+                if (pair.first.isNotEmpty()) {
+
+                    if (downloadNew && (categoriesToDownload.isEmpty() ||
+                                    it.category in categoriesToDownload)) {
+
+                        downloadChapters(it, pair.first)
+                        hasDownloads = true
                     }
 
-                    if (failedUpdates.isNotEmpty()) {
-                        Timber.e("Failed updating: ${failedUpdates.map { it.title }}")
-                    }
-
-                    cancelProgressNotification()
+                    // Convert to the manga that contains new chapters.
+                    val mangaWithNewChapters = Pair(it, (pair.first.sortedByDescending { ch -> ch.source_order }.toTypedArray()))
+                    newUpdates.add(mangaWithNewChapters)
                 }
-                .map { manga -> manga.first }
+
+
+            } catch (e: Exception) {
+                Timber.e(e)
+                failedUpdates.add(it)
+            }
+        }
+
+        if (newUpdates.isNotEmpty()) {
+            showResultNotification(newUpdates)
+            if (downloadNew && hasDownloads) {
+                DownloadService.start(this)
+            }
+        }
+
+        if (failedUpdates.isNotEmpty()) {
+            Timber.e("Failed updating: ${failedUpdates.map { it.title }}")
+        }
+
+        cancelProgressNotification()
     }
 
     fun downloadChapters(manga: Manga, chapters: List<Chapter>) {
@@ -380,23 +366,22 @@ class LibraryUpdateService(
      * @param manga the manga to update.
      * @return a pair of the inserted and removed chapters.
      */
-    fun updateManga(manga: Manga): Observable<Pair<List<Chapter>, List<Chapter>>> {
-        val source = sourceManager.getMangadex() as? HttpSource ?: return Observable.empty()
-        return source.fetchChapterListObservable(manga)
-                .map { syncChaptersWithSource(db, it, manga, source) }
-    }
+    suspend fun updateManga(manga: Manga): Pair<List<Chapter>, List<Chapter>> {
+        val source = sourceManager.getMangadex()
+        val details = source.fetchMangaAndChapterDetails(manga)
 
-    private suspend fun cleanupDownloads() {
-        val mangaList = db.getMangas().executeAsBlocking()
-        for (manga in mangaList) {
-            val chapterList = db.getChapters(manga).executeAsBlocking()
-            downloadManager.cleanupChapters(chapterList, manga, sourceManager.getMangadex())
+        //delete cover cache image if the thumbnail from network is not empty
+        if (!details.first.thumbnail_url.isNullOrEmpty()) {
+            coverCache.deleteFromCache(manga.thumbnail_url)
         }
+        manga.copyFrom(details.first)
+        db.insertManga(manga).executeAsBlocking()
+        return syncChaptersWithSource(db, details.second, manga, source)
+
     }
 
     /**
-     * Method that updates the FollowStatus of the given list of manga. It's called in a background
-     * thread, so it's safe to do heavy operations or network calls here.
+     * Method that updates the syncs reading and rereading manga into neko library
      */
     private suspend fun syncFollows() {
         val count = AtomicInteger(0)
@@ -420,58 +405,6 @@ class LibraryUpdateService(
 
                 }
         cancelProgressNotification()
-    }
-
-    /**
-     * Method that updates the syncs reading and rereading manga into neko library
-     */
-    private suspend fun syncFollowsStatus() {
-        val count = AtomicInteger(0)
-        val listManga = sourceManager.getMangadex().fetchAllFollows()
-        listManga.forEach { networkManga ->
-            showProgressNotification(networkManga, count.andIncrement, listManga.size)
-            db.getManga(networkManga.url, sourceManager.getMangadex().id)
-                    .executeAsBlocking()
-                    ?.let {
-                        it.copyFrom(networkManga)
-                        db.insertManga(it).executeAsBlocking()
-                    }
-        }
-        cancelProgressNotification()
-    }
-
-
-    /**
-     * Method that updates the details of the given list of manga. It's called in a background
-     * thread, so it's safe to do heavy operations or network calls here.
-     *
-     * @param mangaToUpdate the list to update
-     * @return an observable delivering the progress of each update.
-     */
-    fun updateDetails(mangaToUpdate: List<LibraryManga>): Observable<LibraryManga> {
-        // Initialize the variables holding the progress of the updates.
-        val count = AtomicInteger(0)
-
-        // Emit each manga and update it sequentially.
-        return Observable.from(mangaToUpdate)
-                // Notify manga that will update.
-                .doOnNext { showProgressNotification(it, count.andIncrement, mangaToUpdate.size) }
-                // Update the details of the manga.
-                .concatMap { manga ->
-                    val source = sourceManager.get(manga.source) as? HttpSource
-                            ?: return@concatMap Observable.empty<LibraryManga>()
-
-                    source.fetchMangaDetailsObservable(manga)
-                            .map { networkManga ->
-                                manga.copyFrom(networkManga)
-                                db.insertManga(manga).executeAsBlocking()
-                                manga
-                            }
-                            .onErrorReturn { manga }
-                }
-                .doOnCompleted {
-                    cancelProgressNotification()
-                }
     }
 
     /**

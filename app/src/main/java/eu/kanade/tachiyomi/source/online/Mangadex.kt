@@ -92,6 +92,10 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         return MangaHandler(clientBuilder(), headers, internalLang).fetchMangaDetails(manga)
     }
 
+    override suspend fun fetchMangaAndChapterDetails(manga: SManga): Pair<SManga, List<SChapter>> {
+        return MangaHandler(clientBuilder(), headers, internalLang).fetchMangaAndChapterDetails(manga)
+    }
+
     override fun fetchChapterListObservable(manga: SManga): Observable<List<SChapter>> {
         return MangaHandler(clientBuilder(), headers, internalLang).fetchChapterListObservable(manga)
     }

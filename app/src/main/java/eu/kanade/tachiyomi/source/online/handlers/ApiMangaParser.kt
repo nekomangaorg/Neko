@@ -14,8 +14,11 @@ import java.util.*
 
 class ApiMangaParser(val lang: String) {
     fun mangaDetailsParse(response: Response): SManga {
+        return mangaDetailsParse(response.body!!.string())
+    }
+
+    fun mangaDetailsParse(jsonData: String): SManga {
         val manga = SManga.create()
-        val jsonData = response.body!!.string()
         val json = JsonParser().parse(jsonData).asJsonObject
         val mangaJson = json.getAsJsonObject("manga")
         val chapterJson = json.getAsJsonObject("chapter")
@@ -95,8 +98,11 @@ class ApiMangaParser(val lang: String) {
     }
 
     fun chapterListParse(response: Response): List<SChapter> {
+        return chapterListParse(response.body!!.string())
+    }
+
+    fun chapterListParse(jsonData: String): List<SChapter> {
         val now = Date().time
-        val jsonData = response.body!!.string()
         val json = JsonParser().parse(jsonData).asJsonObject
         val mangaJson = json.getAsJsonObject("manga")
         val status = mangaJson.get("status").int
