@@ -30,6 +30,7 @@ import eu.kanade.tachiyomi.ui.base.controller.TabbedController
 import eu.kanade.tachiyomi.ui.base.controller.requestPermissionsSafe
 import eu.kanade.tachiyomi.ui.manga.chapter.ChaptersController
 import eu.kanade.tachiyomi.ui.manga.info.MangaInfoController
+import eu.kanade.tachiyomi.ui.manga.related.RelatedController
 import eu.kanade.tachiyomi.ui.manga.track.TrackController
 import eu.kanade.tachiyomi.util.toast
 import kotlinx.android.synthetic.main.main_activity.*
@@ -93,7 +94,7 @@ class MangaController : RxController, TabbedController {
         requestPermissionsSafe(arrayOf(WRITE_EXTERNAL_STORAGE), 301)
 
         adapter = MangaDetailAdapter()
-        manga_pager.offscreenPageLimit = 3
+        manga_pager.offscreenPageLimit = 4
         manga_pager.adapter = adapter
 
         if (!fromCatalogue) {
@@ -164,11 +165,12 @@ class MangaController : RxController, TabbedController {
 
     private inner class MangaDetailAdapter : RouterPagerAdapter(this@MangaController) {
 
-        private val tabCount = if (Injekt.get<TrackManager>().hasLoggedServices()) 3 else 2
+        private val tabCount = if (Injekt.get<TrackManager>().hasLoggedServices()) 4 else 3
 
         private val tabTitles = listOf(
                 R.string.manga_detail_tab,
                 R.string.manga_chapters_tab,
+                R.string.manga_related_tab,
                 R.string.manga_tracking_tab)
                 .map { resources!!.getString(it) }
 
@@ -181,6 +183,7 @@ class MangaController : RxController, TabbedController {
                 val controller = when (position) {
                     INFO_CONTROLLER -> MangaInfoController()
                     CHAPTERS_CONTROLLER -> ChaptersController()
+                    RELATED_CONTROLLER -> RelatedController(manga!!, source!!)
                     TRACK_CONTROLLER -> TrackController()
                     else -> error("Wrong position $position")
                 }
@@ -201,7 +204,9 @@ class MangaController : RxController, TabbedController {
 
         const val INFO_CONTROLLER = 0
         const val CHAPTERS_CONTROLLER = 1
-        const val TRACK_CONTROLLER = 2
+        const val RELATED_CONTROLLER = 2
+        const val TRACK_CONTROLLER = 3
+
     }
 
 

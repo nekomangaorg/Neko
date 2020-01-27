@@ -85,6 +85,14 @@ interface Source {
     suspend fun fetchMangaDetails(manga: SManga): SManga
 
     /**
+     * Returns an observable with all the relatable for a manga.
+     *
+     * @param page the page number to retrieve.
+     * @param manga the manga to update.
+     */
+    fun fetchMangaRelatedObservable(page: Int, manga: SManga): Observable<MangasPage>
+
+    /**
      * Returns a updated details for a manga and the chapter list
      *
      * @param manga the manga to update.
@@ -117,5 +125,6 @@ interface Source {
     fun login(username: String, password: String, twoFactorCode: String = ""): Observable<Boolean>
 
     suspend fun logout(): Boolean
+
 
 }

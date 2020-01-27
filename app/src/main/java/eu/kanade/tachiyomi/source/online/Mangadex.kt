@@ -118,6 +118,11 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         return FollowsHandler(clientBuilder(), headers).fetchMangaFollowStatus(manga)
     }
 
+    override fun fetchMangaRelatedObservable(page: Int, manga: SManga): Observable<MangasPage> {
+        return RelatedHandler().fetchReleated(manga)
+
+    }
+
 
     override fun isLogged(): Boolean {
         val httpUrl = baseUrl.toHttpUrlOrNull()!!
