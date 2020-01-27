@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.data.database.models
 
 import eu.kanade.tachiyomi.source.model.SManga
+import java.lang.Exception
 
 open class MangaImpl : Manga {
 
@@ -37,13 +38,16 @@ open class MangaImpl : Manga {
     override var hide_title: Boolean = false
 
     override fun copyFrom(other: SManga) {
-        if ((other is MangaImpl && (other as MangaImpl)::title.isInitialized && other.title != title)) {
-            title = if (currentTitle() != originalTitle()) {
-                val customTitle = currentTitle()
-                val trueTitle = other.title
-                "${customTitle}${SManga.splitter}${trueTitle}"
-            } else other.title
+        try {
+            if (other.title != title) {
+                title = if (currentTitle() != originalTitle()) {
+                    val customTitle = currentTitle()
+                    val trueTitle = other.title
+                    "${customTitle}${SManga.splitter}${trueTitle}"
+                } else other.title
+            }
         }
+        catch(e: Exception) { }
         super.copyFrom(other)
     }
 
