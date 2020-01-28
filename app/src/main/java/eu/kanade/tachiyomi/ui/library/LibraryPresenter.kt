@@ -236,19 +236,20 @@ class LibraryPresenter(
                         val category = catListing.find { it.id == i1.manga.category }
                         when {
                             category?.mangaSort != null -> {
-                                when (category.mangaSort) {
-                                    'a' -> sortAlphabetical(i1, i2)
-                                    'b' -> sortAlphabetical(i2, i1)
-                                    'c' -> i2.manga.last_update.compareTo(i1.manga.last_update)
-                                    'd' -> i1.manga.last_update.compareTo(i2.manga.last_update)
-                                    'e' -> i2.manga.unread.compareTo(i1.manga.unread)
-                                    'f' -> {
+                                var sort = when (category.mangaSort) {
+                                    'a', 'b' -> sortAlphabetical(i1, i2)
+                                    'c', 'd' -> i2.manga.last_update.compareTo(i1.manga.last_update)
+                                    'e', 'f' -> i2.manga.unread.compareTo(i1.manga.unread)
+                                    'g', 'h' -> {
                                         val manga1LastRead = lastReadManga[i1.manga.id!!] ?: lastReadManga.size
                                         val manga2LastRead = lastReadManga[i2.manga.id!!] ?: lastReadManga.size
                                         manga1LastRead.compareTo(manga2LastRead)
                                     }
                                     else -> sortAlphabetical(i1, i2)
                                 }
+                                if ((category.mangaSort!! - 'a') % 2 == 1 )
+                                    sort *= -1
+                                sort
                             }
                             category?.mangaOrder?.isEmpty() == false -> {
                                 val order = category.mangaOrder

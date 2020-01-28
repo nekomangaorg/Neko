@@ -75,14 +75,12 @@
     <string name="action_sort_down">По убыванию</string>
     <string name="action_sort_drag_and_drop">Перетаскивание</string>
     <string name="action_sort_enabled">По статусу вкл/выкл</string>
-    <string name="action_sort_first_updated">Последняя обновленная (обр. порядок)</string>
     <string name="action_sort_last_read">Последняя прочитанная</string>
     <string name="action_sort_last_updated">Последняя обновленная</string>
     <string name="action_sort_total">По количеству глав</string>
     <string name="action_sort_up">По возрастанию</string>
     <string name="action_start">Старт</string>
     <string name="action_stop">Стоп</string>
-    <string name="action_title_reverse">Название (обр. порядок)</string>
     <string name="action_track">Отслеживать</string>
     <string name="action_undo">Отменить</string>
     <string name="action_update">Обновить</string>

@@ -107,9 +107,8 @@
     <string name="action_migrate_now">Migrate now</string>
     <string name="action_copy_now">Copy now</string>
     <string name="action_reorganize_by">Reorder</string>
-    <string name="action_title_reverse">Title (descending)</string>
+    <string name="action_reverse_order">Reverse order</string>
     <string name="action_sort_last_updated">Last updated</string>
-    <string name="action_sort_first_updated">Last updated (desc.)</string>
     <string name="action_hide_title">Hide title</string>
     <string name="action_show_title">Show title</string>
     <string name="action_newest">Newest</string>

@@ -219,15 +219,15 @@ class LibraryController(
         if (orderOfCat != null) {
             subMenu.setGroupCheckable(R.id.reorder_group, true, true)
             when (orderOfCat) {
-                'a' -> subMenu.findItem(R.id.action_alpha_asc)?.isChecked = true
-                'b' -> subMenu.findItem(R.id.action_alpha_dsc)?.isChecked = true
-                'c' -> subMenu.findItem(R.id.action_update_asc)?.isChecked = true
-                'd' -> subMenu.findItem(R.id.action_update_dsc)?.isChecked = true
-                'e' -> subMenu.findItem(R.id.action_unread)?.isChecked = true
-                'f' -> subMenu.findItem(R.id.action_last_read)?.isChecked = true
+                'a', 'b' -> subMenu.findItem(R.id.action_alpha_asc)?.isChecked = true
+                'c', 'd' -> subMenu.findItem(R.id.action_update_asc)?.isChecked = true
+                'e', 'f' -> subMenu.findItem(R.id.action_unread)?.isChecked = true
+                'g', 'h' -> subMenu.findItem(R.id.action_last_read)?.isChecked = true
             }
+            subMenu.findItem(R.id.action_reverse)?.isVisible = true
         }
         else {
+            subMenu.findItem(R.id.action_reverse)?.isVisible = false
             subMenu.setGroupCheckable(R.id.reorder_group, false, false)
         }
     }
@@ -479,12 +479,11 @@ class LibraryController(
             R.id.action_source_migration -> {
                 router.pushController(MigrationController().withFadeTransaction())
             }
-            R.id.action_alpha_asc -> reOrder(1)
-            R.id.action_alpha_dsc -> reOrder(2)
-            R.id.action_update_asc -> reOrder(3)
-            R.id.action_update_dsc -> reOrder(4)
-            R.id.action_unread -> reOrder(5)
-            R.id.action_last_read -> reOrder(6)
+            R.id.action_alpha_asc -> reOrder(0)
+            R.id.action_update_asc -> reOrder(1)
+            R.id.action_unread -> reOrder(2)
+            R.id.action_last_read -> reOrder(3)
+            R.id.action_reverse -> reOrder(-1)
             else -> return super.onOptionsItemSelected(item)
         }
 
@@ -492,8 +491,15 @@ class LibraryController(
     }
 
     private fun reOrder(type: Int) {
+        val modType = if (type == -1) {
+            val t = (adapter?.categories?.getOrNull(library_pager.currentItem)?.mangaSort
+                ?.minus('a') ?: 0) + 1
+            if (t % 2 != 0) t + 1
+            else t - 1
+        }
+        else 2 * type + 1
         adapter?.categories?.getOrNull(library_pager.currentItem)?.id?.let {
-            reorganizeRelay.call(it to type)
+            reorganizeRelay.call(it to modType)
             onSortChanged()
         }
     }

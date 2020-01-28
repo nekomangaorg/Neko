@@ -43,14 +43,8 @@
                     android:id="@+id/action_alpha_asc"
                     android:title="@string/title"/>
                 <item
-                    android:id="@+id/action_alpha_dsc"
-                    android:title="@string/action_title_reverse"/>
-                <item
                     android:id="@+id/action_update_asc"
                     android:title="@string/action_sort_last_updated"/>
-                <item
-                    android:id="@+id/action_update_dsc"
-                    android:title="@string/action_sort_first_updated"/>
                 <item
                     android:id="@+id/action_unread"
                     android:title="@string/action_filter_unread"/>
@@ -59,6 +53,10 @@
                     android:title="@string/action_sort_last_read"/>
 
             </group>
+
+            <item
+                android:id="@+id/action_reverse"
+                android:title="@string/action_reverse_order"/>
         </menu>
     </item>
 
