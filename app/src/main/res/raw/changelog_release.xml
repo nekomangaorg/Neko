@@ -1,5 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <changelog bulletedList="true">
+	<changelogversion versionName="v0.9.75" changeDate="">
+		<changelogtext>Edit all manga info from title to tags for both online and local manga</changelogtext>
+		<changelogtext>Tracked filter no longer shows tracking for services you've logged out of</changelogtext>
+		<changelogtext>Added logout button to tracking settings</changelogtext>
+		<changelogtext>Track button pre-selected when adding new manga to track and there's a single entry</changelogtext>
+		<changelogtext>Tracking status options now reflect the site's wording and order</changelogtext>
+		<changelogtext>Refreshing metadata now updates the manga title (if there is a new manga title)</changelogtext>
+		<changelogtext>Search "local" to see local manga, also can now search artist</changelogtext>
+		<changelogtext>Tapping the app icon on homescreen no longer closes the reader or webview</changelogtext>
+		<changelogtext>Fixed crash when changing categories for global download</changelogtext>
+		<changelogtext>Fully Translated Russian Language</changelogtext>
+		<changelogtext>Default category name in settings now honors locale</changelogtext>
+		<changelogtext>Added Last Read to Drag &amp; Drop sorting</changelogtext>
+		<changelogtext>Fixes to stopping downloads</changelogtext>
+	</changelogversion>
+
     <changelogversion versionName="v0.9.7" changeDate="">
 		<changelogtext>Extensions notifications now perfected</changelogtext>
 		<changelogtext>Extensions are checked every hour in app</changelogtext>
