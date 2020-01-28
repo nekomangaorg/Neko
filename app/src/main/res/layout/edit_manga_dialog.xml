@@ -22,20 +22,6 @@
             android:contentDescription="@string/description_cover"
             android:background="@drawable/image_border_background"
             android:src="@mipmap/ic_launcher"/>
-
-        <FrameLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
-            android:layout_gravity="end|bottom"
-            android:layout_marginEnd="4dp"
-            android:layout_marginBottom="4dp">
-        <ImageView
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:layout_gravity="center"
-            android:src="@drawable/ic_edit_outlined_white_24dp"/>
-        </FrameLayout>
     </FrameLayout>
 
     <EditText
@@ -77,15 +63,6 @@
         android:inputType="text|textMultiLine"
         android:scrollHorizontally="false" />
 
-    <Button
-        android:id="@+id/reset_tags"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:text="@string/reset_tags" />
-
     <me.gujun.android.taggroup.TagGroup
         android:id="@+id/manga_genres_tags"
         style="@style/TagGroup"
@@ -104,6 +81,14 @@
         app:atg_checkedBorderColor="@color/red_error"
         app:atg_borderColor="@color/md_blue_A400"
         app:atg_textColor="@color/md_blue_A400" />
+
+    <Button
+        android:id="@+id/reset_tags"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:text="@string/reset_tags" />
 
     <View
         android:layout_width="match_parent"
