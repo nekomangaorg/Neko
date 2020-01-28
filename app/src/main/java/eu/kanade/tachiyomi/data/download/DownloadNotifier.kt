@@ -112,6 +112,7 @@ internal class DownloadNotifier(private val context: Context) {
             setContentTitle("$title - $chapter".chop(30))
             setContentText(context.getString(R.string.chapter_downloading_progress)
                     .format(download.downloadedImages, download.pages!!.size))
+            setStyle(null)
             setProgress(download.pages!!.size, download.downloadedImages, false)
         }
         // Displays the progress bar on notification

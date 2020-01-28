@@ -128,7 +128,8 @@ class Downloader(
         } else {
             if (notifier.paused) {
                 notifier.paused = false
-                notifier.onDownloadPaused()
+                if (queue.isEmpty()) notifier.dismiss()
+                else notifier.onDownloadPaused()
             } else if (notifier.isSingleChapter && !notifier.errorThrown) {
                 notifier.isSingleChapter = false
             } else {
