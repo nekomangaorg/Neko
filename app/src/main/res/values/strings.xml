@@ -113,6 +113,7 @@
     <string name="pref_category_downloads">Downloads</string>
     <string name="pref_category_site_specific">Site Specific</string>
     <string name="pref_category_tracking">Tracking</string>
+    <string name="pref_category_related">Related Mangas</string>
     <string name="pref_category_advanced">Advanced</string>
     <string name="pref_category_about">About</string>
 
@@ -248,6 +249,11 @@
 
     <!-- Sync section -->
     <string name="services">Services</string>
+
+
+    <!-- Related Mangas section -->
+    <string name="pref_related_file_path">Manga Related JSON File</string>
+    <string name="pref_related_show_tab">Show Related Manga Tab</string>
 
     <!-- Backup section -->
     <string name="backup">Backup</string>

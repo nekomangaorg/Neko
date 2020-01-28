@@ -26,6 +26,10 @@ class PreferencesHelper(val context: Context) {
             File(Environment.getExternalStorageDirectory().absolutePath + File.separator +
                     context.getString(R.string.app_name), "downloads"))
 
+    private val defaultRelatedFilepath = Uri.fromFile(
+            File(Environment.getExternalStorageDirectory().absolutePath + File.separator,
+                    "downloads" + File.separator + "mangas.json"))
+
     private val defaultBackupDir = Uri.fromFile(
             File(Environment.getExternalStorageDirectory().absolutePath + File.separator +
                     context.getString(R.string.app_name), "backup"))
@@ -142,6 +146,10 @@ class PreferencesHelper(val context: Context) {
     fun downloadsDirectory() = rxPrefs.getString(Keys.downloadsDirectory, defaultDownloadsDir.toString())
 
     fun downloadOnlyOverWifi() = prefs.getBoolean(Keys.downloadOnlyOverWifi, true)
+
+    fun relatedFilePath() = rxPrefs.getString(Keys.relatedFilePath, defaultRelatedFilepath.toString())
+
+    fun relatedShowTab() = prefs.getBoolean(Keys.relatedShowTab, false)
 
     fun numberOfBackups() = rxPrefs.getInteger(Keys.numberOfBackups, 1)
 

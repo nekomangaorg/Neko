@@ -13,9 +13,15 @@ import eu.kanade.tachiyomi.ui.main.MainActivity
 import kotlinx.serialization.json.Json
 import rx.Observable
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import uy.kohesive.injekt.injectLazy
 import java.io.File
 
 class RelatedHandler {
+
+
+
+    private val preferences by injectLazy<PreferencesHelper>()
 
 
     /**
@@ -25,9 +31,8 @@ class RelatedHandler {
 
 
         // load these results from disk
-        // TODO: figure out a proper way to do this...
-        // TODO: seems that the resource access is broken since this isn't the main activity?
-        var result = File("/storage/emulated/0/Download/mangas_compressed.json").readText(Charsets.UTF_8)
+        //var result = File("/storage/emulated/0/Download/mangas_compressed.json").readText(Charsets.UTF_8)
+        var result = File(preferences.relatedFilePath().get()).readText(Charsets.UTF_8)
         //var result = this::class.java.classLoader?.getResource("/res/raw/mangas_compressed.json")?.readText()
         //var result = MainActivity::class.java.classLoader?.getResource("/SDCARD/TEMP/mangas_compressed.json")?.readText()
         //val result = Resources.getSystem().openRawResource(R.raw.mangas_compressed).bufferedReader(Charsets.UTF_8).use { it.readText() }
