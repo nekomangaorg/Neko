@@ -84,7 +84,7 @@ class SettingsReaderController : SettingsController() {
             switchPreference {
                 key = Keys.trueColor
                 titleRes = R.string.pref_true_color
-                defaultValue = true
+                defaultValue = false
             }
         }
         preferenceCategory {
