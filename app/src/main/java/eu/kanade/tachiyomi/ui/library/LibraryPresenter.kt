@@ -242,6 +242,11 @@ class LibraryPresenter(
                                     'c' -> i2.manga.last_update.compareTo(i1.manga.last_update)
                                     'd' -> i1.manga.last_update.compareTo(i2.manga.last_update)
                                     'e' -> i2.manga.unread.compareTo(i1.manga.unread)
+                                    'f' -> {
+                                        val manga1LastRead = lastReadManga[i1.manga.id!!] ?: lastReadManga.size
+                                        val manga2LastRead = lastReadManga[i2.manga.id!!] ?: lastReadManga.size
+                                        manga1LastRead.compareTo(manga2LastRead)
+                                    }
                                     else -> sortAlphabetical(i1, i2)
                                 }
                             }

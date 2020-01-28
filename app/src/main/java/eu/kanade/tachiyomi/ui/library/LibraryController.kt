@@ -224,6 +224,7 @@ class LibraryController(
                 'c' -> subMenu.findItem(R.id.action_update_asc)?.isChecked = true
                 'd' -> subMenu.findItem(R.id.action_update_dsc)?.isChecked = true
                 'e' -> subMenu.findItem(R.id.action_unread)?.isChecked = true
+                'f' -> subMenu.findItem(R.id.action_last_read)?.isChecked = true
             }
         }
         else {
@@ -483,6 +484,7 @@ class LibraryController(
             R.id.action_update_asc -> reOrder(3)
             R.id.action_update_dsc -> reOrder(4)
             R.id.action_unread -> reOrder(5)
+            R.id.action_last_read -> reOrder(6)
             else -> return super.onOptionsItemSelected(item)
         }
 
