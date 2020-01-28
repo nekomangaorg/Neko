@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.reader.viewer.pager
 
-import androidx.viewpager.widget.PagerAdapter
 import android.view.View
 import android.view.ViewGroup
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
@@ -18,6 +17,9 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
      * List of currently set items.
      */
     var items: List<Any> = emptyList()
+        private set
+
+    var nextTransition: ChapterTransition.Next? = null
         private set
 
     /**
@@ -46,7 +48,8 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
         }
 
         // Add next chapter transition and pages.
-        newItems.add(ChapterTransition.Next(chapters.currChapter, chapters.nextChapter))
+        nextTransition = ChapterTransition.Next(chapters.currChapter, chapters.nextChapter)
+                .also { newItems.add(it) }
         if (chapters.nextChapter != null) {
             // Add at most two pages, because this chapter will be selected before the user can
             // swap more pages.
@@ -95,7 +98,7 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
                 Timber.d("Position for ${view.item} not found")
             }
         }
-        return androidx.viewpager.widget.PagerAdapter.POSITION_NONE
+        return POSITION_NONE
     }
 
 }
