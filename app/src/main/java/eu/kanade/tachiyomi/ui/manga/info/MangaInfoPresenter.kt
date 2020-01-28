@@ -253,7 +253,8 @@ class MangaInfoPresenter(
             }
 
             var tagsString = tags?.joinToString(", ")
-            if (tagsString.isNullOrBlank() && manga.currentGenres() != manga.originalGenres()) {
+            if ((tagsString.isNullOrBlank() && manga.currentGenres() != manga.originalGenres())
+                || tagsString == manga.originalGenres()) {
                 manga.genre = manga.originalGenres()
                 changed = true
             } else if (!tagsString.isNullOrBlank() && tagsString != manga.currentGenres()) {
