@@ -40,6 +40,7 @@ class SettingsGeneralController : SettingsController() {
                 true
             }
         }
+
         intListPreference(activity) {
             key = Keys.theme
             titleRes = R.string.pref_theme
@@ -53,6 +54,20 @@ class SettingsGeneralController : SettingsController() {
                 activity?.recreate()
                 true
             }
+        }
+        listPreference(activity) {
+            key= Keys.dateFormat
+            titleRes = R.string.pref_date_format
+            entryValues = listOf("", "MM/dd/yy", "dd/MM/yy", "yyyy-MM-dd")
+            entries = entryValues.map { value ->
+                if (value == "") {
+                    context.getString(R.string.system_default)
+                } else {
+                    value
+                }
+            }
+            defaultValue = ""
+            summary= "%s"
         }
         intListPreference(activity) {
             key = Keys.startScreen
