@@ -67,7 +67,7 @@ class SettingsGeneralController : SettingsController() {
                 }
             }
             defaultValue = ""
-            summary= "%s"
+            summary = "%s"
         }
         intListPreference(activity) {
             key = Keys.startScreen

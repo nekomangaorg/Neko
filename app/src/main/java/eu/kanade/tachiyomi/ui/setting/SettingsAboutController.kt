@@ -17,6 +17,7 @@ import eu.kanade.tachiyomi.data.updater.UpdaterService
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.main.ChangelogDialogController
 import eu.kanade.tachiyomi.util.system.toast
+import eu.kanade.tachiyomi.util.lang.toTimestampString
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
@@ -34,7 +35,6 @@ class SettingsAboutController : SettingsController() {
      * Checks for new releases
      */
     private val updateChecker by lazy { UpdateChecker.getUpdateChecker() }
-
 
     private val userPreferences: PreferencesHelper by injectLazy()
 
@@ -165,9 +165,7 @@ class SettingsAboutController : SettingsController() {
             inputDf.timeZone = TimeZone.getTimeZone("UTC")
             val buildTime = inputDf.parse(BuildConfig.BUILD_TIME) ?: return BuildConfig.BUILD_TIME
 
-            val date = dateFormat.format(buildTime)
-            val time = DateFormat.getTimeInstance(DateFormat.SHORT).format(buildTime)
-            return "$date $time"
+            return buildTime.toTimestampString(dateFormat)
         } catch (e: ParseException) {
             return BuildConfig.BUILD_TIME
         }

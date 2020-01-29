@@ -114,7 +114,9 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
 
     var fullRes:Drawable? = null
 
-    private val dateFormat: DateFormat = preferences.dateFormat().getOrDefault()
+    private val dateFormat: DateFormat by lazy {
+        preferences.dateFormat().getOrDefault()
+    }
 
     init {
         setHasOptionsMenu(true)
