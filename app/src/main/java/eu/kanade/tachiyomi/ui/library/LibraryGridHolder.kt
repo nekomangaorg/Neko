@@ -58,7 +58,7 @@ class LibraryGridHolder(
         GlideApp.with(view.context).clear(thumbnail)
         GlideApp.with(view.context)
                 .load(item.manga)
-                .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                 .signature(ObjectKey(MangaImpl.getLastCoverFetch(item.manga.id!!).toString()))
                 .centerCrop()
                 .into(thumbnail)

@@ -12,7 +12,6 @@ import java.util.concurrent.Executors
 class BiometricActivity : BaseActivity() {
     val executor = Executors.newSingleThreadExecutor()
 
-    val preferences: PreferencesHelper by injectLazy()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val biometricPrompt = BiometricPrompt(this, executor, object : BiometricPrompt

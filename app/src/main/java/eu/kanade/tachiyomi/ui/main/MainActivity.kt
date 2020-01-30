@@ -17,6 +17,7 @@ import android.webkit.WebView
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
 import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
 import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
@@ -77,8 +78,6 @@ open class MainActivity : BaseActivity() {
 
     protected lateinit var router: Router
 
-    val preferences: PreferencesHelper by injectLazy()
-
     protected var drawerArrow: DrawerArrowDrawable? = null
 
     protected open var trulyGoBack = false
@@ -109,17 +108,14 @@ open class MainActivity : BaseActivity() {
 
     lateinit var tabAnimator: TabsAnimator
 
-    override fun getTheme(): Resources.Theme {
-        val theme = super.getTheme()
-        theme.applyStyle(when (preferences.theme()) {
-            3, 6 -> R.style.Theme_Tachiyomi_Amoled
-            4, 7 -> R.style.Theme_Tachiyomi_DarkBlue
-            else -> R.style.Theme_Tachiyomi
-        }, true)
-        return theme
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
+        setDefaultNightMode(
+            when (preferences.theme()) {
+                1 -> MODE_NIGHT_NO
+                2, 3, 4 -> MODE_NIGHT_YES
+                else -> MODE_NIGHT_FOLLOW_SYSTEM
+            }
+        )
         // Some webview somewwhere breaks night mode, we create a webview to solve this:
         // https://stackoverflow.com/a/45430282
         if (preferences.theme() in 2..4) {
@@ -130,11 +126,6 @@ open class MainActivity : BaseActivity() {
                 Timber.e(e, "Exception when creating webview at start")
             }
         }
-        setDefaultNightMode(when (preferences.theme()) {
-            1 -> MODE_NIGHT_NO
-            2, 3, 4 -> MODE_NIGHT_YES
-            else -> MODE_NIGHT_FOLLOW_SYSTEM
-        })
         super.onCreate(savedInstanceState)
         if (trulyGoBack) return
 

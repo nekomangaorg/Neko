@@ -38,7 +38,6 @@ class WebViewActivity : BaseActivity() {
 
     private val sourceManager by injectLazy<SourceManager>()
     private var bundle:Bundle? = null
-    val preferences: PreferencesHelper by injectLazy()
 
     companion object {
         const val SOURCE_KEY = "source_key"
@@ -55,7 +54,7 @@ class WebViewActivity : BaseActivity() {
         }
     }
 
-    override fun getTheme(): Resources.Theme {
+    /*override fun getTheme(): Resources.Theme {
         val theme = super.getTheme()
         theme.applyStyle(when (preferences.theme()) {
             3, 6 -> R.style.Theme_Tachiyomi_Amoled
@@ -63,7 +62,7 @@ class WebViewActivity : BaseActivity() {
             else -> R.style.Theme_Tachiyomi
         }, true)
         return theme
-    }
+    }*/
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

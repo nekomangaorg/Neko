@@ -96,8 +96,6 @@ class LibraryController(
      */
     private var migratingMangas = mutableSetOf<Manga>()
 
-    private var selectedCoverManga: Manga? = null
-
     /**
      * Relay to notify the UI of selection updates.
      */

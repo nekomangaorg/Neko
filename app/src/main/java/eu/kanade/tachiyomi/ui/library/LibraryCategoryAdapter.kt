@@ -50,12 +50,14 @@ class LibraryCategoryAdapter(val view: LibraryCategoryView) :
     }
 
     fun performFilter() {
-        var s = getFilter(String::class.java)
-        if (s == null) {
-            s = ""
+        val s = getFilter(String::class.java)
+        if (s.isNullOrBlank()) {
+            updateDataSet(mangas)
+        }
+        else {
+            updateDataSet(mangas.filter { it.filter(s) })
         }
         isLongPressDragEnabled = view.canDrag() && s.isNullOrBlank()
-        updateDataSet(mangas.filter { it.filter(s) })
     }
 
     override fun onCreateBubbleText(position: Int):String {
