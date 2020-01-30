@@ -58,7 +58,7 @@ class SaveImageNotifier(private val context: Context) {
             setStyle(NotificationCompat.BigPictureStyle().bigPicture(image))
             setLargeIcon(image)
             setAutoCancel(true)
-            color = ContextCompat.getColor(context, R.color.colorAccentLight)
+            color = ContextCompat.getColor(context, R.color.colorAccent)
             // Clear old actions if they exist
             if (mActions.isNotEmpty())
                 mActions.clear()

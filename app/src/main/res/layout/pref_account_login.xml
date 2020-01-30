@@ -20,7 +20,7 @@
         android:layout_height="1dp"
         android:layout_marginBottom="24dp"
         android:layout_marginTop="6dp"
-        android:background="@color/dividerLight"/>
+        android:background="@color/divider"/>
 
     <TextView
         android:layout_width="match_parent"

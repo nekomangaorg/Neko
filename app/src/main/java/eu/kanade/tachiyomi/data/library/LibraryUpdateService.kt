@@ -103,7 +103,7 @@ class LibraryUpdateService(
             .setLargeIcon(notificationBitmap)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
-            .setColor(ContextCompat.getColor(this, R.color.colorAccentLight))
+            .setColor(ContextCompat.getColor(this, R.color.colorAccent))
             .addAction(R.drawable.ic_clear_grey_24dp_img, getString(android.R.string.cancel), cancelIntent)
     }
 
@@ -489,7 +489,7 @@ class LibraryUpdateService(
                 catch (e: Exception) { }
                 setGroupAlertBehavior(GROUP_ALERT_SUMMARY)
                 setContentTitle(manga.currentTitle())
-                color = ContextCompat.getColor(this@LibraryUpdateService, R.color.colorAccentLight)
+                color = ContextCompat.getColor(this@LibraryUpdateService, R.color.colorAccent)
                 val chaptersNames = if (chapterNames.size > 5) {
                     "${chapterNames.take(4).joinToString(", ")}, " +
                         resources.getQuantityString(R.plurals.notification_and_n_more,
@@ -523,7 +523,7 @@ class LibraryUpdateService(
                 setSmallIcon(R.drawable.ic_tachi)
                 setLargeIcon(notificationBitmap)
                 setContentTitle(getString(R.string.notification_new_chapters))
-                color = ContextCompat.getColor(applicationContext, R.color.colorAccentLight)
+                color = ContextCompat.getColor(applicationContext, R.color.colorAccent)
                 if (updates.size > 1) {
                     setContentText(resources.getQuantityString(R.plurals
                         .notification_new_chapters_text,

@@ -19,7 +19,7 @@
         android:ellipsize="end"
         android:maxLines="1"
         android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-        android:textColor="@color/textColorPrimaryDark"
+        android:textColor="@color/md_white_1000"
         tools:text="Header"/>
 
     <ImageView

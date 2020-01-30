@@ -97,7 +97,7 @@ internal class UpdaterNotifier(private val context: Context) {
             setSmallIcon(android.R.drawable.stat_sys_warning)
             setOnlyAlertOnce(false)
             setProgress(0, 0, false)
-            color = ContextCompat.getColor(context, R.color.colorAccentLight)
+            color = ContextCompat.getColor(context, R.color.colorAccent)
             // Retry action
             addAction(R.drawable.ic_refresh_grey_24dp_img,
                     context.getString(R.string.action_retry),

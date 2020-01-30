@@ -222,7 +222,7 @@ internal class DownloadNotifier(private val context: Context) {
             clearActions()
             setAutoCancel(true)
             setContentIntent(NotificationHandler.openDownloadManagerPendingActivity(context))
-            color = ContextCompat.getColor(context, R.color.colorAccentLight)
+            color = ContextCompat.getColor(context, R.color.colorAccent)
             setProgress(0, 0, false)
         }
         notification.show(Notifications.ID_DOWNLOAD_CHAPTER_ERROR)

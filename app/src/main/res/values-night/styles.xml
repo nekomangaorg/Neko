@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.ActionBar.DayNight" parent="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+        <item name="popupTheme">@style/ThemeOverlay.AppCompat.Dark</item>
+    </style>
+</resources>

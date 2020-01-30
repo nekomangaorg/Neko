@@ -18,6 +18,13 @@ abstract class BaseActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        AppCompatDelegate.setDefaultNightMode(
+            when (preferences.theme()) {
+                1 -> AppCompatDelegate.MODE_NIGHT_NO
+                2, 3, 4 -> AppCompatDelegate.MODE_NIGHT_YES
+                else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+            }
+        )
         setTheme(when (preferences.theme()) {
             3, 6 -> R.style.Theme_Tachiyomi_Amoled
             4, 7 -> R.style.Theme_Tachiyomi_DarkBlue

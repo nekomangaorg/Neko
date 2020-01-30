@@ -51,7 +51,7 @@ class ExtensionUpdateJob : Job() {
                             setContentText(extNames)
                             setStyle(NotificationCompat.BigTextStyle().bigText(extNames))
                             setSmallIcon(R.drawable.ic_extension_update)
-                            color = ContextCompat.getColor(context, R.color.colorAccentLight)
+                            color = ContextCompat.getColor(context, R.color.colorAccent)
                             setContentIntent(
                                 NotificationReceiver.openExtensionsPendingActivity(
                                     context

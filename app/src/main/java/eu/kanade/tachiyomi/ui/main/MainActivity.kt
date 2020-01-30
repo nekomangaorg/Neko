@@ -109,15 +109,6 @@ open class MainActivity : BaseActivity() {
     lateinit var tabAnimator: TabsAnimator
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        setDefaultNightMode(
-            when (preferences.theme()) {
-                1 -> MODE_NIGHT_NO
-                2, 3, 4 -> MODE_NIGHT_YES
-                else -> MODE_NIGHT_FOLLOW_SYSTEM
-            }
-        )
-        // Some webview somewwhere breaks night mode, we create a webview to solve this:
-        // https://stackoverflow.com/a/45430282
         if (preferences.theme() in 2..4) {
             Timber.d("Manually instantiating WebView to avoid night mode issue.");
             try {
