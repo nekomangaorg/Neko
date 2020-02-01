@@ -247,7 +247,7 @@ class LibraryPresenter(
                                     }
                                     else -> sortAlphabetical(i1, i2)
                                 }
-                                if ((category.mangaSort!! - 'a') % 2 == 1 )
+                                if ((category.mangaSort?.minus('a')) ?: 0 % 2 == 1 )
                                     sort *= -1
                                 sort
                             }

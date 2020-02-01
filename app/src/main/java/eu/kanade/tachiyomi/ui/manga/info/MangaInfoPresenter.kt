@@ -217,7 +217,11 @@ class MangaInfoPresenter(
         else {
             var changed = false
             val title = title?.trim()
-            if (title.isNullOrBlank() && manga.currentTitle() != manga.originalTitle()) {
+            if (!title.isNullOrBlank() && manga.originalTitle().isBlank()) {
+                manga.title = title
+                changed = true
+            }
+            else if (title.isNullOrBlank() && manga.currentTitle() != manga.originalTitle()) {
                 manga.title = manga.originalTitle()
                 changed = true
             } else if (!title.isNullOrBlank() && title != manga.currentTitle()) {
