@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:bottom="5dp">
+        <shape>
+            <solid android:color="?attr/colorPrimary"/>
+        </shape>
+    </item>
+    <item android:height="5dp" android:gravity="bottom">
+        <shape>
+            <gradient
+                android:angle="90"
+                android:endColor="@color/actionModeShadow"
+                android:startColor="@android:color/transparent"
+                android:type="linear" />
+        </shape>
+    </item>
+</layer-list>

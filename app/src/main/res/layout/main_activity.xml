@@ -13,7 +13,7 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:orientation="vertical"
         android:id="@+id/main_content"
         android:layout_width="match_parent"
@@ -23,6 +23,9 @@
         <eu.kanade.tachiyomi.widget.ElevationAppBarLayout
             android:id="@+id/appbar"
             android:layout_width="match_parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
             android:layout_height="wrap_content">
 
             <androidx.appcompat.widget.Toolbar
@@ -38,10 +41,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:theme="@style/Theme.ActionBar.Tab"
-                app:tabIndicatorColor="@android:color/white"
+                app:tabBackground="?colorPrimary"
+                app:tabIndicatorColor="?attr/tabBarIconColor"
+                app:tabTextColor="?attr/tabBarIconColor"
                 app:tabInlineLabel="true"
                 app:tabGravity="center"
-                app:tabMode="scrollable"
+                app:tabMode="auto"
                 app:tabMinWidth="75dp"/>
 
         </eu.kanade.tachiyomi.widget.ElevationAppBarLayout>
@@ -49,9 +54,30 @@
         <com.bluelinelabs.conductor.ChangeHandlerFrameLayout
             android:id="@+id/controller_container"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toTopOf="@+id/navigationView"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/appbar">
 
-    </LinearLayout>
+        </com.bluelinelabs.conductor.ChangeHandlerFrameLayout>
+
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/navigationView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/colorPrimary"
+            app:tabBackground="@color/rippleColor"
+            app:itemIconTint="@drawable/bottom_nav_item_selector"
+            app:tabRippleColor="@color/rippleColor"
+            app:itemTextColor="?attr/tabBarIconColor"
+            app:tabTextColor="?attr/tabBarIconColor"
+            app:itemRippleColor="@color/rippleColor"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:menu="@menu/bottom_navigation" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/nav_view"

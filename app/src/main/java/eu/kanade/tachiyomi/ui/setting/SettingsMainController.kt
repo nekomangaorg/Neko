@@ -1,17 +1,39 @@
 package eu.kanade.tachiyomi.ui.setting
 
 import androidx.preference.PreferenceScreen
+import com.bluelinelabs.conductor.Controller
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.preference.getOrDefault
+import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.updater.UpdaterJob
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.ui.extension.ExtensionController
+import uy.kohesive.injekt.injectLazy
 
 class SettingsMainController : SettingsController() {
     override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
         titleRes = R.string.label_settings
 
         val tintColor = context.getResourceColor(R.attr.colorAccent)
+        val preferencesH: PreferencesHelper by injectLazy()
+
+        val updateCount = preferencesH.extensionUpdatesCount().getOrDefault()
+        preference {
+            iconRes = R.drawable.ic_extension_black_24dp
+            iconTint = tintColor
+            if (updateCount == 0) {
+                titleRes = R.string.label_extensions
+            }
+            else {
+                title = "${resources?.getString(R.string.label_extensions)} ${resources
+                ?.getQuantityString(R.plurals.extensions_updates_pendings, updateCount, 
+                    updateCount)}"
+            }
+            onClick { navigateTo(ExtensionController()) }
+        }
 
         preference {
             iconRes = R.drawable.ic_tune_black_24dp
@@ -63,7 +85,7 @@ class SettingsMainController : SettingsController() {
         }
     }
 
-    private fun navigateTo(controller: SettingsController) {
+    private fun navigateTo(controller: Controller) {
         router.pushController(controller.withFadeTransaction())
     }
 }

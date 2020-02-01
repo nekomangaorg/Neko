@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.library
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
@@ -11,6 +12,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsets
+import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
@@ -41,6 +43,7 @@ import eu.kanade.tachiyomi.ui.base.controller.SecondaryDrawerController
 import eu.kanade.tachiyomi.ui.base.controller.TabbedController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.category.CategoryController
+import eu.kanade.tachiyomi.ui.download.DownloadController
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.ui.migration.MigrationController
@@ -443,9 +446,6 @@ class LibraryController(
             searchView.clearFocus()
         }
 
-        // Mutate the filter icon because it needs to be tinted and the resource is shared.
-        menu.findItem(R.id.action_filter).icon.mutate()
-
         searchViewSubscription?.unsubscribe()
         searchViewSubscription = searchView.queryTextChanges()
                 // Ignore events if this controller isn't at the top
@@ -468,8 +468,10 @@ class LibraryController(
         val filterItem = menu.findItem(R.id.action_filter)
 
         // Tint icon if there's a filter active
-        val filterColor = if (navView.hasActiveFilters()) Color.rgb(255, 238, 7) else Color.WHITE
-        DrawableCompat.setTint(filterItem.icon, filterColor)
+        if (navView.hasActiveFilters())
+            DrawableCompat.setTint(filterItem.icon,  Color.rgb(255, 238, 7))
+        else
+            DrawableCompat.clearColorFilter(filterItem.icon)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -480,6 +482,9 @@ class LibraryController(
             }
             R.id.action_edit_categories -> {
                 router.pushController(CategoryController().withFadeTransaction())
+            }
+            R.id.action_downloads -> {
+                router.pushController(DownloadController().withFadeTransaction())
             }
             R.id.action_source_migration -> {
                 router.pushController(MigrationController().withFadeTransaction())

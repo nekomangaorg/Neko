@@ -28,6 +28,7 @@
         app:layout_anchor="@id/recycler"
         app:layout_anchorGravity="bottom|right|end"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:backgroundTint="?attr/colorAccent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

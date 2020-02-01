@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.main
 
-import android.animation.ObjectAnimator
 import android.app.SearchManager
 import android.content.Intent
 import android.content.res.Configuration
@@ -8,12 +7,12 @@ import android.graphics.Color
 import android.graphics.Rect
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebView
 import android.widget.FrameLayout
-import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.biometric.BiometricManager
@@ -126,7 +125,7 @@ open class MainActivity : BaseActivity() {
         setSupportActionBar(toolbar)
 
         drawerArrow = DrawerArrowDrawable(this)
-        drawerArrow?.color = Color.WHITE
+        drawerArrow?.color = getResourceColor(R.attr.actionBarTintColor)
         toolbar.navigationIcon = drawerArrow
 
         tabAnimator = TabsAnimator(tabs)
@@ -158,9 +157,33 @@ open class MainActivity : BaseActivity() {
             true
         }
 
+        navigationView.setOnNavigationItemSelectedListener { item ->
+            val id = item.itemId
+
+            val currentRoot = router.backstack.firstOrNull()
+            if (currentRoot?.tag()?.toIntOrNull() != id) {
+                when (id) {
+                    R.id.nav_drawer_library -> setRoot(LibraryController(), id)
+                    R.id.nav_drawer_recent_updates -> setRoot(RecentChaptersController(), id)
+                    R.id.nav_drawer_recently_read -> setRoot(RecentlyReadController(), id)
+                    R.id.nav_drawer_catalogues -> setRoot(CatalogueController(), id)
+                    R.id.nav_drawer_extensions -> setRoot(ExtensionController(), id)
+                    R.id.nav_drawer_downloads -> {
+                        setRoot(DownloadController(), id)
+                    }
+                    R.id.nav_drawer_settings -> {
+                        setRoot(SettingsMainController(), id)
+                    }
+                    R.id.nav_drawer_help -> {
+                        openInBrowser(URL_HELP)
+                    }
+                }
+            }
+            true
+        }
         val container: ViewGroup = findViewById(R.id.controller_container)
 
-        val content: LinearLayout = findViewById(R.id.main_content)
+        val content: ViewGroup = findViewById(R.id.main_content)
         container.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
             View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
             View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
@@ -209,6 +232,8 @@ open class MainActivity : BaseActivity() {
         if (Build.VERSION.SDK_INT >= 26 && currentNightMode == Configuration.UI_MODE_NIGHT_NO) {
             content.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
         }
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && currentNightMode == Configuration.UI_MODE_NIGHT_NO) {
+//            content.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
 
         val drawerContainer: FrameLayout = findViewById(R.id.drawer_container)
         drawerContainer.setOnApplyWindowInsetsListener { v, insets ->
@@ -273,6 +298,23 @@ open class MainActivity : BaseActivity() {
         setExtensionsBadge()
     }
 
+    override fun startSupportActionMode(callback: androidx.appcompat.view.ActionMode.Callback): androidx.appcompat.view.ActionMode? {
+        window?.statusBarColor = getResourceColor(R.attr.colorPrimary)
+        return super.startSupportActionMode(callback)
+    }
+
+    override fun onSupportActionModeFinished(mode: androidx.appcompat.view.ActionMode) {
+        launchUI {
+            val scale = Settings.Global.getFloat(contentResolver, Settings.Global
+            .ANIMATOR_DURATION_SCALE, 1.0f)
+            val duration = resources.getInteger(android.R.integer.config_mediumAnimTime) * scale
+            delay(duration.toLong())
+            delay(100)
+            window?.statusBarColor = Color.TRANSPARENT
+        }
+        super.onSupportActionModeFinished(mode)
+    }
+
     private fun setExtensionsBadge() {
 
         val extUpdateText: TextView = nav_view.menu.findItem(
@@ -283,10 +325,12 @@ open class MainActivity : BaseActivity() {
         if (updates > 0) {
             extUpdateText.text = updates.toString()
             extUpdateText.visible()
+            navigationView.getOrCreateBadge(R.id.nav_drawer_settings).number = updates
         }
         else {
             extUpdateText.text = null
             extUpdateText.gone()
+            navigationView.getOrCreateBadge(R.id.nav_drawer_settings).clearNumber()
         }
     }
 
@@ -390,8 +434,8 @@ open class MainActivity : BaseActivity() {
         val backstackSize = router.backstackSize
         if (drawer.isDrawerOpen(GravityCompat.START) || drawer.isDrawerOpen(GravityCompat.END)) {
             drawer.closeDrawers()
-        } else if (backstackSize == 1 && router.getControllerWithTag("$startScreenId") == null) {
-            setSelectedDrawerItem(startScreenId)
+        //} else if (backstackSize == 1 && router.getControllerWithTag("$startScreenId") == null) {
+           // setSelectedDrawerItem(startScreenId)
         } else if (!router.handleBack()) {
             unlocked = false
             super.onBackPressed()
@@ -401,7 +445,9 @@ open class MainActivity : BaseActivity() {
     fun setSelectedDrawerItem(itemId: Int) {
         if (!isFinishing) {
             nav_view.setCheckedItem(itemId)
+            navigationView.selectedItemId = itemId
             nav_view.menu.performIdentifierAction(itemId, 0)
+            //navigationView.menu.performIdentifierAction(itemId, 0)
         }
     }
 
@@ -441,13 +487,16 @@ open class MainActivity : BaseActivity() {
         }
 
         val showHamburger = router.backstackSize == 1
+        drawer.setDrawerLockMode(androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
         if (showHamburger) {
-            drawer.setDrawerLockMode(androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_UNLOCKED)
+            toolbar.navigationIcon = null
+            //drawer.setDrawerLockMode(androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_UNLOCKED)
         } else {
-            drawer.setDrawerLockMode(androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
+            toolbar.navigationIcon = drawerArrow
+           // drawer.setDrawerLockMode(androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
         }
-
-        ObjectAnimator.ofFloat(drawerArrow, "progress", if (showHamburger) 0f else 1f).start()
+        drawerArrow?.progress = 1f
+        //ObjectAnimator.ofFloat(drawerArrow, "alpha", if (showHamburger) 0f else 1f).start()
 
         if (from is TabbedController) {
             from.cleanupTabs(tabs)

@@ -20,19 +20,17 @@
 
     <item
         android:id="@+id/action_migrate"
+        android:icon="@drawable/ic_swap_calls_white_24dp"
         android:title="@string/label_migration"
         app:showAsAction="ifRoom" />
 
-    <item
-        android:id="@+id/action_hide_title"
-        android:title="@string/action_hide_title"
-        app:showAsAction="never" />
 
 
     <item
         android:id="@+id/action_move_manga"
+        android:icon="@drawable/ic_swap_vert_white_24dp"
         android:title="@string/action_move"
-        app:showAsAction="never"
+        app:showAsAction="ifRoom"
         >
         <menu >
             <item
@@ -43,5 +41,10 @@
                 android:title="@string/action_move_to_bottom" />
         </menu>
     </item>
+
+    <item
+        android:id="@+id/action_hide_title"
+        android:title="@string/action_hide_title"
+        app:showAsAction="never" />
 
 </menu>

@@ -1,7 +1,8 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:app="http://schemas.android.com/apk/res-auto"
       xmlns:tools="http://schemas.android.com/tools"
-      tools:context=".MainActivity">
+      tools:context=".MainActivity"
+      app:tint="@android:color/black">
 
     <item
         android:id="@+id/action_search"
@@ -14,6 +15,12 @@
         android:id="@+id/action_filter"
         android:icon="@drawable/ic_filter_list_white_24dp"
         android:title="@string/action_filter"
+        app:showAsAction="ifRoom"/>
+
+    <item
+        android:id="@+id/action_downloads"
+        android:icon="@drawable/ic_file_download_white_24dp"
+        android:title="@string/pref_category_downloads"
         app:showAsAction="ifRoom"/>
 
     <item
