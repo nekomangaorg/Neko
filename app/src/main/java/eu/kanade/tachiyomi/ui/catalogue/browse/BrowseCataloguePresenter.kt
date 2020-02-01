@@ -218,6 +218,10 @@ open class BrowseCataloguePresenter(
             newManga.id = result.insertedId()
             localManga = newManga
         }
+        else if (localManga.title.isBlank()) {
+            localManga.title = sManga.title
+            db.insertManga(localManga).executeAsBlocking()
+        }
         return localManga
     }
 
