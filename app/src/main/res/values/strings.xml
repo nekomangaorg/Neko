@@ -134,9 +134,11 @@
     <string name="dark_theme">Dark</string>
     <string name="amoled_theme">AMOLED dark</string>
     <string name="darkblue_theme">Dark blue</string>
-    <string name="system_theme">System default</string>
-    <string name="system_amoled_theme">System default (AMOLED dark)</string>
-    <string name="system_darkblue_theme">System default (Dark blue)</string>
+    <string name="system_theme">System default (Light + Dark)</string>
+    <string name="white_theme">Pure White</string>
+    <string name="sysyem_white_theme">System default (White + Dark)</string>
+    <string name="system_amoled_theme">System default (Light + AMOLED dark)</string>
+    <string name="system_darkblue_theme">System default (Light + Dark blue)</string>
     <string name="pref_start_screen">Start screen</string>
     <string name="pref_language">Language</string>
     <string name="system_default">System default</string>

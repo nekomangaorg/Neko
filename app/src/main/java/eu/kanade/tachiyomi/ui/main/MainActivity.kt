@@ -215,25 +215,29 @@ open class MainActivity : BaseActivity() {
                 getColor(android.R.color.transparent)
             }
             // if in landscape with 2/3 button mode, fully opaque nav bar
-            else if (v.rootWindowInsets.systemWindowInsetLeft > 0
-                || v.rootWindowInsets.systemWindowInsetRight > 0) {
-                getResourceColor(android.R.attr.colorBackground)
+            else {/*if (v.rootWindowInsets.systemWindowInsetLeft > 0
+                || v.rootWindowInsets.systemWindowInsetRight > 0) {*/
+                getResourceColor(android.R.attr.colorPrimary)
             }
             // if in portrait with 2/3 button mode, translucent nav bar
-            else {
+           /* else {
                 ColorUtils.setAlphaComponent(
-                    getResourceColor(android.R.attr.colorBackground), 179)
-            }
+                    getResourceColor(android.R.attr.colorPrimary), 179)
+            }*/
             v.setPadding(insets.systemWindowInsetLeft, insets.systemWindowInsetTop,
                 insets.systemWindowInsetRight, 0)
             insets
         }
         val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        if (Build.VERSION.SDK_INT >= 26 && currentNightMode == Configuration.UI_MODE_NIGHT_NO) {
-            content.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+        if (Build.VERSION.SDK_INT >= 26 && currentNightMode == Configuration.UI_MODE_NIGHT_NO &&
+            preferences.theme() >= 8) {
+            content.systemUiVisibility = content.systemUiVisibility.or(View
+                .SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR)
         }
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && currentNightMode == Configuration.UI_MODE_NIGHT_NO) {
-//            content.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && currentNightMode == Configuration
+                .UI_MODE_NIGHT_NO && preferences.theme() >= 8)
+            content.systemUiVisibility = content.systemUiVisibility.or(View
+                .SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
 
         val drawerContainer: FrameLayout = findViewById(R.id.drawer_container)
         drawerContainer.setOnApplyWindowInsetsListener { v, insets ->
@@ -330,7 +334,7 @@ open class MainActivity : BaseActivity() {
         else {
             extUpdateText.text = null
             extUpdateText.gone()
-            navigationView.getOrCreateBadge(R.id.nav_drawer_settings).clearNumber()
+            navigationView.removeBadge(R.id.nav_drawer_settings)
         }
     }
 

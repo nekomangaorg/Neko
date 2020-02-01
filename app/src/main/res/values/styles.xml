@@ -16,8 +16,6 @@
 
     <style name="CustomActionModeStyle" parent="Base.Widget.AppCompat.ActionMode">
         <item name="background">@drawable/action_mode_bg</item>
-        <item name="android:tint">@color/red_error</item>
-        <item name="backgroundSplit">@color/red_error</item>
     </style>
 
     <!--===========-->

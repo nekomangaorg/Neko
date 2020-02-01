@@ -25,7 +25,6 @@
         <item name="actionModeStyle">@style/CustomActionModeStyle</item>
         <item name="tabBarIconColor">@color/md_white_1000</item>
         <item name="tabBarIconInactive">@color/md_white_1000_76</item>
-        <item name="colorControlHighlight">@color/rippleColor</item>
 
 
         <!-- Themes -->

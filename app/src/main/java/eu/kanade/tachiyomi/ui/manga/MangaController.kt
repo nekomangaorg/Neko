@@ -200,7 +200,7 @@ class MangaController : RxController, TabbedController {
             VectorDrawableCompat.create(resources!!, R.drawable.ic_done_white_18dp, null)
         else null
 
-        tab.icon = drawable
+        //tab.icon = drawable
     }
 
     private inner class MangaDetailAdapter : RouterPagerAdapter(this@MangaController) {
