@@ -1,9 +1,9 @@
 package eu.kanade.tachiyomi.ui.catalogue.follows
 
 import android.os.Bundle
-import androidx.drawerlayout.widget.DrawerLayout
 import android.view.Menu
 import android.view.ViewGroup
+import androidx.drawerlayout.widget.DrawerLayout
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.ui.catalogue.browse.BrowseCatalogueController

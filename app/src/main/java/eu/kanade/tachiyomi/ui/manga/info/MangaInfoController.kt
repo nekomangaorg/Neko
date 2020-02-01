@@ -49,6 +49,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.HttpSource
+import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.library.ChangeMangaCategoriesDialog
@@ -479,15 +480,15 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         setRefreshing(false)
     }
 
-    fun updateFollowsButton(followStatus: SManga.FollowStatus?) {
+    fun updateFollowsButton(followStatus: FollowStatus?) {
 // Update status TextView.
         val followsRes = when (followStatus) {
-            SManga.FollowStatus.COMPLETED -> R.string.follows_completed
-            SManga.FollowStatus.DROPPED -> R.string.follows_dropped
-            SManga.FollowStatus.ON_HOLD -> R.string.follows_on_hold
-            SManga.FollowStatus.PLAN_TO_READ -> R.string.follows_plan_to_read
-            SManga.FollowStatus.READING -> R.string.follows_reading
-            SManga.FollowStatus.RE_READING -> R.string.follows_re_reading
+            FollowStatus.COMPLETED -> R.string.follows_completed
+            FollowStatus.DROPPED -> R.string.follows_dropped
+            FollowStatus.ON_HOLD -> R.string.follows_on_hold
+            FollowStatus.PLAN_TO_READ -> R.string.follows_plan_to_read
+            FollowStatus.READING -> R.string.follows_reading
+            FollowStatus.RE_READING -> R.string.follows_re_reading
             else -> R.string.follows_unfollowed
         }
 

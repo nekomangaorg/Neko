@@ -12,13 +12,13 @@ import android.content.res.Resources
 import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.PowerManager
+import android.widget.Toast
 import androidx.annotation.AttrRes
 import androidx.annotation.StringRes
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import android.widget.Toast
 import com.nononsenseapps.filepicker.FilePickerActivity
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.widget.CustomLayoutPickerActivity
@@ -75,8 +75,7 @@ fun Context.getFilePicker(currentDir: String): Intent {
  * @param permission the permission to check.
  * @return true if it has permissions.
  */
-fun Context.hasPermission(permission: String)
-        = ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
+fun Context.hasPermission(permission: String) = ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
 
 /**
  * Returns the color for the given attribute.

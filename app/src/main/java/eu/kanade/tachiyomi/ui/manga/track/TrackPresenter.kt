@@ -8,7 +8,6 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
-import eu.kanade.tachiyomi.util.toast
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
@@ -23,9 +22,7 @@ class TrackPresenter(
         private val db: DatabaseHelper = Injekt.get(),
         private val trackManager: TrackManager = Injekt.get()
 ) : BasePresenter<TrackController>() {
-
-    private val context = preferences.context
-
+    
     private var trackList: List<TrackItem> = emptyList()
 
     private val loggedServices by lazy { trackManager.services.filter { it.isLogged } }
@@ -89,7 +86,7 @@ class TrackPresenter(
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeFirst({ view, _ -> view.onRefreshDone() },
-                        TrackController::onRefreshError))
+                            TrackController::onRefreshError))
         } else {
             db.deleteTrackForManga(manga, service).executeAsBlocking()
         }

@@ -9,6 +9,8 @@ class MdUtil {
         const val randMangaPage = "/manga/"
         const val apiManga = "/api/manga/"
         const val apiChapter = "/api/chapter/"
+        const val followsAllApi = "/api/?type=manga_follows"
+        const val followsMangaApi = "/api/?type=manga_follows&manga_id="
 
         //guess the thumbnail url is .jpg  this has a ~80% success rate
         fun formThumbUrl(mangaUrl: String): String {

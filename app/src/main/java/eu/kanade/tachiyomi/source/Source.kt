@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.source
 
 import eu.kanade.tachiyomi.source.model.*
+import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import rx.Observable
 
 /**
@@ -57,12 +58,12 @@ interface Source {
     /**returns the follow status for the single manga
      *
      */
-    suspend fun fetchMangaFollowStatus(manga: SManga): SManga.FollowStatus
+    suspend fun fetchMangaFollowStatus(manga: SManga): FollowStatus
 
     /**
      * updates the follow status for a manga
      */
-    suspend fun changeFollowStatus(manga: SManga, followStatus: SManga.FollowStatus): Boolean
+    suspend fun changeFollowStatus(manga: SManga, followStatus: FollowStatus): Boolean
 
     /**
      * Returns the list of filters for the source.

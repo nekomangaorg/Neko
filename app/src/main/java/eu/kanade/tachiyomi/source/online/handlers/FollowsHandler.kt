@@ -6,6 +6,7 @@ import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.handlers.serializers.FollowsPageResult
 import eu.kanade.tachiyomi.source.online.handlers.serializers.Result
+import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.MdUtil.Companion.baseUrl
 import eu.kanade.tachiyomi.source.online.utils.MdUtil.Companion.getMangaId
@@ -53,13 +54,13 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers) {
     /**fetch follow status used when fetching status for 1 manga
      *
      */
-    private fun followStatusParse(response: Response): SManga.FollowStatus {
+    private fun followStatusParse(response: Response): FollowStatus {
         val followsPageResult = Json.nonstrict.parse(FollowsPageResult.serializer(), response.body!!.string())
         if (followsPageResult.result.isEmpty()) {
-            return SManga.FollowStatus.UNFOLLOWED
+            return FollowStatus.UNFOLLOWED
         } else {
             val result = followsPageResult.result[0]
-            return SManga.FollowStatus.fromMangadex(result.follow_type)
+            return FollowStatus.fromInt(result.follow_type)!!
         }
     }
 
@@ -68,7 +69,7 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers) {
      */
     private fun followsListRequest(page: Int): Request {
 
-        val url = "${MdUtil.baseUrl}$followsAllApi".toHttpUrlOrNull()!!.newBuilder()
+        val url = "${MdUtil.baseUrl}${MdUtil.followsAllApi}".toHttpUrlOrNull()!!.newBuilder()
                 .addQueryParameter("page", page.toString())
 
         return GET(url.toString(), headers)
@@ -82,28 +83,28 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers) {
         manga.title = MdUtil.cleanString(result.title)
         manga.thumbnail_url = "${MdUtil.cdnUrl}/images/manga/${result.manga_id}.jpg"
         manga.url = "/manga/${result.manga_id}/"
-        manga.follow_status = SManga.FollowStatus.fromMangadex(result.follow_type)
+        manga.follow_status = FollowStatus.fromInt(result.follow_type)
         return manga
     }
 
     /**
      * Change the status of a manga
      */
-    suspend fun changeFollowStatus(manga: SManga, followStatus: SManga.FollowStatus): Boolean {
+    suspend fun changeFollowStatus(manga: SManga, followStatus: FollowStatus): Boolean {
         return withContext(Dispatchers.IO) {
             val mangaID = getMangaId(manga.url)
 
             val response: Response =
-                    if (followStatus == SManga.FollowStatus.UNFOLLOWED) {
+                    if (followStatus == FollowStatus.UNFOLLOWED) {
                         client.newCall(GET("$baseUrl/ajax/actions.ajax.php?function=manga_unfollow&id=$mangaID&type=$mangaID", headers))
                                 .execute()
                     } else {
 
-                        val status = followStatus.toMangadexInt()
+                        val status = followStatus.int
                         client.newCall(GET("$baseUrl/ajax/actions.ajax.php?function=manga_follow&id=$mangaID&type=$status", headers))
                                 .execute()
                     }
-            
+
             response.body!!.string().isEmpty()
         }
     }
@@ -134,30 +135,11 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers) {
     /**
      * fetch individual follow status
      */
-    suspend fun fetchMangaFollowStatus(manga: SManga): SManga.FollowStatus {
+    suspend fun fetchMangaFollowStatus(manga: SManga): FollowStatus {
         return withContext(Dispatchers.IO) {
-            val request = GET("${MdUtil.baseUrl}$followsMangaApi" + getMangaId(manga.url), headers)
+            val request = GET("${MdUtil.baseUrl}${MdUtil.followsMangaApi}" + getMangaId(manga.url), headers)
             val response = client.newCall(request).execute()
             followStatusParse(response)
         }
-    }
-
-
-    companion object {
-        const val followsAllApi = "/api/?type=manga_follows"
-        const val followsMangaApi = "/api/?type=manga_follows&manga_id="
-        private val FOLLOW_STATUS_LIST = listOf(
-                Triple(0, SManga.FollowStatus.UNFOLLOWED, "Unfollowed"),
-                Triple(1, SManga.FollowStatus.READING, "Reading"),
-                Triple(2, SManga.FollowStatus.COMPLETED, "Completed"),
-                Triple(3, SManga.FollowStatus.ON_HOLD, "On hold"),
-                Triple(4, SManga.FollowStatus.PLAN_TO_READ, "Plan to read"),
-                Triple(5, SManga.FollowStatus.DROPPED, "Dropped"),
-                Triple(6, SManga.FollowStatus.RE_READING, "Re-reading"))
-
-        fun SManga.FollowStatus.Companion.fromMangadex(x: Int) = FOLLOW_STATUS_LIST.first { it.first == x }.second
-        fun SManga.FollowStatus.Companion.fromMangadex(MangadexFollowString: String) = FOLLOW_STATUS_LIST.first { it.third == MangadexFollowString }.second
-        fun SManga.FollowStatus.toMangadexInt() = FOLLOW_STATUS_LIST.first { it.second == this }.first
-        fun SManga.FollowStatus.toMangadexString() = FOLLOW_STATUS_LIST.first { it.second == this }.third
     }
 }

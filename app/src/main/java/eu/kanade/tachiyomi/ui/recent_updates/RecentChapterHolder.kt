@@ -3,8 +3,8 @@ package eu.kanade.tachiyomi.ui.recent_updates
 import android.view.View
 import android.widget.PopupMenu
 import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.IconicsDrawable
+import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.utils.colorInt
 import com.mikepenz.iconics.utils.sizeDp
 import eu.kanade.tachiyomi.R

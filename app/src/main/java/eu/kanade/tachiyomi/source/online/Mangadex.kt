@@ -6,6 +6,7 @@ import eu.kanade.tachiyomi.network.POSTWithCookie
 import eu.kanade.tachiyomi.network.asObservable
 import eu.kanade.tachiyomi.source.model.*
 import eu.kanade.tachiyomi.source.online.handlers.*
+import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import okhttp3.FormBody
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
@@ -62,7 +63,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         return clientBuilder()
     }
 
-    override suspend fun changeFollowStatus(manga: SManga, followStatus: SManga.FollowStatus): Boolean {
+    override suspend fun changeFollowStatus(manga: SManga, followStatus: FollowStatus): Boolean {
         return FollowsHandler(clientBuilder(), headers).changeFollowStatus(manga, followStatus)
     }
 
@@ -114,7 +115,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         return FollowsHandler(clientBuilder(), headers).fetchAllFollows()
     }
 
-    override suspend fun fetchMangaFollowStatus(manga: SManga): SManga.FollowStatus {
+    override suspend fun fetchMangaFollowStatus(manga: SManga): FollowStatus {
         return FollowsHandler(clientBuilder(), headers).fetchMangaFollowStatus(manga)
     }
 

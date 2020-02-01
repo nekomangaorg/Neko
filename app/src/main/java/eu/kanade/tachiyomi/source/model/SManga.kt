@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.source.model
 
+import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import java.io.Serializable
 
 interface SManga : Serializable {
@@ -85,18 +86,6 @@ interface SManga : Serializable {
 
         if (!initialized)
             initialized = other.initialized
-    }
-
-    enum class FollowStatus {
-        UNFOLLOWED,
-        READING,
-        COMPLETED,
-        ON_HOLD,
-        PLAN_TO_READ,
-        DROPPED,
-        RE_READING;
-
-        companion object {}
     }
 
     companion object {

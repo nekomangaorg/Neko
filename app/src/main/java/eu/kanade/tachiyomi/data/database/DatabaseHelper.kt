@@ -1,7 +1,7 @@
 package eu.kanade.tachiyomi.data.database
 
-import androidx.sqlite.db.SupportSQLiteOpenHelper
 import android.content.Context
+import androidx.sqlite.db.SupportSQLiteOpenHelper
 import com.pushtorefresh.storio.sqlite.impl.DefaultStorIOSQLite
 import eu.kanade.tachiyomi.data.database.mappers.*
 import eu.kanade.tachiyomi.data.database.models.*
@@ -12,12 +12,12 @@ import io.requery.android.database.sqlite.RequerySQLiteOpenHelperFactory
  * This class provides operations to manage the database through its interfaces.
  */
 open class DatabaseHelper(context: Context)
-: MangaQueries, ChapterQueries, TrackQueries, CategoryQueries, MangaCategoryQueries, HistoryQueries {
+    : MangaQueries, ChapterQueries, TrackQueries, CategoryQueries, MangaCategoryQueries, HistoryQueries {
 
     private val configuration = SupportSQLiteOpenHelper.Configuration.builder(context)
-        .name(DbOpenCallback.DATABASE_NAME)
-        .callback(DbOpenCallback())
-        .build()
+            .name(DbOpenCallback.DATABASE_NAME)
+            .callback(DbOpenCallback())
+            .build()
 
     override val db = DefaultStorIOSQLite.builder()
             .sqliteOpenHelper(RequerySQLiteOpenHelperFactory().create(configuration))

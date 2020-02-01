@@ -5,7 +5,6 @@ import android.view.View
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.base.holder.BaseViewHolder
 import eu.kanade.tachiyomi.util.setVectorCompat
-import eu.kanade.tachiyomi.util.visibleIf
 import kotlinx.android.synthetic.main.track_item.*
 
 class TrackHolder(view: View, adapter: TrackAdapter) : BaseViewHolder(view) {

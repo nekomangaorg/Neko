@@ -1,6 +1,6 @@
 package eu.kanade.tachiyomi.data.database.models
 
-import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 
 open class MangaImpl : Manga {
 
@@ -35,7 +35,7 @@ open class MangaImpl : Manga {
 
     override var status: Int = 0
 
-    override var follow_status: SManga.FollowStatus? = null
+    override var follow_status: FollowStatus? = null
 
     override var thumbnail_url: String? = null
 

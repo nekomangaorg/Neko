@@ -1,11 +1,11 @@
 package eu.kanade.tachiyomi.ui.base.controller
 
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
@@ -55,7 +55,7 @@ abstract class BaseController(bundle: Bundle? = null) : RestoreViewOnCreateContr
 
     abstract fun inflateView(inflater: LayoutInflater, container: ViewGroup): View
 
-    open fun onViewCreated(view: View) { }
+    open fun onViewCreated(view: View) {}
 
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
         if (type.isEnter) {
@@ -90,6 +90,7 @@ abstract class BaseController(bundle: Bundle? = null) : RestoreViewOnCreateContr
      * Issue link: https://issuetracker.google.com/issues/37657375
      */
     var expandActionViewFromInteraction = false
+
     fun MenuItem.fixExpand(onExpand: ((MenuItem) -> Boolean)? = null, onCollapse: ((MenuItem) -> Boolean)? = null) {
         setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
             override fun onMenuItemActionExpand(item: MenuItem): Boolean {

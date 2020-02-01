@@ -1,5 +1,7 @@
 package eu.kanade.tachiyomi.source.model
 
+import eu.kanade.tachiyomi.source.online.utils.FollowStatus
+
 class SMangaImpl : SManga {
 
     override lateinit var url: String
@@ -28,7 +30,7 @@ class SMangaImpl : SManga {
 
     override var status: Int = 0
 
-    override var follow_status: SManga.FollowStatus? = null
+    override var follow_status: FollowStatus? = null
 
     override var thumbnail_url: String? = null
 

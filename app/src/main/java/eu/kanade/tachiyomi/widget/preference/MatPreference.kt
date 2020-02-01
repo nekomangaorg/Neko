@@ -6,17 +6,15 @@ import android.util.AttributeSet
 import androidx.preference.Preference
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.callbacks.onDismiss
-import com.afollestad.materialdialogs.list.listItemsSingleChoice
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 open class MatPreference @JvmOverloads constructor(val activity: Activity?, context: Context,
-    attrs:
-    AttributeSet? =
-        null) :
-    Preference(context, attrs) {
+                                                   attrs:
+                                                   AttributeSet? =
+                                                           null) :
+        Preference(context, attrs) {
 
     protected val prefs: PreferencesHelper = Injekt.get()
     private var isShowing = false

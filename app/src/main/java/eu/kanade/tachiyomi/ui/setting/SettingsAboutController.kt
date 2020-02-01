@@ -11,7 +11,6 @@ import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.updater.GithubUpdateChecker
 import eu.kanade.tachiyomi.data.updater.GithubUpdateResult
-import eu.kanade.tachiyomi.data.updater.UpdaterJob
 import eu.kanade.tachiyomi.data.updater.UpdaterService
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.main.ChangelogDialogController
@@ -24,7 +23,6 @@ import java.text.DateFormat
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
-import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 
 
 class SettingsAboutController : SettingsController() {
