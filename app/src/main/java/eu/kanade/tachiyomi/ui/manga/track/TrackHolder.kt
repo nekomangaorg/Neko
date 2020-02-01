@@ -3,7 +3,9 @@ package eu.kanade.tachiyomi.ui.manga.track
 import android.annotation.SuppressLint
 import android.view.View
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.ui.base.holder.BaseViewHolder
+import eu.kanade.tachiyomi.util.gone
 import eu.kanade.tachiyomi.util.setVectorCompat
 import kotlinx.android.synthetic.main.track_item.*
 
@@ -38,6 +40,11 @@ class TrackHolder(view: View, adapter: TrackAdapter) : BaseViewHolder(view) {
             track_chapters.text = ""
             track_score.text = ""
             track_status.text = ""
+        }
+        if (item.service.id == TrackManager.MDLIST) {
+            track_logo.isClickable = false
+            title_container.isClickable = false
+            score_container.gone()
         }
     }
 }

@@ -7,7 +7,13 @@ import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
+import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
@@ -22,10 +28,12 @@ class TrackPresenter(
         private val db: DatabaseHelper = Injekt.get(),
         private val trackManager: TrackManager = Injekt.get()
 ) : BasePresenter<TrackController>() {
-    
+
     private var trackList: List<TrackItem> = emptyList()
 
     private val loggedServices by lazy { trackManager.services.filter { it.isLogged } }
+
+    private val mdex by lazy { Injekt.get<SourceManager>().getMangadex() as HttpSource }
 
     private var trackSubscription: Subscription? = null
 
@@ -35,7 +43,8 @@ class TrackPresenter(
 
     override fun onCreate(savedState: Bundle?) {
         super.onCreate(savedState)
-        fetchTrackings()
+        job = Job()
+        job = launch { registerMdList(manga) }
     }
 
     fun fetchTrackings() {
@@ -76,6 +85,20 @@ class TrackPresenter(
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeLatestCache(TrackController::onSearchResults,
                         TrackController::onSearchResultsError)
+    }
+
+    private suspend fun registerMdList(manga: Manga) {
+        withContext(Dispatchers.IO) {
+            val count = db.getTracks(manga).executeAsBlocking().filter { it.sync_id == TrackManager.MDLIST }.count()
+            if (count == 0) {
+                val track = mdex.fetchTrackingInfo(manga)
+                track.manga_id = manga.id!!
+                db.insertTrack(track).executeAsBlocking()
+            }
+        }
+        withContext(Dispatchers.Main) {
+            fetchTrackings()
+        }
     }
 
     fun registerTracking(item: Track?, service: TrackService) {

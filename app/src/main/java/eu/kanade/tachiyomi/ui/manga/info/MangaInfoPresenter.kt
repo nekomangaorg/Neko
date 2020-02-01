@@ -12,7 +12,6 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.source.Source
-import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
 import eu.kanade.tachiyomi.util.DiskUtil
 import kotlinx.coroutines.*
@@ -25,7 +24,6 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
 import java.util.*
-import kotlin.coroutines.CoroutineContext
 
 /**
  * Presenter of MangaInfoFragment.
@@ -42,11 +40,6 @@ class MangaInfoPresenter(
         private val downloadManager: DownloadManager = Injekt.get(),
         private val coverCache: CoverCache = Injekt.get()
 ) : BasePresenter<MangaInfoController>(), CoroutineScope {
-
-    private lateinit var job: Job
-
-    override val coroutineContext: CoroutineContext
-        get() = Dispatchers.IO + job
 
     override fun onCreate(savedState: Bundle?) {
         super.onCreate(savedState)
@@ -105,35 +98,6 @@ class MangaInfoPresenter(
         }
     }
 
-    /**
-     * Fetch manga information from source.
-     */
-    fun updateMangaFollowStatus(position: Int) {
-
-        job.isActive.let { return@let }
-
-        job = Job()
-
-        val followStatus = FollowStatus.values()[position]
-
-        job = launch(CoroutineExceptionHandler { _, _ -> MangaInfoController::onUpdateFollowsMangaError })
-        {
-
-            val result = source.changeFollowStatus(manga, followStatus)
-            withContext(Dispatchers.Main) {
-                if (result) {
-                    view?.updateFollowsButton(followStatus)
-                } else {
-                    view?.onUpdateFollowsMangaError(Exception("Error Updating Follows"))
-                }
-            }
-        }
-    }
-
-    override fun onDestroy() {
-        job.cancel()
-        super.onDestroy()
-    }
 
     /**
      * Update favorite status of manga, (removes / adds) manga (to / from) library.

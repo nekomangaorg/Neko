@@ -65,7 +65,6 @@ class TrackController : NucleusController<TrackPresenter>(),
         getSearchDialog()?.onSearchResults(results)
     }
 
-    @Suppress("UNUSED_PARAMETER")
     fun onSearchResultsError(error: Throwable) {
         Timber.e(error)
         getSearchDialog()?.onSearchResultsError()

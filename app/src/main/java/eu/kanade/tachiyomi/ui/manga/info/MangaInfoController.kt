@@ -18,7 +18,6 @@ import android.os.Bundle
 import android.view.*
 import android.view.animation.DecelerateInterpolator
 import android.widget.ImageView
-import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
@@ -49,7 +48,6 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.HttpSource
-import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.library.ChangeMangaCategoriesDialog
@@ -268,26 +266,6 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
                 else -> R.string.unknown
             })
 
-
-            updateFollowsButton(manga.follow_status)
-
-            follows_button.setOnClickListener {
-
-                val followsList = resources!!.getStringArray(R.array.follows_options).asList()
-                val initialPosition = followsList.indexOf(follows_button.text)
-                MaterialDialog(activity!!).show {
-                    title(text = "Change Follow Status?")
-                    listItemsSingleChoice(res = R.array.follows_options, initialSelection = initialPosition, waitForPositiveButton = true) { _, index, text ->
-                        if (index != initialPosition) {
-                            switchProgressBar(View.VISIBLE)
-                            presenter.updateMangaFollowStatus(index)
-                        }
-                    }
-                    positiveButton()
-
-                }
-            }
-
             // Set the favorite drawable to the correct one.
             setFavoriteDrawable(manga.favorite)
 
@@ -479,31 +457,7 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
     fun onFetchMangaDone() {
         setRefreshing(false)
     }
-
-    fun updateFollowsButton(followStatus: FollowStatus?) {
-// Update status TextView.
-        val followsRes = when (followStatus) {
-            FollowStatus.COMPLETED -> R.string.follows_completed
-            FollowStatus.DROPPED -> R.string.follows_dropped
-            FollowStatus.ON_HOLD -> R.string.follows_on_hold
-            FollowStatus.PLAN_TO_READ -> R.string.follows_plan_to_read
-            FollowStatus.READING -> R.string.follows_reading
-            FollowStatus.RE_READING -> R.string.follows_re_reading
-            else -> R.string.follows_unfollowed
-        }
-
-        follows_button.text = view?.context?.getString(followsRes)
-        switchProgressBar(View.INVISIBLE)
-    }
-
-    /**
-     * Update swipe refresh to start showing refresh in progress spinner.
-     */
-    fun onUpdateFollowsMangaError(error: Throwable) {
-        Timber.e(error)
-        switchProgressBar(ProgressBar.INVISIBLE)
-        activity?.toast(error.message)
-    }
+    
 
     /**
      * Update swipe refresh to start showing refresh in progress spinner.

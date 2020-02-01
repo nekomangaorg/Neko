@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.source.online
 
+import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.POST
 import eu.kanade.tachiyomi.network.POSTWithCookie
@@ -117,6 +118,10 @@ open class Mangadex(override val lang: String, private val internalLang: String,
 
     override suspend fun fetchMangaFollowStatus(manga: SManga): FollowStatus {
         return FollowsHandler(clientBuilder(), headers).fetchMangaFollowStatus(manga)
+    }
+
+    override suspend fun fetchTrackingInfo(manga: SManga): Track {
+        return FollowsHandler(clientBuilder(), headers).fetchTrackingInfo(manga)
     }
 
 

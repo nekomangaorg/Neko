@@ -1,5 +1,7 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
+import eu.kanade.tachiyomi.data.database.models.Track
+import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.asObservable
 import eu.kanade.tachiyomi.source.model.MangasPage
@@ -62,6 +64,20 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers) {
             val result = followsPageResult.result[0]
             return FollowStatus.fromInt(result.follow_type)!!
         }
+    }
+
+    private fun followStatusParses(response: Response): Track {
+        val followsPageResult = Json.nonstrict.parse(FollowsPageResult.serializer(), response.body!!.string())
+        val track = Track.create(TrackManager.MDLIST)
+        val result = followsPageResult.result
+        if (result.isEmpty()) {
+            track.status = FollowStatus.UNFOLLOWED.int
+        } else {
+            track.status = result[0].follow_type
+            track.last_chapter_read = result[0].chapter.toInt()
+        }
+        return track
+
     }
 
     /**build Request for follows page
@@ -140,6 +156,17 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers) {
             val request = GET("${MdUtil.baseUrl}${MdUtil.followsMangaApi}" + getMangaId(manga.url), headers)
             val response = client.newCall(request).execute()
             followStatusParse(response)
+        }
+    }
+
+    suspend fun fetchTrackingInfo(manga: SManga): Track {
+        return withContext(Dispatchers.IO) {
+            val request = GET("${MdUtil.baseUrl}${MdUtil.followsMangaApi}" + getMangaId(manga.url), headers)
+            val response = client.newCall(request).execute()
+            val track = followStatusParses(response)
+            track.tracking_url = MdUtil.baseUrl + MdUtil.followsMangaApi + manga.url
+            track.title = manga.title
+            track
         }
     }
 }
