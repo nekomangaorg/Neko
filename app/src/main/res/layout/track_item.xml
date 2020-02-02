@@ -56,6 +56,7 @@
                 android:layout_height="wrap_content"
                 android:background="?attr/selectable_list_drawable"
                 android:clickable="true"
+                android:focusable="true"
                 android:padding="16dp">
 
                 <TextView

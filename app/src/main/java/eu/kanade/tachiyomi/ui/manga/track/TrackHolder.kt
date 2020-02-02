@@ -1,9 +1,7 @@
 package eu.kanade.tachiyomi.ui.manga.track
 
 import android.annotation.SuppressLint
-import android.view.Gravity
 import android.view.View
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.base.holder.BaseViewHolder
 import eu.kanade.tachiyomi.util.gone
 import eu.kanade.tachiyomi.util.setVectorCompat
@@ -29,23 +27,15 @@ class TrackHolder(view: View, adapter: TrackAdapter) : BaseViewHolder(view) {
         track_logo.setVectorCompat(item.service.getLogo())
         logo_container.setBackgroundColor(item.service.getLogoColor())
 
-        track_details.visibleIf { track != null }
-        track_set.visibleIf { track == null }
+        track_details.visibleIf { track != null && !item.service.isExternalLink() }
+        track_set.visibleIf { track == null || item.service.isExternalLink() }
 
         if (track != null) {
-            track_title.isAllCaps = false
-            track_title.setTextAppearance(itemView.context, R.style.TextAppearance_Regular_Body1_Secondary)
 
             if (item.service.isExternalLink()) {
-                title_container.isClickable = false
-                track_title.gravity = Gravity.START
-                track_title.text = item.service.name
-                title_container.setOnClickListener { listener.onLogoClick(adapterPosition) }
-                track_title_static_text.gone()
-                score_container.gone()
-                chapters_container.gone()
-                status_container.gone()
-
+                track_set.isAllCaps = false
+                track_set.text = item.service.name
+                track_set.setOnClickListener { listener.onLogoClick(adapterPosition) }
             } else {
                 track_title.text = track.title
                 track_chapters.text = "${track.last_chapter_read}/" +
