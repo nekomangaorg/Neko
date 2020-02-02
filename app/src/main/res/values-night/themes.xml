@@ -3,9 +3,9 @@
   <style name="Theme.Base.Reader" parent="Theme.Base">
     <item name="android:statusBarColor">?colorPrimaryDark</item>
     <item name="android:navigationBarColor">?colorPrimaryDark</item>
-    <item name="colorPrimary">#212121</item>
-    <item name="colorPrimaryDark">#212121</item>
-    <item name="android:colorBackground">#1C1C1D</item>
+    <item name="colorPrimary">@color/readerPrimary</item>
+    <item name="colorPrimaryDark">@color/readerPrimary</item>
+    <item name="android:colorBackground">@color/readerDarkBackground</item>
   </style>
 
   <style name="Theme.Tachiyomi.DarkBlue" parent="Theme.Tachiyomi">
