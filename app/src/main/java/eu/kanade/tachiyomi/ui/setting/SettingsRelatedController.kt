@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.data.database.models.MangaRelatedImpl
 import eu.kanade.tachiyomi.util.getFilePicker
 import eu.kanade.tachiyomi.util.toast
 import kotlinx.io.InputStream
+import org.json.JSONException
 import org.json.JSONObject
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -112,7 +113,14 @@ class SettingsRelatedController : SettingsController() {
 
                 // Load everything from the buffer into our string
                 val result = input.bufferedReader().use { it.readText() }
-                val relatedPageResult = JSONObject(result)
+
+                val relatedPageResult: JSONObject
+                try {
+                    relatedPageResult = JSONObject(result)
+                } catch (e : JSONException) {
+                    context.toast("Unable to parse. Is it a valid JSON?")
+                    return
+                }
 
                 // Loop through each and insert into the database
                 var counter: Long = 0
