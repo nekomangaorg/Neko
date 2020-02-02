@@ -37,6 +37,7 @@
             android:layout_height="wrap_content"
             android:padding="16dp"
             android:text="@string/action_edit"
+            android:background="?attr/selectable_list_drawable"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/logo_container"
             app:layout_constraintTop_toTopOf="parent" />
