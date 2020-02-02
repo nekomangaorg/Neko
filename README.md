@@ -30,28 +30,30 @@ Need info? Check the [Wiki](https://github.com/CarlosEsco/Neko/wiki)
 Using Tachiyomi as a base to add MangaDex specific features.
 
 ## Features:
-* Supports login to MangaDex
-* Local reading of downloaded manga
-* [MyAnimeList](https://myanimelist.net/), [AniList](https://anilist.co/), [Kitsu](https://kitsu.io/explore/anime) and [Shikimori](https://shikimori.org/) support.
-* Schedule updating your library for new chapters.
-* Create backups locally to read offline or to your desired cloud service. 
+- Supports login to MangaDex
+- Local reading of downloaded manga
+- [MyAnimeList](https://myanimelist.net/), [AniList](https://anilist.co/), [Kitsu](https://kitsu.io/explore/anime) and [Shikimori](https://shikimori.org/) support.
+- Schedule updating your library for new chapters.
+- Create backups locally to read offline or to your desired cloud service. 
 
-* features compared to standard tachiyomi
-Built in login with 2FA support
-Different theme
-Minor UI changes
-- flags for source language in manga info page
-- select chapters between option
-- all the mangadex statuses
-- sort library by date added
-- view mdlist follows
-- reorder and delete downloads in download queue
--  ability skip chapters that are hidden or read
-- manga covers update when a manga info update is triggered
-- tri state filter when filtering in library
-- ability to lock with biometrics
--  Filter out your library by searching for tags (ex. "Comedy" or "Slice of Life") or exclude mangas by a tag (ex. "-Shounen" or "-Romance"). Tapping on these tags also performs a local search
-- range select chapters with select between
+## Differences Compared to Tachiyomi
+- Built in login with 2FA support
+- Different theme
+- Minor UI changes
+- Flags for source language in manga info page
+- Select chapters between option
+- All the mangadex statuses
+- Sort library by date added
+- View mdlist follows
+- Reorder and delete downloads in download queue
+- Ability skip chapters that are hidden or read
+- Manga covers update when a manga info update is triggered
+- Tri-state filter when filtering in library
+- Ability to lock with biometrics
+- Filter out your library by searching for tags (ex. "Comedy" or "Slice of Life")
+- Exclude mangas by a tag (ex. "-Shounen" or "-Romance").
+- Tapping on tags performs a local library search
+- Range select chapters with select between
 
 ## Download
 Get the app from our [releases page](https://github.com/CarlosEsco/Neko/releases).
