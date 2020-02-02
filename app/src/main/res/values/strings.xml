@@ -134,12 +134,16 @@
     <string name="pref_start_screen">Start screen</string>
     <string name="pref_language">Language</string>
     <string name="system_default">System default</string>
+    <string name="pref_date_format">Date format</string>
 
       <!-- Library section -->
+    <string name="pref_category_library_display">Display</string>
     <string name="pref_library_columns">Library manga per row</string>
     <string name="portrait">Portrait</string>
     <string name="landscape">Landscape</string>
     <string name="default_columns">Default</string>
+
+    <string name="pref_category_library_update">Updates</string>
     <string name="pref_library_update_interval">Library update frequency</string>
     <string name="update_never">Manual</string>
     <string name="update_1hour">Hourly</string>
@@ -150,8 +154,7 @@
     <string name="update_24hour">Daily</string>
     <string name="update_48hour">Every 2 days</string>
     <string name="update_weekly">Weekly</string>
-    <string name="pref_library_update_categories">Categories to include in global update</string>
-    <string name="all">All</string>
+    <string name="update_monthly">Monthly</string>
     <string name="pref_library_update_prioritization">Library update order</string>
     <string name="pref_library_update_prioritization_summary">Select the order in which Tachiyomi checks for update</string>
     <string name="pref_library_update_restriction">Library update restrictions</string>
@@ -166,8 +169,11 @@
     <string name="pref_skip_pre_migration">Skip pre-migration</string>
     <string name="pref_skip_pre_migration_summary">Use last saved pre-migration preferences
     and sources to mass migrate</string>
+    <string name="pref_category_library_categories">Categories</string>
     <string name="default_category">Default category</string>
     <string name="default_category_summary">Always ask</string>
+    <string name="pref_library_update_categories">Categories to include in global update</string>
+    <string name="all">All</string>
     <string name="lock_with_biometrics">Lock with biometrics</string>
     <string name="lock_when_idle">Lock when idle</string>
     <string name="lock_always">Always</string>
@@ -180,6 +186,9 @@
     <string name="pref_refresh_covers_too">Automatically refresh covers</string>
     <string name="pref_refresh_covers_too_summary">Refresh covers in library as well
         when updating library (overwrites local covers)</string>
+
+    <string name="pref_category_library_migration">Migration</string>
+
 
     <!-- Extension section -->
     <string name="all_lang">All</string>
@@ -262,7 +271,6 @@
     <string name="color_filter_a_value">A</string>
     <string name="reader_theme_smart">Smart (based on page)</string>
     <string name="reader_theme_smart_theme">Smart (based on page and theme)</string>
-
 
       <!-- Downloads section -->
     <string name="pref_download_directory">Download location</string>

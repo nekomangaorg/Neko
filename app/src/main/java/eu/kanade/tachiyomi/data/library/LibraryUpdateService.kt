@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.data.library
 
-import android.app.ActivityManager
 import android.app.Notification
 import android.app.PendingIntent
 import android.app.Service
