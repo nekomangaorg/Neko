@@ -7,6 +7,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.category.CategoryAdapter
+import eu.kanade.tachiyomi.util.chop
 import eu.kanade.tachiyomi.util.removeArticles
 import uy.kohesive.injekt.injectLazy
 import java.text.SimpleDateFormat
@@ -69,14 +70,36 @@ class LibraryCategoryAdapter(val view: LibraryCategoryView) :
             val iFlexible: IFlexible<*>? = getItem(position)
             val preferences:PreferencesHelper by injectLazy()
             when (preferences.librarySortingMode().getOrDefault()) {
+                LibrarySort.DRAG_AND_DROP -> {
+                    if (preferences.showCategories().getOrDefault()) {
+                        val title = (iFlexible as LibraryItem).manga.currentTitle()
+                        if (preferences.removeArticles().getOrDefault())
+                            title.removeArticles().substring(0, 1).toUpperCase(Locale.US)
+                        else title.substring(0, 1).toUpperCase(Locale.US)
+                    }
+                    else {
+                        val db:DatabaseHelper by injectLazy()
+                        val category = db.getCategoriesForManga((iFlexible as LibraryItem).manga)
+                            .executeAsBlocking().firstOrNull()?.name
+                        category?.chop(10) ?: "Default"
+                    }
+                }
                 LibrarySort.LAST_READ -> {
                     val db:DatabaseHelper by injectLazy()
                     val id = (iFlexible as LibraryItem).manga.id ?: return ""
                     val history = db.getHistoryByMangaId(id).executeAsBlocking()
-                    if (history.firstOrNull() != null)
-                        getShortDate(Date(history.first().last_read))
+                    val last = history.maxBy { it.last_read }
+                    if (last != null)
+                        getShortDate(Date(last.last_read))
                     else
-                        "Never Read"
+                        "N/A"
+                }
+                LibrarySort.UNREAD -> {
+                    val unread = (iFlexible as LibraryItem).manga.unread
+                    if (unread > 0)
+                        unread.toString()
+                    else
+                        "Read"
                 }
                 LibrarySort.LAST_UPDATED -> {
                     val lastUpdate = (iFlexible as LibraryItem).manga.last_update
@@ -105,9 +128,9 @@ class LibraryCategoryAdapter(val view: LibraryCategoryView) :
         val yearThen = cal2.get(Calendar.YEAR)
 
         return if (yearNow == yearThen)
-            SimpleDateFormat("MMM").format(date)
+            SimpleDateFormat("MMM", Locale.getDefault()).format(date)
         else
-            SimpleDateFormat("yyyy").format(date)
+            SimpleDateFormat("yyyy", Locale.getDefault()).format(date)
     }
 
 }

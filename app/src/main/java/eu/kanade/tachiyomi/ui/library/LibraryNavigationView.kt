@@ -3,17 +3,17 @@ package eu.kanade.tachiyomi.ui.library
 import android.content.Context
 import android.util.AttributeSet
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackManager
-import eu.kanade.tachiyomi.ui.catalogue.filter.TriStateItem
 import eu.kanade.tachiyomi.widget.ExtendedNavigationView
 import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.MultiSort.Companion.SORT_ASC
 import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.MultiSort.Companion.SORT_DESC
 import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.MultiSort.Companion.SORT_NONE
+import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_EXCLUDE
 import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_IGNORE
 import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_INCLUDE
-import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_EXCLUDE
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -42,7 +42,7 @@ class LibraryNavigationView @JvmOverloads constructor(context: Context, attrs: A
     /**
      * Click listener to notify the parent fragment when an item from a group is clicked.
      */
-    var onGroupClicked: (Group) -> Unit = {}
+    var onGroupClicked: (Group, Item) -> Unit = { _, _ ->  }
 
     init {
         recycler.adapter = adapter
@@ -55,7 +55,15 @@ class LibraryNavigationView @JvmOverloads constructor(context: Context, attrs: A
      * Returns true if there's at least one filter from [FilterGroup] active.
      */
     fun hasActiveFilters(): Boolean {
-        return (groups[0] as FilterGroup).items.any { it.state != STATE_IGNORE }
+        return (groups[0] as FilterGroup).items.any {
+            when (it) {
+                is Item.TriStateGroup ->
+                    if (it.resTitle == R.string.categories) it.state == STATE_IGNORE
+                    else it.state != STATE_IGNORE
+                is Item.CheckboxGroup -> it.checked
+                else -> false
+            }
+        }
     }
 
     /**
@@ -66,7 +74,7 @@ class LibraryNavigationView @JvmOverloads constructor(context: Context, attrs: A
         override fun onItemClicked(item: Item) {
             if (item is GroupedItem) {
                 item.group.onItemClicked(item)
-                onGroupClicked(item.group)
+                onGroupClicked(item.group, item)
             }
         }
     }
@@ -84,9 +92,19 @@ class LibraryNavigationView @JvmOverloads constructor(context: Context, attrs: A
 
         private val tracked = Item.TriStateGroup(R.string.tracked, this)
 
-        override val items = if (Injekt.get<TrackManager>().hasLoggedServices())
-            listOf(downloaded, unread, completed, tracked) else listOf(downloaded, unread,
-        completed)
+        private val categories = Item.TriStateGroup(R.string.categories, this)
+
+        override val items:List<Item> = {
+            val list = mutableListOf<Item>()
+            if (Injekt.get<DatabaseHelper>().getCategories().executeAsBlocking().isNotEmpty())
+                list.add(categories)
+                list.add(downloaded)
+                list.add(unread)
+                list.add(completed)
+            if (Injekt.get<TrackManager>().hasLoggedServices())
+                list.add(tracked)
+            list
+        }()
 
         override val header = Item.Header(R.string.action_filter)
 
@@ -94,6 +112,8 @@ class LibraryNavigationView @JvmOverloads constructor(context: Context, attrs: A
 
         override fun initModels() {
             try {
+                categories.state = if (preferences.showCategories().getOrDefault()) STATE_INCLUDE
+                else STATE_IGNORE
                 downloaded.state = preferences.filterDownloaded().getOrDefault()
                 unread.state = preferences.filterUnread().getOrDefault()
                 completed.state = preferences.filterCompleted().getOrDefault()
@@ -105,20 +125,31 @@ class LibraryNavigationView @JvmOverloads constructor(context: Context, attrs: A
         }
 
         override fun onItemClicked(item: Item) {
-            item as Item.TriStateGroup
-            val newState = when (item.state) {
-                STATE_IGNORE -> STATE_INCLUDE
-                STATE_INCLUDE -> STATE_EXCLUDE
-                else -> STATE_IGNORE
+            if (item == categories) {
+                item as Item.TriStateGroup
+                val newState = when (item.state) {
+                    STATE_IGNORE -> STATE_INCLUDE
+                    else -> STATE_IGNORE
+                }
+                item.state = newState
+                when (item) {
+                    categories -> preferences.showCategories().set(item.state == STATE_INCLUDE)
+                }
             }
-            item.state = newState
-            when (item) {
-                downloaded -> preferences.filterDownloaded().set(item.state)
-                unread -> preferences.filterUnread().set(item.state)
-                completed -> preferences.filterCompleted().set(item.state)
-                tracked -> preferences.filterTracked().set(item.state)
+            else if (item is Item.TriStateGroup) {
+                val newState = when (item.state) {
+                    STATE_IGNORE -> STATE_INCLUDE
+                    STATE_INCLUDE -> STATE_EXCLUDE
+                    else -> STATE_IGNORE
+                }
+                item.state = newState
+                when (item) {
+                    downloaded -> preferences.filterDownloaded().set(item.state)
+                    unread -> preferences.filterUnread().set(item.state)
+                    completed -> preferences.filterCompleted().set(item.state)
+                    tracked -> preferences.filterTracked().set(item.state)
+                }
             }
-
             adapter.notifyItemChanged(item)
         }
     }

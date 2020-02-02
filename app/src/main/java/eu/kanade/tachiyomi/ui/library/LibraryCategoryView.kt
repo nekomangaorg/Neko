@@ -13,15 +13,19 @@ import eu.davidea.flexibleadapter.SelectableAdapter
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
-import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.category.CategoryAdapter
-import eu.kanade.tachiyomi.util.*
+import eu.kanade.tachiyomi.util.doOnApplyWindowInsets
+import eu.kanade.tachiyomi.util.inflate
+import eu.kanade.tachiyomi.util.launchUI
+import eu.kanade.tachiyomi.util.plusAssign
+import eu.kanade.tachiyomi.util.snack
+import eu.kanade.tachiyomi.util.updateLayoutParams
+import eu.kanade.tachiyomi.util.updatePaddingRelative
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
-import kotlinx.android.synthetic.main.chapters_controller.*
 import kotlinx.android.synthetic.main.library_category.view.*
 import kotlinx.coroutines.delay
 import rx.subscriptions.CompositeSubscription
@@ -98,10 +102,12 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
                 // Disable swipe refresh when view is not at the top
                 val firstPos = (recycler.layoutManager as LinearLayoutManager)
                         .findFirstCompletelyVisibleItemPosition()
-                swipe_refresh.isEnabled = firstPos <= 0
+                swipe_refresh.isEnabled = firstPos <= 0 && preferences.showCategories().getOrDefault()
             }
         })
-        fast_scroller?.gone()
+        fast_scroller.addOnScrollStateChangeListener {
+            controller.lockFilterBar(it)
+        }
         recycler.doOnApplyWindowInsets { v, insets, padding ->
             v.updatePaddingRelative(bottom = padding.bottom + insets.systemWindowInsetBottom)
 
@@ -185,7 +191,8 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
         val filterOff = preferences.filterCompleted().getOrDefault() +
             preferences.filterTracked().getOrDefault() +
             preferences.filterUnread().getOrDefault() +
-            preferences.filterCompleted().getOrDefault() == 0
+            preferences.filterCompleted().getOrDefault() == 0 &&
+            preferences.showCategories().getOrDefault()
         return sortingMode == LibrarySort.DRAG_AND_DROP && filterOff &&
             adapter.mode != SelectableAdapter.Mode.MULTI
     }
@@ -213,6 +220,8 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
 
         // Update the category with its manga.
         adapter.setItems(mangaForCategory)
+
+        swipe_refresh.isEnabled = preferences.showCategories().getOrDefault()
 
         if (adapter.mode == SelectableAdapter.Mode.MULTI) {
             controller.selectedMangas.forEach { manga ->

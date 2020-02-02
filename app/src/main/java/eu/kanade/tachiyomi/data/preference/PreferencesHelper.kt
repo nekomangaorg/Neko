@@ -165,6 +165,8 @@ class PreferencesHelper(val context: Context) {
 
     fun filterTracked() = rxPrefs.getInteger(Keys.filterTrcaked, 0)
 
+    fun showCategories() = rxPrefs.getBoolean("show_categories", true)
+
     fun librarySortingMode() = rxPrefs.getInteger(Keys.librarySortingMode, 0)
 
     fun librarySortingAscending() = rxPrefs.getBoolean("library_sorting_ascending", true)

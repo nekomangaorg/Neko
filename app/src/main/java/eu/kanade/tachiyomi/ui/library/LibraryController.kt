@@ -54,6 +54,8 @@ import eu.kanade.tachiyomi.util.marginBottom
 import eu.kanade.tachiyomi.util.marginTop
 import eu.kanade.tachiyomi.util.snack
 import eu.kanade.tachiyomi.util.updatePaddingRelative
+import eu.kanade.tachiyomi.util.visible
+import eu.kanade.tachiyomi.widget.ExtendedNavigationView
 import kotlinx.android.synthetic.main.library_controller.*
 import kotlinx.android.synthetic.main.main_activity.*
 import rx.Subscription
@@ -259,9 +261,9 @@ class LibraryController(
         navView = view
         drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, GravityCompat.END)
 
-        navView?.onGroupClicked = { group ->
+        navView?.onGroupClicked = { group, item ->
             when (group) {
-                is LibraryNavigationView.FilterGroup -> onFilterChanged()
+                is LibraryNavigationView.FilterGroup -> onFilterChanged(item)
                 is LibraryNavigationView.SortGroup -> onSortChanged()
                 is LibraryNavigationView.DisplayGroup -> reattachAdapter()
                 is LibraryNavigationView.BadgeGroup -> onDownloadBadgeChanged()
@@ -361,7 +363,12 @@ class LibraryController(
     /**
      * Called when a filter is changed.
      */
-    private fun onFilterChanged() {
+    private fun onFilterChanged(item: ExtendedNavigationView.Item) {
+        if (item is ExtendedNavigationView.Item.MultiStateGroup && item.resTitle == R.string.categories) {
+            activity?.invalidateOptionsMenu()
+            presenter.requestFullUpdate()
+            return
+        }
         presenter.requestFilterUpdate()
         destroyActionModeIfNeeded()
         activity?.invalidateOptionsMenu()
@@ -417,7 +424,9 @@ class LibraryController(
         inflater.inflate(R.menu.library, menu)
 
         val reorganizeItem = menu.findItem(R.id.action_reorganize)
-        reorganizeItem.isVisible = preferences.librarySortingMode().getOrDefault() == LibrarySort.DRAG_AND_DROP
+        reorganizeItem.isVisible =
+            preferences.librarySortingMode().getOrDefault() == LibrarySort.DRAG_AND_DROP &&
+                preferences.showCategories().getOrDefault()
         reorderMenuItem = reorganizeItem
         enableReorderItems()
 
@@ -629,7 +638,7 @@ class LibraryController(
         val mangas = selectedMangas.toList()
 
         // Hide the default category because it has a different behavior than the ones from db.
-        val categories = presenter.categories.filter { it.id != 0 }
+        val categories = presenter.allCategories.filter { it.id != 0 }
 
         // Get indexes of the common categories to preselect.
         val commonCategoriesIndexes = presenter.getCommonCategories(mangas)
@@ -638,6 +647,17 @@ class LibraryController(
 
         ChangeMangaCategoriesDialog(this, mangas, categories, commonCategoriesIndexes)
                 .showDialog(router)
+    }
+
+    fun lockFilterBar(lock: Boolean) {
+        val drawer = (navView?.parent  as? DrawerLayout) ?: return
+        if (lock) {
+            drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
+            drawer.closeDrawers()
+        } else {
+            drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
+            drawer.visible()
+        }
     }
 
     private fun deleteMangasFromLibrary() {

@@ -5,11 +5,14 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.CheckBox
+import android.widget.CheckedTextView
+import android.widget.EditText
+import android.widget.RadioButton
+import android.widget.Spinner
+import android.widget.TextView
 import androidx.appcompat.widget.TintTypedArray
 import androidx.core.view.ViewCompat
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.R
 import com.google.android.material.internal.ScrimInsetsFrameLayout
 import com.google.android.material.textfield.TextInputLayout

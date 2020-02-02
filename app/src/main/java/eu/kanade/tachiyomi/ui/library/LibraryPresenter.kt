@@ -70,6 +70,8 @@ class LibraryPresenter(
     var categories: List<Category> = emptyList()
         private set
 
+    var allCategories: List<Category> = emptyList()
+        private set
     /**
      * Relay used to apply the UI filters to the last emission of the library.
      */
@@ -264,7 +266,11 @@ class LibraryPresenter(
                             else -> 0
                         }
                     }
-                    else 0
+                    else  {
+                        val category = catListing.find { it.id == i1.manga.category }
+                        val category2 = catListing.find { it.id == i2.manga.category }
+                        category?.order?.compareTo(category2?.order ?: 0) ?: 0
+                    }
                 }
                 else -> 0
             }
@@ -296,12 +302,15 @@ class LibraryPresenter(
      */
     private fun getLibraryObservable(): Observable<Library> {
         return Observable.combineLatest(getCategoriesObservable(), getLibraryMangasObservable()) { dbCategories, libraryManga ->
-            val categories = if (libraryManga.containsKey(0)) arrayListOf(Category.createDefault
-                (context)) + dbCategories
+            val categories = if (libraryManga.containsKey(0))
+                arrayListOf(Category.createDefault(context)) + dbCategories
             else dbCategories
 
-            this.categories = categories
-            Library(categories, libraryManga)
+            this.allCategories = categories
+            this.categories = if (!preferences.showCategories().getOrDefault())
+                arrayListOf(Category.createDefault(context))
+            else categories
+            Library(this.categories, libraryManga)
         }
     }
 
@@ -324,7 +333,13 @@ class LibraryPresenter(
         val libraryAsList = preferences.libraryAsList()
         return db.getLibraryMangas().asRxObservable()
                 .map { list ->
-                    list.map { LibraryItem(it, libraryAsList) }.groupBy { it.manga.category }
+                    if (preferences.showCategories().getOrDefault()) {
+                        list.map { LibraryItem(it, libraryAsList) }.groupBy { it.manga.category }
+                    }
+                    else {
+                        list.distinctBy { it.id }.map { LibraryItem(it, libraryAsList)}.groupBy {
+                            0 }
+                    }
                 }
     }
 
@@ -347,6 +362,11 @@ class LibraryPresenter(
      */
     fun requestSortUpdate() {
         sortTriggerRelay.call(Unit)
+    }
+
+    fun requestFullUpdate() {
+        librarySubscription?.unsubscribe()
+        subscribeLibrary()
     }
 
     /**

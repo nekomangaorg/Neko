@@ -18,5 +18,6 @@
         android:layout_height="match_parent"
         android:layout_gravity="end"
         app:fastScrollerBubbleEnabled="true"
+        app:fastScrollerIgnoreTouchesOutsideHandle="true"
         tools:visibility="visible" />
 </eu.kanade.tachiyomi.ui.library.LibraryCategoryView>
