@@ -21,14 +21,8 @@ class RelatedHandler {
      */
     fun fetchReleated(manga: Manga): Observable<MangasPage> {
 
-        // Parse the Mangadex id from the URL (should be first number)
-        // Return if we can't find the id in the url
-        val p = Pattern.compile("\\d+")
-        val m = p.matcher(manga.url)
-        if(!m.find() || m.group().isEmpty()) {
-            return Observable.just(MangasPage(mutableListOf(), false))
-        }
-        var mangaid = m.group().toLong()
+        // Parse the Mangadex id from the URL
+        var mangaid = MdUtil.getMangaId(manga.url).toLong()
 
         // Get our current database
         var db = Injekt.get<DatabaseHelper>()
