@@ -603,9 +603,11 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
                     .title(R.string.icon_shape)
                     .negativeButton(android.R.string.cancel)
                     .listItemsSingleChoice (
-                    items = modes.map { activity?.getString(it) as CharSequence })
+                        items = modes.map { activity?.getString(it) as CharSequence },
+                        waitForPositiveButton = false)
                     { _, i, _ ->
                         (targetController as? MangaInfoController)?.createShortcutForShape(i)
+                        dismissDialog()
                     }
         }
     }
