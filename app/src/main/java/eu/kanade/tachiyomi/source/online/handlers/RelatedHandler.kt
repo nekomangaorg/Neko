@@ -1,80 +1,65 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
-import android.content.ContentValues.TAG
-import android.content.res.Resources
 import android.util.Log
+import eu.kanade.tachiyomi.data.database.DatabaseHelper
+import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.online.handlers.serializers.RelatedMatch
-import eu.kanade.tachiyomi.source.online.handlers.serializers.RelatedPageResult
-import eu.kanade.tachiyomi.source.online.handlers.serializers.RelatedResult
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
-import eu.kanade.tachiyomi.ui.main.MainActivity
-import kotlinx.serialization.json.Json
 import rx.Observable
-import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import uy.kohesive.injekt.injectLazy
-import java.io.File
+import org.json.JSONArray
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
+import java.util.regex.Pattern
 
 class RelatedHandler {
 
 
 
-    private val preferences by injectLazy<PreferencesHelper>()
-
-
     /**
      * fetch our related mangas
      */
-    fun fetchReleated(manga: SManga): Observable<MangasPage> {
+    fun fetchReleated(manga: Manga): Observable<MangasPage> {
 
+        // Parse the Mangadex id from the URL (should be first number)
+        // Return if we can't find the id in the url
+        val p = Pattern.compile("\\d+")
+        val m = p.matcher(manga.url)
+        if(!m.find() || m.group().isEmpty()) {
+            return Observable.just(MangasPage(mutableListOf(), false))
+        }
+        var mangaid = m.group().toLong()
 
-        // load these results from disk
-        //var result = File("/storage/emulated/0/Download/mangas_compressed.json").readText(Charsets.UTF_8)
-        var result = File(preferences.relatedFilePath().get()).readText(Charsets.UTF_8)
-        //var result = this::class.java.classLoader?.getResource("/res/raw/mangas_compressed.json")?.readText()
-        //var result = MainActivity::class.java.classLoader?.getResource("/SDCARD/TEMP/mangas_compressed.json")?.readText()
-        //val result = Resources.getSystem().openRawResource(R.raw.mangas_compressed).bufferedReader(Charsets.UTF_8).use { it.readText() }
-        val relatedPageResult = Json.nonstrict.parse(RelatedPageResult.serializer(), result)
+        // Get our current database
+        var db = Injekt.get<DatabaseHelper>()
+        var related_manga = db.getRelated(mangaid).executeAsBlocking()
 
         // Check if we have a result
-        if (relatedPageResult.result.isEmpty()) {
+        if (related_manga.size != 1) {
             return Observable.just(MangasPage(mutableListOf(), false))
         }
 
-        // Loop through and find the matching url with this manga id
-        var found: Boolean = false
-        var relatedMatchesResult: RelatedResult = RelatedResult(-1,"Unknown", emptyList())
-        for (item in relatedPageResult.result) {
-            if("/manga/${item.id}/" == manga.url) {
-                found = true
-                relatedMatchesResult = item
-            }
+        // Loop through and create a manga for each match
+        var arrTiles = JSONArray(related_manga[0].matched_titles)
+        var arrMatched = JSONArray(related_manga[0].matched_ids)
+        var arrMangas = arrayListOf<SManga>()
+        for (i in 0 until arrMatched.length()) {
+
+            // Get this related id
+            val id = arrMatched.getLong(i)
+
+            // Create the manga
+            val manga_matched = SManga.create()
+            manga_matched.title = arrTiles.getString(i)
+            manga_matched.thumbnail_url = "${MdUtil.cdnUrl}/images/manga/${id}.jpg"
+            manga_matched.url = "/manga/${id}/"
+            arrMangas.add(manga_matched)
+
         }
 
-        // Check if we have a result
-        if (!found || relatedMatchesResult.matches.isEmpty()) {
-            return Observable.just(MangasPage(mutableListOf(), false))
-        }
+        // Return the matches
+        return Observable.just(MangasPage(arrMangas, false))
 
-        // Else lets try to parse the matches
-        val follows = relatedMatchesResult.matches.map {
-            relatedFromElement(it)
-        }
-        return Observable.just(MangasPage(follows, false))
-
-    }
-
-    /**
-     * Parse result element to manga
-     */
-    private fun relatedFromElement(result: RelatedMatch): SManga {
-        val manga = SManga.create()
-        manga.title = MdUtil.cleanString(result.title)
-        manga.thumbnail_url = "${MdUtil.cdnUrl}/images/manga/${result.id}.jpg"
-        manga.url = "/manga/${result.id}/"
-        return manga
     }
 
 

@@ -15,7 +15,7 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
         /**
          * Version of the database.
          */
-        const val DATABASE_VERSION = 11
+        const val DATABASE_VERSION = 12
     }
 
     override fun onCreate(db: SupportSQLiteDatabase) = with(db) {
@@ -25,6 +25,7 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
         execSQL(CategoryTable.createTableQuery)
         execSQL(MangaCategoryTable.createTableQuery)
         execSQL(HistoryTable.createTableQuery)
+        execSQL(RelatedTable.createTableQuery)
 
         // DB indexes
         execSQL(MangaTable.createUrlIndexQuery)
@@ -50,6 +51,10 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
             db.execSQL(MangaTable.addAnimePlanetIdCol)
             db.execSQL(MangaTable.addMangaUpdatesIdCol)
         }
+        if (oldVersion < 12) {
+            db.execSQL(RelatedTable.createTableQuery)
+        }
+
     }
 
     override fun onConfigure(db: SupportSQLiteDatabase) {

@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.source.online
 
+import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.POST
 import eu.kanade.tachiyomi.network.POSTWithCookie
@@ -118,9 +119,8 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         return FollowsHandler(clientBuilder(), headers).fetchMangaFollowStatus(manga)
     }
 
-    override fun fetchMangaRelatedObservable(page: Int, manga: SManga): Observable<MangasPage> {
+    override fun fetchMangaRelatedObservable(page: Int, manga: Manga): Observable<MangasPage> {
         return RelatedHandler().fetchReleated(manga)
-
     }
 
 

@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.source
 
+import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.model.*
 import rx.Observable
 
@@ -90,7 +91,7 @@ interface Source {
      * @param page the page number to retrieve.
      * @param manga the manga to update.
      */
-    fun fetchMangaRelatedObservable(page: Int, manga: SManga): Observable<MangasPage>
+    fun fetchMangaRelatedObservable(page: Int, manga: Manga): Observable<MangasPage>
 
     /**
      * Returns a updated details for a manga and the chapter list

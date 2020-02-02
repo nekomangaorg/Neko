@@ -77,7 +77,7 @@ object PreferenceKeys {
 
     const val downloadOnlyOverWifi = "pref_download_only_over_wifi_key"
 
-    const val relatedFilePath = "related_file_path"
+    const val relatedLastUpdated = "related_file_path"
 
     const val relatedShowTab = "pref_related_show_tab_key"
 

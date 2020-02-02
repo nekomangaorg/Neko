@@ -113,7 +113,7 @@
     <string name="pref_category_downloads">Downloads</string>
     <string name="pref_category_site_specific">Site Specific</string>
     <string name="pref_category_tracking">Tracking</string>
-    <string name="pref_category_related">Related Mangas</string>
+    <string name="pref_category_related">Related (Alpha)</string>
     <string name="pref_category_advanced">Advanced</string>
     <string name="pref_category_about">About</string>
 
@@ -252,7 +252,8 @@
 
 
     <!-- Related Mangas section -->
-    <string name="pref_related_file_path">Manga Related JSON File</string>
+    <string name="pref_related_last_updated_txt">Open Related Manga JSON File</string>
+    <string name="pref_related_last_updated">Updated</string>
     <string name="pref_related_show_tab">Show Related Manga Tab</string>
 
     <!-- Backup section -->
