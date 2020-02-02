@@ -388,17 +388,12 @@ class LibraryController(
             destroyActionModeIfNeeded()
         } else {
             mode.title = resources?.getString(R.string.label_selected, count)
-            menu.findItem(R.id.action_edit_cover)?.isVisible = count == 1
         }
         return false
     }
 
     override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.action_edit_cover -> {
-                changeSelectedCover()
-                destroyActionModeIfNeeded()
-            }
             R.id.action_move_to_category -> showChangeMangaCategoriesDialog()
             R.id.action_delete -> showDeleteMangaDialog()
             R.id.action_select_all -> {

@@ -8,7 +8,6 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.anilist.AnilistApi
-import eu.kanade.tachiyomi.data.track.shikimori.ShikimoriApi
 import eu.kanade.tachiyomi.util.getResourceColor
 import eu.kanade.tachiyomi.widget.preference.LoginPreference
 import eu.kanade.tachiyomi.widget.preference.TrackLoginDialog
@@ -50,13 +49,7 @@ class SettingsTrackingController : SettingsController(),
                 dialog.targetController = this@SettingsTrackingController
                 dialog.showDialog(router)
             }
-            trackPreference(trackManager.shikimori) {
-                val tabsIntent = CustomTabsIntent.Builder()
-                        .setToolbarColor(context.getResourceColor(R.attr.colorPrimary))
-                        .build()
-                tabsIntent.intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
-                tabsIntent.launchUrl(activity!!, ShikimoriApi.authUrl())
-            }
+
         }
     }
 
@@ -84,7 +77,6 @@ class SettingsTrackingController : SettingsController(),
         super.onActivityResumed(activity)
         // Manually refresh anilist holder
         updatePreference(trackManager.aniList.id)
-        updatePreference(trackManager.shikimori.id)
     }
 
     private fun updatePreference(id: Int) {

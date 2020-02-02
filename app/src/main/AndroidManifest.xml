@@ -33,21 +33,23 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <!--suppress AndroidDomInspection -->
-            <meta-data android:name="android.app.shortcuts" android:resource="@xml/shortcuts"/>
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
         </activity>
         <activity
             android:name=".ui.main.DeepLinkActivity"
             android:launchMode="singleTask"
             android:theme="@android:style/Theme.NoDisplay">
             <intent-filter>
-                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-            <meta-data android:name="android.app.searchable" android:resource="@xml/searchable"/>
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable" />
         </activity>
-        <activity
-            android:name=".ui.reader.ReaderActivity" />
-        <activity
-            android:name=".ui.main.BiometricActivity" />
+        <activity android:name=".ui.reader.ReaderActivity" />
+        <activity android:name=".ui.main.BiometricActivity" />
         <activity
             android:name=".ui.webview.WebViewActivity"
             android:configChanges="uiMode|orientation|screenSize" />
@@ -66,21 +68,7 @@
 
                 <data
                     android:host="anilist-auth"
-                    android:scheme="neko"/>
-            </intent-filter>
-        </activity>
-        <activity
-            android:name=".ui.setting.ShikimoriLoginActivity"
-            android:label="Shikimori">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data
-                    android:host="shikimori-auth"
-                    android:scheme="neko"/>
+                    android:scheme="neko" />
             </intent-filter>
         </activity>
 
@@ -112,11 +100,11 @@
 
         <service
             android:name=".data.backup.BackupCreateService"
-            android:exported="false"/>
+            android:exported="false" />
 
         <service
             android:name=".data.backup.BackupRestoreService"
-            android:exported="false"/>
+            android:exported="false" />
 
     </application>
 

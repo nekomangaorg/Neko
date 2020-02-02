@@ -1,35 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-      xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <item android:id="@+id/action_edit_cover"
-          android:title="@string/action_edit_cover"
-          app:ico_icon="cmd_pencil"
-          app:ico_size="20dp"
-          app:ico_color="@color/md_white_1000"
-          app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/action_move_to_category"
+        android:title="@string/action_move_category"
+        app:ico_icon="cmd_label"
+        app:ico_size="20dp"
+        app:ico_color="@color/md_white_1000"
+        app:showAsAction="ifRoom" />
 
-    <item android:id="@+id/action_move_to_category"
-          android:title="@string/action_move_category"
-          app:ico_icon="cmd_label"
-          app:ico_size="20dp"
-          app:ico_color="@color/md_white_1000"
-          app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/action_delete"
+        android:title="@string/action_delete"
+        app:ico_icon="cmd_delete"
+        app:ico_size="20dp"
+        app:ico_color="@color/md_white_1000"
+        app:showAsAction="ifRoom" />
 
-    <item android:id="@+id/action_delete"
-          android:title="@string/action_delete"
-          app:ico_icon="cmd_delete"
-          app:ico_size="20dp"
-          app:ico_color="@color/md_white_1000"
-          app:showAsAction="ifRoom"/>
-
-    <item android:id="@+id/action_select_all"
+    <item
+        android:id="@+id/action_select_all"
         android:title="@string/action_select_all"
         app:ico_icon="cmd_select_all"
         app:ico_size="20dp"
         app:ico_color="@color/md_white_1000"
-        app:showAsAction="ifRoom"/>
+        app:showAsAction="ifRoom" />
 
 
 </menu>
