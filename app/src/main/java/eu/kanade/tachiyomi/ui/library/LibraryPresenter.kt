@@ -53,7 +53,7 @@ class LibraryPresenter(
 
     private val context = preferences.context
 
-    private val loggedServices by lazy { Injekt.get<TrackManager>().services.filter { it.isLogged } }
+    private val loggedServices by lazy { Injekt.get<TrackManager>().services.filter { it.isLogged && !it.isMdList() } }
     /**
      * Categories of the library.
      */
@@ -91,14 +91,14 @@ class LibraryPresenter(
     fun subscribeLibrary() {
         if (librarySubscription.isNullOrUnsubscribed()) {
             librarySubscription = getLibraryObservable()
-                    .combineLatest(downloadTriggerRelay.observeOn(Schedulers.io())) {
-                        lib, _ -> lib.apply { setDownloadCount(mangaMap) }
+                    .combineLatest(downloadTriggerRelay.observeOn(Schedulers.io())) { lib, _ ->
+                        lib.apply { setDownloadCount(mangaMap) }
                     }
-                    .combineLatest(filterTriggerRelay.observeOn(Schedulers.io())) {
-                        lib, _ -> lib.copy(mangaMap = applyFilters(lib.mangaMap))
+                    .combineLatest(filterTriggerRelay.observeOn(Schedulers.io())) { lib, _ ->
+                        lib.copy(mangaMap = applyFilters(lib.mangaMap))
                     }
-                    .combineLatest(sortTriggerRelay.observeOn(Schedulers.io())) {
-                        lib, _ -> lib.copy(mangaMap = applySort(lib.mangaMap))
+                    .combineLatest(sortTriggerRelay.observeOn(Schedulers.io())) { lib, _ ->
+                        lib.copy(mangaMap = applySort(lib.mangaMap))
                     }
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribeLatestCache({ view, (categories, mangaMap) ->
