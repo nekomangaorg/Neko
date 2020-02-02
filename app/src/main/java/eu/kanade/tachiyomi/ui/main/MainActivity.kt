@@ -226,6 +226,9 @@ open class MainActivity : BaseActivity() {
             }*/
             v.setPadding(insets.systemWindowInsetLeft, insets.systemWindowInsetTop,
                 insets.systemWindowInsetRight, 0)
+            view_offset.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                height = insets.systemWindowInsetBottom
+            }
             insets
         }
         val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK

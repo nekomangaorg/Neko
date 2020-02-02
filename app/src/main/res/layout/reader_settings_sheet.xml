@@ -107,7 +107,7 @@
         android:id="@+id/true_color"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="0dp"
         android:text="@string/pref_true_color"
         android:textColor="?android:attr/textColorSecondary"
         android:visibility="gone"
@@ -118,7 +118,7 @@
         android:id="@+id/fullscreen"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="0dp"
         android:text="@string/pref_fullscreen"
         android:textColor="?android:attr/textColorSecondary"
         app:layout_constraintTop_toBottomOf="@id/true_color" />
@@ -127,7 +127,7 @@
         android:id="@+id/keepscreen"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="0dp"
         android:text="@string/pref_keep_screen_on"
         android:textColor="?android:attr/textColorSecondary"
         app:layout_constraintTop_toBottomOf="@id/fullscreen" />
@@ -136,7 +136,7 @@
         android:id="@+id/long_tap"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="0dp"
         android:text="@string/pref_read_with_long_tap"
         android:textColor="?android:attr/textColorSecondary"
         app:layout_constraintTop_toBottomOf="@id/keepscreen" />
@@ -209,7 +209,7 @@
         android:id="@+id/page_transitions"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="0dp"
         android:text="@string/pref_page_transitions"
         android:textColor="?android:attr/textColorSecondary"
         app:layout_constraintTop_toBottomOf="@id/crop_borders" />

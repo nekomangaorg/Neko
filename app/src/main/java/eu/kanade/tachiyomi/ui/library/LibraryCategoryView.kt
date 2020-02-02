@@ -6,6 +6,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import eu.davidea.flexibleadapter.FlexibleAdapter
@@ -35,7 +36,7 @@ import uy.kohesive.injekt.injectLazy
  * Fragment containing the library manga for a certain category.
  */
 class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
-        FrameLayout(context, attrs),
+        CoordinatorLayout(context, attrs),
         FlexibleAdapter.OnItemClickListener,
         FlexibleAdapter.OnItemLongClickListener,
         FlexibleAdapter.OnItemMoveListener,
@@ -113,7 +114,7 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
         swipe_refresh.setOnRefreshListener {
             val inQueue = LibraryUpdateService.categoryInQueue(category.id)
             controller.snack?.dismiss()
-            controller.snack = swipe_refresh.snack(
+            controller.snack = snack(
                 resources.getString(
                     when {
                         inQueue -> R.string.category_already_in_queue

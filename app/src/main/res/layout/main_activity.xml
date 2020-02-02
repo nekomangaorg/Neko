@@ -56,28 +56,36 @@
             android:id="@+id/controller_container"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            app:layout_constraintBottom_toTopOf="@+id/navigationView"
+            app:layout_constraintBottom_toBottomOf="@+id/view_offset"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/appbar">
 
         </com.bluelinelabs.conductor.ChangeHandlerFrameLayout>
 
+        <View
+            android:id="@+id/view_offset"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/navigationView" />
+
         <com.google.android.material.bottomnavigation.BottomNavigationView
             android:id="@+id/navigationView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="?attr/colorPrimary"
-            app:tabBackground="@color/rippleColor"
             app:itemIconTint="@drawable/bottom_nav_item_selector"
-            app:tabRippleColor="@color/rippleColor"
-            app:itemTextColor="?attr/tabBarIconColor"
-            app:tabTextColor="?attr/tabBarIconColor"
             app:itemRippleColor="@color/rippleColor"
+            app:itemTextColor="?attr/tabBarIconColor"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:menu="@menu/bottom_navigation" />
+            app:menu="@menu/bottom_navigation"
+            app:tabBackground="@color/rippleColor"
+            app:tabRippleColor="@color/rippleColor"
+            app:tabTextColor="?attr/tabBarIconColor" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <com.google.android.material.navigation.NavigationView
