@@ -160,15 +160,25 @@ class TrackPresenter(
         }
     }
 
+    /**
+     * This updates MDList Tracker
+     */
     private suspend fun updateMdList(track: Track) {
         withContext(Dispatchers.IO) {
-            mdex.updateReadingProgress(track)
             val followStatus = FollowStatus.fromInt(track.status)!!
+
+            //allow follow status to update
             if (manga.follow_status != followStatus) {
                 mdex.updateFollowStatus(MdUtil.getMangaId(track.tracking_url), followStatus)
                 manga.follow_status = followStatus
                 db.insertManga(manga).executeAsBlocking()
             }
+
+            //mangadex wont update chapters if manga is not follows this prevents unneeded network call
+            if (followStatus != FollowStatus.UNFOLLOWED) {
+                mdex.updateReadingProgress(track)
+            }
+            // insert the changes into tracking db
             db.insertTrack(track).executeAsBlocking()
         }
         withContext(Dispatchers.Main) {
@@ -191,8 +201,16 @@ class TrackPresenter(
 
     fun setLastChapterRead(item: TrackItem, chapterNumber: Int) {
         val track = item.track!!
-        track.last_chapter_read = chapterNumber
-        updateRemote(track, item.service)
+        var shouldUpdate = true
+        //mangadex doesnt allow chapters to be updated if manga is unfollowed
+        if (item.service.id == TrackManager.MDLIST && track.status == FollowStatus.UNFOLLOWED.int) {
+            shouldUpdate = false
+            view?.onRefreshDone()
+        }
+        if (shouldUpdate) {
+            track.last_chapter_read = chapterNumber
+            updateRemote(track, item.service)
+        }
     }
 
 }
