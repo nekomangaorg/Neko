@@ -56,15 +56,16 @@ interface Source {
      */
     suspend fun fetchAllFollows(): List<SManga>
 
-    /**returns the follow status for the single manga
+
+    /**Updates reading status
      *
      */
-    suspend fun fetchMangaFollowStatus(manga: SManga): FollowStatus
+    suspend fun updateReadingProgress(track: Track): Boolean
 
     /**
      * updates the follow status for a manga
      */
-    suspend fun changeFollowStatus(manga: SManga, followStatus: FollowStatus): Boolean
+    suspend fun updateFollowStatus(mangaID: String, followStatus: FollowStatus): Boolean
 
 
     //Get a MdList Track of the manga

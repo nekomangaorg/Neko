@@ -3,7 +3,7 @@ package eu.kanade.tachiyomi.data.track
 import android.content.Context
 import eu.kanade.tachiyomi.data.track.anilist.Anilist
 import eu.kanade.tachiyomi.data.track.kitsu.Kitsu
-import eu.kanade.tachiyomi.data.track.kitsu.MdList
+import eu.kanade.tachiyomi.data.track.mdlist.MdList
 import eu.kanade.tachiyomi.data.track.myanimelist.Myanimelist
 import eu.kanade.tachiyomi.data.track.shikimori.Shikimori
 

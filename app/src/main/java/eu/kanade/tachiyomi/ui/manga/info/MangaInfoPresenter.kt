@@ -39,7 +39,7 @@ class MangaInfoPresenter(
         private val db: DatabaseHelper = Injekt.get(),
         private val downloadManager: DownloadManager = Injekt.get(),
         private val coverCache: CoverCache = Injekt.get()
-) : BasePresenter<MangaInfoController>(), CoroutineScope {
+) : BasePresenter<MangaInfoController>() {
 
     override fun onCreate(savedState: Bundle?) {
         super.onCreate(savedState)
@@ -81,13 +81,13 @@ class MangaInfoPresenter(
 
         job = Job()
 
-        job = launch(CoroutineExceptionHandler { _, _ -> MangaInfoController::onFetchMangaError })
+        job = launch(CoroutineExceptionHandler { _, _ ->
+            GlobalScope.launch(Dispatchers.Main) { MangaInfoController::onFetchMangaError }
+        })
         {
             coverCache.deleteFromCache(manga.thumbnail_url)
             val networkManga = source.fetchMangaDetails(manga)
-            val fetchMangaFollowStatus = source.fetchMangaFollowStatus(manga)
             manga.copyFrom(networkManga)
-            manga.follow_status = fetchMangaFollowStatus
             manga.initialized = true
             db.insertManga(manga).executeAsBlocking()
 

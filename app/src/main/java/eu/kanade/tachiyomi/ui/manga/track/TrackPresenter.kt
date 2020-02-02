@@ -9,11 +9,10 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
+import eu.kanade.tachiyomi.source.online.utils.FollowStatus
+import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
@@ -41,10 +40,13 @@ class TrackPresenter(
 
     private var refreshSubscription: Subscription? = null
 
+    private var exceptionHandler = CoroutineExceptionHandler { _, error -> GlobalScope.launch(Dispatchers.Main) { view?.onRefreshError(error) } }
+
     override fun onCreate(savedState: Bundle?) {
         super.onCreate(savedState)
         job = Job()
-        job = launch { registerMdList(manga) }
+        job = launch(exceptionHandler)
+        { registerMdList(manga) }
     }
 
     fun fetchTrackings() {
@@ -62,7 +64,18 @@ class TrackPresenter(
     }
 
     fun refresh() {
+        job = Job()
+        job = launch(exceptionHandler)
+        {
+            refreshMdList(trackList[0].track!!)
+
+        }
+
+    }
+
+    private fun refreshOthers() {
         refreshSubscription?.let { remove(it) }
+
         refreshSubscription = Observable.from(trackList)
                 .filter { it.track != null }
                 .concatMap { item ->
@@ -76,6 +89,19 @@ class TrackPresenter(
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeFirst({ view, _ -> view.onRefreshDone() },
                         TrackController::onRefreshError)
+    }
+
+    private suspend fun refreshMdList(track: Track) {
+        withContext(Dispatchers.IO) {
+            val remoteTrack = mdex.fetchTrackingInfo(manga)
+            track.copyPersonalFrom(remoteTrack)
+            track.total_chapters = remoteTrack.total_chapters
+            db.insertTrack(track).executeAsBlocking()
+        }
+        withContext(Dispatchers.Main)
+        {
+            refreshOthers()
+        }
     }
 
     fun search(query: String, service: TrackService) {
@@ -116,17 +142,39 @@ class TrackPresenter(
     }
 
     private fun updateRemote(track: Track, service: TrackService) {
-        service.update(track)
-                .flatMap { db.insertTrack(track).asRxObservable() }
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeFirst({ view, _ -> view.onRefreshDone() },
-                        { view, error ->
-                            view.onRefreshError(error)
+        if (service.id == TrackManager.MDLIST) {
+            job = Job()
+            job = launch(exceptionHandler) { updateMdList(track) }
+        } else {
+            service.update(track)
+                    .flatMap { db.insertTrack(track).asRxObservable() }
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeFirst({ view, _ -> view.onRefreshDone() },
+                            { view, error ->
+                                view.onRefreshError(error)
 
-                            // Restart on error to set old values
-                            fetchTrackings()
-                        })
+                                // Restart on error to set old values
+                                fetchTrackings()
+                            })
+        }
+    }
+
+    private suspend fun updateMdList(track: Track) {
+        withContext(Dispatchers.IO) {
+            mdex.updateReadingProgress(track)
+            val followStatus = FollowStatus.fromInt(track.status)!!
+            if (manga.follow_status != followStatus) {
+                mdex.updateFollowStatus(MdUtil.getMangaId(track.tracking_url), followStatus)
+                manga.follow_status = followStatus
+                db.insertManga(manga).executeAsBlocking()
+            }
+            db.insertTrack(track).executeAsBlocking()
+        }
+        withContext(Dispatchers.Main) {
+            view?.onRefreshDone()
+            fetchTrackings()
+        }
     }
 
     fun setStatus(item: TrackItem, index: Int) {

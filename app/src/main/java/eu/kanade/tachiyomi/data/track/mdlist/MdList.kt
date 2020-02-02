@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.data.track.kitsu
+package eu.kanade.tachiyomi.data.track.mdlist
 
 import android.annotation.SuppressLint
 import android.content.Context

@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.source.online.handlers
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.network.GET
+import eu.kanade.tachiyomi.network.POST
 import eu.kanade.tachiyomi.network.asObservable
 import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.model.SManga
@@ -15,12 +16,10 @@ import eu.kanade.tachiyomi.source.online.utils.MdUtil.Companion.getMangaId
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
-import okhttp3.Headers
+import okhttp3.*
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.Response
 import rx.Observable
+import timber.log.Timber
 
 class FollowsHandler(val client: OkHttpClient, val headers: Headers) {
 
@@ -56,17 +55,8 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers) {
     /**fetch follow status used when fetching status for 1 manga
      *
      */
-    private fun followStatusParse(response: Response): FollowStatus {
-        val followsPageResult = Json.nonstrict.parse(FollowsPageResult.serializer(), response.body!!.string())
-        if (followsPageResult.result.isEmpty()) {
-            return FollowStatus.UNFOLLOWED
-        } else {
-            val result = followsPageResult.result[0]
-            return FollowStatus.fromInt(result.follow_type)!!
-        }
-    }
 
-    private fun followStatusParses(response: Response): Track {
+    private fun followStatusParse(response: Response): Track {
         val followsPageResult = Json.nonstrict.parse(FollowsPageResult.serializer(), response.body!!.string())
         val track = Track.create(TrackManager.MDLIST)
         val result = followsPageResult.result
@@ -74,7 +64,10 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers) {
             track.status = FollowStatus.UNFOLLOWED.int
         } else {
             track.status = result[0].follow_type
-            track.last_chapter_read = result[0].chapter.toInt()
+            if (result[0].chapter.isNotBlank()) {
+                track.last_chapter_read = result[0].chapter.toInt()
+            }
+
         }
         return track
 
@@ -106,9 +99,8 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers) {
     /**
      * Change the status of a manga
      */
-    suspend fun changeFollowStatus(manga: SManga, followStatus: FollowStatus): Boolean {
+    suspend fun updateFollowStatus(mangaID: String, followStatus: FollowStatus): Boolean {
         return withContext(Dispatchers.IO) {
-            val mangaID = getMangaId(manga.url)
 
             val response: Response =
                     if (followStatus == FollowStatus.UNFOLLOWED) {
@@ -120,6 +112,19 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers) {
                         client.newCall(GET("$baseUrl/ajax/actions.ajax.php?function=manga_follow&id=$mangaID&type=$status", headers))
                                 .execute()
                     }
+
+            response.body!!.string().isEmpty()
+        }
+    }
+
+    suspend fun updateReadingProgress(track: Track): Boolean {
+        return withContext(Dispatchers.IO) {
+            val mangaID = getMangaId(track.tracking_url)
+            val formBody = FormBody.Builder()
+                    .add("chapter", track.last_chapter_read.toString())
+            Timber.d("chapter to update %s", track.last_chapter_read.toString())
+            val response = client.newCall(POST("$baseUrl/ajax/actions.ajax.php?function=edit_progress&&id=$mangaID", headers, formBody.build()))
+                    .execute()
 
             response.body!!.string().isEmpty()
         }
@@ -148,23 +153,13 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers) {
         }
     }
 
-    /**
-     * fetch individual follow status
-     */
-    suspend fun fetchMangaFollowStatus(manga: SManga): FollowStatus {
-        return withContext(Dispatchers.IO) {
-            val request = GET("${MdUtil.baseUrl}${MdUtil.followsMangaApi}" + getMangaId(manga.url), headers)
-            val response = client.newCall(request).execute()
-            followStatusParse(response)
-        }
-    }
 
     suspend fun fetchTrackingInfo(manga: SManga): Track {
         return withContext(Dispatchers.IO) {
             val request = GET("${MdUtil.baseUrl}${MdUtil.followsMangaApi}" + getMangaId(manga.url), headers)
             val response = client.newCall(request).execute()
-            val track = followStatusParses(response)
-            track.tracking_url = MdUtil.baseUrl + MdUtil.followsMangaApi + manga.url
+            val track = followStatusParse(response)
+            track.tracking_url = MdUtil.baseUrl + manga.url
             track.title = manga.title
             track
         }
