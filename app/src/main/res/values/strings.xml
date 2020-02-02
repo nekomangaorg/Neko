@@ -53,7 +53,6 @@
     <string name="action_edit_categories">Edit categories</string>
     <string name="action_rename_category">Rename category</string>
     <string name="action_move_category">Move to categories</string>
-    <string name="action_edit_cover">Edit the cover picture</string>
     <string name="action_sort_up">Sort up</string>
     <string name="action_sort_down">Sort down</string>
     <string name="action_show_downloaded">Downloaded</string>
@@ -73,7 +72,7 @@
     <string name="action_open_in_browser">Open in browser</string>
     <string name="action_open_in_web_view">Open in web view</string>
     <string name="action_add_to_home_screen">Add to home screen</string>
-    <string name="action_display_mode">Change display mode</string>
+    <string name="action_display_mode">Display mode</string>
     <string name="action_display">Display</string>
     <string name="action_display_grid">Grid</string>
     <string name="action_display_list">List</string>
@@ -100,6 +99,9 @@
     <string name="deleting">Deleting…</string>
     <string name="loading">Loading…</string>
     <string name="processing">Processing…</string>
+
+    <!-- content description -->
+    <string name="content_description_tracker_logo">logo</string>
 
     <!-- Shortcuts-->
     <string name="app_not_available">Application not available</string>
@@ -422,9 +424,9 @@
     <string name="chapter_downloading_progress">Downloading (%1$d/%2$d)</string>
     <string name="chapter_error">Error</string>
     <string name="chapter_paused">Paused</string>
-    <string name="fetch_chapters_error">Error while fetching chapters</string>
-    <string name="show_title">Show title</string>
-    <string name="show_chapter_number">Show chapter number</string>
+    <string name="fetch_chapters_error">Could not fetch chapters</string>
+    <string name="show_title">Title</string>
+    <string name="show_chapter_number">Chapter number</string>
     <string name="sorting_mode">Sorting mode</string>
     <string name="sort_by_source">By source</string>
     <string name="sort_by_number">By chapter number</string>
@@ -441,7 +443,7 @@
     <string name="invalid_download_dir">Invalid download directory</string>
 
     <!-- Tracking Screen -->
-    <string name="manga_tracking_tab">Tracking</string>
+    <string name="manga_external_tab">External</string>
     <string name="reading">Reading</string>
     <string name="currently_reading">Currently Reading</string>
     <string name="completed">Completed</string>

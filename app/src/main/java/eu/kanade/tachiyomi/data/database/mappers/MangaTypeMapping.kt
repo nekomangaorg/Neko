@@ -10,8 +10,6 @@ import com.pushtorefresh.storio.sqlite.queries.DeleteQuery
 import com.pushtorefresh.storio.sqlite.queries.InsertQuery
 import com.pushtorefresh.storio.sqlite.queries.UpdateQuery
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.database.models.Manga.Companion.fromDatabaseInt
-import eu.kanade.tachiyomi.data.database.models.Manga.Companion.toDatabaseInt
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_ANILIST_ID
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_ANIME_PLANET_ID
@@ -37,7 +35,7 @@ import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_TITLE
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_URL
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_VIEWER
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.TABLE
-import eu.kanade.tachiyomi.source.model.SManga.FollowStatus
+import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 
 class MangaTypeMapping : SQLiteTypeMapping<Manga>(
         MangaPutResolver(),
@@ -75,7 +73,7 @@ class MangaPutResolver : DefaultPutResolver<Manga>() {
         put(COL_INITIALIZED, obj.initialized)
         put(COL_VIEWER, obj.viewer)
         put(COL_CHAPTER_FLAGS, obj.chapter_flags)
-        put(COL_FOLLOW_STATUS, obj.follow_status?.toDatabaseInt())
+        put(COL_FOLLOW_STATUS, obj.follow_status?.int)
         put(COL_ANILIST_ID, obj.anilist_id)
         put(COL_KITSU_ID, obj.kitsu_id)
         put(COL_MY_ANIME_LIST_ID, obj.my_anime_list_id)
@@ -108,7 +106,7 @@ interface BaseMangaGetResolver {
         initialized = cursor.getInt(cursor.getColumnIndex(COL_INITIALIZED)) == 1
         viewer = cursor.getInt(cursor.getColumnIndex(COL_VIEWER))
         chapter_flags = cursor.getInt(cursor.getColumnIndex(COL_CHAPTER_FLAGS))
-        follow_status = cursor.getInt(cursor.getColumnIndex(COL_FOLLOW_STATUS)).let { FollowStatus.fromDatabaseInt(it) }
+        follow_status = cursor.getInt(cursor.getColumnIndex(COL_FOLLOW_STATUS)).let { FollowStatus.fromInt(it) }
     }
 }
 

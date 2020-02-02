@@ -12,7 +12,6 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.source.Source
-import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
 import eu.kanade.tachiyomi.util.DiskUtil
 import kotlinx.coroutines.*
@@ -25,7 +24,6 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
 import java.util.*
-import kotlin.coroutines.CoroutineContext
 
 /**
  * Presenter of MangaInfoFragment.
@@ -41,12 +39,7 @@ class MangaInfoPresenter(
         private val db: DatabaseHelper = Injekt.get(),
         private val downloadManager: DownloadManager = Injekt.get(),
         private val coverCache: CoverCache = Injekt.get()
-) : BasePresenter<MangaInfoController>(), CoroutineScope {
-
-    private lateinit var job: Job
-
-    override val coroutineContext: CoroutineContext
-        get() = Dispatchers.IO + job
+) : BasePresenter<MangaInfoController>() {
 
     override fun onCreate(savedState: Bundle?) {
         super.onCreate(savedState)
@@ -88,13 +81,13 @@ class MangaInfoPresenter(
 
         job = Job()
 
-        job = launch(CoroutineExceptionHandler { _, _ -> MangaInfoController::onFetchMangaError })
+        job = launch(CoroutineExceptionHandler { _, _ ->
+            GlobalScope.launch(Dispatchers.Main) { MangaInfoController::onFetchMangaError }
+        })
         {
             coverCache.deleteFromCache(manga.thumbnail_url)
             val networkManga = source.fetchMangaDetails(manga)
-            val fetchMangaFollowStatus = source.fetchMangaFollowStatus(manga)
             manga.copyFrom(networkManga)
-            manga.follow_status = fetchMangaFollowStatus
             manga.initialized = true
             db.insertManga(manga).executeAsBlocking()
 
@@ -105,35 +98,6 @@ class MangaInfoPresenter(
         }
     }
 
-    /**
-     * Fetch manga information from source.
-     */
-    fun updateMangaFollowStatus(position: Int) {
-
-        job.isActive.let { return@let }
-
-        job = Job()
-
-        val followStatus = SManga.FollowStatus.values()[position]
-
-        job = launch(CoroutineExceptionHandler { _, _ -> MangaInfoController::onUpdateFollowsMangaError })
-        {
-
-            val result = source.changeFollowStatus(manga, followStatus)
-            withContext(Dispatchers.Main) {
-                if (result) {
-                    view?.updateFollowsButton(followStatus)
-                } else {
-                    view?.onUpdateFollowsMangaError(Exception("Error Updating Follows"))
-                }
-            }
-        }
-    }
-
-    override fun onDestroy() {
-        job.cancel()
-        super.onDestroy()
-    }
 
     /**
      * Update favorite status of manga, (removes / adds) manga (to / from) library.

@@ -6,8 +6,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
-import com.bluelinelabs.conductor.*
+import com.bluelinelabs.conductor.ControllerChangeHandler
+import com.bluelinelabs.conductor.ControllerChangeType
+import com.bluelinelabs.conductor.Router
+import com.bluelinelabs.conductor.RouterTransaction
 import com.bluelinelabs.conductor.support.RouterPagerAdapter
 import com.google.android.material.tabs.TabLayout
 import com.jakewharton.rxrelay.BehaviorRelay
@@ -174,8 +176,8 @@ class MangaController : RxController, TabbedController {
         private val tabTitles = listOf(
                 R.string.manga_detail_tab,
                 R.string.manga_chapters_tab,
-                if (preferences.relatedShowTab()) R.string.manga_related_tab else R.string.manga_tracking_tab,
-                R.string.manga_tracking_tab)
+                if (preferences.relatedShowTab()) R.string.manga_related_tab else R.string.manga_external_tab,
+                R.string.manga_external_tab)
                 .map { resources!!.getString(it) }
 
         override fun getCount(): Int {

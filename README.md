@@ -32,7 +32,7 @@ Using Tachiyomi as a base to add MangaDex specific features.
 ## Features:
 - Supports login to MangaDex
 - Local reading of downloaded manga
-- [MyAnimeList](https://myanimelist.net/), [AniList](https://anilist.co/), [Kitsu](https://kitsu.io/explore/anime) and [Shikimori](https://shikimori.org/) support.
+- [MyAnimeList](https://myanimelist.net/), [AniList](https://anilist.co/), [Kitsu](https://kitsu.io/explore/anime) support.
 - Schedule updating your library for new chapters.
 - Create backups locally to read offline or to your desired cloud service. 
 

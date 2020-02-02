@@ -1,11 +1,11 @@
 package eu.kanade.tachiyomi.ui.reader.viewer.pager
 
-import androidx.viewpager.widget.ViewPager
 import android.view.InputDevice
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup.LayoutParams
+import androidx.viewpager.widget.ViewPager
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
@@ -92,7 +92,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
                 else -> activity.toggleMenu()
             }
         }
-        pager.longTapListener = f@ {
+        pager.longTapListener = f@{
             if (activity.menuVisible || config.longTapEnabled) {
                 val item = adapter.items.getOrNull(pager.currentItem)
                 if (item is ReaderPage) {

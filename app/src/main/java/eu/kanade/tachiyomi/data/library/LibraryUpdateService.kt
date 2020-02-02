@@ -32,6 +32,7 @@ import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.*
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -388,7 +389,7 @@ class LibraryUpdateService(
         val listManga = sourceManager.getMangadex().fetchAllFollows()
         //filter all follows from Mangadex and only add reading or rereading manga to library
         listManga.filter { it ->
-            it.follow_status == SManga.FollowStatus.RE_READING || it.follow_status == SManga.FollowStatus.READING
+            it.follow_status == FollowStatus.RE_READING || it.follow_status == FollowStatus.READING
         }
                 .forEach { networkManga ->
                     showProgressNotification(networkManga, count.andIncrement, listManga.size)

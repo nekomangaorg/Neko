@@ -1,12 +1,14 @@
 package eu.kanade.tachiyomi.source.online
 
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.POST
 import eu.kanade.tachiyomi.network.POSTWithCookie
 import eu.kanade.tachiyomi.network.asObservable
 import eu.kanade.tachiyomi.source.model.*
 import eu.kanade.tachiyomi.source.online.handlers.*
+import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import okhttp3.FormBody
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
@@ -63,8 +65,8 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         return clientBuilder()
     }
 
-    override suspend fun changeFollowStatus(manga: SManga, followStatus: SManga.FollowStatus): Boolean {
-        return FollowsHandler(clientBuilder(), headers).changeFollowStatus(manga, followStatus)
+    override suspend fun updateFollowStatus(mangaID: String, followStatus: FollowStatus): Boolean {
+        return FollowsHandler(clientBuilder(), headers).updateFollowStatus(mangaID, followStatus)
     }
 
     fun fetchRandomMangaId(): Observable<String> {
@@ -115,8 +117,13 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         return FollowsHandler(clientBuilder(), headers).fetchAllFollows()
     }
 
-    override suspend fun fetchMangaFollowStatus(manga: SManga): SManga.FollowStatus {
-        return FollowsHandler(clientBuilder(), headers).fetchMangaFollowStatus(manga)
+    override suspend fun updateReadingProgress(track: Track): Boolean {
+        return FollowsHandler(clientBuilder(), headers).updateReadingProgress(track)
+    }
+
+
+    override suspend fun fetchTrackingInfo(manga: SManga): Track {
+        return FollowsHandler(clientBuilder(), headers).fetchTrackingInfo(manga)
     }
 
     override fun fetchMangaRelatedObservable(page: Int, manga: Manga): Observable<MangasPage> {

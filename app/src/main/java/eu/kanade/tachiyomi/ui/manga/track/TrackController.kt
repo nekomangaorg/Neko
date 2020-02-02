@@ -65,7 +65,6 @@ class TrackController : NucleusController<TrackPresenter>(),
         getSearchDialog()?.onSearchResults(results)
     }
 
-    @Suppress("UNUSED_PARAMETER")
     fun onSearchResultsError(error: Throwable) {
         Timber.e(error)
         getSearchDialog()?.onSearchResultsError()
@@ -122,18 +121,18 @@ class TrackController : NucleusController<TrackPresenter>(),
     }
 
     override fun setStatus(item: TrackItem, selection: Int) {
-        presenter.setStatus(item, selection)
         swipe_refresh?.isRefreshing = true
+        presenter.setStatus(item, selection)
     }
 
     override fun setScore(item: TrackItem, score: Int) {
-        presenter.setScore(item, score)
         swipe_refresh?.isRefreshing = true
+        presenter.setScore(item, score)
     }
 
     override fun setChaptersRead(item: TrackItem, chaptersRead: Int) {
-        presenter.setLastChapterRead(item, chaptersRead)
         swipe_refresh?.isRefreshing = true
+        presenter.setLastChapterRead(item, chaptersRead)
     }
 
     private companion object {

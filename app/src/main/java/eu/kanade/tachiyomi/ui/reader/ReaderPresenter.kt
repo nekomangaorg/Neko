@@ -118,8 +118,7 @@ class ReaderPresenter(
                         }
 
                         shouldInclude
-                    }
-                    else {
+                    } else {
                         true
                     }
                 }
@@ -358,8 +357,7 @@ class ReaderPresenter(
         selectedChapter.chapter.last_page_read = page.index
         if (selectedChapter.pages?.lastIndex == page.index) {
             selectedChapter.chapter.read = true
-            selectedChapter.chapter.last_page_read = 0
-            updateTrackLastChapterRead()
+            updateTrackChapterRead(selectedChapter)
             enqueueDeleteReadChapters(selectedChapter)
         }
 
@@ -552,13 +550,13 @@ class ReaderPresenter(
 
         Observable
                 .fromCallable {
-                        val thumbUrl = manga.thumbnail_url ?: throw Exception("Image url not found")
-                        if (manga.favorite) {
-                            coverCache.copyToCache(thumbUrl, stream())
-                            SetAsCoverResult.Success
-                        } else {
-                            SetAsCoverResult.AddToLibraryFirst
-                        }
+                    val thumbUrl = manga.thumbnail_url ?: throw Exception("Image url not found")
+                    if (manga.favorite) {
+                        coverCache.copyToCache(thumbUrl, stream())
+                        SetAsCoverResult.Success
+                    } else {
+                        SetAsCoverResult.AddToLibraryFirst
+                    }
                 }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -587,21 +585,11 @@ class ReaderPresenter(
      * Starts the service that updates the last chapter read in sync services. This operation
      * will run in a background thread and errors are ignored.
      */
-    private fun updateTrackLastChapterRead() {
+    private fun updateTrackChapterRead(readerChapter: ReaderChapter) {
         if (!preferences.autoUpdateTrack()) return
-        val viewerChapters = viewerChaptersRelay.value ?: return
         val manga = manga ?: return
 
-        val currChapter = viewerChapters.currChapter.chapter
-        val prevChapter = viewerChapters.prevChapter?.chapter
-
-        // Get the last chapter read from the reader.
-        val lastChapterRead = if (currChapter.read)
-            currChapter.chapter_number.toInt()
-        else if (prevChapter != null && prevChapter.read)
-            prevChapter.chapter_number.toInt()
-        else
-            return
+        val chapterRead = readerChapter.chapter.chapter_number.toInt()
 
         val trackManager = Injekt.get<TrackManager>()
 
@@ -609,8 +597,8 @@ class ReaderPresenter(
                 .flatMapCompletable { trackList ->
                     Completable.concat(trackList.map { track ->
                         val service = trackManager.getService(track.sync_id)
-                        if (service != null && service.isLogged && lastChapterRead > track.last_chapter_read) {
-                            track.last_chapter_read = lastChapterRead
+                        if (service != null && service.isLogged && chapterRead > track.last_chapter_read) {
+                            track.last_chapter_read = chapterRead
 
                             // We wan't these to execute even if the presenter is destroyed and leaks
                             // for a while. The view can still be garbage collected.

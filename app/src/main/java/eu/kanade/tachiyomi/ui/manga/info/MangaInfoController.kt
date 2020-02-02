@@ -18,7 +18,6 @@ import android.os.Bundle
 import android.view.*
 import android.view.animation.DecelerateInterpolator
 import android.widget.ImageView
-import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
@@ -267,26 +266,6 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
                 else -> R.string.unknown
             })
 
-
-            updateFollowsButton(manga.follow_status)
-
-            follows_button.setOnClickListener {
-
-                val followsList = resources!!.getStringArray(R.array.follows_options).asList()
-                val initialPosition = followsList.indexOf(follows_button.text)
-                MaterialDialog(activity!!).show {
-                    title(text = "Change Follow Status?")
-                    listItemsSingleChoice(res = R.array.follows_options, initialSelection = initialPosition, waitForPositiveButton = true) { _, index, text ->
-                        if (index != initialPosition) {
-                            switchProgressBar(View.VISIBLE)
-                            presenter.updateMangaFollowStatus(index)
-                        }
-                    }
-                    positiveButton()
-
-                }
-            }
-
             // Set the favorite drawable to the correct one.
             setFavoriteDrawable(manga.favorite)
 
@@ -479,30 +458,6 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         setRefreshing(false)
     }
 
-    fun updateFollowsButton(followStatus: SManga.FollowStatus?) {
-// Update status TextView.
-        val followsRes = when (followStatus) {
-            SManga.FollowStatus.COMPLETED -> R.string.follows_completed
-            SManga.FollowStatus.DROPPED -> R.string.follows_dropped
-            SManga.FollowStatus.ON_HOLD -> R.string.follows_on_hold
-            SManga.FollowStatus.PLAN_TO_READ -> R.string.follows_plan_to_read
-            SManga.FollowStatus.READING -> R.string.follows_reading
-            SManga.FollowStatus.RE_READING -> R.string.follows_re_reading
-            else -> R.string.follows_unfollowed
-        }
-
-        follows_button.text = view?.context?.getString(followsRes)
-        switchProgressBar(View.INVISIBLE)
-    }
-
-    /**
-     * Update swipe refresh to start showing refresh in progress spinner.
-     */
-    fun onUpdateFollowsMangaError(error: Throwable) {
-        Timber.e(error)
-        switchProgressBar(ProgressBar.INVISIBLE)
-        activity?.toast(error.message)
-    }
 
     /**
      * Update swipe refresh to start showing refresh in progress spinner.
@@ -611,11 +566,13 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
             return MaterialDialog(activity!!)
                     .title(R.string.icon_shape)
                     .negativeButton(android.R.string.cancel)
-                    .listItemsSingleChoice(items = modes.map { activity?.getString(it) as CharSequence })
-                    { dialog, position, text ->
-                        (targetController as? MangaInfoController)?.createShortcutForShape(position)
+                    .listItemsSingleChoice (
+                        items = modes.map { activity?.getString(it) as CharSequence },
+                        waitForPositiveButton = false)
+                    { _, i, _ ->
+                        (targetController as? MangaInfoController)?.createShortcutForShape(i)
+                        dismissDialog()
                     }
-                    .positiveButton(android.R.string.ok)
         }
     }
 

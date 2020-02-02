@@ -1,7 +1,9 @@
 package eu.kanade.tachiyomi.source
 
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.source.model.*
+import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import rx.Observable
 
 /**
@@ -55,15 +57,20 @@ interface Source {
      */
     suspend fun fetchAllFollows(): List<SManga>
 
-    /**returns the follow status for the single manga
-     *
+    /**
+     * Updates reading status
      */
-    suspend fun fetchMangaFollowStatus(manga: SManga): SManga.FollowStatus
+    suspend fun updateReadingProgress(track: Track): Boolean
 
     /**
      * updates the follow status for a manga
      */
-    suspend fun changeFollowStatus(manga: SManga, followStatus: SManga.FollowStatus): Boolean
+    suspend fun updateFollowStatus(mangaID: String, followStatus: FollowStatus): Boolean
+
+    /**
+     * Get a MdList Track of the manga
+     */
+    suspend fun fetchTrackingInfo(manga: SManga): Track
 
     /**
      * Returns the list of filters for the source.

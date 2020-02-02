@@ -27,29 +27,35 @@ abstract class TrackService(val id: Int) {
 
     abstract fun getLogoColor(): Int
 
-    abstract fun getStatusList(): List<Int>
+    open fun getStatusList(): List<Int> = throw Exception("Not used")
 
-    abstract fun getStatus(status: Int): String
+    open fun getStatus(status: Int): String = throw Exception("Not used")
 
-    abstract fun getScoreList(): List<String>
+    open fun getScoreList(): List<String> = throw Exception("Not used")
 
     open fun indexToScore(index: Int): Float {
         return index.toFloat()
     }
 
-    abstract fun displayScore(track: Track): String
+    open fun displayScore(track: Track): String = throw Exception("Not used")
 
-    abstract fun add(track: Track): Observable<Track>
+    open fun add(track: Track): Observable<Track> = throw Exception("Not used")
 
-    abstract fun update(track: Track): Observable<Track>
+    open fun update(track: Track): Observable<Track> = throw Exception("Not used")
 
-    abstract fun bind(track: Track): Observable<Track>
+    open fun bind(track: Track): Observable<Track> = throw Exception("Not used")
 
-    abstract fun search(query: String): Observable<List<TrackSearch>>
+    open fun search(query: String): Observable<List<TrackSearch>> = throw Exception("Not used")
 
-    abstract fun refresh(track: Track): Observable<Track>
+    open fun refresh(track: Track): Observable<Track> = throw Exception("Not used")
 
-    abstract fun login(username: String, password: String): Completable
+    open fun login(username: String, password: String): Completable = throw Exception("Not used")
+
+    open fun isTracker() = true
+
+    open fun isMdList() = false
+
+    open fun isExternalLink() = false
 
     @CallSuper
     open fun logout() {

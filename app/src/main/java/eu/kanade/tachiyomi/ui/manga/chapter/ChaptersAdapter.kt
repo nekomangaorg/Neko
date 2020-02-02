@@ -1,8 +1,8 @@
 package eu.kanade.tachiyomi.ui.manga.chapter
 
 import android.content.Context
-import androidx.core.content.ContextCompat
 import android.view.MenuItem
+import androidx.core.content.ContextCompat
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.getResourceColor
