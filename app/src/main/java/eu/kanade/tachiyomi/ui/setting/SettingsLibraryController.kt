@@ -27,18 +27,21 @@ class SettingsLibraryController : SettingsController() {
     override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
         titleRes = R.string.pref_category_library
 
-        preference {
-            titleRes = R.string.pref_library_columns
-            onClick {
-                LibraryColumnsDialog().showDialog(router)
-            }
+        preferenceCategory {
+            titleRes = R.string.pref_category_library_display
 
-            fun getColumnValue(value: Int): String {
-                return if (value == 0)
-                    context.getString(R.string.default_columns)
-                else
-                    value.toString()
-            }
+            preference {
+                titleRes = R.string.pref_library_columns
+                onClick {
+                    LibraryColumnsDialog().showDialog(router)
+                }
+
+                fun getColumnValue(value: Int): String {
+                    return if (value == 0)
+                        context.getString(R.string.default_columns)
+                    else
+                        value.toString()
+                }
 
             Observable.combineLatest(
                     preferences.portraitColumns().asObservable(),
@@ -50,7 +53,10 @@ class SettingsLibraryController : SettingsController() {
                         summary = "${context.getString(R.string.portrait)}: $portrait, " +
                                 "${context.getString(R.string.landscape)}: $landscape"
                     }
-        }
+            }
+            preferenceCategory {
+                titleRes = R.string.pref_category_library_update
+
         intListPreference(activity) {
             key = Keys.libraryUpdateInterval
             titleRes = R.string.pref_library_update_interval
@@ -60,9 +66,9 @@ class SettingsLibraryController : SettingsController() {
             entryValues = listOf(0, 1, 2, 3, 6, 12, 24, 48)
             defaultValue = 0
 
-            onChange { newValue ->
-                // Always cancel the previous task, it seems that sometimes they are not updated.
-                LibraryUpdateJob.cancelTask()
+                    onChange { newValue ->
+                        // Always cancel the previous task, it seems that sometimes they are not updated.
+                        LibraryUpdateJob.cancelTask()
 
                 val interval = newValue as Int
                 if (interval > 0) {
@@ -78,8 +84,8 @@ class SettingsLibraryController : SettingsController() {
             entryValues = listOf("wifi", "ac")
             customSummaryRes = R.string.pref_library_update_restriction_summary
 
-            preferences.libraryUpdateInterval().asObservable()
-                    .subscribeUntilDestroy { isVisible = it > 0 }
+                    preferences.libraryUpdateInterval().asObservable()
+                            .subscribeUntilDestroy { isVisible = it > 0 }
 
             onChange {
                 // Post to event looper to allow the preference to be updated.
