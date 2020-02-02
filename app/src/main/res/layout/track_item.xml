@@ -35,9 +35,9 @@
             style="@style/Theme.Widget.Button.Borderless.Small"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:background="?attr/selectable_list_drawable"
             android:padding="16dp"
             android:text="@string/action_edit"
-            android:background="?attr/selectable_list_drawable"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/logo_container"
             app:layout_constraintTop_toTopOf="parent" />
