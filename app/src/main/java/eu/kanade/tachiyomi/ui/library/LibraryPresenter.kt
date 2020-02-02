@@ -209,6 +209,7 @@ class LibraryPresenter(
         }
         val catListing by lazy {
             val default = Category.createDefault(context)
+            default.order = -1
             val defOrder = preferences.defaultMangaOrder().getOrDefault()
             if (defOrder.firstOrNull()?.isLetter() == true) default.mangaSort = defOrder.first()
             else default.mangaOrder = defOrder.split("/").mapNotNull { it.toLongOrNull() }
@@ -267,9 +268,9 @@ class LibraryPresenter(
                         }
                     }
                     else  {
-                        val category = catListing.find { it.id == i1.manga.category }
-                        val category2 = catListing.find { it.id == i2.manga.category }
-                        category?.order?.compareTo(category2?.order ?: 0) ?: 0
+                        val category = catListing.find { it.id == i1.manga.category }?.order ?: -1
+                        val category2 = catListing.find { it.id == i2.manga.category }?.order ?: -1
+                        category.compareTo(category2)
                     }
                 }
                 else -> 0
