@@ -14,17 +14,19 @@
             android:id="@+id/logo_container"
             android:layout_width="48dp"
             android:layout_height="0dp"
+            android:clickable="true"
+            android:focusable="true"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            android:clickable="true"
             tools:background="#2E51A2">
 
             <ImageView
                 android:id="@+id/track_logo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"/>
+                android:layout_gravity="center"
+                android:contentDescription="@string/content_description_tracker_logo" />
 
         </FrameLayout>
 
@@ -34,12 +36,14 @@
             android:layout_height="wrap_content"
             android:background="?attr/selectable_list_drawable"
             android:clickable="true"
+            android:focusable="true"
             android:padding="16dp"
-            app:layout_constraintStart_toEndOf="@+id/logo_container"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/logo_container"
             app:layout_constraintTop_toTopOf="parent">
 
             <TextView
+                android:id="@+id/track_title_static_text"
                 style="@style/TextAppearance.Regular.Body1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -53,7 +57,7 @@
                 android:layout_marginStart="4dp"
                 android:ellipsize="middle"
                 android:gravity="end"
-                android:maxLines="1"
+                android:singleLine="true"
                 android:text="@string/action_edit" />
 
         </LinearLayout>
@@ -62,11 +66,11 @@
             android:id="@+id/divider1"
             android:layout_width="0dp"
             android:layout_height="1dp"
-            android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
             android:background="?android:attr/divider"
-            app:layout_constraintStart_toEndOf="@+id/logo_container"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/logo_container"
             app:layout_constraintTop_toBottomOf="@+id/title_container" />
 
         <LinearLayout
@@ -75,9 +79,10 @@
             android:layout_height="wrap_content"
             android:background="?attr/selectable_list_drawable"
             android:clickable="true"
+            android:focusable="true"
             android:padding="16dp"
-            app:layout_constraintStart_toEndOf="@+id/logo_container"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/logo_container"
             app:layout_constraintTop_toBottomOf="@+id/divider1">
 
             <TextView
@@ -101,11 +106,11 @@
             android:id="@+id/divider2"
             android:layout_width="0dp"
             android:layout_height="1dp"
-            android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
             android:background="?android:attr/divider"
-            app:layout_constraintStart_toEndOf="@+id/logo_container"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/logo_container"
             app:layout_constraintTop_toBottomOf="@+id/status_container" />
 
         <LinearLayout
@@ -114,9 +119,10 @@
             android:layout_height="wrap_content"
             android:background="?attr/selectable_list_drawable"
             android:clickable="true"
+            android:focusable="true"
             android:padding="16dp"
-            app:layout_constraintStart_toEndOf="@+id/logo_container"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/logo_container"
             app:layout_constraintTop_toBottomOf="@+id/divider2">
 
             <TextView
@@ -140,11 +146,11 @@
             android:id="@+id/divider3"
             android:layout_width="0dp"
             android:layout_height="1dp"
-            android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
             android:background="?android:attr/divider"
-            app:layout_constraintStart_toEndOf="@+id/logo_container"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/logo_container"
             app:layout_constraintTop_toBottomOf="@+id/chapters_container" />
 
         <LinearLayout
@@ -153,9 +159,10 @@
             android:layout_height="wrap_content"
             android:background="?attr/selectable_list_drawable"
             android:clickable="true"
+            android:focusable="true"
             android:padding="16dp"
-            app:layout_constraintStart_toEndOf="@+id/logo_container"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/logo_container"
             app:layout_constraintTop_toBottomOf="@+id/divider3">
 
             <TextView

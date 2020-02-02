@@ -100,6 +100,9 @@
     <string name="loading">Loading…</string>
     <string name="processing">Processing…</string>
 
+    <!-- content description -->
+    <string name="content_description_tracker_logo">logo</string>
+
     <!-- Shortcuts-->
     <string name="app_not_available">Application not available</string>
     <string name="short_recent_updates">Updates</string>
