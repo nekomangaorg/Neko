@@ -4,6 +4,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import androidx.appcompat.widget.SearchView
+import com.jakewharton.rxbinding.support.v7.widget.queryTextChanges
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.backup.BackupRestoreService
@@ -31,6 +36,9 @@ class RecentlyReadController : NucleusController<RecentlyReadPresenter>(),
         RecentlyReadAdapter.OnCoverClickListener,
         RemoveHistoryDialog.Listener {
 
+    init {
+        setHasOptionsMenu(true)
+    }
     /**
      * Adapter containing the recent manga.
      */
@@ -41,6 +49,7 @@ class RecentlyReadController : NucleusController<RecentlyReadPresenter>(),
      * Endless loading item.
      */
     private var progressItem: ProgressItem? = null
+    private var query = ""
 
     override fun getTitle(): String? {
         return resources?.getString(R.string.label_recent_manga)
@@ -116,7 +125,7 @@ class RecentlyReadController : NucleusController<RecentlyReadPresenter>(),
             return
         }
         val adapter = adapter ?: return
-        presenter.requestNext(adapter.itemCount)
+        presenter.requestNext(adapter.itemCount, query)
     }
 
     override fun noMoreLoad(newItemsSize: Int) { }
@@ -154,5 +163,32 @@ class RecentlyReadController : NucleusController<RecentlyReadPresenter>(),
             presenter.removeFromHistory(history)
         }
     }
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.recently_read, menu)
+        val searchItem = menu.findItem(R.id.action_search)
+        val searchView = searchItem.actionView as SearchView
+        searchView.maxWidth = Int.MAX_VALUE
+        if (query.isNotEmpty()) {
+            searchItem.expandActionView()
+            searchView.setQuery(query, true)
+            searchView.clearFocus()
+        }
+        searchView.queryTextChanges().filter { router.backstack.lastOrNull()?.controller() == this }
+            .subscribeUntilDestroy {
+                query = it.toString()
+                presenter.updateList(query)
+            }
 
+        // Fixes problem with the overflow icon showing up in lieu of search
+        searchItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
+            override fun onMenuItemActionExpand(item: MenuItem): Boolean {
+                return true
+            }
+
+            override fun onMenuItemActionCollapse(item: MenuItem): Boolean {
+                activity?.invalidateOptionsMenu()
+                return true
+            }
+        })
+    }
 }
