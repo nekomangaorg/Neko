@@ -436,7 +436,7 @@
     <string name="invalid_download_dir">Invalid download directory</string>
 
     <!-- Tracking Screen -->
-    <string name="manga_tracking_tab">Tracking</string>
+    <string name="manga_external_tab">External</string>
     <string name="reading">Reading</string>
     <string name="currently_reading">Currently Reading</string>
     <string name="completed">Completed</string>

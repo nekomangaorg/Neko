@@ -168,7 +168,7 @@ class MangaController : RxController, TabbedController {
         private val tabTitles = listOf(
                 R.string.manga_detail_tab,
                 R.string.manga_chapters_tab,
-                R.string.manga_tracking_tab)
+                R.string.manga_external_tab)
                 .map { resources!!.getString(it) }
 
         override fun getCount(): Int {
