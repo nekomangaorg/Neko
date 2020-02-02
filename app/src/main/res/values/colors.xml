@@ -16,6 +16,8 @@
     <!-- Dark Application Colors -->
     <color name="colorAmoledPrimary">@color/md_black_1000</color>
     <color name="dialog_amoled">@color/darkPrimaryColor</color>
+    <color name="readerPrimary">#212121</color>
+    <color name="readerDarkBackground">#1C1C1D</color>
 
     <color name="splashBackgroundColor">@color/colorPrimary</color>
 
