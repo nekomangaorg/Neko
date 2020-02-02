@@ -23,6 +23,8 @@ import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.Router
 import com.bluelinelabs.conductor.RouterTransaction
+import com.bluelinelabs.conductor.changehandler.FadeChangeHandler
+import com.bluelinelabs.conductor.changehandler.SimpleSwapChangeHandler
 import com.google.android.material.snackbar.Snackbar
 import eu.kanade.tachiyomi.Migrations
 import eu.kanade.tachiyomi.R
@@ -169,7 +171,10 @@ open class MainActivity : BaseActivity() {
                     R.id.nav_drawer_catalogues -> setRoot(CatalogueController(), id)
                     R.id.nav_drawer_extensions -> setRoot(ExtensionController(), id)
                     R.id.nav_drawer_downloads -> {
-                        setRoot(DownloadController(), id)
+                        if (router.backstack.isEmpty()) {
+                            setRoot(LibraryController(), R.id.nav_drawer_library)
+                        }
+                        router.pushController(DownloadController().withFadeTransaction())
                     }
                     R.id.nav_drawer_settings -> {
                         setRoot(SettingsMainController(), id)
@@ -453,8 +458,49 @@ open class MainActivity : BaseActivity() {
         if (!isFinishing) {
             nav_view.setCheckedItem(itemId)
             navigationView.selectedItemId = itemId
-            nav_view.menu.performIdentifierAction(itemId, 0)
-            //navigationView.menu.performIdentifierAction(itemId, 0)
+            jumpToController(itemId)
+        }
+    }
+
+    fun jumpToController(id: Int) {
+
+        val currentRoot = router.backstack.firstOrNull()
+        if (currentRoot?.tag()?.toIntOrNull() != id) {
+            when (id) {
+                R.id.nav_drawer_library -> setRoot(LibraryController(), id)
+                R.id.nav_drawer_recent_updates -> setRoot(RecentChaptersController(), id)
+                R.id.nav_drawer_recently_read -> setRoot(RecentlyReadController(), id)
+                R.id.nav_drawer_catalogues -> setRoot(CatalogueController(), id)
+                R.id.nav_drawer_extensions -> {
+                    if (router.backstack.isEmpty()) {
+                        navigationView.selectedItemId = R.id.nav_drawer_settings
+                        setRoot(SettingsMainController(), R.id.nav_drawer_settings)
+                        router.pushController(RouterTransaction.with(ExtensionController())
+                            .pushChangeHandler(SimpleSwapChangeHandler())
+                            .popChangeHandler(FadeChangeHandler()))
+                    }
+                    else {
+                        router.pushController(ExtensionController().withFadeTransaction())
+                    }
+                }
+                R.id.nav_drawer_downloads -> {
+                    if (router.backstack.isEmpty()) {
+                        setRoot(LibraryController(), R.id.nav_drawer_library)
+                        router.pushController(RouterTransaction.with(DownloadController())
+                            .pushChangeHandler(SimpleSwapChangeHandler())
+                            .popChangeHandler(FadeChangeHandler()))
+                    }
+                    else {
+                        router.pushController(DownloadController().withFadeTransaction())
+                    }
+                }
+                R.id.nav_drawer_settings -> {
+                    setRoot(SettingsMainController(), id)
+                }
+                R.id.nav_drawer_help -> {
+                    openInBrowser(URL_HELP)
+                }
+            }
         }
     }
 

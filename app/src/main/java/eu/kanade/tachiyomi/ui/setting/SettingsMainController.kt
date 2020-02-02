@@ -1,19 +1,22 @@
 package eu.kanade.tachiyomi.ui.setting
 
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import androidx.preference.PreferenceScreen
 import com.bluelinelabs.conductor.Controller
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.preference.PreferenceKeys
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.getOrDefault
-import eu.kanade.tachiyomi.data.track.TrackManager
-import eu.kanade.tachiyomi.data.updater.UpdaterJob
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
-import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.ui.extension.ExtensionController
-import uy.kohesive.injekt.injectLazy
+import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.system.openInBrowser
 
 class SettingsMainController : SettingsController() {
+
+    init {
+        setHasOptionsMenu(true)
+    }
+
     override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
         titleRes = R.string.label_settings
 
@@ -75,8 +78,23 @@ class SettingsMainController : SettingsController() {
             onClick { navigateTo(SettingsAboutController()) }
         }
     }
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.settings_main, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.action_help -> activity?.openInBrowser(URL_HELP)
+            else -> return super.onOptionsItemSelected(item)
+        }
+        return true
+    }
 
     private fun navigateTo(controller: Controller) {
         router.pushController(controller.withFadeTransaction())
+    }
+
+    private companion object {
+        private const val URL_HELP = "https://tachiyomi.org/help/"
     }
 }
