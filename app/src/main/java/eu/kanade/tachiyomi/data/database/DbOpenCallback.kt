@@ -53,6 +53,7 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
         }
         if (oldVersion < 12) {
             db.execSQL(RelatedTable.createTableQuery)
+            db.execSQL(RelatedTable.createMangaIdIndexQuery)
         }
 
     }

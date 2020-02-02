@@ -16,15 +16,6 @@ interface RelatedQueries : DbProvider {
                     .build())
             .prepare()
 
-//    fun getRelated(manga: Manga) = db.get()
-//            .listOfObjects(MangaRelated::class.java)
-//            .withQuery(Query.builder()
-//                    .table(RelatedTable.TABLE)
-//                    .where("${RelatedTable.COL_MANGA_ID} = ?")
-//                    .whereArgs(manga.id)
-//                    .build())
-//            .prepare()
-
     fun getRelated(manga_id: Long) = db.get()
             .listOfObjects(MangaRelated::class.java)
             .withQuery(Query.builder()
