@@ -9,6 +9,7 @@ import com.afollestad.materialdialogs.list.listItems
 import com.afollestad.materialdialogs.list.listItemsSingleChoice
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
+import eu.kanade.tachiyomi.widget.preference.ExtensionPreference
 import eu.kanade.tachiyomi.widget.preference.IntListMatPreference
 import eu.kanade.tachiyomi.widget.preference.IntListPreference
 import eu.kanade.tachiyomi.widget.preference.ListMatPreference
@@ -27,6 +28,10 @@ inline fun PreferenceManager.newScreen(block: (@DSL PreferenceScreen).() -> Unit
 
 inline fun PreferenceGroup.preference(block: (@DSL Preference).() -> Unit): Preference {
     return initThenAdd(Preference(context), block)
+}
+
+inline fun PreferenceGroup.extensionPreference(block: (@DSL Preference).() -> Unit): ExtensionPreference {
+    return initThenAdd(ExtensionPreference(context), block)
 }
 
 inline fun PreferenceGroup.switchPreference(block: (@DSL SwitchPreferenceCompat).() -> Unit): SwitchPreferenceCompat {

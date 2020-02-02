@@ -39,7 +39,7 @@ class SearchActivity: MainActivity() {
         setSupportActionBar(sToolbar)
 
         drawerArrow = DrawerArrowDrawable(this)
-        drawerArrow?.color = Color.WHITE
+        drawerArrow?.color = getResourceColor(R.attr.actionBarTintColor)
         sToolbar.navigationIcon = drawerArrow
 
         tabAnimator = TabsAnimator(sTabs)
@@ -87,9 +87,15 @@ class SearchActivity: MainActivity() {
             insets
         }
         val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        if (Build.VERSION.SDK_INT >= 26 && currentNightMode == Configuration.UI_MODE_NIGHT_NO) {
-            content.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+        if (Build.VERSION.SDK_INT >= 26 && currentNightMode == Configuration.UI_MODE_NIGHT_NO &&
+            preferences.theme() >= 8) {
+            content.systemUiVisibility = content.systemUiVisibility.or(View
+                .SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR)
         }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && currentNightMode == Configuration
+                .UI_MODE_NIGHT_NO && preferences.theme() >= 8)
+            content.systemUiVisibility = content.systemUiVisibility.or(View
+                .SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
 
         val drawerContainer: FrameLayout = findViewById(R.id.search_container)
         drawerContainer.setOnApplyWindowInsetsListener { v, insets ->

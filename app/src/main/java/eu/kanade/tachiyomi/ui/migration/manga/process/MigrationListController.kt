@@ -32,6 +32,7 @@ import eu.kanade.tachiyomi.util.system.await
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.system.toast
+import eu.kanade.tachiyomi.util.system.getResourceColor
 import kotlinx.android.synthetic.main.chapters_controller.*
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -400,9 +401,13 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
                 resources!!, R.drawable.ic_done_white_24dp, null
             )
         }
-        val translucentWhite = ColorUtils.setAlphaComponent(Color.WHITE, 127)
-        menuCopy.icon?.setTint(if (allMangasDone) Color.WHITE else translucentWhite)
-        menuMigrate?.icon?.setTint(if (allMangasDone) Color.WHITE else translucentWhite)
+
+        menuCopy.icon.mutate()
+        menuMigrate.icon.mutate()
+        val tintColor = activity?.getResourceColor(R.attr.actionBarTintColor) ?: Color.WHITE
+        val translucentWhite = ColorUtils.setAlphaComponent(tintColor, 127)
+        menuCopy.icon?.setTint(if (allMangasDone) tintColor else translucentWhite)
+        menuMigrate?.icon?.setTint(if (allMangasDone) tintColor else translucentWhite)
         menuCopy.isEnabled = allMangasDone
         menuMigrate.isEnabled = allMangasDone
     }

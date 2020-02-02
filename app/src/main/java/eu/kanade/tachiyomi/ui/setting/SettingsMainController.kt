@@ -18,20 +18,11 @@ class SettingsMainController : SettingsController() {
         titleRes = R.string.label_settings
 
         val tintColor = context.getResourceColor(R.attr.colorAccent)
-        val preferencesH: PreferencesHelper by injectLazy()
 
-        val updateCount = preferencesH.extensionUpdatesCount().getOrDefault()
-        preference {
+        extensionPreference {
             iconRes = R.drawable.ic_extension_black_24dp
             iconTint = tintColor
-            if (updateCount == 0) {
-                titleRes = R.string.label_extensions
-            }
-            else {
-                title = "${resources?.getString(R.string.label_extensions)} ${resources
-                ?.getQuantityString(R.plurals.extensions_updates_pendings, updateCount, 
-                    updateCount)}"
-            }
+            titleRes = R.string.label_extensions
             onClick { navigateTo(ExtensionController()) }
         }
 

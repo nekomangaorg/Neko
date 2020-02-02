@@ -20,9 +20,9 @@
     <string name="label_selected">Selected: %1$d</string>
     <string name="label_migration">Source migration</string>
     <string name="label_extensions">Extensions</string>
-    <plurals name="extensions_updates_pendings">
-        <item quantity="one">(1 update pending)</item>
-        <item quantity="other">(%d updates pending)</item>
+    <plurals name="extensions_updates_available">
+        <item quantity="one">Update available</item>
+        <item quantity="other">%d updates available</item>
     </plurals>
     <string name="label_extension_info">Extension info</string>
     <string name="label_help">Help</string>

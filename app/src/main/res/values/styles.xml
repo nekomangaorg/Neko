@@ -6,7 +6,7 @@
     <!--========-->
 
     <style name="Theme.ActionBar.DayNight" parent="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
-        <item name="popupTheme">@style/ThemeOverlay.AppCompat.Light</item>
+        <item name="popupTheme">@style/ThemeOverlay.MaterialComponents.Light</item>
     </style>
 
     <!--====-->
@@ -196,9 +196,11 @@
     <!--==============-->
     <style name="Theme.Widget.Button" parent="Widget.AppCompat.Button"/>
 
-    <style name="Theme.Widget.Button.Colored" parent="Widget.AppCompat.Button.Colored"/>
+    <style name="Theme.Widget.Button.Colored" parent="Widget.MaterialComponents.Button">
+        <item name="backgroundTint">?attr/colorAccent</item>
+    </style>
 
-    <style name="Theme.Widget.Button.Borderless" parent="Widget.AppCompat.Button.Borderless">
+    <style name="Theme.Widget.Button.Borderless" parent="Widget.MaterialComponents.Button.TextButton">
         <item name="android:textColor">?attr/colorAccent</item>
     </style>
 

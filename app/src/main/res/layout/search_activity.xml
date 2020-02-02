@@ -30,11 +30,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:theme="@style/Theme.ActionBar.Tab"
-                app:tabIndicatorColor="?attr/actionBarTintColor"
-                app:tabTextColor="?attr/actionBarTintColor"
+                android:background="?colorPrimary"
+                app:tabRippleColor="@color/rippleColor"
+                app:tabIndicatorColor="?attr/tabBarIconColor"
+                app:tabTextColor="?attr/tabBarIconColor"
                 app:tabInlineLabel="true"
                 app:tabGravity="center"
-                app:tabMode="scrollable"
+                app:tabMode="auto"
                 app:tabMinWidth="75dp"/>
 
         </eu.kanade.tachiyomi.widget.ElevationAppBarLayout>

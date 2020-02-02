@@ -10,6 +10,7 @@
         <item name="android:forceDarkAllowed">false</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorOnPrimary">@color/md_white_1000</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:textColorPrimary">@color/textColorPrimary</item>
@@ -60,6 +61,7 @@
     <style name="Theme.Tachiyomi.MatWhite" parent="Theme.Tachiyomi">
         <item name="colorPrimary">@color/purePrimary</item>
         <item name="colorPrimaryDark">@color/purePrimary</item>
+        <item name="colorOnPrimary">@color/colorPrimary</item>
         <item name="actionBarTintColor">@color/textColorPrimary</item>
         <item name="actionBarTheme">@style/ThemeOverlay.AppCompat.DayNight.ActionBar</item>
         <item name="tabBarIconColor">@color/colorPrimary</item>

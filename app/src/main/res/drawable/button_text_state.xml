@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_activated="true" android:color="?attr/colorAccent">
+    <item android:state_activated="true" android:color="@color/md_white_1000">
         <shape android:shape="rectangle">
             <corners android:radius="2dp" />
             <solid android:color="?attr/colorAccent" />
@@ -15,7 +15,7 @@
             <padding android:left="8dp" android:right="8dp" />
         </shape>
     </item>
-    <item android:color="@color/button_bg">
+    <item android:color="@color/colorAccent">
         <shape android:shape="rectangle" android:color="@color/colorAccent">
             <corners android:radius="2dp" />
             <solid android:color="@android:color/transparent" />

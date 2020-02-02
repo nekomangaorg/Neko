@@ -446,6 +446,9 @@ class LibraryController(
             searchView.clearFocus()
         }
 
+        // Mutate the filter icon because it needs to be tinted and the resource is shared.
+        menu.findItem(R.id.action_filter).icon.mutate()
+
         searchViewSubscription?.unsubscribe()
         searchViewSubscription = searchView.queryTextChanges()
                 // Ignore events if this controller isn't at the top
@@ -468,10 +471,9 @@ class LibraryController(
         val filterItem = menu.findItem(R.id.action_filter)
 
         // Tint icon if there's a filter active
-        if (navView.hasActiveFilters())
-            DrawableCompat.setTint(filterItem.icon,  Color.rgb(255, 238, 7))
-        else
-            DrawableCompat.clearColorFilter(filterItem.icon)
+        val filterColor = if (navView.hasActiveFilters()) Color.rgb(255, 238, 7)
+        else activity?.getResourceColor(R.attr.actionBarTintColor) ?: Color.WHITE
+        DrawableCompat.setTint(filterItem.icon, filterColor)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

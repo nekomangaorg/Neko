@@ -2,7 +2,7 @@
 <resources>
     <!-- Application Colors -->
     <color name="colorPrimary">#54759E</color>
-    <color name="colorPrimaryInactive">#C254759E</color>
+    <color name="colorPrimaryInactive">#C2424242</color>
     <color name="drawerColor">#54759E</color>
     <color name="colorPrimaryDark">#54759E</color>
     <color name="purePrimary">@color/md_white_1000</color>
@@ -21,8 +21,8 @@
     <color name="dialog_amoled">@color/darkPrimaryColor</color>
     <color name="readerPrimary">#212121</color>
     <color name="readerDarkBackground">#1C1C1D</color>
+    <color name="button_bg">@color/md_white_1000</color>
 
-    <!-- Light Theme -->
     <color name="textColorPrimary">@color/md_black_1000_87</color>
     <color name="textColorSecondary">@color/md_black_1000_54</color>
     <color name="textColorPrimaryInverse">@color/md_white_1000</color>
