@@ -7,6 +7,8 @@ import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
+import eu.kanade.tachiyomi.data.track.mdlist.AnimePlanet
+import eu.kanade.tachiyomi.data.track.mdlist.MangaUpdates
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
@@ -30,7 +32,7 @@ class TrackPresenter(
 
     private var trackList: List<TrackItem> = emptyList()
 
-    private val loggedServices by lazy { trackManager.services.filter { it.isLogged } }
+    private lateinit var validServices: List<TrackService>
 
     private val mdex by lazy { Injekt.get<SourceManager>().getMangadex() as HttpSource }
 
@@ -54,7 +56,7 @@ class TrackPresenter(
         trackSubscription = db.getTracks(manga)
                 .asRxObservable()
                 .map { tracks ->
-                    loggedServices.map { service ->
+                    validServices.map { service ->
                         TrackItem(tracks.find { it.sync_id == service.id }, service)
                     }
                 }
@@ -77,7 +79,7 @@ class TrackPresenter(
         refreshSubscription?.let { remove(it) }
 
         refreshSubscription = Observable.from(trackList)
-                .filter { it.track != null }
+                .filter { it.track != null && !it.service.isExternalLink() && !it.service.isMdList() }
                 .concatMap { item ->
                     item.service.refresh(item.track!!)
                             .flatMap { db.insertTrack(it).asRxObservable() }
@@ -115,15 +117,40 @@ class TrackPresenter(
 
     private suspend fun registerMdList(manga: Manga) {
         withContext(Dispatchers.IO) {
-            val count = db.getTracks(manga).executeAsBlocking().filter { it.sync_id == TrackManager.MDLIST }.count()
-            if (count == 0) {
+            validServices = trackManager.services.filter { it.isLogged || it.isExternalLink() }
+            val tracksInDb = db.getTracks(manga).executeAsBlocking()
+
+            val mdTrackCount = tracksInDb.filter { it.sync_id == TrackManager.MDLIST }.count()
+            if (mdTrackCount == 0) {
                 val track = mdex.fetchTrackingInfo(manga)
                 track.manga_id = manga.id!!
                 db.insertTrack(track).executeAsBlocking()
             }
+
+            if (manga.anime_planet_id == null) {
+                validServices = validServices.filter { it.id != TrackManager.ANIMEPLANET }
+            } else {
+                registerExternal(TrackManager.ANIMEPLANET, tracksInDb, AnimePlanet.URL, manga.anime_planet_id!!)
+            }
+            if (manga.manga_updates_id == null) {
+                validServices = validServices.filter { it.id != TrackManager.MANGAUPDATES }
+            } else {
+                registerExternal(TrackManager.MANGAUPDATES, tracksInDb, MangaUpdates.URL, manga.manga_updates_id!!)
+            }
         }
         withContext(Dispatchers.Main) {
             fetchTrackings()
+        }
+    }
+
+    fun registerExternal(serviceId: Int, tracksInDb: List<Track>, url: String, idForService: String) {
+        val trackCount = tracksInDb.filter { it.sync_id == serviceId }.count()
+        if (trackCount == 0) {
+            val track = Track.create(serviceId)
+            track.tracking_url = url + idForService
+            track.title = manga.title
+            track.manga_id = manga.id!!
+            db.insertTrack(track).executeAsBlocking()
         }
     }
 
@@ -138,14 +165,15 @@ class TrackPresenter(
                             TrackController::onRefreshError))
         } else {
             db.deleteTrackForManga(manga, service).executeAsBlocking()
+            view?.onRefreshDone()
         }
     }
 
     private fun updateRemote(track: Track, service: TrackService) {
-        if (service.id == TrackManager.MDLIST) {
+        if (service.isMdList()) {
             job = Job()
             job = launch(exceptionHandler) { updateMdList(track) }
-        } else {
+        } else if (!service.isExternalLink()) {
             service.update(track)
                     .flatMap { db.insertTrack(track).asRxObservable() }
                     .subscribeOn(Schedulers.io())
@@ -203,7 +231,7 @@ class TrackPresenter(
         val track = item.track!!
         var shouldUpdate = true
         //mangadex doesnt allow chapters to be updated if manga is unfollowed
-        if (item.service.id == TrackManager.MDLIST && track.status == FollowStatus.UNFOLLOWED.int) {
+        if (item.service.isMdList() && track.status == FollowStatus.UNFOLLOWED.int) {
             shouldUpdate = false
             view?.onRefreshDone()
         }

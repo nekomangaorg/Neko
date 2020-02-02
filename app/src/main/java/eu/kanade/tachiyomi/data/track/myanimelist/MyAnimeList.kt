@@ -31,8 +31,7 @@ class Myanimelist(private val context: Context, id: Int) : TrackService(id) {
     private val interceptor by lazy { MyAnimeListInterceptor(this) }
     private val api by lazy { MyAnimelistApi(client, interceptor) }
 
-    override val name: String
-        get() = "MyAnimeList"
+    override val name: String = "MyAnimeList"
 
     override fun getLogo() = R.drawable.ic_tracker_mal_logo
 

@@ -4,22 +4,22 @@ import android.graphics.Color
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.track.TrackService
 
-class AnimePlanet(id: Int) : TrackService(id) {
+class MangaUpdates(id: Int) : TrackService(id) {
 
 
-    override val name = "AnimePlanet"
+    override val name = "MangaUpdates"
 
     override fun getLogo(): Int {
-        return R.drawable.ic_tracker_anime_planet_logo
+        return R.drawable.ic_tracker_manga_updates_logo
     }
 
     override fun getLogoColor(): Int {
-        return Color.rgb(24, 47, 98)
+        return Color.rgb(137, 164, 195)
     }
 
     override fun isExternalLink() = true
 
     companion object {
-        val URL = "https://www.anime-planet.com/manga/"
+        val URL = "https://www.mangaupdates.com/series.html?id="
     }
 }

@@ -39,9 +39,7 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
 
     override fun displayScore(track: Track) = track.score.toInt().toString()
 
-
-    override fun add(track: Track): Observable<Track> = throw Exception("not used")
-
+    
     override fun update(track: Track): Observable<Track> {
         if (track.total_chapters != 0 && track.last_chapter_read == track.total_chapters) {
             track.status = FollowStatus.COMPLETED.int
@@ -51,22 +49,6 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
         //return api.updateLibManga(track)
     }
 
-    override fun bind(track: Track) = throw Exception("not used")
-
-    override fun search(query: String) = throw Exception("not used")
-
-    override fun refresh(track: Track): Observable<Track> {
-
-        return Observable.just(track)
-
-        //mdex.fetchMangaFollowStatusObs(track.manga_id)
-
-        // return api.getLibManga(track)
-        //   .map { remoteTrack ->
-        //    track.copyPersonalFrom(remoteTrack)
-        //     track.total_chapters = remoteTrack.total_chapters
-        //    track
-    }
 
     override fun login(username: String, password: String) = throw Exception("not used")
 
@@ -74,5 +56,7 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
     override fun logout() = throw Exception("not used")
 
     override val isLogged = mdex.isLogged()
+
+    override fun isMdList() = true
 
 }
