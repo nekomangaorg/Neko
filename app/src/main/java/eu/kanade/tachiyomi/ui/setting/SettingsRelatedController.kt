@@ -11,6 +11,7 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.MangaRelatedImpl
 import eu.kanade.tachiyomi.util.getFilePicker
 import eu.kanade.tachiyomi.util.toast
+import kotlinx.io.InputStream
 import org.json.JSONObject
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -89,20 +90,16 @@ class SettingsRelatedController : SettingsController() {
                 //=============================================================
                 //=============================================================
 
-                // The file url we have isn't in the right format, so extract the parts
-                //val docId = DocumentsContract.getDocumentId(data.data)
-                var docstr = data.data!!.getPath()
-                val split = docstr!!.split(":".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-                // Assume that if we couldn't split, it is on an external drive
-                if (split.size < 2) return
-                // External storage is in XXXX-XXXX:path/on/storage.json
-                // Otherwise, it is just a raw local file
-                //if (!"raw".equals(split[0], ignoreCase=true) && !"file".equals(split[0], ignoreCase=true)) {
-                //    preferences.relatedLastUpdated().set(Environment.getExternalStorageDirectory().toString()+"/"+split[1])
-                //} else {
-                //    preferences.relatedLastUpdated().set(split[1])
-                //}
-                val filePath = split[1]
+                // Parse the url from the specified uri
+                val context = applicationContext ?: return
+                val selectedFile = data.data
+                val input: InputStream? = context.getContentResolver()?.openInputStream(data.data!!)
+
+                // Check if we where able to open it
+                if(input==null) {
+                    context.toast("Unable to open file $selectedFile")
+                    return
+                }
 
                 //=============================================================
                 //=============================================================
@@ -113,8 +110,8 @@ class SettingsRelatedController : SettingsController() {
                 // Delete the old related table
                 db.deleteAllRelated()
 
-                // Open the manga file
-                var result = File(filePath).readText(Charsets.UTF_8)
+                // Load everything from the buffer into our string
+                val result = input.bufferedReader().use { it.readText() }
                 val relatedPageResult = JSONObject(result)
 
                 // Loop through each and insert into the database
@@ -129,15 +126,11 @@ class SettingsRelatedController : SettingsController() {
                     db.insertRelated(related).executeAsBlocking()
                     counter++
                 }
-
-                // Lets now open our manga file
-                val context = applicationContext ?: return
                 context.toast("Loaded $counter mangas from file")
 
                 // Nice debug to see if they were inserted
-                var mangas = db.getAllRelated().executeAsBlocking()
-                context.toast("There are ${mangas.size} in the database")
-
+                //var mangas = db.getAllRelated().executeAsBlocking()
+                //context.toast("There are ${mangas.size} in the database")
 
                 // Finally, save when we last loaded the database
                 val dataFormater = SimpleDateFormat("MMM dd, yyyy HH:mm:ss zzz", Locale.getDefault())
