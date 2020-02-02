@@ -457,7 +457,7 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
     fun onFetchMangaDone() {
         setRefreshing(false)
     }
-    
+
 
     /**
      * Update swipe refresh to start showing refresh in progress spinner.
@@ -566,11 +566,13 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
             return MaterialDialog(activity!!)
                     .title(R.string.icon_shape)
                     .negativeButton(android.R.string.cancel)
-                    .listItemsSingleChoice(items = modes.map { activity?.getString(it) as CharSequence })
-                    { dialog, position, text ->
-                        (targetController as? MangaInfoController)?.createShortcutForShape(position)
+                    .listItemsSingleChoice (
+                        items = modes.map { activity?.getString(it) as CharSequence },
+                        waitForPositiveButton = false)
+                    { _, i, _ ->
+                        (targetController as? MangaInfoController)?.createShortcutForShape(i)
+                        dismissDialog()
                     }
-                    .positiveButton(android.R.string.ok)
         }
     }
 
