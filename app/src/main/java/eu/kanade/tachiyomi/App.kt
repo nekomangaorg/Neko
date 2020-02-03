@@ -17,7 +17,7 @@ import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.updater.UpdaterJob
 import eu.kanade.tachiyomi.extension.ExtensionUpdateJob
 import eu.kanade.tachiyomi.ui.main.MainActivity
-import eu.kanade.tachiyomi.util.LocaleHelper
+import eu.kanade.tachiyomi.util.system.LocaleHelper
 import org.acra.ACRA
 import org.acra.annotation.ReportsCrashes
 import timber.log.Timber

@@ -30,14 +30,14 @@ import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.SourceNotFoundException
-import eu.kanade.tachiyomi.util.chop
+import eu.kanade.tachiyomi.util.lang.chop
 import eu.kanade.tachiyomi.util.storage.getUriCompat
-import eu.kanade.tachiyomi.util.isServiceRunning
-import eu.kanade.tachiyomi.util.notificationManager
+import eu.kanade.tachiyomi.util.system.notificationManager
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import eu.kanade.tachiyomi.util.system.isServiceRunning
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 import java.io.File

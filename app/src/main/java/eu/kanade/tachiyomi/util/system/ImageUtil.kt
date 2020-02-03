@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.util
+package eu.kanade.tachiyomi.util.system
 
 import android.graphics.Bitmap
 import android.graphics.Color

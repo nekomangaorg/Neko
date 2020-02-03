@@ -9,8 +9,8 @@ import com.evernote.android.job.JobManager
 import com.evernote.android.job.JobRequest
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.notification.Notifications
-import eu.kanade.tachiyomi.util.notificationManager
 import java.util.concurrent.TimeUnit
+import eu.kanade.tachiyomi.util.system.notificationManager
 
 class UpdaterJob : Job() {
 

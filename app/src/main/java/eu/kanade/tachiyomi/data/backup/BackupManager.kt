@@ -30,10 +30,10 @@ import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.util.sendLocalBroadcast
-import eu.kanade.tachiyomi.util.syncChaptersWithSource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
+import eu.kanade.tachiyomi.util.system.sendLocalBroadcast
 import rx.Observable
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy

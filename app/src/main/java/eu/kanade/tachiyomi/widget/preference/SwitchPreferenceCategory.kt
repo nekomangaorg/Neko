@@ -13,7 +13,7 @@ import android.widget.Checkable
 import android.widget.CompoundButton
 import android.widget.TextView
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.util.getResourceColor
+import eu.kanade.tachiyomi.util.system.getResourceColor
 
 class SwitchPreferenceCategory @JvmOverloads constructor(
         context: Context,

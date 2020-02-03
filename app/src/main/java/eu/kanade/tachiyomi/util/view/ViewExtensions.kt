@@ -1,6 +1,6 @@
 @file:Suppress("NOTHING_TO_INLINE")
 
-package eu.kanade.tachiyomi.util
+package eu.kanade.tachiyomi.util.view
 
 import android.content.Context
 import android.graphics.Color

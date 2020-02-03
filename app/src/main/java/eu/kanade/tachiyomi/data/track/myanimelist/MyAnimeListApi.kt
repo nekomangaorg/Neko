@@ -8,9 +8,9 @@ import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.POST
 import eu.kanade.tachiyomi.network.asObservable
 import eu.kanade.tachiyomi.network.asObservableSuccess
-import eu.kanade.tachiyomi.util.selectInt
-import eu.kanade.tachiyomi.util.selectText
-import okhttp3.*
+import eu.kanade.tachiyomi.util.system.selectInt
+import eu.kanade.tachiyomi.util.system.selectText
+import okhttp3.FormBody
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody

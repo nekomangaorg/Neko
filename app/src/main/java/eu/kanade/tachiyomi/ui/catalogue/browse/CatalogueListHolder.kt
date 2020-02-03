@@ -5,10 +5,11 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.glide.GlideApp
-import eu.kanade.tachiyomi.util.getResourceColor
-import kotlinx.android.synthetic.main.catalogue_list_item.*
 import androidx.recyclerview.widget.RecyclerView
 import eu.davidea.flexibleadapter.items.IFlexible
+import eu.kanade.tachiyomi.util.system.getResourceColor
+import kotlinx.android.synthetic.main.catalogue_list_item.thumbnail
+import kotlinx.android.synthetic.main.catalogue_list_item.title
 
 /**
  * Class used to hold the displayed data of a manga in the catalogue, like the cover or the title.

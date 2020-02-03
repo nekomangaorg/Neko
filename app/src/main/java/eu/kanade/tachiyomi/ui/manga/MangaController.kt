@@ -29,8 +29,8 @@ import eu.kanade.tachiyomi.ui.main.SearchActivity
 import eu.kanade.tachiyomi.ui.manga.chapter.ChaptersController
 import eu.kanade.tachiyomi.ui.manga.info.MangaInfoController
 import eu.kanade.tachiyomi.ui.manga.track.TrackController
-import eu.kanade.tachiyomi.util.toast
 import kotlinx.android.synthetic.main.search_activity.sTabs
+import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.android.synthetic.main.main_activity.tabs
 import kotlinx.android.synthetic.main.manga_controller.manga_pager
 import rx.Subscription

@@ -19,9 +19,10 @@ import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.catalogue.browse.ProgressItem
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
-import eu.kanade.tachiyomi.util.RecyclerWindowInsetsListener
-import eu.kanade.tachiyomi.util.toast
-import kotlinx.android.synthetic.main.recently_read_controller.*
+import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
+import eu.kanade.tachiyomi.util.system.toast
+import kotlinx.android.synthetic.main.recently_read_controller.empty_view
+import kotlinx.android.synthetic.main.recently_read_controller.recycler
 
 /**
  * Fragment that shows recently read manga.

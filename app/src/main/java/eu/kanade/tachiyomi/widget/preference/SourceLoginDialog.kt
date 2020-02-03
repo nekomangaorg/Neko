@@ -6,8 +6,11 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.LoginSource
-import eu.kanade.tachiyomi.util.toast
-import kotlinx.android.synthetic.main.pref_account_login.view.*
+import eu.kanade.tachiyomi.util.system.toast
+import kotlinx.android.synthetic.main.pref_account_login.view.dialog_title
+import kotlinx.android.synthetic.main.pref_account_login.view.login
+import kotlinx.android.synthetic.main.pref_account_login.view.password
+import kotlinx.android.synthetic.main.pref_account_login.view.username
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 import uy.kohesive.injekt.Injekt

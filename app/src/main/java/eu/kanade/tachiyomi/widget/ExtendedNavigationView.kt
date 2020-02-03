@@ -10,7 +10,7 @@ import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.util.getResourceColor
+import eu.kanade.tachiyomi.util.system.getResourceColor
 
 /**
  * An alternative implementation of [com.google.android.material.navigation.NavigationView], without menu

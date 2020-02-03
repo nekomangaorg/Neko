@@ -3,8 +3,10 @@ package eu.kanade.tachiyomi.ui.category
 import android.view.View
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
-import eu.kanade.tachiyomi.util.getRound
-import kotlinx.android.synthetic.main.categories_item.*
+import eu.kanade.tachiyomi.util.view.getRound
+import kotlinx.android.synthetic.main.categories_item.image
+import kotlinx.android.synthetic.main.categories_item.reorder
+import kotlinx.android.synthetic.main.categories_item.title
 
 /**
  * Holder used to display category items.

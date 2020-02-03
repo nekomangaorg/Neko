@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.util
+package eu.kanade.tachiyomi.util.view
 
 import androidx.annotation.LayoutRes
 import android.view.LayoutInflater
