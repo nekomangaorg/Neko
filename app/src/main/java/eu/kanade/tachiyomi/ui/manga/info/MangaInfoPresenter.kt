@@ -95,7 +95,6 @@ class MangaInfoPresenter(
                     manga.copyFrom(networkManga)
                     manga.initialized = true
                     db.insertManga(manga).executeAsBlocking()
-                    coverCache.deleteFromCache(manga.thumbnail_url)
                     MangaImpl.setLastCoverFetch(manga.id!!, Date().time)
                     manga
                 }

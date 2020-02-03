@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.util.DiskUtil
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.concurrent.TimeUnit
@@ -101,7 +102,9 @@ class DownloadCache(
         if (sourceDir != null) {
             val mangaDir = sourceDir.files[provider.getMangaDirName(manga)]
             if (mangaDir != null) {
-                return mangaDir.files.size
+                return mangaDir.files
+                        .filter { !it.endsWith(Downloader.TMP_DIR_SUFFIX) }
+                        .size
             }
         }
         return 0
@@ -225,6 +228,20 @@ class DownloadCache(
                 mangaDir.files -= chapter
             }
         }
+    }
+
+    fun renameFolder(from: String, to: String, source: Long) {
+        val sourceDir = rootDir.files[source] ?: return
+        val list = sourceDir.files.toMutableMap()
+        val mangaFiles = sourceDir.files[DiskUtil.buildValidFilename(from)] ?: return
+        val newDir = MangaDirectory(
+            UniFile.fromUri(
+                context, Uri.parse(sourceDir.dir.filePath + "/" + DiskUtil.buildValidFilename(to))
+            )
+        )
+        newDir.files = mangaFiles.files
+        list.remove(DiskUtil.buildValidFilename(from))
+        list[to] = newDir
     }
 
 

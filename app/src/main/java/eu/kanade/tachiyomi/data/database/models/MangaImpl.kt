@@ -1,6 +1,9 @@
 package eu.kanade.tachiyomi.data.database.models
 
+import eu.kanade.tachiyomi.data.download.DownloadProvider
 import eu.kanade.tachiyomi.source.model.SManga
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 
 open class MangaImpl : Manga {
 
@@ -37,13 +40,15 @@ open class MangaImpl : Manga {
     override var hide_title: Boolean = false
 
     override fun copyFrom(other: SManga) {
-        if (other is MangaImpl && (other as MangaImpl)::title.isInitialized && !other.title
-                .isBlank()) {
+        if (other is MangaImpl && (other as MangaImpl)::title.isInitialized &&
+            !other.title.isBlank() && other.title != originalTitle()) {
+            val oldTitle = originalTitle()
             title = if (currentTitle() != originalTitle()) {
                 val customTitle = currentTitle()
                 val trueTitle = other.title
                 "${customTitle}${SManga.splitter}${trueTitle}"
             } else other.title
+            Injekt.get<DownloadProvider>().renameMangaFolder(oldTitle, title, source)
         }
         super.copyFrom(other)
     }

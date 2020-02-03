@@ -329,12 +329,19 @@ class LibraryUpdateService(
                 .doOnCompleted {
                     if (newUpdates.isNotEmpty()) {
                         showResultNotification(newUpdates)
-                        if (downloadNew && hasDownloads) {
-                            DownloadService.start(this)
-                        }
+
                         if (preferences.refreshCoversToo().getOrDefault()) {
                             updateDetails(newUpdates.map { it.first }).observeOn(Schedulers.io())
+                                .doOnCompleted {
+                                    cancelProgressNotification()
+                                    if (downloadNew && hasDownloads) {
+                                        DownloadService.start(this)
+                                    }
+                                }
                                 .subscribeOn(Schedulers.io()).subscribe {}
+                        }
+                        else if (downloadNew && hasDownloads) {
+                            DownloadService.start(this)
                         }
                     }
 
@@ -391,7 +398,6 @@ class LibraryUpdateService(
     fun updateDetails(mangaToUpdate: List<LibraryManga>): Observable<LibraryManga> {
         // Initialize the variables holding the progress of the updates.
         val count = AtomicInteger(0)
-        val coverCache by injectLazy<CoverCache>()
 
         // Emit each manga and update it sequentially.
         return Observable.from(mangaToUpdate)
@@ -406,7 +412,6 @@ class LibraryUpdateService(
                             .map { networkManga ->
                                 manga.copyFrom(networkManga)
                                 db.insertManga(manga).executeAsBlocking()
-                                coverCache.deleteFromCache(manga.thumbnail_url)
                                 MangaImpl.setLastCoverFetch(manga.id!!, Date().time)
                                 manga
                             }

@@ -493,4 +493,8 @@ class Downloader(
         return queue.none { it.status <= Download.DOWNLOADING }
     }
 
+    companion object {
+        const val TMP_DIR_SUFFIX = "_tmp"
+    }
+
 }

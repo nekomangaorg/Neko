@@ -132,6 +132,16 @@ class DownloadProvider(private val context: Context) {
         cache.renew()
     }
 
+    fun renameMangaFolder(from: String, to: String, sourceId: Long) {
+        val sourceManager by injectLazy<SourceManager>()
+        val source = sourceManager.get(sourceId) ?: return
+        val sourceDir = findSourceDir(source)
+        val mangaDir = sourceDir?.findFile(DiskUtil.buildValidFilename(from))
+        mangaDir?.renameTo(to)
+        val cache = DownloadCache(context, this, sourceManager)
+        cache.renameFolder(from, to, sourceId)
+    }
+
     /**
      * Returns a list of all files in manga directory
      *
