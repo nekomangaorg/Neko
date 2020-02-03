@@ -31,7 +31,7 @@ import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.SourceNotFoundException
 import eu.kanade.tachiyomi.util.chop
-import eu.kanade.tachiyomi.util.getUriCompat
+import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.isServiceRunning
 import eu.kanade.tachiyomi.util.notificationManager
 import kotlinx.coroutines.CoroutineExceptionHandler

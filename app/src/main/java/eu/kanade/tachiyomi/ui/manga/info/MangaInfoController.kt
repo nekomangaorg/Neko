@@ -62,7 +62,7 @@ import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.doOnApplyWindowInsets
-import eu.kanade.tachiyomi.util.getUriCompat
+import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.marginBottom
 import eu.kanade.tachiyomi.util.snack
 import eu.kanade.tachiyomi.util.toast
