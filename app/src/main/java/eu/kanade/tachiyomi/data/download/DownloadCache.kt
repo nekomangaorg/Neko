@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.util.DiskUtil
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.io.File
 import java.util.concurrent.TimeUnit
 
 /**
@@ -124,7 +125,7 @@ class DownloadCache(
     /**
      * Renews the downloads cache.
      */
-    fun renew() {
+    private fun renew() {
         val onlineSources = sourceManager.getOnlineSources()
 
         val sourceDirs = rootDir.dir.listFiles()
@@ -234,14 +235,13 @@ class DownloadCache(
         val sourceDir = rootDir.files[source] ?: return
         val list = sourceDir.files.toMutableMap()
         val mangaFiles = sourceDir.files[DiskUtil.buildValidFilename(from)] ?: return
-        val newDir = MangaDirectory(
-            UniFile.fromUri(
-                context, Uri.parse(sourceDir.dir.filePath + "/" + DiskUtil.buildValidFilename(to))
-            )
-        )
+        val newFile = UniFile.fromFile(File(sourceDir.dir.filePath + "/" + DiskUtil
+            .buildValidFilename(to))) ?: return
+        val newDir = MangaDirectory(newFile)
         newDir.files = mangaFiles.files
         list.remove(DiskUtil.buildValidFilename(from))
         list[to] = newDir
+        sourceDir.files = list
     }
 
 

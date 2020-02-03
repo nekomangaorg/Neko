@@ -128,8 +128,6 @@ class DownloadProvider(private val context: Context) {
                 }
             }
         }
-        val cache = DownloadCache(context, this, sourceManager)
-        cache.renew()
     }
 
     fun renameMangaFolder(from: String, to: String, sourceId: Long) {
@@ -138,8 +136,8 @@ class DownloadProvider(private val context: Context) {
         val sourceDir = findSourceDir(source)
         val mangaDir = sourceDir?.findFile(DiskUtil.buildValidFilename(from))
         mangaDir?.renameTo(to)
-        val cache = DownloadCache(context, this, sourceManager)
-        cache.renameFolder(from, to, sourceId)
+        val downloadManager:DownloadManager by injectLazy()
+        downloadManager.renameCache(from, to, sourceId)
     }
 
     /**

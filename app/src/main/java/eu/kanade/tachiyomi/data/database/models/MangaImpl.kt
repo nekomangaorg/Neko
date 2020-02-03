@@ -1,9 +1,12 @@
 package eu.kanade.tachiyomi.data.database.models
 
+import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadProvider
 import eu.kanade.tachiyomi.source.model.SManga
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
+import uy.kohesive.injekt.injectLazy
+import kotlin.collections.MutableMap
+import kotlin.collections.mutableMapOf
+import kotlin.collections.set
 
 open class MangaImpl : Manga {
 
@@ -48,7 +51,9 @@ open class MangaImpl : Manga {
                 val trueTitle = other.title
                 "${customTitle}${SManga.splitter}${trueTitle}"
             } else other.title
-            Injekt.get<DownloadProvider>().renameMangaFolder(oldTitle, title, source)
+            val db:DownloadManager by injectLazy()
+            val provider = DownloadProvider(db.context)
+            provider.renameMangaFolder(oldTitle, title, source)
         }
         super.copyFrom(other)
     }
