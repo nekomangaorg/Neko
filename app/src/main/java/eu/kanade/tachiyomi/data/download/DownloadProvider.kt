@@ -136,8 +136,8 @@ class DownloadProvider(private val context: Context) {
         val sourceDir = findSourceDir(source)
         val mangaDir = sourceDir?.findFile(DiskUtil.buildValidFilename(from))
         mangaDir?.renameTo(to)
-        val downloadManager:DownloadManager by injectLazy()
-        downloadManager.renameCache(from, to, sourceId)
+       // val downloadManager:DownloadManager by injectLazy()
+       // downloadManager.renameCache(from, to, sourceId)
     }
 
     /**

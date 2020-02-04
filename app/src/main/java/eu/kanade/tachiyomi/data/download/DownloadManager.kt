@@ -182,9 +182,9 @@ class DownloadManager(val context: Context) {
         return cache.getDownloadCount(manga)
     }
 
-    fun renameCache(from: String, to: String, source: Long) {
+    /*fun renameCache(from: String, to: String, source: Long) {
         cache.renameFolder(from, to, source)
-    }
+    }*/
 
     /**
      * Calls delete chapter, which deletes temp downloads

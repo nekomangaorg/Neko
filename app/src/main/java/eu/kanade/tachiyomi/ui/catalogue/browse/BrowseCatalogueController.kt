@@ -558,6 +558,9 @@ open class BrowseCatalogueController(bundle: Bundle) :
                 presenter.moveMangaToCategory(manga, null)
             else -> {
                 val ids = presenter.getMangaCategoryIds(manga)
+                if (ids.isNullOrEmpty()) {
+                    presenter.moveMangaToCategory(manga, null)
+                }
                 val preselected = ids.mapNotNull { id ->
                     categories.indexOfFirst { it.id == id }.takeIf { it != -1 }
                 }.toTypedArray()
