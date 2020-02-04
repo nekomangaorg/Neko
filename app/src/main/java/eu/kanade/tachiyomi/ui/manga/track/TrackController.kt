@@ -5,15 +5,21 @@ import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.jakewharton.rxbinding.support.v4.widget.refreshes
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
+import eu.kanade.tachiyomi.ui.main.SearchActivity
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.util.system.toast
-import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
+import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsAlwaysListener
 import kotlinx.android.synthetic.main.track_controller.*
 import timber.log.Timber
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 
 class TrackController : NucleusController<TrackPresenter>(),
         TrackAdapter.OnClickListener,
@@ -42,9 +48,11 @@ class TrackController : NucleusController<TrackPresenter>(),
 
         adapter = TrackAdapter(this)
         with(view) {
-            track_recycler.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
+            track_recycler.layoutManager = LinearLayoutManager(context)
             track_recycler.adapter = adapter
-            track_recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
+            if (activity is SearchActivity ||
+                !Injekt.get<PreferencesHelper>().useBottonNav().getOrDefault())
+            track_recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsAlwaysListener)
             swipe_refresh.isEnabled = false
             swipe_refresh.refreshes().subscribeUntilDestroy { presenter.refresh() }
         }

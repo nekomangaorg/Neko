@@ -8,7 +8,6 @@ import androidx.preference.PreferenceManager
 import com.f2prateek.rx.preferences.Preference
 import com.f2prateek.rx.preferences.RxSharedPreferences
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.source.Source
 import java.io.File
@@ -231,6 +230,8 @@ class PreferencesHelper(val context: Context) {
     fun refreshCoversToo() = rxPrefs.getBoolean(Keys.refreshCoversToo, true)
 
     fun extensionUpdatesCount() = rxPrefs.getInteger("ext_updates_count", 0)
+
+    fun useBottonNav() = rxPrefs.getBoolean(Keys.useBottomNav, true)
 
     fun lastExtCheck() = rxPrefs.getLong("last_ext_check", 0)
 

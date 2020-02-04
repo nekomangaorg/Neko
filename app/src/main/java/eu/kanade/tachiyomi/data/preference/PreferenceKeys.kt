@@ -135,6 +135,8 @@ object PreferenceKeys {
 
     const val refreshCoversToo = "refresh_covers_too"
 
+    const val useBottomNav = "use_bottom_nav"
+
     @Deprecated("Use the preferences of the source")
     fun sourceUsername(sourceId: Long) = "pref_source_username_$sourceId"
 

@@ -279,11 +279,12 @@ class LibraryController(
           View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
         val statusScrim = view.findViewById(R.id.status_bar_scrim) as View
         statusScrim.setOnApplyWindowInsetsListener(HeightTopWindowInsetsListener)
-        view.doOnApplyWindowInsets { _, insets, _ ->
+        view.setOnApplyWindowInsetsListener { _, insets ->
             view.recycler.updatePaddingRelative(
                 bottom = view.recycler.marginBottom + insets.systemWindowInsetBottom,
                 top = view.recycler.marginTop + insets.systemWindowInsetTop
             )
+            insets
         }
         return view
     }

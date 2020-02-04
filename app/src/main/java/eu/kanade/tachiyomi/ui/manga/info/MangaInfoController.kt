@@ -60,6 +60,7 @@ import eu.kanade.tachiyomi.ui.catalogue.global_search.CatalogueSearchController
 import eu.kanade.tachiyomi.ui.library.ChangeMangaCategoriesDialog
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.main.MainActivity
+import eu.kanade.tachiyomi.ui.main.SearchActivity
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
@@ -74,6 +75,8 @@ import jp.wasabeef.glide.transformations.MaskTransformation
 import kotlinx.android.synthetic.main.manga_info_controller.*
 import kotlinx.android.synthetic.main.manga_info_controller.manga_cover
 import kotlinx.android.synthetic.main.manga_info_controller.manga_genres_tags
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 import java.io.File
 import java.text.DateFormat
@@ -195,7 +198,10 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         val fabBaseMarginBottom = fab_favorite.marginBottom
         val mangaCoverMarginBottom = manga_cover.marginBottom
         val fullMarginBottom = manga_cover_full?.marginBottom ?: 0
-        container?.doOnApplyWindowInsets { v, insets, padding ->
+        container?.setOnApplyWindowInsetsListener { _, insets ->
+            if (activity !is SearchActivity &&
+                Injekt.get<PreferencesHelper>().useBottonNav().getOrDefault())
+                return@setOnApplyWindowInsetsListener insets
             if (resources?.configuration?.orientation == Configuration.ORIENTATION_LANDSCAPE) {
                 fab_favorite?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                     bottomMargin = fabBaseMarginBottom + insets.systemWindowInsetBottom
@@ -203,8 +209,7 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
                 manga_cover?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                     bottomMargin = mangaCoverMarginBottom + insets.systemWindowInsetBottom
                 }
-            }
-            else {
+            } else {
                 manga_genres_tags?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                     bottomMargin = bottomM + insets.systemWindowInsetBottom
                 }
@@ -213,6 +218,7 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
                 bottomMargin = fullMarginBottom + insets.systemWindowInsetBottom
             }
             setFullCoverToThumb()
+            insets
         }
         info_scrollview.doOnApplyWindowInsets { v, insets, padding ->
             if (resources?.configuration?.orientation == Configuration.ORIENTATION_LANDSCAPE) {

@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.main
 
+import android.animation.ObjectAnimator
 import android.app.SearchManager
 import android.content.Intent
 import android.content.res.Configuration
@@ -154,6 +155,7 @@ open class MainActivity : BaseActivity() {
                         openInBrowser(URL_HELP)
                     }
                 }
+                //navigationView.selectedItemId = id
             }
             drawer.closeDrawer(GravityCompat.START)
             true
@@ -183,57 +185,60 @@ open class MainActivity : BaseActivity() {
                         openInBrowser(URL_HELP)
                     }
                 }
+                nav_view.setCheckedItem(id)
             }
             true
         }
         val container: ViewGroup = findViewById(R.id.controller_container)
 
         val content: ViewGroup = findViewById(R.id.main_content)
-        container.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
+        val drawerEnabled = !preferences.useBottonNav().getOrDefault()
+        content.fitsSystemWindows = drawerEnabled
+        if (drawerEnabled) {
+            container.systemUiVisibility =
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+        }
+        content.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
             View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
             View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-        content.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
-          View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
-          View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
         nav_view.doOnApplyWindowInsets { v, _, _ ->
             v.updatePaddingRelative(
                 bottom = v.marginBottom,
                 top = v.marginTop
             )
         }
+        navigationView.visibility = if (drawerEnabled) View.GONE else View.VISIBLE
         content.setOnApplyWindowInsetsListener { v, insets ->
             window.navigationBarColor =
-            // if the os does not support light nav bar and is portrait, draw a dark translucent
-            // nav bar
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-                    (v.rootWindowInsets.systemWindowInsetLeft > 0 ||
-                        v.rootWindowInsets.systemWindowInsetRight > 0))
-                    // For lollipop, draw opaque nav bar
-                    Color.BLACK
-                else Color.argb(179, 0, 0, 0)
-            }
-            // if the android q+ device has gesture nav, transparent nav bar
-            else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
-                && (v.rootWindowInsets.systemWindowInsetBottom != v.rootWindowInsets
-                .tappableElementInsets.bottom)) {
-                getColor(android.R.color.transparent)
-            }
-            // if in landscape with 2/3 button mode, fully opaque nav bar
-            else {/*if (v.rootWindowInsets.systemWindowInsetLeft > 0
-                || v.rootWindowInsets.systemWindowInsetRight > 0) {*/
-                getResourceColor(android.R.attr.colorPrimary)
-            }
-            // if in portrait with 2/3 button mode, translucent nav bar
-           /* else {
-                ColorUtils.setAlphaComponent(
-                    getResourceColor(android.R.attr.colorPrimary), 179)
-            }*/
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+                        (v.rootWindowInsets.systemWindowInsetLeft > 0 ||
+                            v.rootWindowInsets.systemWindowInsetRight > 0))
+                        // For lollipop, draw opaque nav bar
+                        Color.BLACK
+                    else Color.argb(179, 0, 0, 0)
+                }
+                // if the android q+ device has gesture nav, transparent nav bar
+                else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
+                    && (v.rootWindowInsets.systemWindowInsetBottom != v.rootWindowInsets
+                    .tappableElementInsets.bottom)) {
+                    getColor(android.R.color.transparent)
+                }
+                // if in landscape with 2/3 button mode, fully opaque nav bar
+                else if (v.rootWindowInsets.systemWindowInsetLeft > 0
+                    || v.rootWindowInsets.systemWindowInsetRight > 0) {
+                    getResourceColor(
+                        if (drawerEnabled) android.R.attr.colorBackground
+                        else android.R.attr.colorPrimary)
+                }
+                // if in portrait with 2/3 button mode, translucent nav bar
+                else {
+                    ColorUtils.setAlphaComponent(
+                        getResourceColor(if (drawerEnabled) android.R.attr.colorBackground
+                        else android.R.attr.colorPrimary), 179)
+                }
             v.setPadding(insets.systemWindowInsetLeft, insets.systemWindowInsetTop,
                 insets.systemWindowInsetRight, 0)
-            view_offset.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                height = insets.systemWindowInsetBottom
-            }
             insets
         }
         val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
@@ -247,6 +252,7 @@ open class MainActivity : BaseActivity() {
             content.systemUiVisibility = content.systemUiVisibility.or(View
                 .SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
 
+        val navBarScrim: View = findViewById(R.id.nav_bar_scrim)
         val drawerContainer: FrameLayout = findViewById(R.id.drawer_container)
         drawerContainer.setOnApplyWindowInsetsListener { v, insets ->
             val contextView = window?.decorView?.findViewById<View>(R.id.action_mode_bar)
@@ -260,6 +266,9 @@ open class MainActivity : BaseActivity() {
                 left = insets.systemWindowInsetLeft,
                 right = insets.systemWindowInsetRight
             )
+            nav_bar_scrim.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                height = if (!drawerEnabled) insets.systemWindowInsetBottom else 0
+            }
             insets.replaceSystemWindowInsets(
                 0, insets.systemWindowInsetTop,
                 0, insets.systemWindowInsetBottom
@@ -337,7 +346,10 @@ open class MainActivity : BaseActivity() {
         if (updates > 0) {
             extUpdateText.text = updates.toString()
             extUpdateText.visible()
-            navigationView.getOrCreateBadge(R.id.nav_drawer_settings).number = updates
+            val badge = navigationView.getOrCreateBadge(R.id.nav_drawer_settings)
+            badge.number = updates
+            badge.backgroundColor = getResourceColor(R.attr.colorAccent)
+            badge.badgeTextColor = Color.WHITE
         }
         else {
             extUpdateText.text = null
@@ -446,9 +458,11 @@ open class MainActivity : BaseActivity() {
         val backstackSize = router.backstackSize
         if (drawer.isDrawerOpen(GravityCompat.START) || drawer.isDrawerOpen(GravityCompat.END)) {
             drawer.closeDrawers()
-        //} else if (backstackSize == 1 && router.getControllerWithTag("$startScreenId") == null) {
-           // setSelectedDrawerItem(startScreenId)
-        } else if (!router.handleBack()) {
+        } else if (!preferences.useBottonNav().getOrDefault()
+            && backstackSize == 1 && router.getControllerWithTag
+                ("$startScreenId") == null) {
+            setSelectedDrawerItem(startScreenId)
+        }  else if (!router.handleBack()) {
             unlocked = false
             super.onBackPressed()
         }
@@ -538,18 +552,23 @@ open class MainActivity : BaseActivity() {
         if (from is DialogController || to is DialogController) {
             return
         }
+        val drawerEnabled = !preferences.useBottonNav().getOrDefault()
 
         val showHamburger = router.backstackSize == 1
         drawer.setDrawerLockMode(androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
         if (showHamburger) {
-            toolbar.navigationIcon = null
-            //drawer.setDrawerLockMode(androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_UNLOCKED)
+            if (drawerEnabled)
+                drawer.setDrawerLockMode(androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_UNLOCKED)
+            else toolbar.navigationIcon = null
         } else {
-            toolbar.navigationIcon = drawerArrow
-           // drawer.setDrawerLockMode(androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
+            if (drawerEnabled) drawer.setDrawerLockMode(
+                androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_LOCKED_CLOSED
+            )
+            else toolbar.navigationIcon = drawerArrow
         }
-        drawerArrow?.progress = 1f
-        //ObjectAnimator.ofFloat(drawerArrow, "alpha", if (showHamburger) 0f else 1f).start()
+        if (drawerEnabled)
+            ObjectAnimator.ofFloat(drawerArrow, "progress", if (showHamburger) 0f else 1f).start()
+        else drawerArrow?.progress = 1f
 
         if (from is TabbedController) {
             from.cleanupTabs(tabs)

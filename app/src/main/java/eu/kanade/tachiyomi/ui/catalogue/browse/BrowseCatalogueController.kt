@@ -36,7 +36,6 @@ import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
-import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.inflate
 import eu.kanade.tachiyomi.util.view.marginTop
@@ -45,6 +44,7 @@ import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.util.system.connectivityManager
+import eu.kanade.tachiyomi.util.view.marginBottom
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import kotlinx.android.synthetic.main.catalogue_controller.*
 import kotlinx.android.synthetic.main.main_activity.*
@@ -191,14 +191,15 @@ open class BrowseCatalogueController(bundle: Bundle) :
         statusScrim.setOnApplyWindowInsetsListener(HeightTopWindowInsetsListener)
         val titleView = navView.findViewById(R.id.title_background) as View
         val titleMarginTop = titleView.marginTop
-        navView.doOnApplyWindowInsets { v, insets, padding ->
-            v.updatePaddingRelative(
-                bottom = padding.bottom + insets.systemWindowInsetBottom,
-                end = padding.right + insets.systemWindowInsetRight
+        navView.setOnApplyWindowInsetsListener { v, insets ->
+            navView.recycler.updatePaddingRelative(
+                bottom = navView.recycler.marginBottom + insets.systemWindowInsetBottom,
+                top = navView.recycler.marginTop + insets.systemWindowInsetTop
             )
             titleView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 topMargin = titleMarginTop + insets.systemWindowInsetTop
             }
+            insets
         }
         return navView
     }

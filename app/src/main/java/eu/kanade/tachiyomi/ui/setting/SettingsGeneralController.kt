@@ -8,6 +8,8 @@ import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.updater.UpdaterJob
 import eu.kanade.tachiyomi.widget.preference.IntListMatPreference
 import eu.kanade.tachiyomi.util.system.LocaleHelper
+import eu.kanade.tachiyomi.ui.main.MainActivity
+import kotlinx.android.synthetic.main.main_activity.*
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 
 class SettingsGeneralController : SettingsController() {
@@ -56,6 +58,20 @@ class SettingsGeneralController : SettingsController() {
                 true
             }
         }
+
+        switchPreference {
+            key = Keys.useBottomNav
+            titleRes = R.string.use_bottom_nav
+            defaultValue = true
+            onChange {
+                activity?.recreate()
+                if (it as Boolean) {
+                    (activity as MainActivity).navigationView.selectedItemId = R.id.nav_drawer_settings
+                }
+                true
+            }
+        }
+
         listPreference(activity) {
             key= Keys.dateFormat
             titleRes = R.string.pref_date_format
@@ -70,6 +86,7 @@ class SettingsGeneralController : SettingsController() {
             defaultValue = ""
             summary = "%s"
         }
+
         intListPreference(activity) {
             key = Keys.startScreen
             titleRes = R.string.pref_start_screen

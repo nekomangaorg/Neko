@@ -6,10 +6,13 @@ import android.view.MenuItem
 import androidx.preference.PreferenceScreen
 import com.bluelinelabs.conductor.Controller
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.extension.ExtensionController
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.openInBrowser
+import uy.kohesive.injekt.injectLazy
 
 class SettingsMainController : SettingsController() {
 
@@ -22,10 +25,12 @@ class SettingsMainController : SettingsController() {
 
         val tintColor = context.getResourceColor(R.attr.colorAccent)
 
+        val prefs:PreferencesHelper by injectLazy()
         extensionPreference {
             iconRes = R.drawable.ic_extension_black_24dp
             iconTint = tintColor
             titleRes = R.string.label_extensions
+            isVisible = prefs.useBottonNav().getOrDefault()
             onClick { navigateTo(ExtensionController()) }
         }
 

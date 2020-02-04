@@ -22,8 +22,10 @@ import com.google.android.material.snackbar.Snackbar
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.data.preference.getOrDefault
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import uy.kohesive.injekt.injectLazy
 import kotlin.math.min
 
 /**
@@ -44,7 +46,7 @@ fun View.getCoordinates() = Point((left + right) / 2, (top + bottom) / 2)
 fun View.snack(message: String, length: Int = Snackbar.LENGTH_SHORT, f: (Snackbar.() ->
 Unit)? = null): Snackbar {
     val snack = Snackbar.make(this, message, length)
-    val theme =Injekt.get<PreferencesHelper>().theme()
+    val theme = Injekt.get<PreferencesHelper>().theme()
     if (theme == 3 || theme == 6) {
         val textView: TextView =
             snack.view.findViewById(com.google.android.material.R.id.snackbar_text)
@@ -147,6 +149,16 @@ inline val View.marginLeft: Int
 
 object RecyclerWindowInsetsListener : View.OnApplyWindowInsetsListener {
     override fun onApplyWindowInsets(v: View, insets: WindowInsets): WindowInsets {
+        val prefs:PreferencesHelper by injectLazy()
+        if (prefs.useBottonNav().getOrDefault()) return insets
+        v.setPadding(0,0,0,insets.systemWindowInsetBottom)
+        //v.updatePaddingRelative(bottom = v.paddingBottom + insets.systemWindowInsetBottom)
+        return insets
+    }
+}
+
+object RecyclerWindowInsetsAlwaysListener : View.OnApplyWindowInsetsListener {
+    override fun onApplyWindowInsets(v: View, insets: WindowInsets): WindowInsets {
         v.setPadding(0,0,0,insets.systemWindowInsetBottom)
         //v.updatePaddingRelative(bottom = v.paddingBottom + insets.systemWindowInsetBottom)
         return insets
@@ -155,6 +167,8 @@ object RecyclerWindowInsetsListener : View.OnApplyWindowInsetsListener {
 
 fun View.doOnApplyWindowInsets(f: (View, WindowInsets, ViewPaddingState) -> Unit) {
     // Create a snapshot of the view's padding state
+    val prefs:PreferencesHelper by injectLazy()
+    if (prefs.useBottonNav().getOrDefault()) return
     val paddingState = createStateForView(this)
     setOnApplyWindowInsetsListener { v, insets ->
         f(v, insets, paddingState)

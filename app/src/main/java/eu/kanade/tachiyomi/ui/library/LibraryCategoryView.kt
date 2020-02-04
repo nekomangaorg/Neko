@@ -104,7 +104,7 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
         recycler.doOnApplyWindowInsets { v, insets, padding ->
             v.updatePaddingRelative(bottom = padding.bottom + insets.systemWindowInsetBottom)
 
-            fast_scroller?.updateLayoutParams<ViewGroup.MarginLayoutParams>  {
+            fast_scroller?.updateLayoutParams<MarginLayoutParams>  {
                 bottomMargin = insets.systemWindowInsetBottom
             }
         }

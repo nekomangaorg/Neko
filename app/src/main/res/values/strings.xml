@@ -143,6 +143,9 @@
     <string name="pref_language">Language</string>
     <string name="system_default">System default</string>
     <string name="pref_date_format">Date format</string>
+    <string name="pref_enable_automatic_updates">Check for updates</string>
+    <string name="pref_enable_automatic_updates_summary">Automatically check for new app versions</string>
+    <string name="use_bottom_nav">Use bottom navigation</string>
 
       <!-- Library section -->
     <string name="pref_category_library_display">Display</string>
@@ -360,8 +363,6 @@
       <!-- About section -->
     <string name="version">Version</string>
     <string name="build_time">Build time</string>
-    <string name="pref_enable_automatic_updates">Check for updates</string>
-    <string name="pref_enable_automatic_updates_summary">Automatically check for new app versions</string>
     <!-- ACRA -->
     <string name="pref_enable_acra">Send crash reports</string>
     <string name="pref_acra_summary">Helps fix any bugs. No sensitive data will be sent</string>

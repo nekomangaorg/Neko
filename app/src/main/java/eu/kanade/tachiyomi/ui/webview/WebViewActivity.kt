@@ -170,13 +170,14 @@ class WebViewActivity : BaseActivity() {
                 }
             }
             val marginB = webview.marginBottom
-            webview.doOnApplyWindowInsets { v, insets, _ ->
+            webview.setOnApplyWindowInsetsListener { v, insets ->
                 val bottomInset =
                     if (Build.VERSION.SDK_INT >= 29) insets.tappableElementInsets.bottom
                     else insets.systemWindowInsetBottom
                 v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                     bottomMargin = marginB + bottomInset
                 }
+                insets
             }
             webview.settings.javaScriptEnabled = true
             webview.settings.userAgentString = source.headers["User-Agent"]

@@ -29,8 +29,9 @@
             android:id="@+id/recycler"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:paddingBottom="@dimen/fab_list_padding"
             android:clipToPadding="false"
             android:descendantFocusability="blocksDescendants"
             tools:listitem="@layout/chapters_item">
@@ -50,9 +51,8 @@
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
-        style="@style/Theme.Widget.FABFixed"
+        style="@style/Theme.Widget.FAB"
         app:layout_anchor="@id/recycler"
-        app:layout_anchorGravity="bottom|right|end"
         app:srcCompat="@drawable/ic_play_arrow_white_24dp"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
