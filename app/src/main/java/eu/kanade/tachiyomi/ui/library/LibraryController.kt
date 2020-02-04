@@ -440,6 +440,7 @@ class LibraryController(
         val searchView = searchItem.actionView as SearchView
         searchView.queryHint = resources?.getString(R.string.search_hint)
 
+        menu.findItem(R.id.action_downloads).isVisible = preferences.useBottonNav().getOrDefault()
         searchItem.collapseActionView()
         if (!query.isEmpty()) {
             searchItem.expandActionView()
