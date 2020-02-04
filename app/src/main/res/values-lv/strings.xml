@@ -12,12 +12,8 @@
     <string name="label_recent_manga">Nesen izlasīti</string>
     <string name="label_catalogues">Katalogi</string>
     <string name="label_recent_updates">Bibliotēkas atjauninājumi</string>
-    <string name="label_latest_updates">Pēdējie atjauninājumi</string>
-    <string name="label_categories">Kategorijas</string>
     <string name="label_selected">Atlasīts: %1$d</string>
-    <string name="label_backup">Rezerves kopija</string>
 
-    <string name="action_settings">Iestatījumi</string>
     <string name="action_filter">Filtrs</string>
     <string name="action_filter_downloaded">Lejupieladēts</string>
     <string name="action_filter_bookmarked">Ar grāmatzīmēm</string>
@@ -37,7 +33,6 @@
     <string name="action_bookmark">Grāmatzīme</string>
     <string name="action_remove_bookmark">Dzēst grāmatzīmi</string>
     <string name="action_delete">Dzēst</string>
-    <string name="action_update">Atjaunināt</string>
     <string name="action_update_library">Atjaunināt bibliotēku</string>
     <string name="action_edit">Rediģēt</string>
     <string name="action_add">Pievienot</string>
@@ -45,11 +40,6 @@
     <string name="action_edit_categories">Rediģēt kategorijas</string>
     <string name="action_rename_category">Pārdēvēt kategoriju</string>
     <string name="action_move_category">Pārvietot uz kategorijam</string>
-    <string name="action_edit_cover">Mainīt vāka attēlu</string>
-    <string name="action_sort_up">Kārtot augšup</string>
-    <string name="action_sort_down">Kārtot lejup</string>
-    <string name="action_show_downloaded">Lejupieladēti</string>
-    <string name="action_next_unread">Nākamais neizlasīts</string>
     <string name="action_start">Sākt</string>
     <string name="action_stop">Beigt</string>
     <string name="action_pause">Pārtraukt</string>
@@ -75,12 +65,9 @@
     <string name="action_save">Saglabāt</string>
     <string name="action_reset">Sākt no jauna</string>
     <string name="action_undo">atraisīt</string>
-    <string name="action_export">Eksportēt</string>
-    <string name="action_open_log">Atvērt žurnālfailu</string>
     <string name="action_create">Izveidot</string>
     <string name="action_restore">Atjaunot</string>
 
-    <string name="deleting">Dzēsu…</string>
     <string name="loading">Ieladēšana…</string>
 
     <string name="app_not_available">Programma nav pieejama</string>

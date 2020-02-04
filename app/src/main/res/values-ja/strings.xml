@@ -11,11 +11,7 @@
     <string name="label_recent_manga">最近読んだ</string>
     <string name="label_catalogues">カタログ</string>
     <string name="label_recent_updates">ライブラリの更新歴</string>
-    <string name="label_latest_updates">最新漫画本章</string>
-    <string name="label_categories">カテゴリ</string>
     <string name="label_selected">選択: %1$d</string>
-    <string name="label_backup">バックアップ</string>
-    <string name="action_settings">設定</string>
     <string name="action_filter">フィルター</string>
     <string name="action_filter_downloaded">ダウンロードした</string>
     <string name="action_filter_bookmarked">お気に入り</string>
@@ -27,7 +23,6 @@
     <string name="action_sort_last_read">最後に読んだ</string>
     <string name="action_sort_last_updated">最終更新</string>
     <string name="action_search">検索</string>
-    <string name="action_global_search">グローバル検索</string>
     <string name="action_select_all">すべて選択</string>
     <string name="action_download">ダウンロード</string>
     <string name="action_bookmark">ブックマーク</string>
@@ -42,12 +37,10 @@
     <string name="action_mark_as_read">既読にする</string>
     <string name="action_mark_as_unread">未読としてマーク</string>
     <string name="action_delete">削除する</string>
-    <string name="action_update">更新</string>
     <string name="action_update_library">ライブラリを更新する</string>
     <string name="action_edit">編集</string>
     <string name="action_add_category">カテゴリを追加</string>
     <string name="action_edit_categories">カテゴリを編集</string>
-    <string name="action_edit_cover">表紙画像を編集</string>
     <string name="action_start">開始</string>
     <string name="action_pause">一時停止</string>
     <string name="action_clear">クリア</string>
@@ -65,13 +58,8 @@
     <string name="action_share">シェア</string>
     <string name="action_save">保存する</string>
     <string name="action_reset">リセット</string>
-    <string name="action_export">輸出する</string>
-    <string name="action_open_log">ログを開く</string>
     <string name="action_create">作成する</string>
     <string name="action_restore">リストア</string>
-    <string name="action_open">開いた</string>
-    <string name="action_login">ログイン</string>
-    <string name="deleting">削除しています…</string>
     <string name="loading">読み込み中…</string>
     <string name="app_not_available">利用できないアプリケーション</string>
     <string name="pref_category_general">全般</string>
@@ -92,7 +80,6 @@
     <string name="update_24hour">毎日</string>
     <string name="update_48hour">2日ごと</string>
     <string name="update_weekly">毎週</string>
-    <string name="update_monthly">毎月</string>
     <string name="pref_library_update_categories">グローバルアップデートに含まれるカテゴリ</string>
     <string name="all">すべて</string>
     <string name="pref_library_update_restriction">ライブラリ更新制限</string>
@@ -122,8 +109,6 @@
     <string name="ext_trust">トラスト</string>
     <string name="ext_untrusted">信用できない</string>
     <string name="ext_uninstall">アンインストール</string>
-    <string name="ext_preferences">設定</string>
-    <string name="ext_available">利用可能</string>
     <string name="untrusted_extension">信頼できない拡張</string>
     <string name="ext_version_info">バージョン：%1$s</string>
     <string name="ext_language_info">言語： %1$s</string>
@@ -147,7 +132,6 @@
     <string name="vertical_viewer">縦反転</string>
     <string name="webtoon_viewer">Webtoon</string>
     <string name="pager_viewer">ページャ</string>
-    <string name="pref_image_decoder">画像デコーダ</string>
     <string name="pref_image_scale_type">スケールの種類</string>
     <string name="scale_type_fit_screen">フィット画面</string>
     <string name="scale_type_stretch">ストレッチ</string>
@@ -187,11 +171,7 @@
     <string name="pref_backup_service_category">サービス</string>
     <string name="pref_backup_interval">バックアップ頻度</string>
     <string name="pref_backup_slots">最大自動バックアップ</string>
-    <string name="dialog_restoring_backup">バックアップを復元します
-\n%1$s がライブラリに追加されました</string>
-    <string name="source_not_found">ソースが見つかりません</string>
     <string name="backup_created">バックアップが作成されました</string>
-    <string name="error_opening_log">ログをオープンできませんでした</string>
     <string name="pref_clear_chapter_cache">チャプタキャッシュをクリア</string>
     <string name="cache_delete_error">キャッシュの消去中にエラーが発生しました</string>
     <string name="pref_clear_database">データベースをクリア</string>
@@ -213,9 +193,6 @@
     <string name="action_add">追加</string>
     <string name="action_rename_category">カテゴリー名を変更</string>
     <string name="action_move_category">カテゴリーに移動</string>
-    <string name="action_sort_up">昇順に並べ替え</string>
-    <string name="action_sort_down">降順に並べ替え</string>
-    <string name="action_show_downloaded">ダウンロード終了</string>
     <string name="action_stop">停止</string>
     <string name="action_remove">削除</string>
     <string name="action_install">インストール</string>

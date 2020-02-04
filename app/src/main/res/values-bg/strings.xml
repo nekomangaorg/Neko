@@ -8,12 +8,8 @@
     <string name="label_recent_manga">Наскоро прочетени</string>
     <string name="label_catalogues">Каталози</string>
     <string name="label_recent_updates">Наскоро обновени</string>
-    <string name="label_latest_updates">Последни обновления</string>
-    <string name="label_categories">Категории</string>
     <string name="label_selected">Избрани: %1$d</string>
-    <string name="label_backup">Резервно копие</string>
     <!-- Actions -->
-    <string name="action_settings">Настройки</string>
     <string name="action_filter">Филтрирай</string>
     <string name="action_filter_downloaded">Изтеглени</string>
     <string name="action_filter_bookmarked">Отбелязани</string>
@@ -32,7 +28,6 @@
     <string name="action_bookmark">Отметни</string>
     <string name="action_remove_bookmark">Премахни отметката</string>
     <string name="action_delete">Изтрий</string>
-    <string name="action_update">Обнови</string>
     <string name="action_update_library">Обнови библиотеката</string>
     <string name="action_edit">Редактирай</string>
     <string name="action_add">Добави</string>
@@ -40,11 +35,6 @@
     <string name="action_edit_categories">Редактирай категории</string>
     <string name="action_rename_category">Преименувай категория</string>
     <string name="action_move_category">Премести в категории</string>
-    <string name="action_edit_cover">Смени корицата</string>
-    <string name="action_sort_up">Сортирай по възходящ ред</string>
-    <string name="action_sort_down">Сортирай по низходящ ред</string>
-    <string name="action_show_downloaded">Изтеглени</string>
-    <string name="action_next_unread">Следваща непрочетена</string>
     <string name="action_start">Започни</string>
     <string name="action_stop">Спри</string>
     <string name="action_pause">Паузирай</string>
@@ -69,7 +59,6 @@
     <string name="action_reset">Изчисти</string>
     <string name="action_undo">Върни</string>
     <!-- Operations -->
-    <string name="deleting">Изтриване…</string>
     <string name="loading">Зареждане…</string>
     <!-- Preferences -->
     <!-- Subsections -->
@@ -115,7 +104,6 @@
     <string name="system_default">По подразбиране</string>
     <!-- Reader section -->
     <string name="pref_fullscreen">Цял екран</string>
-    <string name="pref_lock_orientation">Заключи ориентацията</string>
     <string name="pref_page_transitions">Преходи</string>
     <string name="pref_show_page_number">Номер на страница</string>
     <string name="pref_custom_brightness">Персонализирана яркост</string>
@@ -133,7 +121,6 @@
     <string name="right_to_left_viewer">От дясно наляво</string>
     <string name="vertical_viewer">Вертикално</string>
     <string name="webtoon_viewer">Уебкомикс</string>
-    <string name="pref_image_decoder">Декодер на изображенията</string>
     <string name="pref_image_scale_type">Увеличение</string>
     <string name="scale_type_fit_screen">Запълване</string>
     <string name="scale_type_stretch">Разтегляне</string>
@@ -173,11 +160,9 @@
     <!-- Advanced section -->
     <string name="pref_clear_chapter_cache">Изчисти кеша на главите</string>
     <string name="used_cache">Използвани: %1$s</string>
-    <string name="cache_deleted">Кеш изчистен. %1$d файла бяха изчистени</string>
     <string name="cache_delete_error">Възникна грешка при изчистването на кеша</string>
     <string name="pref_clear_cookies">Изчисти бисквитки</string>
     <string name="cookies_cleared">Бисквитки изчистени</string>
-    <string name="choices_reset">Рестартирай диалогичните избори</string>
     <string name="pref_clear_database">Изчисти базата данни</string>
     <string name="pref_clear_database_summary">Изтрий манга и глави, които не са в библиотеката ми</string>
     <string name="clear_database_confirmation">Сигурни ли сте\? Прочетените глави и напредъкът на манги, които не са в библиотеката Ви, ще бъдат изгубени</string>
@@ -202,13 +187,8 @@
     <string name="invalid_login">Получи се грешка при влизане</string>
     <string name="unknown_error">Неизвестна грешка</string>
     <!-- Library fragment -->
-    <string name="library_search_hint">Заглавие или автор…</string>
     <string name="updating_category">Обновяване на категорията</string>
-    <string name="confirm_delete_manga">Сигурни ли сте, че желаете да премахнете избраната манга?</string>
     <!-- Catalogue fragment -->
-    <string name="source_requires_login">Източникът изисква от вас да въведете име и парола</string>
-    <string name="select_source">Изберете източник</string>
-    <string name="no_valid_sources">Моля, изберете поне един валиден източник</string>
     <string name="no_more_results">Няма повече резултати</string>
     <!-- Manga activity -->
     <string name="manga_not_in_db">Тази манга беше премахната от базата данни!</string>
@@ -218,30 +198,24 @@
     <string name="ongoing">Излизаща</string>
     <string name="unknown">Неизвестно</string>
     <string name="licensed">Лицензирана</string>
-    <string name="remove_from_library">Премахни от библиотеката</string>
     <string name="manga_info_author_label">Автор</string>
     <string name="manga_info_artist_label">Артист</string>
-    <string name="manga_info_chapters_label">Глави</string>
     <string name="manga_info_status_label">Статус</string>
     <string name="manga_info_source_label">Източник</string>
-    <string name="manga_info_genres_label">Жанрове</string>
     <string name="circular_icon">Кръгла икона</string>
     <string name="rounded_icon">Заоблена икона</string>
     <string name="square_icon">Квадратна икона</string>
     <string name="star_icon">Звездоподобна икона</string>
-    <string name="shortcut_title">Име на пряк път</string>
     <string name="icon_shape">Форма на икона</string>
     <string name="icon_creation_fail">Пряк път не можа да бъде създаден!</string>
     <!-- Manga chapters fragment -->
     <string name="manga_chapters_tab">Глави</string>
-    <string name="manga_chapter_no_title">Неозаглавена</string>
     <string name="display_mode_chapter">Глава %1$s</string>
     <string name="chapter_downloaded">Изтеглена</string>
     <string name="chapter_queued">На изчакване</string>
     <string name="chapter_downloading">Изтегляне</string>
     <string name="chapter_downloading_progress">Изтегляне (%1$d/%2$d)</string>
     <string name="chapter_error">Грешка</string>
-    <string name="fetch_chapters_error">Възникна грешка при показването на главите</string>
     <string name="show_title">Покажи заглавие</string>
     <string name="show_chapter_number">Показвай номера на главата</string>
     <string name="sorting_mode">Сортиране</string>
@@ -275,21 +249,14 @@
     <string name="snack_add_to_library">Добавяне на мангата към библиотеката\?</string>
     <!-- Image notifier -->
     <string name="picture_saved">Изображението запазено</string>
-    <string name="saving_picture">Запазване на изображението</string>
     <string name="options">Опции</string>
     <!-- Reader activity -->
     <string name="custom_filter">Персонализиран филтър</string>
     <string name="set_as_cover">Постави за корица</string>
     <string name="cover_updated">Корицата обновена</string>
-    <string name="page_downloaded">Страницата копирана на %1$s</string>
-    <string name="downloading">Изтегляне…</string>
-    <string name="download_progress">Изтеглени %1$d%%</string>
     <string name="chapter_progress">Страница: %1$d</string>
-    <string name="chapter_subtitle">Глава %1$s</string>
     <string name="no_next_chapter">Не беше намерена следваща глава</string>
-    <string name="no_previous_chapter">Не беше намерена предишна глава</string>
     <string name="decode_image_error">Неуспешно декодиране на изображението</string>
-    <string name="confirm_update_manga_sync">Обнови последната прочетена глава в %1$d?</string>
     <string name="confirm_set_image_as_cover">Желаете ли да използвате това изображение за корица?</string>
     <string name="viewer_for_this_series">Начин на четене за тази поредица</string>
     <!-- Backup fragment -->
@@ -299,33 +266,24 @@
     <!-- Downloads activity and service -->
     <string name="download_queue_error">Получи се грешка при изтеглянето на главите. Може да опитате пак в секцията на изтеглянията</string>
     <!-- Library update service notifications -->
-    <string name="notification_update_progress">Напредък на обновяването: %1$d/%2$d</string>
     <string name="notification_new_chapters">Нови глави</string>
     <string name="notification_cover_update_failed">Грешка при обновяването на корицата</string>
     <string name="notification_first_add_to_library">Моля, добавете мангата в библиотеката си, преди да направите това</string>
-    <string name="notification_not_connected_to_ac_title">Синхронизиране отменено</string>
-    <string name="notification_not_connected_to_ac_body">Няма връзка към зарядно устройство</string>
-    <string name="notification_no_connection_title">Синхронизиране отменено</string>
-    <string name="notification_no_connection_body">Няма налична връзка</string>
     <!-- File Picker Titles -->
     <string name="file_select_cover">Изберете корица</string>
     <string name="file_select_backup">Изберете резервно копие</string>
-    <string name="file_select_icon">Изберете икона за пряк път</string>
     <!--UpdateCheck-->
     <string name="update_check_title">Достъпна е нова актуализация!</string>
     <string name="update_check_confirm">Изтегли</string>
     <string name="update_check_ignore">Игнорирай</string>
     <string name="update_check_no_new_updates">Няма налични актуализации</string>
-    <string name="update_check_download_started">Изтеглянето започна</string>
     <string name="update_check_look_for_updates">Търсене на актуализации</string>
     <!--UpdateCheck Notifications-->
-    <string name="update_check_notification_file_download">Изтегли актуализацията</string>
     <string name="update_check_notification_download_in_progress">Изтегля се</string>
     <string name="update_check_notification_download_complete">Изтегляне завършено</string>
     <string name="update_check_notification_download_error">Грешка при изтегляне</string>
     <string name="update_check_notification_update_available">Налична актуализация</string>
     <!--Content Description-->
-    <string name="description_backdrop">Фон на мангата</string>
     <string name="description_cover">Корица</string>
     <!-- Information Text -->
     <string name="information_no_downloads">Нямате изтегляния</string>
@@ -336,8 +294,6 @@
     <string name="download_notifier_downloader_title">Изтегли</string>
     <string name="download_notifier_title_error">Грешка</string>
     <string name="download_notifier_unkown_error">Имаше неочаквана грешка при изтеглянето на главата</string>
-    <string name="download_notifier_page_error">Липсва страница в директорията</string>
-    <string name="download_notifier_page_ready_error">Някоя страница не е заредена</string>
     <string name="download_notifier_text_only_wifi">Няма налична Wi-Fi връзка</string>
     <string name="download_notifier_no_network">Няма налична мрежова връзка</string>
     <string name="categories">Категории</string>
@@ -347,14 +303,11 @@
     <string name="action_sort_total">Общ брой глави</string>
     <string name="action_close">Затвори</string>
     <string name="action_move">Премести</string>
-    <string name="action_export">Експортирай</string>
-    <string name="action_open_log">Отвори лога</string>
     <string name="action_create">Създай</string>
     <string name="action_restore">Възстанови</string>
     <string name="app_not_available">Приложението не е достъпно</string>
     <string name="short_recent_updates">Обновления</string>
     <string name="update_weekly">Ежеседмично</string>
-    <string name="update_monthly">Ежемесечно</string>
     <string name="default_category">Категория по подразбиране</string>
     <string name="default_category_summary">Питай всеки път</string>
     <string name="pref_crop_borders">Изрязвай границите</string>
@@ -368,42 +321,26 @@
     <string name="pref_backup_service_category">Обслужване</string>
     <string name="pref_backup_interval">Честота на запазване</string>
     <string name="pref_backup_slots">Максимален брой автоматични запазвания</string>
-    <string name="dialog_restoring_backup">Възстановяване от копие 
-\n%1$s добавено към библиотеката</string>
-    <string name="source_not_found">Не беше намерен източник</string>
-    <string name="dialog_restoring_source_not_found">Възстановяване от копие
-\nЗа %1$s не беше намерен източник</string>
     <string name="backup_created">Резервно копие създадено</string>
     <string name="restore_completed">Възстановяването завършено</string>
-    <string name="error_opening_log">Грешка при отварянето на историята</string>
     <string name="restore_completed_content">Възстановяването отне %1$s.
 \nБяха намерени %2$s грешки.</string>
     <string name="file_saved">Файлът запазен на %1$s</string>
     <string name="backup_choice">Какво искате да запазите?</string>
     <string name="restoring_backup">Възстановяване на копие</string>
-    <string name="creating_backup">Създаване на резервно копие</string>
     <string name="pref_refresh_library_tracking">Обнови метаданните на проследяването</string>
     <string name="pref_refresh_library_tracking_summary">Обновява статус, оценка и последно прочетена глава от услугите за проследяване</string>
-    <string name="also_delete_chapters">Също изтрий изтеглените глави</string>
     <string name="local_source">Локална манга</string>
-    <string name="invalid_combination">\"По подразбиране\" не може да се избира с други категории</string>
-    <string name="added_to_library">Мангата беше добавена към библиотеката Ви</string>
     <string name="manga_info_last_chapter_label">Последна глава</string>
-    <string name="delete_downloads_for_manga">Да се изтрият ли изтеглените глави?</string>
     <string name="chapter_paused">На пауза</string>
-    <string name="notification_new_chapters_text">За %1$d заглавия</string>
     <string name="download_notifier_download_paused">Изтеглянето спряно</string>
     <string name="backup_restore_content">За възстановяването се изтеглят данни от източника, за които може да бъде отчетен разход на данни. Също проверете дали сте влезли коректно в източниците, които го изискват, преди възстановяването.</string>
-    <string name="action_global_search">Глобално търсене</string>
-    <string name="action_open">Отвори</string>
-    <string name="action_login">Вход</string>
     <string name="other_source">Други</string>
     <string name="action_global_search_hint">Глобално търсене…</string>
     <string name="latest">Последни</string>
     <string name="browse">Търсене</string>
     <string name="shortcut_created">Прекият път беше добавен към началния екран.</string>
     <string name="channel_common">Общи</string>
-    <string name="channel_library">Библиотека</string>
     <string name="channel_downloader">Изтегляния</string>
     <string name="action_display_download_badge">Изтегляне на значки</string>
     <string name="local_source_badge">Локална</string>
@@ -422,8 +359,6 @@
     <string name="ext_trust">Потвърдени</string>
     <string name="ext_untrusted">Непотвърдени</string>
     <string name="ext_uninstall">Деинсталирай</string>
-    <string name="ext_preferences">Предпочитания</string>
-    <string name="ext_available">Достъпни</string>
     <string name="untrusted_extension">Непотвърдено разширение</string>
     <string name="untrusted_extension_message">Следното разширение имаше непотвърден сертификат и не беше активирано.
 \n
@@ -444,21 +379,17 @@
     <string name="manga_info_latest_data_label">Обновена</string>
     <string name="copied_to_clipboard">%1$s копирано към клипборда</string>
     <string name="custom_download">Изтегли определен брой</string>
-    <string name="custom_hint">брой</string>
     <string name="download_custom">Изтегли определен брой</string>
-    <string name="migration_info">Натисни, за да избереш от кой източник да мигрираш</string>
     <string name="migration_dialog_what_to_include">Изберете кои данни ще мигрирате</string>
     <string name="select">Избери</string>
     <string name="migrate">Мигрирай</string>
     <string name="copy">Копирай</string>
-    <string name="migrating">Мигриране…</string>
     <string name="pager_viewer">Страница</string>
     <string name="source_not_installed">Източникът не е инсталиран: %1$s</string>
     <string name="repeating">Препрочитане</string>
     <string name="track_status">Статус</string>
     <string name="track_start_date">Начало</string>
     <string name="track_type">Тип</string>
-    <string name="track_author">Автор</string>
     <string name="url_not_set">Мангата няма връзка с акаунта, молим отново да натиснете заглавието и да изберете мангата</string>
     <string name="transition_finished">Завършени:</string>
     <string name="transition_current">Текущи:</string>

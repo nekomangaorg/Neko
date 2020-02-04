@@ -12,15 +12,11 @@
     <string name="label_recent_manga">Nedávno čítané</string>
     <string name="label_catalogues">Katalógy</string>
     <string name="label_recent_updates">Updaty</string>
-    <string name="label_latest_updates">Nedávno aktualizované</string>
-    <string name="label_categories">Kategórie</string>
     <string name="label_selected">Vybraté: %1$d</string>
-    <string name="label_backup">Záloha</string>
     <string name="label_migration">Presun zdrojov</string>
     <string name="label_extensions">Rozšírenia</string>
     <string name="label_extension_info">Info o rozšíreniach</string>
     <string name="label_help">Pomoc</string>
-    <string name="action_settings">Nastavenia</string>
     <string name="action_filter">Filter</string>
     <string name="action_filter_downloaded">Stiahnuté</string>
     <string name="action_filter_bookmarked">Uložené</string>
@@ -32,7 +28,6 @@
     <string name="action_sort_last_read">Naposledy čítané</string>
     <string name="action_sort_last_updated">Naposledy aktualizované</string>
     <string name="action_search">Hľadať</string>
-    <string name="action_global_search">Hľadať všade</string>
     <string name="action_select_all">Vybrať všetko</string>
     <string name="action_mark_as_read">Označiť ako prečítané</string>
     <string name="action_mark_as_unread">Označiť ako neprečítané</string>
@@ -41,7 +36,6 @@
     <string name="action_bookmark">Uložiť</string>
     <string name="action_remove_bookmark">Odstrániť z uložených</string>
     <string name="action_delete">Vymazať</string>
-    <string name="action_update">Aktualizovať</string>
     <string name="action_update_library">Aktualizovať knižnicu</string>
     <string name="action_edit">Upraviť</string>
     <string name="action_add">Pridať</string>
@@ -49,11 +43,6 @@
     <string name="action_edit_categories">Upraviť kategórie</string>
     <string name="action_rename_category">Premenovať kategóriu</string>
     <string name="action_move_category">Presunúť do kategórie</string>
-    <string name="action_edit_cover">Nahrať vlastný obal</string>
-    <string name="action_sort_up">Zatriediť hore</string>
-    <string name="action_sort_down">Zatriediť dole</string>
-    <string name="action_show_downloaded">Stiahnuté</string>
-    <string name="action_next_unread">Nasledujúce nečítané</string>
     <string name="action_start">Začať</string>
     <string name="action_stop">Zastaviť</string>
     <string name="action_pause">Pauza</string>
@@ -81,13 +70,8 @@
     <string name="action_save">Uložiť</string>
     <string name="action_reset">Reset</string>
     <string name="action_undo">Krok späť</string>
-    <string name="action_export">Exportovať</string>
-    <string name="action_open_log">Otvoriť log</string>
     <string name="action_create">Vytvoriť</string>
     <string name="action_restore">Obnoviť</string>
-    <string name="action_open">Otvoriť</string>
-    <string name="action_login">Prihlásiť sa</string>
-    <string name="deleting">Maže sa…</string>
     <string name="loading">Načítava sa…</string>
     <string name="app_not_available">Aplikácia nedostupná</string>
     <string name="short_recent_updates">Updaty</string>
@@ -112,7 +96,6 @@
     <string name="update_24hour">Raz za deň</string>
     <string name="update_48hour">Každé 2 dni</string>
     <string name="update_weekly">Každý týždeň</string>
-    <string name="update_monthly">Každý mesiac</string>
     <string name="pref_library_update_categories">Kategórie, ktoré sa majú zahrnúť do globálnej aktualizácie</string>
     <string name="all">Všetko</string>
     <string name="pref_library_update_prioritization">Poradie aktualizácie knižnice</string>
@@ -144,8 +127,6 @@
     <string name="ext_trust">Dôverovať</string>
     <string name="ext_untrusted">Odobrať dôveru</string>
     <string name="ext_uninstall">Odinštalovať</string>
-    <string name="ext_preferences">Preferencie</string>
-    <string name="ext_available">K dispozícii</string>
     <string name="untrusted_extension">Nedôveryhodné rozšírenie</string>
     <string name="untrusted_extension_message">Toto rozšírenie bolo podpísané nedôveryhodným certifikátom a nebolo aktivované.
 \n
@@ -156,9 +137,6 @@
     <string name="ext_language_info">Jazyk: %1$s</string>
     <string name="ext_empty_preferences">Nie sú k dispozícii žiadne preferencie na úpravu pre toto rozšírenie</string>
     <string name="pref_fullscreen">Na celú obrazovku</string>
-    <string name="action_forward">Dopredu</string>
-    <string name="action_refresh">Obnoviť</string>
-    <string name="pref_lock_orientation">Zamknúť orientáciu</string>
     <string name="pref_page_transitions">Prechod stránok</string>
     <string name="pref_double_tap_anim_speed">Rýchlosť animácie pre dvojité ťuknutie</string>
     <string name="pref_show_page_number">Zobraziť číslo strany</string>
@@ -190,7 +168,6 @@
     <string name="vertical_viewer">Vertikálne</string>
     <string name="webtoon_viewer">Ako Webtoon - Zhora dole a strany sa spájajú do jednej dlhej</string>
     <string name="pager_viewer">pager</string>
-    <string name="pref_image_decoder">Dekodér obrázkov</string>
     <string name="pref_image_scale_type">Mód škálovania</string>
     <string name="scale_type_fit_screen">Prispôsobiť obrazovke</string>
     <string name="scale_type_stretch">natiahnuť</string>
@@ -238,14 +215,8 @@
     <string name="pref_backup_service_category">Služby</string>
     <string name="pref_backup_interval">Frekvencia zálohovania</string>
     <string name="pref_backup_slots">Max. počet automatických záloh</string>
-    <string name="dialog_restoring_backup">Obnovujem zálohu
-\n%1$s pridaná do knižnice</string>
-    <string name="source_not_found">Zdroj sa nenašiel</string>
-    <string name="dialog_restoring_source_not_found">Obnovujem zálohu
-\n%1$s zdroj sa nenašiel</string>
     <string name="backup_created">Záloha bola vytvorená</string>
     <string name="restore_completed">Obnovenie dokončené</string>
-    <string name="error_opening_log">Log sa nedá otvoriť</string>
     <string name="restore_completed_content">Obnova trvala %1$s.
 \n%2$s nájdených chýb.</string>
 </resources>

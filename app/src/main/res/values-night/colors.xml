@@ -22,8 +22,6 @@
     <color name="textColorHintInverse">@color/md_black_1000_38</color>
     <color name="divider">@android:color/transparent</color>
 
-    <color name="statusBar">@color/md_black_1000</color>
-    <color name="appBar">@color/md_grey_900</color>
     <color name="background">#1C1C1D</color>
     <color name="dialog">@color/md_grey_800</color>
 

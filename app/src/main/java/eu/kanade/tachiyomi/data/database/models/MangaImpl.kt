@@ -73,7 +73,7 @@ open class MangaImpl : Manga {
     }
 
     companion object {
-        private var lastCoverFetch:MutableMap<Long, Long> = mutableMapOf()
+        private var lastCoverFetch:HashMap<Long, Long> = hashMapOf()
 
         fun setLastCoverFetch(id: Long, time: Long) {
             lastCoverFetch[id] = time

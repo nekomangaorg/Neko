@@ -12,14 +12,10 @@
     <string name="label_recent_manga">Nedavno čitano</string>
     <string name="label_catalogues">Katalozi</string>
     <string name="label_recent_updates">Ažuriranja biblioteke</string>
-    <string name="label_latest_updates">Najnovija ažuriranja</string>
-    <string name="label_categories">Kategorije</string>
     <string name="label_selected">Izabrano: %1$d</string>
-    <string name="label_backup">Rezerva</string>
     <string name="label_migration">Migracija izvora</string>
     <string name="label_extensions">Dodaci</string>
     <string name="label_extension_info">Informacije o dodatku</string>
-    <string name="action_settings">Podešavanja</string>
     <string name="action_filter">Filter</string>
     <string name="action_filter_downloaded">Preuzeto</string>
     <string name="action_filter_bookmarked">Zabilježeno</string>
@@ -31,7 +27,6 @@
     <string name="action_sort_last_read">Zadnje čitano</string>
     <string name="action_sort_last_updated">Zadnje ažurirano</string>
     <string name="action_search">Pretraži</string>
-    <string name="action_global_search">Pretraži globalno</string>
     <string name="action_select_all">Izaberi sve</string>
     <string name="action_mark_as_read">Označi kao pročitano</string>
     <string name="action_mark_as_unread">Označi kao nepročitano</string>
@@ -40,7 +35,6 @@
     <string name="action_bookmark">Označi</string>
     <string name="action_remove_bookmark">Ukloni oznaku</string>
     <string name="action_delete">Obriši</string>
-    <string name="action_update">Ažuriraj</string>
     <string name="action_update_library">Ažuriraj biblioteku</string>
     <string name="action_edit">Uredi</string>
     <string name="action_add">Dodaj</string>
@@ -48,11 +42,6 @@
     <string name="action_edit_categories">Uredi kategorije</string>
     <string name="action_rename_category">Preimenuj kategoriju</string>
     <string name="action_move_category">Premesti u kategoriju</string>
-    <string name="action_edit_cover">Promeni naslovnu sliku</string>
-    <string name="action_sort_up">Sortiraj odozgo</string>
-    <string name="action_sort_down">Sortiraj odozdo</string>
-    <string name="action_show_downloaded">Preuzeto</string>
-    <string name="action_next_unread">Sledeće nepročitano</string>
     <string name="action_start">Počni</string>
     <string name="action_stop">Zaustavi</string>
     <string name="action_pause">Pauziraj</string>
@@ -79,13 +68,8 @@
     <string name="action_save">Sačuvaj</string>
     <string name="action_reset">Resetuj</string>
     <string name="action_undo">Vrati nazad</string>
-    <string name="action_export">Eksportuj</string>
-    <string name="action_open_log">Otvori zapisnik</string>
     <string name="action_create">Napravi</string>
     <string name="action_restore">Povrati</string>
-    <string name="action_open">Otvori</string>
-    <string name="action_login">Prijavi se</string>
-    <string name="deleting">Brisanje…</string>
     <string name="loading">Učitavanje…</string>
     <string name="app_not_available">Aplikacija nije dostupna</string>
     <string name="short_recent_updates">Ažuriranja</string>
@@ -110,7 +94,6 @@
     <string name="update_24hour">Dnevno</string>
     <string name="update_48hour">Svaka 2 dana</string>
     <string name="update_weekly">Nedeljno</string>
-    <string name="update_monthly">Mjesečno</string>
     <string name="pref_library_update_categories">Kategorije koje su ubrajane u globalnom ažuriranju</string>
     <string name="all">Sve</string>
     <string name="pref_library_update_restriction">Restrikcije ažuriranja biblioteke</string>
@@ -140,8 +123,6 @@
     <string name="ext_trust">Veruj</string>
     <string name="ext_untrusted">Ne veruj</string>
     <string name="ext_uninstall">Izbriši</string>
-    <string name="ext_preferences">Prefrence</string>
-    <string name="ext_available">Dostupno</string>
     <string name="untrusted_extension">Nepouzdan dodatak</string>
     <string name="untrusted_extension_message">Ovaj dodatak je potpisan nepovjerljivim sertifikatima i nije aktiviran,
 \n
@@ -153,7 +134,6 @@
     <string name="ext_language_info">Jezik: %1$s</string>
     <string name="ext_empty_preferences">Nema prefrenca za podešavanje na ovom dodatku</string>
     <string name="pref_fullscreen">Ceo ekran</string>
-    <string name="pref_lock_orientation">Zaključaj orjentaciju</string>
     <string name="pref_page_transitions">Prelaz stranica</string>
     <string name="pref_double_tap_anim_speed">Brzina animacije dvoklika</string>
     <string name="pref_show_page_number">Prikaži broj stranice</string>
@@ -175,7 +155,6 @@
     <string name="vertical_viewer">Verticalno</string>
     <string name="webtoon_viewer">"Webtoon "</string>
     <string name="pager_viewer">Stranično</string>
-    <string name="pref_image_decoder">Dekoder slika</string>
     <string name="pref_image_scale_type">Tip skaliranja</string>
     <string name="scale_type_fit_screen">Popuni ekran</string>
     <string name="scale_type_stretch">Razvuci</string>
@@ -223,14 +202,8 @@
     <string name="pref_backup_service_category">Servis</string>
     <string name="pref_backup_interval">Učestalost pravljenja rezernih kopija</string>
     <string name="pref_backup_slots">Maksimalano automatskih rezernih kopija</string>
-    <string name="dialog_restoring_backup">Vraćanje rezerne kopije
-\n%1$s dodat u biblioteku</string>
-    <string name="source_not_found">Izvor nije pronađen</string>
-    <string name="dialog_restoring_source_not_found">Vraćanje rezerne kopije
-\n%1$s izvor nije pronađen</string>
     <string name="backup_created">Rezerna kopija napravljena</string>
     <string name="restore_completed">Vraćanje završeno</string>
-    <string name="error_opening_log">Ne mogu otvoriti zapisnik</string>
     <string name="restore_completed_content">Vraćanju trebalo %1$s.
 \n%2$s grešaka pronađeno.</string>
     <string name="backup_restore_content">Vraćanja koriste izvore da dobiju podatke, troškovi prenošenja se mogu primijeniti.
@@ -238,14 +211,11 @@
     <string name="file_saved">Fajl sačuvan na %1$s</string>
     <string name="backup_choice">\?Šta želite da stavite u rezernu kopiju\?</string>
     <string name="restoring_backup">Vraćanje rezerne kopije</string>
-    <string name="creating_backup">Pravljenje rezerne kopije</string>
     <string name="pref_clear_chapter_cache">Izbriši keš poglavlja</string>
     <string name="used_cache">Koristio: %1$s</string>
-    <string name="cache_deleted">Keš izbrisan, %1$d fajlova je izbrisano</string>
     <string name="cache_delete_error">Greška se desila tokom brisanja keša</string>
     <string name="pref_clear_cookies">Izbriši kolačiće</string>
     <string name="cookies_cleared">Kolačići izbrisani</string>
-    <string name="choices_reset">Izbori dialoga resetovani</string>
     <string name="pref_clear_database">Izbriši baze podataka</string>
     <string name="pref_clear_database_summary">Izbriši mange i poglavlja koji nisu u vašoj biblioteci</string>
     <string name="clear_database_confirmation">Da li ste sigurni\? Pročitana poglavlja i progres manga koje nisu u biblioteci će biti izgubljen</string>
@@ -268,20 +238,12 @@
     <string name="login_success">Prijava uspješna</string>
     <string name="invalid_login">Prijava neuspešna</string>
     <string name="unknown_error">Nepoznata greška</string>
-    <string name="library_search_hint">Ime ili autor…</string>
     <string name="updating_category">Ažuriranje kategorije</string>
     <string name="local_source_badge">Lokalno</string>
-    <string name="confirm_delete_manga">Da li ste sigurni da želite da uklonite označenu mangu\?</string>
-    <string name="also_delete_chapters">Takođe obriši preuzeta poglavlja</string>
     <string name="source_search_options">Filteri pretrage</string>
-    <string name="source_requires_login">Na ovom izvoru je potrebno prijaviti se</string>
-    <string name="select_source">Izaberi izvor</string>
-    <string name="no_valid_sources">Molimo izaberite bar jedan validan izvor</string>
     <string name="no_more_results">Nema više rezultata</string>
     <string name="local_source">Lokalna manga</string>
     <string name="other_source">Ostalo</string>
-    <string name="invalid_combination">Opšte je nemoguće označiti sa ostalim kategorijama</string>
-    <string name="added_to_library">Ova manga je dodata u biblioteku</string>
     <string name="action_global_search_hint">Globalno pretraživanje…</string>
     <string name="latest">Poslednje</string>
     <string name="browse">Pretraži</string>
@@ -291,31 +253,25 @@
     <string name="ongoing">U toku</string>
     <string name="unknown">Nepoznato</string>
     <string name="licensed">Licencirana</string>
-    <string name="remove_from_library">Obriši iz biblioteke</string>
     <string name="manga_info_full_title_label">Ime</string>
     <string name="manga_added_library">Dodato u biblioteku</string>
     <string name="manga_removed_library">Uklonjeno iz biblioteke</string>
     <string name="manga_info_author_label">Autor</string>
     <string name="manga_info_artist_label">Umjetnik</string>
-    <string name="manga_info_chapters_label">Poglavlja</string>
     <string name="manga_info_last_chapter_label">Poslednje poglavlje</string>
     <string name="manga_info_latest_data_label">Ažurirano</string>
     <string name="manga_info_status_label">Status</string>
     <string name="manga_info_source_label">Izvor</string>
-    <string name="manga_info_genres_label">Žanr</string>
     <string name="circular_icon">Kružna ikonica</string>
     <string name="rounded_icon">Okrugla ikonica</string>
     <string name="square_icon">Kvadratasta ikonica</string>
     <string name="star_icon">Zvezdasta ikonica</string>
-    <string name="shortcut_title">Ime prečice</string>
     <string name="shortcut_created">Prečica je postavljena na vaš početni ekran.</string>
     <string name="icon_shape">Oblik ikonice</string>
     <string name="icon_creation_fail">Neuspeh tokom kreiranja ikonice!</string>
-    <string name="delete_downloads_for_manga">Obriši preuzeta poglavlja\?</string>
     <string name="copied_to_clipboard">%1$s je kopiran</string>
     <string name="source_not_installed">Izvor nije instaliran: %1$s</string>
     <string name="manga_chapters_tab">Poglavlja</string>
-    <string name="manga_chapter_no_title">Nema naslova</string>
     <string name="display_mode_chapter">Poglavlje %1$s</string>
     <string name="chapter_downloaded">Preuzeto</string>
     <string name="chapter_queued">U redu za preuzimanje</string>
@@ -323,7 +279,6 @@
     <string name="chapter_downloading_progress">Preuzimam (%1$d/%2$d)</string>
     <string name="chapter_error">Greška</string>
     <string name="chapter_paused">Pauzirano</string>
-    <string name="fetch_chapters_error">Greška tokom dobijanja poglavlja</string>
     <string name="show_title">Prikaži naslov</string>
     <string name="show_chapter_number">Prikaži broj poglavlja</string>
     <string name="sorting_mode">Model sortiranja</string>
@@ -332,7 +287,6 @@
     <string name="sort_by_number">Prema broju poglavlja</string>
     <string name="manga_download">Preuzmi</string>
     <string name="custom_download">Preuzmi određen broj</string>
-    <string name="custom_hint">količina</string>
     <string name="download_1">Preuzmi sledeće poglavlje</string>
     <string name="download_5">Preuzmi 5 narednih poglavlja</string>
     <string name="download_10">Preuzmi 10 narednih poglavlja</string>

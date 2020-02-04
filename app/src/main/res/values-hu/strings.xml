@@ -9,12 +9,7 @@
     <string name="label_settings">Beállítások</string>
     <string name="label_recent_manga">Legutóbb olvasott</string>
     <string name="label_catalogues">Katalógusok</string>
-    <string name="label_latest_updates">Legutóbbi frissítések</string>
-    <string name="label_categories">Kategóriák</string>
-    <string name="label_backup">Biztonsági mentés</string>
-    <string name="action_settings">Beállítások</string>
     <string name="action_search">Keresés</string>
-    <string name="action_show_downloaded">Letöltve</string>
     <string name="action_close">Bezárás</string>
     <string name="action_remove">Eltávolítás</string>
     <string name="action_move">Áthelyezés</string>
@@ -27,9 +22,6 @@
     <string name="action_save">Mentés</string>
     <string name="action_reset">Visszaállítás</string>
     <string name="action_undo">Visszavonás</string>
-    <string name="action_export">Exportálás</string>
-    <string name="action_login">Bejelentkezés</string>
-    <string name="deleting">Törlés…</string>
     <string name="loading">Betöltés…</string>
     <string name="pref_category_general">Általános</string>
     <string name="pref_category_reader">Olvasó</string>
@@ -52,7 +44,6 @@
     <string name="update_24hour">Naponta</string>
     <string name="update_48hour">2 naponta</string>
     <string name="update_weekly">Hetente</string>
-    <string name="update_monthly">Havonta</string>
     <string name="pref_library_update_categories">Globális frissítésben tartalmazott kategóriák</string>
     <string name="all">Összes</string>
     <string name="pref_library_update_restriction">Könyvtár frissítési korlátozások</string>
@@ -77,7 +68,6 @@
     <string name="pref_read_with_volume_keys_inverted">Gombok felcserélése</string>
     <string name="pref_read_with_tapping">Koppintással</string>
     <string name="pref_reader_theme">Háttérszín</string>
-    <string name="pref_image_decoder">Képdekódoló</string>
     <string name="pref_download_directory">Letöltések könyvtára</string>
     <string name="backup">Biztonsági mentés</string>
     <string name="version">Verzió</string>
@@ -90,9 +80,7 @@
     <string name="status">Állapot</string>
     <string name="options">Beállítások</string>
     <string name="chapter_progress">%1$d oldal</string>
-    <string name="chapter_subtitle">%1$s. fejezet</string>
     <string name="no_next_chapter">Nem található a következő fejezet</string>
-    <string name="no_previous_chapter">Nem található az előző fejezet</string>
     <string name="download_notifier_no_network">A hálózat nem érhető el</string>
     <string name="label_download_queue">Letöltési sor</string>
     <string name="label_library">Könyvtár</string>
@@ -108,7 +96,6 @@
     <string name="action_sort_total">Összes fejezet</string>
     <string name="action_sort_last_read">Legutóbb olvasott</string>
     <string name="action_sort_last_updated">Legutóbb frissített</string>
-    <string name="action_global_search">Globális keresés</string>
     <string name="action_mark_as_read">Olvasottnak jelölés</string>
     <string name="action_mark_as_unread">Olvasatlannak jelölés</string>
     <string name="action_mark_previous_as_read">Előző olvasottnak jelölése</string>
@@ -116,7 +103,6 @@
     <string name="action_bookmark">Könyvjelzőzés</string>
     <string name="action_remove_bookmark">Könyvjelző eltávolítása</string>
     <string name="action_delete">Törlés</string>
-    <string name="action_update">Frissítés</string>
     <string name="action_update_library">Könyvtár frissítése</string>
     <string name="action_edit">Szerkesztés</string>
     <string name="action_add">Hozzáadás</string>
@@ -124,10 +110,6 @@
     <string name="action_edit_categories">Kategóriák szerkesztése</string>
     <string name="action_rename_category">Kategória átnevezése</string>
     <string name="action_move_category">Áthelyezés kategóriákba</string>
-    <string name="action_edit_cover">Borítókép szerkesztése</string>
-    <string name="action_sort_up">Rendezés növekvő sorrendben</string>
-    <string name="action_sort_down">Rendezés csökkenő sorrendben</string>
-    <string name="action_next_unread">Következő olvasatlan</string>
     <string name="action_start">Kezdés</string>
     <string name="action_stop">Megállítás</string>
     <string name="action_pause">Szüneteltetés</string>
@@ -144,14 +126,11 @@
     <string name="action_select_all">Összes kijelölése</string>
     <string name="action_set_filter">Szűrő alkalmazása</string>
     <string name="action_cancel">Mégse</string>
-    <string name="action_open_log">Napló megnyitása</string>
     <string name="action_create">Létrehozás</string>
     <string name="action_restore">Visszaállítás</string>
-    <string name="action_open">Megnyitás</string>
     <string name="app_not_available">Az alkalmazás nem érhető el</string>
     <string name="short_recent_updates">Frissítések</string>
     <string name="pref_auto_update_manga_sync">Olvasás után a fejezetek szinkronizálása</string>
-    <string name="pref_lock_orientation">Elforgatás zárolása</string>
     <string name="pref_page_transitions">Áttűnés lapozáskor</string>
     <string name="pref_crop_borders">Szegélyek vágása</string>
     <string name="pref_custom_brightness">Egyéni fényerő használata</string>
@@ -169,7 +148,6 @@
     <string name="label_extensions">Bővítmények</string>
     <string name="ext_untrusted">Nem megbízható</string>
     <string name="ext_uninstall">Eltávolítás</string>
-    <string name="ext_preferences">Preferenciák</string>
     <string name="darkblue_theme">Sötétkék</string>
     <string name="all_lang">Összes</string>
     <string name="system_theme">Rendszer alapértelmezése</string>
@@ -183,7 +161,6 @@
     <string name="ext_downloading">Letöltés</string>
     <string name="ext_installing">Telepítés</string>
     <string name="ext_installed">Telepítve</string>
-    <string name="ext_available">Elérhető</string>
     <string name="action_open_in_web_view">Webnézet</string>
     <string name="label_help">Segítség</string>
     <string name="pref_library_update_prioritization">Könyvtár frissítési sorrend</string>
