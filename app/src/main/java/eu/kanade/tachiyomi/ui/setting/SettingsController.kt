@@ -15,9 +15,9 @@ import com.bluelinelabs.conductor.ControllerChangeType
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
-import eu.kanade.tachiyomi.util.RecyclerWindowInsetsListener
-import eu.kanade.tachiyomi.util.doOnApplyWindowInsets
-import eu.kanade.tachiyomi.util.updatePaddingRelative
+import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
+import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
+import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import rx.Observable
 import rx.Subscription
 import rx.subscriptions.CompositeSubscription

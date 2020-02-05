@@ -22,6 +22,7 @@ import com.amulyakhare.textdrawable.TextDrawable
 import eu.kanade.tachiyomi.R
 import com.amulyakhare.textdrawable.util.ColorGenerator
 import com.google.android.material.snackbar.Snackbar
+import eu.kanade.tachiyomi.util.system.getResourceColor
 import kotlin.math.min
 
 /**

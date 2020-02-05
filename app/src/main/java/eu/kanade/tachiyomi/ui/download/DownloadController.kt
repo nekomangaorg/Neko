@@ -13,7 +13,7 @@ import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
-import eu.kanade.tachiyomi.util.RecyclerWindowInsetsListener
+import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
 import kotlinx.android.synthetic.main.download_controller.*
 import rx.Observable
 import rx.Subscription

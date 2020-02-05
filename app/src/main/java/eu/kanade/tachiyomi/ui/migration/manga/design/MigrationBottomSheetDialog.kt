@@ -15,9 +15,9 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.migration.MigrationFlags
-import eu.kanade.tachiyomi.util.gone
-import eu.kanade.tachiyomi.util.toast
-import eu.kanade.tachiyomi.util.visible
+import eu.kanade.tachiyomi.util.view.gone
+import eu.kanade.tachiyomi.util.system.toast
+import eu.kanade.tachiyomi.util.view.visible
 import kotlinx.android.synthetic.main.migration_bottom_sheet.*
 import kotlinx.android.synthetic.main.migration_bottom_sheet.extra_search_param
 import kotlinx.android.synthetic.main.migration_bottom_sheet.extra_search_param_text

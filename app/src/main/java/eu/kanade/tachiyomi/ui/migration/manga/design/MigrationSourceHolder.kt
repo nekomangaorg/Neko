@@ -2,12 +2,11 @@ package eu.kanade.tachiyomi.ui.migration.manga.design
 
 import android.graphics.Paint.STRIKE_THRU_TEXT_FLAG
 import android.view.View
-import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
-import eu.kanade.tachiyomi.util.getRound
+import eu.kanade.tachiyomi.util.view.getRound
 import kotlinx.android.synthetic.main.migration_source_item.*
 import uy.kohesive.injekt.injectLazy
 

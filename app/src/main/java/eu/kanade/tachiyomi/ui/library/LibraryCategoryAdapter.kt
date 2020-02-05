@@ -7,8 +7,8 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.category.CategoryAdapter
-import eu.kanade.tachiyomi.util.chop
-import eu.kanade.tachiyomi.util.removeArticles
+import eu.kanade.tachiyomi.util.lang.chop
+import eu.kanade.tachiyomi.util.lang.removeArticles
 import uy.kohesive.injekt.injectLazy
 import java.text.SimpleDateFormat
 import java.util.*

@@ -17,10 +17,10 @@ import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationListController
-import eu.kanade.tachiyomi.util.doOnApplyWindowInsets
-import eu.kanade.tachiyomi.util.marginBottom
-import eu.kanade.tachiyomi.util.updateLayoutParams
-import eu.kanade.tachiyomi.util.updatePaddingRelative
+import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
+import eu.kanade.tachiyomi.util.view.marginBottom
+import eu.kanade.tachiyomi.util.view.updateLayoutParams
+import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationProcedureConfig
 import kotlinx.android.synthetic.main.pre_migration_controller.fab
 import kotlinx.android.synthetic.main.pre_migration_controller.recycler
