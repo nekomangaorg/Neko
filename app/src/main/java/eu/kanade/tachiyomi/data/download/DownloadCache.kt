@@ -126,7 +126,7 @@ class DownloadCache(
         //rootDir.files = sourceDirs
 
         val db:DatabaseHelper by injectLazy()
-        val mangas = db.getLibraryMangas().executeAsBlocking()
+        val mangas = db.getMangas().executeAsBlocking()
 
         sourceDirs.forEach { sourceValue ->
             val sourceDir = sourceValue.value

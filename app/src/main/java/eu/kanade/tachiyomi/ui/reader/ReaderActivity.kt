@@ -20,6 +20,7 @@ import android.view.WindowManager
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.SeekBar
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.biometric.BiometricManager
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -150,6 +151,13 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
      * Called when the activity is created. Initializes the presenter and configuration.
      */
     override fun onCreate(savedState: Bundle?) {
+        AppCompatDelegate.setDefaultNightMode(
+            when (preferences.theme()) {
+                1 -> AppCompatDelegate.MODE_NIGHT_NO
+                2, 3, 4 -> AppCompatDelegate.MODE_NIGHT_YES
+                else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+            }
+        )
         setTheme(when (preferences.readerTheme().getOrDefault()) {
             0 -> R.style.Theme_Base_Reader_Light
             1 -> R.style.Theme_Base_Reader_Dark
