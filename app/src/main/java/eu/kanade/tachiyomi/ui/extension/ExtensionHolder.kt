@@ -1,10 +1,8 @@
 package eu.kanade.tachiyomi.ui.extension
 
 import android.content.res.ColorStateList
-import android.graphics.Color
 import android.view.View
 import androidx.core.content.ContextCompat
-import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.extension.model.Extension
@@ -12,6 +10,7 @@ import eu.kanade.tachiyomi.extension.model.InstallStep
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.ui.base.holder.SlicedHolder
 import eu.kanade.tachiyomi.util.system.LocaleHelper
+import eu.kanade.tachiyomi.util.system.getResourceColor
 import io.github.mthli.slice.Slice
 import kotlinx.android.synthetic.main.extension_card_item.*
 
@@ -64,6 +63,7 @@ class ExtensionHolder(view: View, override val adapter: ExtensionAdapter) :
 
         //background = VectorDrawableCompat.create(resources!!, R.drawable.button_bg_transparent, null)
         setTextColor(ContextCompat.getColorStateList(context, R.drawable.button_text_state))
+        backgroundTintList = ContextCompat.getColorStateList(context, R.drawable.button_bg_transparent)
 
         val extension = item.extension
 
@@ -84,14 +84,12 @@ class ExtensionHolder(view: View, override val adapter: ExtensionAdapter) :
             when {
                 extension.hasUpdate -> {
                     isActivated = true
-                   // backgroundTintList = ColorStateList(arrayOf(intArrayOf(0)), intArrayOf(Color
-                        //.BLACK))
+                    backgroundTintList = ColorStateList.valueOf(
+                        context.getResourceColor(R.attr.colorAccent))
                     setText(R.string.ext_update)
                 }
                 extension.isObsolete -> {
                     // Red outline
-                   // background = VectorDrawableCompat.create(resources, R.drawable
-                       // .button_bg_error, null)
                     setTextColor(ContextCompat.getColorStateList(context, R.drawable.button_bg_error))
 
                     setText(R.string.ext_obsolete)

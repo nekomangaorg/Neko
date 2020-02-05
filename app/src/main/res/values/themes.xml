@@ -24,7 +24,7 @@
         <item name="android:divider">@color/divider</item>
         <item name="android:listDivider">@drawable/line_divider_light</item>
         <item name="actionModeStyle">@style/CustomActionModeStyle</item>
-        <item name="tabBarIconColor">@color/md_white_1000</item>
+        <item name="tabBarIconColor">@color/tabBarIconHighlight</item>
         <item name="tabBarIconInactive">@color/md_white_1000_76</item>
 
 
@@ -68,7 +68,6 @@
         <item name="tabBarIconColor">@color/colorPrimary</item>
         <item name="tabBarIconInactive">@color/colorPrimaryInactive</item>
         <item name="android:statusBarColor">@color/md_black_1000_54</item>
-        <item name="badgeColor">@color/colorAccent</item>
     </style>
     <style name="Theme.Tachiyomi.DarkBlue" parent="Theme.Tachiyomi"/>
     <style name="Theme.Tachiyomi.Amoled" parent="Theme.Tachiyomi"/>

@@ -9,14 +9,15 @@
   </style>
 
   <style name="Theme.Tachiyomi.MatWhite" parent="Theme.Tachiyomi">
-    <item name="tabBarIconColor">@color/md_white_1000</item>
-    <item name="tabBarIconInactive">@color/md_white_1000_76</item>
+      <item name="tabBarIconColor">@color/tabBarIconHighlight</item>
+      <item name="tabBarIconInactive">@color/md_white_1000_76</item>
   </style>
 
   <style name="Theme.Tachiyomi.DarkBlue" parent="Theme.Tachiyomi">
     <item name="colorPrimary">#54759E</item>
     <item name="colorPrimaryDark">#54759E</item>
     <item name="badgeColor">@color/material_red_accent_700</item>
+      <item name="tabBarIconColor">@color/md_white_1000</item>
   </style>
 
   <!--==============-->

@@ -6,9 +6,8 @@
         <item name="colorOnPrimary">@color/colorPrimary</item>
         <item name="actionBarTintColor">@color/textColorPrimary</item>
         <item name="actionBarTheme">@style/ThemeOverlay.AppCompat.DayNight.ActionBar</item>
-        <item name="tabBarIconColor">@color/colorPrimary</item>
+        <item name="tabBarIconColor">@color/colorAccent</item>
         <item name="tabBarIconInactive">@color/colorPrimaryInactive</item>
-        <item name="badgeColor">@color/colorAccent</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
 </resources>
