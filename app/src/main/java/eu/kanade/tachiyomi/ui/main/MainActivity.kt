@@ -149,12 +149,7 @@ open class MainActivity : BaseActivity() {
                     R.id.nav_drawer_downloads -> {
                         router.pushController(DownloadController().withFadeTransaction())
                     }
-                    R.id.nav_drawer_settings -> {
-                        router.pushController(SettingsMainController().withFadeTransaction())
-                    }
-                    R.id.nav_drawer_help -> {
-                        openInBrowser(URL_HELP)
-                    }
+                    R.id.nav_drawer_settings -> setRoot(SettingsMainController(), id)
                 }
                 //navigationView.selectedItemId = id
             }

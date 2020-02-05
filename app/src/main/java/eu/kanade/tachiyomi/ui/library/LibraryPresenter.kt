@@ -101,6 +101,8 @@ class LibraryPresenter(
         subscribeLibrary()
     }
 
+    fun hasPendingDownloads() = downloadManager.hasQueue()
+
     /**
      * Subscribes to library if needed.
      */

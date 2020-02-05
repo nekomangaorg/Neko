@@ -1,9 +1,9 @@
 package eu.kanade.tachiyomi.ui.library
 
+import android.app.DownloadManager
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Color
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
@@ -12,7 +12,6 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsets
-import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
@@ -51,8 +50,7 @@ import eu.kanade.tachiyomi.ui.migration.MigrationInterface
 import eu.kanade.tachiyomi.ui.migration.manga.design.PreMigrationController
 import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationListController
 import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationProcedureConfig
-import eu.kanade.tachiyomi.ui.setting.SettingsAdvancedController
-import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
+import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.inflate
 import eu.kanade.tachiyomi.util.view.marginBottom
 import eu.kanade.tachiyomi.util.view.marginTop
@@ -440,9 +438,10 @@ class LibraryController(
         val searchView = searchItem.actionView as SearchView
         searchView.queryHint = resources?.getString(R.string.search_hint)
 
-        menu.findItem(R.id.action_downloads).isVisible = MainActivity.bottomNav
+        menu.findItem(R.id.action_downloads).isVisible = MainActivity.bottomNav &&
+            presenter.hasPendingDownloads()
         searchItem.collapseActionView()
-        if (!query.isEmpty()) {
+        if (query.isNotEmpty()) {
             searchItem.expandActionView()
             searchView.setQuery(query, true)
             searchView.clearFocus()

@@ -120,6 +120,7 @@ class DownloadManager(val context: Context) {
 
     fun isPaused() = downloader.isPaused()
 
+    fun hasQueue() = downloader.queue.isNotEmpty()
 
     /**
      * Tells the downloader to enqueue the given list of chapters.

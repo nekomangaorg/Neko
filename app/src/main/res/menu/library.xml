@@ -20,7 +20,7 @@
     <item
         android:id="@+id/action_downloads"
         android:icon="@drawable/ic_file_download_white_24dp"
-        android:title="@string/pref_category_downloads"
+        android:title="@string/label_download_queue"
         app:showAsAction="ifRoom"/>
 
     <item

@@ -7,8 +7,8 @@ import android.util.AttributeSet
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
-import eu.kanade.tachiyomi.util.gone
-import eu.kanade.tachiyomi.util.visible
+import eu.kanade.tachiyomi.util.view.gone
+import eu.kanade.tachiyomi.util.view.visible
 import kotlinx.android.synthetic.main.preference_update_text.view.*
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
