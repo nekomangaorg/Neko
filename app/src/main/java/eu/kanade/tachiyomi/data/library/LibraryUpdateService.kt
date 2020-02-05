@@ -334,7 +334,7 @@ class LibraryUpdateService(
         // Boolean to determine if DownloadManager has downloads
         var hasDownloads = false
 
-        while (count < mangaToUpdate.size && count + 1 >= mangaToUpdate.size) {
+        while (count < mangaToUpdate.size) {
             if (job?.isCancelled == true || job == null) break
             val manga = mangaToUpdate[count]
             showProgressNotification(manga, count++, mangaToUpdate.size)
