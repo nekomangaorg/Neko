@@ -29,6 +29,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.online.HttpSource
+import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.base.controller.SecondaryDrawerController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
@@ -480,9 +481,19 @@ open class BrowseCatalogueController(bundle: Bundle) :
     override fun onItemClick(view: View, position: Int): Boolean {
         val item = adapter?.getItem(position) as? CatalogueItem ?: return false
         item.manga.initialized = false
-        router.pushController(MangaController(item.manga, true).withFadeTransaction())
 
+        // We should check if the parent is the base controller
+        // If it is, then we are in a nested view, thus we should append
+        // To the parent controller as compared to just the current controller
+        // TODO: this might grow the memory unbounded since we keep appending without removing
+        // TODO: but this prevents breaking of the back button logic if controller is in subview
+        if (parentController is BaseController) {
+            (parentController as BaseController).router.pushController(MangaController(item.manga, true).withFadeTransaction())
+        } else {
+            router.pushController(MangaController(item.manga, true).withFadeTransaction())
+        }
         return false
+
     }
 
     /**
