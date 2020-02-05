@@ -1,11 +1,7 @@
 package eu.kanade.tachiyomi.data.cache
 
 import android.content.Context
-import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.util.DiskUtil
-import eu.kanade.tachiyomi.util.launchUI
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.delay
+import eu.kanade.tachiyomi.util.storage.DiskUtil
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
