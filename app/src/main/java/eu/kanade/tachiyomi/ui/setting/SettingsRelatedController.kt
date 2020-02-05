@@ -37,15 +37,8 @@ class SettingsRelatedController : SettingsController() {
 
 
         preference {
-            title = "Information"
-            summary = "This is an alpha feature where one can get manga recommendations. " +
-                    "This is a recommendation system outside of MangaDex, and works by " +
-                    "matching by genres, demographics, and then using term frequency–inverse " +
-                    "document frequency (Tfidf) to get the similarity of two manga's " +
-                    "descriptions. You will need to download from the below github the " +
-                    "recommendation JSON manually."
-            onClick {
-            }
+            titleRes = R.string.pref_related_info_tab
+            summary = context.resources.getString(R.string.pref_related_summary_message)
             isIconSpaceReserved = true
         }
 

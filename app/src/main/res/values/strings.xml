@@ -115,9 +115,17 @@
     <string name="pref_category_downloads">Downloads</string>
     <string name="pref_category_site_specific">Site Specific</string>
     <string name="pref_category_tracking">Tracking</string>
-    <string name="pref_category_related">Related (Alpha)</string>
+    <string name="pref_category_related">Related (Beta)</string>
     <string name="pref_category_advanced">Advanced</string>
     <string name="pref_category_about">About</string>
+    <string name="pref_related_info_tab">Information</string>
+    <string name="pref_related_summary_message">
+        This is an beta feature where one can get manga recommendations.
+        This is a recommendation system outside of MangaDex, and works by matching by genres,
+        demographics, and then using term frequency–inverse document frequency (Tfidf) to get the
+        similarity of two manga\'s descriptions. You will need to download from the below
+        github the recommendation JSON manually.
+    </string>
 
     <!-- General section -->
     <string name="pref_library_columns">Library manga per row</string>
