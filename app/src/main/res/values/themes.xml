@@ -45,6 +45,7 @@
         <item name="snackbar_background">@color/snackbarBackground</item>
         <item name="snackbar_text">@color/textColorPrimaryInverse</item>
         <item name="actionBarTintColor">@color/md_white_1000</item>
+        <item name="badgeColor">@color/badgeColor</item>
 
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">#B3000000</item>
@@ -66,6 +67,7 @@
         <item name="actionBarTheme">@style/ThemeOverlay.AppCompat.DayNight.ActionBar</item>
         <item name="tabBarIconColor">@color/colorPrimary</item>
         <item name="tabBarIconInactive">@color/colorPrimaryInactive</item>
+        <item name="badgeColor">@color/colorAccent</item>
     </style>
     <style name="Theme.Tachiyomi.DarkBlue" parent="Theme.Tachiyomi"/>
     <style name="Theme.Tachiyomi.Amoled" parent="Theme.Tachiyomi"/>

@@ -18,12 +18,6 @@
         app:showAsAction="ifRoom"/>
 
     <item
-        android:id="@+id/action_downloads"
-        android:icon="@drawable/ic_file_download_white_24dp"
-        android:title="@string/label_download_queue"
-        app:showAsAction="ifRoom"/>
-
-    <item
         android:id="@+id/action_edit_categories"
         android:title="@string/action_edit_categories"
         app:showAsAction="never"/>

@@ -16,6 +16,7 @@
   <style name="Theme.Tachiyomi.DarkBlue" parent="Theme.Tachiyomi">
     <item name="colorPrimary">#54759E</item>
     <item name="colorPrimaryDark">#54759E</item>
+    <item name="badgeColor">@color/material_red_accent_700</item>
   </style>
 
   <!--==============-->

@@ -27,9 +27,11 @@ import com.bluelinelabs.conductor.Router
 import com.bluelinelabs.conductor.RouterTransaction
 import com.bluelinelabs.conductor.changehandler.FadeChangeHandler
 import com.bluelinelabs.conductor.changehandler.SimpleSwapChangeHandler
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
 import eu.kanade.tachiyomi.Migrations
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
@@ -48,10 +50,11 @@ import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.ui.recent_updates.RecentChaptersController
 import eu.kanade.tachiyomi.ui.recently_read.RecentlyReadController
+import eu.kanade.tachiyomi.ui.setting.SettingsDownloadController
 import eu.kanade.tachiyomi.ui.setting.SettingsMainController
+import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
-import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.marginBottom
 import eu.kanade.tachiyomi.util.view.marginTop
@@ -59,13 +62,14 @@ import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePadding
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.visible
-import eu.kanade.tachiyomi.util.system.openInBrowser
 import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 import java.util.Date
 import java.util.concurrent.TimeUnit
@@ -146,9 +150,7 @@ open class MainActivity : BaseActivity() {
                     R.id.nav_drawer_recently_read -> setRoot(RecentlyReadController(), id)
                     R.id.nav_drawer_catalogues -> setRoot(CatalogueController(), id)
                     R.id.nav_drawer_extensions -> setRoot(ExtensionController(), id)
-                    R.id.nav_drawer_downloads -> {
-                        router.pushController(DownloadController().withFadeTransaction())
-                    }
+                    R.id.nav_drawer_downloads -> setRoot(DownloadController(), id)
                     R.id.nav_drawer_settings -> setRoot(SettingsMainController(), id)
                 }
                 //navigationView.selectedItemId = id
@@ -197,6 +199,7 @@ open class MainActivity : BaseActivity() {
 
         val content: ViewGroup = findViewById(R.id.main_content)
         bottomNav = preferences.useBottonNav().getOrDefault()
+        bottomNavView = navigationView
         content.fitsSystemWindows = !bottomNav
         if (!bottomNav) {
             container.systemUiVisibility =
@@ -365,7 +368,7 @@ open class MainActivity : BaseActivity() {
             extUpdateText.visible()
             val badge = navigationView.getOrCreateBadge(R.id.nav_drawer_settings)
             badge.number = updates
-            badge.backgroundColor = getResourceColor(R.attr.colorAccent)
+            badge.backgroundColor = getResourceColor(R.attr.badgeColor)
             badge.badgeTextColor = Color.WHITE
         }
         else {
@@ -379,6 +382,8 @@ open class MainActivity : BaseActivity() {
         super.onResume()
         bottomNav = preferences.useBottonNav().getOrDefault()
         getExtensionUpdates()
+        bottomNavView = navigationView
+        setDownloadBadge(Injekt.get<DownloadManager>().hasQueue())
         val useBiometrics = preferences.useBiometrics().getOrDefault()
         if (useBiometrics && BiometricManager.from(this)
                 .canAuthenticate() == BiometricManager.BIOMETRIC_SUCCESS) {
@@ -393,6 +398,10 @@ open class MainActivity : BaseActivity() {
             preferences.useBiometrics().set(false)
     }
 
+    override fun onPause() {
+        super.onPause()
+        bottomNavView = null
+    }
 
     private fun getExtensionUpdates() {
         if (Date().time >= preferences.lastExtCheck().getOrDefault() +
@@ -464,6 +473,7 @@ open class MainActivity : BaseActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        bottomNavView = null
         nav_view?.setNavigationItemSelectedListener(null)
         toolbar?.setNavigationOnClickListener(null)
     }
@@ -529,21 +539,27 @@ open class MainActivity : BaseActivity() {
                     }
                 }
                 R.id.nav_drawer_downloads -> {
-                    if (router.backstack.isEmpty()) {
-                        setRoot(LibraryController(), R.id.nav_drawer_library)
-                        router.pushController(RouterTransaction.with(DownloadController())
-                            .pushChangeHandler(SimpleSwapChangeHandler())
-                            .popChangeHandler(FadeChangeHandler()))
+                    if (router.backstackSize > 1) {
+                        router.popToRoot()
+                    }
+
+                    if (bottomNav) {
+                        navigationView.selectedItemId = R.id.nav_drawer_settings
+                        val newBackstack = listOf(
+                            RouterTransaction.with(SettingsMainController()),
+                            RouterTransaction.with(SettingsDownloadController()),
+                            RouterTransaction.with(DownloadController()))
+
+                        router.setBackstack(newBackstack, FadeChangeHandler())
                     }
                     else {
-                        router.pushController(DownloadController().withFadeTransaction())
+                        nav_view.setCheckedItem(R.id.nav_drawer_settings)
+                        setRoot(DownloadController(), id)
                     }
+
                 }
                 R.id.nav_drawer_settings -> {
                     setRoot(SettingsMainController(), id)
-                }
-                R.id.nav_drawer_help -> {
-                    openInBrowser(URL_HELP)
                 }
             }
         }
@@ -650,6 +666,33 @@ open class MainActivity : BaseActivity() {
 
         var bottomNav = false
             internal set
+
+        internal var bottomNavView:BottomNavigationView? = null
+
+        fun setDownloadBadge(downloading: Boolean) {
+            if (!bottomNav) return
+            val badge = bottomNavView?.getOrCreateBadge(R.id.nav_drawer_settings) ?: return
+            val downloadManager = Injekt.get<DownloadManager>()
+            val hasQueue = downloading || downloadManager.hasQueue()
+            if (hasQueue) {
+                badge.clearNumber()
+                badge.backgroundColor = bottomNavView?.context?.getResourceColor(R.attr
+                    .badgeColor) ?: Color.BLACK
+            }
+            else
+            {
+                val updates = Injekt.get<PreferencesHelper>().extensionUpdatesCount().getOrDefault()
+                if (updates > 0) {
+                    badge.number = updates
+                    badge.backgroundColor = bottomNavView?.context?.getResourceColor(R.attr
+                        .badgeColor) ?: Color.BLACK
+                    badge.badgeTextColor = Color.WHITE
+                }
+                else {
+                    bottomNavView?.removeBadge(R.id.nav_drawer_settings)
+                }
+            }
+        }
     }
 
 }

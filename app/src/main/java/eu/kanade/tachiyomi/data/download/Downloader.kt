@@ -14,6 +14,7 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.fetchAllImageUrlsFromPageList
+import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.lang.RetryWithDelay
 import eu.kanade.tachiyomi.util.lang.plusAssign
 import eu.kanade.tachiyomi.util.storage.DiskUtil
@@ -90,6 +91,7 @@ class Downloader(
         launchNow {
             val chapters = async { store.restore() }
             queue.addAll(chapters.await())
+            MainActivity.setDownloadBadge(queue.isNotEmpty())
         }
     }
 

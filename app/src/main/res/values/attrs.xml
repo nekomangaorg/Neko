@@ -31,4 +31,5 @@
     <attr name="icon_color" format="reference|integer"/>
     <attr name="snackbar_background" format="reference|integer"/>
     <attr name="snackbar_text" format="reference|integer"/>
+    <attr name="badgeColor" format="reference|integer"/>
 </resources>

@@ -20,13 +20,17 @@
     <string name="label_selected">Selected: %1$d</string>
     <string name="label_migration">Source migration</string>
     <string name="label_extensions">Extensions</string>
+    <string name="label_extension_info">Extension info</string>
+    <string name="label_help">Help</string>
+    <string name="unlock_library">Unlock to access Library</string>
     <plurals name="extensions_updates_available">
         <item quantity="one">Update available</item>
         <item quantity="other">%d updates available</item>
     </plurals>
-    <string name="label_extension_info">Extension info</string>
-    <string name="label_help">Help</string>
-    <string name="unlock_library">Unlock to access Library</string>
+    <plurals name="downloads_pending">
+        <item quantity="one">1 in queue</item>
+        <item quantity="other">%d in queue</item>
+    </plurals>
 
     <!-- Actions -->
     <string name="action_filter">Filter</string>

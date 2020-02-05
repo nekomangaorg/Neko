@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.data.download
 
+import android.app.Activity
 import android.app.Notification
 import android.app.Service
 import android.content.Context
@@ -16,6 +17,7 @@ import com.jakewharton.rxrelay.BehaviorRelay
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.lang.plusAssign
 import eu.kanade.tachiyomi.util.system.connectivityManager
 import eu.kanade.tachiyomi.util.system.isServiceRunning
@@ -46,6 +48,7 @@ class DownloadService : Service() {
          * @param context the application context.
          */
         fun start(context: Context) {
+            MainActivity.setDownloadBadge(true)
             val intent = Intent(context, DownloadService::class.java)
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
                 context.startService(intent)
@@ -60,6 +63,7 @@ class DownloadService : Service() {
          * @param context the application context.
          */
         fun stop(context: Context) {
+            MainActivity.setDownloadBadge(false)
             context.stopService(Intent(context, DownloadService::class.java))
         }
 
@@ -124,7 +128,7 @@ class DownloadService : Service() {
      * Not used.
      */
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        return Service.START_NOT_STICKY
+        return START_NOT_STICKY
     }
 
     /**

@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <group android:checkableBehavior="single">
+    <group android:checkableBehavior="single"
+        android:id="@+id/menu_top">
         <item
             android:checked="true"
             android:id="@+id/nav_drawer_library"
@@ -24,6 +25,9 @@
             android:icon="@drawable/ic_extension_black_24dp"
             app:actionLayout="@layout/menu_counter"
             android:title="@string/label_extensions"/>
+    </group>
+    <group android:checkableBehavior="single"
+        android:id="@+id/menu_bottom">
         <item
             android:id="@+id/nav_drawer_downloads"
             android:icon="@drawable/ic_file_download_black_24dp"

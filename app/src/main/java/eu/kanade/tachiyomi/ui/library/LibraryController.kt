@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.library
 
-import android.app.DownloadManager
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Color
@@ -42,7 +41,6 @@ import eu.kanade.tachiyomi.ui.base.controller.SecondaryDrawerController
 import eu.kanade.tachiyomi.ui.base.controller.TabbedController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.category.CategoryController
-import eu.kanade.tachiyomi.ui.download.DownloadController
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.ui.migration.MigrationController
@@ -438,8 +436,6 @@ class LibraryController(
         val searchView = searchItem.actionView as SearchView
         searchView.queryHint = resources?.getString(R.string.search_hint)
 
-        menu.findItem(R.id.action_downloads).isVisible = MainActivity.bottomNav &&
-            presenter.hasPendingDownloads()
         searchItem.collapseActionView()
         if (query.isNotEmpty()) {
             searchItem.expandActionView()
@@ -485,9 +481,6 @@ class LibraryController(
             }
             R.id.action_edit_categories -> {
                 router.pushController(CategoryController().withFadeTransaction())
-            }
-            R.id.action_downloads -> {
-                router.pushController(DownloadController().withFadeTransaction())
             }
             R.id.action_source_migration -> {
                 router.pushController(MigrationController().withFadeTransaction())
