@@ -6,7 +6,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.extension.model.LoadResult
-import eu.kanade.tachiyomi.util.lang.launchNow
+import eu.kanade.tachiyomi.util.system.launchNow
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -61,7 +61,8 @@ internal class ExtensionInstallReceiver(private val listener: Listener) :
                     when (result) {
                         is LoadResult.Success -> listener.onExtensionUpdated(result.extension)
                         // Not needed as a package can't be upgraded if the signature is different
-                        is LoadResult.Untrusted -> {}
+                        is LoadResult.Untrusted -> {
+                        }
                     }
                 }
             }

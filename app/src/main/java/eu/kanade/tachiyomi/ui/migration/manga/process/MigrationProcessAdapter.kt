@@ -9,10 +9,9 @@ import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.migration.MigrationFlags
-import eu.kanade.tachiyomi.util.lang.launchUI
+import eu.kanade.tachiyomi.util.system.launchUI
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.injectLazy
 
@@ -75,8 +74,9 @@ class MigrationProcessAdapter(
         launchUI {
             val manga = getItem(position)?.manga ?: return@launchUI
             db.inTransaction {
-                val toMangaObj = db.getManga(manga.searchResult.get() ?: return@launchUI).executeAsBlocking()
-                    ?: return@launchUI
+                val toMangaObj =
+                    db.getManga(manga.searchResult.get() ?: return@launchUI).executeAsBlocking()
+                        ?: return@launchUI
                 migrateMangaInternal(
                     manga.manga() ?: return@launchUI, toMangaObj, !copy
                 )

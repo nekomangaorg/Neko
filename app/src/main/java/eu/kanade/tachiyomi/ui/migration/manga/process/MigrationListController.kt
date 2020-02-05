@@ -29,7 +29,7 @@ import eu.kanade.tachiyomi.ui.migration.MigrationMangaDialog
 import eu.kanade.tachiyomi.ui.migration.SearchController
 import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
 import eu.kanade.tachiyomi.util.await
-import eu.kanade.tachiyomi.util.lang.launchUI
+import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.android.synthetic.main.chapters_controller.*
@@ -274,8 +274,9 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
             val res = resources
             if (res != null) {
                 activity?.toast(
-                    res.getQuantityString(R.plurals.manga_migrated,
-                        manaulMigrations, manaulMigrations)
+                    res.getQuantityString(
+                        R.plurals.manga_migrated, manaulMigrations, manaulMigrations
+                    )
                 )
             }
             router.popCurrentController()
@@ -319,8 +320,7 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
                 )
                 try {
                     syncChaptersWithSource(db, chapters, localManga, source)
-                }
-                catch (e: Exception) {
+                } catch (e: Exception) {
                     return@async null
                 }
                 localManga
@@ -343,8 +343,7 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
                 migratingManga.manga.migrationStatus = MigrationStatus.MANGA_FOUND
                 migratingManga.manga.searchResult.set(result.id)
                 adapter?.notifyDataSetChanged()
-            }
-            else {
+            } else {
                 migratingManga.manga.migrationStatus = MigrationStatus.MANGA_NOT_FOUND
                 activity?.toast(R.string.error_fetching_migration, Toast.LENGTH_LONG)
                 adapter?.notifyDataSetChanged()

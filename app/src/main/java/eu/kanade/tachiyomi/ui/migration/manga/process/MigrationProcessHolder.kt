@@ -15,7 +15,7 @@ import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.invisible
-import eu.kanade.tachiyomi.util.lang.launchUI
+import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.setVectorCompat
 import eu.kanade.tachiyomi.util.view.visible
 import kotlinx.android.synthetic.main.migration_manga_card.view.*
@@ -49,10 +49,14 @@ class MigrationProcessHolder(
             val manga = item.manga.manga()
             val source = item.manga.mangaSource()
 
-            migration_menu.setVectorCompat(R.drawable.ic_more_vert_black_24dp, view.context
-                 .getResourceColor(R.attr.icon_color))
-            skip_manga.setVectorCompat(R.drawable.ic_close_white_24dp, view.context.getResourceColor(R
-                .attr.icon_color))
+            migration_menu.setVectorCompat(
+                R.drawable.ic_more_vert_black_24dp, view.context.getResourceColor(R.attr.icon_color)
+            )
+            skip_manga.setVectorCompat(
+                R.drawable.ic_close_white_24dp, view.context.getResourceColor(
+                    R.attr.icon_color
+                )
+            )
             migration_menu.invisible()
             skip_manga.visible()
             migration_manga_card_to.resetManga()
@@ -62,8 +66,7 @@ class MigrationProcessHolder(
                     migration_manga_card_from.setOnClickListener {
                         adapter.controller.router.pushController(
                             MangaController(
-                                manga,
-                                true
+                                manga, true
                             ).withFadeTransaction()
                         )
                     }
@@ -87,8 +90,7 @@ class MigrationProcessHolder(
                     sourceManager.get(it)
                 }
                 withContext(Dispatchers.Main) {
-                    if (item.manga.mangaId != this@MigrationProcessHolder.item?.manga?.mangaId ||
-                     item.manga.migrationStatus == MigrationStatus.RUNNUNG) {
+                    if (item.manga.mangaId != this@MigrationProcessHolder.item?.manga?.mangaId || item.manga.migrationStatus == MigrationStatus.RUNNUNG) {
                         return@withContext
                     }
                     if (searchResult != null && resultSource != null) {
@@ -102,8 +104,8 @@ class MigrationProcessHolder(
                         }
                     } else {
                         migration_manga_card_to.loading_group.gone()
-                        migration_manga_card_to.title.text = view.context.applicationContext
-                            .getString(R.string.no_alternatives_found)
+                        migration_manga_card_to.title.text =
+                            view.context.applicationContext.getString(R.string.no_alternatives_found)
                     }
                     migration_menu.visible()
                     skip_manga.gone()

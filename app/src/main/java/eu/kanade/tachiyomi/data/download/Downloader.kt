@@ -15,8 +15,8 @@ import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.fetchAllImageUrlsFromPageList
 import eu.kanade.tachiyomi.util.lang.RetryWithDelay
-import eu.kanade.tachiyomi.util.lang.launchNow
-import eu.kanade.tachiyomi.util.lang.launchUI
+import eu.kanade.tachiyomi.util.system.launchNow
+import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.lang.plusAssign
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.storage.saveTo
@@ -230,42 +230,43 @@ class Downloader(
      * @param chapters the list of chapters to download.
      * @param autoStart whether to start the downloader after enqueing the chapters.
      */
-    fun queueChapters(manga: Manga, chapters: List<Chapter>, autoStart: Boolean) = launchUI {
-        val source = sourceManager.get(manga.source) as? HttpSource ?: return@launchUI
-        val wasEmpty = queue.isEmpty()
-        // Called in background thread, the operation can be slow with SAF.
-        val chaptersWithoutDir = async {
-            chapters
+    fun queueChapters(manga: Manga, chapters: List<Chapter>, autoStart: Boolean) =
+        launchUI {
+            val source = sourceManager.get(manga.source) as? HttpSource ?: return@launchUI
+            val wasEmpty = queue.isEmpty()
+            // Called in background thread, the operation can be slow with SAF.
+            val chaptersWithoutDir = async {
+                chapters
                     // Filter out those already downloaded.
                     .filter { provider.findChapterDir(it, manga, source) == null }
                     // Add chapters to queue from the start.
                     .sortedByDescending { it.source_order }
-        }
+            }
 
-        // Runs in main thread (synchronization needed).
-        val chaptersToQueue = chaptersWithoutDir.await()
+            // Runs in main thread (synchronization needed).
+            val chaptersToQueue = chaptersWithoutDir.await()
                 // Filter out those already enqueued.
                 .filter { chapter -> queue.none { it.chapter.id == chapter.id } }
                 // Create a download for each one.
                 .map { Download(source, manga, it) }
 
-        if (chaptersToQueue.isNotEmpty()) {
-            queue.addAll(chaptersToQueue)
+            if (chaptersToQueue.isNotEmpty()) {
+                queue.addAll(chaptersToQueue)
 
-            // Initialize queue size.
-            notifier.initialQueueSize = queue.size
+                // Initialize queue size.
+                notifier.initialQueueSize = queue.size
 
-            if (isRunning) {
-                // Send the list of downloads to the downloader.
-                downloadsRelay.call(chaptersToQueue)
-            }
+                if (isRunning) {
+                    // Send the list of downloads to the downloader.
+                    downloadsRelay.call(chaptersToQueue)
+                }
 
-            // Start downloader if needed
-            if (autoStart && wasEmpty) {
-                DownloadService.start(this@Downloader.context)
+                // Start downloader if needed
+                if (autoStart && wasEmpty) {
+                    DownloadService.start(this@Downloader.context)
+                }
             }
         }
-    }
 
     /**
      * Returns the observable which downloads a chapter.

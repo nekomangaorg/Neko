@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.ui.setting
 import android.app.Dialog
 import android.os.Bundle
 import androidx.preference.PreferenceScreen
-import android.view.View
 import android.widget.Toast
 import com.afollestad.materialdialogs.MaterialDialog
 import com.bluelinelabs.conductor.RouterTransaction
@@ -14,12 +13,11 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService.Target
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.library.LibraryController
-import eu.kanade.tachiyomi.util.lang.launchUI
+import eu.kanade.tachiyomi.util.system.launchUI
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -105,8 +103,13 @@ class SettingsAdvancedController : SettingsController() {
             }
             launchUI {
                 val activity = activity ?: return@launchUI
-                val cleanupString = if (foldersCleared == 0) activity.getString(R.string.no_cleanup_done)
-                else resources!!.getQuantityString(R.plurals.cleanup_done, foldersCleared, foldersCleared)
+                val cleanupString =
+                    if (foldersCleared == 0) activity.getString(R.string.no_cleanup_done)
+                    else resources!!.getQuantityString(
+                        R.plurals.cleanup_done,
+                        foldersCleared,
+                        foldersCleared
+                    )
                 activity.toast(cleanupString, Toast.LENGTH_LONG)
             }
         }

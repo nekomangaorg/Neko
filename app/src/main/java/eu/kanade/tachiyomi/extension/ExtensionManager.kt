@@ -12,7 +12,7 @@ import eu.kanade.tachiyomi.extension.util.ExtensionInstallReceiver
 import eu.kanade.tachiyomi.extension.util.ExtensionInstaller
 import eu.kanade.tachiyomi.extension.util.ExtensionLoader
 import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.util.lang.launchNow
+import eu.kanade.tachiyomi.util.system.launchNow
 import kotlinx.coroutines.async
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
@@ -252,16 +252,13 @@ class ExtensionManager(
 
         val ctx = context
         launchNow {
-            nowTrustedExtensions
-                    .map { extension ->
-                        async { ExtensionLoader.loadExtensionFromPkgName(ctx, extension.pkgName) }
+            nowTrustedExtensions.map { extension ->
+                async { ExtensionLoader.loadExtensionFromPkgName(ctx, extension.pkgName) }
+            }.map { it.await() }.forEach { result ->
+                    if (result is LoadResult.Success) {
+                        registerNewExtension(result.extension)
                     }
-                    .map { it.await() }
-                    .forEach { result ->
-                        if (result is LoadResult.Success) {
-                            registerNewExtension(result.extension)
-                        }
-                    }
+                }
         }
     }
 
