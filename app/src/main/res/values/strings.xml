@@ -255,8 +255,11 @@
 
     <!-- Related Mangas section -->
     <string name="pref_related_last_updated_txt">Open Related Manga JSON File</string>
-    <string name="pref_related_last_updated">Updated</string>
+    <string name="pref_related_last_updated">Updated: %s</string>
+    <string name="pref_related_broken_file">Unable to parse. Is it a valid JSON?</string>
     <string name="pref_related_show_tab">Show Related Manga Tab</string>
+    <string name="pref_related_loading_percent">%d / %d mangas loaded so far&#8230;</string>
+    <string name="pref_related_loading_welcome">Loading JSON From File!</string>
 
     <!-- Backup section -->
     <string name="backup">Backup</string>

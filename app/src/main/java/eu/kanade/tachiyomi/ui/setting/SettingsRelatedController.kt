@@ -1,11 +1,9 @@
 package eu.kanade.tachiyomi.ui.setting
 
 import android.app.Activity
-import android.app.Notification
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
-import android.util.Log
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -20,8 +18,13 @@ import uy.kohesive.injekt.injectLazy
 import java.text.SimpleDateFormat
 import java.util.*
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
-import android.app.ProgressDialog
+import android.widget.ProgressBar
 import eu.kanade.tachiyomi.data.database.models.MangaRelatedImpl
+import android.app.AlertDialog
+import android.widget.TextView
+import android.widget.LinearLayout
+
+
 
 
 class SettingsRelatedController : SettingsController() {
@@ -107,6 +110,7 @@ class SettingsRelatedController : SettingsController() {
 
                 //=============================================================
                 //=============================================================
+                
 
                 // Load everything from the buffer into our string
                 val result = input.bufferedReader().use { it.readText() }
@@ -114,7 +118,7 @@ class SettingsRelatedController : SettingsController() {
                 try {
                     relatedPageResult = JSONObject(result)
                 } catch (e : JSONException) {
-                    context.toast("Unable to parse. Is it a valid JSON?")
+                    context.toast(context.resources.getString(R.string.pref_related_broken_file))
                     return
                 }
 
@@ -124,14 +128,20 @@ class SettingsRelatedController : SettingsController() {
                     totaMangas++
                 }
 
-                // Create the progress bar
-                val progressDialog = ProgressDialog(activity)
-                progressDialog.isIndeterminate = false
-                progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL)
-                progressDialog.setCanceledOnTouchOutside(false)
-                progressDialog.setMax(totaMangas)
-                progressDialog.setMessage("Loading Related Mangas from File")
-                progressDialog.show()
+                // Display an alert to the user (replaces the ProgressDialog)
+                // https://stackoverflow.com/a/51694457
+                val builder = AlertDialog.Builder(activity)
+                builder.setCancelable(false)
+                val layout = activity.layoutInflater.inflate(R.layout.layout_loading_dialog, null)
+                val progressBar = layout.findViewById<ProgressBar>(R.id.progress)
+                val progressMessage = layout.findViewById<TextView>(R.id.text)
+                progressBar.progress = 0
+                progressBar.scaleY = 3f
+                progressBar.max = totaMangas
+                progressMessage.text = context.resources.getString(R.string.pref_related_loading_welcome)
+                builder.setView(layout)
+                val dialog = builder.create()
+                dialog.show()
 
                 //=============================================================
                 //=============================================================
@@ -158,10 +168,11 @@ class SettingsRelatedController : SettingsController() {
                             related.scores = relatedPageResult.getJSONObject(key).getJSONArray("scores").toString()
                             db.insertRelated(related).executeAsBlocking()
                             counter++
-                            progressDialog.setProgress(counter)
+                            progressBar.progress = counter
+                            progressMessage.text = context.resources.getString(R.string.pref_related_loading_percent,counter,totaMangas)
                         }
-                        progressDialog.dismiss()
-                        context.toast("Loaded $counter mangas from file")
+                        dialog.dismiss()
+                        //context.toast("Loaded $counter mangas from file")
 
                         // Nice debug to see if they were inserted
                         //var mangas = db.getAllRelated().executeAsBlocking()
@@ -170,10 +181,11 @@ class SettingsRelatedController : SettingsController() {
                         // Finally, save when we last loaded the database
                         val dataFormater = SimpleDateFormat("MMM dd, yyyy HH:mm:ss zzz", Locale.getDefault())
                         val currentDate = dataFormater.format(Date())
-                        preferences.relatedLastUpdated().set(context.resources.getString(R.string.pref_related_last_updated)+": "+currentDate.toString())
+                        preferences.relatedLastUpdated().set(context.resources.getString(R.string.pref_related_last_updated,currentDate.toString()))
 
                     } catch (e: Exception) {
                         e.printStackTrace()
+                        dialog.dismiss()
                     }
                 }).start()
 
