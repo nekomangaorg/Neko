@@ -23,6 +23,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.data.preference.getOrDefault
+import eu.kanade.tachiyomi.ui.main.MainActivity
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -149,16 +150,7 @@ inline val View.marginLeft: Int
 
 object RecyclerWindowInsetsListener : View.OnApplyWindowInsetsListener {
     override fun onApplyWindowInsets(v: View, insets: WindowInsets): WindowInsets {
-        val prefs:PreferencesHelper by injectLazy()
-        if (prefs.useBottonNav().getOrDefault()) return insets
-        v.setPadding(0,0,0,insets.systemWindowInsetBottom)
-        //v.updatePaddingRelative(bottom = v.paddingBottom + insets.systemWindowInsetBottom)
-        return insets
-    }
-}
-
-object RecyclerWindowInsetsAlwaysListener : View.OnApplyWindowInsetsListener {
-    override fun onApplyWindowInsets(v: View, insets: WindowInsets): WindowInsets {
+        if (MainActivity.bottomNav) return insets
         v.setPadding(0,0,0,insets.systemWindowInsetBottom)
         //v.updatePaddingRelative(bottom = v.paddingBottom + insets.systemWindowInsetBottom)
         return insets
@@ -167,8 +159,7 @@ object RecyclerWindowInsetsAlwaysListener : View.OnApplyWindowInsetsListener {
 
 fun View.doOnApplyWindowInsets(f: (View, WindowInsets, ViewPaddingState) -> Unit) {
     // Create a snapshot of the view's padding state
-    val prefs:PreferencesHelper by injectLazy()
-    if (prefs.useBottonNav().getOrDefault()) return
+    if (MainActivity.bottomNav) return
     val paddingState = createStateForView(this)
     setOnApplyWindowInsetsListener { v, insets ->
         f(v, insets, paddingState)

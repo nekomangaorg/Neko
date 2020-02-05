@@ -16,7 +16,7 @@
     <string name="label_library">My library</string>
     <string name="label_recent_manga">Recently read</string>
     <string name="label_catalogues">Catalogues</string>
-    <string name="label_recent_updates">Library updates</string>
+    <string name="label_recent_updates">Recently updated</string>
     <string name="label_selected">Selected: %1$d</string>
     <string name="label_migration">Source migration</string>
     <string name="label_extensions">Extensions</string>
@@ -113,7 +113,7 @@
     <!-- Shortcuts-->
     <string name="app_not_available">App not available</string>
     <string name="short_recent_updates">Updates</string>
-    <string name="short_recently_read">Recents</string>
+    <string name="short_recents">Recents</string>
     <string name="short_catalogues">Browse</string>
 
     <!-- Preferences -->

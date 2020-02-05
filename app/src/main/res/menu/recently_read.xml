@@ -7,4 +7,10 @@
         app:actionViewClass="androidx.appcompat.widget.SearchView"
         app:showAsAction="ifRoom|collapseActionView" />
 
+    <item
+        android:id="@+id/action_recents"
+        android:icon="@drawable/ic_update_black_24dp"
+        android:title="@string/label_recent_updates"
+        app:showAsAction="ifRoom" />
+
 </menu>

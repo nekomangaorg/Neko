@@ -104,8 +104,7 @@ class ChaptersController() : NucleusController<ChaptersPresenter>(),
 
         val fabBaseMarginBottom = fab?.marginBottom ?: 0
         recycler.setOnApplyWindowInsetsListener { v, insets ->
-            if (activity !is SearchActivity &&
-                presenter.preferences.useBottonNav().getOrDefault())
+            if (MainActivity.bottomNav)
                 return@setOnApplyWindowInsetsListener insets
             fab?.updateLayoutParams<ViewGroup.MarginLayoutParams>  {
                 bottomMargin = fabBaseMarginBottom + insets.systemWindowInsetBottom

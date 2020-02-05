@@ -8,13 +8,9 @@
             android:icon="@drawable/ic_book_black_24dp"
             android:title="@string/pref_category_library" />
         <item
-            android:id="@+id/nav_drawer_recent_updates"
+            android:id="@+id/nav_drawer_recents"
             android:icon="@drawable/ic_update_black_24dp"
-            android:title="@string/short_recent_updates" />
-        <item
-            android:id="@+id/nav_drawer_recently_read"
-            android:icon="@drawable/ic_glasses_black_24dp"
-            android:title="@string/short_recently_read"/>
+            android:title="@string/short_recents" />
         <item
             android:id="@+id/nav_drawer_catalogues"
             android:icon="@drawable/ic_explore_black_24dp"

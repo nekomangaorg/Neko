@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.recent_updates
 
 import android.view.LayoutInflater
 import android.view.Menu
+import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
@@ -18,16 +19,21 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.notification.Notifications
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.controller.NoToolbarElevationController
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
+import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.system.notificationManager
 import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
 import eu.kanade.tachiyomi.util.view.snack
+import eu.kanade.tachiyomi.ui.recently_read.RecentlyReadController
 import kotlinx.android.synthetic.main.recent_chapters_controller.*
 import timber.log.Timber
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 
 /**
  * Fragment that shows recent chapters.
@@ -43,6 +49,9 @@ class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
         ConfirmDeleteChaptersDialog.Listener,
         RecentChaptersAdapter.OnCoverClickListener {
 
+    init {
+        setHasOptionsMenu(true)
+    }
     /**
      * Action mode for multiple selection.
      */
@@ -326,4 +335,22 @@ class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
         actionMode = null
     }
 
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.recent_updates, menu)
+        menu.findItem(R.id.action_recents).isVisible = MainActivity.bottomNav
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.action_recents -> {
+                router.setRoot(
+                    RecentlyReadController().withFadeTransaction()
+                        .tag(R.id.nav_drawer_recents.toString()))
+                Injekt.get<PreferencesHelper>().showRecentUpdates().set(false)
+                (activity as? MainActivity)?.updateRecentsIcon()
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
 }

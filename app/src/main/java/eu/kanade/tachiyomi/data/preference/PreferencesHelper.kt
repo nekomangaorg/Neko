@@ -233,6 +233,8 @@ class PreferencesHelper(val context: Context) {
 
     fun useBottonNav() = rxPrefs.getBoolean(Keys.useBottomNav, true)
 
+    fun showRecentUpdates() = rxPrefs.getBoolean("show_recents", false)
+
     fun lastExtCheck() = rxPrefs.getLong("last_ext_check", 0)
 
     fun upgradeFilters() {

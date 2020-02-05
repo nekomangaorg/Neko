@@ -198,9 +198,10 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         val fabBaseMarginBottom = fab_favorite.marginBottom
         val mangaCoverMarginBottom = manga_cover.marginBottom
         val fullMarginBottom = manga_cover_full?.marginBottom ?: 0
+        setFullCoverToThumb()
         container?.setOnApplyWindowInsetsListener { _, insets ->
-            if (activity !is SearchActivity &&
-                Injekt.get<PreferencesHelper>().useBottonNav().getOrDefault())
+            setFullCoverToThumb()
+            if (MainActivity.bottomNav)
                 return@setOnApplyWindowInsetsListener insets
             if (resources?.configuration?.orientation == Configuration.ORIENTATION_LANDSCAPE) {
                 fab_favorite?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
@@ -217,7 +218,6 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
             manga_cover_full?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 bottomMargin = fullMarginBottom + insets.systemWindowInsetBottom
             }
-            setFullCoverToThumb()
             insets
         }
         info_scrollview.doOnApplyWindowInsets { v, insets, padding ->
@@ -759,7 +759,7 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         layoutParams.width = thumbView.width
         expandedImageView.layoutParams = layoutParams
         expandedImageView.scaleType = ImageView.ScaleType.FIT_CENTER
-        setUpFullCover = thumbView.height > 0
+        setUpFullCover = expandedImageView.height > 0
     }
 
     override fun handleBack(): Boolean {

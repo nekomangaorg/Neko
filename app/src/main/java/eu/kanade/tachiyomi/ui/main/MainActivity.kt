@@ -19,6 +19,7 @@ import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.biometric.BiometricManager
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.GravityCompat
+import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import com.bluelinelabs.conductor.Conductor
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.ControllerChangeHandler
@@ -168,33 +169,41 @@ open class MainActivity : BaseActivity() {
             if (currentRoot?.tag()?.toIntOrNull() != id) {
                 when (id) {
                     R.id.nav_drawer_library -> setRoot(LibraryController(), id)
-                    R.id.nav_drawer_recent_updates -> setRoot(RecentChaptersController(), id)
-                    R.id.nav_drawer_recently_read -> setRoot(RecentlyReadController(), id)
+                    R.id.nav_drawer_recents ->  {
+                        if (preferences.showRecentUpdates().getOrDefault())
+                            setRoot(RecentChaptersController(), id)
+                        else
+                            setRoot(RecentlyReadController(), id)
+                    }
                     R.id.nav_drawer_catalogues -> setRoot(CatalogueController(), id)
-                    R.id.nav_drawer_extensions -> setRoot(ExtensionController(), id)
-                    R.id.nav_drawer_downloads -> {
-                        if (router.backstack.isEmpty()) {
-                            setRoot(LibraryController(), R.id.nav_drawer_library)
-                        }
-                        router.pushController(DownloadController().withFadeTransaction())
-                    }
-                    R.id.nav_drawer_settings -> {
-                        setRoot(SettingsMainController(), id)
-                    }
-                    R.id.nav_drawer_help -> {
-                        openInBrowser(URL_HELP)
-                    }
+                    R.id.nav_drawer_settings -> setRoot(SettingsMainController(), id)
                 }
                 nav_view.setCheckedItem(id)
+            }
+            else if (currentRoot?.tag()?.toIntOrNull() == id)  {
+                when (id) {
+                    R.id.nav_drawer_recents -> {
+                        if (router.backstack.size > 1) router.popToRoot()
+                        else {
+                            val showRecents = preferences.showRecentUpdates().getOrDefault()
+                            if (!showRecents) setRoot(RecentChaptersController(), id)
+                            else setRoot(RecentlyReadController(), id)
+                            preferences.showRecentUpdates().set(!showRecents)
+                            updateRecentsIcon()
+                        }
+                    }
+                    R.id.nav_drawer_library, R.id.nav_drawer_catalogues,
+                    R.id.nav_drawer_settings -> router.popToRoot()
+                }
             }
             true
         }
         val container: ViewGroup = findViewById(R.id.controller_container)
 
         val content: ViewGroup = findViewById(R.id.main_content)
-        val drawerEnabled = !preferences.useBottonNav().getOrDefault()
-        content.fitsSystemWindows = drawerEnabled
-        if (drawerEnabled) {
+        bottomNav = preferences.useBottonNav().getOrDefault()
+        content.fitsSystemWindows = !bottomNav
+        if (!bottomNav) {
             container.systemUiVisibility =
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
         }
@@ -207,7 +216,8 @@ open class MainActivity : BaseActivity() {
                 top = v.marginTop
             )
         }
-        navigationView.visibility = if (drawerEnabled) View.GONE else View.VISIBLE
+        navigationView.visibility = if (bottomNav) View.VISIBLE else View.GONE
+        updateRecentsIcon()
         content.setOnApplyWindowInsetsListener { v, insets ->
             window.navigationBarColor =
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
@@ -228,14 +238,17 @@ open class MainActivity : BaseActivity() {
                 else if (v.rootWindowInsets.systemWindowInsetLeft > 0
                     || v.rootWindowInsets.systemWindowInsetRight > 0) {
                     getResourceColor(
-                        if (drawerEnabled) android.R.attr.colorBackground
-                        else android.R.attr.colorPrimary)
+                        if (bottomNav) android.R.attr.colorPrimary
+                        else android.R.attr.colorBackground
+                    )
                 }
                 // if in portrait with 2/3 button mode, translucent nav bar
                 else {
                     ColorUtils.setAlphaComponent(
-                        getResourceColor(if (drawerEnabled) android.R.attr.colorBackground
-                        else android.R.attr.colorPrimary), 179)
+                        getResourceColor(
+                            if (bottomNav) android.R.attr.colorPrimary
+                            else android.R.attr.colorBackground
+                        ), 179)
                 }
             v.setPadding(insets.systemWindowInsetLeft, insets.systemWindowInsetTop,
                 insets.systemWindowInsetRight, 0)
@@ -252,7 +265,6 @@ open class MainActivity : BaseActivity() {
             content.systemUiVisibility = content.systemUiVisibility.or(View
                 .SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
 
-        val navBarScrim: View = findViewById(R.id.nav_bar_scrim)
         val drawerContainer: FrameLayout = findViewById(R.id.drawer_container)
         drawerContainer.setOnApplyWindowInsetsListener { v, insets ->
             val contextView = window?.decorView?.findViewById<View>(R.id.action_mode_bar)
@@ -267,7 +279,7 @@ open class MainActivity : BaseActivity() {
                 right = insets.systemWindowInsetRight
             )
             nav_bar_scrim.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                height = if (!drawerEnabled) insets.systemWindowInsetBottom else 0
+                height = if (bottomNav) insets.systemWindowInsetBottom else 0
             }
             insets.replaceSystemWindowInsets(
                 0, insets.systemWindowInsetTop,
@@ -319,6 +331,16 @@ open class MainActivity : BaseActivity() {
         setExtensionsBadge()
     }
 
+    fun updateRecentsIcon() {
+        if (bottomNav) navigationView.menu.findItem(R.id.nav_drawer_recents).icon =
+            VectorDrawableCompat.create(
+                resources!!,
+                if (preferences.showRecentUpdates().getOrDefault()) R.drawable.ic_update_black_24dp
+                else R.drawable.ic_history_black_24dp,
+                null
+            )
+    }
+
     override fun startSupportActionMode(callback: androidx.appcompat.view.ActionMode.Callback): androidx.appcompat.view.ActionMode? {
         window?.statusBarColor = getResourceColor(R.attr.colorPrimary)
         return super.startSupportActionMode(callback)
@@ -360,6 +382,7 @@ open class MainActivity : BaseActivity() {
 
     override fun onResume() {
         super.onResume()
+        bottomNav = preferences.useBottonNav().getOrDefault()
         getExtensionUpdates()
         val useBiometrics = preferences.useBiometrics().getOrDefault()
         if (useBiometrics && BiometricManager.from(this)
@@ -458,8 +481,7 @@ open class MainActivity : BaseActivity() {
         val backstackSize = router.backstackSize
         if (drawer.isDrawerOpen(GravityCompat.START) || drawer.isDrawerOpen(GravityCompat.END)) {
             drawer.closeDrawers()
-        } else if (!preferences.useBottonNav().getOrDefault()
-            && backstackSize == 1 && router.getControllerWithTag
+        } else if (!bottomNav && backstackSize == 1 && router.getControllerWithTag
                 ("$startScreenId") == null) {
             setSelectedDrawerItem(startScreenId)
         }  else if (!router.handleBack()) {
@@ -468,22 +490,36 @@ open class MainActivity : BaseActivity() {
         }
     }
 
-    fun setSelectedDrawerItem(itemId: Int) {
+    private fun setSelectedDrawerItem(itemId: Int) {
         if (!isFinishing) {
-            nav_view.setCheckedItem(itemId)
-            navigationView.selectedItemId = itemId
+            if (bottomNav) navigationView.selectedItemId = itemId
+            else nav_view.setCheckedItem(itemId)
             jumpToController(itemId)
         }
     }
 
-    fun jumpToController(id: Int) {
+    private fun jumpToController(id: Int) {
 
         val currentRoot = router.backstack.firstOrNull()
         if (currentRoot?.tag()?.toIntOrNull() != id) {
             when (id) {
                 R.id.nav_drawer_library -> setRoot(LibraryController(), id)
-                R.id.nav_drawer_recent_updates -> setRoot(RecentChaptersController(), id)
-                R.id.nav_drawer_recently_read -> setRoot(RecentlyReadController(), id)
+                R.id.nav_drawer_recent_updates -> {
+                    if (bottomNav)
+                        navigationView.selectedItemId = R.id.nav_drawer_recents
+                    setRoot(RecentChaptersController(), if (bottomNav) R.id.nav_drawer_recents
+                        else id)
+                    preferences.showRecentUpdates().set(true)
+                    updateRecentsIcon()
+                }
+                R.id.nav_drawer_recently_read -> {
+                    if (bottomNav)
+                        navigationView.selectedItemId = R.id.nav_drawer_recents
+                    setRoot(RecentlyReadController(), if (bottomNav) R.id.nav_drawer_recents
+                    else id)
+                    preferences.showRecentUpdates().set(false)
+                    updateRecentsIcon()
+                }
                 R.id.nav_drawer_catalogues -> setRoot(CatalogueController(), id)
                 R.id.nav_drawer_extensions -> {
                     if (router.backstack.isEmpty()) {
@@ -552,23 +588,19 @@ open class MainActivity : BaseActivity() {
         if (from is DialogController || to is DialogController) {
             return
         }
-        val drawerEnabled = !preferences.useBottonNav().getOrDefault()
-
         val showHamburger = router.backstackSize == 1
         drawer.setDrawerLockMode(androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
         if (showHamburger) {
-            if (drawerEnabled)
-                drawer.setDrawerLockMode(androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_UNLOCKED)
-            else toolbar.navigationIcon = null
+            if (bottomNav) toolbar.navigationIcon = null
+            else drawer.setDrawerLockMode(androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_UNLOCKED)
         } else {
-            if (drawerEnabled) drawer.setDrawerLockMode(
+            if (bottomNav) toolbar.navigationIcon = drawerArrow
+            else drawer.setDrawerLockMode(
                 androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_LOCKED_CLOSED
             )
-            else toolbar.navigationIcon = drawerArrow
         }
-        if (drawerEnabled)
-            ObjectAnimator.ofFloat(drawerArrow, "progress", if (showHamburger) 0f else 1f).start()
-        else drawerArrow?.progress = 1f
+        if (bottomNav) drawerArrow?.progress = 1f
+        else ObjectAnimator.ofFloat(drawerArrow, "progress", if (showHamburger) 0f else 1f).start()
 
         if (from is TabbedController) {
             from.cleanupTabs(tabs)
@@ -620,6 +652,9 @@ open class MainActivity : BaseActivity() {
         private const val URL_HELP = "https://tachiyomi.org/help/"
 
         var unlocked = false
+
+        var bottomNav = false
+            internal set
     }
 
 }
