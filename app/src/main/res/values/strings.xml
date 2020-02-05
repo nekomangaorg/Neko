@@ -134,15 +134,15 @@
 
       <!-- General section -->
     <string name="pref_theme">App theme</string>
-    <string name="light_theme">Light</string>
+    <string name="light_theme">Light Blue</string>
     <string name="dark_theme">Dark</string>
     <string name="amoled_theme">AMOLED dark</string>
     <string name="darkblue_theme">Dark blue</string>
     <string name="system_theme">System default (Light + Dark)</string>
     <string name="white_theme">Pure White</string>
     <string name="sysyem_white_theme">System default (White + Dark)</string>
-    <string name="system_amoled_theme">System default (Light + AMOLED dark)</string>
-    <string name="system_darkblue_theme">System default (Light + Dark blue)</string>
+    <string name="system_amoled_theme">System default (Light + AMOLED)</string>
+    <string name="system_darkblue_theme">System default (All blue)</string>
     <string name="pref_start_screen">Start screen</string>
     <string name="pref_language">Language</string>
     <string name="system_default">System default</string>
@@ -549,12 +549,12 @@
         <item quantity="other">For %d titles</item>
     </plurals>
     <plurals name="notification_and_n_more">
-        <item quantity="one">and %1$d more chapter.</item>
-        <item quantity="other">and %1$d more chapters.</item>
+        <item quantity="one">and %1$d more chapter</item>
+        <item quantity="other">and %1$d more chapters</item>
     </plurals>
     <plurals name="notification_and_n_more_ext">
-        <item quantity="one">and %1$d more extension.</item>
-        <item quantity="other">and %1$d more extensions.</item>
+        <item quantity="one">and %1$d more extension</item>
+        <item quantity="other">and %1$d more extensions</item>
     </plurals>
     <string name="notification_cover_update_failed">Failed to update cover</string>
     <string name="notification_first_add_to_library">Please add the manga to your library before doing this</string>

@@ -15,6 +15,7 @@ import android.view.ViewGroup
 import android.webkit.WebView
 import android.widget.FrameLayout
 import android.widget.TextView
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.biometric.BiometricManager
 import androidx.core.graphics.ColorUtils
@@ -331,12 +332,9 @@ open class MainActivity : BaseActivity() {
 
     fun updateRecentsIcon() {
         if (bottomNav) navigationView.menu.findItem(R.id.nav_drawer_recents).icon =
-            VectorDrawableCompat.create(
-                resources!!,
+            AppCompatResources.getDrawable(this,
                 if (preferences.showRecentUpdates().getOrDefault()) R.drawable.ic_update_black_24dp
-                else R.drawable.ic_history_black_24dp,
-                null
-            )
+                else R.drawable.ic_history_black_24dp)
     }
 
     override fun startSupportActionMode(callback: androidx.appcompat.view.ActionMode.Callback): androidx.appcompat.view.ActionMode? {

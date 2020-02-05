@@ -14,6 +14,7 @@ import android.view.ViewGroup
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.widget.LinearLayout
+import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.SourceManager
@@ -104,19 +105,22 @@ class WebViewActivity : BaseActivity() {
         }
 
         content.setOnApplyWindowInsetsListener { v, insets ->
-            window.statusBarColor = getResourceColor(R.attr.colorPrimary)
-            window.navigationBarColor =
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-                    v.context.getResourceColor(android.R.attr.colorPrimary)
-                }
-                // if the android q+ device has gesture nav, transparent nav bar
-                else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
-                    && (v.rootWindowInsets.systemWindowInsetBottom != v.rootWindowInsets
-                        .tappableElementInsets.bottom)) {
-                    getColor(android.R.color.transparent)
-                } else {
-                    v.context.getResourceColor(android.R.attr.colorBackground)
-                }
+            // if pure white theme on a device that does not support dark status bar
+            if (getResourceColor(android.R.attr.statusBarColor) != Color.TRANSPARENT)
+                window.statusBarColor = Color.BLACK
+            else window.statusBarColor = getResourceColor(R.attr.colorPrimary)
+            window.navigationBarColor = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                val colorPrimary = getResourceColor(android.R.attr.colorPrimary)
+                if (colorPrimary == Color.WHITE) Color.BLACK
+                else getResourceColor(android.R.attr.colorPrimary)
+            }
+            // if the android q+ device has gesture nav, transparent nav bar
+            else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
+                (v.rootWindowInsets.systemWindowInsetBottom != v.rootWindowInsets.tappableElementInsets.bottom)) {
+                getColor(android.R.color.transparent)
+            } else {
+                getResourceColor(android.R.attr.colorBackground)
+            }
             v.setPadding(insets.systemWindowInsetLeft, insets.systemWindowInsetTop,
                 insets.systemWindowInsetRight, 0)
             val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
