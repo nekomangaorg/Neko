@@ -119,12 +119,9 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
         // Double the distance required to trigger sync
         swipe_refresh.setDistanceToTriggerSync((2 * 64 * resources.displayMetrics.density).toInt())
         swipe_refresh.setOnRefreshListener {
-            if (!LibraryUpdateService.isRunning(context)) {
-                LibraryUpdateService.start(context, category)
-                controller.snack?.dismiss()
-                controller.snack = swipe_refresh.snack(R.string.updating_category)
-            }
-            // It can be a very long operation, so we disable swipe refresh and show a toast.
+            LibraryUpdateService.start(context, category)
+            controller.snack?.dismiss()
+            controller.snack = swipe_refresh.snack(R.string.updating_category)
             swipe_refresh.isRefreshing = false
         }
     }
