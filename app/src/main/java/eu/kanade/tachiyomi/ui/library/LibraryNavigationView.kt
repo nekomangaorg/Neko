@@ -17,6 +17,7 @@ import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Comp
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
+import kotlin.math.min
 
 /**
  * The navigation view shown in a drawer with the different options to show the library.
@@ -90,7 +91,7 @@ class LibraryNavigationView @JvmOverloads constructor(context: Context, attrs: A
 
         private val completed = Item.TriStateGroup(R.string.completed, this)
 
-        private val tracked = Item.TriStateGroup(R.string.tracked, this)
+        private val tracked = Item.TriStateGroup(R.string.action_filter_tracked, this)
 
         private val categories = Item.TriStateGroup(R.string.action_hide_categories, this)
 
@@ -115,10 +116,10 @@ class LibraryNavigationView @JvmOverloads constructor(context: Context, attrs: A
                 categories.state =
                     if (preferences.hideCategories().getOrDefault()) STATE_INCLUDE
                     else STATE_IGNORE
-                downloaded.state = preferences.filterDownloaded().getOrDefault()
-                unread.state = preferences.filterUnread().getOrDefault()
-                completed.state = preferences.filterCompleted().getOrDefault()
-                tracked.state = preferences.filterTracked().getOrDefault()
+                downloaded.state = min(2, preferences.filterDownloaded().getOrDefault())
+                unread.state = min(2, preferences.filterUnread().getOrDefault())
+                completed.state = min(2, preferences.filterCompleted().getOrDefault())
+                tracked.state = min(2, preferences.filterTracked().getOrDefault())
             }
             catch (e: Exception) {
                 preferences.upgradeFilters()

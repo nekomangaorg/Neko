@@ -35,9 +35,15 @@
     <!-- Actions -->
     <string name="action_filter">Filter</string>
     <string name="action_filter_downloaded">Downloaded</string>
+    <string name="action_filter_not_downloaded">Not downloaded</string>
     <string name="action_filter_bookmarked">Bookmarked</string>
     <string name="action_filter_unread">Unread</string>
+    <string name="action_filter_not_started">Not started</string>
+    <string name="action_filter_in_progress">In progress</string>
     <string name="action_filter_read">Read</string>
+    <string name="action_filter_tracked">Tracked</string>
+    <string name="action_filter_not_tracked">Not tracked</string>
+
     <string name="action_filter_empty">Remove filter</string>
     <string name="action_sort_alpha">Alphabetically</string>
     <string name="action_sort_enabled">Enabled</string>
@@ -478,7 +484,6 @@
     <string name="reading">Reading</string>
     <string name="currently_reading">Currently Reading</string>
     <string name="completed">Completed</string>
-    <string name="tracked">Tracked</string>
     <string name="dropped">Dropped</string>
     <string name="on_hold">On hold</string>
     <string name="plan_to_read">Plan to read</string>

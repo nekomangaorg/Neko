@@ -588,7 +588,7 @@
     <string name="track_status">Статус</string>
     <string name="track_type">Тип</string>
 
-    <string name="tracked">Отслеживаемые</string>
+    <string name="action_filter_tracked">Отслеживаемые</string>
 
     <string name="transition_current">Текущая:</string>
     <string name="transition_finished">Закончена:</string>

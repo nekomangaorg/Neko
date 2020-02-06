@@ -23,6 +23,8 @@ import com.afollestad.materialdialogs.MaterialDialog
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
 import com.f2prateek.rx.preferences.Preference
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
@@ -56,6 +58,7 @@ import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.widget.ExtendedNavigationView
+import kotlinx.android.synthetic.main.filter_bottom_sheet.*
 import kotlinx.android.synthetic.main.library_controller.*
 import kotlinx.android.synthetic.main.main_activity.*
 import rx.Subscription
@@ -203,6 +206,18 @@ class LibraryController(
 
         if (selectedMangas.isNotEmpty()) {
             createActionModeIfNeeded()
+        }
+
+        bottom_sheet.onCreate(library_pager)
+
+        bottom_sheet?.onGroupClicked = {
+            when (it) {
+                FilterBottomSheet.ACTION_REFRESH -> onRefresh()
+                FilterBottomSheet.ACTION_FILTER -> onFilterChanged()
+                FilterBottomSheet.ACTION_SORT -> onSortChanged()
+                FilterBottomSheet.ACTION_DISPLAY -> reattachAdapter()
+                FilterBottomSheet.ACTION_BADGE -> onDownloadBadgeChanged()
+            }
         }
     }
 
@@ -359,6 +374,11 @@ class LibraryController(
             preferences.portraitColumns()
         else
             preferences.landscapeColumns()
+    }
+
+    private fun onRefresh() {
+        activity?.invalidateOptionsMenu()
+        presenter.requestFullUpdate()
     }
 
     /**

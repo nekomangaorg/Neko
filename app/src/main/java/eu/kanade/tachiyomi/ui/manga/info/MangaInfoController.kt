@@ -402,7 +402,8 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         }
 
         val activity = activity ?: return
-        val intent = WebViewActivity.newIntent(activity, source.id, url, presenter.manga.originalTitle())
+        val intent = WebViewActivity.newIntent(activity.applicationContext, source.id, url, presenter.manga
+            .originalTitle())
         startActivity(intent)
     }
 

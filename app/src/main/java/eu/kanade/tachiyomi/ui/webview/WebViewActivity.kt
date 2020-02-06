@@ -53,16 +53,6 @@ class WebViewActivity : BaseActivity() {
         }
     }
 
-    /*override fun getTheme(): Resources.Theme {
-        val theme = super.getTheme()
-        theme.applyStyle(when (preferences.theme()) {
-            3, 6 -> R.style.Theme_Tachiyomi_Amoled
-            4, 7 -> R.style.Theme_Tachiyomi_DarkBlue
-            else -> R.style.Theme_Tachiyomi
-        }, true)
-        return theme
-    }*/
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.webview_activity)

@@ -126,6 +126,7 @@ open class ExtendedNavigationView @JvmOverloads constructor(
                 const val STATE_IGNORE = 0
                 const val STATE_INCLUDE = 1
                 const val STATE_EXCLUDE = 2
+                const val STATE_REALLY_EXCLUDE = 3
             }
 
             override fun getStateDrawable(context: Context): Drawable? {

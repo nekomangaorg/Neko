@@ -26,6 +26,7 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
+import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.migration.MigrationFlags
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.lang.combineLatest
@@ -34,6 +35,7 @@ import eu.kanade.tachiyomi.util.lang.removeArticles
 import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_EXCLUDE
 import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_IGNORE
 import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_INCLUDE
+import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_REALLY_EXCLUDE
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
@@ -139,8 +141,20 @@ class LibraryPresenter(
 
         val filterFn: (LibraryItem) -> Boolean = f@ { item ->
             // Filter when there isn't unread chapters.
-            if (filterUnread == STATE_INCLUDE && item.manga.unread == 0) return@f false
-            if (filterUnread == STATE_EXCLUDE && item.manga.unread > 0) return@f false
+            if (MainActivity.bottomNav) {
+                if (filterUnread == STATE_INCLUDE &&
+                    (item.manga.unread == 0 || db.getChapters(item.manga).executeAsBlocking()
+                        .size != item.manga.unread)) return@f false
+                if (filterUnread == STATE_EXCLUDE &&
+                    (item.manga.unread == 0 || db.getChapters(item.manga).executeAsBlocking().size == item.manga.unread)) return@f false
+                if (filterUnread == STATE_REALLY_EXCLUDE && item.manga.unread > 0) return@f false
+            }
+            else {
+                if (filterUnread == STATE_INCLUDE && item.manga.unread == 0) return@f false
+                if ((filterUnread == STATE_EXCLUDE || filterUnread == STATE_REALLY_EXCLUDE) && item
+                    .manga.unread > 0) return@f false
+            }
+
 
             if (filterCompleted == STATE_INCLUDE && item.manga.status != SManga.COMPLETED)
                 return@f false
