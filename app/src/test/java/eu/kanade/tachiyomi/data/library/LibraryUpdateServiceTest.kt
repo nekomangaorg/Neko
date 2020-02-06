@@ -97,7 +97,7 @@ class LibraryUpdateServiceTest {
 
         val intent = Intent()
         val target = LibraryUpdateService.Target.CHAPTERS
-        service.updateChapterList(service.getMangaToUpdate(intent, target)).subscribe()
+        service.updateDetails(favManga).subscribe()
 
         // There are 3 network attempts and 2 insertions (1 request failed)
         assertThat(service.db.getChapters(favManga[0]).executeAsBlocking()).hasSize(2)

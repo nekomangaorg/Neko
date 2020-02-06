@@ -379,17 +379,6 @@ class LibraryUpdateService(
         cancelProgressNotification()
     }
 
-    private fun cleanupDownloads() {
-        val mangaList = db.getMangas().executeAsBlocking()
-        var foldersCleared = 0
-        for (manga in mangaList) {
-            val chapterList = db.getChapters(manga).executeAsBlocking()
-            val source = sourceManager.getOrStub(manga.source)
-            foldersCleared += downloadManager.cleanupChapters(chapterList, manga, source)
-        }
-
-    }
-
     fun downloadChapters(manga: Manga, chapters: List<Chapter>) {
         // we need to get the chapters from the db so we have chapter ids
         val mangaChapters = db.getChapters(manga).executeAsBlocking()

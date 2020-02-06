@@ -44,10 +44,6 @@ class DownloadCache(
      */
     private var lastRenew = 0L
 
-    /**
-     * The root directory for downloads.
-     */
-    //private var rootDir = RootDirectory(getDirectoryFromPreference())
     private var mangaFiles: MutableMap<Long, MutableSet<String>> = mutableMapOf()
 
     init {
@@ -55,7 +51,6 @@ class DownloadCache(
                 .skip(1)
                 .subscribe {
                     lastRenew = 0L // invalidate cache
-                    //rootDir = RootDirectory(getDirectoryFromPreference())
                 }
     }
 
@@ -121,14 +116,14 @@ class DownloadCache(
                 .mapNotNullKeys { entry ->
                     onlineSources.find { provider.getSourceDirName(it) == entry.key }?.id
                 }
-        //Timber.i("Sources: ${sourceDirs.map { it.value.dir.filePath }.joinToString(", ")}")
-
-        //rootDir.files = sourceDirs
 
         val db:DatabaseHelper by injectLazy()
-        val mangas = db.getMangas().executeAsBlocking()
+        val mangas = db.getMangas().executeAsBlocking().groupBy { it.source }
 
         sourceDirs.forEach { sourceValue ->
+            val sourceMangasRaw = mangas[sourceValue.key]?.toMutableSet() ?: return@forEach
+            val sourceMangas = arrayOf(sourceMangasRaw.filter { it.favorite }, sourceMangasRaw
+                .filterNot { it.favorite })
             val sourceDir = sourceValue.value
             val mangaDirs = sourceDir.dir.listFiles()
                     .orEmpty()
@@ -136,25 +131,24 @@ class DownloadCache(
                         val name = it.name ?: return@mapNotNull null
                         name to MangaDirectory(it) }.toMap()
 
-//            Timber.i("${sourceDir.dir.name}: ${mangaDirs.map {
-//                it.key + " :: " + it.value.dir.filePath }.joinToString(", ")}")
-
             mangaDirs.values.forEach { mangaDir ->
                 val chapterDirs = mangaDir.dir.listFiles()
                         .orEmpty()
                         .mapNotNull { it.name }
                         .toHashSet()
-//                Timber.i("${mangaDir.dir.name}: ${chapterDirs.joinToString(", ")}")
                 mangaDir.files = chapterDirs
             }
             val trueMangaDirs = mangaDirs.mapNotNull { mangaDir ->
-                val manga = mangas.find { DiskUtil.buildValidFilename(it.originalTitle()) ==
-                    mangaDir.key && it.source == sourceValue.key }
+                val manga = sourceMangas.firstOrNull()?.find { DiskUtil.buildValidFilename(
+                    it.originalTitle()).toLowerCase() == mangaDir.key
+                    .toLowerCase() && it.source == sourceValue.key } ?:
+                sourceMangas.lastOrNull()?.find { DiskUtil.buildValidFilename(
+                    it.originalTitle()).toLowerCase() == mangaDir.key
+                    .toLowerCase() && it.source == sourceValue.key }
                 val id = manga?.id ?: return@mapNotNull null
                 id to mangaDir.value.files
             }.toMap()
 
-            //sourceDir.files = trueMangaDirs
             mangaFiles.putAll(trueMangaDirs)
         }
     }
