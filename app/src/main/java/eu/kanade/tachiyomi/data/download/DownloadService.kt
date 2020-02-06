@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.data.download
 
-import android.app.Activity
 import android.app.Notification
 import android.app.Service
 import android.content.Context
@@ -17,7 +16,6 @@ import com.jakewharton.rxrelay.BehaviorRelay
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.lang.plusAssign
 import eu.kanade.tachiyomi.util.system.connectivityManager
 import eu.kanade.tachiyomi.util.system.isServiceRunning
@@ -42,13 +40,29 @@ class DownloadService : Service() {
          */
         val runningRelay: BehaviorRelay<Boolean> = BehaviorRelay.create(false)
 
+        private val listeners = mutableSetOf<DownloadServiceListener>()
+
+        fun addListener(listener: DownloadServiceListener) {
+            listeners.add(listener)
+        }
+
+        fun removeListener(listener: DownloadServiceListener) {
+            listeners.remove(listener)
+        }
+
+        fun callListeners() {
+            val downloadManager: DownloadManager by injectLazy()
+            listeners.forEach {
+                it.downloadStatusChanged(downloadManager.hasQueue())
+            }
+        }
         /**
          * Starts this service.
          *
          * @param context the application context.
          */
         fun start(context: Context) {
-            MainActivity.setDownloadBadge(true)
+            callListeners()
             val intent = Intent(context, DownloadService::class.java)
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
                 context.startService(intent)
@@ -63,7 +77,7 @@ class DownloadService : Service() {
          * @param context the application context.
          */
         fun stop(context: Context) {
-            MainActivity.setDownloadBadge(false)
+            callListeners()
             context.stopService(Intent(context, DownloadService::class.java))
         }
 
@@ -208,4 +222,8 @@ class DownloadService : Service() {
             .build()
     }
 
+}
+
+interface DownloadServiceListener {
+    fun downloadStatusChanged(downloading: Boolean)
 }

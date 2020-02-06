@@ -33,6 +33,8 @@ import com.google.android.material.snackbar.Snackbar
 import eu.kanade.tachiyomi.Migrations
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.DownloadManager
+import eu.kanade.tachiyomi.data.download.DownloadService
+import eu.kanade.tachiyomi.data.download.DownloadServiceListener
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
@@ -75,7 +77,7 @@ import uy.kohesive.injekt.injectLazy
 import java.util.Date
 import java.util.concurrent.TimeUnit
 
-open class MainActivity : BaseActivity() {
+open class MainActivity : BaseActivity(), DownloadServiceListener {
 
     protected lateinit var router: Router
 
@@ -198,7 +200,7 @@ open class MainActivity : BaseActivity() {
 
         val content: ViewGroup = findViewById(R.id.main_content)
         bottomNav = preferences.useBottonNav().getOrDefault()
-        bottomNavView = navigationView
+        DownloadService.addListener(this)
         content.fitsSystemWindows = !bottomNav
         if (!bottomNav) {
             container.systemUiVisibility =
@@ -378,8 +380,7 @@ open class MainActivity : BaseActivity() {
         super.onResume()
         bottomNav = preferences.useBottonNav().getOrDefault()
         getExtensionUpdates()
-        bottomNavView = navigationView
-        setDownloadBadge(Injekt.get<DownloadManager>().hasQueue())
+        DownloadService.callListeners()
         val useBiometrics = preferences.useBiometrics().getOrDefault()
         if (useBiometrics && BiometricManager.from(this)
                 .canAuthenticate() == BiometricManager.BIOMETRIC_SUCCESS) {
@@ -392,11 +393,6 @@ open class MainActivity : BaseActivity() {
         }
         else if (useBiometrics)
             preferences.useBiometrics().set(false)
-    }
-
-    override fun onPause() {
-        super.onPause()
-        bottomNavView = null
     }
 
     private fun getExtensionUpdates() {
@@ -469,7 +465,7 @@ open class MainActivity : BaseActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        bottomNavView = null
+        DownloadService.removeListener(this)
         nav_view?.setNavigationItemSelectedListener(null)
         toolbar?.setNavigationOnClickListener(null)
     }
@@ -642,6 +638,21 @@ open class MainActivity : BaseActivity() {
         }
     }
 
+    override fun downloadStatusChanged(downloading: Boolean) {
+        if (!bottomNav) return
+        val downloadManager = Injekt.get<DownloadManager>()
+        val hasQueue = downloading || downloadManager.hasQueue()
+        if (hasQueue) {
+            val badge = navigationView?.getOrCreateBadge(R.id.nav_drawer_library)
+                ?: return
+            badge.clearNumber()
+            badge.backgroundColor = getResourceColor(R.attr.badgeColor)
+        }
+        else {
+            navigationView?.removeBadge(R.id.nav_drawer_library)
+        }
+    }
+
     companion object {
         // Shortcut actions
         const val SHORTCUT_LIBRARY = "eu.kanade.tachiyomi.SHOW_LIBRARY"
@@ -662,24 +673,6 @@ open class MainActivity : BaseActivity() {
 
         var bottomNav = false
             internal set
-
-        internal var bottomNavView:BottomNavigationView? = null
-
-        fun setDownloadBadge(downloading: Boolean) {
-            if (!bottomNav) return
-            val downloadManager = Injekt.get<DownloadManager>()
-            val hasQueue = downloading || downloadManager.hasQueue()
-            if (hasQueue) {
-                val badge = bottomNavView?.getOrCreateBadge(R.id.nav_drawer_library)
-                    ?: return
-                badge.clearNumber()
-                badge.backgroundColor = bottomNavView?.context?.getResourceColor(R.attr
-                    .badgeColor) ?: Color.BLACK
-            }
-            else {
-                bottomNavView?.removeBadge(R.id.nav_drawer_library)
-            }
-        }
     }
 
 }

@@ -182,7 +182,6 @@ class SearchActivity: MainActivity() {
     override fun onResume() {
         super.onResume()
         bottomNav = false
-        bottomNavView = null
     }
 
     override fun handleIntentAction(intent: Intent): Boolean {

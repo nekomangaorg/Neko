@@ -91,7 +91,7 @@ class Downloader(
         launchNow {
             val chapters = async { store.restore() }
             queue.addAll(chapters.await())
-            MainActivity.setDownloadBadge(queue.isNotEmpty())
+            DownloadService.callListeners()
         }
     }
 

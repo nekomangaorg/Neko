@@ -36,6 +36,8 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.download.DownloadService
+import eu.kanade.tachiyomi.data.download.DownloadServiceListener
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
@@ -74,7 +76,8 @@ class LibraryController(
         SecondaryDrawerController,
         ActionMode.Callback,
         ChangeMangaCategoriesDialog.Listener,
-        MigrationInterface {
+        MigrationInterface,
+        DownloadServiceListener {
 
     /**
      * Position of the active category.
@@ -226,6 +229,8 @@ class LibraryController(
         fab.setOnClickListener {
             router.pushController(DownloadController().withFadeTransaction())
         }
+        fab.scaleX = 0f
+        fab.scaleY = 0f
     }
 
     fun enableReorderItems(category: Category) {
@@ -259,11 +264,13 @@ class LibraryController(
         if (type.isEnter) {
             activity?.tabs?.setupWithViewPager(library_pager)
             presenter.subscribeLibrary()
+            DownloadService.addListener(this)
         }
     }
 
     override fun onDestroyView(view: View) {
         adapter?.onDestroy()
+        DownloadService.removeListener(this)
         adapter = null
         actionMode = null
         tabsVisibilitySubscription?.unsubscribe()
@@ -271,6 +278,12 @@ class LibraryController(
         super.onDestroyView(view)
     }
 
+    override fun downloadStatusChanged(downloading: Boolean) {
+        val scale = if (downloading) 1f else 0f
+        fab.animate().scaleX(scale).scaleY(scale).setDuration(200).start()
+        fab.isClickable = downloading
+        fab.isFocusable = downloading
+    }
     override fun onDetach(view: View) {
         destroyActionModeIfNeeded()
         snack?.dismiss()
