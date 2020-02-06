@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.util
+package eu.kanade.tachiyomi.util.view
 
 
 import kotlinx.coroutines.sync.Mutex
