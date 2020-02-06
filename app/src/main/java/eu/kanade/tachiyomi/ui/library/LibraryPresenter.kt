@@ -139,14 +139,19 @@ class LibraryPresenter(
 
         val filterTracked = preferences.filterTracked().getOrDefault()
 
+        val lastReadManga by lazy {
+            db.getLastReadManga().executeAsBlocking()
+        }
+
         val filterFn: (LibraryItem) -> Boolean = f@ { item ->
             // Filter when there isn't unread chapters.
             if (MainActivity.bottomNav) {
                 if (filterUnread == STATE_INCLUDE &&
-                    (item.manga.unread == 0 || db.getChapters(item.manga).executeAsBlocking()
-                        .size != item.manga.unread)) return@f false
+                    (item.manga.unread == 0 || lastReadManga.find { it.id == item.manga.id } ==
+                        null)) return@f false
                 if (filterUnread == STATE_EXCLUDE &&
-                    (item.manga.unread == 0 || db.getChapters(item.manga).executeAsBlocking().size == item.manga.unread)) return@f false
+                    (item.manga.unread == 0 || lastReadManga.find { it.id == item.manga.id } !=
+                        null)) return@f false
                 if (filterUnread == STATE_REALLY_EXCLUDE && item.manga.unread > 0) return@f false
             }
             else {

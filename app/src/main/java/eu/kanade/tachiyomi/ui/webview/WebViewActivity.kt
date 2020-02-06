@@ -14,6 +14,7 @@ import android.view.ViewGroup
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.widget.LinearLayout
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import eu.kanade.tachiyomi.R
@@ -55,6 +56,11 @@ class WebViewActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        delegate.localNightMode = when (preferences.theme()) {
+            1, 8 -> AppCompatDelegate.MODE_NIGHT_NO
+            2, 3, 4 -> AppCompatDelegate.MODE_NIGHT_YES
+            else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+        }
         setContentView(R.layout.webview_activity)
         title = intent.extras?.getString(TITLE_KEY)
         setSupportActionBar(toolbar)
@@ -188,7 +194,7 @@ class WebViewActivity : BaseActivity() {
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        val currentNightMode = newConfig.uiMode and Configuration.UI_MODE_NIGHT_MASK
+        val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
         val lightMode = currentNightMode == Configuration.UI_MODE_NIGHT_NO
         window.statusBarColor = getResourceColor(R.attr.colorPrimary)
         toolbar.setBackgroundColor(getResourceColor(R.attr.colorPrimary))

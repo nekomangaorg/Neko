@@ -112,15 +112,13 @@ open class MainActivity : BaseActivity() {
     lateinit var tabAnimator: TabsAnimator
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        if (preferences.theme() in 1..4) {
-            Timber.d("Manually instantiating WebView to avoid night mode issue.")
-            try {
-                WebView(applicationContext)
-            } catch (e: Exception) {
-                Timber.e(e, "Exception when creating webview at start")
-            }
-        }
         super.onCreate(savedInstanceState)
+        Timber.d("Manually instantiating WebView to avoid night mode issue.")
+        try {
+            WebView(applicationContext)
+        } catch (e: Exception) {
+            Timber.e(e, "Exception when creating webview at start")
+        }
         if (trulyGoBack) return
 
         // Do not let the launcher create a new activity http://stackoverflow.com/questions/16283079

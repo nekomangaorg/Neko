@@ -44,6 +44,7 @@
     <string name="action_filter_tracked">Tracked</string>
     <string name="action_filter_not_tracked">Not tracked</string>
 
+    <string name="sorting_by_">Sorting by %1$s</string>
     <string name="action_filter_empty">Remove filter</string>
     <string name="action_sort_alpha">Alphabetically</string>
     <string name="action_sort_enabled">Enabled</string>

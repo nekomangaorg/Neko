@@ -38,7 +38,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
     private lateinit var categories:FilterTagGroup
 
-    val items:List<FilterTagGroup> by lazy {
+    val filterItems:List<FilterTagGroup> by lazy {
         val list = mutableListOf<FilterTagGroup>()
         if (Injekt.get<DatabaseHelper>().getCategories().executeAsBlocking().isNotEmpty())
             list.add(categories)
@@ -53,7 +53,6 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
     var onGroupClicked: (Int) -> Unit = { _ ->  }
     val recycler = androidx.recyclerview.widget.RecyclerView(context)
     var pager:View? = null
-    var filters = listOf<FilterTagGroup>()
 
     init {
 
@@ -68,8 +67,16 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                 sheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
             }
         }
+        line.alpha = 0f
+
+
+
+        sortText.alpha = if (sheetBehavior.state != BottomSheetBehavior.STATE_EXPANDED) 1f else 0f
+        title.alpha = if (sheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED) 1f else 0f
+
         pager = pagerView
         pager?.setPadding(0, 0, 0, topbar.height)
+        updateTitle()
         sheetBehavior.setBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onSlide(bottomSheet: View, progress: Float) {
                 val minHeight = sheetBehavior.peekHeight
@@ -77,7 +84,9 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                 val percent = (progress * 100).roundToInt()
                 val value = (percent * (maxHeight - minHeight) / 100) + minHeight
                 pager?.setPadding(0, 0, 0, value)
-                line.alpha = 1 - progress
+                sortText.alpha = 1 - progress
+                title.alpha = progress
+                //line.alpha = 1 - progress
             }
 
             override fun onStateChanged(p0: View, p1: Int) {
@@ -92,6 +101,64 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         }
         createTags()
     }
+
+    fun updateTitle() {
+        val filters = getFilters().toMutableList()
+        if (filters.isEmpty()) {
+            sortText.text = context.getString(
+                R.string.sorting_by_, context.getString(
+                    when (preferences.librarySortingMode().getOrDefault()) {
+                        LibrarySort.LAST_UPDATED -> R.string.action_sort_last_updated
+                        LibrarySort.DRAG_AND_DROP -> R.string.action_sort_drag_and_drop
+                        LibrarySort.TOTAL -> R.string.action_sort_total
+                        LibrarySort.UNREAD -> R.string.action_filter_unread
+                        LibrarySort.LAST_READ -> R.string.action_sort_last_read
+                        else -> R.string.title
+                    }
+                )
+            )
+        }
+        else {
+            filters.add(0, when (preferences.librarySortingMode().getOrDefault()) {
+                LibrarySort.LAST_UPDATED -> R.string.action_sort_last_updated
+                LibrarySort.DRAG_AND_DROP -> R.string.action_sort_drag_and_drop
+                LibrarySort.TOTAL -> R.string.action_sort_total
+                LibrarySort.UNREAD -> R.string.action_filter_unread
+                LibrarySort.LAST_READ -> R.string.action_sort_last_read
+                else -> R.string.action_sort_alpha
+            })
+            sortText.text = filters.joinToString(", ") { context.getString(it) }
+        }
+    }
+
+    fun getFilters(): List<Int> {
+        val filters = mutableListOf<Int>()
+        var filter = preferences.filterDownloaded().getOrDefault()
+        if (filter > 0) {
+            filters.add(if (filter == 1) R.string.action_filter_downloaded else R.string
+                .action_filter_not_downloaded)
+        }
+        filter = preferences.filterCompleted().getOrDefault()
+        if (filter > 0) {
+            filters.add(if (filter == 1) R.string.completed else R.string
+                .ongoing)
+        }
+        filter = preferences.filterUnread().getOrDefault()
+        if (filter > 0) {
+            filters.add(when (filter) {
+                3 -> R.string.action_filter_read
+                2 -> R.string.action_filter_in_progress
+                else -> R.string.action_filter_not_started
+            })
+        }
+        filter = preferences.filterTracked().getOrDefault()
+        if (filter > 0) {
+            filters.add(if (filter == 1) R.string.action_filter_tracked else R.string
+                .action_filter_not_tracked)
+        }
+        return filters
+    }
+
 
     fun createTags() {
         categories = inflate(R.layout.filter_buttons) as FilterTagGroup
@@ -120,15 +187,15 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         tracked.onItemClicked = { view, index -> onFilterClicked(view, index) }
         tracked.setState(preferences.filterTracked())
 
-        items.forEach {
+        filterItems.forEach {
             filterLayout.addView(it)
         }
     }
 
     private fun onFilterClicked(view: View, index: Int) {
-        val transition = AutoTransition()
+        /*val transition = AutoTransition()
         transition.duration = 150
-        TransitionManager.beginDelayedTransition(this, transition)
+        TransitionManager.beginDelayedTransition(this, transition)*/
         /*f (index > -1) {
             filterScrollView.scrollX = 0
             filterLayout.removeView(view)
@@ -160,6 +227,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                 onGroupClicked(ACTION_FILTER)
             }
         }
+        updateTitle()
     }
 
     companion object {

@@ -61,7 +61,7 @@ class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: Attribute
 
     fun setState(preference: Preference<Int>) {
         val index = preference.getOrDefault() - 1
-        if (index > 1)
+        if (index > -1)
             toggleButton(index)
     }
 

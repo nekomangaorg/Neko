@@ -16,6 +16,21 @@
         android:layout_gravity="center"
         android:layout_height="wrap_content"/>
 
+    <View
+        android:id="@+id/shadow"
+        android:layout_width="match_parent"
+        android:layout_height="16dp"
+        android:backgroundTint="@color/md_black_1000_54"
+        android:background="@drawable/shape_gradient_top_shadow"
+        app:layout_anchor="@id/bottom_sheet" />
     <!-- Adding bottom sheet after main content -->
     <include layout="@layout/filter_bottom_sheet" />
+
+    <View
+        android:id="@+id/shadow2"
+        android:layout_width="match_parent"
+        android:layout_height="8dp"
+        android:alpha="0.25"
+        android:background="@drawable/shape_gradient_top_shadow"
+       android:layout_gravity="bottom" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
