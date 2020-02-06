@@ -26,6 +26,18 @@
     <!-- Adding bottom sheet after main content -->
     <include layout="@layout/filter_bottom_sheet" />
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_anchor="@id/bottom_sheet"
+        app:layout_anchorGravity="end|top"
+        android:backgroundTint="?attr/colorAccent"
+        android:tint="@color/md_white_1000"
+        app:tint="@color/md_white_1000"
+        android:layout_margin="24dp"
+        app:srcCompat="@drawable/ic_file_download_white_24dp"/>
+
     <View
         android:id="@+id/shadow2"
         android:layout_width="match_parent"

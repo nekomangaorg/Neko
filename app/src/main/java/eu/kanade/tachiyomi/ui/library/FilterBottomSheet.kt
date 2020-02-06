@@ -83,11 +83,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         updateTitle()
         sheetBehavior.setBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onSlide(bottomSheet: View, progress: Float) {
-                val minHeight = sheetBehavior.peekHeight
-                val maxHeight = bottomSheet.height
-                val percent = (progress * 100).roundToInt()
-                val value = (percent * (maxHeight - minHeight) / 100) + minHeight
-                pager?.setPadding(0, 0, 0, value)
+                updateRootPadding()
                 sortText.alpha = 1 - progress
                 title.alpha = progress
                 //line.alpha = 1 - progress
@@ -101,6 +97,9 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             sheetBehavior.peekHeight = topbar.height
             if (sheetBehavior.state == BottomSheetBehavior.STATE_COLLAPSED) {
                 pager?.setPadding(0, 0, 0, topbar.height)
+            }
+            else {
+                updateRootPadding()
             }
         }
         createTags()
@@ -133,6 +132,16 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             })
             sortText.text = filters.joinToString(", ") { context.getString(it) }
         }
+    }
+
+    fun updateRootPadding() {
+        val sheetBehavior = BottomSheetBehavior.from(this)
+        val minHeight = sheetBehavior.peekHeight
+        val maxHeight = height
+        val percent = ((if (sheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED) 1f else 0f)
+        * 100).roundToInt()
+        val value = (percent * (maxHeight - minHeight) / 100) + minHeight
+        pager?.setPadding(0, 0, 0, value)
     }
 
     fun sorting(): Int {

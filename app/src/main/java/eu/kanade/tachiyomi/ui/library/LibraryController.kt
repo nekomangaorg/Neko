@@ -43,6 +43,7 @@ import eu.kanade.tachiyomi.ui.base.controller.SecondaryDrawerController
 import eu.kanade.tachiyomi.ui.base.controller.TabbedController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.category.CategoryController
+import eu.kanade.tachiyomi.ui.download.DownloadController
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.ui.migration.MigrationController
@@ -220,6 +221,10 @@ class LibraryController(
                 FilterBottomSheet.ACTION_DISPLAY -> reattachAdapter()
                 FilterBottomSheet.ACTION_BADGE -> onDownloadBadgeChanged()
             }
+        }
+
+        fab.setOnClickListener {
+            router.pushController(DownloadController().withFadeTransaction())
         }
     }
 

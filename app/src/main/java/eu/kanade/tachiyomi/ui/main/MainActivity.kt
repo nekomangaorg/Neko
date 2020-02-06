@@ -667,26 +667,17 @@ open class MainActivity : BaseActivity() {
 
         fun setDownloadBadge(downloading: Boolean) {
             if (!bottomNav) return
-            val badge = bottomNavView?.getOrCreateBadge(R.id.nav_drawer_settings) ?: return
             val downloadManager = Injekt.get<DownloadManager>()
             val hasQueue = downloading || downloadManager.hasQueue()
             if (hasQueue) {
+                val badge = bottomNavView?.getOrCreateBadge(R.id.nav_drawer_library)
+                    ?: return
                 badge.clearNumber()
                 badge.backgroundColor = bottomNavView?.context?.getResourceColor(R.attr
                     .badgeColor) ?: Color.BLACK
             }
-            else
-            {
-                val updates = Injekt.get<PreferencesHelper>().extensionUpdatesCount().getOrDefault()
-                if (updates > 0) {
-                    badge.number = updates
-                    badge.backgroundColor = bottomNavView?.context?.getResourceColor(R.attr
-                        .badgeColor) ?: Color.BLACK
-                    badge.badgeTextColor = Color.WHITE
-                }
-                else {
-                    bottomNavView?.removeBadge(R.id.nav_drawer_settings)
-                }
+            else {
+                bottomNavView?.removeBadge(R.id.nav_drawer_library)
             }
         }
     }
