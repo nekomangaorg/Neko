@@ -183,7 +183,6 @@ class LibraryController(
             when (group) {
                 is LibraryNavigationView.FilterGroup -> onFilterChanged()
                 is LibraryNavigationView.SortGroup -> onSortChanged()
-                is LibraryNavigationView.DisplayGroup -> reattachAdapter()
             }
         }
 
@@ -348,6 +347,13 @@ class LibraryController(
         // Tint icon if there's a filter active
         val filterColor = if (navView.hasActiveFilters()) Color.rgb(255, 238, 7) else Color.WHITE
         DrawableCompat.setTint(filterItem.icon, filterColor)
+
+        // Display submenu
+        if (preferences.libraryAsList().getOrDefault()) {
+            menu.findItem(R.id.action_display_list).isChecked = true
+        } else {
+            menu.findItem(R.id.action_display_grid).isChecked = true
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -358,6 +364,18 @@ class LibraryController(
             }
             R.id.action_update_library -> {
                 activity?.let { LibraryUpdateService.start(it) }
+            }
+
+            // Display submenu
+            R.id.action_display_grid -> {
+                item.isChecked = true
+                preferences.libraryAsList().set(false)
+                reattachAdapter()
+            }
+            R.id.action_display_list -> {
+                item.isChecked = true
+                preferences.libraryAsList().set(true)
+                reattachAdapter()
             }
 
             else -> return super.onOptionsItemSelected(item)
