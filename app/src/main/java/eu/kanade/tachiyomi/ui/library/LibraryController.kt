@@ -187,6 +187,8 @@ class LibraryController(
         library_pager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
             override fun onPageSelected(position: Int) {
                 enableReorderItems(position)
+                bottom_sheet.lastCategory = adapter?.categories?.getOrNull(position)
+                bottom_sheet.updateTitle()
             }
 
             override fun onPageScrolled(
@@ -350,6 +352,9 @@ class LibraryController(
 
         // Restore active category.
         library_pager.setCurrentItem(activeCat, false)
+
+        bottom_sheet.lastCategory = adapter.categories.getOrNull(activeCat)
+        bottom_sheet.updateTitle()
 
         tabsVisibilityRelay.call(categories.size > 1)
 

@@ -43,6 +43,7 @@
     <string name="action_filter_read">Read</string>
     <string name="action_filter_tracked">Tracked</string>
     <string name="action_filter_not_tracked">Not tracked</string>
+    <string name="hiding_categories">Hiding categories</string>
 
     <string name="sorting_by_">Sorting by %1$s</string>
     <string name="action_filter_empty">Remove filter</string>

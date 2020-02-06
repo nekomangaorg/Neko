@@ -62,14 +62,14 @@ class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: Attribute
     fun setState(preference: Preference<Int>) {
         val index = preference.getOrDefault() - 1
         if (index > -1)
-            toggleButton(index)
+            toggleButton(index, false)
     }
 
-    private fun toggleButton(index: Int) {
+    private fun toggleButton(index: Int, callBack: Boolean = true) {
         if (itemCount == 0) return
         if (itemCount == 1) {
             firstButton.isActivated = !firstButton.isActivated
-            onItemClicked(this, if (firstButton.isActivated) index else -1)
+            if (callBack) onItemClicked(this, if (firstButton.isActivated) index else -1)
             return
         }
         val buttons = mutableListOf(firstButton, secondButton)
@@ -83,14 +83,14 @@ class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: Attribute
         if (mainButton.isActivated) {
             mainButton.isActivated = false
             separator1.visible()
-            onItemClicked(this, -1)
+            if (callBack) onItemClicked(this, -1)
             if (itemCount >= 3)
                 separator2.visible()
             buttons.forEach{ it.visible() }
         }
         else {
             mainButton.isActivated = true
-            onItemClicked(this, index)
+            if (callBack) onItemClicked(this, index)
             buttons.forEach{ it.gone() }
             separator1.gone()
             if (itemCount >= 3) {

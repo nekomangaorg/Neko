@@ -9,6 +9,7 @@ import android.widget.LinearLayout
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
+import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackManager
@@ -18,6 +19,7 @@ import kotlinx.android.synthetic.main.filter_buttons.view.*
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
+import java.util.Locale
 import kotlin.math.roundToInt
 
 class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null)
@@ -37,6 +39,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
     private lateinit var tracked:FilterTagGroup
 
     private lateinit var categories:FilterTagGroup
+
+    var lastCategory:Category? = null
 
     val filterItems:List<FilterTagGroup> by lazy {
         val list = mutableListOf<FilterTagGroup>()
@@ -107,7 +111,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         if (filters.isEmpty()) {
             sortText.text = context.getString(
                 R.string.sorting_by_, context.getString(
-                    when (preferences.librarySortingMode().getOrDefault()) {
+                    when (sorting()) {
                         LibrarySort.LAST_UPDATED -> R.string.action_sort_last_updated
                         LibrarySort.DRAG_AND_DROP -> R.string.action_sort_drag_and_drop
                         LibrarySort.TOTAL -> R.string.action_sort_total
@@ -119,7 +123,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             )
         }
         else {
-            filters.add(0, when (preferences.librarySortingMode().getOrDefault()) {
+            filters.add(0, when (sorting()) {
                 LibrarySort.LAST_UPDATED -> R.string.action_sort_last_updated
                 LibrarySort.DRAG_AND_DROP -> R.string.action_sort_drag_and_drop
                 LibrarySort.TOTAL -> R.string.action_sort_total
@@ -131,17 +135,31 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         }
     }
 
+    fun sorting(): Int {
+        return if (lastCategory != null && preferences.showCategories().getOrDefault()) {
+            when (lastCategory?.mangaSort) {
+                'a', 'b' -> LibrarySort.ALPHA
+                'c', 'd' -> LibrarySort.LAST_UPDATED
+                'e', 'f' -> LibrarySort.UNREAD
+                'g', 'h' -> LibrarySort.LAST_READ
+                else -> LibrarySort.DRAG_AND_DROP
+            }
+        }
+        else {
+            preferences.librarySortingMode().getOrDefault()
+        }
+    }
+
     fun getFilters(): List<Int> {
         val filters = mutableListOf<Int>()
+        var categoriesOn = preferences.showCategories().getOrDefault()
+        if (!categoriesOn) {
+            filters.add(R.string.hiding_categories)
+        }
         var filter = preferences.filterDownloaded().getOrDefault()
         if (filter > 0) {
             filters.add(if (filter == 1) R.string.action_filter_downloaded else R.string
                 .action_filter_not_downloaded)
-        }
-        filter = preferences.filterCompleted().getOrDefault()
-        if (filter > 0) {
-            filters.add(if (filter == 1) R.string.completed else R.string
-                .ongoing)
         }
         filter = preferences.filterUnread().getOrDefault()
         if (filter > 0) {
@@ -150,6 +168,11 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                 2 -> R.string.action_filter_in_progress
                 else -> R.string.action_filter_not_started
             })
+        }
+        filter = preferences.filterCompleted().getOrDefault()
+        if (filter > 0) {
+            filters.add(if (filter == 1) R.string.completed else R.string
+                .ongoing)
         }
         filter = preferences.filterTracked().getOrDefault()
         if (filter > 0) {
@@ -163,29 +186,29 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
     fun createTags() {
         categories = inflate(R.layout.filter_buttons) as FilterTagGroup
         categories.setup(this, R.string.categories)
-        categories.onItemClicked = { view, index -> onFilterClicked(view, index) }
         categories.firstButton.isActivated = preferences.showCategories().getOrDefault()
+        categories.onItemClicked = { view, index -> onFilterClicked(view, index) }
 
         downloaded = inflate(R.layout.filter_buttons) as FilterTagGroup
         downloaded.setup(this, R.string.action_filter_downloaded, R.string.action_filter_not_downloaded)
-        downloaded.onItemClicked = { view, index -> onFilterClicked(view, index) }
         downloaded.setState(preferences.filterDownloaded())
+        downloaded.onItemClicked = { view, index -> onFilterClicked(view, index) }
 
         completed = inflate(R.layout.filter_buttons) as FilterTagGroup
         completed.setup(this, R.string.completed, R.string.ongoing)
-        completed.onItemClicked = { view, index -> onFilterClicked(view, index) }
         completed.setState(preferences.filterCompleted())
+        completed.onItemClicked = { view, index -> onFilterClicked(view, index) }
 
         unread = inflate(R.layout.filter_buttons) as FilterTagGroup
         unread.setup(this, R.string.action_filter_not_started, R.string.action_filter_in_progress,
             R.string.action_filter_read)
-        unread.onItemClicked = { view, index -> onFilterClicked(view, index) }
         unread.setState(preferences.filterUnread())
+        unread.onItemClicked = { view, index -> onFilterClicked(view, index) }
 
         tracked = inflate(R.layout.filter_buttons) as FilterTagGroup
         tracked.setup(this, R.string.action_filter_tracked, R.string.action_filter_not_tracked)
-        tracked.onItemClicked = { view, index -> onFilterClicked(view, index) }
         tracked.setState(preferences.filterTracked())
+        tracked.onItemClicked = { view, index -> onFilterClicked(view, index) }
 
         filterItems.forEach {
             filterLayout.addView(it)
