@@ -86,7 +86,9 @@ open class MainActivity : BaseActivity() {
         canDismissSnackBar = false
         launchUI {
             delay(5000)
-            canDismissSnackBar = true
+            if (this@MainActivity.snackBar == snackBar) {
+                canDismissSnackBar = true
+            }
         }
         extraViewForUndo = extraViewToCheck
     }
@@ -466,7 +468,11 @@ open class MainActivity : BaseActivity() {
             }
         }
         if (to is SecondaryDrawerController) {
-            secondaryDrawer = to.createSecondaryDrawer(drawer)?.also { drawer.addView(it) }
+            val newDrawer = to.createSecondaryDrawer(drawer)?.also { drawer.addView(it) }
+            secondaryDrawer = if (newDrawer == null && secondaryDrawer != null) {
+                drawer.removeView(secondaryDrawer)
+                null
+            } else newDrawer
         }
 
         if (to is NoToolbarElevationController) {
