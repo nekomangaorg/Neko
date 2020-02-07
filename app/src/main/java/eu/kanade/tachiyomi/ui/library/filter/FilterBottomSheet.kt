@@ -340,10 +340,10 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         popup.menuInflater.inflate(R.menu.cat_sort, popup.menu)
 
         // Set a listener so we are notified if a menu item is clicked
-      /*  popup.setOnMenuItemClickListener { menuItem ->
-            onMainSortClicked(menuItem)
+        popup.setOnMenuItemClickListener { menuItem ->
+            onCatSortClicked(menuItem)
             true
-        }*/
+        }
         popup.menu.findItem(R.id.action_reverse).isVisible = lastCategory?.mangaSort != null
 
         // Finally show the PopupMenu
@@ -372,8 +372,38 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         onGroupClicked(ACTION_SORT)
     }
 
-    fun setMainSortText() {
-        if (sheetBehavior?.state == BottomSheetBehavior.STATE_COLLAPSED) return
+    private fun onCatSortClicked(menu: MenuItem) {
+        val category = lastCategory ?: return
+        val modType = if (menu.itemId == R.id.action_reverse) {
+            val t = (category.mangaSort?.minus('a') ?: 0) + 1
+                if (t % 2 != 0) t + 1
+                else t - 1
+        }
+        else {
+            val order = when (menu.itemId) {
+                R.id.action_last_read -> 3
+                R.id.action_unread -> 2
+                R.id.action_update -> 1
+                else -> 0
+            }
+            (2 * order + 1)
+        }
+        setCatOrder(modType)
+        setCatSortText()
+        onGroupClicked(ACTION_SORT)
+    }
+
+    private fun setCatOrder(order: Int) {
+        val category = lastCategory ?: return
+        category.mangaSort = ('a' + (order - 1))
+        if (category.id == 0)
+            preferences.defaultMangaOrder().set(category.mangaSort.toString())
+        else
+            Injekt.get<DatabaseHelper>().insertCategory(category).asRxObservable().subscribe()
+    }
+
+    private fun setMainSortText() {
+        //if (sheetBehavior?.state == BottomSheetBehavior.STATE_COLLAPSED) return
         launchUI {
             val sortId = withContext(Dispatchers.IO) { sorting(true) }
             val drawable = withContext(Dispatchers.IO) {
@@ -417,7 +447,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                     tintVector(
                         when {
                             sortId == LibrarySort.DRAG_AND_DROP -> R.drawable.ic_sort_white_24dp
-                            preferences.librarySortingAscending().getOrDefault() -> R.drawable
+                            lastCategory?.isAscending() == true -> R.drawable
                                 .ic_arrow_up_white_24dp
                             else -> R.drawable.ic_arrow_down_white_24dp
                         }

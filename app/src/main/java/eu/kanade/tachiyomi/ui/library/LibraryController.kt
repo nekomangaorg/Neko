@@ -386,7 +386,6 @@ class LibraryController(
 
         bottom_sheet.lastCategory = adapter.categories.getOrNull(activeCat)
         bottom_sheet.updateTitle()
-        bottom_sheet.setMainSortText()
 
         tabsVisibilityRelay.call(categories.size > 1)
 
