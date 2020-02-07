@@ -1,13 +1,10 @@
 package eu.kanade.tachiyomi.ui.library
 
 import android.content.Context
-import android.transition.AutoTransition
-import android.transition.TransitionManager
 import android.util.AttributeSet
 import android.view.View
 import android.widget.LinearLayout
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.bottomsheet.BottomSheetDialog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
@@ -19,7 +16,6 @@ import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.inflate
 import kotlinx.android.synthetic.main.filter_bottom_sheet.view.*
-import kotlinx.android.synthetic.main.filter_buttons.view.*
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -27,11 +23,11 @@ import kotlinx.coroutines.launch
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
-import java.util.Locale
 import kotlin.math.roundToInt
 
 class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null)
-    : LinearLayout(context, attrs) {
+    : LinearLayout(context, attrs),
+    FilterTagGroupListener {
 
     /**
      * Preferences helper.
@@ -52,13 +48,13 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
     var lastCategory:Category? = null
 
-    val filterItems:List<FilterTagGroup> by lazy {
+    private val filterItems:MutableList<FilterTagGroup> by lazy {
         val list = mutableListOf<FilterTagGroup>()
+        if (Injekt.get<DatabaseHelper>().getCategories().executeAsBlocking().isNotEmpty())
+            list.add(categories)
         list.add(downloaded)
         list.add(unread)
         list.add(completed)
-        if (Injekt.get<DatabaseHelper>().getCategories().executeAsBlocking().isNotEmpty())
-            list.add(categories)
         if (Injekt.get<TrackManager>().hasLoggedServices())
             list.add(tracked)
         list
@@ -94,14 +90,18 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                 title.alpha = progress
             }
 
-            override fun onStateChanged(p0: View, p1: Int) {
-
+            override fun onStateChanged(p0: View, state: Int) {
+                if (state == BottomSheetBehavior.STATE_COLLAPSED) {
+                    reSortViews()
+                }
             }
         })
         topbar.viewTreeObserver.addOnGlobalLayoutListener {
             sheetBehavior.peekHeight = topbar.height
             if (sheetBehavior.state == BottomSheetBehavior.STATE_COLLAPSED) {
                 pager?.setPadding(0, 0, 0, topbar.height)
+                sortText.alpha = 1f
+                title.alpha = 0f
             }
             else {
                 updateRootPadding()
@@ -139,9 +139,10 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         }
     }
 
-    fun moveTitleMargin(downloading: Boolean) {
-        (sortText.layoutParams as? MarginLayoutParams)?.rightMargin =
-            (if (downloading) 40 else 8).dpToPx
+    fun adjustTitleMargin(downloading: Boolean) {
+        val params = sortText.layoutParams as? MarginLayoutParams ?: return
+        params.rightMargin = (if (downloading) 80 else 8).dpToPx
+        sortText.layoutParams = params
     }
 
     fun updateRootPadding(progress: Float? = null) {
@@ -174,6 +175,10 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
     private fun getFilters(): List<Int> {
         val filters = mutableListOf<Int>()
+        val categoriesOn = preferences.showCategories().getOrDefault()
+        if (!categoriesOn) {
+            filters.add(R.string.hiding_categories)
+        }
         var filter = preferences.filterDownloaded().getOrDefault()
         if (filter > 0) {
             filters.add(if (filter == 1) R.string.action_filter_downloaded else R.string
@@ -192,10 +197,6 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             filters.add(if (filter == 1) R.string.completed else R.string
                 .ongoing)
         }
-        val categoriesOn = preferences.showCategories().getOrDefault()
-        if (!categoriesOn) {
-            filters.add(R.string.hiding_categories)
-        }
         filter = preferences.filterTracked().getOrDefault()
         if (filter > 0) {
             filters.add(if (filter == 1) R.string.action_filter_tracked else R.string
@@ -212,38 +213,28 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
     fun createTags() {
         categories = inflate(R.layout.filter_buttons) as FilterTagGroup
         categories.setup(this, R.string.hide_categories)
-        categories.firstButton.isActivated = !preferences.showCategories().getOrDefault()
-        categories.onItemClicked = { view, index -> onFilterClicked(view, index) }
 
         downloaded = inflate(R.layout.filter_buttons) as FilterTagGroup
         downloaded.setup(this, R.string.action_filter_downloaded, R.string.action_filter_not_downloaded)
-        downloaded.setState(preferences.filterDownloaded())
-        downloaded.onItemClicked = { view, index -> onFilterClicked(view, index) }
 
         completed = inflate(R.layout.filter_buttons) as FilterTagGroup
         completed.setup(this, R.string.completed, R.string.ongoing)
-        completed.setState(preferences.filterCompleted())
-        completed.onItemClicked = { view, index -> onFilterClicked(view, index) }
 
         unread = inflate(R.layout.filter_buttons) as FilterTagGroup
         unread.setup(this, R.string.action_filter_not_started, R.string.action_filter_in_progress,
             R.string.action_filter_read)
-        unread.setState(preferences.filterUnread())
-        unread.onItemClicked = { view, index -> onFilterClicked(view, index) }
 
         tracked = inflate(R.layout.filter_buttons) as FilterTagGroup
         tracked.setup(this, R.string.action_filter_tracked, R.string.action_filter_not_tracked)
-        tracked.setState(preferences.filterTracked())
-        tracked.onItemClicked = { view, index -> onFilterClicked(view, index) }
 
         filterItems.forEach {
             filterLayout.addView(it)
         }
 
-        checkForWebtoons()
+        checkForManwha()
     }
 
-    private fun checkForWebtoons() {
+    private fun checkForManwha() {
         GlobalScope.launch(Dispatchers.IO, CoroutineStart.DEFAULT) {
             val db:DatabaseHelper by injectLazy()
             val librryManga = db.getLibraryMangas().executeAsBlocking()
@@ -255,55 +246,65 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                         R.string.manga,
                         R.string.manwha
                     )
-                    mangaType.setState(preferences.filterMangaType())
-                    mangaType.onItemClicked = { view, index -> onFilterClicked(view, index) }
                     this@FilterBottomSheet.mangaType = mangaType
                     filterLayout.addView(mangaType)
+                    filterItems.add(mangaType)
                 }
             }
+            launchUI {
+                categories.setState(!preferences.showCategories().getOrDefault())
+                downloaded.setState(preferences.filterDownloaded())
+                completed.setState(preferences.filterCompleted())
+                unread.setState(preferences.filterUnread())
+                tracked.setState(preferences.filterTracked())
+                mangaType?.setState(preferences.filterMangaType())
+                reSortViews()
+            }
+
         }
     }
 
-    private fun onFilterClicked(view: View, index: Int) {
-        /*val transition = AutoTransition()
-        transition.duration = 150
-        TransitionManager.beginDelayedTransition(this, transition)*/
-        /*f (index > -1) {
-            filterScrollView.scrollX = 0
-            filterLayout.removeView(view)
-            filterLayout.addView(view, 0)
+    override fun onFilterClicked(view: FilterTagGroup, index: Int, updatePreference:Boolean) {
+        if (updatePreference) {
+            when (view) {
+                categories -> {
+                    preferences.showCategories().set(index != 0)
+                    onGroupClicked(ACTION_REFRESH)
+                }
+                downloaded -> {
+                    preferences.filterDownloaded().set(index + 1)
+                    onGroupClicked(ACTION_FILTER)
+                }
+                unread -> {
+                    preferences.filterUnread().set(index + 1)
+                    onGroupClicked(ACTION_FILTER)
+                }
+                completed -> {
+                    preferences.filterCompleted().set(index + 1)
+                    onGroupClicked(ACTION_FILTER)
+                }
+                tracked -> {
+                    preferences.filterTracked().set(index + 1)
+                    onGroupClicked(ACTION_FILTER)
+                }
+                mangaType -> {
+                    preferences.filterMangaType().set(index + 1)
+                    onGroupClicked(ACTION_FILTER)
+                }
+            }
+            updateTitle()
         }
-        else{
-            filterLayout.removeView(view)
-            filterLayout.addView(view, items.indexOf(view as FilterTagGroup))
-        }*/
-        when (view) {
-            categories -> {
-                preferences.showCategories().set(index != 0)
-                onGroupClicked(ACTION_REFRESH)
-            }
-            downloaded -> {
-                preferences.filterDownloaded().set(index + 1)
-                onGroupClicked(ACTION_FILTER)
-            }
-            unread -> {
-                preferences.filterUnread().set(index + 1)
-                onGroupClicked(ACTION_FILTER)
-            }
-            completed -> {
-                preferences.filterCompleted().set(index + 1)
-                onGroupClicked(ACTION_FILTER)
-            }
-            tracked -> {
-                preferences.filterTracked().set(index + 1)
-                onGroupClicked(ACTION_FILTER)
-            }
-            mangaType -> {
-                preferences.filterMangaType().set(index + 1)
-                onGroupClicked(ACTION_FILTER)
-            }
+    }
+
+    fun reSortViews() {
+        filterLayout.removeAllViews()
+        filterItems.filter { it.isActivated }.forEach {
+            filterLayout.addView(it)
         }
-        updateTitle()
+        filterItems.filterNot { it.isActivated }.forEach {
+            filterLayout.addView(it)
+        }
+        filterScrollView.scrollTo(0, 0)
     }
 
     companion object {

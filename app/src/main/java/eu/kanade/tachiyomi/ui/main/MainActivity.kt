@@ -536,13 +536,12 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                     }
 
                     if (bottomNav) {
-                        navigationView.selectedItemId = R.id.nav_drawer_settings
-                        val newBackstack = listOf(
-                            RouterTransaction.with(SettingsMainController()),
-                            RouterTransaction.with(SettingsDownloadController()),
-                            RouterTransaction.with(DownloadController()))
-
-                        router.setBackstack(newBackstack, FadeChangeHandler())
+                        navigationView.selectedItemId = R.id.nav_drawer_library
+                        if (router.backstack.firstOrNull()?.controller() is LibraryController)
+                            router.popToRoot()
+                        else
+                            setRoot(LibraryController(), R.id.nav_drawer_library)
+                        router.pushController(DownloadController().withFadeTransaction())
                     }
                     else {
                         nav_view.setCheckedItem(R.id.nav_drawer_settings)

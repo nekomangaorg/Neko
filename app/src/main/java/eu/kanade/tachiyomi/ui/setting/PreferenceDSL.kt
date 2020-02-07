@@ -4,20 +4,10 @@ import android.app.Activity
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.preference.*
-import com.afollestad.materialdialogs.MaterialDialog
-import com.afollestad.materialdialogs.list.listItems
-import com.afollestad.materialdialogs.list.listItemsSingleChoice
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.getOrDefault
-import eu.kanade.tachiyomi.widget.preference.DownloadQueuePreference
 import eu.kanade.tachiyomi.widget.preference.ExtensionPreference
 import eu.kanade.tachiyomi.widget.preference.IntListMatPreference
-import eu.kanade.tachiyomi.widget.preference.IntListPreference
 import eu.kanade.tachiyomi.widget.preference.ListMatPreference
 import eu.kanade.tachiyomi.widget.preference.MultiListMatPreference
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
-import uy.kohesive.injekt.injectLazy
 
 @DslMarker
 @Target(AnnotationTarget.TYPE)
@@ -33,11 +23,6 @@ inline fun PreferenceGroup.preference(block: (@DSL Preference).() -> Unit): Pref
 
 inline fun PreferenceGroup.extensionPreference(block: (@DSL Preference).() -> Unit): ExtensionPreference {
     return initThenAdd(ExtensionPreference(context), block)
-}
-
-inline fun PreferenceGroup.downloadQueuePreference(block: (@DSL Preference).() -> Unit):
-    DownloadQueuePreference {
-    return initThenAdd(DownloadQueuePreference(context), block)
 }
 
 

@@ -50,10 +50,10 @@ class DownloadService : Service() {
             listeners.remove(listener)
         }
 
-        fun callListeners() {
+        fun callListeners(downloading: Boolean? = null) {
             val downloadManager: DownloadManager by injectLazy()
             listeners.forEach {
-                it.downloadStatusChanged(downloadManager.hasQueue())
+                it.downloadStatusChanged(downloading ?: downloadManager.hasQueue())
             }
         }
         /**
@@ -133,7 +133,7 @@ class DownloadService : Service() {
         runningRelay.call(false)
         subscriptions.unsubscribe()
         downloadManager.stopDownloads()
-        callListeners()
+        callListeners(downloadManager.hasQueue())
         wakeLock.releaseIfNeeded()
         super.onDestroy()
     }

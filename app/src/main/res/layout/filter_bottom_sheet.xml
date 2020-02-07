@@ -70,6 +70,7 @@
 
 
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/scrollView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <LinearLayout
@@ -82,14 +83,14 @@
         android:paddingTop="10dp"
         android:paddingBottom="10dp"
         android:id="@+id/filterScrollView"
-        android:layout_width="fill_parent"
+        android:layout_width="wrap_content"
         android:scrollbars="none"
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
         android:clipToPadding="false"
         android:layout_height="wrap_content">
     <LinearLayout
-        android:layout_width="fill_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/filterLayout"
         android:gravity="center_vertical"

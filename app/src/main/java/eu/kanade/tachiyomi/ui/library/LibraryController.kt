@@ -238,10 +238,6 @@ class LibraryController(
             shadow.gone()
             shadow2.gone()
         }
-        fab.scaleX = 0f
-        fab.scaleY = 0f
-        fab.isClickable = false
-        fab.isFocusable = false
     }
 
     fun enableReorderItems(category: Category) {
@@ -276,6 +272,7 @@ class LibraryController(
             activity?.tabs?.setupWithViewPager(library_pager)
             presenter.subscribeLibrary()
             DownloadService.addListener(this)
+            DownloadService.callListeners()
         }
     }
 
@@ -295,6 +292,7 @@ class LibraryController(
             fab.animate().scaleX(scale).scaleY(scale).setDuration(200).start()
             fab.isClickable = downloading
             fab.isFocusable = downloading
+            bottom_sheet.adjustTitleMargin(downloading)
         }
     }
     override fun onDetach(view: View) {

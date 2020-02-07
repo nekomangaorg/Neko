@@ -49,6 +49,7 @@
 
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">#B3000000</item>
+        <item name="android:colorEdgeEffect">@color/colorAccent</item>
 
         <!-- Material Dialog colors -->
         <item name="md_color_title">@color/textColorPrimary</item>

@@ -28,6 +28,10 @@
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
+        android:scaleX="0"
+        android:scaleY="0"
+        android:clickable="false"
+        android:focusable="false"
         app:layout_anchor="@id/bottom_sheet"
         style="@style/Theme.Widget.FABFixed"
         app:layout_anchorGravity="end|top"

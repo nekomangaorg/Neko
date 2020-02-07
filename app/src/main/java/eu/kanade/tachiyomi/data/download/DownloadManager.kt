@@ -96,6 +96,7 @@ class DownloadManager(val context: Context) {
     fun clearQueue(isNotification: Boolean = false) {
         deletePendingDownloads(*downloader.queue.toTypedArray())
         downloader.clearQueue(isNotification)
+        DownloadService.callListeners(false)
     }
 
     /**

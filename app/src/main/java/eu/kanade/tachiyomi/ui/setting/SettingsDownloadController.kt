@@ -34,13 +34,6 @@ class SettingsDownloadController : SettingsController() {
     override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
         titleRes = R.string.pref_category_downloads
 
-        downloadQueuePreference {
-            titleRes = R.string.label_download_queue
-            onClick {
-                router.pushController(DownloadController().withFadeTransaction())
-            }
-        }
-
         preference {
             key = Keys.downloadsDirectory
             titleRes = R.string.pref_download_directory

@@ -49,7 +49,7 @@ class SettingsMainController : SettingsController() {
             titleRes = R.string.pref_category_reader
             onClick { navigateTo(SettingsReaderController()) }
         }
-        downloadQueuePreference {
+        preference {
             iconRes = R.drawable.ic_file_download_black_24dp
             iconTint = tintColor
             titleRes = R.string.pref_category_downloads

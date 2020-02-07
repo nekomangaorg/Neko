@@ -1,12 +1,12 @@
 package eu.kanade.tachiyomi.ui.library
 
 import android.content.Context
-import android.transition.AutoTransition
-import android.transition.TransitionManager
 import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
+import android.widget.HorizontalScrollView
 import android.widget.LinearLayout
+import androidx.transition.Transition
 import com.f2prateek.rx.preferences.Preference
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.util.system.dpToPx
@@ -17,10 +17,18 @@ import kotlinx.android.synthetic.main.filter_buttons.view.*
 class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: AttributeSet? = null): LinearLayout
     (context, attrs) {
 
-    var onItemClicked: (View, Int) -> Unit = { _, _ ->  }
+    private var listener:FilterTagGroupListener? = null
 
-    private var itemCount = 0
+    var itemCount = 0
+        private set
+
     private var root:ViewGroup? = null
+
+    private val buttons by lazy { arrayOf(firstButton, secondButton, thirdButton) }
+
+    override fun isActivated(): Boolean {
+        return buttons.any { it.isActivated }
+    }
 
     fun setup(root: ViewGroup, firstText: Int, secondText: Int? = null, thirdText: Int? = null) {
         val text1 = context.getString(firstText)
@@ -31,6 +39,7 @@ class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: Attribute
 
     fun setup(root: ViewGroup, firstText: String, secondText: String? = null, thirdText: String? =
         null) {
+        listener = root as? FilterTagGroupListener
         (layoutParams as? MarginLayoutParams)?.rightMargin = 5.dpToPx
         (layoutParams as? MarginLayoutParams)?.leftMargin = 5.dpToPx
         firstButton.text = firstText
@@ -65,11 +74,23 @@ class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: Attribute
             toggleButton(index, false)
     }
 
+    fun setState(enabled: Boolean) {
+        if (enabled)
+            toggleButton(0, false)
+    }
+
     private fun toggleButton(index: Int, callBack: Boolean = true) {
         if (itemCount == 0) return
+        if (callBack) {
+            val transition = androidx.transition.AutoTransition()
+            transition.duration = 150
+            androidx.transition.TransitionManager.beginDelayedTransition(
+                parent.parent as ViewGroup, transition
+            )
+        }
         if (itemCount == 1) {
             firstButton.isActivated = !firstButton.isActivated
-            if (callBack) onItemClicked(this, if (firstButton.isActivated) index else -1)
+            listener?.onFilterClicked(this, if (firstButton.isActivated) index else -1, callBack)
             return
         }
         val buttons = mutableListOf(firstButton, secondButton)
@@ -77,20 +98,18 @@ class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: Attribute
             buttons.add(thirdButton)
         val mainButton = buttons[index]
         buttons.remove(mainButton)
-        val transition = AutoTransition()
-        transition.duration = 150
-        TransitionManager.beginDelayedTransition(root, transition)
+
         if (mainButton.isActivated) {
             mainButton.isActivated = false
             separator1.visible()
-            if (callBack) onItemClicked(this, -1)
+            listener?.onFilterClicked(this, -1, callBack)
             if (itemCount >= 3)
                 separator2.visible()
             buttons.forEach{ it.visible() }
         }
         else {
             mainButton.isActivated = true
-            if (callBack) onItemClicked(this, index)
+            listener?.onFilterClicked(this, index, callBack)
             buttons.forEach{ it.gone() }
             separator1.gone()
             if (itemCount >= 3) {
@@ -98,4 +117,8 @@ class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: Attribute
             }
         }
     }
+}
+
+interface FilterTagGroupListener {
+    fun onFilterClicked(view: FilterTagGroup, index: Int, updatePreference:Boolean)
 }
