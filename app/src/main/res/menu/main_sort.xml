@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".MainActivity">
+    <group android:id="@+id/reorder_group"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/action_alpha"
+            android:title="@string/title"/>
+
+        <item
+            android:id="@+id/action_last_read"
+            android:title="@string/action_sort_last_read"/>
+
+        <item
+            android:id="@+id/action_update"
+            android:title="@string/action_sort_last_updated"/>
+        <item
+            android:id="@+id/action_unread"
+            android:title="@string/action_filter_unread"/>
+
+        <item
+            android:id="@+id/action_total_chaps"
+            android:title="@string/action_sort_total"/>
+
+        <item
+            android:id="@+id/action_drag_and_drop"
+            android:title="@string/action_sort_drag_and_drop"/>
+
+    </group>
+
+    <item
+        android:id="@+id/action_reverse"
+        android:title="@string/action_reverse_order"/>
+</menu>

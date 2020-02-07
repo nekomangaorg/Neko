@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<eu.kanade.tachiyomi.ui.library.FilterTagGroup xmlns:android="http://schemas.android.com/apk/res/android"
+<eu.kanade.tachiyomi.ui.library.filter.FilterTagGroup xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal" android:layout_width="wrap_content"
     android:background="@drawable/round_textview_border"
     android:layout_marginStart="5dp"
@@ -64,4 +64,4 @@
         android:text="112"
         android:paddingStart="20dp"
         android:paddingEnd="20dp"/>
-</eu.kanade.tachiyomi.ui.library.FilterTagGroup>
+</eu.kanade.tachiyomi.ui.library.filter.FilterTagGroup>

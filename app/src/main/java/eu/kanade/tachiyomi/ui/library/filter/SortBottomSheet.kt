@@ -1,13 +1,11 @@
-package eu.kanade.tachiyomi.ui.migration.manga.design
+package eu.kanade.tachiyomi.ui.library.filter
 
 import android.app.Activity
 import android.content.res.Configuration
 import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.os.Bundle
-import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
@@ -36,13 +34,12 @@ import kotlinx.android.synthetic.main.migration_bottom_sheet.extra_search_param_
 import kotlinx.android.synthetic.main.migration_bottom_sheet.mig_categories
 import kotlinx.android.synthetic.main.migration_bottom_sheet.mig_chapters
 import kotlinx.android.synthetic.main.migration_bottom_sheet.mig_tracking
-import kotlinx.android.synthetic.main.migration_bottom_sheet.view.*
 import uy.kohesive.injekt.injectLazy
 
-class MigrationBottomSheetDialog(private val activity: Activity, theme: Int, private val listener:
-StartMigrationListener) :
+class SortBottomSheet(private val activity: Activity, theme: Int, private val listener:
+SortBottomSheetListener) :
     BottomSheetDialog(activity,
-    theme) {
+        theme) {
     /**
      * Preferences helper.
      */
@@ -52,7 +49,7 @@ StartMigrationListener) :
         // Use activity theme for this layout
         val view = activity.layoutInflater.inflate(R.layout.migration_bottom_sheet, null)
         //val scroll = NestedScrollView(context)
-       // scroll.addView(view)
+        // scroll.addView(view)
 
         setContentView(view)
         if (activity.resources.configuration?.orientation == Configuration.ORIENTATION_LANDSCAPE)
@@ -61,25 +58,25 @@ StartMigrationListener) :
         val currentNightMode = activity.resources.configuration.uiMode and Configuration
             .UI_MODE_NIGHT_MASK
         if (currentNightMode == Configuration.UI_MODE_NIGHT_NO)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
-        else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val nView = View(context)
-            val height = activity.window.decorView.rootWindowInsets.systemWindowInsetBottom
-            val params = ConstraintLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, height
-            )
-            params.bottomToBottom = constraintLayout.id
-            params.startToStart = constraintLayout.id
-            params.endToEnd = constraintLayout.id
-            nView.layoutParams = params
-            nView.background = GradientDrawable(
-                GradientDrawable.Orientation.BOTTOM_TOP, intArrayOf(
-                    ColorUtils.setAlphaComponent(Color.BLACK, 179), Color.TRANSPARENT
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+            else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                val nView = View(context)
+                val height = activity.window.decorView.rootWindowInsets.systemWindowInsetBottom
+                val params = ConstraintLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, height
                 )
-            )
-            constraintLayout.addView(nView)
-        }
+                params.bottomToBottom = constraintLayout.id
+                params.startToStart = constraintLayout.id
+                params.endToEnd = constraintLayout.id
+                nView.layoutParams = params
+                nView.background = GradientDrawable(
+                    GradientDrawable.Orientation.BOTTOM_TOP, intArrayOf(
+                        ColorUtils.setAlphaComponent(Color.BLACK, 179), Color.TRANSPARENT
+                    )
+                )
+                constraintLayout.addView(nView)
+            }
     }
 
     /**
@@ -99,14 +96,6 @@ StartMigrationListener) :
             }
         }
 
-
-        fab.setOnClickListener {
-            preferences.skipPreMigration().set(skip_step.isChecked)
-            listener.startMigration(
-                if (extra_search_param.isChecked && extra_search_param_text.text.isNotBlank())
-                    extra_search_param_text.text.toString() else null)
-            dismiss()
-        }
     }
 
     /**
@@ -174,6 +163,6 @@ StartMigrationListener) :
 
 }
 
-interface StartMigrationListener {
-    fun startMigration(extraParam:String?)
+interface SortBottomSheetListener {
+    fun onApplySort()
 }

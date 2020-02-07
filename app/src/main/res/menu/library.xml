@@ -19,18 +19,21 @@
 
     <item
         android:id="@+id/action_edit_categories"
+        android:icon="@drawable/ic_label_outline_white_24dp"
         android:title="@string/action_edit_categories"
-        app:showAsAction="never"/>
+        app:showAsAction="ifRoom"/>
 
     <item
         android:id="@+id/action_source_migration"
+        android:icon="@drawable/ic_swap_calls_white_24dp"
         android:title="@string/label_migration"
         app:showAsAction="never"/>
 
     <item
         android:id="@+id/action_reorganize"
+        android:icon="@drawable/ic_swap_vert_white_24dp"
         android:title="@string/action_sort_by"
-        app:showAsAction="never">
+        app:showAsAction="ifRoom">
         <menu>
             <group android:id="@+id/reorder_group"
                 android:checkableBehavior="single">

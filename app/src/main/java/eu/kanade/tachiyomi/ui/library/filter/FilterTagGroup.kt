@@ -1,12 +1,9 @@
-package eu.kanade.tachiyomi.ui.library
+package eu.kanade.tachiyomi.ui.library.filter
 
 import android.content.Context
 import android.util.AttributeSet
-import android.view.View
 import android.view.ViewGroup
-import android.widget.HorizontalScrollView
 import android.widget.LinearLayout
-import androidx.transition.Transition
 import com.f2prateek.rx.preferences.Preference
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.util.system.dpToPx
@@ -17,7 +14,7 @@ import kotlinx.android.synthetic.main.filter_buttons.view.*
 class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: AttributeSet? = null): LinearLayout
     (context, attrs) {
 
-    private var listener:FilterTagGroupListener? = null
+    private var listener: FilterTagGroupListener? = null
 
     var itemCount = 0
         private set

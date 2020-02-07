@@ -23,8 +23,6 @@ import com.afollestad.materialdialogs.MaterialDialog
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
 import com.f2prateek.rx.preferences.Preference
-import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
@@ -46,6 +44,7 @@ import eu.kanade.tachiyomi.ui.base.controller.TabbedController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.category.CategoryController
 import eu.kanade.tachiyomi.ui.download.DownloadController
+import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.ui.migration.MigrationController
@@ -217,7 +216,7 @@ class LibraryController(
         }
 
         if (MainActivity.bottomNav) {
-            bottom_sheet.onCreate(library_pager)
+            bottom_sheet.onCreate(pager_layout)
 
             bottom_sheet?.onGroupClicked = {
                 when (it) {
@@ -241,11 +240,13 @@ class LibraryController(
     }
 
     fun enableReorderItems(category: Category) {
+        if (MainActivity.bottomNav) return
         adapter?.categories?.getOrNull(library_pager.currentItem)?.mangaSort = category.mangaSort
         enableReorderItems(sortType = category.mangaSort)
     }
 
     private fun enableReorderItems(position: Int? = null, sortType: Char? = null) {
+        if (MainActivity.bottomNav) return
         val pos = position ?: library_pager.currentItem
         val orderOfCat = sortType ?: adapter?.categories?.getOrNull(pos)?.mangaSort
         if (reorderMenuItem?.isVisible != true) return
@@ -302,7 +303,8 @@ class LibraryController(
         super.onDetach(view)
     }
 
-    override fun createSecondaryDrawer(drawer: DrawerLayout): ViewGroup {
+    override fun createSecondaryDrawer(drawer: DrawerLayout): ViewGroup? {
+        if (MainActivity.bottomNav) return null
         val view = drawer.inflate(R.layout.library_drawer) as LibraryNavigationView
         navView = view
         drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, GravityCompat.END)
@@ -384,6 +386,7 @@ class LibraryController(
 
         bottom_sheet.lastCategory = adapter.categories.getOrNull(activeCat)
         bottom_sheet.updateTitle()
+        bottom_sheet.setMainSortText()
 
         tabsVisibilityRelay.call(categories.size > 1)
 
@@ -481,8 +484,10 @@ class LibraryController(
 
         val reorganizeItem = menu.findItem(R.id.action_reorganize)
         reorganizeItem.isVisible =
+            !MainActivity.bottomNav
             preferences.librarySortingMode().getOrDefault() == LibrarySort.DRAG_AND_DROP &&
                 !preferences.hideCategories().getOrDefault()
+        menu.findItem(R.id.action_filter).isVisible = !MainActivity.bottomNav
         reorderMenuItem = reorganizeItem
         enableReorderItems()
 
@@ -726,7 +731,8 @@ class LibraryController(
         presenter.removeMangaFromLibrary(mangas)
         destroyActionModeIfNeeded()
         snack?.dismiss()
-        snack = view?.snack(activity?.getString(R.string.manga_removed_library) ?: "", Snackbar.LENGTH_INDEFINITE)  {
+        snack = pager_layout?.snack(activity?.getString(R.string.manga_removed_library) ?: "", Snackbar
+            .LENGTH_INDEFINITE)  {
             var undoing = false
             setAction(R.string.action_undo) {
                 presenter.addMangas(mangas)

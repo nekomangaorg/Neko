@@ -24,8 +24,6 @@
         android:title="@string/label_migration"
         app:showAsAction="ifRoom" />
 
-
-
     <item
         android:id="@+id/action_move_manga"
         android:icon="@drawable/ic_swap_vert_white_24dp"

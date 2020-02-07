@@ -1,21 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<eu.kanade.tachiyomi.ui.library.FilterBottomSheet xmlns:android="http://schemas.android.com/apk/res/android"
+<eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/bottom_sheet"
     android:layout_width="match_parent"
+    style="@style/BottomSheetDialogTheme"
+    android:background="@drawable/bg_bottom_sheet_dialog_fragment"
     android:layout_height="wrap_content"
-    android:background="?android:attr/colorBackground"
-    android:orientation="vertical"
     android:clickable="true"
-    app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
-    android:focusable="true">
+    android:focusable="true"
+    android:orientation="vertical"
+    app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/topbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/topbar"
-        android:background="?android:attr/colorPrimary">
+        android:backgroundTint="?android:attr/colorPrimary"
+        android:background="@drawable/bg_bottom_sheet_dialog_fragment">
 
 
         <ImageView
@@ -33,39 +35,30 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
             android:layout_marginTop="15dp"
-            android:textColor="?attr/actionBarTintColor"
-            android:text="Filter &amp; Sort"
+            android:layout_marginBottom="15dp"
+            android:layout_marginEnd="8dp"
+            android:text="@string/filter_and_sort"
             android:textAlignment="textStart"
             android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
-            app:layout_constraintStart_toEndOf="@+id/imageView2"
+            android:textColor="?attr/actionBarTintColor"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/imageView2"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:textColor="?attr/actionBarTintColor"
             android:text="Filter &amp; Sort"
             android:textAlignment="textStart"
             android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
-            app:layout_constraintTop_toTopOf="@+id/sortText"
+            android:textColor="?attr/actionBarTintColor"
             app:layout_constraintBottom_toBottomOf="@+id/sortText"
             app:layout_constraintEnd_toEndOf="@+id/sortText"
-            app:layout_constraintStart_toStartOf="@+id/sortText" />
-
-        <View
-            android:id="@+id/line"
-            android:layout_width="wrap_content"
-            android:layout_height="1dp"
-            android:layout_marginTop="15dp"
-            android:background="?attr/actionBarTintColor"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/sortText" />
+            app:layout_constraintStart_toStartOf="@+id/sortText"
+            app:layout_constraintTop_toTopOf="@+id/sortText" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
@@ -73,38 +66,134 @@
         android:id="@+id/scrollView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
 
             android:orientation="vertical">
-    <HorizontalScrollView
-        android:layout_marginTop="6dp"
-        android:paddingTop="10dp"
-        android:paddingBottom="10dp"
-        android:id="@+id/filterScrollView"
-        android:layout_width="wrap_content"
-        android:scrollbars="none"
-        android:paddingStart="20dp"
-        android:paddingEnd="20dp"
-        android:clipToPadding="false"
-        android:layout_height="wrap_content">
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/filterLayout"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
 
-    </LinearLayout>
-    </HorizontalScrollView>
+            <HorizontalScrollView
+                android:id="@+id/filterScrollView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:clipToPadding="false"
+                android:paddingStart="20dp"
+                android:paddingTop="10dp"
+                android:paddingEnd="20dp"
+                android:paddingBottom="10dp"
+                android:scrollbars="none">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:drawablePadding="16dp"
-        android:text="For sorting later" />
+                <LinearLayout
+                    android:id="@+id/filterLayout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                </LinearLayout>
+            </HorizontalScrollView>
+
+            <HorizontalScrollView
+                android:id="@+id/sortScrollView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:clipToPadding="false"
+                android:paddingStart="30dp"
+                android:paddingTop="10dp"
+                android:paddingEnd="20dp"
+                android:paddingBottom="10dp"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:id="@+id/sortLayout"
+                    android:layout_width="wrap_content"
+                    android:baselineAligned="true"
+                    android:layout_height="wrap_content"
+                    android:gravity="center|start"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/mainSortTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="20dp"
+                        android:layout_weight="1"
+                        android:layout_marginBottom="20dp"
+                        android:clickable="true"
+                        android:drawablePadding="16dp"
+                        android:focusable="true"
+                        android:gravity="center"
+                        android:text="srgdg"
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
+                        android:textColor="?android:attr/textColorPrimary"
+                        android:textSize="15sp"
+                        android:textStyle="normal" />
+
+
+                    <TextView
+                        android:id="@+id/catSortTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="20dp"
+                        android:layout_weight="1"
+                        android:layout_marginBottom="20dp"
+                        android:clickable="true"
+                        android:drawablePadding="16dp"
+                        android:gravity="center"
+                        android:focusable="true"
+                        android:text="srgdg"
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
+                        android:textColor="?android:attr/textColorPrimary"
+                        android:textSize="15sp"
+                        android:textStyle="normal" />
+
+                    <LinearLayout
+                        android:id="@+id/displayLayout"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center|start"
+                        android:layout_weight="1"
+                        android:baselineAligned="false"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:clickable="true"
+                            android:layout_marginEnd="14dp"
+                            android:focusable="true"
+                            android:text="@string/display_as"
+                            android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
+                            android:textColor="?android:attr/textColorPrimary"
+                            android:textSize="15sp"
+                            android:textStyle="normal" />
+
+
+                        <RadioGroup
+                            android:id="@+id/displayGroup"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <RadioButton
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:paddingStart="0dp"
+                                android:paddingEnd="8dp"
+                                android:text="@string/action_display_grid" />
+
+                            <RadioButton
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="24dp"
+                                android:text="@string/action_display_list" />
+                        </RadioGroup>
+                    </LinearLayout>
+                </LinearLayout>
+            </HorizontalScrollView>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
-</eu.kanade.tachiyomi.ui.library.FilterBottomSheet>
+</eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet>

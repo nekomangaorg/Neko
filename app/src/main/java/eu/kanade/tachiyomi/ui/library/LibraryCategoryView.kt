@@ -19,6 +19,7 @@ import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.category.CategoryAdapter
+import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.inflate
@@ -26,6 +27,7 @@ import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.lang.plusAssign
+import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import kotlinx.android.synthetic.main.library_category.view.*
 import kotlinx.coroutines.delay
@@ -98,14 +100,26 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
         swipe_refresh.addView(recycler)
         adapter.fastScroller = fast_scroller
 
-        fast_scroller.addOnScrollStateChangeListener {
-            controller.lockFilterBar(it)
-        }
-        recycler.doOnApplyWindowInsets { v, insets, padding ->
-            v.updatePaddingRelative(bottom = padding.bottom + insets.systemWindowInsetBottom)
 
-            fast_scroller?.updateLayoutParams<MarginLayoutParams>  {
-                bottomMargin = insets.systemWindowInsetBottom
+        if (!MainActivity.bottomNav) {
+            fast_scroller.addOnScrollStateChangeListener {
+                controller.lockFilterBar(it)
+            }
+        }
+        else {
+            fast_scroller.setIgnoreTouchesOutsideHandle(false)
+        }
+        if (MainActivity.bottomNav) {
+            val height = context.resources.getDimensionPixelSize(R.dimen.rounder_radius) + 5.dpToPx
+            recycler.updatePaddingRelative(bottom = height)
+        }
+        else {
+            recycler.doOnApplyWindowInsets { v, insets, padding ->
+                v.updatePaddingRelative(bottom = padding.bottom + insets.systemWindowInsetBottom)
+
+                fast_scroller?.updateLayoutParams<MarginLayoutParams> {
+                    bottomMargin = insets.systemWindowInsetBottom
+                }
             }
         }
 
