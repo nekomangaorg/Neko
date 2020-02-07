@@ -31,6 +31,7 @@ import eu.kanade.tachiyomi.util.view.marginBottom
 import eu.kanade.tachiyomi.util.view.marginTop
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePadding
+import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.visible
 import kotlinx.android.synthetic.main.filter_bottom_sheet.view.*
 import kotlinx.coroutines.CoroutineStart
@@ -103,13 +104,14 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         topbar.setOnClickListener {
             if (sheetBehavior?.state != BottomSheetBehavior.STATE_EXPANDED) {
                 sheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
+                topbar.animate().alpha(0f).setDuration(100).start()
             } else {
                 sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
             }
         }
 
-        sortText.alpha = if (sheetBehavior?.state != BottomSheetBehavior.STATE_EXPANDED) 1f else 0f
-        title.alpha = if (sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) 1f else 0f
+        sortText.alpha = 1f
+        title.alpha = 0f
 
         pager = pagerView
         pager?.setPadding(0, 0, 0, topbar.height)
@@ -122,13 +124,14 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                     progress < 0.1f -> 0f
                     else -> progress
                 }
-                sortText.alpha = 1 - newProg
-                title.alpha = newProg
+                topbar.alpha = 1 - newProg
             }
 
             override fun onStateChanged(p0: View, state: Int) {
                 if (state == BottomSheetBehavior.STATE_COLLAPSED) reSortViews()
                 else setMainSortText()
+                topbar.isClickable = state == BottomSheetBehavior.STATE_COLLAPSED
+                topbar.isFocusable = state == BottomSheetBehavior.STATE_COLLAPSED
             }
         })
         topbar.viewTreeObserver.addOnGlobalLayoutListener {
@@ -191,6 +194,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         val params = sortText.layoutParams as? MarginLayoutParams ?: return
         params.rightMargin = (if (downloading) 80 else 8).dpToPx
         sortText.layoutParams = params
+
+        filterScrollView.updatePaddingRelative(end = (if (downloading) 80 else 20).dpToPx)
     }
 
     fun updateRootPadding(progress: Float? = null) {
