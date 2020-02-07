@@ -15,12 +15,12 @@ import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.fetchAllImageUrlsFromPageList
 import eu.kanade.tachiyomi.util.lang.RetryWithDelay
-import eu.kanade.tachiyomi.util.system.launchNow
-import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.lang.plusAssign
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.storage.saveTo
 import eu.kanade.tachiyomi.util.system.ImageUtil
+import eu.kanade.tachiyomi.util.system.launchNow
+import eu.kanade.tachiyomi.util.system.launchUI
 import kotlinx.coroutines.async
 import okhttp3.Response
 import rx.Observable
@@ -126,12 +126,14 @@ class Downloader(
             notifier.onWarning(reason)
         } else {
             if (notifier.paused) {
-                notifier.paused = false
-                if (queue.isEmpty()) notifier.dismiss()
-                else notifier.onDownloadPaused()
-            } else if (notifier.isSingleChapter && !notifier.errorThrown) {
-                notifier.isSingleChapter = false
-            } else {
+                if (queue.isEmpty()) {
+                    notifier.dismiss()
+                }
+                else {
+                    notifier.paused = false
+                    notifier.onDownloadPaused()
+                }
+            }else {
                 notifier.dismiss()
             }
         }
@@ -185,7 +187,7 @@ class Downloader(
         }
         queue.remove(manga)
         if (queue.isEmpty()) {
-            DownloadService.stop(context)
+            if (DownloadService.isRunning(context)) DownloadService.stop(context)
             stop()
         }
         notifier.dismiss()
@@ -253,9 +255,6 @@ class Downloader(
             if (chaptersToQueue.isNotEmpty()) {
                 queue.addAll(chaptersToQueue)
 
-                // Initialize queue size.
-                notifier.initialQueueSize = queue.size
-
                 if (isRunning) {
                     // Send the list of downloads to the downloader.
                     downloadsRelay.call(chaptersToQueue)
@@ -276,7 +275,7 @@ class Downloader(
     private fun downloadChapter(download: Download): Observable<Download> = Observable.defer {
         val chapterDirname = provider.getChapterDirName(download.chapter)
         val mangaDir = provider.getMangaDir(download.manga, download.source)
-        val tmpDir = mangaDir.createDirectory("${chapterDirname}_tmp")
+        val tmpDir = mangaDir.createDirectory(chapterDirname + TMP_DIR_SUFFIX)
 
         val pageListObservable = if (download.pages == null) {
             // Pull page list from network and add them to download object
@@ -479,11 +478,12 @@ class Downloader(
             queue.remove(download)
         }
         if (areAllDownloadsFinished()) {
-            if (notifier.isSingleChapter && !notifier.errorThrown) {
-                notifier.onDownloadCompleted(download, queue)
-            }
             DownloadService.stop(context)
         }
+    }
+
+    fun setPlaceholder() {
+        notifier.setPlaceholder(queue.firstOrNull())
     }
 
     /**

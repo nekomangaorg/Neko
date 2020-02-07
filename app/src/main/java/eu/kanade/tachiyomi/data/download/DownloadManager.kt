@@ -77,6 +77,10 @@ class DownloadManager(val context: Context) {
         downloader.stop(reason)
     }
 
+    fun setPlaceholder() {
+        downloader.setPlaceholder()
+    }
+
     /**
      * Tells the downloader to pause downloads.
      */
@@ -218,7 +222,7 @@ class DownloadManager(val context: Context) {
         if(!wasPaused && downloader.queue.isNotEmpty()){
             downloader.start()
         }
-        else if (downloader.queue.isEmpty()) {
+        else if (downloader.queue.isEmpty() && DownloadService.isRunning(context)) {
             DownloadService.stop(context)
         }
         queue.remove(chapters)

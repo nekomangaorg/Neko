@@ -85,7 +85,7 @@ open class MainActivity : BaseActivity() {
         this.snackBar = snackBar
         canDismissSnackBar = false
         launchUI {
-            delay(1000)
+            delay(5000)
             canDismissSnackBar = true
         }
         extraViewForUndo = extraViewToCheck

@@ -18,6 +18,7 @@ import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.lang.plusAssign
 import eu.kanade.tachiyomi.util.system.connectivityManager
+import eu.kanade.tachiyomi.util.system.isServiceRunning
 import eu.kanade.tachiyomi.util.system.powerManager
 import eu.kanade.tachiyomi.util.system.toast
 import rx.android.schedulers.AndroidSchedulers
@@ -61,6 +62,16 @@ class DownloadService : Service() {
         fun stop(context: Context) {
             context.stopService(Intent(context, DownloadService::class.java))
         }
+
+        /**
+         * Returns the status of the service.
+         *
+         * @param context the application context.
+         * @return true if the service is running, false otherwise.
+         */
+        fun isRunning(context: Context): Boolean {
+            return context.isServiceRunning(DownloadService::class.java)
+        }
     }
 
     /**
@@ -91,6 +102,7 @@ class DownloadService : Service() {
     override fun onCreate() {
         super.onCreate()
         startForeground(Notifications.ID_DOWNLOAD_CHAPTER, getPlaceholderNotification())
+        downloadManager.setPlaceholder()
         runningRelay.call(true)
         subscriptions = CompositeSubscription()
         listenDownloaderState()
