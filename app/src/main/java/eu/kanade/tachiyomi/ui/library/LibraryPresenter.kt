@@ -5,6 +5,14 @@ import com.jakewharton.rxrelay.BehaviorRelay
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
+import eu.kanade.tachiyomi.data.database.models.Category.Companion.ALPHA_ASC
+import eu.kanade.tachiyomi.data.database.models.Category.Companion.ALPHA_DSC
+import eu.kanade.tachiyomi.data.database.models.Category.Companion.LAST_READ_ASC
+import eu.kanade.tachiyomi.data.database.models.Category.Companion.LAST_READ_DSC
+import eu.kanade.tachiyomi.data.database.models.Category.Companion.UNREAD_ASC
+import eu.kanade.tachiyomi.data.database.models.Category.Companion.UNREAD_DSC
+import eu.kanade.tachiyomi.data.database.models.Category.Companion.UPDATED_ASC
+import eu.kanade.tachiyomi.data.database.models.Category.Companion.UPDATED_DSC
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.download.DownloadManager
@@ -221,7 +229,13 @@ class LibraryPresenter(
                     manga1LastRead.compareTo(manga2LastRead)
                 }
                 LibrarySort.LAST_UPDATED -> i2.manga.last_update.compareTo(i1.manga.last_update)
-                LibrarySort.UNREAD -> i1.manga.unread.compareTo(i2.manga.unread)
+                LibrarySort.UNREAD ->
+                    when {
+                        i1.manga.unread == i2.manga.unread -> 0
+                        i1.manga.unread == 0 -> if (ascending) 1 else -1
+                        i2.manga.unread == 0 -> if (ascending) -1 else 1
+                        else -> i1.manga.unread.compareTo(i2.manga.unread)
+                    }
                 LibrarySort.TOTAL -> {
                     val manga1TotalChapter = totalChapterManga[i1.manga.id!!] ?: 0
                     val mange2TotalChapter = totalChapterManga[i2.manga.id!!] ?: 0
@@ -233,17 +247,26 @@ class LibraryPresenter(
                         when {
                             category?.mangaSort != null -> {
                                 var sort = when (category.mangaSort) {
-                                    'a', 'b' -> sortAlphabetical(i1, i2)
-                                    'c', 'd' -> i2.manga.last_update.compareTo(i1.manga.last_update)
-                                    'e', 'f' -> i2.manga.unread.compareTo(i1.manga.unread)
-                                    'g', 'h' -> {
+                                    ALPHA_ASC, ALPHA_DSC -> sortAlphabetical(i1, i2)
+                                    UPDATED_ASC, UPDATED_DSC ->
+                                        i2.manga.last_update.compareTo(i1.manga.last_update)
+                                    UNREAD_ASC, UNREAD_DSC ->
+                                        when {
+                                            i1.manga.unread == i2.manga.unread -> 0
+                                            i1.manga.unread == 0 ->
+                                                if (category.isAscending()) 1 else -1
+                                            i2.manga.unread == 0 ->
+                                                if (category.isAscending()) -1 else 1
+                                            else -> i1.manga.unread.compareTo(i2.manga.unread)
+                                        }
+                                    LAST_READ_ASC, LAST_READ_DSC -> {
                                         val manga1LastRead = lastReadManga[i1.manga.id!!] ?: lastReadManga.size
                                         val manga2LastRead = lastReadManga[i2.manga.id!!] ?: lastReadManga.size
                                         manga1LastRead.compareTo(manga2LastRead)
                                     }
                                     else -> sortAlphabetical(i1, i2)
                                 }
-                                if ((category.mangaSort?.minus('a')) ?: 0 % 2 == 1 )
+                                if (!category.isAscending())
                                     sort *= -1
                                 sort
                             }
@@ -260,7 +283,7 @@ class LibraryPresenter(
                             else -> 0
                         }
                     }
-                    else  {
+                    else {
                         val category = catListing.find { it.id == i1.manga.category }?.order ?: -1
                         val category2 = catListing.find { it.id == i2.manga.category }?.order ?: -1
                         category.compareTo(category2)

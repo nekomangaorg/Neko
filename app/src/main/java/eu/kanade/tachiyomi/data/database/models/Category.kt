@@ -21,7 +21,20 @@ interface Category : Serializable {
     val nameLower: String
         get() = name.toLowerCase()
 
+    fun isAscending(): Boolean {
+       return ((mangaSort?.minus('a') ?: 0) % 2) != 1
+    }
+
     companion object {
+        const val ALPHA_ASC = 'a'
+        const val ALPHA_DSC = 'b'
+        const val UPDATED_ASC = 'c'
+        const val UPDATED_DSC = 'd'
+        const val UNREAD_ASC = 'e'
+        const val UNREAD_DSC = 'f'
+        const val LAST_READ_ASC = 'g'
+        const val LAST_READ_DSC = 'h'
+
 
         fun create(name: String): Category = CategoryImpl().apply {
             this.name = name
