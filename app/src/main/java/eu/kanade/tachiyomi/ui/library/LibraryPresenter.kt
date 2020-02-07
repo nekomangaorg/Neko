@@ -13,6 +13,7 @@ import eu.kanade.tachiyomi.data.database.models.Category.Companion.UNREAD_ASC
 import eu.kanade.tachiyomi.data.database.models.Category.Companion.UNREAD_DSC
 import eu.kanade.tachiyomi.data.database.models.Category.Companion.UPDATED_ASC
 import eu.kanade.tachiyomi.data.database.models.Category.Companion.UPDATED_DSC
+import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.download.DownloadManager
@@ -139,6 +140,8 @@ class LibraryPresenter(
 
         val filterTracked = preferences.filterTracked().getOrDefault()
 
+        val filterMangaType by lazy { preferences.filterMangaType().getOrDefault() }
+
         val filterFn: (LibraryItem) -> Boolean = f@ { item ->
             // Filter when there isn't unread chapters.
             if (MainActivity.bottomNav) {
@@ -153,6 +156,14 @@ class LibraryPresenter(
                 if (filterUnread == STATE_INCLUDE && item.manga.unread == 0) return@f false
                 if ((filterUnread == STATE_EXCLUDE || filterUnread == STATE_REALLY_EXCLUDE) && item
                     .manga.unread > 0) return@f false
+            }
+
+            if (MainActivity.bottomNav) {
+                if (filterMangaType == LibraryManga.MANGA &&
+                    item.manga.mangaType() == LibraryManga.MANWHA)
+                    return@f false
+                if ((filterMangaType == LibraryManga.MANWHA) &&
+                    item.manga.mangaType() == LibraryManga.MANGA) return@f false
             }
 
 

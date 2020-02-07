@@ -54,6 +54,8 @@ import eu.kanade.tachiyomi.ui.migration.manga.design.PreMigrationController
 import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationListController
 import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationProcedureConfig
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.inflate
 import eu.kanade.tachiyomi.util.view.marginBottom
 import eu.kanade.tachiyomi.util.view.marginTop
@@ -214,23 +216,32 @@ class LibraryController(
             createActionModeIfNeeded()
         }
 
-        bottom_sheet.onCreate(library_pager)
+        if (MainActivity.bottomNav) {
+            bottom_sheet.onCreate(library_pager)
 
-        bottom_sheet?.onGroupClicked = {
-            when (it) {
-                FilterBottomSheet.ACTION_REFRESH -> onRefresh()
-                FilterBottomSheet.ACTION_FILTER -> onFilterChanged()
-                FilterBottomSheet.ACTION_SORT -> onSortChanged()
-                FilterBottomSheet.ACTION_DISPLAY -> reattachAdapter()
-                FilterBottomSheet.ACTION_BADGE -> onDownloadBadgeChanged()
+            bottom_sheet?.onGroupClicked = {
+                when (it) {
+                    FilterBottomSheet.ACTION_REFRESH -> onRefresh()
+                    FilterBottomSheet.ACTION_FILTER -> onFilterChanged()
+                    FilterBottomSheet.ACTION_SORT -> onSortChanged()
+                    FilterBottomSheet.ACTION_DISPLAY -> reattachAdapter()
+                    FilterBottomSheet.ACTION_BADGE -> onDownloadBadgeChanged()
+                }
+            }
+
+            fab.setOnClickListener {
+                router.pushController(DownloadController().withFadeTransaction())
             }
         }
-
-        fab.setOnClickListener {
-            router.pushController(DownloadController().withFadeTransaction())
+        else {
+            bottom_sheet.gone()
+            shadow.gone()
+            shadow2.gone()
         }
         fab.scaleX = 0f
         fab.scaleY = 0f
+        fab.isClickable = false
+        fab.isFocusable = false
     }
 
     fun enableReorderItems(category: Category) {
@@ -279,10 +290,12 @@ class LibraryController(
     }
 
     override fun downloadStatusChanged(downloading: Boolean) {
-        val scale = if (downloading) 1f else 0f
-        fab.animate().scaleX(scale).scaleY(scale).setDuration(200).start()
-        fab.isClickable = downloading
-        fab.isFocusable = downloading
+        launchUI {
+            val scale = if (downloading) 1f else 0f
+            fab.animate().scaleX(scale).scaleY(scale).setDuration(200).start()
+            fab.isClickable = downloading
+            fab.isFocusable = downloading
+        }
     }
     override fun onDetach(view: View) {
         destroyActionModeIfNeeded()

@@ -183,7 +183,9 @@ class PreferencesHelper(val context: Context) {
 
     fun filterCompleted() = rxPrefs.getInteger(Keys.filterCompleted, 0)
 
-    fun filterTracked() = rxPrefs.getInteger(Keys.filterTrcaked, 0)
+    fun filterTracked() = rxPrefs.getInteger(Keys.filterTracked, 0)
+
+    fun filterMangaType() = rxPrefs.getInteger(Keys.filterMangaType, 0)
 
     fun hideCategories() = rxPrefs.getBoolean("hide_categories", false)
 

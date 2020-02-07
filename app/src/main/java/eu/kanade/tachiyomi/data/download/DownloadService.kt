@@ -77,7 +77,6 @@ class DownloadService : Service() {
          * @param context the application context.
          */
         fun stop(context: Context) {
-            callListeners()
             context.stopService(Intent(context, DownloadService::class.java))
         }
 
@@ -134,6 +133,7 @@ class DownloadService : Service() {
         runningRelay.call(false)
         subscriptions.unsubscribe()
         downloadManager.stopDownloads()
+        callListeners()
         wakeLock.releaseIfNeeded()
         super.onDestroy()
     }

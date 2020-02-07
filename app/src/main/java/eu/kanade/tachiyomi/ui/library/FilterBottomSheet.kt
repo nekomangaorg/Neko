@@ -7,15 +7,23 @@ import android.util.AttributeSet
 import android.view.View
 import android.widget.LinearLayout
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
+import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackManager
+import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.inflate
 import kotlinx.android.synthetic.main.filter_bottom_sheet.view.*
 import kotlinx.android.synthetic.main.filter_buttons.view.*
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -40,15 +48,17 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
     private lateinit var categories:FilterTagGroup
 
+    private var mangaType:FilterTagGroup? = null
+
     var lastCategory:Category? = null
 
     val filterItems:List<FilterTagGroup> by lazy {
         val list = mutableListOf<FilterTagGroup>()
-        if (Injekt.get<DatabaseHelper>().getCategories().executeAsBlocking().isNotEmpty())
-            list.add(categories)
         list.add(downloaded)
         list.add(unread)
         list.add(completed)
+        if (Injekt.get<DatabaseHelper>().getCategories().executeAsBlocking().isNotEmpty())
+            list.add(categories)
         if (Injekt.get<TrackManager>().hasLoggedServices())
             list.add(tracked)
         list
@@ -57,10 +67,6 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
     var onGroupClicked: (Int) -> Unit = { _ ->  }
     val recycler = androidx.recyclerview.widget.RecyclerView(context)
     var pager:View? = null
-
-    init {
-
-    }
 
     fun onCreate(pagerView:View) {
         val sheetBehavior = BottomSheetBehavior.from(this)
@@ -83,10 +89,9 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         updateTitle()
         sheetBehavior.setBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onSlide(bottomSheet: View, progress: Float) {
-                updateRootPadding()
+                updateRootPadding(progress)
                 sortText.alpha = 1 - progress
                 title.alpha = progress
-                //line.alpha = 1 - progress
             }
 
             override fun onStateChanged(p0: View, p1: Int) {
@@ -134,18 +139,26 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         }
     }
 
-    fun updateRootPadding() {
+    fun moveTitleMargin(downloading: Boolean) {
+        (sortText.layoutParams as? MarginLayoutParams)?.rightMargin =
+            (if (downloading) 40 else 8).dpToPx
+    }
+
+    fun updateRootPadding(progress: Float? = null) {
         val sheetBehavior = BottomSheetBehavior.from(this)
         val minHeight = sheetBehavior.peekHeight
         val maxHeight = height
-        val percent = ((if (sheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED) 1f else 0f)
-        * 100).roundToInt()
+        val trueProgress = progress ?: if (sheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED) 1f else 0f
+        val percent = (trueProgress * 100).roundToInt()
         val value = (percent * (maxHeight - minHeight) / 100) + minHeight
         pager?.setPadding(0, 0, 0, value)
     }
 
     fun sorting(): Int {
-        return if (lastCategory != null && preferences.showCategories().getOrDefault()) {
+        val sortingMode = preferences.librarySortingMode().getOrDefault()
+        return if (sortingMode == LibrarySort.DRAG_AND_DROP &&
+            lastCategory != null &&
+            preferences.showCategories().getOrDefault()) {
             when (lastCategory?.mangaSort) {
                 'a', 'b' -> LibrarySort.ALPHA
                 'c', 'd' -> LibrarySort.LAST_UPDATED
@@ -159,12 +172,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         }
     }
 
-    fun getFilters(): List<Int> {
+    private fun getFilters(): List<Int> {
         val filters = mutableListOf<Int>()
-        var categoriesOn = preferences.showCategories().getOrDefault()
-        if (!categoriesOn) {
-            filters.add(R.string.hiding_categories)
-        }
         var filter = preferences.filterDownloaded().getOrDefault()
         if (filter > 0) {
             filters.add(if (filter == 1) R.string.action_filter_downloaded else R.string
@@ -183,10 +192,18 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             filters.add(if (filter == 1) R.string.completed else R.string
                 .ongoing)
         }
+        val categoriesOn = preferences.showCategories().getOrDefault()
+        if (!categoriesOn) {
+            filters.add(R.string.hiding_categories)
+        }
         filter = preferences.filterTracked().getOrDefault()
         if (filter > 0) {
             filters.add(if (filter == 1) R.string.action_filter_tracked else R.string
                 .action_filter_not_tracked)
+        }
+        filter = preferences.filterMangaType().getOrDefault()
+        if (filter > 0) {
+            filters.add(if (filter == 1) R.string.manga_only else R.string.manwha_only)
         }
         return filters
     }
@@ -194,8 +211,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
     fun createTags() {
         categories = inflate(R.layout.filter_buttons) as FilterTagGroup
-        categories.setup(this, R.string.categories)
-        categories.firstButton.isActivated = preferences.showCategories().getOrDefault()
+        categories.setup(this, R.string.hide_categories)
+        categories.firstButton.isActivated = !preferences.showCategories().getOrDefault()
         categories.onItemClicked = { view, index -> onFilterClicked(view, index) }
 
         downloaded = inflate(R.layout.filter_buttons) as FilterTagGroup
@@ -222,6 +239,29 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         filterItems.forEach {
             filterLayout.addView(it)
         }
+
+        checkForWebtoons()
+    }
+
+    private fun checkForWebtoons() {
+        GlobalScope.launch(Dispatchers.IO, CoroutineStart.DEFAULT) {
+            val db:DatabaseHelper by injectLazy()
+            val librryManga = db.getLibraryMangas().executeAsBlocking()
+            if (librryManga.any { it.mangaType() == LibraryManga.MANWHA }) {
+                launchUI {
+                    val mangaType = inflate(R.layout.filter_buttons) as FilterTagGroup
+                    mangaType.setup(
+                        this@FilterBottomSheet,
+                        R.string.manga,
+                        R.string.manwha
+                    )
+                    mangaType.setState(preferences.filterMangaType())
+                    mangaType.onItemClicked = { view, index -> onFilterClicked(view, index) }
+                    this@FilterBottomSheet.mangaType = mangaType
+                    filterLayout.addView(mangaType)
+                }
+            }
+        }
     }
 
     private fun onFilterClicked(view: View, index: Int) {
@@ -239,7 +279,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         }*/
         when (view) {
             categories -> {
-                preferences.showCategories().set(index == 0)
+                preferences.showCategories().set(index != 0)
                 onGroupClicked(ACTION_REFRESH)
             }
             downloaded -> {
@@ -256,6 +296,10 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             }
             tracked -> {
                 preferences.filterTracked().set(index + 1)
+                onGroupClicked(ACTION_FILTER)
+            }
+            mangaType -> {
+                preferences.filterMangaType().set(index + 1)
                 onGroupClicked(ACTION_FILTER)
             }
         }

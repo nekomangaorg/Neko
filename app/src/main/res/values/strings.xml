@@ -6,6 +6,7 @@
     <string name="name">Name</string>
     <string name="categories">Categories</string>
     <string name="manga">Manga</string>
+    <string name="manwha">Manwha</string>
     <string name="chapters">Chapters</string>
     <string name="track">Tracking</string>
     <string name="history">History</string>
@@ -43,7 +44,10 @@
     <string name="action_filter_read">Read</string>
     <string name="action_filter_tracked">Tracked</string>
     <string name="action_filter_not_tracked">Not tracked</string>
+    <string name="hide_categories">Hide categories</string>
     <string name="hiding_categories">Hiding categories</string>
+    <string name="manga_only">Manga only</string>
+    <string name="manwha_only">Manwha only</string>
 
     <string name="sorting_by_">Sorting by %1$s</string>
     <string name="action_filter_empty">Remove filter</string>

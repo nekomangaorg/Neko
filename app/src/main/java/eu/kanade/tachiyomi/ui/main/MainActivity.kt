@@ -642,14 +642,14 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         if (!bottomNav) return
         val downloadManager = Injekt.get<DownloadManager>()
         val hasQueue = downloading || downloadManager.hasQueue()
-        if (hasQueue) {
-            val badge = navigationView?.getOrCreateBadge(R.id.nav_drawer_library)
-                ?: return
-            badge.clearNumber()
-            badge.backgroundColor = getResourceColor(R.attr.badgeColor)
-        }
-        else {
-            navigationView?.removeBadge(R.id.nav_drawer_library)
+        launchUI {
+            if (hasQueue) {
+                val badge = navigationView?.getOrCreateBadge(R.id.nav_drawer_library) ?: return@launchUI
+                badge.clearNumber()
+                badge.backgroundColor = getResourceColor(R.attr.badgeColor)
+            } else {
+                navigationView?.removeBadge(R.id.nav_drawer_library)
+            }
         }
     }
 
