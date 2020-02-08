@@ -411,7 +411,7 @@ class LibraryPresenter(
     private fun getLibraryFromDB(): Library {
         val categories = db.getCategories().executeAsBlocking().toMutableList()
         val libraryAsList = preferences.libraryAsList()
-        val showCategories = preferences.showCategories().getOrDefault()
+        val showCategories = !preferences.hideCategories().getOrDefault()
         var libraryManga = db.getLibraryMangas().executeAsBlocking()
         if (!showCategories)
             libraryManga = libraryManga.distinctBy { it.id }
@@ -424,7 +424,7 @@ class LibraryPresenter(
             categories.add(0, createDefaultCategory())
 
         this.allCategories = categories
-        this.categories = if (!preferences.showCategories().getOrDefault())
+        this.categories = if (preferences.hideCategories().getOrDefault())
             arrayListOf(createDefaultCategory())
         else categories
         return Library(this.categories, libraryMap)

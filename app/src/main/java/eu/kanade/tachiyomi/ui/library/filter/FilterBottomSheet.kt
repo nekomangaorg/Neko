@@ -231,7 +231,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         val sortingMode = preferences.librarySortingMode().getOrDefault()
         return if (!trueSort && sortingMode == LibrarySort.DRAG_AND_DROP &&
             lastCategory != null &&
-            preferences.showCategories().getOrDefault()) {
+            !preferences.hideCategories().getOrDefault()) {
             when (lastCategory?.mangaSort) {
                 'a', 'b' -> LibrarySort.ALPHA
                 'c', 'd' -> LibrarySort.LAST_UPDATED
@@ -247,7 +247,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
     private fun getFilters(): List<Int> {
         val filters = mutableListOf<Int>()
-        val categoriesOn = preferences.showCategories().getOrDefault()
+        val categoriesOn = !preferences.hideCategories().getOrDefault()
         if (!categoriesOn) {
             filters.add(R.string.hiding_categories)
         }
@@ -324,7 +324,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                 }
             }
             launchUI {
-                categories.setState(!preferences.showCategories().getOrDefault())
+                categories.setState(preferences.hideCategories().getOrDefault())
                 downloaded.setState(preferences.filterDownloaded())
                 completed.setState(preferences.filterCompleted())
                 unread.setState(preferences.filterUnread())
@@ -479,7 +479,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
     private fun setCatSortText() {
         launchUI {
-            if (preferences.librarySortingMode().getOrDefault() == LibrarySort.DRAG_AND_DROP && preferences.showCategories().getOrDefault() && lastCategory != null) {
+            if (preferences.librarySortingMode().getOrDefault() == LibrarySort.DRAG_AND_DROP &&
+                !preferences.hideCategories().getOrDefault() && lastCategory != null) {
                 val sortId = withContext(Dispatchers.IO) { sorting() }
                 val drawable = withContext(Dispatchers.IO) {
                     tintVector(
@@ -536,7 +537,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
     override fun onFilterClicked(view: FilterTagGroup, index: Int, updatePreference:Boolean) {
         if (updatePreference) {
             if (view == categories) {
-                preferences.showCategories().set(index != 0)
+                preferences.hideCategories().set(index == 0)
                 onGroupClicked(ACTION_REFRESH)
             } else {
                 when (view) {
@@ -559,10 +560,10 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
     }
 
     private fun clearFilters() {
-        val action = if (preferences.showCategories().getOrDefault()) ACTION_REFRESH
+        val action = if (preferences.hideCategories().getOrDefault()) ACTION_REFRESH
         else ACTION_FILTER
 
-        preferences.showCategories().set(true)
+        preferences.hideCategories().set(false)
         preferences.filterDownloaded().set(0)
         preferences.filterUnread().set(0)
         preferences.filterCompleted().set(0)

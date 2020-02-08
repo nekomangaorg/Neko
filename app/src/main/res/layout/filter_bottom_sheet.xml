@@ -19,7 +19,10 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
                 android:orientation="vertical">
 
                 <HorizontalScrollView
@@ -91,7 +94,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginEnd="20dp"
                                 android:clickable="true"
-                                android:drawablePadding="16dp"
+                                android:drawablePadding="6dp"
                                 android:background="@drawable/square_ripple"
                                 android:focusable="true"
                                 android:gravity="center"
