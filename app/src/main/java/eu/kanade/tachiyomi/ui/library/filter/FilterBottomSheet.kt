@@ -4,13 +4,13 @@ import android.content.Context
 import android.content.res.Configuration
 import android.graphics.drawable.Drawable
 import android.util.AttributeSet
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RadioButton
 import android.widget.RadioGroup
+import androidx.appcompat.view.menu.MenuBuilder
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
 import com.f2prateek.rx.preferences.Preference
@@ -86,14 +86,13 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
     var pager:View? = null
 
     fun onCreate(pagerView:View) {
-        if (context.resources.configuration?.orientation == Configuration.ORIENTATION_LANDSCAPE
-            || isTablet()) {
+        if (isLandscape() || isTablet()) {
             sideLayout.orientation = HORIZONTAL
             sortingLayout.updateLayoutParams<MarginLayoutParams> {
                 bottomMargin = 0
                 topMargin = 0
             }
-            sortScrollView.updatePadding(
+            sortScrollView?.updatePadding(
                 bottom = 10.dpToPx,
                 top = 0
             )
@@ -117,14 +116,16 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         val coordLayout:View = (pagerView.parent as ViewGroup).findViewById(R.id.snackbar_layout)
         sheetBehavior?.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onSlide(bottomSheet: View, progress: Float) {
-                updateRootPadding(progress)
                 topbar.alpha = 1 - progress
                 shadow2.alpha = (1 - progress) * 0.25f
+                updateRootPadding(progress)
             }
 
             override fun onStateChanged(p0: View, state: Int) {
                 if (state == BottomSheetBehavior.STATE_COLLAPSED) reSortViews()
                 else setMainSortText()
+                if (state == BottomSheetBehavior.STATE_EXPANDED)
+                    topbar.alpha = 0f
                 topbar.isClickable = state == BottomSheetBehavior.STATE_COLLAPSED
                 topbar.isFocusable = state == BottomSheetBehavior.STATE_COLLAPSED
             }
@@ -165,6 +166,10 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         }
 
         displayGroup.bindToPreference(preferences.libraryAsList())
+    }
+
+    private fun isLandscape(): Boolean {
+        return context.resources.configuration?.orientation == Configuration.ORIENTATION_LANDSCAPE
     }
 
     private fun isTablet(): Boolean {
@@ -345,17 +350,41 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
         // Set a listener so we are notified if a menu item is clicked
         popup.setOnMenuItemClickListener { menuItem ->
-            onMainSortClicked(menuItem)
+            onMainSortClicked(menuItem.itemId)
             true
         }
-        popup.menu.findItem(R.id.action_reverse).isVisible =
-            preferences.librarySortingMode().getOrDefault() != LibrarySort.DRAG_AND_DROP
+
+        if (popup.menu is MenuBuilder) {
+            val m = popup.menu as MenuBuilder
+            m.setOptionalIconsVisible(true)
+        }
+
+        val sortingMode = preferences.librarySortingMode().getOrDefault()
+        val currentItem = popup.menu.findItem(
+            when (sortingMode) {
+                LibrarySort.DRAG_AND_DROP -> R.id.action_drag_and_drop
+                LibrarySort.TOTAL -> R.id.action_total_chaps
+                LibrarySort.LAST_READ -> R.id.action_last_read
+                LibrarySort.UNREAD -> R.id.action_unread
+                LibrarySort.LAST_UPDATED -> R.id.action_update
+                else -> R.id.action_alpha
+            }
+        )
+        currentItem.icon = tintVector(
+            when {
+                sortingMode == LibrarySort.DRAG_AND_DROP -> R.drawable.ic_check_white_24dp
+                !preferences.librarySortingAscending().getOrDefault() ->
+                    R.drawable.ic_arrow_down_white_24dp
+                else -> R.drawable.ic_arrow_up_white_24dp
+            }, android.R.attr.colorAccent
+        )
 
         // Finally show the PopupMenu
         popup.show()
     }
 
     private fun showCatSortOptions() {
+        val category = lastCategory ?: return
         // Create a PopupMenu, giving it the clicked view for an anchor
         val popup = PopupMenu(context, catSortTextView)
 
@@ -364,23 +393,45 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
         // Set a listener so we are notified if a menu item is clicked
         popup.setOnMenuItemClickListener { menuItem ->
-            onCatSortClicked(menuItem)
+            onCatSortClicked(menuItem.itemId)
             true
         }
-        popup.menu.findItem(R.id.action_reverse).isVisible = lastCategory?.mangaSort != null
+
+        val sortingMode = category.sortingMode()
+        val currentItem = if (sortingMode == null) null
+        else popup.menu.findItem(
+            when (sortingMode) {
+                LibrarySort.DRAG_AND_DROP -> R.id.action_drag_and_drop
+                LibrarySort.TOTAL -> R.id.action_total_chaps
+                LibrarySort.LAST_READ -> R.id.action_last_read
+                LibrarySort.UNREAD -> R.id.action_unread
+                LibrarySort.LAST_UPDATED -> R.id.action_update
+                else -> R.id.action_alpha
+            }
+        )
+
+        if (sortingMode != null && popup.menu is MenuBuilder) {
+            val m = popup.menu as MenuBuilder
+            m.setOptionalIconsVisible(true)
+        }
+
+        currentItem?.icon = tintVector(
+            if (category.isAscending()) R.drawable.ic_arrow_up_white_24dp
+            else R.drawable.ic_arrow_down_white_24dp,
+            android.R.attr.colorAccent
+        )
 
         // Finally show the PopupMenu
         popup.show()
     }
 
-    private fun onMainSortClicked(menu: MenuItem) {
-        if (menu.itemId == R.id.action_reverse) {
+    private fun onMainSortClicked(menuId: Int) {
+        if (menuId == R.id.action_reverse) {
             preferences.librarySortingAscending().set(
                 !preferences.librarySortingAscending().getOrDefault())
         }
         else {
-            preferences.librarySortingMode().set(
-                when (menu.itemId) {
+            val sort = when (menuId) {
                     R.id.action_update -> LibrarySort.LAST_UPDATED
                     R.id.action_unread -> LibrarySort.UNREAD
                     R.id.action_total_chaps -> LibrarySort.TOTAL
@@ -388,26 +439,35 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                     R.id.action_drag_and_drop -> LibrarySort.DRAG_AND_DROP
                     else -> LibrarySort.ALPHA
                 }
-            )
+            if (sort == preferences.librarySortingMode().getOrDefault()) {
+                if (sort != LibrarySort.DRAG_AND_DROP)
+                    onMainSortClicked(R.id.action_reverse)
+                return
+            }
+            preferences.librarySortingMode().set(sort)
             preferences.librarySortingAscending().set(true)
         }
         setMainSortText()
         onGroupClicked(ACTION_SORT)
     }
 
-    private fun onCatSortClicked(menu: MenuItem) {
+    private fun onCatSortClicked(menuId: Int) {
         val category = lastCategory ?: return
-        val modType = if (menu.itemId == R.id.action_reverse) {
+        val modType = if (menuId == R.id.action_reverse) {
             val t = (category.mangaSort?.minus('a') ?: 0) + 1
                 if (t % 2 != 0) t + 1
                 else t - 1
         }
         else {
-            val order = when (menu.itemId) {
+            val order = when (menuId) {
                 R.id.action_last_read -> 3
                 R.id.action_unread -> 2
                 R.id.action_update -> 1
                 else -> 0
+            }
+            if (order == category.catSortingMode()) {
+                onCatSortClicked(R.id.action_reverse)
+                return
             }
             (2 * order + 1)
         }
@@ -430,25 +490,21 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
     }
 
     private fun setMainSortText() {
-        //if (sheetBehavior?.state == BottomSheetBehavior.STATE_COLLAPSED) return
         launchUI {
             val sortId = withContext(Dispatchers.IO) { sorting(true) }
-            val drawable = withContext(Dispatchers.IO) {
-                tintVector(
-                    when {
-                        sortId == LibrarySort.DRAG_AND_DROP -> R.drawable.ic_sort_white_24dp
-                        preferences.librarySortingAscending().getOrDefault() -> R.drawable
-                            .ic_arrow_up_white_24dp
-                        else -> R.drawable.ic_arrow_down_white_24dp
-                    }
+            val drawableL = withContext(Dispatchers.IO) {
+                 tintVector(
+                     when {
+                         sortId == LibrarySort.DRAG_AND_DROP -> R.drawable.ic_sort_white_24dp
+                         preferences.librarySortingAscending().getOrDefault() -> R.drawable.ic_arrow_up_white_24dp
+                         else -> R.drawable.ic_arrow_down_white_24dp
+                     }, android.R.attr.colorAccent
                 )
             }
-            mainSortTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(
-                null, null, drawable, null
-            )
             mainSortTextView.text = withContext(Dispatchers.IO) {
-                if (sortId == LibrarySort.DRAG_AND_DROP)
-                    context.getString(
+                context.getString(
+                    if (sortId == LibrarySort.DRAG_AND_DROP) R.string.sort_library_by_
+                    else R.string.sort_by_, context.getString(
                         when (sortId) {
                             LibrarySort.LAST_UPDATED -> R.string.action_sort_last_updated
                             LibrarySort.DRAG_AND_DROP -> R.string.action_sort_drag_and_drop
@@ -458,9 +514,32 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                             else -> R.string.title
                         }
                     )
-                else {
-                    context.getString(
-                        R.string.sort_by_, context.getString(
+                )
+            }
+            mainSortTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(
+                drawableL, null, null, null
+            )
+            setCatSortText()
+        }
+    }
+
+    private fun setCatSortText() {
+        launchUI {
+            if (preferences.librarySortingMode().getOrDefault() == LibrarySort.DRAG_AND_DROP &&
+                !preferences.hideCategories().getOrDefault() && lastCategory != null) {
+                val sortId = withContext(Dispatchers.IO) { sorting() }
+                val drawableL = withContext(Dispatchers.IO) {
+                    tintVector(
+                        when {
+                            sortId == LibrarySort.DRAG_AND_DROP -> R.drawable.ic_label_outline_white_24dp
+                            lastCategory?.isAscending() == true -> R.drawable.ic_arrow_up_white_24dp
+                            else -> R.drawable.ic_arrow_down_white_24dp
+                        }, android.R.attr.colorAccent
+                    )
+                }
+                catSortTextView.text = withContext(Dispatchers.IO) {
+                   context.getString(
+                        R.string.sort_category_by_, context.getString(
                             when (sortId) {
                                 LibrarySort.LAST_UPDATED -> R.string.action_sort_last_updated
                                 LibrarySort.DRAG_AND_DROP -> R.string.action_sort_drag_and_drop
@@ -472,42 +551,9 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                         )
                     )
                 }
-            }
-            setCatSortText()
-        }
-    }
-
-    private fun setCatSortText() {
-        launchUI {
-            if (preferences.librarySortingMode().getOrDefault() == LibrarySort.DRAG_AND_DROP &&
-                !preferences.hideCategories().getOrDefault() && lastCategory != null) {
-                val sortId = withContext(Dispatchers.IO) { sorting() }
-                val drawable = withContext(Dispatchers.IO) {
-                    tintVector(
-                        R.drawable.ic_label_outline_white_24dp
-                        /*when {
-                            sortId == LibrarySort.DRAG_AND_DROP -> R.drawable.ic_sort_white_24dp
-                            lastCategory?.isAscending() == true -> R.drawable
-                                .ic_arrow_up_white_24dp
-                            else -> R.drawable.ic_arrow_down_white_24dp
-                        }*/
-                    )
-                }
                 catSortTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(
-                    null, null, drawable, null
+                    drawableL, null, null, null
                 )
-                catSortTextView.text = withContext(Dispatchers.IO) {
-                    context.getString(
-                        when (sortId) {
-                            LibrarySort.LAST_UPDATED -> R.string.action_sort_last_updated
-                            LibrarySort.DRAG_AND_DROP -> R.string.action_sort_drag_and_drop
-                            LibrarySort.TOTAL -> R.string.action_sort_total
-                            LibrarySort.UNREAD -> R.string.action_filter_unread
-                            LibrarySort.LAST_READ -> R.string.action_sort_last_read
-                            else -> R.string.title
-                        }
-                    )
-                }
                 if (catSortTextView.visibility != View.VISIBLE) catSortTextView.visible()
             } else if (catSortTextView.visibility == View.VISIBLE) catSortTextView.gone()
         }
@@ -527,9 +573,9 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
     private fun Boolean.toInt() = if (this) 1 else 0
 
-    private fun tintVector(resId: Int): Drawable? {
+    private fun tintVector(resId: Int, attrId: Int? = null): Drawable? {
         return ContextCompat.getDrawable(context, resId)?.mutate()?.apply {
-            setTint(context.getResourceColor(R.attr.actionBarTintColor))
+            setTint(context.getResourceColor(attrId ?: android.R.attr.textColorPrimary))
         }
     }
 

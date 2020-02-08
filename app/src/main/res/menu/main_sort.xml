@@ -1,35 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".MainActivity">
-    <group android:id="@+id/reorder_group"
-        android:checkableBehavior="single">
         <item
             android:id="@+id/action_alpha"
-            android:title="@string/title"/>
+            android:title="@string/title"
+            android:icon="@drawable/ic_blank_24dp"/>
 
         <item
             android:id="@+id/action_last_read"
-            android:title="@string/action_sort_last_read"/>
+            android:title="@string/action_sort_last_read"
+            android:icon="@drawable/ic_blank_24dp"/>
 
         <item
             android:id="@+id/action_update"
-            android:title="@string/action_sort_last_updated"/>
+            android:title="@string/action_sort_last_updated"
+            android:icon="@drawable/ic_blank_24dp"/>
         <item
             android:id="@+id/action_unread"
-            android:title="@string/action_filter_unread"/>
+            android:title="@string/action_filter_unread"
+            android:icon="@drawable/ic_blank_24dp"/>
 
         <item
             android:id="@+id/action_total_chaps"
-            android:title="@string/action_sort_total"/>
+            android:title="@string/action_sort_total"
+            android:icon="@drawable/ic_blank_24dp"/>
 
         <item
             android:id="@+id/action_drag_and_drop"
-            android:title="@string/action_sort_drag_and_drop"/>
+            android:title="@string/action_sort_drag_and_drop"
+            android:icon="@drawable/ic_blank_24dp"/>
 
-    </group>
-
-    <item
-        android:id="@+id/action_reverse"
-        android:title="@string/action_reverse_order"/>
 </menu>

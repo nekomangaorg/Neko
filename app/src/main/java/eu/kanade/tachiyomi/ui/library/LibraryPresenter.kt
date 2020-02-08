@@ -4,14 +4,6 @@ import android.os.Bundle
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
-import eu.kanade.tachiyomi.data.database.models.Category.Companion.ALPHA_ASC
-import eu.kanade.tachiyomi.data.database.models.Category.Companion.ALPHA_DSC
-import eu.kanade.tachiyomi.data.database.models.Category.Companion.LAST_READ_ASC
-import eu.kanade.tachiyomi.data.database.models.Category.Companion.LAST_READ_DSC
-import eu.kanade.tachiyomi.data.database.models.Category.Companion.UNREAD_ASC
-import eu.kanade.tachiyomi.data.database.models.Category.Companion.UNREAD_DSC
-import eu.kanade.tachiyomi.data.database.models.Category.Companion.UPDATED_ASC
-import eu.kanade.tachiyomi.data.database.models.Category.Companion.UPDATED_DSC
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
@@ -246,16 +238,16 @@ class LibraryPresenter(
         val sortFn: (LibraryItem, LibraryItem) -> Int = { i1, i2 ->
             val compare = when {
                 category.mangaSort != null -> {
-                    var sort = when (category.mangaSort) {
-                        ALPHA_ASC, ALPHA_DSC -> sortAlphabetical(i1, i2)
-                        UPDATED_ASC, UPDATED_DSC -> i2.manga.last_update.compareTo(i1.manga.last_update)
-                        UNREAD_ASC, UNREAD_DSC -> when {
+                    var sort = when (category.sortingMode()) {
+                        LibrarySort.ALPHA -> sortAlphabetical(i1, i2)
+                        LibrarySort.LAST_UPDATED -> i2.manga.last_update.compareTo(i1.manga.last_update)
+                        LibrarySort.UNREAD -> when {
                             i1.manga.unread == i2.manga.unread -> 0
                             i1.manga.unread == 0 -> if (category.isAscending()) 1 else -1
                             i2.manga.unread == 0 -> if (category.isAscending()) -1 else 1
                             else -> i1.manga.unread.compareTo(i2.manga.unread)
                         }
-                        LAST_READ_ASC, LAST_READ_DSC -> {
+                        LibrarySort.LAST_READ -> {
                             val manga1LastRead = lastReadManga[i1.manga.id!!] ?: lastReadManga.size
                             val manga2LastRead = lastReadManga[i2.manga.id!!] ?: lastReadManga.size
                             manga1LastRead.compareTo(manga2LastRead)
@@ -336,20 +328,16 @@ class LibraryPresenter(
                         val category = catListing.find { it.id == i1.manga.category }
                         when {
                             category?.mangaSort != null -> {
-                                var sort = when (category.mangaSort) {
-                                    ALPHA_ASC, ALPHA_DSC -> sortAlphabetical(i1, i2)
-                                    UPDATED_ASC, UPDATED_DSC ->
-                                        i2.manga.last_update.compareTo(i1.manga.last_update)
-                                    UNREAD_ASC, UNREAD_DSC ->
-                                        when {
-                                            i1.manga.unread == i2.manga.unread -> 0
-                                            i1.manga.unread == 0 ->
-                                                if (category.isAscending()) 1 else -1
-                                            i2.manga.unread == 0 ->
-                                                if (category.isAscending()) -1 else 1
-                                            else -> i1.manga.unread.compareTo(i2.manga.unread)
-                                        }
-                                    LAST_READ_ASC, LAST_READ_DSC -> {
+                                var sort = when (category.sortingMode()) {
+                                    LibrarySort.ALPHA -> sortAlphabetical(i1, i2)
+                                    LibrarySort.LAST_UPDATED -> i2.manga.last_update.compareTo(i1.manga.last_update)
+                                    LibrarySort.UNREAD -> when {
+                                        i1.manga.unread == i2.manga.unread -> 0
+                                        i1.manga.unread == 0 -> if (category.isAscending()) 1 else -1
+                                        i2.manga.unread == 0 -> if (category.isAscending()) -1 else 1
+                                        else -> i1.manga.unread.compareTo(i2.manga.unread)
+                                    }
+                                    LibrarySort.LAST_READ -> {
                                         val manga1LastRead = lastReadManga[i1.manga.id!!] ?: lastReadManga.size
                                         val manga2LastRead = lastReadManga[i2.manga.id!!] ?: lastReadManga.size
                                         manga1LastRead.compareTo(manga2LastRead)

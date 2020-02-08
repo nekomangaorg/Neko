@@ -7,8 +7,6 @@
     app:behavior_peekHeight="0dp"
     android:layout_height="wrap_content"
     android:background="@drawable/bg_bottom_sheet_dialog_fragment"
-    android:clickable="true"
-    android:focusable="true"
     android:orientation="vertical"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
@@ -60,20 +58,13 @@
                     </LinearLayout>
                 </HorizontalScrollView>
 
-                <HorizontalScrollView
-                    android:id="@+id/sortScrollView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:clipToPadding="false"
-                    android:paddingStart="23dp"
-                    android:paddingEnd="20dp"
-                    android:scrollbars="none">
-
                     <LinearLayout
                         android:id="@+id/sideLayout"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:paddingStart="23dp"
+                        android:paddingEnd="20dp"
                         android:baselineAligned="true"
                         android:gravity="center|start"
                         android:orientation="vertical">
@@ -90,14 +81,15 @@
 
                             <TextView
                                 android:id="@+id/mainSortTextView"
-                                android:layout_width="wrap_content"
+                                android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:layout_marginEnd="20dp"
+                                android:layout_marginEnd="10dp"
                                 android:clickable="true"
                                 android:drawablePadding="6dp"
                                 android:background="@drawable/square_ripple"
+                                android:layout_weight="1"
                                 android:focusable="true"
-                                android:gravity="center"
+                                android:gravity="start|center"
                                 android:padding="5dp"
                                 android:text="srgdg"
                                 android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
@@ -107,15 +99,17 @@
 
                             <TextView
                                 android:id="@+id/catSortTextView"
-                                android:layout_width="wrap_content"
+                                android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:background="@drawable/square_ripple"
-                                android:layout_marginEnd="20dp"
+                                android:layout_marginEnd="10dp"
+                                android:layout_weight="1"
                                 android:padding="5dp"
                                 android:clickable="true"
-                                android:drawablePadding="16dp"
+                                android:drawablePadding="6dp"
+                                android:textAlignment="textStart"
                                 android:focusable="true"
-                                android:gravity="center"
+                                android:gravity="start|center"
                                 android:text="srgdg"
                                 android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
                                 android:textColor="?android:attr/textColorPrimary"
@@ -174,7 +168,6 @@
                             android:layout_height="wrap_content"
                             android:text="@string/action_display_download_badge"/>
                     </LinearLayout>
-                </HorizontalScrollView>
             </LinearLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
