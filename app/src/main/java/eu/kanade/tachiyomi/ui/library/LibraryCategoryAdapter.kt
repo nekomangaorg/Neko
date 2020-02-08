@@ -71,7 +71,7 @@ class LibraryCategoryAdapter(val view: LibraryCategoryView) :
             val preferences:PreferencesHelper by injectLazy()
             when (preferences.librarySortingMode().getOrDefault()) {
                 LibrarySort.DRAG_AND_DROP -> {
-                    if (preferences.showCategories().getOrDefault()) {
+                    if (!preferences.hideCategories().getOrDefault()) {
                         val title = (iFlexible as LibraryItem).manga.currentTitle()
                         if (preferences.removeArticles().getOrDefault())
                             title.removeArticles().substring(0, 1).toUpperCase(Locale.US)

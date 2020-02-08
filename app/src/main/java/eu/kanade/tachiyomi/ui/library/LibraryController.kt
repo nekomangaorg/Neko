@@ -363,7 +363,8 @@ class LibraryController(
      * Called when a filter is changed.
      */
     private fun onFilterChanged(item: ExtendedNavigationView.Item) {
-        if (item is ExtendedNavigationView.Item.MultiStateGroup && item.resTitle == R.string.categories) {
+        if (item is ExtendedNavigationView.Item.MultiStateGroup &&
+            item.resTitle == R.string.action_hide_categories) {
             activity?.invalidateOptionsMenu()
             presenter.requestFullUpdate()
             return
@@ -425,7 +426,7 @@ class LibraryController(
         val reorganizeItem = menu.findItem(R.id.action_reorganize)
         reorganizeItem.isVisible =
             preferences.librarySortingMode().getOrDefault() == LibrarySort.DRAG_AND_DROP &&
-                preferences.showCategories().getOrDefault()
+                !preferences.hideCategories().getOrDefault()
         reorderMenuItem = reorganizeItem
         enableReorderItems()
 

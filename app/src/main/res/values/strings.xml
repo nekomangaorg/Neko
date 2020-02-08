@@ -37,6 +37,7 @@
     <string name="action_sort_total">Total chapters</string>
     <string name="action_sort_last_read">Last read</string>
     <string name="action_sort_drag_and_drop">Drag &amp; Drop</string>
+    <string name="action_hide_categories">Hide categories</string>
     <string name="action_search">Search</string>
     <string name="action_skip_manga">Don\'t migrate</string>
     <string name="action_select_all">Select all</string>

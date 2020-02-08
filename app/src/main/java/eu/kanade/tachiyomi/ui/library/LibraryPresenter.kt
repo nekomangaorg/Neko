@@ -325,7 +325,7 @@ class LibraryPresenter(
             else dbCategories
 
             this.allCategories = categories
-            this.categories = if (!preferences.showCategories().getOrDefault())
+            this.categories = if (preferences.hideCategories().getOrDefault())
                 arrayListOf(createDefaultCategory())
             else categories
             Library(this.categories, libraryManga)
@@ -359,7 +359,7 @@ class LibraryPresenter(
         val libraryAsList = preferences.libraryAsList()
         return db.getLibraryMangas().asRxObservable()
                 .map { list ->
-                    if (preferences.showCategories().getOrDefault()) {
+                    if (!preferences.hideCategories().getOrDefault()) {
                         list.map { LibraryItem(it, libraryAsList) }.groupBy { it.manga.category }
                     }
                     else {

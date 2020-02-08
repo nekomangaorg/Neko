@@ -102,7 +102,8 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
                 // Disable swipe refresh when view is not at the top
                 val firstPos = (recycler.layoutManager as LinearLayoutManager)
                         .findFirstCompletelyVisibleItemPosition()
-                swipe_refresh.isEnabled = firstPos <= 0 && preferences.showCategories().getOrDefault()
+                swipe_refresh.isEnabled = firstPos <= 0 && !preferences.hideCategories()
+                    .getOrDefault()
             }
         })
         fast_scroller.addOnScrollStateChangeListener {
@@ -189,7 +190,7 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
             preferences.filterTracked().getOrDefault() +
             preferences.filterUnread().getOrDefault() +
             preferences.filterCompleted().getOrDefault() == 0 &&
-            preferences.showCategories().getOrDefault()
+            !preferences.hideCategories().getOrDefault()
         return sortingMode == LibrarySort.DRAG_AND_DROP && filterOff &&
             adapter.mode != SelectableAdapter.Mode.MULTI
     }
@@ -218,7 +219,7 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
         // Update the category with its manga.
         adapter.setItems(mangaForCategory)
 
-        swipe_refresh.isEnabled = preferences.showCategories().getOrDefault()
+        swipe_refresh.isEnabled = !preferences.hideCategories().getOrDefault()
 
         if (adapter.mode == SelectableAdapter.Mode.MULTI) {
             controller.selectedMangas.forEach { manga ->

@@ -92,7 +92,7 @@ class LibraryNavigationView @JvmOverloads constructor(context: Context, attrs: A
 
         private val tracked = Item.TriStateGroup(R.string.tracked, this)
 
-        private val categories = Item.TriStateGroup(R.string.categories, this)
+        private val categories = Item.TriStateGroup(R.string.action_hide_categories, this)
 
         override val items:List<Item> = {
             val list = mutableListOf<Item>()
@@ -112,8 +112,9 @@ class LibraryNavigationView @JvmOverloads constructor(context: Context, attrs: A
 
         override fun initModels() {
             try {
-                categories.state = if (preferences.showCategories().getOrDefault()) STATE_INCLUDE
-                else STATE_IGNORE
+                categories.state =
+                    if (preferences.hideCategories().getOrDefault()) STATE_INCLUDE
+                    else STATE_IGNORE
                 downloaded.state = preferences.filterDownloaded().getOrDefault()
                 unread.state = preferences.filterUnread().getOrDefault()
                 completed.state = preferences.filterCompleted().getOrDefault()
@@ -133,7 +134,7 @@ class LibraryNavigationView @JvmOverloads constructor(context: Context, attrs: A
                 }
                 item.state = newState
                 when (item) {
-                    categories -> preferences.showCategories().set(item.state == STATE_INCLUDE)
+                    categories -> preferences.hideCategories().set(item.state == STATE_INCLUDE)
                 }
             }
             else if (item is Item.TriStateGroup) {
