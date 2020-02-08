@@ -275,6 +275,7 @@ class LibraryPresenter(
                                 val index1 = order.indexOf(i1.manga.id!!)
                                 val index2 = order.indexOf(i2.manga.id!!)
                                 when {
+                                    index1 == index2 -> 0
                                     index1 == -1 -> -1
                                     index2 == -1 -> 1
                                     else -> index1.compareTo(index2)

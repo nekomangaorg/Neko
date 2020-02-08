@@ -392,7 +392,7 @@ open class MainActivity : BaseActivity() {
             drawer.closeDrawers()
         } else if (backstackSize == 1 && router.getControllerWithTag("$startScreenId") == null) {
             setSelectedDrawerItem(startScreenId)
-        } else if (backstackSize == 1 || !router.handleBack()) {
+        } else if (!router.handleBack()) {
             unlocked = false
             super.onBackPressed()
         }
