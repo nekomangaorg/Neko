@@ -17,6 +17,7 @@ import eu.kanade.tachiyomi.source.online.Mangadex
 import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
 import eu.kanade.tachiyomi.ui.catalogue.filter.*
+import eu.kanade.tachiyomi.ui.catalogue.follows.FollowsPager
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
@@ -122,14 +123,18 @@ open class BrowseCataloguePresenter(
      * @param query the query.
      * @param filters the current state of the filters (for search mode).
      */
-    fun restartPager(query: String = this.query, filters: FilterList = this.appliedFilters) {
+    fun restartPager(query: String = this.query, filters: FilterList = this.appliedFilters, followsPager: Boolean = false) {
         this.query = query
         this.appliedFilters = filters
 
         subscribeToMangaInitializer()
 
         // Create a new pager.
-        pager = createPager(query, filters)
+        if (followsPager) {
+            pager = FollowsPager(source)
+        } else {
+            pager = createPager(query, filters)
+        }
 
         val sourceId = source.id
 

@@ -22,7 +22,6 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
 import eu.kanade.tachiyomi.ui.base.controller.*
 import eu.kanade.tachiyomi.ui.catalogue.browse.BrowseCatalogueController
-import eu.kanade.tachiyomi.ui.catalogue.follows.FollowsController
 import eu.kanade.tachiyomi.ui.download.DownloadController
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.manga.MangaController
@@ -80,7 +79,6 @@ class MainActivity : BaseActivity(), MangadexLoginDialog.Listener {
         addIconToMenu(R.id.nav_drawer_recent_updates, CommunityMaterial.Icon2.cmd_update)
         addIconToMenu(R.id.nav_drawer_recently_read, CommunityMaterial.Icon.cmd_glasses)
         addIconToMenu(R.id.nav_drawer_browse, CommunityMaterial.Icon.cmd_compass_outline)
-        addIconToMenu(R.id.nav_drawer_follows, CommunityMaterial.Icon.cmd_bookmark)
         addIconToMenu(R.id.nav_drawer_downloads, CommunityMaterial.Icon.cmd_download)
         addIconToMenu(R.id.nav_drawer_settings, CommunityMaterial.Icon2.cmd_settings)
 
@@ -102,17 +100,6 @@ class MainActivity : BaseActivity(), MangadexLoginDialog.Listener {
                             nav_view.menu.getItem(0).isChecked = true
                         } else {
                             setRoot(browseCatalogueController, id)
-                        }
-                    }
-                    R.id.nav_drawer_follows -> {
-                        val latestUpdatesController = FollowsController(source)
-                        if (!source.isLogged()) {
-                            val dialog = MangadexLoginDialog(source)
-                            dialog.targetController = latestUpdatesController
-                            dialog.showDialog(router)
-                            nav_view.menu.getItem(0).isChecked = true
-                        } else {
-                            setRoot(latestUpdatesController, id)
                         }
                     }
                     R.id.nav_drawer_downloads -> {

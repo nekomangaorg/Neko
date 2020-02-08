@@ -170,6 +170,13 @@ open class BrowseCatalogueController(bundle: Bundle) :
             drawer.closeDrawer(Gravity.RIGHT)
             presenter.searchRandomManga()
         }
+        navView.onFollowsClicked = {
+            drawer.closeDrawer(Gravity.RIGHT)
+            adapter?.clear()
+            presenter.restartPager("", followsPager = true)
+
+
+        }
         return navView as ViewGroup
     }
 
@@ -240,26 +247,26 @@ open class BrowseCatalogueController(bundle: Bundle) :
         }
 
         val searchEventsObservable = searchView.queryTextChangeEvents()
-            .skip(1)
-            .filter { router.backstack.lastOrNull()?.controller() == this@BrowseCatalogueController }
-            .share()
+                .skip(1)
+                .filter { router.backstack.lastOrNull()?.controller() == this@BrowseCatalogueController }
+                .share()
         val writingObservable = searchEventsObservable
-            .filter { !it.isSubmitted }
-            .debounce(1250, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
+                .filter { !it.isSubmitted }
+                .debounce(1250, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
         val submitObservable = searchEventsObservable
-            .filter { it.isSubmitted }
+                .filter { it.isSubmitted }
 
         searchViewSubscription?.unsubscribe()
         searchViewSubscription = Observable.merge(writingObservable, submitObservable)
-            .map { it.queryText().toString() }
-            .subscribeUntilDestroy { searchWithQuery(it) }
+                .map { it.queryText().toString() }
+                .subscribeUntilDestroy { searchWithQuery(it) }
 
         searchItem.fixExpand(
-            onExpand = { invalidateMenuOnExpand() },
-            onCollapse = {
-                searchWithQuery("")
-                true
-            }
+                onExpand = { invalidateMenuOnExpand() },
+                onCollapse = {
+                    searchWithQuery("")
+                    true
+                }
         )
 
         // Setup filters button
