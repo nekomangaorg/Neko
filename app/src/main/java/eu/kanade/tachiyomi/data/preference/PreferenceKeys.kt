@@ -97,7 +97,11 @@ object PreferenceKeys {
 
     const val filterCompleted = "pref_filter_completed_key"
 
-    const val filterTracked = "pref_filter_tracked_key"
+    const val filterAnilist = "pref_filter_anilist_key"
+
+    const val filterKitsu = "pref_filter_kitsu_key"
+
+    const val filterMyanimelist = "pref_filter_myanimelist_key"
 
     const val librarySortingMode = "library_sorting_mode"
 
