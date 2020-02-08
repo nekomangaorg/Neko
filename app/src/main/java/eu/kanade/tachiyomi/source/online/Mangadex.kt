@@ -125,7 +125,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
 
     override suspend fun fetchTrackingInfo(manga: SManga): Track {
         if (!isLogged()) {
-            throw Exception("Login to fix MDList Tracking")
+            throw Exception("Not Logged in")
         }
         return FollowsHandler(clientBuilder(), headers).fetchTrackingInfo(manga)
     }
