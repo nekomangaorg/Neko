@@ -22,7 +22,6 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadService
-import eu.kanade.tachiyomi.data.download.DownloadServiceListener
 import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.data.library.LibraryUpdateRanker.rankingScheme
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService.Companion.start
@@ -53,7 +52,6 @@ import rx.schedulers.Schedulers
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import uy.kohesive.injekt.injectLazy
 import java.util.ArrayList
 import java.util.Date
 import java.util.concurrent.TimeUnit
@@ -368,15 +366,16 @@ class LibraryUpdateService(
                 emptyList<SChapter>()
             }
             if (fetchedChapters.isNotEmpty()) {
-                val newChapters = syncChaptersWithSource(db, fetchedChapters, manga, source).first
-                listener?.updatedManga(manga)
-                if (newChapters.isNotEmpty()) {
+                val newChapters = syncChaptersWithSource(db, fetchedChapters, manga, source)
+                if (newChapters.first.isNotEmpty()) {
                     if (downloadNew && (categoriesToDownload.isEmpty() || manga.category in categoriesToDownload)) {
-                        downloadChapters(manga, newChapters.sortedBy { it.chapter_number })
+                        downloadChapters(manga, newChapters.first.sortedBy { it.chapter_number })
                         hasDownloads = true
                     }
-                    newUpdates.add(manga to newChapters.sortedBy { it.chapter_number }.toTypedArray())
+                    newUpdates.add(manga to newChapters.first.sortedBy { it.chapter_number }.toTypedArray())
                 }
+                if (newChapters.first.size + newChapters.second.size > 0)
+                    listener?.onUpdateManga(manga)
             }
         }
         if (newUpdates.isNotEmpty()) {
@@ -609,5 +608,5 @@ class LibraryUpdateService(
 }
 
 interface LibraryServiceListener {
-    fun updatedManga(manga: LibraryManga)
+    fun onUpdateManga(manga: LibraryManga)
 }

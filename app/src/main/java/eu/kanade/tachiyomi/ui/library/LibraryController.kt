@@ -222,7 +222,7 @@ class LibraryController(
         if (MainActivity.bottomNav) {
             bottom_sheet.onCreate(pager_layout)
 
-            bottom_sheet?.onGroupClicked = {
+            bottom_sheet.onGroupClicked = {
                 when (it) {
                     FilterBottomSheet.ACTION_REFRESH -> onRefresh()
                     FilterBottomSheet.ACTION_FILTER -> onFilterChanged()
@@ -304,7 +304,7 @@ class LibraryController(
         }
     }
 
-    override fun updatedManga(manga: LibraryManga) {
+    override fun onUpdateManga(manga: LibraryManga) {
         presenter.updateManga(manga)
     }
 

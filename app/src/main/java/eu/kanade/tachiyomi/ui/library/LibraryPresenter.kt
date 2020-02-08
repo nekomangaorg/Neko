@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.ui.library
 
 import android.os.Bundle
-import com.jakewharton.rxrelay.BehaviorRelay
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
@@ -30,8 +29,6 @@ import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.migration.MigrationFlags
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
-import eu.kanade.tachiyomi.util.lang.combineLatest
-import eu.kanade.tachiyomi.util.lang.isNullOrUnsubscribed
 import eu.kanade.tachiyomi.util.lang.removeArticles
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_EXCLUDE
@@ -44,7 +41,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import rx.Observable
-import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 import uy.kohesive.injekt.Injekt
@@ -600,19 +596,17 @@ class LibraryPresenter(
         GlobalScope.launch(Dispatchers.IO, CoroutineStart.DEFAULT) {
             val rawMap = rawMangaMap ?: return@launch
             val currentMap = currentMangaMap ?: return@launch
-            rawMap.apply {
-                forEach {
-                    it.value.forEach { item ->
-                        if (item.manga.id == manga.id)
-                            item.manga.unread = manga.unread
-                    }
-                }
-            }
-            currentMap.apply {
-                forEach {
-                    it.value.forEach { item ->
-                        if (item.manga.id == manga.id)
-                            item.manga.unread = manga.unread
+            val id = manga.id ?: return@launch
+            val dbManga = db.getLibraryManga(id).executeAsBlocking() ?: return@launch
+            arrayOf(rawMap, currentMap).forEach { map ->
+                map.apply {
+                    forEach { entry ->
+                        entry.value.forEach { item ->
+                            if (item.manga.id == dbManga.id) {
+                                item.manga.last_update = dbManga.last_update
+                                item.manga.unread = dbManga.unread
+                            }
+                        }
                     }
                 }
             }

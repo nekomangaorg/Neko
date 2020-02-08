@@ -112,13 +112,14 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
         pager = pagerView
         updateTitle()
-        val shadow:View = (pagerView.parent as ViewGroup).findViewById(R.id.shadow2)
+        val shadow2:View = (pagerView.parent as ViewGroup).findViewById(R.id.shadow2)
+        val shadow:View = (pagerView.parent as ViewGroup).findViewById(R.id.shadow)
         val coordLayout:View = (pagerView.parent as ViewGroup).findViewById(R.id.snackbar_layout)
         sheetBehavior?.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onSlide(bottomSheet: View, progress: Float) {
                 updateRootPadding(progress)
                 topbar.alpha = 1 - progress
-                shadow.alpha = (1 - progress) * 0.25f
+                shadow2.alpha = (1 - progress) * 0.25f
             }
 
             override fun onStateChanged(p0: View, state: Int) {
@@ -129,10 +130,23 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             }
         })
         topbar.viewTreeObserver.addOnGlobalLayoutListener {
-            sheetBehavior?.peekHeight = topbar.height
+            val phoneLandscape = (context.resources.configuration?.orientation ==
+                Configuration.ORIENTATION_LANDSCAPE && !isTablet())
+            sheetBehavior?.peekHeight = if (phoneLandscape) {
+                if (shadow2.visibility != View.GONE) {
+                    shadow.gone()
+                    shadow2.gone()
+                }
+                0
+            }
+            else if (!sortText.text.isNullOrBlank()) {
+                topbar.height
+            }
+            else 0
             if (sheetBehavior?.state == BottomSheetBehavior.STATE_COLLAPSED) {
                 val height = context.resources.getDimensionPixelSize(R.dimen.rounder_radius)
-                pager?.setPadding(0, 0, 0, topbar.height - height)
+                pager?.setPadding(0, 0, 0, if (phoneLandscape) 0 else
+                    (topbar.height - height))
                 coordLayout.setPadding(0, 0, 0, topbar.height)
             }
             else {

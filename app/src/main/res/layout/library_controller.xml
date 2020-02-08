@@ -37,7 +37,7 @@
         app:layout_anchorGravity="top"
         app:layout_anchor="@id/bottom_sheet" />
     <!-- Adding bottom sheet after main content -->
-    <include layout="@layout/filter_bottom_sheet" />
+    <include layout="@layout/filter_bottom_sheet"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"

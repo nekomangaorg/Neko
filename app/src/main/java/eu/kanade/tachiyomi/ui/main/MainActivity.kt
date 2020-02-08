@@ -20,7 +20,6 @@ import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.biometric.BiometricManager
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.GravityCompat
-import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import com.bluelinelabs.conductor.Conductor
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.ControllerChangeHandler
@@ -28,7 +27,6 @@ import com.bluelinelabs.conductor.Router
 import com.bluelinelabs.conductor.RouterTransaction
 import com.bluelinelabs.conductor.changehandler.FadeChangeHandler
 import com.bluelinelabs.conductor.changehandler.SimpleSwapChangeHandler
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
 import eu.kanade.tachiyomi.Migrations
 import eu.kanade.tachiyomi.R
@@ -53,7 +51,6 @@ import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.ui.recent_updates.RecentChaptersController
 import eu.kanade.tachiyomi.ui.recently_read.RecentlyReadController
-import eu.kanade.tachiyomi.ui.setting.SettingsDownloadController
 import eu.kanade.tachiyomi.ui.setting.SettingsMainController
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
@@ -338,18 +335,20 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
     }
 
     override fun startSupportActionMode(callback: androidx.appcompat.view.ActionMode.Callback): androidx.appcompat.view.ActionMode? {
-        window?.statusBarColor = getResourceColor(R.attr.colorPrimary)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M )
+            window?.statusBarColor = getResourceColor(R.attr.colorPrimary)
         return super.startSupportActionMode(callback)
     }
 
     override fun onSupportActionModeFinished(mode: androidx.appcompat.view.ActionMode) {
-        launchUI {
-            val scale = Settings.Global.getFloat(contentResolver, Settings.Global
-            .ANIMATOR_DURATION_SCALE, 1.0f)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) launchUI {
+            val scale = Settings.Global.getFloat(
+                contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1.0f
+            )
             val duration = resources.getInteger(android.R.integer.config_mediumAnimTime) * scale
             delay(duration.toLong())
             delay(100)
-            window?.statusBarColor = Color.TRANSPARENT
+            window?.statusBarColor = getResourceColor(android.R.attr.statusBarColor)
         }
         super.onSupportActionModeFinished(mode)
     }
