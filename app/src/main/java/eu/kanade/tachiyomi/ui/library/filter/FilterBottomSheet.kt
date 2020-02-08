@@ -284,7 +284,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
     fun createTags() {
         categories = inflate(R.layout.filter_buttons) as FilterTagGroup
-        categories.setup(this, R.string.hide_categories)
+        categories.setup(this, R.string.action_hide_categories)
 
         downloaded = inflate(R.layout.filter_buttons) as FilterTagGroup
         downloaded.setup(this, R.string.action_filter_downloaded, R.string.action_filter_not_downloaded)

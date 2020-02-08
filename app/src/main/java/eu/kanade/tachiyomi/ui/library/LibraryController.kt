@@ -432,7 +432,7 @@ class LibraryController(
     /**
      * Called when a filter is changed.
      */
-    private fun onFilterChanged(item: ExtendedNavigationView.Item?) {
+    private fun onFilterChanged(item: ExtendedNavigationView.Item? = null) {
         if (item is ExtendedNavigationView.Item.MultiStateGroup && item.resTitle == R.string.categories) {
             if (!MainActivity.bottomNav) activity?.invalidateOptionsMenu()
             presenter.requestFullUpdate()
