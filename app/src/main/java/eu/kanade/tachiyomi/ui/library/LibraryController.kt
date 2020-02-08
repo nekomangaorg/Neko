@@ -425,23 +425,22 @@ class LibraryController(
     }
 
     private fun onRefresh() {
-        activity?.invalidateOptionsMenu()
+        if (!MainActivity.bottomNav) activity?.invalidateOptionsMenu()
         presenter.requestFullUpdate()
     }
 
     /**
      * Called when a filter is changed.
      */
-    private fun onFilterChanged(item: ExtendedNavigationView.Item) {
-        if (item is ExtendedNavigationView.Item.MultiStateGroup &&
-            item.resTitle == R.string.action_hide_categories) {
-            activity?.invalidateOptionsMenu()
+    private fun onFilterChanged(item: ExtendedNavigationView.Item?) {
+        if (item is ExtendedNavigationView.Item.MultiStateGroup && item.resTitle == R.string.categories) {
+            if (!MainActivity.bottomNav) activity?.invalidateOptionsMenu()
             presenter.requestFullUpdate()
             return
         }
         presenter.requestFilterUpdate()
         destroyActionModeIfNeeded()
-        activity?.invalidateOptionsMenu()
+        if (!MainActivity.bottomNav) activity?.invalidateOptionsMenu()
     }
 
     private fun onDownloadBadgeChanged() {
@@ -452,7 +451,7 @@ class LibraryController(
      * Called when the sorting mode is changed.
      */
     private fun onSortChanged() {
-        activity?.invalidateOptionsMenu()
+        if (!MainActivity.bottomNav) activity?.invalidateOptionsMenu()
         presenter.requestSortUpdate()
     }
 
@@ -503,7 +502,13 @@ class LibraryController(
             !MainActivity.bottomNav
             preferences.librarySortingMode().getOrDefault() == LibrarySort.DRAG_AND_DROP &&
                 !preferences.hideCategories().getOrDefault()
-        menu.findItem(R.id.action_filter).isVisible = !MainActivity.bottomNav
+
+        val config = resources?.configuration
+
+        val phoneLandscape = (config?.orientation == Configuration.ORIENTATION_LANDSCAPE &&
+            (config.screenLayout.and(Configuration.SCREENLAYOUT_SIZE_MASK)) <
+            Configuration.SCREENLAYOUT_SIZE_LARGE)
+        menu.findItem(R.id.action_library_filter).isVisible = !MainActivity.bottomNav || phoneLandscape
         reorderMenuItem = reorganizeItem
         enableReorderItems()
 
@@ -519,7 +524,7 @@ class LibraryController(
         }
 
         // Mutate the filter icon because it needs to be tinted and the resource is shared.
-        menu.findItem(R.id.action_filter).icon.mutate()
+        menu.findItem(R.id.action_library_filter).icon.mutate()
 
         searchViewSubscription?.unsubscribe()
         searchViewSubscription = searchView.queryTextChanges()
@@ -549,7 +554,7 @@ class LibraryController(
     override fun onPrepareOptionsMenu(menu: Menu) {
         val navView = navView ?: return
 
-        val filterItem = menu.findItem(R.id.action_filter)
+        val filterItem = menu.findItem(R.id.action_library_filter)
 
         // Tint icon if there's a filter active
         val filterColor = if (navView.hasActiveFilters()) Color.rgb(255, 238, 7)
@@ -560,8 +565,10 @@ class LibraryController(
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_search -> expandActionViewFromInteraction = true
-            R.id.action_filter -> {
-                navView?.let { activity?.drawer?.openDrawer(GravityCompat.END) }
+            R.id.action_library_filter -> {
+                if (MainActivity.bottomNav) bottom_sheet.sheetBehavior?.state =
+                    BottomSheetBehavior.STATE_EXPANDED
+                else navView?.let { activity?.drawer?.openDrawer(GravityCompat.END) }
             }
             R.id.action_edit_categories -> {
                 router.pushController(CategoryController().withFadeTransaction())
