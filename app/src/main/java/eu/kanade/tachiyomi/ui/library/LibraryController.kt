@@ -36,6 +36,7 @@ import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.util.inflate
 import eu.kanade.tachiyomi.util.toast
+import eu.kanade.tachiyomi.util.visible
 import kotlinx.android.synthetic.main.library_controller.*
 import kotlinx.android.synthetic.main.main_activity.*
 import rx.Subscription
@@ -524,6 +525,17 @@ class LibraryController(
                 Timber.e(error)
             }
             selectedCoverManga = null
+        }
+    }
+
+    fun lockFilterBar(lock: Boolean) {
+        val drawer = (navView?.parent as? DrawerLayout) ?: return
+        if (lock) {
+            drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
+            drawer.closeDrawers()
+        } else {
+            drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
+            drawer.visible()
         }
     }
 
