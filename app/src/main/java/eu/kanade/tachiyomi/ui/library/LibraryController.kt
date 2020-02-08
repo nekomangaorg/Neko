@@ -486,23 +486,7 @@ class LibraryController(
         presenter.removeMangaFromLibrary(mangas, deleteChapters)
         destroyActionModeIfNeeded()
     }
-
-    /**
-     * Changes the cover for the selected manga.
-     */
-    private fun changeSelectedCover() {
-        val manga = selectedMangas.firstOrNull() ?: return
-        selectedCoverManga = manga
-
-        if (manga.favorite) {
-            val intent = Intent(Intent.ACTION_GET_CONTENT)
-            intent.type = "image/*"
-            startActivityForResult(Intent.createChooser(intent,
-                    resources?.getString(R.string.file_select_cover)), REQUEST_IMAGE_OPEN)
-        } else {
-            activity?.toast(R.string.notification_first_add_to_library)
-        }
-    }
+    
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == REQUEST_IMAGE_OPEN) {
