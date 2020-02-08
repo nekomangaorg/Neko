@@ -470,6 +470,7 @@ class ReaderPresenter(
         directory.mkdirs()
 
         val chapter = page.chapter.chapter
+        
 
         // Build destination file.
         val filename = DiskUtil.buildValidFilename(
