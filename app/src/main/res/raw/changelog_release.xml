@@ -2,6 +2,11 @@
 <changelog bulletedList="true">
     <changelogversion
         changeDate=""
+        versionName="v1.6.2.1">
+        <changelogtext>Fix saved file name swapping chapter and volume so saved files are always in correct chapter order</changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
         versionName="v1.6.2">
         <changelogtext>Add ability to filter library by specific tracker</changelogtext>
         <changelogtext>Changed internal json parsing logic for manga api</changelogtext>
