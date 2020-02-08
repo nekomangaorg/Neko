@@ -136,7 +136,11 @@ fun syncChaptersWithSource(db: DatabaseHelper,
         // Set this manga as updated since chapters were changed
         val newestChatper = db.getChapters(manga).executeAsBlocking().maxBy { it.date_upload }
         val dateFetch = newestChatper?.date_upload ?: manga.last_update
-        manga.last_update = dateFetch
+        if (dateFetch == 0L) {
+            if (toAdd.isNotEmpty())
+                manga.last_update = Date().time
+        }
+        else manga.last_update = dateFetch
         db.updateLastUpdated(manga).executeAsBlocking()
     }
 
