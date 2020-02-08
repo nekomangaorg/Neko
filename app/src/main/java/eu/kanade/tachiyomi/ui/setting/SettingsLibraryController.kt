@@ -43,101 +43,106 @@ class SettingsLibraryController : SettingsController() {
                         value.toString()
                 }
 
-            Observable.combineLatest(
-                    preferences.portraitColumns().asObservable(),
-                    preferences.landscapeColumns().asObservable(),
-                    { portraitCols, landscapeCols -> Pair(portraitCols, landscapeCols) })
-                    .subscribeUntilDestroy { (portraitCols, landscapeCols) ->
-                        val portrait = getColumnValue(portraitCols)
-                        val landscape = getColumnValue(landscapeCols)
-                        summary = "${context.getString(R.string.portrait)}: $portrait, " +
-                                "${context.getString(R.string.landscape)}: $landscape"
-                    }
+                Observable.combineLatest(
+                        preferences.portraitColumns().asObservable(),
+                        preferences.landscapeColumns().asObservable(),
+                        { portraitCols, landscapeCols -> Pair(portraitCols, landscapeCols) })
+                        .subscribeUntilDestroy { (portraitCols, landscapeCols) ->
+                            val portrait = getColumnValue(portraitCols)
+                            val landscape = getColumnValue(landscapeCols)
+                            summary = "${context.getString(R.string.portrait)}: $portrait, " +
+                                    "${context.getString(R.string.landscape)}: $landscape"
+                        }
             }
-            preferenceCategory {
-                titleRes = R.string.pref_category_library_update
+        }
+        preferenceCategory {
+            titleRes = R.string.pref_category_library_update
 
-        intListPreference(activity) {
-            key = Keys.libraryUpdateInterval
-            titleRes = R.string.pref_library_update_interval
-            entriesRes = arrayOf(R.string.update_never, R.string.update_1hour,
-                    R.string.update_2hour, R.string.update_3hour, R.string.update_6hour,
-                    R.string.update_12hour, R.string.update_24hour, R.string.update_48hour)
-            entryValues = listOf(0, 1, 2, 3, 6, 12, 24, 48)
-            defaultValue = 0
+            intListPreference(activity) {
+                key = Keys.libraryUpdateInterval
+                titleRes = R.string.pref_library_update_interval
+                entriesRes = arrayOf(R.string.update_never, R.string.update_1hour,
+                        R.string.update_2hour, R.string.update_3hour, R.string.update_6hour,
+                        R.string.update_12hour, R.string.update_24hour, R.string.update_48hour)
+                entryValues = listOf(0, 1, 2, 3, 6, 12, 24, 48)
+                defaultValue = 0
 
-                    onChange { newValue ->
-                        // Always cancel the previous task, it seems that sometimes they are not updated.
-                        LibraryUpdateJob.cancelTask()
+                onChange { newValue ->
+                    // Always cancel the previous task, it seems that sometimes they are not updated.
+                    LibraryUpdateJob.cancelTask()
 
-                val interval = newValue as Int
-                if (interval > 0) {
-                    LibraryUpdateJob.setupTask(interval)
+                    val interval = newValue as Int
+                    if (interval > 0) {
+                        LibraryUpdateJob.setupTask(interval)
+                    }
+                    true
                 }
-                true
             }
-        }
-        multiSelectListPreferenceMat(activity) {
-            key = Keys.libraryUpdateRestriction
-            titleRes = R.string.pref_library_update_restriction
-            entriesRes = arrayOf(R.string.wifi, R.string.charging)
-            entryValues = listOf("wifi", "ac")
-            customSummaryRes = R.string.pref_library_update_restriction_summary
+            multiSelectListPreferenceMat(activity) {
+                key = Keys.libraryUpdateRestriction
+                titleRes = R.string.pref_library_update_restriction
+                entriesRes = arrayOf(R.string.wifi, R.string.charging)
+                entryValues = listOf("wifi", "ac")
+                customSummaryRes = R.string.pref_library_update_restriction_summary
 
-                    preferences.libraryUpdateInterval().asObservable()
-                            .subscribeUntilDestroy { isVisible = it > 0 }
+                preferences.libraryUpdateInterval().asObservable()
+                        .subscribeUntilDestroy { isVisible = it > 0 }
 
-            onChange {
-                // Post to event looper to allow the preference to be updated.
-                Handler().post { LibraryUpdateJob.setupTask() }
-                true
+                onChange {
+                    // Post to event looper to allow the preference to be updated.
+                    Handler().post { LibraryUpdateJob.setupTask() }
+                    true
+                }
             }
-        }
-        switchPreference {
-            key = Keys.updateOnlyNonCompleted
-            titleRes = R.string.pref_update_only_non_completed
-            defaultValue = false
-        }
+            switchPreference {
+                key = Keys.updateOnlyNonCompleted
+                titleRes = R.string.pref_update_only_non_completed
+                defaultValue = false
+            }
 
-        val dbCategories = db.getCategories().executeAsBlocking()
+            val dbCategories = db.getCategories().executeAsBlocking()
 
-        multiSelectListPreferenceMat(activity) {
-            key = Keys.libraryUpdateCategories
-            titleRes = R.string.pref_library_update_categories
-            entries = dbCategories.map { it.name }
-            entryValues = dbCategories.map { it.id.toString() }
-            allSelectionRes = R.string.all
+            multiSelectListPreferenceMat(activity) {
+                key = Keys.libraryUpdateCategories
+                titleRes = R.string.pref_library_update_categories
+                entries = dbCategories.map { it.name }
+                entryValues = dbCategories.map { it.id.toString() }
+                allSelectionRes = R.string.all
 
-            preferences.libraryUpdateCategories().asObservable()
-                    .subscribeUntilDestroy {
-                        val selectedCategories = it
-                                .mapNotNull { id -> dbCategories.find { it.id == id.toInt() } }
-                                .sortedBy { it.order }
+                preferences.libraryUpdateCategories().asObservable()
+                        .subscribeUntilDestroy {
+                            val selectedCategories = it
+                                    .mapNotNull { id -> dbCategories.find { it.id == id.toInt() } }
+                                    .sortedBy { it.order }
 
-                        customSummary = if (selectedCategories.isEmpty())
-                            context.getString(R.string.all)
-                        else
-                            selectedCategories.joinToString { it.name }
+                            customSummary = if (selectedCategories.isEmpty())
+                                context.getString(R.string.all)
+                            else
+                                selectedCategories.joinToString { it.name }
+                        }
+            }
+
+            preferenceCategory {
+                titleRes = R.string.pref_category_library_categories
+                intListPreference(activity) {
+                    key = Keys.defaultCategory
+                    titleRes = R.string.default_category
+
+                    val categories = listOf(Category.createDefault()) + dbCategories
+                    entries = listOf(context.getString(R.string.default_category_summary)) +
+                            categories.map { it.name }.toTypedArray()
+                    entryValues = listOf(-1) + categories.mapNotNull { it.id }.toList()
+                    defaultValue = "-1"
+
+                    val selectedCategory = categories.find { it.id == preferences.defaultCategory() }
+                    summary = selectedCategory?.name ?: context.getString(R.string.default_category_summary)
+                    onChange { newValue ->
+                        summary = categories.find {
+                            it.id == newValue as Int
+                        }?.name ?: context.getString(R.string.default_category_summary)
+                        true
                     }
-        }
-
-        intListPreference(activity) {
-            key = Keys.defaultCategory
-            titleRes = R.string.default_category
-
-            val categories = listOf(Category.createDefault()) + dbCategories
-            entries = listOf(context.getString(R.string.default_category_summary)) +
-                    categories.map { it.name }.toTypedArray()
-            entryValues = listOf(-1) + categories.mapNotNull { it.id }.toList()
-            defaultValue = "-1"
-
-            val selectedCategory = categories.find { it.id == preferences.defaultCategory() }
-            summary = selectedCategory?.name ?: context.getString(R.string.default_category_summary)
-            onChange { newValue ->
-                summary = categories.find {
-                    it.id == newValue as Int
-                }?.name ?: context.getString(R.string.default_category_summary)
-                true
+                }
             }
         }
     }
