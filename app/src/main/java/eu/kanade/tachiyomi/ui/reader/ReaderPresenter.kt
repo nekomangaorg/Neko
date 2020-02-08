@@ -470,12 +470,14 @@ class ReaderPresenter(
         directory.mkdirs()
 
         val chapter = page.chapter.chapter
-        
 
-        // Build destination file.
-        val filename = DiskUtil.buildValidFilename(
-                "${manga.title} - ${chapter.name}".take(225)
-        ) + " - ${page.number}.${type.extension}"
+        //create chapter name so its always sorted correctly  max character is 75
+        val pageName = parseChapterName(chapter.name, page.number.toString(), chapter.scanlator)
+        //take only 150 characters so this file maxes at 225
+        val trimmedTitle = manga.title.take(150)
+
+        // Build destination file
+        val filename = DiskUtil.buildValidFilename("${trimmedTitle} - ${pageName}") + ".${type.extension}"
 
         val destFile = File(directory, filename)
         stream().use { input ->
@@ -485,6 +487,34 @@ class ReaderPresenter(
         }
         return destFile
     }
+
+    private fun parseChapterName(chapterName: String, pageNumber: String, scanlator: String?): String {
+        val builder = StringBuilder()
+        var title = ""
+        val list = chapterName.split(Regex(" "), 3)
+
+        list.forEach {
+            if (it.startsWith("vol.", true)) {
+                builder.append("Vol.")
+                builder.append(it.substringAfter(".").padStart(4, '0'))
+            } else if (it.startsWith("ch.", true)) {
+                builder.append(" Ch.")
+                builder.append(it.substringAfter(".").padStart(4, '0'))
+            } else {
+                title = it
+            }
+        }
+
+        builder.append(" Pg.")
+        builder.append(pageNumber.padStart(4, '0'))
+        if (title.isNotEmpty()) {
+            builder.append(" ")
+            builder.append(title.take(200))
+        }
+
+        return builder.toString().trim()
+    }
+
 
     /**
      * Saves the image of this [page] on the pictures directory and notifies the UI of the result.
@@ -501,7 +531,7 @@ class ReaderPresenter(
         // Pictures directory.
         val destDir = File(Environment.getExternalStorageDirectory()!!.absolutePath +
                 File.separator + Environment.DIRECTORY_PICTURES +
-                File.separator + "Tachiyomi")
+                File.separator + "Neko")
 
         // Copy file in background.
         Observable.fromCallable { saveImage(page, destDir, manga) }
@@ -540,39 +570,6 @@ class ReaderPresenter(
                         { view, file -> view.onShareImageResult(file) },
                         { view, error -> /* Empty */ }
                 )
-    }
-
-    /**
-     * Sets the image of this [page] as cover and notifies the UI of the result.
-     */
-    fun setAsCover(page: ReaderPage) {
-        if (page.status != Page.READY) return
-        val manga = manga ?: return
-        val stream = page.stream ?: return
-
-        Observable
-                .fromCallable {
-                    val thumbUrl = manga.thumbnail_url ?: throw Exception("Image url not found")
-                    if (manga.favorite) {
-                        coverCache.copyToCache(thumbUrl, stream())
-                        SetAsCoverResult.Success
-                    } else {
-                        SetAsCoverResult.AddToLibraryFirst
-                    }
-                }
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeFirst(
-                        { view, result -> view.onSetAsCoverResult(result) },
-                        { view, _ -> view.onSetAsCoverResult(SetAsCoverResult.Error) }
-                )
-    }
-
-    /**
-     * Results of the set as cover feature.
-     */
-    enum class SetAsCoverResult {
-        Success, AddToLibraryFirst, Error
     }
 
     /**
