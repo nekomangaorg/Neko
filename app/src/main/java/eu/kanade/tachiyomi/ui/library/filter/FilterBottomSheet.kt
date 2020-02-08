@@ -28,8 +28,6 @@ import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.inflate
-import eu.kanade.tachiyomi.util.view.marginBottom
-import eu.kanade.tachiyomi.util.view.marginTop
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePadding
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
@@ -85,21 +83,18 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
     }
 
     var onGroupClicked: (Int) -> Unit = { _ ->  }
-    val recycler = androidx.recyclerview.widget.RecyclerView(context)
     var pager:View? = null
 
     fun onCreate(pagerView:View) {
-        if (context.resources.configuration?.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        if (context.resources.configuration?.orientation == Configuration.ORIENTATION_LANDSCAPE
+            || isTablet()) {
             sideLayout.orientation = HORIZONTAL
-            val marginValue = 10.dpToPx
-            arrayListOf(sortingLayout).forEach {
-                it.updateLayoutParams<MarginLayoutParams> {
-                    bottomMargin = 0
-                    topMargin = 0
-                }
+            sortingLayout.updateLayoutParams<MarginLayoutParams> {
+                bottomMargin = 0
+                topMargin = 0
             }
             sortScrollView.updatePadding(
-                bottom = marginValue,
+                bottom = 10.dpToPx,
                 top = 0
             )
         }
@@ -116,12 +111,14 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         }
 
         pager = pagerView
-        pager?.setPadding(0, 0, 0, topbar.height)
         updateTitle()
+        val shadow:View = (pagerView.parent as ViewGroup).findViewById(R.id.shadow2)
+        val coordLayout:View = (pagerView.parent as ViewGroup).findViewById(R.id.snackbar_layout)
         sheetBehavior?.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onSlide(bottomSheet: View, progress: Float) {
                 updateRootPadding(progress)
                 topbar.alpha = 1 - progress
+                shadow.alpha = (1 - progress) * 0.25f
             }
 
             override fun onStateChanged(p0: View, state: Int) {
@@ -136,6 +133,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             if (sheetBehavior?.state == BottomSheetBehavior.STATE_COLLAPSED) {
                 val height = context.resources.getDimensionPixelSize(R.dimen.rounder_radius)
                 pager?.setPadding(0, 0, 0, topbar.height - height)
+                coordLayout.setPadding(0, 0, 0, topbar.height)
             }
             else {
                 updateRootPadding()
@@ -146,8 +144,18 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         mainSortTextView.setOnClickListener { showMainSortOptions() }
         catSortTextView.setOnClickListener { showCatSortOptions() }
         clearButton.setOnClickListener { clearFilters() }
+        downloadCheckbox.isChecked = preferences.downloadBadge().getOrDefault()
+        downloadCheckbox.setOnCheckedChangeListener { _, isChecked ->
+            preferences.downloadBadge().set(isChecked)
+            onGroupClicked(ACTION_BADGE)
+        }
 
         displayGroup.bindToPreference(preferences.libraryAsList())
+    }
+
+    private fun isTablet(): Boolean {
+        return (context.resources.configuration.screenLayout and Configuration
+            .SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_LARGE
     }
 
     fun updateTitle() {
@@ -422,7 +430,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                 )
             }
             mainSortTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(
-                drawable, null, null, null
+                null, null, drawable, null
             )
             mainSortTextView.text = withContext(Dispatchers.IO) {
                 if (sortId == LibrarySort.DRAG_AND_DROP)
@@ -471,7 +479,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                     )
                 }
                 catSortTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(
-                    drawable, null, null, null
+                    null, null, drawable, null
                 )
                 catSortTextView.text = withContext(Dispatchers.IO) {
                     context.getString(

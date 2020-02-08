@@ -178,7 +178,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                 }
                 nav_view.setCheckedItem(id)
             }
-            else if (currentRoot?.tag()?.toIntOrNull() == id)  {
+            else if (currentRoot.tag()?.toIntOrNull() == id)  {
                 when (id) {
                     R.id.nav_drawer_recents -> {
                         if (router.backstack.size > 1) router.popToRoot()

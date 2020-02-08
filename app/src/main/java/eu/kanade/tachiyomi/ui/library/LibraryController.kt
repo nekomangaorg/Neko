@@ -37,6 +37,8 @@ import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.download.DownloadServiceListener
+import eu.kanade.tachiyomi.data.library.LibraryServiceListener
+import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
@@ -79,7 +81,8 @@ class LibraryController(
         ActionMode.Callback,
         ChangeMangaCategoriesDialog.Listener,
         MigrationInterface,
-        DownloadServiceListener {
+        DownloadServiceListener,
+        LibraryServiceListener {
 
     /**
      * Position of the active category.
@@ -273,15 +276,17 @@ class LibraryController(
         super.onChangeStarted(handler, type)
         if (type.isEnter) {
             activity?.tabs?.setupWithViewPager(library_pager)
-            presenter.subscribeLibrary()
+            presenter.getLibrary()
             DownloadService.addListener(this)
             DownloadService.callListeners()
+            LibraryUpdateService.setListener(this)
         }
     }
 
     override fun onDestroyView(view: View) {
         adapter?.onDestroy()
         DownloadService.removeListener(this)
+        LibraryUpdateService.removeListener()
         adapter = null
         actionMode = null
         tabsVisibilitySubscription?.unsubscribe()
@@ -298,6 +303,11 @@ class LibraryController(
             bottom_sheet.adjustTitleMargin(downloading)
         }
     }
+
+    override fun updatedManga(manga: LibraryManga) {
+        presenter.updateManga(manga)
+    }
+
     override fun onDetach(view: View) {
         destroyActionModeIfNeeded()
         snack?.dismiss()
@@ -347,9 +357,9 @@ class LibraryController(
         tabsVisibilitySubscription?.unsubscribe()
         tabsVisibilitySubscription = tabsVisibilityRelay.subscribe { visible ->
             val tabAnimator = (activity as? MainActivity)?.tabAnimator ?: return@subscribe
-            if (visible && tabAnimator.getHeight() == 0) {
+            if (visible) {
                 tabAnimator.expand()
-            } else if (!visible && tabAnimator.getHeight() != 0) {
+            } else if (!visible) {
                 tabAnimator.collapse()
             }
         }
@@ -746,7 +756,7 @@ class LibraryController(
         presenter.removeMangaFromLibrary(mangas)
         destroyActionModeIfNeeded()
         snack?.dismiss()
-        snack = pager_layout?.snack(activity?.getString(R.string.manga_removed_library) ?: "", Snackbar
+        snack = snackbar_layout?.snack(activity?.getString(R.string.manga_removed_library) ?: "", Snackbar
             .LENGTH_INDEFINITE)  {
             var undoing = false
             setAction(R.string.action_undo) {

@@ -13,7 +13,10 @@ class LibraryManga : MangaImpl() {
     fun mangaType(): Int {
         val sourceManager:SourceManager by injectLazy()
         return if (currentGenres()?.split(",")?.any
-            { tag -> tag.trim().toLowerCase(Locale.getDefault()) == "long strip" } == true ||
+            { tag ->
+                val trimmedTag = tag.trim().toLowerCase(Locale.getDefault())
+                trimmedTag == "long strip" || trimmedTag == "manwha"
+            } == true ||
             sourceManager.getOrStub(source).name.contains("webtoon", true))
             MANWHA
         else MANGA

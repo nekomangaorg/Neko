@@ -63,7 +63,7 @@ class ExtensionHolder(view: View, override val adapter: ExtensionAdapter) :
 
         //background = VectorDrawableCompat.create(resources!!, R.drawable.button_bg_transparent, null)
         setTextColor(ContextCompat.getColorStateList(context, R.drawable.button_text_state))
-        backgroundTintList = ContextCompat.getColorStateList(context, R.drawable.button_bg_transparent)
+        backgroundTintList = ContextCompat.getColorStateList(context, R.color.button_bg)
 
         val extension = item.extension
 

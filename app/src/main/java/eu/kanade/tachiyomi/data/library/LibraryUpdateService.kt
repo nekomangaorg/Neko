@@ -22,6 +22,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadService
+import eu.kanade.tachiyomi.data.download.DownloadServiceListener
 import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.data.library.LibraryUpdateRanker.rankingScheme
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService.Companion.start
@@ -52,6 +53,7 @@ import rx.schedulers.Schedulers
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import uy.kohesive.injekt.injectLazy
 import java.util.ArrayList
 import java.util.Date
 import java.util.concurrent.TimeUnit
@@ -233,6 +235,16 @@ class LibraryUpdateService(
             val categoryId = intent.getIntExtra(KEY_CATEGORY, -1)
             return getMangaToUpdate(categoryId, target)
         }
+
+        private var listener:LibraryServiceListener? = null
+
+        fun setListener(listener: LibraryServiceListener) {
+            this.listener = listener
+        }
+
+        fun removeListener() {
+            listener = null
+        }
     }
 
     /**
@@ -353,9 +365,11 @@ class LibraryUpdateService(
             val fetchedChapters = try { source.fetchChapterList(manga).toBlocking().single() }
             catch(e: java.lang.Exception) {
                 failedUpdates.add(manga)
-                emptyList<SChapter>() }
+                emptyList<SChapter>()
+            }
             if (fetchedChapters.isNotEmpty()) {
                 val newChapters = syncChaptersWithSource(db, fetchedChapters, manga, source).first
+                listener?.updatedManga(manga)
                 if (newChapters.isNotEmpty()) {
                     if (downloadNew && (categoriesToDownload.isEmpty() || manga.category in categoriesToDownload)) {
                         downloadChapters(manga, newChapters.sortedBy { it.chapter_number })
@@ -592,5 +606,8 @@ class LibraryUpdateService(
         intent.action = MainActivity.SHORTCUT_RECENTLY_UPDATED
         return PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
     }
+}
 
+interface LibraryServiceListener {
+    fun updatedManga(manga: LibraryManga)
 }

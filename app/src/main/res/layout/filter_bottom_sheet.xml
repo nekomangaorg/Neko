@@ -39,7 +39,6 @@
                     android:paddingStart="20dp"
                     android:paddingTop="10dp"
                     android:paddingEnd="20dp"
-                    android:paddingBottom="10dp"
                     android:scrollbars="none">
 
                     <LinearLayout
@@ -72,10 +71,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
                     android:clipToPadding="false"
-                    android:paddingStart="30dp"
-                    android:paddingTop="0dp"
+                    android:paddingStart="23dp"
                     android:paddingEnd="20dp"
-                    android:paddingBottom="10dp"
                     android:scrollbars="none">
 
                     <LinearLayout
@@ -103,8 +100,10 @@
                                 android:layout_marginEnd="20dp"
                                 android:clickable="true"
                                 android:drawablePadding="16dp"
+                                android:background="@drawable/square_ripple"
                                 android:focusable="true"
                                 android:gravity="center"
+                                android:padding="5dp"
                                 android:text="srgdg"
                                 android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
                                 android:textColor="?android:attr/textColorPrimary"
@@ -115,7 +114,9 @@
                                 android:id="@+id/catSortTextView"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:background="@drawable/square_ripple"
                                 android:layout_marginEnd="20dp"
+                                android:padding="5dp"
                                 android:clickable="true"
                                 android:drawablePadding="16dp"
                                 android:focusable="true"
@@ -132,6 +133,8 @@
                             android:id="@+id/displayLayout"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginStart="7dp"
+                            android:layout_marginEnd="14dp"
                             android:baselineAligned="false"
                             android:gravity="center|start"
                             android:orientation="horizontal">
@@ -169,6 +172,12 @@
                                     android:text="@string/action_display_list" />
                             </RadioGroup>
                         </LinearLayout>
+
+                        <CheckBox
+                            android:id="@+id/downloadCheckbox"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/action_display_download_badge"/>
                     </LinearLayout>
                 </HorizontalScrollView>
             </LinearLayout>

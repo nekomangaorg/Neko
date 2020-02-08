@@ -33,10 +33,16 @@ import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.lang.combineLatest
 import eu.kanade.tachiyomi.util.lang.isNullOrUnsubscribed
 import eu.kanade.tachiyomi.util.lang.removeArticles
+import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_EXCLUDE
 import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_IGNORE
 import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_INCLUDE
 import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_REALLY_EXCLUDE
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
@@ -80,36 +86,21 @@ class LibraryPresenter(
     var allCategories: List<Category> = emptyList()
         private set
     /**
-     * Relay used to apply the UI filters to the last emission of the library.
+     * List of all manga to update the
      */
-    private val filterTriggerRelay = BehaviorRelay.create(Unit)
+    private var rawMangaMap:LibraryMap? = null
 
-    /**
-     * Relay used to apply the UI update to the last emission of the library.
-     */
-    private val downloadTriggerRelay = BehaviorRelay.create(Unit)
-
-    /**
-     * Relay used to apply the selected sorting method to the last emission of the library.
-     */
-    private val sortTriggerRelay = BehaviorRelay.create(Unit)
-
-    /**
-     * Library subscription.
-     */
-    private var librarySubscription: Subscription? = null
-
-    private var lastCategoryId:Int? = null
+    private var currentMangaMap:LibraryMap? = null
 
     override fun onCreate(savedState: Bundle?) {
         super.onCreate(savedState)
-        subscribeLibrary()
+        getLibrary()
     }
 
     /**
      * Subscribes to library if needed.
      */
-    fun subscribeLibrary() {
+   /* fun subscribeLibrary() {
         if (librarySubscription.isNullOrUnsubscribed()) {
             librarySubscription = getLibraryObservable()
                 .combineLatest(downloadTriggerRelay.observeOn(Schedulers.io())) {
@@ -125,6 +116,22 @@ class LibraryPresenter(
                 .subscribeLatestCache({ view, (categories, mangaMap) ->
                     view.onNextLibraryUpdate(categories, mangaMap)
                 })
+        }
+    }*/
+
+    fun getLibrary() {
+        launchUI {
+            val mangaMap = withContext(Dispatchers.IO) {
+                val library = getLibraryFromDB()
+                library.apply { setDownloadCount(library.mangaMap) }
+                rawMangaMap = library.mangaMap
+                var mangaMap = library.mangaMap
+                mangaMap = applyFilters(mangaMap)
+                mangaMap = applySort(mangaMap)
+                mangaMap
+            }
+            currentMangaMap = mangaMap
+            view?.onNextLibraryUpdate(categories, mangaMap)
         }
     }
 
@@ -228,7 +235,6 @@ class LibraryPresenter(
         val catSorted = applySort(mapOf(catId to categoryManga), catId)
         val mutableMap = map.toMutableMap()
         mutableMap[catId] = catSorted.values.first()
-        lastCategoryId = null
         return mutableMap
     }
 
@@ -289,8 +295,6 @@ class LibraryPresenter(
      * @param map the map to sort.
      */
     private fun applySort(map: LibraryMap): LibraryMap {
-        if (lastCategoryId != null) return applyCatSort(map, lastCategoryId)
-
         val sortingMode = preferences.librarySortingMode().getOrDefault()
 
         val lastReadManga by lazy {
@@ -408,7 +412,34 @@ class LibraryPresenter(
      *
      * @return an observable of the categories and its manga.
      */
-    private fun getLibraryObservable(): Observable<Library> {
+    private fun getLibraryFromDB(): Library {
+        val categories = db.getCategories().executeAsBlocking().toMutableList()
+        val libraryAsList = preferences.libraryAsList()
+        val showCategories = preferences.showCategories().getOrDefault()
+        var libraryManga = db.getLibraryMangas().executeAsBlocking()
+        if (!showCategories)
+            libraryManga = libraryManga.distinctBy { it.id }
+        val libraryMap = libraryManga.map { manga ->
+            LibraryItem(manga, libraryAsList)
+        }.groupBy {
+            if (showCategories) it.manga.category else 0
+        }
+        if (libraryMap.containsKey(0))
+            categories.add(0, createDefaultCategory())
+
+        this.allCategories = categories
+        this.categories = if (!preferences.showCategories().getOrDefault())
+            arrayListOf(createDefaultCategory())
+        else categories
+        return Library(this.categories, libraryMap)
+    }
+
+    /**
+     * Get the categories and all its manga from the database.
+     *
+     * @return an observable of the categories and its manga.
+     */
+    /*private fun getLibraryObservable(): Observable<Library> {
         return Observable.combineLatest(getCategoriesObservable(), getLibraryMangasObservable()) { dbCategories, libraryManga ->
             val categories = if (libraryManga.containsKey(0))
                 arrayListOf(createDefaultCategory()) + dbCategories
@@ -420,7 +451,7 @@ class LibraryPresenter(
             else categories
             Library(this.categories, libraryManga)
         }
-    }
+    }*/
 
     private fun createDefaultCategory(): Category {
         val default = Category.createDefault(context)
@@ -429,7 +460,7 @@ class LibraryPresenter(
         else default.mangaOrder = defOrder.split("/").mapNotNull { it.toLongOrNull() }
         return default
     }
-
+/*
     /**
      * Get the categories from the database.
      *
@@ -458,36 +489,60 @@ class LibraryPresenter(
                     }
                 }
     }
-
+*/
     /**
      * Requests the library to be filtered.
      */
     fun requestFilterUpdate() {
-        filterTriggerRelay.call(Unit)
+        launchUI {
+            var mangaMap = rawMangaMap ?: return@launchUI
+            mangaMap = withContext(Dispatchers.IO) { applyFilters(mangaMap) }
+            mangaMap = withContext(Dispatchers.IO) { applySort(mangaMap) }
+            currentMangaMap = mangaMap
+            view?.onNextLibraryUpdate(categories, mangaMap)
+        }
     }
 
     /**
      * Requests the library to have download badges added.
      */
     fun requestDownloadBadgesUpdate() {
-        downloadTriggerRelay.call(Unit)
+        //getLibrary()
+        launchUI {
+            val mangaMap = rawMangaMap ?: return@launchUI
+            withContext(Dispatchers.IO) { setDownloadCount(mangaMap) }
+            rawMangaMap = mangaMap
+            val current = currentMangaMap ?: return@launchUI
+            withContext(Dispatchers.IO) { setDownloadCount(current) }
+            currentMangaMap = current
+            view?.onNextLibraryUpdate(categories, current)
+        }
     }
 
     /**
      * Requests the library to be sorted.
      */
     fun requestSortUpdate() {
-        sortTriggerRelay.call(Unit)
+        launchUI {
+            var mangaMap = currentMangaMap ?: return@launchUI
+            mangaMap = withContext(Dispatchers.IO) { applySort(mangaMap) }
+            currentMangaMap = mangaMap
+            view?.onNextLibraryUpdate(categories, mangaMap)
+        }
     }
 
     fun requestCatSortUpdate(catId: Int) {
-        lastCategoryId = catId
-        sortTriggerRelay.call(Unit)
+        launchUI {
+            var mangaMap = currentMangaMap ?: return@launchUI
+            mangaMap = withContext(Dispatchers.IO) { applyCatSort(mangaMap, catId) }
+            currentMangaMap = mangaMap
+            view?.onNextLibraryUpdate(categories, mangaMap)
+        }
     }
 
     fun requestFullUpdate() {
-        librarySubscription?.unsubscribe()
-        subscribeLibrary()
+        //librarySubscription?.unsubscribe()
+        getLibrary()
     }
 
     /**
@@ -495,7 +550,7 @@ class LibraryPresenter(
      */
     fun onOpenManga() {
         // Avoid further db updates for the library when it's not needed
-        librarySubscription?.let { remove(it) }
+        //librarySubscription?.let { remove(it) }
     }
 
     /**
@@ -517,18 +572,19 @@ class LibraryPresenter(
      * @param deleteChapters whether to also delete downloaded chapters.
      */
     fun removeMangaFromLibrary(mangas: List<Manga>) {
-        // Create a set of the list
-        val mangaToDelete = mangas.distinctBy { it.id }
-        mangaToDelete.forEach { it.favorite = false }
 
-        Observable.fromCallable { db.insertMangas(mangaToDelete).executeAsBlocking() }
-                .onErrorResumeNext { Observable.empty() }
-                .subscribeOn(Schedulers.io())
-                .subscribe()
+        GlobalScope.launch(Dispatchers.IO, CoroutineStart.DEFAULT) {
+            // Create a set of the list
+            val mangaToDelete = mangas.distinctBy { it.id }
+            mangaToDelete.forEach { it.favorite = false }
+
+            db.insertMangas(mangaToDelete).executeAsBlocking()
+            getLibrary()
+        }
     }
 
     fun confirmDeletion(mangas: List<Manga>) {
-        Observable.fromCallable {
+        GlobalScope.launch(Dispatchers.IO, CoroutineStart.DEFAULT) {
             val mangaToDelete = mangas.distinctBy { it.id }
             mangaToDelete.forEach { manga ->
                 db.resetMangaInfo(manga).executeAsBlocking()
@@ -537,18 +593,44 @@ class LibraryPresenter(
                 if (source != null)
                     downloadManager.deleteManga(manga, source)
             }
-        }.subscribeOn(Schedulers.io()).subscribe()
+        }
+    }
+
+    fun updateManga(manga: LibraryManga) {
+        GlobalScope.launch(Dispatchers.IO, CoroutineStart.DEFAULT) {
+            val rawMap = rawMangaMap ?: return@launch
+            val currentMap = currentMangaMap ?: return@launch
+            rawMap.apply {
+                forEach {
+                    it.value.forEach { item ->
+                        if (item.manga.id == manga.id)
+                            item.manga.unread = manga.unread
+                    }
+                }
+            }
+            currentMap.apply {
+                forEach {
+                    it.value.forEach { item ->
+                        if (item.manga.id == manga.id)
+                            item.manga.unread = manga.unread
+                    }
+                }
+            }
+            rawMangaMap = rawMap
+            currentMangaMap = currentMap
+            requestSortUpdate()
+        }
     }
 
     fun addMangas(mangas: List<Manga>) {
-        val mangaToAdd = mangas.distinctBy { it.id }
-        mangaToAdd.forEach { it.favorite = true }
 
-        Observable.fromCallable { db.insertMangas(mangaToAdd).executeAsBlocking() }
-            .onErrorResumeNext { Observable.empty() }
-            .subscribeOn(Schedulers.io())
-            .subscribe()
-        mangaToAdd.forEach { db.insertManga(it).executeAsBlocking() }
+        GlobalScope.launch(Dispatchers.IO, CoroutineStart.DEFAULT) {
+            val mangaToAdd = mangas.distinctBy { it.id }
+            mangaToAdd.forEach { it.favorite = true }
+            db.insertMangas(mangaToAdd).executeAsBlocking()
+            getLibrary()
+            mangaToAdd.forEach { db.insertManga(it).executeAsBlocking() }
+        }
     }
 
     /**
