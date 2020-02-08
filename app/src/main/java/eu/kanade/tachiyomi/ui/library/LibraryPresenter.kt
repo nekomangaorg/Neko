@@ -99,6 +99,8 @@ class LibraryPresenter(
      */
     private var librarySubscription: Subscription? = null
 
+    private var lastCategoryId:Int? = null
+
     override fun onCreate(savedState: Bundle?) {
         super.onCreate(savedState)
         subscribeLibrary()
@@ -110,19 +112,19 @@ class LibraryPresenter(
     fun subscribeLibrary() {
         if (librarySubscription.isNullOrUnsubscribed()) {
             librarySubscription = getLibraryObservable()
-                    .combineLatest(downloadTriggerRelay.observeOn(Schedulers.io())) {
+                .combineLatest(downloadTriggerRelay.observeOn(Schedulers.io())) {
                         lib, _ -> lib.apply { setDownloadCount(mangaMap) }
-                    }
-                    .combineLatest(filterTriggerRelay.observeOn(Schedulers.io())) {
+                }
+                .combineLatest(filterTriggerRelay.observeOn(Schedulers.io())) {
                         lib, _ -> lib.copy(mangaMap = applyFilters(lib.mangaMap))
-                    }
-                    .combineLatest(sortTriggerRelay.observeOn(Schedulers.io())) {
+                }
+                .combineLatest(sortTriggerRelay.observeOn(Schedulers.io())) {
                         lib, _ -> lib.copy(mangaMap = applySort(lib.mangaMap))
-                    }
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeLatestCache({ view, (categories, mangaMap) ->
-                        view.onNextLibraryUpdate(categories, mangaMap)
-                    })
+                }
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeLatestCache({ view, (categories, mangaMap) ->
+                    view.onNextLibraryUpdate(categories, mangaMap)
+                })
         }
     }
 
@@ -220,12 +222,75 @@ class LibraryPresenter(
         }
     }
 
+    private fun applyCatSort(map: LibraryMap, catId: Int?): LibraryMap {
+        if (catId == null) return map
+        val categoryManga = map[catId] ?: return map
+        val catSorted = applySort(mapOf(catId to categoryManga), catId)
+        val mutableMap = map.toMutableMap()
+        mutableMap[catId] = catSorted.values.first()
+        lastCategoryId = null
+        return mutableMap
+    }
+
+    private fun applySort(map: LibraryMap, catId: Int?): LibraryMap {
+        if (catId == null) return map
+        val category = allCategories.find { it.id == catId } ?: return map
+
+        val lastReadManga by lazy {
+            var counter = 0
+            db.getLastReadManga().executeAsBlocking().associate { it.id!! to counter++ }
+        }
+
+        val sortFn: (LibraryItem, LibraryItem) -> Int = { i1, i2 ->
+            val compare = when {
+                category.mangaSort != null -> {
+                    var sort = when (category.mangaSort) {
+                        ALPHA_ASC, ALPHA_DSC -> sortAlphabetical(i1, i2)
+                        UPDATED_ASC, UPDATED_DSC -> i2.manga.last_update.compareTo(i1.manga.last_update)
+                        UNREAD_ASC, UNREAD_DSC -> when {
+                            i1.manga.unread == i2.manga.unread -> 0
+                            i1.manga.unread == 0 -> if (category.isAscending()) 1 else -1
+                            i2.manga.unread == 0 -> if (category.isAscending()) -1 else 1
+                            else -> i1.manga.unread.compareTo(i2.manga.unread)
+                        }
+                        LAST_READ_ASC, LAST_READ_DSC -> {
+                            val manga1LastRead = lastReadManga[i1.manga.id!!] ?: lastReadManga.size
+                            val manga2LastRead = lastReadManga[i2.manga.id!!] ?: lastReadManga.size
+                            manga1LastRead.compareTo(manga2LastRead)
+                        }
+                        else -> sortAlphabetical(i1, i2)
+                    }
+                    if (!category.isAscending()) sort *= -1
+                    sort
+                }
+                category.mangaOrder.isNotEmpty() -> {
+                    val order = category.mangaOrder
+                    val index1 = order.indexOf(i1.manga.id!!)
+                    val index2 = order.indexOf(i2.manga.id!!)
+                    when {
+                        index1 == index2 -> 0
+                        index1 == -1 -> -1
+                        index2 == -1 -> 1
+                        else -> index1.compareTo(index2)
+                    }
+                }
+                else -> 0
+            }
+            compare
+        }
+        val comparator = Comparator(sortFn)
+
+        return map.mapValues { entry -> entry.value.sortedWith(comparator) }
+    }
+
     /**
      * Applies library sorting to the given map of manga.
      *
      * @param map the map to sort.
      */
     private fun applySort(map: LibraryMap): LibraryMap {
+        if (lastCategoryId != null) return applyCatSort(map, lastCategoryId)
+
         val sortingMode = preferences.librarySortingMode().getOrDefault()
 
         val lastReadManga by lazy {
@@ -412,6 +477,11 @@ class LibraryPresenter(
      * Requests the library to be sorted.
      */
     fun requestSortUpdate() {
+        sortTriggerRelay.call(Unit)
+    }
+
+    fun requestCatSortUpdate(catId: Int) {
+        lastCategoryId = catId
         sortTriggerRelay.call(Unit)
     }
 

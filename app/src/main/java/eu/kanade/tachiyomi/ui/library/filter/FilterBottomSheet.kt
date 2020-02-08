@@ -7,6 +7,7 @@ import android.util.AttributeSet
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RadioButton
 import android.widget.RadioGroup
@@ -69,6 +70,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
     var sheetBehavior:BottomSheetBehavior<View>? = null
 
+    private lateinit var clearButton:ImageView
+
     private val filterItems:MutableList<FilterTagGroup> by lazy {
         val list = mutableListOf<FilterTagGroup>()
         if (Injekt.get<DatabaseHelper>().getCategories().executeAsBlocking().isNotEmpty())
@@ -87,9 +90,9 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
     fun onCreate(pagerView:View) {
         if (context.resources.configuration?.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            sortLayout.orientation = HORIZONTAL
+            sideLayout.orientation = HORIZONTAL
             val marginValue = 10.dpToPx
-            arrayListOf(mainSortTextView, catSortTextView, displayLayout).forEach {
+            arrayListOf(sortingLayout).forEach {
                 it.updateLayoutParams<MarginLayoutParams> {
                     bottomMargin = 0
                     topMargin = 0
@@ -100,6 +103,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                 top = 0
             )
         }
+        clearButton = pendingClearButton
+        filterLayout.removeView(clearButton)
         sheetBehavior = BottomSheetBehavior.from(this)
         topbar.setOnClickListener {
             if (sheetBehavior?.state != BottomSheetBehavior.STATE_EXPANDED) {
@@ -110,21 +115,13 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             }
         }
 
-        sortText.alpha = 1f
-        title.alpha = 0f
-
         pager = pagerView
         pager?.setPadding(0, 0, 0, topbar.height)
         updateTitle()
         sheetBehavior?.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onSlide(bottomSheet: View, progress: Float) {
                 updateRootPadding(progress)
-                val newProg = when {
-                    progress > 0.9f -> 1f
-                    progress < 0.1f -> 0f
-                    else -> progress
-                }
-                topbar.alpha = 1 - newProg
+                topbar.alpha = 1 - progress
             }
 
             override fun onStateChanged(p0: View, state: Int) {
@@ -139,8 +136,6 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             if (sheetBehavior?.state == BottomSheetBehavior.STATE_COLLAPSED) {
                 val height = context.resources.getDimensionPixelSize(R.dimen.rounder_radius)
                 pager?.setPadding(0, 0, 0, topbar.height - height)
-                sortText.alpha = 1f
-                title.alpha = 0f
             }
             else {
                 updateRootPadding()
@@ -150,6 +145,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
         mainSortTextView.setOnClickListener { showMainSortOptions() }
         catSortTextView.setOnClickListener { showCatSortOptions() }
+        clearButton.setOnClickListener { clearFilters() }
 
         displayGroup.bindToPreference(preferences.libraryAsList())
     }
@@ -179,7 +175,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                             LibrarySort.TOTAL -> R.string.action_sort_total
                             LibrarySort.UNREAD -> R.string.action_filter_unread
                             LibrarySort.LAST_READ -> R.string.action_sort_last_read
-                            else -> R.string.action_sort_alpha
+                            else -> R.string.title
                         }
                     )
                     filters.joinToString(", ") { context.getString(it) }
@@ -393,9 +389,13 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             }
             (2 * order + 1)
         }
-        setCatOrder(modType)
-        setCatSortText()
-        onGroupClicked(ACTION_SORT)
+        launchUI {
+            withContext(Dispatchers.IO) {
+                setCatOrder(modType)
+            }
+            setCatSortText()
+            onGroupClicked(ACTION_CAT_SORT)
+        }
     }
 
     private fun setCatOrder(order: Int) {
@@ -425,10 +425,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                 drawable, null, null, null
             )
             mainSortTextView.text = withContext(Dispatchers.IO) {
-                context.getString(
-                    if (sortId == LibrarySort.DRAG_AND_DROP) R.string.sort_library_by_
-                    else R.string.sort_by_
-                    , context.getString(
+                if (sortId == LibrarySort.DRAG_AND_DROP)
+                    context.getString(
                         when (sortId) {
                             LibrarySort.LAST_UPDATED -> R.string.action_sort_last_updated
                             LibrarySort.DRAG_AND_DROP -> R.string.action_sort_drag_and_drop
@@ -438,7 +436,20 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                             else -> R.string.title
                         }
                     )
-                )
+                else {
+                    context.getString(
+                        R.string.sort_by_, context.getString(
+                            when (sortId) {
+                                LibrarySort.LAST_UPDATED -> R.string.action_sort_last_updated
+                                LibrarySort.DRAG_AND_DROP -> R.string.action_sort_drag_and_drop
+                                LibrarySort.TOTAL -> R.string.action_sort_total
+                                LibrarySort.UNREAD -> R.string.action_filter_unread
+                                LibrarySort.LAST_READ -> R.string.action_sort_last_read
+                                else -> R.string.title
+                            }
+                        )
+                    )
+                }
             }
             setCatSortText()
         }
@@ -450,12 +461,13 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                 val sortId = withContext(Dispatchers.IO) { sorting() }
                 val drawable = withContext(Dispatchers.IO) {
                     tintVector(
-                        when {
+                        R.drawable.ic_label_outline_white_24dp
+                        /*when {
                             sortId == LibrarySort.DRAG_AND_DROP -> R.drawable.ic_sort_white_24dp
                             lastCategory?.isAscending() == true -> R.drawable
                                 .ic_arrow_up_white_24dp
                             else -> R.drawable.ic_arrow_down_white_24dp
-                        }
+                        }*/
                     )
                 }
                 catSortTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(
@@ -463,16 +475,14 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                 )
                 catSortTextView.text = withContext(Dispatchers.IO) {
                     context.getString(
-                        R.string.sort_category_by_, context.getString(
-                            when (sortId) {
-                                LibrarySort.LAST_UPDATED -> R.string.action_sort_last_updated
-                                LibrarySort.DRAG_AND_DROP -> R.string.action_sort_drag_and_drop
-                                LibrarySort.TOTAL -> R.string.action_sort_total
-                                LibrarySort.UNREAD -> R.string.action_filter_unread
-                                LibrarySort.LAST_READ -> R.string.action_sort_last_read
-                                else -> R.string.title
-                            }
-                        )
+                        when (sortId) {
+                            LibrarySort.LAST_UPDATED -> R.string.action_sort_last_updated
+                            LibrarySort.DRAG_AND_DROP -> R.string.action_sort_drag_and_drop
+                            LibrarySort.TOTAL -> R.string.action_sort_total
+                            LibrarySort.UNREAD -> R.string.action_filter_unread
+                            LibrarySort.LAST_READ -> R.string.action_sort_last_read
+                            else -> R.string.title
+                        }
                     )
                 }
                 if (catSortTextView.visibility != View.VISIBLE) catSortTextView.visible()
@@ -503,38 +513,54 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
     override fun onFilterClicked(view: FilterTagGroup, index: Int, updatePreference:Boolean) {
         if (updatePreference) {
-            when (view) {
-                categories -> {
-                    preferences.showCategories().set(index != 0)
-                    onGroupClicked(ACTION_REFRESH)
-                }
-                downloaded -> {
-                    preferences.filterDownloaded().set(index + 1)
-                    onGroupClicked(ACTION_FILTER)
-                }
-                unread -> {
-                    preferences.filterUnread().set(index + 1)
-                    onGroupClicked(ACTION_FILTER)
-                }
-                completed -> {
-                    preferences.filterCompleted().set(index + 1)
-                    onGroupClicked(ACTION_FILTER)
-                }
-                tracked -> {
-                    preferences.filterTracked().set(index + 1)
-                    onGroupClicked(ACTION_FILTER)
-                }
-                mangaType -> {
-                    preferences.filterMangaType().set(index + 1)
-                    onGroupClicked(ACTION_FILTER)
-                }
+            if (view == categories) {
+                preferences.showCategories().set(index != 0)
+                onGroupClicked(ACTION_REFRESH)
+            } else {
+                when (view) {
+                    downloaded -> preferences.filterDownloaded()
+                    unread -> preferences.filterUnread()
+                    completed -> preferences.filterCompleted()
+                    tracked -> preferences.filterTracked()
+                    mangaType -> preferences.filterMangaType()
+                    else -> null
+                }?.set(index + 1)
+                onGroupClicked (ACTION_FILTER)
             }
             updateTitle()
         }
+        val filters = getFilters().size
+        if (filters > 0 && clearButton.parent == null)
+            filterLayout.addView(clearButton, 0)
+        else if (filters == 0 && clearButton.parent != null)
+            filterLayout.removeView(clearButton)
+    }
+
+    private fun clearFilters() {
+        val action = if (preferences.showCategories().getOrDefault()) ACTION_REFRESH
+        else ACTION_FILTER
+
+        preferences.showCategories().set(true)
+        preferences.filterDownloaded().set(0)
+        preferences.filterUnread().set(0)
+        preferences.filterCompleted().set(0)
+        preferences.filterTracked().set(0)
+        preferences.filterMangaType().set(0)
+
+        val transition = androidx.transition.AutoTransition()
+        transition.duration = 150
+        androidx.transition.TransitionManager.beginDelayedTransition(filterLayout, transition)
+        filterItems.forEach {
+            it.reset()
+        }
+        reSortViews()
+        onGroupClicked(action)
     }
 
     fun reSortViews() {
         filterLayout.removeAllViews()
+        if (filterItems.any { it.isActivated })
+            filterLayout.addView(clearButton)
         filterItems.filter { it.isActivated }.forEach {
             filterLayout.addView(it)
         }
@@ -550,5 +576,6 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         const val ACTION_FILTER = 2
         const val ACTION_DISPLAY = 3
         const val ACTION_BADGE = 4
+        const val ACTION_CAT_SORT = 5
     }
 }

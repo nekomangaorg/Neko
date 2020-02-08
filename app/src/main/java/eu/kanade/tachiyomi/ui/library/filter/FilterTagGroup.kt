@@ -22,6 +22,7 @@ class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: Attribute
     private var root:ViewGroup? = null
 
     private val buttons by lazy { arrayOf(firstButton, secondButton, thirdButton) }
+    private val separators by lazy { arrayOf(separator1, separator2) }
 
     override fun isActivated(): Boolean {
         return buttons.any { it.isActivated }
@@ -74,6 +75,14 @@ class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: Attribute
     fun setState(enabled: Boolean) {
         if (enabled)
             toggleButton(0, false)
+    }
+
+    fun reset() {
+        buttons.forEach {
+            it.isActivated = false
+        }
+        for (i in 0 until itemCount) buttons[i].visible()
+        for (i in 0 until (itemCount - 1)) separators[i].visible()
     }
 
     private fun toggleButton(index: Int, callBack: Boolean = true) {

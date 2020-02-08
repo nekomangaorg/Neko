@@ -23,6 +23,7 @@ import com.afollestad.materialdialogs.MaterialDialog
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
 import com.f2prateek.rx.preferences.Preference
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
@@ -225,6 +226,7 @@ class LibraryController(
                     FilterBottomSheet.ACTION_SORT -> onSortChanged()
                     FilterBottomSheet.ACTION_DISPLAY -> reattachAdapter()
                     FilterBottomSheet.ACTION_BADGE -> onDownloadBadgeChanged()
+                    FilterBottomSheet.ACTION_CAT_SORT -> onCatSortChanged()
                 }
             }
 
@@ -344,11 +346,11 @@ class LibraryController(
         }
         tabsVisibilitySubscription?.unsubscribe()
         tabsVisibilitySubscription = tabsVisibilityRelay.subscribe { visible ->
-            val tabAnimator = (activity as? MainActivity)?.tabAnimator
-            if (visible) {
-                tabAnimator?.expand()
-            } else {
-                tabAnimator?.collapse()
+            val tabAnimator = (activity as? MainActivity)?.tabAnimator ?: return@subscribe
+            if (visible && tabAnimator.getHeight() == 0) {
+                tabAnimator.expand()
+            } else if (!visible && tabAnimator.getHeight() != 0) {
+                tabAnimator.collapse()
             }
         }
     }
@@ -439,9 +441,14 @@ class LibraryController(
     /**
      * Called when the sorting mode is changed.
      */
-    fun onSortChanged() {
+    private fun onSortChanged() {
         activity?.invalidateOptionsMenu()
         presenter.requestSortUpdate()
+    }
+
+    fun onCatSortChanged(id: Int? = null) {
+        val catId = id ?: adapter?.categories?.getOrNull(library_pager.currentItem)?.id ?: return
+        presenter.requestCatSortUpdate(catId)
     }
 
     /**
@@ -518,6 +525,15 @@ class LibraryController(
 
     fun search(query:String) {
         this.query = query
+    }
+
+    override fun handleBack(): Boolean {
+        val sheetBehavior = BottomSheetBehavior.from(bottom_sheet)
+        if (sheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED) {
+            sheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+            return true
+        }
+        return super.handleBack()
     }
 
     override fun onPrepareOptionsMenu(menu: Menu) {

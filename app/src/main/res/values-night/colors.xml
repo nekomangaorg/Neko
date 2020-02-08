@@ -31,4 +31,5 @@
     <color name="selectorColor">@color/md_blue_A200_50</color>
     <color name="iconColor">@color/md_white_1000_54</color>
     <color name="button_bg">@color/md_grey_800</color>
+    <color name="gray_button">#BFBFBF</color>
 </resources>

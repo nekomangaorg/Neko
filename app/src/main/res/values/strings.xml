@@ -51,8 +51,6 @@
 
     <string name="sorting_by_">Sorting by %1$s</string>
     <string name="sort_by_">Sort by: %1$s</string>
-    <string name="sort_library_by_">Sort library by: %1$s</string>
-    <string name="sort_category_by_">Sort category by: %1$s</string>
     <string name="action_filter_empty">Remove filter</string>
     <string name="action_sort_alpha">Alphabetically</string>
     <string name="action_sort_enabled">Enabled</string>
@@ -631,7 +629,6 @@
     <string name="skip_this_step_next_time">Skip this step next time</string>
     <string name="pre_migration_skip_toast">To show this screen again, go to Settings -> Library.</string>
     <string name="reset_tags">Reset Tags</string>
-    <string name="filter_and_sort"><![CDATA[Filter & Sort]]></string>
     <string name="display_as">Display as:</string>
 
 </resources>

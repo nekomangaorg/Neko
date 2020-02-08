@@ -4,8 +4,6 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import android.view.ViewGroup
-import android.widget.FrameLayout
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -20,14 +18,14 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.category.CategoryAdapter
 import eu.kanade.tachiyomi.ui.main.MainActivity
+import eu.kanade.tachiyomi.util.lang.plusAssign
+import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.inflate
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
-import eu.kanade.tachiyomi.util.lang.plusAssign
-import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import kotlinx.android.synthetic.main.library_category.view.*
 import kotlinx.coroutines.delay
@@ -79,6 +77,8 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
     private var lastTouchUpY = 0f
 
     private var lastClickPosition = -1
+
+    private var justDraggedAndDropped = false
 
     fun onCreate(controller: LibraryController) {
         this.controller = controller
@@ -231,7 +231,10 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
         val mangaForCategory = event.getMangaForCategory(category).orEmpty()
 
         // Update the category with its manga.
-        adapter.setItems(mangaForCategory)
+        if (!justDraggedAndDropped)
+            adapter.setItems(mangaForCategory)
+        else
+            justDraggedAndDropped = false
 
         swipe_refresh.isEnabled = !preferences.hideCategories().getOrDefault()
 
@@ -355,7 +358,8 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
             preferences.defaultMangaOrder().set(mangaIds.joinToString("/"))
         else
             db.insertCategory(category).asRxObservable().subscribe()
-        controller.onSortChanged()
+        justDraggedAndDropped = true
+        controller.onCatSortChanged(category.id)
         controller.enableReorderItems(category)
     }
     override fun shouldMoveItem(fromPosition: Int, toPosition: Int): Boolean {
