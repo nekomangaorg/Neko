@@ -85,7 +85,7 @@ open class MainActivity : BaseActivity() {
         this.snackBar = snackBar
         canDismissSnackBar = false
         launchUI {
-            delay(5000)
+            delay(2000)
             if (this@MainActivity.snackBar == snackBar) {
                 canDismissSnackBar = true
             }

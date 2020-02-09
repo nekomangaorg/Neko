@@ -19,6 +19,7 @@ import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.viewpager.widget.ViewPager
+import com.afollestad.materialdialogs.MaterialDialog
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
 import com.f2prateek.rx.preferences.Preference
@@ -47,6 +48,7 @@ import eu.kanade.tachiyomi.ui.migration.MigrationInterface
 import eu.kanade.tachiyomi.ui.migration.manga.design.PreMigrationController
 import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationListController
 import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationProcedureConfig
+import eu.kanade.tachiyomi.ui.setting.SettingsAdvancedController
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.inflate
 import eu.kanade.tachiyomi.util.view.marginBottom
@@ -548,7 +550,15 @@ class LibraryController(
     override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_move_to_category -> showChangeMangaCategoriesDialog()
-            R.id.action_delete -> deleteMangasFromLibrary()
+            R.id.action_delete -> {
+                MaterialDialog(activity!!)
+                    .message(R.string.confirm_manga_deletion)
+                    .positiveButton(R.string.action_remove) {
+                        deleteMangasFromLibrary()
+                    }
+                    .negativeButton(android.R.string.no)
+                    .show()
+            }
             R.id.action_select_all -> {
                 adapter?.categories?.getOrNull(library_pager.currentItem)?.id?.let {
                     selectAllRelay.call(it)
