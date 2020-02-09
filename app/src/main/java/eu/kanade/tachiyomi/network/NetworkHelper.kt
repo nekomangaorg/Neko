@@ -50,46 +50,22 @@ class NetworkHelper(context: Context) {
         it.proceed(it.request())
     }
 
-    val nonLoggedInClient = if (BuildConfig.DEBUG) {
-        val httpLoggingInterceptor = HttpLoggingInterceptor()
-        OkHttpClient.Builder()
-                .connectTimeout(10, TimeUnit.SECONDS)
-                .readTimeout(30, TimeUnit.SECONDS)
-                .cache(Cache(cacheDir, cacheSize))
-                .addNetworkInterceptor(rateLimitInterceptor)
-                .addInterceptor(httpLoggingInterceptor.apply { httpLoggingInterceptor.level = HttpLoggingInterceptor.Level.BODY })
-                .build()
-    } else {
-        OkHttpClient.Builder()
+
+    val nonLoggedInClient = {
+        val builder = OkHttpClient.Builder()
                 .connectTimeout(10, TimeUnit.SECONDS)
                 .readTimeout(30, TimeUnit.SECONDS)
                 .cache(Cache(cacheDir, cacheSize))
                 .addNetworkInterceptor(rateLimitInterceptor)
 
-                .build()
-    }
+        if (BuildConfig.DEBUG) {
+            val httpLoggingInterceptor = HttpLoggingInterceptor()
+            builder.addInterceptor(httpLoggingInterceptor.apply { httpLoggingInterceptor.level = HttpLoggingInterceptor.Level.BODY })
+        }
 
+        builder.build()
+    }()
 
-    val client =
-            if (BuildConfig.DEBUG) {
-                val httpLoggingInterceptor = HttpLoggingInterceptor()
-                OkHttpClient.Builder()
-                        .connectTimeout(10, TimeUnit.SECONDS)
-                        .readTimeout(30, TimeUnit.SECONDS)
-                        .cookieJar(cookieManager)
-                        .cache(Cache(cacheDir, cacheSize))
-                        .addNetworkInterceptor(rateLimitInterceptor)
-                        .addInterceptor(httpLoggingInterceptor.apply { httpLoggingInterceptor.level = HttpLoggingInterceptor.Level.BODY })
-                        .build()
-            } else {
-                OkHttpClient.Builder()
-                        .connectTimeout(10, TimeUnit.SECONDS)
-                        .readTimeout(30, TimeUnit.SECONDS)
-                        .cookieJar(cookieManager)
-                        .cache(Cache(cacheDir, cacheSize))
-                        .addNetworkInterceptor(rateLimitInterceptor)
-
-                        .build()
-            }
+    val client = nonLoggedInClient.newBuilder().cookieJar(cookieManager).build()
+    
 }
-
