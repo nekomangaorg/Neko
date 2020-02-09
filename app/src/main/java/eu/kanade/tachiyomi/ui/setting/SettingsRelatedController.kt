@@ -140,53 +140,50 @@ class SettingsRelatedController : SettingsController() {
                         setColor(ContextCompat.getColor(context, R.color.colorPrimary))
                     }
 
-                    // Inside of here we will insert into our database
-                    NotificationManagerCompat.from(context).apply {
 
-                        // Issue the initial notification with zero progress
-                        builder.setProgress(totaMangas, 0, false)
-                        notify(Notifications.ID_MANGA_RELATED_IMPORT, builder.build())
+                    // Issue the initial notification with zero progress
+                    builder.setProgress(totaMangas, 0, false)
+                    NotificationManagerCompat.from(context).notify(Notifications.ID_MANGA_RELATED_IMPORT, builder.build())
 
-                        try {
+                    try {
 
-                            // Loop through each and insert into the database
-                            var counter: Int = 0
-                            for(key in relatedPageResult.keys()) {
+                        // Loop through each and insert into the database
+                        var counter: Int = 0
+                        for(key in relatedPageResult.keys()) {
 
-                                // check if activity is still running
-                                // if it isn't then we should stop updating and delete the notification
-                                if(activity.isDestroyed) {
-                                    NotificationManagerCompat.from(context).cancel(Notifications.ID_MANGA_RELATED_IMPORT)
-                                    exitProcess(0)
-                                }
-
-                                // create the implementation and insert
-                                var related = MangaRelatedImpl()
-                                related.id = counter.toLong()
-                                related.manga_id = key.toLong()
-                                related.matched_ids = relatedPageResult.getJSONObject(key).getJSONArray("m_ids").toString()
-                                related.matched_titles = relatedPageResult.getJSONObject(key).getJSONArray("m_titles").toString()
-                                related.scores = relatedPageResult.getJSONObject(key).getJSONArray("scores").toString()
-                                db.insertRelated(related).executeAsBlocking()
-
-                                // display to the user
-                                counter++
-                                builder.setProgress(totaMangas, counter, false)
-                                builder.setContentTitle(context.resources.getString(R.string.pref_related_loading_percent,counter,totaMangas))
-                                notify(Notifications.ID_MANGA_RELATED_IMPORT, builder.build())
-
+                            // check if activity is still running
+                            // if it isn't then we should stop updating and delete the notification
+                            if(activity.isDestroyed) {
+                                NotificationManagerCompat.from(context).cancel(Notifications.ID_MANGA_RELATED_IMPORT)
+                                exitProcess(0)
                             }
 
-                            // Finally, save when we last loaded the database
-                            val dataFormater = SimpleDateFormat("MMM dd, yyyy HH:mm:ss zzz", Locale.getDefault())
-                            val currentDate = dataFormater.format(Date())
-                            preferences.relatedLastUpdated().set(context.resources.getString(R.string.pref_related_last_updated,currentDate.toString()))
+                            // create the implementation and insert
+                            var related = MangaRelatedImpl()
+                            related.id = counter.toLong()
+                            related.manga_id = key.toLong()
+                            related.matched_ids = relatedPageResult.getJSONObject(key).getJSONArray("m_ids").toString()
+                            related.matched_titles = relatedPageResult.getJSONObject(key).getJSONArray("m_titles").toString()
+                            related.scores = relatedPageResult.getJSONObject(key).getJSONArray("scores").toString()
+                            db.insertRelated(related).executeAsBlocking()
 
-                        } catch (e: Exception) {
-                            e.printStackTrace()
+                            // display to the user
+                            counter++
+                            builder.setProgress(totaMangas, counter, false)
+                            builder.setContentTitle(context.resources.getString(R.string.pref_related_loading_percent,counter,totaMangas))
+                            NotificationManagerCompat.from(context).notify(Notifications.ID_MANGA_RELATED_IMPORT, builder.build())
+
                         }
 
+                        // Finally, save when we last loaded the database
+                        val dataFormater = SimpleDateFormat("MMM dd, yyyy HH:mm:ss zzz", Locale.getDefault())
+                        val currentDate = dataFormater.format(Date())
+                        preferences.relatedLastUpdated().set(context.resources.getString(R.string.pref_related_last_updated,currentDate.toString()))
+
+                    } catch (e: Exception) {
+                        e.printStackTrace()
                     }
+
 
                     // Cancel the progress bar
                     NotificationManagerCompat.from(context).cancel(Notifications.ID_MANGA_RELATED_IMPORT)
