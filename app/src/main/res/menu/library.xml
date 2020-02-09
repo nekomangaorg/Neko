@@ -1,7 +1,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-      xmlns:app="http://schemas.android.com/apk/res-auto"
-      xmlns:tools="http://schemas.android.com/tools"
-      tools:context=".MainActivity">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".MainActivity">
 
     <item
         android:id="@+id/action_search"
@@ -10,7 +10,7 @@
         app:ico_color="@color/md_white_1000"
         android:title="@string/action_search"
         app:actionViewClass="androidx.appcompat.widget.SearchView"
-        app:showAsAction="collapseActionView|ifRoom"/>
+        app:showAsAction="collapseActionView|ifRoom" />
 
     <item
         android:id="@+id/action_filter"
@@ -18,7 +18,7 @@
         app:ico_size="20dp"
         app:ico_color="@color/md_white_1000"
         android:title="@string/action_filter"
-        app:showAsAction="ifRoom"/>
+        app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/action_update_library"
@@ -26,11 +26,20 @@
         app:ico_size="20dp"
         app:ico_color="@color/md_white_1000"
         android:title="@string/action_update_library"
-        app:showAsAction="ifRoom"/>
+        app:showAsAction="ifRoom" />
 
     <item
-        android:id="@+id/action_edit_categories"
-        android:title="@string/action_edit_categories"
-        app:showAsAction="never"/>
-
+        android:title="@string/action_display"
+        app:showAsAction="never">
+        <menu>
+            <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/action_display_grid"
+                    android:title="@string/action_display_grid" />
+                <item
+                    android:id="@+id/action_display_list"
+                    android:title="@string/action_display_list" />
+            </group>
+        </menu>
+    </item>
 </menu>

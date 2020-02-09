@@ -16,7 +16,6 @@
     <string name="label_library">My library</string>
     <string name="label_recent_manga">Recently read</string>
     <string name="label_browse">Browse</string>
-    <string name="label_follows">Follows</string>
     <string name="label_latest">Latest</string>
     <string name="label_recent_updates">Library updates</string>
     <string name="label_categories">Categories</string>
@@ -28,9 +27,15 @@
     <string name="action_filter">Filter</string>
     <string name="action_filter_downloaded">Downloaded</string>
     <string name="action_filter_bookmarked">Bookmarked</string>
+    <string name="action_filter_anilist">Anilist</string>
+    <string name="action_filter_myanimelist">MyAnimeList</string>
+    <string name="action_filter_kitsu">Kitsu</string>
+
     <string name="action_filter_unread">Unread</string>
     <string name="action_filter_read">Read</string>
     <string name="action_filter_empty">Remove filter</string>
+    <string name="action_follows">My Follows</string>
+
     <string name="action_sort_alpha">Alphabetically</string>
     <string name="action_sort_total">Total chapters</string>
     <string name="action_sort_last_read">Last read</string>
@@ -43,6 +48,7 @@
     <string name="action_mark_previous_as_read">Mark previous as read</string>
     <string name="action_download">Download</string>
     <string name="action_bookmark">Bookmark</string>
+    <string name="action_random_manga">Random Manga</string>
     <string name="action_remove_bookmark">Remove bookmark</string>
     <string name="action_delete">Delete</string>
     <string name="action_update">Update</string>
@@ -76,7 +82,6 @@
     <string name="action_display">Display</string>
     <string name="action_display_grid">Grid</string>
     <string name="action_display_list">List</string>
-    <string name="action_display_download_badge">Download badges</string>
     <string name="action_set_filter">Set filter</string>
     <string name="action_sort">Sort</string>
     <string name="action_install">Install</string>
@@ -126,6 +131,11 @@
         similarity of two manga\'s descriptions. You will need to download from the below
         github the recommendation JSON manually.
     </string>
+
+    <string name="pref_category_library_display">Display</string>
+    <string name="pref_category_library_update">Update</string>
+    <string name="pref_category_library_categories">Categories</string>
+
 
     <!-- General section -->
     <string name="pref_library_columns">Library manga per row</string>

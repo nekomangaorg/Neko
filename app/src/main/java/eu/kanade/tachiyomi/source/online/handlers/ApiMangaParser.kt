@@ -1,15 +1,15 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
-import com.github.salomonbrys.kotson.*
-import com.google.gson.JsonElement
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
 import eu.kanade.tachiyomi.network.consumeBody
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.online.handlers.serializers.ApiMangaSerializer
+import eu.kanade.tachiyomi.source.online.handlers.serializers.ChapterSerializer
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import kotlinx.serialization.json.Json
 import okhttp3.Response
 import org.jsoup.Jsoup
+import timber.log.Timber
 import java.util.*
 
 class ApiMangaParser(val lang: String) {
@@ -17,56 +17,77 @@ class ApiMangaParser(val lang: String) {
         return mangaDetailsParse(response.body!!.string())
     }
 
+    /**
+     * Parse the manga details json into manga object
+     */
     fun mangaDetailsParse(jsonData: String): SManga {
-        val manga = SManga.create()
-        val json = JsonParser().parse(jsonData).asJsonObject
-        val mangaJson = json.getAsJsonObject("manga")
-        val chapterJson = json.getAsJsonObject("chapter")
-        manga.title = MdUtil.cleanString(mangaJson.get("title").string)
-        manga.thumbnail_url = MdUtil.cdnUrl + mangaJson.get("cover_url").string
-        manga.description = MdUtil.cleanString(mangaJson.get("description").string)
-        manga.author = mangaJson.get("author").string
-        manga.artist = mangaJson.get("artist").string
-        manga.lang_flag = mangaJson.get("lang_flag").string
-        val links = mangaJson.getAsJsonObject("links")
+        try {
+            val manga = SManga.create()
+            val networkApiManga = Json.nonstrict.parse(ApiMangaSerializer.serializer(), jsonData)
+            val networkManga = networkApiManga.manga
+            manga.title = MdUtil.cleanString(networkManga.title)
+            manga.thumbnail_url = MdUtil.cdnUrl + networkManga.cover_url
+            manga.description = MdUtil.cleanString(networkManga.description)
+            manga.author = networkManga.author
+            manga.artist = networkManga.artist
+            manga.lang_flag = networkManga.lang_flag
 
-        links?.forEach { key, jsonElement ->
-            if (key.equals("al")) {
-                manga.anilist_id = jsonElement.asString
-            } else if (key.equals("kt")) {
-                manga.kitsu_id = jsonElement.asString
-            } else if (key.equals("mal")) {
-                manga.my_anime_list_id = jsonElement.asString
-            } else if (key.equals("mu")) {
-                manga.manga_updates_id = jsonElement.asString
-            } else if (key.equals("ap")) {
-                manga.anime_planet_id = jsonElement.asString
+            networkManga.links?.let {
+                it.al?.let { manga.anilist_id = it }
+                it.kt?.let { manga.kitsu_id = it }
+                it.mal?.let { manga.my_anime_list_id = it }
+                it.mu?.let { manga.manga_updates_id = it }
+                it.ap?.let { manga.anime_planet_id = it }
             }
+
+            val tempStatus = parseStatus(networkManga.status)
+            val publishedOrCancelled = tempStatus == SManga.PUBLICATION_COMPLETE || tempStatus == SManga.CANCELLED
+            if (publishedOrCancelled && isMangaCompleted(networkApiManga)) {
+                manga.status = SManga.COMPLETED
+            } else {
+                manga.status = tempStatus
+            }
+
+
+            val genres = networkManga.genres.mapNotNull { FilterHandler.allTypes[it.toString()] }.toMutableList()
+
+            if (networkManga.hentai == 1) {
+                genres.add("Hentai")
+            }
+
+            manga.genre = genres.joinToString(", ")
+
+            return manga
+        } catch (e: Exception) {
+            Timber.e(e)
+            throw e
         }
-
-        val status = mangaJson.get("status").int
-        val tempStatus = parseStatus(status)
-        val finalChapterNumber = getFinalChapter(mangaJson)
-        if ((tempStatus == SManga.PUBLICATION_COMPLETE || tempStatus == SManga.CANCELLED) && chapterJson != null && isMangaCompleted(chapterJson, finalChapterNumber)) {
-            manga.status = SManga.COMPLETED
-        } else if (tempStatus == SManga.PUBLICATION_COMPLETE && chapterJson != null && isOneshot(chapterJson, finalChapterNumber)) {
-            manga.status = SManga.COMPLETED
-        } else {
-            manga.status = tempStatus
-        }
-
-        val genres = (if (mangaJson.get("hentai").int == 1) listOf("Hentai") else listOf()) +
-                mangaJson.get("genres").asJsonArray.mapNotNull { FilterHandler.allTypes[it.toString()] }
-        manga.genre = genres.joinToString(", ")
-
-        return manga
     }
 
-    private fun isMangaCompleted(chapterJson: JsonObject, finalChapterNumber: String): Boolean {
-        val count = chapterJson.entrySet()
-                .filter { it.value.asJsonObject.get("lang_code").string == lang }
-                .filter { doesFinalChapterExist(finalChapterNumber, it.value) }.count()
-        return count != 0
+    /**
+     * If chapter title is oneshot or a chapter exists which matches the last chapter in the required language
+     * return manga is complete
+     */
+    private fun isMangaCompleted(serializer: ApiMangaSerializer): Boolean {
+        if (serializer.chapter.isNullOrEmpty() || serializer.manga.last_chapter.isNullOrEmpty()) {
+            return false
+        }
+        val finalChapterNumber = serializer.manga.last_chapter
+
+
+        val foundMatch = serializer.chapter.entries
+                .filter { it.value.lang_code == lang }
+                .filter {
+                    isOneShot(it.value, finalChapterNumber)
+                            || it.value.chapter == finalChapterNumber
+
+                }.firstOrNull()
+
+        return foundMatch != null
+    }
+
+    private fun isOneShot(chapter: ChapterSerializer, finalChapterNumber: String): Boolean {
+        return chapter.title.equals("oneshot", true) || (chapter.chapter.isNullOrEmpty() && finalChapterNumber == "0")
     }
 
     private fun parseStatus(status: Int) = when (status) {
@@ -78,14 +99,6 @@ class ApiMangaParser(val lang: String) {
 
     }
 
-    private fun isOneshot(chapterJson: JsonObject, lastChapter: String): Boolean {
-        val chapter = chapterJson.takeIf { it.size() > 0 }?.get(chapterJson.keys().elementAt(0))?.obj?.get("title")?.string
-        return if (chapter != null) {
-            chapter == "Oneshot" || chapter.isEmpty() && lastChapter == "0"
-        } else {
-            false
-        }
-    }
 
     /**
      * Parse for the random manga id from the [MdUtil.randMangaPage] response.
@@ -103,71 +116,76 @@ class ApiMangaParser(val lang: String) {
 
     fun chapterListParse(jsonData: String): List<SChapter> {
         val now = Date().time
-        val json = JsonParser().parse(jsonData).asJsonObject
-        val mangaJson = json.getAsJsonObject("manga")
-        val status = mangaJson.get("status").int
+        val networkApiManga = Json.nonstrict.parse(ApiMangaSerializer.serializer(), jsonData)
+        val networkManga = networkApiManga.manga
+        val networkChapters = networkApiManga.chapter
+        if (networkChapters.isNullOrEmpty()) {
+            return listOf()
+        }
+        val status = networkManga.status
 
-        val finalChapterNumber = getFinalChapter(mangaJson)
-        val chapterJson = json.getAsJsonObject("chapter")
+        val finalChapterNumber = networkManga.last_chapter!!
+
         val chapters = mutableListOf<SChapter>()
 
         // Skip chapters that don't match the desired language, or are future releases
-        chapterJson?.forEach { key, jsonElement ->
-            val chapterElement = jsonElement.asJsonObject
-            if (chapterElement.get("lang_code").string == lang && (chapterElement.get("timestamp").asLong * 1000) <= now) {
-                chapters.add(chapterFromJson(key, chapterElement, finalChapterNumber, status))
+
+        networkChapters.forEach {
+            if (it.value.lang_code == lang && (it.value.timestamp * 1000) <= now) {
+                chapters.add(mapChapter(it.key, it.value, finalChapterNumber, status))
             }
         }
+
         return chapters
     }
 
-    private fun chapterFromJson(chapterId: String, chapterJson: JsonObject, finalChapterNumber: String, status: Int): SChapter {
+    private fun mapChapter(chapterId: String, networkChapter: ChapterSerializer, finalChapterNumber: String, status: Int): SChapter {
         val chapter = SChapter.create()
         chapter.url = MdUtil.apiChapter + chapterId
         val chapterName = mutableListOf<String>()
         // Build chapter name
-        if (chapterJson.get("volume").string.isNotBlank()) {
-            chapterName.add("Vol." + chapterJson.get("volume").string)
+
+        if (!networkChapter.volume.isNullOrBlank()) {
+            chapterName.add("Vol." + networkChapter.volume)
         }
-        if (chapterJson.get("chapter").string.isNotBlank()) {
-            chapterName.add("Ch." + chapterJson.get("chapter").string)
+
+        if (!networkChapter.chapter.isNullOrBlank()) {
+            chapterName.add("Ch." + networkChapter.chapter)
         }
-        if (chapterJson.get("title").string.isNotBlank()) {
+
+        if (!networkChapter.title.isNullOrBlank()) {
             if (chapterName.isNotEmpty()) {
                 chapterName.add("-")
             }
-            chapterName.add(chapterJson.get("title").string)
+            chapterName.add(networkChapter.title)
         }
+
         //if volume, chapter and title is empty its a oneshot
         if (chapterName.isEmpty()) {
             chapterName.add("Oneshot")
         }
-        if ((status == 2 || status == 3) && doesFinalChapterExist(finalChapterNumber, chapterJson)) {
+        if ((status == 2 || status == 3) && (isOneShot(networkChapter, finalChapterNumber) || networkChapter.chapter == finalChapterNumber)) {
             chapterName.add("[END]")
         }
 
         chapter.name = MdUtil.cleanString(chapterName.joinToString(" "))
         // Convert from unix time
-        chapter.date_upload = chapterJson.get("timestamp").long * 1000
+        chapter.date_upload = networkChapter.timestamp * 1000
         val scanlatorName = mutableListOf<String>()
-        if (!chapterJson.get("group_name").nullString.isNullOrBlank()) {
-            scanlatorName.add(chapterJson.get("group_name").string)
+
+        networkChapter.group_name?.let {
+            scanlatorName.add(it)
         }
-        if (!chapterJson.get("group_name_2").nullString.isNullOrBlank()) {
-            scanlatorName.add(chapterJson.get("group_name_2").string)
+        networkChapter.group_name_2?.let {
+            scanlatorName.add(it)
         }
-        if (!chapterJson.get("group_name_3").nullString.isNullOrBlank()) {
-            scanlatorName.add(chapterJson.get("group_name_3").string)
+        networkChapter.group_name_3?.let {
+            scanlatorName.add(it)
         }
+
         chapter.scanlator = MdUtil.cleanString(scanlatorName.joinToString(" & "))
 
         return chapter
     }
-
-
-    private fun doesFinalChapterExist(finalChapterNumber: String, chapterJson: JsonElement) = finalChapterNumber.isNotEmpty() && finalChapterNumber == chapterJson.get("chapter").string.trim()
-
-
-    private fun getFinalChapter(jsonObj: JsonObject): String = jsonObj.get("last_chapter").string.trim()
 
 }

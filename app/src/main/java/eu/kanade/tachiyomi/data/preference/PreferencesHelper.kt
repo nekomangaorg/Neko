@@ -171,15 +171,17 @@ class PreferencesHelper(val context: Context) {
 
     fun filterCompleted() = rxPrefs.getInteger(Keys.filterCompleted, 0)
 
-    fun filterTracked() = rxPrefs.getInteger(Keys.filterTracked, 0)
+    fun filterAnilist() = rxPrefs.getInteger(Keys.filterAnilist, 0)
+
+    fun filterKitsu() = rxPrefs.getInteger(Keys.filterKitsu, 0)
+
+    fun filterMyAnimeList() = rxPrefs.getInteger(Keys.filterMyanimelist, 0)
 
     fun librarySortingMode() = rxPrefs.getInteger(Keys.librarySortingMode, 0)
 
     fun librarySortingAscending() = rxPrefs.getBoolean("library_sorting_ascending", true)
 
     fun automaticUpdates() = prefs.getBoolean(Keys.automaticUpdates, true)
-
-    fun hiddenCatalogues() = rxPrefs.getStringSet("hidden_catalogues", emptySet())
 
     fun downloadNew() = rxPrefs.getBoolean(Keys.downloadNew, false)
 
@@ -198,11 +200,7 @@ class PreferencesHelper(val context: Context) {
     fun lastUnlock() = rxPrefs.getLong(Keys.lastUnlock, 0)
 
     fun skipHidden() = prefs.getBoolean(Keys.skipHidden, false)
-
-    fun migrateFlags() = rxPrefs.getInteger("migrate_flags", Int.MAX_VALUE)
-
-    fun trustedSignatures() = rxPrefs.getStringSet("trusted_signatures", emptySet())
-
+    
     fun upgradeFilters() {
         val filterDl = rxPrefs.getBoolean(Keys.filterDownloaded, false).getOrDefault()
         val filterUn = rxPrefs.getBoolean(Keys.filterUnread, false).getOrDefault()

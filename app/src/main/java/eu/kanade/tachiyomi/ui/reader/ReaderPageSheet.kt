@@ -4,14 +4,12 @@ import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
-import com.afollestad.materialdialogs.MaterialDialog
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.utils.colorInt
 import com.mikepenz.iconics.utils.sizeDp
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import kotlinx.android.synthetic.main.reader_page_sheet.*
 
@@ -30,8 +28,6 @@ class ReaderPageSheet(
 
     init {
         setContentView(view)
-
-        set_as_cover_layout.setOnClickListener { setAsCover() }
         share_layout.setOnClickListener { share() }
         save_layout.setOnClickListener { save() }
     }
@@ -46,26 +42,12 @@ class ReaderPageSheet(
 
     override fun setContentView(view: View) {
         super.setContentView(view!!)
-        set_as_cover_image.setImageDrawable(IconicsDrawable(context).icon(CommunityMaterial.Icon2.cmd_image)
-                .colorInt(Color.GRAY).sizeDp(20))
         share_image.setImageDrawable(IconicsDrawable(context).icon(CommunityMaterial.Icon2.cmd_share_variant)
                 .colorInt(Color.GRAY).sizeDp(20))
         save_image.setImageDrawable(IconicsDrawable(context).icon(CommunityMaterial.Icon.cmd_download)
                 .colorInt(Color.GRAY).sizeDp(20))
     }
 
-    /**
-     * Sets the image of this page as the cover of the manga.
-     */
-    private fun setAsCover() {
-        if (page.status != Page.READY) return
-
-        MaterialDialog(activity).show {
-            message(R.string.confirm_set_image_as_cover)
-            negativeButton(android.R.string.no)
-            positiveButton(android.R.string.yes) { activity.setAsCover(page) }
-        }
-    }
 
     /**
      * Shares the image of this page with external apps.

@@ -32,7 +32,6 @@ import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.base.activity.BaseRxActivity
 import eu.kanade.tachiyomi.ui.main.BiometricActivity
 import eu.kanade.tachiyomi.ui.main.MainActivity
-import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.*
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
@@ -491,16 +490,15 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         super.onResume()
         val useBiometrics = preferences.useBiometrics().getOrDefault()
         if (useBiometrics && BiometricManager.from(this)
-                .canAuthenticate() == BiometricManager.BIOMETRIC_SUCCESS) {
+                        .canAuthenticate() == BiometricManager.BIOMETRIC_SUCCESS) {
             if (!MainActivity.unlocked && (preferences.lockAfter().getOrDefault() <= 0 || Date()
-                    .time >=
-                    preferences.lastUnlock().getOrDefault() + 60 * 1000 * preferences.lockAfter().getOrDefault())) {
+                            .time >=
+                            preferences.lastUnlock().getOrDefault() + 60 * 1000 * preferences.lockAfter().getOrDefault())) {
                 val intent = Intent(this, BiometricActivity::class.java)
                 startActivity(intent)
                 this.overridePendingTransition(0, 0)
             }
-        }
-        else if (useBiometrics)
+        } else if (useBiometrics)
             preferences.useBiometrics().set(false)
     }
 
@@ -543,26 +541,6 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
     }
 
     /**
-     * Called from the page sheet. It delegates setting the image of the given [page] as the
-     * cover to the presenter.
-     */
-    fun setAsCover(page: ReaderPage) {
-        presenter.setAsCover(page)
-    }
-
-    /**
-     * Called from the presenter when a page is set as cover or fails. It shows a different message
-     * depending on the [result].
-     */
-    fun onSetAsCoverResult(result: ReaderPresenter.SetAsCoverResult) {
-        toast(when (result) {
-            Success -> R.string.cover_updated
-            AddToLibraryFirst -> R.string.notification_first_add_to_library
-            Error -> R.string.notification_cover_update_failed
-        })
-    }
-
-    /**
      * Class that handles the user preferences of the reader.
      */
     private inner class ReaderConfig {
@@ -589,35 +567,35 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
             val sharedRotation = preferences.rotation().asObservable().share()
             val initialRotation = sharedRotation.take(1)
             val rotationUpdates = sharedRotation.skip(1)
-                .delay(250, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
+                    .delay(250, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
 
             subscriptions += Observable.merge(initialRotation, rotationUpdates)
-                .subscribe { setOrientation(it) }
+                    .subscribe { setOrientation(it) }
 
             subscriptions += preferences.readerTheme().asObservable()
-                .skip(1) // We only care about updates
-                .subscribe { recreate() }
+                    .skip(1) // We only care about updates
+                    .subscribe { recreate() }
 
             subscriptions += preferences.showPageNumber().asObservable()
-                .subscribe { setPageNumberVisibility(it) }
+                    .subscribe { setPageNumberVisibility(it) }
 
             subscriptions += preferences.trueColor().asObservable()
-                .subscribe { setTrueColor(it) }
+                    .subscribe { setTrueColor(it) }
 
             subscriptions += preferences.fullscreen().asObservable()
-                .subscribe { setFullscreen(it) }
+                    .subscribe { setFullscreen(it) }
 
             subscriptions += preferences.keepScreenOn().asObservable()
-                .subscribe { setKeepScreenOn(it) }
+                    .subscribe { setKeepScreenOn(it) }
 
             subscriptions += preferences.customBrightness().asObservable()
-                .subscribe { setCustomBrightness(it) }
+                    .subscribe { setCustomBrightness(it) }
 
             subscriptions += preferences.colorFilter().asObservable()
-                .subscribe { setColorFilter(it) }
+                    .subscribe { setColorFilter(it) }
 
             subscriptions += preferences.colorFilterMode().asObservable()
-                .subscribe { setColorFilter(preferences.colorFilter().getOrDefault()) }
+                    .subscribe { setColorFilter(preferences.colorFilter().getOrDefault()) }
         }
 
         /**
@@ -705,8 +683,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         private fun setCustomBrightness(enabled: Boolean) {
             if (enabled) {
                 customBrightnessSubscription = preferences.customBrightnessValue().asObservable()
-                    .sample(100, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
-                    .subscribe { setCustomBrightnessValue(it) }
+                        .sample(100, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
+                        .subscribe { setCustomBrightnessValue(it) }
 
                 subscriptions.add(customBrightnessSubscription)
             } else {
@@ -721,8 +699,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         private fun setColorFilter(enabled: Boolean) {
             if (enabled) {
                 customFilterColorSubscription = preferences.colorFilterValue().asObservable()
-                    .sample(100, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
-                    .subscribe { setColorFilterValue(it) }
+                        .sample(100, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
+                        .subscribe { setColorFilterValue(it) }
 
                 subscriptions.add(customFilterColorSubscription)
             } else {

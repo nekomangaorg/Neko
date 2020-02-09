@@ -51,9 +51,6 @@ class LibraryPresenter(
         private val downloadManager: DownloadManager = Injekt.get()
 ) : BasePresenter<LibraryController>() {
 
-    private val context = preferences.context
-
-    private val loggedServices by lazy { Injekt.get<TrackManager>().services.filter { it.isLogged && !it.isMdList() } }
     /**
      * Categories of the library.
      */
@@ -119,7 +116,12 @@ class LibraryPresenter(
 
         val filterCompleted = preferences.filterCompleted().getOrDefault()
 
-        val filterTracked = preferences.filterTracked().getOrDefault()
+        val filterAnilist = preferences.filterAnilist().getOrDefault()
+
+        val filterKitsu = preferences.filterKitsu().getOrDefault()
+
+        val filterMyanimelist = preferences.filterMyAnimeList().getOrDefault()
+
 
         val filterFn: (LibraryItem) -> Boolean = f@{ item ->
             // Filter when there isn't unread chapters.
@@ -131,15 +133,29 @@ class LibraryPresenter(
             if (filterCompleted == STATE_EXCLUDE && item.manga.status == SManga.COMPLETED)
                 return@f false
 
-            if (filterTracked != STATE_IGNORE) {
+            if (filterAnilist != STATE_IGNORE) {
                 val db = Injekt.get<DatabaseHelper>()
                 val tracks = db.getTracks(item.manga).executeAsBlocking()
+                val trackCount = tracks.count { it.sync_id == TrackManager.ANILIST }
+                if (filterAnilist == STATE_INCLUDE && trackCount == 0) return@f false
+                if (filterAnilist == STATE_EXCLUDE && trackCount > 0) return@f false
 
-                val trackCount = loggedServices.count { service ->
-                    tracks.any { it.sync_id == service.id }
-                }
-                if (filterTracked == STATE_INCLUDE && trackCount == 0) return@f false
-                if (filterTracked == STATE_EXCLUDE && trackCount > 0) return@f false
+            }
+            if (filterKitsu != STATE_IGNORE) {
+                val db = Injekt.get<DatabaseHelper>()
+                val tracks = db.getTracks(item.manga).executeAsBlocking()
+                val trackCount = tracks.count { it.sync_id == TrackManager.KITSU }
+                if (filterKitsu == STATE_INCLUDE && trackCount == 0) return@f false
+                if (filterKitsu == STATE_EXCLUDE && trackCount > 0) return@f false
+
+            }
+            if (filterMyanimelist != STATE_IGNORE) {
+                val db = Injekt.get<DatabaseHelper>()
+                val tracks = db.getTracks(item.manga).executeAsBlocking()
+                val trackCount = tracks.count { it.sync_id == TrackManager.MYANIMELIST }
+                if (filterMyanimelist == STATE_INCLUDE && trackCount == 0) return@f false
+                if (filterMyanimelist == STATE_EXCLUDE && trackCount > 0) return@f false
+
             }
             // Filter when there are no downloads.
             if (filterDownloaded != STATE_IGNORE) {

@@ -117,6 +117,7 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers) {
         }
     }
 
+    
     suspend fun updateReadingProgress(track: Track): Boolean {
         return withContext(Dispatchers.IO) {
             val mangaID = getMangaId(track.tracking_url)

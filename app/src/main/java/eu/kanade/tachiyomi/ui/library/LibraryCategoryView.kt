@@ -82,6 +82,7 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
         recycler.adapter = adapter
         swipe_refresh.addView(recycler)
         adapter.fastScroller = fast_scroller
+        
 
         recycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recycler: RecyclerView, newState: Int) {
@@ -91,6 +92,10 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
                 swipe_refresh.isEnabled = firstPos <= 0
             }
         })
+
+        fast_scroller.addOnScrollStateChangeListener {
+            controller.lockFilterBar(it)
+        }
 
         // Double the distance required to trigger sync
         swipe_refresh.setDistanceToTriggerSync((2 * 64 * resources.displayMetrics.density).toInt())
@@ -282,5 +287,6 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
         controller.setSelection(item.manga, true)
         controller.invalidateActionMode()
     }
+
 
 }

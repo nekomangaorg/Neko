@@ -32,11 +32,11 @@ import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.base.controller.SecondaryDrawerController
 import eu.kanade.tachiyomi.ui.base.controller.TabbedController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
-import eu.kanade.tachiyomi.ui.category.CategoryController
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.util.inflate
 import eu.kanade.tachiyomi.util.toast
+import eu.kanade.tachiyomi.util.visible
 import kotlinx.android.synthetic.main.library_controller.*
 import kotlinx.android.synthetic.main.main_activity.*
 import rx.Subscription
@@ -184,7 +184,6 @@ class LibraryController(
             when (group) {
                 is LibraryNavigationView.FilterGroup -> onFilterChanged()
                 is LibraryNavigationView.SortGroup -> onSortChanged()
-                is LibraryNavigationView.DisplayGroup -> reattachAdapter()
             }
         }
 
@@ -349,6 +348,13 @@ class LibraryController(
         // Tint icon if there's a filter active
         val filterColor = if (navView.hasActiveFilters()) Color.rgb(255, 238, 7) else Color.WHITE
         DrawableCompat.setTint(filterItem.icon, filterColor)
+
+        // Display submenu
+        if (preferences.libraryAsList().getOrDefault()) {
+            menu.findItem(R.id.action_display_list).isChecked = true
+        } else {
+            menu.findItem(R.id.action_display_grid).isChecked = true
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -360,9 +366,19 @@ class LibraryController(
             R.id.action_update_library -> {
                 activity?.let { LibraryUpdateService.start(it) }
             }
-            R.id.action_edit_categories -> {
-                router.pushController(CategoryController().withFadeTransaction())
+
+            // Display submenu
+            R.id.action_display_grid -> {
+                item.isChecked = true
+                preferences.libraryAsList().set(false)
+                reattachAdapter()
             }
+            R.id.action_display_list -> {
+                item.isChecked = true
+                preferences.libraryAsList().set(true)
+                reattachAdapter()
+            }
+
             else -> return super.onOptionsItemSelected(item)
         }
 
@@ -470,23 +486,7 @@ class LibraryController(
         presenter.removeMangaFromLibrary(mangas, deleteChapters)
         destroyActionModeIfNeeded()
     }
-
-    /**
-     * Changes the cover for the selected manga.
-     */
-    private fun changeSelectedCover() {
-        val manga = selectedMangas.firstOrNull() ?: return
-        selectedCoverManga = manga
-
-        if (manga.favorite) {
-            val intent = Intent(Intent.ACTION_GET_CONTENT)
-            intent.type = "image/*"
-            startActivityForResult(Intent.createChooser(intent,
-                    resources?.getString(R.string.file_select_cover)), REQUEST_IMAGE_OPEN)
-        } else {
-            activity?.toast(R.string.notification_first_add_to_library)
-        }
-    }
+    
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == REQUEST_IMAGE_OPEN) {
@@ -509,6 +509,17 @@ class LibraryController(
                 Timber.e(error)
             }
             selectedCoverManga = null
+        }
+    }
+
+    fun lockFilterBar(lock: Boolean) {
+        val drawer = (navView?.parent as? DrawerLayout) ?: return
+        if (lock) {
+            drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
+            drawer.closeDrawers()
+        } else {
+            drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
+            drawer.visible()
         }
     }
 

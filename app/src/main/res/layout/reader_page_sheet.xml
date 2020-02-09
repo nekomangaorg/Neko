@@ -1,37 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:background="?android:colorBackground"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     tools:ignore="MissingPrefix">
-
-    <LinearLayout
-        android:id="@+id/set_as_cover_layout"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:gravity="center"
-        android:clickable="true"
-        android:focusable="true"
-        android:foreground="?attr/selectableItemBackground">
-
-        <ImageView
-            android:id="@+id/set_as_cover_image"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="32dp"
-            android:text="@string/set_as_cover"/>
-
-    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/share_layout"
@@ -47,13 +21,13 @@
         <ImageView
             android:id="@+id/share_image"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="32dp"
-            android:text="@string/action_share"/>
+            android:text="@string/action_share" />
 
     </LinearLayout>
 
@@ -71,13 +45,13 @@
         <ImageView
             android:id="@+id/save_image"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="32dp"
-            android:text="@string/action_save"/>
+            android:text="@string/action_save" />
 
     </LinearLayout>
 

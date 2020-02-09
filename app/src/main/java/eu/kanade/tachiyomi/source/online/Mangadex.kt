@@ -9,6 +9,8 @@ import eu.kanade.tachiyomi.network.asObservable
 import eu.kanade.tachiyomi.source.model.*
 import eu.kanade.tachiyomi.source.online.handlers.*
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import okhttp3.FormBody
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
@@ -123,6 +125,9 @@ open class Mangadex(override val lang: String, private val internalLang: String,
 
 
     override suspend fun fetchTrackingInfo(manga: SManga): Track {
+        if (!isLogged()) {
+            throw Exception("Not Logged in")
+        }
         return FollowsHandler(clientBuilder(), headers).fetchTrackingInfo(manga)
     }
 
@@ -153,19 +158,24 @@ open class Mangadex(override val lang: String, private val internalLang: String,
     }
 
     override suspend fun logout(): Boolean {
-        //https://mangadex.org/ajax/actions.ajax.php?function=logout
-        val httpUrl = baseUrl.toHttpUrlOrNull()!!
-        val cookie = network.cookieManager.get(httpUrl).find { it.name == REMEMBER_ME }
-        val token = cookie?.value
-        if (token.isNullOrEmpty()) {
-            return true
-        }
-        val result = clientBuilder().newCall(POSTWithCookie("$baseUrl/ajax/actions.ajax.php?function=logout", REMEMBER_ME, token, headers)).execute()
-        result.body?.string()?.let {
-            return it.contains("success", true)
-        }
+        return withContext(Dispatchers.IO) {
+            //https://mangadex.org/ajax/actions.ajax.php?function=logout
+            val httpUrl = baseUrl.toHttpUrlOrNull()!!
+            val listOfDexCookies = network.cookieManager.get(httpUrl)
+            val cookie = listOfDexCookies.find { it.name == REMEMBER_ME }
+            val token = cookie?.value
+            if (token.isNullOrEmpty()) {
+                return@withContext true
+            }
+            val result = clientBuilder().newCall(POSTWithCookie("$baseUrl/ajax/actions.ajax.php?function=logout", REMEMBER_ME, token, headers)).execute()
+            val resultStr = result.body!!.string()
+            if (resultStr.contains("success", true)) {
+                network.cookieManager.remove(httpUrl)
+                return@withContext true
+            }
 
-        return false
+            false
+        }
     }
 
     override fun getFilterList(): FilterList {
