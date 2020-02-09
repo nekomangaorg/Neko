@@ -2,13 +2,14 @@ package eu.kanade.tachiyomi.ui.manga.track
 
 import android.annotation.SuppressLint
 import android.view.View
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.base.holder.BaseViewHolder
 import eu.kanade.tachiyomi.util.gone
 import eu.kanade.tachiyomi.util.setVectorCompat
 import eu.kanade.tachiyomi.util.visibleIf
 import kotlinx.android.synthetic.main.track_item.*
 
-class TrackHolder(view: View, adapter: TrackAdapter) : BaseViewHolder(view) {
+class TrackHolder(val view: View, adapter: TrackAdapter) : BaseViewHolder(view) {
     val listener = adapter.rowClickListener
 
     init {
@@ -30,13 +31,17 @@ class TrackHolder(view: View, adapter: TrackAdapter) : BaseViewHolder(view) {
         track_details.visibleIf { track != null && !item.service.isExternalLink() }
         track_set.visibleIf { track == null || item.service.isExternalLink() }
 
-        if (track != null) {
-
-            if (item.service.isExternalLink()) {
-                track_set.isAllCaps = false
-                track_set.text = item.service.name
-                track_set.setOnClickListener { listener.onLogoClick(adapterPosition) }
+        if (item.service.isExternalLink()) {
+            track_set.isAllCaps = false
+            track_set.text = item.service.name
+            track_set.setOnClickListener { listener.onLogoClick(adapterPosition) }
+        } else {
+            if (track == null) {
+                track_set.isAllCaps = true
+                track_set.text = view.resources.getString(R.string.action_edit)
+                track_set.setOnClickListener { listener.onTitleClick(adapterPosition) }
             } else {
+
                 track_title.text = track.title
                 track_chapters.text = "${track.last_chapter_read}/" +
                         if (track.total_chapters > 0) track.total_chapters else "-"
@@ -47,6 +52,7 @@ class TrackHolder(view: View, adapter: TrackAdapter) : BaseViewHolder(view) {
                     title_container.isClickable = false
                     score_container.gone()
                 }
+
             }
         }
     }

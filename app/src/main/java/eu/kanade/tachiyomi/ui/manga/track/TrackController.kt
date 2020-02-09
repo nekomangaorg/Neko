@@ -44,7 +44,7 @@ class TrackController : NucleusController<TrackPresenter>(),
         with(view) {
             track_recycler.layoutManager = LinearLayoutManager(context)
             track_recycler.adapter = adapter
-            swipe_refresh.isEnabled = false
+            swipe_refresh.isEnabled = true
             swipe_refresh.refreshes().subscribeUntilDestroy { presenter.refresh() }
         }
     }
@@ -57,7 +57,6 @@ class TrackController : NucleusController<TrackPresenter>(),
     fun onNextTrackings(trackings: List<TrackItem>) {
         val atLeastOneLink = trackings.any { it.track != null }
         adapter?.items = trackings
-        swipe_refresh?.isEnabled = atLeastOneLink
         (parentController as? MangaController)?.setTrackingIcon(atLeastOneLink)
     }
 
