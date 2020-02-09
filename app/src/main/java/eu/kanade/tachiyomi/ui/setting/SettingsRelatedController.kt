@@ -131,7 +131,7 @@ class SettingsRelatedController : SettingsController() {
                     db.deleteAllRelated().executeAsBlocking()
 
                     // Build the notification which we will display the progress bar in
-                    val builder = NotificationCompat.Builder(context, Notifications.CHANNEL_LIBRARY).apply {
+                    val builder = NotificationCompat.Builder(context, Notifications.CHANNEL_MANGA_RELATED).apply {
                         setContentTitle(context.resources.getString(R.string.pref_related_loading_welcome))
                         setSmallIcon(R.drawable.ic_neko_notification)
                         setPriority(NotificationCompat.PRIORITY_LOW)
@@ -145,7 +145,7 @@ class SettingsRelatedController : SettingsController() {
 
                         // Issue the initial notification with zero progress
                         builder.setProgress(totaMangas, 0, false)
-                        notify(Notifications.ID_LIBRARY_RELATED_IMPORT, builder.build())
+                        notify(Notifications.ID_MANGA_RELATED_IMPORT, builder.build())
 
                         try {
 
@@ -156,7 +156,7 @@ class SettingsRelatedController : SettingsController() {
                                 // check if activity is still running
                                 // if it isn't then we should stop updating and delete the notification
                                 if(activity.isDestroyed) {
-                                    NotificationManagerCompat.from(context).cancel(Notifications.ID_LIBRARY_RELATED_IMPORT)
+                                    NotificationManagerCompat.from(context).cancel(Notifications.ID_MANGA_RELATED_IMPORT)
                                     exitProcess(0)
                                 }
 
@@ -173,7 +173,7 @@ class SettingsRelatedController : SettingsController() {
                                 counter++
                                 builder.setProgress(totaMangas, counter, false)
                                 builder.setContentTitle(context.resources.getString(R.string.pref_related_loading_percent,counter,totaMangas))
-                                notify(Notifications.ID_LIBRARY_RELATED_IMPORT, builder.build())
+                                notify(Notifications.ID_MANGA_RELATED_IMPORT, builder.build())
 
                             }
 
@@ -189,17 +189,17 @@ class SettingsRelatedController : SettingsController() {
                     }
 
                     // Cancel the progress bar
-                    NotificationManagerCompat.from(context).cancel(Notifications.ID_LIBRARY_RELATED_IMPORT)
+                    NotificationManagerCompat.from(context).cancel(Notifications.ID_MANGA_RELATED_IMPORT)
 
                     // Show the finished notification
-                    val builder_done = NotificationCompat.Builder(context, Notifications.CHANNEL_LIBRARY).apply {
+                    val builder_done = NotificationCompat.Builder(context, Notifications.CHANNEL_MANGA_RELATED).apply {
                         setContentTitle(context.resources.getString(R.string.pref_related_loading_complete,totaMangas))
                         setSmallIcon(R.drawable.ic_neko_notification)
                         setPriority(NotificationCompat.PRIORITY_LOW)
                         setOnlyAlertOnce(true)
                         setColor(ContextCompat.getColor(context, R.color.colorPrimary))
                     }
-                    NotificationManagerCompat.from(context).notify(Notifications.ID_LIBRARY_RELATED_IMPORT,builder_done.build())
+                    NotificationManagerCompat.from(context).notify(Notifications.ID_MANGA_RELATED_IMPORT,builder_done.build())
 
                 }).start()
 
