@@ -8,11 +8,14 @@ import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
+import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Page
+import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
 import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
 import eu.kanade.tachiyomi.ui.reader.loader.ChapterLoader
@@ -600,12 +603,13 @@ class ReaderPresenter(
                 .flatMapCompletable { trackList ->
                     Completable.concat(trackList.map { track ->
                         val service = trackManager.getService(track.sync_id)
-                        if (service != null && service.isLogged && chapterRead > track.last_chapter_read) {
+
+                        if (shouldUpdateTracker(service, chapterRead, track)) {
                             track.last_chapter_read = chapterRead
 
                             // We wan't these to execute even if the presenter is destroyed and leaks
                             // for a while. The view can still be garbage collected.
-                            Observable.defer { service.update(track) }
+                            Observable.defer { service!!.update(track) }
                                     .map { db.insertTrack(track).executeAsBlocking() }
                                     .toCompletable()
                                     .onErrorComplete()
@@ -618,6 +622,17 @@ class ReaderPresenter(
                 .subscribeOn(Schedulers.io())
                 .subscribe()
     }
+
+    private fun shouldUpdateTracker(service: TrackService?, chapterRead: Int, track: Track): Boolean {
+        if (service == null || !service.isLogged || chapterRead <= track.last_chapter_read) {
+            return false
+        }
+        if (service.isMdList() && track.status == FollowStatus.UNFOLLOWED.int) {
+            return false
+        }
+        return true
+    }
+
 
     /**
      * Enqueues this [chapter] to be deleted when [deletePendingChapters] is called. The download
