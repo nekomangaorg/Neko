@@ -265,9 +265,12 @@
     <string name="pref_related_last_updated_txt">Open Related Manga JSON File</string>
     <string name="pref_related_last_updated">Updated: %s</string>
     <string name="pref_related_broken_file">Unable to parse. Is it a valid JSON?</string>
+    <string name="pref_related_file_error">Unable Open File %s</string>
     <string name="pref_related_show_tab">Show Related Manga Tab</string>
-    <string name="pref_related_loading_percent">%d / %d mangas loaded so far&#8230;</string>
+    <string name="pref_related_loading_percent">Loading Related Mangas (%d / %d loaded)</string>
     <string name="pref_related_loading_welcome">Loading JSON From File!</string>
+    <string name="pref_related_loading_complete">Done Loading %d Related Mangas!</string>
+    <string name="pref_related_notify_start">Starting to parse %d mangas from file</string>
 
     <!-- Backup section -->
     <string name="backup">Backup</string>

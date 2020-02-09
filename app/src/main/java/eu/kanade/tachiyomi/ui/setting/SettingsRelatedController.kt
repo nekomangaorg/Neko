@@ -14,22 +14,18 @@ import org.json.JSONException
 import org.json.JSONObject
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import uy.kohesive.injekt.injectLazy
 import java.text.SimpleDateFormat
 import java.util.*
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
-import android.widget.ProgressBar
 import eu.kanade.tachiyomi.data.database.models.MangaRelatedImpl
-import android.app.AlertDialog
-import android.widget.TextView
-import android.widget.LinearLayout
-
-
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
+import eu.kanade.tachiyomi.data.notification.Notifications
+import kotlin.system.exitProcess
 
 
 class SettingsRelatedController : SettingsController() {
-
-    private val db: DatabaseHelper by injectLazy()
 
     override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
         titleRes = R.string.pref_category_related
@@ -97,13 +93,12 @@ class SettingsRelatedController : SettingsController() {
 
                 // Check if we where able to open it
                 if(input==null) {
-                    context.toast("Unable to open file $selectedFile")
+                    context.toast(context.resources.getString(R.string.pref_related_file_error,selectedFile))
                     return
                 }
 
                 //=============================================================
                 //=============================================================
-                
 
                 // Load everything from the buffer into our string
                 val result = input.bufferedReader().use { it.readText() }
@@ -120,66 +115,92 @@ class SettingsRelatedController : SettingsController() {
                 for(key in relatedPageResult.keys()) {
                     totaMangas++
                 }
-
-                // Display an alert to the user (replaces the ProgressDialog)
-                // https://stackoverflow.com/a/51694457
-                val builder = AlertDialog.Builder(activity)
-                builder.setCancelable(false)
-                val layout = activity.layoutInflater.inflate(R.layout.layout_loading_dialog, null)
-                val progressBar = layout.findViewById<ProgressBar>(R.id.progress)
-                val progressMessage = layout.findViewById<TextView>(R.id.text)
-                progressBar.progress = 0
-                progressBar.scaleY = 3f
-                progressBar.max = totaMangas
-                progressMessage.text = context.resources.getString(R.string.pref_related_loading_welcome)
-                builder.setView(layout)
-                val dialog = builder.create()
-                dialog.show()
+                context.toast(context.resources.getString(R.string.pref_related_notify_start,totaMangas))
 
                 //=============================================================
                 //=============================================================
-
-                // Get our current database
-                var db = Injekt.get<DatabaseHelper>()
-
-                // Delete the old related table
-                db.deleteAllRelated()
 
                 // Now in a second thread lets insert into the database
                 // This takes some time so display it all to the user
                 Thread(Runnable {
-                    try {
 
-                        // Loop through each and insert into the database
-                        var counter: Int = 0
-                        for(key in relatedPageResult.keys()) {
-                            var related = MangaRelatedImpl()
-                            related.id = counter.toLong()
-                            related.manga_id = key.toLong()
-                            related.matched_ids = relatedPageResult.getJSONObject(key).getJSONArray("m_ids").toString()
-                            related.matched_titles = relatedPageResult.getJSONObject(key).getJSONArray("m_titles").toString()
-                            related.scores = relatedPageResult.getJSONObject(key).getJSONArray("scores").toString()
-                            db.insertRelated(related).executeAsBlocking()
-                            counter++
-                            progressBar.progress = counter
-                            progressMessage.text = context.resources.getString(R.string.pref_related_loading_percent,counter,totaMangas)
-                        }
-                        dialog.dismiss()
-                        //context.toast("Loaded $counter mangas from file")
+                    // Get our current database
+                    val db = Injekt.get<DatabaseHelper>()
 
-                        // Nice debug to see if they were inserted
-                        //var mangas = db.getAllRelated().executeAsBlocking()
-                        //context.toast("There are ${mangas.size} in the database")
+                    // Delete the old related table
+                    db.deleteAllRelated().executeAsBlocking()
 
-                        // Finally, save when we last loaded the database
-                        val dataFormater = SimpleDateFormat("MMM dd, yyyy HH:mm:ss zzz", Locale.getDefault())
-                        val currentDate = dataFormater.format(Date())
-                        preferences.relatedLastUpdated().set(context.resources.getString(R.string.pref_related_last_updated,currentDate.toString()))
-
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        dialog.dismiss()
+                    // Build the notification which we will display the progress bar in
+                    val builder = NotificationCompat.Builder(context, Notifications.CHANNEL_LIBRARY).apply {
+                        setContentTitle(context.resources.getString(R.string.pref_related_loading_welcome))
+                        setSmallIcon(R.drawable.ic_neko_notification)
+                        setPriority(NotificationCompat.PRIORITY_LOW)
+                        setOngoing(true)
+                        setOnlyAlertOnce(true)
+                        setColor(ContextCompat.getColor(context, R.color.colorPrimary))
                     }
+
+                    // Inside of here we will insert into our database
+                    NotificationManagerCompat.from(context).apply {
+
+                        // Issue the initial notification with zero progress
+                        builder.setProgress(totaMangas, 0, false)
+                        notify(Notifications.ID_LIBRARY_RELATED_IMPORT, builder.build())
+
+                        try {
+
+                            // Loop through each and insert into the database
+                            var counter: Int = 0
+                            for(key in relatedPageResult.keys()) {
+
+                                // check if activity is still running
+                                // if it isn't then we should stop updating and delete the notification
+                                if(activity.isDestroyed) {
+                                    NotificationManagerCompat.from(context).cancel(Notifications.ID_LIBRARY_RELATED_IMPORT)
+                                    exitProcess(0)
+                                }
+
+                                // create the implementation and insert
+                                var related = MangaRelatedImpl()
+                                related.id = counter.toLong()
+                                related.manga_id = key.toLong()
+                                related.matched_ids = relatedPageResult.getJSONObject(key).getJSONArray("m_ids").toString()
+                                related.matched_titles = relatedPageResult.getJSONObject(key).getJSONArray("m_titles").toString()
+                                related.scores = relatedPageResult.getJSONObject(key).getJSONArray("scores").toString()
+                                db.insertRelated(related).executeAsBlocking()
+
+                                // display to the user
+                                counter++
+                                builder.setProgress(totaMangas, counter, false)
+                                builder.setContentTitle(context.resources.getString(R.string.pref_related_loading_percent,counter,totaMangas))
+                                notify(Notifications.ID_LIBRARY_RELATED_IMPORT, builder.build())
+
+                            }
+
+                            // Finally, save when we last loaded the database
+                            val dataFormater = SimpleDateFormat("MMM dd, yyyy HH:mm:ss zzz", Locale.getDefault())
+                            val currentDate = dataFormater.format(Date())
+                            preferences.relatedLastUpdated().set(context.resources.getString(R.string.pref_related_last_updated,currentDate.toString()))
+
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+
+                    }
+
+                    // Cancel the progress bar
+                    NotificationManagerCompat.from(context).cancel(Notifications.ID_LIBRARY_RELATED_IMPORT)
+
+                    // Show the finished notification
+                    val builder_done = NotificationCompat.Builder(context, Notifications.CHANNEL_LIBRARY).apply {
+                        setContentTitle(context.resources.getString(R.string.pref_related_loading_complete,totaMangas))
+                        setSmallIcon(R.drawable.ic_neko_notification)
+                        setPriority(NotificationCompat.PRIORITY_LOW)
+                        setOnlyAlertOnce(true)
+                        setColor(ContextCompat.getColor(context, R.color.colorPrimary))
+                    }
+                    NotificationManagerCompat.from(context).notify(Notifications.ID_LIBRARY_RELATED_IMPORT,builder_done.build())
+
                 }).start()
 
 
