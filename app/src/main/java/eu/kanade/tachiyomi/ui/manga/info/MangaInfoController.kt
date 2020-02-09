@@ -72,7 +72,10 @@ import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import jp.wasabeef.glide.transformations.CropSquareTransformation
 import jp.wasabeef.glide.transformations.MaskTransformation
+import kotlinx.android.synthetic.main.edit_manga_dialog.*
 import kotlinx.android.synthetic.main.manga_info_controller.*
+import kotlinx.android.synthetic.main.manga_info_controller.manga_artist
+import kotlinx.android.synthetic.main.manga_info_controller.manga_author
 import kotlinx.android.synthetic.main.manga_info_controller.manga_cover
 import kotlinx.android.synthetic.main.manga_info_controller.manga_genres_tags
 import uy.kohesive.injekt.Injekt
@@ -198,9 +201,10 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         val fabBaseMarginBottom = fab_favorite.marginBottom
         val mangaCoverMarginBottom = manga_cover.marginBottom
         val fullMarginBottom = manga_cover_full?.marginBottom ?: 0
-        setFullCoverToThumb()
-        container?.setOnApplyWindowInsetsListener { _, insets ->
+        manga_cover.viewTreeObserver.addOnGlobalLayoutListener {
             setFullCoverToThumb()
+        }
+        container?.setOnApplyWindowInsetsListener { _, insets ->
             if (MainActivity.bottomNav)
                 return@setOnApplyWindowInsetsListener insets
             if (resources?.configuration?.orientation == Configuration.ORIENTATION_LANDSCAPE) {

@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.ui.main
 
 import android.app.SearchManager
-import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
@@ -98,8 +97,8 @@ class SearchActivity: MainActivity() {
             content.systemUiVisibility = content.systemUiVisibility.or(View
                 .SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
 
-        val drawerContainer: FrameLayout = findViewById(R.id.search_container)
-        drawerContainer.setOnApplyWindowInsetsListener { v, insets ->
+        val searchContainer: FrameLayout = findViewById(R.id.search_container)
+        searchContainer.setOnApplyWindowInsetsListener { v, insets ->
             window.statusBarColor = getResourceColor(R.attr.colorPrimary)
             val contextView = window?.decorView?.findViewById<View>(R.id.action_mode_bar)
             contextView?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
@@ -147,12 +146,21 @@ class SearchActivity: MainActivity() {
         syncActivityViewWithController(router.backstack.lastOrNull()?.controller())
     }
 
-    private fun Context.popToRoot() {
-        val intent = Intent(this, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+    override fun onBackPressed() {
+        if (router.backstack.size <= 1 || !router.handleBack()) {
+            unlocked = false
+            super.onBackPressed()
         }
-        startActivity(intent)
-        finishAfterTransition()
+    }
+
+    private fun popToRoot() {
+        if (!router.handleBack()) {
+            val intent = Intent(this, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            }
+            startActivity(intent)
+            finishAfterTransition()
+        }
     }
 
     override fun syncActivityViewWithController(to: Controller?, from: Controller?) {
