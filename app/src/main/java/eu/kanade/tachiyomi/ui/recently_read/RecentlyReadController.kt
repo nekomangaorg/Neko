@@ -192,7 +192,6 @@ class RecentlyReadController(bundle: Bundle? = null) : BaseController(bundle),
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.recently_read, menu)
         val searchItem = menu.findItem(R.id.action_search)
-        menu.findItem(R.id.action_recents).isVisible = MainActivity.bottomNav
         val searchView = searchItem.actionView as SearchView
         if (query.isNotEmpty()) {
             searchItem.expandActionView()

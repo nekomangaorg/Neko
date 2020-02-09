@@ -103,9 +103,7 @@ class ChaptersController() : NucleusController<ChaptersPresenter>(),
         adapter?.fastScroller = fast_scroller
 
         val fabBaseMarginBottom = fab?.marginBottom ?: 0
-        recycler.setOnApplyWindowInsetsListener { v, insets ->
-            if (MainActivity.bottomNav)
-                return@setOnApplyWindowInsetsListener insets
+        recycler.doOnApplyWindowInsets { v, insets, _ ->
             fab?.updateLayoutParams<ViewGroup.MarginLayoutParams>  {
                 bottomMargin = fabBaseMarginBottom + insets.systemWindowInsetBottom
             }
@@ -115,7 +113,6 @@ class ChaptersController() : NucleusController<ChaptersPresenter>(),
             // offset the recycler by the fab's inset + some inset on top
             v.updatePaddingRelative(bottom = insets.systemWindowInsetBottom +
                 v.context.resources.getDimensionPixelSize(R.dimen.fab_list_padding))
-            insets
         }
         swipe_refresh.refreshes().subscribeUntilDestroy { fetchChaptersFromSource() }
 

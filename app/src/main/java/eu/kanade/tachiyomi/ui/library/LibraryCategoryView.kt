@@ -101,31 +101,15 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
         swipe_refresh.addView(recycler)
         adapter.fastScroller = fast_scroller
 
-        if (!MainActivity.bottomNav) {
-            fast_scroller.addOnScrollStateChangeListener {
-                controller.lockFilterBar(it)
-            }
-        }
-        else {
-            fast_scroller.setIgnoreTouchesOutsideHandle(false)
-        }
         val config = resources?.configuration
 
         val phoneLandscape = (config?.orientation == Configuration.ORIENTATION_LANDSCAPE &&
             (config.screenLayout.and(Configuration.SCREENLAYOUT_SIZE_MASK)) <
             Configuration.SCREENLAYOUT_SIZE_LARGE)
-        if (MainActivity.bottomNav && !phoneLandscape) {
+        // pad the recycler if the filter bottom sheet is visible
+        if (!phoneLandscape) {
             val height = context.resources.getDimensionPixelSize(R.dimen.rounder_radius) + 5.dpToPx
             recycler.updatePaddingRelative(bottom = height)
-        }
-        else if (!MainActivity.bottomNav) {
-            recycler.doOnApplyWindowInsets { v, insets, padding ->
-                v.updatePaddingRelative(bottom = padding.bottom + insets.systemWindowInsetBottom)
-
-                fast_scroller?.updateLayoutParams<MarginLayoutParams> {
-                    bottomMargin = insets.systemWindowInsetBottom
-                }
-            }
         }
 
         // Double the distance required to trigger sync
@@ -190,14 +174,6 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
                         adapter.setItems(items)
                         adapter.notifyDataSetChanged()
                         saveDragSort()
-                    }
-                    else {
-                        category.mangaSort = ('a' + (it.second - 1))
-                        if (category.id == 0)
-                            preferences.defaultMangaOrder().set(category.mangaSort.toString())
-                        else
-                            db.insertCategory(category).asRxObservable().subscribe()
-                        controller.enableReorderItems(category)
                     }
                 }
             }
@@ -363,9 +339,7 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
             preferences.defaultMangaOrder().set(mangaIds.joinToString("/"))
         else
             db.insertCategory(category).asRxObservable().subscribe()
-        //justDraggedAndDropped = true
         controller.onCatSortChanged(category.id)
-        controller.enableReorderItems(category)
     }
     override fun shouldMoveItem(fromPosition: Int, toPosition: Int): Boolean {
         if (adapter.selectedItemCount > 1)

@@ -260,6 +260,8 @@ class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: A
         }
     }
 
+    fun hasActiveFilters() = filterItems.any { it.isActivated }
+
     private fun getFilters(): List<Int> {
         val filters = mutableListOf<Int>()
         val categoriesOn = !preferences.hideCategories().getOrDefault()
@@ -434,8 +436,8 @@ class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: A
         popup.show()
     }
 
-    private fun onMainSortClicked(menuId: Int) {
-        if (menuId == R.id.action_reverse) {
+    private fun onMainSortClicked(menuId: Int?) {
+        if (menuId == null) {
             preferences.librarySortingAscending().set(
                 !preferences.librarySortingAscending().getOrDefault())
         }
@@ -450,7 +452,7 @@ class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: A
                 }
             if (sort == preferences.librarySortingMode().getOrDefault()) {
                 if (sort != LibrarySort.DRAG_AND_DROP)
-                    onMainSortClicked(R.id.action_reverse)
+                    onMainSortClicked(null)
                 return
             }
             preferences.librarySortingMode().set(sort)
@@ -460,9 +462,9 @@ class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: A
         onGroupClicked(ACTION_SORT)
     }
 
-    private fun onCatSortClicked(menuId: Int) {
+    private fun onCatSortClicked(menuId: Int?) {
         val category = lastCategory ?: return
-        val modType = if (menuId == R.id.action_reverse) {
+        val modType = if (menuId == null) {
             val t = (category.mangaSort?.minus('a') ?: 0) + 1
                 if (t % 2 != 0) t + 1
                 else t - 1
@@ -475,7 +477,7 @@ class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: A
                 else -> 0
             }
             if (order == category.catSortingMode()) {
-                onCatSortClicked(R.id.action_reverse)
+                onCatSortClicked(null)
                 return
             }
             (2 * order + 1)
@@ -607,10 +609,10 @@ class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: A
             }
             updateTitle()
         }
-        val filters = getFilters().size
-        if (filters > 0 && clearButton.parent == null)
+        val hasFilters = hasActiveFilters()
+        if (hasFilters && clearButton.parent == null)
             filter_layout.addView(clearButton, 0)
-        else if (filters == 0 && clearButton.parent != null)
+        else if (!hasFilters && clearButton.parent != null)
             filter_layout.removeView(clearButton)
     }
 

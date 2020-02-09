@@ -115,27 +115,20 @@ class LibraryPresenter(
 
         val filterFn: (LibraryItem) -> Boolean = f@ { item ->
             // Filter when there isn't unread chapters.
-            if (MainActivity.bottomNav) {
-                if (filterUnread == STATE_INCLUDE &&
-                    (item.manga.unread == 0 || db.getChapters(item.manga).executeAsBlocking()
-                        .size != item.manga.unread)) return@f false
-                if (filterUnread == STATE_EXCLUDE &&
-                    (item.manga.unread == 0 || db.getChapters(item.manga).executeAsBlocking().size == item.manga.unread)) return@f false
-                if (filterUnread == STATE_REALLY_EXCLUDE && item.manga.unread > 0) return@f false
-            }
-            else {
-                if (filterUnread == STATE_INCLUDE && item.manga.unread == 0) return@f false
-                if ((filterUnread == STATE_EXCLUDE || filterUnread == STATE_REALLY_EXCLUDE) && item
-                    .manga.unread > 0) return@f false
-            }
+            if (filterUnread == STATE_INCLUDE &&
+                (item.manga.unread == 0 || db.getChapters(item.manga).executeAsBlocking()
+                    .size != item.manga.unread)) return@f false
+            if (filterUnread == STATE_EXCLUDE &&
+                (item.manga.unread == 0 ||
+                    db.getChapters(item.manga).executeAsBlocking().size == item.manga.unread))
+                return@f false
+            if (filterUnread == STATE_REALLY_EXCLUDE && item.manga.unread > 0) return@f false
 
-            if (MainActivity.bottomNav) {
-                if (filterMangaType == LibraryManga.MANGA &&
-                    item.manga.mangaType() == LibraryManga.MANWHA)
-                    return@f false
-                if ((filterMangaType == LibraryManga.MANWHA) &&
-                    item.manga.mangaType() == LibraryManga.MANGA) return@f false
-            }
+            if (filterMangaType == LibraryManga.MANGA &&
+                item.manga.mangaType() == LibraryManga.MANWHA)
+                return@f false
+            if ((filterMangaType == LibraryManga.MANWHA) &&
+                item.manga.mangaType() == LibraryManga.MANGA) return@f false
 
 
             if (filterCompleted == STATE_INCLUDE && item.manga.status != SManga.COMPLETED)
@@ -477,10 +470,6 @@ class LibraryPresenter(
             currentMangaMap = mangaMap
             view.onNextLibraryUpdate(categories, mangaMap)
         }
-    }
-
-    fun requestFullUpdate() {
-        getLibrary()
     }
 
     /**

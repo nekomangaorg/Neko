@@ -135,35 +135,5 @@ class SettingsGeneralController : SettingsController() {
                 defaultValue = 0
             }
         }
-
-        switchPreference {
-            key = Keys.useBottomNav
-            titleRes = R.string.use_bottom_nav
-            defaultValue = true
-            onChange { bottomNav ->
-                bottomNav as Boolean
-                if (!bottomNav) {
-                    MaterialDialog(activity!!).title(R.string.switch_to_sidebar)
-                        .message(R.string.switch_to_sidebar_summary)
-                        .positiveButton(R.string.action_switch) {
-                            preferences.useBottonNav().set(bottomNav)
-                            switchNavType(bottomNav)
-                        }.negativeButton(android.R.string.no).show()
-                    false
-                }
-                else {
-                    switchNavType(bottomNav)
-                    true
-                }
-
-            }
-        }
-    }
-
-    fun switchNavType(bottomNav: Boolean) {
-        activity?.recreate()
-        if (bottomNav) {
-            (activity as MainActivity).navigationView.selectedItemId = R.id.nav_drawer_settings
-        }
     }
 }

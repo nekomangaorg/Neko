@@ -75,7 +75,6 @@ class LibraryController(
         private val preferences: PreferencesHelper = Injekt.get()
 ) : BaseController(bundle),
         TabbedController,
-        SecondaryDrawerController,
         ActionMode.Callback,
         ChangeMangaCategoriesDialog.Listener,
         MigrationInterface,
@@ -145,11 +144,6 @@ class LibraryController(
     private var adapter: LibraryAdapter? = null
 
     /**
-     * Navigation view containing filter/sort/display items.
-     */
-    private var navView: LibraryNavigationView? = null
-
-    /**
      * Drawer listener to allow swipe only for closing the drawer.
      */
     private var tabsVisibilityRelay: BehaviorRelay<Boolean> = BehaviorRelay.create(false)
@@ -157,8 +151,6 @@ class LibraryController(
     private var tabsVisibilitySubscription: Subscription? = null
 
     var snack: Snackbar? = null
-
-    private var reorderMenuItem:MenuItem? = null
 
     private var presenter = LibraryPresenter(this)
 
@@ -196,9 +188,9 @@ class LibraryController(
 
         library_pager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
             override fun onPageSelected(position: Int) {
-                enableReorderItems(position)
                 bottom_sheet.lastCategory = adapter?.categories?.getOrNull(position)
-                bottom_sheet.updateTitle()
+                if (preferences.librarySortingMode().getOrDefault() == LibrarySort.DRAG_AND_DROP)
+                    bottom_sheet.updateTitle()
             }
 
             override fun onPageScrolled(
@@ -216,58 +208,22 @@ class LibraryController(
             createActionModeIfNeeded()
         }
 
-        if (MainActivity.bottomNav) {
-            bottom_sheet.onCreate(pager_layout)
+        bottom_sheet.onCreate(pager_layout)
 
-            bottom_sheet.onGroupClicked = {
-                when (it) {
-                    SortFilterBottomSheet.ACTION_REFRESH -> onRefresh()
-                    SortFilterBottomSheet.ACTION_FILTER -> onFilterChanged()
-                    SortFilterBottomSheet.ACTION_SORT -> onSortChanged()
-                    SortFilterBottomSheet.ACTION_DISPLAY -> reattachAdapter()
-                    SortFilterBottomSheet.ACTION_DOWNLOAD_BADGE ->
-                        presenter.requestDownloadBadgesUpdate()
-                    SortFilterBottomSheet.ACTION_UNREAD_BADGE -> presenter.requestUnreadBadgesUpdate()
-                    SortFilterBottomSheet.ACTION_CAT_SORT -> onCatSortChanged()
-                }
-            }
-
-            fab.setOnClickListener {
-                router.pushController(DownloadController().withFadeTransaction())
+        bottom_sheet.onGroupClicked = {
+            when (it) {
+                SortFilterBottomSheet.ACTION_REFRESH -> onRefresh()
+                SortFilterBottomSheet.ACTION_FILTER -> onFilterChanged()
+                SortFilterBottomSheet.ACTION_SORT -> onSortChanged()
+                SortFilterBottomSheet.ACTION_DISPLAY -> reattachAdapter()
+                SortFilterBottomSheet.ACTION_DOWNLOAD_BADGE -> presenter.requestDownloadBadgesUpdate()
+                SortFilterBottomSheet.ACTION_UNREAD_BADGE -> presenter.requestUnreadBadgesUpdate()
+                SortFilterBottomSheet.ACTION_CAT_SORT -> onCatSortChanged()
             }
         }
-        else {
-            bottom_sheet.gone()
-            shadow.gone()
-            shadow2.gone()
-        }
-    }
 
-    fun enableReorderItems(category: Category) {
-        if (MainActivity.bottomNav) return
-        adapter?.categories?.getOrNull(library_pager.currentItem)?.mangaSort = category.mangaSort
-        enableReorderItems(sortType = category.mangaSort)
-    }
-
-    private fun enableReorderItems(position: Int? = null, sortType: Char? = null) {
-        if (MainActivity.bottomNav) return
-        val pos = position ?: library_pager.currentItem
-        val orderOfCat = sortType ?: adapter?.categories?.getOrNull(pos)?.mangaSort
-        if (reorderMenuItem?.isVisible != true) return
-        val subMenu = reorderMenuItem?.subMenu ?: return
-        if (orderOfCat != null) {
-            subMenu.setGroupCheckable(R.id.reorder_group, true, true)
-            when (orderOfCat) {
-                'a', 'b' -> subMenu.findItem(R.id.action_alpha_asc)?.isChecked = true
-                'c', 'd' -> subMenu.findItem(R.id.action_update_asc)?.isChecked = true
-                'e', 'f' -> subMenu.findItem(R.id.action_unread)?.isChecked = true
-                'g', 'h' -> subMenu.findItem(R.id.action_last_read)?.isChecked = true
-            }
-            subMenu.findItem(R.id.action_reverse)?.isVisible = true
-        }
-        else {
-            subMenu.findItem(R.id.action_reverse)?.isVisible = false
-            subMenu.setGroupCheckable(R.id.reorder_group, false, false)
+        fab.setOnClickListener {
+            router.pushController(DownloadController().withFadeTransaction())
         }
     }
 
@@ -312,40 +268,6 @@ class LibraryController(
         snack?.dismiss()
         snack = null
         super.onDetach(view)
-    }
-
-    override fun createSecondaryDrawer(drawer: DrawerLayout): ViewGroup? {
-        if (MainActivity.bottomNav) return null
-        val view = drawer.inflate(R.layout.library_drawer) as LibraryNavigationView
-        navView = view
-        drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, GravityCompat.END)
-
-        navView?.onGroupClicked = { group, item ->
-            when (group) {
-                is LibraryNavigationView.FilterGroup -> onFilterChanged(item)
-                is LibraryNavigationView.SortGroup -> onSortChanged()
-                is LibraryNavigationView.DisplayGroup -> reattachAdapter()
-                is LibraryNavigationView.BadgeGroup -> onDownloadBadgeChanged()
-            }
-        }
-
-        drawer.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
-          View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
-          View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-        val statusScrim = view.findViewById(R.id.status_bar_scrim) as View
-        statusScrim.setOnApplyWindowInsetsListener(HeightTopWindowInsetsListener)
-        view.setOnApplyWindowInsetsListener { _, insets ->
-            view.recycler.updatePaddingRelative(
-                bottom = view.recycler.marginBottom + insets.systemWindowInsetBottom,
-                top = view.recycler.marginTop + insets.systemWindowInsetTop
-            )
-            insets
-        }
-        return view
-    }
-
-    override fun cleanupSecondaryDrawer(drawer: DrawerLayout) {
-        navView = null
     }
 
     override fun configureTabs(tabs: TabLayout) {
@@ -423,35 +345,25 @@ class LibraryController(
             preferences.landscapeColumns()
     }
 
-    private fun onRefresh() {
-        if (!MainActivity.bottomNav) activity?.invalidateOptionsMenu()
-        presenter.requestFullUpdate()
-    }
-
     /**
      * Called when a filter is changed.
      */
-    private fun onFilterChanged(item: ExtendedNavigationView.Item? = null) {
-        if (item is ExtendedNavigationView.Item.MultiStateGroup && item.resTitle == R.string.categories) {
-            if (!MainActivity.bottomNav) activity?.invalidateOptionsMenu()
-            presenter.requestFullUpdate()
-            return
-        }
+    private fun onFilterChanged() {
         presenter.requestFilterUpdate()
         destroyActionModeIfNeeded()
-        if (!MainActivity.bottomNav) activity?.invalidateOptionsMenu()
     }
 
-    private fun onDownloadBadgeChanged() {
-        presenter.requestDownloadBadgesUpdate()
+    private fun onRefresh() {
+        presenter.getLibrary()
+        destroyActionModeIfNeeded()
     }
 
     /**
      * Called when the sorting mode is changed.
      */
     private fun onSortChanged() {
-        if (!MainActivity.bottomNav) activity?.invalidateOptionsMenu()
         presenter.requestSortUpdate()
+        destroyActionModeIfNeeded()
     }
 
     fun onCatSortChanged(id: Int? = null) {
@@ -489,27 +401,19 @@ class LibraryController(
     /**
      * Destroys the action mode.
      */
-    fun destroyActionModeIfNeeded() {
+    private fun destroyActionModeIfNeeded() {
         actionMode?.finish()
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.library, menu)
 
-        val reorganizeItem = menu.findItem(R.id.action_reorganize)
-        reorganizeItem.isVisible =
-            !MainActivity.bottomNav
-            preferences.librarySortingMode().getOrDefault() == LibrarySort.DRAG_AND_DROP &&
-                !preferences.hideCategories().getOrDefault()
-
         val config = resources?.configuration
 
         val phoneLandscape = (config?.orientation == Configuration.ORIENTATION_LANDSCAPE &&
             (config.screenLayout.and(Configuration.SCREENLAYOUT_SIZE_MASK)) <
             Configuration.SCREENLAYOUT_SIZE_LARGE)
-        menu.findItem(R.id.action_library_filter).isVisible = !MainActivity.bottomNav || phoneLandscape
-        reorderMenuItem = reorganizeItem
-        enableReorderItems()
+        menu.findItem(R.id.action_library_filter).isVisible = phoneLandscape
 
         val searchItem = menu.findItem(R.id.action_search)
         val searchView = searchItem.actionView as SearchView
@@ -555,7 +459,7 @@ class LibraryController(
     }
 
     override fun onPrepareOptionsMenu(menu: Menu) {
-        val navView = navView ?: return
+        val navView = bottom_sheet ?: return
 
         val filterItem = menu.findItem(R.id.action_library_filter)
 
@@ -569,15 +473,9 @@ class LibraryController(
         when (item.itemId) {
             R.id.action_search -> expandActionViewFromInteraction = true
             R.id.action_library_filter -> {
-                if (MainActivity.bottomNav) {
-                    if (bottom_sheet.sheetBehavior?.state != BottomSheetBehavior.STATE_COLLAPSED)
-                    bottom_sheet.sheetBehavior?.state =
-                        BottomSheetBehavior.STATE_COLLAPSED
-                    else
-                        bottom_sheet.sheetBehavior?.state =
-                            BottomSheetBehavior.STATE_EXPANDED
-                }
-                else navView?.let { activity?.drawer?.openDrawer(GravityCompat.END) }
+                if (bottom_sheet.sheetBehavior?.state != BottomSheetBehavior.STATE_COLLAPSED)
+                    bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
+                else bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
             }
             R.id.action_edit_categories -> {
                 router.pushController(CategoryController().withFadeTransaction())
@@ -585,29 +483,10 @@ class LibraryController(
             R.id.action_source_migration -> {
                 router.pushController(MigrationController().withFadeTransaction())
             }
-            R.id.action_alpha_asc -> reOrder(0)
-            R.id.action_update_asc -> reOrder(1)
-            R.id.action_unread -> reOrder(2)
-            R.id.action_last_read -> reOrder(3)
-            R.id.action_reverse -> reOrder(-1)
             else -> return super.onOptionsItemSelected(item)
         }
 
         return true
-    }
-
-    private fun reOrder(type: Int) {
-        val modType = if (type == -1) {
-            val t = (adapter?.categories?.getOrNull(library_pager.currentItem)?.mangaSort
-                ?.minus('a') ?: 0) + 1
-            if (t % 2 != 0) t + 1
-            else t - 1
-        }
-        else 2 * type + 1
-        adapter?.categories?.getOrNull(library_pager.currentItem)?.id?.let {
-            reorganizeRelay.call(it to modType)
-            onSortChanged()
-        }
     }
 
     /**
@@ -751,17 +630,6 @@ class LibraryController(
 
         ChangeMangaCategoriesDialog(this, mangas, categories, commonCategoriesIndexes)
                 .showDialog(router)
-    }
-
-    fun lockFilterBar(lock: Boolean) {
-        val drawer = (navView?.parent  as? DrawerLayout) ?: return
-        if (lock) {
-            drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
-            drawer.closeDrawers()
-        } else {
-            drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
-            drawer.visible()
-        }
     }
 
     private fun deleteMangasFromLibrary() {

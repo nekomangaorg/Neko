@@ -233,8 +233,6 @@ class PreferencesHelper(val context: Context) {
 
     fun extensionUpdatesCount() = rxPrefs.getInteger("ext_updates_count", 0)
 
-    fun useBottonNav() = rxPrefs.getBoolean(Keys.useBottomNav, true)
-
     fun showRecentUpdates() = rxPrefs.getBoolean("show_recents", false)
 
     fun lastExtCheck() = rxPrefs.getLong("last_ext_check", 0)

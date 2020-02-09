@@ -33,7 +33,7 @@ class SearchActivity: MainActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        bottomNav = false
+        usingBottomNav = false
         setContentView(R.layout.search_activity)
 
         setSupportActionBar(sToolbar)
@@ -189,7 +189,7 @@ class SearchActivity: MainActivity() {
 
     override fun onResume() {
         super.onResume()
-        bottomNav = false
+        usingBottomNav = false
     }
 
     override fun handleIntentAction(intent: Intent): Boolean {

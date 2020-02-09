@@ -17,6 +17,7 @@ import com.f2prateek.rx.preferences.Preference
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.jakewharton.rxbinding.support.v7.widget.queryTextChangeEvents
+import com.jakewharton.rxbinding.view.visible
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
@@ -294,16 +295,7 @@ open class BrowseCatalogueController(bundle: Bundle) :
         )
 
         // Setup filters button
-        menu.findItem(R.id.action_set_filter).apply {
-            icon.mutate()
-            if (presenter.sourceFilters.isEmpty()) {
-                isEnabled = false
-                icon.alpha = 128
-            } else {
-                isEnabled = true
-                icon.alpha = 255
-            }
-        }
+        menu.findItem(R.id.action_set_filter).isVisible = presenter.sourceFilters.isNotEmpty()
 
         // Show next display mode
         menu.findItem(R.id.action_display_mode).apply {

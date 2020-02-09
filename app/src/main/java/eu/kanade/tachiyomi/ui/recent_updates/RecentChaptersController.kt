@@ -338,7 +338,6 @@ class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.recent_updates, menu)
-        menu.findItem(R.id.action_recents).isVisible = MainActivity.bottomNav
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

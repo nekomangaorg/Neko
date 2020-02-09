@@ -29,33 +29,4 @@
         android:title="@string/label_migration"
         app:showAsAction="never"/>
 
-    <item
-        android:id="@+id/action_reorganize"
-        android:icon="@drawable/ic_swap_vert_white_24dp"
-        android:title="@string/action_sort_by"
-        app:showAsAction="ifRoom">
-        <menu>
-            <group android:id="@+id/reorder_group"
-                android:checkableBehavior="single">
-                <item
-                    android:id="@+id/action_alpha_asc"
-                    android:title="@string/title"/>
-                <item
-                    android:id="@+id/action_update_asc"
-                    android:title="@string/action_sort_last_updated"/>
-                <item
-                    android:id="@+id/action_unread"
-                    android:title="@string/action_filter_unread"/>
-                <item
-                    android:id="@+id/action_last_read"
-                    android:title="@string/action_sort_last_read"/>
-
-            </group>
-
-            <item
-                android:id="@+id/action_reverse"
-                android:title="@string/action_reverse_order"/>
-        </menu>
-    </item>
-
 </menu>

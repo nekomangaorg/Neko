@@ -154,7 +154,7 @@ inline val View.marginLeft: Int
 
 object RecyclerWindowInsetsListener : View.OnApplyWindowInsetsListener {
     override fun onApplyWindowInsets(v: View, insets: WindowInsets): WindowInsets {
-        if (MainActivity.bottomNav) return insets
+        if (MainActivity.usingBottomNav) return insets
         v.setPadding(0,0,0,insets.systemWindowInsetBottom)
         //v.updatePaddingRelative(bottom = v.paddingBottom + insets.systemWindowInsetBottom)
         return insets
@@ -163,7 +163,7 @@ object RecyclerWindowInsetsListener : View.OnApplyWindowInsetsListener {
 
 fun View.doOnApplyWindowInsets(f: (View, WindowInsets, ViewPaddingState) -> Unit) {
     // Create a snapshot of the view's padding state
-    if (MainActivity.bottomNav) return
+    if (MainActivity.usingBottomNav) return
     val paddingState = createStateForView(this)
     setOnApplyWindowInsetsListener { v, insets ->
         f(v, insets, paddingState)

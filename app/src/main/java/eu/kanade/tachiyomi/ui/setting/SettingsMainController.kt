@@ -27,7 +27,6 @@ class SettingsMainController : SettingsController() {
             iconRes = R.drawable.ic_extension_black_24dp
             iconTint = tintColor
             titleRes = R.string.label_extensions
-            isVisible = MainActivity.bottomNav
             onClick { navigateTo(ExtensionController()) }
         }
 

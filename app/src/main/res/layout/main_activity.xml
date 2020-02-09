@@ -87,15 +87,5 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <com.google.android.material.navigation.NavigationView
-        android:id="@+id/nav_view"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_gravity="start"
-        android:fitsSystemWindows="true"
-        android:theme="?attr/navigation_view_theme"
-        app:headerLayout="@layout/navigation_header"
-        app:menu="@menu/menu_navigation"/>
-
 </androidx.drawerlayout.widget.DrawerLayout>
 </FrameLayout>
