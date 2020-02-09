@@ -84,7 +84,7 @@
         <item name="android:navigationBarColor">?colorPrimaryDark</item>
     </style>
 
-    <style name="Theme.Base.Reader.Dark" parent="Theme.AppCompat.NoActionBar">
+    <style name="Theme.Base.Reader.Dark" parent="Theme.MaterialComponents.NoActionBar">
         <item name="android:forceDarkAllowed">false</item>
         <item name="colorPrimary">@color/darkPrimaryColor</item>
         <item name="colorPrimaryDark">@color/darkPrimaryColor</item>
@@ -123,7 +123,7 @@
 
     </style>
 
-    <style name="Theme.Base.Reader.Light" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="Theme.Base.Reader.Light" parent="Theme.MaterialComponents.Light.NoActionBar">
         <item name="android:forceDarkAllowed">false</item>
         <item name="colorPrimary">@color/darkPrimaryColor</item>
         <item name="colorPrimaryDark">@color/darkPrimaryColor</item>

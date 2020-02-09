@@ -2,31 +2,35 @@
 
 package eu.kanade.tachiyomi.util.view
 
+import android.app.Activity
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.Point
 import android.graphics.Typeface
+import android.graphics.drawable.GradientDrawable
+import android.os.Build
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsets
 import android.widget.TextView
 import androidx.annotation.Px
 import androidx.annotation.RequiresApi
-import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.appcompat.widget.SearchView
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.graphics.ColorUtils
 import androidx.core.view.ViewCompat
 import com.amulyakhare.textdrawable.TextDrawable
 import com.amulyakhare.textdrawable.util.ColorGenerator
 import com.bluelinelabs.conductor.Controller
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.snackbar.Snackbar
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.util.system.getResourceColor
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.main.MainActivity
+import eu.kanade.tachiyomi.util.system.getResourceColor
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import uy.kohesive.injekt.injectLazy
 import kotlin.math.min
 
 /**
@@ -233,4 +237,55 @@ inline fun View.updatePaddingRelative(
     @Px bottom: Int = paddingBottom
 ) {
     setPaddingRelative(start, top, end, bottom)
+}
+
+fun BottomSheetDialog.setEdgeToEdge(activity: Activity, layout: View, contentView: View,
+    setTopMargin: Boolean) {
+    window?.setBackgroundDrawable(null)
+    val currentNightMode = activity.resources.configuration.uiMode and Configuration
+        .UI_MODE_NIGHT_MASK
+    if (currentNightMode == Configuration.UI_MODE_NIGHT_NO)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (activity.window.decorView.rootWindowInsets.systemWindowInsetRight == 0 &&
+                activity.window.decorView.rootWindowInsets.systemWindowInsetLeft == 0)
+                window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+        }
+        else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && layout is ConstraintLayout) {
+            val nView = View(context)
+            val height = activity.window.decorView.rootWindowInsets.systemWindowInsetBottom
+            val params = ConstraintLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, height
+            )
+            params.bottomToBottom = layout.id
+            params.startToStart = layout.id
+            params.endToEnd = layout.id
+            nView.layoutParams = params
+            nView.background = GradientDrawable(
+                GradientDrawable.Orientation.BOTTOM_TOP, intArrayOf(
+                    ColorUtils.setAlphaComponent(Color.BLACK, 179), Color.TRANSPARENT
+                )
+            )
+            layout.addView(nView)
+        }
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        //window?.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+        window?.findViewById<View>(com.google.android.material.R.id.container)?.fitsSystemWindows =
+            false
+        contentView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            if (setTopMargin)
+                topMargin = activity.window.decorView.rootWindowInsets.systemWindowInsetTop
+            leftMargin = activity.window.decorView.rootWindowInsets.systemWindowInsetLeft
+            rightMargin = activity.window.decorView.rootWindowInsets.systemWindowInsetRight
+        }
+    }
+}
+
+fun setBottomEdge(view: View, activity: Activity) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        val marginB = view.marginBottom
+        view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            bottomMargin = marginB +
+                activity.window.decorView.rootWindowInsets.systemWindowInsetBottom
+        }
+    }
 }

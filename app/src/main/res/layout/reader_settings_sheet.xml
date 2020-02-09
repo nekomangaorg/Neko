@@ -3,12 +3,16 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/constraint_layout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="?android:colorBackground"
+    style="@style/BottomSheetDialogTheme"
+    android:background="@drawable/bg_bottom_sheet_dialog_fragment"
+    android:layout_height="wrap_content"
     android:clipToPadding="false"
     android:orientation="vertical"
-    android:padding="@dimen/material_component_dialogs_padding_around_content_area"
+    android:paddingStart="@dimen/material_component_dialogs_padding_around_content_area"
+    android:paddingEnd="@dimen/material_component_dialogs_padding_around_content_area"
+    android:paddingTop="16dp"
     android:forceDarkAllowed="false">
 
     <!-- General preferences -->
@@ -20,18 +24,22 @@
         android:text="@string/pref_category_general"
         android:textColor="?attr/colorAccent"
         android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@id/close_button"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/pull_up_for_more"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:text="@string/reader_pull_up_for_more_options"
-        android:textColor="?android:attr/textColorHint"
-        app:layout_constraintStart_toEndOf="@id/general_prefs"
-        app:layout_constraintTop_toTopOf="@id/general_prefs" />
+    <ImageView
+        android:id="@+id/close_button"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="@drawable/round_ripple"
+        android:tint="?android:attr/textColorPrimary"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/general_prefs"
+        app:layout_constraintBottom_toBottomOf="@id/general_prefs"
+        android:src="@drawable/ic_expand_more_white_24dp"/>
 
     <androidx.legacy.widget.Space
         android:id="@+id/spinner_end"
@@ -53,7 +61,7 @@
         android:layout_height="24dp"
         android:layout_marginTop="16dp"
         android:entries="@array/viewers_selector"
-        app:layout_constraintTop_toBottomOf="@id/pull_up_for_more"
+        app:layout_constraintTop_toBottomOf="@id/general_prefs"
         app:layout_constraintStart_toEndOf="@id/verticalcenter"
         app:layout_constraintEnd_toEndOf="@id/spinner_end" />
 
@@ -163,6 +171,7 @@
     <TextView
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:id="@+id/zoom_start_text"
         android:text="@string/pref_image_scale_type"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/verticalcenter"
@@ -179,6 +188,7 @@
         app:layout_constraintTop_toBottomOf="@id/pager_prefs"/>
 
     <TextView
+        android:id="@+id/scale_type_text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@string/pref_zoom_start"
@@ -212,7 +222,8 @@
         android:layout_marginTop="0dp"
         android:text="@string/pref_page_transitions"
         android:textColor="?android:attr/textColorSecondary"
-        app:layout_constraintTop_toBottomOf="@id/crop_borders" />
+        app:layout_constraintTop_toBottomOf="@id/crop_borders"
+        app:layout_constraintBottom_toBottomOf="parent"/>
 
     <!-- Webtoon preferences -->
 
@@ -234,7 +245,8 @@
         android:layout_marginTop="16dp"
         android:text="@string/pref_crop_borders"
         android:textColor="?android:attr/textColorSecondary"
-        app:layout_constraintTop_toBottomOf="@id/webtoon_prefs" />
+        app:layout_constraintTop_toBottomOf="@id/webtoon_prefs"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
     <!-- Groups of preferences -->
 
@@ -243,7 +255,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        app:constraint_referenced_ids="pager_prefs,scale_type_text,scale_type,zoom_start_text,zoom_start,crop_borders,page_transitions"
+        app:constraint_referenced_ids="pager_prefs,scale_type,scale_type_text,zoom_start_text,zoom_start,crop_borders,page_transitions"
         tools:visibility="visible" />
 
     <androidx.constraintlayout.widget.Group

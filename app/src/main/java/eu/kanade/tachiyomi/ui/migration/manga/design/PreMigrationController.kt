@@ -72,8 +72,7 @@ class PreMigrationController(bundle: Bundle? = null) : BaseController(bundle), F
 
         fab.setOnClickListener {
             if (dialog?.isShowing != true) {
-                dialog = MigrationBottomSheetDialog(activity!!, R.style.BottomSheetDialogTheme,
-                    this)
+                dialog = MigrationBottomSheetDialog(activity!!,  this)
                 dialog?.show()
                 val bottomSheet = dialog?.findViewById<FrameLayout>(
                     com.google.android.material.R.id.design_bottom_sheet

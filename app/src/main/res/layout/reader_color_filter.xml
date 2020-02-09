@@ -2,8 +2,9 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/constraint_layout"
     android:padding="16dp">
 
     <androidx.legacy.widget.Space
@@ -202,6 +203,7 @@
         app:layout_constraintTop_toBottomOf="@id/custom_brightness"
         app:layout_constraintStart_toEndOf="@id/txt_brightness_seekbar_icon"
         app:layout_constraintEnd_toStartOf="@id/txt_brightness_seekbar_value"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:max_seek="100"
         app:min_seek="-75" />
 
