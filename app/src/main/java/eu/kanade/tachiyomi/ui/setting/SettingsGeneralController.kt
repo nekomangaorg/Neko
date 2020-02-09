@@ -61,29 +61,6 @@ class SettingsGeneralController : SettingsController() {
             }
         }
 
-        switchPreference {
-            key = Keys.useBottomNav
-            titleRes = R.string.use_bottom_nav
-            defaultValue = true
-            onChange { bottomNav ->
-                bottomNav as Boolean
-                if (!bottomNav) {
-                    MaterialDialog(activity!!).title(R.string.switch_to_sidebar)
-                        .message(R.string.switch_to_sidebar_summary)
-                        .positiveButton(R.string.action_switch) {
-                            preferences.useBottonNav().set(bottomNav)
-                            switchNavType(bottomNav)
-                        }.negativeButton(android.R.string.no).show()
-                    false
-                }
-                else {
-                    switchNavType(bottomNav)
-                    true
-                }
-
-            }
-        }
-
         listPreference(activity) {
             key= Keys.dateFormat
             titleRes = R.string.pref_date_format
@@ -156,6 +133,29 @@ class SettingsGeneralController : SettingsController() {
                 }
                 entryValues = values
                 defaultValue = 0
+            }
+        }
+
+        switchPreference {
+            key = Keys.useBottomNav
+            titleRes = R.string.use_bottom_nav
+            defaultValue = true
+            onChange { bottomNav ->
+                bottomNav as Boolean
+                if (!bottomNav) {
+                    MaterialDialog(activity!!).title(R.string.switch_to_sidebar)
+                        .message(R.string.switch_to_sidebar_summary)
+                        .positiveButton(R.string.action_switch) {
+                            preferences.useBottonNav().set(bottomNav)
+                            switchNavType(bottomNav)
+                        }.negativeButton(android.R.string.no).show()
+                    false
+                }
+                else {
+                    switchNavType(bottomNav)
+                    true
+                }
+
             }
         }
     }
