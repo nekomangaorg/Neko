@@ -2,6 +2,16 @@
 <changelog bulletedList="true">
     <changelogversion
         changeDate=""
+        versionName="v1.6.3">
+        <changelogtext>Added setting to use low quality covers in browse/search</changelogtext>
+        <changelogtext>Added setting to to use non logged in network for chapter downloads to prevent marking website chapter as read</changelogtext>
+        <changelogtext>Fix bug with mdlist where unfollowing a manga was not resetting the chapter count</changelogtext>
+        <changelogtext>Fix bug with mdlist where switching status then refreshing was showing the old status</changelogtext>
+        <changelogtext>Fix bug with mdlist where reading a chapter was updating the tracking tab for unfollowed manga</changelogtext>
+        <changelogtext>Fix bug where external link title was replacing the EDIT button for untracked manga</changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
         versionName="v1.6.2.1">
         <changelogtext>Fix saved file name swapping chapter and volume so saved files are always in correct chapter order</changelogtext>
     </changelogversion>
