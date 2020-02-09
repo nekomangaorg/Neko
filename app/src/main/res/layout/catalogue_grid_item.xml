@@ -45,8 +45,8 @@
                 android:paddingStart="3dp"
                 android:paddingEnd="3dp"
                 android:paddingTop="1dp"
-                android:visibility="gone"
                 android:textColor="@color/md_white_1000"
+                android:visibility="gone"
                 tools:visibility="visible"
                 tools:text="120"
                 app:layout_constraintStart_toEndOf="@+id/download_text"
@@ -124,6 +124,8 @@
         android:id="@+id/unread_badge"
         android:layout_width="20dp"
         android:layout_height="20dp"
+        android:visibility="gone"
+        tools:visibility="visible"
         android:layout_gravity="end"
         android:src="@drawable/unread_circle_badge"/>
 

@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.setting
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.biometric.BiometricManager
 import androidx.preference.PreferenceScreen
+import com.afollestad.materialdialogs.MaterialDialog
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.getOrDefault
@@ -64,12 +65,22 @@ class SettingsGeneralController : SettingsController() {
             key = Keys.useBottomNav
             titleRes = R.string.use_bottom_nav
             defaultValue = true
-            onChange {
-                activity?.recreate()
-                if (it as Boolean) {
-                    (activity as MainActivity).navigationView.selectedItemId = R.id.nav_drawer_settings
+            onChange { bottomNav ->
+                bottomNav as Boolean
+                if (!bottomNav) {
+                    MaterialDialog(activity!!).title(R.string.switch_to_sidebar)
+                        .message(R.string.switch_to_sidebar_summary)
+                        .positiveButton(R.string.action_switch) {
+                            preferences.useBottonNav().set(bottomNav)
+                            switchNavType(bottomNav)
+                        }.negativeButton(android.R.string.no).show()
+                    false
                 }
-                true
+                else {
+                    switchNavType(bottomNav)
+                    true
+                }
+
             }
         }
 
@@ -146,6 +157,13 @@ class SettingsGeneralController : SettingsController() {
                 entryValues = values
                 defaultValue = 0
             }
+        }
+    }
+
+    fun switchNavType(bottomNav: Boolean) {
+        activity?.recreate()
+        if (bottomNav) {
+            (activity as MainActivity).navigationView.selectedItemId = R.id.nav_drawer_settings
         }
     }
 }

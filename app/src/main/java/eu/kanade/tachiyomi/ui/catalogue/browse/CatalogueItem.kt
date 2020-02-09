@@ -30,11 +30,8 @@ class CatalogueItem(val manga: Manga, private val catalogueAsList: Preference<Bo
         val parent = adapter.recyclerView
         return if (parent is AutofitRecyclerView) {
             view.apply {
-                /*val params = card.layoutParams
-                //val fiveDp = 10.dpToPx
-                params.height = MATCH_PARENT
-                params.width = parent.itemWidth / 3 * 4
-                card.layoutParams = params*/
+                card.layoutParams = FrameLayout.LayoutParams(
+                        MATCH_PARENT, parent.itemWidth / 3 * 4)
                 gradient.layoutParams = FrameLayout.LayoutParams(
                         MATCH_PARENT, parent.itemWidth / 3 * 4 / 2, Gravity.BOTTOM)
             }

@@ -120,6 +120,8 @@
         android:id="@+id/unread_badge"
         android:layout_width="10dp"
         android:layout_height="10dp"
+        android:visibility="gone"
+        tools:visibility="visible"
         android:layout_gravity="end"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
