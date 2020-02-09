@@ -81,7 +81,7 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers) {
         val url = "${MdUtil.baseUrl}${MdUtil.followsAllApi}".toHttpUrlOrNull()!!.newBuilder()
                 .addQueryParameter("page", page.toString())
 
-        return GET(url.toString(), headers)
+        return GET(url.toString(), headers, CacheControl.FORCE_NETWORK)
     }
 
     /**
@@ -104,12 +104,12 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers) {
 
             val response: Response =
                     if (followStatus == FollowStatus.UNFOLLOWED) {
-                        client.newCall(GET("$baseUrl/ajax/actions.ajax.php?function=manga_unfollow&id=$mangaID&type=$mangaID", headers))
+                        client.newCall(GET("$baseUrl/ajax/actions.ajax.php?function=manga_unfollow&id=$mangaID&type=$mangaID", headers, CacheControl.FORCE_NETWORK))
                                 .execute()
                     } else {
 
                         val status = followStatus.int
-                        client.newCall(GET("$baseUrl/ajax/actions.ajax.php?function=manga_follow&id=$mangaID&type=$status", headers))
+                        client.newCall(GET("$baseUrl/ajax/actions.ajax.php?function=manga_follow&id=$mangaID&type=$status", headers, CacheControl.FORCE_NETWORK))
                                 .execute()
                     }
 
@@ -117,7 +117,7 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers) {
         }
     }
 
-    
+
     suspend fun updateReadingProgress(track: Track): Boolean {
         return withContext(Dispatchers.IO) {
             val mangaID = getMangaId(track.tracking_url)
@@ -157,7 +157,7 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers) {
 
     suspend fun fetchTrackingInfo(manga: SManga): Track {
         return withContext(Dispatchers.IO) {
-            val request = GET("${MdUtil.baseUrl}${MdUtil.followsMangaApi}" + getMangaId(manga.url), headers)
+            val request = GET("${MdUtil.baseUrl}${MdUtil.followsMangaApi}" + getMangaId(manga.url), headers, CacheControl.FORCE_NETWORK)
             val response = client.newCall(request).execute()
             val track = followStatusParse(response)
             track.tracking_url = MdUtil.baseUrl + manga.url
