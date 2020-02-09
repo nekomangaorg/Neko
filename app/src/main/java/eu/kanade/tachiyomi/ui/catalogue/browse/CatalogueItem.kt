@@ -12,6 +12,7 @@ import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.getOrDefault
+import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import kotlinx.android.synthetic.main.catalogue_grid_item.view.*
 
@@ -29,8 +30,11 @@ class CatalogueItem(val manga: Manga, private val catalogueAsList: Preference<Bo
         val parent = adapter.recyclerView
         return if (parent is AutofitRecyclerView) {
             view.apply {
-                card.layoutParams = FrameLayout.LayoutParams(
-                        MATCH_PARENT, parent.itemWidth / 3 * 4)
+                /*val params = card.layoutParams
+                //val fiveDp = 10.dpToPx
+                params.height = MATCH_PARENT
+                params.width = parent.itemWidth / 3 * 4
+                card.layoutParams = params*/
                 gradient.layoutParams = FrameLayout.LayoutParams(
                         MATCH_PARENT, parent.itemWidth / 3 * 4 / 2, Gravity.BOTTOM)
             }

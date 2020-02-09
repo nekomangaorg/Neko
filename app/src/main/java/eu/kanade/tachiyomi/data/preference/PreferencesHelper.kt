@@ -239,6 +239,8 @@ class PreferencesHelper(val context: Context) {
 
     fun lastExtCheck() = rxPrefs.getLong("last_ext_check", 0)
 
+    fun unreadBadgeType() = rxPrefs.getInteger("unread_badge_type", 1)
+
     fun upgradeFilters() {
         val filterDl = rxPrefs.getBoolean(Keys.filterDownloaded, false).getOrDefault()
         val filterUn = rxPrefs.getBoolean(Keys.filterUnread, false).getOrDefault()

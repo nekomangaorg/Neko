@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:background="@android:color/white">
+    <item>
+        <shape>
+            <gradient
+                android:type="radial"
+                android:gradientRadius="20dp"
+                android:endColor="@android:color/transparent"
+                android:centerColor="@android:color/black"
+                android:startColor="@android:color/black"/>
+            <corners android:radius="19dp" />
+        </shape>
+    </item>
+
+    <item
+        android:bottom="5dp"
+        android:left="5dp"
+        android:right="5dp"
+        android:top="5dp">
+        <!--whatever you want in the background, here i preferred solid white -->
+        <shape android:shape="oval">
+        <corners android:radius="16dp" />
+        <size
+            android:width="32dp"
+            android:height="32dp" />
+        <solid android:color="?android:attr/colorAccent"/>
+        </shape>
+    </item>
+</layer-list>

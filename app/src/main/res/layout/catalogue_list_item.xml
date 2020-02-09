@@ -59,6 +59,32 @@
         android:textColor="@color/md_white_1000"
         tools:visibility="visible"
         android:layout_marginEnd="8dp"
+        app:layout_constraintEnd_toStartOf="@+id/download_text"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="8dp"/>
+
+
+
+    <TextView
+        android:id="@+id/download_text"
+        style="@style/TextAppearance.Regular.Caption.Light"
+        android:textColor="@color/md_white_1000"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/md_red_500"
+        android:paddingBottom="1dp"
+        android:paddingStart="3dp"
+        android:paddingEnd="3dp"
+        android:paddingTop="1dp"
+        android:layout_centerVertical="true"
+        android:layout_toStartOf="@+id/unread_text"
+        android:maxLines="1"
+        android:visibility="gone"
+        tools:text="122"
+        tools:visibility="visible"
+        android:layout_marginEnd="8dp"
         app:layout_constraintEnd_toStartOf="@+id/unread_text"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginTop="8dp"
@@ -83,35 +109,22 @@
         tools:text="130"
         tools:visibility="visible"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/download_text"
+        app:layout_constraintEnd_toStartOf="@+id/unread_badge"
         android:layout_marginTop="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <TextView
-        android:id="@+id/download_text"
-        style="@style/TextAppearance.Regular.Caption.Light"
-        android:textColor="@color/md_white_1000"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@color/md_red_500"
-        android:paddingBottom="1dp"
-        android:paddingStart="3dp"
-        android:paddingEnd="3dp"
-        android:paddingTop="1dp"
-        android:layout_centerVertical="true"
-        android:layout_toStartOf="@+id/unread_text"
-        android:maxLines="1"
-        android:visibility="gone"
-        tools:text="122"
-        tools:visibility="visible"
-        android:layout_marginEnd="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
+    <ImageView
+        android:id="@+id/unread_badge"
+        android:layout_width="10dp"
+        android:layout_height="10dp"
+        android:layout_gravity="end"
         app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginTop="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginEnd="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_marginBottom="8dp"/>
+        android:src="@drawable/unread_circle_badge"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

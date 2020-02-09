@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.library
 
 import android.content.Context
+import android.content.res.Configuration
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
@@ -27,6 +28,7 @@ import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
+import kotlinx.android.synthetic.main.filter_bottom_sheet.*
 import kotlinx.android.synthetic.main.library_category.view.*
 import kotlinx.android.synthetic.main.library_controller.*
 import kotlinx.coroutines.delay
@@ -110,11 +112,16 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
         else {
             fast_scroller.setIgnoreTouchesOutsideHandle(false)
         }
-        if (MainActivity.bottomNav) {
+        val config = resources?.configuration
+
+        val phoneLandscape = (config?.orientation == Configuration.ORIENTATION_LANDSCAPE &&
+            (config.screenLayout.and(Configuration.SCREENLAYOUT_SIZE_MASK)) <
+            Configuration.SCREENLAYOUT_SIZE_LARGE)
+        if (MainActivity.bottomNav && !phoneLandscape) {
             val height = context.resources.getDimensionPixelSize(R.dimen.rounder_radius) + 5.dpToPx
             recycler.updatePaddingRelative(bottom = height)
         }
-        else {
+        else if (!MainActivity.bottomNav) {
             recycler.doOnApplyWindowInsets { v, insets, padding ->
                 v.updatePaddingRelative(bottom = padding.bottom + insets.systemWindowInsetBottom)
 

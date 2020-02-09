@@ -41,6 +41,7 @@ import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
+import kotlin.math.min
 import kotlin.math.roundToInt
 
 class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null)
@@ -103,7 +104,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         topbar.setOnClickListener {
             if (sheetBehavior?.state != BottomSheetBehavior.STATE_EXPANDED) {
                 sheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
-                topbar.animate().alpha(0f).setDuration(100).start()
+                //topbar.animate().alpha(0f).setDuration(100).start()
             } else {
                 sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
             }
@@ -131,8 +132,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             }
         })
         topbar.viewTreeObserver.addOnGlobalLayoutListener {
-            val phoneLandscape = (context.resources.configuration?.orientation ==
-                Configuration.ORIENTATION_LANDSCAPE && !isTablet())
+            val phoneLandscape = (isLandscape() && !isTablet())
             sheetBehavior?.peekHeight = if (phoneLandscape) {
                 if (shadow2.visibility != View.GONE) {
                     shadow.gone()
@@ -162,7 +162,11 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         downloadCheckbox.isChecked = preferences.downloadBadge().getOrDefault()
         downloadCheckbox.setOnCheckedChangeListener { _, isChecked ->
             preferences.downloadBadge().set(isChecked)
-            onGroupClicked(ACTION_BADGE)
+            onGroupClicked(ACTION_DOWNLOAD_BADGE)
+        }
+        setUnreadIcon()
+        unread_badge.setOnClickListener {
+            showUnreadMenu()
         }
 
         displayGroup.bindToPreference(preferences.libraryAsList())
@@ -376,7 +380,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                 !preferences.librarySortingAscending().getOrDefault() ->
                     R.drawable.ic_arrow_down_white_24dp
                 else -> R.drawable.ic_arrow_up_white_24dp
-            }, android.R.attr.colorAccent
+            }
         )
 
         // Finally show the PopupMenu
@@ -417,8 +421,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
         currentItem?.icon = tintVector(
             if (category.isAscending()) R.drawable.ic_arrow_up_white_24dp
-            else R.drawable.ic_arrow_down_white_24dp,
-            android.R.attr.colorAccent
+            else R.drawable.ic_arrow_down_white_24dp
         )
 
         // Finally show the PopupMenu
@@ -498,7 +501,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                          sortId == LibrarySort.DRAG_AND_DROP -> R.drawable.ic_sort_white_24dp
                          preferences.librarySortingAscending().getOrDefault() -> R.drawable.ic_arrow_up_white_24dp
                          else -> R.drawable.ic_arrow_down_white_24dp
-                     }, android.R.attr.colorAccent
+                     }
                 )
             }
             mainSortTextView.text = withContext(Dispatchers.IO) {
@@ -534,7 +537,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                             sortId == LibrarySort.DRAG_AND_DROP -> R.drawable.ic_label_outline_white_24dp
                             lastCategory?.isAscending() == true -> R.drawable.ic_arrow_up_white_24dp
                             else -> R.drawable.ic_arrow_down_white_24dp
-                        }, android.R.attr.colorAccent
+                        }
                     )
                 }
                 catSortTextView.text = withContext(Dispatchers.IO) {
@@ -573,9 +576,9 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
     private fun Boolean.toInt() = if (this) 1 else 0
 
-    private fun tintVector(resId: Int, attrId: Int? = null): Drawable? {
+    private fun tintVector(resId: Int): Drawable? {
         return ContextCompat.getDrawable(context, resId)?.mutate()?.apply {
-            setTint(context.getResourceColor(attrId ?: android.R.attr.textColorPrimary))
+            setTint(context.getResourceColor(android.R.attr.colorAccent))
         }
     }
 
@@ -639,12 +642,54 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         filterScrollView.scrollTo(0, 0)
     }
 
+    private fun showUnreadMenu() {
+        val popup = PopupMenu(context, unread_badge)
+
+        popup.menuInflater.inflate(R.menu.unread_badge, popup.menu)
+
+        popup.menu.getItem(min(preferences.unreadBadgeType().getOrDefault(), 1) + 1).isChecked =
+            true
+
+        popup.setOnMenuItemClickListener { menuItem ->
+            preferences.unreadBadgeType().set(when (menuItem.itemId) {
+                R.id.action_no_unread -> -1
+                R.id.action_any_unread -> 0
+                else -> 1
+            })
+            setUnreadIcon()
+            onGroupClicked(ACTION_UNREAD_BADGE)
+            true
+        }
+
+        // Finally show the PopupMenu
+        popup.show()
+    }
+
+    private fun setUnreadIcon() {
+        launchUI {
+            val unreadType = preferences.unreadBadgeType().getOrDefault()
+            val drawableL = withContext(Dispatchers.IO) {
+                tintVector(
+                    when (unreadType){
+                        -1 -> R.drawable.ic_check_box_outline_blank_24dp
+                        0 -> R.drawable.ic_unread_circle_white_24dp
+                        else -> R.drawable.ic_looks_two_white_24dp
+                    }
+                )
+            }
+            unread_badge.setCompoundDrawablesRelativeWithIntrinsicBounds(
+                drawableL, null, null, null
+            )
+        }
+    }
+
     companion object {
         const val ACTION_REFRESH = 0
         const val ACTION_SORT = 1
         const val ACTION_FILTER = 2
         const val ACTION_DISPLAY = 3
-        const val ACTION_BADGE = 4
-        const val ACTION_CAT_SORT = 5
+        const val ACTION_DOWNLOAD_BADGE = 4
+        const val ACTION_UNREAD_BADGE = 5
+        const val ACTION_CAT_SORT = 6
     }
 }

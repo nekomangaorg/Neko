@@ -217,6 +217,15 @@ class LibraryPresenter(
         }
     }
 
+    private fun setUnreadBadge(map: LibraryMap) {
+        val unreadType = preferences.unreadBadgeType().getOrDefault()
+        for ((_, itemList) in map) {
+            for (item in itemList) {
+                item.unreadType = unreadType
+            }
+        }
+    }
+
     private fun applyCatSort(map: LibraryMap, catId: Int?): LibraryMap {
         if (catId == null) return map
         val categoryManga = map[catId] ?: return map
@@ -400,11 +409,12 @@ class LibraryPresenter(
         val categories = db.getCategories().executeAsBlocking().toMutableList()
         val libraryAsList = preferences.libraryAsList()
         val showCategories = !preferences.hideCategories().getOrDefault()
+        val unreadBadgeType = preferences.unreadBadgeType().getOrDefault()
         var libraryManga = db.getLibraryMangas().executeAsBlocking()
         if (!showCategories)
             libraryManga = libraryManga.distinctBy { it.id }
         val libraryMap = libraryManga.map { manga ->
-            LibraryItem(manga, libraryAsList)
+            LibraryItem(manga, libraryAsList).apply { unreadType = unreadBadgeType }
         }.groupBy {
             if (showCategories) it.manga.category else 0
         }
@@ -488,7 +498,7 @@ class LibraryPresenter(
     }
 
     /**
-     * Requests the library to have download badges added.
+     * Requests the library to have download badges added/removed.
      */
     fun requestDownloadBadgesUpdate() {
         //getLibrary()
@@ -498,6 +508,22 @@ class LibraryPresenter(
             rawMangaMap = mangaMap
             val current = currentMangaMap ?: return@launchUI
             withContext(Dispatchers.IO) { setDownloadCount(current) }
+            currentMangaMap = current
+            view?.onNextLibraryUpdate(categories, current)
+        }
+    }
+
+    /**
+     * Requests the library to have unread badges changed.
+     */
+    fun requestUnreadBadgesUpdate() {
+        //getLibrary()
+        launchUI {
+            val mangaMap = rawMangaMap ?: return@launchUI
+            withContext(Dispatchers.IO) { setUnreadBadge(mangaMap) }
+            rawMangaMap = mangaMap
+            val current = currentMangaMap ?: return@launchUI
+            withContext(Dispatchers.IO) { setUnreadBadge(current) }
             currentMangaMap = current
             view?.onNextLibraryUpdate(categories, current)
         }

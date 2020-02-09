@@ -228,7 +228,9 @@ class LibraryController(
                     FilterBottomSheet.ACTION_FILTER -> onFilterChanged()
                     FilterBottomSheet.ACTION_SORT -> onSortChanged()
                     FilterBottomSheet.ACTION_DISPLAY -> reattachAdapter()
-                    FilterBottomSheet.ACTION_BADGE -> onDownloadBadgeChanged()
+                    FilterBottomSheet.ACTION_DOWNLOAD_BADGE ->
+                        presenter.requestDownloadBadgesUpdate()
+                    FilterBottomSheet.ACTION_UNREAD_BADGE -> presenter.requestUnreadBadgesUpdate()
                     FilterBottomSheet.ACTION_CAT_SORT -> onCatSortChanged()
                 }
             }
@@ -566,8 +568,14 @@ class LibraryController(
         when (item.itemId) {
             R.id.action_search -> expandActionViewFromInteraction = true
             R.id.action_library_filter -> {
-                if (MainActivity.bottomNav) bottom_sheet.sheetBehavior?.state =
-                    BottomSheetBehavior.STATE_EXPANDED
+                if (MainActivity.bottomNav) {
+                    if (bottom_sheet.sheetBehavior?.state != BottomSheetBehavior.STATE_EXPANDED)
+                    bottom_sheet.sheetBehavior?.state =
+                        BottomSheetBehavior.STATE_EXPANDED
+                    else
+                        bottom_sheet.sheetBehavior?.state =
+                            BottomSheetBehavior.STATE_COLLAPSED
+                }
                 else navView?.let { activity?.drawer?.openDrawer(GravityCompat.END) }
             }
             R.id.action_edit_categories -> {

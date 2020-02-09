@@ -23,6 +23,7 @@ class LibraryItem(val manga: LibraryManga, private val libraryAsList: Preference
         AbstractFlexibleItem<LibraryHolder>(), IFilterable<String> {
 
     var downloadCount = -1
+    var unreadType = 1
 
     override fun getLayoutRes(): Int {
         return if (libraryAsList.getOrDefault())

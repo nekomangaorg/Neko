@@ -10,6 +10,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.signature.ObjectKey
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
+import kotlinx.android.synthetic.main.catalogue_grid_item.*
+import kotlinx.android.synthetic.main.catalogue_list_item.download_text
+import kotlinx.android.synthetic.main.catalogue_list_item.local_text
+import kotlinx.android.synthetic.main.catalogue_list_item.thumbnail
+import kotlinx.android.synthetic.main.catalogue_list_item.title
+import kotlinx.android.synthetic.main.catalogue_list_item.unread_badge
+import kotlinx.android.synthetic.main.catalogue_list_item.unread_text
 
 /**
  * Class used to hold the displayed data of a manga in the library, like the cover or the title.
@@ -38,9 +45,12 @@ class LibraryListHolder(
 
         // Update the unread count and its visibility.
         with(unread_text) {
-            visibility = if (item.manga.unread > 0) View.VISIBLE else View.GONE
+            visibility = if (item.manga.unread > 0 && item.unreadType == 1) View.VISIBLE else
+                View.GONE
             text = item.manga.unread.toString()
         }
+        unread_badge.visibility =
+            if (item.manga.unread > 0 && item.unreadType == 0) View.VISIBLE else View.GONE
         // Update the download count and its visibility.
         with(download_text) {
             visibility = if (item.downloadCount > 0) View.VISIBLE else View.GONE

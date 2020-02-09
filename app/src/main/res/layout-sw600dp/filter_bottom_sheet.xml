@@ -127,7 +127,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="7dp"
-                        android:layout_marginEnd="14dp"
+                        android:layout_marginEnd="30dp"
                         android:baselineAligned="false"
                         android:gravity="center|start"
                         android:orientation="horizontal">
@@ -166,11 +166,39 @@
                         </RadioGroup>
                     </LinearLayout>
 
-                    <CheckBox
-                        android:id="@+id/downloadCheckbox"
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/action_display_download_badge"/>
+                        android:orientation="horizontal"
+                        android:baselineAligned="false"
+                        android:gravity="center|start"
+                        >
+
+                        <CheckBox
+                            android:id="@+id/downloadCheckbox"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="20dp"
+                            android:text="@string/action_display_download_badge" />
+
+
+                        <TextView
+                            android:id="@+id/unread_badge"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="10dp"
+                            android:clickable="true"
+                            android:drawablePadding="6dp"
+                            android:background="@drawable/square_ripple"
+                            android:focusable="true"
+                            android:gravity="start|center"
+                            android:padding="5dp"
+                            android:text="@string/action_display_unread_badge"
+                            android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
+                            android:textColor="?android:attr/textColorPrimary"
+                            android:textSize="15sp"
+                            android:textStyle="normal" />
+                    </LinearLayout>
                 </LinearLayout>
             </HorizontalScrollView>
         </LinearLayout>
