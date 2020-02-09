@@ -115,34 +115,40 @@ class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: A
         val shadow2:View = (pagerView.parent as ViewGroup).findViewById(R.id.shadow2)
         val shadow:View = (pagerView.parent as ViewGroup).findViewById(R.id.shadow)
         val coordLayout:View = (pagerView.parent as ViewGroup).findViewById(R.id.snackbar_layout)
+        val phoneLandscape = (isLandscape() && !isTablet())
+        if (phoneLandscape)
+            shadow.alpha = 0f
         sheetBehavior?.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onSlide(bottomSheet: View, progress: Float) {
                 top_bar.alpha = 1 - progress
                 shadow2.alpha = (1 - progress) * 0.25f
+                if (phoneLandscape)
+                    shadow.alpha = progress
                 updateRootPadding(progress)
             }
 
             override fun onStateChanged(p0: View, state: Int) {
-                if (state == BottomSheetBehavior.STATE_COLLAPSED) reSortViews()
+                if (state == BottomSheetBehavior.STATE_COLLAPSED) {
+                    reSortViews()
+                    if (phoneLandscape)
+                        shadow.alpha = 0f
+                }
                 else setMainSortText()
-                if (state == BottomSheetBehavior.STATE_EXPANDED)
+                if (state == BottomSheetBehavior.STATE_EXPANDED) {
                     top_bar.alpha = 0f
+                    if (phoneLandscape)
+                        shadow.alpha = 1f
+                }
                 top_bar.isClickable = state == BottomSheetBehavior.STATE_COLLAPSED
                 top_bar.isFocusable = state == BottomSheetBehavior.STATE_COLLAPSED
             }
         })
+        if (phoneLandscape && shadow2.visibility != View.GONE) {
+            shadow2.gone()
+        }
         top_bar.viewTreeObserver.addOnGlobalLayoutListener {
-            val phoneLandscape = (isLandscape() && !isTablet())
-            sheetBehavior?.peekHeight = if (phoneLandscape) {
-                if (shadow2.visibility != View.GONE) {
-                    shadow.gone()
-                    shadow2.gone()
-                }
-                0
-            }
-            else if (!title.text.isNullOrBlank()) {
-                top_bar.height
-            }
+            sheetBehavior?.peekHeight = if (phoneLandscape) 0
+            else if (!title.text.isNullOrBlank()) top_bar.height
             else 0
             if (sheetBehavior?.state == BottomSheetBehavior.STATE_COLLAPSED) {
                 val height = context.resources.getDimensionPixelSize(R.dimen.rounder_radius)

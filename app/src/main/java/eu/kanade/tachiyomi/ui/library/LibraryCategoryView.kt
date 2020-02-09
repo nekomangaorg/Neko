@@ -101,7 +101,6 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
         swipe_refresh.addView(recycler)
         adapter.fastScroller = fast_scroller
 
-
         if (!MainActivity.bottomNav) {
             fast_scroller.addOnScrollStateChangeListener {
                 controller.lockFilterBar(it)

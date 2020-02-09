@@ -547,7 +547,7 @@ class LibraryController(
 
     override fun handleBack(): Boolean {
         val sheetBehavior = BottomSheetBehavior.from(bottom_sheet)
-        if (sheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED) {
+        if (sheetBehavior.state != BottomSheetBehavior.STATE_COLLAPSED) {
             sheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
             return true
         }
@@ -570,12 +570,12 @@ class LibraryController(
             R.id.action_search -> expandActionViewFromInteraction = true
             R.id.action_library_filter -> {
                 if (MainActivity.bottomNav) {
-                    if (bottom_sheet.sheetBehavior?.state != BottomSheetBehavior.STATE_EXPANDED)
+                    if (bottom_sheet.sheetBehavior?.state != BottomSheetBehavior.STATE_COLLAPSED)
                     bottom_sheet.sheetBehavior?.state =
-                        BottomSheetBehavior.STATE_EXPANDED
+                        BottomSheetBehavior.STATE_COLLAPSED
                     else
                         bottom_sheet.sheetBehavior?.state =
-                            BottomSheetBehavior.STATE_COLLAPSED
+                            BottomSheetBehavior.STATE_EXPANDED
                 }
                 else navView?.let { activity?.drawer?.openDrawer(GravityCompat.END) }
             }

@@ -1,12 +1,14 @@
 package eu.kanade.tachiyomi.ui.library.filter
 
 import android.content.Context
+import android.graphics.Color
 import android.util.AttributeSet
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import com.f2prateek.rx.preferences.Preference
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.visible
 import kotlinx.android.synthetic.main.filter_buttons.view.*
@@ -81,7 +83,10 @@ class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: Attribute
         buttons.forEach {
             it.isActivated = false
         }
-        for (i in 0 until itemCount) buttons[i].visible()
+        for (i in 0 until itemCount)  {
+            buttons[i].visible()
+            buttons[i].setTextColor(context.getResourceColor(android.R.attr.textColorPrimary))
+        }
         for (i in 0 until (itemCount - 1)) separators[i].visible()
     }
 
@@ -96,6 +101,8 @@ class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: Attribute
         }
         if (itemCount == 1) {
             firstButton.isActivated = !firstButton.isActivated
+            firstButton.setTextColor(if (firstButton.isActivated) Color.WHITE else context
+                .getResourceColor(android.R.attr.textColorPrimary))
             listener?.onFilterClicked(this, if (firstButton.isActivated) index else -1, callBack)
             return
         }
@@ -122,6 +129,8 @@ class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: Attribute
                 separator2.gone()
             }
         }
+        mainButton.setTextColor(if (mainButton.isActivated) Color.WHITE else context
+            .getResourceColor(android.R.attr.textColorPrimary))
     }
 }
 
