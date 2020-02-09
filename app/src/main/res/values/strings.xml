@@ -374,7 +374,9 @@
 
     <!-- Library fragment -->
     <string name="updating_library">Updating library</string>
-    <string name="updating_category">Updating category</string>
+    <string name="updating_category_x">Updating %1$s</string>
+    <string name="adding_category_to_queue">Adding %1$s to update queue</string>
+    <string name="category_already_in_queue">%1$s is already in queue</string>
     <string name="local_source_badge">Local</string>
     <string name="confirm_manga_deletion">Remove from library?</string>
 

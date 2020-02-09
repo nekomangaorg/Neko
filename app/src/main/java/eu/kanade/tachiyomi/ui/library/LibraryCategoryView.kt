@@ -97,15 +97,6 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
         swipe_refresh.addView(recycler)
         adapter.fastScroller = fast_scroller
 
-        recycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrollStateChanged(recycler: RecyclerView, newState: Int) {
-                // Disable swipe refresh when view is not at the top
-                val firstPos = (recycler.layoutManager as LinearLayoutManager)
-                        .findFirstCompletelyVisibleItemPosition()
-                swipe_refresh.isEnabled = firstPos <= 0 && !preferences.hideCategories()
-                    .getOrDefault()
-            }
-        })
         fast_scroller.addOnScrollStateChangeListener {
             controller.lockFilterBar(it)
         }
@@ -120,9 +111,17 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
         // Double the distance required to trigger sync
         swipe_refresh.setDistanceToTriggerSync((2 * 64 * resources.displayMetrics.density).toInt())
         swipe_refresh.setOnRefreshListener {
-            LibraryUpdateService.start(context, category)
+            val inQueue = LibraryUpdateService.categoryInQueue(category.id)
             controller.snack?.dismiss()
-            controller.snack = swipe_refresh.snack(R.string.updating_category)
+            controller.snack = swipe_refresh.snack(
+                resources.getString(
+                    when {
+                        inQueue -> R.string.category_already_in_queue
+                        LibraryUpdateService.isRunning(context) -> R.string.adding_category_to_queue
+                        else -> R.string.updating_category_x
+                    }, category.name))
+            if (!inQueue)
+                LibraryUpdateService.start(context, category)
             swipe_refresh.isRefreshing = false
         }
     }

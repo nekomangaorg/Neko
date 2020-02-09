@@ -131,6 +131,10 @@ class LibraryUpdateService(
 
         private val mangaToUpdate = mutableListOf<LibraryManga>()
 
+        private val categoryIds = mutableSetOf<Int>()
+
+        fun categoryInQueue(id: Int?) = categoryIds.contains(id)
+
         /**
          * Key that defines what should be updated.
          */
@@ -158,7 +162,10 @@ class LibraryUpdateService(
             if (!isRunning(context)) {
                 val intent = Intent(context, LibraryUpdateService::class.java).apply {
                     putExtra(KEY_TARGET, target)
-                    category?.let { putExtra(KEY_CATEGORY, it.id) }
+                    category?.id?.let { id ->
+                        putExtra(KEY_CATEGORY, id)
+                        categoryIds.add(id)
+                    }
                 }
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
                     context.startService(intent)
@@ -168,6 +175,7 @@ class LibraryUpdateService(
             }
             else {
                 if (target == Target.CHAPTERS) category?.id?.let {
+                    categoryIds.add(it)
                     val preferences: PreferencesHelper = Injekt.get()
                     val selectedScheme = preferences.libraryUpdatePrioritization().getOrDefault()
                     addManga(getMangaToUpdate(it, target).sortedWith(
@@ -206,6 +214,7 @@ class LibraryUpdateService(
                 db.getLibraryMangas().executeAsBlocking().filter { it.category == categoryId }
             else {
                 val categoriesToUpdate = preferences.libraryUpdateCategories().getOrDefault().map(String::toInt)
+                categoryIds.addAll(categoriesToUpdate)
                 if (categoriesToUpdate.isNotEmpty())
                     db.getLibraryMangas().executeAsBlocking()
                         .filter { it.category in categoriesToUpdate }
@@ -250,6 +259,7 @@ class LibraryUpdateService(
     override fun onDestroy() {
         subscription?.unsubscribe()
         mangaToUpdate.clear()
+        categoryIds.clear()
         if (wakeLock.isHeld) {
             wakeLock.release()
         }
@@ -315,6 +325,7 @@ class LibraryUpdateService(
             job = GlobalScope.launch(Dispatchers.IO, CoroutineStart.DEFAULT) {
                 updateChaptersJob()
                 mangaToUpdate.clear()
+                categoryIds.clear()
                 stopSelf(startId)
             }
         }
