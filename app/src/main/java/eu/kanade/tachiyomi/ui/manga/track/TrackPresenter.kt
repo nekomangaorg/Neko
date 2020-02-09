@@ -218,6 +218,10 @@ class TrackPresenter(
     fun setStatus(item: TrackItem, index: Int) {
         val track = item.track!!
         track.status = item.service.getStatusList()[index]
+        //zero out tracking since mdlist zeros out on their website when you switch to unfollowed
+        if (item.service.isMdList() && track.status == FollowStatus.UNFOLLOWED.int) {
+            track.last_chapter_read = 0
+        }
         updateRemote(track, item.service)
     }
 
