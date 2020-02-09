@@ -211,7 +211,11 @@ class LibraryPresenter(
 
     private fun applySort(map: LibraryMap, catId: Int?): LibraryMap {
         if (catId == null) return map
-        val category = allCategories.find { it.id == catId } ?: return map
+        val category = db.getCategories().executeAsBlocking().find { it.id == catId } ?: return map
+        allCategories.find { it.id == catId }?.apply {
+            mangaOrder = category.mangaOrder
+            mangaSort = category.mangaSort
+        }
 
         val lastReadManga by lazy {
             var counter = 0

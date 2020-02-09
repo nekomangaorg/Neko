@@ -81,8 +81,6 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
 
     private var lastClickPosition = -1
 
-    private var justDraggedAndDropped = false
-
     fun onCreate(controller: LibraryController) {
         this.controller = controller
 
@@ -239,10 +237,10 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
         val mangaForCategory = event.getMangaForCategory(category).orEmpty()
 
         // Update the category with its manga.
-        if (!justDraggedAndDropped)
+       // if (!justDraggedAndDropped)
             adapter.setItems(mangaForCategory)
-        else
-            justDraggedAndDropped = false
+       // else
+         //   justDraggedAndDropped = false
 
         swipe_refresh.isEnabled = !preferences.hideCategories().getOrDefault()
 
@@ -366,7 +364,7 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
             preferences.defaultMangaOrder().set(mangaIds.joinToString("/"))
         else
             db.insertCategory(category).asRxObservable().subscribe()
-        justDraggedAndDropped = true
+        //justDraggedAndDropped = true
         controller.onCatSortChanged(category.id)
         controller.enableReorderItems(category)
     }

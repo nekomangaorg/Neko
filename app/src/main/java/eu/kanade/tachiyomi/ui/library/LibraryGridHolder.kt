@@ -60,9 +60,9 @@ class LibraryGridHolder(
         local_text.visibility = if (item.manga.source == LocalSource.ID) View.VISIBLE else View.GONE
 
         // Update the cover.
-        GlideApp.with(view.context).clear(thumbnail)
-        GlideApp.with(view.context)
-            .load(item.manga)
+        if (item.manga.thumbnail_url == null)
+            GlideApp.with(view.context).clear(thumbnail)
+        else GlideApp.with(view.context).load(item.manga)
             .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
             .signature(ObjectKey(MangaImpl.getLastCoverFetch(item.manga.id!!).toString()))
             .centerCrop().into(thumbnail)
