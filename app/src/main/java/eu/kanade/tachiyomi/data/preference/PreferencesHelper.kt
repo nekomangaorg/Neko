@@ -77,6 +77,10 @@ class PreferencesHelper(val context: Context) {
 
     fun readerTheme() = rxPrefs.getInteger(Keys.readerTheme, 0)
 
+    fun lowQualityCovers() = prefs.getBoolean(Keys.lowQualityCovers, false)
+
+    fun useNonLoggedNetwork() = prefs.getBoolean(Keys.useNonLoggedNetwork, false)
+
     fun cropBorders() = rxPrefs.getBoolean(Keys.cropBorders, false)
 
     fun cropBordersWebtoon() = rxPrefs.getBoolean(Keys.cropBordersWebtoon, false)
@@ -101,15 +105,11 @@ class PreferencesHelper(val context: Context) {
 
     fun autoUpdateTrack() = prefs.getBoolean(Keys.autoUpdateTrack, true)
 
-    fun lastUsedCatalogueSource() = rxPrefs.getLong(Keys.lastUsedCatalogueSource, -1)
-
     fun lastUsedCategory() = rxPrefs.getInteger(Keys.lastUsedCategory, 0)
 
     fun lastVersionCode() = rxPrefs.getInteger("last_version_code", 0)
 
     fun catalogueAsList() = rxPrefs.getBoolean(Keys.catalogueAsList, false)
-
-    fun enabledLanguages() = rxPrefs.getStringSet(Keys.enabledLanguages, setOf("en"))
 
     fun sourceUsername(source: Source) = prefs.getString(Keys.sourceUsername(source.id), "")
 
@@ -194,7 +194,7 @@ class PreferencesHelper(val context: Context) {
     fun lastUnlock() = rxPrefs.getLong(Keys.lastUnlock, 0)
 
     fun skipHidden() = prefs.getBoolean(Keys.skipHidden, false)
-    
+
     fun upgradeFilters() {
         val filterDl = rxPrefs.getBoolean(Keys.filterDownloaded, false).getOrDefault()
         val filterUn = rxPrefs.getBoolean(Keys.filterUnread, false).getOrDefault()

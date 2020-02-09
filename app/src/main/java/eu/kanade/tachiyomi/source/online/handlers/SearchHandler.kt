@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.asObservableSuccess
 import eu.kanade.tachiyomi.source.model.FilterList
@@ -12,8 +13,12 @@ import okhttp3.*
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.jsoup.nodes.Element
 import rx.Observable
+import uy.kohesive.injekt.injectLazy
 
 class SearchHandler(val client: OkHttpClient, private val headers: Headers, val lang: String) {
+
+    private val preferences: PreferencesHelper by injectLazy()
+
 
     fun fetchSearchManga(page: Int, query: String, filters: FilterList): Observable<MangasPage> {
         return if (query.startsWith(PREFIX_ID_SEARCH)) {
@@ -159,7 +164,7 @@ class SearchHandler(val client: OkHttpClient, private val headers: Headers, val 
             manga.title = it.text().trim()
         }
 
-        manga.thumbnail_url = MdUtil.formThumbUrl(manga.url)
+        manga.thumbnail_url = MdUtil.formThumbUrl(manga.url, preferences.lowQualityCovers())
 
 
         return manga

@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.asObservableSuccess
 import eu.kanade.tachiyomi.source.model.MangasPage
@@ -13,9 +14,11 @@ import okhttp3.Request
 import okhttp3.Response
 import org.jsoup.nodes.Element
 import rx.Observable
+import uy.kohesive.injekt.injectLazy
 
 class PopularHandler(val client: OkHttpClient, private val headers: Headers) {
 
+    private val preferences: PreferencesHelper by injectLazy()
 
     fun fetchPopularManga(page: Int): Observable<MangasPage> {
         return client.newCall(popularMangaRequest(page))
@@ -50,7 +53,7 @@ class PopularHandler(val client: OkHttpClient, private val headers: Headers) {
             manga.setUrlWithoutDomain(url)
             manga.title = it.text().trim()
         }
-        manga.thumbnail_url = MdUtil.formThumbUrl(manga.url)
+        manga.thumbnail_url = MdUtil.formThumbUrl(manga.url, preferences.lowQualityCovers())
 
         return manga
     }

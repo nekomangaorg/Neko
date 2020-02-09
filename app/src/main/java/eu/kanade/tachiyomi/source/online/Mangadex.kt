@@ -16,7 +16,6 @@ import okhttp3.OkHttpClient
 import rx.Observable
 import uy.kohesive.injekt.injectLazy
 import java.net.URLEncoder
-import java.util.concurrent.TimeUnit
 import kotlin.collections.set
 
 open class Mangadex(override val lang: String, private val internalLang: String, private val langCode: Int) : HttpSource() {
@@ -25,11 +24,12 @@ open class Mangadex(override val lang: String, private val internalLang: String,
 
     private fun clientBuilder(): OkHttpClient = clientBuilder(preferences.r18()!!.toInt())
 
-    private fun clientBuilder(r18Toggle: Int): OkHttpClient = network.client.newBuilder()
-            .connectTimeout(10, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
+    private fun nonLoggedInClientBuilder(): OkHttpClient = clientBuilder(preferences.r18()!!.toInt(), network.nonLoggedInClient)
+
+
+    private fun clientBuilder(r18Toggle: Int, okHttpClient: OkHttpClient = network.client): OkHttpClient = okHttpClient.newBuilder()
             .addNetworkInterceptor { chain ->
-                val originalCookies = chain.request().header("Cookie") ?: ""
+                var originalCookies = chain.request().header("Cookie") ?: ""
                 val newReq = chain
                         .request()
                         .newBuilder()
@@ -105,13 +105,17 @@ open class Mangadex(override val lang: String, private val internalLang: String,
     }
 
     override suspend fun fetchChapterList(manga: SManga): List<SChapter> {
+
         return MangaHandler(clientBuilder(), headers, internalLang).fetchChapterList(manga)
     }
 
     override fun fetchPageList(chapter: SChapter): Observable<List<Page>> {
         val imageServer = preferences.imageServer().takeIf { it in SERVER_PREF_ENTRY_VALUES }
                 ?: SERVER_PREF_ENTRY_VALUES.first()
-        return PageHandler(client, headers, imageServer).fetchPageList(chapter)
+
+        val correctClientToUse = if (preferences.useNonLoggedNetwork()) nonLoggedInClientBuilder() else clientBuilder()
+
+        return PageHandler(correctClientToUse, headers, imageServer).fetchPageList(chapter)
     }
 
     override suspend fun fetchAllFollows(): List<SManga> {

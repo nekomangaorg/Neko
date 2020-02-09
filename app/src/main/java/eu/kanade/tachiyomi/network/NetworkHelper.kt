@@ -8,6 +8,7 @@ import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import java.io.File
+import java.util.concurrent.TimeUnit
 
 class NetworkHelper(context: Context) {
 
@@ -49,11 +50,32 @@ class NetworkHelper(context: Context) {
         it.proceed(it.request())
     }
 
+    val nonLoggedInClient = if (BuildConfig.DEBUG) {
+        val httpLoggingInterceptor = HttpLoggingInterceptor()
+        OkHttpClient.Builder()
+                .connectTimeout(10, TimeUnit.SECONDS)
+                .readTimeout(30, TimeUnit.SECONDS)
+                .cache(Cache(cacheDir, cacheSize))
+                .addNetworkInterceptor(rateLimitInterceptor)
+                .addInterceptor(httpLoggingInterceptor.apply { httpLoggingInterceptor.level = HttpLoggingInterceptor.Level.BODY })
+                .build()
+    } else {
+        OkHttpClient.Builder()
+                .connectTimeout(10, TimeUnit.SECONDS)
+                .readTimeout(30, TimeUnit.SECONDS)
+                .cache(Cache(cacheDir, cacheSize))
+                .addNetworkInterceptor(rateLimitInterceptor)
+
+                .build()
+    }
+
 
     val client =
             if (BuildConfig.DEBUG) {
                 val httpLoggingInterceptor = HttpLoggingInterceptor()
                 OkHttpClient.Builder()
+                        .connectTimeout(10, TimeUnit.SECONDS)
+                        .readTimeout(30, TimeUnit.SECONDS)
                         .cookieJar(cookieManager)
                         .cache(Cache(cacheDir, cacheSize))
                         .addNetworkInterceptor(rateLimitInterceptor)
@@ -61,6 +83,8 @@ class NetworkHelper(context: Context) {
                         .build()
             } else {
                 OkHttpClient.Builder()
+                        .connectTimeout(10, TimeUnit.SECONDS)
+                        .readTimeout(30, TimeUnit.SECONDS)
                         .cookieJar(cookieManager)
                         .cache(Cache(cacheDir, cacheSize))
                         .addNetworkInterceptor(rateLimitInterceptor)

@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.source.online.utils
 import org.jsoup.parser.Parser
 
 class MdUtil {
+    
     companion object {
         const val cdnUrl = "https://mangadex.org"//"https://s0.mangadex.org"
         const val baseUrl = "https://mangadex.org"
@@ -13,8 +14,14 @@ class MdUtil {
         const val followsMangaApi = "/api/?type=manga_follows&manga_id="
 
         //guess the thumbnail url is .jpg  this has a ~80% success rate
-        fun formThumbUrl(mangaUrl: String): String {
-            return cdnUrl + "/images/manga/" + getMangaId(mangaUrl) + ".jpg"
+        fun formThumbUrl(mangaUrl: String, lowQuality: Boolean): String {
+            var ext = ".jpg"
+
+            if (lowQuality) {
+                ext = ".thumb$ext"
+            }
+
+            return cdnUrl + "/images/manga/" + getMangaId(mangaUrl) + ext
         }
 
         //Get the ID from the manga url

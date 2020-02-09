@@ -58,6 +58,19 @@ class SettingsSiteController : SettingsController(), MangadexLoginDialog.Listene
             summary = "%s"
 
         }
+
+
+        switchPreference {
+            key = PreferenceKeys.lowQualityCovers
+            titleRes = R.string.pref_low_quality_covers
+            defaultValue = false
+        }
+        switchPreference {
+            key = PreferenceKeys.useNonLoggedNetwork
+            titleRes = R.string.pref_use_non_logged_in_network
+            defaultValue = false
+        }
+
         preference {
             titleRes = R.string.pref_sync_library_follows
             summaryRes = R.string.pref_refresh_library_follows_summary

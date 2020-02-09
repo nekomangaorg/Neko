@@ -133,6 +133,10 @@ object PreferenceKeys {
 
     const val imageServer = "image_server"
 
+    const val lowQualityCovers = "low_quality_covers"
+
+    const val useNonLoggedNetwork = "non_logged_in_network"
+
     fun sourceUsername(sourceId: Long) = "pref_source_username_$sourceId"
 
     fun sourcePassword(sourceId: Long) = "pref_source_password_$sourceId"
