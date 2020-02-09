@@ -111,13 +111,15 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
     lateinit var tabAnimator: TabsAnimator
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+        // Create a webview before extensions do or else they will break night mode theme
+        // https://stackoverflow.com/questions/54191883
         Timber.d("Manually instantiating WebView to avoid night mode issue.")
         try {
             WebView(applicationContext)
         } catch (e: Exception) {
             Timber.e(e, "Exception when creating webview at start")
         }
+        super.onCreate(savedInstanceState)
         if (trulyGoBack) return
 
         // Do not let the launcher create a new activity http://stackoverflow.com/questions/16283079
@@ -480,7 +482,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         } else if (!bottomNav && backstackSize == 1 && router.getControllerWithTag
                 ("$startScreenId") == null) {
             setSelectedDrawerItem(startScreenId)
-        }  else if (!router.handleBack()) {
+        } else if (!router.handleBack()) {
             unlocked = false
             super.onBackPressed()
         }
@@ -488,7 +490,10 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
 
     private fun setSelectedDrawerItem(itemId: Int) {
         if (!isFinishing) {
-            if (bottomNav) navigationView.selectedItemId = itemId
+            if (bottomNav) {
+                if (itemId == R.id.nav_drawer_library || itemId == R.id.nav_drawer_settings)
+                navigationView.selectedItemId = itemId
+            }
             else nav_view.setCheckedItem(itemId)
             jumpToController(itemId)
         }
@@ -499,21 +504,17 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         val currentRoot = router.backstack.firstOrNull()
         if (currentRoot?.tag()?.toIntOrNull() != id) {
             when (id) {
-                R.id.nav_drawer_library -> setRoot(LibraryController(), id)
+                R.id.nav_drawer_library ->  if (!bottomNav) setRoot(LibraryController(), id)
                 R.id.nav_drawer_recent_updates -> {
-                    if (bottomNav)
-                        navigationView.selectedItemId = R.id.nav_drawer_recents
-                    setRoot(RecentChaptersController(), if (bottomNav) R.id.nav_drawer_recents
-                        else id)
                     preferences.showRecentUpdates().set(true)
+                    if (bottomNav) navigationView.selectedItemId = R.id.nav_drawer_recents
+                    else setRoot(RecentChaptersController(), id)
                     updateRecentsIcon()
                 }
                 R.id.nav_drawer_recently_read -> {
-                    if (bottomNav)
-                        navigationView.selectedItemId = R.id.nav_drawer_recents
-                    setRoot(RecentlyReadController(), if (bottomNav) R.id.nav_drawer_recents
-                    else id)
                     preferences.showRecentUpdates().set(false)
+                    if (bottomNav) navigationView.selectedItemId = R.id.nav_drawer_recents
+                    else setRoot(RecentlyReadController(), id)
                     updateRecentsIcon()
                 }
                 R.id.nav_drawer_catalogues -> setRoot(CatalogueController(), id)
@@ -549,7 +550,8 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
 
                 }
                 R.id.nav_drawer_settings -> {
-                    setRoot(SettingsMainController(), id)
+                    if (!bottomNav)
+                        setRoot(SettingsMainController(), id)
                 }
             }
         }

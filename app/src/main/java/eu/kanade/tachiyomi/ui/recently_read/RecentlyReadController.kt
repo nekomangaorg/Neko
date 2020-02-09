@@ -131,7 +131,7 @@ class RecentlyReadController(bundle: Bundle? = null) : BaseController(bundle),
         if (size > 0) {
             empty_view?.hide()
         } else {
-            empty_view.show(R.drawable.ic_glasses_black_128dp, R.string.information_no_recent_manga)
+            empty_view.show(R.drawable.ic_history_white_128dp, R.string.information_no_recent_manga)
         }
     }
 

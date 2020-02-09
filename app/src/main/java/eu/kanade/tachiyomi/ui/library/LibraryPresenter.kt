@@ -55,12 +55,13 @@ private typealias LibraryMap = Map<Int, List<LibraryItem>>
  * Presenter of [LibraryController].
  */
 class LibraryPresenter(
+        private val view: LibraryController,
         private val db: DatabaseHelper = Injekt.get(),
         private val preferences: PreferencesHelper = Injekt.get(),
         private val coverCache: CoverCache = Injekt.get(),
         private val sourceManager: SourceManager = Injekt.get(),
         private val downloadManager: DownloadManager = Injekt.get()
-) : BasePresenter<LibraryController>() {
+) {
 
     private val context = preferences.context
 
@@ -80,33 +81,6 @@ class LibraryPresenter(
 
     private var currentMangaMap:LibraryMap? = null
 
-    override fun onCreate(savedState: Bundle?) {
-        super.onCreate(savedState)
-        getLibrary()
-    }
-
-    /**
-     * Subscribes to library if needed.
-     */
-   /* fun subscribeLibrary() {
-        if (librarySubscription.isNullOrUnsubscribed()) {
-            librarySubscription = getLibraryObservable()
-                .combineLatest(downloadTriggerRelay.observeOn(Schedulers.io())) {
-                        lib, _ -> lib.apply { setDownloadCount(mangaMap) }
-                }
-                .combineLatest(filterTriggerRelay.observeOn(Schedulers.io())) {
-                        lib, _ -> lib.copy(mangaMap = applyFilters(lib.mangaMap))
-                }
-                .combineLatest(sortTriggerRelay.observeOn(Schedulers.io())) {
-                        lib, _ -> lib.copy(mangaMap = applySort(lib.mangaMap))
-                }
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeLatestCache({ view, (categories, mangaMap) ->
-                    view.onNextLibraryUpdate(categories, mangaMap)
-                })
-        }
-    }*/
-
     fun getLibrary() {
         launchUI {
             val mangaMap = withContext(Dispatchers.IO) {
@@ -119,7 +93,7 @@ class LibraryPresenter(
                 mangaMap
             }
             currentMangaMap = mangaMap
-            view?.onNextLibraryUpdate(categories, mangaMap)
+            view.onNextLibraryUpdate(categories, mangaMap)
         }
     }
 
@@ -428,25 +402,6 @@ class LibraryPresenter(
         return Library(this.categories, libraryMap)
     }
 
-    /**
-     * Get the categories and all its manga from the database.
-     *
-     * @return an observable of the categories and its manga.
-     */
-    /*private fun getLibraryObservable(): Observable<Library> {
-        return Observable.combineLatest(getCategoriesObservable(), getLibraryMangasObservable()) { dbCategories, libraryManga ->
-            val categories = if (libraryManga.containsKey(0))
-                arrayListOf(createDefaultCategory()) + dbCategories
-            else dbCategories
-
-            this.allCategories = categories
-            this.categories = if (preferences.hideCategories().getOrDefault())
-                arrayListOf(createDefaultCategory())
-            else categories
-            Library(this.categories, libraryManga)
-        }
-    }*/
-
     private fun createDefaultCategory(): Category {
         val default = Category.createDefault(context)
         val defOrder = preferences.defaultMangaOrder().getOrDefault()
@@ -454,36 +409,7 @@ class LibraryPresenter(
         else default.mangaOrder = defOrder.split("/").mapNotNull { it.toLongOrNull() }
         return default
     }
-/*
-    /**
-     * Get the categories from the database.
-     *
-     * @return an observable of the categories.
-     */
-    private fun getCategoriesObservable(): Observable<List<Category>> {
-        return db.getCategories().asRxObservable()
-    }
 
-    /**
-     * Get the manga grouped by categories.
-     *
-     * @return an observable containing a map with the category id as key and a list of manga as the
-     * value.
-     */
-    private fun getLibraryMangasObservable(): Observable<LibraryMap> {
-        val libraryAsList = preferences.libraryAsList()
-        return db.getLibraryMangas().asRxObservable()
-                .map { list ->
-                    if (!preferences.hideCategories().getOrDefault()) {
-                        list.map { LibraryItem(it, libraryAsList) }.groupBy { it.manga.category }
-                    }
-                    else {
-                        list.distinctBy { it.id }.map { LibraryItem(it, libraryAsList)}.groupBy {
-                            0 }
-                    }
-                }
-    }
-*/
     /**
      * Requests the library to be filtered.
      */
@@ -493,7 +419,7 @@ class LibraryPresenter(
             mangaMap = withContext(Dispatchers.IO) { applyFilters(mangaMap) }
             mangaMap = withContext(Dispatchers.IO) { applySort(mangaMap) }
             currentMangaMap = mangaMap
-            view?.onNextLibraryUpdate(categories, mangaMap)
+            view.onNextLibraryUpdate(categories, mangaMap)
         }
     }
 
@@ -501,7 +427,6 @@ class LibraryPresenter(
      * Requests the library to have download badges added/removed.
      */
     fun requestDownloadBadgesUpdate() {
-        //getLibrary()
         launchUI {
             val mangaMap = rawMangaMap ?: return@launchUI
             withContext(Dispatchers.IO) { setDownloadCount(mangaMap) }
@@ -509,7 +434,7 @@ class LibraryPresenter(
             val current = currentMangaMap ?: return@launchUI
             withContext(Dispatchers.IO) { setDownloadCount(current) }
             currentMangaMap = current
-            view?.onNextLibraryUpdate(categories, current)
+            view.onNextLibraryUpdate(categories, current)
         }
     }
 
@@ -525,7 +450,7 @@ class LibraryPresenter(
             val current = currentMangaMap ?: return@launchUI
             withContext(Dispatchers.IO) { setUnreadBadge(current) }
             currentMangaMap = current
-            view?.onNextLibraryUpdate(categories, current)
+            view.onNextLibraryUpdate(categories, current)
         }
     }
 
@@ -537,7 +462,7 @@ class LibraryPresenter(
             var mangaMap = currentMangaMap ?: return@launchUI
             mangaMap = withContext(Dispatchers.IO) { applySort(mangaMap) }
             currentMangaMap = mangaMap
-            view?.onNextLibraryUpdate(categories, mangaMap)
+            view.onNextLibraryUpdate(categories, mangaMap)
         }
     }
 
@@ -546,21 +471,12 @@ class LibraryPresenter(
             var mangaMap = currentMangaMap ?: return@launchUI
             mangaMap = withContext(Dispatchers.IO) { applyCatSort(mangaMap, catId) }
             currentMangaMap = mangaMap
-            view?.onNextLibraryUpdate(categories, mangaMap)
+            view.onNextLibraryUpdate(categories, mangaMap)
         }
     }
 
     fun requestFullUpdate() {
-        //librarySubscription?.unsubscribe()
         getLibrary()
-    }
-
-    /**
-     * Called when a manga is opened.
-     */
-    fun onOpenManga() {
-        // Avoid further db updates for the library when it's not needed
-        //librarySubscription?.let { remove(it) }
     }
 
     /**

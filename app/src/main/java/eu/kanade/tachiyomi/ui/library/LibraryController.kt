@@ -27,8 +27,6 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
-import com.jakewharton.rxbinding.support.v4.view.pageSelections
-import com.jakewharton.rxbinding.support.v7.widget.queryTextChanges
 import com.jakewharton.rxrelay.BehaviorRelay
 import com.jakewharton.rxrelay.PublishRelay
 import eu.kanade.tachiyomi.R
@@ -41,13 +39,13 @@ import eu.kanade.tachiyomi.data.library.LibraryServiceListener
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
-import eu.kanade.tachiyomi.ui.base.controller.NucleusController
+import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.SecondaryDrawerController
 import eu.kanade.tachiyomi.ui.base.controller.TabbedController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.category.CategoryController
 import eu.kanade.tachiyomi.ui.download.DownloadController
-import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet
+import eu.kanade.tachiyomi.ui.library.filter.SortFilterBottomSheet
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.ui.migration.MigrationController
@@ -75,7 +73,7 @@ import uy.kohesive.injekt.api.get
 class LibraryController(
         bundle: Bundle? = null,
         private val preferences: PreferencesHelper = Injekt.get()
-) : NucleusController<LibraryPresenter>(bundle),
+) : BaseController(bundle),
         TabbedController,
         SecondaryDrawerController,
         ActionMode.Callback,
@@ -154,17 +152,15 @@ class LibraryController(
     /**
      * Drawer listener to allow swipe only for closing the drawer.
      */
-    private var drawerListener: DrawerLayout.DrawerListener? = null
-
     private var tabsVisibilityRelay: BehaviorRelay<Boolean> = BehaviorRelay.create(false)
 
     private var tabsVisibilitySubscription: Subscription? = null
 
-    private var searchViewSubscription: Subscription? = null
-
     var snack: Snackbar? = null
 
     private var reorderMenuItem:MenuItem? = null
+
+    private var presenter = LibraryPresenter(this)
 
     init {
         setHasOptionsMenu(true)
@@ -174,11 +170,6 @@ class LibraryController(
     override fun getTitle(): String? {
         return resources?.getString(R.string.label_library)
     }
-
-    override fun createPresenter(): LibraryPresenter {
-        return LibraryPresenter()
-    }
-
     override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
         return inflater.inflate(R.layout.library_controller, container, false)
     }
@@ -188,10 +179,20 @@ class LibraryController(
 
         adapter = LibraryAdapter(this)
         library_pager.adapter = adapter
-        library_pager.pageSelections().skip(1).subscribeUntilDestroy {
-            preferences.lastUsedCategory().set(it)
-            activeCategory = it
-        }
+        library_pager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
+            override fun onPageSelected(position: Int) {
+                preferences.lastUsedCategory().set(position)
+                activeCategory = position
+            }
+
+            override fun onPageScrollStateChanged(state: Int) { }
+
+            override fun onPageScrolled(
+                position: Int,
+                positionOffset: Float,
+                positionOffsetPixels: Int
+            ) { }
+        })
 
         library_pager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
             override fun onPageSelected(position: Int) {
@@ -209,11 +210,7 @@ class LibraryController(
             override fun onPageScrollStateChanged(state: Int) { }
         })
 
-        getColumnsPreferenceForCurrentOrientation().asObservable()
-                .doOnNext { mangaPerRow = it }
-                .skip(1)
-                // Set again the adapter to recalculate the covers height
-                .subscribeUntilDestroy { reattachAdapter() }
+        mangaPerRow = getColumnsPreferenceForCurrentOrientation().getOrDefault()
 
         if (selectedMangas.isNotEmpty()) {
             createActionModeIfNeeded()
@@ -224,14 +221,14 @@ class LibraryController(
 
             bottom_sheet.onGroupClicked = {
                 when (it) {
-                    FilterBottomSheet.ACTION_REFRESH -> onRefresh()
-                    FilterBottomSheet.ACTION_FILTER -> onFilterChanged()
-                    FilterBottomSheet.ACTION_SORT -> onSortChanged()
-                    FilterBottomSheet.ACTION_DISPLAY -> reattachAdapter()
-                    FilterBottomSheet.ACTION_DOWNLOAD_BADGE ->
+                    SortFilterBottomSheet.ACTION_REFRESH -> onRefresh()
+                    SortFilterBottomSheet.ACTION_FILTER -> onFilterChanged()
+                    SortFilterBottomSheet.ACTION_SORT -> onSortChanged()
+                    SortFilterBottomSheet.ACTION_DISPLAY -> reattachAdapter()
+                    SortFilterBottomSheet.ACTION_DOWNLOAD_BADGE ->
                         presenter.requestDownloadBadgesUpdate()
-                    FilterBottomSheet.ACTION_UNREAD_BADGE -> presenter.requestUnreadBadgesUpdate()
-                    FilterBottomSheet.ACTION_CAT_SORT -> onCatSortChanged()
+                    SortFilterBottomSheet.ACTION_UNREAD_BADGE -> presenter.requestUnreadBadgesUpdate()
+                    SortFilterBottomSheet.ACTION_CAT_SORT -> onCatSortChanged()
                 }
             }
 
@@ -528,15 +525,19 @@ class LibraryController(
         // Mutate the filter icon because it needs to be tinted and the resource is shared.
         menu.findItem(R.id.action_library_filter).icon.mutate()
 
-        searchViewSubscription?.unsubscribe()
-        searchViewSubscription = searchView.queryTextChanges()
-                // Ignore events if this controller isn't at the top
-                .filter { router.backstack.lastOrNull()?.controller() == this }
-                .subscribeUntilDestroy {
-                    query = it.toString()
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextChange(newText: String?): Boolean {
+                if (router.backstack.lastOrNull()?.controller() == this@LibraryController) {
+                    query = newText ?: ""
                     searchRelay.call(query)
                 }
+                return true
+            }
 
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                return true
+            }
+        })
         searchItem.fixExpand(onExpand = { invalidateMenuOnExpand() })
     }
 
@@ -712,9 +713,6 @@ class LibraryController(
     }
 
     fun openManga(manga: Manga, startY: Float?) {
-        // Notify the presenter a manga is being opened.
-        presenter.onOpenManga()
-
         router.pushController(MangaController(manga, startY).withFadeTransaction())
     }
 

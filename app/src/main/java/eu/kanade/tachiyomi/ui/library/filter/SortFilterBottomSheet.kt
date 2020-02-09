@@ -44,7 +44,7 @@ import uy.kohesive.injekt.injectLazy
 import kotlin.math.min
 import kotlin.math.roundToInt
 
-class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null)
+class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null)
     : LinearLayout(context, attrs),
     FilterTagGroupListener {
 
@@ -88,8 +88,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
     fun onCreate(pagerView:View) {
         if (isLandscape() || isTablet()) {
-            sideLayout.orientation = HORIZONTAL
-            sortingLayout.updateLayoutParams<MarginLayoutParams> {
+            side_layout.orientation = HORIZONTAL
+            sorting_layout.updateLayoutParams<MarginLayoutParams> {
                 bottomMargin = 0
                 topMargin = 0
             }
@@ -98,10 +98,10 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                 top = 0
             )
         }
-        clearButton = pendingClearButton
-        filterLayout.removeView(clearButton)
+        clearButton = clear_button
+        filter_layout.removeView(clearButton)
         sheetBehavior = BottomSheetBehavior.from(this)
-        topbar.setOnClickListener {
+        top_bar.setOnClickListener {
             if (sheetBehavior?.state != BottomSheetBehavior.STATE_EXPANDED) {
                 sheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
                 //topbar.animate().alpha(0f).setDuration(100).start()
@@ -117,7 +117,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         val coordLayout:View = (pagerView.parent as ViewGroup).findViewById(R.id.snackbar_layout)
         sheetBehavior?.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onSlide(bottomSheet: View, progress: Float) {
-                topbar.alpha = 1 - progress
+                top_bar.alpha = 1 - progress
                 shadow2.alpha = (1 - progress) * 0.25f
                 updateRootPadding(progress)
             }
@@ -126,12 +126,12 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                 if (state == BottomSheetBehavior.STATE_COLLAPSED) reSortViews()
                 else setMainSortText()
                 if (state == BottomSheetBehavior.STATE_EXPANDED)
-                    topbar.alpha = 0f
-                topbar.isClickable = state == BottomSheetBehavior.STATE_COLLAPSED
-                topbar.isFocusable = state == BottomSheetBehavior.STATE_COLLAPSED
+                    top_bar.alpha = 0f
+                top_bar.isClickable = state == BottomSheetBehavior.STATE_COLLAPSED
+                top_bar.isFocusable = state == BottomSheetBehavior.STATE_COLLAPSED
             }
         })
-        topbar.viewTreeObserver.addOnGlobalLayoutListener {
+        top_bar.viewTreeObserver.addOnGlobalLayoutListener {
             val phoneLandscape = (isLandscape() && !isTablet())
             sheetBehavior?.peekHeight = if (phoneLandscape) {
                 if (shadow2.visibility != View.GONE) {
@@ -140,15 +140,15 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                 }
                 0
             }
-            else if (!sortText.text.isNullOrBlank()) {
-                topbar.height
+            else if (!title.text.isNullOrBlank()) {
+                top_bar.height
             }
             else 0
             if (sheetBehavior?.state == BottomSheetBehavior.STATE_COLLAPSED) {
                 val height = context.resources.getDimensionPixelSize(R.dimen.rounder_radius)
                 pager?.setPadding(0, 0, 0, if (phoneLandscape) 0 else
-                    (topbar.height - height))
-                coordLayout.setPadding(0, 0, 0, topbar.height)
+                    (top_bar.height - height))
+                coordLayout.setPadding(0, 0, 0, top_bar.height)
             }
             else {
                 updateRootPadding()
@@ -156,11 +156,11 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         }
         createTags()
 
-        mainSortTextView.setOnClickListener { showMainSortOptions() }
-        catSortTextView.setOnClickListener { showCatSortOptions() }
+        library_sort_text.setOnClickListener { showMainSortOptions() }
+        category_sort_text.setOnClickListener { showCatSortOptions() }
         clearButton.setOnClickListener { clearFilters() }
-        downloadCheckbox.isChecked = preferences.downloadBadge().getOrDefault()
-        downloadCheckbox.setOnCheckedChangeListener { _, isChecked ->
+        download_checkbox.isChecked = preferences.downloadBadge().getOrDefault()
+        download_checkbox.setOnCheckedChangeListener { _, isChecked ->
             preferences.downloadBadge().set(isChecked)
             onGroupClicked(ACTION_DOWNLOAD_BADGE)
         }
@@ -169,7 +169,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             showUnreadMenu()
         }
 
-        displayGroup.bindToPreference(preferences.libraryAsList())
+        display_group.bindToPreference(preferences.libraryAsList())
     }
 
     private fun isLandscape(): Boolean {
@@ -212,17 +212,17 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                     filters.joinToString(", ") { context.getString(it) }
                 }
             }
-            sortText.text = text
+            title.text = text
             setMainSortText()
         }
     }
 
     fun adjustTitleMargin(downloading: Boolean) {
-        val params = sortText.layoutParams as? MarginLayoutParams ?: return
+        val params = title.layoutParams as? MarginLayoutParams ?: return
         params.rightMargin = (if (downloading) 80 else 8).dpToPx
-        sortText.layoutParams = params
+        title.layoutParams = params
 
-        filterScrollView.updatePaddingRelative(end = (if (downloading) 80 else 20).dpToPx)
+        filter_scroll.updatePaddingRelative(end = (if (downloading) 80 else 20).dpToPx)
     }
 
     fun updateRootPadding(progress: Float? = null) {
@@ -309,7 +309,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         tracked.setup(this, R.string.action_filter_tracked, R.string.action_filter_not_tracked)
 
         filterItems.forEach {
-            filterLayout.addView(it)
+            filter_layout.addView(it)
         }
 
         checkForManwha()
@@ -323,12 +323,12 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                 launchUI {
                     val mangaType = inflate(R.layout.filter_buttons) as FilterTagGroup
                     mangaType.setup(
-                        this@FilterBottomSheet,
+                        this@SortFilterBottomSheet,
                         R.string.manga,
                         R.string.manwha
                     )
-                    this@FilterBottomSheet.mangaType = mangaType
-                    filterLayout.addView(mangaType)
+                    this@SortFilterBottomSheet.mangaType = mangaType
+                    filter_layout.addView(mangaType)
                     filterItems.add(mangaType)
                 }
             }
@@ -347,7 +347,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
     private fun showMainSortOptions() {
         // Create a PopupMenu, giving it the clicked view for an anchor
-        val popup = PopupMenu(context, mainSortTextView)
+        val popup = PopupMenu(context, library_sort_text)
 
         // Inflate our menu resource into the PopupMenu's Menu
         popup.menuInflater.inflate(R.menu.main_sort, popup.menu)
@@ -390,7 +390,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
     private fun showCatSortOptions() {
         val category = lastCategory ?: return
         // Create a PopupMenu, giving it the clicked view for an anchor
-        val popup = PopupMenu(context, catSortTextView)
+        val popup = PopupMenu(context, category_sort_text)
 
         // Inflate our menu resource into the PopupMenu's Menu
         popup.menuInflater.inflate(R.menu.cat_sort, popup.menu)
@@ -504,7 +504,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                      }
                 )
             }
-            mainSortTextView.text = withContext(Dispatchers.IO) {
+            library_sort_text.text = withContext(Dispatchers.IO) {
                 context.getString(
                     if (sortId == LibrarySort.DRAG_AND_DROP) R.string.sort_library_by_
                     else R.string.sort_by_, context.getString(
@@ -519,7 +519,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                     )
                 )
             }
-            mainSortTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(
+            library_sort_text.setCompoundDrawablesRelativeWithIntrinsicBounds(
                 drawableL, null, null, null
             )
             setCatSortText()
@@ -540,7 +540,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                         }
                     )
                 }
-                catSortTextView.text = withContext(Dispatchers.IO) {
+                category_sort_text.text = withContext(Dispatchers.IO) {
                    context.getString(
                         R.string.sort_category_by_, context.getString(
                             when (sortId) {
@@ -554,11 +554,11 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                         )
                     )
                 }
-                catSortTextView.setCompoundDrawablesRelativeWithIntrinsicBounds(
+                category_sort_text.setCompoundDrawablesRelativeWithIntrinsicBounds(
                     drawableL, null, null, null
                 )
-                if (catSortTextView.visibility != View.VISIBLE) catSortTextView.visible()
-            } else if (catSortTextView.visibility == View.VISIBLE) catSortTextView.gone()
+                if (category_sort_text.visibility != View.VISIBLE) category_sort_text.visible()
+            } else if (category_sort_text.visibility == View.VISIBLE) category_sort_text.gone()
         }
     }
 
@@ -603,9 +603,9 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         }
         val filters = getFilters().size
         if (filters > 0 && clearButton.parent == null)
-            filterLayout.addView(clearButton, 0)
+            filter_layout.addView(clearButton, 0)
         else if (filters == 0 && clearButton.parent != null)
-            filterLayout.removeView(clearButton)
+            filter_layout.removeView(clearButton)
     }
 
     private fun clearFilters() {
@@ -621,7 +621,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
         val transition = androidx.transition.AutoTransition()
         transition.duration = 150
-        androidx.transition.TransitionManager.beginDelayedTransition(filterLayout, transition)
+        androidx.transition.TransitionManager.beginDelayedTransition(filter_layout, transition)
         filterItems.forEach {
             it.reset()
         }
@@ -630,16 +630,16 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
     }
 
     fun reSortViews() {
-        filterLayout.removeAllViews()
+        filter_layout.removeAllViews()
         if (filterItems.any { it.isActivated })
-            filterLayout.addView(clearButton)
+            filter_layout.addView(clearButton)
         filterItems.filter { it.isActivated }.forEach {
-            filterLayout.addView(it)
+            filter_layout.addView(it)
         }
         filterItems.filterNot { it.isActivated }.forEach {
-            filterLayout.addView(it)
+            filter_layout.addView(it)
         }
-        filterScrollView.scrollTo(0, 0)
+        filter_scroll.scrollTo(0, 0)
     }
 
     private fun showUnreadMenu() {
