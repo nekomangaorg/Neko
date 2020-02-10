@@ -105,16 +105,18 @@ class RecentlyReadController(bundle: Bundle? = null) : BaseController(bundle),
      *
      * @param mangaHistory list of manga history
      */
-    fun onNextManga(mangaHistory: List<RecentlyReadItem>) {
+    fun onNextManga(mangaHistory: List<RecentlyReadItem>, freshList:Boolean = false) {
         val adapter = adapter ?: return
         adapter.updateDataSet(mangaHistory)
         adapter.onLoadMoreComplete(null)
-        if (recentItems == null)
+        if (recentItems == null || adapter.endlessTargetCount == 1)
             resetProgressItem()
+        else if (freshList && mangaHistory.size == recentItems!!.size)
+            onAddPageError()
         recentItems = mangaHistory.toMutableList()
     }
 
-    fun onAddPageError() {
+    private fun onAddPageError() {
         adapter?.onLoadMoreComplete(null)
         adapter?.endlessTargetCount = 1
     }

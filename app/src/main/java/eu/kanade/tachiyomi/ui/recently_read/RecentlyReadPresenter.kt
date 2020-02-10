@@ -55,14 +55,13 @@ class RecentlyReadPresenter(private val view: RecentlyReadController) {
     }
 
     fun observe() {
-        readerSubscription?.unsubscribe()
         val cal = Calendar.getInstance()
         cal.time = Date()
         cal.add(Calendar.YEAR, -50)
-        readerSubscription = db.getRecentMangaLimit(cal.time, lastCount, "").asRxObservable().map {
+        db.getRecentMangaLimit(cal.time, lastCount, "").asRxObservable().map {
             val items = it.map(::RecentlyReadItem)
             launchUI {
-                view.onNextManga(items)
+                view.onNextManga(items, false)
             }
         }.observeOn(Schedulers.io()).skip(1).take(1).subscribe()
     }
