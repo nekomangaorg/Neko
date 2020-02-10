@@ -84,6 +84,8 @@ class LibraryPresenter(
         var currentLibrary:Library? = null
     }
 
+    fun isDownloading() = downloadManager.hasQueue()
+
     fun onDestroy() {
         if (currentMangaMap != null)
             currentLibrary = Library(categories, currentMangaMap!!)

@@ -152,7 +152,8 @@ class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: A
         if (phoneLandscape && shadow2.visibility != View.GONE) {
             shadow2.gone()
         }
-        sheetBehavior?.peekHeight = peekHeight
+        if (phoneLandscape)
+            sheetBehavior?.peekHeight = 0
         top_bar.viewTreeObserver.addOnGlobalLayoutListener {
             val peekingHeight = if (phoneLandscape) 0
             else if (!title.text.isNullOrBlank()) top_bar.height
@@ -204,7 +205,10 @@ class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: A
             this.peekHeight = state.getInt("peek")
             this.startingTitle = state.getString("title") ?: ""
             val sheet = BottomSheetBehavior.from(this)
-            sheet.peekHeight = peekHeight
+            if (isLandscape() && !isTablet())
+                sheet.peekHeight = 0
+            else
+                sheet.peekHeight = peekHeight
             title.text = startingTitle
             super.onRestoreInstanceState( state.getParcelable("superState"))
             top_bar.alpha =

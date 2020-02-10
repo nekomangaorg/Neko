@@ -215,6 +215,13 @@ class LibraryController(
         fab.setOnClickListener {
             router.pushController(DownloadController().withFadeTransaction())
         }
+
+        if (presenter.isDownloading()) {
+            fab.scaleY = 1f
+            fab.scaleX = 1f
+            fab.isClickable = true
+            fab.isFocusable = true
+        }
         presenter.onRestore()
         val library = presenter.getAllManga()
         if (library != null) onNextLibraryUpdate(presenter.categories, library)

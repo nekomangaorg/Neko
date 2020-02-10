@@ -212,6 +212,17 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
+            <ImageView
+                android:id="@+id/pill"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:src="@drawable/draggable_pill"
+                android:alpha="0.15"
+                android:contentDescription="@string/drag_handle"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <ImageView
                 android:id="@+id/title_icon"
@@ -219,6 +230,7 @@
                 android:layout_height="0dp"
                 android:layout_marginStart="24dp"
                 android:src="@drawable/ic_sort_white_24dp"
+                android:contentDescription="@string/sorting_mode"
                 app:layout_constraintBottom_toBottomOf="@+id/title"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="@+id/title" />
