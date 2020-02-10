@@ -6,6 +6,10 @@ import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
+import eu.kanade.tachiyomi.util.system.launchUI
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import okhttp3.Dispatcher
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
@@ -20,60 +24,47 @@ import java.util.Date
  * Contains information and data for fragment.
  * Observable updates should be called from here.
  */
-class RecentlyReadPresenter : BasePresenter<RecentlyReadController>() {
+class RecentlyReadPresenter(private val view: RecentlyReadController) {
 
     /**
      * Used to connect to database
      */
     val db: DatabaseHelper by injectLazy()
+    private var readerSubscription:Subscription? = null
     var lastCount = 25
     var lastSearch = ""
 
-    override fun onCreate(savedState: Bundle?) {
-        super.onCreate(savedState)
-
-        //pageSubscription?.let { remove(it) }
-        // Used to get a list of recently read manga
-        updateList()
-    }
-
-    fun requestNext(offset: Int, search: String = "") {
-        lastCount = offset
+    fun requestNext(search: String = "") {
+        lastCount += 25
         lastSearch = search
-        getRecentMangaObservable((offset), search)
-            .subscribeLatestCache({ view, mangas ->
-                view.onNextManga(mangas)
-            }, RecentlyReadController::onAddPageError)
+        updateList(search)
     }
 
     /**
-     * Get recent manga observable
+     * Get all recent manga up to a point
      * @return list of history
      */
-    private fun getRecentMangaObservable(offset: Int = 0, search: String = ""): Observable<List<RecentlyReadItem>> {
+    private fun getRecentMangaLimit(search: String = ""): List<RecentlyReadItem> {
         // Set date for recent manga
         val cal = Calendar.getInstance()
         cal.time = Date()
         cal.add(Calendar.YEAR, -50)
 
-        return db.getRecentManga(cal.time, offset, search).asRxObservable()
-                .map { recents -> recents.map(::RecentlyReadItem) }
-                .observeOn(AndroidSchedulers.mainThread())
+        return db.getRecentMangaLimit(cal.time, lastCount, search).executeAsBlocking()
+            .map(::RecentlyReadItem)
     }
 
-    /**
-     * Get recent manga observable
-     * @return list of history
-     */
-    private fun getRecentMangaLimitObservable(offset: Int = 0, search: String = ""): Observable<List<RecentlyReadItem>> {
-        // Set date for recent manga
+    fun observe() {
+        readerSubscription?.unsubscribe()
         val cal = Calendar.getInstance()
         cal.time = Date()
         cal.add(Calendar.YEAR, -50)
-
-        return db.getRecentMangaLimit(cal.time, lastCount, search).asRxObservable()
-            .map { recents -> recents.map(::RecentlyReadItem) }
-            .observeOn(AndroidSchedulers.mainThread())
+        readerSubscription = db.getRecentMangaLimit(cal.time, lastCount, "").asRxObservable().map {
+            val items = it.map(::RecentlyReadItem)
+            launchUI {
+                view.onNextManga(items)
+            }
+        }.observeOn(Schedulers.io()).skip(1).take(1).subscribe()
     }
 
     /**
@@ -86,12 +77,28 @@ class RecentlyReadPresenter : BasePresenter<RecentlyReadController>() {
         updateList()
     }
 
-    fun updateList(search: String? = null) {
-        lastSearch = search?:lastSearch
-        getRecentMangaLimitObservable(lastCount, lastSearch).take(1)
-            .subscribeLatestCache({ view, mangas ->
-                view.onNextManga(mangas, true)
-            }, RecentlyReadController::onAddPageError)
+    suspend fun refresh(search: String? = null): List<RecentlyReadItem> {
+        val manga = withContext(Dispatchers.IO) { getRecentMangaLimit(search ?: "") }
+        checkIfNew(manga.size, search)
+        lastSearch = search ?: lastSearch
+        lastCount = manga.size
+        return manga
+    }
+
+    private fun updateList(search: String? = null) {
+        launchUI {
+            val manga = withContext(Dispatchers.IO) { getRecentMangaLimit(search ?: "") }
+            checkIfNew(manga.size, search)
+            lastSearch = search ?: lastSearch
+            lastCount = manga.size
+            view.onNextManga(manga)
+        }
+    }
+
+    private fun checkIfNew(newCount: Int, newSearch: String?) {
+        if (lastCount > newCount && newSearch == lastSearch) {
+            view.onAddPageError()
+        }
     }
 
     /**

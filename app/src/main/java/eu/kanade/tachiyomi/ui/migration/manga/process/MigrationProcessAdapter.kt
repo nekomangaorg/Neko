@@ -16,8 +16,7 @@ import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.injectLazy
 
 class MigrationProcessAdapter(
-    val controller: MigrationListController,
-    context: Context
+    val controller: MigrationListController
 ) : FlexibleAdapter<MigrationProcessItem>(null, controller, true) {
 
 

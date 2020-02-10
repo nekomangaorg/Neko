@@ -13,14 +13,12 @@ import android.widget.TextView
 import androidx.annotation.Px
 import androidx.annotation.RequiresApi
 import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.appcompat.widget.SearchView
 import androidx.core.view.ViewCompat
-import com.afollestad.materialdialogs.MaterialDialog
-import com.afollestad.materialdialogs.WhichButton
-import com.afollestad.materialdialogs.actions.getActionButton
-import com.afollestad.materialdialogs.actions.hasActionButton
 import com.amulyakhare.textdrawable.TextDrawable
 import eu.kanade.tachiyomi.R
 import com.amulyakhare.textdrawable.util.ColorGenerator
+import com.bluelinelabs.conductor.Controller
 import com.google.android.material.snackbar.Snackbar
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import kotlin.math.min
@@ -198,6 +196,22 @@ data class ViewPaddingState(
     val start: Int,
     val end: Int
 )
+
+
+fun Controller.setOnQueryTextChangeListener(searchView: SearchView, f: (text: String?) -> Boolean) {
+    searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+        override fun onQueryTextChange(newText: String?): Boolean {
+            if (router.backstack.lastOrNull()?.controller() == this@setOnQueryTextChangeListener) {
+                return f(newText)
+            }
+            return true
+        }
+
+        override fun onQueryTextSubmit(query: String?): Boolean {
+            return true
+        }
+    })
+}
 
 @RequiresApi(17)
 inline fun View.updatePaddingRelative(

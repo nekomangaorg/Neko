@@ -1,35 +1,37 @@
 package eu.kanade.tachiyomi.ui.recently_read
 
-import androidx.recyclerview.widget.LinearLayoutManager
+import android.app.Activity
+import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import androidx.appcompat.widget.SearchView
-import com.jakewharton.rxbinding.support.v7.widget.queryTextChanges
+import androidx.recyclerview.widget.LinearLayoutManager
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.backup.BackupRestoreService
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.ui.base.controller.NucleusController
+import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.catalogue.browse.ProgressItem
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
-import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
+import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
-import kotlinx.android.synthetic.main.recently_read_controller.empty_view
-import kotlinx.android.synthetic.main.recently_read_controller.recycler
+import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
+import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
+import kotlinx.android.synthetic.main.recently_read_controller.*
 
 /**
  * Fragment that shows recently read manga.
  * Uses R.layout.fragment_recently_read.
  * UI related actions should be called from here.
  */
-class RecentlyReadController : NucleusController<RecentlyReadPresenter>(),
+class RecentlyReadController(bundle: Bundle? = null) : BaseController(bundle),
         FlexibleAdapter.OnUpdateListener,
         FlexibleAdapter.EndlessScrollListener,
         RecentlyReadAdapter.OnRemoveClickListener,
@@ -50,14 +52,15 @@ class RecentlyReadController : NucleusController<RecentlyReadPresenter>(),
      * Endless loading item.
      */
     private var progressItem: ProgressItem? = null
+    private var observeLater:Boolean = false
     private var query = ""
+
+    private var presenter = RecentlyReadPresenter(this)
+    private var recentItems: MutableList<RecentlyReadItem>? = null
+
 
     override fun getTitle(): String? {
         return resources?.getString(R.string.label_recent_manga)
-    }
-
-    override fun createPresenter(): RecentlyReadPresenter {
-        return RecentlyReadPresenter()
     }
 
     override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
@@ -73,38 +76,52 @@ class RecentlyReadController : NucleusController<RecentlyReadPresenter>(),
         super.onViewCreated(view)
 
         // Initialize adapter
-        recycler.layoutManager = LinearLayoutManager(view.context)
-        adapter = RecentlyReadAdapter(this@RecentlyReadController)
-        recycler.setHasFixedSize(true)
+        adapter = RecentlyReadAdapter(this)
         recycler.adapter = adapter
+        recycler.layoutManager = LinearLayoutManager(view.context)
+        recycler.setHasFixedSize(true)
         recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
+        resetProgressItem()
+
+        if (recentItems != null)
+            adapter?.updateDataSet(recentItems!!.toList())
+
+        launchUI {
+            val manga = presenter.refresh(query)
+            recentItems = manga.toMutableList()
+            adapter?.updateDataSet(manga)
+        }
     }
 
-    override fun onDestroyView(view: View) {
-        adapter = null
-        super.onDestroyView(view)
+    override fun onActivityResumed(activity: Activity) {
+        super.onActivityResumed(activity)
+        if (observeLater) {
+            presenter.observe()
+            observeLater = false
+        }
     }
-
     /**
      * Populate adapter with chapters
      *
      * @param mangaHistory list of manga history
      */
-    fun onNextManga(mangaHistory: List<RecentlyReadItem>, cleanBatch: Boolean = false) {
-        if (adapter?.itemCount ?: 0 == 0 || cleanBatch)
+    fun onNextManga(mangaHistory: List<RecentlyReadItem>) {
+        val adapter = adapter ?: return
+        adapter.updateDataSet(mangaHistory)
+        adapter.onLoadMoreComplete(null)
+        if (recentItems == null)
             resetProgressItem()
-        if (cleanBatch) adapter?.updateDataSet(mangaHistory)
-        else adapter?.onLoadMoreComplete(mangaHistory)
+        recentItems = mangaHistory.toMutableList()
     }
 
-    fun onAddPageError(error: Throwable) {
+    fun onAddPageError() {
         adapter?.onLoadMoreComplete(null)
         adapter?.endlessTargetCount = 1
     }
 
     override fun onUpdateEmptyView(size: Int) {
         if (size > 0) {
-            empty_view.hide()
+            empty_view?.hide()
         } else {
             empty_view.show(R.drawable.ic_glasses_black_128dp, R.string.information_no_recent_manga)
         }
@@ -122,17 +139,17 @@ class RecentlyReadController : NucleusController<RecentlyReadPresenter>(),
     override fun onLoadMore(lastPosition: Int, currentPage: Int) {
         val view = view ?: return
         if (BackupRestoreService.isRunning(view.context.applicationContext)) {
-            onAddPageError(Throwable())
+            onAddPageError()
             return
         }
-        val adapter = adapter ?: return
-        presenter.requestNext(adapter.itemCount, query)
+        presenter.requestNext(query)
     }
 
     override fun noMoreLoad(newItemsSize: Int) { }
 
     override fun onResumeClick(position: Int) {
         val activity = activity ?: return
+        observeLater = true
         val (manga, chapter, _) = (adapter?.getItem(position) as? RecentlyReadItem)?.mch ?: return
 
         val nextChapter = presenter.getNextChapter(chapter, manga)
@@ -168,17 +185,24 @@ class RecentlyReadController : NucleusController<RecentlyReadPresenter>(),
         inflater.inflate(R.menu.recently_read, menu)
         val searchItem = menu.findItem(R.id.action_search)
         val searchView = searchItem.actionView as SearchView
-        searchView.maxWidth = Int.MAX_VALUE
         if (query.isNotEmpty()) {
             searchItem.expandActionView()
             searchView.setQuery(query, true)
             searchView.clearFocus()
         }
-        searchView.queryTextChanges().filter { router.backstack.lastOrNull()?.controller() == this }
-            .subscribeUntilDestroy {
-                query = it.toString()
-                presenter.updateList(query)
+        setOnQueryTextChangeListener(searchView) {
+            if (query != it) {
+                query = it ?: return@setOnQueryTextChangeListener false
+                launchUI {
+                    resetProgressItem()
+                    presenter.lastCount = 25
+                    val manga = presenter.refresh(query)
+                    recentItems = manga.toMutableList()
+                    adapter?.updateDataSet(manga)
+                }
             }
+            true
+        }
 
         // Fixes problem with the overflow icon showing up in lieu of search
         searchItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {

@@ -96,7 +96,7 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
             new
         }
 
-        adapter = MigrationProcessAdapter(this, view.context)
+        adapter = MigrationProcessAdapter(this)
 
         recycler.adapter = adapter
         recycler.layoutManager = LinearLayoutManager(view.context)
