@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.main
 
-import android.animation.ObjectAnimator
 import android.app.SearchManager
 import android.content.Intent
 import android.content.res.Configuration
@@ -36,6 +35,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.extension.api.ExtensionGithubApi
 import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
+import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.base.controller.NoToolbarElevationController
 import eu.kanade.tachiyomi.ui.base.controller.SecondaryDrawerController
@@ -90,14 +90,6 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             }
         }
         extraViewForUndo = extraViewToCheck
-    }
-
-    private val startScreenId by lazy {
-        when (preferences.startScreen()) {
-            2 -> R.id.nav_drawer_recently_read
-            3 -> R.id.nav_drawer_recent_updates
-            else -> R.id.nav_drawer_library
-        }
     }
 
     lateinit var tabAnimator: TabsAnimator
@@ -240,7 +232,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         if (!router.hasRootController()) {
             // Set start screen
             if (!handleIntentAction(intent)) {
-                setSelectedDrawerItem(startScreenId)
+                setSelectedDrawerItem(R.id.nav_drawer_library)
             }
         }
 
@@ -420,9 +412,13 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         }
         if (drawer.isDrawerOpen(GravityCompat.START) || drawer.isDrawerOpen(GravityCompat.END)) {
             drawer.closeDrawers()
-        } else if (!router.handleBack()) {
-            unlocked = false
-            super.onBackPressed()
+        } else  {
+            val baseController = router.backstack.last().controller() as BaseController
+            if (if (router.backstackSize == 1) !baseController.handleRootBack()
+                else !router.handleBack()) {
+                unlocked = false
+                super.onBackPressed()
+            }
         }
     }
 

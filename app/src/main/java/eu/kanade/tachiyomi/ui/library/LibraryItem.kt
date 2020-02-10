@@ -18,6 +18,7 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import kotlinx.android.synthetic.main.catalogue_grid_item.view.*
 import uy.kohesive.injekt.injectLazy
+import java.io.Serializable
 
 class LibraryItem(val manga: LibraryManga, private val libraryAsList: Preference<Boolean>) :
         AbstractFlexibleItem<LibraryHolder>(), IFilterable<String> {

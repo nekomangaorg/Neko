@@ -76,14 +76,6 @@ class SettingsGeneralController : SettingsController() {
             summary = "%s"
         }
 
-        intListPreference(activity) {
-            key = Keys.startScreen
-            titleRes = R.string.pref_start_screen
-            entriesRes = arrayOf(R.string.label_library, R.string.label_recent_manga,
-                R.string.label_recent_updates)
-            entryRange = 1..3
-            defaultValue = 1
-        }
         switchPreference {
             key = Keys.automaticUpdates
             titleRes = R.string.pref_enable_automatic_updates

@@ -53,8 +53,6 @@ class PreferencesHelper(val context: Context) {
     fun getStringPref(key: String, default: String?) = rxPrefs.getString(key, default)
     fun getStringSet(key: String, default: Set<String>) = rxPrefs.getStringSet(key, default)
 
-    fun startScreen() = prefs.getInt(Keys.startScreen, 1)
-
     fun clear() = prefs.edit().clear().apply()
 
     fun theme() = prefs.getInt(Keys.theme, 5)

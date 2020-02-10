@@ -16,8 +16,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.SearchView
 import androidx.core.graphics.drawable.DrawableCompat
-import androidx.core.view.GravityCompat
-import androidx.drawerlayout.widget.DrawerLayout
 import androidx.viewpager.widget.ViewPager
 import com.afollestad.materialdialogs.MaterialDialog
 import com.bluelinelabs.conductor.ControllerChangeHandler
@@ -40,7 +38,6 @@ import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
-import eu.kanade.tachiyomi.ui.base.controller.SecondaryDrawerController
 import eu.kanade.tachiyomi.ui.base.controller.TabbedController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.category.CategoryController
@@ -55,14 +52,8 @@ import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationListController
 import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationProcedureConfig
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
-import eu.kanade.tachiyomi.util.view.gone
-import eu.kanade.tachiyomi.util.view.inflate
-import eu.kanade.tachiyomi.util.view.marginBottom
-import eu.kanade.tachiyomi.util.view.marginTop
+import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import eu.kanade.tachiyomi.util.view.snack
-import eu.kanade.tachiyomi.util.view.updatePaddingRelative
-import eu.kanade.tachiyomi.util.view.visible
-import eu.kanade.tachiyomi.widget.ExtendedNavigationView
 import kotlinx.android.synthetic.main.filter_bottom_sheet.*
 import kotlinx.android.synthetic.main.library_controller.*
 import kotlinx.android.synthetic.main.main_activity.*
@@ -152,7 +143,9 @@ class LibraryController(
 
     var snack: Snackbar? = null
 
-    private var presenter = LibraryPresenter(this)
+    var presenter = LibraryPresenter(this)
+        private set
+
 
     init {
         setHasOptionsMenu(true)
@@ -177,29 +170,26 @@ class LibraryController(
                 activeCategory = position
             }
 
-            override fun onPageScrollStateChanged(state: Int) { }
+            override fun onPageScrollStateChanged(state: Int) {}
 
             override fun onPageScrolled(
-                position: Int,
-                positionOffset: Float,
-                positionOffsetPixels: Int
-            ) { }
+                position: Int, positionOffset: Float, positionOffsetPixels: Int
+            ) {
+            }
         })
 
         library_pager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
             override fun onPageSelected(position: Int) {
                 bottom_sheet.lastCategory = adapter?.categories?.getOrNull(position)
-                if (preferences.librarySortingMode().getOrDefault() == LibrarySort.DRAG_AND_DROP)
-                    bottom_sheet.updateTitle()
+                if (preferences.librarySortingMode().getOrDefault() == LibrarySort.DRAG_AND_DROP) bottom_sheet.updateTitle()
             }
 
             override fun onPageScrolled(
-                position: Int,
-                positionOffset: Float,
-                positionOffsetPixels: Int
-            ) { }
+                position: Int, positionOffset: Float, positionOffsetPixels: Int
+            ) {
+            }
 
-            override fun onPageScrollStateChanged(state: Int) { }
+            override fun onPageScrollStateChanged(state: Int) {}
         })
 
         mangaPerRow = getColumnsPreferenceForCurrentOrientation().getOrDefault()
@@ -225,6 +215,12 @@ class LibraryController(
         fab.setOnClickListener {
             router.pushController(DownloadController().withFadeTransaction())
         }
+        presenter.onRestore()
+        val library = presenter.getAllManga()
+        if (library != null) onNextLibraryUpdate(presenter.categories, library)
+        else {
+            presenter.getLibraryBlocking()
+        }
     }
 
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
@@ -236,6 +232,11 @@ class LibraryController(
             DownloadService.callListeners()
             LibraryUpdateService.setListener(this)
         }
+    }
+
+    override fun onDestroy() {
+        presenter.onDestroy()
+        super.onDestroy()
     }
 
     override fun onDestroyView(view: View) {
@@ -429,19 +430,11 @@ class LibraryController(
         // Mutate the filter icon because it needs to be tinted and the resource is shared.
         menu.findItem(R.id.action_library_filter).icon.mutate()
 
-        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextChange(newText: String?): Boolean {
-                if (router.backstack.lastOrNull()?.controller() == this@LibraryController) {
-                    query = newText ?: ""
-                    searchRelay.call(query)
-                }
-                return true
-            }
-
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                return true
-            }
-        })
+        setOnQueryTextChangeListener(searchView) {
+            query = it ?: ""
+            searchRelay.call(query)
+            true
+        }
         searchItem.fixExpand(onExpand = { invalidateMenuOnExpand() })
     }
 
@@ -449,13 +442,13 @@ class LibraryController(
         this.query = query
     }
 
-    override fun handleBack(): Boolean {
+    override fun handleRootBack(): Boolean {
         val sheetBehavior = BottomSheetBehavior.from(bottom_sheet)
         if (sheetBehavior.state != BottomSheetBehavior.STATE_COLLAPSED) {
             sheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
             return true
         }
-        return super.handleBack()
+        return false
     }
 
     override fun onPrepareOptionsMenu(menu: Menu) {

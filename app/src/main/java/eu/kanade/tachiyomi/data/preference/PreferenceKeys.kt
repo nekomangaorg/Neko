@@ -107,8 +107,6 @@ object PreferenceKeys {
 
     const val automaticExtUpdates = "automatic_ext_updates"
 
-    const val startScreen = "start_screen"
-
     const val downloadNew = "download_new"
 
     const val downloadNewCategories = "download_new_categories"

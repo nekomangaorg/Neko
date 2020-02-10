@@ -17,8 +17,6 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.HttpSource
-import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
-import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.migration.MigrationFlags
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.lang.removeArticles
@@ -37,6 +35,7 @@ import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.io.Serializable
 import java.util.ArrayList
 import java.util.Collections
 import java.util.Comparator
@@ -44,12 +43,12 @@ import java.util.Comparator
 /**
  * Class containing library information.
  */
-private data class Library(val categories: List<Category>, val mangaMap: LibraryMap)
+private data class Library(val categories: List<Category>, val mangaMap: LibraryMap): Serializable
 
 /**
  * Typealias for the library manga, using the category as keys, and list of manga as values.
  */
-private typealias LibraryMap = Map<Int, List<LibraryItem>>
+private typealias LibraryMap = HashMap<Int, List<LibraryItem>>
 
 /**
  * Presenter of [LibraryController].
@@ -81,6 +80,21 @@ class LibraryPresenter(
 
     private var currentMangaMap:LibraryMap? = null
 
+    private companion object {
+        var currentLibrary:Library? = null
+    }
+
+    fun onDestroy() {
+        if (currentMangaMap != null)
+            currentLibrary = Library(categories, currentMangaMap!!)
+    }
+
+    fun onRestore() {
+        categories = currentLibrary?.categories ?: return
+        currentMangaMap = currentLibrary?.mangaMap
+        currentLibrary = null
+    }
+
     fun getLibrary() {
         launchUI {
             val mangaMap = withContext(Dispatchers.IO) {
@@ -95,6 +109,29 @@ class LibraryPresenter(
             currentMangaMap = mangaMap
             view.onNextLibraryUpdate(categories, mangaMap)
         }
+    }
+
+    fun getLibraryBlocking() {
+        val mangaMap = {
+            val library = getLibraryFromDB()
+            library.apply { setDownloadCount(library.mangaMap) }
+            rawMangaMap = library.mangaMap
+            var mangaMap = library.mangaMap
+            mangaMap = applyFilters(mangaMap)
+            mangaMap = applySort(mangaMap)
+            mangaMap
+        }()
+        currentMangaMap = mangaMap
+        view.onNextLibraryUpdate(categories, mangaMap)
+    }
+
+    fun getAllManga(): LibraryMap? {
+        return currentMangaMap
+    }
+
+    fun getMangaInCategory(catId: Int?): List<LibraryItem>? {
+        val categoryId = catId ?: return null
+        return currentMangaMap?.get(categoryId)
     }
 
     /**
@@ -158,7 +195,13 @@ class LibraryPresenter(
             true
         }
 
-        return map.mapValues { entry -> entry.value.filter(filterFn) }
+        val filterMap = map.mapValues { entry -> entry.value.filter(filterFn) }
+        val hashMap = hashMapOf<Int, List<LibraryItem>>()
+        filterMap.map {
+            hashMap.put(it.key, it.value)
+        }
+
+        return hashMap
     }
 
     /**
@@ -196,10 +239,9 @@ class LibraryPresenter(
     private fun applyCatSort(map: LibraryMap, catId: Int?): LibraryMap {
         if (catId == null) return map
         val categoryManga = map[catId] ?: return map
-        val catSorted = applySort(mapOf(catId to categoryManga), catId)
-        val mutableMap = map.toMutableMap()
-        mutableMap[catId] = catSorted.values.first()
-        return mutableMap
+        val catSorted = applySort(hashMapOf(catId to categoryManga), catId)
+        map[catId] = catSorted.values.first()
+        return map
     }
 
     private fun applySort(map: LibraryMap, catId: Int?): LibraryMap {
@@ -254,7 +296,13 @@ class LibraryPresenter(
         }
         val comparator = Comparator(sortFn)
 
-        return map.mapValues { entry -> entry.value.sortedWith(comparator) }
+        val sortedMap = map.mapValues { entry -> entry.value.sortedWith(comparator) }
+        val hashMap = hashMapOf<Int, List<LibraryItem>>()
+        sortedMap.map {
+            hashMap.put(it.key, it.value)
+        }
+
+        return hashMap
     }
 
     /**
@@ -362,7 +410,13 @@ class LibraryPresenter(
         else
             Collections.reverseOrder(sortFn)
 
-        return map.mapValues { entry -> entry.value.sortedWith(comparator) }
+        val sortedMap = map.mapValues { entry -> entry.value.sortedWith(comparator) }
+        val hashMap = hashMapOf<Int, List<LibraryItem>>()
+        sortedMap.map {
+            hashMap.put(it.key, it.value)
+        }
+
+        return hashMap
     }
 
     private fun sortAlphabetical(i1: LibraryItem, i2: LibraryItem): Int {
@@ -396,7 +450,11 @@ class LibraryPresenter(
         this.categories = if (preferences.hideCategories().getOrDefault())
             arrayListOf(createDefaultCategory())
         else categories
-        return Library(this.categories, libraryMap)
+        val hashMap = hashMapOf<Int, List<LibraryItem>>()
+        libraryMap.map {
+            hashMap.put(it.key, it.value)
+        }
+        return Library(this.categories, hashMap)
     }
 
     private fun createDefaultCategory(): Category {

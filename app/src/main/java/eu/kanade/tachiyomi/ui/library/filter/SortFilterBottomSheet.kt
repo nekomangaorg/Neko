@@ -3,6 +3,8 @@ package eu.kanade.tachiyomi.ui.library.filter
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.drawable.Drawable
+import android.os.Bundle
+import android.os.Parcelable
 import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
@@ -69,6 +71,10 @@ class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: A
 
     var sheetBehavior:BottomSheetBehavior<View>? = null
 
+    var peekHeight = 0
+
+    var startingTitle = ""
+
     private lateinit var clearButton:ImageView
 
     private val filterItems:MutableList<FilterTagGroup> by lazy {
@@ -109,7 +115,7 @@ class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: A
                 sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
             }
         }
-
+        title.text = startingTitle
         pager = pagerView
         updateTitle()
         val shadow2:View = (pagerView.parent as ViewGroup).findViewById(R.id.shadow2)
@@ -146,10 +152,16 @@ class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: A
         if (phoneLandscape && shadow2.visibility != View.GONE) {
             shadow2.gone()
         }
+        sheetBehavior?.peekHeight = peekHeight
         top_bar.viewTreeObserver.addOnGlobalLayoutListener {
-            sheetBehavior?.peekHeight = if (phoneLandscape) 0
+            val peekingHeight = if (phoneLandscape) 0
             else if (!title.text.isNullOrBlank()) top_bar.height
+            else if (peekHeight != 0) -1
             else 0
+            if (peekingHeight > -1 && (peekHeight == 0 || peekingHeight > 0)) {
+                sheetBehavior?.peekHeight = peekingHeight
+                peekHeight = peekingHeight
+            }
             if (sheetBehavior?.state == BottomSheetBehavior.STATE_COLLAPSED) {
                 val height = context.resources.getDimensionPixelSize(R.dimen.rounder_radius)
                 pager?.setPadding(0, 0, 0, if (phoneLandscape) 0 else
@@ -176,6 +188,31 @@ class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: A
         }
 
         display_group.bindToPreference(preferences.libraryAsList())
+    }
+
+    override fun onSaveInstanceState(): Parcelable? {
+        val bundle = Bundle()
+        bundle.putParcelable("superState", super.onSaveInstanceState())
+        bundle.putInt("peek", sheetBehavior?.peekHeight ?: 0)
+        bundle.putString("title", title.text.toString())
+        return bundle
+    }
+
+    override fun onRestoreInstanceState(state: Parcelable?) {
+        if (state is Bundle) // implicit null check
+        {
+            this.peekHeight = state.getInt("peek")
+            this.startingTitle = state.getString("title") ?: ""
+            val sheet = BottomSheetBehavior.from(this)
+            sheet.peekHeight = peekHeight
+            title.text = startingTitle
+            super.onRestoreInstanceState( state.getParcelable("superState"))
+            top_bar.alpha =
+                if (sheet.state == BottomSheetBehavior.STATE_COLLAPSED) 1f
+                else 0f
+        }
+        else
+        super.onRestoreInstanceState(state)
     }
 
     private fun isLandscape(): Boolean {
