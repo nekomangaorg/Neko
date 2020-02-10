@@ -460,6 +460,7 @@
     <string name="show_title">Title</string>
     <string name="show_chapter_number">Chapter number</string>
     <string name="sorting_mode">Sorting mode</string>
+    <string name="drag_handle">Drag handle</string>
     <string name="sort_by_source">By source</string>
     <string name="sort_by_number">By chapter number</string>
     <string name="manga_download">Download</string>
