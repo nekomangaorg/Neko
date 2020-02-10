@@ -16,21 +16,15 @@ import eu.kanade.tachiyomi.data.backup.BackupRestoreService
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.catalogue.browse.ProgressItem
-import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
-import kotlinx.android.synthetic.main.recently_read_controller.empty_view
-import kotlinx.android.synthetic.main.recently_read_controller.recycler
-import eu.kanade.tachiyomi.ui.recent_updates.RecentChaptersController
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
+import kotlinx.android.synthetic.main.recently_read_controller.*
 
 /**
  * Fragment that shows recently read manga.
@@ -111,18 +105,16 @@ class RecentlyReadController(bundle: Bundle? = null) : BaseController(bundle),
      *
      * @param mangaHistory list of manga history
      */
-    fun onNextManga(mangaHistory: List<RecentlyReadItem>, freshList:Boolean = false) {
+    fun onNextManga(mangaHistory: List<RecentlyReadItem>) {
         val adapter = adapter ?: return
         adapter.updateDataSet(mangaHistory)
         adapter.onLoadMoreComplete(null)
-        if (recentItems == null || adapter.endlessTargetCount == 1)
+        if (recentItems == null)
             resetProgressItem()
-        else if (freshList && mangaHistory.size == recentItems!!.size)
-            onAddPageError()
         recentItems = mangaHistory.toMutableList()
     }
 
-    private fun onAddPageError() {
+    fun onAddPageError() {
         adapter?.onLoadMoreComplete(null)
         adapter?.endlessTargetCount = 1
     }
@@ -213,18 +205,15 @@ class RecentlyReadController(bundle: Bundle? = null) : BaseController(bundle),
         }
 
         // Fixes problem with the overflow icon showing up in lieu of search
-        searchItem.fixExpand(onExpand = { invalidateMenuOnExpand() })
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.action_recents -> {
-                router.setRoot(RecentChaptersController().withFadeTransaction()
-                    .tag(R.id.nav_drawer_recents.toString()))
-                Injekt.get<PreferencesHelper>().showRecentUpdates().set(true)
-                (activity as? MainActivity)?.updateRecentsIcon()
+        searchItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
+            override fun onMenuItemActionExpand(item: MenuItem): Boolean {
+                return true
             }
-        }
-        return super.onOptionsItemSelected(item)
+
+            override fun onMenuItemActionCollapse(item: MenuItem): Boolean {
+                activity?.invalidateOptionsMenu()
+                return true
+            }
+        })
     }
 }

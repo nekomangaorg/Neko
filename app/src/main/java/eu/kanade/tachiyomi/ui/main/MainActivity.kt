@@ -413,8 +413,8 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         if (drawer.isDrawerOpen(GravityCompat.START) || drawer.isDrawerOpen(GravityCompat.END)) {
             drawer.closeDrawers()
         } else  {
-            val baseController = router.backstack.last().controller() as BaseController
-            if (if (router.backstackSize == 1) !baseController.handleRootBack()
+            val baseController = router.backstack.last().controller() as? BaseController
+            if (if (router.backstackSize == 1) !(baseController?.handleRootBack() ?: false)
                 else !router.handleBack()) {
                 unlocked = false
                 super.onBackPressed()
