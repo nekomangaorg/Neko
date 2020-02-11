@@ -167,7 +167,7 @@ class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: A
                 val height = context.resources.getDimensionPixelSize(R.dimen.rounder_radius)
                 pager?.setPadding(0, 0, 0, if (phoneLandscape) 0 else
                     (top_bar.height - height))
-                coordLayout.setPadding(0, 0, 0, top_bar.height)
+                coordLayout.setPadding(0, 0, 0, peekingHeight)
             }
             else {
                 updateRootPadding()
