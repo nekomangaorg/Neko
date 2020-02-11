@@ -23,6 +23,7 @@
     <color name="readerDarkBackground">#1C1C1D</color>
     <color name="button_bg">@color/md_white_1000</color>
     <color name="gray_button">#404040</color>
+    <color name="darkPrimaryTranslucent">@color/darkPrimaryColor</color>
 
     <color name="textColorPrimary">@color/md_black_1000_87</color>
     <color name="textColorSecondary">@color/md_black_1000_54</color>

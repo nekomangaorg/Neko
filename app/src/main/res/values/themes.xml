@@ -77,8 +77,8 @@
     <!--==============-->
     <style name="Theme.Base.Reader" parent="Theme.Base">
         <item name="android:forceDarkAllowed">false</item>
-        <item name="colorPrimary">@color/darkPrimaryColor</item>
-        <item name="colorPrimaryDark">@color/darkPrimaryColor</item>
+        <item name="colorPrimary">@color/darkPrimaryTranslucent</item>
+        <item name="colorPrimaryDark">@color/darkPrimaryTranslucent</item>
         <item name="android:colorBackground">@android:color/white</item>
         <item name="android:statusBarColor">?colorPrimaryDark</item>
         <item name="android:navigationBarColor">?colorPrimaryDark</item>
@@ -86,8 +86,8 @@
 
     <style name="Theme.Base.Reader.Dark" parent="Theme.MaterialComponents.NoActionBar">
         <item name="android:forceDarkAllowed">false</item>
-        <item name="colorPrimary">@color/darkPrimaryColor</item>
-        <item name="colorPrimaryDark">@color/darkPrimaryColor</item>
+        <item name="colorPrimary">@color/darkPrimaryTranslucent</item>
+        <item name="colorPrimaryDark">@color/darkPrimaryTranslucent</item>
         <item name="android:colorBackground">@android:color/black</item>
         <item name="colorAccent">#3399FF</item>
         <item name="android:textColorPrimary">@color/md_white_1000</item>
@@ -125,8 +125,8 @@
 
     <style name="Theme.Base.Reader.Light" parent="Theme.MaterialComponents.Light.NoActionBar">
         <item name="android:forceDarkAllowed">false</item>
-        <item name="colorPrimary">@color/darkPrimaryColor</item>
-        <item name="colorPrimaryDark">@color/darkPrimaryColor</item>
+        <item name="colorPrimary">@color/darkPrimaryTranslucent</item>
+        <item name="colorPrimaryDark">@color/darkPrimaryTranslucent</item>
         <item name="android:colorBackground">@android:color/white</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:textColorPrimary">@color/md_black_1000_87</item>
