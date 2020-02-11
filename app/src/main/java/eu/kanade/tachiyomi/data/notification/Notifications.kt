@@ -39,10 +39,19 @@ object Notifications {
     const val ID_NEW_CHAPTERS = -301
     const val GROUP_NEW_CHAPTERS = "eu.kanade.tachiyomi.NEW_CHAPTERS"
 
+    /**
+     * Notification channel and ids used for backup and restore.
+     */
     const val CHANNEL_RESTORE = "backup_restore_channel"
     const val ID_RESTORE_PROGRESS = -401
     const val ID_RESTORE_COMPLETE = -402
     const val ID_RESTORE_ERROR = -403
+
+    /**
+     * Notification channel and ids used for backup and restore.
+     */
+    const val CHANNEL_MANGA_RELATED = "manga_related_channel"
+    const val ID_MANGA_RELATED_IMPORT = -502
 
 
     /**
@@ -54,21 +63,30 @@ object Notifications {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
 
         val channels = listOf(
-                NotificationChannel(CHANNEL_COMMON, context.getString(R.string.channel_common),
+                NotificationChannel(CHANNEL_COMMON,
+                        context.getString(R.string.channel_common),
                         NotificationManager.IMPORTANCE_LOW),
-                NotificationChannel(CHANNEL_LIBRARY, context.getString(R.string.channel_library),
+                NotificationChannel(CHANNEL_LIBRARY,
+                        context.getString(R.string.channel_library),
                         NotificationManager.IMPORTANCE_LOW).apply {
                     setShowBadge(false)
                 },
-                NotificationChannel(CHANNEL_DOWNLOADER, context.getString(R.string.channel_downloader),
+                NotificationChannel(CHANNEL_DOWNLOADER,
+                        context.getString(R.string.channel_downloader),
                         NotificationManager.IMPORTANCE_LOW).apply {
                     setShowBadge(false)
-                }, NotificationChannel(
-                CHANNEL_NEW_CHAPTERS,
-                context.getString(R.string.channel_new_chapters),
-                NotificationManager.IMPORTANCE_DEFAULT
-        ),
-                NotificationChannel(CHANNEL_RESTORE, context.getString(R.string.channel_backup_restore),
+                },
+                NotificationChannel(CHANNEL_NEW_CHAPTERS,
+                        context.getString(R.string.channel_new_chapters),
+                        NotificationManager.IMPORTANCE_DEFAULT
+                ),
+                NotificationChannel(CHANNEL_RESTORE,
+                        context.getString(R.string.channel_backup_restore),
+                        NotificationManager.IMPORTANCE_LOW).apply {
+                    setShowBadge(false)
+                },
+                NotificationChannel(CHANNEL_MANGA_RELATED,
+                        context.getString(R.string.channel_manga_related),
                         NotificationManager.IMPORTANCE_LOW).apply {
                     setShowBadge(false)
                 }

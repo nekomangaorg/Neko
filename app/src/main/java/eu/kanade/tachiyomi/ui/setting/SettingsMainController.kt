@@ -76,6 +76,16 @@ class SettingsMainController : SettingsController() {
         preference {
             iconDrawable =
                     IconicsDrawable(context)
+                            .icon(CommunityMaterial.Icon.cmd_chart_histogram)
+                            .colorInt(tintColor)
+                            .sizeDp(size)
+
+            titleRes = R.string.pref_category_related
+            onClick { navigateTo(SettingsRelatedController()) }
+        }
+        preference {
+            iconDrawable =
+                    IconicsDrawable(context)
                             .icon(CommunityMaterial.Icon.cmd_cloud_upload)
                             .colorInt(tintColor)
                             .sizeDp(size)

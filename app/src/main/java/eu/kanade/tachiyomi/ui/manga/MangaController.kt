@@ -14,13 +14,14 @@ import com.bluelinelabs.conductor.support.RouterPagerAdapter
 import com.google.android.material.tabs.TabLayout
 import com.jakewharton.rxrelay.BehaviorRelay
 import com.jakewharton.rxrelay.PublishRelay
-import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
+import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.utils.colorInt
 import com.mikepenz.iconics.utils.sizeDp
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
@@ -29,6 +30,7 @@ import eu.kanade.tachiyomi.ui.base.controller.TabbedController
 import eu.kanade.tachiyomi.ui.base.controller.requestPermissionsSafe
 import eu.kanade.tachiyomi.ui.manga.chapter.ChaptersController
 import eu.kanade.tachiyomi.ui.manga.info.MangaInfoController
+import eu.kanade.tachiyomi.ui.manga.related.RelatedController
 import eu.kanade.tachiyomi.ui.manga.track.TrackController
 import eu.kanade.tachiyomi.util.toast
 import kotlinx.android.synthetic.main.main_activity.*
@@ -36,6 +38,7 @@ import kotlinx.android.synthetic.main.manga_controller.*
 import rx.Subscription
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import uy.kohesive.injekt.injectLazy
 import java.util.*
 
 class MangaController : RxController, TabbedController {
@@ -63,6 +66,8 @@ class MangaController : RxController, TabbedController {
         private set
 
     private var adapter: MangaDetailAdapter? = null
+
+    private val preferences by injectLazy<PreferencesHelper>()
 
     val fromCatalogue = args.getBoolean(FROM_CATALOGUE_EXTRA, false)
 
@@ -92,7 +97,7 @@ class MangaController : RxController, TabbedController {
         requestPermissionsSafe(arrayOf(WRITE_EXTERNAL_STORAGE), 301)
 
         adapter = MangaDetailAdapter()
-        manga_pager.offscreenPageLimit = 3
+        manga_pager.offscreenPageLimit = 4
         manga_pager.adapter = adapter
 
         if (!fromCatalogue) {
@@ -150,7 +155,8 @@ class MangaController : RxController, TabbedController {
     }
 
     private fun setTrackingIconInternal(visible: Boolean) {
-        val tab = activity?.tabs?.getTabAt(TRACK_CONTROLLER) ?: return
+        if (!Injekt.get<TrackManager>().hasLoggedServices()) return
+        val tab = activity?.tabs?.getTabAt(adapter!!.getCount()-1) ?: return
         val drawable = if (visible)
             IconicsDrawable(applicationContext!!)
                     .icon(CommunityMaterial.Icon.cmd_check)
@@ -163,11 +169,14 @@ class MangaController : RxController, TabbedController {
 
     private inner class MangaDetailAdapter : RouterPagerAdapter(this@MangaController) {
 
-        private val tabCount = if (Injekt.get<TrackManager>().hasLoggedServices()) 3 else 2
+        private val tabCount = 2 +
+                (if (preferences.relatedShowTab()) 1 else 0) +
+                (if (Injekt.get<TrackManager>().hasLoggedServices()) 1 else 0)
 
         private val tabTitles = listOf(
                 R.string.manga_detail_tab,
                 R.string.manga_chapters_tab,
+                if (preferences.relatedShowTab()) R.string.manga_related_tab else R.string.manga_external_tab,
                 R.string.manga_external_tab)
                 .map { resources!!.getString(it) }
 
@@ -177,13 +186,25 @@ class MangaController : RxController, TabbedController {
 
         override fun configureRouter(router: Router, position: Int) {
             if (!router.hasRootController()) {
-                val controller = when (position) {
-                    INFO_CONTROLLER -> MangaInfoController()
-                    CHAPTERS_CONTROLLER -> ChaptersController()
-                    TRACK_CONTROLLER -> TrackController()
-                    else -> error("Wrong position $position")
+
+                // First two tabs are always the info page and chapters
+                if(position == INFO_CONTROLLER) {
+                    router.setRoot(RouterTransaction.with(MangaInfoController()))
+                } else if(position == CHAPTERS_CONTROLLER) {
+                    router.setRoot(RouterTransaction.with(ChaptersController()))
+                    return
+                } else if (position == TAB_3 && preferences.relatedShowTab()) {
+                    // For the 3rd tab display the related if enabled, else show the tracked
+                    router.setRoot(RouterTransaction.with(RelatedController(manga!!, source!!)))
+                } else if (position == TAB_3
+                        && !preferences.relatedShowTab()
+                        && Injekt.get<TrackManager>().hasLoggedServices()) {
+                    router.setRoot(RouterTransaction.with(TrackController()))
+                } else if (position == TAB_4 && position <= tabCount) {
+                    // If we are at 4, then we should have all tabs enabled as our max count
+                    router.setRoot(RouterTransaction.with(TrackController()))
                 }
-                router.setRoot(RouterTransaction.with(controller))
+
             }
         }
 
@@ -200,7 +221,9 @@ class MangaController : RxController, TabbedController {
 
         const val INFO_CONTROLLER = 0
         const val CHAPTERS_CONTROLLER = 1
-        const val TRACK_CONTROLLER = 2
+        const val TAB_3 = 2
+        const val TAB_4 = 3
+
     }
 
 

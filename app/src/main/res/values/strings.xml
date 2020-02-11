@@ -120,8 +120,17 @@
     <string name="pref_category_downloads">Downloads</string>
     <string name="pref_category_site_specific">Site Specific</string>
     <string name="pref_category_tracking">Tracking</string>
+    <string name="pref_category_related">Related (Beta)</string>
     <string name="pref_category_advanced">Advanced</string>
     <string name="pref_category_about">About</string>
+    <string name="pref_related_info_tab">Information</string>
+    <string name="pref_related_summary_message">
+        This is an beta feature where one can get manga recommendations.
+        This is a recommendation system outside of MangaDex, and works by matching by genres,
+        demographics, and then using term frequency–inverse document frequency (Tfidf) to get the
+        similarity of two manga\'s descriptions. You will need to download from the below
+        github the recommendation JSON manually.
+    </string>
 
     <string name="pref_category_library_display">Display</string>
     <string name="pref_category_library_update">Update</string>
@@ -262,6 +271,18 @@
 
     <!-- Sync section -->
     <string name="services">Services</string>
+
+
+    <!-- Related Mangas section -->
+    <string name="pref_related_last_updated_txt">Open Related Manga JSON File</string>
+    <string name="pref_related_last_updated">Updated: %s</string>
+    <string name="pref_related_broken_file">Unable to parse. Is it a valid JSON?</string>
+    <string name="pref_related_file_error">Unable Open File %s</string>
+    <string name="pref_related_show_tab">Show Related Manga Tab</string>
+    <string name="pref_related_loading_percent">Loading Related Mangas (%d / %d loaded)</string>
+    <string name="pref_related_loading_welcome">Loading JSON From File!</string>
+    <string name="pref_related_loading_complete">Done Loading %d Related Mangas!</string>
+    <string name="pref_related_notify_start">Starting to parse %d mangas from file</string>
 
     <!-- Backup section -->
     <string name="backup">Backup</string>
@@ -468,6 +489,10 @@
     <string name="track_author">Author</string>
     <string name="url_not_set">Manga url is not set please click title and select manga again</string>
 
+
+    <!-- Related Manga Screen -->
+    <string name="manga_related_tab">Related</string>
+
     <!-- Category activity -->
     <string name="error_category_exists">A category with this name already exists!</string>
     <string name="snack_categories_deleted">Categories deleted</string>
@@ -576,6 +601,7 @@
     <string name="channel_backup_restore">Restore Backup</string>
     <string name="channel_downloader">Downloader</string>
     <string name="channel_new_chapters">New Chapters</string>
+    <string name="channel_manga_related">Related Manga Loading</string>
     <string name="flag">flag</string>
 
 </resources>

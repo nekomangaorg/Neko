@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.source
 
+import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.source.model.*
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
@@ -56,9 +57,8 @@ interface Source {
      */
     suspend fun fetchAllFollows(): List<SManga>
 
-
-    /**Updates reading status
-     *
+    /**
+     * Updates reading status
      */
     suspend fun updateReadingProgress(track: Track): Boolean
 
@@ -67,8 +67,9 @@ interface Source {
      */
     suspend fun updateFollowStatus(mangaID: String, followStatus: FollowStatus): Boolean
 
-
-    //Get a MdList Track of the manga
+    /**
+     * Get a MdList Track of the manga
+     */
     suspend fun fetchTrackingInfo(manga: SManga): Track
 
     /**
@@ -90,6 +91,14 @@ interface Source {
      * @param manga the manga to update.
      */
     suspend fun fetchMangaDetails(manga: SManga): SManga
+
+    /**
+     * Returns an observable with all the relatable for a manga.
+     *
+     * @param page the page number to retrieve.
+     * @param manga the manga to update.
+     */
+    fun fetchMangaRelatedObservable(page: Int, manga: Manga): Observable<MangasPage>
 
     /**
      * Returns a updated details for a manga and the chapter list
@@ -124,5 +133,6 @@ interface Source {
     fun login(username: String, password: String, twoFactorCode: String = ""): Observable<Boolean>
 
     suspend fun logout(): Boolean
+
 
 }

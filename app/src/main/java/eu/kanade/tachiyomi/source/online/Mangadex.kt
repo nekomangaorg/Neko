@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.source.online
 
+import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.POST
@@ -132,6 +133,10 @@ open class Mangadex(override val lang: String, private val internalLang: String,
             throw Exception("Not Logged in")
         }
         return FollowsHandler(clientBuilder(), headers).fetchTrackingInfo(manga)
+    }
+
+    override fun fetchMangaRelatedObservable(page: Int, manga: Manga): Observable<MangasPage> {
+        return RelatedHandler().fetchRelated(manga)
     }
 
 
