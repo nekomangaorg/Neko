@@ -118,7 +118,7 @@ class LibraryPresenter(
             mangaMap
         }()
         currentMangaMap = mangaMap
-        view.onNextLibraryUpdate(categories, mangaMap)
+        view.onNextLibraryUpdate(categories, mangaMap, true)
     }
 
     fun getAllManga(): LibraryMap? {

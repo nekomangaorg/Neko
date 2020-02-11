@@ -146,6 +146,7 @@ class LibraryController(
     var presenter = LibraryPresenter(this)
         private set
 
+    private var justStarted = true
 
     init {
         setHasOptionsMenu(true)
@@ -299,7 +300,8 @@ class LibraryController(
         tabsVisibilitySubscription = null
     }
 
-    fun onNextLibraryUpdate(categories: List<Category>, mangaMap: Map<Int, List<LibraryItem>>) {
+    fun onNextLibraryUpdate(categories: List<Category>, mangaMap: Map<Int, List<LibraryItem>>,
+        freshStart: Boolean = false) {
         val view = view ?: return
         val adapter = adapter ?: return
 
@@ -330,15 +332,20 @@ class LibraryController(
 
         tabsVisibilityRelay.call(categories.size > 1)
 
-        // Delay the scroll position to allow the view to be properly measured.
-        view.post {
-            if (isAttached) {
-                activity?.tabs?.setScrollPosition(library_pager.currentItem, 0f, true)
+        if (freshStart || !justStarted) {
+            // Delay the scroll position to allow the view to be properly measured.
+            view.post {
+                if (isAttached) {
+                    activity?.tabs?.setScrollPosition(library_pager.currentItem, 0f, true)
+                }
             }
-        }
 
-        // Send the manga map to child fragments after the adapter is updated.
-        libraryMangaRelay.call(LibraryMangaEvent(mangaMap))
+            // Send the manga map to child fragments after the adapter is updated.
+            libraryMangaRelay.call(LibraryMangaEvent(mangaMap))
+        }
+        else if (!freshStart) {
+            justStarted = false
+        }
     }
 
     /**
