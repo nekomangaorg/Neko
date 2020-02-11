@@ -358,7 +358,7 @@ class LibraryUpdateService(
                 val newChapters = syncChaptersWithSource(db, fetchedChapters, manga, source).first
                 if (newChapters.isNotEmpty()) {
                     if (downloadNew && (categoriesToDownload.isEmpty() || manga.category in categoriesToDownload)) {
-                        downloadChapters(manga, newChapters)
+                        downloadChapters(manga, newChapters.sortedBy { it.chapter_number })
                         hasDownloads = true
                     }
                     newUpdates.add(manga to newChapters.toTypedArray())
