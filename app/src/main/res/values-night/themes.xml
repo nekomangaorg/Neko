@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <style name="Theme.Base.Reader" parent="Theme.Base">
+    <item name="colorPrimary">@color/darkPrimaryTranslucent</item>
+    <item name="colorPrimaryDark">@color/darkPrimaryTranslucent</item>
     <item name="android:statusBarColor">?colorPrimaryDark</item>
     <item name="android:navigationBarColor">?colorPrimaryDark</item>
-    <item name="colorPrimary">@color/readerPrimary</item>
-    <item name="colorPrimaryDark">@color/readerPrimary</item>
     <item name="android:colorBackground">@color/readerDarkBackground</item>
   </style>
 
