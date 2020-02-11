@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.library
 
-import android.os.Bundle
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
@@ -35,7 +34,6 @@ import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import java.io.Serializable
 import java.util.ArrayList
 import java.util.Collections
 import java.util.Comparator
@@ -43,12 +41,12 @@ import java.util.Comparator
 /**
  * Class containing library information.
  */
-private data class Library(val categories: List<Category>, val mangaMap: LibraryMap): Serializable
+private data class Library(val categories: List<Category>, val mangaMap: LibraryMap)
 
 /**
  * Typealias for the library manga, using the category as keys, and list of manga as values.
  */
-private typealias LibraryMap = HashMap<Int, List<LibraryItem>>
+private typealias LibraryMap = Map<Int, List<LibraryItem>>
 
 /**
  * Presenter of [LibraryController].
@@ -79,10 +77,6 @@ class LibraryPresenter(
     private var rawMangaMap:LibraryMap? = null
 
     private var currentMangaMap:LibraryMap? = null
-
-    private companion object {
-        var currentLibrary:Library? = null
-    }
 
     fun isDownloading() = downloadManager.hasQueue()
 
@@ -197,13 +191,7 @@ class LibraryPresenter(
             true
         }
 
-        val filterMap = map.mapValues { entry -> entry.value.filter(filterFn) }
-        val hashMap = hashMapOf<Int, List<LibraryItem>>()
-        filterMap.map {
-            hashMap.put(it.key, it.value)
-        }
-
-        return hashMap
+        return map.mapValues { entry -> entry.value.filter(filterFn) }
     }
 
     /**
@@ -241,9 +229,10 @@ class LibraryPresenter(
     private fun applyCatSort(map: LibraryMap, catId: Int?): LibraryMap {
         if (catId == null) return map
         val categoryManga = map[catId] ?: return map
-        val catSorted = applySort(hashMapOf(catId to categoryManga), catId)
-        map[catId] = catSorted.values.first()
-        return map
+        val catSorted = applySort(mapOf(catId to categoryManga), catId)
+        val mutableMap = map.toMutableMap()
+        mutableMap[catId] = catSorted.values.first()
+        return mutableMap
     }
 
     private fun applySort(map: LibraryMap, catId: Int?): LibraryMap {
@@ -298,13 +287,7 @@ class LibraryPresenter(
         }
         val comparator = Comparator(sortFn)
 
-        val sortedMap = map.mapValues { entry -> entry.value.sortedWith(comparator) }
-        val hashMap = hashMapOf<Int, List<LibraryItem>>()
-        sortedMap.map {
-            hashMap.put(it.key, it.value)
-        }
-
-        return hashMap
+        return  map.mapValues { entry -> entry.value.sortedWith(comparator) }
     }
 
     /**
@@ -412,13 +395,7 @@ class LibraryPresenter(
         else
             Collections.reverseOrder(sortFn)
 
-        val sortedMap = map.mapValues { entry -> entry.value.sortedWith(comparator) }
-        val hashMap = hashMapOf<Int, List<LibraryItem>>()
-        sortedMap.map {
-            hashMap.put(it.key, it.value)
-        }
-
-        return hashMap
+        return map.mapValues { entry -> entry.value.sortedWith(comparator) }
     }
 
     private fun sortAlphabetical(i1: LibraryItem, i2: LibraryItem): Int {
@@ -452,11 +429,8 @@ class LibraryPresenter(
         this.categories = if (preferences.hideCategories().getOrDefault())
             arrayListOf(createDefaultCategory())
         else categories
-        val hashMap = hashMapOf<Int, List<LibraryItem>>()
-        libraryMap.map {
-            hashMap.put(it.key, it.value)
-        }
-        return Library(this.categories, hashMap)
+
+        return Library(this.categories, libraryMap)
     }
 
     private fun createDefaultCategory(): Category {
@@ -708,5 +682,9 @@ class LibraryPresenter(
             // SearchPresenter#networkToLocalManga may have updated the manga title, so ensure db gets updated title
             db.updateMangaTitle(manga).executeAsBlocking()
         }
+    }
+
+    private companion object {
+        var currentLibrary:Library? = null
     }
 }

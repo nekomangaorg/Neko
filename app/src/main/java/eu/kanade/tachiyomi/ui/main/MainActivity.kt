@@ -46,6 +46,7 @@ import eu.kanade.tachiyomi.ui.catalogue.global_search.CatalogueSearchController
 import eu.kanade.tachiyomi.ui.download.DownloadController
 import eu.kanade.tachiyomi.ui.extension.ExtensionController
 import eu.kanade.tachiyomi.ui.library.LibraryController
+import eu.kanade.tachiyomi.ui.library.LibraryPresenter
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.ui.recent_updates.RecentChaptersController
 import eu.kanade.tachiyomi.ui.recently_read.RecentlyReadController
@@ -128,20 +129,20 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             val currentRoot = router.backstack.firstOrNull()
             if (currentRoot?.tag()?.toIntOrNull() != id) {
                 when (id) {
-                    R.id.nav_drawer_library -> setRoot(LibraryController(), id)
-                    R.id.nav_drawer_recents ->  {
+                    R.id.nav_library -> setRoot(LibraryController(), id)
+                    R.id.nav_recents ->  {
                         if (preferences.showRecentUpdates().getOrDefault())
                             setRoot(RecentChaptersController(), id)
                         else
                             setRoot(RecentlyReadController(), id)
                     }
-                    R.id.nav_drawer_catalogues -> setRoot(CatalogueController(), id)
-                    R.id.nav_drawer_settings -> setRoot(SettingsMainController(), id)
+                    R.id.nav_catalogues -> setRoot(CatalogueController(), id)
+                    R.id.nav_settings -> setRoot(SettingsMainController(), id)
                 }
             }
             else if (currentRoot.tag()?.toIntOrNull() == id)  {
                 when (id) {
-                    R.id.nav_drawer_recents -> {
+                    R.id.nav_recents -> {
                         if (router.backstack.size > 1) router.popToRoot()
                         else {
                             val showRecents = preferences.showRecentUpdates().getOrDefault()
@@ -151,8 +152,8 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                             updateRecentsIcon()
                         }
                     }
-                    R.id.nav_drawer_library, R.id.nav_drawer_catalogues,
-                    R.id.nav_drawer_settings -> router.popToRoot()
+                    R.id.nav_library, R.id.nav_catalogues,
+                    R.id.nav_settings -> router.popToRoot()
                 }
             }
             true
@@ -232,7 +233,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         if (!router.hasRootController()) {
             // Set start screen
             if (!handleIntentAction(intent)) {
-                setSelectedDrawerItem(R.id.nav_drawer_library)
+                navigationView.selectedItemId = R.id.nav_library
             }
         }
 
@@ -273,7 +274,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
     }
 
     fun updateRecentsIcon() {
-        navigationView.menu.findItem(R.id.nav_drawer_recents).icon =
+        navigationView.menu.findItem(R.id.nav_recents).icon =
             AppCompatResources.getDrawable(this,
                 if (preferences.showRecentUpdates().getOrDefault()) R.drawable.ic_update_black_24dp
                 else R.drawable.ic_history_black_24dp)
@@ -301,13 +302,13 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
     private fun setExtensionsBadge() {
         val updates = preferences.extensionUpdatesCount().getOrDefault()
         if (updates > 0) {
-            val badge = navigationView.getOrCreateBadge(R.id.nav_drawer_settings)
+            val badge = navigationView.getOrCreateBadge(R.id.nav_settings)
             badge.number = updates
             badge.backgroundColor = getResourceColor(R.attr.badgeColor)
             badge.badgeTextColor = Color.WHITE
         }
         else {
-            navigationView.removeBadge(R.id.nav_drawer_settings)
+            navigationView.removeBadge(R.id.nav_settings)
         }
     }
 
@@ -357,18 +358,42 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             applicationContext, notificationId, intent.getIntExtra("groupId", 0)
         )
         when (intent.action) {
-            SHORTCUT_LIBRARY -> setSelectedDrawerItem(R.id.nav_drawer_library)
-            SHORTCUT_RECENTLY_UPDATED -> setSelectedDrawerItem(R.id.nav_drawer_recent_updates)
-            SHORTCUT_RECENTLY_READ -> setSelectedDrawerItem(R.id.nav_drawer_recently_read)
-            SHORTCUT_CATALOGUES -> setSelectedDrawerItem(R.id.nav_drawer_catalogues)
-            SHORTCUT_EXTENSIONS -> setSelectedDrawerItem(R.id.nav_drawer_extensions)
+            SHORTCUT_LIBRARY -> navigationView.selectedItemId = R.id.nav_library
+            SHORTCUT_RECENTLY_UPDATED, SHORTCUT_RECENTLY_READ -> {
+                preferences.showRecentUpdates().set(intent.action == SHORTCUT_RECENTLY_UPDATED)
+                navigationView.selectedItemId = R.id.nav_recents
+                updateRecentsIcon()
+            }
+            SHORTCUT_CATALOGUES -> navigationView.selectedItemId = R.id.nav_catalogues
+            SHORTCUT_EXTENSIONS -> {
+                if (router.backstack.none { it.controller() is ExtensionController }) {
+                    if (router.backstack.isEmpty()) {
+                        navigationView.selectedItemId = R.id.nav_library
+                        router.pushController(
+                            RouterTransaction.with(ExtensionController()).pushChangeHandler(
+                                SimpleSwapChangeHandler()
+                            ).popChangeHandler(FadeChangeHandler())
+                        )
+                    } else {
+                        router.pushController(ExtensionController().withFadeTransaction())
+                    }
+                }
+            }
             SHORTCUT_MANGA -> {
                 val extras = intent.extras ?: return false
                 router.setRoot(RouterTransaction.with(MangaController(extras)))
             }
             SHORTCUT_DOWNLOADS -> {
                 if (router.backstack.none { it.controller() is DownloadController }) {
-                    setSelectedDrawerItem(R.id.nav_drawer_downloads)
+                    if (router.backstack.isEmpty()) {
+                        navigationView.selectedItemId = R.id.nav_library
+                        router.pushController(RouterTransaction.with(DownloadController())
+                            .pushChangeHandler(SimpleSwapChangeHandler())
+                            .popChangeHandler(FadeChangeHandler()))
+                    }
+                    else {
+                        router.pushController(DownloadController().withFadeTransaction())
+                    }
                 }
             }
             Intent.ACTION_SEARCH, "com.google.android.gms.actions.SEARCH_ACTION" -> {
@@ -418,54 +443,6 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                 else !router.handleBack()) {
                 unlocked = false
                 super.onBackPressed()
-            }
-        }
-    }
-
-    private fun setSelectedDrawerItem(itemId: Int) {
-        if (!isFinishing) {
-            if (itemId == R.id.nav_drawer_library ||
-                itemId == R.id.nav_drawer_settings ||
-                itemId == R.id.nav_drawer_catalogues)
-                navigationView.selectedItemId = itemId
-            jumpToController(itemId)
-        }
-    }
-
-    private fun jumpToController(id: Int) {
-        val currentRoot = router.backstack.firstOrNull()
-        if (currentRoot?.tag()?.toIntOrNull() != id) {
-            when (id) {
-                R.id.nav_drawer_recent_updates, R.id.nav_drawer_recently_read -> {
-                    preferences.showRecentUpdates().set(id == R.id.nav_drawer_recent_updates)
-                    navigationView.selectedItemId = R.id.nav_drawer_recents
-                    updateRecentsIcon()
-                }
-                R.id.nav_drawer_extensions -> {
-                    if (router.backstack.isEmpty()) {
-                        navigationView.selectedItemId = R.id.nav_drawer_settings
-                        router.pushController(RouterTransaction.with(ExtensionController())
-                            .pushChangeHandler(SimpleSwapChangeHandler())
-                            .popChangeHandler(FadeChangeHandler()))
-                    }
-                    else {
-                        router.pushController(ExtensionController().withFadeTransaction())
-                    }
-                }
-                R.id.nav_drawer_downloads -> {
-                    if (router.backstackSize > 1) {
-                        router.popToRoot()
-                    }
-                    if (router.backstack.isEmpty()) {
-                        navigationView.selectedItemId = R.id.nav_drawer_library
-                        router.pushController(RouterTransaction.with(DownloadController())
-                            .pushChangeHandler(SimpleSwapChangeHandler())
-                            .popChangeHandler(FadeChangeHandler()))
-                    }
-                    else {
-                        router.pushController(DownloadController().withFadeTransaction())
-                    }
-                }
             }
         }
     }
@@ -552,11 +529,11 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         val hasQueue = downloading || downloadManager.hasQueue()
         launchUI {
             if (hasQueue) {
-                val badge = navigationView?.getOrCreateBadge(R.id.nav_drawer_library) ?: return@launchUI
+                val badge = navigationView?.getOrCreateBadge(R.id.nav_library) ?: return@launchUI
                 badge.clearNumber()
                 badge.backgroundColor = getResourceColor(R.attr.badgeColor)
             } else {
-                navigationView?.removeBadge(R.id.nav_drawer_library)
+                navigationView?.removeBadge(R.id.nav_library)
             }
         }
     }

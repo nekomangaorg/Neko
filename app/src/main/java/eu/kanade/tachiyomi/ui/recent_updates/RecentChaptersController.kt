@@ -344,8 +344,7 @@ class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
         when (item.itemId) {
             R.id.action_recents -> {
                 router.setRoot(
-                    RecentlyReadController().withFadeTransaction()
-                        .tag(R.id.nav_drawer_recents.toString()))
+                    RecentlyReadController().withFadeTransaction().tag(R.id.nav_recents.toString()))
                 Injekt.get<PreferencesHelper>().showRecentUpdates().set(false)
                 (activity as? MainActivity)?.updateRecentsIcon()
             }

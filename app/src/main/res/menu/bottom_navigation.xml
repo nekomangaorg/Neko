@@ -4,19 +4,19 @@
     <group android:id="@+id/group_feature">
         <item
             android:checked="true"
-            android:id="@+id/nav_drawer_library"
+            android:id="@+id/nav_library"
             android:icon="@drawable/ic_book_black_24dp"
             android:title="@string/pref_category_library" />
         <item
-            android:id="@+id/nav_drawer_recents"
+            android:id="@+id/nav_recents"
             android:icon="@drawable/ic_update_black_24dp"
             android:title="@string/short_recents" />
         <item
-            android:id="@+id/nav_drawer_catalogues"
+            android:id="@+id/nav_catalogues"
             android:icon="@drawable/ic_explore_black_24dp"
             android:title="@string/short_catalogues" />
         <item
-            android:id="@+id/nav_drawer_settings"
+            android:id="@+id/nav_settings"
             android:icon="@drawable/ic_settings_black_24dp"
             android:title="@string/label_settings"
             android:checkable="false" />
