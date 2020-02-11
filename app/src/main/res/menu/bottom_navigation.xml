@@ -6,7 +6,7 @@
             android:checked="true"
             android:id="@+id/nav_library"
             android:icon="@drawable/ic_book_black_24dp"
-            android:title="@string/pref_category_library" />
+            android:title="@string/label_library" />
         <item
             android:id="@+id/nav_recents"
             android:icon="@drawable/ic_update_black_24dp"
