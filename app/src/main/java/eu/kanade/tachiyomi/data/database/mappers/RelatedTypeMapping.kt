@@ -16,7 +16,6 @@ import eu.kanade.tachiyomi.data.database.tables.RelatedTable.COL_ID
 import eu.kanade.tachiyomi.data.database.tables.RelatedTable.COL_MANGA_ID
 import eu.kanade.tachiyomi.data.database.tables.RelatedTable.COL_MANGA_RELATED_MATCHED_IDS
 import eu.kanade.tachiyomi.data.database.tables.RelatedTable.COL_MANGA_RELATED_MATCHED_TITLES
-import eu.kanade.tachiyomi.data.database.tables.RelatedTable.COL_MANGA_RELATED_SCORES
 
 
 
@@ -38,12 +37,11 @@ class RelatedPutResolver : DefaultPutResolver<MangaRelated>() {
             .whereArgs(obj.id)
             .build()
 
-    override fun mapToContentValues(obj: MangaRelated) = ContentValues(5).apply {
+    override fun mapToContentValues(obj: MangaRelated) = ContentValues(4).apply {
         put(COL_ID, obj.id)
         put(COL_MANGA_ID, obj.manga_id)
         put(COL_MANGA_RELATED_MATCHED_IDS, obj.matched_ids)
         put(COL_MANGA_RELATED_MATCHED_TITLES, obj.matched_titles)
-        put(COL_MANGA_RELATED_SCORES, obj.scores)
     }
 
 }
@@ -55,7 +53,6 @@ class RelatedGetResolver : DefaultGetResolver<MangaRelated>() {
         manga_id = cursor.getLong(cursor.getColumnIndex(COL_MANGA_ID))
         matched_ids = cursor.getString(cursor.getColumnIndex(COL_MANGA_RELATED_MATCHED_IDS))
         matched_titles = cursor.getString(cursor.getColumnIndex(COL_MANGA_RELATED_MATCHED_TITLES))
-        scores = cursor.getString(cursor.getColumnIndex(COL_MANGA_RELATED_SCORES))
     }
 
 }

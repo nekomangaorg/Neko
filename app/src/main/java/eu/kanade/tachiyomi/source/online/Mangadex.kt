@@ -132,7 +132,7 @@ open class Mangadex(override val lang: String, private val internalLang: String,
     }
 
     override fun fetchMangaRelatedObservable(page: Int, manga: Manga): Observable<MangasPage> {
-        return RelatedHandler().fetchReleated(manga)
+        return RelatedHandler().fetchRelated(manga)
     }
 
 

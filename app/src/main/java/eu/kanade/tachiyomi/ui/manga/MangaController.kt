@@ -190,33 +190,21 @@ class MangaController : RxController, TabbedController {
                 // First two tabs are always the info page and chapters
                 if(position == INFO_CONTROLLER) {
                     router.setRoot(RouterTransaction.with(MangaInfoController()))
-                    return
-                }
-                if(position == CHAPTERS_CONTROLLER) {
+                } else if(position == CHAPTERS_CONTROLLER) {
                     router.setRoot(RouterTransaction.with(ChaptersController()))
                     return
-                }
-
-                // For the 3rd tab display the related if enabled, else show the tracked
-                if(position == TAB_3 && preferences.relatedShowTab()) {
+                } else if (position == TAB_3 && preferences.relatedShowTab()) {
+                    // For the 3rd tab display the related if enabled, else show the tracked
                     router.setRoot(RouterTransaction.with(RelatedController(manga!!, source!!)))
-                    return
-                }
-                if(position == TAB_3
+                } else if (position == TAB_3
                         && !preferences.relatedShowTab()
                         && Injekt.get<TrackManager>().hasLoggedServices()) {
                     router.setRoot(RouterTransaction.with(TrackController()))
-                    return
-                }
-
-                // If we are at 4, then we should have all tabs enabled as our max count
-                if(position == TAB_4 && position <= tabCount) {
+                } else if (position == TAB_4 && position <= tabCount) {
+                    // If we are at 4, then we should have all tabs enabled as our max count
                     router.setRoot(RouterTransaction.with(TrackController()))
-                    return
                 }
 
-                // Else we should error
-                error("Wrong position $position")
             }
         }
 

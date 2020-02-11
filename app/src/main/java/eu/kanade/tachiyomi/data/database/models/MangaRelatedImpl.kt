@@ -12,8 +12,6 @@ class MangaRelatedImpl : MangaRelated {
 
     override lateinit var matched_titles: String
 
-    override lateinit var scores: String
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || javaClass != other.javaClass) return false
@@ -23,8 +21,7 @@ class MangaRelatedImpl : MangaRelated {
         if (id != other.id) return false
         if (manga_id != other.manga_id) return false
         if (matched_ids != other.matched_ids) return false
-        if (matched_titles != other.matched_titles) return false
-        return scores == other.scores
+        return matched_titles != other.matched_titles
     }
 
     override fun hashCode(): Int {

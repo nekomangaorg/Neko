@@ -149,6 +149,8 @@ class SettingsRelatedController : SettingsController() {
 
                         // Loop through each and insert into the database
                         var counter: Int = 0
+                        val batchMultiple = 1000
+                        var dataToInsert = mutableListOf<MangaRelatedImpl>()
                         for(key in relatedPageResult.keys()) {
 
                             // check if activity is still running
@@ -158,14 +160,20 @@ class SettingsRelatedController : SettingsController() {
                                 exitProcess(0)
                             }
 
+                            // Get our two arrays of ids and titles
+                            val matchedIds = relatedPageResult.getJSONObject(key).getJSONArray("m_ids")
+                            val matchedTitles = relatedPageResult.getJSONObject(key).getJSONArray("m_titles")
+                            if(matchedIds.length() != matchedTitles.length()) {
+                                continue
+                            }
+
                             // create the implementation and insert
                             var related = MangaRelatedImpl()
                             related.id = counter.toLong()
                             related.manga_id = key.toLong()
-                            related.matched_ids = relatedPageResult.getJSONObject(key).getJSONArray("m_ids").toString()
-                            related.matched_titles = relatedPageResult.getJSONObject(key).getJSONArray("m_titles").toString()
-                            related.scores = relatedPageResult.getJSONObject(key).getJSONArray("scores").toString()
-                            db.insertRelated(related).executeAsBlocking()
+                            related.matched_ids = matchedIds.toString()
+                            related.matched_titles = matchedTitles.toString()
+                            dataToInsert.add(related)
 
                             // display to the user
                             counter++
@@ -173,6 +181,18 @@ class SettingsRelatedController : SettingsController() {
                             builder.setContentTitle(context.resources.getString(R.string.pref_related_loading_percent,counter,totaMangas))
                             NotificationManagerCompat.from(context).notify(Notifications.ID_MANGA_RELATED_IMPORT, builder.build())
 
+                            // Every batch of manga, insert into the database
+                            if(counter % batchMultiple == 0) {
+                                db.insertManyRelated(dataToInsert).executeAsBlocking()
+                                dataToInsert.clear()
+                            }
+
+                        }
+
+                        // Insert the last bit in the case we are not divisable by 1000
+                        if(dataToInsert.isNotEmpty()) {
+                            db.insertManyRelated(dataToInsert).executeAsBlocking()
+                            dataToInsert.clear()
                         }
 
                         // Finally, save when we last loaded the database

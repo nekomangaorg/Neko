@@ -12,15 +12,12 @@ object RelatedTable {
 
     const val COL_MANGA_RELATED_MATCHED_TITLES = "matched_titles"
 
-    const val COL_MANGA_RELATED_SCORES = "scores"
-
     val createTableQuery: String
         get() = """CREATE TABLE $TABLE(
             $COL_ID INTEGER NOT NULL PRIMARY KEY,
             $COL_MANGA_ID INTEGER NOT NULL,
             $COL_MANGA_RELATED_MATCHED_IDS TEXT NOT NULL,
             $COL_MANGA_RELATED_MATCHED_TITLES TEXT NOT NULL,
-            $COL_MANGA_RELATED_SCORES TEXT NOT NULL,
             UNIQUE ($COL_ID) ON CONFLICT REPLACE
             )"""
 
