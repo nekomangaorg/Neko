@@ -361,7 +361,7 @@ class LibraryUpdateService(
                         downloadChapters(manga, newChapters.sortedBy { it.chapter_number })
                         hasDownloads = true
                     }
-                    newUpdates.add(manga to newChapters.toTypedArray())
+                    newUpdates.add(manga to newChapters.sortedBy { it.chapter_number }.toTypedArray())
                 }
             }
         }
@@ -507,7 +507,7 @@ class LibraryUpdateService(
         updates.forEach {
             val manga = it.first
             val chapters = it.second
-            val chapterNames = chapters.map { chapter -> chapter.name }.toSet()
+            val chapterNames = chapters.map { chapter -> chapter.name }
             notifications.add(Pair(notification(Notifications.CHANNEL_NEW_CHAPTERS) {
                 setSmallIcon(R.drawable.ic_tachi)
                 try {
