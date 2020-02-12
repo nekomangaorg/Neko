@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <changelog bulletedList="true">
+    <changelogversion versionName="v0.9.78" changeDate="">
+		<changelogtext>Hide categories and show your library in a single list in filters</changelogtext>
+		<changelogtext>Option to set date format</changelogtext>
+		<changelogtext>You can now pull to refresh on multiple categories, they will be added to the queue</changelogtext>
+		<changelogtext>Fast scroller added to library</changelogtext>
+		<changelogtext>Search history in recently read</changelogtext>
+		<changelogtext>Unread sorting now always shows unread on top</changelogtext>
+		<changelogtext>Download notification placeholder improved</changelogtext>
+		<changelogtext>Confirmation popup when removing manga from library</changelogtext>
+		<changelogtext>Reworked downloads caching logic</changelogtext>
+		<changelogtext>Bug fixes for icons and themes</changelogtext>
+    </changelogversion>
+
     <changelogversion versionName="v0.9.761" changeDate="">
         <changelogtext>More bug fixes :(</changelogtext>
     </changelogversion>
