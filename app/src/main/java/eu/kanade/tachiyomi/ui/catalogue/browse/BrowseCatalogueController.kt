@@ -106,7 +106,7 @@ open class BrowseCatalogueController(bundle: Bundle) :
     /**
      * Recycler view with the list of results.
      */
-    private var recycler: androidx.recyclerview.widget.RecyclerView? = null
+    private var recycler: RecyclerView? = null
 
     /**
      * Subscription for the search view.
@@ -212,9 +212,9 @@ open class BrowseCatalogueController(bundle: Bundle) :
     private fun setupRecycler(view: View) {
         numColumnsSubscription?.unsubscribe()
 
-        var oldPosition = androidx.recyclerview.widget.RecyclerView.NO_POSITION
+        var oldPosition = RecyclerView.NO_POSITION
         val oldRecycler = catalogue_view?.getChildAt(1)
-        if (oldRecycler is androidx.recyclerview.widget.RecyclerView) {
+        if (oldRecycler is RecyclerView) {
             oldPosition = (oldRecycler.layoutManager as androidx.recyclerview.widget.LinearLayoutManager).findFirstVisibleItemPosition()
             oldRecycler.adapter = null
 
@@ -239,7 +239,7 @@ open class BrowseCatalogueController(bundle: Bundle) :
                 (layoutManager as androidx.recyclerview.widget.GridLayoutManager).spanSizeLookup = object : androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup() {
                     override fun getSpanSize(position: Int): Int {
                         return when (adapter?.getItemViewType(position)) {
-                            R.layout.catalogue_grid_item, null -> 1
+                            R.layout.catalogue_mat_grid_item, null -> 1
                             else -> spanCount
                         }
                     }
@@ -251,7 +251,7 @@ open class BrowseCatalogueController(bundle: Bundle) :
 
         catalogue_view.addView(recycler, 1)
         recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
-        if (oldPosition != androidx.recyclerview.widget.RecyclerView.NO_POSITION) {
+        if (oldPosition != RecyclerView.NO_POSITION) {
             recycler.layoutManager?.scrollToPosition(oldPosition)
         }
         this.recycler = recycler

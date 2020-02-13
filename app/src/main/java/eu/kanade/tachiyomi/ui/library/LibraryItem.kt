@@ -1,10 +1,7 @@
 package eu.kanade.tachiyomi.ui.library
 
 import android.annotation.SuppressLint
-import android.view.Gravity
 import android.view.View
-import android.view.ViewGroup.LayoutParams.MATCH_PARENT
-import android.widget.FrameLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.f2prateek.rx.preferences.Preference
 import eu.davidea.flexibleadapter.FlexibleAdapter
@@ -15,10 +12,10 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
-import kotlinx.android.synthetic.main.catalogue_grid_item.view.*
+import kotlinx.android.synthetic.main.catalogue_mat_grid_item.view.*
 import uy.kohesive.injekt.injectLazy
-import java.io.Serializable
 
 class LibraryItem(val manga: LibraryManga, private val libraryAsList: Preference<Boolean>) :
         AbstractFlexibleItem<LibraryHolder>(), IFilterable<String> {
@@ -30,21 +27,21 @@ class LibraryItem(val manga: LibraryManga, private val libraryAsList: Preference
         return if (libraryAsList.getOrDefault())
             R.layout.catalogue_list_item
         else
-            R.layout.catalogue_grid_item
+            R.layout.catalogue_mat_grid_item
     }
 
     override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): LibraryHolder {
         val parent = adapter.recyclerView
         return if (parent is AutofitRecyclerView) {
             view.apply {
-                val coverHeight = parent.itemWidth / 3 * 4
-                card.layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, coverHeight)
-                gradient.layoutParams = FrameLayout.LayoutParams(
-                        MATCH_PARENT, coverHeight / 2, Gravity.BOTTOM)
+                val coverHeight = (parent.itemWidth / 3 * 4f).toInt()
+                constraint_layout.minHeight = coverHeight
             }
-            LibraryGridHolder(view, adapter)
+            LibraryMatGridHolder(view, adapter as LibraryCategoryAdapter, parent.itemWidth - 22.dpToPx, parent
+                .spanCount)
+
         } else {
-            LibraryListHolder(view, adapter)
+            LibraryListHolder(view, adapter as LibraryCategoryAdapter)
         }
     }
 
@@ -52,7 +49,6 @@ class LibraryItem(val manga: LibraryManga, private val libraryAsList: Preference
                                 holder: LibraryHolder,
                                 position: Int,
                                 payloads: MutableList<Any?>?) {
-
         holder.onSetValues(this)
     }
 

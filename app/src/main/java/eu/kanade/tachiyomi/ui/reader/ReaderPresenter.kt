@@ -120,20 +120,6 @@ class ReaderPresenter(
     }
 
     /**
-     * Called when the presenter is destroyed. It saves the current progress and cleans up
-     * references on the currently active chapters.
-     */
-    override fun onDestroy() {
-        super.onDestroy()
-        val currentChapters = viewerChaptersRelay.value
-        if (currentChapters != null) {
-            currentChapters.unref()
-            saveChapterProgress(currentChapters.currChapter)
-            saveChapterHistory(currentChapters.currChapter)
-        }
-    }
-
-    /**
      * Called when the presenter instance is being saved. It saves the currently active chapter
      * id and the last page read.
      */
@@ -152,6 +138,12 @@ class ReaderPresenter(
      */
     fun onBackPressed() {
         deletePendingChapters()
+        val currentChapters = viewerChaptersRelay.value
+        if (currentChapters != null) {
+            currentChapters.unref()
+            saveChapterProgress(currentChapters.currChapter)
+            saveChapterHistory(currentChapters.currChapter)
+        }
     }
 
     /**
@@ -364,10 +356,7 @@ class ReaderPresenter(
      */
     private fun saveChapterHistory(chapter: ReaderChapter) {
         val history = History.create(chapter.chapter).apply { last_read = Date().time }
-        db.updateHistoryLastRead(history).asRxCompletable()
-                .onErrorComplete()
-                .subscribeOn(Schedulers.io())
-                .subscribe()
+        db.updateHistoryLastRead(history).executeAsBlocking()
     }
 
     /**

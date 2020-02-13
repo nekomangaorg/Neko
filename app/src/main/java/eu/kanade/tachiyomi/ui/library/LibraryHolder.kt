@@ -15,7 +15,7 @@ import eu.davidea.flexibleadapter.items.IFlexible
 
 abstract class LibraryHolder(
         view: View,
-    val adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>
+    val adapter: LibraryCategoryAdapter
 ) : BaseFlexibleViewHolder(view, adapter) {
 
     /**

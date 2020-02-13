@@ -34,6 +34,7 @@ import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.list.listItemsSingleChoice
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import com.bumptech.glide.signature.ObjectKey
@@ -333,6 +334,7 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
                     .load(manga)
                     .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
                     .signature(ObjectKey(MangaImpl.getLastCoverFetch(manga.id!!).toString()))
+                    .transition(DrawableTransitionOptions.withCrossFade())
                     //.centerCrop()
                     .into(manga_cover)
             if (manga_cover_full != null) {
@@ -356,6 +358,7 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
                         .load(manga)
                         .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
                         .signature(ObjectKey(MangaImpl.getLastCoverFetch(manga.id!!).toString()))
+                        .transition(DrawableTransitionOptions.withCrossFade())
                         .centerCrop()
                         .into(backdrop)
             }

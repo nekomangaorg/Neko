@@ -33,10 +33,10 @@
         android:layout_width="match_parent"
         android:layout_height="20dp"
         android:background="@drawable/shape_gradient_top_shadow"
-        android:backgroundTint="@color/md_black_1000_54"
         android:paddingBottom="10dp"
         app:layout_anchorGravity="top"
         app:layout_anchor="@id/bottom_sheet" />
+
     <!-- Adding bottom sheet after main content -->
     <include layout="@layout/filter_bottom_sheet"/>
 

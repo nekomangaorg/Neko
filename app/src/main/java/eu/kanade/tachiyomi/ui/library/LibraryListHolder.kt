@@ -30,7 +30,7 @@ import kotlinx.android.synthetic.main.catalogue_list_item.unread_text
 
 class LibraryListHolder(
         private val view: View,
-        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>
+        adapter: LibraryCategoryAdapter
 ) : LibraryHolder(view, adapter) {
 
     /**

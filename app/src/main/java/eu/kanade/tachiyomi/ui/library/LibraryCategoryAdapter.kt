@@ -11,8 +11,9 @@ import eu.kanade.tachiyomi.util.lang.chop
 import eu.kanade.tachiyomi.util.lang.removeArticles
 import uy.kohesive.injekt.injectLazy
 import java.text.SimpleDateFormat
-import java.util.*
-
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 /**
  * Adapter storing a list of manga in a certain category.
@@ -28,6 +29,12 @@ class LibraryCategoryAdapter(val view: LibraryCategoryView) :
     private var mangas: List<LibraryItem> = emptyList()
 
     val onItemReleaseListener: CategoryAdapter.OnItemReleaseListener = view
+
+
+    /**
+     * Listener called when an item of the list press start reading.
+     */
+    val libraryListener: LibraryListener = view
 
     /**
      * Sets a list of manga in the adapter.
@@ -133,4 +140,10 @@ class LibraryCategoryAdapter(val view: LibraryCategoryView) :
             SimpleDateFormat("yyyy", Locale.getDefault()).format(date)
     }
 
+    interface LibraryListener {
+        /**
+         * Called when an item of the list is released.
+         */
+        fun startReading(position: Int)
+    }
 }

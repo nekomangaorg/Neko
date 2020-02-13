@@ -9,7 +9,7 @@ import kotlin.math.max
 class AutofitRecyclerView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
         androidx.recyclerview.widget.RecyclerView(context, attrs) {
 
-    private val manager = androidx.recyclerview.widget.GridLayoutManager(context, 1)
+    private val manager = GridLayoutManager(context, 1)
 
     private var columnWidth = -1
 

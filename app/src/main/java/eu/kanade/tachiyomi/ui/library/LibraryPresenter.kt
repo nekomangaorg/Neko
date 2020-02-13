@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.library
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
+import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
@@ -16,6 +17,7 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.HttpSource
+import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
 import eu.kanade.tachiyomi.ui.migration.MigrationFlags
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.lang.removeArticles
@@ -27,16 +29,20 @@ import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Comp
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import rx.Observable
+import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.ArrayList
+import java.util.Calendar
 import java.util.Collections
 import java.util.Comparator
+import java.util.Date
 
 /**
  * Class containing library information.
@@ -77,6 +83,8 @@ class LibraryPresenter(
     private var rawMangaMap:LibraryMap? = null
 
     private var currentMangaMap:LibraryMap? = null
+
+    private var readerSubscription: Subscription? = null
 
     fun isDownloading() = downloadManager.hasQueue()
 
@@ -682,6 +690,12 @@ class LibraryPresenter(
             // SearchPresenter#networkToLocalManga may have updated the manga title, so ensure db gets updated title
             db.updateMangaTitle(manga).executeAsBlocking()
         }
+    }
+
+    fun getFirstUnread(manga: Manga): Chapter? {
+        val chapters = db.getChapters(manga).executeAsBlocking()
+        return chapters.sortedByDescending { it.source_order }.find { !it.read }
+
     }
 
     private companion object {

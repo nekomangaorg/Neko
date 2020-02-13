@@ -409,6 +409,12 @@
     <string name="category_already_in_queue">%1$s is already in queue</string>
     <string name="local_source_badge">Local</string>
     <string name="confirm_manga_deletion">Remove from library?</string>
+    <plurals name="unread_count">
+        <item quantity="one">New chapter</item>
+        <item quantity="other">%d Unread</item>
+    </plurals>
+    <string name="new_chapter">New</string>
+    <string name="start_reading">Start Reading</string>
 
     <!-- Catalogue fragment -->
     <string name="source_search_options">Search filters</string>
@@ -419,6 +425,7 @@
     <string name="action_global_search_hint">Global search…</string>
     <string name="latest">Latest</string>
     <string name="browse">Browse</string>
+    <string name="in_library">In Library</string>
 
     <!-- Manga activity -->
     <string name="manga_not_in_db">This manga has been removed from the database.</string>

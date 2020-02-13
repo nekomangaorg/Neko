@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.catalogue.browse
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.FrameLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.f2prateek.rx.preferences.Preference
@@ -15,6 +16,7 @@ import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import kotlinx.android.synthetic.main.catalogue_grid_item.view.*
+import kotlinx.android.synthetic.main.catalogue_mat_grid_item.view.*
 
 class CatalogueItem(val manga: Manga, private val catalogueAsList: Preference<Boolean>) :
         AbstractFlexibleItem<CatalogueHolder>() {
@@ -23,19 +25,19 @@ class CatalogueItem(val manga: Manga, private val catalogueAsList: Preference<Bo
         return if (catalogueAsList.getOrDefault())
             R.layout.catalogue_list_item
         else
-            R.layout.catalogue_grid_item
+            R.layout.catalogue_mat_grid_item
     }
 
     override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): CatalogueHolder {
         val parent = adapter.recyclerView
         return if (parent is AutofitRecyclerView) {
             view.apply {
-                card.layoutParams = FrameLayout.LayoutParams(
-                        MATCH_PARENT, parent.itemWidth / 3 * 4)
-                gradient.layoutParams = FrameLayout.LayoutParams(
-                        MATCH_PARENT, parent.itemWidth / 3 * 4 / 2, Gravity.BOTTOM)
+                val coverHeight = (parent.itemWidth / 3 * 4f).toInt()
+                constraint_layout.layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
+                cover_thumbnail.adjustViewBounds = false
+                cover_thumbnail.layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, coverHeight)
             }
-            CatalogueGridHolder(view, adapter)
+            CatalogueMatGridHolder(view, adapter)
         } else {
             CatalogueListHolder(view, adapter)
         }

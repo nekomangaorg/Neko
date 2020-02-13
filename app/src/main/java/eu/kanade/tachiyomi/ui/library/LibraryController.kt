@@ -1,6 +1,8 @@
 package eu.kanade.tachiyomi.ui.library
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Bundle
@@ -50,6 +52,7 @@ import eu.kanade.tachiyomi.ui.migration.MigrationInterface
 import eu.kanade.tachiyomi.ui.migration.manga.design.PreMigrationController
 import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationListController
 import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationProcedureConfig
+import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
@@ -141,6 +144,8 @@ class LibraryController(
 
     private var tabsVisibilitySubscription: Subscription? = null
 
+    private var observeLater:Boolean = false
+
     var snack: Snackbar? = null
 
     var presenter = LibraryPresenter(this)
@@ -165,22 +170,11 @@ class LibraryController(
 
         adapter = LibraryAdapter(this)
         library_pager.adapter = adapter
+
         library_pager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
             override fun onPageSelected(position: Int) {
                 preferences.lastUsedCategory().set(position)
                 activeCategory = position
-            }
-
-            override fun onPageScrollStateChanged(state: Int) {}
-
-            override fun onPageScrolled(
-                position: Int, positionOffset: Float, positionOffsetPixels: Int
-            ) {
-            }
-        })
-
-        library_pager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
-            override fun onPageSelected(position: Int) {
                 bottom_sheet.lastCategory = adapter?.categories?.getOrNull(position)
                 if (preferences.librarySortingMode().getOrDefault() == LibrarySort.DRAG_AND_DROP) bottom_sheet.updateTitle()
             }
@@ -227,6 +221,7 @@ class LibraryController(
         val library = presenter.getAllManga()
         if (library != null) onNextLibraryUpdate(presenter.categories, library)
         else {
+            library_pager.alpha = 0f
             presenter.getLibraryBlocking()
         }
     }
@@ -239,6 +234,14 @@ class LibraryController(
             DownloadService.addListener(this)
             DownloadService.callListeners()
             LibraryUpdateService.setListener(this)
+        }
+    }
+
+    override fun onActivityResumed(activity: Activity) {
+        super.onActivityResumed(activity)
+        if (observeLater) {
+            presenter.getLibrary()
+            observeLater = false
         }
     }
 
@@ -345,6 +348,8 @@ class LibraryController(
         }
         else if (!freshStart) {
             justStarted = false
+            if (library_pager.alpha == 0f)
+                library_pager.animate().alpha(1f).setDuration(500).start()
         }
     }
 
@@ -665,6 +670,14 @@ class LibraryController(
     override fun updateCategoriesForMangas(mangas: List<Manga>, categories: List<Category>) {
         presenter.moveMangasToCategories(categories, mangas)
         destroyActionModeIfNeeded()
+    }
+
+    fun startReading(manga: Manga) {
+        val activity = activity ?: return
+        val chapter = presenter.getFirstUnread(manga) ?: return
+        val intent = ReaderActivity.newIntent(activity, manga, chapter)
+        observeLater = true
+        startActivity(intent)
     }
 }
 

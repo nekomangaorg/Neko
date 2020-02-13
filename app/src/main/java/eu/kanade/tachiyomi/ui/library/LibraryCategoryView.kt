@@ -39,6 +39,7 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
         FlexibleAdapter.OnItemClickListener,
         FlexibleAdapter.OnItemLongClickListener,
         FlexibleAdapter.OnItemMoveListener,
+    LibraryCategoryAdapter.LibraryListener,
     CategoryAdapter.OnItemReleaseListener {
 
     /**
@@ -96,6 +97,7 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
         recycler.adapter = adapter
         swipe_refresh.addView(recycler)
         adapter.fastScroller = fast_scroller
+        // recycler.addOnScrollListener(adapter.preloader())
 
         if (::category.isInitialized) {
             val mangaForCategory = controller.presenter.getMangaInCategory(category.id)
@@ -330,6 +332,11 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
 
     override fun onItemReleased(position: Int) {
         if (adapter.selectedItemCount == 0) saveDragSort()
+    }
+
+    override fun startReading(position: Int) {
+        val manga = adapter.getItem(position)?.manga ?: return
+        controller.startReading(manga)
     }
 
     private fun saveDragSort() {
