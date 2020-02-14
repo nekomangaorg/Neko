@@ -52,7 +52,7 @@
         android:layout_height="wrap_content"
         android:text="@string/viewer_for_this_series"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/verticalcenter"
+        app:layout_constraintEnd_toStartOf="@id/bottom_line"
         app:layout_constraintBaseline_toBaselineOf="@id/viewer" />
 
     <androidx.appcompat.widget.AppCompatSpinner
@@ -62,7 +62,7 @@
         android:layout_marginTop="16dp"
         android:entries="@array/viewers_selector"
         app:layout_constraintTop_toBottomOf="@id/general_prefs"
-        app:layout_constraintStart_toEndOf="@id/verticalcenter"
+        app:layout_constraintStart_toEndOf="@id/bottom_line"
         app:layout_constraintEnd_toEndOf="@id/spinner_end" />
 
     <TextView
@@ -71,7 +71,7 @@
         android:layout_marginTop="16dp"
         android:text="@string/pref_rotation_type"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/verticalcenter"
+        app:layout_constraintEnd_toStartOf="@id/bottom_line"
         app:layout_constraintBaseline_toBaselineOf="@id/rotation_mode" />
 
     <androidx.appcompat.widget.AppCompatSpinner
@@ -81,7 +81,7 @@
         android:layout_marginTop="16dp"
         android:entries="@array/rotation_type"
         app:layout_constraintTop_toBottomOf="@id/viewer"
-        app:layout_constraintStart_toEndOf="@id/verticalcenter"
+        app:layout_constraintStart_toEndOf="@id/bottom_line"
         app:layout_constraintEnd_toEndOf="@id/spinner_end" />
 
     <TextView
@@ -99,7 +99,7 @@
         android:layout_marginTop="16dp"
         android:entries="@array/reader_themes"
         app:layout_constraintTop_toBottomOf="@id/rotation_mode"
-        app:layout_constraintStart_toEndOf="@id/verticalcenter"
+        app:layout_constraintStart_toEndOf="@id/bottom_line"
         app:layout_constraintEnd_toEndOf="@id/spinner_end" />
 
     <androidx.appcompat.widget.SwitchCompat
@@ -174,7 +174,7 @@
         android:id="@+id/zoom_start_text"
         android:text="@string/pref_image_scale_type"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/verticalcenter"
+        app:layout_constraintEnd_toStartOf="@id/bottom_line"
         app:layout_constraintBaseline_toBaselineOf="@id/scale_type"/>
 
     <androidx.appcompat.widget.AppCompatSpinner
@@ -183,7 +183,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:entries="@array/image_scale_type"
-        app:layout_constraintStart_toEndOf="@id/verticalcenter"
+        app:layout_constraintStart_toEndOf="@id/bottom_line"
         app:layout_constraintEnd_toEndOf="@id/spinner_end"
         app:layout_constraintTop_toBottomOf="@id/pager_prefs"/>
 
@@ -193,7 +193,7 @@
         android:layout_height="wrap_content"
         android:text="@string/pref_zoom_start"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/verticalcenter"
+        app:layout_constraintEnd_toStartOf="@id/bottom_line"
         app:layout_constraintBaseline_toBaselineOf="@id/zoom_start"/>
 
     <androidx.appcompat.widget.AppCompatSpinner
@@ -203,7 +203,7 @@
         android:entries="@array/zoom_start"
         android:layout_marginTop="16dp"
         app:layout_constraintTop_toBottomOf="@id/scale_type"
-        app:layout_constraintStart_toEndOf="@id/verticalcenter"
+        app:layout_constraintStart_toEndOf="@id/bottom_line"
         app:layout_constraintEnd_toEndOf="@id/spinner_end" />
 
     <androidx.appcompat.widget.SwitchCompat
@@ -266,7 +266,7 @@
         app:constraint_referenced_ids="webtoon_prefs,crop_borders_webtoon" />
 
     <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/verticalcenter"
+        android:id="@+id/bottom_line"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"

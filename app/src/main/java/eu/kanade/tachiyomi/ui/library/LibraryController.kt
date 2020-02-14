@@ -245,6 +245,11 @@ class LibraryController(
         }
     }
 
+    override fun onActivityPaused(activity: Activity) {
+        super.onActivityPaused(activity)
+        presenter.onDestroy()
+    }
+
     override fun onDestroy() {
         presenter.onDestroy()
         super.onDestroy()

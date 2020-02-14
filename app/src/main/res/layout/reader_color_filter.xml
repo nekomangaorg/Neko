@@ -178,7 +178,7 @@
         android:layout_marginTop="16dp"
         android:entries="@array/color_filter_modes"
         app:layout_constraintTop_toBottomOf="@id/seekbar_color_filter_alpha"
-        app:layout_constraintStart_toEndOf="@id/verticalcenter"
+        app:layout_constraintStart_toEndOf="@id/bottom_line"
         app:layout_constraintEnd_toEndOf="@id/spinner_end" />
 
     <!-- Brightness -->
@@ -228,7 +228,7 @@
         app:layout_constraintEnd_toEndOf="parent"/>
 
     <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/verticalcenter"
+        android:id="@+id/bottom_line"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"

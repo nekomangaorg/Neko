@@ -15,7 +15,7 @@ import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
-import kotlinx.android.synthetic.main.catalogue_mat_grid_item.view.*
+import kotlinx.android.synthetic.main.catalogue_grid_item.view.*
 import uy.kohesive.injekt.injectLazy
 
 class LibraryItem(val manga: LibraryManga, private val libraryAsList: Preference<Boolean>,
@@ -29,7 +29,7 @@ class LibraryItem(val manga: LibraryManga, private val libraryAsList: Preference
         return if (libraryAsList.getOrDefault())
             R.layout.catalogue_list_item
         else
-            R.layout.catalogue_mat_grid_item
+            R.layout.catalogue_grid_item
     }
 
     override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): LibraryHolder {
@@ -51,7 +51,7 @@ class LibraryItem(val manga: LibraryManga, private val libraryAsList: Preference
                     cover_thumbnail.maxHeight = (parent.itemWidth / 3f * 6f).toInt()
                 }
             }
-            LibraryMatGridHolder(view, adapter as LibraryCategoryAdapter, parent.itemWidth, fixedSize)
+            LibraryGridHolder(view, adapter as LibraryCategoryAdapter, parent.itemWidth, fixedSize)
 
         } else {
             LibraryListHolder(view, adapter as LibraryCategoryAdapter)

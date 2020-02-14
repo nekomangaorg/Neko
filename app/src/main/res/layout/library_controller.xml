@@ -31,7 +31,7 @@
     <View
         android:id="@+id/shadow"
         android:layout_width="match_parent"
-        android:layout_height="20dp"
+        android:layout_height="24dp"
         android:background="@drawable/shape_gradient_top_shadow"
         android:paddingBottom="10dp"
         app:layout_anchorGravity="top"

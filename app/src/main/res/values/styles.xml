@@ -56,6 +56,10 @@
         <item name="android:textStyle">bold</item>
     </style>
 
+    <style name="TextAppearance.Regular.Body1.SemiBold">
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
     <style name="TextAppearance.Regular.Body1.Light">
         <item name="android:textColor">@color/textColorPrimary</item>
     </style>

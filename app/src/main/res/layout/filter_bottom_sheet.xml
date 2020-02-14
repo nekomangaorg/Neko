@@ -190,7 +190,7 @@
                                 android:focusable="true"
                                 android:gravity="start|center"
                                 android:padding="5dp"
-                                android:text="@string/action_display_unread_badge"
+                                android:text="@string/action_display_unread_text"
                                 android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
                                 android:textColor="?android:attr/textColorPrimary"
                                 android:textSize="15sp"

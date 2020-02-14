@@ -19,20 +19,20 @@ class MangaHolder(
         title.text = item.manga.currentTitle()
 
         // Create thumbnail onclick to simulate long click
-        thumbnail.setOnClickListener {
+        cover_thumbnail.setOnClickListener {
             // Simulate long click on this view to enter selection mode
             onLongClick(itemView)
         }
 
         // Update the cover.
-        GlideApp.with(itemView.context).clear(thumbnail)
+        GlideApp.with(itemView.context).clear(cover_thumbnail)
         GlideApp.with(itemView.context)
                 .load(item.manga)
                 .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
-                .centerCrop()
-                .circleCrop()
+//                .centerCrop()
+//                .circleCrop()
                 .dontAnimate()
-                .into(thumbnail)
+                .into(cover_thumbnail)
     }
 
 }

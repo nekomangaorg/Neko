@@ -84,8 +84,6 @@ class LibraryPresenter(
 
     private var currentMangaMap:LibraryMap? = null
 
-    private var readerSubscription: Subscription? = null
-
     fun isDownloading() = downloadManager.hasQueue()
 
     fun onDestroy() {

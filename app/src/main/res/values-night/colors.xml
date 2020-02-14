@@ -4,12 +4,14 @@
     <color name="colorPrimary">#212121</color>
     <color name="colorPrimaryDark">#212121</color>
 
+
     <color name="drawerHighlight">@color/md_white_1000_12</color>
     <color name="drawerPrimary">#3399FF</color>
     <color name="oldNavBarBackground">#B3000000</color>
     <color name="snackbarBackground">#FFFFFF</color>
     <color name="cardBackground">#212121</color>
     <color name="rippleColor">@color/md_white_1000_20</color>
+    <color name="fullRippleColor">#707070</color>
     <color name="dialogBackground">@color/md_grey_800</color>
     <color name="colorAccent">#3399FF</color>
     <color name="purePrimary">#212121</color>

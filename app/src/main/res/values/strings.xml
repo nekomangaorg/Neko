@@ -97,7 +97,7 @@
     <string name="action_display_grid">Grid</string>
     <string name="action_display_list">List</string>
     <string name="action_display_download_badge">Download badges</string>
-    <string name="action_display_unread_badge">Unread badges</string>
+    <string name="action_display_unread_text">Unread text</string>
     <string name="action_display_all_unread">All unread</string>
     <string name="action_display_any_unread">Any unread</string>
     <string name="action_display_hide_unread">Hide unread</string>
@@ -197,8 +197,7 @@
     <string name="pref_auto_update_manga_sync">Sync chapters after reading</string>
     <string name="pref_remove_articles">Sort by ignoring articles</string>
     <string name="pref_fixed_grid">Fixed grid size in library</string>
-    <string name="pref_fixed_grid_summary">Show all covers as the same height by cropping (improves
-        fast scrolling performance)</string>
+    <string name="pref_fixed_grid_summary">Show all covers as the same height by cropping</string>
     <string name="pref_remove_articles_summary">When sorting alphabetically, sort ignoring
         articles (a, an, the) at the start of manga titles</string>
     <string name="pref_skip_pre_migration">Skip pre-migration</string>
@@ -414,10 +413,14 @@
     <string name="confirm_manga_deletion">Remove from library?</string>
     <plurals name="unread_count">
         <item quantity="one">New chapter</item>
-        <item quantity="other">%d Unread</item>
+        <item quantity="other">%d unread</item>
     </plurals>
     <string name="new_chapter">New</string>
     <string name="start_reading">Start Reading</string>
+    <plurals name="download_count">
+        <item quantity="one">1 downloaded</item>
+        <item quantity="other">%d downloaded</item>
+    </plurals>
 
     <!-- Catalogue fragment -->
     <string name="source_search_options">Search filters</string>

@@ -17,7 +17,6 @@ import com.f2prateek.rx.preferences.Preference
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.jakewharton.rxbinding.support.v7.widget.queryTextChangeEvents
-import com.jakewharton.rxbinding.view.visible
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
@@ -239,7 +238,7 @@ open class BrowseCatalogueController(bundle: Bundle) :
                 (layoutManager as androidx.recyclerview.widget.GridLayoutManager).spanSizeLookup = object : androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup() {
                     override fun getSpanSize(position: Int): Int {
                         return when (adapter?.getItemViewType(position)) {
-                            R.layout.catalogue_mat_grid_item, null -> 1
+                            R.layout.catalogue_grid_item, null -> 1
                             else -> spanCount
                         }
                     }
