@@ -6,7 +6,9 @@ import android.view.ViewGroup
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
 import eu.kanade.tachiyomi.util.view.inflate
+import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.widget.SimpleNavigationView
 import kotlinx.android.synthetic.main.catalogue_drawer_content.view.*
 
@@ -31,6 +33,10 @@ class CatalogueNavigationView @JvmOverloads constructor(context: Context, attrs:
         title.text = context.getString(R.string.source_search_options)
         search_btn.setOnClickListener { onSearchClicked() }
         reset_btn.setOnClickListener { onResetClicked() }
+        view.search_layout.setOnApplyWindowInsetsListener { v, insets ->
+            view.updatePaddingRelative(bottom = insets.systemWindowInsetBottom)
+            insets
+        }
     }
 
     fun setFilters(items: List<IFlexible<*>>) {

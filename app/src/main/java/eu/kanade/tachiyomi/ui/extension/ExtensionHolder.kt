@@ -61,9 +61,8 @@ class ExtensionHolder(view: View, override val adapter: ExtensionAdapter) :
         isClickable = true
         isActivated = false
 
-        //background = VectorDrawableCompat.create(resources!!, R.drawable.button_bg_transparent, null)
         setTextColor(ContextCompat.getColorStateList(context, R.drawable.button_text_state))
-        backgroundTintList = ContextCompat.getColorStateList(context, R.color.button_bg)
+        backgroundTintList = ContextCompat.getColorStateList(context, android.R.color.transparent)
 
         val extension = item.extension
 
