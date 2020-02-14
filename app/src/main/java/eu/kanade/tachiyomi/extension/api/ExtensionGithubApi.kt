@@ -29,7 +29,9 @@ internal class ExtensionGithubApi {
     suspend fun findExtensions(): List<Extension.Available> {
         val call = GET("$REPO_URL/index.json")
 
-        return parseResponse(network.client.newCall(call).await())
+        return withContext(Dispatchers.IO) {
+             parseResponse(network.client.newCall(call).await())
+        }
     }
 
     suspend fun checkforUpdates(context: Context): List<Extension.Installed> {
