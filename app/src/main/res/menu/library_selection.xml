@@ -40,9 +40,4 @@
         </menu>
     </item>
 
-    <item
-        android:id="@+id/action_hide_title"
-        android:title="@string/action_hide_title"
-        app:showAsAction="never" />
-
 </menu>

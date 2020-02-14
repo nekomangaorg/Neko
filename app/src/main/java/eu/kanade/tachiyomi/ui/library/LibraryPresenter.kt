@@ -420,13 +420,14 @@ class LibraryPresenter(
     private fun getLibraryFromDB(): Library {
         val categories = db.getCategories().executeAsBlocking().toMutableList()
         val libraryAsList = preferences.libraryAsList()
+        val fixedGrid = preferences.libraryGridFixedSize()
         val showCategories = !preferences.hideCategories().getOrDefault()
         val unreadBadgeType = preferences.unreadBadgeType().getOrDefault()
         var libraryManga = db.getLibraryMangas().executeAsBlocking()
         if (!showCategories)
             libraryManga = libraryManga.distinctBy { it.id }
         val libraryMap = libraryManga.map { manga ->
-            LibraryItem(manga, libraryAsList).apply { unreadType = unreadBadgeType }
+            LibraryItem(manga, libraryAsList, fixedGrid).apply { unreadType = unreadBadgeType }
         }.groupBy {
             if (showCategories) it.manga.category else 0
         }

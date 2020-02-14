@@ -108,29 +108,39 @@
                 android:paddingTop="10dp"
                 android:paddingEnd="5dp"
                 android:paddingBottom="3dp"
+                android:text="@string/in_library"
                 android:textColor="@color/md_white_1000"
                 android:textSize="13sp"
                 android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/local_text"
                 app:layout_constraintTop_toTopOf="parent"
-                android:text="@string/in_library"
                 tools:visibility="visible" />
 
-            <ImageButton
-                android:id="@+id/play_button"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
+            <FrameLayout
+                android:id="@+id/play_layout"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
                 android:layout_gravity="end|bottom"
-                android:layout_marginEnd="6dp"
-                android:layout_marginBottom="6dp"
-                android:background="@drawable/round_play_background"
-                android:contentDescription="@string/start_reading"
-                android:src="@drawable/ic_play_arrow_white_24dp"
-                android:tint="@android:color/white"
+                android:clickable="true"
+                android:focusable="true"
                 android:visibility="gone"
-                tools:visibility="visible" />
+                tools:visibility="visible">
 
+                <ImageView
+                    android:id="@+id/play_button"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_gravity="end|bottom"
+                    android:layout_marginEnd="6dp"
+                    android:layout_marginBottom="6dp"
+                    android:padding="3dp"
+                    android:background="@drawable/round_play_background"
+                    android:contentDescription="@string/start_reading"
+                    android:src="@drawable/ic_play_arrow_white_24dp"
+                    android:tint="@android:color/white" />
+
+            </FrameLayout>
 
             <ProgressBar
                 android:id="@+id/progress"

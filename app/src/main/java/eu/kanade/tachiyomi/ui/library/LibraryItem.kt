@@ -2,6 +2,8 @@ package eu.kanade.tachiyomi.ui.library
 
 import android.annotation.SuppressLint
 import android.view.View
+import android.view.ViewGroup
+import android.widget.FrameLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.f2prateek.rx.preferences.Preference
 import eu.davidea.flexibleadapter.FlexibleAdapter
@@ -12,12 +14,12 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import kotlinx.android.synthetic.main.catalogue_mat_grid_item.view.*
 import uy.kohesive.injekt.injectLazy
 
-class LibraryItem(val manga: LibraryManga, private val libraryAsList: Preference<Boolean>) :
+class LibraryItem(val manga: LibraryManga, private val libraryAsList: Preference<Boolean>,
+    private val fixedGrid: Preference<Boolean>) :
         AbstractFlexibleItem<LibraryHolder>(), IFilterable<String> {
 
     var downloadCount = -1
@@ -33,12 +35,23 @@ class LibraryItem(val manga: LibraryManga, private val libraryAsList: Preference
     override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): LibraryHolder {
         val parent = adapter.recyclerView
         return if (parent is AutofitRecyclerView) {
+            val fixedSize = fixedGrid.getOrDefault()
             view.apply {
-                val coverHeight = (parent.itemWidth / 3 * 4f).toInt()
-                constraint_layout.minHeight = coverHeight
+                val coverHeight = (parent.itemWidth / 3f * 4f).toInt()
+                if (fixedSize) {
+                    constraint_layout.layoutParams = FrameLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT
+                    )
+                    cover_thumbnail.adjustViewBounds = false
+                    cover_thumbnail.layoutParams = FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, coverHeight)
+                }
+                else {
+                    constraint_layout.minHeight = coverHeight
+                    cover_thumbnail.maxHeight = (parent.itemWidth / 3f * 6f).toInt()
+                }
             }
-            LibraryMatGridHolder(view, adapter as LibraryCategoryAdapter, parent.itemWidth - 22.dpToPx, parent
-                .spanCount)
+            LibraryMatGridHolder(view, adapter as LibraryCategoryAdapter, parent.itemWidth, fixedSize)
 
         } else {
             LibraryListHolder(view, adapter as LibraryCategoryAdapter)

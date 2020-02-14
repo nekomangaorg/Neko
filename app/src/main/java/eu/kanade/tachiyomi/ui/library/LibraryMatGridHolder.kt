@@ -25,7 +25,7 @@ class LibraryMatGridHolder(
     private val view: View,
     adapter: LibraryCategoryAdapter,
     var width:Int,
-    var rowCount: Int
+    var fixedSize: Boolean
 ) : LibraryHolder(view, adapter) {
 
     /**
@@ -58,8 +58,8 @@ class LibraryMatGridHolder(
                 )
             )
         }
-        play_button.visibility = if (unread > 0) View.VISIBLE else View.GONE
-        play_button.setOnClickListener { playButtonClicked() }
+        play_layout.visibility = if (unread > 0) View.VISIBLE else View.GONE
+        play_layout.setOnClickListener { playButtonClicked() }
 
         // Update the download count and its visibility.
         with(download_text) {
@@ -73,10 +73,11 @@ class LibraryMatGridHolder(
         if (item.manga.thumbnail_url == null) Glide.with(view.context).clear(cover_thumbnail)
         else {
             val id = item.manga.id ?: return
-            GlideApp.with(view.context).load(item.manga)
+            var glide = GlideApp.with(view.context).load(item.manga)
                 .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
                 .signature(ObjectKey(MangaImpl.getLastCoverFetch(id).toString()))
-                .into(cover_thumbnail)
+            glide = if (fixedSize) glide.centerCrop() else glide.override(width)
+            glide.into(cover_thumbnail)
         }
     }
 

@@ -101,7 +101,11 @@ class RecentlyReadController(bundle: Bundle? = null) : BaseController(bundle),
     override fun onActivityResumed(activity: Activity) {
         super.onActivityResumed(activity)
         if (observeLater) {
-            presenter.observe()
+            launchUI {
+                val manga = presenter.refresh(query)
+                recentItems = manga.toMutableList()
+                adapter?.updateDataSet(manga)
+            }
             observeLater = false
         }
     }

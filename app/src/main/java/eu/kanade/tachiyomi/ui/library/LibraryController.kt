@@ -264,10 +264,11 @@ class LibraryController(
     override fun downloadStatusChanged(downloading: Boolean) {
         launchUI {
             val scale = if (downloading) 1f else 0f
+            val fab = fab ?: return@launchUI
             fab.animate().scaleX(scale).scaleY(scale).setDuration(200).start()
             fab.isClickable = downloading
             fab.isFocusable = downloading
-            bottom_sheet.adjustTitleMargin(downloading)
+            bottom_sheet?.adjustTitleMargin(downloading)
         }
     }
 
@@ -520,14 +521,6 @@ class LibraryController(
             destroyActionModeIfNeeded()
         } else {
             mode.title = resources?.getString(R.string.label_selected, count)
-            menu.findItem(R.id.action_hide_title)?.isVisible =
-                !preferences.libraryAsList().getOrDefault()
-            if (!preferences.libraryAsList().getOrDefault()) {
-                val showAll = (selectedMangas.all { (it as? LibraryManga)?.hide_title == true })
-                menu.findItem(R.id.action_hide_title)?.title = activity?.getString(
-                    if (showAll) R.string.action_show_title else R.string.action_hide_title
-                )
-            }
             if (preferences.librarySortingMode().getOrDefault() == LibrarySort.DRAG_AND_DROP) {
                 val catId = (selectedMangas.first() as? LibraryManga)?.category
                 val sameCat = (adapter?.categories?.getOrNull(library_pager.currentItem)?.id
@@ -568,12 +561,6 @@ class LibraryController(
                         PreMigrationController.create( selectedMangas.mapNotNull { it.id } )
                     }
                    .withFadeTransaction())
-                destroyActionModeIfNeeded()
-            }
-            R.id.action_hide_title -> {
-                val showAll = (selectedMangas.filter { (it as? LibraryManga)?.hide_title == true }
-                    ).size == selectedMangas.size
-                presenter.hideShowTitle(selectedMangas.toList(), !showAll)
                 destroyActionModeIfNeeded()
             }
             R.id.action_to_top, R.id.action_to_bottom -> {
@@ -676,6 +663,7 @@ class LibraryController(
         val activity = activity ?: return
         val chapter = presenter.getFirstUnread(manga) ?: return
         val intent = ReaderActivity.newIntent(activity, manga, chapter)
+        destroyActionModeIfNeeded()
         observeLater = true
         startActivity(intent)
     }

@@ -113,6 +113,8 @@ object PreferenceKeys {
 
     const val libraryAsList = "pref_display_library_as_list"
 
+    const val libraryGridFixed = "library_grid_fixes"
+
     const val lang = "app_language"
 
     const val dateFormat = "app_date_format"

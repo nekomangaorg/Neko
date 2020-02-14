@@ -196,6 +196,9 @@
     <string name="pref_update_only_non_completed">Only update ongoing manga</string>
     <string name="pref_auto_update_manga_sync">Sync chapters after reading</string>
     <string name="pref_remove_articles">Sort by ignoring articles</string>
+    <string name="pref_fixed_grid">Fixed grid size in library</string>
+    <string name="pref_fixed_grid_summary">Show all covers as the same height by cropping (improves
+        fast scrolling performance)</string>
     <string name="pref_remove_articles_summary">When sorting alphabetically, sort ignoring
         articles (a, an, the) at the start of manga titles</string>
     <string name="pref_skip_pre_migration">Skip pre-migration</string>

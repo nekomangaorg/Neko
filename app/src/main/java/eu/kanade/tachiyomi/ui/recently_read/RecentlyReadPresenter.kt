@@ -1,19 +1,12 @@
 package eu.kanade.tachiyomi.ui.recently_read
 
-import android.os.Bundle
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
 import eu.kanade.tachiyomi.util.system.launchUI
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import okhttp3.Dispatcher
-import rx.Observable
-import rx.Subscription
-import rx.android.schedulers.AndroidSchedulers
-import rx.schedulers.Schedulers
 import uy.kohesive.injekt.injectLazy
 import java.util.Calendar
 import java.util.Comparator
@@ -30,7 +23,6 @@ class RecentlyReadPresenter(private val view: RecentlyReadController) {
      * Used to connect to database
      */
     val db: DatabaseHelper by injectLazy()
-    private var readerSubscription:Subscription? = null
     var lastCount = 25
     var lastSearch = ""
 
@@ -52,19 +44,6 @@ class RecentlyReadPresenter(private val view: RecentlyReadController) {
 
         return db.getRecentMangaLimit(cal.time, lastCount, search).executeAsBlocking()
             .map(::RecentlyReadItem)
-    }
-
-    fun observe() {
-        readerSubscription?.unsubscribe()
-        val cal = Calendar.getInstance()
-        cal.time = Date()
-        cal.add(Calendar.YEAR, -50)
-        readerSubscription = db.getRecentMangaLimit(cal.time, lastCount, "").asRxObservable().map {
-            val items = it.map(::RecentlyReadItem)
-            launchUI {
-                view.onNextManga(items)
-            }
-        }.observeOn(Schedulers.io()).skip(1).take(1).subscribe()
     }
 
     /**
