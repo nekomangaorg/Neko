@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <changelog bulletedList="true">
-    <changelogversion versionName="v0.9.78" changeDate="">
+    <changelogversion versionName="v0.9.81" changeDate="">
+        <changelogtext>Fixed Catalogue list resetting to the top</changelogtext>
+        <changelogtext>Fixed those without a category seeing "Updating Default"</changelogtext>
+    </changelogversion>
+
+    <changelogversion versionName="v0.9.8" changeDate="">
 		<changelogtext>Hide categories and show your library in a single list in filters</changelogtext>
 		<changelogtext>Option to set date format</changelogtext>
 		<changelogtext>You can now pull to refresh on multiple categories, they will be added to the queue</changelogtext>
