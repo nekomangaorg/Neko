@@ -45,4 +45,10 @@
         <item>@string/filter_mode_screen</item>
     </string-array>
 
+    <string-array name="library_display">
+        <item>@string/action_display_list</item>
+        <item>@string/action_display_grid</item>
+        <item>@string/action_display_comfy_grid</item>
+    </string-array>
+
 </resources>

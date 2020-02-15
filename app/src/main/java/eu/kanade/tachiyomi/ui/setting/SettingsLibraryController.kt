@@ -53,13 +53,6 @@ class SettingsLibraryController : SettingsController() {
             }
 
             switchPreference {
-                key = Keys.libraryGridFixed
-                titleRes = R.string.pref_fixed_grid
-                summaryRes = R.string.pref_fixed_grid_summary
-                defaultValue = false
-            }
-
-            switchPreference {
                 key = Keys.removeArticles
                 titleRes = R.string.pref_remove_articles
                 summaryRes = R.string.pref_remove_articles_summary

@@ -12,9 +12,18 @@ import kotlinx.android.synthetic.main.catalogue_list_item.*
 import com.bumptech.glide.signature.ObjectKey
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
+import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.view.updatePaddingRelative
+import kotlinx.android.synthetic.main.catalogue_grid_item.*
+import kotlinx.android.synthetic.main.catalogue_list_item.badge_view
+import kotlinx.android.synthetic.main.catalogue_list_item.cover_thumbnail
+import kotlinx.android.synthetic.main.catalogue_list_item.download_text
+import kotlinx.android.synthetic.main.catalogue_list_item.play_layout
 import kotlinx.android.synthetic.main.catalogue_list_item.subtitle
 import kotlinx.android.synthetic.main.catalogue_list_item.title
+import kotlinx.android.synthetic.main.catalogue_list_item.unread_angle
+import kotlinx.android.synthetic.main.catalogue_list_item.unread_text
 import kotlinx.android.synthetic.main.catalogue_list_item.view.*
 
 /**
@@ -45,25 +54,39 @@ class LibraryListHolder(
         // Update the unread count and its visibility.
         val unread = item.manga.unread
 
-        // Update the subtitle of the manga with artist or the unread count and download count
-        "<font color=#cc0029>First Color</font>"
-        val subtitleText = when {
-            unread > 0 -> when (item.unreadType) {
-                1 -> view.resources.getQuantityString(R.plurals.unread_count, unread, unread)
-                0 -> view.resources.getString(R.string.new_chapter)
-                else -> item.manga.originalAuthor()
-            }
-            else -> item.manga.originalAuthor()
+        with(unread_text) {
+            text = unread.toString()
+            visibility = if (unread > 0) View.VISIBLE else View.GONE
         }
-        // Update the download count or local status and its visibility.
-        val downloadText =
-            if (item.manga.source == LocalSource.ID)
-                itemView.resources.getString(R.string.local_source_badge)
-            else view.resources.getQuantityString(R.plurals.download_count,
-                item.downloadCount, item.downloadCount)
 
-        // Combine the 2 above using html
-        val subText = if (item.downloadCount > 0 || item.manga.source == LocalSource.ID) {
+        // Update the download count or local status and its visibility.
+        with(download_text) {
+            visibility = if (item.downloadCount > -1 && (item.downloadCount > 0 || item.manga
+                    .source == LocalSource.ID))
+                View.VISIBLE else View.GONE
+            text = if (item.manga.source == LocalSource.ID)
+                itemView.resources.getString(R.string.local_source_badge)
+            else item.downloadCount.toString()
+        }
+
+        // Show the bade card if unread or downloads exists
+        badge_view.visibility = if (download_text.visibility == View.VISIBLE || unread_text
+                .visibility == View.VISIBLE) View.VISIBLE else View.GONE
+
+        // Show the angles divider if both unread and downloads exists
+        unread_angle.visibility = if (download_text.visibility == View.VISIBLE && unread_text
+                .visibility == View.VISIBLE) View.VISIBLE else View.GONE
+
+        if (unread_angle.visibility == View.VISIBLE) {
+            download_text.updatePaddingRelative(end = 8.dpToPx)
+            unread_text.updatePaddingRelative(start = 2.dpToPx)
+        }
+        else {
+            download_text.updatePaddingRelative(end = 5.dpToPx)
+            unread_text.updatePaddingRelative(start = 5.dpToPx)
+        }
+
+        /* if (item.downloadCount > 0 || item.manga.source == LocalSource.ID) {
             val downloadColor = convertColor(ContextCompat.getColor(itemView.context,
                 if (item.manga.source == LocalSource.ID) R.color.md_teal_500
                 else R.color.md_red_500))
@@ -76,21 +99,14 @@ class LibraryListHolder(
                     subtitleText
                 else ->  "<font color=#$downloadColor>$downloadText</font>"
             }
-        }
-        else {
+        }*/
+        /*else {
             subtitleText
-        }
-        with(subtitle) {
-            text = HtmlCompat.fromHtml(subText ?: "", HtmlCompat.FROM_HTML_MODE_LEGACY)
-            setTextColor(
-                view.context.getResourceColor(
-                    if (item.manga.unread > 0 && item.unreadType > -1 && item.downloadCount <= 0
-                        && item.manga.source != LocalSource.ID)
-                        android.R.attr.colorAccent
-                    else android.R.attr.textColorSecondary
-                )
-            )
-        }
+        }*/
+        subtitle.text = item.manga.originalAuthor()?.trim()
+        subtitle.visibility = if (!item.manga.originalAuthor().isNullOrBlank()) View.VISIBLE
+        else View.GONE
+
         play_layout.visibility = if (unread > 0) View.VISIBLE else View.GONE
         play_layout.setOnClickListener { playButtonClicked() }
 
@@ -106,10 +122,6 @@ class LibraryListHolder(
                 .override(height)
                 .into(cover_thumbnail)
         }
-    }
-
-    private fun convertColor(color: Int):String {
-        return Integer.toHexString(color and 0x00ffffff)
     }
 
     private fun playButtonClicked() {

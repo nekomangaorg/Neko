@@ -5,14 +5,15 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
-import com.bumptech.glide.signature.ObjectKey
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.ui.library.LibraryCategoryAdapter
+import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.gone
+import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.widget.StateImageViewTarget
 import kotlinx.android.synthetic.main.catalogue_grid_item.*
 
@@ -38,10 +39,15 @@ class CatalogueGridHolder(
      */
     override fun onSetValues(manga: Manga) {
         // Update the title of the manga.
-        title.text = manga.currentTitle()
         subtitle.gone()
+        title.gone()
+        compact_title.text = manga.currentTitle()
 
-        bookmark_text.visibility = if (manga.favorite) View.VISIBLE else View.GONE
+        badge_view.visibility = if (manga.favorite) View.VISIBLE else View.GONE
+        unread_angle.visibility = View.GONE
+        unread_text.updatePaddingRelative(start = 5.dpToPx)
+        unread_text.visibility = if (manga.favorite) View.VISIBLE else View.GONE
+        unread_text.text = itemView.resources.getText(R.string.in_library)
 
         // Update the cover.
         setImage(manga)

@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.f2prateek.rx.preferences.Preference
 import eu.davidea.flexibleadapter.FlexibleAdapter
@@ -14,19 +16,19 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import kotlinx.android.synthetic.main.catalogue_grid_item.view.*
 import uy.kohesive.injekt.injectLazy
 
-class LibraryItem(val manga: LibraryManga, private val libraryAsList: Preference<Boolean>,
-    private val fixedGrid: Preference<Boolean>) :
+class LibraryItem(val manga: LibraryManga, private val libraryLayout: Preference<Int>) :
         AbstractFlexibleItem<LibraryHolder>(), IFilterable<String> {
 
     var downloadCount = -1
     var unreadType = 1
 
     override fun getLayoutRes(): Int {
-        return if (libraryAsList.getOrDefault())
+        return if (libraryLayout.getOrDefault() == 0)
             R.layout.catalogue_list_item
         else
             R.layout.catalogue_grid_item
@@ -35,7 +37,7 @@ class LibraryItem(val manga: LibraryManga, private val libraryAsList: Preference
     override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): LibraryHolder {
         val parent = adapter.recyclerView
         return if (parent is AutofitRecyclerView) {
-            val fixedSize = fixedGrid.getOrDefault()
+            val fixedSize = libraryLayout.getOrDefault() == 1
             view.apply {
                 val coverHeight = (parent.itemWidth / 3f * 4f).toInt()
                 if (fixedSize) {
@@ -43,12 +45,18 @@ class LibraryItem(val manga: LibraryManga, private val libraryAsList: Preference
                         ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT
                     )
+                    val marginParams = card.layoutParams as ConstraintLayout.LayoutParams
+                    marginParams.bottomMargin = 10.dpToPx
+                    card.layoutParams = marginParams
+                    constraint_layout.minHeight = 0
                     cover_thumbnail.adjustViewBounds = false
                     cover_thumbnail.layoutParams = FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, coverHeight)
                 }
                 else {
                     constraint_layout.minHeight = coverHeight
                     cover_thumbnail.maxHeight = (parent.itemWidth / 3f * 6f).toInt()
+                    constraint_layout.background = ContextCompat.getDrawable(context,
+                        R.drawable.library_item_selector)
                 }
             }
             LibraryGridHolder(view, adapter as LibraryCategoryAdapter, parent.itemWidth, fixedSize)

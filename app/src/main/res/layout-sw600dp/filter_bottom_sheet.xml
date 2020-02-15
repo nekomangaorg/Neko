@@ -145,25 +145,11 @@
                             android:textStyle="normal" />
 
 
-                        <RadioGroup
-                            android:id="@+id/display_group"
+                        <androidx.appcompat.widget.AppCompatSpinner
+                            android:id="@+id/display_spinner"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:orientation="horizontal">
-
-                            <RadioButton
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:paddingStart="0dp"
-                                android:paddingEnd="8dp"
-                                android:text="@string/action_display_grid" />
-
-                            <RadioButton
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginStart="24dp"
-                                android:text="@string/action_display_list" />
-                        </RadioGroup>
+                            android:entries="@array/library_display"/>
                     </LinearLayout>
 
                     <LinearLayout

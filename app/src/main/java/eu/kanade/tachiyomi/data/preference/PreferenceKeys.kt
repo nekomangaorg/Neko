@@ -111,9 +111,7 @@ object PreferenceKeys {
 
     const val downloadNewCategories = "download_new_categories"
 
-    const val libraryAsList = "pref_display_library_as_list"
-
-    const val libraryGridFixed = "library_grid_fixes"
+    const val libraryLayout = "pref_display_library_layout"
 
     const val lang = "app_language"
 

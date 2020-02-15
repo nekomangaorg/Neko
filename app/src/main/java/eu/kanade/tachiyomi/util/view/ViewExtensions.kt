@@ -229,7 +229,6 @@ fun Controller.setOnQueryTextChangeListener(searchView: SearchView, f: (text: St
     })
 }
 
-@RequiresApi(17)
 inline fun View.updatePaddingRelative(
     @Px start: Int = paddingStart,
     @Px top: Int = paddingTop,

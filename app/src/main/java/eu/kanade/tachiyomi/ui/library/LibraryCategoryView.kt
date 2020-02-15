@@ -8,6 +8,7 @@ import android.view.View
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.SelectableAdapter
 import eu.kanade.tachiyomi.R
@@ -81,7 +82,7 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
     fun onCreate(controller: LibraryController) {
         this.controller = controller
 
-        recycler = if (preferences.libraryAsList().getOrDefault()) {
+        recycler = if (preferences.libraryLayout().getOrDefault() == 0) {
             (swipe_refresh.inflate(R.layout.library_list_recycler) as RecyclerView).apply {
                 layoutManager = LinearLayoutManager(context)
             }
@@ -97,7 +98,6 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
         recycler.adapter = adapter
         swipe_refresh.addView(recycler)
         adapter.fastScroller = fast_scroller
-        // recycler.addOnScrollListener(adapter.preloader())
 
         if (::category.isInitialized) {
             val mangaForCategory = controller.presenter.getMangaInCategory(category.id)
@@ -336,7 +336,8 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
 
     override fun startReading(position: Int) {
         val manga = adapter.getItem(position)?.manga ?: return
-        controller.startReading(manga)
+        if (adapter.mode == SelectableAdapter.Mode.MULTI) toggleSelection(position)
+        else controller.startReading(manga)
     }
 
     private fun saveDragSort() {

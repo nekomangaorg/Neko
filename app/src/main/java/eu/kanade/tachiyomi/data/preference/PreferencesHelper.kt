@@ -171,9 +171,7 @@ class PreferencesHelper(val context: Context) {
 
     fun libraryUpdatePrioritization() = rxPrefs.getInteger(Keys.libraryUpdatePrioritization, 0)
 
-    fun libraryAsList() = rxPrefs.getBoolean(Keys.libraryAsList, false)
-
-    fun libraryGridFixedSize() = rxPrefs.getBoolean(Keys.libraryGridFixed, false)
+    fun libraryLayout() = rxPrefs.getInteger(Keys.libraryLayout, 1)
 
     fun downloadBadge() = rxPrefs.getBoolean(Keys.downloadBadge, false)
 

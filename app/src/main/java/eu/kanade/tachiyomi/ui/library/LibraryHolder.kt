@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.library
 
 import android.view.View
+import androidx.core.content.ContextCompat
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import androidx.recyclerview.widget.RecyclerView
@@ -37,4 +38,7 @@ abstract class LibraryHolder(
         (adapter as? LibraryCategoryAdapter)?.onItemReleaseListener?.onItemReleased(position)
     }
 
+    protected fun convertColor(color: Int):String {
+        return Integer.toHexString(color and 0x00ffffff)
+    }
 }

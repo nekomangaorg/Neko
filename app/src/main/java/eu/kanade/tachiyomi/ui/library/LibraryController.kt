@@ -378,11 +378,13 @@ class LibraryController(
      * Called when a filter is changed.
      */
     private fun onFilterChanged() {
+        activity?.invalidateOptionsMenu()
         presenter.requestFilterUpdate()
         destroyActionModeIfNeeded()
     }
 
     private fun onRefresh() {
+        activity?.invalidateOptionsMenu()
         presenter.getLibrary()
         destroyActionModeIfNeeded()
     }

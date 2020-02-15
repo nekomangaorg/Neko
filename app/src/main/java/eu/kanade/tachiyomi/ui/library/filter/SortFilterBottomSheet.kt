@@ -12,6 +12,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RadioButton
 import android.widget.RadioGroup
+import android.widget.Spinner
 import androidx.appcompat.view.menu.MenuBuilder
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
@@ -34,6 +35,7 @@ import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePadding
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.visible
+import eu.kanade.tachiyomi.widget.IgnoreFirstSpinnerListener
 import kotlinx.android.synthetic.main.filter_bottom_sheet.view.*
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
@@ -188,7 +190,7 @@ class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: A
             showUnreadMenu()
         }
 
-        display_group.bindToPreference(preferences.libraryAsList())
+        display_spinner.bindToPreference(preferences.libraryLayout())
     }
 
     override fun onSaveInstanceState(): Parcelable? {
@@ -612,18 +614,15 @@ class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: A
     }
 
     /**
-     * Binds a radio group with a boolean preference.
+     * Binds a Spinner with a boolean preference.
      */
-    private fun RadioGroup.bindToPreference(pref: Preference<Boolean>) {
-        (getChildAt(pref.getOrDefault().toInt()) as RadioButton).isChecked = true
-        setOnCheckedChangeListener { _, value ->
-            val index = indexOfChild(findViewById(value))
-            pref.set(index == 1)
+    private fun Spinner.bindToPreference(pref: Preference<Int>) {
+        onItemSelectedListener = IgnoreFirstSpinnerListener { position ->
+            pref.set(position)
             onGroupClicked(ACTION_DISPLAY)
         }
+        setSelection(pref.getOrDefault(), false)
     }
-
-    private fun Boolean.toInt() = if (this) 1 else 0
 
     private fun tintVector(resId: Int): Drawable? {
         return ContextCompat.getDrawable(context, resId)?.mutate()?.apply {
