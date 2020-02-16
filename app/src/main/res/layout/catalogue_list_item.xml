@@ -113,76 +113,16 @@
         app:layout_constraintVertical_bias="0.0"
         tools:text="Manga artist" />
 
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/badge_view"
+
+    <include layout="@layout/unread_download_badge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="2dp"
+        android:layout_marginTop="0dp"
         android:layout_marginEnd="12dp"
-        android:visibility="gone"
-        app:cardCornerRadius="10dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:cardElevation="5dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:visibility="visible">
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/download_text"
-                style="@style/TextAppearance.Regular.Caption.Light"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@color/pale_green"
-                android:gravity="center"
-                android:maxLines="1"
-                android:paddingStart="5dp"
-                android:paddingEnd="5dp"
-                android:textColor="@color/md_black_1000"
-                android:textSize="13sp"
-                android:visibility="gone"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:paddingEnd="8dp"
-                tools:text="1"
-                tools:visibility="visible" />
-
-            <ImageView
-                android:id="@+id/unread_angle"
-                android:layout_width="10dp"
-                android:layout_height="0dp"
-                android:scaleType="fitXY"
-                android:src="@drawable/unread_angled_badge"
-                app:layout_constraintBottom_toBottomOf="@+id/unread_text"
-                app:layout_constraintEnd_toStartOf="@id/unread_text"
-                app:layout_constraintTop_toTopOf="@+id/unread_text" />
-
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/unread_text"
-                style="@style/TextAppearance.Regular.Caption.Light"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@color/colorAccent"
-                android:gravity="center"
-                android:maxLines="1"
-                android:paddingStart="5dp"
-                android:paddingEnd="5dp"
-                android:textColor="@color/md_white_1000"
-                android:textSize="13sp"
-                android:visibility="gone"
-                app:layout_constraintBottom_toBottomOf="@+id/download_text"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@id/download_text"
-                app:layout_constraintTop_toTopOf="@+id/download_text"
-                tools:paddingStart="2dp"
-                tools:text="20"
-                tools:visibility="visible" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </com.google.android.material.card.MaterialCardView>
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <androidx.constraintlayout.widget.Barrier
         android:id="@+id/bottom_line"

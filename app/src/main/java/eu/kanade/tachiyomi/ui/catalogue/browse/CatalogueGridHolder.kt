@@ -16,6 +16,7 @@ import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.widget.StateImageViewTarget
 import kotlinx.android.synthetic.main.catalogue_grid_item.*
+import kotlinx.android.synthetic.main.unread_download_badge.*
 
 /**
  * Class used to hold the displayed data of a manga in the library, like the cover or the title.
@@ -42,12 +43,7 @@ class CatalogueGridHolder(
         subtitle.gone()
         title.gone()
         compact_title.text = manga.currentTitle()
-
-        badge_view.visibility = if (manga.favorite) View.VISIBLE else View.GONE
-        unread_angle.visibility = View.GONE
-        unread_text.updatePaddingRelative(start = 5.dpToPx)
-        unread_text.visibility = if (manga.favorite) View.VISIBLE else View.GONE
-        unread_text.text = itemView.resources.getText(R.string.in_library)
+        badge_view.setInLibrary(manga.favorite)
 
         // Update the cover.
         setImage(manga)

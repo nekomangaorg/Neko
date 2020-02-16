@@ -1,9 +1,10 @@
 package eu.kanade.tachiyomi.ui.library
 
+import android.view.Gravity
 import android.view.View
 import android.view.ViewTreeObserver
+import android.widget.FrameLayout
 import androidx.constraintlayout.widget.ConstraintLayout
-import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.signature.ObjectKey
 import eu.kanade.tachiyomi.R
@@ -15,6 +16,7 @@ import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.visible
 import kotlinx.android.synthetic.main.catalogue_grid_item.*
+import kotlinx.android.synthetic.main.unread_download_badge.*
 
 /**
  * Class used to hold the displayed data of a manga in the library, like the cover or the title.
@@ -66,42 +68,15 @@ class LibraryGridHolder(
 
         compact_title.text = title.text
 
-        // Update the unread count and its visibility.
-        val unread = item.manga.unread
-
-        with(unread_text) {
-            text = unread.toString()
-            visibility = if (unread > 0) View.VISIBLE else View.GONE
-        }
-
-        // Update the download count or local status and its visibility.
-        with(download_text) {
-            visibility = if (item.downloadCount > -1 && (item.downloadCount > 0 || item.manga
-                    .source == LocalSource.ID))
-                View.VISIBLE else View.GONE
-            text = if (item.manga.source == LocalSource.ID)
-                itemView.resources.getString(R.string.local_source_badge)
-            else item.downloadCount.toString()
-        }
-
-        // Show the bade card if unread or downloads exists
-        badge_view.visibility = if (download_text.visibility == View.VISIBLE || unread_text
-        .visibility == View.VISIBLE) View.VISIBLE else View.GONE
-
-        // Show the angles divider if both unread and downloads exists
-        unread_angle.visibility = if (download_text.visibility == View.VISIBLE && unread_text
-                .visibility == View.VISIBLE) View.VISIBLE else View.GONE
-
-        if (unread_angle.visibility == View.VISIBLE) {
-            download_text.updatePaddingRelative(end = 8.dpToPx)
-            unread_text.updatePaddingRelative(start = 2.dpToPx)
-        }
-        else {
-            download_text.updatePaddingRelative(end = 5.dpToPx)
-            unread_text.updatePaddingRelative(start = 5.dpToPx)
-        }
-
-        play_layout.visibility = if (unread > 0) View.VISIBLE else View.GONE
+        badge_view.setUnreadDownload(
+            when (item.unreadType) {
+                1 -> item.manga.unread
+                0 -> if (item.manga.unread > 0) -1 else -2
+                else -> -2
+            },
+            if (item.manga.source == LocalSource.ID) -2 else item.downloadCount)
+        play_layout.visibility = if (item.manga.unread > 0 && item.unreadType > -1)
+            View.VISIBLE else View.GONE
         play_layout.setOnClickListener { playButtonClicked() }
 
         if (fixedSize) {
@@ -111,6 +86,12 @@ class LibraryGridHolder(
         else {
             compact_title.gone()
             gradient.gone()
+            val playLayout = play_layout.layoutParams as FrameLayout.LayoutParams
+            val buttonLayout = play_button.layoutParams as FrameLayout.LayoutParams
+            playLayout.gravity = Gravity.BOTTOM or Gravity.END
+            buttonLayout.gravity = Gravity.BOTTOM or Gravity.END
+            play_layout.layoutParams = playLayout
+            play_button.layoutParams = buttonLayout
         }
 
         // Update the cover.

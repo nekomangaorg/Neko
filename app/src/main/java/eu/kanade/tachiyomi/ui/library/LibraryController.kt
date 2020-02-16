@@ -241,12 +241,12 @@ class LibraryController(
         super.onActivityResumed(activity)
         if (observeLater) {
             presenter.getLibrary()
-            observeLater = false
         }
     }
 
     override fun onActivityPaused(activity: Activity) {
         super.onActivityPaused(activity)
+        observeLater = true
         presenter.onDestroy()
     }
 
@@ -674,7 +674,6 @@ class LibraryController(
         val chapter = presenter.getFirstUnread(manga) ?: return
         val intent = ReaderActivity.newIntent(activity, manga, chapter)
         destroyActionModeIfNeeded()
-        observeLater = true
         startActivity(intent)
     }
 }
