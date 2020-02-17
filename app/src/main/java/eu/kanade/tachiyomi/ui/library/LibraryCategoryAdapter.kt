@@ -85,12 +85,8 @@ class LibraryCategoryAdapter(val libraryListener: LibraryListener) :
             "Bottom"
         } else { // Get and show the first character
             val iFlexible: IFlexible<*>? = getItem(position)
-            return if (iFlexible is LibraryHeaderItem) {
-                iFlexible.category.name
-            } else {
-                val db:DatabaseHelper by injectLazy()
-                val category = db.getCategoriesForManga((iFlexible as LibraryItem).manga).executeAsBlocking().firstOrNull()?.name
-                category?.chop(10) ?: "Default"
+            if (iFlexible is LibraryHeaderItem) {
+                return iFlexible.category.name
             }
             val preferences:PreferencesHelper by injectLazy()
             when (preferences.librarySortingMode().getOrDefault()) {
