@@ -13,7 +13,7 @@
         android:background="?attr/selectable_list_drawable">
 
         <ImageView
-            android:id="@+id/image"
+            android:id="@+id/edit_button"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:padding="12dp"
@@ -33,7 +33,7 @@
             android:maxLines="1"
             android:textAppearance="@style/TextAppearance.Regular.SubHeading"
             android:textSize="14sp"
-            app:layout_constraintStart_toEndOf="@id/image"
+            app:layout_constraintStart_toEndOf="@id/edit_button"
             app:layout_constraintEnd_toStartOf="@id/ext_button"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toTopOf="@id/lang"
@@ -47,7 +47,7 @@
             android:layout_height="wrap_content"
             android:maxLines="1"
             android:textSize="12sp"
-            app:layout_constraintStart_toEndOf="@id/image"
+            app:layout_constraintStart_toEndOf="@id/edit_button"
             app:layout_constraintTop_toBottomOf="@+id/ext_title"
             app:layout_constraintBottom_toBottomOf="parent"
             tools:text="English"

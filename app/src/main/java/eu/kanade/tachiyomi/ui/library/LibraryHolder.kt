@@ -35,7 +35,7 @@ abstract class LibraryHolder(
      */
     override fun onItemReleased(position: Int) {
         super.onItemReleased(position)
-        (adapter as? LibraryCategoryAdapter)?.onItemReleaseListener?.onItemReleased(position)
+        (adapter as? LibraryCategoryAdapter)?.libraryListener?.onItemReleased(position)
     }
 
     protected fun convertColor(color: Int):String {

@@ -175,6 +175,7 @@
     <string name="portrait">Portrait</string>
     <string name="landscape">Landscape</string>
     <string name="default_columns">Default</string>
+    <string name="create_new_category">Create new category</string>
 
     <string name="pref_category_library_update">Updates</string>
     <string name="pref_library_update_interval">Library update frequency</string>
@@ -412,6 +413,9 @@
     <string name="category_already_in_queue">%1$s is already in queue</string>
     <string name="local_source_badge">Local</string>
     <string name="confirm_manga_deletion">Remove from library?</string>
+    <string name="confirm_category_deletion">Delete category?</string>
+    <string name="confirm_category_deletion_message">Manga in this category will moved into the
+        default category.</string>
     <plurals name="unread_count">
         <item quantity="one">New chapter</item>
         <item quantity="other">%d unread</item>
@@ -526,7 +530,7 @@
 
     <!-- Category activity -->
     <string name="error_category_exists">A category with this name already exists!</string>
-    <string name="snack_categories_deleted">Categories deleted</string>
+    <string name="snack_category_deleted">Category deleted</string>
 
     <!-- Dialog option with checkbox view -->
     <string name="dialog_with_checkbox_remove_description">This will remove the read date of this chapter. Are you sure?</string>
@@ -649,5 +653,6 @@
     <string name="pre_migration_skip_toast">To show this screen again, go to Settings -> Library.</string>
     <string name="reset_tags">Reset Tags</string>
     <string name="display_as">Display as</string>
+    <string name="action_auto">Auto</string>
 
 </resources>

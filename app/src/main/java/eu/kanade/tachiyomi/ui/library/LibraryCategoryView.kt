@@ -8,7 +8,6 @@ import android.view.View
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.SelectableAdapter
 import eu.kanade.tachiyomi.R
@@ -18,7 +17,6 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
-import eu.kanade.tachiyomi.ui.category.CategoryAdapter
 import eu.kanade.tachiyomi.util.lang.plusAssign
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.launchUI
@@ -40,8 +38,7 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
         FlexibleAdapter.OnItemClickListener,
         FlexibleAdapter.OnItemLongClickListener,
         FlexibleAdapter.OnItemMoveListener,
-    LibraryCategoryAdapter.LibraryListener,
-    CategoryAdapter.OnItemReleaseListener {
+    LibraryCategoryAdapter.LibraryListener {
 
     /**
      * Preferences.
@@ -209,16 +206,12 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
      *
      * @param event the event received.
      */
-    fun onNextLibraryManga(event: LibraryMangaEvent) {
+    private fun onNextLibraryManga(event: LibraryMangaEvent) {
         // Get the manga list for this category.
         adapter.isLongPressDragEnabled = canDrag()
         val mangaForCategory = event.getMangaForCategory(category).orEmpty()
 
-        // Update the category with its manga.
-       // if (!justDraggedAndDropped)
-            adapter.setItems(mangaForCategory)
-       // else
-         //   justDraggedAndDropped = false
+        adapter.setItems(mangaForCategory)
 
         swipe_refresh.isEnabled = !preferences.hideCategories().getOrDefault()
 

@@ -8,7 +8,7 @@
     android:background="?attr/selectable_list_drawable">
 
     <ImageView
-        android:id="@+id/image"
+        android:id="@+id/edit_button"
         android:layout_width="@dimen/material_component_lists_single_line_with_avatar_height"
         android:layout_height="@dimen/material_component_lists_single_line_with_avatar_height"
         android:paddingLeft="@dimen/material_component_lists_icon_left_padding"

@@ -14,10 +14,10 @@ import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.migration.manga.design.PreMigrationController
 import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationListController
-import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
+import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationProcedureConfig
 import eu.kanade.tachiyomi.util.system.await
 import eu.kanade.tachiyomi.util.system.launchUI
-import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationProcedureConfig
+import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
 import kotlinx.android.synthetic.main.migration_controller.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -91,12 +91,17 @@ class MigrationController : NucleusController<MigrationPresenter>(),
             }
             adapter?.updateDataSet(state.sourcesWithManga)
         } else {
+            val switching = title == resources?.getString(R.string.label_migration)
             title = state.selectedSource.toString()
             if (adapter !is MangaAdapter) {
                 adapter = MangaAdapter(this)
                 migration_recycler.adapter = adapter
             }
-            adapter?.updateDataSet(state.mangaForSource)
+            adapter?.updateDataSet(state.mangaForSource, true)
+            /*if (switching) launchUI {
+                migration_recycler.alpha = 0f
+                migration_recycler.animate().alpha(1f).setStartDelay(100).setDuration(200).start()
+            }*/
         }
     }
 
@@ -104,7 +109,7 @@ class MigrationController : NucleusController<MigrationPresenter>(),
         val item = adapter?.getItem(position) ?: return false
 
         if (item is MangaItem) {
-            val controller = SearchController(item.manga)
+            val controller = PreMigrationController.create(listOf(item.manga.id!!))
             controller.targetController = this
 
             router.pushController(controller.withFadeTransaction())

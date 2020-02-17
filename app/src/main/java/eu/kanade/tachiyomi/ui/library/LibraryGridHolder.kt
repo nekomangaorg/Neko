@@ -31,8 +31,26 @@ class LibraryGridHolder(
     private val view: View,
     adapter: LibraryCategoryAdapter,
     var width:Int,
-    var fixedSize: Boolean
+    private var fixedSize: Boolean
 ) : LibraryHolder(view, adapter) {
+
+    init {
+        play_layout.setOnClickListener { playButtonClicked() }
+        if (fixedSize) {
+            title.gone()
+            subtitle.gone()
+        }
+        else {
+            compact_title.gone()
+            gradient.gone()
+            val playLayout = play_layout.layoutParams as FrameLayout.LayoutParams
+            val buttonLayout = play_button.layoutParams as FrameLayout.LayoutParams
+            playLayout.gravity = Gravity.BOTTOM or Gravity.END
+            buttonLayout.gravity = Gravity.BOTTOM or Gravity.END
+            play_layout.layoutParams = playLayout
+            play_button.layoutParams = buttonLayout
+        }
+    }
 
     /**
      * Method called from [LibraryCategoryAdapter.onBindViewHolder]. It updates the data for this
@@ -44,6 +62,7 @@ class LibraryGridHolder(
         // Update the title and subtitle of the manga.
         title.text = item.manga.currentTitle()
         subtitle.text = item.manga.originalAuthor()?.trim()
+
         if (!fixedSize) {
             title.viewTreeObserver.addOnPreDrawListener(object : ViewTreeObserver.OnPreDrawListener {
                 override fun onPreDraw(): Boolean {
@@ -74,25 +93,13 @@ class LibraryGridHolder(
                 0 -> if (item.manga.unread > 0) -1 else -2
                 else -> -2
             },
-            if (item.manga.source == LocalSource.ID) -2 else item.downloadCount)
+            when {
+                item.downloadCount == -1 -> -1
+                item.manga.source == LocalSource.ID -> -2
+                else ->  item.downloadCount
+            })
         play_layout.visibility = if (item.manga.unread > 0 && item.unreadType > -1)
             View.VISIBLE else View.GONE
-        play_layout.setOnClickListener { playButtonClicked() }
-
-        if (fixedSize) {
-            title.gone()
-            subtitle.gone()
-        }
-        else {
-            compact_title.gone()
-            gradient.gone()
-            val playLayout = play_layout.layoutParams as FrameLayout.LayoutParams
-            val buttonLayout = play_button.layoutParams as FrameLayout.LayoutParams
-            playLayout.gravity = Gravity.BOTTOM or Gravity.END
-            buttonLayout.gravity = Gravity.BOTTOM or Gravity.END
-            play_layout.layoutParams = playLayout
-            play_button.layoutParams = buttonLayout
-        }
 
         // Update the cover.
         if (item.manga.thumbnail_url == null) GlideApp.with(view.context).clear(cover_thumbnail)

@@ -1,46 +1,33 @@
 package eu.kanade.tachiyomi.ui.category
 
-import com.google.android.material.snackbar.Snackbar
-import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.view.ActionMode
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.view.WindowManager
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import android.view.*
+import com.afollestad.materialdialogs.MaterialDialog
 import com.google.android.material.snackbar.BaseTransientBottomBar
-import com.jakewharton.rxbinding.view.clicks
+import com.google.android.material.snackbar.Snackbar
 import eu.davidea.flexibleadapter.FlexibleAdapter
-import eu.davidea.flexibleadapter.SelectableAdapter
 import eu.davidea.flexibleadapter.helpers.UndoHelper
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
-import eu.kanade.tachiyomi.ui.base.controller.NucleusController
+import eu.kanade.tachiyomi.ui.base.controller.BaseController
+import eu.kanade.tachiyomi.ui.category.CategoryPresenter.Companion.CREATE_CATEGORY_ORDER
 import eu.kanade.tachiyomi.ui.main.MainActivity
-import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
-import eu.kanade.tachiyomi.util.view.marginBottom
-import eu.kanade.tachiyomi.util.view.snack
-import eu.kanade.tachiyomi.util.view.updateLayoutParams
-import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.system.toast
-import kotlinx.android.synthetic.main.categories_controller.empty_view
-import kotlinx.android.synthetic.main.categories_controller.fab
-import kotlinx.android.synthetic.main.categories_controller.recycler
+import eu.kanade.tachiyomi.util.view.snack
+import kotlinx.android.synthetic.main.categories_controller.*
 
 /**
  * Controller to manage the categories for the users' library.
  */
-class CategoryController : NucleusController<CategoryPresenter>(),
-        ActionMode.Callback,
+class CategoryController(bundle: Bundle? = null) : BaseController(bundle),
         FlexibleAdapter.OnItemClickListener,
-        FlexibleAdapter.OnItemLongClickListener,
-        CategoryAdapter.OnItemReleaseListener,
+        CategoryAdapter.CategoryItemListener,
         CategoryCreateDialog.Listener,
-        CategoryRenameDialog.Listener,
-        UndoHelper.OnActionListener {
-
-    /**
-     * Object used to show ActionMode toolbar.
-     */
-    private var actionMode: ActionMode? = null
+        CategoryRenameDialog.Listener {
 
     /**
      * Adapter containing category items.
@@ -55,7 +42,7 @@ class CategoryController : NucleusController<CategoryPresenter>(),
     /**
      * Creates the presenter for this controller. Not to be manually called.
      */
-    override fun createPresenter() = CategoryPresenter()
+    private val presenter = CategoryPresenter(this)
 
     /**
      * Returns the toolbar title to show when this controller is attached.
@@ -89,20 +76,8 @@ class CategoryController : NucleusController<CategoryPresenter>(),
         adapter?.isHandleDragEnabled = true
         adapter?.isPermanentDelete = false
 
-        fab.clicks().subscribeUntilDestroy {
-            CategoryCreateDialog(this@CategoryController).showDialog(router, null)
-        }
-
-        val fabBaseMarginBottom = fab?.marginBottom ?: 0
-        recycler.doOnApplyWindowInsets { v, insets, padding ->
-
-            fab?.updateLayoutParams<ViewGroup.MarginLayoutParams>  {
-                bottomMargin = fabBaseMarginBottom + insets.systemWindowInsetBottom
-            }
-            // offset the recycler by the fab's inset + some inset on top
-            v.updatePaddingRelative(bottom = padding.bottom + (fab?.marginBottom ?: 0) +
-                fabBaseMarginBottom + (fab?.height ?: 0))
-        }
+        activity?.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+        presenter.getCategories()
     }
 
     /**
@@ -113,11 +88,19 @@ class CategoryController : NucleusController<CategoryPresenter>(),
     override fun onDestroyView(view: View) {
         // Manually call callback to delete categories if required
         snack?.dismiss()
+        view.clearFocus()
+        activity?.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
         confirmDelete()
         snack = null
-        actionMode = null
         adapter = null
         super.onDestroyView(view)
+    }
+
+    override fun handleBack(): Boolean {
+        view?.clearFocus()
+        confirmDelete()
+        activity?.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
+        return super.handleBack()
     }
 
     /**
@@ -126,110 +109,12 @@ class CategoryController : NucleusController<CategoryPresenter>(),
      * @param categories The new list of categories to display.
      */
     fun setCategories(categories: List<CategoryItem>) {
-        actionMode?.finish()
         adapter?.updateDataSet(categories)
         if (categories.isNotEmpty()) {
             empty_view.hide()
-            val selected = categories.filter { it.isSelected }
-            if (selected.isNotEmpty()) {
-                selected.forEach { onItemLongClick(categories.indexOf(it)) }
-            }
         } else {
             empty_view.show(R.drawable.ic_shape_black_128dp, R.string.information_empty_category)
         }
-    }
-
-    /**
-     * Called when action mode is first created. The menu supplied will be used to generate action
-     * buttons for the action mode.
-     *
-     * @param mode ActionMode being created.
-     * @param menu Menu used to populate action buttons.
-     * @return true if the action mode should be created, false if entering this mode should be
-     *              aborted.
-     */
-    override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
-        // Inflate menu.
-        mode.menuInflater.inflate(R.menu.category_selection, menu)
-        // Enable adapter multi selection.
-        adapter?.mode = SelectableAdapter.Mode.MULTI
-        return true
-    }
-
-    /**
-     * Called to refresh an action mode's action menu whenever it is invalidated.
-     *
-     * @param mode ActionMode being prepared.
-     * @param menu Menu used to populate action buttons.
-     * @return true if the menu or action mode was updated, false otherwise.
-     */
-    override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
-        val adapter = adapter ?: return false
-        val count = adapter.selectedItemCount
-        mode.title = resources?.getString(R.string.label_selected, count)
-
-        // Show edit button only when one item is selected
-        val editItem = mode.menu.findItem(R.id.action_edit)
-        editItem.isVisible = count == 1
-        return true
-    }
-
-    /**
-     * Called to report a user click on an action button.
-     *
-     * @param mode The current ActionMode.
-     * @param item The item that was clicked.
-     * @return true if this callback handled the event, false if the standard MenuItem invocation
-     *              should continue.
-     */
-    override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
-        val adapter = adapter ?: return false
-
-        when (item.itemId) {
-            R.id.action_delete -> {
-                adapter.removeItems(adapter.selectedPositions)
-                snack =
-                    view?.snack(R.string.snack_categories_deleted, Snackbar.LENGTH_INDEFINITE) {
-                        var undoing = false
-                        setAction(R.string.action_undo) {
-                            adapter.restoreDeletedItems()
-                            undoing = true
-                        }
-                        addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
-                            override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
-                                super.onDismissed(transientBottomBar, event)
-                                if (!undoing) confirmDelete()
-                            }
-                        })
-                    }
-                (activity as? MainActivity)?.setUndoSnackBar(snack)
-                mode.finish()
-            }
-            R.id.action_edit -> {
-                // Edit selected category
-                if (adapter.selectedItemCount == 1) {
-                    val position = adapter.selectedPositions.first()
-                    val category = adapter.getItem(position)?.category
-                    if (category != null) {
-                        editCategory(category)
-                    }
-                }
-            }
-            else -> return false
-        }
-        return true
-    }
-
-    /**
-     * Called when an action mode is about to be exited and destroyed.
-     *
-     * @param mode The current ActionMode being destroyed.
-     */
-    override fun onDestroyActionMode(mode: ActionMode) {
-        // Reset adapter to single selection
-        adapter?.mode = SelectableAdapter.Mode.IDLE
-        adapter?.clearSelection()
-        actionMode = null
     }
 
     /**
@@ -239,50 +124,45 @@ class CategoryController : NucleusController<CategoryPresenter>(),
      * @return true if this click should enable selection mode.
      */
     override fun onItemClick(view: View?, position: Int): Boolean {
-        // Check if action mode is initialized and selected item exist.
-        return if (actionMode != null && position != RecyclerView.NO_POSITION) {
-            toggleSelection(position)
-            true
-        } else {
-            false
-        }
+        adapter?.resetEditing(position)
+        return true
     }
 
-    /**
-     * Called when an item in the list is long clicked.
-     *
-     * @param position The position of the clicked item.
-     */
-    override fun onItemLongClick(position: Int) {
-        val activity = activity as? AppCompatActivity ?: return
-
-        // Check if action mode is initialized.
-        if (actionMode == null) {
-            // Initialize action mode
-            actionMode = activity.startSupportActionMode(this)
-        }
-
-        // Set item as selected
-        toggleSelection(position)
+    override fun onCategoryRename(position: Int, newName: String): Boolean {
+        val category = adapter?.getItem(position)?.category ?: return false
+        if (category.order == CREATE_CATEGORY_ORDER)
+            return (presenter.createCategory(newName))
+        return (presenter.renameCategory(category, newName))
     }
 
-    /**
-     * Toggle the selection state of an item.
-     * If the item was the last one in the selection and is unselected, the ActionMode is finished.
-     *
-     * @param position The position of the item to toggle.
-     */
-    private fun toggleSelection(position: Int) {
-        val adapter = adapter ?: return
+    override fun onItemDelete(position: Int) {
+        MaterialDialog(activity!!)
+            .title(R.string.confirm_category_deletion)
+            .message(R.string.confirm_category_deletion_message)
+            .positiveButton(R.string.action_delete) {
+                deleteCategory(position)
+            }
+            .negativeButton(android.R.string.no)
+            .show()
+    }
 
-        //Mark the position selected
-        adapter.toggleSelection(position)
-
-        if (adapter.selectedItemCount == 0) {
-            actionMode?.finish()
-        } else {
-            actionMode?.invalidate()
-        }
+    private fun deleteCategory(position: Int) {
+        adapter?.removeItem(position)
+        snack =
+            view?.snack(R.string.snack_category_deleted, Snackbar.LENGTH_INDEFINITE) {
+                var undoing = false
+                setAction(R.string.action_undo) {
+                    adapter?.restoreDeletedItems()
+                    undoing = true
+                }
+                addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
+                    override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+                        super.onDismissed(transientBottomBar, event)
+                        if (!undoing) confirmDelete()
+                    }
+                })
+            }
+        (activity as? MainActivity)?.setUndoSnackBar(snack)
     }
 
     /**
@@ -296,31 +176,10 @@ class CategoryController : NucleusController<CategoryPresenter>(),
         presenter.reorderCategories(categories)
     }
 
-    /**
-     * Called when the undo action is clicked in the snackbar.
-     *
-     * @param action The action performed.
-     */
-    override fun onActionCanceled(action: Int, positions: MutableList<Int>?) {
-        adapter?.restoreDeletedItems()
-        snack = null
-    }
-
-    /**
-     * Called when the time to restore the items expires.
-     *
-     * @param action The action performed.
-     * @param event The event that triggered the action
-     */
-    override fun onActionConfirmed(action: Int, event: Int) {
-        val adapter = adapter ?: return
-        presenter.deleteCategories(adapter.deletedItems.map { it.category })
-        snack = null
-    }
-
     fun confirmDelete() {
         val adapter = adapter ?: return
-        presenter.deleteCategories(adapter.deletedItems.map { it.category })
+        presenter.deleteCategory(adapter.deletedItems.map { it.category }.firstOrNull())
+        adapter.confirmDeletion()
         snack = null
     }
 

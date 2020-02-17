@@ -17,20 +17,13 @@ class MangaHolder(
     fun bind(item: MangaItem) {
         // Update the title of the manga.
         title.text = item.manga.currentTitle()
-
-        // Create thumbnail onclick to simulate long click
-        cover_thumbnail.setOnClickListener {
-            // Simulate long click on this view to enter selection mode
-            onLongClick(itemView)
-        }
+        subtitle.text = item.manga.currentAuthor()?.trim()
 
         // Update the cover.
         GlideApp.with(itemView.context).clear(cover_thumbnail)
         GlideApp.with(itemView.context)
                 .load(item.manga)
                 .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
-//                .centerCrop()
-//                .circleCrop()
                 .dontAnimate()
                 .into(cover_thumbnail)
     }

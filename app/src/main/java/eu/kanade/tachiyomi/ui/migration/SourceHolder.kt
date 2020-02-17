@@ -20,7 +20,7 @@ class SourceHolder(view: View, override val adapter: SourceAdapter) :
         get() = card
 
     init {
-        source_latest.text = "Auto"
+        source_latest.text = view.context.getString(R.string.action_auto)
         source_browse.setText(R.string.select)
         source_browse.setOnClickListener {
             adapter.selectClickListener?.onSelectClick(adapterPosition)
@@ -39,7 +39,7 @@ class SourceHolder(view: View, override val adapter: SourceAdapter) :
 
         // Set circle letter image.
         itemView.post {
-            image.setImageDrawable(image.getRound(source.name.take(1).toUpperCase(),false))
+            edit_button.setImageDrawable(edit_button.getRound(source.name.take(1).toUpperCase(),false))
         }
     }
 }

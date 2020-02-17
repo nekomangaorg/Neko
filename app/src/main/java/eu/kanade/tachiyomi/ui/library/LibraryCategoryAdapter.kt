@@ -9,6 +9,8 @@ import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.category.CategoryAdapter
 import eu.kanade.tachiyomi.util.lang.chop
 import eu.kanade.tachiyomi.util.lang.removeArticles
+import eu.kanade.tachiyomi.util.system.launchUI
+import kotlinx.coroutines.delay
 import uy.kohesive.injekt.injectLazy
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -27,9 +29,6 @@ class LibraryCategoryAdapter(val view: LibraryCategoryView) :
      * The list of manga in this category.
      */
     private var mangas: List<LibraryItem> = emptyList()
-
-    val onItemReleaseListener: CategoryAdapter.OnItemReleaseListener = view
-
 
     /**
      * Listener called when an item of the list press start reading.
@@ -145,5 +144,6 @@ class LibraryCategoryAdapter(val view: LibraryCategoryView) :
          * Called when an item of the list is released.
          */
         fun startReading(position: Int)
+        fun onItemReleased(position: Int)
     }
 }

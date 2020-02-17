@@ -48,6 +48,7 @@ class LibraryItem(val manga: LibraryManga, private val libraryLayout: Preference
                     val marginParams = card.layoutParams as ConstraintLayout.LayoutParams
                     marginParams.bottomMargin = 6.dpToPx
                     card.layoutParams = marginParams
+                    cover_thumbnail.maxHeight = Integer.MAX_VALUE
                     constraint_layout.minHeight = 0
                     cover_thumbnail.adjustViewBounds = false
                     cover_thumbnail.layoutParams = FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, coverHeight)

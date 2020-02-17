@@ -38,8 +38,16 @@ class LibraryListHolder(
         title.text = item.manga.currentTitle()
 
         badge_view.setUnreadDownload(
-            if (item.unreadType == 1) item.manga.unread else (item.unreadType - 1),
-            if (item.manga.source == LocalSource.ID) -2 else item.downloadCount)
+            when (item.unreadType) {
+                1 -> item.manga.unread
+                0 -> if (item.manga.unread > 0) -1 else -2
+                else -> -2
+            },
+            when {
+                item.downloadCount == -1 -> -1
+                item.manga.source == LocalSource.ID -> -2
+                else ->  item.downloadCount
+            })
 
         subtitle.text = item.manga.originalAuthor()?.trim()
         subtitle.visibility = if (!item.manga.originalAuthor().isNullOrBlank()) View.VISIBLE

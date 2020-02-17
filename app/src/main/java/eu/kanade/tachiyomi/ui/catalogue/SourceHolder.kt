@@ -41,7 +41,7 @@ class SourceHolder(view: View, override val adapter: CatalogueAdapter) :
 
         // Set circle letter image.
         itemView.post {
-            image.setImageDrawable(image.getRound(source.name.take(1).toUpperCase(), false))
+            edit_button.setImageDrawable(edit_button.getRound(source.name.take(1).toUpperCase(), false))
         }
 
         // If source is login, show only login option

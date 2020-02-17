@@ -9,26 +9,24 @@
     </item>
     <item>
         <selector>
-    <item android:state_activated="false">
-        <shape
-            android:shape="rectangle">
-            <corners android:radius="16dp"/>
-            <size
-                android:height="32dp"
-                android:width="32dp" />
-            <solid android:color="@android:color/transparent"/>
-        </shape>
-    </item>
-    <item android:state_activated="true">
-        <shape
-            android:shape="rectangle">
-            <corners android:radius="16dp"/>
-            <size
-                android:height="32dp"
-                android:width="32dp" />
-            <solid android:color="?attr/colorAccent"/>
-        </shape>
-    </item>
+            <item android:state_activated="false">
+                <shape android:shape="rectangle">
+                    <corners android:radius="16dp" />
+                    <size
+                        android:width="32dp"
+                        android:height="32dp" />
+                    <solid android:color="@android:color/transparent" />
+                </shape>
+            </item>
+            <item android:state_activated="true">
+                <shape android:shape="rectangle">
+                    <corners android:radius="16dp" />
+                    <size
+                        android:width="32dp"
+                        android:height="32dp" />
+                    <solid android:color="?attr/colorAccent" />
+                </shape>
+            </item>
         </selector>
     </item>
 </ripple>

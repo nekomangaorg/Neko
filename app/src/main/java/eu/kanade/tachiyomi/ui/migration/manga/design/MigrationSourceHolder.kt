@@ -24,16 +24,16 @@ class MigrationSourceHolder(view: View, val adapter: MigrationSourceAdapter):
         title.text = sourceName
         // Update circle letter image.
         itemView.post {
-            image.setImageDrawable(image.getRound(source.name.take(1).toUpperCase(),false))
+            edit_button.setImageDrawable(edit_button.getRound(source.name.take(1).toUpperCase(),false))
         }
 
         if(sourceEnabled) {
             title.alpha = 1.0f
-            image.alpha = 1.0f
+            edit_button.alpha = 1.0f
             title.paintFlags = title.paintFlags and STRIKE_THRU_TEXT_FLAG.inv()
         } else {
             title.alpha = DISABLED_ALPHA
-            image.alpha = DISABLED_ALPHA
+            edit_button.alpha = DISABLED_ALPHA
             title.paintFlags = title.paintFlags or STRIKE_THRU_TEXT_FLAG
         }
     }

@@ -44,13 +44,13 @@ class ExtensionHolder(view: View, override val adapter: ExtensionAdapter) :
             itemView.context.getString(R.string.ext_untrusted).toUpperCase()
         }
 
-        GlideApp.with(itemView.context).clear(image)
+        GlideApp.with(itemView.context).clear(edit_button)
         if (extension is Extension.Available) {
             GlideApp.with(itemView.context)
                     .load(extension.iconUrl)
-                    .into(image)
+                    .into(edit_button)
         } else {
-            extension.getApplicationIcon(itemView.context)?.let { image.setImageDrawable(it) }
+            extension.getApplicationIcon(itemView.context)?.let { edit_button.setImageDrawable(it) }
         }
         bindButton(item)
     }
