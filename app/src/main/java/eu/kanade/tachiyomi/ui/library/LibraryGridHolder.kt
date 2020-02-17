@@ -7,13 +7,11 @@ import android.widget.FrameLayout
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.signature.ObjectKey
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.gone
-import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.visible
 import kotlinx.android.synthetic.main.catalogue_grid_item.*
 import kotlinx.android.synthetic.main.unread_download_badge.*

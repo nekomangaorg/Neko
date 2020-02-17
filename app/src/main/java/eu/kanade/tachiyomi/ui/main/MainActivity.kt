@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.ui.main
 
 import android.app.SearchManager
-import android.content.ComponentCallbacks2
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
@@ -48,7 +47,6 @@ import eu.kanade.tachiyomi.ui.catalogue.global_search.CatalogueSearchController
 import eu.kanade.tachiyomi.ui.download.DownloadController
 import eu.kanade.tachiyomi.ui.extension.ExtensionController
 import eu.kanade.tachiyomi.ui.library.LibraryController
-import eu.kanade.tachiyomi.ui.library.LibraryPresenter
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.ui.recent_updates.RecentChaptersController
 import eu.kanade.tachiyomi.ui.recently_read.RecentlyReadController
@@ -58,7 +56,6 @@ import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePadding
-import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.visible
 import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.coroutines.Dispatchers
@@ -186,6 +183,8 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             }
         }
 
+        supportActionBar?.setDisplayShowCustomEnabled(true)
+
         content.setOnApplyWindowInsetsListener { v, insets ->
                 // if device doesn't support light nav bar
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
@@ -278,6 +277,10 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             }
 
         })
+
+        if (router.backstackSize <= 1) {
+            tabAnimator.hide()
+        }
 
         syncActivityViewWithController(router.backstack.lastOrNull()?.controller())
 

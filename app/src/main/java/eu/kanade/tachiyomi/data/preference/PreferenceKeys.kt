@@ -113,6 +113,8 @@ object PreferenceKeys {
 
     const val libraryLayout = "pref_display_library_layout"
 
+    const val libraryUsingPager = "library_using_pager"
+
     const val lang = "app_language"
 
     const val dateFormat = "app_date_format"

@@ -6,11 +6,10 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
-import eu.kanade.tachiyomi.ui.category.CategoryAdapter
 import eu.kanade.tachiyomi.util.lang.chop
 import eu.kanade.tachiyomi.util.lang.removeArticles
-import eu.kanade.tachiyomi.util.system.launchUI
-import kotlinx.coroutines.delay
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -22,18 +21,17 @@ import java.util.Locale
  *
  * @param view the fragment containing this adapter.
  */
-class LibraryCategoryAdapter(val view: LibraryCategoryView) :
-        FlexibleAdapter<LibraryItem>(null, view, true) {
+class LibraryCategoryAdapter(val libraryListener: LibraryListener) :
+        FlexibleAdapter<IFlexible<*>>(null, libraryListener, true) {
 
+    init {
+        setDisplayHeadersAtStartUp(!Injekt.get<PreferencesHelper>().libraryUsingPager()
+            .getOrDefault())
+    }
     /**
      * The list of manga in this category.
      */
     private var mangas: List<LibraryItem> = emptyList()
-
-    /**
-     * Listener called when an item of the list press start reading.
-     */
-    val libraryListener: LibraryListener = view
 
     /**
      * Sets a list of manga in the adapter.
@@ -52,8 +50,21 @@ class LibraryCategoryAdapter(val view: LibraryCategoryView) :
      *
      * @param manga the manga to find.
      */
+    fun indexOf(categoryOrder: Int): Int {
+        return currentItems.indexOfFirst {
+            if (it is LibraryHeaderItem) it.category.order == categoryOrder
+            else false }
+    }
+
+    /**
+     * Returns the position in the adapter for the given manga.
+     *
+     * @param manga the manga to find.
+     */
     fun indexOf(manga: Manga): Int {
-        return currentItems.indexOfFirst { it.manga.id == manga.id }
+        return currentItems.indexOfFirst {
+            if (it is LibraryItem) it.manga.id == manga.id
+            else false }
     }
 
     fun performFilter() {
@@ -64,7 +75,7 @@ class LibraryCategoryAdapter(val view: LibraryCategoryView) :
         else {
             updateDataSet(mangas.filter { it.filter(s) })
         }
-        isLongPressDragEnabled = view.canDrag() && s.isNullOrBlank()
+        isLongPressDragEnabled = libraryListener.canDrag() && s.isNullOrBlank()
     }
 
     override fun onCreateBubbleText(position: Int):String {
@@ -74,6 +85,13 @@ class LibraryCategoryAdapter(val view: LibraryCategoryView) :
             "Bottom"
         } else { // Get and show the first character
             val iFlexible: IFlexible<*>? = getItem(position)
+            return if (iFlexible is LibraryHeaderItem) {
+                iFlexible.category.name
+            } else {
+                val db:DatabaseHelper by injectLazy()
+                val category = db.getCategoriesForManga((iFlexible as LibraryItem).manga).executeAsBlocking().firstOrNull()?.name
+                category?.chop(10) ?: "Default"
+            }
             val preferences:PreferencesHelper by injectLazy()
             when (preferences.librarySortingMode().getOrDefault()) {
                 LibrarySort.DRAG_AND_DROP -> {
@@ -145,5 +163,6 @@ class LibraryCategoryAdapter(val view: LibraryCategoryView) :
          */
         fun startReading(position: Int)
         fun onItemReleased(position: Int)
+        fun canDrag(): Boolean
     }
 }

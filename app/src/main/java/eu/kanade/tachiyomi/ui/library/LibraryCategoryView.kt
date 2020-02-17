@@ -79,6 +79,7 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
     fun onCreate(controller: LibraryController) {
         this.controller = controller
 
+        adapter = LibraryCategoryAdapter(this)
         recycler = if (preferences.libraryLayout().getOrDefault() == 0) {
             (swipe_refresh.inflate(R.layout.library_list_recycler) as RecyclerView).apply {
                 layoutManager = LinearLayoutManager(context)
@@ -89,7 +90,6 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
             }
         }
 
-        adapter = LibraryCategoryAdapter(this)
 
         recycler.setHasFixedSize(true)
         recycler.adapter = adapter
@@ -155,7 +155,7 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
             .subscribe {
                 if (it == category.id) {
                     adapter.currentItems.forEach { item ->
-                        controller.setSelection(item.manga, true)
+                        controller.setSelection((item as LibraryItem).manga, true)
                     }
                     controller.invalidateActionMode()
                 }
@@ -167,11 +167,12 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
                     if (it.second in -2..-1) {
                         val items = adapter.currentItems.toMutableList()
                         val mangas = controller.selectedMangas
-                        val selectedManga = items.filter { item -> item.manga in mangas }
+                        val selectedManga = items.filter { item -> (item as LibraryItem).manga in
+                            mangas }
                         items.removeAll(selectedManga)
                         if (it.second == -1) items.addAll(0, selectedManga)
                         else items.addAll(selectedManga)
-                        adapter.setItems(items)
+                        adapter.setItems(items.filterIsInstance<LibraryItem>())
                         adapter.notifyDataSetChanged()
                         saveDragSort()
                     }
@@ -179,7 +180,7 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
             }
     }
 
-    fun canDrag(): Boolean {
+    override fun canDrag(): Boolean {
         val sortingMode = preferences.librarySortingMode().getOrDefault()
         val filterOff = preferences.filterCompleted().getOrDefault() +
             preferences.filterTracked().getOrDefault() +
@@ -212,6 +213,7 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
         val mangaForCategory = event.getMangaForCategory(category).orEmpty()
 
         adapter.setItems(mangaForCategory)
+        adapter.hideAllHeaders()
 
         swipe_refresh.isEnabled = !preferences.hideCategories().getOrDefault()
 
@@ -283,7 +285,7 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
      */
     override fun onItemClick(view: View?, position: Int): Boolean {
         // If the action mode is created and the position is valid, toggle the selection.
-        val item = adapter.getItem(position) ?: return false
+        val item = adapter.getItem(position) as? LibraryItem ?: return false
         return if (adapter.mode == SelectableAdapter.Mode.MULTI) {
             lastClickPosition = position
             toggleSelection(position)
@@ -328,13 +330,13 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
     }
 
     override fun startReading(position: Int) {
-        val manga = adapter.getItem(position)?.manga ?: return
+        val manga = (adapter.getItem(position) as? LibraryItem)?.manga ?: return
         if (adapter.mode == SelectableAdapter.Mode.MULTI) toggleSelection(position)
         else controller.startReading(manga)
     }
 
     private fun saveDragSort() {
-        val mangaIds = adapter.currentItems.mapNotNull { it.manga.id }
+        val mangaIds = adapter.currentItems.mapNotNull { (it as? LibraryItem)?.manga?.id }
         category.mangaSort = null
         category.mangaOrder = mangaIds
         if (category.id == 0)
@@ -373,7 +375,7 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
     private fun toggleSelection(position: Int) {
         val item = adapter.getItem(position) ?: return
 
-        controller.setSelection(item.manga, !adapter.isSelected(position))
+        controller.setSelection((item as LibraryItem).manga, !adapter.isSelected(position))
         controller.invalidateActionMode()
     }
 
@@ -386,7 +388,7 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
     private fun setSelection(position: Int) {
         val item = adapter.getItem(position) ?: return
 
-        controller.setSelection(item.manga, true)
+        controller.setSelection((item as LibraryItem).manga, true)
         controller.invalidateActionMode()
     }
 

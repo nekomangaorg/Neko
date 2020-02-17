@@ -53,6 +53,13 @@ class SettingsLibraryController : SettingsController() {
             }
 
             switchPreference {
+                key = Keys.libraryUsingPager
+                titleRes = R.string.pref_remove_articles
+                summaryRes = R.string.pref_remove_articles_summary
+                defaultValue = false
+            }
+
+            switchPreference {
                 key = Keys.removeArticles
                 titleRes = R.string.pref_remove_articles
                 summaryRes = R.string.pref_remove_articles_summary

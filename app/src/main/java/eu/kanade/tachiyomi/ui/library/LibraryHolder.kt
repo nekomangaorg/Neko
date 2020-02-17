@@ -37,8 +37,4 @@ abstract class LibraryHolder(
         super.onItemReleased(position)
         (adapter as? LibraryCategoryAdapter)?.libraryListener?.onItemReleased(position)
     }
-
-    protected fun convertColor(color: Int):String {
-        return Integer.toHexString(color and 0x00ffffff)
-    }
 }

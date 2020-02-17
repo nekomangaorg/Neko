@@ -9,7 +9,7 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.f2prateek.rx.preferences.Preference
 import eu.davidea.flexibleadapter.FlexibleAdapter
-import eu.davidea.flexibleadapter.items.AbstractFlexibleItem
+import eu.davidea.flexibleadapter.items.AbstractSectionableItem
 import eu.davidea.flexibleadapter.items.IFilterable
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
@@ -21,8 +21,10 @@ import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import kotlinx.android.synthetic.main.catalogue_grid_item.view.*
 import uy.kohesive.injekt.injectLazy
 
-class LibraryItem(val manga: LibraryManga, private val libraryLayout: Preference<Int>) :
-        AbstractFlexibleItem<LibraryHolder>(), IFilterable<String> {
+class LibraryItem(val manga: LibraryManga,
+    private val libraryLayout: Preference<Int>,
+    header: LibraryHeaderItem) :
+    AbstractSectionableItem<LibraryHolder, LibraryHeaderItem>(header), IFilterable<String> {
 
     var downloadCount = -1
     var unreadType = 1
@@ -51,7 +53,8 @@ class LibraryItem(val manga: LibraryManga, private val libraryLayout: Preference
                     cover_thumbnail.maxHeight = Integer.MAX_VALUE
                     constraint_layout.minHeight = 0
                     cover_thumbnail.adjustViewBounds = false
-                    cover_thumbnail.layoutParams = FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, coverHeight)
+                    cover_thumbnail.layoutParams =
+                        FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, coverHeight)
                 }
                 else {
                     constraint_layout.minHeight = coverHeight

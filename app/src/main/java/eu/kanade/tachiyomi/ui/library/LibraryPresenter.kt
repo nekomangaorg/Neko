@@ -17,7 +17,6 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.HttpSource
-import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
 import eu.kanade.tachiyomi.ui.migration.MigrationFlags
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.lang.removeArticles
@@ -29,20 +28,16 @@ import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Comp
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import rx.Observable
-import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.ArrayList
-import java.util.Calendar
 import java.util.Collections
 import java.util.Comparator
-import java.util.Date
 
 /**
  * Class containing library information.
@@ -109,7 +104,7 @@ class LibraryPresenter(
                 mangaMap
             }
             currentMangaMap = mangaMap
-            view.onNextLibraryUpdate(categories, mangaMap)
+            updateView(categories, mangaMap)
         }
     }
 
@@ -124,7 +119,9 @@ class LibraryPresenter(
             mangaMap
         }()
         currentMangaMap = mangaMap
-        view.onNextLibraryUpdate(categories, mangaMap, true)
+        launchUI {
+            updateView(categories, mangaMap, true)
+        }
     }
 
     fun getAllManga(): LibraryMap? {
@@ -314,7 +311,6 @@ class LibraryPresenter(
         }
         val catListing by lazy {
             val default = createDefaultCategory()
-            default.order = -1
             listOf(default) + db.getCategories().executeAsBlocking()
         }
 
@@ -423,11 +419,38 @@ class LibraryPresenter(
         var libraryManga = db.getLibraryMangas().executeAsBlocking()
         if (!showCategories)
             libraryManga = libraryManga.distinctBy { it.id }
-        val libraryMap = libraryManga.map { manga ->
+        /*val libraryMap = libraryManga.map { manga ->
             LibraryItem(manga, libraryLayout).apply { unreadType = unreadBadgeType }
         }.groupBy {
             if (showCategories) it.manga.category else 0
-        }
+        }*/
+        val catItemMain = LibraryHeaderItem(categories.firstOrNull() ?: createDefaultCategory())
+        val libraryMap =
+            if (preferences.libraryUsingPager().getOrDefault()) {
+                libraryManga.map { manga ->
+                    LibraryItem(manga, libraryLayout, catItemMain).apply { unreadType = unreadBadgeType }
+                }.groupBy {
+                    if (showCategories) it.manga.category else 0
+                }
+            }
+        else {
+                libraryManga.groupBy { manga ->
+                    if (showCategories) manga.category else 0
+                    //LibraryItem(manga, libraryLayout).apply { unreadType = unreadBadgeType }
+                }.map { entry ->
+                    val categoryItem = LibraryHeaderItem(categories.find { entry.key == it.id }
+                        ?: createDefaultCategory())
+                    entry.value.map {
+                        LibraryItem(
+                            it, libraryLayout, categoryItem
+                        ).apply { unreadType = unreadBadgeType }
+                    }
+                }.map {
+                    val cat = if (showCategories) it.firstOrNull()?.manga?.category ?: 0 else 0
+                    cat to it
+                    //LibraryItem(manga, libraryLayout).apply { unreadType = unreadBadgeType }
+                }.toMap()
+            }
         if (libraryMap.containsKey(0))
             categories.add(0, createDefaultCategory())
 
@@ -441,6 +464,7 @@ class LibraryPresenter(
 
     private fun createDefaultCategory(): Category {
         val default = Category.createDefault(context)
+        default.order = -1
         val defOrder = preferences.defaultMangaOrder().getOrDefault()
         if (defOrder.firstOrNull()?.isLetter() == true) default.mangaSort = defOrder.first()
         else default.mangaOrder = defOrder.split("/").mapNotNull { it.toLongOrNull() }
@@ -456,8 +480,59 @@ class LibraryPresenter(
             mangaMap = withContext(Dispatchers.IO) { applyFilters(mangaMap) }
             mangaMap = withContext(Dispatchers.IO) { applySort(mangaMap) }
             currentMangaMap = mangaMap
-            view.onNextLibraryUpdate(categories, mangaMap)
+            updateView(categories, mangaMap)
         }
+    }
+
+    suspend fun updateView(categories: List<Category>, mangaMap: LibraryMap, freshStart:Boolean
+    = false) {
+       /* val list = withContext(Dispatchers.IO) {
+            val showCategories = !preferences.hideCategories().getOrDefault()
+            val current = mangaMap.values.first()
+            current.groupBy {
+                if (showCategories) it.manga.category else 0
+            }.flatMap { it.value }
+        }*/
+        if (preferences.libraryUsingPager().getOrDefault()) {
+            view.onNextLibraryUpdate(categories, mangaMap, true)
+        }
+        else {
+            val mangaList = withContext(Dispatchers.IO) {
+                val list = mutableListOf<LibraryItem>()
+                val many = categories.size > 1
+                for (element in mangaMap.toSortedMap(compareBy { entry ->
+                    categories.find { it.id == entry }?.order ?: -1
+                })) {
+                    list.addAll(element.value)
+                }
+                list
+            }
+            view.onNextLibraryUpdate(mangaList, freshStart)
+        }
+    }
+
+    fun updateViewBlocking() {
+        /* val list = withContext(Dispatchers.IO) {
+             val showCategories = !preferences.hideCategories().getOrDefault()
+             val current = mangaMap.values.first()
+             current.groupBy {
+                 if (showCategories) it.manga.category else 0
+             }.flatMap { it.value }
+         }*/
+        val mangaMap = currentMangaMap ?: return
+        if (preferences.libraryUsingPager().getOrDefault()) {
+            view.onNextLibraryUpdate(categories, mangaMap, true)
+        }
+        else {
+            val list = mutableListOf<LibraryItem>()
+            for (element in mangaMap?.toSortedMap(compareBy { entry ->
+                categories.find { it.id == entry }?.order ?: -1
+            })) {
+                list.addAll(element.value)
+            }
+            view.onNextLibraryUpdate(list, true)
+        }
+
     }
 
     /**
@@ -471,7 +546,7 @@ class LibraryPresenter(
             val current = currentMangaMap ?: return@launchUI
             withContext(Dispatchers.IO) { setDownloadCount(current) }
             currentMangaMap = current
-            view.onNextLibraryUpdate(categories, current)
+            updateView(categories, current)
         }
     }
 
@@ -487,7 +562,7 @@ class LibraryPresenter(
             val current = currentMangaMap ?: return@launchUI
             withContext(Dispatchers.IO) { setUnreadBadge(current) }
             currentMangaMap = current
-            view.onNextLibraryUpdate(categories, current)
+            updateView(categories, current)
         }
     }
 
@@ -499,7 +574,7 @@ class LibraryPresenter(
             var mangaMap = currentMangaMap ?: return@launchUI
             mangaMap = withContext(Dispatchers.IO) { applySort(mangaMap) }
             currentMangaMap = mangaMap
-            view.onNextLibraryUpdate(categories, mangaMap)
+            updateView(categories, mangaMap)
         }
     }
 
@@ -508,7 +583,7 @@ class LibraryPresenter(
             var mangaMap = currentMangaMap ?: return@launchUI
             mangaMap = withContext(Dispatchers.IO) { applyCatSort(mangaMap, catId) }
             currentMangaMap = mangaMap
-            view.onNextLibraryUpdate(categories, mangaMap)
+            updateView(categories, mangaMap)
         }
     }
 
@@ -698,5 +773,6 @@ class LibraryPresenter(
 
     private companion object {
         var currentLibrary:Library? = null
+        var currentList:List<LibraryItem>? = null
     }
 }
