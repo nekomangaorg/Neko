@@ -358,8 +358,8 @@ class LibraryController(
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
         super.onChangeStarted(handler, type)
         if (type.isEnter) {
-            if (usePager)
-            (activity as MainActivity).supportActionBar?.setDisplayShowCustomEnabled(true)
+            if (!usePager)
+                (activity as MainActivity).supportActionBar?.setDisplayShowCustomEnabled(true)
             //activity?.tabs?.setupWithViewPager(library_pager)
             presenter.getLibrary()
             DownloadService.addListener(this)
@@ -919,7 +919,7 @@ class LibraryController(
             toggleSelection(position)
             true
         } else {
-            openManga(item.manga, 0f)
+            openManga(item.manga, null)
             false
         }
     }

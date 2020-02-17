@@ -278,10 +278,6 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
 
         })
 
-        if (router.backstackSize <= 1) {
-            tabAnimator.hide()
-        }
-
         syncActivityViewWithController(router.backstack.lastOrNull()?.controller())
 
         if (savedInstanceState == null) {

@@ -97,11 +97,6 @@ class TabsAnimator(val tabs: TabLayout) {
         isLastStateShown = false
     }
 
-    fun hide() {
-        setHeight(0)
-        isLastStateShown = false
-    }
-
     /**
      * Returns whether the tab layout has a known height.
      */
