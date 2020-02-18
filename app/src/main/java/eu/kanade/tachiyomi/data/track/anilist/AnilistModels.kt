@@ -1,10 +1,15 @@
 package eu.kanade.tachiyomi.data.track.anilist
 
+import android.app.DownloadManager
+import android.content.Context
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 import java.text.SimpleDateFormat
 import java.util.*
@@ -44,7 +49,9 @@ data class ALUserManga(
         val list_status: String,
         val score_raw: Int,
         val chapters_read: Int,
-        val manga: ALManga) {
+        val manga: ALManga,
+        val context: Context = Injekt.get<PreferencesHelper>().context
+) {
 
     fun toTrack() = Track.create(TrackManager.ANILIST).apply {
         media_id = manga.media_id
@@ -55,21 +62,23 @@ data class ALUserManga(
         total_chapters = manga.total_chapters
     }
 
-    fun toTrackStatus() = when (list_status) {
-        "CURRENT" -> Anilist.READING
-        "COMPLETED" -> Anilist.COMPLETED
-        "PAUSED" -> Anilist.ON_HOLD
-        "DROPPED" -> Anilist.DROPPED
-        "PLANNING" -> Anilist.PLANNING
-        "REPEATING" -> Anilist.REPEATING
-        else -> throw NotImplementedError("Unknown status")
+    fun toTrackStatus() = with(context) {
+        when (list_status) {
+            getString(R.string.reading) -> Anilist.READING
+            getString(R.string.completed) -> Anilist.COMPLETED
+            getString(R.string.paused) -> Anilist.PAUSED
+            getString(R.string.dropped) -> Anilist.DROPPED
+            getString(R.string.plan_to_read) -> Anilist.PLANNING
+            getString(R.string.repeating)-> Anilist.REPEATING
+            else -> throw NotImplementedError("Unknown status")
+        }
     }
 }
 
 fun Track.toAnilistStatus() = when (status) {
     Anilist.READING -> "CURRENT"
     Anilist.COMPLETED -> "COMPLETED"
-    Anilist.ON_HOLD -> "PAUSED"
+    Anilist.PAUSED -> "PAUSED"
     Anilist.DROPPED -> "DROPPED"
     Anilist.PLANNING -> "PLANNING"
     Anilist.REPEATING -> "REPEATING"
