@@ -596,6 +596,7 @@ class LibraryController(
         val position = (recycler.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
         if (recycler is AutofitRecyclerView && preferences.libraryLayout().getOrDefault() == 0 ||
             recycler !is AutofitRecyclerView && preferences.libraryLayout().getOrDefault() > 0) {
+            destroyActionModeIfNeeded()
             recycler_layout.removeView(recycler)
             recycler = if (preferences.libraryLayout().getOrDefault() == 0) {
                 (recycler_layout.inflate(R.layout.library_list_recycler) as RecyclerView).apply {
@@ -614,10 +615,16 @@ class LibraryController(
                 }
             }
             recycler.setHasFixedSize(true)
+            adapter = LibraryCategoryAdapter(this)
+            recycler.adapter = adapter
             recycler.addOnScrollListener(scrollListener)
+            adapter.isLongPressDragEnabled = canDrag()
             recycler_layout.addView(recycler)
+            adapter.setItems(presenter.getList())
+        } else {
+            recycler.adapter = adapter
         }
-        recycler.adapter = adapter
+
         (recycler.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(position, 0)
         //val adapter = adapter ?: return
 

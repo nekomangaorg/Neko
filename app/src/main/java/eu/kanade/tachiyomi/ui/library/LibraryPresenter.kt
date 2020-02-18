@@ -503,6 +503,16 @@ class LibraryPresenter(
         }
     }
 
+    fun getList(): List<LibraryItem> {
+        val list = mutableListOf<LibraryItem>()
+        for (element in currentMangaMap!!.toSortedMap(compareBy { entry ->
+            categories.find { it.id == entry }?.order ?: -1
+        })) {
+            list.addAll(element.value)
+        }
+        return list
+    }
+
     fun updateViewBlocking() {
         /* val list = withContext(Dispatchers.IO) {
              val showCategories = !preferences.hideCategories().getOrDefault()
