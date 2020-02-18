@@ -160,5 +160,7 @@ class LibraryCategoryAdapter(val libraryListener: LibraryListener) :
         fun startReading(position: Int)
         fun onItemReleased(position: Int)
         fun canDrag(): Boolean
+        fun updateCategory(catId: Int): Boolean
+        fun sortCategory(catId: Int, sortBy: Int): String
     }
 }

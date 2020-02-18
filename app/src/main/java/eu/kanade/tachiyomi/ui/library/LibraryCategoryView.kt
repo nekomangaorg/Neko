@@ -90,7 +90,6 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
             }
         }
 
-
         recycler.setHasFixedSize(true)
         recycler.adapter = adapter
         swipe_refresh.addView(recycler)
@@ -390,6 +389,14 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
 
         controller.setSelection((item as LibraryItem).manga, true)
         controller.invalidateActionMode()
+    }
+
+    override fun updateCategory(catId: Int): Boolean {
+        return true
+    }
+
+    override fun sortCategory(catId: Int, sortBy: Int): String {
+        return ""
     }
 
 }

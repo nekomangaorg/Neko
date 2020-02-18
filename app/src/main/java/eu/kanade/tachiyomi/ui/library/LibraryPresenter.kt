@@ -486,20 +486,12 @@ class LibraryPresenter(
 
     suspend fun updateView(categories: List<Category>, mangaMap: LibraryMap, freshStart:Boolean
     = false) {
-       /* val list = withContext(Dispatchers.IO) {
-            val showCategories = !preferences.hideCategories().getOrDefault()
-            val current = mangaMap.values.first()
-            current.groupBy {
-                if (showCategories) it.manga.category else 0
-            }.flatMap { it.value }
-        }*/
         if (preferences.libraryUsingPager().getOrDefault()) {
             view.onNextLibraryUpdate(categories, mangaMap, true)
         }
         else {
             val mangaList = withContext(Dispatchers.IO) {
                 val list = mutableListOf<LibraryItem>()
-                val many = categories.size > 1
                 for (element in mangaMap.toSortedMap(compareBy { entry ->
                     categories.find { it.id == entry }?.order ?: -1
                 })) {
@@ -771,8 +763,67 @@ class LibraryPresenter(
 
     }
 
+    fun sortCategory(catId: Int, order: Int) {
+        val category = categories.find { catId == it.id } ?: return
+        category.mangaSort = ('a' + (order - 1))
+        if (category.id == 0)
+            preferences.defaultMangaOrder().set(category.mangaSort.toString())
+        else
+            Injekt.get<DatabaseHelper>().insertCategory(category).asRxObservable().subscribe()
+        requestCatSortUpdate(category.id!!)
+    }
+
+    fun rearrangeCategory(catId: Int?, mangaIds: List<Long>) {
+        GlobalScope.launch(Dispatchers.IO) {
+            val category = categories.find { catId == it.id } ?: return@launch
+            category.mangaSort = null
+            category.mangaOrder = mangaIds
+            if (category.id == 0) preferences.defaultMangaOrder().set(mangaIds.joinToString("/"))
+            else db.insertCategory(category).executeAsBlocking()
+            requestCatSortUpdate(category.id!!)
+        }
+    }
+
+    fun moveMangaToCategory(item: LibraryItem, catId: Int?, mangaIds: List<Long>) {
+        GlobalScope.launch(Dispatchers.IO) {
+            val categoryId = catId ?: return@launch
+            val category = categories.find { catId == it.id } ?: return@launch
+            val manga = item.manga
+
+            val mangaMap = currentMangaMap?.toMutableMap() ?: return@launch
+            val oldCatId = item.manga.category
+            val oldCatMap = mangaMap[manga.category]?.toMutableList() ?: return@launch
+            val newCatMap = mangaMap[catId]?.toMutableList() ?: return@launch
+            oldCatMap.remove(item)
+            newCatMap.add(item)
+            mangaMap[oldCatId] = oldCatMap
+            mangaMap[catId] = newCatMap
+            currentMangaMap = mangaMap
+
+            item.manga.category = categoryId
+
+            val mc = ArrayList<MangaCategory>()
+            val categories =
+                db.getCategoriesForManga(manga).executeAsBlocking().filter { it.id  != oldCatId } + listOf(category)
+
+            for (cat in categories) {
+                mc.add(MangaCategory.create(manga, cat))
+            }
+
+            db.setMangaCategories(mc, listOf(manga))
+
+            category.mangaSort = null
+            val ids = mangaIds.toMutableList()
+            if (!ids.contains(manga.id!!))
+                ids.add(manga.id!!)
+            category.mangaOrder = ids
+            if (category.id == 0) preferences.defaultMangaOrder().set(mangaIds.joinToString("/"))
+            else db.insertCategory(category).executeAsBlocking()
+            getLibrary()
+        }
+    }
+
     private companion object {
         var currentLibrary:Library? = null
-        var currentList:List<LibraryItem>? = null
     }
 }

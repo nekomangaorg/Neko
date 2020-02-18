@@ -35,17 +35,15 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.main.MainActivity
-import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.lang.chop
 import eu.kanade.tachiyomi.util.system.isServiceRunning
 import eu.kanade.tachiyomi.util.system.notification
 import eu.kanade.tachiyomi.util.system.notificationManager
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import rx.Observable
 import rx.Subscription
 import rx.schedulers.Schedulers
@@ -296,12 +294,9 @@ class LibraryUpdateService(
         val target = intent.getSerializableExtra(KEY_TARGET) as? Target ?: return START_NOT_STICKY
 
         // Unsubscribe from any previous subscription if needed.
+        job?.cancel()
         subscription?.unsubscribe()
 
-        val handler = CoroutineExceptionHandler { _, exception ->
-            Timber.e(exception)
-            stopSelf(startId)
-        }
         val selectedScheme = preferences.libraryUpdatePrioritization().getOrDefault()
         if (target == Target.CHAPTERS) {
             updateChapters(
@@ -331,13 +326,15 @@ class LibraryUpdateService(
     private fun updateChapters(mangaToAdd: List<LibraryManga>, startId: Int) {
         addManga(mangaToAdd)
 
-        if (job == null) {
-            job = GlobalScope.launch(Dispatchers.IO, CoroutineStart.DEFAULT) {
-                updateChaptersJob()
-                mangaToUpdate.clear()
-                categoryIds.clear()
-                stopSelf(startId)
-            }
+        val handler = CoroutineExceptionHandler { _, exception ->
+            Timber.e(exception)
+            stopSelf(startId)
+        }
+        job = GlobalScope.launch(handler) {
+            updateChaptersJob()
+            mangaToUpdate.clear()
+            categoryIds.clear()
+            stopSelf(startId)
         }
     }
 
