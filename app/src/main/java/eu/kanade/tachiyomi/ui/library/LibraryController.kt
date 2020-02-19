@@ -5,16 +5,13 @@ import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Bundle
-import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowInsets
 import android.view.inputmethod.InputMethodManager
-import android.widget.ArrayAdapter
 import android.widget.Spinner
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
@@ -213,6 +210,8 @@ class LibraryController(
      */
     private lateinit var recycler: RecyclerView
 
+    var libraryLayout = preferences.libraryLayout().getOrDefault()
+
     private var usePager: Boolean = !preferences.libraryAsSingleList().getOrDefault()
 
     init {
@@ -255,26 +254,20 @@ class LibraryController(
         }
         else {
             adapter = LibraryCategoryAdapter(this)
-            recycler = if (preferences.libraryLayout().getOrDefault() == 0) {
-                (recycler_layout.inflate(R.layout.library_list_recycler) as RecyclerView).apply {
-                    layoutManager = LinearLayoutManager(context)
-                }
-            } else {
-                (recycler_layout.inflate(R.layout.library_grid_recycler) as AutofitRecyclerView).apply {
-                    spanCount = mangaPerRow
-                    manager.spanSizeLookup = (object : GridLayoutManager.SpanSizeLookup() {
-                        override fun getSpanSize(position: Int): Int {
-                            val item = this@LibraryController.adapter.getItem(position)
-                            return if (item is LibraryHeaderItem)
-                                manager.spanCount else 1
-                        }
-                    })
-                }
+            recycler = (recycler_layout.inflate(R.layout.library_grid_recycler) as
+                AutofitRecyclerView).apply {
+                spanCount = if (libraryLayout == 0) 1 else mangaPerRow
+                manager.spanSizeLookup = (object : GridLayoutManager.SpanSizeLookup() {
+                    override fun getSpanSize(position: Int): Int {
+                        if (libraryLayout == 0) return 1
+                        val item = this@LibraryController.adapter.getItem(position)
+                        return if (item is LibraryHeaderItem) manager.spanCount else 1
+                    }
+                })
             }
 
             recycler.setHasFixedSize(true)
             recycler.adapter = adapter
-            //adapter.setStickyHeaders(true)
             recycler_layout.addView(recycler)
             adapter.fastScroller = fast_scroller
             recycler.addOnScrollListener(scrollListener)
@@ -286,15 +279,12 @@ class LibraryController(
                 arrayOf(resources!!.getString(R.string.label_library)))
             spinnerAdapter?.setDropDownViewResource(R.layout.library_spinner_entry_text)
             spinner.adapter = spinnerAdapter
-
-            //spinnerAdapter?.setCustomText(resources?.getString(R.string.label_library))
         }
 
 
         if (selectedMangas.isNotEmpty()) {
             createActionModeIfNeeded()
         }
-
 
         //bottom_sheet.onCreate(pager_layout)
         bottom_sheet.onCreate(if (usePager) pager_layout else recycler_layout)
@@ -440,7 +430,6 @@ class LibraryController(
         }
         adapter.setItems(mangaMap)
 
-        val position = if (freshStart) adapter.indexOf(activeCategory) + 1 else null
 
         spinner.onItemSelectedListener = null
         spinnerAdapter = SpinnerAdapter(view!!.context, R.layout.library_spinner_textview,
@@ -450,8 +439,6 @@ class LibraryController(
 
 
         spinner.setSelection(min(presenter.categories.size - 1, activeCategory + 1))
-       /* spinnerAdapter?.setCustomText(presenter.categories.find { it.order == activeCategory
-        }?.name ?: resources?.getString(R.string.label_library))*/
         if (!freshStart) {
             justStarted = false
             if (recycler_layout.alpha == 0f)
@@ -459,9 +446,10 @@ class LibraryController(
 
 
         }else {
+            val position = if (freshStart) adapter.indexOf(activeCategory) else null
             if (position != null)
                 (recycler.layoutManager as LinearLayoutManager)
-                    .scrollToPositionWithOffset(position, 0)
+                    .scrollToPositionWithOffset(position, (-30).dpToPx)
         }
         adapter.isLongPressDragEnabled = canDrag()
         tabsVisibilityRelay.call(false)
@@ -476,10 +464,10 @@ class LibraryController(
                 updateScroll = false
                 return@IgnoreFirstSpinnerListener
             }
-            val headerPosition = adapter.indexOf(pos - 1) + 1
+            val headerPosition = adapter.indexOf(pos - 1)
             if (headerPosition > -1) {
                 (recycler.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
-                    headerPosition, 0
+                    headerPosition, (-30).dpToPx
                 )
             }
         }
@@ -598,45 +586,9 @@ class LibraryController(
         else {
             val position =
                 (recycler.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
-            // if switching from list to grid
-            if (recycler is AutofitRecyclerView && preferences.libraryLayout().getOrDefault() == 0
-                || recycler !is AutofitRecyclerView && preferences.libraryLayout().getOrDefault() > 0) {
-                destroyActionModeIfNeeded()
-                recycler_layout.removeView(recycler)
-                recycler = if (preferences.libraryLayout().getOrDefault() == 0) {
-                    (recycler_layout.inflate(R.layout.library_list_recycler) as RecyclerView).apply {
-                        layoutManager = LinearLayoutManager(context)
-                    }
-                } else {
-                    (recycler_layout.inflate(R.layout.library_grid_recycler) as AutofitRecyclerView).apply {
-                        spanCount = mangaPerRow
-                        manager.spanSizeLookup = (object : GridLayoutManager.SpanSizeLookup() {
-                            override fun getSpanSize(position: Int): Int {
-                                val item = this@LibraryController.adapter.getItem(position)
-                                return if (item is LibraryHeaderItem) manager.spanCount else 1
-                            }
-                        })
-                    }
-                }
-                recycler.setHasFixedSize(true)
-                adapter = LibraryCategoryAdapter(this)
-                recycler.adapter = adapter
-                recycler.addOnScrollListener(scrollListener)
-                adapter.isLongPressDragEnabled = canDrag()
-                recycler_layout.addView(recycler)
-                adapter.setItems(presenter.getList())
-                val config = resources?.configuration
-                val phoneLandscape = (config?.orientation == Configuration.ORIENTATION_LANDSCAPE &&
-                    (config.screenLayout.and(Configuration.SCREENLAYOUT_SIZE_MASK)) <
-                    Configuration.SCREENLAYOUT_SIZE_LARGE)
-                if (!usePager && !phoneLandscape) {
-                    val height = recycler.resources.getDimensionPixelSize(R.dimen
-                        .rounder_radius) + 4.dpToPx
-                    recycler.updatePaddingRelative(bottom = height)
-                }
-            } else {
-                recycler.adapter = adapter
-            }
+            libraryLayout = preferences.libraryLayout().getOrDefault()
+            recycler.adapter = adapter
+            (recycler as? AutofitRecyclerView)?.spanCount = if (libraryLayout == 0) 1 else mangaPerRow
 
             (recycler.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(position, 0)
         }
@@ -924,19 +876,17 @@ class LibraryController(
         destroyActionModeIfNeeded()
     }
 
+    /// Method for single list
     override fun startReading(position: Int) {
-        val activity = activity ?: return
-        val manga = (adapter.getItem(position) as? LibraryItem)?.manga ?: return
         if (adapter.mode == SelectableAdapter.Mode.MULTI) {
             toggleSelection(position)
             return
         }
-        val chapter = presenter.getFirstUnread(manga) ?: return
-        val intent = ReaderActivity.newIntent(activity, manga, chapter)
-        destroyActionModeIfNeeded()
-        startActivity(intent)
+        val manga = (adapter.getItem(position) as? LibraryItem)?.manga ?: return
+        startReading(manga)
     }
 
+    /// Method for the category view
     fun startReading(manga: Manga) {
         val activity = activity ?: return
         val chapter = presenter.getFirstUnread(manga) ?: return
@@ -1057,7 +1007,6 @@ class LibraryController(
         }
     }
 
-
     override fun shouldMoveItem(fromPosition: Int, toPosition: Int): Boolean {
         if (adapter.selectedItemCount > 1)
             return false
@@ -1087,49 +1036,5 @@ class LibraryController(
     override fun sortCategory(catId: Int, sortBy: Int): String {
         presenter.sortCategory(catId, sortBy)
         return ""
-    }
-}
-
-object HeightTopWindowInsetsListener : View.OnApplyWindowInsetsListener {
-    override fun onApplyWindowInsets(v: View, insets: WindowInsets): WindowInsets {
-        val topInset = insets.systemWindowInsetTop
-        v.setPadding(0,topInset,0,0)
-        if (v.layoutParams.height != topInset) {
-            v.layoutParams.height = topInset
-            v.requestLayout()
-        }
-        return insets
-    }
-}
-
-class SpinnerAdapter(context: Context, layoutId: Int, val array: Array<String>) :
-    ArrayAdapter<String>
-    (context, layoutId, array)
-
-class ReSpinner : Spinner {
-    constructor(context: Context?) : super(context) {}
-    constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs) {}
-    constructor(context: Context?, attrs: AttributeSet?, defStyle: Int) : super(
-        context, attrs, defStyle
-    )
-
-    override fun setSelection(position: Int, animate: Boolean) {
-        val sameSelected = position == selectedItemPosition
-        super.setSelection(position, animate)
-        if (sameSelected) { // Spinner does not call the OnItemSelectedListener if the same item is selected, so do it manually now
-            onItemSelectedListener?.onItemSelected(
-                this, selectedView, position, selectedItemId
-            )
-        }
-    }
-
-    override fun setSelection(position: Int) {
-        val sameSelected = position == selectedItemPosition
-        super.setSelection(position)
-        if (sameSelected) { // Spinner does not call the OnItemSelectedListener if the same item is selected, so do it manually now
-            onItemSelectedListener?.onItemSelected(
-                this, selectedView, position, selectedItemId
-            )
-        }
     }
 }

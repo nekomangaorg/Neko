@@ -6,11 +6,8 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
-import android.view.WindowManager
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.customview.customView
-import com.afollestad.materialdialogs.internal.main.DialogLayout
-import com.bluelinelabs.conductor.Router
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.signature.ObjectKey
 import eu.kanade.tachiyomi.R
@@ -60,7 +57,7 @@ class EditMangaDialog : DialogController {
             positiveButton(R.string.action_save) { onPositiveButtonClick() }
         }
         dialogView = dialog.view
-        onViewCreated(dialog.view, savedViewState)
+        onViewCreated(dialog.view)
         dialog.setOnShowListener {
             val dView = (it as? MaterialDialog)?.view
             dView?.contentLayout?.scrollView?.scrollTo(0, 0)
@@ -68,7 +65,7 @@ class EditMangaDialog : DialogController {
         return dialog
     }
 
-    fun onViewCreated(view: View, savedState: Bundle?) {
+    fun onViewCreated(view: View) {
         GlideApp.with(view.context)
             .asDrawable()
             .load(manga)

@@ -15,7 +15,6 @@ import android.view.ViewGroup
 import android.view.WindowInsets
 import android.widget.TextView
 import androidx.annotation.Px
-import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.SearchView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.graphics.ColorUtils
@@ -157,6 +156,18 @@ object RecyclerWindowInsetsListener : View.OnApplyWindowInsetsListener {
         if (MainActivity.usingBottomNav) return insets
         v.setPadding(0,0,0,insets.systemWindowInsetBottom)
         //v.updatePaddingRelative(bottom = v.paddingBottom + insets.systemWindowInsetBottom)
+        return insets
+    }
+}
+
+object HeightTopWindowInsetsListener : View.OnApplyWindowInsetsListener {
+    override fun onApplyWindowInsets(v: View, insets: WindowInsets): WindowInsets {
+        val topInset = insets.systemWindowInsetTop
+        v.setPadding(0,topInset,0,0)
+        if (v.layoutParams.height != topInset) {
+            v.layoutParams.height = topInset
+            v.requestLayout()
+        }
         return insets
     }
 }

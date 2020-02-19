@@ -90,7 +90,6 @@ class LibraryHeaderItem(val category: Category) : AbstractHeaderItem<LibraryHead
                 }
             )
 
-
             when {
                 item.category.id == -1 -> {
                     updateButton.invisible()

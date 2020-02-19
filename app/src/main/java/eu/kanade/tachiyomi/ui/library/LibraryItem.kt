@@ -39,32 +39,42 @@ class LibraryItem(val manga: LibraryManga,
     override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): LibraryHolder {
         val parent = adapter.recyclerView
         return if (parent is AutofitRecyclerView) {
-            val fixedSize = libraryLayout.getOrDefault() == 1
-            view.apply {
-                val coverHeight = (parent.itemWidth / 3f * 4f).toInt()
-                if (fixedSize) {
-                    constraint_layout.layoutParams = FrameLayout.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT
-                    )
-                    val marginParams = card.layoutParams as ConstraintLayout.LayoutParams
-                    marginParams.bottomMargin = 6.dpToPx
-                    card.layoutParams = marginParams
-                    cover_thumbnail.maxHeight = Integer.MAX_VALUE
-                    constraint_layout.minHeight = 0
-                    cover_thumbnail.adjustViewBounds = false
-                    cover_thumbnail.layoutParams =
-                        FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, coverHeight)
-                }
-                else {
-                    constraint_layout.minHeight = coverHeight
-                    cover_thumbnail.maxHeight = (parent.itemWidth / 3f * 6f).toInt()
-                    constraint_layout.background = ContextCompat.getDrawable(context,
-                        R.drawable.library_item_selector)
-                }
+            val libraryLayout = libraryLayout.getOrDefault()
+            if (libraryLayout == 0) {
+                LibraryListHolder(view, adapter as LibraryCategoryAdapter)
             }
-            LibraryGridHolder(view, adapter as LibraryCategoryAdapter, parent.itemWidth, fixedSize)
-
+            else {
+                view.apply {
+                    val coverHeight = (parent.itemWidth / 3f * 4f).toInt()
+                    if (libraryLayout == 1) {
+                        constraint_layout.layoutParams = FrameLayout.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
+                        )
+                        val marginParams = card.layoutParams as ConstraintLayout.LayoutParams
+                        marginParams.bottomMargin = 6.dpToPx
+                        card.layoutParams = marginParams
+                        cover_thumbnail.maxHeight = Integer.MAX_VALUE
+                        constraint_layout.minHeight = 0
+                        cover_thumbnail.adjustViewBounds = false
+                        cover_thumbnail.layoutParams = FrameLayout.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            coverHeight
+                        )
+                    } else if (libraryLayout == 2) {
+                        constraint_layout.minHeight = coverHeight
+                        cover_thumbnail.maxHeight = (parent.itemWidth / 3f * 6f).toInt()
+                        constraint_layout.background = ContextCompat.getDrawable(
+                            context, R.drawable.library_item_selector
+                        )
+                    }
+                }
+                LibraryGridHolder(
+                    view,
+                    adapter as LibraryCategoryAdapter,
+                    parent.itemWidth,
+                    libraryLayout == 1
+                )
+            }
         } else {
             LibraryListHolder(view, adapter as LibraryCategoryAdapter)
         }
