@@ -90,12 +90,20 @@ class LibraryHeaderItem(val category: Category) : AbstractHeaderItem<LibraryHead
                 }
             )
 
-            if (LibraryUpdateService.categoryInQueue(item.category.id)) {
-                catProgress.visible()
-                updateButton.invisible()
-            } else {
-                catProgress.gone()
-                updateButton.visible()
+
+            when {
+                item.category.id == -1 -> {
+                    updateButton.invisible()
+                    catProgress.gone()
+                }
+                LibraryUpdateService.categoryInQueue(item.category.id) -> {
+                    catProgress.visible()
+                    updateButton.invisible()
+                }
+                else -> {
+                    catProgress.gone()
+                    updateButton.visible()
+                }
             }
         }
 
@@ -113,7 +121,9 @@ class LibraryHeaderItem(val category: Category) : AbstractHeaderItem<LibraryHead
             val popup = PopupMenu(itemView.context, sortText)
 
             // Inflate our menu resource into the PopupMenu's Menu
-            popup.menuInflater.inflate(R.menu.cat_sort, popup.menu)
+            popup.menuInflater.inflate(
+                if (category.id == -1) R.menu.main_sort
+                else R.menu.cat_sort, popup.menu)
 
             // Set a listener so we are notified if a menu item is clicked
             popup.setOnMenuItemClickListener { menuItem ->
@@ -140,8 +150,11 @@ class LibraryHeaderItem(val category: Category) : AbstractHeaderItem<LibraryHead
             }
 
             currentItem?.icon = tintVector(
-                if (category.isAscending()) R.drawable.ic_arrow_up_white_24dp
-                else R.drawable.ic_arrow_down_white_24dp
+                when {
+                    sortingMode == LibrarySort.DRAG_AND_DROP -> R.drawable.ic_check_white_24dp
+                    category.isAscending() -> R.drawable.ic_arrow_up_white_24dp
+                    else -> R.drawable.ic_arrow_down_white_24dp
+                }
             )
 
             // Finally show the PopupMenu
@@ -162,6 +175,7 @@ class LibraryHeaderItem(val category: Category) : AbstractHeaderItem<LibraryHead
             }
             else {
                 val order = when (menuId) {
+                    R.id.action_total_chaps -> 4
                     R.id.action_last_read -> 3
                     R.id.action_unread -> 2
                     R.id.action_update -> 1

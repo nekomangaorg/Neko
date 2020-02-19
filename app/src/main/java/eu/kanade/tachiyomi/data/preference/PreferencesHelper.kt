@@ -173,7 +173,7 @@ class PreferencesHelper(val context: Context) {
 
     fun libraryLayout() = rxPrefs.getInteger(Keys.libraryLayout, 1)
 
-    fun libraryUsingPager() = rxPrefs.getBoolean(Keys.libraryUsingPager, false)
+    fun libraryAsSingleList() = rxPrefs.getBoolean(Keys.libraryAsSingleList, false)
 
     fun downloadBadge() = rxPrefs.getBoolean(Keys.downloadBadge, false)
 

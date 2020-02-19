@@ -40,8 +40,8 @@ class SettingsLibraryController : SettingsController() {
                 }
 
                 Observable.combineLatest(preferences.portraitColumns().asObservable(),
-                    preferences.landscapeColumns().asObservable(),
-                    { portraitCols, landscapeCols -> Pair(portraitCols, landscapeCols) })
+                    preferences.landscapeColumns().asObservable()
+                ) { portraitCols, landscapeCols -> Pair(portraitCols, landscapeCols) }
                     .subscribeUntilDestroy { (portraitCols, landscapeCols) ->
                         val portrait = getColumnValue(portraitCols)
                         val landscape = getColumnValue(landscapeCols)
@@ -53,9 +53,9 @@ class SettingsLibraryController : SettingsController() {
             }
 
             switchPreference {
-                key = Keys.libraryUsingPager
-                titleRes = R.string.pref_remove_articles
-                summaryRes = R.string.pref_remove_articles_summary
+                key = Keys.libraryAsSingleList
+                titleRes = R.string.pref_library_single_list
+                summaryRes = R.string.pref_library_single_list_summary
                 defaultValue = false
             }
 

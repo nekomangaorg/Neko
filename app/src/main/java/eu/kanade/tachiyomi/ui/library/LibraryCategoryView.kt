@@ -184,6 +184,7 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
         val filterOff = preferences.filterCompleted().getOrDefault() +
             preferences.filterTracked().getOrDefault() +
             preferences.filterUnread().getOrDefault() +
+            preferences.filterMangaType().getOrDefault() +
             preferences.filterCompleted().getOrDefault() == 0 &&
             !preferences.hideCategories().getOrDefault()
         return sortingMode == LibrarySort.DRAG_AND_DROP && filterOff &&
@@ -212,7 +213,6 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
         val mangaForCategory = event.getMangaForCategory(category).orEmpty()
 
         adapter.setItems(mangaForCategory)
-        adapter.hideAllHeaders()
 
         swipe_refresh.isEnabled = !preferences.hideCategories().getOrDefault()
 

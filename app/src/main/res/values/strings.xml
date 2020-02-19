@@ -129,6 +129,7 @@
     <string name="action_move_to_bottom">Move to bottom</string>
     <string name="action_track">Track</string>
     <string name="action_sort_by">Sort category by…</string>
+    <string name="action_switch">Switch</string>
 
     <!-- Operations -->
     <string name="loading">Loading…</string>
@@ -198,8 +199,9 @@
     <string name="pref_update_only_non_completed">Only update ongoing manga</string>
     <string name="pref_auto_update_manga_sync">Sync chapters after reading</string>
     <string name="pref_remove_articles">Sort by ignoring articles</string>
-    <string name="pref_fixed_grid">Fixed grid size in library</string>
-    <string name="pref_fixed_grid_summary">Show all covers as the same height by cropping</string>
+    <string name="pref_library_single_list">Show library as a single list</string>
+    <string name="pref_library_single_list_summary">Show all categories under a single
+        sectioned list</string>
     <string name="pref_remove_articles_summary">When sorting alphabetically, sort ignoring
         articles (a, an, the) at the start of manga titles</string>
     <string name="pref_skip_pre_migration">Skip pre-migration</string>
@@ -413,6 +415,8 @@
     <string name="category_already_in_queue">%1$s is already in queue</string>
     <string name="local_source_badge">Local</string>
     <string name="confirm_manga_deletion">Remove from library?</string>
+    <string name="switch_to_dnd">Switch to Drag &amp; Drop mode?</string>
+    <string name="keep_current_sort">Keep sorting by %1$s</string>
     <string name="confirm_category_deletion">Delete category?</string>
     <string name="confirm_category_deletion_message">Manga in this category will moved into the
         default category.</string>

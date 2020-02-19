@@ -25,7 +25,7 @@ class LibraryCategoryAdapter(val libraryListener: LibraryListener) :
         FlexibleAdapter<IFlexible<*>>(null, libraryListener, true) {
 
     init {
-        setDisplayHeadersAtStartUp(!Injekt.get<PreferencesHelper>().libraryUsingPager()
+        setDisplayHeadersAtStartUp(Injekt.get<PreferencesHelper>().libraryAsSingleList()
             .getOrDefault())
     }
     /**

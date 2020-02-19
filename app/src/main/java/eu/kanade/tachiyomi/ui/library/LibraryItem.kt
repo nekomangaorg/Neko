@@ -23,8 +23,8 @@ import uy.kohesive.injekt.injectLazy
 
 class LibraryItem(val manga: LibraryManga,
     private val libraryLayout: Preference<Int>,
-    header: LibraryHeaderItem) :
-    AbstractSectionableItem<LibraryHolder, LibraryHeaderItem>(header), IFilterable<String> {
+    header: LibraryHeaderItem?) :
+    AbstractSectionableItem<LibraryHolder, LibraryHeaderItem?>(header), IFilterable<String> {
 
     var downloadCount = -1
     var unreadType = 1

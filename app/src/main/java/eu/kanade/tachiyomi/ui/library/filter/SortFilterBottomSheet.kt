@@ -179,6 +179,9 @@ class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: A
             }
         }
         createTags()
+        sorting_layout.visibility =
+            if (preferences.libraryAsSingleList().getOrDefault()) View.GONE
+            else View.VISIBLE
 
         library_sort_text.setOnClickListener { showMainSortOptions() }
         category_sort_text.setOnClickListener { showCatSortOptions() }
@@ -290,16 +293,12 @@ class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: A
 
     fun sorting(trueSort:Boolean = false): Int {
         val sortingMode = preferences.librarySortingMode().getOrDefault()
-        return if (!trueSort && sortingMode == LibrarySort.DRAG_AND_DROP &&
+        val singleList = preferences.libraryAsSingleList().getOrDefault()
+        return if (!trueSort &&
+            (sortingMode == LibrarySort.DRAG_AND_DROP || singleList) &&
             lastCategory != null &&
             !preferences.hideCategories().getOrDefault()) {
-            when (lastCategory?.mangaSort) {
-                'a', 'b' -> LibrarySort.ALPHA
-                'c', 'd' -> LibrarySort.LAST_UPDATED
-                'e', 'f' -> LibrarySort.UNREAD
-                'g', 'h' -> LibrarySort.LAST_READ
-                else -> LibrarySort.DRAG_AND_DROP
-            }
+            lastCategory?.sortingMode() ?: LibrarySort.DRAG_AND_DROP
         }
         else {
             sortingMode
