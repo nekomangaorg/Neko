@@ -273,8 +273,8 @@ class LibraryController(
             recycler.addOnScrollListener(scrollListener)
 
             spinner = ReSpinner(view.context)
-            (activity as MainActivity).supportActionBar?.setDisplayShowCustomEnabled(true)
             (activity as MainActivity).supportActionBar?.customView = spinner
+            (activity as MainActivity).supportActionBar?.setDisplayShowCustomEnabled(true)
             spinnerAdapter = SpinnerAdapter(view.context, R.layout.library_spinner_textview,
                 arrayOf(resources!!.getString(R.string.label_library)))
             spinnerAdapter?.setDropDownViewResource(R.layout.library_spinner_entry_text)
@@ -345,6 +345,8 @@ class LibraryController(
             LibraryUpdateService.setListener(this)
         }
         else if (type == ControllerChangeType.PUSH_EXIT) {
+            (activity as MainActivity).toolbar.menu.findItem(R.id
+                .action_search)?.collapseActionView()
             (activity as MainActivity).supportActionBar?.setDisplayShowCustomEnabled(false)
         }
     }
