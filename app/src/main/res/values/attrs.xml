@@ -21,7 +21,7 @@
     </declare-styleable>
 
     <attr name="navigation_view_theme" format="reference"/>
-    <attr name="actionBarTintColor" format="reference|integer"/>
+    <attr name="actionBarTintColor" format="color"/>
     <attr name="tabBarIconColor" format="reference|integer"/>
     <attr name="tabBarIconInactive" format="reference|integer"/>
     <attr name="selectable_list_drawable" format="reference|integer" />

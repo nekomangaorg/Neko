@@ -120,7 +120,7 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
                 resources.getString(
                     when {
                         inQueue -> R.string.category_already_in_queue
-                        LibraryUpdateService.isRunning(context) -> R.string.adding_category_to_queue
+                        LibraryUpdateService.isRunning() -> R.string.adding_category_to_queue
                         else -> R.string.updating_category_x
                     }, category.name))
             if (!inQueue)

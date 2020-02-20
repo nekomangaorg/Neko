@@ -47,6 +47,7 @@ import eu.kanade.tachiyomi.ui.catalogue.global_search.CatalogueSearchController
 import eu.kanade.tachiyomi.ui.download.DownloadController
 import eu.kanade.tachiyomi.ui.extension.ExtensionController
 import eu.kanade.tachiyomi.ui.library.LibraryController
+import eu.kanade.tachiyomi.ui.library.LibraryListController
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.ui.recent_updates.RecentChaptersController
 import eu.kanade.tachiyomi.ui.recently_read.RecentlyReadController
@@ -131,7 +132,11 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             val currentRoot = router.backstack.firstOrNull()
             if (currentRoot?.tag()?.toIntOrNull() != id) {
                 when (id) {
-                    R.id.nav_library -> setRoot(LibraryController(), id)
+                    R.id.nav_library -> setRoot(
+                        if (preferences.libraryAsSingleList().getOrDefault())
+                            LibraryListController()
+                        else
+                            LibraryController(), id)
                     R.id.nav_recents ->  {
                         if (preferences.showRecentUpdates().getOrDefault())
                             setRoot(RecentChaptersController(), id)

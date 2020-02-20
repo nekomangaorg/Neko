@@ -121,7 +121,7 @@ class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: A
         updateTitle()
         val shadow2:View = (pagerView.parent as ViewGroup).findViewById(R.id.shadow2)
         val shadow:View = (pagerView.parent as ViewGroup).findViewById(R.id.shadow)
-        val fastScroller:View = (pagerView.parent as ViewGroup).findViewById(R.id.fast_scroller)
+        val fastScroller:View? = (pagerView.parent as ViewGroup).findViewById(R.id.fast_scroller)
         val coordLayout:View = (pagerView.parent as ViewGroup).findViewById(R.id.snackbar_layout)
         val phoneLandscape = (isLandscape() && !isTablet())
         if (phoneLandscape)
@@ -167,7 +167,7 @@ class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: A
             }
             if (sheetBehavior?.state == BottomSheetBehavior.STATE_COLLAPSED) {
                 val height = context.resources.getDimensionPixelSize(R.dimen.rounder_radius)
-                fastScroller.updateLayoutParams<CoordinatorLayout.LayoutParams> {
+                fastScroller?.updateLayoutParams<CoordinatorLayout.LayoutParams> {
                     bottomMargin = if (phoneLandscape) 0 else (top_bar.height - height)
                 }
                 pager?.setPadding(0, 0, 0, if (phoneLandscape) 0 else

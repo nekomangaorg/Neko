@@ -17,9 +17,9 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.util.system.getResourceColor
-import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.invisible
 import eu.kanade.tachiyomi.util.view.visible
+import kotlinx.android.synthetic.main.library_category_header_item.view.*
 
 class LibraryHeaderItem(val category: Category) : AbstractHeaderItem<LibraryHeaderItem.Holder>() {
 
@@ -63,7 +63,7 @@ class LibraryHeaderItem(val category: Category) : AbstractHeaderItem<LibraryHead
         return -(category.id!!)
     }
 
-    class Holder(view: View, private val adapter: LibraryCategoryAdapter) :
+    class Holder(val view: View, private val adapter: LibraryCategoryAdapter) :
         FlexibleViewHolder(view, adapter, true) {
 
         private val sectionText: TextView = view.findViewById(R.id.category_title)
@@ -92,15 +92,15 @@ class LibraryHeaderItem(val category: Category) : AbstractHeaderItem<LibraryHead
 
             when {
                 item.category.id == -1 -> {
+                    catProgress.alpha = 1f
                     updateButton.invisible()
-                    catProgress.gone()
                 }
                 LibraryUpdateService.categoryInQueue(item.category.id) -> {
-                    catProgress.visible()
+                    catProgress.alpha = 1f
                     updateButton.invisible()
                 }
                 else -> {
-                    catProgress.gone()
+                    catProgress.alpha = 0f
                     updateButton.visible()
                 }
             }
@@ -108,16 +108,15 @@ class LibraryHeaderItem(val category: Category) : AbstractHeaderItem<LibraryHead
 
         private fun addCategoryToUpdate() {
             if (adapter.libraryListener.updateCategory(adapterPosition)) {
-                catProgress.visible()
+                catProgress.alpha = 1f
                 updateButton.invisible()
             }
         }
-
         private fun showCatSortOptions() {
             val category =
                 (adapter.getItem(adapterPosition) as? LibraryHeaderItem)?.category ?: return
             // Create a PopupMenu, giving it the clicked view for an anchor
-            val popup = PopupMenu(itemView.context, sortText)
+            val popup = PopupMenu(itemView.context, view.category_sort)
 
             // Inflate our menu resource into the PopupMenu's Menu
             popup.menuInflater.inflate(

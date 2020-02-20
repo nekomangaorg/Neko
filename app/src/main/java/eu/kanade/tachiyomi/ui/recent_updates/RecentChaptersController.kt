@@ -26,10 +26,10 @@ import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
+import eu.kanade.tachiyomi.ui.recently_read.RecentlyReadController
 import eu.kanade.tachiyomi.util.system.notificationManager
 import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
 import eu.kanade.tachiyomi.util.view.snack
-import eu.kanade.tachiyomi.ui.recently_read.RecentlyReadController
 import kotlinx.android.synthetic.main.recent_chapters_controller.*
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
@@ -98,7 +98,7 @@ class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
 
         swipe_refresh.setDistanceToTriggerSync((2 * 64 * view.resources.displayMetrics.density).toInt())
         swipe_refresh.refreshes().subscribeUntilDestroy {
-            if (!LibraryUpdateService.isRunning(view.context)) {
+            if (!LibraryUpdateService.isRunning()) {
                 LibraryUpdateService.start(view.context)
                 view.snack(R.string.updating_library)
             }

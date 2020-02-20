@@ -12,15 +12,10 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
-import android.widget.Spinner
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.SearchView
 import androidx.core.graphics.drawable.DrawableCompat
-import androidx.core.math.MathUtils.clamp
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager.widget.ViewPager
 import com.afollestad.materialdialogs.MaterialDialog
 import com.bluelinelabs.conductor.ControllerChangeHandler
@@ -32,8 +27,6 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 import com.jakewharton.rxrelay.BehaviorRelay
 import com.jakewharton.rxrelay.PublishRelay
-import eu.davidea.flexibleadapter.FlexibleAdapter
-import eu.davidea.flexibleadapter.SelectableAdapter
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
@@ -58,46 +51,31 @@ import eu.kanade.tachiyomi.ui.migration.manga.design.PreMigrationController
 import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationListController
 import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationProcedureConfig
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
-import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
-import eu.kanade.tachiyomi.util.view.gone
-import eu.kanade.tachiyomi.util.view.inflate
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import eu.kanade.tachiyomi.util.view.snack
-import eu.kanade.tachiyomi.util.view.updatePaddingRelative
-import eu.kanade.tachiyomi.util.view.visible
-import eu.kanade.tachiyomi.widget.AutofitRecyclerView
-import eu.kanade.tachiyomi.widget.IgnoreFirstSpinnerListener
 import kotlinx.android.synthetic.main.filter_bottom_sheet.*
 import kotlinx.android.synthetic.main.library_controller.*
 import kotlinx.android.synthetic.main.main_activity.*
-import kotlinx.coroutines.delay
 import rx.Subscription
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import java.util.Locale
-import kotlin.math.min
 
-class LibraryController(
+open class LibraryController(
         bundle: Bundle? = null,
-        private val preferences: PreferencesHelper = Injekt.get()
+        protected val preferences: PreferencesHelper = Injekt.get()
 ) : BaseController(bundle), TabbedController,
         ActionMode.Callback,
         ChangeMangaCategoriesDialog.Listener,
         MigrationInterface,
         DownloadServiceListener,
-        LibraryServiceListener,
-    FlexibleAdapter.OnItemClickListener,
-    FlexibleAdapter.OnItemLongClickListener,
-    FlexibleAdapter.OnItemMoveListener,
-        LibraryCategoryAdapter.LibraryListener{
+        LibraryServiceListener {
 
     /**
      * Position of the active category.
      */
-    var activeCategory: Int = preferences.lastUsedCategory().getOrDefault()
-        private set
+    protected var activeCategory: Int = preferences.lastUsedCategory().getOrDefault()
 
     /**
      * Action mode for selections.
@@ -107,7 +85,7 @@ class LibraryController(
     /**
      * Library search query.
      */
-    private var query = ""
+    protected var query = ""
 
     /**
      * Currently selected mangas.
@@ -154,16 +132,11 @@ class LibraryController(
      * Adapter of the view pager.
      */
     private var pagerAdapter: LibraryAdapter? = null
-    private lateinit var adapter: LibraryCategoryAdapter
-
-    private lateinit var spinner: Spinner
-
-    private var lastClickPosition = -1
 
     /**
      * Drawer listener to allow swipe only for closing the drawer.
      */
-    private var tabsVisibilityRelay: BehaviorRelay<Boolean> = BehaviorRelay.create(false)
+    protected var tabsVisibilityRelay: BehaviorRelay<Boolean> = BehaviorRelay.create(false)
 
     private var tabsVisibilitySubscription: Subscription? = null
 
@@ -171,48 +144,16 @@ class LibraryController(
 
     var snack: Snackbar? = null
 
-    var presenter = LibraryPresenter(this)
+    lateinit var presenter:LibraryPresenter
         private set
 
-    private var justStarted = true
+    protected var justStarted = true
 
-    private var updateScroll = true
-
-    private var spinnerAdapter: SpinnerAdapter? = null
-
-    private var scrollListener = object : RecyclerView.OnScrollListener () {
-        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-            super.onScrolled(recyclerView, dx, dy)
-            val position =
-                (recycler.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
-            val order = when (val item = adapter.getItem(position)) {
-                is LibraryHeaderItem -> item.category.order
-                is LibraryItem -> presenter.categories.find { it.id == item.manga.category }?.order
-                else -> null
-            }
-            if (order != null && order != activeCategory) {
-                preferences.lastUsedCategory().set(order)
-                activeCategory = order
-                val category = presenter.categories.find { it.order == order }
-
-                bottom_sheet.lastCategory = category
-                bottom_sheet.updateTitle()
-                if (spinner.selectedItemPosition != order + 1) {
-                    updateScroll = true
-                    spinner.setSelection(order + 1, true)
-                }
-            }
-        }
-    }
-
-    /**
-     * Recycler view of the list of manga.
-     */
-    private lateinit var recycler: RecyclerView
-
-    var libraryLayout = preferences.libraryLayout().getOrDefault()
+    var libraryLayout:Int = preferences.libraryLayout().getOrDefault()
 
     private var usePager: Boolean = !preferences.libraryAsSingleList().getOrDefault()
+
+    open fun contentView():View = pager_layout
 
     init {
         setHasOptionsMenu(true)
@@ -220,7 +161,7 @@ class LibraryController(
     }
 
     override fun getTitle(): String? {
-        return if (usePager) resources?.getString(R.string.label_library) else null
+        return resources?.getString(R.string.label_library)
     }
 
     override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
@@ -230,64 +171,17 @@ class LibraryController(
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
         mangaPerRow = getColumnsPreferenceForCurrentOrientation().getOrDefault()
+        if (!::presenter.isInitialized)
+            presenter = LibraryPresenter(this)
 
-        if (usePager) {
-            pager_layout.visible()
-            fast_scroller.gone()
-            pagerAdapter = LibraryAdapter(this)
-            library_pager.adapter = pagerAdapter
-            library_pager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
-                override fun onPageSelected(position: Int) {
-                    preferences.lastUsedCategory().set(position)
-                    activeCategory = position
-                    bottom_sheet.lastCategory = pagerAdapter?.categories?.getOrNull(position)
-                    if (preferences.librarySortingMode().getOrDefault() == LibrarySort.DRAG_AND_DROP) bottom_sheet.updateTitle()
-                }
-
-                override fun onPageScrolled(
-                    position: Int, positionOffset: Float, positionOffsetPixels: Int
-                ) {
-                }
-
-                override fun onPageScrollStateChanged(state: Int) {}
-            })
-        }
-        else {
-            adapter = LibraryCategoryAdapter(this)
-            recycler = (recycler_layout.inflate(R.layout.library_grid_recycler) as
-                AutofitRecyclerView).apply {
-                spanCount = if (libraryLayout == 0) 1 else mangaPerRow
-                manager.spanSizeLookup = (object : GridLayoutManager.SpanSizeLookup() {
-                    override fun getSpanSize(position: Int): Int {
-                        if (libraryLayout == 0) return 1
-                        val item = this@LibraryController.adapter.getItem(position)
-                        return if (item is LibraryHeaderItem) manager.spanCount else 1
-                    }
-                })
-            }
-
-            recycler.setHasFixedSize(true)
-            recycler.adapter = adapter
-            recycler_layout.addView(recycler)
-            adapter.fastScroller = fast_scroller
-            recycler.addOnScrollListener(scrollListener)
-
-            spinner = ReSpinner(view.context)
-            (activity as MainActivity).supportActionBar?.customView = spinner
-            (activity as MainActivity).supportActionBar?.setDisplayShowCustomEnabled(true)
-            spinnerAdapter = SpinnerAdapter(view.context, R.layout.library_spinner_textview,
-                arrayOf(resources!!.getString(R.string.label_library)))
-            spinnerAdapter?.setDropDownViewResource(R.layout.library_spinner_entry_text)
-            spinner.adapter = spinnerAdapter
-        }
-
+        layoutView(view)
 
         if (selectedMangas.isNotEmpty()) {
             createActionModeIfNeeded()
         }
 
         //bottom_sheet.onCreate(pager_layout)
-        bottom_sheet.onCreate(if (usePager) pager_layout else recycler_layout)
+        bottom_sheet.onCreate(contentView())
 
         bottom_sheet.onGroupClicked = {
             when (it) {
@@ -305,49 +199,52 @@ class LibraryController(
             router.pushController(DownloadController().withFadeTransaction())
         }
 
-        val config = resources?.configuration
-        val phoneLandscape = (config?.orientation == Configuration.ORIENTATION_LANDSCAPE &&
-            (config.screenLayout.and(Configuration.SCREENLAYOUT_SIZE_MASK)) <
-            Configuration.SCREENLAYOUT_SIZE_LARGE)
-
-        // pad the recycler if the filter bottom sheet is visible
-        if (!usePager && !phoneLandscape) {
-            val height = view.context.resources.getDimensionPixelSize(R.dimen.rounder_radius) + 4.dpToPx
-            recycler.updatePaddingRelative(bottom = height)
-        }
-
         if (presenter.isDownloading()) {
             fab.scaleY = 1f
             fab.scaleX = 1f
             fab.isClickable = true
             fab.isFocusable = true
         }
+
         presenter.onRestore()
         val library = presenter.getAllManga()
         if (library != null)  presenter.updateViewBlocking() //onNextLibraryUpdate(presenter.categories, library)
         else {
-            library_pager.alpha = 0f
-            recycler_layout.alpha = 0f
+            contentView().alpha = 0f
             presenter.getLibraryBlocking()
         }
+    }
+
+
+    open fun layoutView(view: View) {
+        pagerAdapter = LibraryAdapter(this)
+        library_pager.adapter = pagerAdapter
+        library_pager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
+            override fun onPageSelected(position: Int) {
+                preferences.lastUsedCategory().set(position)
+                activeCategory = position
+                bottom_sheet.lastCategory = pagerAdapter?.categories?.getOrNull(position)
+                if (preferences.librarySortingMode().getOrDefault() == LibrarySort.DRAG_AND_DROP) bottom_sheet.updateTitle()
+            }
+
+            override fun onPageScrolled(
+                position: Int, positionOffset: Float, positionOffsetPixels: Int
+            ) {
+            }
+
+            override fun onPageScrollStateChanged(state: Int) {}
+        })
     }
 
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
         super.onChangeStarted(handler, type)
         if (type.isEnter) {
-            if (!usePager)
-                (activity as MainActivity).supportActionBar?.setDisplayShowCustomEnabled(true)
-            else
+            if (library_pager != null)
                 activity?.tabs?.setupWithViewPager(library_pager)
             presenter.getLibrary()
             DownloadService.addListener(this)
             DownloadService.callListeners()
             LibraryUpdateService.setListener(this)
-        }
-        else if (type == ControllerChangeType.PUSH_EXIT) {
-            (activity as MainActivity).toolbar.menu.findItem(R.id
-                .action_search)?.collapseActionView()
-            (activity as MainActivity).supportActionBar?.setDisplayShowCustomEnabled(false)
         }
     }
 
@@ -365,7 +262,6 @@ class LibraryController(
     }
 
     override fun onDestroy() {
-        (activity as MainActivity).supportActionBar?.setDisplayShowCustomEnabled(false)
         presenter.onDestroy()
         super.onDestroy()
     }
@@ -393,7 +289,7 @@ class LibraryController(
     }
 
     override fun onUpdateManga(manga: LibraryManga) {
-        presenter.updateManga(manga)
+        if (manga.id != null) presenter.updateManga(manga)
     }
 
     override fun onDetach(view: View) {
@@ -424,56 +320,7 @@ class LibraryController(
         tabsVisibilitySubscription = null
     }
 
-    fun onNextLibraryUpdate(mangaMap: List<LibraryItem>, freshStart: Boolean = false) {
-        if (mangaMap.isNotEmpty()) {
-            empty_view.hide()
-        } else {
-            empty_view.show(R.drawable.ic_book_black_128dp, R.string.information_empty_library)
-        }
-        adapter.setItems(mangaMap)
-
-
-        spinner.onItemSelectedListener = null
-        spinnerAdapter = SpinnerAdapter(view!!.context, R.layout.library_spinner_textview,
-            presenter.categories.map { it.name }.toTypedArray())
-        spinnerAdapter?.setDropDownViewResource(R.layout.library_spinner_entry_text)
-        spinner.adapter = spinnerAdapter
-
-
-        spinner.setSelection(min(presenter.categories.size - 1, activeCategory + 1))
-        if (!freshStart) {
-            justStarted = false
-            if (recycler_layout.alpha == 0f)
-                recycler_layout.animate().alpha(1f).setDuration(500).start()
-
-
-        }else {
-            val position = if (freshStart) adapter.indexOf(activeCategory) else null
-            if (position != null)
-                (recycler.layoutManager as LinearLayoutManager)
-                    .scrollToPositionWithOffset(position, (-30).dpToPx)
-        }
-        adapter.isLongPressDragEnabled = canDrag()
-        tabsVisibilityRelay.call(false)
-
-        bottom_sheet.lastCategory = presenter.categories[clamp(activeCategory,
-            0,
-            presenter.categories.size - 1)]
-        bottom_sheet.updateTitle()
-        updateScroll = false
-        spinner.onItemSelectedListener = IgnoreFirstSpinnerListener { pos ->
-            if (updateScroll) {
-                updateScroll = false
-                return@IgnoreFirstSpinnerListener
-            }
-            val headerPosition = adapter.indexOf(pos - 1)
-            if (headerPosition > -1) {
-                (recycler.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
-                    headerPosition, (-30).dpToPx
-                )
-            }
-        }
-    }
+    open fun onNextLibraryUpdate(mangaMap: List<LibraryItem>, freshStart: Boolean = false) { }
 
     fun onNextLibraryUpdate(categories: List<Category>, mangaMap: Map<Int, List<LibraryItem>>,
         freshStart: Boolean = false) {
@@ -523,8 +370,8 @@ class LibraryController(
         }
         else if (!freshStart) {
             justStarted = false
-            if (library_pager.alpha == 0f)
-                library_pager.animate().alpha(1f).setDuration(500).start()
+            if (pager_layout.alpha == 0f)
+                pager_layout.animate().alpha(1f).setDuration(500).start()
         }
     }
 
@@ -563,10 +410,8 @@ class LibraryController(
         destroyActionModeIfNeeded()
     }
 
-    fun onCatSortChanged(id: Int? = null) {
-        val catId =
-            (if (usePager)(id ?: pagerAdapter?.categories?.getOrNull(library_pager.currentItem)?.id)
-            else (id ?: presenter.categories.find { it.order == activeCategory }?.id))
+    open fun onCatSortChanged(id: Int? = null) {
+        val catId = (id ?: pagerAdapter?.categories?.getOrNull(library_pager.currentItem)?.id)
                 ?: return
          presenter.requestCatSortUpdate(catId)
     }
@@ -574,26 +419,15 @@ class LibraryController(
     /**
      * Reattaches the adapter to the view pager to recreate fragments
      */
-    private fun reattachAdapter() {
-        if (usePager) {
-            val adapter = pagerAdapter ?: return
+    protected open fun reattachAdapter() {
+        val adapter = pagerAdapter ?: return
 
-            val position = library_pager.currentItem
+        val position = library_pager.currentItem
 
-            adapter.recycle = false
-            library_pager.adapter = adapter
-            library_pager.currentItem = position
-            adapter.recycle = true
-        }
-        else {
-            val position =
-                (recycler.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
-            libraryLayout = preferences.libraryLayout().getOrDefault()
-            recycler.adapter = adapter
-            (recycler as? AutofitRecyclerView)?.spanCount = if (libraryLayout == 0) 1 else mangaPerRow
-
-            (recycler.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(position, 0)
-        }
+        adapter.recycle = false
+        library_pager.adapter = adapter
+        library_pager.currentItem = position
+        adapter.recycle = true
     }
 
     /**
@@ -643,8 +477,6 @@ class LibraryController(
         setOnQueryTextChangeListener(searchView) {
             query = it ?: ""
             searchRelay.call(query)
-            adapter.setFilter(it)
-            adapter.performFilter()
             true
         }
         searchItem.fixExpand(onExpand = { invalidateMenuOnExpand() })
@@ -778,11 +610,6 @@ class LibraryController(
     override fun onDestroyActionMode(mode: ActionMode?) {
         // Clear all the manga selections and notify child views.
         selectedMangas.clear()
-        adapter.mode = SelectableAdapter.Mode.SINGLE
-        adapter.clearSelection()
-        adapter.notifyDataSetChanged()
-        lastClickPosition = -1
-        adapter.isLongPressDragEnabled = canDrag()
         selectionRelay.call(LibrarySelectionEvent.Cleared())
         actionMode = null
     }
@@ -797,36 +624,14 @@ class LibraryController(
      * @param manga the manga whose selection has changed.
      * @param selected whether it's now selected or not.
      */
-    fun setSelection(manga: Manga, selected: Boolean) {
+    open fun setSelection(manga: Manga, selected: Boolean) {
         if (selected) {
             if (selectedMangas.add(manga)) {
-                if (usePager) selectionRelay.call(LibrarySelectionEvent.Selected(manga))
-                else {
-                    val position = adapter.indexOf(manga)
-                    if (adapter.mode != SelectableAdapter.Mode.MULTI) {
-                        adapter.mode = SelectableAdapter.Mode.MULTI
-                    }
-                    launchUI {
-                        delay(100)
-                        adapter.isLongPressDragEnabled = false
-                    }
-                    adapter.toggleSelection(position)
-                    (recycler.findViewHolderForItemId(manga.id!!) as? LibraryHolder)?.toggleActivation()
-                }
+                selectionRelay.call(LibrarySelectionEvent.Selected(manga))
             }
         } else {
             if (selectedMangas.remove(manga)) {
-                if (usePager) selectionRelay.call(LibrarySelectionEvent.Unselected(manga))
-                else {
-                    val position = adapter.indexOf(manga)
-                    lastClickPosition = -1
-                    if (selectedMangas.isEmpty()) {
-                        adapter.mode = SelectableAdapter.Mode.SINGLE
-                        adapter.isLongPressDragEnabled = canDrag()
-                    }
-                    adapter.toggleSelection(position)
-                    (recycler.findViewHolderForItemId(manga.id!!) as? LibraryHolder)?.toggleActivation()
-                }
+                selectionRelay.call(LibrarySelectionEvent.Unselected(manga))
             }
         }
     }
@@ -878,16 +683,6 @@ class LibraryController(
         destroyActionModeIfNeeded()
     }
 
-    /// Method for single list
-    override fun startReading(position: Int) {
-        if (adapter.mode == SelectableAdapter.Mode.MULTI) {
-            toggleSelection(position)
-            return
-        }
-        val manga = (adapter.getItem(position) as? LibraryItem)?.manga ?: return
-        startReading(manga)
-    }
-
     /// Method for the category view
     fun startReading(manga: Manga) {
         val activity = activity ?: return
@@ -895,148 +690,5 @@ class LibraryController(
         val intent = ReaderActivity.newIntent(activity, manga, chapter)
         destroyActionModeIfNeeded()
         startActivity(intent)
-    }
-
-    override fun canDrag(): Boolean {
-        val filterOff = preferences.filterCompleted().getOrDefault() +
-            preferences.filterTracked().getOrDefault() +
-            preferences.filterUnread().getOrDefault() +
-            preferences.filterMangaType().getOrDefault() +
-            preferences.filterCompleted().getOrDefault() == 0 &&
-            !preferences.hideCategories().getOrDefault()
-        return filterOff && adapter.mode != SelectableAdapter.Mode.MULTI
-    }
-
-    /**
-     * Called when a manga is clicked.
-     *
-     * @param position the position of the element clicked.
-     * @return true if the item should be selected, false otherwise.
-     */
-    override fun onItemClick(view: View?, position: Int): Boolean {
-        // If the action mode is created and the position is valid, toggle the selection.
-        val item = adapter.getItem(position) as? LibraryItem ?: return false
-        return if (adapter.mode == SelectableAdapter.Mode.MULTI) {
-            lastClickPosition = position
-            toggleSelection(position)
-            true
-        } else {
-            openManga(item.manga, null)
-            false
-        }
-    }
-
-    /**
-     * Called when a manga is long clicked.
-     *
-     * @param position the position of the element clicked.
-     */
-    override fun onItemLongClick(position: Int) {
-        createActionModeIfNeeded()
-        when {
-            lastClickPosition == -1 -> setSelection(position)
-            lastClickPosition > position -> for (i in position until lastClickPosition)
-                setSelection(i)
-            lastClickPosition < position -> for (i in lastClickPosition + 1..position)
-                setSelection(i)
-            else -> setSelection(position)
-        }
-        lastClickPosition = position
-    }
-
-    override fun onActionStateChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
-        val position = viewHolder?.adapterPosition ?: return
-        if (actionState == 2) onItemLongClick(position)
-    }
-
-    /**
-     * Tells the presenter to toggle the selection for the given position.
-     *
-     * @param position the position to toggle.
-     */
-    private fun toggleSelection(position: Int) {
-        val item = adapter.getItem(position) as? LibraryItem ?: return
-
-        setSelection(item.manga, !adapter.isSelected(position))
-        invalidateActionMode()
-    }
-
-
-    /**
-     * Tells the presenter to set the selection for the given position.
-     *
-     * @param position the position to toggle.
-     */
-    private fun setSelection(position: Int) {
-        val item = adapter.getItem(position) as? LibraryItem ?: return
-
-        setSelection(item.manga, true)
-        invalidateActionMode()
-    }
-
-    override fun onItemMove(fromPosition: Int, toPosition: Int) { }
-
-    override fun onItemReleased(position: Int) {
-        if (adapter.selectedItemCount > 0) return
-        val item = adapter.getItem(position) as? LibraryItem ?: return
-        val newHeader = adapter.getSectionHeader(position) as? LibraryHeaderItem
-        val libraryItems = adapter.getSectionItems(adapter.getSectionHeader(position))
-            .filterIsInstance<LibraryItem>()
-        val mangaIds = libraryItems.mapNotNull { (it as? LibraryItem)?.manga?.id }
-        if (newHeader?.category?.id == item.manga.category) {
-            presenter.rearrangeCategory(item.manga.category, mangaIds)
-        } else {
-            if (newHeader?.category?.mangaSort == null) {
-                presenter.moveMangaToCategory(item, newHeader?.category?.id, mangaIds, true)
-            } else {
-                MaterialDialog(activity!!).message(R.string.switch_to_dnd)
-                    .positiveButton(R.string.action_switch) {
-                        presenter.moveMangaToCategory(item, newHeader.category.id, mangaIds, true)
-                    }.negativeButton(
-                        text = resources?.getString(
-                            R.string.keep_current_sort,
-                            resources!!.getString(newHeader.category.sortRes()).toLowerCase
-                                (Locale.getDefault())
-                        )
-                    ) {
-                        presenter.moveMangaToCategory(
-                            item, newHeader.category.id, mangaIds, false
-                        )
-                    }
-                    .cancelOnTouchOutside(false)
-                    .show()
-            }
-        }
-    }
-
-    override fun shouldMoveItem(fromPosition: Int, toPosition: Int): Boolean {
-        if (adapter.selectedItemCount > 1)
-            return false
-        if (adapter.isSelected(fromPosition))
-            toggleSelection(fromPosition)
-        return true
-    }
-
-    override fun updateCategory(catId: Int): Boolean {
-        val category = (adapter.getItem(catId) as? LibraryHeaderItem)?.category ?:
-        return false
-        val inQueue = LibraryUpdateService.categoryInQueue(category.id)
-        snack?.dismiss()
-        snack = snackbar_layout.snack(resources!!.getString(
-                when {
-                    inQueue -> R.string.category_already_in_queue
-                    LibraryUpdateService.isRunning(view!!.context) ->
-                        R.string.adding_category_to_queue
-                    else -> R.string.updating_category_x
-                }, category.name))
-        if (!inQueue)
-            LibraryUpdateService.start(view!!.context, category)
-        return true
-
-    }
-
-    override fun sortCategory(catId: Int, sortBy: Int): String {
-        presenter.sortCategory(catId, sortBy)
-        return ""
     }
 }

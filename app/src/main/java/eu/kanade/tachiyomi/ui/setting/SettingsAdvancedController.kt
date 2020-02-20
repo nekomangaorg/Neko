@@ -2,8 +2,8 @@ package eu.kanade.tachiyomi.ui.setting
 
 import android.app.Dialog
 import android.os.Bundle
-import androidx.preference.PreferenceScreen
 import android.widget.Toast
+import androidx.preference.PreferenceScreen
 import com.afollestad.materialdialogs.MaterialDialog
 import com.bluelinelabs.conductor.RouterTransaction
 import com.bluelinelabs.conductor.changehandler.FadeChangeHandler
@@ -13,17 +13,19 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService.Target
+import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.library.LibraryController
+import eu.kanade.tachiyomi.ui.library.LibraryListController
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import eu.kanade.tachiyomi.util.system.toast
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
@@ -154,7 +156,11 @@ class SettingsAdvancedController : SettingsController() {
 
     private fun clearDatabase() {
         // Avoid weird behavior by going back to the library.
-        val newBackstack = listOf(RouterTransaction.with(LibraryController())) +
+        val newBackstack = listOf(RouterTransaction.with(
+            if (preferences.libraryAsSingleList().getOrDefault())
+                LibraryListController()
+            else
+                LibraryController())) +
                 router.backstack.drop(1)
 
         router.setBackstack(newBackstack, FadeChangeHandler())
