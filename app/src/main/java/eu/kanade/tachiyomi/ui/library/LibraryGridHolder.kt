@@ -2,17 +2,13 @@ package eu.kanade.tachiyomi.ui.library
 
 import android.view.Gravity
 import android.view.View
-import android.view.ViewTreeObserver
 import android.widget.FrameLayout
-import androidx.constraintlayout.widget.ConstraintLayout
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.signature.ObjectKey
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.source.LocalSource
-import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.gone
-import eu.kanade.tachiyomi.util.view.visible
 import kotlinx.android.synthetic.main.catalogue_grid_item.*
 import kotlinx.android.synthetic.main.unread_download_badge.*
 
@@ -35,8 +31,7 @@ class LibraryGridHolder(
     init {
         play_layout.setOnClickListener { playButtonClicked() }
         if (fixedSize) {
-            title.gone()
-            subtitle.gone()
+            text_layout.gone()
         }
         else {
             compact_title.gone()
@@ -61,7 +56,7 @@ class LibraryGridHolder(
         title.text = item.manga.currentTitle()
         subtitle.text = item.manga.originalAuthor()?.trim()
 
-        if (!fixedSize) {
+       /* if (!fixedSize) {
             title.viewTreeObserver.addOnPreDrawListener(object : ViewTreeObserver.OnPreDrawListener {
                 override fun onPreDraw(): Boolean {
                     title.viewTreeObserver.removeOnPreDrawListener(this)
@@ -81,7 +76,7 @@ class LibraryGridHolder(
                     return true
                 }
             })
-        }
+        }*/
 
         compact_title.text = title.text
 
@@ -103,10 +98,10 @@ class LibraryGridHolder(
         if (item.manga.thumbnail_url == null) GlideApp.with(view.context).clear(cover_thumbnail)
         else {
             val id = item.manga.id ?: return
-            var glide = GlideApp.with(view.context).load(item.manga)
-                .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+            var glide = GlideApp.with(adapter.recyclerView.context).load(item.manga)
+                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                 .signature(ObjectKey(MangaImpl.getLastCoverFetch(id).toString()))
-            glide = if (fixedSize) glide.centerCrop() else glide.override(width)
+            glide = if (fixedSize) glide.centerCrop() else glide.override(cover_thumbnail.maxHeight)
             glide.into(cover_thumbnail)
         }
     }

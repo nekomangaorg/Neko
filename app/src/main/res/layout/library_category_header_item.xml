@@ -64,11 +64,9 @@
 
     <ProgressBar
         android:id="@+id/cat_progress"
-        android:layout_width="wrap_content"
+        android:layout_width="30dp"
         android:indeterminate="true"
         android:layout_height="30dp"
-        android:alpha="0.0"
-        tools:alpha="1.0"
         android:layout_marginStart="0dp"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintBottom_toBottomOf="@+id/update_button"

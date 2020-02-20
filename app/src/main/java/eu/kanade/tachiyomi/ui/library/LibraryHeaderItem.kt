@@ -17,6 +17,8 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.invisible
 import eu.kanade.tachiyomi.util.view.visible
 import kotlinx.android.synthetic.main.library_category_header_item.view.*
@@ -92,15 +94,15 @@ class LibraryHeaderItem(val category: Category) : AbstractHeaderItem<LibraryHead
 
             when {
                 item.category.id == -1 -> {
-                    catProgress.alpha = 1f
+                    catProgress.gone()
                     updateButton.invisible()
                 }
                 LibraryUpdateService.categoryInQueue(item.category.id) -> {
-                    catProgress.alpha = 1f
+                    catProgress.visible()
                     updateButton.invisible()
                 }
                 else -> {
-                    catProgress.alpha = 0f
+                    catProgress.gone()
                     updateButton.visible()
                 }
             }
@@ -108,8 +110,10 @@ class LibraryHeaderItem(val category: Category) : AbstractHeaderItem<LibraryHead
 
         private fun addCategoryToUpdate() {
             if (adapter.libraryListener.updateCategory(adapterPosition)) {
-                catProgress.alpha = 1f
                 updateButton.invisible()
+                launchUI {
+                    adapter.notifyItemChanged(adapterPosition)
+                }
             }
         }
         private fun showCatSortOptions() {
