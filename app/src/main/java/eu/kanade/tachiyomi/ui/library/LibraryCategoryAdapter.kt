@@ -67,6 +67,12 @@ class LibraryCategoryAdapter(val libraryListener: LibraryListener) :
             else false }
     }
 
+    fun getHeaderPositions(): List<Int> {
+        return currentItems.mapIndexedNotNull { index, it ->
+            if (it is LibraryHeaderItem) index
+            else null }
+    }
+
     /**
      * Returns the position in the adapter for the given manga.
      *
@@ -173,5 +179,7 @@ class LibraryCategoryAdapter(val libraryListener: LibraryListener) :
         fun canDrag(): Boolean
         fun updateCategory(catId: Int): Boolean
         fun sortCategory(catId: Int, sortBy: Int)
+        fun selectAll(position: Int)
+        fun allSelected(position: Int): Boolean
     }
 }

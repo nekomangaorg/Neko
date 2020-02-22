@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.library
 
 import android.graphics.drawable.Drawable
 import android.view.View
+import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.view.menu.MenuBuilder
@@ -10,6 +11,7 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import eu.davidea.flexibleadapter.FlexibleAdapter
+import eu.davidea.flexibleadapter.SelectableAdapter
 import eu.davidea.flexibleadapter.items.AbstractHeaderItem
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.davidea.viewholders.FlexibleViewHolder
@@ -76,10 +78,12 @@ class LibraryHeaderItem(private val categoryF: (Int) -> Category, val catId: Int
         private val sortText: TextView = view.findViewById(R.id.category_sort)
         private val updateButton: MaterialButton = view.findViewById(R.id.update_button)
         private val catProgress: ProgressBar = view.findViewById(R.id.cat_progress)
+        private val checkboxImage: ImageView = view.findViewById(R.id.checkbox)
 
         init {
             updateButton.setOnClickListener { addCategoryToUpdate() }
             sortText.setOnClickListener { showCatSortOptions() }
+            checkboxImage.setOnClickListener { selectAll() }
         }
 
         fun bind(category: Category) {
@@ -97,15 +101,24 @@ class LibraryHeaderItem(private val categoryF: (Int) -> Category, val catId: Int
             )
 
             when {
+                adapter.mode == SelectableAdapter.Mode.MULTI -> {
+                    checkboxImage.visible()
+                    catProgress.gone()
+                    updateButton.invisible()
+                    setSelection()
+                }
                 category.id == -1 -> {
+                    checkboxImage.gone()
                     catProgress.gone()
                     updateButton.invisible()
                 }
                 LibraryUpdateService.categoryInQueue(category.id) -> {
+                    checkboxImage.gone()
                     catProgress.visible()
                     updateButton.invisible()
                 }
                 else -> {
+                    checkboxImage.gone()
                     catProgress.gone()
                     updateButton.visible()
                 }
@@ -195,5 +208,24 @@ class LibraryHeaderItem(private val categoryF: (Int) -> Category, val catId: Int
             }
             adapter.libraryListener.sortCategory(category.id!!, modType)
         }
+
+        private fun selectAll() {
+            adapter.libraryListener.selectAll(adapterPosition)
+        }
+
+        fun setSelection() {
+            val allSelected = adapter.libraryListener.allSelected(adapterPosition)
+            val drawable =
+                ContextCompat.getDrawable(contentView.context,
+                if (allSelected) R.drawable.ic_check_circle_white_24dp else
+                    R.drawable.ic_radio_button_unchecked_white_24dp)
+            val tintedDrawable = drawable?.mutate()
+            tintedDrawable?.setTint(ContextCompat.getColor(contentView.context,
+                if (allSelected) R.color.colorAccent
+                else R.color.gray_button))
+            checkboxImage.setImageDrawable(tintedDrawable)
+        }
+
+
     }
 }

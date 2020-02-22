@@ -200,7 +200,7 @@
     <string name="pref_auto_update_manga_sync">Sync chapters after reading</string>
     <string name="pref_remove_articles">Sort by ignoring articles</string>
     <string name="pref_library_single_list">Show library as a single list</string>
-    <string name="pref_library_single_list_summary">Show all categories under a single
+    <string name="pref_library_single_list_summary">Show all categories under a single,
         sectioned list</string>
     <string name="pref_remove_articles_summary">When sorting alphabetically, sort ignoring
         articles (a, an, the) at the start of manga titles</string>

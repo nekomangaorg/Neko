@@ -389,9 +389,9 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
         controller.invalidateActionMode()
     }
 
-    override fun updateCategory(catId: Int): Boolean {
-        return true
-    }
-
+    // unused for this view
+    override fun updateCategory(catId: Int): Boolean = true
     override fun sortCategory(catId: Int, sortBy: Int) { }
+    override fun selectAll(position: Int) { }
+    override fun allSelected(position: Int): Boolean = false
 }

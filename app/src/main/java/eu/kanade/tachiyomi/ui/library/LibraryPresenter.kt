@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.library
 
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
@@ -468,6 +469,9 @@ class LibraryPresenter(
             }
         if (libraryMap.containsKey(0))
             categories.add(0, createDefaultCategory())
+
+        if (categories.size == 1 && showCategories)
+            categories.first().name = context.getString(R.string.label_library)
 
         this.allCategories = categories
         this.categories = if (!showCategories) arrayListOf(categoryAll)

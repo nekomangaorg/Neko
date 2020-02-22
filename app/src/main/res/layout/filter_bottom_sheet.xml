@@ -32,6 +32,7 @@
                     android:clipToPadding="false"
                     android:paddingStart="20dp"
                     android:paddingTop="10dp"
+                    android:paddingBottom="18dp"
                     android:paddingEnd="20dp"
                     android:scrollbars="none">
 
@@ -63,7 +64,7 @@
                         android:id="@+id/side_layout"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
+                        android:layout_marginTop="0dp"
                         android:paddingStart="23dp"
                         android:paddingEnd="20dp"
                         android:baselineAligned="true"
@@ -189,7 +190,7 @@
             android:id="@+id/top_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            tools:visibility="visible"
+            tools:visibility="gone"
             android:background="@drawable/bg_bottom_sheet_primary"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

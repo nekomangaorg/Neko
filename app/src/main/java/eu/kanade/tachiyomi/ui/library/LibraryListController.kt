@@ -177,6 +177,7 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
 
     override fun onNextLibraryUpdate(mangaMap: List<LibraryItem>, freshStart: Boolean) {
         val recyclerLayout = recycler_layout ?: return
+        destroyActionModeIfNeeded()
         if (mangaMap.isNotEmpty()) {
             empty_view?.hide()
         } else {
@@ -193,17 +194,21 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
 
 
         spinner.setSelection(min(presenter.categories.size - 1, activeCategory + 1))
+        updateScroll = false
         if (!freshStart) {
             justStarted = false
             if (recyclerLayout.alpha == 0f)
                 recyclerLayout.animate().alpha(1f).setDuration(500).start()
 
 
-        }else {
+        } else if (justStarted) {
             val position = if (freshStart) adapter.indexOf(activeCategory) else null
             if (position != null)
                 (recycler.layoutManager as LinearLayoutManager)
                     .scrollToPositionWithOffset(position, (-30).dpToPx)
+        }
+        else {
+            updateScroll = true
         }
         adapter.isLongPressDragEnabled = canDrag()
         tabsVisibilityRelay.call(false)
@@ -212,7 +217,6 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
             activeCategory, 0, presenter.categories.size - 1
         )]
         bottom_sheet.updateTitle()
-        updateScroll = false
         spinner.onItemSelectedListener = IgnoreFirstSpinnerListener { pos ->
             if (updateScroll) {
                 updateScroll = false
@@ -287,6 +291,14 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
                     (recycler.findViewHolderForAdapterPosition(position) as? LibraryHolder)?.toggleActivation()
                 }
             }
+        }
+        updateHeaders()
+    }
+
+    fun updateHeaders() {
+        val headerPositions = adapter.getHeaderPositions()
+        headerPositions.forEach {
+            adapter.notifyItemChanged(it)
         }
     }
 
@@ -375,18 +387,12 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
         else super.onUpdateManga(manga)
     }
 
-    /**
-     * Tells the presenter to set the selection for the given position.
-     *
-     * @param position the position to toggle.
-     */
-    private fun setSelection(position: Int) {
+    private fun setSelection(position: Int, selected: Boolean = true) {
         val item = adapter.getItem(position) as? LibraryItem ?: return
 
-        setSelection(item.manga, true)
+        setSelection(item.manga, selected)
         invalidateActionMode()
     }
-
     override fun onItemMove(fromPosition: Int, toPosition: Int) {
         if (lastItemPosition == toPosition)
             lastItemPosition = null
@@ -479,5 +485,19 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
 
     override fun sortCategory(catId: Int, sortBy: Int) {
         presenter.sortCategory(catId, sortBy)
+    }
+
+    override fun selectAll(position: Int) {
+        val header = adapter.getSectionHeader(position) ?: return
+        val items = adapter.getSectionItemPositions(header)
+        val allSelected = allSelected(position)
+        for (i in items)
+            setSelection(i, !allSelected)
+    }
+
+    override fun allSelected(position: Int): Boolean {
+        val header = adapter.getSectionHeader(position) ?: return false
+        val items = adapter.getSectionItemPositions(header)
+        return items.all { adapter.isSelected(it) }
     }
 }

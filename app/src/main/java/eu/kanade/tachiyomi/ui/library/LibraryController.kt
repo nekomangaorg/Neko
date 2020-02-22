@@ -535,6 +535,8 @@ open class LibraryController(
 
     override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
         mode.menuInflater.inflate(R.menu.library_selection, menu)
+        val selectItem = menu.findItem(R.id.action_select_all)
+        selectItem.isVisible = !preferences.libraryAsSingleList().getOrDefault()
         return true
     }
 
@@ -568,11 +570,11 @@ open class LibraryController(
                     .negativeButton(android.R.string.no)
                     .show()
             }
-            /*R.id.action_select_all -> {
-                adapter?.categories?.getOrNull(library_pager.currentItem)?.id?.let {
+            R.id.action_select_all -> {
+                pagerAdapter?.categories?.getOrNull(library_pager.currentItem)?.id?.let {
                     selectAllRelay.call(it)
                 }
-            }*/
+            }
             R.id.action_migrate -> {
                 router.pushController(
                     if (preferences.skipPreMigration().getOrDefault()) {

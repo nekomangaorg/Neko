@@ -31,7 +31,6 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="10dp"
         android:layout_marginBottom="4dp"
-        android:background="@drawable/square_ripple"
         android:clickable="true"
         android:drawableEnd="@drawable/ic_sort_white_24dp"
         android:drawablePadding="6dp"
@@ -51,7 +50,7 @@
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toEndOf="@id/space"
         app:layout_constraintWidth_min="20dp"
-        tools:text="Drag wddf Drop" />
+        tools:text="Drag and Drop" />
 
     <Space
         android:id="@+id/space"
@@ -90,5 +89,22 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@+id/category_title"
         app:layout_constraintTop_toTopOf="@+id/category_title" />
+
+    <ImageView
+        android:id="@+id/checkbox"
+        android:padding="10dp"
+        android:visibility="gone"
+        tools:visibility="visible"
+        android:layout_width="wrap_content"
+        android:contentDescription="@string/action_select_all"
+        android:clickable="true"
+        android:focusable="true"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_check_circle_white_24dp"
+        android:layout_marginStart="2dp"
+        app:layout_constraintBottom_toBottomOf="@+id/category_title"
+        app:layout_constraintStart_toEndOf="@+id/category_title"
+        app:layout_constraintTop_toTopOf="@+id/category_title"
+        />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
