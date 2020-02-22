@@ -221,7 +221,7 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
                 val position = adapter.indexOf(manga)
                 if (position != -1 && !adapter.isSelected(position)) {
                     adapter.toggleSelection(position)
-                    (recycler.findViewHolderForItemId(manga.id!!) as? LibraryHolder)?.toggleActivation()
+                    (recycler.findViewHolderForAdapterPosition(position) as? LibraryHolder)?.toggleActivation()
                 }
             }
         }
@@ -272,7 +272,7 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
         val position = adapter.indexOf(manga)
         if (position != -1) {
             adapter.toggleSelection(position)
-            (recycler.findViewHolderForItemId(manga.id!!) as? LibraryHolder)?.toggleActivation()
+            (recycler.findViewHolderForAdapterPosition(position) as? LibraryHolder)?.toggleActivation()
         }
     }
 
@@ -320,9 +320,7 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
         lastClickPosition = position
     }
 
-    override fun onItemMove(fromPosition: Int, toPosition: Int) {
-
-    }
+    override fun onItemMove(fromPosition: Int, toPosition: Int) { }
 
     override fun onItemReleased(position: Int) {
         if (adapter.selectedItemCount == 0) saveDragSort()
@@ -395,8 +393,5 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
         return true
     }
 
-    override fun sortCategory(catId: Int, sortBy: Int): String {
-        return ""
-    }
-
+    override fun sortCategory(catId: Int, sortBy: Int) { }
 }

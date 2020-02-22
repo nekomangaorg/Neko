@@ -17,10 +17,13 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.checkbox.checkBoxPrompt
+import com.afollestad.materialdialogs.checkbox.isCheckPromptChecked
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.SelectableAdapter
+import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -57,6 +60,9 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
     private var updateScroll = true
 
     private var spinnerAdapter: SpinnerAdapter? = null
+
+    private var lastItemPostion:Int? = null
+    private var lastItem:IFlexible<*>? = null
 
     /**
      * Recycler view of the list of manga.
@@ -261,7 +267,7 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
     override fun setSelection(manga: Manga, selected: Boolean) {
         if (selected) {
             if (selectedMangas.add(manga)) {
-                val position = adapter.indexOf(manga)
+                val positions = adapter.allIndexOf(manga)
                 if (adapter.mode != SelectableAdapter.Mode.MULTI) {
                     adapter.mode = SelectableAdapter.Mode.MULTI
                 }
@@ -269,19 +275,23 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
                     delay(100)
                     adapter.isLongPressDragEnabled = false
                 }
-                adapter.toggleSelection(position)
-                (recycler.findViewHolderForItemId(manga.id!!) as? LibraryHolder)?.toggleActivation()
+                positions.forEach { position ->
+                    adapter.addSelection(position)
+                    (recycler.findViewHolderForAdapterPosition(position) as? LibraryHolder)?.toggleActivation()
+                }
             }
         } else {
             if (selectedMangas.remove(manga)) {
-                val position = adapter.indexOf(manga)
+                val positions = adapter.allIndexOf(manga)
                 lastClickPosition = -1
                 if (selectedMangas.isEmpty()) {
                     adapter.mode = SelectableAdapter.Mode.SINGLE
                     adapter.isLongPressDragEnabled = canDrag()
                 }
-                adapter.toggleSelection(position)
-                (recycler.findViewHolderForItemId(manga.id!!) as? LibraryHolder)?.toggleActivation()
+                positions.forEach { position ->
+                    adapter.removeSelection(position)
+                    (recycler.findViewHolderForAdapterPosition(position) as? LibraryHolder)?.toggleActivation()
+                }
             }
         }
     }
@@ -358,7 +368,20 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
 
     override fun onActionStateChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
         val position = viewHolder?.adapterPosition ?: return
-        if (actionState == 2) onItemLongClick(position)
+        if (actionState == 2) {
+            if (lastItemPostion != null && position != lastItemPostion
+                && lastItem == adapter.getItem(position)) {
+                // because for whatever reason you can re
+                adapter.removeSelection(position)
+                (recycler.findViewHolderForAdapterPosition(position) as? LibraryHolder)?.toggleActivation()
+                adapter.moveItem(position, lastItemPostion!!)
+            }
+            else {
+                lastItem = adapter.getItem(position)
+                lastItemPostion = position
+                onItemLongClick(position)
+            }
+        }
     }
 
     override fun onUpdateManga(manga: LibraryManga) {
@@ -378,10 +401,17 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
         invalidateActionMode()
     }
 
-    override fun onItemMove(fromPosition: Int, toPosition: Int) { }
+    override fun onItemMove(fromPosition: Int, toPosition: Int) {
+        if (lastItemPostion == toPosition)
+            lastItemPostion = null
+    }
 
     override fun onItemReleased(position: Int) {
-        if (adapter.selectedItemCount > 0) return
+        if (adapter.selectedItemCount > 0) {
+            lastItemPostion = null
+            return
+        }
+        destroyActionModeIfNeeded()
         val item = adapter.getItem(position) as? LibraryItem ?: return
         val newHeader = adapter.getSectionHeader(position) as? LibraryHeaderItem
         val libraryItems = adapter.getSectionItems(adapter.getSectionHeader(position))
@@ -390,35 +420,58 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
         if (newHeader?.category?.id == item.manga.category) {
             presenter.rearrangeCategory(item.manga.category, mangaIds)
         } else {
+            if (presenter.mangaIsInCategory(item.manga, newHeader?.category?.id)) {
+                adapter.moveItem(position, lastItemPostion!!)
+                snack = snackbar_layout?.snack(R.string.already_in_category)
+                return
+            }
             if (newHeader?.category?.mangaSort == null) {
                 presenter.moveMangaToCategory(item, newHeader?.category?.id, mangaIds, true)
             } else {
-                MaterialDialog(activity!!).message(R.string.switch_to_dnd)
-                    .positiveButton(R.string.action_switch) {
-                        presenter.moveMangaToCategory(item, newHeader.category.id, mangaIds, true)
-                    }.negativeButton(
-                        text = resources?.getString(
-                            R.string.keep_current_sort,
-                            resources!!.getString(newHeader.category.sortRes()).toLowerCase
-                                (Locale.getDefault())
-                        )
-                    ) {
-                        presenter.moveMangaToCategory(
-                            item, newHeader.category.id, mangaIds, false
-                        )
-                    }
-                    .cancelOnTouchOutside(false)
-                    .show()
+                val keepCatSort = preferences.keepCatSort().getOrDefault()
+                if (keepCatSort == 0) {
+                    MaterialDialog(activity!!).message(R.string.switch_to_dnd)
+                        .positiveButton(R.string.action_switch) {
+                            presenter.moveMangaToCategory(
+                                item, newHeader.category.id, mangaIds, true
+                            )
+                            if (it.isCheckPromptChecked()) preferences.keepCatSort().set(2)
+                        }
+                        .checkBoxPrompt(R.string.remember_choice) {}
+                        .negativeButton(
+                            text = resources?.getString(
+                                R.string.keep_current_sort,
+                                resources!!.getString(newHeader.category.sortRes()).toLowerCase(
+                                    Locale.getDefault()
+                                )
+                            )
+                        ) {
+                            presenter.moveMangaToCategory(
+                                item, newHeader.category.id, mangaIds, false
+                            )
+                            if (it.isCheckPromptChecked()) preferences.keepCatSort().set(1)
+                        }.cancelOnTouchOutside(false).show()
+                }
+                else {
+                    presenter.moveMangaToCategory(
+                        item, newHeader.category.id, mangaIds, keepCatSort == 2
+                    )
+                }
             }
         }
+        lastItemPostion = null
     }
 
     override fun shouldMoveItem(fromPosition: Int, toPosition: Int): Boolean {
-        if (adapter.selectedItemCount > 1)
-            return false
+        //if (adapter.selectedItemCount > 1)
+           // return false
         if (adapter.isSelected(fromPosition))
             toggleSelection(fromPosition)
-        return true
+        val item = adapter.getItem(fromPosition) as? LibraryItem ?: return false
+        val newHeader = adapter.getSectionHeader(toPosition) as? LibraryHeaderItem
+        //if (adapter.getItem(toPosition) is LibraryHeaderItem) return false
+        return newHeader?.category?.id == item.manga.category ||
+            !presenter.mangaIsInCategory(item.manga, newHeader?.category?.id)
     }
 
     override fun updateCategory(catId: Int): Boolean {
@@ -438,8 +491,7 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
         return true
     }
 
-    override fun sortCategory(catId: Int, sortBy: Int): String {
+    override fun sortCategory(catId: Int, sortBy: Int) {
         presenter.sortCategory(catId, sortBy)
-        return ""
     }
 }

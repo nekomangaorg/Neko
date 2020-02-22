@@ -67,6 +67,17 @@ class LibraryCategoryAdapter(val libraryListener: LibraryListener) :
             else false }
     }
 
+    /**
+     * Returns the position in the adapter for the given manga.
+     *
+     * @param manga the manga to find.
+     */
+    fun allIndexOf(manga: Manga): List<Int> {
+        return currentItems.mapIndexedNotNull { index, it ->
+            if (it is LibraryItem &&  it.manga.id == manga.id) index
+            else null }
+    }
+
     fun performFilter() {
         val s = getFilter(String::class.java)
         if (s.isNullOrBlank()) {
@@ -161,6 +172,6 @@ class LibraryCategoryAdapter(val libraryListener: LibraryListener) :
         fun onItemReleased(position: Int)
         fun canDrag(): Boolean
         fun updateCategory(catId: Int): Boolean
-        fun sortCategory(catId: Int, sortBy: Int): String
+        fun sortCategory(catId: Int, sortBy: Int)
     }
 }

@@ -131,12 +131,12 @@ class LibraryItem(val manga: LibraryManga,
 
     override fun equals(other: Any?): Boolean {
         if (other is LibraryItem) {
-            return manga.id == other.manga.id
+            return manga.id == other.manga.id && manga.category == other.manga.category
         }
         return false
     }
 
     override fun hashCode(): Int {
-        return manga.id!!.hashCode()
+        return (manga.id!! + (manga.category shl 50).toLong()).hashCode()  //!!.hashCode()
     }
 }

@@ -446,7 +446,7 @@ open class LibraryController(
     /**
      * Destroys the action mode.
      */
-    private fun destroyActionModeIfNeeded() {
+    protected fun destroyActionModeIfNeeded() {
         actionMode?.finish()
     }
 

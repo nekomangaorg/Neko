@@ -1,9 +1,18 @@
 package eu.kanade.tachiyomi.ui.setting
 
 import android.app.Activity
-import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import androidx.core.graphics.drawable.DrawableCompat
-import androidx.preference.*
+import androidx.preference.CheckBoxPreference
+import androidx.preference.DialogPreference
+import androidx.preference.DropDownPreference
+import androidx.preference.EditTextPreference
+import androidx.preference.Preference
+import androidx.preference.PreferenceCategory
+import androidx.preference.PreferenceGroup
+import androidx.preference.PreferenceManager
+import androidx.preference.PreferenceScreen
+import androidx.preference.SwitchPreferenceCompat
+import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import eu.kanade.tachiyomi.widget.preference.ExtensionPreference
 import eu.kanade.tachiyomi.widget.preference.IntListMatPreference
 import eu.kanade.tachiyomi.widget.preference.ListMatPreference
@@ -36,6 +45,11 @@ inline fun PreferenceGroup.checkBoxPreference(block: (@DSL CheckBoxPreference).(
 
 inline fun PreferenceGroup.editTextPreference(block: (@DSL EditTextPreference).() -> Unit): EditTextPreference {
     return initThenAdd(EditTextPreference(context), block).also(::initDialog)
+}
+
+inline fun PreferenceGroup.dropDownPreference(block: (@DSL DropDownPreference).() -> Unit):
+    DropDownPreference {
+    return initThenAdd(DropDownPreference(context), block).also(::initDialog)
 }
 
 inline fun PreferenceGroup.listPreference(activity: Activity?, block: (@DSL ListMatPreference).()

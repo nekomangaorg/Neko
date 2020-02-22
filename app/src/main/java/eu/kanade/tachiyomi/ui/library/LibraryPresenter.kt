@@ -843,6 +843,11 @@ class LibraryPresenter(
         }
     }
 
+    fun mangaIsInCategory(manga: LibraryManga, catId: Int?): Boolean {
+        val categories = db.getCategoriesForManga(manga).executeAsBlocking().map { it.id }
+        return catId in categories
+    }
+
     private companion object {
         var currentLibrary:Library? = null
     }

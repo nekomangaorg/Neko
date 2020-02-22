@@ -182,6 +182,18 @@ class SettingsLibraryController : SettingsController() {
                     true
                 }
             }
+            intListPreference(activity) {
+                titleRes = R.string.pref_keep_category_sorting
+                key = Keys.keepCatSort
+                summaryRes = R.string.pref_keep_category_sorting_summary
+                entries = listOf(
+                    context.getString(R.string.always_ask),
+                    context.getString(R.string.option_keep_category_sort),
+                    context.getString(R.string.option_switch_to_dnd)
+                )
+                entryRange = 0..2
+                defaultValue = 0
+            }
         }
         if (preferences.skipPreMigration().getOrDefault() || preferences.migrationSources().getOrDefault().isNotEmpty()) {
             preferenceCategory {
