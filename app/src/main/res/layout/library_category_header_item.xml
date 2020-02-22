@@ -13,38 +13,54 @@
         android:layout_height="match_parent"
         android:layout_marginStart="8dp"
         android:layout_marginBottom="4dp"
+        android:ellipsize="end"
         android:gravity="center|start"
         android:inputType="none"
         android:maxLines="1"
+        app:layout_constrainedWidth="true"
         app:layout_constraintBottom_toBottomOf="@id/update_button"
+        app:layout_constraintEnd_toStartOf="@id/update_button"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintWidth_default="wrap"
-        tools:text="Title" />
+        tools:text="Title dfdsfsfsfsfsfsfs" />
 
     <TextView
         android:id="@+id/category_sort"
-        android:padding="6dp"
-        android:layout_width="0dp"
-        android:layout_marginBottom="4dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintWidth_default="wrap"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="4dp"
         android:background="@drawable/square_ripple"
         android:clickable="true"
-        android:layout_marginEnd="10dp"
-        android:drawableTint="@color/gray_button"
         android:drawableEnd="@drawable/ic_sort_white_24dp"
         android:drawablePadding="6dp"
+        android:drawableTint="@color/gray_button"
+        android:ellipsize="none"
         android:focusable="true"
         android:gravity="start|center"
+        android:maxLines="3"
+        android:padding="6dp"
         android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
         android:textColor="?android:attr/textColorPrimary"
         android:textSize="12sp"
         android:textStyle="normal"
+        app:layout_constrainedWidth="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@id/space"
+        app:layout_constraintWidth_min="20dp"
+        tools:text="Drag wddf Drop" />
+
+    <Space
+        android:id="@+id/space"
+        android:layout_width="0dp"
+        android:layout_height="20dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/category_sort"
         app:layout_constraintStart_toEndOf="@id/update_button"
-        tools:text="Sort by: Recent" />
+        app:layout_constraintWidth_min="1dp" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/update_button"
@@ -58,20 +74,21 @@
         android:text="@string/ext_update"
         android:textColor="?android:attr/colorAccent"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/space"
         app:layout_constraintStart_toEndOf="@+id/category_title"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintWidth_default="wrap"
         app:rippleColor="@color/fullRippleColor" />
 
     <ProgressBar
         android:id="@+id/cat_progress"
         android:layout_width="30dp"
-        android:indeterminate="true"
         android:layout_height="30dp"
-        android:layout_marginStart="0dp"
+        android:layout_marginStart="10dp"
+        android:indeterminate="true"
+        app:layout_constraintBottom_toBottomOf="@+id/category_title"
         app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintBottom_toBottomOf="@+id/update_button"
-        app:layout_constraintStart_toStartOf="@+id/update_button"
-        app:layout_constraintEnd_toEndOf="@id/update_button"
-        app:layout_constraintTop_toTopOf="@+id/update_button" />
+        app:layout_constraintStart_toEndOf="@+id/category_title"
+        app:layout_constraintTop_toTopOf="@+id/category_title" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

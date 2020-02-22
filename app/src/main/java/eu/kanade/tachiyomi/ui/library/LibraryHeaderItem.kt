@@ -23,7 +23,8 @@ import eu.kanade.tachiyomi.util.view.invisible
 import eu.kanade.tachiyomi.util.view.visible
 import kotlinx.android.synthetic.main.library_category_header_item.view.*
 
-class LibraryHeaderItem(val category: Category) : AbstractHeaderItem<LibraryHeaderItem.Holder>() {
+class LibraryHeaderItem(private val categoryF: (Int) -> Category, val catId: Int) :
+    AbstractHeaderItem<LibraryHeaderItem.Holder>() {
 
     override fun getLayoutRes(): Int {
         return R.layout.library_category_header_item
@@ -42,13 +43,16 @@ class LibraryHeaderItem(val category: Category) : AbstractHeaderItem<LibraryHead
         position: Int,
         payloads: MutableList<Any?>?
     ) {
-        holder.bind(this)
+        holder.bind(categoryF(catId))
     }
+
+    var category:Category = categoryF(catId)
+    fun gCategory():Category = categoryF(catId)
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other is LibraryHeaderItem) {
-            return category.id == other.category.id
+            return gCategory().id == other.gCategory().id
         }
         return false
     }
@@ -62,7 +66,7 @@ class LibraryHeaderItem(val category: Category) : AbstractHeaderItem<LibraryHead
     }
 
     override fun hashCode(): Int {
-        return -(category.id!!)
+        return -(gCategory().id!!)
     }
 
     class Holder(val view: View, private val adapter: LibraryCategoryAdapter) :
@@ -78,10 +82,10 @@ class LibraryHeaderItem(val category: Category) : AbstractHeaderItem<LibraryHead
             sortText.setOnClickListener { showCatSortOptions() }
         }
 
-        fun bind(item: LibraryHeaderItem) {
-            sectionText.text = item.category.name
+        fun bind(category: Category) {
+            sectionText.text = category.name
             sortText.text = itemView.context.getString(
-                when (item.category.sortingMode()) {
+                when (category.sortingMode()) {
                     LibrarySort.LAST_UPDATED -> R.string.action_sort_last_updated
                     LibrarySort.DRAG_AND_DROP -> R.string.action_sort_drag_and_drop
                     LibrarySort.TOTAL -> R.string.action_sort_total
@@ -93,11 +97,11 @@ class LibraryHeaderItem(val category: Category) : AbstractHeaderItem<LibraryHead
             )
 
             when {
-                item.category.id == -1 -> {
+                category.id == -1 -> {
                     catProgress.gone()
                     updateButton.invisible()
                 }
-                LibraryUpdateService.categoryInQueue(item.category.id) -> {
+                LibraryUpdateService.categoryInQueue(category.id) -> {
                     catProgress.visible()
                     updateButton.invisible()
                 }
@@ -118,7 +122,7 @@ class LibraryHeaderItem(val category: Category) : AbstractHeaderItem<LibraryHead
         }
         private fun showCatSortOptions() {
             val category =
-                (adapter.getItem(adapterPosition) as? LibraryHeaderItem)?.category ?: return
+                (adapter.getItem(adapterPosition) as? LibraryHeaderItem)?.gCategory() ?: return
             // Create a PopupMenu, giving it the clicked view for an anchor
             val popup = PopupMenu(itemView.context, view.category_sort)
 

@@ -52,7 +52,7 @@ class LibraryCategoryAdapter(val libraryListener: LibraryListener) :
      */
     fun indexOf(categoryOrder: Int): Int {
         return currentItems.indexOfFirst {
-            if (it is LibraryHeaderItem) it.category.order == categoryOrder
+            if (it is LibraryHeaderItem) it.gCategory().order == categoryOrder
             else false }
     }
 

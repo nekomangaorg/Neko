@@ -248,7 +248,8 @@ class LibraryPresenter(
 
     private fun applySort(map: LibraryMap, catId: Int?): LibraryMap {
         if (catId == null) return map
-        val category = db.getCategories().executeAsBlocking().find { it.id == catId } ?: return map
+        val category = if (catId == 0) createDefaultCategory() else
+            db.getCategories().executeAsBlocking().find { it.id == catId } ?: return map
         allCategories.find { it.id == catId }?.apply {
             mangaOrder = category.mangaOrder
             mangaSort = category.mangaSort
@@ -343,6 +344,10 @@ class LibraryPresenter(
         }
     }
 
+    fun getCategory(categoryId: Int): Category {
+        return categories.find { it.id == categoryId } ?: createDefaultCategory()
+    }
+
     private fun sortCategory(i1: LibraryItem, i2: LibraryItem,
         lastReadManga: Map<Long, Int>,
         initCat: Category? = null):
@@ -430,9 +435,10 @@ class LibraryPresenter(
         }.groupBy {
             if (showCategories) it.manga.category else 0
         }*/
-        val catItemAll = LibraryHeaderItem(Category.createAll(context,
+        val categoryAll = Category.createAll(context,
             preferences.librarySortingMode().getOrDefault(),
-            preferences.librarySortingAscending().getOrDefault()))
+            preferences.librarySortingAscending().getOrDefault())
+        val catItemAll = LibraryHeaderItem({ categoryAll }, -1)
         val libraryMap =
             if (!preferences.libraryAsSingleList().getOrDefault()) {
                 libraryManga.map { manga ->
@@ -448,8 +454,7 @@ class LibraryPresenter(
                 }.map { entry ->
                     val categoryItem =
                         if (!showCategories) catItemAll else
-                            (LibraryHeaderItem(categories.find { entry.key == it.id }
-                                ?: createDefaultCategory()))
+                            (LibraryHeaderItem({ getCategory(it) }, entry.key))
                     entry.value.map {
                         LibraryItem(
                             it, libraryLayout, categoryItem
@@ -465,7 +470,7 @@ class LibraryPresenter(
             categories.add(0, createDefaultCategory())
 
         this.allCategories = categories
-        this.categories = if (!showCategories) arrayListOf(catItemAll.category)
+        this.categories = if (!showCategories) arrayListOf(categoryAll)
         else categories
 
         return Library(this.categories, libraryMap)
@@ -786,7 +791,7 @@ class LibraryPresenter(
         }
         else {
             if (category.id == 0) preferences.defaultMangaOrder().set(category.mangaSort.toString())
-            else Injekt.get<DatabaseHelper>().insertCategory(category).asRxObservable().subscribe()
+            else Injekt.get<DatabaseHelper>().insertCategory(category).executeAsBlocking()
             requestCatSortUpdate(category.id!!)
         }
     }

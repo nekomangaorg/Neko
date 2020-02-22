@@ -81,7 +81,7 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
             val position =
                 (recycler.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
             val order = when (val item = adapter.getItem(position)) {
-                is LibraryHeaderItem -> item.category.order
+                is LibraryHeaderItem -> item.gCategory().order
                 is LibraryItem -> presenter.categories.find { it.id == item.manga.category }?.order
                 else -> null
             }
@@ -247,12 +247,6 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
             adapter.performFilter()
             true
         }
-    }
-
-    override fun onCatSortChanged(id: Int?) {
-        val catId = (id ?: presenter.categories.find { it.order == activeCategory }?.id)
-                ?: return
-        presenter.requestCatSortUpdate(catId)
     }
 
     override fun onDestroyActionMode(mode: ActionMode?) {
