@@ -170,6 +170,7 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
     }
 
     override fun onNextLibraryUpdate(mangaMap: List<LibraryItem>, freshStart: Boolean) {
+        val recyclerLayout = recycler_layout ?: return
         if (mangaMap.isNotEmpty()) {
             empty_view?.hide()
         } else {
@@ -179,7 +180,7 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
 
 
         spinner.onItemSelectedListener = null
-        spinnerAdapter = SpinnerAdapter(view!!.context, R.layout.library_spinner_textview,
+        spinnerAdapter = SpinnerAdapter(spinner.context, R.layout.library_spinner_textview,
             presenter.categories.map { it.name }.toTypedArray())
         spinnerAdapter?.setDropDownViewResource(R.layout.library_spinner_entry_text)
         spinner.adapter = spinnerAdapter
@@ -188,8 +189,8 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
         spinner.setSelection(min(presenter.categories.size - 1, activeCategory + 1))
         if (!freshStart) {
             justStarted = false
-            if (recycler_layout.alpha == 0f)
-                recycler_layout.animate().alpha(1f).setDuration(500).start()
+            if (recyclerLayout.alpha == 0f)
+                recyclerLayout.animate().alpha(1f).setDuration(500).start()
 
 
         }else {

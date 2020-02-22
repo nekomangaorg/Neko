@@ -27,12 +27,12 @@ import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.migration.MigrationMangaDialog
 import eu.kanade.tachiyomi.ui.migration.SearchController
-import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
-import eu.kanade.tachiyomi.util.system.await
-import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
-import eu.kanade.tachiyomi.util.system.toast
+import eu.kanade.tachiyomi.util.system.await
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.toast
+import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
 import kotlinx.android.synthetic.main.chapters_controller.*
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -69,7 +69,8 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
 
     private val smartSearchEngine = SmartSearchEngine(coroutineContext, config?.extraSearchParams)
 
-    private var migrationsJob: Job? = null
+    var migrationsJob: Job? = null
+        private set
     private var migratingManga: MutableList<MigratingManga>? = null
     private var selectedPosition:Int? = null
     private var manaulMigrations = 0

@@ -59,6 +59,10 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
         }
     }
 
+    fun setChapters(chapters: Int?) {
+        setUnreadDownload(chapters ?: 0, 0, chapters != null)
+    }
+
     fun setInLibrary(inLibrary: Boolean) {
         badge_view.visibility = if (inLibrary) View.VISIBLE else View.GONE
         unread_angle.visibility = View.GONE

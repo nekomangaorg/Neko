@@ -208,7 +208,7 @@ open class LibraryController(
 
         presenter.onRestore()
         val library = presenter.getAllManga()
-        if (library != null)  presenter.updateViewBlocking() //onNextLibraryUpdate(presenter.categories, library)
+        if (library != null)  presenter.updateViewBlocking()
         else {
             contentView().alpha = 0f
             presenter.getLibraryBlocking()

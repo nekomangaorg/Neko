@@ -18,6 +18,7 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.biometric.BiometricManager
 import androidx.core.view.GravityCompat
+import com.afollestad.materialdialogs.MaterialDialog
 import com.bluelinelabs.conductor.Conductor
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.ControllerChangeHandler
@@ -49,6 +50,7 @@ import eu.kanade.tachiyomi.ui.extension.ExtensionController
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.library.LibraryListController
 import eu.kanade.tachiyomi.ui.manga.MangaController
+import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationListController
 import eu.kanade.tachiyomi.ui.recent_updates.RecentChaptersController
 import eu.kanade.tachiyomi.ui.recently_read.RecentlyReadController
 import eu.kanade.tachiyomi.ui.setting.SettingsMainController
@@ -128,6 +130,19 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
 
         navigationView.setOnNavigationItemSelectedListener { item ->
             val id = item.itemId
+            val currentController = router.backstack.lastOrNull()?.controller()
+            if (currentController is MigrationListController &&
+                currentController.migrationsJob?.isCancelled == false) {
+                MaterialDialog(this).show {
+                    title(R.string.stop_migration)
+                    positiveButton(R.string.action_stop)  {
+                        currentController.migrationsJob?.cancel()
+                        this@MainActivity.navigationView.selectedItemId = id
+                    }
+                    negativeButton(android.R.string.cancel)
+                }
+                return@setOnNavigationItemSelectedListener false
+            }
 
             val currentRoot = router.backstack.firstOrNull()
             if (currentRoot?.tag()?.toIntOrNull() != id) {

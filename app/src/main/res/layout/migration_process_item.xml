@@ -8,8 +8,9 @@
 
     <include
         android:id="@+id/migration_manga_card_from"
-        layout="@layout/migration_manga_card"
+        layout="@layout/catalogue_grid_item"
         android:layout_width="150dp"
+        app:layout_constraintVertical_bias="1.0"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/imageView"
@@ -34,7 +35,8 @@
 
     <include
         android:id="@+id/migration_manga_card_to"
-        layout="@layout/migration_manga_card"
+        layout="@layout/catalogue_grid_item"
+        app:layout_constraintVertical_bias="1.0"
         android:layout_width="150dp"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
