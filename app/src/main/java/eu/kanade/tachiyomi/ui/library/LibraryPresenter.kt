@@ -79,6 +79,8 @@ class LibraryPresenter(
 
     private var currentMangaMap:LibraryMap? = null
 
+    private var totalChapters:Map<Long, Int>? = null
+
     fun isDownloading() = downloadManager.hasQueue()
 
     fun onDestroy() {
@@ -94,6 +96,7 @@ class LibraryPresenter(
 
     fun getLibrary() {
         launchUI {
+            totalChapters = null
             val freshStart = !preferences.libraryAsSingleList().getOrDefault()
                 && (currentMangaMap?.values?.firstOrNull()?.firstOrNull()?.header != null)
             val mangaMap = withContext(Dispatchers.IO) {
@@ -107,6 +110,9 @@ class LibraryPresenter(
             }
             currentMangaMap = mangaMap
             updateView(categories, mangaMap, freshStart)
+            withContext(Dispatchers.IO) {
+                setTotalChapters()
+            }
         }
     }
 
@@ -254,6 +260,8 @@ class LibraryPresenter(
         }
 
         val sortFn: (LibraryItem, LibraryItem) -> Int = { i1, i2 ->
+            i1.chapterCount = -1
+            i2.chapterCount = -1
             sortCategory(i1, i2, lastReadManga, category)
         }
         val comparator = Comparator(sortFn)
@@ -273,16 +281,14 @@ class LibraryPresenter(
             var counter = 0
             db.getLastReadManga().executeAsBlocking().associate { it.id!! to counter++ }
         }
-        val totalChapterManga by lazy {
-            var counter = 0
-            db.getTotalChapterManga().executeAsBlocking().associate { it.id!! to counter++ }
-        }
 
         val ascending = preferences.librarySortingAscending().getOrDefault()
         val useDnD = preferences.libraryAsSingleList().getOrDefault() && !preferences
             .hideCategories().getOrDefault()
 
         val sortFn: (LibraryItem, LibraryItem) -> Int = { i1, i2 ->
+            i1.chapterCount = -1
+            i2.chapterCount = -1
             val compare = when {
                 sortingMode == LibrarySort.DRAG_AND_DROP || useDnD ->
                     sortCategory(i1, i2, lastReadManga)
@@ -303,8 +309,11 @@ class LibraryPresenter(
                         else -> i1.manga.unread.compareTo(i2.manga.unread)
                     }
                 sortingMode == LibrarySort.TOTAL -> {
-                    val manga1TotalChapter = totalChapterManga[i1.manga.id!!] ?: 0
-                    val mange2TotalChapter = totalChapterManga[i2.manga.id!!] ?: 0
+                    setTotalChapters()
+                    val manga1TotalChapter = totalChapters!![i1.manga.id!!] ?: 0
+                    val mange2TotalChapter = totalChapters!![i2.manga.id!!] ?: 0
+                    i1.chapterCount = totalChapters!![i1.manga.id!!] ?: 0
+                    i2.chapterCount = totalChapters!![i2.manga.id!!] ?: 0
                     manga1TotalChapter.compareTo(mange2TotalChapter)
                 }
                 else -> 0
@@ -324,11 +333,23 @@ class LibraryPresenter(
         return map.mapValues { entry -> entry.value.sortedWith(comparator) }
     }
 
+    private fun setTotalChapters() {
+        if (totalChapters != null) return
+        val mangaMap = rawMangaMap ?: return
+        totalChapters = mangaMap.flatMap{
+            it.value
+        }.associate {
+            it.manga.id!! to db.getChapters(it.manga).executeAsBlocking().size
+        }
+    }
+
     private fun sortCategory(i1: LibraryItem, i2: LibraryItem,
-        lastReadManga: Map<Long, Int>, initCat: Category? = null): Int {
+        lastReadManga: Map<Long, Int>,
+        initCat: Category? = null):
+        Int {
        return if (initCat != null || i1.manga.category == i2.manga.category) {
             val category = initCat ?: allCategories.find { it.id == i1.manga.category }
-            when {
+            val compare = when {
                 category?.mangaSort != null -> {
                     var sort = when (category.sortingMode()) {
                         LibrarySort.ALPHA -> sortAlphabetical(i1, i2)
@@ -343,6 +364,14 @@ class LibraryPresenter(
                             val manga1LastRead = lastReadManga[i1.manga.id!!] ?: lastReadManga.size
                             val manga2LastRead = lastReadManga[i2.manga.id!!] ?: lastReadManga.size
                             manga1LastRead.compareTo(manga2LastRead)
+                        }
+                        LibrarySort.TOTAL -> {
+                            setTotalChapters()
+                            val manga1TotalChapter = totalChapters!![i1.manga.id!!] ?: 0
+                            val mange2TotalChapter = totalChapters!![i2.manga.id!!] ?: 0
+                            i1.chapterCount = totalChapters!![i1.manga.id!!] ?: 0
+                            i2.chapterCount = totalChapters!![i2.manga.id!!] ?: 0
+                            manga1TotalChapter.compareTo(mange2TotalChapter)
                         }
                         else -> sortAlphabetical(i1, i2)
                     }
@@ -363,6 +392,11 @@ class LibraryPresenter(
                 }
                 else -> 0
             }
+           if (compare == 0) {
+               if (category?.isAscending() != false) sortAlphabetical(i1, i2)
+               else sortAlphabetical(i2, i1)
+           }
+           else compare
         }
         else {
             val category = allCategories.find { it.id == i1.manga.category }?.order ?: -1
@@ -620,9 +654,7 @@ class LibraryPresenter(
                     }
                 }
             }
-            rawMangaMap = rawMap
-            currentMangaMap = currentMap
-            requestSortUpdate()
+            getLibrary()
         }
     }
 

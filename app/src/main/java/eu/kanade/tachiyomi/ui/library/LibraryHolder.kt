@@ -1,11 +1,8 @@
 package eu.kanade.tachiyomi.ui.library
 
 import android.view.View
-import androidx.core.content.ContextCompat
-import eu.davidea.flexibleadapter.FlexibleAdapter
+import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
-import androidx.recyclerview.widget.RecyclerView
-import eu.davidea.flexibleadapter.items.IFlexible
 
 /**
  * Generic class used to hold the displayed data of a manga in the library.
@@ -27,6 +24,22 @@ abstract class LibraryHolder(
      */
     abstract fun onSetValues(item: LibraryItem)
 
+
+    fun setUnreadBadge(badge: LibraryBadge, item: LibraryItem) {
+        badge.setUnreadDownload(
+            when {
+                item.chapterCount > -1 -> item.chapterCount
+                item.unreadType == 1 -> item.manga.unread
+                item.unreadType == 0 -> if (item.manga.unread > 0) -1 else -2
+                else -> -2
+            },
+            when {
+                item.downloadCount == -1 -> -1
+                item.manga.source == LocalSource.ID -> -2
+                else ->  item.downloadCount
+            },
+            item.chapterCount > -1)
+    }
 
     /**
      * Called when an item is released.

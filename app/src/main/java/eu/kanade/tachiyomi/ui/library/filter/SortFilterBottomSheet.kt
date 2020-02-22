@@ -516,6 +516,7 @@ class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: A
         }
         else {
             val order = when (menuId) {
+                R.id.action_total_chaps -> 4
                 R.id.action_last_read -> 3
                 R.id.action_unread -> 2
                 R.id.action_update -> 1

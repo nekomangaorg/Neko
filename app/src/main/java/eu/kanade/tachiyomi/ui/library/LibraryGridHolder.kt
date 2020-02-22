@@ -7,7 +7,6 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.signature.ObjectKey
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.glide.GlideApp
-import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.util.view.gone
 import kotlinx.android.synthetic.main.catalogue_grid_item.*
 import kotlinx.android.synthetic.main.unread_download_badge.*
@@ -80,17 +79,7 @@ class LibraryGridHolder(
 
         compact_title.text = title.text
 
-        badge_view.setUnreadDownload(
-            when (item.unreadType) {
-                1 -> item.manga.unread
-                0 -> if (item.manga.unread > 0) -1 else -2
-                else -> -2
-            },
-            when {
-                item.downloadCount == -1 -> -1
-                item.manga.source == LocalSource.ID -> -2
-                else ->  item.downloadCount
-            })
+        setUnreadBadge(badge_view, item)
         play_layout.visibility = if (item.manga.unread > 0 && item.unreadType > -1)
             View.VISIBLE else View.GONE
 

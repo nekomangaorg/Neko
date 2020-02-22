@@ -7,7 +7,6 @@ import com.bumptech.glide.signature.ObjectKey
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.glide.GlideApp
-import eu.kanade.tachiyomi.source.LocalSource
 import kotlinx.android.synthetic.main.catalogue_list_item.*
 import kotlinx.android.synthetic.main.catalogue_list_item.view.*
 import kotlinx.android.synthetic.main.unread_download_badge.*
@@ -36,18 +35,7 @@ class LibraryListHolder(
     override fun onSetValues(item: LibraryItem) {
         // Update the title of the manga.
         title.text = item.manga.currentTitle()
-
-        badge_view.setUnreadDownload(
-            when (item.unreadType) {
-                1 -> item.manga.unread
-                0 -> if (item.manga.unread > 0) -1 else -2
-                else -> -2
-            },
-            when {
-                item.downloadCount == -1 -> -1
-                item.manga.source == LocalSource.ID -> -2
-                else ->  item.downloadCount
-            })
+        setUnreadBadge(badge_view, item)
 
         subtitle.text = item.manga.originalAuthor()?.trim()
         subtitle.visibility = if (!item.manga.originalAuthor().isNullOrBlank()) View.VISIBLE

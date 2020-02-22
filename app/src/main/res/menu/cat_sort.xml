@@ -16,8 +16,14 @@
             android:id="@+id/action_update"
             android:title="@string/action_sort_last_updated"
             android:icon="@drawable/ic_blank_24dp"/>
+
         <item
             android:id="@+id/action_unread"
             android:title="@string/action_filter_unread"
+            android:icon="@drawable/ic_blank_24dp"/>
+
+        <item
+            android:id="@+id/action_total_chaps"
+            android:title="@string/action_sort_total"
             android:icon="@drawable/ic_blank_24dp"/>
 </menu>

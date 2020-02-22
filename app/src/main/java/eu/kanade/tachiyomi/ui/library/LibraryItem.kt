@@ -28,6 +28,7 @@ class LibraryItem(val manga: LibraryManga,
 
     var downloadCount = -1
     var unreadType = 1
+    var chapterCount = -1
 
     override fun getLayoutRes(): Int {
         return if (libraryLayout.getOrDefault() == 0)

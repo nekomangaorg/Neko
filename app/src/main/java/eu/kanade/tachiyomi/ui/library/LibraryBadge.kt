@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Color
 import android.util.AttributeSet
 import android.view.View
+import androidx.core.content.ContextCompat
 import com.google.android.material.card.MaterialCardView
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.system.dpToPx
@@ -14,14 +15,18 @@ import kotlinx.android.synthetic.main.unread_download_badge.view.*
 class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null):
     MaterialCardView(context, attrs) {
 
-    fun setUnreadDownload(unread: Int, downloads: Int) {
+    fun setUnreadDownload(unread: Int, downloads: Int, showTotalChapters: Boolean) {
         // Update the unread count and its visibility.
         with(unread_text) {
             text = if (unread == -1) "0" else unread.toString()
-            setTextColor(if (unread == -1) context.getResourceColor(android.R.attr.colorAccent)
+            setTextColor(if (unread == -1 && !showTotalChapters)
+                context.getResourceColor(android.R.attr.colorAccent)
             else Color.WHITE)
+            setBackgroundColor(
+                if (showTotalChapters) ContextCompat.getColor(context, R.color.md_red_500)
+                else context.getResourceColor(android.R.attr.colorAccent))
             visibility = when {
-                unread > 0 || unread == -1 -> View.VISIBLE
+                unread > 0 || unread == -1 || showTotalChapters -> View.VISIBLE
                 else -> View.GONE
             }
         }
@@ -41,7 +46,9 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
         // Show the angles divider if both unread and downloads exists
         unread_angle.visibility = if (download_text.visibility == View.VISIBLE && unread_text
                 .visibility != View.GONE) View.VISIBLE else View.GONE
-
+        unread_angle.setColorFilter(
+            if (showTotalChapters) ContextCompat.getColor(context, R.color.md_red_500)
+            else context.getResourceColor(android.R.attr.colorAccent))
         if (unread_angle.visibility == View.VISIBLE) {
             download_text.updatePaddingRelative(end = 8.dpToPx)
             unread_text.updatePaddingRelative(start = 2.dpToPx)
