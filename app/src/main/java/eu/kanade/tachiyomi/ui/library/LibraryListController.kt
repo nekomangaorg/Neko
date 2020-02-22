@@ -61,7 +61,7 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
 
     private var spinnerAdapter: SpinnerAdapter? = null
 
-    private var lastItemPostion:Int? = null
+    private var lastItemPosition:Int? = null
     private var lastItem:IFlexible<*>? = null
 
     /**
@@ -296,7 +296,6 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
         }
     }
 
-    /// Method for single list
     override fun startReading(position: Int) {
         if (adapter.mode == SelectableAdapter.Mode.MULTI) {
             toggleSelection(position)
@@ -306,18 +305,12 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
         startReading(manga)
     }
 
-    /**
-     * Tells the presenter to toggle the selection for the given position.
-     *
-     * @param position the position to toggle.
-     */
     private fun toggleSelection(position: Int) {
         val item = adapter.getItem(position) as? LibraryItem ?: return
 
         setSelection(item.manga, !adapter.isSelected(position))
         invalidateActionMode()
     }
-
 
     override fun canDrag(): Boolean {
         val filterOff = preferences.filterCompleted().getOrDefault() +
@@ -336,7 +329,6 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
      * @return true if the item should be selected, false otherwise.
      */
     override fun onItemClick(view: View?, position: Int): Boolean {
-        // If the action mode is created and the position is valid, toggle the selection.
         val item = adapter.getItem(position) as? LibraryItem ?: return false
         return if (adapter.mode == SelectableAdapter.Mode.MULTI) {
             lastClickPosition = position
@@ -369,16 +361,16 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
     override fun onActionStateChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
         val position = viewHolder?.adapterPosition ?: return
         if (actionState == 2) {
-            if (lastItemPostion != null && position != lastItemPostion
+            if (lastItemPosition != null && position != lastItemPosition
                 && lastItem == adapter.getItem(position)) {
-                // because for whatever reason you can re
+                // because for whatever reason you can repeatedly tap on a currently dragging manga
                 adapter.removeSelection(position)
                 (recycler.findViewHolderForAdapterPosition(position) as? LibraryHolder)?.toggleActivation()
-                adapter.moveItem(position, lastItemPostion!!)
+                adapter.moveItem(position, lastItemPosition!!)
             }
             else {
                 lastItem = adapter.getItem(position)
-                lastItemPostion = position
+                lastItemPosition = position
                 onItemLongClick(position)
             }
         }
@@ -402,13 +394,13 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
     }
 
     override fun onItemMove(fromPosition: Int, toPosition: Int) {
-        if (lastItemPostion == toPosition)
-            lastItemPostion = null
+        if (lastItemPosition == toPosition)
+            lastItemPosition = null
     }
 
     override fun onItemReleased(position: Int) {
         if (adapter.selectedItemCount > 0) {
-            lastItemPostion = null
+            lastItemPosition = null
             return
         }
         destroyActionModeIfNeeded()
@@ -421,7 +413,7 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
             presenter.rearrangeCategory(item.manga.category, mangaIds)
         } else {
             if (presenter.mangaIsInCategory(item.manga, newHeader?.category?.id)) {
-                adapter.moveItem(position, lastItemPostion!!)
+                adapter.moveItem(position, lastItemPosition!!)
                 snack = snackbar_layout?.snack(R.string.already_in_category)
                 return
             }
@@ -459,7 +451,7 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
                 }
             }
         }
-        lastItemPostion = null
+        lastItemPosition = null
     }
 
     override fun shouldMoveItem(fromPosition: Int, toPosition: Int): Boolean {
