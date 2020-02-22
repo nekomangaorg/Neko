@@ -17,7 +17,6 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Chapter
-import eu.kanade.tachiyomi.data.database.models.ChapterImpl
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
@@ -346,18 +345,6 @@ class LibraryUpdateService(
         val downloadNew = preferences.downloadNew().getOrDefault()
         // Boolean to determine if DownloadManager has downloads
         var hasDownloads = false
-        val fakeM = LibraryManga()
-        fakeM.title = "Test"
-        fakeM.favorite = true
-        fakeM.id = -12
-        fakeM.initialized = true
-        fakeM.url = ""
-        val fakeC = ChapterImpl()
-        fakeC.chapter_number = 1.0f
-        fakeC.name = "Chapter Test"
-        fakeC.id = -15
-        fakeC.url = ""
-        newUpdates[fakeM] = arrayOf<Chapter>(fakeC)
         // Initialize the variables holding the progress of the updates.
         var count = 0
 
