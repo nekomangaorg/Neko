@@ -14,6 +14,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import kotlinx.android.synthetic.main.catalogue_grid_item.view.*
 
@@ -37,6 +38,7 @@ class CatalogueItem(val manga: Manga, private val catalogueAsList: Preference<Bo
                 val marginParams = card.layoutParams as ConstraintLayout.LayoutParams
                 marginParams.bottomMargin = 10.dpToPx
                 card.layoutParams = marginParams
+                text_layout.gone()
                 constraint_layout.minHeight = 0
                 cover_thumbnail.adjustViewBounds = false
                 cover_thumbnail.layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, coverHeight)

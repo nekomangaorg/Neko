@@ -19,7 +19,6 @@
     <color name="actionModeShadow">@color/md_black_1000_38</color>
     <!-- Dark Application Colors -->
     <color name="colorAmoledPrimary">@color/md_black_1000</color>
-    <color name="dialog_amoled">@color/darkPrimaryColor</color>
     <color name="readerPrimary">#212121</color>
     <color name="readerDarkBackground">#1C1C1D</color>
     <color name="button_bg">@color/md_white_1000</color>

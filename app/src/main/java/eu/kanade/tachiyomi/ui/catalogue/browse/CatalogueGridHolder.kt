@@ -7,13 +7,9 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.ui.library.LibraryCategoryAdapter
-import eu.kanade.tachiyomi.util.system.dpToPx
-import eu.kanade.tachiyomi.util.view.gone
-import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.widget.StateImageViewTarget
 import kotlinx.android.synthetic.main.catalogue_grid_item.*
 import kotlinx.android.synthetic.main.unread_download_badge.*
@@ -40,8 +36,6 @@ class CatalogueGridHolder(
      */
     override fun onSetValues(manga: Manga) {
         // Update the title of the manga.
-        subtitle.gone()
-        title.gone()
         compact_title.text = manga.currentTitle()
         badge_view.setInLibrary(manga.favorite)
 

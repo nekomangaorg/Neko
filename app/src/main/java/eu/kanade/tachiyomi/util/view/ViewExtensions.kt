@@ -13,6 +13,7 @@ import android.os.Build
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsets
+import android.widget.Button
 import android.widget.TextView
 import androidx.annotation.Px
 import androidx.appcompat.widget.SearchView
@@ -50,13 +51,6 @@ fun View.getCoordinates() = Point((left + right) / 2, (top + bottom) / 2)
 fun View.snack(message: String, length: Int = Snackbar.LENGTH_SHORT, f: (Snackbar.() ->
 Unit)? = null): Snackbar {
     val snack = Snackbar.make(this, message, length)
-    val theme = Injekt.get<PreferencesHelper>().theme()
-    if (theme == 3 || theme == 6) {
-        val textView: TextView =
-            snack.view.findViewById(com.google.android.material.R.id.snackbar_text)
-        textView.setTextColor(context.getResourceColor(R.attr.snackbar_text))
-        snack.config(context)
-    }
    /* when {
         Build.VERSION.SDK_INT >= 23 ->  {
             val leftM = if (this is CoordinatorLayout) 0 else rootWindowInsets.systemWindowInsetLeft
@@ -69,6 +63,16 @@ Unit)? = null): Snackbar {
     }*/
     if (f != null) {
         snack.f()
+    }
+    val theme = Injekt.get<PreferencesHelper>().theme()
+    if (theme == 3 || theme == 6) {
+        val textView: TextView =
+            snack.view.findViewById(com.google.android.material.R.id.snackbar_text)
+        val button: Button? =
+            snack.view.findViewById(com.google.android.material.R.id.snackbar_action)
+        textView.setTextColor(context.getResourceColor(R.attr.snackbar_text))
+        button?.setTextColor(context.getResourceColor(R.attr.snackbar_text))
+        snack.config(context)
     }
    // if (Build.VERSION.SDK_INT < 23) {
 /*        val view = if (this !is CoordinatorLayout) this else snack.view
