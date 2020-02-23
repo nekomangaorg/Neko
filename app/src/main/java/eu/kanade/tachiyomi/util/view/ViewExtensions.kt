@@ -255,7 +255,8 @@ inline fun View.updatePaddingRelative(
 
 fun BottomSheetDialog.setEdgeToEdge(activity: Activity, layout: View, contentView: View,
     setTopMargin: Boolean) {
-    window?.setBackgroundDrawable(null)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+        window?.setBackgroundDrawable(null)
     val currentNightMode = activity.resources.configuration.uiMode and Configuration
         .UI_MODE_NIGHT_MASK
     if (currentNightMode == Configuration.UI_MODE_NIGHT_NO)

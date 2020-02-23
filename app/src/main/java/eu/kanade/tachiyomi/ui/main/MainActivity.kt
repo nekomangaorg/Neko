@@ -578,8 +578,6 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         const val INTENT_SEARCH_QUERY = "query"
         const val INTENT_SEARCH_FILTER = "filter"
 
-        private const val URL_HELP = "https://tachiyomi.org/help/"
-
         var usingBottomNav = true
             internal set
     }
