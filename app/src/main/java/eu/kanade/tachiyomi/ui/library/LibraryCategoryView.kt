@@ -125,7 +125,6 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
                     }, category.name))
             if (!inQueue)
                 LibraryUpdateService.start(context, category)
-            swipe_refresh.isRefreshing = false
         }
     }
 
@@ -177,6 +176,10 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
                     }
                 }
             }
+
+        subscriptions += controller.stopRefreshRelay.subscribe {
+            swipe_refresh?.isRefreshing = false
+        }
     }
 
     override fun canDrag(): Boolean {
@@ -215,6 +218,7 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
         adapter.setItems(mangaForCategory)
 
         swipe_refresh.isEnabled = !preferences.hideCategories().getOrDefault()
+        swipe_refresh.isRefreshing = LibraryUpdateService.categoryInQueue(category.id)
 
         if (adapter.mode == SelectableAdapter.Mode.MULTI) {
             controller.selectedMangas.forEach { manga ->

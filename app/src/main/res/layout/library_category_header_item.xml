@@ -56,32 +56,21 @@
         app:layout_constraintStart_toEndOf="@id/update_button"
         app:layout_constraintWidth_min="1dp" />
 
-    <com.google.android.material.button.MaterialButton
+    <ImageView
         android:id="@+id/update_button"
-        style="@style/Widget.MaterialComponents.Button.TextButton"
         android:layout_width="wrap_content"
         android:layout_height="35dp"
+        android:padding="5dp"
         android:clickable="true"
         android:focusable="true"
-        android:text="@string/ext_update"
-        android:textColor="?android:attr/colorAccent"
-        app:layout_constraintBaseline_toBaselineOf="@id/category_title"
+        android:layout_marginBottom="6dp"
+        tools:tint="?attr/colorAccent"
+        android:src="@drawable/ic_refresh_white_24dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/space"
         app:layout_constraintStart_toEndOf="@+id/category_title"
         app:layout_constraintWidth_default="wrap"
         app:rippleColor="@color/fullRippleColor" />
-
-    <ProgressBar
-        android:id="@+id/cat_progress"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_marginStart="10dp"
-        android:indeterminate="true"
-        app:layout_constraintBottom_toBottomOf="@+id/category_title"
-        app:layout_constraintEnd_toStartOf="@+id/category_sort"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toEndOf="@+id/category_title"
-        app:layout_constraintTop_toTopOf="@+id/category_title" />
 
     <TextView
         android:id="@+id/category_sort"

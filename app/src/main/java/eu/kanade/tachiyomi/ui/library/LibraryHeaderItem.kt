@@ -4,14 +4,12 @@ import android.graphics.drawable.Drawable
 import android.os.Build
 import android.view.View
 import android.widget.ImageView
-import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.view.menu.MenuBuilder
 import androidx.appcompat.widget.PopupMenu
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.button.MaterialButton
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.SelectableAdapter
 import eu.davidea.flexibleadapter.items.AbstractHeaderItem
@@ -22,7 +20,6 @@ import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
-import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.visible
@@ -79,8 +76,7 @@ class LibraryHeaderItem(private val categoryF: (Int) -> Category, val catId: Int
 
         private val sectionText: TextView = view.findViewById(R.id.category_title)
         private val sortText: TextView = view.findViewById(R.id.category_sort)
-        private val updateButton: MaterialButton = view.findViewById(R.id.update_button)
-        private val catProgress: ProgressBar = view.findViewById(R.id.cat_progress)
+        private val updateButton: ImageView = view.findViewById(R.id.update_button)
         private val checkboxImage: ImageView = view.findViewById(R.id.checkbox)
 
         init {
@@ -91,6 +87,7 @@ class LibraryHeaderItem(private val categoryF: (Int) -> Category, val catId: Int
                 sortText.compoundDrawablesRelative[2]?.mutate()?.setTint(
                     ContextCompat.getColor(contentView.context, R.color.gray_button))
             }
+            updateButton.drawable.mutate()
         }
 
         fun bind(category: Category) {
@@ -115,23 +112,23 @@ class LibraryHeaderItem(private val categoryF: (Int) -> Category, val catId: Int
             when {
                 adapter.mode == SelectableAdapter.Mode.MULTI -> {
                     checkboxImage.visible()
-                    catProgress.gone()
                     updateButton.gone()
                     setSelection()
                 }
                 category.id == -1 -> {
                     checkboxImage.gone()
-                    catProgress.gone()
                     updateButton.gone()
                 }
                 LibraryUpdateService.categoryInQueue(category.id) -> {
                     checkboxImage.gone()
-                    catProgress.visible()
-                    updateButton.gone()
+                    updateButton.drawable.setTint(ContextCompat.getColor(itemView.context,
+                        R.color.material_on_surface_disabled))
+                    updateButton.visible()
                 }
                 else -> {
                     checkboxImage.gone()
-                    catProgress.gone()
+                    updateButton.drawable.setTint(itemView.context.getResourceColor(
+                        R.attr.colorAccent))
                     updateButton.visible()
                 }
             }
@@ -139,10 +136,8 @@ class LibraryHeaderItem(private val categoryF: (Int) -> Category, val catId: Int
 
         private fun addCategoryToUpdate() {
             if (adapter.libraryListener.updateCategory(adapterPosition)) {
-                updateButton.gone()
-                launchUI {
-                    adapter.notifyItemChanged(adapterPosition)
-                }
+                updateButton.drawable.setTint(ContextCompat.getColor(itemView.context,
+                    R.color.material_on_surface_disabled))
             }
         }
         private fun showCatSortOptions() {

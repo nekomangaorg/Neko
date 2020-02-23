@@ -122,6 +122,8 @@ open class LibraryController(
      */
     val reorganizeRelay: PublishRelay<Pair<Int, Int>> = PublishRelay.create()
 
+    val stopRefreshRelay: PublishRelay<Boolean> = PublishRelay.create()
+
     /**
      * Number of manga per row in grid mode.
      */
@@ -292,6 +294,7 @@ open class LibraryController(
 
     override fun onUpdateManga(manga: LibraryManga) {
         if (manga.id != null) presenter.updateManga(manga)
+        else stopRefreshRelay.call(true)
     }
 
     override fun onDetach(view: View) {
