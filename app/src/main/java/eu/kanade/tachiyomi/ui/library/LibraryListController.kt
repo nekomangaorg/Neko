@@ -263,6 +263,7 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
     }
 
     override fun setSelection(manga: Manga, selected: Boolean) {
+        val currentMode = adapter.mode
         if (selected) {
             if (selectedMangas.add(manga)) {
                 val positions = adapter.allIndexOf(manga)
@@ -292,13 +293,18 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
                 }
             }
         }
-        updateHeaders()
+        updateHeaders(currentMode != adapter.mode)
     }
 
-    fun updateHeaders() {
+    private fun updateHeaders(changedMode: Boolean = false) {
         val headerPositions = adapter.getHeaderPositions()
         headerPositions.forEach {
-            adapter.notifyItemChanged(it)
+            if (changedMode) {
+                adapter.notifyItemChanged(it)
+            }
+            else {
+                (recycler.findViewHolderForAdapterPosition(it) as? LibraryHeaderItem.Holder)?.setSelection()
+            }
         }
     }
 
