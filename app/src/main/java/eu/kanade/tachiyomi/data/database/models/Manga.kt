@@ -38,11 +38,11 @@ interface Manga : SManga {
         return if (currentGenres()?.split(",")?.any
             { tag ->
                 val trimmedTag = tag.trim().toLowerCase(Locale.US)
-                trimmedTag == "long strip" || trimmedTag == "manwha" ||
+                trimmedTag == "long strip" || trimmedTag == "manhwa" ||
                     trimmedTag.contains("webtoon")
             } == true ||
             sourceManager.getOrStub(source).name.contains("webtoon", true))
-            TYPE_MANWHA
+            TYPE_MANHWA
         else TYPE_MANGA
     }
 
@@ -97,7 +97,7 @@ interface Manga : SManga {
         const val DISPLAY_MASK = 0x00100000
 
         const val TYPE_MANGA = 1
-        const val TYPE_MANWHA = 2
+        const val TYPE_MANHWA = 2
 
         fun create(source: Long): Manga = MangaImpl().apply {
             this.source = source

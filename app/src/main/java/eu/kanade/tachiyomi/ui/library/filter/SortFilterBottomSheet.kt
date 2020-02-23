@@ -338,7 +338,7 @@ class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: A
         }
         filter = preferences.filterMangaType().getOrDefault()
         if (filter > 0) {
-            filters.add(if (filter == 1) R.string.manga_only else R.string.manwha_only)
+            filters.add(if (filter == 1) R.string.manga_only else R.string.manhwa_only)
         }
         return filters
     }
@@ -365,20 +365,20 @@ class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: A
             filter_layout.addView(it)
         }
 
-        checkForManwha()
+        checkForManhwa()
     }
 
-    private fun checkForManwha() {
+    private fun checkForManhwa() {
         GlobalScope.launch(Dispatchers.IO, CoroutineStart.DEFAULT) {
             val db:DatabaseHelper by injectLazy()
             val librryManga = db.getLibraryMangas().executeAsBlocking()
-            if (librryManga.any { it.mangaType() == Manga.TYPE_MANWHA }) {
+            if (librryManga.any { it.mangaType() == Manga.TYPE_MANHWA }) {
                 launchUI {
                     val mangaType = inflate(R.layout.filter_buttons) as FilterTagGroup
                     mangaType.setup(
                         this@SortFilterBottomSheet,
                         R.string.manga,
-                        R.string.manwha
+                        R.string.manhwa
                     )
                     this@SortFilterBottomSheet.mangaType = mangaType
                     filter_layout.addView(mangaType)

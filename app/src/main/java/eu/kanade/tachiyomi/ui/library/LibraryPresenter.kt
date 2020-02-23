@@ -170,9 +170,9 @@ class LibraryPresenter(
             if (filterUnread == STATE_REALLY_EXCLUDE && item.manga.unread > 0) return@f false
 
             if (filterMangaType == Manga.TYPE_MANGA &&
-                item.manga.mangaType() == Manga.TYPE_MANWHA)
+                item.manga.mangaType() == Manga.TYPE_MANHWA)
                 return@f false
-            if ((filterMangaType == Manga.TYPE_MANWHA) &&
+            if ((filterMangaType == Manga.TYPE_MANHWA) &&
                 item.manga.mangaType() == Manga.TYPE_MANGA) return@f false
 
 
