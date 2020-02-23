@@ -14,6 +14,8 @@ import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.ui.reader.viewer.BaseViewer
 import rx.subscriptions.CompositeSubscription
 import timber.log.Timber
+import kotlin.math.max
+import kotlin.math.min
 
 /**
  * Implementation of a [BaseViewer] to display pages with a [RecyclerView].
@@ -89,7 +91,6 @@ class WebtoonViewer(val activity: ReaderActivity) : BaseViewer {
         })
         recycler.tapListener = { event ->
             val positionX = event.rawX
-            val positionY = event.rawY
             when {
                 positionY < recycler.height * 0.25 -> if (config.tappingEnabled) scrollUp()
                 positionY > recycler.height * 0.75 -> if (config.tappingEnabled) scrollDown()
@@ -113,10 +114,12 @@ class WebtoonViewer(val activity: ReaderActivity) : BaseViewer {
             false
         }
 
+        config.imagePropertyChangedListener = {
+            refreshAdapter()
+        }
+
         frame.layoutParams = ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT)
         frame.addView(recycler)
-
-        config.imagePropertyChangedListener = { adapter.notifyDataSetChanged() }
     }
 
     /**
@@ -254,4 +257,14 @@ class WebtoonViewer(val activity: ReaderActivity) : BaseViewer {
     override fun handleGenericMotionEvent(event: MotionEvent): Boolean {
         return false
     }
+
+    /**
+     * Notifies adapter of changes around the current page to trigger a relayout in the recycler.
+     * Used when a image configuration is changed.
+     */
+    private fun refreshAdapter() {
+        val position = layoutManager.findLastEndVisibleItemPosition()
+        adapter.notifyItemRangeChanged(max(0, position - 1), min(2, adapter.itemCount - position))
+    }
+
 }
