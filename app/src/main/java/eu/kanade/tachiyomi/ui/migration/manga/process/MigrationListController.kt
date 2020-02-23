@@ -25,6 +25,7 @@ import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
+import eu.kanade.tachiyomi.ui.main.BottomNavBarInterface
 import eu.kanade.tachiyomi.ui.migration.MigrationMangaDialog
 import eu.kanade.tachiyomi.ui.migration.SearchController
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
@@ -50,7 +51,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import kotlin.coroutines.CoroutineContext
 
 class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
-    MigrationProcessAdapter.MigrationProcessInterface,
+    MigrationProcessAdapter.MigrationProcessInterface, BottomNavBarInterface,
     CoroutineScope {
 
     init {
@@ -422,6 +423,23 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
             R.id.action_migrate_manga -> MigrationMangaDialog(this, false, totalManga, mangaSkipped)
                 .showDialog(router)
             else -> return super.onOptionsItemSelected(item)
+        }
+        return true
+    }
+
+    override fun canChangeTabs(block: () -> Unit): Boolean {
+        if (migrationsJob?.isCancelled == false || adapter?.allMangasDone() == true) {
+            activity?.let {
+                MaterialDialog(it).show {
+                    title(R.string.stop_migration)
+                    positiveButton (R.string.action_stop) {
+                        block()
+                        migrationsJob?.cancel()
+                    }
+                    negativeButton(android.R.string.cancel)
+                }
+            }
+            return false
         }
         return true
     }

@@ -16,8 +16,8 @@ import android.webkit.WebView
 import android.widget.FrameLayout
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
+import androidx.core.graphics.ColorUtils
 import androidx.core.view.GravityCompat
-import com.afollestad.materialdialogs.MaterialDialog
 import com.bluelinelabs.conductor.Conductor
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.ControllerChangeHandler
@@ -49,7 +49,6 @@ import eu.kanade.tachiyomi.ui.extension.ExtensionController
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.library.LibraryListController
 import eu.kanade.tachiyomi.ui.manga.MangaController
-import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationListController
 import eu.kanade.tachiyomi.ui.recent_updates.RecentChaptersController
 import eu.kanade.tachiyomi.ui.recently_read.RecentlyReadController
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
@@ -128,22 +127,17 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
 
         tabAnimator = TabsAnimator(tabs)
 
+        var continueSwitchingTabs = false
         navigationView.setOnNavigationItemSelectedListener { item ->
             val id = item.itemId
             val currentController = router.backstack.lastOrNull()?.controller()
-            if (currentController is MigrationListController &&
-                currentController.migrationsJob?.isCancelled == false) {
-                MaterialDialog(this).show {
-                    title(R.string.stop_migration)
-                    positiveButton(R.string.action_stop)  {
-                        currentController.migrationsJob?.cancel()
-                        this@MainActivity.navigationView.selectedItemId = id
-                    }
-                    negativeButton(android.R.string.cancel)
+            if (!continueSwitchingTabs && currentController is BottomNavBarInterface) {
+                return@setOnNavigationItemSelectedListener currentController.canChangeTabs {
+                    continueSwitchingTabs = true
+                    this@MainActivity.navigationView.selectedItemId = id
                 }
-                return@setOnNavigationItemSelectedListener false
             }
-
+            continueSwitchingTabs = false
             val currentRoot = router.backstack.firstOrNull()
             if (currentRoot?.tag()?.toIntOrNull() != id) {
                 when (id) {
@@ -207,7 +201,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
 
         content.setOnApplyWindowInsetsListener { v, insets ->
                 // if device doesn't support light nav bar
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            window.navigationBarColor = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
                     // basically if in landscape on a phone
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
                         (v.rootWindowInsets.systemWindowInsetLeft > 0 ||
@@ -216,10 +210,10 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                         Color.BLACK
                     else Color.argb(179, 0, 0, 0)
                 }
-                else {
+                /*else {
                     getColor(android.R.color.transparent)
-                }
-               /* // if the android q+ device has gesture nav, transparent nav bar
+                }*/
+                // if the android q+ device has gesture nav, transparent nav bar
                 // this is here incase some crazy with a notch uses landscape
                 else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
                     && (v.rootWindowInsets.systemWindowInsetBottom != v.rootWindowInsets
@@ -230,7 +224,12 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                 else if (v.rootWindowInsets.systemWindowInsetLeft > 0
                     || v.rootWindowInsets.systemWindowInsetRight > 0) {
                     getResourceColor( android.R.attr.colorPrimary )
-                }*/
+                }
+                // if in portrait with 2/3 button mode, translucent nav bar
+                else {
+                    ColorUtils.setAlphaComponent(
+                        getResourceColor(android.R.attr.colorPrimary), 179)
+                }
             v.setPadding(insets.systemWindowInsetLeft, insets.systemWindowInsetTop,
                 insets.systemWindowInsetRight, 0)
             insets
@@ -584,4 +583,8 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         var usingBottomNav = true
             internal set
     }
+}
+
+interface BottomNavBarInterface {
+    fun canChangeTabs(block: () -> Unit): Boolean
 }
