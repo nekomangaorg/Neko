@@ -169,11 +169,11 @@ class LibraryPresenter(
                 return@f false
             if (filterUnread == STATE_REALLY_EXCLUDE && item.manga.unread > 0) return@f false
 
-            if (filterMangaType == LibraryManga.MANGA &&
-                item.manga.mangaType() == LibraryManga.MANWHA)
+            if (filterMangaType == Manga.TYPE_MANGA &&
+                item.manga.mangaType() == Manga.TYPE_MANWHA)
                 return@f false
-            if ((filterMangaType == LibraryManga.MANWHA) &&
-                item.manga.mangaType() == LibraryManga.MANGA) return@f false
+            if ((filterMangaType == Manga.TYPE_MANWHA) &&
+                item.manga.mangaType() == Manga.TYPE_MANGA) return@f false
 
 
             if (filterCompleted == STATE_INCLUDE && item.manga.status != SManga.COMPLETED)

@@ -1,6 +1,9 @@
 package eu.kanade.tachiyomi.data.database.models
 
+import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
+import uy.kohesive.injekt.injectLazy
+import java.util.Locale
 
 interface Manga : SManga {
 
@@ -28,6 +31,19 @@ interface Manga : SManga {
 
     fun sortDescending(): Boolean {
         return chapter_flags and SORT_MASK == SORT_DESC
+    }
+
+    fun mangaType(): Int {
+        val sourceManager: SourceManager by injectLazy()
+        return if (currentGenres()?.split(",")?.any
+            { tag ->
+                val trimmedTag = tag.trim().toLowerCase(Locale.US)
+                trimmedTag == "long strip" || trimmedTag == "manwha" ||
+                    trimmedTag.contains("webtoon")
+            } == true ||
+            sourceManager.getOrStub(source).name.contains("webtoon", true))
+            TYPE_MANWHA
+        else TYPE_MANGA
     }
 
     // Used to display the chapter's title one way or another
@@ -79,6 +95,9 @@ interface Manga : SManga {
         const val DISPLAY_NAME = 0x00000000
         const val DISPLAY_NUMBER = 0x00100000
         const val DISPLAY_MASK = 0x00100000
+
+        const val TYPE_MANGA = 1
+        const val TYPE_MANWHA = 2
 
         fun create(source: Long): Manga = MangaImpl().apply {
             this.source = source

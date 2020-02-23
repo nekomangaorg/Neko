@@ -20,7 +20,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
-import eu.kanade.tachiyomi.data.database.models.LibraryManga
+import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackManager
@@ -372,7 +372,7 @@ class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: A
         GlobalScope.launch(Dispatchers.IO, CoroutineStart.DEFAULT) {
             val db:DatabaseHelper by injectLazy()
             val librryManga = db.getLibraryMangas().executeAsBlocking()
-            if (librryManga.any { it.mangaType() == LibraryManga.MANWHA }) {
+            if (librryManga.any { it.mangaType() == Manga.TYPE_MANWHA }) {
                 launchUI {
                     val mangaType = inflate(R.layout.filter_buttons) as FilterTagGroup
                     mangaType.setup(

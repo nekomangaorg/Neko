@@ -33,7 +33,7 @@ import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File
-import java.util.*
+import java.util.Date
 import java.util.concurrent.TimeUnit
 
 /**
@@ -394,6 +394,12 @@ class ReaderPresenter(
      */
     fun getMangaViewer(): Int {
         val manga = manga ?: return preferences.defaultViewer()
+        if (manga.viewer == -1) {
+            val type =
+                if (manga.mangaType() == Manga.TYPE_MANWHA) ReaderActivity.WEBTOON
+                else 0
+            setMangaViewer(type)
+        }
         return if (manga.viewer == 0) preferences.defaultViewer() else manga.viewer
     }
 

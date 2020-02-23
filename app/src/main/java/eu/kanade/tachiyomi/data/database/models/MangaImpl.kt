@@ -4,8 +4,6 @@ import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadProvider
 import eu.kanade.tachiyomi.source.model.SManga
 import uy.kohesive.injekt.injectLazy
-import kotlin.collections.MutableMap
-import kotlin.collections.mutableMapOf
 import kotlin.collections.set
 
 open class MangaImpl : Manga {
@@ -36,7 +34,7 @@ open class MangaImpl : Manga {
 
     override var initialized: Boolean = false
 
-    override var viewer: Int = 0
+    override var viewer: Int = -1
 
     override var chapter_flags: Int = 0
 
