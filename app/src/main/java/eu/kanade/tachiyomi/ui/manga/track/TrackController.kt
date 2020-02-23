@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.manga.track
 
+import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.view.LayoutInflater
@@ -11,8 +12,12 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.manga.MangaController
+import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
+import eu.kanade.tachiyomi.util.view.gone
+import eu.kanade.tachiyomi.util.view.invisible
+import eu.kanade.tachiyomi.util.view.visible
 import kotlinx.android.synthetic.main.track_controller.*
 import timber.log.Timber
 
@@ -41,13 +46,31 @@ class TrackController : NucleusController<TrackPresenter>(),
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
 
+        if ((parentController as MangaController).isLockedFromSearch) {
+            swipe_refresh.invisible()
+            unlock_button.visible()
+            unlock_button.setOnClickListener {
+                SecureActivityDelegate.promptLockIfNeeded(activity)
+            }
+        }
+
         adapter = TrackAdapter(this)
-        with(view) {
-            track_recycler.layoutManager = LinearLayoutManager(context)
-            track_recycler.adapter = adapter
-            track_recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
-            swipe_refresh.isEnabled = false
-            swipe_refresh.refreshes().subscribeUntilDestroy { presenter.refresh() }
+        track_recycler.layoutManager = LinearLayoutManager(view.context)
+        track_recycler.adapter = adapter
+        track_recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
+        swipe_refresh.isEnabled = false
+        swipe_refresh.refreshes().subscribeUntilDestroy { presenter.refresh() }
+    }
+
+    private fun showTracking() {
+        swipe_refresh.visible()
+        unlock_button.gone()
+    }
+
+    override fun onActivityResumed(activity: Activity) {
+        super.onActivityResumed(activity)
+        if (!(parentController as MangaController).isLockedFromSearch) {
+            showTracking()
         }
     }
 

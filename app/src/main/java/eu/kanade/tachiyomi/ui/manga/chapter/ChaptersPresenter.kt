@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
+import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.lang.isNullOrUnsubscribed
 import rx.Observable
@@ -65,14 +66,28 @@ class ChaptersPresenter(
      */
     private var observeDownloadsSubscription: Subscription? = null
 
+    var isLockedFromSearch = false
+
+    fun updateLockStatus() {
+        val lastCheck = isLockedFromSearch
+        isLockedFromSearch = SecureActivityDelegate.shouldBeLocked()
+        if (lastCheck && lastCheck != isLockedFromSearch) {
+            chapters.forEach {
+                it.isLocked = false
+            }
+            chaptersRelay.call(chapters)
+        }
+    }
+
     override fun onCreate(savedState: Bundle?) {
         super.onCreate(savedState)
+        isLockedFromSearch = SecureActivityDelegate.shouldBeLocked()
 
         // Prepare the relay.
         chaptersRelay.flatMap { applyChapterFilters(it) }
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribeLatestCache(ChaptersController::onNextChapters,
-                        { _, error -> Timber.e(error) })
+                .subscribeLatestCache(ChaptersController::onNextChapters
+                ) { _, error -> Timber.e(error) }
 
         // Add the subscription that retrieves the chapters from the database, keeps subscribed to
         // changes, and sends the list of chapters to the relay.
@@ -120,6 +135,7 @@ class ChaptersPresenter(
     private fun Chapter.toModel(): ChapterItem {
         // Create the model object.
         val model = ChapterItem(this, manga)
+        model.isLocked = isLockedFromSearch
 
         // Find an active download for this chapter.
         val download = downloadManager.queue.find { it.chapter.id == id }

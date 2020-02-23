@@ -4,6 +4,7 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import android.app.Activity
 import android.app.Dialog
 import android.app.PendingIntent
 import android.content.ClipData
@@ -61,26 +62,19 @@ import eu.kanade.tachiyomi.ui.catalogue.global_search.CatalogueSearchController
 import eu.kanade.tachiyomi.ui.library.ChangeMangaCategoriesDialog
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.main.MainActivity
-import eu.kanade.tachiyomi.ui.main.SearchActivity
 import eu.kanade.tachiyomi.ui.manga.MangaController
+import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
-import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.storage.getUriCompat
+import eu.kanade.tachiyomi.util.system.toast
+import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.marginBottom
 import eu.kanade.tachiyomi.util.view.snack
-import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import jp.wasabeef.glide.transformations.CropSquareTransformation
 import jp.wasabeef.glide.transformations.MaskTransformation
-import kotlinx.android.synthetic.main.edit_manga_dialog.*
 import kotlinx.android.synthetic.main.manga_info_controller.*
-import kotlinx.android.synthetic.main.manga_info_controller.manga_artist
-import kotlinx.android.synthetic.main.manga_info_controller.manga_author
-import kotlinx.android.synthetic.main.manga_info_controller.manga_cover
-import kotlinx.android.synthetic.main.manga_info_controller.manga_genres_tags
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 import java.io.File
 import java.text.DateFormat
@@ -238,7 +232,8 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         inflater.inflate(R.menu.manga_info, menu)
 
         val editItem = menu.findItem(R.id.action_edit)
-        editItem.isVisible = presenter.manga.favorite
+        editItem.isVisible = presenter.manga.favorite &&
+            !(parentController as MangaController).isLockedFromSearch
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -365,6 +360,11 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         }
     }
 
+    override fun onActivityResumed(activity: Activity) {
+        super.onActivityResumed(activity)
+        setFavoriteDrawable(presenter.manga.favorite)
+    }
+
     override fun onDestroyView(view: View) {
         manga_genres_tags.setOnTagClickListener(null)
         snack?.dismiss()
@@ -466,10 +466,13 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
     private fun setFavoriteDrawable(isFavorite: Boolean) {
         // Set the Favorite drawable to the correct one.
         // Border drawable if false, filled drawable if true.
-        fab_favorite?.setImageResource(if (isFavorite)
-            R.drawable.ic_bookmark_white_24dp
-        else
-            R.drawable.ic_add_to_library_24dp)
+        fab_favorite?.setImageResource(
+            when {
+                (parentController as MangaController).isLockedFromSearch -> R.drawable.ic_lock_white_24dp
+                isFavorite -> R.drawable.ic_bookmark_white_24dp
+                else -> R.drawable.ic_add_to_library_24dp
+            }
+        )
     }
 
     /**
@@ -510,6 +513,10 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
      * Called when the fab is clicked.
      */
     private fun onFabClick() {
+        if ((parentController as MangaController).isLockedFromSearch) {
+            SecureActivityDelegate.promptLockIfNeeded(activity)
+            return
+        }
         val manga = presenter.manga
         toggleFavorite()
         if (manga.favorite) {
@@ -689,6 +696,8 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
      * @param query the search query to pass to the search controller
      */
     private fun performGlobalSearch(query: String) {
+        if ((parentController as MangaController).isLockedFromSearch)
+            return
         val router = parentController?.router ?: return
         router.pushController(CatalogueSearchController(query).withFadeTransaction())
     }

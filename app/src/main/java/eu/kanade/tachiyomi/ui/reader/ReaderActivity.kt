@@ -21,7 +21,6 @@ import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.biometric.BiometricManager
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import eu.kanade.tachiyomi.R
@@ -32,8 +31,6 @@ import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.base.activity.BaseRxActivity
-import eu.kanade.tachiyomi.ui.main.BiometricActivity
-import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.AddToLibraryFirst
 import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.Error
 import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.Success
@@ -45,11 +42,12 @@ import eu.kanade.tachiyomi.ui.reader.viewer.pager.L2RPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.R2LPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.VerticalPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
-import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.lang.plusAssign
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.GLUtil
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.visible
@@ -67,7 +65,6 @@ import rx.subscriptions.CompositeSubscription
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 import java.io.File
-import java.util.Date
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 
@@ -525,23 +522,6 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
      */
     fun shareImage(page: ReaderPage) {
         presenter.shareImage(page)
-    }
-
-    override fun onResume() {
-        super.onResume()
-        val useBiometrics = preferences.useBiometrics().getOrDefault()
-        if (useBiometrics && BiometricManager.from(this)
-                .canAuthenticate() == BiometricManager.BIOMETRIC_SUCCESS) {
-            if (!MainActivity.unlocked && (preferences.lockAfter().getOrDefault() <= 0 || Date()
-                    .time >=
-                    preferences.lastUnlock().getOrDefault() + 60 * 1000 * preferences.lockAfter().getOrDefault())) {
-                val intent = Intent(this, BiometricActivity::class.java)
-                startActivity(intent)
-                this.overridePendingTransition(0, 0)
-            }
-        }
-        else if (useBiometrics)
-            preferences.useBiometrics().set(false)
     }
 
     /**

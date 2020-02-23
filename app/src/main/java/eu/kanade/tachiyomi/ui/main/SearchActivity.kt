@@ -22,6 +22,7 @@ import eu.kanade.tachiyomi.ui.base.controller.NoToolbarElevationController
 import eu.kanade.tachiyomi.ui.base.controller.TabbedController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.catalogue.global_search.CatalogueSearchController
+import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePadding
@@ -148,7 +149,7 @@ class SearchActivity: MainActivity() {
 
     override fun onBackPressed() {
         if (router.backstack.size <= 1 || !router.handleBack()) {
-            unlocked = false
+            SecureActivityDelegate.locked = true
             super.onBackPressed()
         }
     }

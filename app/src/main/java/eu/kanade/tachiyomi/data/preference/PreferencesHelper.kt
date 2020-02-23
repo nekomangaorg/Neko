@@ -215,6 +215,8 @@ class PreferencesHelper(val context: Context) {
 
     fun lastUnlock() = rxPrefs.getLong(Keys.lastUnlock, 0)
 
+    fun secureScreen() = rxPrefs.getBoolean(Keys.secureScreen, false)
+
     fun removeArticles() = rxPrefs.getBoolean(Keys.removeArticles, false)
 
     fun migrateFlags() = rxPrefs.getInteger("migrate_flags", Int.MAX_VALUE)

@@ -16,7 +16,6 @@ import android.webkit.WebView
 import android.widget.FrameLayout
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
-import androidx.biometric.BiometricManager
 import androidx.core.view.GravityCompat
 import com.afollestad.materialdialogs.MaterialDialog
 import com.bluelinelabs.conductor.Conductor
@@ -53,6 +52,7 @@ import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationListController
 import eu.kanade.tachiyomi.ui.recent_updates.RecentChaptersController
 import eu.kanade.tachiyomi.ui.recently_read.RecentlyReadController
+import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.ui.setting.SettingsMainController
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
@@ -353,22 +353,10 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
 
     override fun onResume() {
         super.onResume()
-        // setting in case someone comes from the search activity
+        // setting in case someone comes from the search activity to main
         usingBottomNav = true
         getExtensionUpdates()
         DownloadService.callListeners()
-        val useBiometrics = preferences.useBiometrics().getOrDefault()
-        if (useBiometrics && BiometricManager.from(this)
-                .canAuthenticate() == BiometricManager.BIOMETRIC_SUCCESS) {
-            if (!unlocked && (preferences.lockAfter().getOrDefault() <= 0 || Date().time >=
-                    preferences.lastUnlock().getOrDefault() + 60 * 1000 * preferences.lockAfter().getOrDefault())) {
-                val intent = Intent(this, BiometricActivity::class.java)
-                startActivity(intent)
-                this.overridePendingTransition(0, 0)
-            }
-        }
-        else if (useBiometrics)
-            preferences.useBiometrics().set(false)
     }
 
     private fun getExtensionUpdates() {
@@ -480,7 +468,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             val baseController = router.backstack.last().controller() as? BaseController
             if (if (router.backstackSize == 1) !(baseController?.handleRootBack() ?: false)
                 else !router.handleBack()) {
-                unlocked = false
+                SecureActivityDelegate.locked = true
                 super.onBackPressed()
             }
         }
@@ -592,8 +580,6 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         const val INTENT_SEARCH_FILTER = "filter"
 
         private const val URL_HELP = "https://tachiyomi.org/help/"
-
-        var unlocked = false
 
         var usingBottomNav = true
             internal set

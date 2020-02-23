@@ -3,17 +3,11 @@ package eu.kanade.tachiyomi.widget.preference
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
-import android.content.SharedPreferences
 import android.util.AttributeSet
 import androidx.preference.Preference
-import androidx.preference.PreferenceManager
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.list.listItemsSingleChoice
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
-import eu.kanade.tachiyomi.ui.setting.defaultValue
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
 
 open class ListMatPreference @JvmOverloads constructor(activity: Activity?, context: Context,
     attrs: AttributeSet? =
@@ -34,6 +28,7 @@ open class ListMatPreference @JvmOverloads constructor(activity: Activity?, cont
         defValue = defaultValue as? String ?: defValue
     }
     override fun getSummary(): CharSequence {
+        if (customSummary != null) return customSummary!!
         val index = entryValues.indexOf(prefs.getStringPref(key, defValue).getOrDefault())
         return if (entries.isEmpty() || index == -1) ""
         else entries[index]

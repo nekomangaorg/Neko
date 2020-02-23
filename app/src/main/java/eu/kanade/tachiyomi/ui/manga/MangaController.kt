@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.manga
 
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+import android.app.Activity
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -29,10 +30,11 @@ import eu.kanade.tachiyomi.ui.main.SearchActivity
 import eu.kanade.tachiyomi.ui.manga.chapter.ChaptersController
 import eu.kanade.tachiyomi.ui.manga.info.MangaInfoController
 import eu.kanade.tachiyomi.ui.manga.track.TrackController
-import kotlinx.android.synthetic.main.search_activity.sTabs
+import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.system.toast
-import kotlinx.android.synthetic.main.main_activity.tabs
-import kotlinx.android.synthetic.main.manga_controller.manga_pager
+import kotlinx.android.synthetic.main.main_activity.*
+import kotlinx.android.synthetic.main.manga_controller.*
+import kotlinx.android.synthetic.main.search_activity.*
 import rx.Subscription
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -98,6 +100,8 @@ class MangaController : RxController, TabbedController {
 
     var startingChapterYPos:Float? = null
 
+    var isLockedFromSearch = false
+
     private var adapter: MangaDetailAdapter? = null
 
     val fromCatalogue = args.getBoolean(FROM_CATALOGUE_EXTRA, false)
@@ -131,6 +135,9 @@ class MangaController : RxController, TabbedController {
         manga_pager.offscreenPageLimit = 3
         manga_pager.adapter = adapter
 
+        isLockedFromSearch = activity is SearchActivity &&
+            SecureActivityDelegate.shouldBeLocked()
+
         if (!fromCatalogue)
             manga_pager.currentItem = CHAPTERS_CONTROLLER
     }
@@ -138,6 +145,12 @@ class MangaController : RxController, TabbedController {
     override fun onDestroyView(view: View) {
         super.onDestroyView(view)
         adapter = null
+    }
+
+    override fun onActivityResumed(activity: Activity) {
+        super.onActivityResumed(activity)
+        isLockedFromSearch = activity is SearchActivity &&
+            SecureActivityDelegate.shouldBeLocked()
     }
 
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {

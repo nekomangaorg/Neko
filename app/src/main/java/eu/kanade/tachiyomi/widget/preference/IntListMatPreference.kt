@@ -27,7 +27,8 @@ AttributeSet? =
         defValue = defaultValue as? Int ?: defValue
     }
     override fun getSummary(): CharSequence {
-        if (key == null || useCustomSummary) return super.getSummary()
+        if (customSummary != null) return customSummary!!
+        if (key == null) return super.getSummary()
         val index = entryValues.indexOf(prefs.getInt(key, defValue).getOrDefault())
         return if (entries.isEmpty() || index == -1) ""
         else entries[index]

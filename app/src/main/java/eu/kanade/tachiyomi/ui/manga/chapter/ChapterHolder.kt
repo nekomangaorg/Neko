@@ -8,9 +8,11 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.gone
+import eu.kanade.tachiyomi.util.view.invisible
 import eu.kanade.tachiyomi.util.view.setVectorCompat
+import eu.kanade.tachiyomi.util.view.visible
 import kotlinx.android.synthetic.main.chapters_item.*
-import java.util.*
+import java.util.Date
 
 class ChapterHolder(
         private val view: View,
@@ -26,7 +28,7 @@ class ChapterHolder(
 
     fun bind(item: ChapterItem, manga: Manga) {
         val chapter = item.chapter
-
+        val isLocked = item.isLocked
         chapter_title.text = when (manga.displayMode) {
             Manga.DISPLAY_NUMBER -> {
                 val number = adapter.decimalFormat.format(chapter.chapter_number.toDouble())
@@ -35,12 +37,16 @@ class ChapterHolder(
             else -> chapter.name
         }
 
+        chapter_menu.visible()
         // Set the correct drawable for dropdown and update the tint to match theme.
         chapter_menu.setVectorCompat(R.drawable.ic_more_vert_black_24dp, view.context.getResourceColor(R.attr.icon_color))
 
+        if (isLocked) chapter_menu.invisible()
+
         // Set correct text color
-        chapter_title.setTextColor(if (chapter.read) adapter.readColor else adapter.unreadColor)
-        if (chapter.bookmark) chapter_title.setTextColor(adapter.bookmarkedColor)
+        chapter_title.setTextColor(if (chapter.read && !isLocked)
+            adapter.readColor else adapter.unreadColor)
+        if (chapter.bookmark && !isLocked) chapter_title.setTextColor(adapter.bookmarkedColor)
 
         if (chapter.date_upload > 0) {
             chapter_date.text = adapter.dateFormat.format(Date(chapter.date_upload))
@@ -59,7 +65,7 @@ class ChapterHolder(
             chapter_title.maxLines = 1
         }
 
-        chapter_pages.text = if (!chapter.read && chapter.last_page_read > 0) {
+        chapter_pages.text = if (!chapter.read && chapter.last_page_read > 0 && !isLocked) {
             itemView.context.getString(R.string.chapter_progress, chapter.last_page_read + 1)
         } else {
             ""
@@ -81,6 +87,10 @@ class ChapterHolder(
     private fun showPopupMenu(view: View) {
         val item = adapter.getItem(adapterPosition) ?: return
 
+        if (item.isLocked) {
+            adapter.unlock()
+            return
+        }
         // Create a PopupMenu, giving it the clicked view for an anchor
         val popup = PopupMenu(view.context, view)
 

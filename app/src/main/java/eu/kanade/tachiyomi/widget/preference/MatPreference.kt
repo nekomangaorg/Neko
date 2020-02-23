@@ -16,25 +16,20 @@ open class MatPreference @JvmOverloads constructor(val activity: Activity?, cont
         null) :
     Preference(context, attrs) {
 
-    protected var useCustomSummary = false
     protected val prefs: PreferencesHelper = Injekt.get()
     private var isShowing = false
+    var customSummary:String? = null
 
-    override fun setSummary(summaryResId: Int) {
-        useCustomSummary = true
-        super.setSummary(summaryResId)
-    }
-
-    override fun setSummary(summary: CharSequence?) {
-        useCustomSummary = true
-        super.setSummary(summary)
-    }
     override fun onClick() {
         if (!isShowing)
             dialog().apply {
                 onDismiss { this@MatPreference.isShowing = false }
             }.show()
         isShowing = true
+    }
+
+    override fun getSummary(): CharSequence {
+        return customSummary ?: super.getSummary()
     }
 
     open fun dialog(): MaterialDialog {

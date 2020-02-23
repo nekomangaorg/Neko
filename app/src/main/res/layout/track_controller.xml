@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipe_refresh"
@@ -20,4 +22,17 @@
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-</LinearLayout>
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/unlock_button"
+        android:layout_width="wrap_content"
+        android:layout_marginTop="30dp"
+        android:layout_gravity="center|top"
+        app:rippleColor="@color/fullRippleColor"
+        android:visibility="gone"
+        tools:visibility="visible"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:textColor="?android:attr/colorAccent"
+        android:layout_height="wrap_content"
+        android:text="@string/action_unlock_trackers"/>
+
+</FrameLayout>

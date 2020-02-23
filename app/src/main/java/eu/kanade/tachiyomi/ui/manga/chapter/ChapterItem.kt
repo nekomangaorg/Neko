@@ -14,6 +14,7 @@ class ChapterItem(val chapter: Chapter, val manga: Manga) : AbstractFlexibleItem
         Chapter by chapter {
 
     private var _status: Int = 0
+    var isLocked = false
 
     var status: Int
         get() = download?.status ?: _status

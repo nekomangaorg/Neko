@@ -25,12 +25,12 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.model.Download
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.SearchActivity
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
+import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.getCoordinates
@@ -95,6 +95,7 @@ class ChaptersController() : NucleusController<ChaptersPresenter>(),
 
         // Init RecyclerView and adapter
         adapter = ChaptersAdapter(this, view.context)
+        setReadingDrawable()
 
         recycler.adapter = adapter
         recycler.layoutManager = LinearLayoutManager(view.context)
@@ -117,6 +118,10 @@ class ChaptersController() : NucleusController<ChaptersPresenter>(),
         swipe_refresh.refreshes().subscribeUntilDestroy { fetchChaptersFromSource() }
 
         fab.clicks().subscribeUntilDestroy {
+            if (activity is SearchActivity && presenter.isLockedFromSearch) {
+                SecureActivityDelegate.promptLockIfNeeded(activity)
+                return@subscribeUntilDestroy
+            }
             val item = presenter.getNextUnreadChapter()
             if (item != null) {
                 // Create animation listener
@@ -149,9 +154,29 @@ class ChaptersController() : NucleusController<ChaptersPresenter>(),
         actionMode = null
         super.onDestroyView(view)
     }
+    /**
+     * Update FAB with correct drawable.
+     *
+     * @param isFavorite determines if manga is favorite or not.
+     */
+    private fun setReadingDrawable() {
+        // Set the Favorite drawable to the correct one.
+        // Border drawable if false, filled drawable if true.
+        fab.setImageResource(
+            when {
+                (parentController as MangaController).isLockedFromSearch -> R.drawable.ic_lock_white_24dp
+                else -> R.drawable.ic_play_arrow_white_24dp
+            }
+        )
+    }
 
     override fun onActivityResumed(activity: Activity) {
+        super.onActivityResumed(activity)
         if (view == null) return
+        if (activity is SearchActivity) {
+            presenter.updateLockStatus()
+            setReadingDrawable()
+        }
 
         // Check if animation view is visible
         if (reveal_view.visibility == View.VISIBLE) {
@@ -159,11 +184,11 @@ class ChaptersController() : NucleusController<ChaptersPresenter>(),
             val coordinates = fab.getCoordinates()
             reveal_view.hideRevealEffect(coordinates.x, coordinates.y, 1920)
         }
-        super.onActivityResumed(activity)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.chapters, menu)
+        if (!(parentController as MangaController).isLockedFromSearch)
+            inflater.inflate(R.menu.chapters, menu)
     }
 
     override fun onPrepareOptionsMenu(menu: Menu) {

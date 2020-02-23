@@ -1,16 +1,15 @@
-package eu.kanade.tachiyomi.ui.main
+package eu.kanade.tachiyomi.ui.security
 
 import android.os.Bundle
 import androidx.biometric.BiometricPrompt
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
-import uy.kohesive.injekt.injectLazy
 import java.util.Date
+import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 class BiometricActivity : BaseActivity() {
-    val executor = Executors.newSingleThreadExecutor()
+    private val executor: ExecutorService = Executors.newSingleThreadExecutor()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,14 +23,9 @@ class BiometricActivity : BaseActivity() {
 
             override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
                 super.onAuthenticationSucceeded(result)
-                MainActivity.unlocked = true
+                SecureActivityDelegate.locked = false
                 preferences.lastUnlock().set(Date().time)
                 finish()
-            }
-
-            override fun onAuthenticationFailed() {
-                super.onAuthenticationFailed()
-                //  TODO("Called when a biometric is valid but not recognized.")
             }
         })
 

@@ -2,18 +2,20 @@ package eu.kanade.tachiyomi.ui.manga.chapter
 
 import android.content.Context
 import android.view.MenuItem
+import androidx.fragment.app.FragmentActivity
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.preference.getOrDefault
+import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import uy.kohesive.injekt.injectLazy
 import java.text.DateFormat
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.getOrDefault
-import uy.kohesive.injekt.injectLazy
 
 class ChaptersAdapter(
-        controller: ChaptersController,
+        val controller: ChaptersController,
         context: Context
 ) : FlexibleAdapter<ChapterItem>(null, controller, true) {
 
@@ -43,8 +45,12 @@ class ChaptersAdapter(
         return items.indexOf(item)
     }
 
+    fun unlock() {
+        val activity = controller.activity as? FragmentActivity ?: return
+        SecureActivityDelegate.promptLockIfNeeded(activity)
+    }
+
     interface OnMenuItemClickListener {
         fun onMenuItemClick(position: Int, item: MenuItem)
     }
-
 }

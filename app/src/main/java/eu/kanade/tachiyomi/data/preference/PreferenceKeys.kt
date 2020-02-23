@@ -131,6 +131,8 @@ object PreferenceKeys {
 
     const val lastUnlock = "last_unlock"
 
+    const val secureScreen = "secure_screen"
+
     const val removeArticles = "remove_articles"
 
     const val skipPreMigration = "skip_pre_migration"

@@ -185,7 +185,8 @@ class SettingsLibraryController : SettingsController() {
             intListPreference(activity) {
                 titleRes = R.string.pref_keep_category_sorting
                 key = Keys.keepCatSort
-                summaryRes = R.string.pref_keep_category_sorting_summary
+
+                customSummary = context.getString(R.string.pref_keep_category_sorting_summary)
                 entries = listOf(
                     context.getString(R.string.always_ask),
                     context.getString(R.string.option_keep_category_sort),
