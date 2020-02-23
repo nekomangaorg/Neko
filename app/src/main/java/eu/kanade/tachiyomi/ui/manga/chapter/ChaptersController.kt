@@ -338,7 +338,7 @@ class ChaptersController() : NucleusController<ChaptersPresenter>(),
     }
 
     fun onChapterStatusChange(download: Download) {
-        getHolder(download.chapter)?.notifyStatus(download.status)
+        getHolder(download.chapter)?.notifyStatus(download.status, presenter.isLockedFromSearch)
     }
 
     private fun getHolder(chapter: Chapter): ChapterHolder? {

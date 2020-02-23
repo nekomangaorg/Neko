@@ -171,7 +171,7 @@
     <string name="pref_enable_automatic_updates">Check for updates</string>
     <string name="pref_enable_automatic_updates_summary">Automatically check for new app versions</string>
     <string name="pref_secure_screen">Secure screen</string>
-    <string name="pref_secure_screen_summary">Hide Tachiyomi from the overview screen</string>
+    <string name="pref_secure_screen_summary">Hide Tachiyomi from the recents screen</string>
     <string name="pref_category_security">Security</string>
 
       <!-- Library section -->

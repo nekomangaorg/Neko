@@ -71,10 +71,14 @@ class ChapterHolder(
             ""
         }
 
-        notifyStatus(item.status)
+        notifyStatus(item.status, item.isLocked)
     }
 
-    fun notifyStatus(status: Int) = with(download_text) {
+    fun notifyStatus(status: Int, locked: Boolean) = with(download_text) {
+        if (locked) {
+            text = ""
+            return
+        }
         when (status) {
             Download.QUEUE -> setText(R.string.chapter_queued)
             Download.DOWNLOADING -> setText(R.string.chapter_downloading)
