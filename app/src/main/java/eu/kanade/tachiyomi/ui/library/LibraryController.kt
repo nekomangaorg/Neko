@@ -250,7 +250,7 @@ open class LibraryController(
 
     override fun onActivityResumed(activity: Activity) {
         super.onActivityResumed(activity)
-        if (observeLater && !::presenter.isInitialized) {
+        if (observeLater && ::presenter.isInitialized) {
             presenter.getLibrary()
         }
     }
@@ -258,12 +258,12 @@ open class LibraryController(
     override fun onActivityPaused(activity: Activity) {
         super.onActivityPaused(activity)
         observeLater = true
-        if (!::presenter.isInitialized)
+        if (::presenter.isInitialized)
             presenter.onDestroy()
     }
 
     override fun onDestroy() {
-        if (!::presenter.isInitialized)
+        if (::presenter.isInitialized)
             presenter.onDestroy()
         super.onDestroy()
     }
