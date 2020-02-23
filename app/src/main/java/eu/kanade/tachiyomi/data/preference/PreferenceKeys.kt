@@ -63,13 +63,9 @@ object PreferenceKeys {
 
     const val autoUpdateTrack = "pref_auto_update_manga_sync_key"
 
-    const val lastUsedCatalogueSource = "last_catalogue_source"
-
     const val lastUsedCategory = "last_used_category"
 
     const val catalogueAsList = "pref_display_catalogue_as_list"
-
-    const val enabledLanguages = "source_languages"
 
     const val backupDirectory = "backup_directory"
 
@@ -144,9 +140,7 @@ object PreferenceKeys {
     fun sourceUsername(sourceId: Long) = "pref_source_username_$sourceId"
 
     fun sourcePassword(sourceId: Long) = "pref_source_password_$sourceId"
-
-    fun sourceSharedPref(sourceId: Long) = "source_$sourceId"
-
+    
     fun trackUsername(syncId: Int) = "pref_mangasync_username_$syncId"
 
     fun trackPassword(syncId: Int) = "pref_mangasync_password_$syncId"
