@@ -443,6 +443,8 @@
     </plurals>
     <string name="remember_choice">Remember this choice</string>
     <string name="already_in_category">Manga already in category</string>
+    <string name="category">Category</string>
+
 
     <!-- Catalogue fragment -->
     <string name="source_search_options">Search filters</string>

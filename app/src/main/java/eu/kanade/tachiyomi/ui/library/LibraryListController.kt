@@ -9,6 +9,7 @@ import android.view.MenuInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Spinner
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
@@ -72,7 +73,11 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
     override fun contentView():View = recycler_layout
 
     override fun getTitle(): String? {
-        return null
+        return when {
+            spinnerAdapter?.array?.size ?: 0 > 1 -> null
+            spinnerAdapter?.array?.size == 1 -> return spinnerAdapter?.array?.firstOrNull()
+            else -> return super.getTitle()
+        }
     }
 
     private var scrollListener = object : RecyclerView.OnScrollListener () {
@@ -81,7 +86,7 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
             val position =
                 (recycler.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
             val order = when (val item = adapter.getItem(position)) {
-                is LibraryHeaderItem -> item.gCategory().order
+                is LibraryHeaderItem -> item.category.order
                 is LibraryItem -> presenter.categories.find { it.id == item.manga.category }?.order
                 else -> null
             }
@@ -92,9 +97,10 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
 
                 bottom_sheet.lastCategory = category
                 bottom_sheet.updateTitle()
-                if (spinner.selectedItemPosition != order + 1) {
+                val categortPosition = presenter.categories.indexOf(category)
+                if (spinner.selectedItemPosition != categortPosition) {
                     updateScroll = true
-                    spinner.setSelection(order + 1, true)
+                    spinner.setSelection(categortPosition, true)
                 }
             }
         }
@@ -148,7 +154,7 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
             view.context, tv.resourceId
         )
         (activity as MainActivity).supportActionBar?.customView = spinner
-        (activity as MainActivity).supportActionBar?.setDisplayShowCustomEnabled(true)
+        (activity as MainActivity).supportActionBar?.setDisplayShowCustomEnabled(false)
         spinnerAdapter = SpinnerAdapter(
             view.context,
             R.layout.library_spinner_textview,
@@ -161,7 +167,9 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
         super.onChangeStarted(handler, type)
         if (type.isEnter) {
-            (activity as MainActivity).supportActionBar?.setDisplayShowCustomEnabled(true)
+            (activity as MainActivity).supportActionBar
+                ?.setDisplayShowCustomEnabled(router?.backstack?.lastOrNull()?.controller() ==
+                    this && spinnerAdapter?.array?.size ?: 0 > 1)
         }
         else if (type == ControllerChangeType.PUSH_EXIT) {
             (activity as MainActivity).toolbar.menu.findItem(R.id
@@ -187,11 +195,19 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
 
 
         spinner.onItemSelectedListener = null
+        val categoryNames =  presenter.categories.map { it.name }.toTypedArray()
         spinnerAdapter = SpinnerAdapter(spinner.context, R.layout.library_spinner_textview,
-            presenter.categories.map { it.name }.toTypedArray())
+            if (categoryNames.isNotEmpty()) categoryNames
+            else arrayOf(spinner.context.getString(R.string.label_library))
+        )
         spinnerAdapter?.setDropDownViewResource(R.layout.library_spinner_entry_text)
         spinner.adapter = spinnerAdapter
 
+        val isCurrentController = router?.backstack?.lastOrNull()?.controller() ==
+            this
+        (activity as AppCompatActivity).supportActionBar
+            ?.setDisplayShowCustomEnabled(isCurrentController && categoryNames.size > 1)
+        if (isCurrentController) setTitle()
 
         spinner.setSelection(min(presenter.categories.size - 1, activeCategory + 1))
         updateScroll = false
@@ -202,10 +218,7 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
 
 
         } else if (justStarted) {
-            val position = if (freshStart) adapter.indexOf(activeCategory) else null
-            if (position != null)
-                (recycler.layoutManager as LinearLayoutManager)
-                    .scrollToPositionWithOffset(position, (-30).dpToPx)
+            if (freshStart) scrollToHeader(activeCategory)
         }
         else {
             updateScroll = true
@@ -213,21 +226,25 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
         adapter.isLongPressDragEnabled = canDrag()
         tabsVisibilityRelay.call(false)
 
-        bottom_sheet.lastCategory = presenter.categories[MathUtils.clamp(
+        bottom_sheet.lastCategory = presenter.categories.getOrNull(MathUtils.clamp(
             activeCategory, 0, presenter.categories.size - 1
-        )]
+        ))
         bottom_sheet.updateTitle()
         spinner.onItemSelectedListener = IgnoreFirstSpinnerListener { pos ->
             if (updateScroll) {
                 updateScroll = false
                 return@IgnoreFirstSpinnerListener
             }
-            val headerPosition = adapter.indexOf(pos - 1)
-            if (headerPosition > -1) {
-                (recycler.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
-                    headerPosition, (-30).dpToPx
-                )
-            }
+            scrollToHeader(pos - 1)
+        }
+    }
+
+    private fun scrollToHeader(pos: Int) {
+        val headerPosition = adapter.indexOf(pos)
+        if (headerPosition > -1) {
+            (recycler.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
+                headerPosition, if (headerPosition == 0) 0 else (-30).dpToPx
+            )
         }
     }
 

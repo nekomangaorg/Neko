@@ -18,12 +18,13 @@ import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.catalogue.global_search.CatalogueSearchController
 import eu.kanade.tachiyomi.ui.catalogue.global_search.CatalogueSearchPresenter
+import eu.kanade.tachiyomi.ui.main.BottomNavBarInterface
 import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationListController
 import uy.kohesive.injekt.injectLazy
 
 class SearchController(
         private var manga: Manga? = null
-) : CatalogueSearchController(manga?.originalTitle()) {
+) : CatalogueSearchController(manga?.originalTitle()), BottomNavBarInterface{
 
     private var newManga: Manga? = null
     private var progress = 1
@@ -191,5 +192,10 @@ class SearchController(
             }
     }
 
-
+    override fun canChangeTabs(block: () -> Unit): Boolean {
+        val migrationListController = router.getControllerWithTag(MigrationListController.TAG)
+        as? BottomNavBarInterface
+        if (migrationListController != null) return migrationListController.canChangeTabs(block)
+        return true
+    }
 }

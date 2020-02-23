@@ -345,8 +345,13 @@ class LibraryPresenter(
         }
     }
 
-    fun getCategory(categoryId: Int): Category {
-        return categories.find { it.id == categoryId } ?: createDefaultCategory()
+    private fun getCategory(categoryId: Int): Category {
+        val category = categories.find { it.id == categoryId } ?: createDefaultCategory()
+        if (category.isFirst == null) {
+            category.isFirst = (category.id ?: 0 <= 0 ||
+                (category.order == 0 && categories.none { it.id == 0 }))
+        }
+        return category
     }
 
     private fun sortCategory(i1: LibraryItem, i2: LibraryItem,

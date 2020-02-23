@@ -576,8 +576,9 @@ open class LibraryController(
                 }
             }
             R.id.action_migrate -> {
+                val skipPre = preferences.skipPreMigration().getOrDefault()
                 router.pushController(
-                    if (preferences.skipPreMigration().getOrDefault()) {
+                    if (skipPre) {
                         MigrationListController.create(
                             MigrationProcedureConfig(
                                 selectedMangas.mapNotNull { it.id },null)
@@ -586,7 +587,7 @@ open class LibraryController(
                     else {
                         PreMigrationController.create( selectedMangas.mapNotNull { it.id } )
                     }
-                   .withFadeTransaction())
+                   .withFadeTransaction().tag(if (skipPre) MigrationListController.TAG else null))
                 destroyActionModeIfNeeded()
             }
             /*R.id.action_to_top, R.id.action_to_bottom -> {

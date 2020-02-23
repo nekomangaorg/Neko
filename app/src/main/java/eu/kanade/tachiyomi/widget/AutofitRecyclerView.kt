@@ -21,7 +21,10 @@ class AutofitRecyclerView @JvmOverloads constructor(context: Context, attrs: Att
         }
 
     val itemWidth: Int
-        get() = measuredWidth / manager.spanCount
+        get() {
+            return if (spanCount == 0) measuredWidth / getTempSpan()
+            else measuredWidth / manager.spanCount
+        }
 
     init {
         if (attrs != null) {
@@ -32,6 +35,13 @@ class AutofitRecyclerView @JvmOverloads constructor(context: Context, attrs: Att
         }
 
         layoutManager = manager
+    }
+
+    private fun getTempSpan():Int {
+        if (spanCount == 0 && columnWidth > 0) {
+            return max(1, measuredWidth / columnWidth)
+        }
+        return 2
     }
 
     override fun onMeasure(widthSpec: Int, heightSpec: Int) {

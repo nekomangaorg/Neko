@@ -26,10 +26,12 @@ import eu.kanade.tachiyomi.ui.base.controller.RxController
 import eu.kanade.tachiyomi.ui.base.controller.TabbedController
 import eu.kanade.tachiyomi.ui.base.controller.requestPermissionsSafe
 import eu.kanade.tachiyomi.ui.catalogue.CatalogueController
+import eu.kanade.tachiyomi.ui.main.BottomNavBarInterface
 import eu.kanade.tachiyomi.ui.main.SearchActivity
 import eu.kanade.tachiyomi.ui.manga.chapter.ChaptersController
 import eu.kanade.tachiyomi.ui.manga.info.MangaInfoController
 import eu.kanade.tachiyomi.ui.manga.track.TrackController
+import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationListController
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.android.synthetic.main.main_activity.*
@@ -40,7 +42,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.Date
 
-class MangaController : RxController, TabbedController {
+class MangaController : RxController, TabbedController, BottomNavBarInterface {
 
     constructor(manga: Manga?,
         fromCatalogue: Boolean = false,
@@ -214,6 +216,13 @@ class MangaController : RxController, TabbedController {
         else null
 
         //tab.icon = drawable
+    }
+
+    override fun canChangeTabs(block: () -> Unit): Boolean {
+        val migrationListController = router.getControllerWithTag(MigrationListController.TAG)
+            as? BottomNavBarInterface
+        if (migrationListController != null) return migrationListController.canChangeTabs(block)
+        return true
     }
 
     private inner class MangaDetailAdapter : RouterPagerAdapter(this@MangaController) {

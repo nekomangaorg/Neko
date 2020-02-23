@@ -1,12 +1,14 @@
 package eu.kanade.tachiyomi.ui.library
 
 import android.graphics.drawable.Drawable
+import android.os.Build
 import android.view.View
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.view.menu.MenuBuilder
 import androidx.appcompat.widget.PopupMenu
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
@@ -18,9 +20,11 @@ import eu.davidea.viewholders.FlexibleViewHolder
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
+import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.gone
+import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.visible
 import kotlinx.android.synthetic.main.library_category_header_item.view.*
 
@@ -47,13 +51,13 @@ class LibraryHeaderItem(private val categoryF: (Int) -> Category, val catId: Int
         holder.bind(categoryF(catId))
     }
 
-    var category:Category = categoryF(catId)
-    fun gCategory():Category = categoryF(catId)
+    val category:Category
+        get() = categoryF(catId)
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other is LibraryHeaderItem) {
-            return gCategory().id == other.gCategory().id
+            return category.id == other.category.id
         }
         return false
     }
@@ -67,7 +71,7 @@ class LibraryHeaderItem(private val categoryF: (Int) -> Category, val catId: Int
     }
 
     override fun hashCode(): Int {
-        return -(gCategory().id!!)
+        return -(category.id!!)
     }
 
     class Holder(val view: View, private val adapter: LibraryCategoryAdapter) :
@@ -81,16 +85,25 @@ class LibraryHeaderItem(private val categoryF: (Int) -> Category, val catId: Int
 
         init {
             updateButton.setOnClickListener { addCategoryToUpdate() }
-            sortText.setOnClickListener { showCatSortOptions() }
+            sortText.setOnClickListener {  it.post { showCatSortOptions() } }
             checkboxImage.setOnClickListener { selectAll() }
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+                sortText.compoundDrawablesRelative[2]?.mutate()?.setTint(
+                    ContextCompat.getColor(contentView.context, R.color.gray_button))
+            }
         }
 
         fun bind(category: Category) {
+            sectionText.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                topMargin = (if (category.isFirst == true) 2 else 32).dpToPx
+            }
             sectionText.text = category.name
             sortText.text = itemView.context.getString(
                 when (category.sortingMode()) {
                     LibrarySort.LAST_UPDATED -> R.string.action_sort_last_updated
-                    LibrarySort.DRAG_AND_DROP -> R.string.action_sort_drag_and_drop
+                    LibrarySort.DRAG_AND_DROP ->
+                        if (category.id == -1) R.string.category
+                        else R.string.action_sort_drag_and_drop
                     LibrarySort.TOTAL -> R.string.action_sort_total
                     LibrarySort.UNREAD -> R.string.action_filter_unread
                     LibrarySort.LAST_READ -> R.string.action_sort_last_read
@@ -134,7 +147,7 @@ class LibraryHeaderItem(private val categoryF: (Int) -> Category, val catId: Int
         }
         private fun showCatSortOptions() {
             val category =
-                (adapter.getItem(adapterPosition) as? LibraryHeaderItem)?.gCategory() ?: return
+                (adapter.getItem(adapterPosition) as? LibraryHeaderItem)?.category ?: return
             // Create a PopupMenu, giving it the clicked view for an anchor
             val popup = PopupMenu(itemView.context, view.category_sort)
 
@@ -160,6 +173,11 @@ class LibraryHeaderItem(private val categoryF: (Int) -> Category, val catId: Int
                     LibrarySort.LAST_UPDATED -> R.id.action_update
                     else -> R.id.action_alpha
                 }
+            )
+
+            if (category.id == -1)
+            popup.menu.findItem(R.id.action_drag_and_drop).title = contentView.context.getString(
+                R.string.category
             )
 
             if (sortingMode != null && popup.menu is MenuBuilder) {
@@ -193,6 +211,10 @@ class LibraryHeaderItem(private val categoryF: (Int) -> Category, val catId: Int
             }
             else {
                 val order = when (menuId) {
+                    R.id.action_drag_and_drop -> {
+                        adapter.libraryListener.sortCategory(category.id!!,  'D' - 'a' + 1)
+                        return
+                    }
                     R.id.action_total_chaps -> 4
                     R.id.action_last_read -> 3
                     R.id.action_unread -> 2

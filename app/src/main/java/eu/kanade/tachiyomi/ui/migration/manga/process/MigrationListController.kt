@@ -446,6 +446,7 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
 
     companion object {
         const val CONFIG_EXTRA = "config_extra"
+        const val TAG = "migration_list"
 
         fun create(config: MigrationProcedureConfig): MigrationListController {
             return MigrationListController(Bundle().apply {

@@ -19,6 +19,8 @@ interface Category : Serializable {
 
     var mangaSort:Char?
 
+    var isFirst:Boolean?
+
     val nameLower: String
         get() = name.toLowerCase()
 
@@ -85,9 +87,10 @@ interface Category : Serializable {
                     LibrarySort.UNREAD -> UNREAD_ASC
                     LibrarySort.LAST_READ -> LAST_READ_ASC
                     LibrarySort.TOTAL -> TOTAL_ASC
-                    else -> 'D'
+                    LibrarySort.DRAG_AND_DROP -> DRAG_AND_DROP
+                    else -> DRAG_AND_DROP
                 }
-                if (mangaSort != 'D' && !ascending) {
+                if (mangaSort != DRAG_AND_DROP && !ascending) {
                     mangaSort?.plus(1)
                 }
                 order = -1
