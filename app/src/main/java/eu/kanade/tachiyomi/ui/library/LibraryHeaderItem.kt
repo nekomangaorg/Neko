@@ -21,7 +21,6 @@ import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.gone
-import eu.kanade.tachiyomi.util.view.invisible
 import eu.kanade.tachiyomi.util.view.visible
 import kotlinx.android.synthetic.main.library_category_header_item.view.*
 
@@ -104,18 +103,18 @@ class LibraryHeaderItem(private val categoryF: (Int) -> Category, val catId: Int
                 adapter.mode == SelectableAdapter.Mode.MULTI -> {
                     checkboxImage.visible()
                     catProgress.gone()
-                    updateButton.invisible()
+                    updateButton.gone()
                     setSelection()
                 }
                 category.id == -1 -> {
                     checkboxImage.gone()
                     catProgress.gone()
-                    updateButton.invisible()
+                    updateButton.gone()
                 }
                 LibraryUpdateService.categoryInQueue(category.id) -> {
                     checkboxImage.gone()
                     catProgress.visible()
-                    updateButton.invisible()
+                    updateButton.gone()
                 }
                 else -> {
                     checkboxImage.gone()
@@ -127,7 +126,7 @@ class LibraryHeaderItem(private val categoryF: (Int) -> Category, val catId: Int
 
         private fun addCategoryToUpdate() {
             if (adapter.libraryListener.updateCategory(adapterPosition)) {
-                updateButton.invisible()
+                updateButton.gone()
                 launchUI {
                     adapter.notifyItemChanged(adapterPosition)
                 }
