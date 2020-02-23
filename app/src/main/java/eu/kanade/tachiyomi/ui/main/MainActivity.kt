@@ -132,10 +132,10 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             val id = item.itemId
             val currentController = router.backstack.lastOrNull()?.controller()
             if (!continueSwitchingTabs && currentController is BottomNavBarInterface) {
-                return@setOnNavigationItemSelectedListener currentController.canChangeTabs {
+                if (!currentController.canChangeTabs {
                     continueSwitchingTabs = true
                     this@MainActivity.navigationView.selectedItemId = id
-                }
+                }) return@setOnNavigationItemSelectedListener false
             }
             continueSwitchingTabs = false
             val currentRoot = router.backstack.firstOrNull()
