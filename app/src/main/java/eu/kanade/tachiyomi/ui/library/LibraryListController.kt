@@ -235,7 +235,7 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
                 updateScroll = false
                 return@IgnoreFirstSpinnerListener
             }
-            scrollToHeader(pos - 1)
+            scrollToHeader(presenter.categories[pos].order)
         }
     }
 

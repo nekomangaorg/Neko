@@ -450,12 +450,12 @@ class LibraryPresenter(
                 libraryManga.map { manga ->
                     LibraryItem(manga, libraryLayout, null).apply { unreadType = unreadBadgeType }
                 }.groupBy {
-                    if (showCategories) it.manga.category else 0
+                    if (showCategories) it.manga.category else -1
                 }
             }
         else {
                 libraryManga.groupBy { manga ->
-                    if (showCategories) manga.category else 0
+                    if (showCategories) manga.category else -1
                     //LibraryItem(manga, libraryLayout).apply { unreadType = unreadBadgeType }
                 }.map { entry ->
                     val categoryItem =
@@ -467,7 +467,7 @@ class LibraryPresenter(
                         ).apply { unreadType = unreadBadgeType }
                     }
                 }.map {
-                    val cat = if (showCategories) it.firstOrNull()?.manga?.category ?: 0 else 0
+                    val cat = if (showCategories) it.firstOrNull()?.manga?.category ?: 0 else -1
                     cat to it
                     //LibraryItem(manga, libraryLayout).apply { unreadType = unreadBadgeType }
                 }.toMap()

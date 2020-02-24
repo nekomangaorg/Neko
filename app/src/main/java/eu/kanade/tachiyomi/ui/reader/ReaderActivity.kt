@@ -42,7 +42,6 @@ import eu.kanade.tachiyomi.ui.reader.viewer.pager.L2RPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.R2LPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.VerticalPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
-import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.lang.plusAssign
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.GLUtil
@@ -150,7 +149,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
     override fun onCreate(savedState: Bundle?) {
         AppCompatDelegate.setDefaultNightMode(
             when (preferences.theme()) {
-                1 -> AppCompatDelegate.MODE_NIGHT_NO
+                1, 8 -> AppCompatDelegate.MODE_NIGHT_NO
                 2, 3, 4 -> AppCompatDelegate.MODE_NIGHT_YES
                 else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
             }

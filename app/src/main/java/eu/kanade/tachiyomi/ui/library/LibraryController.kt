@@ -362,22 +362,23 @@ open class LibraryController(
 
         tabsVisibilityRelay.call(categories.size > 1)
 
-        if (freshStart || !justStarted) {
-            // Delay the scroll position to allow the view to be properly measured.
-            view.post {
-                if (isAttached) {
-                    activity?.tabs?.setScrollPosition(library_pager.currentItem, 0f, true)
-                }
-            }
+        libraryMangaRelay.call(LibraryMangaEvent(mangaMap))
 
-            // Send the manga map to child fragments after the adapter is updated.
-            libraryMangaRelay.call(LibraryMangaEvent(mangaMap))
+        view.post {
+            if (isAttached) {
+                activity?.tabs?.setScrollPosition(library_pager.currentItem, 0f, true)
+            }
         }
-        else if (!freshStart) {
-            justStarted = false
-            if (pager_layout.alpha == 0f)
-                pager_layout.animate().alpha(1f).setDuration(500).start()
+
+        if (!freshStart && justStarted) {
+            if (!freshStart) {
+                justStarted = false
+                if (pager_layout.alpha == 0f) pager_layout.animate().alpha(1f).setDuration(500).start()
+            }
         }
+        // Delay the scroll position to allow the view to be properly measured.
+
+        // Send the manga map to child fragments after the adapter is updated.
     }
 
     /**

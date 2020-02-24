@@ -58,7 +58,7 @@ android {
     buildTypes {
         debug {
             versionNameSuffix "-${getCommitCount()}"
-            applicationIdSuffix ".debug"
+            applicationIdSuffix ".debugJ2K"
         }
         release {
             applicationIdSuffix = '.j2k'

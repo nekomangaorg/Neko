@@ -94,6 +94,7 @@ interface Category : Serializable {
                     mangaSort?.plus(1)
                 }
                 order = -1
+                isFirst = true
             }
     }
 
