@@ -131,6 +131,7 @@
     <string name="action_track">Track</string>
     <string name="action_sort_by">Sort category by…</string>
     <string name="action_switch">Switch</string>
+    <string name="action_bug_report">Report a Bug</string>
 
     <!-- Operations -->
     <string name="loading">Loading…</string>
