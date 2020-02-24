@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.extension.ExtensionController
+import eu.kanade.tachiyomi.ui.migration.MigrationController
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.openInBrowser
 
@@ -59,6 +60,12 @@ class SettingsMainController : SettingsController() {
             iconTint = tintColor
             titleRes = R.string.pref_category_tracking
             onClick { navigateTo(SettingsTrackingController()) }
+        }
+        preference {
+            iconRes = R.drawable.ic_swap_calls_white_24dp
+            iconTint = tintColor
+            titleRes = R.string.label_migration
+            onClick { navigateTo(MigrationController()) }
         }
         preference {
             iconRes = R.drawable.ic_backup_black_24dp

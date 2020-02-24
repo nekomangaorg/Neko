@@ -14,6 +14,8 @@ import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
+import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
+import eu.kanade.tachiyomi.ui.category.CategoryController
 import kotlinx.android.synthetic.main.pref_library_columns.view.*
 import rx.Observable
 import uy.kohesive.injekt.Injekt
@@ -69,6 +71,47 @@ class SettingsLibraryController : SettingsController() {
         }
 
         val dbCategories = db.getCategories().executeAsBlocking()
+
+        preferenceCategory {
+            titleRes = R.string.pref_category_library_categories
+            preference {
+                titleRes = R.string.action_edit_categories
+                onClick { router.pushController(CategoryController().withFadeTransaction()) }
+            }
+            intListPreference(activity) {
+                key = Keys.defaultCategory
+                titleRes = R.string.default_category
+
+                val categories = listOf(Category.createDefault(context)) + dbCategories
+                entries =
+                    listOf(context.getString(R.string.default_category_summary)) + categories.map { it.name }.toTypedArray()
+                entryValues = listOf(-1) + categories.mapNotNull { it.id }.toList()
+                defaultValue = "-1"
+
+                val selectedCategory = categories.find { it.id == preferences.defaultCategory() }
+                summary =
+                    selectedCategory?.name ?: context.getString(R.string.default_category_summary)
+                onChange { newValue ->
+                    summary = categories.find {
+                        it.id == newValue as Int
+                    }?.name ?: context.getString(R.string.default_category_summary)
+                    true
+                }
+            }
+            intListPreference(activity) {
+                titleRes = R.string.pref_keep_category_sorting
+                key = Keys.keepCatSort
+
+                customSummary = context.getString(R.string.pref_keep_category_sorting_summary)
+                entries = listOf(
+                    context.getString(R.string.always_ask),
+                    context.getString(R.string.option_keep_category_sort),
+                    context.getString(R.string.option_switch_to_dnd)
+                )
+                entryRange = 0..2
+                defaultValue = 0
+            }
+        }
 
         preferenceCategory {
             titleRes = R.string.pref_category_library_update
@@ -158,42 +201,6 @@ class SettingsLibraryController : SettingsController() {
                         if (selectedCategories.isEmpty()) context.getString(R.string.all)
                         else selectedCategories.joinToString { it.name }
                 }
-            }
-        }
-        preferenceCategory {
-            titleRes = R.string.pref_category_library_categories
-            intListPreference(activity) {
-                key = Keys.defaultCategory
-                titleRes = R.string.default_category
-
-                val categories = listOf(Category.createDefault(context)) + dbCategories
-                entries =
-                    listOf(context.getString(R.string.default_category_summary)) + categories.map { it.name }.toTypedArray()
-                entryValues = listOf(-1) + categories.mapNotNull { it.id }.toList()
-                defaultValue = "-1"
-
-                val selectedCategory = categories.find { it.id == preferences.defaultCategory() }
-                summary =
-                    selectedCategory?.name ?: context.getString(R.string.default_category_summary)
-                onChange { newValue ->
-                    summary = categories.find {
-                        it.id == newValue as Int
-                    }?.name ?: context.getString(R.string.default_category_summary)
-                    true
-                }
-            }
-            intListPreference(activity) {
-                titleRes = R.string.pref_keep_category_sorting
-                key = Keys.keepCatSort
-
-                customSummary = context.getString(R.string.pref_keep_category_sorting_summary)
-                entries = listOf(
-                    context.getString(R.string.always_ask),
-                    context.getString(R.string.option_keep_category_sort),
-                    context.getString(R.string.option_switch_to_dnd)
-                )
-                entryRange = 0..2
-                defaultValue = 0
             }
         }
         if (preferences.skipPreMigration().getOrDefault() || preferences.migrationSources().getOrDefault().isNotEmpty()) {

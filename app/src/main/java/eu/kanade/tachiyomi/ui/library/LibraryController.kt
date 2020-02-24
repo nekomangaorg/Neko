@@ -40,12 +40,10 @@ import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.TabbedController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
-import eu.kanade.tachiyomi.ui.category.CategoryController
 import eu.kanade.tachiyomi.ui.download.DownloadController
 import eu.kanade.tachiyomi.ui.library.filter.SortFilterBottomSheet
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaController
-import eu.kanade.tachiyomi.ui.migration.MigrationController
 import eu.kanade.tachiyomi.ui.migration.MigrationInterface
 import eu.kanade.tachiyomi.ui.migration.manga.design.PreMigrationController
 import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationListController
@@ -519,12 +517,6 @@ open class LibraryController(
                 if (bottom_sheet.sheetBehavior?.state != BottomSheetBehavior.STATE_COLLAPSED)
                     bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
                 else bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
-            }
-            R.id.action_edit_categories -> {
-                router.pushController(CategoryController().withFadeTransaction())
-            }
-            R.id.action_source_migration -> {
-                router.pushController(MigrationController().withFadeTransaction())
             }
             else -> return super.onOptionsItemSelected(item)
         }
