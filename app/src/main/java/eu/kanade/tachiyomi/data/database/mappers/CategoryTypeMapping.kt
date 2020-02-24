@@ -60,12 +60,17 @@ class CategoryGetResolver : DefaultGetResolver<Category>() {
         flags = cursor.getInt(cursor.getColumnIndex(COL_FLAGS))
 
         val orderString = cursor.getString(cursor.getColumnIndex(COL_MANGA_ORDER))
-        if (orderString?.firstOrNull()?.isLetter() == true) {
-            mangaSort = orderString.first()
-            mangaOrder = emptyList()
+        when {
+            orderString.isNullOrBlank() -> {
+                mangaSort = 'a'
+                mangaOrder = emptyList()
+            }
+            orderString.firstOrNull()?.isLetter() == true -> {
+                mangaSort = orderString.first()
+                mangaOrder = emptyList()
+            }
+            else -> mangaOrder = orderString.split("/")?.mapNotNull { it.toLongOrNull() }
         }
-        else
-            mangaOrder = orderString?.split("/")?.mapNotNull { it.toLongOrNull() } ?: emptyList()
     }
 }
 

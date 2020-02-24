@@ -72,6 +72,7 @@ class CategoryPresenter(
 
         // Insert into database.
 
+        cat.mangaSort = 'a'
         db.insertCategory(cat).executeAsBlocking()
         val cats = db.getCategories().executeAsBlocking()
         val newCat = cats.find { it.name == name } ?: return false

@@ -50,7 +50,7 @@ class SettingsGeneralController : SettingsController() {
                 R.string.system_theme, R.string.sysyem_white_theme, R.string.system_amoled_theme, R.string
                     .system_darkblue_theme)
             entryValues = listOf(1, 8, 2, 3, 4, 5, 9, 6, 7)
-            defaultValue = 8
+            defaultValue = 9
 
             onChange {
                 activity?.recreate()
