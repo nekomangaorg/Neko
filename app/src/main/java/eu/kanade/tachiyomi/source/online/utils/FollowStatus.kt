@@ -12,5 +12,4 @@ enum class FollowStatus(val int: Int) {
     companion object {
         fun fromInt(value: Int): FollowStatus? = FollowStatus.values().find { it.int == value }
     }
-
 }

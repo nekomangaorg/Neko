@@ -35,7 +35,6 @@ class RemoveHistoryDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
                 .positiveButton(R.string.action_remove) {
                     onPositive(it.isCheckPromptChecked())
                 }
-
     }
 
     private fun onPositive(checked: Boolean) {
@@ -49,5 +48,4 @@ class RemoveHistoryDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
     interface Listener {
         fun removeHistory(manga: Manga, history: History, all: Boolean)
     }
-
 }

@@ -12,7 +12,12 @@ import java.io.File
 
 class CustomLayoutPickerActivity : FilePickerActivity() {
 
-    override fun getFragment(startPath: String?, mode: Int, allowMultiple: Boolean, allowCreateDir: Boolean):
+    override fun getFragment(
+        startPath: String?,
+        mode: Int,
+        allowMultiple: Boolean,
+        allowCreateDir: Boolean
+    ):
             AbstractFilePickerFragment<File> {
         val fragment = CustomLayoutFilePickerFragment()
         fragment.setArgs(startPath, mode, allowMultiple, allowCreateDir)

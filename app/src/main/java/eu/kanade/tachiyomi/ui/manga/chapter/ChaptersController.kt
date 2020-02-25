@@ -6,7 +6,12 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Color
-import android.view.*
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -36,12 +41,12 @@ import kotlinx.android.synthetic.main.chapters_controller.*
 import timber.log.Timber
 
 class ChaptersController : NucleusController<ChaptersPresenter>(),
-        ActionMode.Callback,
-        FlexibleAdapter.OnItemClickListener,
-        FlexibleAdapter.OnItemLongClickListener,
-        ChaptersAdapter.OnMenuItemClickListener,
-        DownloadCustomChaptersDialog.Listener,
-        DeleteChaptersDialog.Listener {
+    ActionMode.Callback,
+    FlexibleAdapter.OnItemClickListener,
+    FlexibleAdapter.OnItemLongClickListener,
+    ChaptersAdapter.OnMenuItemClickListener,
+    DownloadCustomChaptersDialog.Listener,
+    DeleteChaptersDialog.Listener {
 
     /**
      * Adapter containing a list of chapters.
@@ -67,8 +72,10 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
 
     override fun createPresenter(): ChaptersPresenter {
         val ctrl = parentController as MangaController
-        return ChaptersPresenter(ctrl.manga!!, ctrl.source!!,
-                ctrl.chapterCountRelay, ctrl.lastUpdateRelay, ctrl.mangaFavoriteRelay)
+        return ChaptersPresenter(
+            ctrl.manga!!, ctrl.source!!,
+            ctrl.chapterCountRelay, ctrl.lastUpdateRelay, ctrl.mangaFavoriteRelay
+        )
     }
 
     override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
@@ -83,33 +90,44 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
 
         recycler.adapter = adapter
         recycler.layoutManager = LinearLayoutManager(view.context)
-        recycler.addItemDecoration(DividerItemDecoration(view.context, DividerItemDecoration.VERTICAL))
+        recycler.addItemDecoration(
+            DividerItemDecoration(
+                view.context,
+                DividerItemDecoration.VERTICAL
+            )
+        )
         recycler.setHasFixedSize(true)
         adapter?.fastScroller = fast_scroller
 
         swipe_refresh.refreshes().subscribeUntilDestroy { fetchChaptersFromSource() }
 
         fab.setImageDrawable(
-                IconicsDrawable(applicationContext!!)
-                        .icon(CommunityMaterial.Icon2.cmd_play)
-                        .colorInt(Color.WHITE)
-                        .sizeDp(20)
-                        .iconOffsetX(IconicsSize.dp(2))
+            IconicsDrawable(applicationContext!!)
+                .icon(CommunityMaterial.Icon2.cmd_play)
+                .colorInt(Color.WHITE)
+                .sizeDp(20)
+                .iconOffsetX(IconicsSize.dp(2))
         )
 
         fab.clicks().subscribeUntilDestroy {
             val item = presenter.getNextUnreadChapter()
             if (item != null) {
                 // Create animation listener
-                val revealAnimationListener: Animator.AnimatorListener = object : AnimatorListenerAdapter() {
-                    override fun onAnimationStart(animation: Animator?) {
-                        openChapter(item.chapter, true)
+                val revealAnimationListener: Animator.AnimatorListener =
+                    object : AnimatorListenerAdapter() {
+                        override fun onAnimationStart(animation: Animator?) {
+                            openChapter(item.chapter, true)
+                        }
                     }
-                }
 
                 // Get coordinates and start animation
                 val coordinates = fab.getCoordinates()
-                if (!reveal_view.showRevealEffect(coordinates.x, coordinates.y, revealAnimationListener)) {
+                if (!reveal_view.showRevealEffect(
+                        coordinates.x,
+                        coordinates.y,
+                        revealAnimationListener
+                    )
+                ) {
                     openChapter(item.chapter)
                 }
             } else {
@@ -147,8 +165,8 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
         val menuFilterDownloaded = menu.findItem(R.id.action_filter_downloaded)
         val menuFilterBookmarked = menu.findItem(R.id.action_filter_bookmarked)
 
-
-        menu.findItem(R.id.action_sort).icon = IconicsDrawable(applicationContext!!).icon(CommunityMaterial.Icon2.cmd_sort_numeric)
+        menu.findItem(R.id.action_sort).icon =
+            IconicsDrawable(applicationContext!!).icon(CommunityMaterial.Icon2.cmd_sort_numeric)
                 .sizeDp(20).colorInt(Color.WHITE)
 
         // Set correct checkbox values.
@@ -158,10 +176,10 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
         menuFilterBookmarked.isChecked = presenter.onlyBookmarked()
 
         if (presenter.onlyRead())
-        //Disable unread filter option if read filter is enabled.
+        // Disable unread filter option if read filter is enabled.
             menuFilterUnread.isEnabled = false
         if (presenter.onlyUnread())
-        //Disable read filter option if unread filter is enabled.
+        // Disable read filter option if unread filter is enabled.
             menuFilterRead.isEnabled = false
 
         // Display mode submenu
@@ -252,7 +270,6 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
             }
             actionMode?.invalidate()
         }
-
     }
 
     private fun initialFetchChapters() {
@@ -362,7 +379,12 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
     }
 
     override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
-        IconicsMenuInflaterUtil.inflate(mode.menuInflater, applicationContext!!, R.menu.chapter_selection, menu)
+        IconicsMenuInflaterUtil.inflate(
+            mode.menuInflater,
+            applicationContext!!,
+            R.menu.chapter_selection,
+            menu
+        )
         adapter?.mode = SelectableAdapter.Mode.MULTI
         return true
     }
@@ -443,14 +465,16 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
         destroyActionModeIfNeeded()
         presenter.downloadChapters(chapters)
         if (view != null && !presenter.manga.favorite) {
-            recycler?.snack(view.context.getString(R.string.snack_add_to_library), Snackbar.LENGTH_INDEFINITE) {
+            recycler?.snack(
+                view.context.getString(R.string.snack_add_to_library),
+                Snackbar.LENGTH_INDEFINITE
+            ) {
                 setAction(R.string.action_add) {
                     presenter.addToLibrary()
                 }
             }
         }
     }
-
 
     private fun showDeleteChaptersConfirmationDialog() {
         DeleteChaptersDialog(this).showDialog(router)
@@ -491,7 +515,6 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
         Timber.e(error)
     }
 
-
     // OVERFLOW MENU DIALOGS
 
     private fun setDisplayMode(id: Int) {
@@ -500,9 +523,9 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
     }
 
     private fun getUnreadChaptersSorted() = presenter.chapters
-            .filter { !it.read && it.status == Download.NOT_DOWNLOADED }
-            .distinctBy { it.name }
-            .sortedByDescending { it.source_order }
+        .filter { !it.read && it.status == Download.NOT_DOWNLOADED }
+        .distinctBy { it.name }
+        .sortedByDescending { it.source_order }
 
     private fun downloadChapters(choice: Int) {
         val chaptersToDownload = when (choice) {

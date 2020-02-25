@@ -71,7 +71,6 @@ class SaveImageNotifier(private val context: Context) {
                     context.getString(R.string.action_delete),
                     NotificationReceiver.deleteImagePendingBroadcast(context, file.absolutePath, notificationId))
             updateNotification()
-
         }
     }
 
@@ -87,7 +86,6 @@ class SaveImageNotifier(private val context: Context) {
         context.notificationManager.notify(notificationId, notificationBuilder.build())
     }
 
-
     /**
      * Called on error while downloading image.
      * @param error string containing error information.
@@ -101,5 +99,4 @@ class SaveImageNotifier(private val context: Context) {
         }
         updateNotification()
     }
-
 }

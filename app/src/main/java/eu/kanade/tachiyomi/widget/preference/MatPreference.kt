@@ -10,10 +10,13 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-open class MatPreference @JvmOverloads constructor(val activity: Activity?, context: Context,
-                                                   attrs:
-                                                   AttributeSet? =
-                                                           null) :
+open class MatPreference @JvmOverloads constructor(
+    val activity: Activity?,
+    context: Context,
+    attrs:
+    AttributeSet? =
+            null
+) :
         Preference(context, attrs) {
 
     protected val prefs: PreferencesHelper = Injekt.get()

@@ -13,10 +13,10 @@ import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.AbstractFlexibleItem
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.davidea.viewholders.FlexibleViewHolder
+import eu.kanade.tachiyomi.R as TR
 import eu.kanade.tachiyomi.source.model.Filter
 import eu.kanade.tachiyomi.util.dpToPx
 import eu.kanade.tachiyomi.util.getResourceColor
-import eu.kanade.tachiyomi.R as TR
 
 open class TriStateItem(val filter: Filter.TriState) : AbstractFlexibleItem<TriStateItem.Holder>() {
 
@@ -28,11 +28,19 @@ open class TriStateItem(val filter: Filter.TriState) : AbstractFlexibleItem<TriS
         return 103
     }
 
-    override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): Holder? {
+    override fun createViewHolder(
+        view: View,
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>
+    ): Holder? {
         return Holder(view, adapter)
     }
 
-    override fun bindViewHolder(adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>, holder: Holder, position: Int, payloads: MutableList<Any>?) {
+    override fun bindViewHolder(
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
+        holder: Holder,
+        position: Int,
+        payloads: MutableList<Any>?
+    ) {
         val view = holder.text
         view.text = filter.name
 
@@ -77,5 +85,4 @@ open class TriStateItem(val filter: Filter.TriState) : AbstractFlexibleItem<TriS
             text.compoundDrawablePadding = 20.dpToPx
         }
     }
-
 }

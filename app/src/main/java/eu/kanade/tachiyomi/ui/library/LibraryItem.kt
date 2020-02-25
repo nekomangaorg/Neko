@@ -28,7 +28,10 @@ class LibraryItem(val manga: LibraryManga, private val libraryAsList: Preference
             R.layout.catalogue_grid_item
     }
 
-    override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): LibraryHolder? {
+    override fun createViewHolder(
+        view: View,
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>
+    ): LibraryHolder? {
         val parent = adapter.recyclerView
         return if (parent is AutofitRecyclerView) {
             view.apply {
@@ -43,7 +46,12 @@ class LibraryItem(val manga: LibraryManga, private val libraryAsList: Preference
         }
     }
 
-    override fun bindViewHolder(adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>, holder: LibraryHolder, position: Int, payloads: MutableList<Any>?) {
+    override fun bindViewHolder(
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
+        holder: LibraryHolder,
+        position: Int,
+        payloads: MutableList<Any>?
+    ) {
 
         holder.onSetValues(this)
     }
@@ -61,15 +69,14 @@ class LibraryItem(val manga: LibraryManga, private val libraryAsList: Preference
             if (constraint.contains(",")) {
                 val genres = manga.genre?.split(", ")
                 constraint.split(",").all { containsGenre(it.trim(), genres) }
-            }
-           else containsGenre(constraint, manga.genre?.split(", "))
+            } else containsGenre(constraint, manga.genre?.split(", "))
     }
 
     private fun containsGenre(tag: String, genres: List<String>?): Boolean {
         return if (tag.startsWith("-"))
             genres?.find {
                 it.trim().toLowerCase() == tag.substringAfter("-").toLowerCase()
-            }                   == null
+            } == null
         else
             genres?.find {
                 it.trim().toLowerCase() == tag.toLowerCase() } != null

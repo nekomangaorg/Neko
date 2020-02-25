@@ -3,7 +3,13 @@ package eu.kanade.tachiyomi.ui.catalogue.browse
 import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Bundle
-import android.view.*
+import android.view.Gravity
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
@@ -36,8 +42,14 @@ import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.library.ChangeMangaCategoriesDialog
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
-import eu.kanade.tachiyomi.util.*
+import eu.kanade.tachiyomi.util.connectivityManager
+import eu.kanade.tachiyomi.util.gone
+import eu.kanade.tachiyomi.util.inflate
+import eu.kanade.tachiyomi.util.snack
+import eu.kanade.tachiyomi.util.toast
+import eu.kanade.tachiyomi.util.visible
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
+import java.util.concurrent.TimeUnit
 import kotlinx.android.synthetic.main.catalogue_controller.*
 import kotlinx.android.synthetic.main.main_activity.*
 import rx.Observable
@@ -45,18 +57,17 @@ import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
-import java.util.concurrent.TimeUnit
 
 /**
  * Controller to manage the catalogues available in the app.
  */
 open class BrowseCatalogueController(bundle: Bundle) :
-        NucleusController<BrowseCataloguePresenter>(bundle),
-        SecondaryDrawerController,
-        FlexibleAdapter.OnItemClickListener,
-        FlexibleAdapter.OnItemLongClickListener,
-        FlexibleAdapter.EndlessScrollListener,
-        ChangeMangaCategoriesDialog.Listener {
+    NucleusController<BrowseCataloguePresenter>(bundle),
+    SecondaryDrawerController,
+    FlexibleAdapter.OnItemClickListener,
+    FlexibleAdapter.OnItemLongClickListener,
+    FlexibleAdapter.EndlessScrollListener,
+    ChangeMangaCategoriesDialog.Listener {
 
     constructor(source: Source) : this(Bundle().apply {
         putLong(SOURCE_ID_KEY, source.id)
@@ -175,8 +186,6 @@ open class BrowseCatalogueController(bundle: Bundle) :
             drawer.closeDrawer(Gravity.RIGHT)
             adapter?.clear()
             presenter.restartPager("", followsPager = true)
-
-
         }
         return navView as ViewGroup
     }
@@ -191,7 +200,8 @@ open class BrowseCatalogueController(bundle: Bundle) :
         var oldPosition = RecyclerView.NO_POSITION
         val oldRecycler = catalogue_view?.getChildAt(1)
         if (oldRecycler is RecyclerView) {
-            oldPosition = (oldRecycler.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+            oldPosition =
+                (oldRecycler.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
             oldRecycler.adapter = null
 
             catalogue_view?.removeView(oldRecycler)
@@ -201,25 +211,29 @@ open class BrowseCatalogueController(bundle: Bundle) :
             RecyclerView(view.context).apply {
                 id = R.id.recycler
                 layoutManager = LinearLayoutManager(context)
-                layoutParams = RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+                layoutParams = RecyclerView.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
                 addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
             }
         } else {
             (catalogue_view.inflate(R.layout.catalogue_recycler_autofit) as AutofitRecyclerView).apply {
                 numColumnsSubscription = getColumnsPreferenceForCurrentOrientation().asObservable()
-                        .doOnNext { spanCount = it }
-                        .skip(1)
-                        // Set again the adapter to recalculate the covers height
-                        .subscribe { adapter = this@BrowseCatalogueController.adapter }
+                    .doOnNext { spanCount = it }
+                    .skip(1)
+                    // Set again the adapter to recalculate the covers height
+                    .subscribe { adapter = this@BrowseCatalogueController.adapter }
 
-                (layoutManager as GridLayoutManager).spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
-                    override fun getSpanSize(position: Int): Int {
-                        return when (adapter?.getItemViewType(position)) {
-                            R.layout.catalogue_grid_item, null -> 1
-                            else -> spanCount
+                (layoutManager as GridLayoutManager).spanSizeLookup =
+                    object : GridLayoutManager.SpanSizeLookup() {
+                        override fun getSpanSize(position: Int): Int {
+                            return when (adapter?.getItemViewType(position)) {
+                                R.layout.catalogue_grid_item, null -> 1
+                                else -> spanCount
+                            }
                         }
                     }
-                }
             }
         }
         recycler.setHasFixedSize(true)
@@ -248,26 +262,26 @@ open class BrowseCatalogueController(bundle: Bundle) :
         }
 
         val searchEventsObservable = searchView.queryTextChangeEvents()
-                .skip(1)
-                .filter { router.backstack.lastOrNull()?.controller() == this@BrowseCatalogueController }
-                .share()
+            .skip(1)
+            .filter { router.backstack.lastOrNull()?.controller() == this@BrowseCatalogueController }
+            .share()
         val writingObservable = searchEventsObservable
-                .filter { !it.isSubmitted }
-                .debounce(1250, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
+            .filter { !it.isSubmitted }
+            .debounce(1250, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
         val submitObservable = searchEventsObservable
-                .filter { it.isSubmitted }
+            .filter { it.isSubmitted }
 
         searchViewSubscription?.unsubscribe()
         searchViewSubscription = Observable.merge(writingObservable, submitObservable)
-                .map { it.queryText().toString() }
-                .subscribeUntilDestroy { searchWithQuery(it) }
+            .map { it.queryText().toString() }
+            .subscribeUntilDestroy { searchWithQuery(it) }
 
         searchItem.fixExpand(
-                onExpand = { invalidateMenuOnExpand() },
-                onCollapse = {
-                    searchWithQuery("")
-                    true
-                }
+            onExpand = { invalidateMenuOnExpand() },
+            onCollapse = {
+                searchWithQuery("")
+                true
+            }
         )
 
         // Setup filters button
@@ -288,8 +302,10 @@ open class BrowseCatalogueController(bundle: Bundle) :
                 CommunityMaterial.Icon2.cmd_view_module
             else
                 CommunityMaterial.Icon2.cmd_view_list
-            setIcon(IconicsDrawable(applicationContext!!)
-                    .icon(icon).colorInt(Color.WHITE).sizeDp(20))
+            setIcon(
+                IconicsDrawable(applicationContext!!)
+                    .icon(icon).colorInt(Color.WHITE).sizeDp(20)
+            )
         }
     }
 
@@ -315,7 +331,8 @@ open class BrowseCatalogueController(bundle: Bundle) :
         val source = presenter.source as? HttpSource ?: return
 
         val activity = activity ?: return
-        val intent = WebViewActivity.newIntent(activity, source.id, source.baseUrl, presenter.source.name)
+        val intent =
+            WebViewActivity.newIntent(activity, source.id, source.baseUrl, presenter.source.name)
         startActivity(intent)
     }
 
@@ -495,12 +512,16 @@ open class BrowseCatalogueController(bundle: Bundle) :
         // TODO: this might grow the memory unbounded since we keep appending without removing
         // TODO: but this prevents breaking of the back button logic if controller is in subview
         if (parentController is BaseController) {
-            (parentController as BaseController).router.pushController(MangaController(item.manga, true).withFadeTransaction())
+            (parentController as BaseController).router.pushController(
+                MangaController(
+                    item.manga,
+                    true
+                ).withFadeTransaction()
+            )
         } else {
             router.pushController(MangaController(item.manga, true).withFadeTransaction())
         }
         return false
-
     }
 
     /**
@@ -543,12 +564,11 @@ open class BrowseCatalogueController(bundle: Bundle) :
                     }.toTypedArray()
 
                     ChangeMangaCategoriesDialog(this, listOf(manga), categories, preselected)
-                            .showDialog(router)
+                        .showDialog(router)
                 }
             }
             activity?.toast(activity?.getString(R.string.manga_added_library))
         }
-
     }
 
     /**
@@ -565,5 +585,4 @@ open class BrowseCatalogueController(bundle: Bundle) :
     protected companion object {
         const val SOURCE_ID_KEY = "sourceId"
     }
-
 }

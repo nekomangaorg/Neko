@@ -28,11 +28,19 @@ class RecentChapterItem(val chapter: Chapter, val manga: Manga, header: DateItem
         return R.layout.recent_chapters_item
     }
 
-    override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): RecentChapterHolder? {
-        return RecentChapterHolder(view , adapter as RecentChaptersAdapter)
+    override fun createViewHolder(
+        view: View,
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>
+    ): RecentChapterHolder? {
+        return RecentChapterHolder(view, adapter as RecentChaptersAdapter)
     }
 
-    override fun bindViewHolder(adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>, holder: RecentChapterHolder, position: Int, payloads: MutableList<Any>?) {
+    override fun bindViewHolder(
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
+        holder: RecentChapterHolder,
+        position: Int,
+        payloads: MutableList<Any>?
+    ) {
 
         holder.bind(this)
     }
@@ -48,5 +56,4 @@ class RecentChapterItem(val chapter: Chapter, val manga: Manga, header: DateItem
     override fun hashCode(): Int {
         return chapter.id!!.hashCode()
     }
-
 }

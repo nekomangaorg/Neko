@@ -140,11 +140,10 @@ object PreferenceKeys {
     fun sourceUsername(sourceId: Long) = "pref_source_username_$sourceId"
 
     fun sourcePassword(sourceId: Long) = "pref_source_password_$sourceId"
-    
+
     fun trackUsername(syncId: Int) = "pref_mangasync_username_$syncId"
 
     fun trackPassword(syncId: Int) = "pref_mangasync_password_$syncId"
 
     fun trackToken(syncId: Int) = "track_token_$syncId"
-
 }

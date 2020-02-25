@@ -7,10 +7,13 @@ import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.list.listItemsSingleChoice
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 
-class IntListMatPreference @JvmOverloads constructor(activity: Activity?, context: Context,
-                                                     attrs:
-                                                     AttributeSet? =
-                                                             null) :
+class IntListMatPreference @JvmOverloads constructor(
+    activity: Activity?,
+    context: Context,
+    attrs:
+    AttributeSet? =
+            null
+) :
         MatPreference(activity, context, attrs) {
     var entryValues: List<Int> = emptyList()
     var entryRange: IntRange

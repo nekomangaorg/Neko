@@ -85,7 +85,6 @@ class ReaderSettingsSheet(private val activity: ReaderActivity) : BottomSheetDia
         crop_borders_webtoon.bindToPreference(preferences.cropBordersWebtoon())
         margin_between_webtoon.bindToPreference(preferences.marginBetweenPagesWebtoon())
         margin_ratio_webtoon.bindToIntPreference(preferences.marginRatioWebtoon(), R.array.webtoon_margin_ratio_values)
-
     }
 
     /**
@@ -118,5 +117,4 @@ class ReaderSettingsSheet(private val activity: ReaderActivity) : BottomSheetDia
         }
         setSelection(intValues.indexOf(pref.getOrDefault()), false)
     }
-
 }

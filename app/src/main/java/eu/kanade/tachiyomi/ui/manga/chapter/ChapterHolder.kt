@@ -12,12 +12,12 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.getResourceColor
 import eu.kanade.tachiyomi.util.gone
+import java.util.Date
 import kotlinx.android.synthetic.main.chapters_item.*
-import java.util.*
 
 class ChapterHolder(
-        private val view: View,
-        private val adapter: ChaptersAdapter
+    private val view: View,
+    private val adapter: ChaptersAdapter
 ) : BaseFlexibleViewHolder(view, adapter) {
 
     init {
@@ -40,8 +40,10 @@ class ChapterHolder(
 
         // Set the correct drawable for dropdown and update the tint to match theme.
         // Set the correct drawable for dropdown and update the tint to match theme.
-        chapter_menu.setImageDrawable(IconicsDrawable(view.context).icon(CommunityMaterial.Icon.cmd_dots_vertical)
-                .sizeDp(18).colorInt(view.context.getResourceColor(R.attr.icon_color)))
+        chapter_menu.setImageDrawable(
+            IconicsDrawable(view.context).icon(CommunityMaterial.Icon.cmd_dots_vertical)
+                .sizeDp(18).colorInt(view.context.getResourceColor(R.attr.icon_color))
+        )
         // Set correct text color
         chapter_title.setTextColor(if (chapter.read) adapter.readColor else adapter.unreadColor)
         if (chapter.bookmark) chapter_title.setTextColor(adapter.bookmarkedColor)
@@ -53,9 +55,9 @@ class ChapterHolder(
             chapter_date.text = ""
         }
 
-        //add scanlator if exists
+        // add scanlator if exists
         chapter_scanlator.text = chapter.scanlator
-        //allow longer titles if there is no scanlator (most sources)
+        // allow longer titles if there is no scanlator (most sources)
         if (chapter_scanlator.text.isNullOrBlank()) {
             chapter_title.maxLines = 2
             chapter_scanlator.gone()
@@ -122,5 +124,4 @@ class ChapterHolder(
         // Finally show the PopupMenu
         popup.show()
     }
-
 }

@@ -1,13 +1,19 @@
 package eu.kanade.tachiyomi.data.track.kitsu
 
 import androidx.annotation.CallSuper
-import com.github.salomonbrys.kotson.*
+import com.github.salomonbrys.kotson.byInt
+import com.github.salomonbrys.kotson.byString
+import com.github.salomonbrys.kotson.nullInt
+import com.github.salomonbrys.kotson.nullObj
+import com.github.salomonbrys.kotson.nullString
+import com.github.salomonbrys.kotson.obj
 import com.google.gson.JsonObject
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 
 class KitsuSearchManga(obj: JsonObject) {
     val id by obj.byInt
@@ -21,7 +27,6 @@ class KitsuSearchManga(obj: JsonObject) {
         outputDf.format(Date(it!!.toLong() * 1000))
     }
     private val endDate = obj.get("endDate").nullString
-
 
     @CallSuper
     open fun toTrack() = TrackSearch.create(TrackManager.KITSU).apply {
@@ -40,7 +45,6 @@ class KitsuSearchManga(obj: JsonObject) {
         start_date = startDate ?: ""
     }
 }
-
 
 class KitsuLibManga(obj: JsonObject, manga: JsonObject) {
     val id by manga.byInt
@@ -78,7 +82,6 @@ class KitsuLibManga(obj: JsonObject, manga: JsonObject) {
         "planned" -> Kitsu.PLAN_TO_READ
         else -> throw Exception("Unknown status")
     }
-
 }
 
 fun Track.toKitsuStatus() = when (status) {

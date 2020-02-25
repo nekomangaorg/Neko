@@ -20,8 +20,8 @@ class CoverCache(private val context: Context) {
     /**
      * Cache directory used for cache management.
      */
-    private val cacheDir = context.getExternalFilesDir("covers") ?:
-            File(context.filesDir, "covers").also { it.mkdirs() }
+    private val cacheDir = context.getExternalFilesDir("covers")
+            ?: File(context.filesDir, "covers").also { it.mkdirs() }
 
     /**
      * Returns the cover from cache.
@@ -32,13 +32,12 @@ class CoverCache(private val context: Context) {
     fun getCoverFile(thumbnailUrl: String): File {
         return File(cacheDir, DiskUtil.hashKeyForDisk(thumbnailUrl))
     }
-    
 
     /**
      * Copy the given stream to this cache.
      *
      * @param thumbnailUrl url of the thumbnail.
-     * @param inputStream  the stream to copy.
+     * @param inputStream the stream to copy.
      * @throws IOException if there's any error.
      */
     @Throws(IOException::class)
@@ -64,5 +63,4 @@ class CoverCache(private val context: Context) {
         val file = getCoverFile(thumbnailUrl!!)
         return file.exists() && file.delete()
     }
-
 }

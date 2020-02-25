@@ -48,7 +48,6 @@ class SetTrackChaptersDialog<T> : DialogController
                     (targetController as? Listener)?.setChaptersRead(item, np.value)
                 }
 
-
         val view = dialog.getCustomView()
         val np: NumberPicker = view.findViewById(R.id.chapters_picker)
         // Set initial value
@@ -66,5 +65,4 @@ class SetTrackChaptersDialog<T> : DialogController
     private companion object {
         const val KEY_ITEM_TRACK = "SetTrackChaptersDialog.item.track"
     }
-
 }

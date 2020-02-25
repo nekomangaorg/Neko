@@ -7,5 +7,4 @@ abstract class BaseRxActivity<P : BasePresenter<*>> : NucleusAppCompatActivity<P
 
     init {
     }
-
 }

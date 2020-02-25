@@ -18,11 +18,19 @@ open class TextItem(val filter: Filter.Text) : AbstractFlexibleItem<TextItem.Hol
         return R.layout.navigation_view_text
     }
 
-    override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): Holder? {
+    override fun createViewHolder(
+        view: View,
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>
+    ): Holder? {
         return Holder(view, adapter)
     }
 
-    override fun bindViewHolder(adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>, holder: Holder, position: Int, payloads: MutableList<Any>?) {
+    override fun bindViewHolder(
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
+        holder: Holder,
+        position: Int,
+        payloads: MutableList<Any>?
+    ) {
         holder.wrapper.hint = filter.name
         holder.edit.setText(filter.state)
         holder.edit.addTextChangedListener(object : SimpleTextWatcher() {

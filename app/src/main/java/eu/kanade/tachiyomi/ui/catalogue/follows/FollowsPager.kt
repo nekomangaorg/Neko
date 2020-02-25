@@ -18,5 +18,4 @@ class FollowsPager(val source: Source) : Pager() {
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnNext { onPageReceived(it) }
     }
-
 }

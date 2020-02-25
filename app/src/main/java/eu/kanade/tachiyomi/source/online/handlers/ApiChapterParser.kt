@@ -31,5 +31,4 @@ class ApiChapterParser {
         val external = json.get("external").string
         return external.substringAfterLast("/")
     }
-
 }

@@ -19,7 +19,6 @@ class FilterHandler {
     class TagInclusionMode : Filter.Select<String>("Tag inclusion", arrayOf("All (and)", "Any (or)"), 0)
     class TagExclusionMode : Filter.Select<String>("Tag exclusion", arrayOf("All (and)", "Any (or)"), 1)
 
-
     class SortFilter : Filter.Sort("Sort",
             sortables.map { it.first }.toTypedArray(),
             Filter.Sort.Selection(0, true))
@@ -41,7 +40,6 @@ class FilterHandler {
             TagInclusionMode(),
             TagExclusionMode()
     )
-
 
     companion object {
         val demographics = listOf(
@@ -170,6 +168,5 @@ class FilterHandler {
         ).sortedWith(compareBy { it.name })
 
         val allTypes = (contentType + formats + genre + themes).map { it.id to it.name }.toMap()
-
     }
 }

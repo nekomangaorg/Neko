@@ -1,9 +1,9 @@
 package eu.kanade.tachiyomi.ui.manga.related
 
 import android.os.Bundle
-import androidx.drawerlayout.widget.DrawerLayout
 import android.view.Menu
 import android.view.ViewGroup
+import androidx.drawerlayout.widget.DrawerLayout
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.Source
@@ -40,7 +40,5 @@ class RelatedController(bundle: Bundle) : BrowseCatalogueController(bundle) {
     }
 
     override fun cleanupSecondaryDrawer(drawer: DrawerLayout) {
-
     }
-
 }

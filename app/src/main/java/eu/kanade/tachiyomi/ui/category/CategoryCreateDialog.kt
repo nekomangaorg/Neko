@@ -29,7 +29,7 @@ class CategoryCreateDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
                 .title(R.string.action_add_category)
                 .negativeButton(android.R.string.cancel)
                 .positiveButton(android.R.string.ok)
-                .input(hintRes = R.string.name){dialog, input ->
+                .input(hintRes = R.string.name) { dialog, input ->
                     (targetController as? Listener)?.createCategory(input.toString())
                 }
     }
@@ -37,5 +37,4 @@ class CategoryCreateDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
     interface Listener {
         fun createCategory(name: String)
     }
-
 }

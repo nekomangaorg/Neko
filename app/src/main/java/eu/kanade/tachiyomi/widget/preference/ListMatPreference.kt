@@ -9,9 +9,12 @@ import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.list.listItemsSingleChoice
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 
-open class ListMatPreference @JvmOverloads constructor(activity: Activity?, context: Context,
-                                                       attrs: AttributeSet? =
-                                                               null) :
+open class ListMatPreference @JvmOverloads constructor(
+    activity: Activity?,
+    context: Context,
+    attrs: AttributeSet? =
+            null
+) :
         MatPreference(activity, context, attrs) {
 
     var sharedPref: String? = null

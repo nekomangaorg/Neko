@@ -33,5 +33,4 @@ interface RelatedQueries : DbProvider {
                     .table(RelatedTable.TABLE)
                     .build())
             .prepare()
-
 }

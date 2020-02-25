@@ -1,16 +1,15 @@
 package eu.kanade.tachiyomi.ui.base.presenter
 
 import android.os.Bundle
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import nucleus.presenter.RxPresenter
 import nucleus.presenter.delivery.Delivery
 import rx.Observable
-import kotlin.coroutines.CoroutineContext
 
 open class BasePresenter<V> : RxPresenter<V>(), CoroutineScope {
-
 
     lateinit var job: Job
 
@@ -33,7 +32,10 @@ open class BasePresenter<V> : RxPresenter<V>(), CoroutineScope {
      * @param onNext function to execute when the observable emits an item.
      * @param onError function to execute when the observable throws an error.
      */
-    fun <T> Observable<T>.subscribeFirst(onNext: (V, T) -> Unit, onError: ((V, Throwable) -> Unit)? = null) = compose(deliverFirst<T>()).subscribe(split(onNext, onError)).apply { add(this) }
+    fun <T> Observable<T>.subscribeFirst(
+        onNext: (V, T) -> Unit,
+        onError: ((V, Throwable) -> Unit)? = null
+    ) = compose(deliverFirst<T>()).subscribe(split(onNext, onError)).apply { add(this) }
 
     /**
      * Subscribes an observable with [deliverLatestCache] and adds it to the presenter's lifecycle
@@ -42,7 +44,10 @@ open class BasePresenter<V> : RxPresenter<V>(), CoroutineScope {
      * @param onNext function to execute when the observable emits an item.
      * @param onError function to execute when the observable throws an error.
      */
-    fun <T> Observable<T>.subscribeLatestCache(onNext: (V, T) -> Unit, onError: ((V, Throwable) -> Unit)? = null) = compose(deliverLatestCache<T>()).subscribe(split(onNext, onError)).apply { add(this) }
+    fun <T> Observable<T>.subscribeLatestCache(
+        onNext: (V, T) -> Unit,
+        onError: ((V, Throwable) -> Unit)? = null
+    ) = compose(deliverLatestCache<T>()).subscribe(split(onNext, onError)).apply { add(this) }
 
     /**
      * Subscribes an observable with [deliverReplay] and adds it to the presenter's lifecycle
@@ -51,7 +56,10 @@ open class BasePresenter<V> : RxPresenter<V>(), CoroutineScope {
      * @param onNext function to execute when the observable emits an item.
      * @param onError function to execute when the observable throws an error.
      */
-    fun <T> Observable<T>.subscribeReplay(onNext: (V, T) -> Unit, onError: ((V, Throwable) -> Unit)? = null) = compose(deliverReplay<T>()).subscribe(split(onNext, onError)).apply { add(this) }
+    fun <T> Observable<T>.subscribeReplay(
+        onNext: (V, T) -> Unit,
+        onError: ((V, Throwable) -> Unit)? = null
+    ) = compose(deliverReplay<T>()).subscribe(split(onNext, onError)).apply { add(this) }
 
     /**
      * Subscribes an observable with [DeliverWithView] and adds it to the presenter's lifecycle
@@ -60,7 +68,10 @@ open class BasePresenter<V> : RxPresenter<V>(), CoroutineScope {
      * @param onNext function to execute when the observable emits an item.
      * @param onError function to execute when the observable throws an error.
      */
-    fun <T> Observable<T>.subscribeWithView(onNext: (V, T) -> Unit, onError: ((V, Throwable) -> Unit)? = null) = compose(DeliverWithView<V, T>(view())).subscribe(split(onNext, onError)).apply { add(this) }
+    fun <T> Observable<T>.subscribeWithView(
+        onNext: (V, T) -> Unit,
+        onError: ((V, Throwable) -> Unit)? = null
+    ) = compose(DeliverWithView<V, T>(view())).subscribe(split(onNext, onError)).apply { add(this) }
 
     /**
      * A deliverable that only emits to the view if attached, otherwise the event is ignored.

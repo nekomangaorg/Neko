@@ -11,13 +11,13 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.handlers.MangaPlusHandler
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import java.security.MessageDigest
 import okhttp3.Headers
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import rx.Observable
 import uy.kohesive.injekt.injectLazy
-import java.security.MessageDigest
 
 /**
  * A simple implementation for sources from a website.
@@ -28,7 +28,6 @@ abstract class HttpSource : Source {
      * Network service.
      */
     protected val network: NetworkHelper by injectLazy()
-
 
 //    /**
 //     * Preferences that a source may need.
@@ -79,18 +78,15 @@ abstract class HttpSource : Source {
         add("X-Requested-With", "XMLHttpRequest")
     }
 
-
     /**
      * Visible name of the source.
      */
     override fun toString() = "$name (${lang.toUpperCase()})"
 
-
-    //used to get the manga url instead of the api manga url
+    // used to get the manga url instead of the api manga url
     open fun mangaDetailsRequest(manga: SManga): Request {
         return GET(baseUrl + manga.url, headers)
     }
-
 
     /**
      * Returns an observable with the page containing the source url of the image. If there's any
@@ -109,7 +105,6 @@ abstract class HttpSource : Source {
                 .map { "" }
     }
 
-
     /**
      * Returns an observable with the response of the source image.
      *
@@ -123,7 +118,6 @@ abstract class HttpSource : Source {
         return client.newCallWithProgress(GET(page.imageUrl!!, headers), page)
                 .asObservableSuccess()
     }
-
 
     /**
      * Called before inserting a new chapter into database. Use it if you need to override chapter

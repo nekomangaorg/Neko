@@ -1,7 +1,12 @@
 package eu.kanade.tachiyomi.ui.download
 
 import android.graphics.Color
-import android.view.*
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
@@ -13,19 +18,20 @@ import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
+import java.util.HashMap
+import java.util.concurrent.TimeUnit
 import kotlinx.android.synthetic.main.download_controller.*
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
-import java.util.*
-import java.util.concurrent.TimeUnit
 
 /**
  * Controller that shows the currently active downloads.
  * Uses R.layout.fragment_download_queue.
  */
 class DownloadController : NucleusController<DownloadPresenter>(),
-        DownloadAdapter.OnItemReleaseListener, DownloadAdapter.OnItemDeleteListener, FlexibleAdapter.OnItemClickListener {
+    DownloadAdapter.OnItemReleaseListener, DownloadAdapter.OnItemDeleteListener,
+    FlexibleAdapter.OnItemClickListener {
 
     /**
      * Adapter containing the active downloads.
@@ -75,16 +81,16 @@ class DownloadController : NucleusController<DownloadPresenter>(),
 
         // Suscribe to changes
         DownloadService.runningRelay
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeUntilDestroy { onQueueStatusChange(it) }
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeUntilDestroy { onQueueStatusChange(it) }
 
         presenter.getDownloadStatusObservable()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeUntilDestroy { onStatusChange(it) }
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeUntilDestroy { onStatusChange(it) }
 
         presenter.getDownloadProgressObservable()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeUntilDestroy { onUpdateDownloadedPages(it) }
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeUntilDestroy { onUpdateDownloadedPages(it) }
     }
 
     override fun onDestroyView(view: View) {
@@ -104,19 +110,19 @@ class DownloadController : NucleusController<DownloadPresenter>(),
         // Set start button visibility.
         menu.findItem(R.id.start_queue).isVisible = !isRunning && !presenter.downloadQueue.isEmpty()
         menu.findItem(R.id.start_queue).icon = IconicsDrawable(applicationContext!!)
-                .icon(CommunityMaterial.Icon2.cmd_play)
-                .colorInt(Color.WHITE).sizeDp(18)
+            .icon(CommunityMaterial.Icon2.cmd_play)
+            .colorInt(Color.WHITE).sizeDp(18)
 
         // Set pause button visibility.
         menu.findItem(R.id.pause_queue).isVisible = isRunning
         menu.findItem(R.id.pause_queue).icon = IconicsDrawable(applicationContext!!)
-                .icon(CommunityMaterial.Icon2.cmd_pause)
-                .colorInt(Color.WHITE).sizeDp(18)
+            .icon(CommunityMaterial.Icon2.cmd_pause)
+            .colorInt(Color.WHITE).sizeDp(18)
         // Set clear button visibility.
         menu.findItem(R.id.clear_queue).isVisible = !presenter.downloadQueue.isEmpty()
         menu.findItem(R.id.clear_queue).icon = IconicsDrawable(applicationContext!!)
-                .icon(CommunityMaterial.Icon2.cmd_notification_clear_all)
-                .colorInt(Color.WHITE).sizeDp(20)
+            .icon(CommunityMaterial.Icon2.cmd_notification_clear_all)
+            .colorInt(Color.WHITE).sizeDp(20)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -164,22 +170,22 @@ class DownloadController : NucleusController<DownloadPresenter>(),
      */
     private fun observeProgress(download: Download) {
         val subscription = Observable.interval(50, TimeUnit.MILLISECONDS)
-                // Get the sum of percentages for all the pages.
-                .flatMap {
-                    Observable.from(download.pages)
-                            .map(Page::progress)
-                            .reduce { x, y -> x + y }
+            // Get the sum of percentages for all the pages.
+            .flatMap {
+                Observable.from(download.pages)
+                    .map(Page::progress)
+                    .reduce { x, y -> x + y }
+            }
+            // Keep only the latest emission to avoid backpressure.
+            .onBackpressureLatest()
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe { progress ->
+                // Update the view only if the progress has changed.
+                if (download.totalProgress != progress) {
+                    download.totalProgress = progress
+                    onUpdateProgress(download)
                 }
-                // Keep only the latest emission to avoid backpressure.
-                .onBackpressureLatest()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe { progress ->
-                    // Update the view only if the progress has changed.
-                    if (download.totalProgress != progress) {
-                        download.totalProgress = progress
-                        onUpdateProgress(download)
-                    }
-                }
+            }
 
         // Avoid leaking subscriptions
         progressSubscriptions.remove(download)?.unsubscribe()
@@ -272,17 +278,18 @@ class DownloadController : NucleusController<DownloadPresenter>(),
 
     override fun onItemDeleted(position: Int) {
         val adapter = adapter ?: return
-        val downloads = (0 until adapter.itemCount).filter { it -> it != position }.mapNotNull { adapter.getItem(it)?.download }
+        val downloads = (0 until adapter.itemCount).filter { it -> it != position }
+            .mapNotNull { adapter.getItem(it)?.download }
         presenter.reorder(downloads)
     }
 
     override fun onItemClick(view: View?, position: Int): Boolean {
         if (view?.id == R.id.remove_download && adapter != null) {
             val adapter = adapter!!
-            val downloads = (0 until adapter.itemCount).filter { it -> it != position }.mapNotNull { adapter.getItem(it)?.download }
+            val downloads = (0 until adapter.itemCount).filter { it -> it != position }
+                .mapNotNull { adapter.getItem(it)?.download }
             presenter.reorder(downloads)
         }
         return true
     }
-
 }

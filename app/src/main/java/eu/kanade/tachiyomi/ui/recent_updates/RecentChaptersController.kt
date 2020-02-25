@@ -1,6 +1,10 @@
 package eu.kanade.tachiyomi.ui.recent_updates
 
-import android.view.*
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -30,13 +34,13 @@ import timber.log.Timber
  * UI related actions should be called from here.
  */
 class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
-        NoToolbarElevationController,
-        ActionMode.Callback,
-        FlexibleAdapter.OnItemClickListener,
-        FlexibleAdapter.OnItemLongClickListener,
-        FlexibleAdapter.OnUpdateListener,
-        ConfirmDeleteChaptersDialog.Listener,
-        RecentChaptersAdapter.OnCoverClickListener {
+    NoToolbarElevationController,
+    ActionMode.Callback,
+    FlexibleAdapter.OnItemClickListener,
+    FlexibleAdapter.OnItemLongClickListener,
+    FlexibleAdapter.OnUpdateListener,
+    ConfirmDeleteChaptersDialog.Listener,
+    RecentChaptersAdapter.OnCoverClickListener {
 
     /**
      * Action mode for multiple selection.
@@ -71,7 +75,12 @@ class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
         // Init RecyclerView and adapter
         val layoutManager = LinearLayoutManager(view.context)
         recycler.layoutManager = layoutManager
-        recycler.addItemDecoration(DividerItemDecoration(view.context, DividerItemDecoration.VERTICAL))
+        recycler.addItemDecoration(
+            DividerItemDecoration(
+                view.context,
+                DividerItemDecoration.VERTICAL
+            )
+        )
         recycler.setHasFixedSize(true)
         adapter = RecentChaptersAdapter(this@RecentChaptersController)
         recycler.adapter = adapter
@@ -249,7 +258,6 @@ class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
     override fun onCoverClick(position: Int) {
         val chapterClicked = adapter?.getItem(position) as? RecentChapterItem ?: return
         openManga(chapterClicked)
-
     }
 
     fun openManga(chapter: RecentChapterItem) {
@@ -277,7 +285,12 @@ class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
      * @param menu menu object of ActionMode
      */
     override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
-        IconicsMenuInflaterUtil.inflate(mode.menuInflater, applicationContext!!, R.menu.chapter_recent_selection, menu)
+        IconicsMenuInflaterUtil.inflate(
+            mode.menuInflater,
+            applicationContext!!,
+            R.menu.chapter_recent_selection,
+            menu
+        )
         adapter?.mode = SelectableAdapter.Mode.MULTI
         return true
     }
@@ -304,7 +317,7 @@ class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
             R.id.action_mark_as_unread -> markAsUnread(getSelectedChapters())
             R.id.action_download -> downloadChapters(getSelectedChapters())
             R.id.action_delete -> ConfirmDeleteChaptersDialog(this, getSelectedChapters())
-                    .showDialog(router)
+                .showDialog(router)
             else -> return false
         }
         return true
@@ -319,5 +332,4 @@ class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
         adapter?.clearSelection()
         actionMode = null
     }
-
 }

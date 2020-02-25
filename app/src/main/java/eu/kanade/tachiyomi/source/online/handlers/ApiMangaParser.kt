@@ -6,11 +6,11 @@ import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.handlers.serializers.ApiMangaSerializer
 import eu.kanade.tachiyomi.source.online.handlers.serializers.ChapterSerializer
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import java.util.Date
 import kotlinx.serialization.json.Json
 import okhttp3.Response
 import org.jsoup.Jsoup
 import timber.log.Timber
-import java.util.*
 
 class ApiMangaParser(val lang: String) {
     fun mangaDetailsParse(response: Response): SManga {
@@ -41,15 +41,16 @@ class ApiMangaParser(val lang: String) {
             }
 
             val tempStatus = parseStatus(networkManga.status)
-            val publishedOrCancelled = tempStatus == SManga.PUBLICATION_COMPLETE || tempStatus == SManga.CANCELLED
+            val publishedOrCancelled =
+                tempStatus == SManga.PUBLICATION_COMPLETE || tempStatus == SManga.CANCELLED
             if (publishedOrCancelled && isMangaCompleted(networkApiManga)) {
                 manga.status = SManga.COMPLETED
             } else {
                 manga.status = tempStatus
             }
 
-
-            val genres = networkManga.genres.mapNotNull { FilterHandler.allTypes[it.toString()] }.toMutableList()
+            val genres = networkManga.genres.mapNotNull { FilterHandler.allTypes[it.toString()] }
+                .toMutableList()
 
             if (networkManga.hentai == 1) {
                 genres.add("Hentai")
@@ -74,20 +75,21 @@ class ApiMangaParser(val lang: String) {
         }
         val finalChapterNumber = serializer.manga.last_chapter
 
-
         val foundMatch = serializer.chapter.entries
-                .filter { it.value.lang_code == lang }
-                .filter {
-                    isOneShot(it.value, finalChapterNumber)
-                            || it.value.chapter == finalChapterNumber
-
-                }.firstOrNull()
+            .filter { it.value.lang_code == lang }
+            .filter {
+                isOneShot(it.value, finalChapterNumber) ||
+                    it.value.chapter == finalChapterNumber
+            }.firstOrNull()
 
         return foundMatch != null
     }
 
     private fun isOneShot(chapter: ChapterSerializer, finalChapterNumber: String): Boolean {
-        return chapter.title.equals("oneshot", true) || (chapter.chapter.isNullOrEmpty() && finalChapterNumber == "0")
+        return chapter.title.equals(
+            "oneshot",
+            true
+        ) || (chapter.chapter.isNullOrEmpty() && finalChapterNumber == "0")
     }
 
     private fun parseStatus(status: Int) = when (status) {
@@ -96,17 +98,15 @@ class ApiMangaParser(val lang: String) {
         3 -> SManga.CANCELLED
         4 -> SManga.HIATUS
         else -> SManga.UNKNOWN
-
     }
-
 
     /**
      * Parse for the random manga id from the [MdUtil.randMangaPage] response.
      */
     fun randomMangaIdParse(response: Response): String {
         val randMangaUrl = Jsoup.parse(response.consumeBody())
-                .select("link[rel=canonical]")
-                .attr("href")
+            .select("link[rel=canonical]")
+            .attr("href")
         return MdUtil.getMangaId(randMangaUrl)
     }
 
@@ -139,7 +139,12 @@ class ApiMangaParser(val lang: String) {
         return chapters
     }
 
-    private fun mapChapter(chapterId: String, networkChapter: ChapterSerializer, finalChapterNumber: String, status: Int): SChapter {
+    private fun mapChapter(
+        chapterId: String,
+        networkChapter: ChapterSerializer,
+        finalChapterNumber: String,
+        status: Int
+    ): SChapter {
         val chapter = SChapter.create()
         chapter.url = MdUtil.apiChapter + chapterId
         val chapterName = mutableListOf<String>()
@@ -160,11 +165,15 @@ class ApiMangaParser(val lang: String) {
             chapterName.add(networkChapter.title)
         }
 
-        //if volume, chapter and title is empty its a oneshot
+        // if volume, chapter and title is empty its a oneshot
         if (chapterName.isEmpty()) {
             chapterName.add("Oneshot")
         }
-        if ((status == 2 || status == 3) && (isOneShot(networkChapter, finalChapterNumber) || networkChapter.chapter == finalChapterNumber)) {
+        if ((status == 2 || status == 3) && (isOneShot(
+                networkChapter,
+                finalChapterNumber
+            ) || networkChapter.chapter == finalChapterNumber)
+        ) {
             chapterName.add("[END]")
         }
 
@@ -187,5 +196,4 @@ class ApiMangaParser(val lang: String) {
 
         return chapter
     }
-
 }

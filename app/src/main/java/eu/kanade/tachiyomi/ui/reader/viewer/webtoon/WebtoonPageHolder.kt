@@ -33,12 +33,12 @@ import eu.kanade.tachiyomi.util.ImageUtil
 import eu.kanade.tachiyomi.util.dpToPx
 import eu.kanade.tachiyomi.util.gone
 import eu.kanade.tachiyomi.util.visible
+import java.io.InputStream
+import java.util.concurrent.TimeUnit
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
-import java.io.InputStream
-import java.util.concurrent.TimeUnit
 
 /**
  * Holder of the webtoon reader for a single page of a chapter.
@@ -48,8 +48,8 @@ import java.util.concurrent.TimeUnit
  * @constructor creates a new webtoon holder.
  */
 class WebtoonPageHolder(
-        private val frame: FrameLayout,
-        viewer: WebtoonViewer
+    private val frame: FrameLayout,
+    viewer: WebtoonViewer
 ) : WebtoonBaseHolder(frame, viewer) {
 
     /**
@@ -125,7 +125,7 @@ class WebtoonPageHolder(
 
     private fun refreshLayoutParams() {
         frame.layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply {
-            val floatPercent = (viewer.config.marginRatio.toFloat() / 100) //convert int to float percentage
+            val floatPercent = (viewer.config.marginRatio.toFloat() / 100) // convert int to float percentage
             val margin = Resources.getSystem().displayMetrics.widthPixels * floatPercent
             marginEnd = margin.toInt()
             marginStart = margin.toInt()
@@ -495,21 +495,21 @@ class WebtoonPageHolder(
                 .transition(DrawableTransitionOptions.with(NoTransition.getFactory()))
                 .listener(object : RequestListener<Drawable> {
                     override fun onLoadFailed(
-                            e: GlideException?,
-                            model: Any?,
-                            target: Target<Drawable>?,
-                            isFirstResource: Boolean
+                        e: GlideException?,
+                        model: Any?,
+                        target: Target<Drawable>?,
+                        isFirstResource: Boolean
                     ): Boolean {
                         onImageDecodeError()
                         return false
                     }
 
                     override fun onResourceReady(
-                            resource: Drawable?,
-                            model: Any?,
-                            target: Target<Drawable>?,
-                            dataSource: DataSource?,
-                            isFirstResource: Boolean
+                        resource: Drawable?,
+                        model: Any?,
+                        target: Target<Drawable>?,
+                        dataSource: DataSource?,
+                        isFirstResource: Boolean
                     ): Boolean {
                         onImageDecoded()
                         return false
@@ -517,5 +517,4 @@ class WebtoonPageHolder(
                 })
                 .into(this)
     }
-
 }

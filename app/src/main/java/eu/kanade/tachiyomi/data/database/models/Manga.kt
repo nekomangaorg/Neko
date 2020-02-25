@@ -89,7 +89,5 @@ interface Manga : SManga {
             this.title = title
             this.source = source
         }
-        
     }
-
 }

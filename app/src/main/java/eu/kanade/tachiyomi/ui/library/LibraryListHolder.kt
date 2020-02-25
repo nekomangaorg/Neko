@@ -21,8 +21,8 @@ import kotlinx.android.synthetic.main.catalogue_list_item.*
  */
 
 class LibraryListHolder(
-        private val view: View,
-        private val adapter: FlexibleAdapter<*>
+    private val view: View,
+    private val adapter: FlexibleAdapter<*>
 ) : LibraryHolder(view, adapter) {
 
     /**
@@ -71,5 +71,4 @@ class LibraryListHolder(
                 .dontAnimate()
                 .into(thumbnail)
     }
-
 }

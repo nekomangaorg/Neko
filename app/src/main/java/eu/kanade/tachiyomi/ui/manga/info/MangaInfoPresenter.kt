@@ -14,16 +14,21 @@ import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
 import eu.kanade.tachiyomi.util.DiskUtil
-import kotlinx.coroutines.*
+import java.io.File
+import java.io.FileOutputStream
+import java.io.OutputStream
+import java.util.Date
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import java.io.File
-import java.io.FileOutputStream
-import java.io.OutputStream
-import java.util.*
 
 /**
  * Presenter of MangaInfoFragment.
@@ -31,14 +36,14 @@ import java.util.*
  * Observable updates should be called from here.
  */
 class MangaInfoPresenter(
-        val manga: Manga,
-        val source: Source,
-        private val chapterCountRelay: BehaviorRelay<Float>,
-        private val lastUpdateRelay: BehaviorRelay<Date>,
-        private val mangaFavoriteRelay: PublishRelay<Boolean>,
-        private val db: DatabaseHelper = Injekt.get(),
-        private val downloadManager: DownloadManager = Injekt.get(),
-        private val coverCache: CoverCache = Injekt.get()
+    val manga: Manga,
+    val source: Source,
+    private val chapterCountRelay: BehaviorRelay<Float>,
+    private val lastUpdateRelay: BehaviorRelay<Date>,
+    private val mangaFavoriteRelay: PublishRelay<Boolean>,
+    private val db: DatabaseHelper = Injekt.get(),
+    private val downloadManager: DownloadManager = Injekt.get(),
+    private val coverCache: CoverCache = Injekt.get()
 ) : BasePresenter<MangaInfoController>() {
 
     override fun onCreate(savedState: Bundle?) {
@@ -48,16 +53,16 @@ class MangaInfoPresenter(
 
         // Update chapter count
         chapterCountRelay.observeOn(AndroidSchedulers.mainThread())
-                .subscribeLatestCache(MangaInfoController::setChapterCount)
+            .subscribeLatestCache(MangaInfoController::setChapterCount)
 
         // Update favorite status
         mangaFavoriteRelay.observeOn(AndroidSchedulers.mainThread())
-                .subscribe { setFavorite(it) }
-                .apply { add(this) }
+            .subscribe { setFavorite(it) }
+            .apply { add(this) }
 
-        //update last update date
+        // update last update date
         lastUpdateRelay.observeOn(AndroidSchedulers.mainThread())
-                .subscribeLatestCache(MangaInfoController::setLastUpdateDate)
+            .subscribeLatestCache(MangaInfoController::setLastUpdateDate)
     }
 
     override fun onTakeView(view: MangaInfoController?) {
@@ -83,8 +88,7 @@ class MangaInfoPresenter(
 
         job = launch(CoroutineExceptionHandler { _, _ ->
             GlobalScope.launch(Dispatchers.Main) { MangaInfoController::onFetchMangaError }
-        })
-        {
+        }) {
             coverCache.deleteFromCache(manga.thumbnail_url)
             val networkManga = source.fetchMangaDetails(manga)
             manga.copyFrom(networkManga)
@@ -97,7 +101,6 @@ class MangaInfoPresenter(
             }
         }
     }
-
 
     /**
      * Update favorite status of manga, (removes / adds) manga (to / from) library.
@@ -130,13 +133,13 @@ class MangaInfoPresenter(
         val destDir = File(context.cacheDir, "shared_image")
 
         Observable.fromCallable { destDir.deleteRecursively() } // Keep only the last shared file
-                .map { saveImage(cover, destDir, manga) }
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeFirst(
-                        { view, file -> view.shareManga(file) },
-                        { view, error -> view.shareManga() }
-                )
+            .map { saveImage(cover, destDir, manga) }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeFirst(
+                { view, file -> view.shareManga(file) },
+                { view, error -> view.shareManga() }
+            )
     }
 
     private fun saveImage(cover: Bitmap, directory: File, manga: Manga): File? {
@@ -207,5 +210,4 @@ class MangaInfoPresenter(
     fun moveMangaToCategory(manga: Manga, category: Category?) {
         moveMangaToCategories(manga, listOfNotNull(category))
     }
-
 }

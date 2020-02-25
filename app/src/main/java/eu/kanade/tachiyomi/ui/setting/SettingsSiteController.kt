@@ -34,12 +34,10 @@ class SettingsSiteController : SettingsController(), MangadexLoginDialog.Listene
                     dialog.targetController = this@SettingsSiteController
                     dialog.showDialog(router)
                 }
-
             }
         }
 
         preferenceScreen.addPreference(sourcePreference)
-
 
         listPreference(activity) {
             key = PreferenceKeys.showR18
@@ -47,7 +45,6 @@ class SettingsSiteController : SettingsController(), MangadexLoginDialog.Listene
             entriesRes = arrayOf(R.string.pref_show_r18_no, R.string.pref_show_r18_all, R.string.pref_show_r18_show)
             entryValues = listOf("0", "1", "2")
             summary = "%s"
-
         }
 
         listPreference(activity) {
@@ -56,9 +53,7 @@ class SettingsSiteController : SettingsController(), MangadexLoginDialog.Listene
             entries = Mangadex.SERVER_PREF_ENTRIES
             entryValues = Mangadex.SERVER_PREF_ENTRY_VALUES
             summary = "%s"
-
         }
-
 
         switchPreference {
             key = PreferenceKeys.lowQualityCovers
@@ -92,6 +87,4 @@ class SettingsSiteController : SettingsController(), MangadexLoginDialog.Listene
     private fun getSourceKey(sourceId: Long): String {
         return "source_$sourceId"
     }
-
-
 }

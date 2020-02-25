@@ -153,5 +153,4 @@ class RecentlyReadController : NucleusController<RecentlyReadPresenter>(),
             presenter.removeFromHistory(history)
         }
     }
-
 }

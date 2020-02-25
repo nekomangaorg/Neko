@@ -47,9 +47,7 @@ class SetTrackScoreDialog<T> : DialogController
                     np.clearFocus()
 
                     (targetController as? Listener)?.setScore(item, np.value)
-
                 }
-
 
         val view = dialog.getCustomView()
         val np: NumberPicker = view.findViewById(R.id.score_picker)
@@ -74,5 +72,4 @@ class SetTrackScoreDialog<T> : DialogController
     private companion object {
         const val KEY_ITEM_TRACK = "SetTrackScoreDialog.item.track"
     }
-
 }

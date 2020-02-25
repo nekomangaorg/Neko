@@ -1,6 +1,10 @@
 package eu.kanade.tachiyomi.ui.category
 
-import android.view.*
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -25,13 +29,13 @@ import kotlinx.android.synthetic.main.categories_controller.*
  * Controller to manage the categories for the users' library.
  */
 class CategoryController : NucleusController<CategoryPresenter>(),
-        ActionMode.Callback,
-        FlexibleAdapter.OnItemClickListener,
-        FlexibleAdapter.OnItemLongClickListener,
-        CategoryAdapter.OnItemReleaseListener,
-        CategoryCreateDialog.Listener,
-        CategoryRenameDialog.Listener,
-        UndoHelper.OnActionListener {
+    ActionMode.Callback,
+    FlexibleAdapter.OnItemClickListener,
+    FlexibleAdapter.OnItemLongClickListener,
+    CategoryAdapter.OnItemReleaseListener,
+    CategoryCreateDialog.Listener,
+    CategoryRenameDialog.Listener,
+    UndoHelper.OnActionListener {
 
     /**
      * Object used to show ActionMode toolbar.
@@ -85,9 +89,11 @@ class CategoryController : NucleusController<CategoryPresenter>(),
         adapter?.isHandleDragEnabled = true
         adapter?.isPermanentDelete = false
 
-        fab.setImageDrawable(IconicsDrawable(applicationContext!!, CommunityMaterial.Icon2.cmd_plus)
+        fab.setImageDrawable(
+            IconicsDrawable(applicationContext!!, CommunityMaterial.Icon2.cmd_plus)
                 .colorInt(R.color.md_white_1000)
-                .sizeDp(18))
+                .sizeDp(18)
+        )
 
         fab.clicks().subscribeUntilDestroy {
             CategoryCreateDialog(this@CategoryController).showDialog(router, null)
@@ -138,7 +144,12 @@ class CategoryController : NucleusController<CategoryPresenter>(),
      */
     override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
         // Inflate menu.
-        IconicsMenuInflaterUtil.inflate(mode.menuInflater, applicationContext!!, R.menu.category_selection, menu)
+        IconicsMenuInflaterUtil.inflate(
+            mode.menuInflater,
+            applicationContext!!,
+            R.menu.category_selection,
+            menu
+        )
         // Enable adapter multi selection.
         adapter?.mode = SelectableAdapter.Mode.MULTI
         return true
@@ -176,8 +187,10 @@ class CategoryController : NucleusController<CategoryPresenter>(),
         when (item.itemId) {
             R.id.action_delete -> {
                 undoHelper = UndoHelper(adapter, this)
-                undoHelper?.start(adapter.selectedPositions, view!!,
-                        R.string.snack_categories_deleted, R.string.action_undo, 3000)
+                undoHelper?.start(
+                    adapter.selectedPositions, view!!,
+                    R.string.snack_categories_deleted, R.string.action_undo, 3000
+                )
 
                 mode.finish()
             }
@@ -251,7 +264,7 @@ class CategoryController : NucleusController<CategoryPresenter>(),
     private fun toggleSelection(position: Int) {
         val adapter = adapter ?: return
 
-        //Mark the position selected
+        // Mark the position selected
         adapter.toggleSelection(position)
 
         if (adapter.selectedItemCount == 0) {
@@ -328,5 +341,4 @@ class CategoryController : NucleusController<CategoryPresenter>(),
     fun onCategoryExistsError() {
         activity?.toast(R.string.error_category_exists)
     }
-
 }

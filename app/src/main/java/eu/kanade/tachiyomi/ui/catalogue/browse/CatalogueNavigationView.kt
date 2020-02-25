@@ -10,9 +10,11 @@ import eu.kanade.tachiyomi.util.inflate
 import eu.kanade.tachiyomi.widget.SimpleNavigationView
 import kotlinx.android.synthetic.main.catalogue_drawer_content.view.*
 
-
-class CatalogueNavigationView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null)
-    : SimpleNavigationView(context, attrs) {
+class CatalogueNavigationView @JvmOverloads constructor(
+    context: Context,
+    attrs: AttributeSet? = null
+) :
+    SimpleNavigationView(context, attrs) {
 
     val adapter: FlexibleAdapter<IFlexible<*>> = FlexibleAdapter<IFlexible<*>>(null)
             .setDisplayHeadersAtStartUp(true)
@@ -43,5 +45,4 @@ class CatalogueNavigationView @JvmOverloads constructor(context: Context, attrs:
     fun setFilters(items: List<IFlexible<*>>) {
         adapter.updateDataSet(items)
     }
-
 }

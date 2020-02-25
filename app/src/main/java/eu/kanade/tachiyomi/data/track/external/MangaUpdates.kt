@@ -6,7 +6,6 @@ import eu.kanade.tachiyomi.data.track.TrackService
 
 class MangaUpdates(id: Int) : TrackService(id) {
 
-
     override val name = "MangaUpdates"
 
     override fun getLogo(): Int {

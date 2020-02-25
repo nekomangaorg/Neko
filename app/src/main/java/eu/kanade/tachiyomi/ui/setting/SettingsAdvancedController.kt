@@ -19,7 +19,11 @@ import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.util.launchUI
 import eu.kanade.tachiyomi.util.toast
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
@@ -63,7 +67,7 @@ class SettingsAdvancedController : SettingsController() {
                 ctrl.showDialog(router)
             }
         }
-     
+
         preference {
             titleRes = R.string.pref_refresh_library_tracking
             summaryRes = R.string.pref_refresh_library_tracking_summary
@@ -94,12 +98,16 @@ class SettingsAdvancedController : SettingsController() {
             }
             launchUI {
                 val activity = activity ?: return@launchUI
-                val cleanupString = if (foldersCleared == 0) activity.getString(R.string.no_cleanup_done)
-                else resources!!.getQuantityString(R.plurals.cleanup_done, foldersCleared, foldersCleared)
+                val cleanupString =
+                    if (foldersCleared == 0) activity.getString(R.string.no_cleanup_done)
+                    else resources!!.getQuantityString(
+                        R.plurals.cleanup_done,
+                        foldersCleared,
+                        foldersCleared
+                    )
                 activity.toast(cleanupString, Toast.LENGTH_LONG)
             }
         }
-
     }
 
     private fun clearChapterCache() {
@@ -109,39 +117,43 @@ class SettingsAdvancedController : SettingsController() {
         var deletedFiles = 0
 
         Observable.defer { Observable.from(files) }
-                .doOnNext { file ->
-                    if (chapterCache.removeFileFromCache(file.name)) {
-                        deletedFiles++
-                    }
+            .doOnNext { file ->
+                if (chapterCache.removeFileFromCache(file.name)) {
+                    deletedFiles++
                 }
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({
-                }, {
-                    activity?.toast(R.string.cache_delete_error)
-                }, {
-                    activity?.toast(resources?.getQuantityString(R.plurals.cache_deleted,
-                            deletedFiles, deletedFiles))
-                    findPreference(CLEAR_CACHE_KEY)?.summary =
-                            resources?.getString(R.string.used_cache, chapterCache.readableSize)
-                })
+            }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({
+            }, {
+                activity?.toast(R.string.cache_delete_error)
+            }, {
+                activity?.toast(
+                    resources?.getQuantityString(
+                        R.plurals.cache_deleted,
+                        deletedFiles, deletedFiles
+                    )
+                )
+                findPreference(CLEAR_CACHE_KEY)?.summary =
+                    resources?.getString(R.string.used_cache, chapterCache.readableSize)
+            })
     }
 
     class ClearDatabaseDialogController : DialogController() {
         override fun onCreateDialog(savedViewState: Bundle?): Dialog {
             return MaterialDialog(activity!!)
-                    .message(R.string.clear_database_confirmation)
-                    .positiveButton(android.R.string.yes) {
-                        (targetController as? SettingsAdvancedController)?.clearDatabase()
-                    }
-                    .negativeButton(android.R.string.no)
+                .message(R.string.clear_database_confirmation)
+                .positiveButton(android.R.string.yes) {
+                    (targetController as? SettingsAdvancedController)?.clearDatabase()
+                }
+                .negativeButton(android.R.string.no)
         }
     }
 
     private fun clearDatabase() {
         // Avoid weird behavior by going back to the library.
         val newBackstack = listOf(RouterTransaction.with(LibraryController())) +
-                router.backstack.drop(1)
+            router.backstack.drop(1)
 
         router.setBackstack(newBackstack, FadeChangeHandler())
 

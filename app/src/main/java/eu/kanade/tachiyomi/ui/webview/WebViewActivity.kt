@@ -17,7 +17,12 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
-import eu.kanade.tachiyomi.util.*
+import eu.kanade.tachiyomi.util.WebViewClientCompat
+import eu.kanade.tachiyomi.util.getResourceColor
+import eu.kanade.tachiyomi.util.invisible
+import eu.kanade.tachiyomi.util.openInBrowser
+import eu.kanade.tachiyomi.util.toast
+import eu.kanade.tachiyomi.util.visible
 import kotlinx.android.synthetic.main.webview_activity.*
 import uy.kohesive.injekt.injectLazy
 
@@ -36,8 +41,10 @@ class WebViewActivity : BaseActivity() {
         window.statusBarColor = getResourceColor(R.attr.colorPrimaryDark)
 
         title = intent.extras?.getString(TITLE_KEY)
-        toolbar.setNavigationIcon(IconicsDrawable(applicationContext!!)
-                .icon(MaterialDesignDx.Icon.gmf_close).colorInt(Color.WHITE).sizeDp(20))
+        toolbar.setNavigationIcon(
+            IconicsDrawable(applicationContext!!)
+                .icon(MaterialDesignDx.Icon.gmf_close).colorInt(Color.WHITE).sizeDp(20)
+        )
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         toolbar.setNavigationOnClickListener {
@@ -50,7 +57,8 @@ class WebViewActivity : BaseActivity() {
         }
 
         if (bundle == null) {
-            val source = sourceManager.get(intent.extras!!.getLong(SOURCE_KEY)) as? HttpSource ?: return
+            val source =
+                sourceManager.get(intent.extras!!.getLong(SOURCE_KEY)) as? HttpSource ?: return
             val url = intent.extras!!.getString(URL_KEY) ?: return
             val headers = source.headers.toMultimap().mapValues { it.value.getOrNull(0) ?: "" }
 
@@ -110,11 +118,15 @@ class WebViewActivity : BaseActivity() {
         backItem?.isEnabled = webview.canGoBack()
         forwardItem?.isEnabled = webview.canGoForward()
 
-        backItem.setIcon(IconicsDrawable(applicationContext!!)
-                .icon(MaterialDesignDx.Icon.gmf_arrow_back).colorInt(Color.WHITE).sizeDp(20))
+        backItem.setIcon(
+            IconicsDrawable(applicationContext!!)
+                .icon(MaterialDesignDx.Icon.gmf_arrow_back).colorInt(Color.WHITE).sizeDp(20)
+        )
 
-        forwardItem.setIcon(IconicsDrawable(applicationContext!!)
-                .icon(MaterialDesignDx.Icon.gmf_arrow_forward).colorInt(Color.WHITE).sizeDp(20))
+        forwardItem.setIcon(
+            IconicsDrawable(applicationContext!!)
+                .icon(MaterialDesignDx.Icon.gmf_arrow_forward).colorInt(Color.WHITE).sizeDp(20)
+        )
 
         return super.onPrepareOptionsMenu(menu)
     }

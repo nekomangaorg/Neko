@@ -10,7 +10,6 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.glide.GlideApp
 import kotlinx.android.synthetic.main.catalogue_grid_item.*
 
-
 /**
  * Class used to hold the displayed data of a manga in the library, like the cover or the title.
  * All the elements from the layout file "item_catalogue_grid" are available in this class.
@@ -21,8 +20,8 @@ import kotlinx.android.synthetic.main.catalogue_grid_item.*
  * @constructor creates a new library holder.
  */
 class LibraryGridHolder(
-        private val view: View,
-        private val adapter: FlexibleAdapter<*>
+    private val view: View,
+    private val adapter: FlexibleAdapter<*>
 
 ) : LibraryHolder(view, adapter) {
 
@@ -62,5 +61,4 @@ class LibraryGridHolder(
                 .centerCrop()
                 .into(thumbnail)
     }
-
 }

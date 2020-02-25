@@ -1,11 +1,18 @@
 package eu.kanade.tachiyomi.network
 
+import java.io.IOException
 import okhttp3.MediaType
 import okhttp3.ResponseBody
-import okio.*
-import java.io.IOException
+import okio.Buffer
+import okio.BufferedSource
+import okio.ForwardingSource
+import okio.Source
+import okio.buffer
 
-class ProgressResponseBody(private val responseBody: ResponseBody, private val progressListener: ProgressListener) : ResponseBody() {
+class ProgressResponseBody(
+    private val responseBody: ResponseBody,
+    private val progressListener: ProgressListener
+) : ResponseBody() {
 
     private val bufferedSource: BufferedSource by lazy {
         source(responseBody.source()).buffer()
@@ -32,7 +39,11 @@ class ProgressResponseBody(private val responseBody: ResponseBody, private val p
                 val bytesRead = super.read(sink, byteCount)
                 // read() returns the number of bytes read, or -1 if this source is exhausted.
                 totalBytesRead += if (bytesRead != -1L) bytesRead else 0
-                progressListener.update(totalBytesRead, responseBody.contentLength(), bytesRead == -1L)
+                progressListener.update(
+                    totalBytesRead,
+                    responseBody.contentLength(),
+                    bytesRead == -1L
+                )
                 return bytesRead
             }
         }

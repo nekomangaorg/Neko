@@ -10,6 +10,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Handler
+import eu.kanade.tachiyomi.BuildConfig.APPLICATION_ID as ID
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.backup.BackupRestoreService
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -25,10 +26,8 @@ import eu.kanade.tachiyomi.util.DiskUtil
 import eu.kanade.tachiyomi.util.getUriCompat
 import eu.kanade.tachiyomi.util.notificationManager
 import eu.kanade.tachiyomi.util.toast
-import uy.kohesive.injekt.injectLazy
 import java.io.File
-import eu.kanade.tachiyomi.BuildConfig.APPLICATION_ID as ID
-
+import uy.kohesive.injekt.injectLazy
 
 /**
  * Global [BroadcastReceiver] that runs on UI thread
@@ -100,7 +99,6 @@ class NotificationReceiver : BroadcastReceiver() {
             type = "image/*"
         }
         // Close Navigation Shade
-
     }
 
     /**
@@ -179,7 +177,6 @@ class NotificationReceiver : BroadcastReceiver() {
 
         // Called to cancel library update.
         private const val ACTION_CANCEL_RESTORE = "$ID.$NAME.CANCEL_RESTORE"
-
 
         // Called to open chapter
         private const val ACTION_OPEN_CHAPTER = "$ID.$NAME.ACTION_OPEN_CHAPTER"
@@ -285,8 +282,12 @@ class NotificationReceiver : BroadcastReceiver() {
          * @param notificationId id of notification
          * @return [PendingIntent]
          */
-        internal fun dismissNotification(context: Context, notificationId: Int, groupId: Int? =
-                null) {
+        internal fun dismissNotification(
+            context: Context,
+            notificationId: Int,
+            groupId: Int? =
+                            null
+        ) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 val groupKey = context.notificationManager.activeNotifications.find {
                     it.id == notificationId
@@ -313,7 +314,7 @@ class NotificationReceiver : BroadcastReceiver() {
          * @return [PendingIntent]
          */
         internal fun shareImagePendingBroadcast(context: Context, path: String, notificationId: Int): PendingIntent {
-            //val shareIntent = ShareStartingActivity.newIntent(context, path)
+            // val shareIntent = ShareStartingActivity.newIntent(context, path)
             val shareIntent = Intent(Intent.ACTION_SEND).apply {
                 val uri = File(path).getUriCompat(context)
                 putExtra(Intent.EXTRA_STREAM, uri)
@@ -321,7 +322,7 @@ class NotificationReceiver : BroadcastReceiver() {
                 clipData = ClipData.newRawUri(null, uri)
                 type = "image/*"
             }
-            //val shareIntent2 = Intent.createChooser(shareIntent, context.getString(R.string.action_share))
+            // val shareIntent2 = Intent.createChooser(shareIntent, context.getString(R.string.action_share))
             return PendingIntent.getActivity(context, 0, shareIntent, PendingIntent
                     .FLAG_CANCEL_CURRENT)
         }
@@ -334,7 +335,11 @@ class NotificationReceiver : BroadcastReceiver() {
          * @param notificationId id of notification
          * @return [PendingIntent]
          */
-        internal fun deleteImagePendingBroadcast(context: Context, path: String, notificationId: Int): PendingIntent {
+        internal fun deleteImagePendingBroadcast(
+            context: Context,
+            path: String,
+            notificationId: Int
+        ): PendingIntent {
             val intent = Intent(context, NotificationReceiver::class.java).apply {
                 action = ACTION_DELETE_IMAGE
                 putExtra(EXTRA_FILE_LOCATION, path)
@@ -350,8 +355,12 @@ class NotificationReceiver : BroadcastReceiver() {
          * @param manga manga of chapter
          * @param chapter chapter that needs to be opened
          */
-        internal fun openChapterPendingActivity(context: Context, manga: Manga, chapter:
-        Chapter): PendingIntent {
+        internal fun openChapterPendingActivity(
+            context: Context,
+            manga: Manga,
+            chapter:
+                    Chapter
+        ): PendingIntent {
             val newIntent = ReaderActivity.newIntent(context, manga, chapter)
             return PendingIntent.getActivity(context, manga.id.hashCode(), newIntent, PendingIntent
                     .FLAG_UPDATE_CURRENT)
@@ -387,7 +396,6 @@ class NotificationReceiver : BroadcastReceiver() {
             }
             return PendingIntent.getActivity(context, 0, toLaunch, 0)
         }
-
 
         /**
          * Returns [PendingIntent] that starts a service which stops the library update

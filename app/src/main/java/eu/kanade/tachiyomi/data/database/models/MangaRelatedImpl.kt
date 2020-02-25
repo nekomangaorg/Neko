@@ -1,7 +1,5 @@
 package eu.kanade.tachiyomi.data.database.models
 
-
-
 class MangaRelatedImpl : MangaRelated {
 
     override var id: Long? = null
@@ -25,7 +23,6 @@ class MangaRelatedImpl : MangaRelated {
     }
 
     override fun hashCode(): Int {
-        return id.hashCode()+manga_id.hashCode()
+        return id.hashCode() + manga_id.hashCode()
     }
-
 }

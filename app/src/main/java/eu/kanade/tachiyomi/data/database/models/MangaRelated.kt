@@ -28,6 +28,4 @@ interface MangaRelated : Serializable {
      * Example: [Title1, Title2, ..., Title10]
      */
     var matched_titles: String
-
-
 }

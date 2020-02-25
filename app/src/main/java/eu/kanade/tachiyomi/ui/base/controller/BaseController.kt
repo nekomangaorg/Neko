@@ -44,7 +44,11 @@ abstract class BaseController(bundle: Bundle? = null) : RestoreViewOnCreateContr
     override val containerView: View?
         get() = view
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup, savedViewState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup,
+        savedViewState: Bundle?
+    ): View {
         return inflateView(inflater, container)
     }
 
@@ -91,7 +95,10 @@ abstract class BaseController(bundle: Bundle? = null) : RestoreViewOnCreateContr
      */
     var expandActionViewFromInteraction = false
 
-    fun MenuItem.fixExpand(onExpand: ((MenuItem) -> Boolean)? = null, onCollapse: ((MenuItem) -> Boolean)? = null) {
+    fun MenuItem.fixExpand(
+        onExpand: ((MenuItem) -> Boolean)? = null,
+        onCollapse: ((MenuItem) -> Boolean)? = null
+    ) {
         setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
             override fun onMenuItemActionExpand(item: MenuItem): Boolean {
                 return onExpand?.invoke(item) ?: true
@@ -123,5 +130,4 @@ abstract class BaseController(bundle: Bundle? = null) : RestoreViewOnCreateContr
             true
         }
     }
-
 }

@@ -44,9 +44,7 @@ class MangadexLogoutDialog(bundle: Bundle? = null) : DialogController(bundle) {
                 .negativeButton(android.R.string.cancel)
     }
 
-
     interface Listener {
         fun siteLogoutDialogClosed(source: Source)
     }
-
 }

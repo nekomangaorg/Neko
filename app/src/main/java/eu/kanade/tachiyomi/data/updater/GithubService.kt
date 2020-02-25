@@ -29,5 +29,4 @@ interface GithubService {
 
     @GET("/repos/CarlosEsco/Neko/releases/latest")
     fun getLatestVersion(): Observable<GithubRelease>
-
 }

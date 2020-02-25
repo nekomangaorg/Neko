@@ -26,11 +26,19 @@ class SortItem(val name: String, val group: SortGroup) : AbstractSectionableItem
         return 102
     }
 
-    override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): Holder {
+    override fun createViewHolder(
+        view: View,
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>
+    ): Holder {
         return Holder(view, adapter)
     }
 
-    override fun bindViewHolder(adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>, holder: Holder, position: Int, payloads: MutableList<Any>?) {
+    override fun bindViewHolder(
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
+        holder: Holder,
+        position: Int,
+        payloads: MutableList<Any>?
+    ) {
         val view = holder.text
         view.text = name
         val filter = group.filter
@@ -75,5 +83,4 @@ class SortItem(val name: String, val group: SortGroup) : AbstractSectionableItem
 
         val text: CheckedTextView = itemView.findViewById(R.id.nav_view_item)
     }
-
 }

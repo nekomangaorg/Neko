@@ -63,5 +63,4 @@ class MangadexLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle
     interface Listener {
         fun siteLoginDialogClosed(source: Source)
     }
-
 }

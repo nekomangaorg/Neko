@@ -2,7 +2,11 @@ package eu.kanade.tachiyomi.source
 
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
-import eu.kanade.tachiyomi.source.model.*
+import eu.kanade.tachiyomi.source.model.FilterList
+import eu.kanade.tachiyomi.source.model.MangasPage
+import eu.kanade.tachiyomi.source.model.Page
+import eu.kanade.tachiyomi.source.model.SChapter
+import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import rx.Observable
 
@@ -20,7 +24,6 @@ interface Source {
      * Name of the source.
      */
     val name: String
-
 
     /**
      * An ISO 639-1 compliant language code (two letters in lower case).
@@ -84,7 +87,6 @@ interface Source {
      */
     fun fetchMangaDetailsObservable(manga: SManga): Observable<SManga>
 
-
     /**
      * Returns a updated details for a manga
      *
@@ -133,6 +135,4 @@ interface Source {
     fun login(username: String, password: String, twoFactorCode: String = ""): Observable<Boolean>
 
     suspend fun logout(): Boolean
-
-
 }

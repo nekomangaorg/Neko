@@ -20,8 +20,8 @@ import uy.kohesive.injekt.injectLazy
 /**
  * The navigation view shown in a drawer with the different options to show the library.
  */
-class LibraryNavigationView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null)
-    : ExtendedNavigationView(context, attrs) {
+class LibraryNavigationView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
+    ExtendedNavigationView(context, attrs) {
 
     /**
      * Preferences helper.
@@ -29,7 +29,6 @@ class LibraryNavigationView @JvmOverloads constructor(context: Context, attrs: A
     private val preferences: PreferencesHelper by injectLazy()
 
     private val loggedServices by lazy { Injekt.get<TrackManager>().services.filter { it.isLogged && !it.isMdList() } }
-
 
     /**
      * List of groups shown in the view.
@@ -97,7 +96,6 @@ class LibraryNavigationView @JvmOverloads constructor(context: Context, attrs: A
         private val myanimelist = Item.TriStateGroup(R.string.action_filter_myanimelist, this)
 
         private val kitsu = Item.TriStateGroup(R.string.action_filter_kitsu, this)
-
 
         override val items: List<Item> = {
             val list = mutableListOf<Item>()
@@ -213,6 +211,5 @@ class LibraryNavigationView @JvmOverloads constructor(context: Context, attrs: A
 
             item.group.items.forEach { adapter.notifyItemChanged(it) }
         }
-
     }
 }

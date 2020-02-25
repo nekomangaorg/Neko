@@ -15,8 +15,8 @@ import eu.kanade.tachiyomi.util.OutlineSpan
  * Page indicator found at the bottom of the reader
  */
 class PageIndicatorTextView(
-        context: Context,
-        attrs: AttributeSet? = null
+    context: Context,
+    attrs: AttributeSet? = null
 ) : AppCompatTextView(context, attrs) {
 
     init {

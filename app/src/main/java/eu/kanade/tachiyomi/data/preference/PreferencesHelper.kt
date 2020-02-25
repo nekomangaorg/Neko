@@ -7,11 +7,11 @@ import android.preference.PreferenceManager
 import com.f2prateek.rx.preferences.Preference
 import com.f2prateek.rx.preferences.RxSharedPreferences
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.online.Mangadex
 import java.io.File
-import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 
 fun <T> Preference<T>.getOrDefault(): T = get() ?: defaultValue()!!
 
@@ -53,7 +53,6 @@ class PreferencesHelper(val context: Context) {
     fun r18() = prefs.getString(Keys.showR18, "0")
 
     fun imageServer() = prefs.getString(Keys.imageServer, Mangadex.SERVER_PREF_ENTRY_VALUES.first())
-
 
     fun trueColor() = rxPrefs.getBoolean(Keys.trueColor, false)
 

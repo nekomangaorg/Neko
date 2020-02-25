@@ -15,7 +15,7 @@ class AndroidCookieJar : CookieJar {
             manager.setCookie(urlString, cookie.toString())
         }
     }
-    
+
     override fun loadForRequest(url: HttpUrl): List<Cookie> {
         return get(url)
     }
@@ -42,5 +42,4 @@ class AndroidCookieJar : CookieJar {
     fun removeAll() {
             manager.removeAllCookies {}
     }
-
 }

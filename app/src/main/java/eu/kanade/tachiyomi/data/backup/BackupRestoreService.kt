@@ -25,7 +25,11 @@ import eu.kanade.tachiyomi.data.backup.models.Backup.TRACK
 import eu.kanade.tachiyomi.data.backup.models.Backup.VERSION
 import eu.kanade.tachiyomi.data.backup.models.DHistory
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
-import eu.kanade.tachiyomi.data.database.models.*
+import eu.kanade.tachiyomi.data.database.models.ChapterImpl
+import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.MangaImpl
+import eu.kanade.tachiyomi.data.database.models.Track
+import eu.kanade.tachiyomi.data.database.models.TrackImpl
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.track.TrackManager
@@ -33,21 +37,20 @@ import eu.kanade.tachiyomi.util.chop
 import eu.kanade.tachiyomi.util.getUriCompat
 import eu.kanade.tachiyomi.util.isServiceRunning
 import eu.kanade.tachiyomi.util.notificationManager
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Locale
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
-import java.io.File
-import java.text.SimpleDateFormat
-import java.util.*
 
 /**
  * Restores backup from json file
  */
 class BackupRestoreService : Service() {
-
 
     /**
      * Wake lock that will be held until the service is destroyed.
@@ -83,7 +86,6 @@ class BackupRestoreService : Service() {
      */
     private val trackingErrors = mutableListOf<String>()
 
-
     /**
      * count of cancelled
      */
@@ -104,7 +106,6 @@ class BackupRestoreService : Service() {
      */
     internal val trackManager: TrackManager by injectLazy()
 
-
     /**
      * Method called when the service is created. It injects dependencies and acquire the wake lock.
      */
@@ -112,7 +113,8 @@ class BackupRestoreService : Service() {
         super.onCreate()
         startForeground(Notifications.ID_RESTORE_PROGRESS, progressNotification.build())
         wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).newWakeLock(
-                PowerManager.PARTIAL_WAKE_LOCK, "BackupRestoreService:WakeLock")
+            PowerManager.PARTIAL_WAKE_LOCK, "BackupRestoreService:WakeLock"
+        )
         wakeLock.acquire(java.util.concurrent.TimeUnit.HOURS.toMillis(3))
     }
 
@@ -154,7 +156,7 @@ class BackupRestoreService : Service() {
             stopSelf(startId)
         }
         job = GlobalScope.launch(handler) {
-            restoreBackup(uri!!)
+            restoreBackup(uri)
         }
         job?.invokeOnCompletion { stopSelf(startId) }
 
@@ -192,7 +194,6 @@ class BackupRestoreService : Service() {
                 restoreAmount -= 1
             }
             isMangaDex
-
         }
         // +1 for categories
         totalAmount = mangasJson.size() + 1
@@ -220,7 +221,6 @@ class BackupRestoreService : Service() {
         showResultNotification(logFile.parent, logFile.name)
     }
 
-
     /**Restore categories if they were backed up
      *
      */
@@ -241,8 +241,10 @@ class BackupRestoreService : Service() {
      */
     private suspend fun restoreManga(obj: JsonObject, backupManager: BackupManager) {
         val manga = backupManager.parser.fromJson<MangaImpl>(obj.get(MANGA))
-        val chapters = backupManager.parser.fromJson<List<ChapterImpl>>(obj.get(CHAPTERS) ?: JsonArray())
-        val categories = backupManager.parser.fromJson<List<String>>(obj.get(CATEGORIES) ?: JsonArray())
+        val chapters =
+            backupManager.parser.fromJson<List<ChapterImpl>>(obj.get(CHAPTERS) ?: JsonArray())
+        val categories =
+            backupManager.parser.fromJson<List<String>>(obj.get(CATEGORIES) ?: JsonArray())
         val history = backupManager.parser.fromJson<List<DHistory>>(obj.get(HISTORY) ?: JsonArray())
         val tracks = backupManager.parser.fromJson<List<TrackImpl>>(obj.get(TRACK) ?: JsonArray())
         val source = backupManager.sourceManager.getMangadex()
@@ -261,12 +263,12 @@ class BackupRestoreService : Service() {
                 // Manga in database copy information from manga already in database
                 backupManager.restoreMangaNoFetch(manga, dbManga!!)
             } else {
-                //manga gets details from network
+                // manga gets details from network
                 backupManager.restoreMangaFetch(source, manga)
             }
 
             if (!dbMangaExists || !backupManager.restoreChaptersForManga(manga, chapters)) {
-                //manga gets chapters added
+                // manga gets chapters added
                 backupManager.restoreChapterFetch(source, manga, chapters)
             }
             // Restore categories
@@ -294,11 +296,11 @@ class BackupRestoreService : Service() {
             val service = trackManager.getService(track.sync_id)
             if (service != null && service.isLogged) {
                 service.refresh(track)
-                        .doOnNext { db.insertTrack(it).executeAsBlocking() }
-                        .onErrorReturn {
-                            errors.add("${manga.title} - ${it.message}")
-                            track
-                        }
+                    .doOnNext { db.insertTrack(it).executeAsBlocking() }
+                    .onErrorReturn {
+                        errors.add("${manga.title} - ${it.message}")
+                        track
+                    }
             } else {
                 errors.add("${manga.title} - ${service?.name} not logged in")
                 val notLoggedIn = getString(R.string.not_logged_into, service?.name)
@@ -333,13 +335,13 @@ class BackupRestoreService : Service() {
      */
     private val progressNotification by lazy {
         NotificationCompat.Builder(this, Notifications.CHANNEL_RESTORE)
-                .setContentTitle(getString(R.string.app_name))
-                .setSmallIcon(R.drawable.ic_neko_notification)
-                .setOngoing(true)
-                .setOnlyAlertOnce(true)
-                .setAutoCancel(false)
-                .setColor(ContextCompat.getColor(this, R.color.colorPrimary))
-                .addAction(R.drawable.ic_clear_grey, getString(android.R.string.cancel), cancelIntent)
+            .setContentTitle(getString(R.string.app_name))
+            .setSmallIcon(R.drawable.ic_neko_notification)
+            .setOngoing(true)
+            .setOnlyAlertOnce(true)
+            .setAutoCancel(false)
+            .setColor(ContextCompat.getColor(this, R.color.colorPrimary))
+            .addAction(R.drawable.ic_clear_grey, getString(android.R.string.cancel), cancelIntent)
     }
 
     /**
@@ -349,7 +351,6 @@ class BackupRestoreService : Service() {
         NotificationReceiver.cancelRestorePendingBroadcast(this)
     }
 
-
     /**
      * Shows the notification containing the currently updating manga and the progress.
      *
@@ -358,12 +359,18 @@ class BackupRestoreService : Service() {
      * @param total the total progress.
      */
     private fun showProgressNotification(current: Int, total: Int, title: String) {
-        notificationManager.notify(Notifications.ID_RESTORE_PROGRESS, progressNotification
+        notificationManager.notify(
+            Notifications.ID_RESTORE_PROGRESS, progressNotification
                 .setContentTitle(title.chop(30))
-                .setContentText(getString(R.string.backup_restoring_progress, restoreProgress,
-                        totalAmount))
+                .setContentText(
+                    getString(
+                        R.string.backup_restoring_progress, restoreProgress,
+                        totalAmount
+                    )
+                )
                 .setProgress(total, current, false)
-                .build())
+                .build()
+        )
     }
 
     /**
@@ -371,10 +378,21 @@ class BackupRestoreService : Service() {
      */
     private fun showResultNotification(path: String?, file: String?) {
 
-        val content = mutableListOf(getString(R.string.restore_completed_successful, restoreProgress.toString()))
+        val content = mutableListOf(
+            getString(
+                R.string.restore_completed_successful,
+                restoreProgress.toString()
+            )
+        )
 
         if (skippedAmount > 0) {
-            content.add(getString(R.string.restore_completed_skipped, skippedAmount.toString(), totalAmount.toString()))
+            content.add(
+                getString(
+                    R.string.restore_completed_skipped,
+                    skippedAmount.toString(),
+                    totalAmount.toString()
+                )
+            )
         }
 
         if (errors.isNotEmpty()) {
@@ -387,21 +405,31 @@ class BackupRestoreService : Service() {
         }
 
         if (cancelled > 0) {
-            content.add(getString(R.string.restore_completed_cancelled, cancelled.toString(), totalAmount.toString()))
+            content.add(
+                getString(
+                    R.string.restore_completed_cancelled,
+                    cancelled.toString(),
+                    totalAmount.toString()
+                )
+            )
         }
 
         val restoreString = content.joinToString("\n")
 
         val resultNotification = NotificationCompat.Builder(this, Notifications.CHANNEL_RESTORE)
-                .setContentTitle(getString(R.string.restore_completed))
-                .setContentText(restoreString)
-                .setStyle(NotificationCompat.BigTextStyle().bigText(restoreString))
-                .setSmallIcon(R.drawable.ic_neko_notification)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setColor(ContextCompat.getColor(this, R.color.colorPrimary))
-                .setColor(ContextCompat.getColor(this, R.color.colorAccentLight))
+            .setContentTitle(getString(R.string.restore_completed))
+            .setContentText(restoreString)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(restoreString))
+            .setSmallIcon(R.drawable.ic_neko_notification)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setColor(ContextCompat.getColor(this, R.color.colorPrimary))
+            .setColor(ContextCompat.getColor(this, R.color.colorAccentLight))
         if (errors.size > 0 && !path.isNullOrEmpty() && !file.isNullOrEmpty()) {
-            resultNotification.addAction(R.drawable.ic_clear_grey, getString(R.string.notification_action_error_log), getErrorLogIntent(path, file))
+            resultNotification.addAction(
+                R.drawable.ic_clear_grey,
+                getString(R.string.notification_action_error_log),
+                getErrorLogIntent(path, file)
+            )
         }
         notificationManager.notify(Notifications.ID_RESTORE_COMPLETE, resultNotification.build())
     }
@@ -411,13 +439,15 @@ class BackupRestoreService : Service() {
      */
     private fun showErrorNotification(errorMessage: String) {
         val resultNotification = NotificationCompat.Builder(this, Notifications.CHANNEL_RESTORE)
-                .setContentTitle(getString(R.string.restore_error))
-                .setContentText(errorMessage)
-                .setStyle(NotificationCompat.BigTextStyle()
-                        .bigText(errorMessage))
-                .setSmallIcon(R.drawable.ic_error_grey)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setColor(ContextCompat.getColor(this, R.color.md_red_500))
+            .setContentTitle(getString(R.string.restore_error))
+            .setContentText(errorMessage)
+            .setStyle(
+                NotificationCompat.BigTextStyle()
+                    .bigText(errorMessage)
+            )
+            .setSmallIcon(R.drawable.ic_error_grey)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setColor(ContextCompat.getColor(this, R.color.md_red_500))
         notificationManager.notify(Notifications.ID_RESTORE_ERROR, resultNotification.build())
     }
 
@@ -439,7 +469,7 @@ class BackupRestoreService : Service() {
          * @return true if the service is running, false otherwise.
          */
         fun isRunning(context: Context): Boolean =
-                context.isServiceRunning(BackupRestoreService::class.java)
+            context.isServiceRunning(BackupRestoreService::class.java)
 
         /**
          * Starts a service to restore a backup from Json

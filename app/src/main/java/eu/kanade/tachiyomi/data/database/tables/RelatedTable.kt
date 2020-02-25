@@ -21,9 +21,6 @@ object RelatedTable {
             UNIQUE ($COL_ID) ON CONFLICT REPLACE
             )"""
 
-
     val createMangaIdIndexQuery: String
         get() = "CREATE INDEX ${TABLE}_${COL_MANGA_RELATED_MATCHED_IDS}_index ON $TABLE($COL_MANGA_RELATED_MATCHED_IDS)"
-
 }
-

@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.biometric.BiometricPrompt
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
-import java.util.*
+import java.util.Date
 import java.util.concurrent.Executors
 
 class BiometricActivity : BaseActivity() {
@@ -34,11 +34,10 @@ class BiometricActivity : BaseActivity() {
         })
 
         val promptInfo = BiometricPrompt.PromptInfo.Builder()
-                .setTitle(getString(R.string.unlock_library))
-                .setNegativeButtonText(getString(android.R.string.cancel))
-                .build()
+            .setTitle(getString(R.string.unlock_library))
+            .setNegativeButtonText(getString(android.R.string.cancel))
+            .build()
 
         biometricPrompt.authenticate(promptInfo)
     }
-
 }

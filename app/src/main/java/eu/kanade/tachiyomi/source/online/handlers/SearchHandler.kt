@@ -9,8 +9,12 @@ import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.asJsoup
 import eu.kanade.tachiyomi.util.setUrlWithoutDomain
-import okhttp3.*
+import okhttp3.CacheControl
+import okhttp3.Headers
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
 import org.jsoup.nodes.Element
 import rx.Observable
 import uy.kohesive.injekt.injectLazy
@@ -19,23 +23,22 @@ class SearchHandler(val client: OkHttpClient, private val headers: Headers, val 
 
     private val preferences: PreferencesHelper by injectLazy()
 
-
     fun fetchSearchManga(page: Int, query: String, filters: FilterList): Observable<MangasPage> {
         return if (query.startsWith(PREFIX_ID_SEARCH)) {
             val realQuery = query.removePrefix(PREFIX_ID_SEARCH)
             client.newCall(searchMangaByIdRequest(realQuery))
-                    .asObservableSuccess()
-                    .map { response ->
-                        val details = ApiMangaParser(lang).mangaDetailsParse(response)
-                        details.url = "/manga/$realQuery/"
-                        MangasPage(listOf(details), false)
-                    }
+                .asObservableSuccess()
+                .map { response ->
+                    val details = ApiMangaParser(lang).mangaDetailsParse(response)
+                    details.url = "/manga/$realQuery/"
+                    MangasPage(listOf(details), false)
+                }
         } else {
             client.newCall(searchMangaRequest(page, query, filters))
-                    .asObservableSuccess()
-                    .map { response ->
-                        searchMangaParse(response)
-                    }
+                .asObservableSuccess()
+                .map { response ->
+                    searchMangaParse(response)
+                }
         }
     }
 
@@ -61,8 +64,8 @@ class SearchHandler(val client: OkHttpClient, private val headers: Headers, val 
 
         // Do traditional search
         val url = "${MdUtil.baseUrl}/?page=search".toHttpUrlOrNull()!!.newBuilder()
-                .addQueryParameter("p", page.toString())
-                .addQueryParameter("title", query.replace(WHITESPACE_REGEX, " "))
+            .addQueryParameter("p", page.toString())
+            .addQueryParameter("title", query.replace(WHITESPACE_REGEX, " "))
 
         filters.forEach { filter ->
             when (filter) {
@@ -83,7 +86,9 @@ class SearchHandler(val client: OkHttpClient, private val headers: Headers, val 
                 }
                 is FilterHandler.OriginalLanguage -> {
                     if (filter.state != 0) {
-                        val number: String = FilterHandler.sourceLang.first { it -> it.first == filter.values[filter.state] }.second
+                        val number: String =
+                            FilterHandler.sourceLang.first { it -> it.first == filter.values[filter.state] }
+                                .second
                         url.addQueryParameter("lang_id", number)
                     }
                 }
@@ -132,9 +137,15 @@ class SearchHandler(val client: OkHttpClient, private val headers: Headers, val 
                 is FilterHandler.SortFilter -> {
                     if (filter.state != null) {
                         if (filter.state!!.ascending) {
-                            url.addQueryParameter("s", FilterHandler.sortables[filter.state!!.index].second.toString())
+                            url.addQueryParameter(
+                                "s",
+                                FilterHandler.sortables[filter.state!!.index].second.toString()
+                            )
                         } else {
-                            url.addQueryParameter("s", FilterHandler.sortables[filter.state!!.index].third.toString())
+                            url.addQueryParameter(
+                                "s",
+                                FilterHandler.sortables[filter.state!!.index].third.toString()
+                            )
                         }
                     }
                 }
@@ -166,7 +177,6 @@ class SearchHandler(val client: OkHttpClient, private val headers: Headers, val 
 
         manga.thumbnail_url = MdUtil.formThumbUrl(manga.url, preferences.lowQualityCovers())
 
-
         return manga
     }
 
@@ -177,7 +187,8 @@ class SearchHandler(val client: OkHttpClient, private val headers: Headers, val 
     companion object {
         const val PREFIX_ID_SEARCH = "id:"
         val WHITESPACE_REGEX = "\\s".toRegex()
-        const val searchMangaNextPageSelector = ".pagination li:not(.disabled) span[title*=last page]:not(disabled)"
+        const val searchMangaNextPageSelector =
+            ".pagination li:not(.disabled) span[title*=last page]:not(disabled)"
         const val searchMangaSelector = "div.manga-entry"
     }
 }

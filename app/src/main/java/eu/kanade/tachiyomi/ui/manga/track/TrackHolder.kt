@@ -52,7 +52,6 @@ class TrackHolder(val view: View, adapter: TrackAdapter) : BaseViewHolder(view) 
                     title_container.isClickable = false
                     score_container.gone()
                 }
-
             }
         }
     }

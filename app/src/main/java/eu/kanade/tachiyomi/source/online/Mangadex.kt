@@ -6,9 +6,21 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.POST
 import eu.kanade.tachiyomi.network.POSTWithCookie
 import eu.kanade.tachiyomi.network.asObservable
-import eu.kanade.tachiyomi.source.model.*
-import eu.kanade.tachiyomi.source.online.handlers.*
+import eu.kanade.tachiyomi.source.model.FilterList
+import eu.kanade.tachiyomi.source.model.MangasPage
+import eu.kanade.tachiyomi.source.model.Page
+import eu.kanade.tachiyomi.source.model.SChapter
+import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.online.handlers.FilterHandler
+import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
+import eu.kanade.tachiyomi.source.online.handlers.MangaHandler
+import eu.kanade.tachiyomi.source.online.handlers.PageHandler
+import eu.kanade.tachiyomi.source.online.handlers.PopularHandler
+import eu.kanade.tachiyomi.source.online.handlers.RelatedHandler
+import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
+import java.net.URLEncoder
+import kotlin.collections.set
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.FormBody
@@ -16,29 +28,33 @@ import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
 import rx.Observable
 import uy.kohesive.injekt.injectLazy
-import java.net.URLEncoder
-import kotlin.collections.set
 
-open class Mangadex(override val lang: String, private val internalLang: String, private val langCode: Int) : HttpSource() {
+open class Mangadex(
+    override val lang: String,
+    private val internalLang: String,
+    private val langCode: Int
+) : HttpSource() {
 
     private val preferences: PreferencesHelper by injectLazy()
 
     private fun clientBuilder(): OkHttpClient = clientBuilder(preferences.r18()!!.toInt())
 
-    private fun nonLoggedInClientBuilder(): OkHttpClient = clientBuilder(preferences.r18()!!.toInt(), network.nonLoggedInClient)
+    private fun nonLoggedInClientBuilder(): OkHttpClient =
+        clientBuilder(preferences.r18()!!.toInt(), network.nonLoggedInClient)
 
-
-    private fun clientBuilder(r18Toggle: Int, okHttpClient: OkHttpClient = network.client): OkHttpClient = okHttpClient.newBuilder()
-            .addNetworkInterceptor { chain ->
-                var originalCookies = chain.request().header("Cookie") ?: ""
-                val newReq = chain
-                        .request()
-                        .newBuilder()
-                        .header("Cookie", "$originalCookies; ${cookiesHeader(r18Toggle, langCode)}")
-                        .build()
-                chain.proceed(newReq)
-            }.build()
-
+    private fun clientBuilder(
+        r18Toggle: Int,
+        okHttpClient: OkHttpClient = network.client
+    ): OkHttpClient = okHttpClient.newBuilder()
+        .addNetworkInterceptor { chain ->
+            var originalCookies = chain.request().header("Cookie") ?: ""
+            val newReq = chain
+                .request()
+                .newBuilder()
+                .header("Cookie", "$originalCookies; ${cookiesHeader(r18Toggle, langCode)}")
+                .build()
+            chain.proceed(newReq)
+        }.build()
 
     private fun cookiesHeader(r18Toggle: Int, langCode: Int): String {
         val cookies = mutableMapOf<String, String>()
@@ -47,9 +63,10 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         return buildCookies(cookies)
     }
 
-    private fun buildCookies(cookies: Map<String, String>) = cookies.entries.joinToString(separator = "; ", postfix = ";") {
-        "${URLEncoder.encode(it.key, "UTF-8")}=${URLEncoder.encode(it.value, "UTF-8")}"
-    }
+    private fun buildCookies(cookies: Map<String, String>) =
+        cookies.entries.joinToString(separator = "; ", postfix = ";") {
+            "${URLEncoder.encode(it.key, "UTF-8")}=${URLEncoder.encode(it.value, "UTF-8")}"
+        }
 
     private fun buildR18Client(filters: FilterList): OkHttpClient {
         filters.forEach { filter ->
@@ -77,12 +94,18 @@ open class Mangadex(override val lang: String, private val internalLang: String,
 
     override fun fetchPopularManga(page: Int): Observable<MangasPage> {
         return PopularHandler(clientBuilder(), headers).fetchPopularManga(page)
-
     }
 
-    override fun fetchSearchManga(page: Int, query: String, filters: FilterList): Observable<MangasPage> {
-        return SearchHandler(buildR18Client(filters), headers, internalLang).fetchSearchManga(page, query, filters)
-
+    override fun fetchSearchManga(
+        page: Int,
+        query: String,
+        filters: FilterList
+    ): Observable<MangasPage> {
+        return SearchHandler(buildR18Client(filters), headers, internalLang).fetchSearchManga(
+            page,
+            query,
+            filters
+        )
     }
 
     override fun fetchFollows(page: Int): Observable<MangasPage> {
@@ -90,7 +113,9 @@ open class Mangadex(override val lang: String, private val internalLang: String,
     }
 
     override fun fetchMangaDetailsObservable(manga: SManga): Observable<SManga> {
-        return MangaHandler(clientBuilder(), headers, internalLang).fetchMangaDetailsObservable(manga)
+        return MangaHandler(clientBuilder(), headers, internalLang).fetchMangaDetailsObservable(
+            manga
+        )
     }
 
     override suspend fun fetchMangaDetails(manga: SManga): SManga {
@@ -98,11 +123,17 @@ open class Mangadex(override val lang: String, private val internalLang: String,
     }
 
     override suspend fun fetchMangaAndChapterDetails(manga: SManga): Pair<SManga, List<SChapter>> {
-        return MangaHandler(clientBuilder(), headers, internalLang).fetchMangaAndChapterDetails(manga)
+        return MangaHandler(clientBuilder(), headers, internalLang).fetchMangaAndChapterDetails(
+            manga
+        )
     }
 
     override fun fetchChapterListObservable(manga: SManga): Observable<List<SChapter>> {
-        return MangaHandler(clientBuilder(), headers, internalLang).fetchChapterListObservable(manga)
+        return MangaHandler(
+            clientBuilder(),
+            headers,
+            internalLang
+        ).fetchChapterListObservable(manga)
     }
 
     override suspend fun fetchChapterList(manga: SManga): List<SChapter> {
@@ -112,9 +143,10 @@ open class Mangadex(override val lang: String, private val internalLang: String,
 
     override fun fetchPageList(chapter: SChapter): Observable<List<Page>> {
         val imageServer = preferences.imageServer().takeIf { it in SERVER_PREF_ENTRY_VALUES }
-                ?: SERVER_PREF_ENTRY_VALUES.first()
+            ?: SERVER_PREF_ENTRY_VALUES.first()
 
-        val correctClientToUse = if (preferences.useNonLoggedNetwork()) nonLoggedInClientBuilder() else clientBuilder()
+        val correctClientToUse =
+            if (preferences.useNonLoggedNetwork()) nonLoggedInClientBuilder() else clientBuilder()
 
         return PageHandler(correctClientToUse, headers, imageServer).fetchPageList(chapter)
     }
@@ -127,7 +159,6 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         return FollowsHandler(clientBuilder(), headers).updateReadingProgress(track)
     }
 
-
     override suspend fun fetchTrackingInfo(manga: SManga): Track {
         if (!isLogged()) {
             throw Exception("Not Logged in")
@@ -139,31 +170,40 @@ open class Mangadex(override val lang: String, private val internalLang: String,
         return RelatedHandler().fetchRelated(manga)
     }
 
-
     override fun isLogged(): Boolean {
         val httpUrl = baseUrl.toHttpUrlOrNull()!!
         return network.cookieManager.get(httpUrl).any { it.name == REMEMBER_ME }
     }
 
-    override fun login(username: String, password: String, twoFactorCode: String): Observable<Boolean> {
+    override fun login(
+        username: String,
+        password: String,
+        twoFactorCode: String
+    ): Observable<Boolean> {
         val formBody = FormBody.Builder()
-                .add("login_username", username)
-                .add("login_password", password)
-                .add("no_js", "1")
-                .add("remember_me", "1")
+            .add("login_username", username)
+            .add("login_password", password)
+            .add("no_js", "1")
+            .add("remember_me", "1")
 
         twoFactorCode.let {
             formBody.add("two_factor", it)
         }
 
-        return clientBuilder().newCall(POST("$baseUrl/ajax/actions.ajax.php?function=login", headers, formBody.build()))
-                .asObservable()
-                .map { it.body!!.string().isEmpty() }
+        return clientBuilder().newCall(
+            POST(
+                "$baseUrl/ajax/actions.ajax.php?function=login",
+                headers,
+                formBody.build()
+            )
+        )
+            .asObservable()
+            .map { it.body!!.string().isEmpty() }
     }
 
     override suspend fun logout(): Boolean {
         return withContext(Dispatchers.IO) {
-            //https://mangadex.org/ajax/actions.ajax.php?function=logout
+            // https://mangadex.org/ajax/actions.ajax.php?function=logout
             val httpUrl = baseUrl.toHttpUrlOrNull()!!
             val listOfDexCookies = network.cookieManager.get(httpUrl)
             val cookie = listOfDexCookies.find { it.name == REMEMBER_ME }
@@ -171,7 +211,14 @@ open class Mangadex(override val lang: String, private val internalLang: String,
             if (token.isNullOrEmpty()) {
                 return@withContext true
             }
-            val result = clientBuilder().newCall(POSTWithCookie("$baseUrl/ajax/actions.ajax.php?function=logout", REMEMBER_ME, token, headers)).execute()
+            val result = clientBuilder().newCall(
+                POSTWithCookie(
+                    "$baseUrl/ajax/actions.ajax.php?function=logout",
+                    REMEMBER_ME,
+                    token,
+                    headers
+                )
+            ).execute()
             val resultStr = result.body!!.string()
             if (resultStr.contains("success", true)) {
                 network.cookieManager.remove(httpUrl)

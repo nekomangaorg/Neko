@@ -11,8 +11,8 @@ import android.view.ViewConfiguration
  * one conflicts with the quick scale feature.
  */
 open class GestureDetectorWithLongTap(
-        context: Context,
-        listener: Listener
+    context: Context,
+    listener: Listener
 ) : GestureDetector(context, listener) {
 
     private val handler = Handler()
@@ -70,5 +70,4 @@ open class GestureDetectorWithLongTap(
         open fun onLongTapConfirmed(ev: MotionEvent) {
         }
     }
-
 }

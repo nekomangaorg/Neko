@@ -1,7 +1,7 @@
 package eu.kanade.tachiyomi.data.library
 
 import eu.kanade.tachiyomi.data.database.models.Manga
-import java.util.*
+import java.util.Comparator
 
 /**
  * This class will provide various functions to Rank mangas to efficiently schedule mangas to update.
@@ -19,7 +19,7 @@ internal class LibraryUpdateRanker {
          */
         fun relevanceRanking(): Comparator<Manga> {
             return Comparator { mangaFirst: Manga,
-                                mangaSecond: Manga ->
+                mangaSecond: Manga ->
                 compareValues(mangaSecond.last_update, mangaFirst.last_update)
             }
         }

@@ -2,7 +2,15 @@ package eu.kanade.tachiyomi.ui.setting
 
 import android.app.Activity
 import android.graphics.drawable.Drawable
-import androidx.preference.*
+import androidx.preference.CheckBoxPreference
+import androidx.preference.DialogPreference
+import androidx.preference.EditTextPreference
+import androidx.preference.Preference
+import androidx.preference.PreferenceCategory
+import androidx.preference.PreferenceGroup
+import androidx.preference.PreferenceManager
+import androidx.preference.PreferenceScreen
+import androidx.preference.SwitchPreferenceCompat
 import com.mikepenz.iconics.IconicsDrawable
 import eu.kanade.tachiyomi.widget.preference.IntListMatPreference
 import eu.kanade.tachiyomi.widget.preference.ListMatPreference
@@ -32,23 +40,31 @@ inline fun PreferenceGroup.editTextPreference(block: (@DSL EditTextPreference).(
     return initThenAdd(EditTextPreference(context), block).also(::initDialog)
 }
 
-inline fun PreferenceGroup.listPreference(activity: Activity?, block: (@DSL ListMatPreference).()
--> Unit):
-        ListMatPreference {
+inline fun PreferenceGroup.listPreference(
+    activity: Activity?,
+    block: (@DSL ListMatPreference).()
+    -> Unit
+):
+    ListMatPreference {
     return initThenAdd(ListMatPreference(activity, context), block)
 }
 
-inline fun PreferenceGroup.intListPreference(activity: Activity?, block: (@DSL
-IntListMatPreference).() -> Unit):
-        IntListMatPreference {
+inline fun PreferenceGroup.intListPreference(
+    activity: Activity?,
+    block: (@DSL
+    IntListMatPreference).() -> Unit
+):
+    IntListMatPreference {
     return initThenAdd(IntListMatPreference(activity, context), block)
 }
 
-inline fun PreferenceGroup.multiSelectListPreferenceMat(activity: Activity?, block: (@DSL
-MultiListMatPreference).()
--> Unit): MultiListMatPreference {
+inline fun PreferenceGroup.multiSelectListPreferenceMat(
+    activity: Activity?,
+    block: (@DSL
+    MultiListMatPreference).()
+    -> Unit
+): MultiListMatPreference {
     return initThenAdd(MultiListMatPreference(activity, context), block)
-
 }
 
 inline fun PreferenceScreen.preferenceCategory(block: (@DSL PreferenceCategory).() -> Unit): PreferenceCategory {
@@ -105,7 +121,6 @@ var Preference.titleRes: Int
         setTitle(value)
     }
 
-
 var Preference.iconDrawable: Drawable
     get() = IconicsDrawable(context) // set only
     set(value) {
@@ -117,4 +132,3 @@ var Preference.summaryRes: Int
     set(value) {
         setSummary(value)
     }
-

@@ -28,11 +28,19 @@ class ChapterItem(val chapter: Chapter, val manga: Manga) : AbstractFlexibleItem
         return R.layout.chapters_item
     }
 
-    override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): ChapterHolder? {
+    override fun createViewHolder(
+        view: View,
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>
+    ): ChapterHolder? {
         return ChapterHolder(view, adapter as ChaptersAdapter)
     }
 
-    override fun bindViewHolder(adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>, holder: ChapterHolder, position: Int, payloads: MutableList<Any>?) {
+    override fun bindViewHolder(
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
+        holder: ChapterHolder,
+        position: Int,
+        payloads: MutableList<Any>?
+    ) {
 
         holder.bind(this, manga)
     }
@@ -48,5 +56,4 @@ class ChapterItem(val chapter: Chapter, val manga: Manga) : AbstractFlexibleItem
     override fun hashCode(): Int {
         return chapter.id!!.hashCode()
     }
-
 }

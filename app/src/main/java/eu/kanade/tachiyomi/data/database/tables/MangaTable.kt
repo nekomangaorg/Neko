@@ -111,5 +111,4 @@ object MangaTable {
 
     val addAnimePlanetIdCol: String
         get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_ANIME_PLANET_ID} TEXT DEFAULT NULL"
-
 }

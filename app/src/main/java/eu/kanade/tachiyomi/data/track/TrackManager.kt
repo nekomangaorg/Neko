@@ -6,7 +6,7 @@ import eu.kanade.tachiyomi.data.track.kitsu.Kitsu
 import eu.kanade.tachiyomi.data.track.mdlist.AnimePlanet
 import eu.kanade.tachiyomi.data.track.mdlist.MangaUpdates
 import eu.kanade.tachiyomi.data.track.mdlist.MdList
-import eu.kanade.tachiyomi.data.track.myanimelist.Myanimelist
+import eu.kanade.tachiyomi.data.track.myanimelist.MyAnimeList
 
 class TrackManager(context: Context) {
 
@@ -21,7 +21,7 @@ class TrackManager(context: Context) {
 
     val mdList = MdList(context, MDLIST)
 
-    val myAnimeList = Myanimelist(context, MYANIMELIST)
+    val myAnimeList = MyAnimeList(context, MYANIMELIST)
 
     val aniList = Anilist(context, ANILIST)
 
@@ -31,11 +31,9 @@ class TrackManager(context: Context) {
 
     val mangaUpdates = MangaUpdates(MANGAUPDATES)
 
-
     val services = listOf(mdList, aniList, kitsu, myAnimeList, animePlanet, mangaUpdates)
 
     fun getService(id: Int) = services.find { it.id == id }
 
     fun hasLoggedServices() = services.any { it.isLogged }
-
 }

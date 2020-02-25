@@ -64,5 +64,4 @@ class DownloadPresenter : BasePresenter<DownloadController>() {
     fun reorder(downloads: List<Download>) {
         downloadManager.reorderQueue(downloads)
     }
-
 }

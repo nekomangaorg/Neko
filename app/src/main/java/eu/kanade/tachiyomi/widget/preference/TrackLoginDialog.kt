@@ -18,7 +18,7 @@ import uy.kohesive.injekt.api.get
 class TrackLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle) {
 
     private val service = Injekt.get<TrackManager>().getService(args.getInt("key"))!!
-    
+
     constructor(service: TrackService) : this(Bundle().apply { putInt("key", service.id) })
 
     override fun onCreateDialog(savedState: Bundle?): Dialog {
@@ -70,5 +70,4 @@ class TrackLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle) {
     interface Listener {
         fun trackLoginDialogClosed(service: TrackService)
     }
-
 }

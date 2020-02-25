@@ -31,7 +31,6 @@ import uy.kohesive.injekt.api.InjektScope
 import uy.kohesive.injekt.injectLazy
 import uy.kohesive.injekt.registry.default.DefaultRegistrar
 
-
 @AcraCore(
         buildConfigClass = BuildConfig::class,
         reportFormat = StringFormat.JSON,
@@ -60,12 +59,11 @@ open class App : Application(), LifecycleObserver {
         Iconics.registerFont(CommunityMaterial)
         Iconics.registerFont(MaterialDesignDx)
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
-
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
     fun onAppBackgrounded() {
-        //App in background
+        // App in background
         val preferences: PreferencesHelper by injectLazy()
         if (preferences.lockAfter().getOrDefault() >= 0) {
             MainActivity.unlocked = false

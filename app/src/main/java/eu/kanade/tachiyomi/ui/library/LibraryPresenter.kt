@@ -20,15 +20,17 @@ import eu.kanade.tachiyomi.util.isNullOrUnsubscribed
 import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_EXCLUDE
 import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_IGNORE
 import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_INCLUDE
+import java.io.IOException
+import java.io.InputStream
+import java.util.ArrayList
+import java.util.Collections
+import java.util.Comparator
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import java.io.IOException
-import java.io.InputStream
-import java.util.*
 
 /**
  * Class containing library information.
@@ -44,11 +46,11 @@ private typealias LibraryMap = Map<Int, List<LibraryItem>>
  * Presenter of [LibraryController].
  */
 class LibraryPresenter(
-        private val db: DatabaseHelper = Injekt.get(),
-        private val preferences: PreferencesHelper = Injekt.get(),
-        private val coverCache: CoverCache = Injekt.get(),
-        private val sourceManager: SourceManager = Injekt.get(),
-        private val downloadManager: DownloadManager = Injekt.get()
+    private val db: DatabaseHelper = Injekt.get(),
+    private val preferences: PreferencesHelper = Injekt.get(),
+    private val coverCache: CoverCache = Injekt.get(),
+    private val sourceManager: SourceManager = Injekt.get(),
+    private val downloadManager: DownloadManager = Injekt.get()
 ) : BasePresenter<LibraryController>() {
 
     /**
@@ -88,19 +90,19 @@ class LibraryPresenter(
     fun subscribeLibrary() {
         if (librarySubscription.isNullOrUnsubscribed()) {
             librarySubscription = getLibraryObservable()
-                    .combineLatest(downloadTriggerRelay.observeOn(Schedulers.io())) { lib, _ ->
-                        lib.apply { setDownloadCount(mangaMap) }
-                    }
-                    .combineLatest(filterTriggerRelay.observeOn(Schedulers.io())) { lib, _ ->
-                        lib.copy(mangaMap = applyFilters(lib.mangaMap))
-                    }
-                    .combineLatest(sortTriggerRelay.observeOn(Schedulers.io())) { lib, _ ->
-                        lib.copy(mangaMap = applySort(lib.mangaMap))
-                    }
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeLatestCache({ view, (categories, mangaMap) ->
-                        view.onNextLibraryUpdate(categories, mangaMap)
-                    })
+                .combineLatest(downloadTriggerRelay.observeOn(Schedulers.io())) { lib, _ ->
+                    lib.apply { setDownloadCount(mangaMap) }
+                }
+                .combineLatest(filterTriggerRelay.observeOn(Schedulers.io())) { lib, _ ->
+                    lib.copy(mangaMap = applyFilters(lib.mangaMap))
+                }
+                .combineLatest(sortTriggerRelay.observeOn(Schedulers.io())) { lib, _ ->
+                    lib.copy(mangaMap = applySort(lib.mangaMap))
+                }
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeLatestCache({ view, (categories, mangaMap) ->
+                    view.onNextLibraryUpdate(categories, mangaMap)
+                })
         }
     }
 
@@ -122,7 +124,6 @@ class LibraryPresenter(
 
         val filterMyanimelist = preferences.filterMyAnimeList().getOrDefault()
 
-
         val filterFn: (LibraryItem) -> Boolean = f@{ item ->
             // Filter when there isn't unread chapters.
             if (filterUnread == STATE_INCLUDE && item.manga.unread == 0) return@f false
@@ -139,7 +140,6 @@ class LibraryPresenter(
                 val trackCount = tracks.count { it.sync_id == TrackManager.ANILIST }
                 if (filterAnilist == STATE_INCLUDE && trackCount == 0) return@f false
                 if (filterAnilist == STATE_EXCLUDE && trackCount > 0) return@f false
-
             }
             if (filterKitsu != STATE_IGNORE) {
                 val db = Injekt.get<DatabaseHelper>()
@@ -147,7 +147,6 @@ class LibraryPresenter(
                 val trackCount = tracks.count { it.sync_id == TrackManager.KITSU }
                 if (filterKitsu == STATE_INCLUDE && trackCount == 0) return@f false
                 if (filterKitsu == STATE_EXCLUDE && trackCount > 0) return@f false
-
             }
             if (filterMyanimelist != STATE_IGNORE) {
                 val db = Injekt.get<DatabaseHelper>()
@@ -155,7 +154,6 @@ class LibraryPresenter(
                 val trackCount = tracks.count { it.sync_id == TrackManager.MYANIMELIST }
                 if (filterMyanimelist == STATE_INCLUDE && trackCount == 0) return@f false
                 if (filterMyanimelist == STATE_EXCLUDE && trackCount > 0) return@f false
-
             }
             // Filter when there are no downloads.
             if (filterDownloaded != STATE_IGNORE) {
@@ -243,9 +241,13 @@ class LibraryPresenter(
      * @return an observable of the categories and its manga.
      */
     private fun getLibraryObservable(): Observable<Library> {
-        return Observable.combineLatest(getCategoriesObservable(), getLibraryMangasObservable()) { dbCategories, libraryManga ->
-            val categories = if (libraryManga.containsKey(0)) arrayListOf(Category.createDefault()) + dbCategories
-            else dbCategories
+        return Observable.combineLatest(
+            getCategoriesObservable(),
+            getLibraryMangasObservable()
+        ) { dbCategories, libraryManga ->
+            val categories =
+                if (libraryManga.containsKey(0)) arrayListOf(Category.createDefault()) + dbCategories
+                else dbCategories
 
             this.categories = categories
             Library(categories, libraryManga)
@@ -270,9 +272,9 @@ class LibraryPresenter(
     private fun getLibraryMangasObservable(): Observable<LibraryMap> {
         val libraryAsList = preferences.libraryAsList()
         return db.getLibraryMangas().asRxObservable()
-                .map { list ->
-                    list.map { LibraryItem(it, libraryAsList) }.groupBy { it.manga.category }
-                }
+            .map { list ->
+                list.map { LibraryItem(it, libraryAsList) }.groupBy { it.manga.category }
+            }
     }
 
     /**
@@ -305,8 +307,8 @@ class LibraryPresenter(
     fun getCommonCategories(mangas: List<Manga>): Collection<Category> {
         if (mangas.isEmpty()) return emptyList()
         return mangas.toSet()
-                .map { db.getCategoriesForManga(it).executeAsBlocking() }
-                .reduce { set1: Iterable<Category>, set2 -> set1.intersect(set2) }
+            .map { db.getCategoriesForManga(it).executeAsBlocking() }
+            .reduce { set1: Iterable<Category>, set2 -> set1.intersect(set2) }
     }
 
     /**
@@ -321,9 +323,9 @@ class LibraryPresenter(
         mangaToDelete.forEach { it.favorite = false }
 
         Observable.fromCallable { db.insertMangas(mangaToDelete).executeAsBlocking() }
-                .onErrorResumeNext { Observable.empty() }
-                .subscribeOn(Schedulers.io())
-                .subscribe()
+            .onErrorResumeNext { Observable.empty() }
+            .subscribeOn(Schedulers.io())
+            .subscribe()
 
         Observable.fromCallable {
             mangaToDelete.forEach { manga ->
@@ -336,8 +338,8 @@ class LibraryPresenter(
                 }
             }
         }
-                .subscribeOn(Schedulers.io())
-                .subscribe()
+            .subscribeOn(Schedulers.io())
+            .subscribe()
     }
 
     /**
@@ -373,5 +375,4 @@ class LibraryPresenter(
         }
         return false
     }
-
 }

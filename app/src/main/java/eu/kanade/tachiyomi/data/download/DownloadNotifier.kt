@@ -135,7 +135,7 @@ internal class DownloadNotifier(private val context: Context) {
             addAction(R.drawable.ic_play_arrow_grey,
                     context.getString(R.string.action_resume),
                     NotificationReceiver.resumeDownloadsPendingBroadcast(context))
-            //Clear action
+            // Clear action
             addAction(R.drawable.ic_clear_grey,
                     context.getString(R.string.action_clear),
                     NotificationReceiver.clearDownloadsPendingBroadcast(context))

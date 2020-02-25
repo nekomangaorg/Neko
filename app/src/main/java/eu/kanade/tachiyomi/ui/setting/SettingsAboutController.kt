@@ -15,15 +15,15 @@ import eu.kanade.tachiyomi.data.updater.UpdaterService
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.main.ChangelogDialogController
 import eu.kanade.tachiyomi.util.toast
+import java.text.DateFormat
+import java.text.ParseException
+import java.text.SimpleDateFormat
+import java.util.Locale
+import java.util.TimeZone
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 import timber.log.Timber
-import java.text.DateFormat
-import java.text.ParseException
-import java.text.SimpleDateFormat
-import java.util.*
-
 
 class SettingsAboutController : SettingsController() {
 
@@ -98,25 +98,25 @@ class SettingsAboutController : SettingsController() {
         activity?.toast(R.string.update_check_look_for_updates)
         releaseSubscription?.unsubscribe()
         releaseSubscription = updateChecker.checkForUpdate()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ result ->
-                    when (result) {
-                        is GithubUpdateResult.NewUpdate -> {
-                            val body = result.release.changeLog
-                            val url = result.release.downloadLink
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({ result ->
+                when (result) {
+                    is GithubUpdateResult.NewUpdate -> {
+                        val body = result.release.changeLog
+                        val url = result.release.downloadLink
 
-                            // Create confirmation window
-                            NewUpdateDialogController(body, url).showDialog(router)
-                        }
-                        is GithubUpdateResult.NoNewUpdate -> {
-                            activity?.toast(R.string.update_check_no_new_updates)
-                        }
+                        // Create confirmation window
+                        NewUpdateDialogController(body, url).showDialog(router)
                     }
-                }, { error ->
-                    activity?.toast(error.message)
-                    Timber.e(error)
-                })
+                    is GithubUpdateResult.NoNewUpdate -> {
+                        activity?.toast(R.string.update_check_no_new_updates)
+                    }
+                }
+            }, { error ->
+                activity?.toast(error.message)
+                Timber.e(error)
+            })
     }
 
     class NewUpdateDialogController(bundle: Bundle? = null) : DialogController(bundle) {
@@ -128,17 +128,17 @@ class SettingsAboutController : SettingsController() {
 
         override fun onCreateDialog(savedViewState: Bundle?): Dialog {
             return MaterialDialog(activity!!)
-                    .title(R.string.update_check_title)
-                    .message(text = args.getString(BODY_KEY)!!)
-                    .negativeButton(R.string.update_check_ignore)
-                    .positiveButton(R.string.update_check_confirm) {
-                        val appContext = applicationContext
-                        if (appContext != null) {
-                            // Start download
-                            val url = args.getString(URL_KEY)!!
-                            UpdaterService.downloadUpdate(appContext, url)
-                        }
+                .title(R.string.update_check_title)
+                .message(text = args.getString(BODY_KEY)!!)
+                .negativeButton(R.string.update_check_ignore)
+                .positiveButton(R.string.update_check_confirm) {
+                    val appContext = applicationContext
+                    if (appContext != null) {
+                        // Start download
+                        val url = args.getString(URL_KEY)!!
+                        UpdaterService.downloadUpdate(appContext, url)
                     }
+                }
         }
 
         private companion object {
@@ -154,7 +154,8 @@ class SettingsAboutController : SettingsController() {
             val date = inputDf.parse(BuildConfig.BUILD_TIME)
 
             val outputDf = DateFormat.getDateTimeInstance(
-                    DateFormat.MEDIUM, DateFormat.SHORT, Locale.getDefault())
+                DateFormat.MEDIUM, DateFormat.SHORT, Locale.getDefault()
+            )
             outputDf.timeZone = TimeZone.getDefault()
 
             return outputDf.format(date)

@@ -3,12 +3,12 @@ package eu.kanade.tachiyomi.network
 import android.content.Context
 import android.os.SystemClock
 import eu.kanade.tachiyomi.BuildConfig
+import java.io.File
+import java.util.concurrent.TimeUnit
 import okhttp3.Cache
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
-import java.io.File
-import java.util.concurrent.TimeUnit
 
 class NetworkHelper(context: Context) {
 
@@ -50,7 +50,6 @@ class NetworkHelper(context: Context) {
         it.proceed(it.request())
     }
 
-
     val nonLoggedInClient = {
         val builder = OkHttpClient.Builder()
                 .connectTimeout(10, TimeUnit.SECONDS)
@@ -67,5 +66,4 @@ class NetworkHelper(context: Context) {
     }()
 
     val client = nonLoggedInClient.newBuilder().cookieJar(cookieManager).build()
-    
 }

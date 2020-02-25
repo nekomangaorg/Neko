@@ -15,9 +15,9 @@ import eu.kanade.tachiyomi.source.online.HttpSource
 import kotlinx.android.synthetic.main.pref_item_source.view.*
 
 class LoginCheckBoxPreference @JvmOverloads constructor(
-        context: Context,
-        val source: HttpSource,
-        attrs: AttributeSet? = null
+    context: Context,
+    val source: HttpSource,
+    attrs: AttributeSet? = null
 ) : Preference(context, attrs) {
 
     init {
@@ -25,7 +25,6 @@ class LoginCheckBoxPreference @JvmOverloads constructor(
     }
 
     private var onLoginClick: () -> Unit = {}
-
 
     override fun onBindViewHolder(holder: PreferenceViewHolder) {
         super.onBindViewHolder(holder)
@@ -48,7 +47,6 @@ class LoginCheckBoxPreference @JvmOverloads constructor(
         loginFrame.setOnClickListener {
             onLoginClick()
         }
-
     }
 
     fun setOnLoginClickListener(block: () -> Unit) {
@@ -59,5 +57,4 @@ class LoginCheckBoxPreference @JvmOverloads constructor(
     public override fun notifyChanged() {
         super.notifyChanged()
     }
-
 }

@@ -15,7 +15,12 @@ import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
-import android.view.*
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import android.view.animation.DecelerateInterpolator
 import android.widget.ImageView
 import android.widget.Toast
@@ -59,16 +64,17 @@ import eu.kanade.tachiyomi.util.getUriCompat
 import eu.kanade.tachiyomi.util.snack
 import eu.kanade.tachiyomi.util.toast
 import eu.kanade.tachiyomi.util.truncateCenter
+import java.io.File
+import java.text.DecimalFormat
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import jp.wasabeef.glide.transformations.CropSquareTransformation
 import jp.wasabeef.glide.transformations.MaskTransformation
 import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.android.synthetic.main.manga_info_controller.*
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
-import java.io.File
-import java.text.DecimalFormat
-import java.text.SimpleDateFormat
-import java.util.*
 
 /**
  * Fragment that shows manga information.
@@ -76,7 +82,7 @@ import java.util.*
  * UI related actions should be called from here.
  */
 class MangaInfoController : NucleusController<MangaInfoPresenter>(),
-        ChangeMangaCategoriesDialog.Listener {
+    ChangeMangaCategoriesDialog.Listener {
 
     /**
      * Preferences helper.
@@ -105,8 +111,10 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
 
     override fun createPresenter(): MangaInfoPresenter {
         val ctrl = parentController as MangaController
-        return MangaInfoPresenter(ctrl.manga!!, ctrl.source!!,
-                ctrl.chapterCountRelay, ctrl.lastUpdateRelay, ctrl.mangaFavoriteRelay)
+        return MangaInfoPresenter(
+            ctrl.manga!!, ctrl.source!!,
+            ctrl.chapterCountRelay, ctrl.lastUpdateRelay, ctrl.mangaFavoriteRelay
+        )
     }
 
     override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
@@ -126,7 +134,10 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         swipe_refresh.refreshes().subscribeUntilDestroy { fetchMangaFromSource() }
 
         manga_full_title.longClicks().subscribeUntilDestroy {
-            copyToClipboard(view.context.getString(R.string.title), manga_full_title.text.toString())
+            copyToClipboard(
+                view.context.getString(R.string.title),
+                manga_full_title.text.toString()
+            )
         }
 
         /*manga_full_title.clicks().subscribeUntilDestroy {
@@ -150,7 +161,10 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
          }*/
 
         manga_summary.longClicks().subscribeUntilDestroy {
-            copyToClipboard(view.context.getString(R.string.description), manga_summary.text.toString())
+            copyToClipboard(
+                view.context.getString(R.string.description),
+                manga_summary.text.toString()
+            )
         }
 
         manga_genres_tags.setOnTagClickListener { tag -> performLocalSearch(tag) }
@@ -170,10 +184,10 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.manga_info, menu)
         menu.findItem(R.id.action_share).icon =
-                IconicsDrawable(applicationContext!!)
-                        .icon(CommunityMaterial.Icon2.cmd_share_variant)
-                        .sizeDp(18)
-                        .colorInt(Color.WHITE)
+            IconicsDrawable(applicationContext!!)
+                .icon(CommunityMaterial.Icon2.cmd_share_variant)
+                .sizeDp(18)
+                .colorInt(Color.WHITE)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -190,14 +204,13 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
      * If true update view with manga information,
      * if false fetch manga information
      *
-     * @param manga  manga object containing information about manga.
+     * @param manga manga object containing information about manga.
      * @param source the source of the manga.
      */
     fun onNextManga(manga: Manga, source: Source) {
         if (manga.initialized) {
             // Update view.
             setMangaInfo(manga)
-
         } else {
             // Initialize manga.
             fetchMangaFromSource()
@@ -214,7 +227,7 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         val view = view ?: return
 
         try {
-            //update full title TextView.
+            // update full title TextView.
             manga_full_title.text = if (manga.title.isBlank()) {
                 view.context.getString(R.string.unknown)
             } else {
@@ -238,9 +251,9 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
             // If manga lang flag is known
             manga_lang_flag.visibility = View.VISIBLE
             when (manga.lang_flag?.toLowerCase(Locale.US)) {
-                "cn" -> manga_lang_flag.setImageResource(R.drawable.ic_flag_china);
-                "kr" -> manga_lang_flag.setImageResource(R.drawable.ic_flag_korea);
-                "jp" -> manga_lang_flag.setImageResource(R.drawable.ic_flag_japan);
+                "cn" -> manga_lang_flag.setImageResource(R.drawable.ic_flag_china)
+                "kr" -> manga_lang_flag.setImageResource(R.drawable.ic_flag_korea)
+                "jp" -> manga_lang_flag.setImageResource(R.drawable.ic_flag_japan)
                 else -> manga_lang_flag.visibility = View.GONE
             }
             // Update genres list
@@ -256,15 +269,17 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
             }
 
             // Update status TextView.
-            manga_status.setText(when (manga.status) {
-                SManga.ONGOING -> R.string.ongoing
-                SManga.COMPLETED -> R.string.completed
-                SManga.LICENSED -> R.string.licensed
-                SManga.PUBLICATION_COMPLETE -> R.string.publication_complete
-                SManga.HIATUS -> R.string.hiatus
-                SManga.CANCELLED -> R.string.cancelled
-                else -> R.string.unknown
-            })
+            manga_status.setText(
+                when (manga.status) {
+                    SManga.ONGOING -> R.string.ongoing
+                    SManga.COMPLETED -> R.string.completed
+                    SManga.LICENSED -> R.string.licensed
+                    SManga.PUBLICATION_COMPLETE -> R.string.publication_complete
+                    SManga.HIATUS -> R.string.hiatus
+                    SManga.CANCELLED -> R.string.cancelled
+                    else -> R.string.unknown
+                }
+            )
 
             // Set the favorite drawable to the correct one.
             setFavoriteDrawable(manga.favorite)
@@ -273,7 +288,6 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         } catch (e: Exception) {
             Timber.e(e)
         }
-
     }
 
     private fun switchProgressBar(visibility: Int) {
@@ -285,31 +299,32 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         // Set cover if it wasn't already.
         if (manga_cover.drawable == null && !manga.thumbnail_url.isNullOrEmpty()) {
             GlideApp.with(view.context)
-                    .load(manga)
-                    .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
-                    .centerCrop()
-                    .into(manga_cover)
+                .load(manga)
+                .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+                .centerCrop()
+                .into(manga_cover)
             if (manga_cover_full != null) {
                 GlideApp.with(view.context).asDrawable().load(manga)
-                        .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
-                        .override(CustomTarget.SIZE_ORIGINAL, CustomTarget.SIZE_ORIGINAL)
-                        .into(object : CustomTarget<Drawable>() {
-                            override fun onResourceReady(resource: Drawable,
-                                                         transition: Transition<in Drawable>?
-                            ) {
-                                fullRes = resource
-                            }
+                    .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+                    .override(CustomTarget.SIZE_ORIGINAL, CustomTarget.SIZE_ORIGINAL)
+                    .into(object : CustomTarget<Drawable>() {
+                        override fun onResourceReady(
+                            resource: Drawable,
+                            transition: Transition<in Drawable>?
+                        ) {
+                            fullRes = resource
+                        }
 
-                            override fun onLoadCleared(placeholder: Drawable?) {}
-                        })
+                        override fun onLoadCleared(placeholder: Drawable?) {}
+                    })
             }
 
             if (backdrop != null) {
                 GlideApp.with(view.context)
-                        .load(manga)
-                        .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
-                        .centerCrop()
-                        .into(backdrop)
+                    .load(manga)
+                    .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+                    .centerCrop()
+                    .into(backdrop)
             }
         }
     }
@@ -376,7 +391,7 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
     private fun prepareToShareManga() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && manga_cover.drawable != null)
             GlideApp.with(activity!!).asBitmap().load(presenter.manga).into(object :
-                    CustomTarget<Bitmap>() {
+                CustomTarget<Bitmap>() {
                 override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
                     presenter.shareManga(resource)
                 }
@@ -425,17 +440,18 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         // Border drawable if false, filled drawable if true.
 
         fab_favorite?.setImageDrawable(
-                if (isFavorite) {
-                    IconicsDrawable(applicationContext!!)
-                            .icon(CommunityMaterial.Icon2.cmd_heart)
-                            .colorInt(Color.WHITE)
-                            .sizeDp(20)
-                } else {
-                    IconicsDrawable(applicationContext!!)
-                            .icon(CommunityMaterial.Icon2.cmd_heart_outline)
-                            .colorInt(Color.WHITE)
-                            .sizeDp(20)
-                })
+            if (isFavorite) {
+                IconicsDrawable(applicationContext!!)
+                    .icon(CommunityMaterial.Icon2.cmd_heart)
+                    .colorInt(Color.WHITE)
+                    .sizeDp(20)
+            } else {
+                IconicsDrawable(applicationContext!!)
+                    .icon(CommunityMaterial.Icon2.cmd_heart_outline)
+                    .colorInt(Color.WHITE)
+                    .sizeDp(20)
+            }
+        )
     }
 
     /**
@@ -450,14 +466,12 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         presenter.fetchMangaFromSource()
     }
 
-
     /**
      * Update swipe refresh to stop showing refresh in progress spinner.
      */
     fun onFetchMangaDone() {
         setRefreshing(false)
     }
-
 
     /**
      * Update swipe refresh to start showing refresh in progress spinner.
@@ -498,7 +512,7 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
                     }.toTypedArray()
 
                     ChangeMangaCategoriesDialog(this, listOf(manga), categories, preselected)
-                            .showDialog(router)
+                        .showDialog(router)
                 }
             }
             activity?.toast(activity?.getString(R.string.manga_added_library))
@@ -527,7 +541,7 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
             }.toTypedArray()
 
             ChangeMangaCategoriesDialog(this, listOf(manga), categories, preselected)
-                    .showDialog(router)
+                .showDialog(router)
         }
     }
 
@@ -558,21 +572,23 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         }
 
         override fun onCreateDialog(savedViewState: Bundle?): Dialog {
-            val modes = intArrayOf(R.string.circular_icon,
-                    R.string.rounded_icon,
-                    R.string.square_icon,
-                    R.string.star_icon)
+            val modes = intArrayOf(
+                R.string.circular_icon,
+                R.string.rounded_icon,
+                R.string.square_icon,
+                R.string.star_icon
+            )
 
             return MaterialDialog(activity!!)
-                    .title(R.string.icon_shape)
-                    .negativeButton(android.R.string.cancel)
-                    .listItemsSingleChoice (
-                        items = modes.map { activity?.getString(it) as CharSequence },
-                        waitForPositiveButton = false)
-                    { _, i, _ ->
-                        (targetController as? MangaInfoController)?.createShortcutForShape(i)
-                        dismissDialog()
-                    }
+                .title(R.string.icon_shape)
+                .negativeButton(android.R.string.cancel)
+                .listItemsSingleChoice(
+                    items = modes.map { activity?.getString(it) as CharSequence },
+                    waitForPositiveButton = false
+                ) { _, i, _ ->
+                    (targetController as? MangaInfoController)?.createShortcutForShape(i)
+                    dismissDialog()
+                }
         }
     }
 
@@ -585,28 +601,31 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
     private fun createShortcutForShape(i: Int = 0) {
         if (activity == null) return
         GlideApp.with(activity!!)
-                .asBitmap()
-                .load(presenter.manga)
-                .diskCacheStrategy(DiskCacheStrategy.NONE)
-                .apply {
-                    when (i) {
-                        0 -> circleCrop()
-                        1 -> transform(RoundedCorners(5))
-                        2 -> transform(CropSquareTransformation())
-                        3 -> centerCrop().transform(MaskTransformation(R.drawable.mask_star))
-                    }
+            .asBitmap()
+            .load(presenter.manga)
+            .diskCacheStrategy(DiskCacheStrategy.NONE)
+            .apply {
+                when (i) {
+                    0 -> circleCrop()
+                    1 -> transform(RoundedCorners(5))
+                    2 -> transform(CropSquareTransformation())
+                    3 -> centerCrop().transform(MaskTransformation(R.drawable.mask_star))
                 }
-                .into(object : CustomTarget<Bitmap>(96, 96) {
-                    override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
-                        createShortcut(resource)
-                    }
+            }
+            .into(object : CustomTarget<Bitmap>(96, 96) {
+                override fun onResourceReady(
+                    resource: Bitmap,
+                    transition: Transition<in Bitmap>?
+                ) {
+                    createShortcut(resource)
+                }
 
-                    override fun onLoadCleared(placeholder: Drawable?) {}
+                override fun onLoadCleared(placeholder: Drawable?) {}
 
-                    override fun onLoadFailed(errorDrawable: Drawable?) {
-                        activity?.toast(R.string.icon_creation_fail)
-                    }
-                })
+                override fun onLoadFailed(errorDrawable: Drawable?) {
+                    activity?.toast(R.string.icon_creation_fail)
+                }
+            })
     }
 
     /**
@@ -624,8 +643,10 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         val clipboard = activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         clipboard.setPrimaryClip(ClipData.newPlainText(label, content))
 
-        activity.toast(view.context.getString(R.string.copied_to_clipboard, content.truncateCenter(20)),
-                Toast.LENGTH_SHORT)
+        activity.toast(
+            view.context.getString(R.string.copied_to_clipboard, content.truncateCenter(20)),
+            Toast.LENGTH_SHORT
+        )
     }
 
     /**
@@ -653,10 +674,12 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
 
         // Create the shortcut intent.
         val shortcutIntent = activity.intent
-                .setAction(MainActivity.SHORTCUT_MANGA)
-                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                .putExtra(MangaController.MANGA_EXTRA,
-                        mangaControllerArgs.getLong(MangaController.MANGA_EXTRA))
+            .setAction(MainActivity.SHORTCUT_MANGA)
+            .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            .putExtra(
+                MangaController.MANGA_EXTRA,
+                mangaControllerArgs.getLong(MangaController.MANGA_EXTRA)
+            )
 
         // Check if shortcut placement is supported
         if (ShortcutManagerCompat.isRequestPinShortcutSupported(activity)) {
@@ -664,14 +687,15 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
 
             // Create shortcut info
             val shortcutInfo = ShortcutInfoCompat.Builder(activity, shortcutId)
-                    .setShortLabel(presenter.manga.title)
-                    .setIcon(IconCompat.createWithBitmap(icon))
-                    .setIntent(shortcutIntent)
-                    .build()
+                .setShortLabel(presenter.manga.title)
+                .setIcon(IconCompat.createWithBitmap(icon))
+                .setIntent(shortcutIntent)
+                .build()
 
             val successCallback = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 // Create the CallbackIntent.
-                val intent = ShortcutManagerCompat.createShortcutResultIntent(activity, shortcutInfo)
+                val intent =
+                    ShortcutManagerCompat.createShortcutResultIntent(activity, shortcutInfo)
 
                 // Configure the intent so that the broadcast receiver gets the callback successfully.
                 PendingIntent.getBroadcast(activity, 0, intent, 0)
@@ -680,8 +704,10 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
             }
 
             // Request shortcut.
-            ShortcutManagerCompat.requestPinShortcut(activity, shortcutInfo,
-                    successCallback.intentSender)
+            ShortcutManagerCompat.requestPinShortcut(
+                activity, shortcutInfo,
+                successCallback.intentSender
+            )
         }
     }
 
@@ -702,7 +728,8 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
 
     override fun handleBack(): Boolean {
         if (manga_cover_full?.visibility == View.VISIBLE && activity?.tabs?.selectedTabPosition
-                == 0) {
+            == 0
+        ) {
             manga_cover_full?.performClick()
             return true
         }
@@ -747,7 +774,7 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
         // AnimationSet for backdrop because idk how to use TransitionSet
         currentAnimator = AnimatorSet().apply {
             play(
-                    ObjectAnimator.ofFloat(fullBackdrop, View.ALPHA, 0f, 0.5f)
+                ObjectAnimator.ofFloat(fullBackdrop, View.ALPHA, 0f, 0.5f)
             )
             duration = shortAnimationDuration.toLong()
             interpolator = DecelerateInterpolator()
@@ -810,6 +837,4 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
             }
         }
     }
-
-
 }

@@ -60,7 +60,7 @@ class DownloadCustomChaptersDialog<T> : DialogController
                 .title(R.string.custom_download)
                 .customView(view = view, scrollable = false)
                 .negativeButton(android.R.string.cancel)
-                .positiveButton(android.R.string.ok){
+                .positiveButton(android.R.string.ok) {
                     (targetController as? Listener)?.downloadCustomChapters(view.amount)
                 }
     }

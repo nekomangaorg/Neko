@@ -27,7 +27,7 @@ class SettingsMainController : SettingsController() {
             onClick { navigateTo(SettingsGeneralController()) }
         }
         preference {
-        iconDrawable= IconicsDrawable(context).icon(CommunityMaterial.Icon2.cmd_library)
+        iconDrawable = IconicsDrawable(context).icon(CommunityMaterial.Icon2.cmd_library)
                 .colorInt(tintColor)
                 .sizeDp(size)
             titleRes = R.string.pref_category_library

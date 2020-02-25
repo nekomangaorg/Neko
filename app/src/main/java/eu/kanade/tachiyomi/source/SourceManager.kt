@@ -7,7 +7,7 @@ import eu.kanade.tachiyomi.source.online.Mangadex
  */
 open class SourceManager {
 
-    //private val sourcesMap = mutableMapOf<Long, Source>()
+    // private val sourcesMap = mutableMapOf<Long, Source>()
     private val source: Source
 
     init {
@@ -26,11 +26,9 @@ open class SourceManager {
         return possibleIds.contains(sourceKey)
     }
 
-
     fun getNullableSource(sourceKey: Long): Source? {
         return source
     }
-
 
     fun getSources(): List<Source> {
         return listOf(source)
@@ -81,4 +79,3 @@ open class SourceManager {
         )
     }
 }
-

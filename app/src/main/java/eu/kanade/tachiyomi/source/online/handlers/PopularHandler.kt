@@ -61,6 +61,5 @@ class PopularHandler(val client: OkHttpClient, private val headers: Headers) {
     companion object {
         const val popularMangaSelector = "div.manga-entry"
         const val popularMangaNextPageSelector = ".pagination li:not(.disabled) span[title*=last page]:not(disabled)"
-
     }
 }

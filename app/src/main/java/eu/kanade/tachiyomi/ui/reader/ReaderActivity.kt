@@ -11,7 +11,12 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
-import android.view.*
+import android.view.KeyEvent
+import android.view.Menu
+import android.view.MenuItem
+import android.view.MotionEvent
+import android.view.View
+import android.view.WindowManager
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.SeekBar
@@ -40,9 +45,17 @@ import eu.kanade.tachiyomi.ui.reader.viewer.pager.L2RPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.R2LPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.VerticalPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
-import eu.kanade.tachiyomi.util.*
+import eu.kanade.tachiyomi.util.GLUtil
+import eu.kanade.tachiyomi.util.getUriCompat
+import eu.kanade.tachiyomi.util.gone
+import eu.kanade.tachiyomi.util.plusAssign
+import eu.kanade.tachiyomi.util.toast
+import eu.kanade.tachiyomi.util.visible
 import eu.kanade.tachiyomi.widget.SimpleAnimationListener
 import eu.kanade.tachiyomi.widget.SimpleSeekBarListener
+import java.io.File
+import java.util.Date
+import java.util.concurrent.TimeUnit
 import kotlinx.android.synthetic.main.reader_activity.*
 import me.zhanghai.android.systemuihelper.SystemUiHelper
 import nucleus.factory.RequiresPresenter
@@ -52,9 +65,6 @@ import rx.android.schedulers.AndroidSchedulers
 import rx.subscriptions.CompositeSubscription
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
-import java.io.File
-import java.util.*
-import java.util.concurrent.TimeUnit
 
 /**
  * Activity containing the reader of Tachiyomi. This activity is mostly a container of the
@@ -122,10 +132,12 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
      * Called when the activity is created. Initializes the presenter and configuration.
      */
     override fun onCreate(savedState: Bundle?) {
-        setTheme(when (preferences.readerTheme().getOrDefault()) {
-            0 -> R.style.Theme_Reader_Light
-            else -> R.style.Theme_Reader
-        })
+        setTheme(
+            when (preferences.readerTheme().getOrDefault()) {
+                0 -> R.style.Theme_Reader_Light
+                else -> R.style.Theme_Reader
+            }
+        )
         super.onCreate(savedState)
         setContentView(R.layout.reader_activity)
 
@@ -137,7 +149,11 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
                 finish()
                 return
             }
-            NotificationReceiver.dismissNotification(this, manga.hashCode(), Notifications.ID_NEW_CHAPTERS)
+            NotificationReceiver.dismissNotification(
+                this,
+                manga.hashCode(),
+                Notifications.ID_NEW_CHAPTERS
+            )
             if (chapter > -1) presenter.init(manga, chapter)
             else presenter.init(manga, chapterUrl)
         }
@@ -252,10 +268,12 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
                 }
             }
         })
-        left_chapter.setImageDrawable(IconicsDrawable(applicationContext)
+        left_chapter.setImageDrawable(
+            IconicsDrawable(applicationContext)
                 .icon(CommunityMaterial.Icon2.cmd_skip_previous)
                 .colorInt(Color.WHITE)
-                .sizeDp(18))
+                .sizeDp(18)
+        )
 
         left_chapter.setOnClickListener {
             if (viewer != null) {
@@ -265,10 +283,12 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
                     loadPreviousChapter()
             }
         }
-        right_chapter.setImageDrawable(IconicsDrawable(applicationContext)
+        right_chapter.setImageDrawable(
+            IconicsDrawable(applicationContext)
                 .icon(CommunityMaterial.Icon2.cmd_skip_next)
                 .colorInt(Color.WHITE)
-                .sizeDp(18))
+                .sizeDp(18)
+        )
 
         right_chapter.setOnClickListener {
             if (viewer != null) {
@@ -300,7 +320,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
                         // Fix status bar being translucent the first time it's opened.
                         if (Build.VERSION.SDK_INT >= 21) {
                             window.addFlags(
-                                    WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+                                WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
+                            )
                         }
                     }
                 })
@@ -490,10 +511,12 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         super.onResume()
         val useBiometrics = preferences.useBiometrics().getOrDefault()
         if (useBiometrics && BiometricManager.from(this)
-                        .canAuthenticate() == BiometricManager.BIOMETRIC_SUCCESS) {
+                .canAuthenticate() == BiometricManager.BIOMETRIC_SUCCESS
+        ) {
             if (!MainActivity.unlocked && (preferences.lockAfter().getOrDefault() <= 0 || Date()
-                            .time >=
-                            preferences.lastUnlock().getOrDefault() + 60 * 1000 * preferences.lockAfter().getOrDefault())) {
+                    .time >=
+                    preferences.lastUnlock().getOrDefault() + 60 * 1000 * preferences.lockAfter().getOrDefault())
+            ) {
                 val intent = Intent(this, BiometricActivity::class.java)
                 startActivity(intent)
                 this.overridePendingTransition(0, 0)
@@ -567,35 +590,35 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
             val sharedRotation = preferences.rotation().asObservable().share()
             val initialRotation = sharedRotation.take(1)
             val rotationUpdates = sharedRotation.skip(1)
-                    .delay(250, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
+                .delay(250, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
 
             subscriptions += Observable.merge(initialRotation, rotationUpdates)
-                    .subscribe { setOrientation(it) }
+                .subscribe { setOrientation(it) }
 
             subscriptions += preferences.readerTheme().asObservable()
-                    .skip(1) // We only care about updates
-                    .subscribe { recreate() }
+                .skip(1) // We only care about updates
+                .subscribe { recreate() }
 
             subscriptions += preferences.showPageNumber().asObservable()
-                    .subscribe { setPageNumberVisibility(it) }
+                .subscribe { setPageNumberVisibility(it) }
 
             subscriptions += preferences.trueColor().asObservable()
-                    .subscribe { setTrueColor(it) }
+                .subscribe { setTrueColor(it) }
 
             subscriptions += preferences.fullscreen().asObservable()
-                    .subscribe { setFullscreen(it) }
+                .subscribe { setFullscreen(it) }
 
             subscriptions += preferences.keepScreenOn().asObservable()
-                    .subscribe { setKeepScreenOn(it) }
+                .subscribe { setKeepScreenOn(it) }
 
             subscriptions += preferences.customBrightness().asObservable()
-                    .subscribe { setCustomBrightness(it) }
+                .subscribe { setCustomBrightness(it) }
 
             subscriptions += preferences.colorFilter().asObservable()
-                    .subscribe { setColorFilter(it) }
+                .subscribe { setColorFilter(it) }
 
             subscriptions += preferences.colorFilterMode().asObservable()
-                    .subscribe { setColorFilter(preferences.colorFilter().getOrDefault()) }
+                .subscribe { setColorFilter(preferences.colorFilter().getOrDefault()) }
         }
 
         /**
@@ -658,7 +681,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
             systemUi = if (enabled) {
                 val level = SystemUiHelper.LEVEL_IMMERSIVE
                 val flags = SystemUiHelper.FLAG_IMMERSIVE_STICKY or
-                        SystemUiHelper.FLAG_LAYOUT_IN_SCREEN_OLDER_DEVICES
+                    SystemUiHelper.FLAG_LAYOUT_IN_SCREEN_OLDER_DEVICES
 
                 SystemUiHelper(this@ReaderActivity, level, flags)
             } else {
@@ -683,8 +706,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         private fun setCustomBrightness(enabled: Boolean) {
             if (enabled) {
                 customBrightnessSubscription = preferences.customBrightnessValue().asObservable()
-                        .sample(100, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
-                        .subscribe { setCustomBrightnessValue(it) }
+                    .sample(100, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
+                    .subscribe { setCustomBrightnessValue(it) }
 
                 subscriptions.add(customBrightnessSubscription)
             } else {
@@ -699,8 +722,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         private fun setColorFilter(enabled: Boolean) {
             if (enabled) {
                 customFilterColorSubscription = preferences.colorFilterValue().asObservable()
-                        .sample(100, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
-                        .subscribe { setColorFilterValue(it) }
+                    .sample(100, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
+                    .subscribe { setColorFilterValue(it) }
 
                 subscriptions.add(customFilterColorSubscription)
             } else {
@@ -742,7 +765,5 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
             color_overlay.visibility = View.VISIBLE
             color_overlay.setFilterColor(value, preferences.colorFilterMode().getOrDefault())
         }
-
     }
-
 }

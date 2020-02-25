@@ -10,7 +10,11 @@ import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.biometric.BiometricManager
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
-import com.bluelinelabs.conductor.*
+import com.bluelinelabs.conductor.Conductor
+import com.bluelinelabs.conductor.Controller
+import com.bluelinelabs.conductor.ControllerChangeHandler
+import com.bluelinelabs.conductor.Router
+import com.bluelinelabs.conductor.RouterTransaction
 import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.typeface.IIcon
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
@@ -20,7 +24,11 @@ import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
-import eu.kanade.tachiyomi.ui.base.controller.*
+import eu.kanade.tachiyomi.ui.base.controller.DialogController
+import eu.kanade.tachiyomi.ui.base.controller.NoToolbarElevationController
+import eu.kanade.tachiyomi.ui.base.controller.SecondaryDrawerController
+import eu.kanade.tachiyomi.ui.base.controller.TabbedController
+import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.catalogue.browse.BrowseCatalogueController
 import eu.kanade.tachiyomi.ui.download.DownloadController
 import eu.kanade.tachiyomi.ui.library.LibraryController
@@ -29,11 +37,10 @@ import eu.kanade.tachiyomi.ui.recent_updates.RecentChaptersController
 import eu.kanade.tachiyomi.ui.recently_read.RecentlyReadController
 import eu.kanade.tachiyomi.ui.setting.SettingsMainController
 import eu.kanade.tachiyomi.widget.preference.MangadexLoginDialog
+import java.util.Date
 import kotlinx.android.synthetic.main.main_activity.*
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import java.util.*
-
 
 class MainActivity : BaseActivity(), MangadexLoginDialog.Listener {
 
@@ -133,17 +140,25 @@ class MainActivity : BaseActivity(), MangadexLoginDialog.Listener {
         }
 
         router.addChangeListener(object : ControllerChangeHandler.ControllerChangeListener {
-            override fun onChangeStarted(to: Controller?, from: Controller?, isPush: Boolean,
-                                         container: ViewGroup, handler: ControllerChangeHandler) {
+            override fun onChangeStarted(
+                to: Controller?,
+                from: Controller?,
+                isPush: Boolean,
+                container: ViewGroup,
+                handler: ControllerChangeHandler
+            ) {
 
                 syncActivityViewWithController(to, from)
             }
 
-            override fun onChangeCompleted(to: Controller?, from: Controller?, isPush: Boolean,
-                                           container: ViewGroup, handler: ControllerChangeHandler) {
-
+            override fun onChangeCompleted(
+                to: Controller?,
+                from: Controller?,
+                isPush: Boolean,
+                container: ViewGroup,
+                handler: ControllerChangeHandler
+            ) {
             }
-
         })
 
         syncActivityViewWithController(router.backstack.lastOrNull()?.controller())
@@ -160,9 +175,11 @@ class MainActivity : BaseActivity(), MangadexLoginDialog.Listener {
         super.onResume()
         val useBiometrics = preferences.useBiometrics().getOrDefault()
         if (useBiometrics && BiometricManager.from(this)
-                        .canAuthenticate() == BiometricManager.BIOMETRIC_SUCCESS) {
+                .canAuthenticate() == BiometricManager.BIOMETRIC_SUCCESS
+        ) {
             if (!unlocked && (preferences.lockAfter().getOrDefault() <= 0 || Date().time >=
-                            preferences.lastUnlock().getOrDefault() + 60 * 1000 * preferences.lockAfter().getOrDefault())) {
+                    preferences.lastUnlock().getOrDefault() + 60 * 1000 * preferences.lockAfter().getOrDefault())
+            ) {
                 val intent = Intent(this, BiometricActivity::class.java)
                 startActivity(intent)
                 this.overridePendingTransition(0, 0)
@@ -172,9 +189,8 @@ class MainActivity : BaseActivity(), MangadexLoginDialog.Listener {
     }
 
     private fun addIconToMenu(nav_drawer_library: Int, icon: IIcon) {
-        //no size or color needed since navigation drawer dictates it
+        // no size or color needed since navigation drawer dictates it
         nav_view.menu.findItem(nav_drawer_library).icon = IconicsDrawable(this).icon(icon)
-
     }
 
     /**
@@ -300,5 +316,4 @@ class MainActivity : BaseActivity(), MangadexLoginDialog.Listener {
         const val SHORTCUT_MANGA = "eu.kanade.tachiyomi.SHOW_MANGA"
         var unlocked = false
     }
-
 }

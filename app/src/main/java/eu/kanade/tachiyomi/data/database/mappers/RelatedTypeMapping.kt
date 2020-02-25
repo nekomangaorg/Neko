@@ -11,13 +11,11 @@ import com.pushtorefresh.storio.sqlite.queries.InsertQuery
 import com.pushtorefresh.storio.sqlite.queries.UpdateQuery
 import eu.kanade.tachiyomi.data.database.models.MangaRelated
 import eu.kanade.tachiyomi.data.database.models.MangaRelatedImpl
-import eu.kanade.tachiyomi.data.database.tables.RelatedTable.TABLE
 import eu.kanade.tachiyomi.data.database.tables.RelatedTable.COL_ID
 import eu.kanade.tachiyomi.data.database.tables.RelatedTable.COL_MANGA_ID
 import eu.kanade.tachiyomi.data.database.tables.RelatedTable.COL_MANGA_RELATED_MATCHED_IDS
 import eu.kanade.tachiyomi.data.database.tables.RelatedTable.COL_MANGA_RELATED_MATCHED_TITLES
-
-
+import eu.kanade.tachiyomi.data.database.tables.RelatedTable.TABLE
 
 class RelatedTypeMapping : SQLiteTypeMapping<MangaRelated>(
         RelatedPutResolver(),
@@ -43,7 +41,6 @@ class RelatedPutResolver : DefaultPutResolver<MangaRelated>() {
         put(COL_MANGA_RELATED_MATCHED_IDS, obj.matched_ids)
         put(COL_MANGA_RELATED_MATCHED_TITLES, obj.matched_titles)
     }
-
 }
 
 class RelatedGetResolver : DefaultGetResolver<MangaRelated>() {
@@ -54,7 +51,6 @@ class RelatedGetResolver : DefaultGetResolver<MangaRelated>() {
         matched_ids = cursor.getString(cursor.getColumnIndex(COL_MANGA_RELATED_MATCHED_IDS))
         matched_titles = cursor.getString(cursor.getColumnIndex(COL_MANGA_RELATED_MATCHED_TITLES))
     }
-
 }
 
 class RelatedDeleteResolver : DefaultDeleteResolver<MangaRelated>() {
@@ -64,5 +60,4 @@ class RelatedDeleteResolver : DefaultDeleteResolver<MangaRelated>() {
             .where("$COL_ID = ?")
             .whereArgs(obj.id)
             .build()
-
 }

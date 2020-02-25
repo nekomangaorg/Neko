@@ -36,7 +36,11 @@ abstract class DialogController : RestoreViewOnCreateController {
      */
     protected constructor(args: Bundle?) : super(args)
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup, savedViewState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup,
+        savedViewState: Bundle?
+    ): View {
         dialog = onCreateDialog(savedViewState)
         dialog!!.setOwnerActivity(activity!!)
         dialog!!.setOnDismissListener { dismissDialog() }
@@ -46,7 +50,7 @@ abstract class DialogController : RestoreViewOnCreateController {
                 dialog!!.onRestoreInstanceState(dialogState)
             }
         }
-        return View(activity) //stub view
+        return View(activity) // stub view
     }
 
     override fun onSaveViewState(view: View, outState: Bundle) {

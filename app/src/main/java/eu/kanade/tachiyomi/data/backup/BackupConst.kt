@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.data.backup
 import eu.kanade.tachiyomi.BuildConfig.APPLICATION_ID as ID
 
-
 object BackupConst {
 
     const val INTENT_FILTER = "SettingsBackupFragment"

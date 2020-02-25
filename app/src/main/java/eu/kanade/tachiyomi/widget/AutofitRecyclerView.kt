@@ -41,5 +41,4 @@ class AutofitRecyclerView @JvmOverloads constructor(context: Context, attrs: Att
             spanCount = count
         }
     }
-
 }

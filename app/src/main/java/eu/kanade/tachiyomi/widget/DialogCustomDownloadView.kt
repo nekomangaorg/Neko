@@ -13,7 +13,10 @@ import timber.log.Timber
 /**
  * Custom dialog to select how many chapters to download.
  */
-class DialogCustomDownloadView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
+class DialogCustomDownloadView @JvmOverloads constructor(
+    context: Context,
+    attrs: AttributeSet? = null
+) :
         LinearLayout(context, attrs) {
 
     /**
@@ -36,7 +39,6 @@ class DialogCustomDownloadView @JvmOverloads constructor(context: Context, attrs
         // Add view to stack
         addView(inflate(R.layout.download_custom_amount))
     }
-
 
     /**
      * Called when view is added

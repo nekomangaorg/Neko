@@ -57,5 +57,4 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleVie
         super.onItemReleased(position)
         adapter.onItemReleaseListener.onItemReleased(position)
     }
-
 }

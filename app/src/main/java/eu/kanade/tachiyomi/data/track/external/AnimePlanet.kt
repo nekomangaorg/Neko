@@ -6,7 +6,6 @@ import eu.kanade.tachiyomi.data.track.TrackService
 
 class AnimePlanet(id: Int) : TrackService(id) {
 
-
     override val name = "AnimePlanet"
 
     override fun getLogo(): Int {

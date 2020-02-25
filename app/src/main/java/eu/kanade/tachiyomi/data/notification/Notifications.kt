@@ -53,7 +53,6 @@ object Notifications {
     const val CHANNEL_MANGA_RELATED = "manga_related_channel"
     const val ID_MANGA_RELATED_IMPORT = -502
 
-
     /**
      * Creates the notification channels introduced in Android Oreo.
      *
@@ -90,7 +89,6 @@ object Notifications {
                         NotificationManager.IMPORTANCE_LOW).apply {
                     setShowBadge(false)
                 }
-
 
         )
         context.notificationManager.createNotificationChannels(channels)

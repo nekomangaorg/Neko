@@ -10,9 +10,11 @@ import com.google.gson.annotations.SerializedName
  * @param changeLog log of latest release.
  * @param assets assets of latest release.
  */
-class GithubRelease(@SerializedName("tag_name") val version: String,
-                    @SerializedName("body") val changeLog: String,
-                    @SerializedName("assets") private val assets: List<Assets>) {
+class GithubRelease(
+    @SerializedName("tag_name") val version: String,
+    @SerializedName("body") val changeLog: String,
+    @SerializedName("assets") private val assets: List<Assets>
+) {
 
     /**
      * Get download link of latest release from the assets.
@@ -27,4 +29,3 @@ class GithubRelease(@SerializedName("tag_name") val version: String,
      */
     inner class Assets(@SerializedName("browser_download_url") val downloadLink: String)
 }
-

@@ -99,15 +99,14 @@ class DownloadManager(context: Context) {
      * @param downloads value to set the download queue to
      */
     fun reorderQueue(downloads: List<Download>) {
-        val wasPaused  = downloader.isPaused()
+        val wasPaused = downloader.isPaused()
         downloader.pause()
         downloader.queue.clear()
         downloader.queue.addAll(downloads)
-        if(!wasPaused){
+        if (!wasPaused) {
         downloader.start()
         }
     }
-
 
     /**
      * Tells the downloader to enqueue the given list of chapters.
@@ -210,7 +209,7 @@ class DownloadManager(context: Context) {
         cleaned += readChapterDirs.size
         cache.removeChapters(readChapters, manga)
         if (cache.getDownloadCount(manga) == 0) {
-            provider.findChapterDirs(allChapters, manga, source).firstOrNull()?.parentFile?.delete()// Delete manga directory if empty
+            provider.findChapterDirs(allChapters, manga, source).firstOrNull()?.parentFile?.delete() // Delete manga directory if empty
         }
         return cleaned
     }
@@ -247,5 +246,4 @@ class DownloadManager(context: Context) {
             deleteChapters(chapters, manga, source)
         }
     }
-
 }

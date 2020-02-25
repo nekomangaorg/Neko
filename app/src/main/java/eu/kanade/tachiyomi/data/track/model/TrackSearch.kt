@@ -58,7 +58,5 @@ class TrackSearch : Track {
         fun create(serviceId: Int): TrackSearch = TrackSearch().apply {
             sync_id = serviceId
         }
-
     }
-
 }

@@ -5,6 +5,7 @@ import android.content.Intent
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.anilist.AnilistApi
@@ -13,7 +14,6 @@ import eu.kanade.tachiyomi.widget.preference.LoginPreference
 import eu.kanade.tachiyomi.widget.preference.TrackLoginDialog
 import eu.kanade.tachiyomi.widget.preference.TrackLogoutDialog
 import uy.kohesive.injekt.injectLazy
-import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 
 class SettingsTrackingController : SettingsController(),
         TrackLoginDialog.Listener,
@@ -49,13 +49,12 @@ class SettingsTrackingController : SettingsController(),
                 dialog.targetController = this@SettingsTrackingController
                 dialog.showDialog(router)
             }
-
         }
     }
 
     private inline fun PreferenceScreen.trackPreference(
-            service: TrackService,
-            crossinline login: () -> Unit
+        service: TrackService,
+        crossinline login: () -> Unit
     ): LoginPreference {
         return initThenAdd(LoginPreference(context).apply {
             key = Keys.trackUsername(service.id)
@@ -91,5 +90,4 @@ class SettingsTrackingController : SettingsController(),
     override fun trackLogoutDialogClosed(service: TrackService) {
         updatePreference(service.id)
     }
-
 }

@@ -22,7 +22,6 @@ class LoginPreference @JvmOverloads constructor(context: Context, attrs: Attribu
     override fun onBindViewHolder(holder: PreferenceViewHolder) {
         super.onBindViewHolder(holder)
 
-
         if (getPersistedString("").isNullOrEmpty()) {
             holder.itemView.image_view.setImageResource(android.R.color.transparent)
         } else {
@@ -30,12 +29,10 @@ class LoginPreference @JvmOverloads constructor(context: Context, attrs: Attribu
                     .icon(CommunityMaterial.Icon.cmd_check)
                     .colorInt(ContextCompat.getColor(context, R.color.md_green_500))
                     .sizeDp(20))
-
         }
     }
 
-    override public fun notifyChanged() {
+    public override fun notifyChanged() {
         super.notifyChanged()
     }
-
 }

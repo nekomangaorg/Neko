@@ -8,19 +8,21 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
+import java.util.Calendar
+import java.util.Date
+import java.util.TreeMap
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import java.util.*
 
 class RecentChaptersPresenter(
-        val preferences: PreferencesHelper = Injekt.get(),
-        private val db: DatabaseHelper = Injekt.get(),
-        private val downloadManager: DownloadManager = Injekt.get(),
-        private val sourceManager: SourceManager = Injekt.get()
+    val preferences: PreferencesHelper = Injekt.get(),
+    private val db: DatabaseHelper = Injekt.get(),
+    private val downloadManager: DownloadManager = Injekt.get(),
+    private val sourceManager: SourceManager = Injekt.get()
 ) : BasePresenter<RecentChaptersController>() {
 
     /**
@@ -32,12 +34,12 @@ class RecentChaptersPresenter(
         super.onCreate(savedState)
 
         getRecentChaptersObservable()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeLatestCache(RecentChaptersController::onNextRecentChapters)
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeLatestCache(RecentChaptersController::onNextRecentChapters)
 
         getChapterStatusObservable()
-                .subscribeLatestCache(RecentChaptersController::onChapterStatusChange,
-                        { _, error -> Timber.e(error) })
+            .subscribeLatestCache(RecentChaptersController::onChapterStatusChange,
+                { _, error -> Timber.e(error) })
     }
 
     /**
@@ -53,30 +55,30 @@ class RecentChaptersPresenter(
         }
 
         return db.getRecentChapters(cal.time).asRxObservable()
-                // Convert to a list of recent chapters.
-                .map { mangaChapters ->
-                    val map = TreeMap<Date, MutableList<MangaChapter>> { d1, d2 -> d2.compareTo(d1) }
-                    val byDay = mangaChapters
-                            .groupByTo(map, { getMapKey(it.chapter.date_fetch) })
-                    byDay.flatMap {
-                        val dateItem = DateItem(it.key)
-                        it.value.map { RecentChapterItem(it.chapter, it.manga, dateItem) }
-                    }
+            // Convert to a list of recent chapters.
+            .map { mangaChapters ->
+                val map = TreeMap<Date, MutableList<MangaChapter>> { d1, d2 -> d2.compareTo(d1) }
+                val byDay = mangaChapters
+                    .groupByTo(map, { getMapKey(it.chapter.date_fetch) })
+                byDay.flatMap {
+                    val dateItem = DateItem(it.key)
+                    it.value.map { RecentChapterItem(it.chapter, it.manga, dateItem) }
                 }
-                .doOnNext {
-                    it.forEach { item ->
-                        // Find an active download for this chapter.
-                        val download = downloadManager.queue.find { it.chapter.id == item.chapter.id }
+            }
+            .doOnNext {
+                it.forEach { item ->
+                    // Find an active download for this chapter.
+                    val download = downloadManager.queue.find { it.chapter.id == item.chapter.id }
 
-                        // If there's an active download, assign it, otherwise ask the manager if
-                        // the chapter is downloaded and assign it to the status.
-                        if (download != null) {
-                            item.download = download
-                        }
+                    // If there's an active download, assign it, otherwise ask the manager if
+                    // the chapter is downloaded and assign it to the status.
+                    if (download != null) {
+                        item.download = download
                     }
-                    setDownloadedChapters(it)
-                    chapters = it
                 }
+                setDownloadedChapters(it)
+                chapters = it
+            }
     }
 
     /**
@@ -102,8 +104,8 @@ class RecentChaptersPresenter(
      */
     private fun getChapterStatusObservable(): Observable<Download> {
         return downloadManager.queue.getStatusObservable()
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnNext { download -> onDownloadStatusChange(download) }
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnNext { download -> onDownloadStatusChange(download) }
     }
 
     /**
@@ -148,12 +150,11 @@ class RecentChaptersPresenter(
         chapters.forEach {
             it.read = read
             it.last_page_read = 0
-
         }
 
         Observable.fromCallable { db.updateChaptersProgress(chapters).executeAsBlocking() }
-                .subscribeOn(Schedulers.io())
-                .subscribe()
+            .subscribeOn(Schedulers.io())
+            .subscribe()
     }
 
     /**
@@ -163,12 +164,12 @@ class RecentChaptersPresenter(
      */
     fun deleteChapters(chapters: List<RecentChapterItem>) {
         Observable.just(chapters)
-                .doOnNext { deleteChaptersInternal(it) }
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeFirst({ view, _ ->
-                    view.onChaptersDeleted()
-                }, RecentChaptersController::onChaptersDeletedError)
+            .doOnNext { deleteChaptersInternal(it) }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeFirst({ view, _ ->
+                view.onChaptersDeleted()
+            }, RecentChaptersController::onChaptersDeletedError)
     }
 
     /**
@@ -198,5 +199,4 @@ class RecentChaptersPresenter(
             }
         }
     }
-
 }

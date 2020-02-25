@@ -11,8 +11,8 @@ import java.text.DecimalFormatSymbols
 import java.text.SimpleDateFormat
 
 class ChaptersAdapter(
-        controller: ChaptersController,
-        context: Context
+    controller: ChaptersController,
+    context: Context
 ) : FlexibleAdapter<ChapterItem>(null, controller, true) {
 
     var items: List<ChapterItem> = emptyList()
@@ -42,5 +42,4 @@ class ChaptersAdapter(
     interface OnMenuItemClickListener {
         fun onMenuItemClick(position: Int, item: MenuItem)
     }
-
 }

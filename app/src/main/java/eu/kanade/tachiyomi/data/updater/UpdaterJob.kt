@@ -63,5 +63,4 @@ class UpdaterJob : Job() {
             JobManager.instance().cancelAllForTag(TAG)
         }
     }
-
 }

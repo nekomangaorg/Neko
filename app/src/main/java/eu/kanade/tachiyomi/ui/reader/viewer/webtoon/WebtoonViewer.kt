@@ -254,5 +254,4 @@ class WebtoonViewer(val activity: ReaderActivity) : BaseViewer {
     override fun handleGenericMotionEvent(event: MotionEvent): Boolean {
         return false
     }
-
 }

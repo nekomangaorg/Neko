@@ -36,7 +36,6 @@ abstract class LoginDialogPreference(bundle: Bundle? = null) : DialogController(
         return dialog
     }
 
-
     fun onViewCreated(view: View) {
         v = view.apply {
             show_password.setOnCheckedChangeListener { _, isChecked ->
@@ -53,7 +52,6 @@ abstract class LoginDialogPreference(bundle: Bundle? = null) : DialogController(
                 } else {
                     two_factor_edit.visibility = View.GONE
                     two_factor_static.visibility = View.GONE
-
                 }
             }
 
@@ -69,7 +67,6 @@ abstract class LoginDialogPreference(bundle: Bundle? = null) : DialogController(
                 }
             })
         }
-
     }
 
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
@@ -86,5 +83,4 @@ abstract class LoginDialogPreference(bundle: Bundle? = null) : DialogController(
     protected abstract fun checkLogin()
 
     protected abstract fun setCredentialsOnView(view: View)
-    
 }

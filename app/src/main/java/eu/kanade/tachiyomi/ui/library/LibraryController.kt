@@ -5,7 +5,13 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Bundle
-import android.view.*
+import android.view.Gravity
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.SearchView
@@ -37,23 +43,23 @@ import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.util.inflate
 import eu.kanade.tachiyomi.util.toast
 import eu.kanade.tachiyomi.util.visible
+import java.io.IOException
 import kotlinx.android.synthetic.main.library_controller.*
 import kotlinx.android.synthetic.main.main_activity.*
 import rx.Subscription
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import java.io.IOException
 
 class LibraryController(
-        bundle: Bundle? = null,
-        private val preferences: PreferencesHelper = Injekt.get()
+    bundle: Bundle? = null,
+    private val preferences: PreferencesHelper = Injekt.get()
 ) : NucleusController<LibraryPresenter>(bundle),
-        TabbedController,
-        SecondaryDrawerController,
-        ActionMode.Callback,
-        ChangeMangaCategoriesDialog.Listener,
-        DeleteLibraryMangasDialog.Listener {
+    TabbedController,
+    SecondaryDrawerController,
+    ActionMode.Callback,
+    ChangeMangaCategoriesDialog.Listener,
+    DeleteLibraryMangasDialog.Listener {
 
     /**
      * Position of the active category.
@@ -148,10 +154,10 @@ class LibraryController(
         }
 
         getColumnsPreferenceForCurrentOrientation().asObservable()
-                .doOnNext { mangaPerRow = it }
-                .skip(1)
-                // Set again the adapter to recalculate the covers height
-                .subscribeUntilDestroy { reattachAdapter() }
+            .doOnNext { mangaPerRow = it }
+            .skip(1)
+            // Set again the adapter to recalculate the covers height
+            .subscribeUntilDestroy { reattachAdapter() }
 
         if (selectedMangas.isNotEmpty()) {
             createActionModeIfNeeded()
@@ -326,12 +332,12 @@ class LibraryController(
 
         searchViewSubscription?.unsubscribe()
         searchViewSubscription = searchView.queryTextChanges()
-                // Ignore events if this controller isn't at the top
-                .filter { router.backstack.lastOrNull()?.controller() == this }
-                .subscribeUntilDestroy {
-                    query = it.toString()
-                    searchRelay.call(query)
-                }
+            // Ignore events if this controller isn't at the top
+            .filter { router.backstack.lastOrNull()?.controller() == this }
+            .subscribeUntilDestroy {
+                query = it.toString()
+                searchRelay.call(query)
+            }
 
         searchItem.fixExpand(onExpand = { invalidateMenuOnExpand() })
     }
@@ -393,7 +399,12 @@ class LibraryController(
     }
 
     override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
-        IconicsMenuInflaterUtil.inflate(mode.menuInflater, applicationContext!!, R.menu.library_selection, menu)
+        IconicsMenuInflaterUtil.inflate(
+            mode.menuInflater,
+            applicationContext!!,
+            R.menu.library_selection,
+            menu
+        )
         return true
     }
 
@@ -466,11 +477,11 @@ class LibraryController(
 
         // Get indexes of the common categories to preselect.
         val commonCategoriesIndexes = presenter.getCommonCategories(mangas)
-                .map { categories.indexOf(it) }
-                .toTypedArray()
+            .map { categories.indexOf(it) }
+            .toTypedArray()
 
         ChangeMangaCategoriesDialog(this, mangas, categories, commonCategoriesIndexes)
-                .showDialog(router)
+            .showDialog(router)
     }
 
     private fun showDeleteMangaDialog() {
@@ -486,7 +497,6 @@ class LibraryController(
         presenter.removeMangaFromLibrary(mangas, deleteChapters)
         destroyActionModeIfNeeded()
     }
-    
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == REQUEST_IMAGE_OPEN) {
@@ -529,5 +539,4 @@ class LibraryController(
          */
         const val REQUEST_IMAGE_OPEN = 101
     }
-
 }

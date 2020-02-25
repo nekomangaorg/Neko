@@ -16,7 +16,7 @@ class DownloadHolder(view: View, val adapter: DownloadAdapter) : BaseFlexibleVie
 
     init {
         setDragHandleView(reorder)
-        remove_download.setOnClickListener { adapter.onItemDeleteListener.onItemDeleted(adapterPosition ) }
+        remove_download.setOnClickListener { adapter.onItemDeleteListener.onItemDeleted(adapterPosition) }
     }
 
     private lateinit var download: Download
@@ -47,7 +47,6 @@ class DownloadHolder(view: View, val adapter: DownloadAdapter) : BaseFlexibleVie
         }
     }
 
-
     /**
      * Updates the progress bar of the download.
      */
@@ -71,6 +70,4 @@ class DownloadHolder(view: View, val adapter: DownloadAdapter) : BaseFlexibleVie
         super.onItemReleased(position)
         adapter.onItemReleaseListener.onItemReleased(position)
     }
-
-
 }

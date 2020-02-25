@@ -41,8 +41,7 @@ class SetTrackStatusDialog<T> : DialogController
                 .title(R.string.status)
                 .negativeButton(android.R.string.cancel)
                 .listItemsSingleChoice(items = statusString, initialSelection = selectedIndex,
-                        waitForPositiveButton = false)
-                { dialog, position, _ ->
+                        waitForPositiveButton = false) { dialog, position, _ ->
                     (targetController as? Listener)?.setStatus(item, position)
                     dialog.dismiss()
                 }
@@ -55,5 +54,4 @@ class SetTrackStatusDialog<T> : DialogController
     private companion object {
         const val KEY_ITEM_TRACK = "SetTrackStatusDialog.item.track"
     }
-
 }

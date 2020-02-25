@@ -27,5 +27,4 @@ class DeleteChaptersDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
     interface Listener {
         fun deleteChapters()
     }
-
 }

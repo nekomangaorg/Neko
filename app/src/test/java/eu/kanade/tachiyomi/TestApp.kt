@@ -1,4 +1,3 @@
 package eu.kanade.tachiyomi
 
-open class TestApp : App() {
-}
+open class TestApp : App()

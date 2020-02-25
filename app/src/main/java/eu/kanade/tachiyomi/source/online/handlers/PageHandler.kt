@@ -20,7 +20,6 @@ class PageHandler(val client: OkHttpClient, val headers: Headers, private val im
                         val chapterId = ApiChapterParser().externalParse(response)
                         MangaPlusHandler(client).fetchPageList(chapterId)
                     }
-
         }
         return client.newCall(pageListRequest(chapter))
                 .asObservableSuccess()
@@ -32,5 +31,4 @@ class PageHandler(val client: OkHttpClient, val headers: Headers, private val im
     private fun pageListRequest(chapter: SChapter): Request {
         return GET("${MdUtil.baseUrl}${chapter.url}?server=$imageServer", headers)
     }
-
 }

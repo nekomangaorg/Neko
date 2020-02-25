@@ -5,10 +5,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlinx-serialization'
-apply plugin: 'com.github.zellius.shortcut-helper'
-
-shortcutHelper.filePath = './shortcuts.xml'
-
+apply plugin: "org.jmailen.kotlinter"
 ext {
     // Git is needed in your system PATH for these commands to work.
     // If it's not installed, you can return a random value as a workaround
@@ -32,7 +29,6 @@ ext {
 android {
     compileSdkVersion 29
     buildToolsVersion '29.0.2'
-    publishNonDefault true
 
     compileOptions {
         sourceCompatibility = 1.8
@@ -206,7 +202,8 @@ dependencies {
     implementation 'com.github.dmytrodanylyk.android-process-button:library:1.0.4'
     implementation 'eu.davidea:flexible-adapter:5.1.0'
     implementation 'eu.davidea:flexible-adapter-ui:1.0.0'
-    implementation 'com.nononsenseapps:filepicker:2.5.2' //switch this to material dialog file picker
+    implementation 'com.nononsenseapps:filepicker:2.5.2'
+    //switch this to material dialog file picker
     implementation 'com.github.amulyakhare:TextDrawable:558677e'
     implementation 'com.afollestad.material-dialogs:core:3.1.1'
     implementation 'com.afollestad.material-dialogs:input:3.1.1'
@@ -266,6 +263,7 @@ buildscript {
     }
 }
 
+
 repositories {
     mavenCentral()
 }
@@ -273,6 +271,9 @@ repositories {
 androidExtensions {
     experimental = true
 }
+
+preBuild.dependsOn(lintKotlin)
+lintKotlin.dependsOn(formatKotlin)
 
 if (getGradle().getStartParameter().getTaskRequests().toString().contains("Standard")) {
     apply plugin: 'com.google.gms.google-services'

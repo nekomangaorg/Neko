@@ -10,7 +10,6 @@ import eu.davidea.flexibleadapter.items.IFlexible
 import eu.davidea.viewholders.FlexibleViewHolder
 import eu.kanade.tachiyomi.R
 
-
 class ProgressItem : AbstractFlexibleItem<ProgressItem.Holder>() {
 
     private var loadMore = true
@@ -19,11 +18,19 @@ class ProgressItem : AbstractFlexibleItem<ProgressItem.Holder>() {
         return R.layout.catalogue_progress_item
     }
 
-    override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): Holder {
+    override fun createViewHolder(
+        view: View,
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>
+    ): Holder {
         return Holder(view, adapter)
     }
 
-    override fun bindViewHolder(adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>, holder: Holder, position: Int, payloads: MutableList<Any>?) {
+    override fun bindViewHolder(
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
+        holder: Holder,
+        position: Int,
+        payloads: MutableList<Any>?
+    ) {
         holder.progressBar.visibility = View.GONE
         holder.progressMessage.visibility = View.GONE
 
@@ -47,5 +54,4 @@ class ProgressItem : AbstractFlexibleItem<ProgressItem.Holder>() {
         val progressBar: ProgressBar = view.findViewById(R.id.progress_bar)
         val progressMessage: TextView = view.findViewById(R.id.progress_message)
     }
-
 }

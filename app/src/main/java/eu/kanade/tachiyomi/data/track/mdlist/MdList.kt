@@ -15,7 +15,6 @@ import uy.kohesive.injekt.api.get
 
 class MdList(private val context: Context, id: Int) : TrackService(id) {
 
-
     private val mdex by lazy { Injekt.get<SourceManager>().getMangadex() as HttpSource }
 
     override val name = "MDList"
@@ -34,21 +33,18 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
 
     override fun getStatus(status: Int): String = context.resources.getStringArray(R.array.follows_options).asList()[status]
 
-
     override fun getScoreList() = IntRange(0, 10).map(Int::toString)
 
     override fun displayScore(track: Track) = track.score.toInt().toString()
 
-    
     override fun update(track: Track): Observable<Track> {
         if (track.total_chapters != 0 && track.last_chapter_read == track.total_chapters) {
             track.status = FollowStatus.COMPLETED.int
         }
 
         return Observable.just(track)
-        //return api.updateLibManga(track)
+        // return api.updateLibManga(track)
     }
-
 
     override fun login(username: String, password: String) = throw Exception("not used")
 
@@ -58,5 +54,4 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
     override val isLogged = mdex.isLogged()
 
     override fun isMdList() = true
-
 }

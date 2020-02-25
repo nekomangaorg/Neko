@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.ui.manga.related
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.MangasPage
-import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.ui.catalogue.browse.Pager
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
@@ -20,5 +19,4 @@ class RelatedPager(val manga: Manga, val source: Source) : Pager() {
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnNext { onPageReceived(it) }
     }
-
 }

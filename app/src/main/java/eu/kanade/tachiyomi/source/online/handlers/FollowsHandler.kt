@@ -16,8 +16,13 @@ import eu.kanade.tachiyomi.source.online.utils.MdUtil.Companion.getMangaId
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
-import okhttp3.*
+import okhttp3.CacheControl
+import okhttp3.FormBody
+import okhttp3.Headers
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
 import rx.Observable
 import timber.log.Timber
 
@@ -28,19 +33,19 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers) {
      */
     fun fetchFollows(page: Int): Observable<MangasPage> {
         return client.newCall(followsListRequest(page))
-                .asObservable()
-                .map { response ->
-                    followsParseMangaPage(response)
-                }
+            .asObservable()
+            .map { response ->
+                followsParseMangaPage(response)
+            }
     }
-
 
     /**
      * Parse follows api to manga page
      * used when multiple follows
      */
     private fun followsParseMangaPage(response: Response): MangasPage {
-        val followsPageResult = Json.nonstrict.parse(FollowsPageResult.serializer(), response.body!!.string())
+        val followsPageResult =
+            Json.nonstrict.parse(FollowsPageResult.serializer(), response.body!!.string())
 
         if (followsPageResult.result.isEmpty()) {
             return MangasPage(mutableListOf(), false)
@@ -57,7 +62,8 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers) {
      */
 
     private fun followStatusParse(response: Response): Track {
-        val followsPageResult = Json.nonstrict.parse(FollowsPageResult.serializer(), response.body!!.string())
+        val followsPageResult =
+            Json.nonstrict.parse(FollowsPageResult.serializer(), response.body!!.string())
         val track = Track.create(TrackManager.MDLIST)
         val result = followsPageResult.result
         if (result.isEmpty()) {
@@ -67,10 +73,8 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers) {
             if (result[0].chapter.isNotBlank()) {
                 track.last_chapter_read = result[0].chapter.toInt()
             }
-
         }
         return track
-
     }
 
     /**build Request for follows page
@@ -79,7 +83,7 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers) {
     private fun followsListRequest(page: Int): Request {
 
         val url = "${MdUtil.baseUrl}${MdUtil.followsAllApi}".toHttpUrlOrNull()!!.newBuilder()
-                .addQueryParameter("page", page.toString())
+            .addQueryParameter("page", page.toString())
 
         return GET(url.toString(), headers, CacheControl.FORCE_NETWORK)
     }
@@ -103,34 +107,50 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers) {
         return withContext(Dispatchers.IO) {
 
             val response: Response =
-                    if (followStatus == FollowStatus.UNFOLLOWED) {
-                        client.newCall(GET("$baseUrl/ajax/actions.ajax.php?function=manga_unfollow&id=$mangaID&type=$mangaID", headers, CacheControl.FORCE_NETWORK))
-                                .execute()
-                    } else {
+                if (followStatus == FollowStatus.UNFOLLOWED) {
+                    client.newCall(
+                        GET(
+                            "$baseUrl/ajax/actions.ajax.php?function=manga_unfollow&id=$mangaID&type=$mangaID",
+                            headers,
+                            CacheControl.FORCE_NETWORK
+                        )
+                    )
+                        .execute()
+                } else {
 
-                        val status = followStatus.int
-                        client.newCall(GET("$baseUrl/ajax/actions.ajax.php?function=manga_follow&id=$mangaID&type=$status", headers, CacheControl.FORCE_NETWORK))
-                                .execute()
-                    }
+                    val status = followStatus.int
+                    client.newCall(
+                        GET(
+                            "$baseUrl/ajax/actions.ajax.php?function=manga_follow&id=$mangaID&type=$status",
+                            headers,
+                            CacheControl.FORCE_NETWORK
+                        )
+                    )
+                        .execute()
+                }
 
             response.body!!.string().isEmpty()
         }
     }
-
 
     suspend fun updateReadingProgress(track: Track): Boolean {
         return withContext(Dispatchers.IO) {
             val mangaID = getMangaId(track.tracking_url)
             val formBody = FormBody.Builder()
-                    .add("chapter", track.last_chapter_read.toString())
+                .add("chapter", track.last_chapter_read.toString())
             Timber.d("chapter to update %s", track.last_chapter_read.toString())
-            val response = client.newCall(POST("$baseUrl/ajax/actions.ajax.php?function=edit_progress&&id=$mangaID", headers, formBody.build()))
-                    .execute()
+            val response = client.newCall(
+                POST(
+                    "$baseUrl/ajax/actions.ajax.php?function=edit_progress&&id=$mangaID",
+                    headers,
+                    formBody.build()
+                )
+            )
+                .execute()
 
             response.body!!.string().isEmpty()
         }
     }
-
 
     /**
      * fetch all manga from all possible pages
@@ -140,7 +160,7 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers) {
             val listManga = mutableListOf<SManga>()
             loop@ for (i in 1..10000) {
                 val response = client.newCall(followsListRequest(i))
-                        .execute()
+                    .execute()
                 val mangasPage = followsParseMangaPage(response)
 
                 if (mangasPage.mangas.isNotEmpty()) {
@@ -154,10 +174,13 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers) {
         }
     }
 
-
     suspend fun fetchTrackingInfo(manga: SManga): Track {
         return withContext(Dispatchers.IO) {
-            val request = GET("${MdUtil.baseUrl}${MdUtil.followsMangaApi}" + getMangaId(manga.url), headers, CacheControl.FORCE_NETWORK)
+            val request = GET(
+                "${MdUtil.baseUrl}${MdUtil.followsMangaApi}" + getMangaId(manga.url),
+                headers,
+                CacheControl.FORCE_NETWORK
+            )
             val response = client.newCall(request).execute()
             val track = followStatusParse(response)
             track.tracking_url = MdUtil.baseUrl + manga.url

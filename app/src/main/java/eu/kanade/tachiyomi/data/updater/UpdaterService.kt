@@ -12,9 +12,9 @@ import eu.kanade.tachiyomi.network.ProgressListener
 import eu.kanade.tachiyomi.network.newCallWithProgress
 import eu.kanade.tachiyomi.util.getUriCompat
 import eu.kanade.tachiyomi.util.saveTo
+import java.io.File
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
-import java.io.File
 
 class UpdaterService : IntentService(UpdaterService::class.java.name) {
     /**
@@ -99,7 +99,11 @@ class UpdaterService : IntentService(UpdaterService::class.java.name) {
          * @param context the application context.
          * @param url the url to the new update.
          */
-        fun downloadUpdate(context: Context, url: String, title: String = context.getString(R.string.app_name)) {
+        fun downloadUpdate(
+            context: Context,
+            url: String,
+            title: String = context.getString(R.string.app_name)
+        ) {
             val intent = Intent(context, UpdaterService::class.java).apply {
                 putExtra(EXTRA_DOWNLOAD_TITLE, title)
                 putExtra(EXTRA_DOWNLOAD_URL, url)
@@ -121,5 +125,3 @@ class UpdaterService : IntentService(UpdaterService::class.java.name) {
         }
     }
 }
-
-

@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.ui.library
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 
-
 /**
  * Adapter storing a list of manga in a certain category.
  *
@@ -44,7 +43,5 @@ class LibraryCategoryAdapter(view: LibraryCategoryView) :
             s = ""
         }
         updateDataSet(mangas.filter { it.filter(s) })
-        
     }
-
 }

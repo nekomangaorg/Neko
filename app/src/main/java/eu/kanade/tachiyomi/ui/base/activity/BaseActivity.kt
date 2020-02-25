@@ -17,6 +17,5 @@ abstract class BaseActivity : AppCompatActivity() {
             else -> R.style.Theme_Neko
         })
         super.onCreate(savedInstanceState)
-
     }
 }

@@ -4,7 +4,6 @@ import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 
 open class MangaImpl : Manga {
 
-
     override var id: Long? = null
 
     override var source: Long = -1
@@ -58,11 +57,9 @@ open class MangaImpl : Manga {
         val manga = other as Manga
 
         return url == manga.url
-
     }
 
     override fun hashCode(): Int {
         return url.hashCode()
     }
-
 }
