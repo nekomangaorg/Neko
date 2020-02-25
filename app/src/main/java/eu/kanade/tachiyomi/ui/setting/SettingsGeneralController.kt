@@ -1,5 +1,8 @@
 package eu.kanade.tachiyomi.ui.setting
 
+import android.content.Intent
+import android.os.Build
+import android.provider.Settings
 import androidx.biometric.BiometricManager
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.BuildConfig
@@ -37,6 +40,22 @@ class SettingsGeneralController : SettingsController() {
             entryValues = listOf(1, 2, 3)
             defaultValue = 1
         }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            preference {
+                titleRes = R.string.pref_manage_notifications
+                onClick {
+                    val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                        putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                    }
+                    startActivity(intent)
+                }
+            }
+        }
+
+        preferenceCategory {
+            titleRes = R.string.pref_category_security
+
+            if (BiometricManager.from(context).canAuthenticate() == BiometricManager.BIOMETRIC_SUCCESS) {
         switchPreference {
             key = Keys.automaticUpdates
             titleRes = R.string.pref_enable_automatic_updates
