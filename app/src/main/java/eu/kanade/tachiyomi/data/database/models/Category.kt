@@ -20,6 +20,7 @@ interface Category : Serializable {
     var mangaSort:Char?
 
     var isFirst:Boolean?
+    var isLast:Boolean?
 
     val nameLower: String
         get() = name.toLowerCase()
@@ -76,6 +77,7 @@ interface Category : Serializable {
         fun createDefault(context: Context): Category =
             create(context.getString(R.string.default_columns)).apply {
                 id = 0
+                isFirst = true
             }
 
         fun createAll(context: Context, libSort: Int, ascending: Boolean): Category =
@@ -95,6 +97,7 @@ interface Category : Serializable {
                 }
                 order = -1
                 isFirst = true
+                isLast = true
             }
     }
 

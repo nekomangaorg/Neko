@@ -169,9 +169,6 @@ class LibraryPresenter(
                 return@f false
             if (filterUnread == STATE_REALLY_EXCLUDE && item.manga.unread > 0) return@f false
 
-            if (filterMangaType == Manga.TYPE_MANGA &&
-                item.manga.mangaType() == Manga.TYPE_MANHWA)
-                return@f false
             if ((filterMangaType == Manga.TYPE_MANHWA) &&
                 item.manga.mangaType() == Manga.TYPE_MANGA) return@f false
 
@@ -351,6 +348,7 @@ class LibraryPresenter(
             category.isFirst = (category.id ?: 0 <= 0 ||
                 (category.order == 0 && categories.none { it.id == 0 }))
         }
+        if (category.isLast == null) category.isLast = categories.lastOrNull()?.id == category.id
         return category
     }
 

@@ -168,8 +168,15 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                             updateRecentsIcon()
                         }
                     }
-                    R.id.nav_library, R.id.nav_catalogues,
-                    R.id.nav_settings -> router.popToRoot()
+                    R.id.nav_library -> {
+                        if (router.backstack.size > 1) router.popToRoot()
+                        else {
+                            val controller = router.getControllerWithTag(id.toString()) as?
+                                LibraryController
+                            controller?.showFiltersBottomSheet()
+                        }
+                    }
+                    R.id.nav_catalogues, R.id.nav_settings -> router.popToRoot()
                 }
             }
             true

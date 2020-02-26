@@ -5,7 +5,7 @@
     android:id="@+id/bottom_sheet"
     style="@style/BottomSheetDialogTheme"
     android:layout_width="match_parent"
-    app:behavior_peekHeight="0dp"
+    app:behavior_peekHeight="60dp"
     android:layout_height="wrap_content"
     android:background="@drawable/bg_bottom_sheet_dialog_fragment"
     android:orientation="vertical"
@@ -16,6 +16,7 @@
         android:layout_height="wrap_content">
 
             <LinearLayout
+                android:id="@+id/sheet_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -28,10 +29,10 @@
                     android:id="@+id/filter_scroll"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
+                    android:layout_marginTop="2dp"
                     android:clipToPadding="false"
                     android:paddingStart="20dp"
-                    android:paddingTop="10dp"
+                    android:paddingTop="8dp"
                     android:paddingBottom="18dp"
                     android:paddingEnd="20dp"
                     android:scrollbars="none">
@@ -190,8 +191,6 @@
             android:id="@+id/top_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            tools:visibility="gone"
-            android:background="@drawable/bg_bottom_sheet_primary"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
@@ -203,7 +202,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
                 android:src="@drawable/draggable_pill"
-                android:alpha="0.15"
+                android:alpha="0.25"
                 android:contentDescription="@string/drag_handle"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -214,6 +213,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="0dp"
                 android:layout_marginStart="24dp"
+                android:visibility="gone"
                 android:src="@drawable/ic_sort_white_24dp"
                 app:layout_constraintBottom_toBottomOf="@+id/title"
                 android:contentDescription="@string/sorting_mode"
@@ -228,6 +228,7 @@
                 android:layout_marginTop="15dp"
                 android:layout_marginEnd="8dp"
                 android:layout_marginBottom="15dp"
+                android:visibility="gone"
                 android:textAlignment="textStart"
                 android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
                 android:textColor="?attr/actionBarTintColor"

@@ -13,7 +13,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:background="@drawable/library_compact_grid_selector"
-        android:minHeight="200dp"
         android:orientation="vertical">
 
         <com.google.android.material.card.MaterialCardView

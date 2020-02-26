@@ -6,5 +6,5 @@
         android:color="?attr/tabBarIconColor" />
     <item android:state_focused="false"
         android:color="?attr/tabBarIconInactive" />
-    <item android:color="?attr/tabBarIconColor" />
+    <item android:color="?attr/tabBarIconInactive" />
 </selector>

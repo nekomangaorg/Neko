@@ -96,8 +96,8 @@ interface Manga : SManga {
         const val DISPLAY_NUMBER = 0x00100000
         const val DISPLAY_MASK = 0x00100000
 
-        const val TYPE_MANGA = 1
-        const val TYPE_MANHWA = 2
+        const val TYPE_MANGA = 0
+        const val TYPE_MANHWA = 1
 
         fun create(source: Long): Manga = MangaImpl().apply {
             this.source = source

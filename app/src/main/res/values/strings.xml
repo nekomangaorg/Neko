@@ -95,7 +95,7 @@
     <string name="action_add_to_home_screen">Add to home screen</string>
     <string name="action_display_mode">Display mode</string>
     <string name="action_display">Display</string>
-    <string name="action_display_comfy_grid">Comfortable</string>
+    <string name="action_display_comfy_grid">Comfy Grid</string>
     <string name="action_display_grid">Compact Grid</string>
     <string name="action_display_list">List</string>
     <string name="action_display_download_badge">Download badges</string>

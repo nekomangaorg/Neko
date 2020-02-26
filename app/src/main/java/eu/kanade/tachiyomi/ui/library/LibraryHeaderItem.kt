@@ -78,15 +78,20 @@ class LibraryHeaderItem(private val categoryF: (Int) -> Category, val catId: Int
         private val sortText: TextView = view.findViewById(R.id.category_sort)
         private val updateButton: ImageView = view.findViewById(R.id.update_button)
         private val checkboxImage: ImageView = view.findViewById(R.id.checkbox)
+        private val dropDown:Drawable?
 
         init {
             updateButton.setOnClickListener { addCategoryToUpdate() }
             sortText.setOnClickListener {  it.post { showCatSortOptions() } }
             checkboxImage.setOnClickListener { selectAll() }
+            sectionText.setOnClickListener { it.post {
+                adapter.libraryListener.showCategories(adapterPosition, it)
+            } }
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
                 sortText.compoundDrawablesRelative[2]?.mutate()?.setTint(
                     ContextCompat.getColor(contentView.context, R.color.gray_button))
             }
+            dropDown = sectionText.compoundDrawablesRelative[2]
             updateButton.drawable.mutate()
         }
 
@@ -94,8 +99,14 @@ class LibraryHeaderItem(private val categoryF: (Int) -> Category, val catId: Int
             sectionText.updateLayoutParams<ConstraintLayout.LayoutParams> {
                 topMargin = (if (category.isFirst == true) 2 else 32).dpToPx
             }
+            if (category.isFirst == true && category.isLast == true)
+                sectionText.setCompoundDrawablesRelative(null, null, null, null)
+            else
+                sectionText.setCompoundDrawablesRelative(null, null, dropDown, null)
+
             sectionText.text = category.name
-            sortText.text = itemView.context.getString(
+            sortText.text = itemView.context.getString(R.string.sort_by_,
+                itemView.context.getString(
                 when (category.sortingMode()) {
                     LibrarySort.LAST_UPDATED -> R.string.action_sort_last_updated
                     LibrarySort.DRAG_AND_DROP ->
@@ -107,7 +118,7 @@ class LibraryHeaderItem(private val categoryF: (Int) -> Category, val catId: Int
                     LibrarySort.ALPHA -> R.string.title
                     else -> R.string.action_sort_drag_and_drop
                 }
-            )
+            ))
 
             when {
                 adapter.mode == SelectableAdapter.Mode.MULTI -> {

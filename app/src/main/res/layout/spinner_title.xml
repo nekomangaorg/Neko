@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    android:layout_width="wrap_content"
+    android:orientation="horizontal"
+    android:id="@+id/title_layout"
+    android:layout_height="wrap_content"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    tools:background="?colorPrimary"
+    android:clickable="true"
+    android:focusable="true"
+    xmlns:tools="http://schemas.android.com/tools">
+<com.google.android.material.textview.MaterialTextView
+    style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
+    android:maxLines="1"
+    android:ellipsize="end"
+    android:gravity="start"
+    android:textSize="20sp"
+    android:id="@+id/category_title"
+    android:textColor="?actionBarTintColor"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    tools:text="Title Text"/>
+
+    <ImageView
+        android:layout_gravity="center"
+        android:layout_marginStart="4dp"
+        android:background="@drawable/round_ripple"
+        android:id="@+id/dropdown"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:tint="?actionBarTintColor"
+        android:src="@drawable/ic_arrow_drop_down_white_24dp"/>
+</LinearLayout>

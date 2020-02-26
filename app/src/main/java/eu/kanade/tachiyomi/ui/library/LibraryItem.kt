@@ -63,6 +63,7 @@ class LibraryItem(val manga: LibraryManga,
                         )
                     } else if (libraryLayout == 2) {
                         constraint_layout.minHeight = coverHeight
+                        cover_thumbnail.minimumHeight = (parent.itemWidth / 3f * 3.6f).toInt()
                         cover_thumbnail.maxHeight = (parent.itemWidth / 3f * 6f).toInt()
                         constraint_layout.background = ContextCompat.getDrawable(
                             context, R.drawable.library_item_selector

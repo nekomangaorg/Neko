@@ -3,8 +3,7 @@
     android:orientation="horizontal" android:layout_width="wrap_content"
     xmlns:tools="http://schemas.android.com/tools"
     android:background="@drawable/round_textview_border"
-    android:layout_marginStart="5dp"
-    android:layout_marginEnd="5dp"
+    android:layout_margin="5dp"
     android:layout_height="32dp">
     <TextView
         android:id="@+id/firstButton"

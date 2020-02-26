@@ -13,7 +13,6 @@ import android.widget.LinearLayout
 import android.widget.Spinner
 import androidx.appcompat.view.menu.MenuBuilder
 import androidx.appcompat.widget.PopupMenu
-import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
 import com.f2prateek.rx.preferences.Preference
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -44,6 +43,7 @@ import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
+import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
 
@@ -80,11 +80,11 @@ class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: A
 
     private val filterItems:MutableList<FilterTagGroup> by lazy {
         val list = mutableListOf<FilterTagGroup>()
-        if (Injekt.get<DatabaseHelper>().getCategories().executeAsBlocking().isNotEmpty())
-            list.add(categories)
         list.add(downloaded)
         list.add(unread)
         list.add(completed)
+        if (Injekt.get<DatabaseHelper>().getCategories().executeAsBlocking().isNotEmpty())
+            list.add(categories)
         if (Injekt.get<TrackManager>().hasLoggedServices())
             list.add(tracked)
         list
@@ -108,10 +108,11 @@ class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: A
         clearButton = clear_button
         filter_layout.removeView(clearButton)
         sheetBehavior = BottomSheetBehavior.from(this)
+        val phoneLandscape = (isLandscape() && !isTablet())
+        sheetBehavior?.isHideable = !phoneLandscape
         top_bar.setOnClickListener {
             if (sheetBehavior?.state != BottomSheetBehavior.STATE_EXPANDED) {
                 sheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
-                //topbar.animate().alpha(0f).setDuration(100).start()
             } else {
                 sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
             }
@@ -121,25 +122,34 @@ class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: A
         updateTitle()
         val shadow2:View = (pagerView.parent as ViewGroup).findViewById(R.id.shadow2)
         val shadow:View = (pagerView.parent as ViewGroup).findViewById(R.id.shadow)
-        val fastScroller:View? = (pagerView.parent as ViewGroup).findViewById(R.id.fast_scroller)
-        val coordLayout:View = (pagerView.parent as ViewGroup).findViewById(R.id.snackbar_layout)
-        val phoneLandscape = (isLandscape() && !isTablet())
-        if (phoneLandscape)
+        val snackbarLayout:View = (pagerView.parent as ViewGroup).findViewById(R.id.snackbar_layout)
+        if (phoneLandscape) {
             shadow.alpha = 0f
+            sheetBehavior?.peekHeight = 0
+        }
         sheetBehavior?.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onSlide(bottomSheet: View, progress: Float) {
-                top_bar.alpha = 1 - progress
-                shadow2.alpha = (1 - progress) * 0.25f
+                top_bar.alpha = 1 - max(0f, progress)
+                shadow2.alpha = (1 - max(0f, progress)) * 0.25f
                 if (phoneLandscape)
                     shadow.alpha = progress
-                updateRootPadding(progress)
+                else
+                    shadow.alpha = 1 + min(0f, progress)
+                //if (progress >= 0)
+                    updateRootPadding(progress)
             }
 
             override fun onStateChanged(p0: View, state: Int) {
                 if (state == BottomSheetBehavior.STATE_COLLAPSED) {
-                    reSortViews()
+                    if (phoneLandscape)
+                        reSortViews()
                     if (phoneLandscape)
                         shadow.alpha = 0f
+                    else
+                        shadow.alpha = 1f
+                    pager?.updatePaddingRelative(bottom = sheetBehavior?.peekHeight ?: 0)
+                    snackbarLayout.updatePaddingRelative(bottom = sheetBehavior?.peekHeight ?: 0)
+                    preferences.hideFiltersAtStart().set(false)
                 }
                 else setMainSortText()
                 if (state == BottomSheetBehavior.STATE_EXPANDED) {
@@ -147,37 +157,50 @@ class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: A
                     if (phoneLandscape)
                         shadow.alpha = 1f
                 }
-                top_bar.isClickable = state == BottomSheetBehavior.STATE_COLLAPSED
-                top_bar.isFocusable = state == BottomSheetBehavior.STATE_COLLAPSED
+                if (state == BottomSheetBehavior.STATE_HIDDEN) {
+                    reSortViews()
+                    shadow.alpha = 0f
+                    pager?.updatePaddingRelative(bottom = 0)
+                    snackbarLayout.updatePaddingRelative(bottom = 0)
+                    preferences.hideFiltersAtStart().set(true)
+                }
+                //top_bar.isClickable = state == BottomSheetBehavior.STATE_COLLAPSED
+                //top_bar.isFocusable = state == BottomSheetBehavior.STATE_COLLAPSED
             }
         })
+        if (preferences.hideFiltersAtStart().getOrDefault()) {
+            sheetBehavior?.state = BottomSheetBehavior.STATE_HIDDEN
+            shadow.alpha = 0f
+        }
+        else {
+            pager?.updatePaddingRelative(bottom = sheetBehavior?.peekHeight ?: 0)
+            snackbarLayout.updatePaddingRelative(bottom = sheetBehavior?.peekHeight ?: 0)
+        }
         if (phoneLandscape && shadow2.visibility != View.GONE) {
             shadow2.gone()
         }
-        if (phoneLandscape)
-            sheetBehavior?.peekHeight = 0
-        top_bar.viewTreeObserver.addOnGlobalLayoutListener {
-            val peekingHeight = if (phoneLandscape) 0
+        /*top_bar.viewTreeObserver.addOnGlobalLayoutListener {
+            /*val peekingHeight = if (phoneLandscape) 0
             else if (!title.text.isNullOrBlank()) top_bar.height
             else if (peekHeight != 0) -1
             else 0
             if (peekingHeight > -1 && (peekHeight == 0 || peekingHeight > 0)) {
                 sheetBehavior?.peekHeight = peekingHeight
                 peekHeight = peekingHeight
-            }
+            }*/
             if (sheetBehavior?.state == BottomSheetBehavior.STATE_COLLAPSED) {
                 val height = context.resources.getDimensionPixelSize(R.dimen.rounder_radius)
                 fastScroller?.updateLayoutParams<CoordinatorLayout.LayoutParams> {
                     bottomMargin = if (phoneLandscape) 0 else (top_bar.height - height)
                 }
-                pager?.setPadding(0, 0, 0, if (phoneLandscape) 0 else
+                pager?.updatePaddingRelative(bottom =  if (phoneLandscape) 0 else
                     (top_bar.height - height))
-                coordLayout.setPadding(0, 0, 0, peekingHeight)
+                coordLayout.updatePaddingRelative(bottom = sheetBehavior?.peekHeight ?: 0)
             }
             else {
                 updateRootPadding()
             }
-        }
+        }*/
         createTags()
         sorting_layout.visibility =
             if (preferences.libraryAsSingleList().getOrDefault()) View.GONE
@@ -210,7 +233,7 @@ class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: A
     override fun onRestoreInstanceState(state: Parcelable?) {
         if (state is Bundle) // implicit null check
         {
-            this.peekHeight = state.getInt("peek")
+            /*this.peekHeight = state.getInt("peek")
             this.startingTitle = state.getString("title") ?: ""
             val sheet = BottomSheetBehavior.from(this)
             if (isLandscape() && !isTablet())
@@ -222,9 +245,10 @@ class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: A
             top_bar.alpha =
                 if (sheet.state == BottomSheetBehavior.STATE_COLLAPSED) 1f
                 else 0f
+             */
+            super.onRestoreInstanceState(state.getParcelable("superState"))
         }
-        else
-        super.onRestoreInstanceState(state)
+        else super.onRestoreInstanceState(state)
     }
 
     private fun isLandscape(): Boolean {
@@ -288,7 +312,10 @@ class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: A
         val percent = (trueProgress * 100).roundToInt()
         val value = (percent * (maxHeight - minHeight) / 100) + minHeight
         val height = context.resources.getDimensionPixelSize(R.dimen.rounder_radius)
-        pager?.setPadding(0, 0, 0, value - height)
+        if (trueProgress >= 0)
+            pager?.updatePaddingRelative(bottom = value - height)
+        else
+            pager?.updatePaddingRelative(bottom = (minHeight * (1 + trueProgress)).toInt())
     }
 
     fun sorting(trueSort:Boolean = false): Int {
@@ -338,13 +365,13 @@ class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: A
         }
         filter = preferences.filterMangaType().getOrDefault()
         if (filter > 0) {
-            filters.add(if (filter == 1) R.string.manga_only else R.string.manhwa_only)
+            filters.add(R.string.manhwa_only)
         }
         return filters
     }
 
 
-    fun createTags() {
+    private fun createTags() {
         categories = inflate(R.layout.filter_buttons) as FilterTagGroup
         categories.setup(this, R.string.action_hide_categories)
 
@@ -361,9 +388,7 @@ class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: A
         tracked = inflate(R.layout.filter_buttons) as FilterTagGroup
         tracked.setup(this, R.string.action_filter_tracked, R.string.action_filter_not_tracked)
 
-        filterItems.forEach {
-            filter_layout.addView(it)
-        }
+        reSortViews()
 
         checkForManhwa()
     }
@@ -376,9 +401,7 @@ class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: A
                 launchUI {
                     val mangaType = inflate(R.layout.filter_buttons) as FilterTagGroup
                     mangaType.setup(
-                        this@SortFilterBottomSheet,
-                        R.string.manga,
-                        R.string.manhwa
+                        this@SortFilterBottomSheet, R.string.manhwa
                     )
                     this@SortFilterBottomSheet.mangaType = mangaType
                     filter_layout.addView(mangaType)
@@ -680,7 +703,7 @@ class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: A
         onGroupClicked(action)
     }
 
-    fun reSortViews() {
+    private fun reSortViews() {
         filter_layout.removeAllViews()
         if (filterItems.any { it.isActivated })
             filter_layout.addView(clearButton)

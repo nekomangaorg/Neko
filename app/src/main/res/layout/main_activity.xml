@@ -76,11 +76,12 @@
             android:background="?attr/colorPrimary"
             app:itemIconTint="@drawable/bottom_nav_item_selector"
             app:itemRippleColor="@color/rippleColor"
-            app:itemTextColor="?attr/tabBarIconColor"
+            app:itemTextColor="@drawable/bottom_nav_item_selector"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:menu="@menu/bottom_navigation"
+            app:labelVisibilityMode="labeled"
             app:tabBackground="@color/rippleColor"
             app:tabRippleColor="@color/rippleColor"
             app:tabTextColor="?attr/tabBarIconColor" />

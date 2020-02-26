@@ -122,6 +122,8 @@ open class LibraryController(
 
     val stopRefreshRelay: PublishRelay<Boolean> = PublishRelay.create()
 
+    protected var phoneLandscape = false
+
     /**
      * Number of manga per row in grid mode.
      */
@@ -205,6 +207,11 @@ open class LibraryController(
             fab.isClickable = true
             fab.isFocusable = true
         }
+
+        val config = resources?.configuration
+        phoneLandscape = (config?.orientation == Configuration.ORIENTATION_LANDSCAPE &&
+            (config.screenLayout.and(Configuration.SCREENLAYOUT_SIZE_MASK)) <
+            Configuration.SCREENLAYOUT_SIZE_LARGE)
 
         presenter.onRestore()
         val library = presenter.getAllManga()
@@ -457,13 +464,6 @@ open class LibraryController(
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.library, menu)
 
-        val config = resources?.configuration
-
-        val phoneLandscape = (config?.orientation == Configuration.ORIENTATION_LANDSCAPE &&
-            (config.screenLayout.and(Configuration.SCREENLAYOUT_SIZE_MASK)) <
-            Configuration.SCREENLAYOUT_SIZE_LARGE)
-        menu.findItem(R.id.action_library_filter).isVisible = phoneLandscape
-
         val searchItem = menu.findItem(R.id.action_search)
         val searchView = searchItem.actionView as SearchView
         searchView.queryHint = resources?.getString(R.string.search_hint)
@@ -492,7 +492,8 @@ open class LibraryController(
 
     override fun handleRootBack(): Boolean {
         val sheetBehavior = BottomSheetBehavior.from(bottom_sheet)
-        if (sheetBehavior.state != BottomSheetBehavior.STATE_COLLAPSED) {
+        if (sheetBehavior.state != BottomSheetBehavior.STATE_COLLAPSED &&
+            sheetBehavior.state != BottomSheetBehavior.STATE_HIDDEN) {
             sheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
             return true
         }
@@ -514,7 +515,10 @@ open class LibraryController(
         when (item.itemId) {
             R.id.action_search -> expandActionViewFromInteraction = true
             R.id.action_library_filter -> {
-                if (bottom_sheet.sheetBehavior?.state != BottomSheetBehavior.STATE_COLLAPSED)
+                if (bottom_sheet.sheetBehavior?.isHideable == true &&
+                    bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED)
+                    bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_HIDDEN
+                else if (bottom_sheet.sheetBehavior?.state != BottomSheetBehavior.STATE_COLLAPSED)
                     bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
                 else bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
             }
@@ -523,6 +527,12 @@ open class LibraryController(
 
         return true
     }
+
+    fun showFiltersBottomSheet() {
+        if (bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_HIDDEN)
+            bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
+    }
+
 
     /**
      * Invalidates the action mode, forcing it to refresh its content.

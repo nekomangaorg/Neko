@@ -243,12 +243,5 @@ class PreferencesHelper(val context: Context) {
 
     fun keepCatSort() = rxPrefs.getInteger(Keys.keepCatSort, 0)
 
-    fun upgradeFilters() {
-        val filterDl = rxPrefs.getBoolean(Keys.filterDownloaded, false).getOrDefault()
-        val filterUn = rxPrefs.getBoolean(Keys.filterUnread, false).getOrDefault()
-        val filterCm = rxPrefs.getBoolean(Keys.filterCompleted, false).getOrDefault()
-        filterDownloaded().set(if (filterDl) 1 else 0)
-        filterUnread().set(if (filterUn) 1 else 0)
-        filterCompleted().set(if (filterCm) 1 else 0)
-    }
+    fun hideFiltersAtStart() = rxPrefs.getBoolean("hide_filters_at_start", false)
 }

@@ -35,6 +35,7 @@
     <color name="oldNavBarBackground">#B3FFFFFF</color>
     <color name="badgeColor">@color/material_red_accent_700</color>
     <color name="tabBarIconHighlight">@color/md_white_1000</color>
+    <color name="tabInactive">@color/md_white_1000_50</color>
 
     <color name="preference_fallback_accent_color">@color/colorAccent</color>
     <color name="darkPrimaryColor">#212121</color>
@@ -82,5 +83,6 @@
 
     <color name="md_teal_500">#009688</color>
 
-    <color name="pale_green">#99CC99</color>
+    <color name="total_green">@color/material_green_800</color>
+    <color name="pale_red">@color/material_red_300</color>
 </resources>

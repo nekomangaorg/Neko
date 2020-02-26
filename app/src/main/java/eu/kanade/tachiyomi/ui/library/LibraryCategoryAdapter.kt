@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.library
 
+import android.view.View
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -181,5 +182,6 @@ class LibraryCategoryAdapter(val libraryListener: LibraryListener) :
         fun sortCategory(catId: Int, sortBy: Int)
         fun selectAll(position: Int)
         fun allSelected(position: Int): Boolean
+        fun showCategories(position: Int, view: View)
     }
 }

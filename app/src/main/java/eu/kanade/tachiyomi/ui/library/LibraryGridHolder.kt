@@ -55,28 +55,6 @@ class LibraryGridHolder(
         title.text = item.manga.currentTitle()
         subtitle.text = item.manga.originalAuthor()?.trim()
 
-       /* if (!fixedSize) {
-            title.viewTreeObserver.addOnPreDrawListener(object : ViewTreeObserver.OnPreDrawListener {
-                override fun onPreDraw(): Boolean {
-                    title.viewTreeObserver.removeOnPreDrawListener(this)
-                    // Drawing happens after layout so we can assume getLineCount() returns the correct value
-                    val marginParams = title.layoutParams as ConstraintLayout.LayoutParams
-                    if (title.lineCount == 2) {
-                        // Do whatever you want in case text view has more than 2 lines
-                        subtitle.gone()
-                        marginParams.bottomMargin = 10.dpToPx
-                        marginParams.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID
-                    } else {
-                        subtitle.visible()
-                        marginParams.bottomMargin = 0
-                        marginParams.bottomToBottom = -1
-                    }
-                    title.layoutParams = marginParams
-                    return true
-                }
-            })
-        }*/
-
         compact_title.text = title.text
 
         setUnreadBadge(badge_view, item)

@@ -6,13 +6,6 @@
     android:id="@+id/library_layout"
     android:layout_height="match_parent">
 
-    <FrameLayout
-        android:id="@+id/recycler_layout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-    </FrameLayout>
-
     <eu.davidea.fastscroller.FastScroller
         android:id="@+id/fast_scroller"
         android:layout_width="wrap_content"

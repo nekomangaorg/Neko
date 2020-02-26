@@ -25,7 +25,7 @@
         <item name="android:listDivider">@drawable/line_divider_light</item>
         <item name="actionModeStyle">@style/CustomActionModeStyle</item>
         <item name="tabBarIconColor">@color/tabBarIconHighlight</item>
-        <item name="tabBarIconInactive">@color/md_white_1000_76</item>
+        <item name="tabBarIconInactive">@color/tabInactive</item>
 
 
         <!-- Themes -->

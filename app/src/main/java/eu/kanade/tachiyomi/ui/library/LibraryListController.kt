@@ -1,19 +1,20 @@
 package eu.kanade.tachiyomi.ui.library
 
-import android.content.res.Configuration
 import android.os.Bundle
 import android.util.TypedValue
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Spinner
+import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
+import androidx.appcompat.widget.PopupMenu
 import androidx.appcompat.widget.SearchView
-import androidx.core.content.ContextCompat
 import androidx.core.math.MathUtils
+import androidx.core.math.MathUtils.clamp
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -38,13 +39,13 @@ import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
-import eu.kanade.tachiyomi.widget.IgnoreFirstSpinnerListener
 import kotlinx.android.synthetic.main.filter_bottom_sheet.*
 import kotlinx.android.synthetic.main.library_list_controller.*
 import kotlinx.android.synthetic.main.main_activity.*
+import kotlinx.android.synthetic.main.spinner_title.view.*
 import kotlinx.coroutines.delay
 import java.util.Locale
-import kotlin.math.min
+import kotlin.math.max
 
 class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
     FlexibleAdapter.OnItemClickListener,
@@ -54,7 +55,7 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
 
     private lateinit var adapter: LibraryCategoryAdapter
 
-    private lateinit var spinner: Spinner
+   // private lateinit var spinner: AutoCompleteTextView
 
     private var lastClickPosition = -1
 
@@ -64,13 +65,16 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
 
     private var lastItemPosition:Int? = null
     private var lastItem:IFlexible<*>? = null
+    private var lastHeaderPos = 0
+    private lateinit var customTitleSpinner: LinearLayout
+    private lateinit var titlePopupMenu:PopupMenu
 
     /**
      * Recycler view of the list of manga.
      */
     private lateinit var recycler: RecyclerView
 
-    override fun contentView():View = recycler_layout
+    override fun contentView():View = recycler
 
     override fun getTitle(): String? {
         return when {
@@ -97,22 +101,18 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
 
                 bottom_sheet.lastCategory = category
                 bottom_sheet.updateTitle()
-                val categortPosition = presenter.categories.indexOf(category)
-                if (spinner.selectedItemPosition != categortPosition) {
+                //val categortPosition = presenter.categories.indexOf(category)
+                customTitleSpinner.category_title.text = category?.name ?: ""
+                /*if (spinner.selectedItemPosition != categortPosition) {
                     updateScroll = true
                     spinner.setSelection(categortPosition, true)
-                }
+                }*/
             }
         }
     }
 
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
-        val config = resources?.configuration
-        val phoneLandscape = (config?.orientation == Configuration.ORIENTATION_LANDSCAPE &&
-            (config.screenLayout.and(Configuration.SCREENLAYOUT_SIZE_MASK)) <
-            Configuration.SCREENLAYOUT_SIZE_LARGE)
-
         // pad the recycler if the filter bottom sheet is visible
         if (!phoneLandscape) {
             val height = view.context.resources.getDimensionPixelSize(R.dimen.rounder_radius) + 4.dpToPx
@@ -128,7 +128,7 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
     override fun layoutView(view: View) {
         adapter = LibraryCategoryAdapter(this)
         recycler =
-            (recycler_layout.inflate(R.layout.library_grid_recycler) as AutofitRecyclerView).apply {
+            (library_layout.inflate(R.layout.library_grid_recycler) as AutofitRecyclerView).apply {
                 spanCount = if (libraryLayout == 0) 1 else mangaPerRow
                 manager.spanSizeLookup = (object : GridLayoutManager.SpanSizeLookup() {
                     override fun getSpanSize(position: Int): Int {
@@ -141,27 +141,42 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
 
         recycler.setHasFixedSize(true)
         recycler.adapter = adapter
-        recycler_layout.addView(recycler, 0)
+        library_layout.addView(recycler, 0)
         adapter.fastScroller = fast_scroller
         recycler.addOnScrollListener(scrollListener)
 
-        spinner = ReSpinner(view.context)
+       /* val dropdown = library_layout.inflate(R.layout.expanded_dropdown_menu) as
+            TextInputLayout // ReSpinner(view .context)
+        spinner = dropdown.filled_exposed_dropdown*/
 
         val tv = TypedValue()
         activity!!.theme.resolveAttribute(R.attr.actionBarTintColor, tv, true)
 
-        spinner.backgroundTintList = ContextCompat.getColorStateList(
+        /*spinner.backgroundTintList = ContextCompat.getColorStateList(
             view.context, tv.resourceId
         )
-        (activity as MainActivity).supportActionBar?.customView = spinner
+        (spinner.parent.parent as ViewGroup).removeView(spinner.parent as View)
+        (activity as MainActivity).supportActionBar?.customView = spinner.parent as View*/
+        customTitleSpinner = library_layout.inflate(R.layout.spinner_title) as LinearLayout
         (activity as MainActivity).supportActionBar?.setDisplayShowCustomEnabled(false)
         spinnerAdapter = SpinnerAdapter(
             view.context,
             R.layout.library_spinner_textview,
             arrayOf(resources!!.getString(R.string.label_library))
         )
-        spinnerAdapter?.setDropDownViewResource(R.layout.library_spinner_entry_text)
-        spinner.adapter = spinnerAdapter
+        customTitleSpinner.category_title.text = view.resources.getString(R.string.label_library)
+
+        titlePopupMenu = PopupMenu(view.context, customTitleSpinner, Gravity.END or Gravity.CENTER)
+        customTitleSpinner.setOnTouchListener(titlePopupMenu.dragToOpenListener)
+
+        titlePopupMenu.setOnMenuItemClickListener { item ->
+            scrollToHeader(item.itemId)
+            true
+        }
+        (activity as MainActivity).supportActionBar?.customView = customTitleSpinner
+        //spinnerAdapter?.setDropDownViewResource(R.layout.library_spinner_entry_text)
+        //spinner.setAdapter(spinnerAdapter)
+       // spinner.adapter = spinnerAdapter
     }
 
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
@@ -184,7 +199,7 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
     }
 
     override fun onNextLibraryUpdate(mangaMap: List<LibraryItem>, freshStart: Boolean) {
-        val recyclerLayout = recycler_layout ?: return
+        val recyclerLayout = view ?: return
         destroyActionModeIfNeeded()
         if (mangaMap.isNotEmpty()) {
             empty_view?.hide()
@@ -194,27 +209,31 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
         adapter.setItems(mangaMap)
 
 
-        spinner.onItemSelectedListener = null
+        //spinner.onItemSelectedListener = null
         val categoryNames =  presenter.categories.map { it.name }.toTypedArray()
-        spinnerAdapter = SpinnerAdapter(spinner.context, R.layout.library_spinner_textview,
+        spinnerAdapter = SpinnerAdapter(recyclerLayout.context, R.layout.library_spinner_textview,
             if (categoryNames.isNotEmpty()) categoryNames
-            else arrayOf(spinner.context.getString(R.string.label_library))
+            else arrayOf(recyclerLayout.context.getString(R.string.label_library))
         )
-        spinnerAdapter?.setDropDownViewResource(R.layout.library_spinner_entry_text)
-        spinner.adapter = spinnerAdapter
+        //spinnerAdapter?.setDropDownViewResource(R.layout.library_spinner_entry_text)
+        //spinner.setAdapter(spinnerAdapter)
 
         val isCurrentController = router?.backstack?.lastOrNull()?.controller() ==
             this
         (activity as AppCompatActivity).supportActionBar
-            ?.setDisplayShowCustomEnabled(isCurrentController && categoryNames.size > 1)
+            ?.setDisplayShowCustomEnabled(isCurrentController && presenter.categories.size > 1)
         if (isCurrentController) setTitle()
 
-        spinner.setSelection(min(presenter.categories.size - 1, activeCategory + 1))
+        //spinner.setSelection(min(presenter.categories.size - 1, activeCategory))
+        customTitleSpinner.category_title.text =
+            presenter.categories[clamp(activeCategory,
+                0,
+                presenter.categories.size - 1)].name
         updateScroll = false
         if (!freshStart) {
             justStarted = false
-            if (recyclerLayout.alpha == 0f)
-                recyclerLayout.animate().alpha(1f).setDuration(500).start()
+            if (contentView().alpha == 0f)
+                contentView().animate().alpha(1f).setDuration(500).start()
 
 
         } else if (justStarted) {
@@ -230,21 +249,39 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
             activeCategory, 0, presenter.categories.size - 1
         ))
         bottom_sheet.updateTitle()
-        spinner.onItemSelectedListener = IgnoreFirstSpinnerListener { pos ->
+        titlePopupMenu.menu.clear()
+        presenter.categories.forEach { category ->
+            titlePopupMenu.menu.add(0, category.order, max(0, category.order), category.name)
+        }
+        customTitleSpinner.setOnClickListener {
+
+            titlePopupMenu.show()
+        }
+        /*spinner.onItemSelectedListener = IgnoreFirstSpinnerListener { pos ->
             if (updateScroll) {
                 updateScroll = false
                 return@IgnoreFirstSpinnerListener
             }
             scrollToHeader(presenter.categories[pos].order)
-        }
+        }*/
     }
 
-    private fun scrollToHeader(pos: Int) {
+    private fun scrollToHeader(pos: Int, offset: Float? = null) {
         val headerPosition = adapter.indexOf(pos)
         if (headerPosition > -1) {
             (recycler.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
-                headerPosition, if (headerPosition == 0) 0 else (-30).dpToPx
+                headerPosition, offset?.toInt() ?: if (headerPosition == 0) 0 else (-30).dpToPx
             )
+            lastHeaderPos = pos
+            if (offset != null && preferences.libraryLayout().getOrDefault() == 2) {
+                launchUI {
+                    delay(100)
+                    if (pos == lastHeaderPos)
+                        (recycler.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
+                            headerPosition, offset.toInt()
+                        )
+                }
+            }
         }
     }
 
@@ -522,5 +559,22 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
         val header = adapter.getSectionHeader(position) ?: return false
         val items = adapter.getSectionItemPositions(header)
         return items.all { adapter.isSelected(it) }
+    }
+
+    override fun showCategories(position: Int, view: View) {
+        if (presenter.categories.size <= 1) return
+        val header = adapter.getSectionHeader(position) as? LibraryHeaderItem ?: return
+        if (presenter.categories.size <= 1) return
+        val category = header.category
+        val popupMenu = PopupMenu(view.context, view)
+        presenter.categories.forEach {
+            if (it.id != category.id)
+                popupMenu.menu.add(0, it.order, it.order, it.name)
+        }
+        popupMenu.setOnMenuItemClickListener {
+            scrollToHeader(it.itemId)
+            true
+        }
+        popupMenu.show()
     }
 }
