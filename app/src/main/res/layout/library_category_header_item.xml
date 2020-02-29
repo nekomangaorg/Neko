@@ -35,8 +35,6 @@
         android:layout_marginBottom="10dp"
         android:ellipsize="end"
         android:gravity="center|start"
-        android:clickable="true"
-        android:focusable="true"
         android:inputType="none"
         android:maxLines="2"
         android:layout_marginTop="32dp"
@@ -46,7 +44,6 @@
         app:layout_constraintEnd_toStartOf="@id/update_button"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
-        android:drawableEnd="@drawable/ic_arrow_drop_down_white_24dp"
         tools:text="Title dfdsfsfsfsfsfdsfsfsfs" />
 
     <Space
@@ -71,7 +68,6 @@
         app:layout_constraintTop_toTopOf="@id/category_title"
         app:layout_constraintEnd_toStartOf="@id/space"
         app:layout_constraintStart_toEndOf="@id/category_title"
-        app:layout_constraintWidth_default="wrap"
         app:rippleColor="@color/fullRippleColor" />
 
     <TextView

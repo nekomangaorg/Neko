@@ -353,13 +353,16 @@ class LibraryPresenter(
     }
 
     private fun sortCategory(i1: LibraryItem, i2: LibraryItem,
-        lastReadManga: Map<Long, Int>,
-        initCat: Category? = null):
-        Int {
-       return if (initCat != null || i1.manga.category == i2.manga.category) {
-            val category = initCat ?: allCategories.find { it.id == i1.manga.category }
+        lastReadManga: Map<Long, Int>, initCat: Category? = null
+    ): Int {
+        return if (initCat != null || i1.manga.category == i2.manga.category) {
+            val category = initCat ?: allCategories.find { it.id == i1.manga.category } ?: return 0
+            if (category.mangaOrder.isNullOrEmpty() && category.mangaSort == null) {
+                category.changeSortTo(preferences.librarySortingMode().getOrDefault())
+                db.insertCategory(category).asRxObservable().subscribe()
+            }
             val compare = when {
-                category?.mangaSort != null -> {
+                category.mangaSort != null -> {
                     var sort = when (category.sortingMode()) {
                         LibrarySort.ALPHA -> sortAlphabetical(i1, i2)
                         LibrarySort.LAST_UPDATED -> i2.manga.last_update.compareTo(i1.manga.last_update)
@@ -384,8 +387,7 @@ class LibraryPresenter(
                         }
                         else -> sortAlphabetical(i1, i2)
                     }
-                    if (!category.isAscending())
-                        sort *= -1
+                    if (!category.isAscending()) sort *= -1
                     sort
                 }
                 category?.mangaOrder?.isEmpty() == false -> {
@@ -401,13 +403,11 @@ class LibraryPresenter(
                 }
                 else -> 0
             }
-           if (compare == 0) {
-               if (category?.isAscending() != false) sortAlphabetical(i1, i2)
-               else sortAlphabetical(i2, i1)
-           }
-           else compare
-        }
-        else {
+            if (compare == 0) {
+                if (category?.isAscending() != false) sortAlphabetical(i1, i2)
+                else sortAlphabetical(i2, i1)
+            } else compare
+        } else {
             val category = allCategories.find { it.id == i1.manga.category }?.order ?: -1
             val category2 = allCategories.find { it.id == i2.manga.category }?.order ?: -1
             category.compareTo(category2)
@@ -446,7 +446,8 @@ class LibraryPresenter(
         val libraryMap =
             if (!preferences.libraryAsSingleList().getOrDefault()) {
                 libraryManga.map { manga ->
-                    LibraryItem(manga, libraryLayout, null).apply { unreadType = unreadBadgeType }
+                    LibraryItem(manga, libraryLayout, preferences.uniformGrid(),null).apply { unreadType =
+                        unreadBadgeType }
                 }.groupBy {
                     if (showCategories) it.manga.category else -1
                 }
@@ -461,7 +462,7 @@ class LibraryPresenter(
                             (LibraryHeaderItem({ getCategory(it) }, entry.key))
                     entry.value.map {
                         LibraryItem(
-                            it, libraryLayout, categoryItem
+                            it, libraryLayout, preferences.uniformGrid(), categoryItem
                         ).apply { unreadType = unreadBadgeType }
                     }
                 }.map {

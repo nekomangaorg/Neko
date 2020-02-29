@@ -17,7 +17,6 @@ import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.category.CategoryController
 import kotlinx.android.synthetic.main.pref_library_columns.view.*
-import rx.Observable
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
@@ -30,29 +29,6 @@ class SettingsLibraryController : SettingsController() {
         titleRes = R.string.pref_category_library
         preferenceCategory {
             titleRes = R.string.pref_category_library_display
-            preference {
-                titleRes = R.string.pref_library_columns
-                onClick {
-                    LibraryColumnsDialog().showDialog(router)
-                }
-
-                fun getColumnValue(value: Int): String {
-                    return if (value == 0) context.getString(R.string.default_columns)
-                    else value.toString()
-                }
-
-                Observable.combineLatest(preferences.portraitColumns().asObservable(),
-                    preferences.landscapeColumns().asObservable()
-                ) { portraitCols, landscapeCols -> Pair(portraitCols, landscapeCols) }
-                    .subscribeUntilDestroy { (portraitCols, landscapeCols) ->
-                        val portrait = getColumnValue(portraitCols)
-                        val landscape = getColumnValue(landscapeCols)
-                        summary =
-                            "${context.getString(R.string.portrait)}: $portrait, " + "${context.getString(
-                                R.string.landscape
-                            )}: $landscape"
-                    }
-            }
 
             switchPreference {
                 key = Keys.libraryAsSingleList

@@ -57,6 +57,17 @@ interface Category : Serializable {
         else -> null
     }
 
+    fun changeSortTo(sort: Int) {
+        mangaSort = when (sort) {
+            LibrarySort.ALPHA -> ALPHA_ASC
+            LibrarySort.LAST_UPDATED -> UPDATED_ASC
+            LibrarySort.UNREAD -> UNREAD_ASC
+            LibrarySort.LAST_READ -> LAST_READ_ASC
+            LibrarySort.TOTAL -> ALPHA_ASC
+            else -> ALPHA_ASC
+        }
+    }
+
     companion object {
         private const val DRAG_AND_DROP = 'D'
         private const val ALPHA_ASC = 'a'

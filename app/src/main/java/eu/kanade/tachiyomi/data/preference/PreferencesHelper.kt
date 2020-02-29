@@ -173,6 +173,10 @@ class PreferencesHelper(val context: Context) {
 
     fun libraryLayout() = rxPrefs.getInteger(Keys.libraryLayout, 1)
 
+    fun gridSize() = rxPrefs.getInteger(Keys.gridSize, 1)
+
+    fun uniformGrid() = rxPrefs.getBoolean(Keys.uniformGrid, true)
+
     fun libraryAsSingleList() = rxPrefs.getBoolean(Keys.libraryAsSingleList, false)
 
     fun downloadBadge() = rxPrefs.getBoolean(Keys.downloadBadge, false)
@@ -239,7 +243,7 @@ class PreferencesHelper(val context: Context) {
 
     fun lastExtCheck() = rxPrefs.getLong("last_ext_check", 0)
 
-    fun unreadBadgeType() = rxPrefs.getInteger("unread_badge_type", 1)
+    fun unreadBadgeType() = rxPrefs.getInteger("unread_badge_type", 2)
 
     fun keepCatSort() = rxPrefs.getInteger(Keys.keepCatSort, 0)
 

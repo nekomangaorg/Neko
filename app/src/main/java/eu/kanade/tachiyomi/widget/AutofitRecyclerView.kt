@@ -10,7 +10,16 @@ class AutofitRecyclerView @JvmOverloads constructor(context: Context, attrs: Att
 
     val manager = GridLayoutManager(context, 1)
 
-    private var columnWidth = -1
+    var columnWidth = -1
+       /* set(value) {
+            field = value
+            if (value > 0) {
+                val count = max(1, measuredWidth / value)
+                spanCount = count
+                manager.spanCount = count
+            }
+        }*/
+
 
     var spanCount = 0
         set(value) {

@@ -32,7 +32,7 @@ class SettingsMainController : SettingsController() {
         }
 
         preference {
-            iconRes = R.drawable.ic_tune_black_24dp
+            iconRes = R.drawable.ic_tune_white_24dp
             iconTint = tintColor
             titleRes = R.string.pref_category_general
             onClick { navigateTo(SettingsGeneralController()) }

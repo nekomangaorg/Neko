@@ -8,6 +8,7 @@ import android.graphics.Rect
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -17,6 +18,7 @@ import android.widget.FrameLayout
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.core.graphics.ColorUtils
+import androidx.core.view.GestureDetectorCompat
 import androidx.core.view.GravityCompat
 import com.bluelinelabs.conductor.Conductor
 import com.bluelinelabs.conductor.Controller
@@ -70,12 +72,15 @@ import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 import java.util.Date
 import java.util.concurrent.TimeUnit
+import kotlin.math.abs
 
 open class MainActivity : BaseActivity(), DownloadServiceListener {
 
     protected lateinit var router: Router
 
     protected var drawerArrow: DrawerArrowDrawable? = null
+    private var currentGestureDelegate:SwipeGestureInterface? = null
+    private lateinit var gestureDetector:GestureDetectorCompat
 
     protected open var trulyGoBack = false
 
@@ -116,6 +121,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             finish()
             return
         }
+        gestureDetector = GestureDetectorCompat(this, GestureListener())
 
         setContentView(R.layout.main_activity)
 
@@ -485,6 +491,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
     }
 
     override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
+        gestureDetector.onTouchEvent(ev)
         if (ev?.action == MotionEvent.ACTION_DOWN) {
             if (snackBar != null && snackBar!!.isShown) {
                 val sRect = Rect()
@@ -535,6 +542,8 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             tabs.setupWithViewPager(null)
         }
 
+        currentGestureDelegate = to as? SwipeGestureInterface
+
         if (from is SecondaryDrawerController) {
             if (secondaryDrawer != null) {
                 from.cleanupSecondaryDrawer(drawer)
@@ -571,7 +580,55 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         }
     }
 
+
+    private inner class GestureListener : GestureDetector.SimpleOnGestureListener() {
+        override fun onDown(e: MotionEvent): Boolean {
+            return true
+        }
+
+        override fun onFling(
+            e1: MotionEvent, e2: MotionEvent, velocityX: Float, velocityY: Float
+        ): Boolean {
+            var result = false
+            try {
+                val diffY = e2.y - e1.y
+                val diffX = e2.x - e1.x
+                if (abs(diffX) > abs(diffY)) {
+                    if (abs(diffX) > Companion.SWIPE_THRESHOLD &&
+                        abs(velocityX) > Companion.SWIPE_VELOCITY_THRESHOLD
+                        && abs(diffY) <= Companion.SWIPE_THRESHOLD / 2
+                    ) {
+                        if (diffX > 0) {
+                            currentGestureDelegate?.onSwipeRight(e1.x,  e1.y)
+                        } else {
+                            currentGestureDelegate?.onSwipeLeft(e1.x,  e1.y)
+                        }
+                        result = true
+                    }
+                } else if (abs(diffY) > Companion.SWIPE_THRESHOLD && abs(
+                        velocityY
+                    ) > Companion.SWIPE_VELOCITY_THRESHOLD
+                ) {
+                    if (diffY > 0) {
+                        currentGestureDelegate?.onSwipeBottom(e1.x,  e1.y)
+                        //onSwipeBottom()
+                    } else {
+                        currentGestureDelegate?.onSwipeTop(e1.x,  e1.y)
+                    }
+                    result = true
+                }
+            } catch (exception: Exception) {
+                exception.printStackTrace()
+            }
+            return result
+        }
+
+    }
+
     companion object {
+
+        private const val SWIPE_THRESHOLD = 100
+        private const val SWIPE_VELOCITY_THRESHOLD = 100
         // Shortcut actions
         const val SHORTCUT_LIBRARY = "eu.kanade.tachiyomi.SHOW_LIBRARY"
         const val SHORTCUT_RECENTLY_UPDATED = "eu.kanade.tachiyomi.SHOW_RECENTLY_UPDATED"
@@ -592,4 +649,11 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
 
 interface BottomNavBarInterface {
     fun canChangeTabs(block: () -> Unit): Boolean
+}
+
+interface SwipeGestureInterface {
+    fun onSwipeRight(x: Float, y: Float)
+    fun onSwipeLeft(x: Float, y: Float)
+    fun onSwipeTop(x: Float, y: Float)
+    fun onSwipeBottom(x: Float, y: Float)
 }

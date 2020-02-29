@@ -33,7 +33,7 @@
                     android:clipToPadding="false"
                     android:paddingStart="20dp"
                     android:paddingTop="8dp"
-                    android:paddingBottom="18dp"
+                    android:paddingBottom="6dp"
                     android:paddingEnd="20dp"
                     android:scrollbars="none">
 
@@ -61,130 +61,35 @@
                     </LinearLayout>
                 </HorizontalScrollView>
 
-                    <LinearLayout
-                        android:id="@+id/side_layout"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="0dp"
-                        android:paddingStart="23dp"
-                        android:paddingEnd="20dp"
-                        android:baselineAligned="true"
-                        android:gravity="center|start"
-                        android:orientation="vertical">
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="23dp"
+                    android:orientation="horizontal">
+                <com.google.android.material.checkbox.MaterialCheckBox
+                    android:id="@+id/hide_categories"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="20dp"
+                    android:text="@string/action_hide_categories" />
 
-                        <LinearLayout
-                            android:id="@+id/sorting_layout"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="10dp"
-                            android:baselineAligned="false"
-                            android:gravity="center|start"
-                            android:orientation="horizontal">
-
-                            <TextView
-                                android:id="@+id/library_sort_text"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_marginEnd="10dp"
-                                android:clickable="true"
-                                android:drawablePadding="6dp"
-                                android:background="@drawable/square_ripple"
-                                android:layout_weight="1"
-                                android:focusable="true"
-                                android:gravity="start|center"
-                                android:padding="5dp"
-                                tools:text="Library Sort"
-                                android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
-                                android:textColor="?android:attr/textColorPrimary"
-                                android:textSize="15sp"
-                                android:textStyle="normal" />
-
-                            <TextView
-                                android:id="@+id/category_sort_text"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:background="@drawable/square_ripple"
-                                android:layout_marginEnd="10dp"
-                                android:layout_weight="1"
-                                android:padding="5dp"
-                                android:clickable="true"
-                                android:drawablePadding="6dp"
-                                android:textAlignment="textStart"
-                                android:focusable="true"
-                                android:gravity="start|center"
-                                tools:text="Category Sort"
-                                android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
-                                android:textColor="?android:attr/textColorPrimary"
-                                android:textSize="15sp"
-                                android:textStyle="normal" />
-
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:id="@+id/display_layout"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="7dp"
-                            android:layout_marginTop="7dp"
-                            android:layout_marginBottom="7dp"
-                            android:layout_marginEnd="14dp"
-                            android:baselineAligned="false"
-                            android:gravity="center|start"
-                            android:orientation="horizontal">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginEnd="0dp"
-                                android:clickable="true"
-                                android:focusable="true"
-                                android:text="@string/display_as"
-                                android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
-                                android:textColor="?android:attr/textColorSecondary"
-                                android:textSize="15sp"
-                                android:textStyle="normal" />
-
-                            <androidx.appcompat.widget.AppCompatSpinner
-                                android:id="@+id/display_spinner"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:entries="@array/library_display"/>
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:baselineAligned="false"
-                            android:gravity="center|start"
-                            >
-
-                            <CheckBox
-                                android:id="@+id/download_checkbox"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginEnd="20dp"
-                                android:text="@string/action_display_download_badge" />
-
-
-                            <TextView
-                                android:id="@+id/unread_badge"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginEnd="10dp"
-                                android:clickable="true"
-                                android:drawablePadding="6dp"
-                                android:background="@drawable/square_ripple"
-                                android:focusable="true"
-                                android:gravity="start|center"
-                                android:padding="5dp"
-                                android:text="@string/action_display_unread_badge"
-                                android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
-                                android:textColor="?android:attr/textColorPrimary"
-                                android:textSize="15sp"
-                                android:textStyle="normal" />
-                        </LinearLayout>
-                    </LinearLayout>
+                <TextView
+                    android:layout_marginStart="12dp"
+                    android:id="@+id/reorder_filters"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="10dp"
+                    android:clickable="true"
+                    android:background="@drawable/square_ripple"
+                    android:focusable="true"
+                    android:gravity="start|center"
+                    android:padding="10dp"
+                    android:text="Reorder Filters"
+                    android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
+                    android:textColor="?android:attr/textColorPrimary"
+                    android:textSize="15sp"
+                    android:textStyle="normal" />
+                </LinearLayout>
             </LinearLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -206,35 +111,6 @@
                 android:contentDescription="@string/drag_handle"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <ImageView
-                android:id="@+id/title_icon"
-                android:layout_width="wrap_content"
-                android:layout_height="0dp"
-                android:layout_marginStart="24dp"
-                android:visibility="gone"
-                android:src="@drawable/ic_sort_white_24dp"
-                app:layout_constraintBottom_toBottomOf="@+id/title"
-                android:contentDescription="@string/sorting_mode"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/title" />
-
-            <TextView
-                android:id="@+id/title"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="15dp"
-                android:layout_marginEnd="8dp"
-                android:layout_marginBottom="15dp"
-                android:visibility="gone"
-                android:textAlignment="textStart"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
-                android:textColor="?attr/actionBarTintColor"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/title_icon"
                 app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>

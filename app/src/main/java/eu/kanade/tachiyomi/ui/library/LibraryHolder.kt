@@ -29,8 +29,8 @@ abstract class LibraryHolder(
         badge.setUnreadDownload(
             when {
                 item.chapterCount > -1 -> item.chapterCount
-                item.unreadType == 1 -> item.manga.unread
-                item.unreadType == 0 -> if (item.manga.unread > 0) -1 else -2
+                item.unreadType == 2 -> item.manga.unread
+                item.unreadType == 1 -> if (item.manga.unread > 0) -1 else -2
                 else -> -2
             },
             when {

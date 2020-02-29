@@ -41,7 +41,7 @@ class LibraryListHolder(
         subtitle.visibility = if (!item.manga.originalAuthor().isNullOrBlank()) View.VISIBLE
         else View.GONE
 
-        play_layout.visibility = if (item.manga.unread > 0 && item.unreadType > -1)
+        play_layout.visibility = if (item.manga.unread > 0 && item.unreadType > 0)
             View.VISIBLE else View.GONE
         play_layout.setOnClickListener { playButtonClicked() }
 

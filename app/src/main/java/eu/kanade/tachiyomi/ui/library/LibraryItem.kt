@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.library
 
 import android.annotation.SuppressLint
+import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
@@ -17,17 +18,19 @@ import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import kotlinx.android.synthetic.main.catalogue_grid_item.view.*
 import uy.kohesive.injekt.injectLazy
 
 class LibraryItem(val manga: LibraryManga,
     private val libraryLayout: Preference<Int>,
+    private val fixedSize: Preference<Boolean>,
     header: LibraryHeaderItem?) :
     AbstractSectionableItem<LibraryHolder, LibraryHeaderItem?>(header), IFilterable<String> {
 
     var downloadCount = -1
-    var unreadType = 1
+    var unreadType = 2
     var chapterCount = -1
 
     override fun getLayoutRes(): Int {
@@ -41,6 +44,7 @@ class LibraryItem(val manga: LibraryManga,
         val parent = adapter.recyclerView
         return if (parent is AutofitRecyclerView) {
             val libraryLayout = libraryLayout.getOrDefault()
+            val isFixedSize = fixedSize.getOrDefault()
             if (libraryLayout == 0) {
                 LibraryListHolder(view, adapter as LibraryCategoryAdapter)
             }
@@ -48,33 +52,42 @@ class LibraryItem(val manga: LibraryManga,
                 view.apply {
                     val coverHeight = (parent.itemWidth / 3f * 4f).toInt()
                     if (libraryLayout == 1) {
+                        gradient.layoutParams = FrameLayout.LayoutParams(
+                            FrameLayout.LayoutParams.MATCH_PARENT,
+                            (coverHeight * 0.66f).toInt(),
+                            Gravity.BOTTOM)
+                        card.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                            bottomMargin = 6.dpToPx
+                        }
+                    }
+                    else if (libraryLayout == 2) {
+                        constraint_layout.background = ContextCompat.getDrawable(
+                            context, R.drawable.library_item_selector
+                        )
+                    }
+                    if (isFixedSize) {
                         constraint_layout.layoutParams = FrameLayout.LayoutParams(
                             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
                         )
-                        val marginParams = card.layoutParams as ConstraintLayout.LayoutParams
-                        marginParams.bottomMargin = 6.dpToPx
-                        card.layoutParams = marginParams
-                        cover_thumbnail.maxHeight = coverHeight
+                        cover_thumbnail.maxHeight = (parent.itemWidth / 3f * 3.7f).toInt()
                         constraint_layout.minHeight = 0
                         cover_thumbnail.adjustViewBounds = false
                         cover_thumbnail.layoutParams = FrameLayout.LayoutParams(
                             ViewGroup.LayoutParams.MATCH_PARENT,
-                            coverHeight
+                            (parent.itemWidth / 3f * 3.7f).toInt()
                         )
-                    } else if (libraryLayout == 2) {
+                    } else {
                         constraint_layout.minHeight = coverHeight
                         cover_thumbnail.minimumHeight = (parent.itemWidth / 3f * 3.6f).toInt()
                         cover_thumbnail.maxHeight = (parent.itemWidth / 3f * 6f).toInt()
-                        constraint_layout.background = ContextCompat.getDrawable(
-                            context, R.drawable.library_item_selector
-                        )
                     }
                 }
                 LibraryGridHolder(
                     view,
                     adapter as LibraryCategoryAdapter,
                     parent.itemWidth,
-                    libraryLayout == 1
+                    libraryLayout == 1,
+                    isFixedSize
                 )
             }
         } else {

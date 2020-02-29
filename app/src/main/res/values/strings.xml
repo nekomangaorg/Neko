@@ -35,6 +35,7 @@
 
     <!-- Actions -->
     <string name="action_filter">Filter</string>
+    <string name="action_view_options">View options</string>
     <string name="action_filter_downloaded">Downloaded</string>
     <string name="action_filter_not_downloaded">Not downloaded</string>
     <string name="action_filter_bookmarked">Bookmarked</string>
@@ -100,9 +101,6 @@
     <string name="action_display_list">List</string>
     <string name="action_display_download_badge">Download badges</string>
     <string name="action_display_unread_badge">Unread badges</string>
-    <string name="action_display_all_unread">All unread</string>
-    <string name="action_display_any_unread">Any unread</string>
-    <string name="action_display_hide_unread">Hide unread</string>
     <string name="action_set_filter">Set filter</string>
     <string name="action_cancel">Cancel</string>
     <string name="action_sort">Sort</string>
@@ -445,6 +443,15 @@
     <string name="remember_choice">Remember this choice</string>
     <string name="already_in_category">Manga already in category</string>
     <string name="category">Category</string>
+    <string name="uniform_grid">Uniform Grid</string>
+    <string name="small">Small</string>
+    <string name="medium">Medium</string>
+    <string name="large">Large</string>
+    <string name="grid_options">Grid options</string>
+    <string name="badges">Badges</string>
+    <string name="hide_unread">Hide unread badges</string>
+    <string name="show_unread">Show unread badges</string>
+    <string name="show_unread_count">Show unread count</string>
 
 
     <!-- Catalogue fragment -->

@@ -230,8 +230,6 @@ open class LibraryController(
             override fun onPageSelected(position: Int) {
                 preferences.lastUsedCategory().set(position)
                 activeCategory = position
-                bottom_sheet.lastCategory = pagerAdapter?.categories?.getOrNull(position)
-                if (preferences.librarySortingMode().getOrDefault() == LibrarySort.DRAG_AND_DROP) bottom_sheet.updateTitle()
             }
 
             override fun onPageScrolled(
@@ -293,7 +291,7 @@ open class LibraryController(
             fab.animate().scaleX(scale).scaleY(scale).setDuration(200).start()
             fab.isClickable = downloading
             fab.isFocusable = downloading
-            bottom_sheet?.adjustTitleMargin(downloading)
+            bottom_sheet?.adjustFiltersMargin(downloading)
         }
     }
 
@@ -362,9 +360,6 @@ open class LibraryController(
         // Restore active category.
         library_pager.setCurrentItem(activeCat, false)
 
-        bottom_sheet.lastCategory = adapter.categories.getOrNull(activeCat)
-        bottom_sheet.updateTitle()
-
         tabsVisibilityRelay.call(categories.size > 1)
 
         libraryMangaRelay.call(LibraryMangaEvent(mangaMap))
@@ -430,7 +425,7 @@ open class LibraryController(
     /**
      * Reattaches the adapter to the view pager to recreate fragments
      */
-    protected open fun reattachAdapter() {
+    open fun reattachAdapter() {
         val adapter = pagerAdapter ?: return
 
         val position = library_pager.currentItem
@@ -518,9 +513,13 @@ open class LibraryController(
                 if (bottom_sheet.sheetBehavior?.isHideable == true &&
                     bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED)
                     bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_HIDDEN
-                else if (bottom_sheet.sheetBehavior?.state != BottomSheetBehavior.STATE_COLLAPSED)
+                else if (bottom_sheet.sheetBehavior?.state != BottomSheetBehavior.STATE_COLLAPSED
+                    && bottom_sheet.sheetBehavior?.skipCollapsed == false)
                     bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
                 else bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
+            }
+            R.id.action_library_display -> {
+                DisplayBottomSheet(this).show()
             }
             else -> return super.onOptionsItemSelected(item)
         }
@@ -530,7 +529,10 @@ open class LibraryController(
 
     fun showFiltersBottomSheet() {
         if (bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_HIDDEN)
-            bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
+            bottom_sheet.sheetBehavior?.state =
+                if (bottom_sheet.sheetBehavior?.skipCollapsed == false)
+                    BottomSheetBehavior.STATE_COLLAPSED
+                else  BottomSheetBehavior.STATE_EXPANDED
     }
 
 

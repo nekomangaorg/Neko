@@ -113,6 +113,10 @@ object PreferenceKeys {
 
     const val libraryLayout = "pref_display_library_layout"
 
+    const val gridSize = "grid_size"
+
+    const val uniformGrid = "uniform_grid"
+
     const val libraryAsSingleList = "library_as_single_list"
 
     const val lang = "app_language"

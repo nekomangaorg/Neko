@@ -24,12 +24,13 @@ class LibraryGridHolder(
     private val view: View,
     adapter: LibraryCategoryAdapter,
     var width:Int,
+    compact: Boolean,
     private var fixedSize: Boolean
 ) : LibraryHolder(view, adapter) {
 
     init {
         play_layout.setOnClickListener { playButtonClicked() }
-        if (fixedSize) {
+        if (compact) {
             text_layout.gone()
         }
         else {
@@ -58,7 +59,7 @@ class LibraryGridHolder(
         compact_title.text = title.text
 
         setUnreadBadge(badge_view, item)
-        play_layout.visibility = if (item.manga.unread > 0 && item.unreadType > -1)
+        play_layout.visibility = if (item.manga.unread > 0 && item.unreadType > 0)
             View.VISIBLE else View.GONE
 
         // Update the cover.

@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.library
 
+import android.graphics.Rect
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.Gravity
@@ -13,7 +14,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.PopupMenu
 import androidx.appcompat.widget.SearchView
-import androidx.core.math.MathUtils
 import androidx.core.math.MathUtils.clamp
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -32,6 +32,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.main.MainActivity
+import eu.kanade.tachiyomi.ui.main.SwipeGestureInterface
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.inflate
@@ -40,6 +41,7 @@ import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import kotlinx.android.synthetic.main.filter_bottom_sheet.*
+import kotlinx.android.synthetic.main.library_grid_recycler.*
 import kotlinx.android.synthetic.main.library_list_controller.*
 import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.android.synthetic.main.spinner_title.view.*
@@ -51,11 +53,10 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
     FlexibleAdapter.OnItemClickListener,
     FlexibleAdapter.OnItemLongClickListener,
     FlexibleAdapter.OnItemMoveListener,
-    LibraryCategoryAdapter.LibraryListener{
+    LibraryCategoryAdapter.LibraryListener,
+    SwipeGestureInterface {
 
     private lateinit var adapter: LibraryCategoryAdapter
-
-   // private lateinit var spinner: AutoCompleteTextView
 
     private var lastClickPosition = -1
 
@@ -65,16 +66,16 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
 
     private var lastItemPosition:Int? = null
     private var lastItem:IFlexible<*>? = null
-    private var lastHeaderPos = 0
     private lateinit var customTitleSpinner: LinearLayout
     private lateinit var titlePopupMenu:PopupMenu
+    var switchingCategories = false
 
     /**
      * Recycler view of the list of manga.
      */
-    private lateinit var recycler: RecyclerView
+   // private lateinit var recycler: RecyclerView
 
-    override fun contentView():View = recycler
+    override fun contentView():View = recycler_layout
 
     override fun getTitle(): String? {
         return when {
@@ -99,8 +100,6 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
                 activeCategory = order
                 val category = presenter.categories.find { it.order == order }
 
-                bottom_sheet.lastCategory = category
-                bottom_sheet.updateTitle()
                 //val categortPosition = presenter.categories.indexOf(category)
                 customTitleSpinner.category_title.text = category?.name ?: ""
                 /*if (spinner.selectedItemPosition != categortPosition) {
@@ -127,7 +126,7 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
 
     override fun layoutView(view: View) {
         adapter = LibraryCategoryAdapter(this)
-        recycler =
+       /* recycler =
             (library_layout.inflate(R.layout.library_grid_recycler) as AutofitRecyclerView).apply {
                 spanCount = if (libraryLayout == 0) 1 else mangaPerRow
                 manager.spanSizeLookup = (object : GridLayoutManager.SpanSizeLookup() {
@@ -137,11 +136,21 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
                         return if (item is LibraryHeaderItem) manager.spanCount else 1
                     }
                 })
-            }
+            }*/
 
+        //recycler.spanCount = if (libraryLayout == 0) 1 else mangaPerRow
+        if (libraryLayout == 0)recycler.spanCount =  1
+        else recycler.columnWidth = (90 + (preferences.gridSize().getOrDefault() * 30)).dpToPx
+        recycler.manager.spanSizeLookup = (object : GridLayoutManager.SpanSizeLookup() {
+            override fun getSpanSize(position: Int): Int {
+                if (libraryLayout == 0) return 1
+                val item = this@LibraryListController.adapter.getItem(position)
+                return if (item is LibraryHeaderItem) recycler.manager.spanCount else 1
+            }
+        })
         recycler.setHasFixedSize(true)
         recycler.adapter = adapter
-        library_layout.addView(recycler, 0)
+        //recycler_layout.addView(recycler)
         adapter.fastScroller = fast_scroller
         recycler.addOnScrollListener(scrollListener)
 
@@ -245,10 +254,6 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
         adapter.isLongPressDragEnabled = canDrag()
         tabsVisibilityRelay.call(false)
 
-        bottom_sheet.lastCategory = presenter.categories.getOrNull(MathUtils.clamp(
-            activeCategory, 0, presenter.categories.size - 1
-        ))
-        bottom_sheet.updateTitle()
         titlePopupMenu.menu.clear()
         presenter.categories.forEach { category ->
             titlePopupMenu.menu.add(0, category.order, max(0, category.order), category.name)
@@ -266,26 +271,25 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
         }*/
     }
 
-    private fun scrollToHeader(pos: Int, offset: Float? = null) {
+    private fun scrollToHeader(pos: Int, fade:Boolean = false) {
         val headerPosition = adapter.indexOf(pos)
+        switchingCategories = true
         if (headerPosition > -1) {
+            recycler.suppressLayout(true)
             (recycler.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
-                headerPosition, offset?.toInt() ?: if (headerPosition == 0) 0 else (-30).dpToPx
+                headerPosition, if (headerPosition == 0) 0 else (-30).dpToPx
             )
-            lastHeaderPos = pos
-            if (offset != null && preferences.libraryLayout().getOrDefault() == 2) {
-                launchUI {
-                    delay(100)
-                    if (pos == lastHeaderPos)
-                        (recycler.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
-                            headerPosition, offset.toInt()
-                        )
-                }
-            }
+            recycler.suppressLayout(false)
+        }
+        launchUI {
+            delay(100)
+            switchingCategories = false
         }
     }
 
     override fun reattachAdapter() {
+        if (libraryLayout == 0)recycler.spanCount =  1
+        else recycler.columnWidth = (90 + (preferences.gridSize().getOrDefault() * 30)).dpToPx
         val position =
             (recycler.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
         libraryLayout = preferences.libraryLayout().getOrDefault()
@@ -395,6 +399,7 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
      * @return true if the item should be selected, false otherwise.
      */
     override fun onItemClick(view: View?, position: Int): Boolean {
+        if (switchingCategories) return false
         val item = adapter.getItem(position) as? LibraryItem ?: return false
         return if (adapter.mode == SelectableAdapter.Mode.MULTI) {
             lastClickPosition = position
@@ -576,5 +581,34 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
             true
         }
         popupMenu.show()
+    }
+
+    override fun onSwipeBottom(x: Float, y: Float) { }
+    override fun onSwipeTop(x: Float, y: Float) { }
+    override fun onSwipeLeft(x: Float, y: Float) = goToNextCategory(x, y,-1)
+    override fun onSwipeRight(x: Float, y: Float) = goToNextCategory(x, y,1)
+
+    private fun goToNextCategory(x: Float, y: Float, offset: Int) {
+        val editTextRect = Rect()
+        bottom_sheet.getGlobalVisibleRect(editTextRect)
+
+        if (editTextRect.contains(x.toInt(), y.toInt())) {
+           return
+        }
+        val position =
+            (recycler.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+        val order = when (val item = adapter.getItem(position)) {
+            is LibraryHeaderItem -> item.category.order
+            is LibraryItem -> presenter.categories.find { it.id == item.manga.category }?.order
+                ?.plus(if (offset < 0) 1 else 0)
+            else -> null
+        }
+        if (order != null) {
+            var newOffset = order + offset
+            while (adapter.indexOf(newOffset) == -1 && presenter.categories.any { it.order == newOffset }) {
+                newOffset += offset
+            }
+            scrollToHeader (newOffset, true)
+        }
     }
 }
