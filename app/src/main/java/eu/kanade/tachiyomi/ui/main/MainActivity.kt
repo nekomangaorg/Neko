@@ -589,6 +589,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         override fun onFling(
             e1: MotionEvent, e2: MotionEvent, velocityX: Float, velocityY: Float
         ): Boolean {
+            if (currentGestureDelegate == null) return false
             var result = false
             try {
                 val diffY = e2.y - e1.y
@@ -596,7 +597,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                 if (abs(diffX) > abs(diffY)) {
                     if (abs(diffX) > Companion.SWIPE_THRESHOLD &&
                         abs(velocityX) > Companion.SWIPE_VELOCITY_THRESHOLD
-                        && abs(diffY) <= Companion.SWIPE_THRESHOLD / 2
+                        && abs(diffY) <= Companion.SWIPE_THRESHOLD * 0.75f
                     ) {
                         if (diffX > 0) {
                             currentGestureDelegate?.onSwipeRight(e1.x,  e1.y)

@@ -95,7 +95,8 @@ class LibraryHeaderItem(private val categoryF: (Int) -> Category, val catId: Int
                 topMargin = (if (category.isFirst == true) 2 else 32).dpToPx
             }
 
-            sectionText.text = category.name
+            if (category.isFirst == true && category.isLast == true) sectionText.text = ""
+            else sectionText.text = category.name
             sortText.text = itemView.context.getString(R.string.sort_by_,
                 itemView.context.getString(
                 when (category.sortingMode()) {

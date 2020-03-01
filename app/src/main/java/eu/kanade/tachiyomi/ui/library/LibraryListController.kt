@@ -68,7 +68,8 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
     private var lastItem:IFlexible<*>? = null
     private lateinit var customTitleSpinner: LinearLayout
     private lateinit var titlePopupMenu:PopupMenu
-    var switchingCategories = false
+
+    private var switchingCategories = false
 
     /**
      * Recycler view of the list of manga.
@@ -589,10 +590,13 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
     override fun onSwipeRight(x: Float, y: Float) = goToNextCategory(x, y,1)
 
     private fun goToNextCategory(x: Float, y: Float, offset: Int) {
-        val editTextRect = Rect()
-        bottom_sheet.getGlobalVisibleRect(editTextRect)
+        val sheetRect = Rect()
+        val recyclerRect = Rect()
+        bottom_sheet.getGlobalVisibleRect(sheetRect)
+        recycler.getGlobalVisibleRect(recyclerRect)
 
-        if (editTextRect.contains(x.toInt(), y.toInt())) {
+        if (sheetRect.contains(x.toInt(), y.toInt()) ||
+            !recyclerRect.contains(x.toInt(), y.toInt())) {
            return
         }
         val position =
