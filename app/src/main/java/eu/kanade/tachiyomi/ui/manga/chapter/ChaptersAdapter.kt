@@ -5,8 +5,10 @@ import android.view.MenuItem
 import androidx.fragment.app.FragmentActivity
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
+import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import uy.kohesive.injekt.injectLazy
@@ -15,7 +17,7 @@ import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 
 class ChaptersAdapter(
-        val controller: ChaptersController,
+        val controller: BaseController,
         context: Context
 ) : FlexibleAdapter<ChapterItem>(null, controller, true) {
 
@@ -23,7 +25,8 @@ class ChaptersAdapter(
 
     var items: List<ChapterItem> = emptyList()
 
-    val menuItemListener: OnMenuItemClickListener = controller
+    val menuItemListener: OnMenuItemClickListener? = controller as? OnMenuItemClickListener
+    val coverListener: MangaHeaderInterface? = controller as? MangaHeaderInterface
 
     val readColor = context.getResourceColor(android.R.attr.textColorHint)
 
@@ -52,5 +55,12 @@ class ChaptersAdapter(
 
     interface OnMenuItemClickListener {
         fun onMenuItemClick(position: Int, item: MenuItem)
+    }
+
+    interface MangaHeaderInterface {
+        fun coverColor(): Int?
+        fun nextChapter(): Chapter?
+        fun readNextChapter()
+        fun downloadChapter(position: Int)
     }
 }

@@ -27,7 +27,7 @@ class ChapterHolder(
     }
 
     fun bind(item: ChapterItem, manga: Manga) {
-        val chapter = item.chapter
+        val chapter = item.chapter ?: return
         val isLocked = item.isLocked
         chapter_title.text = when (manga.displayMode) {
             Manga.DISPLAY_NUMBER -> {
@@ -90,6 +90,7 @@ class ChapterHolder(
 
     private fun showPopupMenu(view: View) {
         val item = adapter.getItem(adapterPosition) ?: return
+        val chapter = item.chapter ?: return
 
         if (item.isLocked) {
             adapter.unlock()
@@ -101,7 +102,6 @@ class ChapterHolder(
         // Inflate our menu resource into the PopupMenu's Menu
         popup.menuInflater.inflate(R.menu.chapter_single, popup.menu)
 
-        val chapter = item.chapter
 
         // Hide download and show delete if the chapter is downloaded
         if (item.isDownloaded) {
@@ -125,7 +125,7 @@ class ChapterHolder(
 
         // Set a listener so we are notified if a menu item is clicked
         popup.setOnMenuItemClickListener { menuItem ->
-            adapter.menuItemListener.onMenuItemClick(adapterPosition, menuItem)
+            adapter.menuItemListener?.onMenuItemClick(adapterPosition, menuItem)
             true
         }
 

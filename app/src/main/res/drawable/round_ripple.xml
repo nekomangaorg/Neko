@@ -3,7 +3,7 @@
     android:color="@color/gray_button">
     <item android:id="@android:id/mask">
         <shape android:shape="oval">
-            <solid android:color="@color/gray_button" />
+            <solid android:color="@color/fullRippleColor" />
         </shape>
     </item>
 </ripple>

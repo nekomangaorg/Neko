@@ -9,11 +9,21 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.model.Download
+import eu.kanade.tachiyomi.source.model.Page
+import eu.kanade.tachiyomi.ui.manga.MangaChapterHolder
+import eu.kanade.tachiyomi.ui.manga.MangaHeaderHolder
 
-class ChapterItem(val chapter: Chapter, val manga: Manga) : AbstractFlexibleItem<ChapterHolder>(),
-        Chapter by chapter {
+class ChapterItem(val chapter: Chapter, val manga: Manga) :
+    AbstractFlexibleItem<MangaChapterHolder>(),
+    Chapter by chapter {
 
     private var _status: Int = 0
+
+    val progress: Int
+        get() {
+            val pages = download?.pages ?: return 0
+            return pages.map(Page::progress).average().toInt()
+        }
     var isLocked = false
 
     var status: Int
@@ -26,31 +36,36 @@ class ChapterItem(val chapter: Chapter, val manga: Manga) : AbstractFlexibleItem
         get() = status == Download.DOWNLOADED
 
     override fun getLayoutRes(): Int {
-        return R.layout.chapters_item
+        return if (!chapter.isRecognizedNumber) R.layout.manga_header_item
+        else R.layout.chapters_mat_item
     }
 
-    override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): ChapterHolder {
-        return ChapterHolder(view, adapter as ChaptersAdapter)
+    override fun isSelectable(): Boolean {
+        return chapter.isRecognizedNumber
+    }
+
+    override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): MangaChapterHolder {
+        return if (!chapter.isRecognizedNumber) MangaHeaderHolder(view, adapter as ChaptersAdapter)
+        else ChapterMatHolder(view, adapter as ChaptersAdapter)
     }
 
     override fun bindViewHolder(adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
-                                holder: ChapterHolder,
+                                holder: MangaChapterHolder,
                                 position: Int,
                                 payloads: MutableList<Any?>?) {
-
         holder.bind(this, manga)
     }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other is ChapterItem) {
-            return chapter.id!! == other.chapter.id!!
+            return chapter.id ?: -1 == other.chapter.id ?: -1
         }
         return false
     }
 
     override fun hashCode(): Int {
-        return chapter.id!!.hashCode()
+        return chapter.id?.hashCode() ?: -1
     }
 
 }

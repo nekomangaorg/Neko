@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/manga_header_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <View
+        android:id="@+id/guideline"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="52dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/true_backdrop" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.35" />
+
+    <View
+        android:id="@+id/true_backdrop"
+        android:layout_width="0dp"
+        android:layout_height="200dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:background="@color/material_red_400" />
+
+    <ImageView
+        android:id="@+id/backdrop"
+        android:layout_width="0dp"
+        android:layout_height="200dp"
+        android:alpha="0.1"
+        android:scaleType="centerCrop"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:src="@mipmap/ic_launcher" />
+
+    <View
+        android:id="@+id/backdrop_gradient"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:background="@drawable/gradient_shape"
+        android:backgroundTint="?android:attr/colorBackground"
+        app:layout_constraintBottom_toBottomOf="@+id/true_backdrop" />
+
+    <View
+        android:id="@+id/top_view"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        app:layout_constraintBottom_toTopOf="@id/top_line"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/top_line"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:barrierDirection="top"
+        app:constraint_referenced_ids="cover_card,manga_layout" />
+
+    <FrameLayout
+        android:id="@+id/manga_layout"
+        android:layout_width="100dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintBottom_toBottomOf="@id/guideline"
+        app:layout_constraintDimensionRatio="h,7:10"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/top_line">
+
+    </FrameLayout>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cover_card"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        app:layout_constraintBottom_toBottomOf="@id/manga_layout"
+        app:layout_constraintEnd_toEndOf="@id/manga_layout"
+        app:layout_constraintStart_toStartOf="@id/manga_layout"
+        app:layout_constraintTop_toTopOf="@id/top_line"
+        app:layout_constraintVertical_bias="1.0">
+
+        <ImageView
+            android:id="@+id/manga_cover"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            android:contentDescription="@string/description_cover"
+            android:maxHeight="300dp"
+            tools:background="@color/material_grey_700"
+            tools:src="@mipmap/ic_launcher" />
+    </com.google.android.material.card.MaterialCardView>
+
+
+    <TextView
+        android:id="@+id/manga_title"
+        style="@style/TextAppearance.MaterialComponents.Headline5"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="16dp"
+        android:ellipsize="end"
+        android:maxLines="4"
+        android:text="@string/manga_info_full_title_label"
+        android:textIsSelectable="false"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/manga_layout"
+        app:layout_constraintTop_toTopOf="@id/cover_card"
+        tools:text="Title Example" />
+
+    <TextView
+        android:id="@+id/manga_author"
+        style="@style/TextAppearance.Regular.Body1.Secondary"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:text="@string/manga_info_author_label"
+        android:textIsSelectable="false"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@id/manga_title"
+        app:layout_constraintTop_toBottomOf="@+id/manga_title" />
+
+    <TextView
+        android:id="@+id/manga_last_update_label"
+        style="@style/TextAppearance.Medium.Body2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/manga_info_latest_data_label"
+        android:textIsSelectable="false"
+        app:layout_constraintStart_toStartOf="@id/manga_title"
+        app:layout_constraintTop_toBottomOf="@+id/manga_author" />
+
+    <TextView
+        android:id="@+id/manga_last_update"
+        style="@style/TextAppearance.Regular.Body1.Secondary"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textIsSelectable="false"
+        app:layout_constraintBaseline_toBaselineOf="@+id/manga_last_update_label"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/manga_last_update_label" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/manga_status_source"
+        style="@style/TextAppearance.Regular.Body1.Secondary"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textIsSelectable="false"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@id/manga_title"
+        app:layout_constraintTop_toBottomOf="@id/manga_last_update_label"
+        tools:text="Completed • Mangadex (EN)" />
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/bottom_line"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="6dp"
+        android:orientation="horizontal"
+        app:barrierDirection="bottom"
+        app:constraint_referenced_ids="manga_status_source,manga_layout" />
+
+
+    <LinearLayout
+        android:id="@+id/button_layout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="14dp"
+        app:layout_constraintBottom_toTopOf="@id/manga_summary_label"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/bottom_line">
+
+        <com.google.android.material.button.MaterialButton
+            style="@style/Theme.Widget.Button.RounededOutline"
+            android:id="@+id/favorite_button"
+            android:text="@string/add_to_library"
+            app:icon="@drawable/ic_add_to_library_24dp" />
+
+        <com.google.android.material.button.MaterialButton
+            style="@style/Theme.Widget.Button.RounededOutline"
+            android:layout_marginStart="6dp"
+            android:id="@+id/track_button"
+            android:text="@string/manga_tracking_tab"
+            app:icon="@drawable/ic_sync_black_24dp" />
+
+        <ImageView
+            android:id="@+id/download_button"
+            style="@style/Theme.Widget.CustomImageButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginStart="6dp"
+            android:layout_marginEnd="6dp"
+            android:padding="5dp"
+            android:src="@drawable/ic_edit_white_24dp"
+            app:layout_constraintBottom_toBottomOf="@id/chapters_title"
+            app:layout_constraintEnd_toStartOf="@id/sort_button" />
+    </LinearLayout>
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/manga_summary_label"
+        style="@style/TextAppearance.MaterialComponents.Headline6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="6dp"
+        android:layout_marginEnd="16dp"
+        android:text="@string/description"
+        android:textIsSelectable="false"
+        android:textSize="17sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/button_layout"
+        tools:text="About this manga" />
+
+    <TextView
+        android:id="@+id/manga_summary"
+        style="@style/TextAppearance.Regular.Body1.Secondary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:maxLines="3"
+        android:textIsSelectable="false"
+        app:layout_constraintBottom_toTopOf="@id/start_reading_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/manga_summary_label"
+        tools:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum." />
+
+    <View
+        android:layout_width="75dp"
+        android:layout_height="20dp"
+        android:layout_marginEnd="30dp"
+        android:background="@drawable/full_gradient"
+        android:backgroundTint="?android:attr/colorBackground"
+        app:layout_constraintBottom_toBottomOf="@id/manga_summary"
+        app:layout_constraintEnd_toEndOf="@id/more_button" />
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="20dp"
+        android:layout_marginStart="20dp"
+        android:background="?android:attr/colorBackground"
+        app:layout_constraintBottom_toBottomOf="@id/manga_summary"
+        app:layout_constraintEnd_toEndOf="@id/more_button"
+        app:layout_constraintStart_toStartOf="@id/more_button" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/more_button"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20sp"
+        android:text="More"
+        android:textAllCaps="false"
+        android:textColor="?colorAccent"
+        app:layout_constraintEnd_toEndOf="@id/manga_summary"
+        app:layout_constraintTop_toTopOf="@id/manga_summary"
+        app:rippleColor="@color/gray_button" />
+
+    <me.gujun.android.taggroup.TagGroup
+        android:id="@+id/manga_genres_tags"
+        style="@style/TagGroup"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:visibility="gone"
+        app:atg_backgroundColor="@android:color/transparent"
+        app:atg_borderColor="@color/md_blue_A400"
+        app:atg_borderStrokeWidth="1dp"
+        app:atg_textColor="@color/md_blue_A400"
+        app:layout_constrainedHeight="true"
+        app:layout_constraintBottom_toTopOf="@id/start_reading_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/manga_summary" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/start_reading_button"
+        style="@style/Theme.Widget.Button.Primary"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:text="@string/start_reading"
+        app:layout_constraintBottom_toTopOf="@id/chapters_title"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/manga_genres_tags"
+        tools:text="Continue Reading Chapter 17.1" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/chapters_title"
+        style="@style/TextAppearance.MaterialComponents.Headline6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="18dp"
+        android:text="@string/chapters"
+        android:textSize="17sp"
+        android:layout_marginBottom="12dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="@id/manga_summary_label"
+        app:layout_constraintTop_toBottomOf="@id/start_reading_button" />
+
+    <ImageView
+        android:id="@+id/sort_button"
+        style="@style/Theme.Widget.CustomImageButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:padding="5dp"
+        android:src="@drawable/ic_swap_vert_white_24dp"
+        app:layout_constraintBottom_toBottomOf="@id/chapters_title"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <ImageView
+        android:id="@+id/filter_button"
+        style="@style/Theme.Widget.CustomImageButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="6dp"
+        android:padding="5dp"
+        android:src="@drawable/ic_filter_list_white_24dp"
+        app:layout_constraintBottom_toBottomOf="@id/chapters_title"
+        app:layout_constraintEnd_toStartOf="@id/sort_button" />
+</androidx.constraintlayout.widget.ConstraintLayout>

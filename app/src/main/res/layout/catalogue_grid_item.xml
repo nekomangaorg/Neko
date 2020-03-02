@@ -76,6 +76,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="150dp"
                 android:layout_gravity="bottom"
+                android:alpha="0.75"
                 android:background="@drawable/gradient_shape" />
 
             <com.google.android.material.textview.MaterialTextView
