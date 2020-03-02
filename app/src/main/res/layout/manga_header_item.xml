@@ -19,26 +19,30 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.35" />
+        app:layout_constraintGuide_begin="137dp" />
 
     <View
         android:id="@+id/true_backdrop"
         android:layout_width="0dp"
-        android:layout_height="200dp"
+        android:layout_height="0dp"
+        app:layout_constraintHeight_min="200dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="@id/bottom_line"
+        app:layout_constraintVertical_bias="0.0"
         tools:background="@color/material_red_400" />
 
     <ImageView
         android:id="@+id/backdrop"
         android:layout_width="0dp"
-        android:layout_height="200dp"
+        android:layout_height="0dp"
         android:alpha="0.1"
         android:scaleType="centerCrop"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/true_backdrop"
+        app:layout_constraintBottom_toBottomOf="@+id/true_backdrop"
         tools:src="@mipmap/ic_launcher" />
 
     <View
@@ -52,42 +56,46 @@
     <View
         android:id="@+id/top_view"
         android:layout_width="match_parent"
-        android:layout_height="30dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="100dp"
         app:layout_constraintBottom_toTopOf="@id/top_line"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.48000002" />
 
     <androidx.constraintlayout.widget.Barrier
         android:id="@+id/top_line"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         app:barrierDirection="top"
-        app:constraint_referenced_ids="cover_card,manga_layout" />
+        app:constraint_referenced_ids="cover_card,manga_layout"
+        tools:layout_editor_absoluteY="93dp" />
 
     <FrameLayout
         android:id="@+id/manga_layout"
         android:layout_width="100dp"
         android:layout_height="0dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="32dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
+        android:layout_marginStart="16dp"
         app:layout_constraintBottom_toBottomOf="@id/guideline"
         app:layout_constraintDimensionRatio="h,7:10"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/top_line">
+        app:layout_constraintStart_toStartOf="parent">
 
     </FrameLayout>
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cover_card"
-        android:layout_width="0dp"
+        android:layout_width="100dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        app:layout_constraintBottom_toBottomOf="@id/manga_layout"
+        android:layout_marginBottom="16dp"
+        android:layout_marginStart="16dp"
+        app:layout_constraintBottom_toBottomOf="@id/guideline"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/true_backdrop"
         app:layout_constraintEnd_toEndOf="@id/manga_layout"
-        app:layout_constraintStart_toStartOf="@id/manga_layout"
-        app:layout_constraintTop_toTopOf="@id/top_line"
+        app:layout_constraintTop_toBottomOf="@id/top_view"
         app:layout_constraintVertical_bias="1.0">
 
         <ImageView
@@ -103,7 +111,7 @@
 
 
     <TextView
-        android:id="@+id/manga_title"
+        android:id="@+id/manga_full_title"
         style="@style/TextAppearance.MaterialComponents.Headline5"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -129,31 +137,20 @@
         android:text="@string/manga_info_author_label"
         android:textIsSelectable="false"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@id/manga_title"
-        app:layout_constraintTop_toBottomOf="@+id/manga_title" />
-
-    <TextView
-        android:id="@+id/manga_last_update_label"
-        style="@style/TextAppearance.Medium.Body2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/manga_info_latest_data_label"
-        android:textIsSelectable="false"
-        app:layout_constraintStart_toStartOf="@id/manga_title"
-        app:layout_constraintTop_toBottomOf="@+id/manga_author" />
+        app:layout_constraintStart_toStartOf="@id/manga_full_title"
+        app:layout_constraintTop_toBottomOf="@+id/manga_full_title" />
 
     <TextView
         android:id="@+id/manga_last_update"
         style="@style/TextAppearance.Regular.Body1.Secondary"
-        android:layout_width="0dp"
+        android:layout_marginTop="12dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:ellipsize="end"
-        android:maxLines="1"
+        android:text="@string/manga_info_latest_data_label"
+        tools:text="Last updated 3 days ago"
         android:textIsSelectable="false"
-        app:layout_constraintBaseline_toBaselineOf="@+id/manga_last_update_label"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/manga_last_update_label" />
+        app:layout_constraintStart_toStartOf="@id/manga_full_title"
+        app:layout_constraintTop_toBottomOf="@+id/manga_author" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/manga_status_source"
@@ -164,8 +161,8 @@
         android:maxLines="1"
         android:textIsSelectable="false"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@id/manga_title"
-        app:layout_constraintTop_toBottomOf="@id/manga_last_update_label"
+        app:layout_constraintStart_toStartOf="@id/manga_full_title"
+        app:layout_constraintTop_toBottomOf="@id/manga_last_update"
         tools:text="Completed • Mangadex (EN)" />
 
     <androidx.constraintlayout.widget.Barrier
@@ -175,7 +172,7 @@
         android:layout_margin="6dp"
         android:orientation="horizontal"
         app:barrierDirection="bottom"
-        app:constraint_referenced_ids="manga_status_source,manga_layout" />
+        app:constraint_referenced_ids="manga_status_source,manga_layout,cover_card" />
 
 
     <LinearLayout
@@ -237,6 +234,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
+        android:layout_marginTop="4dp"
         android:layout_marginEnd="16dp"
         android:maxLines="3"
         android:textIsSelectable="false"
@@ -269,7 +267,7 @@
         style="@style/Widget.MaterialComponents.Button.TextButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20sp"
+        android:layout_marginTop="19.5sp"
         android:text="More"
         android:textAllCaps="false"
         android:textColor="?colorAccent"

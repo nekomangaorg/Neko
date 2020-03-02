@@ -18,6 +18,7 @@ import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationListController
 import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationProcedureConfig
+import eu.kanade.tachiyomi.util.view.applyWindowInsetsForController
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.marginBottom
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
@@ -46,6 +47,7 @@ class PreMigrationController(bundle: Bundle? = null) : BaseController(bundle), F
 
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
+        view.applyWindowInsetsForController()
 
         val ourAdapter = adapter ?: MigrationSourceAdapter(
                 getEnabledSources().map { MigrationSourceItem(it, isEnabled(it.id.toString())) },

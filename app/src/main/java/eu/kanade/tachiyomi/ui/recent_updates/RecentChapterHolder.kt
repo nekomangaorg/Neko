@@ -61,7 +61,7 @@ class RecentChapterHolder(private val view: View, private val adapter: RecentCha
         chapter_title.text = item.chapter.name
 
         // Set manga title
-        manga_title.text = item.manga.currentTitle()
+        manga_full_title.text = item.manga.currentTitle()
 
         // Set the correct drawable for dropdown and update the tint to match theme.
         chapter_menu_icon.setVectorCompat(R.drawable.ic_more_horiz_black_24dp, view.context.getResourceColor(R.attr.icon_color))
@@ -79,10 +79,10 @@ class RecentChapterHolder(private val view: View, private val adapter: RecentCha
         // Check if chapter is read and set correct color
         if (item.chapter.read) {
             chapter_title.setTextColor(readColor)
-            manga_title.setTextColor(readColor)
+            manga_full_title.setTextColor(readColor)
         } else {
             chapter_title.setTextColor(unreadColor)
-            manga_title.setTextColor(unreadColor)
+            manga_full_title.setTextColor(unreadColor)
         }
 
         // Set chapter status

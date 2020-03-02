@@ -113,6 +113,19 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
 
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
+        /*launchUI {
+            view.updateLayoutParams<FrameLayout.LayoutParams> {
+                val attrsArray = intArrayOf(android.R.attr.actionBarSize)
+                val array = view.context.obtainStyledAttributes(attrsArray)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    topMargin =
+                        view.rootWindowInsets.systemWindowInsetTop + array.getDimensionPixelSize(
+                            0, 0
+                        )
+                }
+                array.recycle()
+            }
+        }*/
         // pad the recycler if the filter bottom sheet is visible
         if (!phoneLandscape) {
             val height = view.context.resources.getDimensionPixelSize(R.dimen.rounder_radius) + 4.dpToPx
@@ -253,7 +266,7 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
             updateScroll = true
         }
         adapter.isLongPressDragEnabled = canDrag()
-        tabsVisibilityRelay.call(false)
+        //tabsVisibilityRelay.call(false)
 
         titlePopupMenu.menu.clear()
         presenter.categories.forEach { category ->

@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.manga.chapter
 
+import android.text.format.DateUtils
 import android.view.View
 import androidx.appcompat.widget.PopupMenu
 import eu.kanade.tachiyomi.R
@@ -11,6 +12,7 @@ import eu.kanade.tachiyomi.util.view.invisible
 import eu.kanade.tachiyomi.util.view.visible
 import kotlinx.android.synthetic.main.chapters_mat_item.*
 import kotlinx.android.synthetic.main.download_button.*
+import java.util.Date
 
 class ChapterMatHolder(
     private val view: View,
@@ -74,34 +76,34 @@ class ChapterMatHolder(
 
         if (isLocked) download_button.invisible()
 
+
         // Set correct text color
         chapter_title.setTextColor(if (chapter.read && !isLocked)
             adapter.readColor else adapter.unreadColor)
         if (chapter.bookmark && !isLocked) chapter_title.setTextColor(adapter.bookmarkedColor)
 
-        /*if (chapter.date_upload > 0) {
-            chapter_date.text = adapter.dateFormat.format(Date(chapter.date_upload))
-            chapter_date.setTextColor(if (chapter.read) adapter.readColor else adapter.unreadColor)
-        } else {
-            chapter_date.text = ""
-        }*/
+        val statuses = mutableListOf<String>()
 
-        //add scanlator if exists
-        chapter_scanlator.text = chapter.scanlator ?: " "
-        //allow longer titles if there is no scanlator (most sources)
-        /*if (chapter_scanlator.text.isNullOrBlank()) {
-            chapter_title.maxLines = 2
-            //chapter_scanlator.gone()
-        } else {
-            chapter_title.maxLines = 1
-        }*/
+        if (chapter.date_upload > 0) {
+            statuses.add(DateUtils.getRelativeTimeSpanString(chapter.date_upload,
+                Date().time, DateUtils.HOUR_IN_MILLIS).toString())
+        }
 
-       /* chapter_pages.text = if (!chapter.read && chapter.last_page_read > 0 && !isLocked) {
-            itemView.context.getString(R.string.chapter_progress, chapter.last_page_read + 1)
-        } else {
-            ""
-        }*/
+        if (!chapter.read && chapter.last_page_read > 0 && chapter.pages_left > 0 && !isLocked) {
+            statuses.add(itemView.resources.getQuantityString(R.plurals.pages_left, chapter
+                .pages_left, chapter.pages_left))
+        }
+        else if (!chapter.read && chapter.last_page_read > 0 && !isLocked) {
+            statuses.add(itemView.context.getString(R.string.chapter_progress, chapter
+                .last_page_read + 1))
+        }
 
+        if (!chapter.scanlator.isNullOrBlank()) {
+            statuses.add(chapter.scanlator!!)
+        }
+
+        chapter_scanlator.setTextColor(if (chapter.read) adapter.readColor else adapter.unreadColor)
+        chapter_scanlator.text = statuses.joinToString(" • ")
         notifyStatus(item.status, item.isLocked, item.progress)
     }
 

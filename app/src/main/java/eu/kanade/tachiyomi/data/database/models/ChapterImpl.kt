@@ -18,6 +18,8 @@ class ChapterImpl : Chapter {
 
     override var last_page_read: Int = 0
 
+    override var pages_left: Int = 0
+
     override var date_fetch: Long = 0
 
     override var date_upload: Long = 0

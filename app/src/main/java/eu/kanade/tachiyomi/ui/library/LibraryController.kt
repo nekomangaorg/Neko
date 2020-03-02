@@ -51,6 +51,7 @@ import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationProcedureConfig
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.view.applyWindowInsetsForController
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import eu.kanade.tachiyomi.util.view.snack
 import kotlinx.android.synthetic.main.filter_bottom_sheet.*
@@ -170,8 +171,10 @@ open class LibraryController(
         return inflater.inflate(R.layout.library_controller, container, false)
     }
 
+
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
+        view.applyWindowInsetsForController()
         mangaPerRow = getColumnsPreferenceForCurrentOrientation().getOrDefault()
         if (!::presenter.isInitialized)
             presenter = LibraryPresenter(this)
@@ -244,8 +247,8 @@ open class LibraryController(
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
         super.onChangeStarted(handler, type)
         if (type.isEnter) {
-            if (library_pager != null)
-                activity?.tabs?.setupWithViewPager(library_pager)
+            //if (library_pager != null)
+                //activity?.tabs?.setupWithViewPager(library_pager)
             presenter.getLibrary()
             DownloadService.addListener(this)
             DownloadService.callListeners()
@@ -308,7 +311,7 @@ open class LibraryController(
     }
 
     override fun configureTabs(tabs: TabLayout) {
-        with(tabs) {
+       /* with(tabs) {
             tabGravity = TabLayout.GRAVITY_CENTER
             tabMode = TabLayout.MODE_SCROLLABLE
         }
@@ -320,7 +323,7 @@ open class LibraryController(
             } else if (!visible) {
                 tabAnimator.collapse()
             }
-        }
+        }*/
     }
 
     override fun cleanupTabs(tabs: TabLayout) {
@@ -360,14 +363,14 @@ open class LibraryController(
         // Restore active category.
         library_pager.setCurrentItem(activeCat, false)
 
-        tabsVisibilityRelay.call(categories.size > 1)
+        //tabsVisibilityRelay.call(categories.size > 1)
 
         libraryMangaRelay.call(LibraryMangaEvent(mangaMap))
 
         view.post {
-            if (isAttached) {
-                activity?.tabs?.setScrollPosition(library_pager.currentItem, 0f, true)
-            }
+            //if (isAttached) {
+              //  activity?.tabs?.setScrollPosition(library_pager.currentItem, 0f, true)
+            //}
         }
 
         if (!freshStart && justStarted) {

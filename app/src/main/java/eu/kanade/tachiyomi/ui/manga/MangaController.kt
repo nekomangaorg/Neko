@@ -34,6 +34,7 @@ import eu.kanade.tachiyomi.ui.manga.track.TrackController
 import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationListController
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.system.toast
+import eu.kanade.tachiyomi.util.view.applyWindowInsetsForController
 import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.android.synthetic.main.manga_controller.*
 import kotlinx.android.synthetic.main.search_activity.*
@@ -128,6 +129,7 @@ class MangaController : RxController, TabbedController, BottomNavBarInterface {
 
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
+        view.applyWindowInsetsForController()
 
         if (manga == null || source == null) return
 

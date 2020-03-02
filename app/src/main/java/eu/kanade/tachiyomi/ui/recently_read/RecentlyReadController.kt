@@ -20,12 +20,13 @@ import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.catalogue.browse.ProgressItem
 import eu.kanade.tachiyomi.ui.main.MainActivity
-import eu.kanade.tachiyomi.ui.manga.MangaController
+import eu.kanade.tachiyomi.ui.manga.MangaChaptersController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.recent_updates.RecentChaptersController
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
+import eu.kanade.tachiyomi.util.view.applyWindowInsetsForController
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import kotlinx.android.synthetic.main.recently_read_controller.*
 import uy.kohesive.injekt.Injekt
@@ -79,7 +80,16 @@ class RecentlyReadController(bundle: Bundle? = null) : BaseController(bundle),
      */
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
-
+        view.applyWindowInsetsForController()
+        /*view.updateLayoutParams<FrameLayout.LayoutParams> {
+            val attrsArray = intArrayOf(android.R.attr.actionBarSize)
+            val array = view.context.obtainStyledAttributes(attrsArray)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                topMargin = activity!!.window.decorView.rootWindowInsets.systemWindowInsetTop + array
+                    .getDimensionPixelSize(0, 0)
+            }
+            array.recycle()
+        }*/
         // Initialize adapter
         adapter = RecentlyReadAdapter(this)
         recycler.adapter = adapter
@@ -177,7 +187,7 @@ class RecentlyReadController(bundle: Bundle? = null) : BaseController(bundle),
 
     override fun onCoverClick(position: Int, lastTouchY: Float) {
         val manga = (adapter?.getItem(position) as? RecentlyReadItem)?.mch?.manga ?: return
-        router.pushController(MangaController(manga, lastTouchY).withFadeTransaction())
+        router.pushController(MangaChaptersController(manga).withFadeTransaction())
     }
 
     override fun removeHistory(manga: Manga, history: History, all: Boolean) {

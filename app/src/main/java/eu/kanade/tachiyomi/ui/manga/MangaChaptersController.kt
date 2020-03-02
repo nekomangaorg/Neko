@@ -34,6 +34,7 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
+import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.source.Source
@@ -42,13 +43,18 @@ import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.catalogue.CatalogueController
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.SearchActivity
+import eu.kanade.tachiyomi.ui.manga.MangaController.Companion.FROM_CATALOGUE_EXTRA
 import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
 import eu.kanade.tachiyomi.ui.manga.chapter.ChaptersAdapter
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
+import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.getText
 import eu.kanade.tachiyomi.util.view.snack
+import eu.kanade.tachiyomi.util.view.updateLayoutParams
+import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import kotlinx.android.synthetic.main.big_manga_controller.*
 import kotlinx.android.synthetic.main.main_activity.*
 import uy.kohesive.injekt.Injekt
@@ -64,7 +70,7 @@ class MangaChaptersController : BaseController,
         smartSearchConfig: CatalogueController.SmartSearchConfig? = null,
         update: Boolean = false) : super(Bundle().apply {
         putLong(MangaController.MANGA_EXTRA, manga?.id ?: 0)
-        putBoolean(MangaController.FROM_CATALOGUE_EXTRA, fromCatalogue)
+        putBoolean(FROM_CATALOGUE_EXTRA, fromCatalogue)
         putParcelable(MangaController.SMART_SEARCH_CONFIG_EXTRA, smartSearchConfig)
         putBoolean(MangaController.UPDATE_EXTRA, update)
     }) {
@@ -92,11 +98,13 @@ class MangaChaptersController : BaseController,
     var coverColor:Int? = null
     var toolbarIsColored = false
     private var snack: Snackbar? = null
-
+    private val fromCatalogue = args.getBoolean(FROM_CATALOGUE_EXTRA, false)
     /**
      * Adapter containing a list of chapters.
      */
     private var adapter: ChaptersAdapter? = null
+
+    var headerHeight = 0
 
     init {
         setHasOptionsMenu(true)
@@ -124,12 +132,32 @@ class MangaChaptersController : BaseController,
             )
         )
         recycler.setHasFixedSize(true)
+        adapter?.fastScroller = fast_scroller
+            /*activity?.controller_container?.updateLayoutParams<ConstraintLayout.LayoutParams> {
+            topMargin = 0
+        }*/
+        val attrsArray = intArrayOf(android.R.attr.actionBarSize)
+        val array = view.context.obtainStyledAttributes(attrsArray)
+        val appbarHeight = array.getDimensionPixelSize(0, 0)
+        array.recycle()
+        val offset = 20.dpToPx
+
+        recycler.doOnApplyWindowInsets { v, insets, _ ->
+            headerHeight = appbarHeight + insets.systemWindowInsetTop + offset
+            (recycler.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder)
+                ?.setTopHeight(headerHeight)
+            fast_scroller?.updateLayoutParams<ViewGroup.MarginLayoutParams>  {
+                topMargin = appbarHeight + insets.systemWindowInsetTop
+                bottomMargin = insets.systemWindowInsetBottom
+            }
+            // offset the recycler by the fab's inset + some inset on top
+            v.updatePaddingRelative(bottom = insets.systemWindowInsetBottom)
+        }
 
         presenter.onCreate()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             recycler.setOnScrollChangeListener { v, scrollX, scrollY, oldScrollX, oldScrollY ->
-                val atTop =
-                    ((recycler.layoutManager as LinearLayoutManager).findFirstCompletelyVisibleItemPosition() == 0)
+                val atTop = !recycler.canScrollVertically(-1)
                 if ((!atTop && !toolbarIsColored) || (atTop && toolbarIsColored)) {
                     toolbarIsColored = !atTop
                     colorAnimator?.cancel()
@@ -148,7 +176,7 @@ class MangaChaptersController : BaseController,
                     //colorAnimation.startDelay = 150
                     colorAnimator?.addUpdateListener { animator ->
                         (activity as MainActivity).toolbar.setBackgroundColor(animator.animatedValue as Int)
-                        //activity?.window?.statusBarColor = (animator.animatedValue as Int)
+                        activity?.window?.statusBarColor = (animator.animatedValue as Int)
                     }
                     colorAnimator?.start()
                     val isCurrentController = router?.backstack?.lastOrNull()?.controller() == this
@@ -156,6 +184,8 @@ class MangaChaptersController : BaseController,
                 }
             }
         }
+       // recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
+       // recycler.requestApplyInsetsWhenAttached()
         GlideApp.with(view.context).load(manga)
             .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
             .signature(ObjectKey(MangaImpl.getLastCoverFetch(manga!!.id!!).toString()))
@@ -177,16 +207,27 @@ class MangaChaptersController : BaseController,
                             )
                             else it?.getDarkMutedColor(colorBack)) ?: colorBack
                         onCoverLoaded(backDropColor)
-                        (recycler.findViewHolderForItemId(-1) as? MangaHeaderHolder)
+                        (recycler.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder)
                             ?.setBackDrop(backDropColor)
-                        if (toolbarIsColored)
+                        if (toolbarIsColored) {
                             (activity as MainActivity).toolbar.setBackgroundColor(backDropColor)
+                            activity?.window?.statusBarColor = backDropColor
+                        }
                     }
                 }
 
                 override fun onLoadCleared(placeholder: Drawable?) { }
             })
+
+        swipe_refresh.setOnRefreshListener {
+            presenter.refreshAll()
+        }
         //adapter?.fastScroller = fast_scroller
+    }
+
+    fun showError(message: String) {
+        swipe_refresh.isRefreshing = false
+        view?.snack(message)
     }
 
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
@@ -194,6 +235,7 @@ class MangaChaptersController : BaseController,
         if (type == ControllerChangeType.PUSH_ENTER || type == ControllerChangeType.POP_ENTER) {
             (activity as MainActivity).appbar.setBackgroundColor(Color.TRANSPARENT)
             (activity as MainActivity).toolbar.setBackgroundColor(Color.TRANSPARENT)
+            activity?.window?.statusBarColor = Color.TRANSPARENT
           /*  val colorFrom = ((activity as MainActivity).toolbar.background as ColorDrawable).color
             val colorTo = Color.TRANSPARENT
             colorAnimator = ValueAnimator.ofObject(
@@ -233,11 +275,14 @@ class MangaChaptersController : BaseController,
                 android.R.attr.colorPrimary
             ) ?: Color.BLACK)
 
-           // activity!!.window.clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
-
             activity?.window?.statusBarColor = activity?.getResourceColor(
                 android.R.attr.colorPrimary
             ) ?: Color.BLACK
+           // activity!!.window.clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+
+           /* activity?.window?.statusBarColor = activity?.getResourceColor(
+                android.R.attr.colorPrimary
+            ) ?: Color.BLACK*/
            /*(activity as MainActivity).appbar.updateLayoutParams<ConstraintLayout.LayoutParams> {
                 topMargin = 0
             }
@@ -252,18 +297,32 @@ class MangaChaptersController : BaseController,
         }
     }
 
+    fun setRefresh(enabled: Boolean) {
+        swipe_refresh.isRefreshing = enabled
+    }
+
+    fun updateHeader() {
+        if (presenter.chapters.isEmpty()) {
+            adapter?.updateDataSet(listOf(ChapterItem(Chapter.createH(), presenter.manga)))
+        }
+        else
+            adapter?.updateDataSet(listOf(ChapterItem(Chapter.createH(), presenter.manga))
+                + presenter.chapters)
+    }
+
 
     fun updateChapters(chapters: List<ChapterItem>) {
-        if (presenter.chapters.isEmpty()) {
-            //initialFetchChapters()
+        swipe_refresh.isRefreshing = false
+        if (presenter.chapters.isEmpty() && fromCatalogue && !presenter.hasRequested) {
+            presenter.fetchChaptersFromSource()
         }
-        adapter?.updateDataSet(listOf(ChapterItem(Chapter.create(), manga!!)) + chapters)
+        adapter?.updateDataSet(listOf(ChapterItem(Chapter.createH(), presenter.manga)) + chapters)
     }
 
     override fun onItemClick(view: View?, position: Int): Boolean {
         val adapter = adapter ?: return false
         val chapter = adapter.getItem(position)?.chapter ?: return false
-        if (!chapter.isRecognizedNumber) return false
+        if (chapter.isHeader) return false
         /*if (actionMode != null && adapter.mode == SelectableAdapter.Mode.MULTI) {
             lastClickPosition = position
             toggleSelection(position)
@@ -321,14 +380,16 @@ class MangaChaptersController : BaseController,
     fun onCoverLoaded(color: Int) {
         if (view == null) return
         coverColor = color
-        activity?.window?.statusBarColor = color
+        //activity?.window?.statusBarColor = color
     }
 
     override fun coverColor(): Int? = coverColor
+    override fun topCoverHeight(): Int = headerHeight
 
-    override fun nextChapter(): Chapter? {
-        return presenter.getNextUnreadChapter()
-    }
+    override fun nextChapter(): Chapter? = presenter.getNextUnreadChapter()
+    override fun newestChapterDate(): Long? = presenter.getNewestChapterTime()
+    override fun lastChapter(): Float? = presenter.getLatestChapter()
+    override fun mangaSource(): Source = presenter.source
 
     override fun readNextChapter() {
         if (activity is SearchActivity && presenter.isLockedFromSearch) {
@@ -354,8 +415,8 @@ class MangaChaptersController : BaseController,
     override fun downloadChapter(position: Int) {
         val adapter = adapter ?: return
         val chapter = adapter.getItem(position) ?: return
-        if (!chapter.isRecognizedNumber) return
-        if (chapter.isDownloaded) {
+        if (chapter.isHeader) return
+        if (chapter.status != Download.NOT_DOWNLOADED) {
             presenter.deleteChapters(listOf(chapter))
         }
         else presenter.downloadChapters(listOf(chapter))

@@ -38,7 +38,7 @@ class DownloadHolder(private val view: View, val adapter: DownloadAdapter) :
         chapter_title.text = download.chapter.name
 
         // Update the manga title
-        manga_title.text = download.manga.currentTitle()
+        manga_full_title.text = download.manga.currentTitle()
 
         // Update the progress bar and the number of downloaded pages
         val pages = download.pages

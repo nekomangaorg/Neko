@@ -169,8 +169,13 @@ class LibraryPresenter(
                 return@f false
             if (filterUnread == STATE_REALLY_EXCLUDE && item.manga.unread > 0) return@f false
 
-            if ((filterMangaType == Manga.TYPE_MANHWA) &&
-                item.manga.mangaType() == Manga.TYPE_MANGA) return@f false
+            if (filterMangaType > 0) {
+                val mangaType = item.manga.mangaType()
+                if ((filterMangaType == Manga.TYPE_MANHUA) && mangaType != Manga.TYPE_MANHUA)
+                    return@f false
+                if ((filterMangaType == Manga.TYPE_COMIC) && mangaType != Manga.TYPE_COMIC) return@f false
+                if ((filterMangaType == Manga.TYPE_WEBTOON) && mangaType != Manga.TYPE_WEBTOON) return@f false
+            }
 
 
             if (filterCompleted == STATE_INCLUDE && item.manga.status != SManga.COMPLETED)

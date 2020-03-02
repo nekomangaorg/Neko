@@ -2,7 +2,9 @@ package eu.kanade.tachiyomi.ui.manga
 
 import android.content.res.ColorStateList
 import android.graphics.Color
+import android.text.format.DateUtils
 import android.view.View
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import com.bumptech.glide.load.engine.DiskCacheStrategy
@@ -11,11 +13,15 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.glide.GlideApp
+import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
 import eu.kanade.tachiyomi.ui.manga.chapter.ChaptersAdapter
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.visibleIf
 import kotlinx.android.synthetic.main.manga_header_item.*
+import java.util.Date
+import java.util.Locale
 
 class MangaHeaderHolder(
     private val view: View,
@@ -24,10 +30,13 @@ class MangaHeaderHolder(
 
     init {
         start_reading_button.setOnClickListener { adapter.coverListener?.readNextChapter() }
+        top_view.updateLayoutParams<ConstraintLayout.LayoutParams> {
+            topMargin = adapter.coverListener?.topCoverHeight() ?: 0
+        }
     }
 
     override fun bind(item: ChapterItem, manga: Manga) {
-        manga_title.text = manga.currentTitle()
+        manga_full_title.text = manga.currentTitle()
         if (manga.currentAuthor() == manga.currentArtist() ||
             manga.currentArtist().isNullOrBlank())
             manga_author.text = manga.currentAuthor()
@@ -35,8 +44,15 @@ class MangaHeaderHolder(
             manga_author.text = "${manga.currentAuthor()?.trim()}, ${manga.currentArtist()}"
         }
         manga_summary.text = manga.currentDesc()
-        manga_summary_label.text = "About this ${if (manga.mangaType() == Manga.TYPE_MANGA) "Manga"
-        else "Manhwa"}"
+        manga_summary_label.text = itemView.context.getString(R.string.about_this,
+            itemView.context.getString(
+                when {
+                    manga.mangaType() == Manga.TYPE_WEBTOON -> R.string.webtoon_viewer
+                    manga.mangaType() == Manga.TYPE_MANHUA -> R.string.manhua
+                    manga.mangaType() == Manga.TYPE_COMIC -> R.string.comic
+                    else -> R.string.manga
+                }
+            ).toLowerCase(Locale.getDefault()))
         with(favorite_button) {
             icon = ContextCompat.getDrawable(
                 itemView.context, when {
@@ -70,11 +86,43 @@ class MangaHeaderHolder(
             visibleIf(nextChapter != null && !item.isLocked)
             if (nextChapter != null) {
                 val number = adapter.decimalFormat.format(nextChapter.chapter_number.toDouble())
-                text = resources.getString(if (nextChapter.last_page_read > 0)
-                    R.string.continue_reader_chapter
-                else R.string.start_reader_chapter, number)
+                text = resources.getString(
+                    when {
+                        nextChapter.last_page_read > 0 && nextChapter.chapter_number <= 0 ->
+                            R.string.continue_reading
+                        nextChapter.chapter_number <= 0 -> R.string.start_reading
+                        nextChapter.last_page_read > 0 -> R.string.continue_reading_chapter
+                        else -> R.string.start_reader_chapter
+                    }, number
+                )
             }
         }
+
+        top_view.updateLayoutParams<ConstraintLayout.LayoutParams> {
+            topMargin = adapter.coverListener?.topCoverHeight() ?: 0
+        }
+        val lastUpdated =  adapter.coverListener?.newestChapterDate()
+        if (lastUpdated != null) {
+            manga_last_update.text = itemView.context.getString(
+                R.string.last_updated, DateUtils.getRelativeTimeSpanString(
+                    lastUpdated, Date().time, DateUtils.HOUR_IN_MILLIS
+                ).toString()
+            )
+        }
+        else {
+            manga_last_update.text = itemView.context.getString(R.string.last_update_unknown)
+        }
+
+        val sourceAndStatus = mutableListOf<String>()
+        sourceAndStatus.add(itemView.context.getString( when (manga.status) {
+            SManga.ONGOING -> R.string.ongoing
+            SManga.COMPLETED -> R.string.completed
+            SManga.LICENSED -> R.string.licensed
+            else -> R.string.unknown_status
+        }))
+        val sourceName = adapter.coverListener?.mangaSource()?.toString()
+        if (sourceName != null) sourceAndStatus.add(sourceName)
+        manga_status_source.text = sourceAndStatus.joinToString(" • ")
 
         GlideApp.with(view.context).load(manga)
             .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
@@ -85,6 +133,12 @@ class MangaHeaderHolder(
             .signature(ObjectKey(MangaImpl.getLastCoverFetch(manga.id!!).toString()))
             .centerCrop()
             .into(backdrop)
+    }
+
+    fun setTopHeight(newHeight: Int) {
+        top_view.updateLayoutParams<ConstraintLayout.LayoutParams> {
+            topMargin = newHeight
+        }
     }
 
     fun setBackDrop(color: Int) {

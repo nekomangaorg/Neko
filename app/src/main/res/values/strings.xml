@@ -7,6 +7,8 @@
     <string name="categories">Categories</string>
     <string name="manga">Manga</string>
     <string name="manhwa">Manhwa</string>
+    <string name="manhua">Manhua</string>
+    <string name="comic">Comic</string>
     <string name="chapters">Chapters</string>
     <string name="track">Tracking</string>
     <string name="history">History</string>
@@ -437,7 +439,6 @@
         <item quantity="other">%d unread</item>
     </plurals>
     <string name="new_chapter">New</string>
-    <string name="start_reading">Start Reading</string>
     <plurals name="download_count">
         <item quantity="one">1 downloaded</item>
         <item quantity="other">%d downloaded</item>
@@ -475,6 +476,9 @@
     <string name="description">Description</string>
     <string name="ongoing">Ongoing</string>
     <string name="unknown">Unknown</string>
+    <string name="unknown_status">Unknown Status</string>
+    <string name="last_updated">Last updated %1$s</string>
+    <string name="last_update_unknown">Last update unknown</string>
     <string name="licensed">Licensed</string>
     <string name="manga_info_full_title_label">Title</string>
     <string name="manga_added_library">Added to library</string>
@@ -495,10 +499,13 @@
     <string name="icon_creation_fail">Could not create shortcut</string>
     <string name="copied_to_clipboard">%1$s copied to clipboard</string>
     <string name="source_not_installed">Source not installed: %1$s</string>
+    <string name="about_this">About this %1$s</string>
 
     <!-- Manga chapters fragment -->
-    <string name="start_reader_chapter">Start Reading Chapter %1$s</string>
-    <string name="continue_reader_chapter">Continue Reading Chapter %1$s</string>
+    <string name="start_reading">Start reading</string>
+    <string name="start_reader_chapter">Start reading Chapter %1$s</string>
+    <string name="continue_reading_chapter">Continue reading Chapter %1$s</string>
+    <string name="continue_reading">Continue reading</string>
     <string name="manga_chapters_tab">Chapters</string>
     <string name="display_mode_chapter">Chapter %1$s</string>
     <string name="chapter_downloaded">Downloaded</string>
@@ -580,6 +587,10 @@
     <string name="set_as_cover">Set as cover</string>
     <string name="cover_updated">Cover updated</string>
     <string name="chapter_progress">Page: %1$d</string>
+    <plurals name="pages_left">
+        <item quantity="one">%1$d page left</item>
+        <item quantity="other">%1$d pages left</item>
+    </plurals>
     <string name="no_next_chapter">Next chapter not found</string>
     <string name="decode_image_error">The image could not be decoded</string>
     <string name="confirm_set_image_as_cover">Use this image as cover art?</string>

@@ -152,6 +152,7 @@ class RecentChaptersPresenter(
             it.read = read
             if (!read) {
                 it.last_page_read = 0
+                it.pages_left = 0
             }
         }
 

@@ -14,6 +14,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsets
 import android.widget.Button
+import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.annotation.Px
 import androidx.appcompat.widget.SearchView
@@ -27,7 +28,6 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.snackbar.Snackbar
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -161,9 +161,20 @@ inline val View.marginLeft: Int
 
 object RecyclerWindowInsetsListener : View.OnApplyWindowInsetsListener {
     override fun onApplyWindowInsets(v: View, insets: WindowInsets): WindowInsets {
-        if (MainActivity.usingBottomNav) return insets
         v.setPadding(0,0,0,insets.systemWindowInsetBottom)
         //v.updatePaddingRelative(bottom = v.paddingBottom + insets.systemWindowInsetBottom)
+        return insets
+    }
+}
+
+object ControllerViewWindowInsetsListener : View.OnApplyWindowInsetsListener {
+    override fun onApplyWindowInsets(v: View, insets: WindowInsets): WindowInsets {
+        v.updateLayoutParams<FrameLayout.LayoutParams> {
+            val attrsArray = intArrayOf(android.R.attr.actionBarSize)
+            val array = v.context.obtainStyledAttributes(attrsArray)
+            topMargin = insets.systemWindowInsetTop + array.getDimensionPixelSize(0, 0)
+            array.recycle()
+        }
         return insets
     }
 }
@@ -182,7 +193,6 @@ object HeightTopWindowInsetsListener : View.OnApplyWindowInsetsListener {
 
 fun View.doOnApplyWindowInsets(f: (View, WindowInsets, ViewPaddingState) -> Unit) {
     // Create a snapshot of the view's padding state
-    if (MainActivity.usingBottomNav) return
     val paddingState = createStateForView(this)
     setOnApplyWindowInsetsListener { v, insets ->
         f(v, insets, paddingState)
@@ -190,6 +200,13 @@ fun View.doOnApplyWindowInsets(f: (View, WindowInsets, ViewPaddingState) -> Unit
     }
     requestApplyInsetsWhenAttached()
 }
+
+fun View.applyWindowInsetsForController() {
+    // Create a snapshot of the view's padding state
+    setOnApplyWindowInsetsListener(ControllerViewWindowInsetsListener)
+    requestApplyInsetsWhenAttached()
+}
+
 
 fun View.requestApplyInsetsWhenAttached() {
     if (isAttachedToWindow) {

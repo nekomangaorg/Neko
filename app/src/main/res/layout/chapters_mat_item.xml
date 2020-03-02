@@ -35,10 +35,12 @@
         app:layout_constraintTop_toBottomOf="@+id/chapter_title"
         tools:text="3 days ago • On page 45 • Scanlator" />
 
-    <include layout="@layout/download_button"
-        android:layout_height="0dp"
+    <include
+        layout="@layout/download_button"
         android:layout_width="50dp"
+        android:layout_height="0dp"
+        android:layout_marginEnd="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

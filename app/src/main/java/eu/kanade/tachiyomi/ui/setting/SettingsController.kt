@@ -7,7 +7,6 @@ import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceController
 import androidx.preference.PreferenceScreen
@@ -17,7 +16,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
-import eu.kanade.tachiyomi.util.view.updateLayoutParams
+import eu.kanade.tachiyomi.util.view.applyWindowInsetsForController
 import rx.Observable
 import rx.Subscription
 import rx.subscriptions.CompositeSubscription
@@ -36,12 +35,23 @@ abstract class SettingsController : PreferenceController() {
             untilDestroySubscriptions = CompositeSubscription()
         }
         val view = super.onCreateView(inflater, container, savedInstanceState)
-        view.updateLayoutParams<FrameLayout.LayoutParams> {
+        /*view.updateLayoutParams<FrameLayout.LayoutParams> {
             val attrsArray = intArrayOf(android.R.attr.actionBarSize)
             val array = view.context.obtainStyledAttributes(attrsArray)
             topMargin = array.getDimensionPixelSize(0, 0)
             array.recycle()
-        }
+        }*/
+
+        view.applyWindowInsetsForController()
+        /*view.updateLayoutParams<FrameLayout.LayoutParams> {
+            val attrsArray = intArrayOf(android.R.attr.actionBarSize)
+            val array = view.context.obtainStyledAttributes(attrsArray)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                topMargin = activity!!.window.decorView.rootWindowInsets.systemWindowInsetTop + array
+                    .getDimensionPixelSize(0, 0)
+            }
+            array.recycle()
+        }*/
         listView.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
         return view
     }

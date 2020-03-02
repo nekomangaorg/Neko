@@ -13,7 +13,7 @@ import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
-import eu.kanade.tachiyomi.ui.manga.MangaController
+import eu.kanade.tachiyomi.ui.manga.MangaChaptersController
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.gone
@@ -69,7 +69,7 @@ class MigrationProcessHolder(
                     migration_manga_card_from.attachManga(manga, source, false)
                     migration_manga_card_from.setOnClickListener {
                         adapter.controller.router.pushController(
-                            MangaController(
+                            MangaChaptersController(
                                 manga, true
                             ).withFadeTransaction()
                         )
@@ -101,7 +101,7 @@ class MigrationProcessHolder(
                         migration_manga_card_to.attachManga(searchResult, resultSource, true)
                         migration_manga_card_to.setOnClickListener {
                             adapter.controller.router.pushController(
-                                MangaController(
+                                MangaChaptersController(
                                     searchResult, true
                                 ).withFadeTransaction()
                             )

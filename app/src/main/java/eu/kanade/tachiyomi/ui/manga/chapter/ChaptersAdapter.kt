@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
+import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.system.getResourceColor
@@ -62,5 +63,9 @@ class ChaptersAdapter(
         fun nextChapter(): Chapter?
         fun readNextChapter()
         fun downloadChapter(position: Int)
+        fun topCoverHeight(): Int
+        fun newestChapterDate(): Long?
+        fun lastChapter(): Float?
+        fun mangaSource(): Source
     }
 }

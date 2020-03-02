@@ -252,6 +252,7 @@ class ChaptersPresenter(
                     chapter.read = read
                     if (!read) {
                         chapter.last_page_read = 0
+                        chapter.pages_left = 0
                     }
                 }
                 .toList()

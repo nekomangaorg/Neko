@@ -1,18 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout  xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/manga_info_layout"
+    android:id="@id/frame_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
-<androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-    android:id="@id/swipe_refresh"
-    android:layout_width="match_parent"
-    android:background="?android:colorBackground"
-    android:fitsSystemWindows="true"
-    android:layout_height="match_parent"
-    tools:context="eu.kanade.tachiyomi.ui.catalogue.browse.BrowseCatalogueController">
+    android:background="?android:colorBackground">
+
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@id/swipe_refresh"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="?android:colorBackground">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycler"
@@ -25,8 +24,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/chapters_title"
-            tools:listitem="@layout/chapters_mat_item">
-        </androidx.recyclerview.widget.RecyclerView>
+            tools:listitem="@layout/chapters_mat_item"/>
 
         <View
             android:id="@+id/full_backdrop"
@@ -39,6 +37,8 @@
             android:visibility="invisible"
             tools:background="@color/md_black_1000" />
 
+
+
         <ImageView
             android:id="@+id/manga_cover_full"
             android:layout_width="match_parent"
@@ -49,5 +49,12 @@
             android:layout_marginBottom="16dp"
             android:contentDescription="@string/description_cover"
             android:visibility="invisible" />
-</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+    <eu.davidea.fastscroller.FastScroller
+        android:id="@+id/fast_scroller"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="end"
+        app:fastScrollerBubbleEnabled="false"
+        tools:visibility="visible" />
+</FrameLayout>

@@ -214,11 +214,18 @@ class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: A
                     .isNotEmpty()
             }
             val librryManga = db.getLibraryMangas().executeAsBlocking()
-            if (librryManga.any { it.mangaType() == Manga.TYPE_MANHWA }) {
+            val types = mutableListOf<Int>()
+            if (librryManga.any { it.mangaType() == Manga.TYPE_WEBTOON }) types.add(R.string.webtoon_viewer)
+            if (librryManga.any { it.mangaType() == Manga.TYPE_MANHUA }) types.add(R.string.manhua)
+            if (librryManga.any { it.mangaType() == Manga.TYPE_COMIC }) types.add(R.string.comic)
+            if (types.isNotEmpty()) {
                 launchUI {
                     val mangaType = inflate(R.layout.filter_buttons) as FilterTagGroup
                     mangaType.setup(
-                        this@SortFilterBottomSheet, R.string.manhwa
+                        this@SortFilterBottomSheet,
+                        types.first(),
+                        types.getOrNull(1),
+                        types.getOrNull(2)
                     )
                     this@SortFilterBottomSheet.mangaType = mangaType
                     filter_layout.addView(mangaType)

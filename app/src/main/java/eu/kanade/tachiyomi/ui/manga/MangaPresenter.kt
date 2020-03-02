@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.manga
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -10,8 +11,14 @@ import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
+import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.util.Date
 
 class MangaPresenter(private val controller: MangaChaptersController,
     val manga: Manga,
@@ -22,14 +29,46 @@ class MangaPresenter(private val controller: MangaChaptersController,
 
 
     var isLockedFromSearch = false
+    var hasRequested = false
 
     var chapters:List<ChapterItem> = emptyList()
         private set
     fun onCreate() {
         isLockedFromSearch = SecureActivityDelegate.shouldBeLocked()
+        if (!manga.initialized)
+            fetchMangaFromSource()
+        updateChapters()
+        controller.updateChapters(this.chapters)
+    }
 
-        val chapters = db.getChapters(manga).executeAsBlocking().map { it.toModel() }
+    fun fetchMangaFromSource() {
+        GlobalScope.launch(Dispatchers.IO) {
+            withContext(Dispatchers.Main) {
+                controller.setRefresh(true)
+            }
+            val thumbnailUrl = manga.thumbnail_url
+            val networkManga = try {
+                source.fetchMangaDetails(manga).toBlocking().single()
+            } catch (e: java.lang.Exception) {
+                controller.showError(trimException(e))
+                return@launch
+            }
+            if (networkManga != null) {
+                manga.copyFrom(networkManga)
+                manga.initialized = true
+                db.insertManga(manga).executeAsBlocking()
+                if (thumbnailUrl != networkManga.thumbnail_url)
+                    MangaImpl.setLastCoverFetch(manga.id!!, Date().time)
+                withContext(Dispatchers.Main) {
+                    controller.updateHeader()
+                }
+            }
+        }
+    }
 
+    private fun updateChapters(fetchedChapters: List<Chapter>? = null) {
+        val chapters = (fetchedChapters ?:
+        db.getChapters(manga).executeAsBlocking()).map { it.toModel() }
 
         // Store the last emission
         this.chapters = applyChapterFilters(chapters)
@@ -37,67 +76,18 @@ class MangaPresenter(private val controller: MangaChaptersController,
         // Find downloaded chapters
         setDownloadedChapters(chapters)
 
-        controller.updateChapters(this.chapters)
+        /*
+                        // Emit the number of chapters to the info tab.
+                        chapterCountRelay.call(chapters.maxBy { it.chapter_number }?.chapter_number
+                            ?: 0f)
 
-        // Listen for download status changes
-        //observeDownloads()
-
-        // Emit the number of chapters to the info tab.
-        //chapterCountRelay.call(chapters.maxBy { it.chapter_number }?.chapter_number ?: 0f)
-
-        // Emit the upload date of the most recent chapter
-        /*lastUpdateRelay.call(
-                    Date(chapters.maxBy { it.date_upload }?.date_upload ?: 0)
-                )*/
-
-        /*       // Prepare the relay.
-        chaptersRelay.flatMap { applyChapterFilters(it) }
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeLatestCache(
-                ChaptersController::onNextChapters
-            ) { _, error -> Timber.e(error) }
-
-        // Add the subscription that retrieves the chapters from the database, keeps subscribed to
-        // changes, and sends the list of chapters to the relay.
-        add(db.getChapters(manga).asRxObservable()
-            .map { chapters ->
-                // Convert every chapter to a model.
-                chapters.map { it.toModel() }
-            }
-            .doOnNext { chapters ->
-                // Find downloaded chapters
-                setDownloadedChapters(chapters)
-
-                // Store the last emission
-                this.chapters = chapters
-
-                // Listen for download status changes
-                observeDownloads()
-
-                // Emit the number of chapters to the info tab.
-                chapterCountRelay.call(chapters.maxBy { it.chapter_number }?.chapter_number
-                    ?: 0f)
-
-                // Emit the upload date of the most recent chapter
-                lastUpdateRelay.call(
-                    Date(chapters.maxBy { it.date_upload }?.date_upload
-                        ?: 0)
-                )
-
-            }
-            .subscribe { chaptersRelay.call(it) })*/
+                        // Emit the upload date of the most recent chapter
+                        lastUpdateRelay.call(
+                            Date(chapters.maxBy { it.date_upload }?.date_upload
+                                ?: 0)
+                        )*/
     }
 
-    /*private fun observeDownloads() {
-        observeDownloadsSubscription?.let { remove(it) }
-        observeDownloadsSubscription = downloadManager.queue.getStatusObservable()
-            .observeOn(AndroidSchedulers.mainThread())
-            .filter { download -> download.manga.id == manga.id }
-            .doOnNext { onDownloadStatusChange(it) }
-            .subscribeLatestCache(ChaptersController::onChapterStatusChange) {
-                    _, error -> Timber.e(error)
-            }
-    }*/
     /**
      * Finds and assigns the list of downloaded chapters.
      *
@@ -224,6 +214,17 @@ class MangaPresenter(private val controller: MangaChaptersController,
     }
 
     /**
+     * Returns the next unread chapter or null if everything is read.
+     */
+    fun getNewestChapterTime(): Long? {
+        return chapters.maxBy { it.date_upload }?.date_upload
+    }
+
+    fun getLatestChapter(): Float? {
+        return chapters.maxBy { it.chapter_number }?.chapter_number
+    }
+
+    /**
      * Downloads the given list of chapters with the manager.
      * @param chapters the list of chapters to download.
      */
@@ -254,5 +255,40 @@ class MangaPresenter(private val controller: MangaChaptersController,
             it.status = Download.NOT_DOWNLOADED
             it.download = null
         }
+    }
+
+    fun refreshAll() {
+        fetchMangaFromSource()
+        fetchChaptersFromSource()
+    }
+
+    /**
+     * Requests an updated list of chapters from the source.
+     */
+    fun fetchChaptersFromSource() {
+        hasRequested = true
+
+        GlobalScope.launch(Dispatchers.IO) {
+            val chapters = try {
+                source.fetchChapterList(manga).toBlocking().single()
+            }
+            catch(e: Exception) {
+                controller.showError(trimException(e))
+                return@launch
+            } ?: listOf()
+            try {
+                syncChaptersWithSource(db, chapters, manga, source)
+
+                updateChapters()
+                withContext(Dispatchers.Main) { controller.updateChapters(this@MangaPresenter.chapters) }
+            }
+            catch(e: java.lang.Exception) {
+                controller.showError(trimException(e))
+            }
+        }
+    }
+
+    private fun trimException(e: java.lang.Exception): String {
+        return e.message?.split(": ")?.drop(1)?.joinToString(": ") ?: "Error"
     }
 }

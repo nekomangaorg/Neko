@@ -24,11 +24,12 @@ import eu.kanade.tachiyomi.ui.base.controller.NoToolbarElevationController
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.main.MainActivity
+import eu.kanade.tachiyomi.ui.manga.MangaChaptersController
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.recently_read.RecentlyReadController
 import eu.kanade.tachiyomi.util.system.notificationManager
-import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
+import eu.kanade.tachiyomi.util.view.applyWindowInsetsForController
 import eu.kanade.tachiyomi.util.view.snack
 import kotlinx.android.synthetic.main.recent_chapters_controller.*
 import timber.log.Timber
@@ -81,6 +82,7 @@ class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
      */
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
+        view.applyWindowInsetsForController()
         view.context.notificationManager.cancel(Notifications.ID_NEW_CHAPTERS)
         // Init RecyclerView and adapter
         val layoutManager = LinearLayoutManager(view.context)
@@ -105,7 +107,7 @@ class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
             // It can be a very long operation, so we disable swipe refresh and show a snackbar.
             swipe_refresh.isRefreshing = false
         }
-        recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
+        //recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
     }
 
     override fun onDestroyView(view: View) {
@@ -268,7 +270,7 @@ class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
     }
 
     fun openManga(chapter: RecentChapterItem) {
-        router.pushController(MangaController(chapter.manga).withFadeTransaction())
+        router.pushController(MangaChaptersController(chapter.manga).withFadeTransaction())
     }
 
     /**

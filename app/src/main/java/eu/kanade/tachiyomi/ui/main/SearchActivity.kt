@@ -19,7 +19,6 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.base.controller.NoToolbarElevationController
-import eu.kanade.tachiyomi.ui.base.controller.TabbedController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.catalogue.global_search.CatalogueSearchController
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
@@ -43,7 +42,7 @@ class SearchActivity: MainActivity() {
         drawerArrow?.color = getResourceColor(R.attr.actionBarTintColor)
         sToolbar.navigationIcon = drawerArrow
 
-        tabAnimator = TabsAnimator(sTabs)
+        //tabAnimator = TabsAnimator(sTabs)
 
         val container: ViewGroup = findViewById(R.id.controller_container)
 
@@ -170,7 +169,7 @@ class SearchActivity: MainActivity() {
         }
         drawerArrow?.progress = 1f
 
-        if (from is TabbedController) {
+        /*if (from is TabbedController) {
             from.cleanupTabs(sTabs)
         }
         if (to is TabbedController) {
@@ -179,7 +178,7 @@ class SearchActivity: MainActivity() {
         } else {
             tabAnimator.collapse()
             sTabs.setupWithViewPager(null)
-        }
+        }*/
 
         if (to is NoToolbarElevationController) {
             appbar.disableElevation()

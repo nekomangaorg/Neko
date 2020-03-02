@@ -35,6 +35,7 @@ import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
+import eu.kanade.tachiyomi.util.view.applyWindowInsetsForController
 import kotlinx.android.synthetic.main.chapters_controller.*
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -90,6 +91,7 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
     override fun onViewCreated(view: View) {
 
         super.onViewCreated(view)
+        view.applyWindowInsetsForController()
         setTitle()
         val config = this.config ?: return
 

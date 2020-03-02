@@ -36,16 +36,16 @@ class ChapterItem(val chapter: Chapter, val manga: Manga) :
         get() = status == Download.DOWNLOADED
 
     override fun getLayoutRes(): Int {
-        return if (!chapter.isRecognizedNumber) R.layout.manga_header_item
+        return if (chapter.isHeader) R.layout.manga_header_item
         else R.layout.chapters_mat_item
     }
 
     override fun isSelectable(): Boolean {
-        return chapter.isRecognizedNumber
+        return chapter.isHeader
     }
 
     override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): MangaChapterHolder {
-        return if (!chapter.isRecognizedNumber) MangaHeaderHolder(view, adapter as ChaptersAdapter)
+        return if (chapter.isHeader) MangaHeaderHolder(view, adapter as ChaptersAdapter)
         else ChapterMatHolder(view, adapter as ChaptersAdapter)
     }
 
@@ -59,13 +59,13 @@ class ChapterItem(val chapter: Chapter, val manga: Manga) :
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other is ChapterItem) {
-            return chapter.id ?: -1 == other.chapter.id ?: -1
+            return chapter.id!! == other.chapter.id!!
         }
         return false
     }
 
     override fun hashCode(): Int {
-        return chapter.id?.hashCode() ?: -1
+        return chapter.id!!.hashCode()
     }
 
 }

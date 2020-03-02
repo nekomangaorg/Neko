@@ -319,6 +319,8 @@ class ReaderPresenter(
 
         // Save last page read and mark as read if needed
         selectedChapter.chapter.last_page_read = page.index
+        selectedChapter.chapter.pages_left =
+            (selectedChapter.pages?.size ?: page.index) - page.index
         if (selectedChapter.pages?.lastIndex == page.index) {
             selectedChapter.chapter.read = true
             updateTrackChapterRead(selectedChapter)
@@ -395,9 +397,11 @@ class ReaderPresenter(
     fun getMangaViewer(): Int {
         val manga = manga ?: return preferences.defaultViewer()
         if (manga.viewer == -1) {
-            val type =
-                if (manga.mangaType() == Manga.TYPE_MANHWA) ReaderActivity.WEBTOON
-                else 0
+            val type = when(manga.mangaType()) {
+                Manga.TYPE_WEBTOON -> ReaderActivity.WEBTOON
+                Manga.TYPE_COMIC, Manga.TYPE_MANHUA -> ReaderActivity.LEFT_TO_RIGHT
+                else -> 0
+            }
             manga.viewer = type
             db.updateMangaViewer(manga).asRxObservable().subscribe()
         }

@@ -150,7 +150,7 @@
                     app:layout_constraintEnd_toEndOf="parent" />
 
                 <TextView
-                    android:id="@+id/manga_last_update_label"
+                    android:id="@+id/manga_last_update"
                     style="@style/TextAppearance.Medium.Body2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -168,8 +168,8 @@
                     android:ellipsize="end"
                     android:maxLines="1"
                     android:textIsSelectable="false"
-                    app:layout_constraintBaseline_toBaselineOf="@+id/manga_last_update_label"
-                    app:layout_constraintStart_toEndOf="@+id/manga_last_update_label"
+                    app:layout_constraintBaseline_toBaselineOf="@+id/manga_last_update"
+                    app:layout_constraintStart_toEndOf="@+id/manga_last_update"
                     app:layout_constraintEnd_toEndOf="parent" />
 
                 <TextView
@@ -179,7 +179,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/manga_info_status_label"
                     android:textIsSelectable="false"
-                    app:layout_constraintTop_toBottomOf="@+id/manga_last_update_label"
+                    app:layout_constraintTop_toBottomOf="@+id/manga_last_update"
                     app:layout_constraintStart_toStartOf="parent"/>
 
                 <TextView

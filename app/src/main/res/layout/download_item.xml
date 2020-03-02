@@ -22,7 +22,7 @@
         app:srcCompat="@drawable/ic_reorder_grey_24dp" />
 
     <TextView
-        android:id="@+id/manga_title"
+        android:id="@+id/manga_full_title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
@@ -45,8 +45,8 @@
         android:maxLines="1"
         android:textAppearance="@style/TextAppearance.Regular.Caption"
         app:layout_constraintEnd_toStartOf="@+id/migration_menu"
-        app:layout_constraintStart_toStartOf="@+id/manga_title"
-        app:layout_constraintTop_toBottomOf="@+id/manga_title"
+        app:layout_constraintStart_toStartOf="@+id/manga_full_title"
+        app:layout_constraintTop_toBottomOf="@+id/manga_full_title"
         tools:text="Chapter Title" />
 
     <ProgressBar
@@ -64,12 +64,12 @@
         android:id="@+id/download_progress_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toEndOf="@id/manga_title"
+        android:layout_toEndOf="@id/manga_full_title"
         android:maxLines="1"
         android:textAppearance="@style/TextAppearance.Regular.Caption.Hint"
-        app:layout_constraintBottom_toBottomOf="@+id/manga_title"
+        app:layout_constraintBottom_toBottomOf="@+id/manga_full_title"
         app:layout_constraintEnd_toStartOf="@+id/migration_menu"
-        app:layout_constraintTop_toTopOf="@+id/manga_title"
+        app:layout_constraintTop_toTopOf="@+id/manga_full_title"
         tools:text="(0/10)" />
 
     <ImageView
