@@ -23,11 +23,6 @@
         app:fastScrollerBubbleEnabled="false"
         tools:visibility="visible" />
 
-    <androidx.coordinatorlayout.widget.CoordinatorLayout
-        android:id="@+id/snackbar_layout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
-
     <eu.kanade.tachiyomi.widget.EmptyView
         android:id="@+id/empty_view"
         android:layout_width="wrap_content"

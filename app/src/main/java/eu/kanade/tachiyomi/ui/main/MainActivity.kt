@@ -314,7 +314,8 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                                          container: ViewGroup, handler: ControllerChangeHandler) {
 
                 syncActivityViewWithController(to, from)
-                navigationView.visibility = if (router.backstackSize > 1) View.GONE else View.VISIBLE
+                if (to !is DialogController)
+                    navigationView.visibility = if (router.backstackSize > 1) View.GONE else View.VISIBLE
             }
 
             override fun onChangeCompleted(to: Controller?, from: Controller?, isPush: Boolean,

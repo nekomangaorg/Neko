@@ -90,7 +90,7 @@ class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: A
         pager = pagerView
         val shadow2:View = (pagerView.parent as ViewGroup).findViewById(R.id.shadow2)
         val shadow:View = (pagerView.parent as ViewGroup).findViewById(R.id.shadow)
-        val snackbarLayout:View = (pagerView.parent as ViewGroup).findViewById(R.id.snackbar_layout)
+//        val snackbarLayout:View = (pagerView.parent as ViewGroup).findViewById(R.id.snackbar_layout)
         if (phoneLandscape) {
             sheetBehavior?.state = BottomSheetBehavior.STATE_HIDDEN
         }
@@ -115,7 +115,7 @@ class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: A
                     else
                         shadow.alpha = 1f
                     pager?.updatePaddingRelative(bottom = sheetBehavior?.peekHeight ?: 0)
-                    snackbarLayout.updatePaddingRelative(bottom = sheetBehavior?.peekHeight ?: 0)
+//                    snackbarLayout.updatePaddingRelative(bottom = sheetBehavior?.peekHeight ?: 0)
                     if (!phoneLandscape)
                         preferences.hideFiltersAtStart().set(false)
                 }
@@ -128,7 +128,7 @@ class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: A
                     reSortViews()
                     shadow.alpha = 0f
                     pager?.updatePaddingRelative(bottom = 0)
-                    snackbarLayout.updatePaddingRelative(bottom = 0)
+//                    snackbarLayout.updatePaddingRelative(bottom = 0)
                     if (!phoneLandscape)
                         preferences.hideFiltersAtStart().set(true)
                 }
@@ -142,7 +142,7 @@ class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: A
         }
         else {
             pager?.updatePaddingRelative(bottom = sheetBehavior?.peekHeight ?: 0)
-            snackbarLayout.updatePaddingRelative(bottom = sheetBehavior?.peekHeight ?: 0)
+//            snackbarLayout.updatePaddingRelative(bottom = sheetBehavior?.peekHeight ?: 0)
         }
         if (phoneLandscape && shadow2.visibility != View.GONE) {
             shadow2.gone()

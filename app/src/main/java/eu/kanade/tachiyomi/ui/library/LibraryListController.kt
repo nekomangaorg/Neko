@@ -464,6 +464,8 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
     override fun onItemMove(fromPosition: Int, toPosition: Int) {
         if (lastItemPosition == toPosition)
             lastItemPosition = null
+        else if (lastItemPosition == null)
+            lastItemPosition = fromPosition
     }
 
     override fun onItemReleased(position: Int) {
@@ -472,6 +474,9 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
             return
         }
         destroyActionModeIfNeeded()
+        // if nothing moved
+        if (lastItemPosition == null)
+            return
         val item = adapter.getItem(position) as? LibraryItem ?: return
         val newHeader = adapter.getSectionHeader(position) as? LibraryHeaderItem
         val libraryItems = adapter.getSectionItems(adapter.getSectionHeader(position))
@@ -482,7 +487,9 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
         } else {
             if (presenter.mangaIsInCategory(item.manga, newHeader?.category?.id)) {
                 adapter.moveItem(position, lastItemPosition!!)
-                snack = snackbar_layout?.snack(R.string.already_in_category)
+                snack = view?.snack(R.string.already_in_category) {
+                    anchorView = bottom_sheet
+                }
                 return
             }
             if (newHeader?.category?.mangaSort == null) {
@@ -539,13 +546,15 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
         return false
         val inQueue = LibraryUpdateService.categoryInQueue(category.id)
         snack?.dismiss()
-        snack = snackbar_layout.snack(resources!!.getString(
+        snack = view?.snack(resources!!.getString(
             when {
                 inQueue -> R.string.category_already_in_queue
                 LibraryUpdateService.isRunning() ->
                     R.string.adding_category_to_queue
                 else -> R.string.updating_category_x
-            }, category.name))
+            }, category.name)) {
+            anchorView = bottom_sheet
+        }
         if (!inQueue)
             LibraryUpdateService.start(view!!.context, category)
         return true
