@@ -630,6 +630,7 @@
     <string name="filter">Filter</string>
     <string name="forward">Forward</string>
     <string name="free">Free</string>
+    <string name="hide_question">Hide %1$s?</string>
     <string name="ignore">Ignore</string>
     <string name="install">Install</string>
     <string name="left">Left</string>
