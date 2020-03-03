@@ -215,7 +215,7 @@ class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: A
             }
             val librryManga = db.getLibraryMangas().executeAsBlocking()
             val types = mutableListOf<Int>()
-            if (librryManga.any { it.mangaType() == Manga.TYPE_WEBTOON }) types.add(R.string.webtoon_viewer)
+            if (librryManga.any { it.mangaType() == Manga.TYPE_MANHWA }) types.add(R.string.manhwa)
             if (librryManga.any { it.mangaType() == Manga.TYPE_MANHUA }) types.add(R.string.manhua)
             if (librryManga.any { it.mangaType() == Manga.TYPE_COMIC }) types.add(R.string.comic)
             if (types.isNotEmpty()) {

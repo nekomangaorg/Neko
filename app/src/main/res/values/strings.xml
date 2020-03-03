@@ -114,6 +114,7 @@
     <string name="action_save">Save</string>
     <string name="action_reset">Reset</string>
     <string name="action_undo">Undo</string>
+    <string name="action_use_default">Use Default</string>
     <string name="action_create">Create</string>
     <string name="action_restore">Restore</string>
     <string name="action_webview_back">Back</string>
@@ -610,6 +611,8 @@
     <string name="transition_pages_loading">Loading pages…</string>
     <string name="transition_pages_error">Failed to load pages: %1$s</string>
     <string name="reader_pull_up_for_more_options">Pull up for more options</string>
+    <string name="reading_mode">Reading %1$s</string>
+    <string name="webtoon_style">webtoon style</string>
 
     <!-- Recent manga fragment -->
     <string name="recent_manga_source">%1$s - Ch.%2$s</string>

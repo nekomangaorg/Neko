@@ -397,12 +397,7 @@ class ReaderPresenter(
     fun getMangaViewer(): Int {
         val manga = manga ?: return preferences.defaultViewer()
         if (manga.viewer == -1) {
-            val type = when(manga.mangaType()) {
-                Manga.TYPE_WEBTOON -> ReaderActivity.WEBTOON
-                Manga.TYPE_COMIC, Manga.TYPE_MANHUA -> ReaderActivity.LEFT_TO_RIGHT
-                else -> 0
-            }
-            manga.viewer = type
+            manga.viewer = manga.defaultReaderType()
             db.updateMangaViewer(manga).asRxObservable().subscribe()
         }
         return if (manga.viewer == 0) preferences.defaultViewer() else manga.viewer

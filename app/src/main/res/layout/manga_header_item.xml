@@ -7,29 +7,14 @@
     android:layout_height="wrap_content">
 
     <View
-        android:id="@+id/guideline"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginTop="52dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/true_backdrop" />
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintGuide_begin="137dp" />
-
-    <View
         android:id="@+id/true_backdrop"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="@id/bottom_line"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHeight_min="200dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="@id/bottom_line"
         app:layout_constraintVertical_bias="0.0"
         tools:background="@color/material_red_400" />
 
@@ -56,46 +41,22 @@
     <View
         android:id="@+id/top_view"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginTop="100dp"
-        app:layout_constraintBottom_toTopOf="@id/top_line"
+        android:layout_height="100dp"
+        android:layout_marginTop="0dp"
+        app:layout_constraintBottom_toTopOf="@id/cover_card"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.48000002" />
-
-    <androidx.constraintlayout.widget.Barrier
-        android:id="@+id/top_line"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:barrierDirection="top"
-        app:constraint_referenced_ids="cover_card,manga_layout"
-        tools:layout_editor_absoluteY="93dp" />
-
-    <FrameLayout
-        android:id="@+id/manga_layout"
-        android:layout_width="100dp"
-        android:layout_height="0dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
-        app:layout_constraintBottom_toBottomOf="@id/guideline"
-        app:layout_constraintDimensionRatio="h,7:10"
-        app:layout_constraintStart_toStartOf="parent">
-
-    </FrameLayout>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cover_card"
         android:layout_width="100dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
         android:layout_marginStart="16dp"
         android:layout_marginBottom="16dp"
-        app:layout_constraintBottom_toBottomOf="@id/guideline"
-        app:layout_constraintEnd_toEndOf="@id/manga_layout"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/top_view"
-        app:layout_constraintTop_toTopOf="@id/true_backdrop"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintVertical_bias="1.0">
 
         <ImageView
@@ -123,19 +84,20 @@
         android:textIsSelectable="false"
         android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/manga_layout"
+        app:layout_constraintStart_toEndOf="@id/cover_card"
         app:layout_constraintTop_toTopOf="@id/cover_card"
         tools:text="Title Example" />
 
     <TextView
         android:id="@+id/manga_author"
-        android:textAppearance="@style/TextAppearance.Regular.Body1.SemiBold"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:textColor="?android:attr/textColorSecondary"
+        android:layout_marginEnd="16dp"
         android:ellipsize="end"
-        android:maxLines="1"
+        android:maxLines="2"
         android:text="@string/manga_info_author_label"
+        android:textAppearance="@style/TextAppearance.Regular.Body1.SemiBold"
+        android:textColor="?android:attr/textColorSecondary"
         android:textIsSelectable="false"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@id/manga_full_title"
@@ -158,6 +120,7 @@
         style="@style/TextAppearance.Regular.Body1.Secondary"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
         android:ellipsize="end"
         android:maxLines="1"
         android:textIsSelectable="false"
@@ -173,7 +136,7 @@
         android:layout_margin="6dp"
         android:orientation="horizontal"
         app:barrierDirection="bottom"
-        app:constraint_referenced_ids="manga_source,manga_layout,cover_card" />
+        app:constraint_referenced_ids="manga_source,cover_card" />
 
 
     <LinearLayout
@@ -241,8 +204,9 @@
         android:layout_marginEnd="16dp"
         android:maxLines="3"
         android:textIsSelectable="false"
-        app:layout_constraintBottom_toTopOf="@id/start_reading_button"
+        app:layout_constraintBottom_toTopOf="@id/manga_genres_tags"
         app:layout_constraintEnd_toEndOf="parent"
+        tools:maxLines="10"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/manga_summary_label"
         tools:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum." />
@@ -301,6 +265,8 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="16dp"
         android:visibility="gone"
+        tools:visibility="visible"
+        tools:layout_height="100dp"
         app:atg_backgroundColor="@android:color/transparent"
         app:atg_borderColor="@color/md_blue_A400"
         app:atg_borderStrokeWidth="1dp"
@@ -314,12 +280,15 @@
     <com.google.android.material.button.MaterialButton
         android:id="@+id/less_button"
         style="@style/Theme.Widget.Button.TextButton"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@string/less"
         android:visibility="gone"
+        tools:visibility="visible"
         android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
         android:textAlignment="textEnd"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toTopOf="@id/start_reading_button"
         app:layout_constraintTop_toBottomOf="@id/manga_genres_tags"

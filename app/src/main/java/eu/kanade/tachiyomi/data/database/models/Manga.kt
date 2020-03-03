@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.data.database.models
 
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import uy.kohesive.injekt.injectLazy
 import java.util.Locale
 
@@ -38,11 +39,9 @@ interface Manga : SManga {
         val currentTags = currentGenres()?.split(",")?.map { it.trim().toLowerCase(Locale.US) }
         return if (currentTags?.any
             { tag ->
-                tag == "long strip" || tag == "manhwa" ||
-                    tag.contains("webtoon")
-            } == true ||
-            sourceManager.getOrStub(source).name.contains("webtoon", true))
-            TYPE_WEBTOON
+                tag.startsWith("english") || tag == "comic"
+            } == true)
+            TYPE_COMIC
         else if (currentTags?.any
             { tag ->
                 tag.startsWith("chinese") || tag == "manhua"
@@ -50,10 +49,31 @@ interface Manga : SManga {
             TYPE_MANHUA
         else if (currentTags?.any
             { tag ->
-                tag.startsWith("english") || tag == "comic"
-            } == true)
-            TYPE_COMIC
+                tag == "long strip" || tag == "manhwa" ||
+                    tag.contains("webtoon")
+            } == true ||
+            sourceManager.getOrStub(source).name.contains("webtoon", true))
+            TYPE_MANHWA
         else TYPE_MANGA
+    }
+
+    fun defaultReaderType(): Int {
+        val sourceManager: SourceManager by injectLazy()
+        val currentTags = currentGenres()?.split(",")?.map { it.trim().toLowerCase(Locale.US) }
+        return if (currentTags?.any
+            { tag ->
+                tag == "long strip" || tag == "manhwa" ||
+                    tag.contains("webtoon")
+            } == true ||
+            sourceManager.getOrStub(source).name.contains("webtoon", true))
+            ReaderActivity.WEBTOON
+        else if (currentTags?.any
+            { tag ->
+                tag.startsWith("chinese") || tag == "manhua" ||
+                    tag.startsWith("english") || tag == "comic"
+            } == true)
+            ReaderActivity.LEFT_TO_RIGHT
+        else 0
     }
 
     // Used to display the chapter's title one way or another
@@ -106,8 +126,12 @@ interface Manga : SManga {
         const val DISPLAY_NUMBER = 0x00100000
         const val DISPLAY_MASK = 0x00100000
 
+        const val READ_WEBTOON = 0
+        const val READ_LTR = 1
+        const val READ_RTL = 2
+
         const val TYPE_MANGA = 0
-        const val TYPE_WEBTOON = 1
+        const val TYPE_MANHWA = 1
         const val TYPE_MANHUA = 2
         const val TYPE_COMIC = 3
 

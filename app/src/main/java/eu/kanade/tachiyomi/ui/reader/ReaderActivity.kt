@@ -23,6 +23,7 @@ import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatDelegate
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.snackbar.Snackbar
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -49,6 +50,7 @@ import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.gone
+import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.widget.SimpleAnimationListener
 import eu.kanade.tachiyomi.widget.SimpleSeekBarListener
@@ -64,6 +66,7 @@ import rx.subscriptions.CompositeSubscription
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 import java.io.File
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 
@@ -124,6 +127,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
      */
     @Suppress("DEPRECATION")
     private var progressDialog: ProgressDialog? = null
+
+    private var snackbar:Snackbar? = null
 
     companion object {
         @Suppress("unused")
@@ -196,6 +201,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
         bottomSheet = null
         progressDialog?.dismiss()
         progressDialog = null
+        snackbar?.dismiss()
+        snackbar = null
     }
 
     /**
@@ -323,6 +330,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
         menuVisible = visible
         if (visible) coroutine?.cancel()
         if (visible) {
+            snackbar?.dismiss()
             systemUi?.show()
             reader_menu.visibility = View.VISIBLE
             reader_menu_bottom.visibility = View.VISIBLE
@@ -370,11 +378,32 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
      */
     fun setManga(manga: Manga) {
         val prevViewer = viewer
-        val newViewer = when (presenter.getMangaViewer()) {
+        val noDefault = manga.viewer == -1
+        val mangaViewer = presenter.getMangaViewer()
+        val newViewer = when (mangaViewer) {
             RIGHT_TO_LEFT -> R2LPagerViewer(this)
             VERTICAL -> VerticalPagerViewer(this)
             WEBTOON -> WebtoonViewer(this)
             else -> L2RPagerViewer(this)
+        }
+
+        if (noDefault && presenter.manga?.viewer!! > 0) {
+            snackbar = reader_layout.snack(
+                getString(
+                    R.string.reading_mode, getString(
+                        when (mangaViewer) {
+                            RIGHT_TO_LEFT -> R.string.right_to_left_viewer
+                            VERTICAL -> R.string.vertical_viewer
+                            WEBTOON -> R.string.webtoon_style
+                            else -> R.string.left_to_right_viewer
+                        }
+                    ).toLowerCase(Locale.getDefault())
+                ), 8000
+            ) {
+                setAction(R.string.action_use_default) {
+                    presenter.setMangaViewer(0)
+                }
+            }
         }
 
         // Destroy previous viewer if there was one

@@ -31,7 +31,7 @@ class MangaHeaderHolder(
     init {
         start_reading_button.setOnClickListener { adapter.coverListener?.readNextChapter() }
         top_view.updateLayoutParams<ConstraintLayout.LayoutParams> {
-            topMargin = adapter.coverListener?.topCoverHeight() ?: 0
+            height = adapter.coverListener?.topCoverHeight() ?: 0
         }
         more_button.setOnClickListener { expandDesc() }
         manga_summary.setOnClickListener { expandDesc() }
@@ -86,11 +86,13 @@ class MangaHeaderHolder(
             if (manga_summary.lineCount < 3 && manga.currentGenres().isNullOrBlank()) {
                 more_button_group.gone()
             }
+            else
+                more_button_group.visible()
         }
         manga_summary_label.text = itemView.context.getString(R.string.about_this,
             itemView.context.getString(
                 when {
-                    manga.mangaType() == Manga.TYPE_WEBTOON -> R.string.webtoon_viewer
+                    manga.mangaType() == Manga.TYPE_MANHWA -> R.string.manhwa
                     manga.mangaType() == Manga.TYPE_MANHUA -> R.string.manhua
                     manga.mangaType() == Manga.TYPE_COMIC -> R.string.comic
                     else -> R.string.manga
@@ -149,7 +151,7 @@ class MangaHeaderHolder(
         chapters_title.text = itemView.resources.getQuantityString(R.plurals.chapters, count, count)
 
         top_view.updateLayoutParams<ConstraintLayout.LayoutParams> {
-            topMargin = adapter.coverListener?.topCoverHeight() ?: 0
+            height = adapter.coverListener?.topCoverHeight() ?: 0
         }
 
         manga_status.text = (itemView.context.getString( when (manga.status) {
@@ -173,11 +175,16 @@ class MangaHeaderHolder(
 
     fun setTopHeight(newHeight: Int) {
         top_view.updateLayoutParams<ConstraintLayout.LayoutParams> {
-            topMargin = newHeight
+            height = newHeight
         }
     }
 
     fun setBackDrop(color: Int) {
         true_backdrop.setBackgroundColor(color)
+    }
+
+    override fun onLongClick(view: View?): Boolean {
+        super.onLongClick(view)
+        return false
     }
 }

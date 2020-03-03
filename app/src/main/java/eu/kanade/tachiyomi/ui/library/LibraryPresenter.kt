@@ -174,7 +174,7 @@ class LibraryPresenter(
                 if ((filterMangaType == Manga.TYPE_MANHUA) && mangaType != Manga.TYPE_MANHUA)
                     return@f false
                 if ((filterMangaType == Manga.TYPE_COMIC) && mangaType != Manga.TYPE_COMIC) return@f false
-                if ((filterMangaType == Manga.TYPE_WEBTOON) && mangaType != Manga.TYPE_WEBTOON) return@f false
+                if ((filterMangaType == Manga.TYPE_MANHWA) && mangaType != Manga.TYPE_MANHWA) return@f false
             }
 
 

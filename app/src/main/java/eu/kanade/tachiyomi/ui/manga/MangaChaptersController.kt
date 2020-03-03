@@ -57,6 +57,7 @@ import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.getText
 import eu.kanade.tachiyomi.util.view.snack
@@ -235,7 +236,7 @@ class MangaChaptersController : BaseController,
     }
 
     fun showError(message: String) {
-        swipe_refresh.isRefreshing = false
+        swipe_refresh?.isRefreshing = false
         view?.snack(message)
     }
 
@@ -277,7 +278,7 @@ class MangaChaptersController : BaseController,
             adapter?.updateDataSet(listOf(ChapterItem(Chapter.createH(), presenter.manga)))
         }
         else {
-            swipe_refresh.isRefreshing = false
+            swipe_refresh?.isRefreshing = false
             adapter?.updateDataSet(
                 listOf(ChapterItem(Chapter.createH(), presenter.manga)) + presenter.chapters
             )
@@ -286,8 +287,9 @@ class MangaChaptersController : BaseController,
 
 
     fun updateChapters(chapters: List<ChapterItem>) {
-        swipe_refresh.isRefreshing = false
+        swipe_refresh?.isRefreshing = false
         if (presenter.chapters.isEmpty() && fromCatalogue && !presenter.hasRequested) {
+            launchUI { swipe_refresh?.isRefreshing = true }
             presenter.fetchChaptersFromSource()
         }
         adapter?.updateDataSet(listOf(ChapterItem(Chapter.createH(), presenter.manga)) + chapters)

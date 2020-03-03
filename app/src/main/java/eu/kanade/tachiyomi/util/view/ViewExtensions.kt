@@ -65,7 +65,7 @@ Unit)? = null): Snackbar {
         snack.f()
     }
     val theme = Injekt.get<PreferencesHelper>().theme()
-    if (theme == 3 || theme == 6) {
+    if (theme == 3) {
         val textView: TextView =
             snack.view.findViewById(com.google.android.material.R.id.snackbar_text)
         val button: Button? =

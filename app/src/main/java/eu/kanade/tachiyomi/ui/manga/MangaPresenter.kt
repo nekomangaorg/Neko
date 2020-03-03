@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.manga
 
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
@@ -17,6 +18,7 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
+import eu.kanade.tachiyomi.util.system.launchUI
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -50,10 +52,17 @@ class MangaPresenter(private val controller: MangaChaptersController,
     fun onCreate() {
         isLockedFromSearch = SecureActivityDelegate.shouldBeLocked()
         downloadManager.addListener(this)
-        if (!manga.initialized)
-            fetchMangaFromSource()
-        updateChapters()
-        controller.updateChapters(this.chapters)
+        if (!manga.initialized) {
+            controller.updateHeader()
+            launchUI {
+                controller.setRefresh(true)
+            }
+            refreshAll()
+        }
+        else {
+            updateChapters()
+            controller.updateChapters(this.chapters)
+        }
     }
 
     fun onDestroy() {
@@ -363,7 +372,9 @@ class MangaPresenter(private val controller: MangaChaptersController,
     }
 
     private fun trimException(e: java.lang.Exception): String {
-        return e.message?.split(": ")?.drop(1)?.joinToString(": ") ?: "Error"
+        return (if (e.message?.contains(": ") == true)
+            e.message?.split(": ")?.drop(1)?.joinToString(": ")
+        else e.message) ?: preferences.context.getString(R.string.unknown_error)
     }
 
     /**
