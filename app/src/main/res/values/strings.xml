@@ -70,6 +70,7 @@
     <string name="action_mark_as_read">Mark as read</string>
     <string name="action_mark_as_unread">Mark as unread</string>
     <string name="action_mark_previous_as_read">Mark previous as read</string>
+    <string name="action_mark_multiple">Mark multiple</string>
     <string name="action_download">Download</string>
     <string name="action_bookmark">Bookmark</string>
     <string name="action_remove_bookmark">Remove bookmark</string>
@@ -224,7 +225,7 @@
     <string name="lock_always">Always</string>
     <string name="lock_never">Never</string>
     <plurals name="lock_after_mins">
-        <item quantity="one">After %1$s minutes</item>
+        <item quantity="one">After %1$s minute</item>
         <item quantity="other">After %1$s minutes</item>
     </plurals>
     <string name="search_hint">Search title, tags, source</string>
@@ -500,6 +501,11 @@
     <string name="copied_to_clipboard">%1$s copied to clipboard</string>
     <string name="source_not_installed">Source not installed: %1$s</string>
     <string name="about_this">About this %1$s</string>
+    <plurals name="chapters">
+        <item quantity="one">%1$d chapter</item>
+        <item quantity="other">%1$d chapters</item>
+    </plurals>
+    <string name="no_description">No description</string>
 
     <!-- Manga chapters fragment -->
     <string name="start_reading">Start reading</string>
@@ -697,5 +703,7 @@
     <string name="reset_tags">Reset Tags</string>
     <string name="display_as">Display as</string>
     <string name="action_auto">Auto</string>
+    <string name="more">More</string>
+    <string name="less">Less</string>
 
 </resources>

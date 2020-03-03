@@ -5,15 +5,12 @@ import android.os.Bundle
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.PopupMenu
-import androidx.appcompat.widget.SearchView
 import androidx.core.math.MathUtils.clamp
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -36,10 +33,8 @@ import eu.kanade.tachiyomi.ui.main.SwipeGestureInterface
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.inflate
-import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
-import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import kotlinx.android.synthetic.main.filter_bottom_sheet.*
 import kotlinx.android.synthetic.main.library_grid_recycler.*
 import kotlinx.android.synthetic.main.library_list_controller.*
@@ -302,27 +297,21 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
     }
 
     override fun reattachAdapter() {
-        if (libraryLayout == 0)recycler.spanCount =  1
+        if (libraryLayout == 0) recycler.spanCount = 1
         else recycler.columnWidth = (90 + (preferences.gridSize().getOrDefault() * 30)).dpToPx
         val position =
             (recycler.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
         libraryLayout = preferences.libraryLayout().getOrDefault()
         recycler.adapter = adapter
-        (recycler as? AutofitRecyclerView)?.spanCount = if (libraryLayout == 0) 1 else mangaPerRow
 
         (recycler.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(position, 0)
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        super.onCreateOptionsMenu(menu, inflater)
-        val searchItem = menu.findItem(R.id.action_search)
-        val searchView = searchItem.actionView as SearchView
-        setOnQueryTextChangeListener(searchView) {
-            query = it ?: ""
-            adapter.setFilter(it)
-            adapter.performFilter()
-            true
-        }
+    override fun onSearch(query: String?): Boolean {
+        this.query = query ?: ""
+        adapter.setFilter(query)
+        adapter.performFilter()
+        return true
     }
 
     override fun onDestroyActionMode(mode: ActionMode?) {

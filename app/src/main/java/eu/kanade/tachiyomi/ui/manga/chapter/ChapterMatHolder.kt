@@ -29,7 +29,9 @@ class ChapterMatHolder(
 
     private fun downloadOrRemoveMenu() {
         val chapter = adapter.getItem(adapterPosition) ?: return
-        if (chapter.status != Download.NOT_DOWNLOADED) {
+        if (chapter.status == Download.NOT_DOWNLOADED || chapter.status == Download.ERROR) {
+            adapter.coverListener?.downloadChapter(adapterPosition)
+        } else {
             download_button.post {
                 // Create a PopupMenu, giving it the clicked view for an anchor
                 val popup = PopupMenu(download_button.context, download_button)
@@ -38,8 +40,7 @@ class ChapterMatHolder(
                 popup.menuInflater.inflate(R.menu.chapter_download, popup.menu)
 
                 // Hide download and show delete if the chapter is downloaded
-                if (chapter.status != Download.DOWNLOADED) popup.menu.findItem(R.id.action_delete)
-                    .title = download_button.context.getString(
+                if (chapter.status != Download.DOWNLOADED) popup.menu.findItem(R.id.action_delete).title = download_button.context.getString(
                     R.string.action_cancel
                 )
 
@@ -52,9 +53,6 @@ class ChapterMatHolder(
                 // Finally show the PopupMenu
                 popup.show()
             }
-        }
-        else {
-            adapter.coverListener?.downloadChapter(adapterPosition)
         }
     }
 
@@ -113,6 +111,6 @@ class ChapterMatHolder(
             return
         }
         visible()
-        setDownoadStatus(status, progress)
+        setDownloadStatus(status, progress)
     }
 }

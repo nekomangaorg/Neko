@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.download
 
+import android.animation.ObjectAnimator
 import android.content.Context
 import android.graphics.Color
 import android.util.AttributeSet
@@ -26,9 +27,16 @@ class DownloadButton @JvmOverloads constructor(context: Context, attrs: Attribut
         R.drawable.filled_circle)?.mutate()
     private val borderCircle = ContextCompat.getDrawable(context,
         R.drawable.border_circle)?.mutate()
+    private var isAnimating = false
+    private var iconAnimation:ObjectAnimator? = null
 
 
-    fun setDownoadStatus(state: Int, progress: Int = 0) {
+    fun setDownloadStatus(state: Int, progress: Int = 0) {
+        if (state != Download.DOWNLOADING) {
+            iconAnimation?.cancel()
+            download_icon.alpha = 1f
+            isAnimating = false
+        }
         when (state) {
             Download.NOT_DOWNLOADED -> {
                 download_border.visible()
@@ -55,6 +63,15 @@ class DownloadButton @JvmOverloads constructor(context: Context, attrs: Attribut
                 download_border.drawable.setTint(disabledColor)
                 download_progress.progressDrawable?.setTint(downloadedColor)
                 download_icon.drawable.setTint(disabledColor)
+                if (!isAnimating) {
+                    iconAnimation = ObjectAnimator.ofFloat(download_icon, "alpha", 1f, 0f).apply {
+                        duration = 1000
+                        repeatCount = ObjectAnimator.INFINITE
+                        repeatMode = ObjectAnimator.REVERSE
+                    }
+                    iconAnimation?.start()
+                    isAnimating = true
+                }
             }
             Download.DOWNLOADED -> {
                 download_progress.gone()

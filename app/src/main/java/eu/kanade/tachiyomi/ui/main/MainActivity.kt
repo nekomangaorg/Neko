@@ -12,6 +12,7 @@ import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.webkit.WebView
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
@@ -54,8 +55,10 @@ import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.ui.setting.SettingsMainController
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePadding
+import eu.kanade.tachiyomi.util.view.visible
 import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -198,18 +201,19 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION*/
         updateRecentsIcon()
         content.viewTreeObserver.addOnGlobalLayoutListener {
-            /*val heightDiff: Int = content.rootView.height - content.height
+            val heightDiff: Int = content.rootView.height - content.height
             if (heightDiff > 200 &&
                 window.attributes.softInputMode == WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE) {
                 //keyboard is open, hide layout
                 navigationView.gone()
-            } else if (navigationView.visibility == View.GONE) {
+            } else if (navigationView.visibility == View.GONE
+                && window.attributes.softInputMode == WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE) {
                 //keyboard is hidden, show layout
                 // use coroutine to delay so the bottom bar doesn't flash on top of the keyboard
                 launchUI {
                     navigationView.visible()
                 }
-            }*/
+            }
         }
 
         supportActionBar?.setDisplayShowCustomEnabled(true)

@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.manga
 
 import android.animation.ValueAnimator
+import android.app.Activity
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
@@ -8,6 +9,7 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -15,6 +17,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.view.ActionMode
+import androidx.appcompat.widget.PopupMenu
 import androidx.core.graphics.ColorUtils
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -31,6 +34,7 @@ import com.google.android.material.snackbar.Snackbar
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
+import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
@@ -41,10 +45,13 @@ import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.catalogue.CatalogueController
+import eu.kanade.tachiyomi.ui.library.ChangeMangaCategoriesDialog
+import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.SearchActivity
 import eu.kanade.tachiyomi.ui.manga.MangaController.Companion.FROM_CATALOGUE_EXTRA
 import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
+import eu.kanade.tachiyomi.ui.manga.chapter.ChapterMatHolder
 import eu.kanade.tachiyomi.ui.manga.chapter.ChaptersAdapter
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
@@ -56,14 +63,18 @@ import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import kotlinx.android.synthetic.main.big_manga_controller.*
+import kotlinx.android.synthetic.main.big_manga_controller.swipe_refresh
 import kotlinx.android.synthetic.main.main_activity.*
+import kotlinx.android.synthetic.main.manga_info_controller.*
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 class MangaChaptersController : BaseController,
     ActionMode.Callback,
     FlexibleAdapter.OnItemClickListener,
-    ChaptersAdapter.MangaHeaderInterface {
+    FlexibleAdapter.OnItemLongClickListener,
+    ChaptersAdapter.MangaHeaderInterface,
+    ChangeMangaCategoriesDialog.Listener {
 
     constructor(manga: Manga?,
         fromCatalogue: Boolean = false,
@@ -121,7 +132,6 @@ class MangaChaptersController : BaseController,
 
         // Init RecyclerView and adapter
         adapter = ChaptersAdapter(this, view.context)
-        //setReadingDrawable()
 
         recycler.adapter = adapter
         recycler.layoutManager = LinearLayoutManager(view.context)
@@ -133,9 +143,6 @@ class MangaChaptersController : BaseController,
         )
         recycler.setHasFixedSize(true)
         adapter?.fastScroller = fast_scroller
-            /*activity?.controller_container?.updateLayoutParams<ConstraintLayout.LayoutParams> {
-            topMargin = 0
-        }*/
         val attrsArray = intArrayOf(android.R.attr.actionBarSize)
         val array = view.context.obtainStyledAttributes(attrsArray)
         val appbarHeight = array.getDimensionPixelSize(0, 0)
@@ -144,6 +151,7 @@ class MangaChaptersController : BaseController,
 
         recycler.doOnApplyWindowInsets { v, insets, _ ->
             headerHeight = appbarHeight + insets.systemWindowInsetTop + offset
+            swipe_refresh.setProgressViewOffset(false, (-40).dpToPx, headerHeight)
             (recycler.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder)
                 ?.setTopHeight(headerHeight)
             fast_scroller?.updateLayoutParams<ViewGroup.MarginLayoutParams>  {
@@ -156,7 +164,7 @@ class MangaChaptersController : BaseController,
 
         presenter.onCreate()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            recycler.setOnScrollChangeListener { v, scrollX, scrollY, oldScrollX, oldScrollY ->
+            recycler.setOnScrollChangeListener { _, _, _, _, _ ->
                 val atTop = !recycler.canScrollVertically(-1)
                 if ((!atTop && !toolbarIsColored) || (atTop && toolbarIsColored)) {
                     toolbarIsColored = !atTop
@@ -173,7 +181,6 @@ class MangaChaptersController : BaseController,
                         ArgbEvaluator(), colorFrom, colorTo
                     )
                     colorAnimator?.duration = 250 // milliseconds
-                    //colorAnimation.startDelay = 150
                     colorAnimator?.addUpdateListener { animator ->
                         (activity as MainActivity).toolbar.setBackgroundColor(animator.animatedValue as Int)
                         activity?.window?.statusBarColor = (animator.animatedValue as Int)
@@ -184,8 +191,6 @@ class MangaChaptersController : BaseController,
                 }
             }
         }
-       // recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
-       // recycler.requestApplyInsetsWhenAttached()
         GlideApp.with(view.context).load(manga)
             .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
             .signature(ObjectKey(MangaImpl.getLastCoverFetch(manga!!.id!!).toString()))
@@ -222,12 +227,25 @@ class MangaChaptersController : BaseController,
         swipe_refresh.setOnRefreshListener {
             presenter.refreshAll()
         }
-        //adapter?.fastScroller = fast_scroller
+    }
+
+    override fun onActivityResumed(activity: Activity) {
+        super.onActivityResumed(activity)
+        presenter.fetchChapters()
     }
 
     fun showError(message: String) {
         swipe_refresh.isRefreshing = false
         view?.snack(message)
+    }
+
+    fun updateChapterDownload(download: Download) {
+        getHolder(download.chapter)?.notifyStatus(download.status, presenter.isLockedFromSearch,
+            download.progress)
+    }
+
+    private fun getHolder(chapter: Chapter): ChapterMatHolder? {
+        return recycler?.findViewHolderForItemId(chapter.id!!) as? ChapterMatHolder
     }
 
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
@@ -236,37 +254,6 @@ class MangaChaptersController : BaseController,
             (activity as MainActivity).appbar.setBackgroundColor(Color.TRANSPARENT)
             (activity as MainActivity).toolbar.setBackgroundColor(Color.TRANSPARENT)
             activity?.window?.statusBarColor = Color.TRANSPARENT
-          /*  val colorFrom = ((activity as MainActivity).toolbar.background as ColorDrawable).color
-            val colorTo = Color.TRANSPARENT
-            colorAnimator = ValueAnimator.ofObject(
-                ArgbEvaluator(), colorFrom, colorTo)
-            colorAnimator?.duration = 250 // milliseconds
-            //colorAnimation.startDelay = 150
-            colorAnimator?.addUpdateListener { animator ->
-                (activity as MainActivity).toolbar.setBackgroundColor(animator.animatedValue as Int)
-                //activity?.window?.statusBarColor = (animator.animatedValue as Int)
-            }
-            colorAnimator?.start()*/
-
-            /*activity!!.window.setFlags(
-                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
-                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                val insetTop = activity!!.window.decorView.rootWindowInsets.systemWindowInsetTop
-                val insetBottom = activity!!.window.decorView.rootWindowInsets.stableInsetBottom
-                (activity)?.appbar?.updateLayoutParams<ConstraintLayout.LayoutParams> {
-                    topMargin = insetTop
-                }
-
-                (activity)?.navigationView?.updateLayoutParams<ConstraintLayout.LayoutParams> {
-                    bottomMargin = insetBottom
-                }
-            }*/
-
-            //
-            //(activity as MainActivity).toolbar.setBackgroundColor(Color.TRANSPARENT)
-            //(activity as MainActivity).appbar.gone()
         }
         else if (type == ControllerChangeType.PUSH_EXIT || type == ControllerChangeType.POP_EXIT) {
             colorAnimator?.cancel()
@@ -278,22 +265,6 @@ class MangaChaptersController : BaseController,
             activity?.window?.statusBarColor = activity?.getResourceColor(
                 android.R.attr.colorPrimary
             ) ?: Color.BLACK
-           // activity!!.window.clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
-
-           /* activity?.window?.statusBarColor = activity?.getResourceColor(
-                android.R.attr.colorPrimary
-            ) ?: Color.BLACK*/
-           /*(activity as MainActivity).appbar.updateLayoutParams<ConstraintLayout.LayoutParams> {
-                topMargin = 0
-            }
-            (activity as MainActivity).navigationView.updateLayoutParams<ConstraintLayout
-            .LayoutParams> {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    bottomMargin = 0
-                }
-            }*/
-            //(activity as MainActivity).appbar.background = null
-//            (activity as AppCompatActivity).supportActionBar?.show()
         }
     }
 
@@ -305,9 +276,12 @@ class MangaChaptersController : BaseController,
         if (presenter.chapters.isEmpty()) {
             adapter?.updateDataSet(listOf(ChapterItem(Chapter.createH(), presenter.manga)))
         }
-        else
-            adapter?.updateDataSet(listOf(ChapterItem(Chapter.createH(), presenter.manga))
-                + presenter.chapters)
+        else {
+            swipe_refresh.isRefreshing = false
+            adapter?.updateDataSet(
+                listOf(ChapterItem(Chapter.createH(), presenter.manga)) + presenter.chapters
+            )
+        }
     }
 
 
@@ -333,7 +307,62 @@ class MangaChaptersController : BaseController,
         //}
     }
 
-    fun openChapter(chapter: Chapter, hasAnimation: Boolean = false) {
+    override fun onItemLongClick(position: Int) {
+        val adapter = adapter ?: return
+        val item = adapter.getItem(position) ?: return
+        val itemView = getHolder(item)?.itemView ?: return
+        val popup = PopupMenu(itemView.context, itemView, Gravity.END)
+
+        // Inflate our menu resource into the PopupMenu's Menu
+        popup.menuInflater.inflate(R.menu.chapters_mat_single, popup.menu)
+
+        // Hide bookmark if bookmark
+        popup.menu.findItem(R.id.action_bookmark).isVisible = !item.bookmark
+        popup.menu.findItem(R.id.action_remove_bookmark).isVisible = item.bookmark
+
+        // Hide mark as unread when the chapter is unread
+        if (!item.read && item.last_page_read == 0) {
+            popup.menu.findItem(R.id.action_mark_as_unread).isVisible = false
+        }
+
+        // Hide mark as read when the chapter is read
+        if (item.read) {
+            popup.menu.findItem(R.id.action_mark_as_read).isVisible = false
+        }
+
+        // Set a listener so we are notified if a menu item is clicked
+        popup.setOnMenuItemClickListener { menuItem ->
+            val chapters = listOf(item)
+            when (menuItem.itemId) {
+                R.id.action_bookmark -> bookmarkChapters(chapters, true)
+                R.id.action_remove_bookmark -> bookmarkChapters(chapters, false)
+                R.id.action_mark_as_read -> markAsRead(chapters)
+                R.id.action_mark_as_unread -> markAsUnread(chapters)
+            }
+            true
+        }
+
+        // Finally show the PopupMenu
+        popup.show()
+    }
+
+    private fun bookmarkChapters(chapters: List<ChapterItem>, bookmarked: Boolean) {
+        //destroyActionModeIfNeeded()
+        presenter.bookmarkChapters(chapters, bookmarked)
+    }
+
+    private fun markAsRead(chapters: List<ChapterItem>) {
+        presenter.markChaptersRead(chapters, true)
+        if (presenter.preferences.removeAfterMarkedAsRead()) {
+            presenter.deleteChapters(chapters)
+        }
+    }
+
+    private fun markAsUnread(chapters: List<ChapterItem>) {
+        presenter.markChaptersRead(chapters, false)
+    }
+
+    private fun openChapter(chapter: Chapter, hasAnimation: Boolean = false) {
         val activity = activity ?: return
         val intent = ReaderActivity.newIntent(activity, manga!!, chapter)
         if (hasAnimation) {
@@ -342,13 +371,10 @@ class MangaChaptersController : BaseController,
         startActivity(intent)
     }
 
-    fun getStatusBarHeight(): Int {
-        var result = 0
-        val resourceId = resources!!.getIdentifier("status_bar_height", "dimen", "android")
-        if (resourceId > 0) {
-            result = resources!!.getDimensionPixelSize(resourceId)
-        }
-        return result
+    override fun onDestroyView(view: View) {
+        snack?.dismiss()
+        presenter.onDestroy()
+        super.onDestroyView(view)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -387,8 +413,6 @@ class MangaChaptersController : BaseController,
     override fun topCoverHeight(): Int = headerHeight
 
     override fun nextChapter(): Chapter? = presenter.getNextUnreadChapter()
-    override fun newestChapterDate(): Long? = presenter.getNewestChapterTime()
-    override fun lastChapter(): Float? = presenter.getLatestChapter()
     override fun mangaSource(): Source = presenter.source
 
     override fun readNextChapter() {
@@ -420,5 +444,101 @@ class MangaChaptersController : BaseController,
             presenter.deleteChapters(listOf(chapter))
         }
         else presenter.downloadChapters(listOf(chapter))
+    }
+
+    override fun tagClicked(text: String) {
+        val firstController = router.backstack.first()?.controller()
+        if (firstController is LibraryController && router.backstack.size == 2) {
+            router.handleBack()
+            firstController.search(text)
+        }
+    }
+
+    override fun showChapterFilter() {
+        ChaptersSortBottomSheet(this).show()
+    }
+
+    override fun chapterCount():Int = presenter.chapters.size
+
+    override fun favoriteManga(longPress: Boolean) {
+        val manga = presenter.manga
+        if (longPress) {
+            if (!manga.favorite) {
+                presenter.toggleFavorite()
+                showAddedSnack()
+            }
+            val categories = presenter.getCategories()
+            if (categories.isEmpty()) {
+                // no categories exist, display a message about adding categories
+                snack = view?.snack(R.string.action_add_category)
+            } else {
+                val ids = presenter.getMangaCategoryIds(manga)
+                val preselected = ids.mapNotNull { id ->
+                    categories.indexOfFirst { it.id == id }.takeIf { it != -1 }
+                }.toTypedArray()
+
+                ChangeMangaCategoriesDialog(this, listOf(manga), categories, preselected)
+                    .showDialog(router)
+            }
+        }
+        else {
+            if (presenter.toggleFavorite()) {
+                val categories = presenter.getCategories()
+                val defaultCategoryId = presenter.preferences.defaultCategory()
+                val defaultCategory = categories.find { it.id == defaultCategoryId }
+                when {
+                    defaultCategory != null -> presenter.moveMangaToCategory(manga, defaultCategory)
+                    defaultCategoryId == 0 || categories.isEmpty() -> // 'Default' or no category
+                        presenter.moveMangaToCategory(manga, null)
+                    else -> {
+                        val ids = presenter.getMangaCategoryIds(manga)
+                        val preselected = ids.mapNotNull { id ->
+                            categories.indexOfFirst { it.id == id }.takeIf { it != -1 }
+                        }.toTypedArray()
+
+                        ChangeMangaCategoriesDialog(
+                            this,
+                            listOf(manga),
+                            categories,
+                            preselected
+                        ).showDialog(router)
+                    }
+                }
+                showAddedSnack()
+            } else {
+                showRemovedSnack()
+            }
+        }
+    }
+
+    private fun showAddedSnack() {
+        val view = view ?: return
+        snack?.dismiss()
+        snack = view.snack(view.context.getString(R.string.manga_added_library))
+    }
+
+    private fun showRemovedSnack() {
+        val view = view ?: return
+        snack?.dismiss()
+        snack = view.snack(
+            view.context.getString(R.string.manga_removed_library),
+            Snackbar.LENGTH_INDEFINITE
+        ) {
+            setAction(R.string.action_undo) {
+                presenter.setFavorite(true)
+            }
+            addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
+                override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+                    super.onDismissed(transientBottomBar, event)
+                    if (!presenter.manga.favorite) presenter.confirmDeletion()
+                }
+            })
+        }
+        (activity as? MainActivity)?.setUndoSnackBar(snack, fab_favorite)
+    }
+
+    override fun updateCategoriesForMangas(mangas: List<Manga>, categories: List<Category>) {
+        val manga = mangas.firstOrNull() ?: return
+        presenter.moveMangaToCategories(manga, categories)
     }
 }

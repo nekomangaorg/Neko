@@ -64,8 +64,10 @@ class ChaptersAdapter(
         fun readNextChapter()
         fun downloadChapter(position: Int)
         fun topCoverHeight(): Int
-        fun newestChapterDate(): Long?
-        fun lastChapter(): Float?
+        fun chapterCount(): Int
+        fun tagClicked(text: String)
         fun mangaSource(): Source
+        fun showChapterFilter()
+        fun favoriteManga(longPress: Boolean)
     }
 }

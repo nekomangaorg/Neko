@@ -252,6 +252,12 @@
         <item name="android:letterSpacing">0.0</item>
     </style>
 
+    <style name="Theme.Widget.Button.TextButton" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:textAllCaps">false</item>
+        <item name="rippleColor">@color/fullRippleColor</item>
+        <item name="android:textColor">?colorAccent</item>
+    </style>
+
     <style name="Theme.Widget.CustomImageButton">
         <item name="android:background">@drawable/round_ripple</item>
         <item name="android:clickable">true</item>

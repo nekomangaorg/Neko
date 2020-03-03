@@ -1,44 +1,63 @@
 package eu.kanade.tachiyomi.ui.manga
 
+import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
+import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
+import eu.kanade.tachiyomi.data.download.model.DownloadQueue
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.Source
+import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.Date
+import kotlin.coroutines.CoroutineContext
 
 class MangaPresenter(private val controller: MangaChaptersController,
     val manga: Manga,
     val source: Source,
     val preferences: PreferencesHelper = Injekt.get(),
+    private val coverCache: CoverCache = Injekt.get(),
     private val db: DatabaseHelper = Injekt.get(),
-    private val downloadManager: DownloadManager = Injekt.get()) {
+    private val downloadManager: DownloadManager = Injekt.get()):
+    CoroutineScope,
+    DownloadQueue.DownloadListener {
 
+    override var coroutineContext:CoroutineContext = Job() + Dispatchers.Default
 
     var isLockedFromSearch = false
     var hasRequested = false
 
     var chapters:List<ChapterItem> = emptyList()
         private set
+
     fun onCreate() {
         isLockedFromSearch = SecureActivityDelegate.shouldBeLocked()
+        downloadManager.addListener(this)
         if (!manga.initialized)
             fetchMangaFromSource()
         updateChapters()
         controller.updateChapters(this.chapters)
+    }
+
+    fun onDestroy() {
+        downloadManager.removeListener(this)
     }
 
     fun fetchMangaFromSource() {
@@ -66,6 +85,24 @@ class MangaPresenter(private val controller: MangaChaptersController,
         }
     }
 
+    fun fetchChapters() {
+        launch {
+            getChapters()
+            withContext(Dispatchers.Main) { controller.updateChapters(chapters) }
+        }
+    }
+
+    private suspend fun getChapters() {
+        val chapters = withContext(Dispatchers.IO) {
+            db.getChapters(manga).executeAsBlocking().map { it.toModel() }
+        }
+        // Store the last emission
+        this.chapters = applyChapterFilters(chapters)
+
+        // Find downloaded chapters
+        setDownloadedChapters(chapters)
+    }
+
     private fun updateChapters(fetchedChapters: List<Chapter>? = null) {
         val chapters = (fetchedChapters ?:
         db.getChapters(manga).executeAsBlocking()).map { it.toModel() }
@@ -75,17 +112,6 @@ class MangaPresenter(private val controller: MangaChaptersController,
 
         // Find downloaded chapters
         setDownloadedChapters(chapters)
-
-        /*
-                        // Emit the number of chapters to the info tab.
-                        chapterCountRelay.call(chapters.maxBy { it.chapter_number }?.chapter_number
-                            ?: 0f)
-
-                        // Emit the upload date of the most recent chapter
-                        lastUpdateRelay.call(
-                            Date(chapters.maxBy { it.date_upload }?.date_upload
-                                ?: 0)
-                        )*/
     }
 
     /**
@@ -100,6 +126,14 @@ class MangaPresenter(private val controller: MangaChaptersController,
             }
         }
     }
+
+    override fun updateDownload(download: Download) {
+        chapters.find { it.id == download.chapter.id }?.download = download
+        launch(Dispatchers.Main) {
+            controller.updateChapterDownload(download)
+        }
+    }
+
     /**
      * Converts a chapter from the database to an extended model, allowing to store new fields.
      */
@@ -237,9 +271,11 @@ class MangaPresenter(private val controller: MangaChaptersController,
      * @param chapters the list of chapters to delete.
      */
     fun deleteChapters(chapters: List<ChapterItem>) {
-         deleteChaptersInternal(chapters)
+        deleteChaptersInternal(chapters)
 
-        setDownloadedChapters(chapters)
+        chapters.forEach { chapter ->
+            this.chapters.find { it.id == chapter.id }?.download?.status = Download.NOT_DOWNLOADED
+        }
 
         controller.updateChapters(this.chapters)
          //  if (onlyDownloaded()) refreshChapters() }
@@ -258,8 +294,46 @@ class MangaPresenter(private val controller: MangaChaptersController,
     }
 
     fun refreshAll() {
-        fetchMangaFromSource()
-        fetchChaptersFromSource()
+        launch {
+            var mangaError: java.lang.Exception? = null
+            var chapterError: java.lang.Exception? = null
+            val chapters = async(Dispatchers.IO) {
+                try {
+                    source.fetchChapterList(manga).toBlocking().single()
+
+                } catch (e: Exception) {
+                    chapterError = e
+                    emptyList<SChapter>()
+                } ?: emptyList()
+            }
+            val thumbnailUrl = manga.thumbnail_url
+            val nManga = async(Dispatchers.IO) {
+                try {
+                    source.fetchMangaDetails(manga).toBlocking().single()
+                } catch (e: java.lang.Exception) {
+                    mangaError = e
+                    null
+                }
+            }
+
+            val networkManga = nManga.await()
+            if (networkManga != null) {
+                manga.copyFrom(networkManga)
+                manga.initialized = true
+                db.insertManga(manga).executeAsBlocking()
+                if (thumbnailUrl != networkManga.thumbnail_url)
+                    MangaImpl.setLastCoverFetch(manga.id!!, Date().time)
+            }
+            val finChapters = chapters.await()
+            if (finChapters.isNotEmpty()) {
+                syncChaptersWithSource(db, finChapters, manga, source)
+                withContext(Dispatchers.IO) {  updateChapters() }
+            }
+            if (chapterError == null)
+                withContext(Dispatchers.Main) { controller.updateChapters(this@MangaPresenter.chapters) }
+            if (mangaError != null)
+                withContext(Dispatchers.Main) { controller.showError(trimException(mangaError!!)) }
+        }
     }
 
     /**
@@ -268,12 +342,12 @@ class MangaPresenter(private val controller: MangaChaptersController,
     fun fetchChaptersFromSource() {
         hasRequested = true
 
-        GlobalScope.launch(Dispatchers.IO) {
+        launch(Dispatchers.IO) {
             val chapters = try {
                 source.fetchChapterList(manga).toBlocking().single()
             }
             catch(e: Exception) {
-                controller.showError(trimException(e))
+                withContext(Dispatchers.Main) { controller.showError(trimException(e)) }
                 return@launch
             } ?: listOf()
             try {
@@ -290,5 +364,109 @@ class MangaPresenter(private val controller: MangaChaptersController,
 
     private fun trimException(e: java.lang.Exception): String {
         return e.message?.split(": ")?.drop(1)?.joinToString(": ") ?: "Error"
+    }
+
+    /**
+     * Bookmarks the given list of chapters.
+     * @param selectedChapters the list of chapters to bookmark.
+     */
+    fun bookmarkChapters(selectedChapters: List<ChapterItem>, bookmarked: Boolean) {
+        launch(Dispatchers.IO) {
+            selectedChapters.forEach {
+                it.bookmark = bookmarked
+            }
+            db.updateChaptersProgress(selectedChapters).executeAsBlocking()
+            withContext(Dispatchers.Main) { controller.updateChapters(chapters) }
+        }
+    }
+
+    /**
+     * Mark the selected chapter list as read/unread.
+     * @param selectedChapters the list of selected chapters.
+     * @param read whether to mark chapters as read or unread.
+     */
+    fun markChaptersRead(selectedChapters: List<ChapterItem>, read: Boolean) {
+        launch(Dispatchers.IO) {
+            selectedChapters.forEach {
+                it.read = read
+                if (!read) {
+                    it.last_page_read = 0
+                    it.pages_left = 0
+                }
+            }
+            db.updateChaptersProgress(selectedChapters).executeAsBlocking()
+            withContext(Dispatchers.Main) { controller.updateChapters(chapters) }
+        }
+    }
+
+    /**
+     * Reverses the sorting and requests an UI update.
+     */
+    fun setSortOrder(desend: Boolean) {
+        manga.setChapterOrder(if (desend) Manga.SORT_ASC else Manga.SORT_DESC)
+        db.updateFlags(manga).executeAsBlocking()
+        updateChapters()
+        controller.updateChapters(chapters)
+    }
+
+    fun toggleFavorite(): Boolean {
+        manga.favorite = !manga.favorite
+        db.insertManga(manga).executeAsBlocking()
+        controller.updateHeader()
+        return manga.favorite
+    }
+
+    /**
+     * Get user categories.
+     *
+     * @return List of categories, not including the default category
+     */
+    fun getCategories(): List<Category> {
+        return db.getCategories().executeAsBlocking()
+    }
+
+    /**
+     * Move the given manga to the category.
+     *
+     * @param manga the manga to move.
+     * @param category the selected category, or null for default category.
+     */
+    fun moveMangaToCategory(manga: Manga, category: Category?) {
+        moveMangaToCategories(manga, listOfNotNull(category))
+    }
+
+    /**
+     * Move the given manga to categories.
+     *
+     * @param manga the manga to move.
+     * @param categories the selected categories.
+     */
+    fun moveMangaToCategories(manga: Manga, categories: List<Category>) {
+        val mc = categories.filter { it.id != 0 }.map { MangaCategory.create(manga, it) }
+        db.setMangaCategories(mc, listOf(manga))
+    }
+
+    /**
+     * Gets the category id's the manga is in, if the manga is not in a category, returns the default id.
+     *
+     * @param manga the manga to get categories from.
+     * @return Array of category ids the manga is in, if none returns default id
+     */
+    fun getMangaCategoryIds(manga: Manga): Array<Int> {
+        val categories = db.getCategoriesForManga(manga).executeAsBlocking()
+        return categories.mapNotNull { it.id }.toTypedArray()
+    }
+
+    fun confirmDeletion() {
+        coverCache.deleteFromCache(manga.thumbnail_url)
+        db.resetMangaInfo(manga).executeAsBlocking()
+        downloadManager.deleteManga(manga, source)
+    }
+
+    fun setFavorite(favorite: Boolean) {
+        if (manga.favorite == favorite) {
+            return
+        }
+        toggleFavorite()
     }
 }
