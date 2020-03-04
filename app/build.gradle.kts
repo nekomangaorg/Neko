@@ -24,8 +24,8 @@ android {
         minSdkVersion(21)
         targetSdkVersion(29)
         applicationId = "tachiyomi.mangadex"
-        versionCode = 45
-        versionName = "1.6.3"
+        versionCode = 46
+        versionName = "1.6.4"
         multiDexEnabled = true
         setProperty("archivesBaseName", "Neko")
         buildConfigField("String", "BUILD_TIME", "\"${BUILD_TIME}\"")

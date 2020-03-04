@@ -2,18 +2,40 @@
 <changelog bulletedList="true">
     <changelogversion
         changeDate=""
+        versionName="v1.6.4">
+        <changelogtext>Added recommendations tab in manga info (alpha) Requires download a json and
+            loading it manually for now
+        </changelogtext>
+        <changelogtext>add setting to manage notifications</changelogtext>
+        <changelogtext>refresh webtoon adapter on image property changes</changelogtext>
+        <changelogtext>minor code cleanup</changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
         versionName="v1.6.3">
         <changelogtext>Added setting to use low quality covers in browse/search</changelogtext>
-        <changelogtext>Added setting to to use non logged in network for chapter downloads to prevent marking website chapter as read</changelogtext>
-        <changelogtext>Fix bug with mdlist where unfollowing a manga was not resetting the chapter count</changelogtext>
-        <changelogtext>Fix bug with mdlist where switching status then refreshing was showing the old status</changelogtext>
-        <changelogtext>Fix bug with mdlist where reading a chapter was updating the tracking tab for unfollowed manga</changelogtext>
-        <changelogtext>Fix bug where external link title was replacing the EDIT button for untracked manga</changelogtext>
+        <changelogtext>Added setting to to use non logged in network for chapter downloads to
+            prevent marking website chapter as read
+        </changelogtext>
+        <changelogtext>Fix bug with mdlist where unfollowing a manga was not resetting the chapter
+            count
+        </changelogtext>
+        <changelogtext>Fix bug with mdlist where switching status then refreshing was showing the
+            old status
+        </changelogtext>
+        <changelogtext>Fix bug with mdlist where reading a chapter was updating the tracking tab for
+            unfollowed manga
+        </changelogtext>
+        <changelogtext>Fix bug where external link title was replacing the EDIT button for untracked
+            manga
+        </changelogtext>
     </changelogversion>
     <changelogversion
         changeDate=""
         versionName="v1.6.2.1">
-        <changelogtext>Fix saved file name swapping chapter and volume so saved files are always in correct chapter order</changelogtext>
+        <changelogtext>Fix saved file name swapping chapter and volume so saved files are always in
+            correct chapter order
+        </changelogtext>
     </changelogversion>
     <changelogversion
         changeDate=""
@@ -29,13 +51,17 @@
         <changelogtext>Filter out tmp folders from download badges</changelogtext>
         <changelogtext>Moved the follows screen into the browse screen</changelogtext>
         <changelogtext>Moved edit categories into library settings</changelogtext>
-        <changelogtext>Removed ability to set cover since it gets overridden on manga refresh</changelogtext>
+        <changelogtext>Removed ability to set cover since it gets overridden on manga refresh
+        </changelogtext>
     </changelogversion>
     <changelogversion
         changeDate=""
         versionName="v1.6.1">
-        <changelogtext>Add automatic Mangadex List in tracking, note you must be following a manga for chapters to update</changelogtext>
-        <changelogtext>Added external links from mangadex for animeplanet and mangaupdates</changelogtext>
+        <changelogtext>Add automatic Mangadex List in tracking, note you must be following a manga
+            for chapters to update
+        </changelogtext>
+        <changelogtext>Added external links from mangadex for animeplanet and mangaupdates
+        </changelogtext>
         <changelogtext>Renamed tracking tab to external</changelogtext>
         <changelogtext>Removed Shikimori tracker</changelogtext>
         <changelogtext>Removed display/sorting mode dialog and made them submenus</changelogtext>
@@ -74,7 +100,9 @@
         versionName="v1.5.4">
         <changelogtext>Switched back to .org urls</changelogtext>
         <changelogtext>fix some dialog bugs where ok button was missing</changelogtext>
-        <changelogtext>fix dialog bug where you couldnt select no category to add to default category</changelogtext>
+        <changelogtext>fix dialog bug where you couldnt select no category to add to default
+            category
+        </changelogtext>
         <changelogtext>adjust splashscreen for neko</changelogtext>
         <changelogtext>use cache to complete downloads</changelogtext>
         <changelogtext>recently read goes back 50 years</changelogtext>
@@ -90,7 +118,8 @@
         <changelogtext>switched to long press select between like j2k</changelogtext>
         <changelogtext>new splash screen</changelogtext>
         <changelogtext>changed some images to webp</changelogtext>
-        <changelogtext>lower rate limit to 3 per a second to help reduce load on mangadex</changelogtext>
+        <changelogtext>lower rate limit to 3 per a second to help reduce load on mangadex
+        </changelogtext>
         <changelogtext></changelogtext>
         <changelogtext></changelogtext>
     </changelogversion>
@@ -109,8 +138,11 @@
     <changelogversion
         changeDate=""
         versionName="v1.5.0">
-        <changelogtext>Updated domain to .cc since most of the old chapters now work!</changelogtext>
-        <changelogtext>added ability to sync read and reread follows from mangadex into your library</changelogtext>
+        <changelogtext>Updated domain to .cc since most of the old chapters now work!
+        </changelogtext>
+        <changelogtext>added ability to sync read and reread follows from mangadex into your
+            library
+        </changelogtext>
         <changelogtext>minor clean up of code</changelogtext>
     </changelogversion>
     <changelogversion
@@ -119,7 +151,8 @@
         <changelogtext>Enhanced Notifications for library updates</changelogtext>
         <changelogtext>android 10 style share images/ share manga page</changelogtext>
         <changelogtext>split general settings into general and library</changelogtext>
-        <changelogtext>fix bug where marked as read was not updating the DOWNLOADED text</changelogtext>
+        <changelogtext>fix bug where marked as read was not updating the DOWNLOADED text
+        </changelogtext>
         <changelogtext>improved loading speeds when skipping pages in a chapter</changelogtext>
         <changelogtext>file format changes</changelogtext>
         <changelogtext>fix bug in custom downloads dialog for amoled</changelogtext>
