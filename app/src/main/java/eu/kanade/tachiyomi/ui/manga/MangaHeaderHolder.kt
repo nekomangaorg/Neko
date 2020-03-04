@@ -162,6 +162,7 @@ class MangaHeaderHolder(
         }))
         manga_source.text = adapter.coverListener?.mangaSource()?.toString()
 
+        if (!manga.initialized) return
         GlideApp.with(view.context).load(manga)
             .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
             .signature(ObjectKey(MangaImpl.getLastCoverFetch(manga.id!!).toString()))

@@ -200,8 +200,6 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
             setFullCoverToThumb()
         }
         container?.setOnApplyWindowInsetsListener { _, insets ->
-            if (MainActivity.usingBottomNav)
-                return@setOnApplyWindowInsetsListener insets
             if (resources?.configuration?.orientation == Configuration.ORIENTATION_LANDSCAPE) {
                 fab_favorite?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                     bottomMargin = fabBaseMarginBottom + insets.systemWindowInsetBottom

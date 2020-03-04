@@ -677,6 +677,8 @@
     <string name="information_no_recent">No recent chapters</string>
     <string name="information_no_recent_manga">No recently read manga</string>
     <string name="information_empty_library">Your library is empty, add series to your library from the catalogues.</string>
+    <string name="information_empty_library_filtered">No matches found for your current
+        filters</string>
     <string name="information_empty_category">You have no categories. Hit the plus button to create one for organizing your library.</string>
 
     <!-- Download Notification -->

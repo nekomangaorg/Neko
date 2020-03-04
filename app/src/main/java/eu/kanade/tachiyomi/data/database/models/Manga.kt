@@ -3,7 +3,8 @@ package eu.kanade.tachiyomi.data.database.models
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
-import uy.kohesive.injekt.injectLazy
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import java.util.Locale
 
 interface Manga : SManga {
@@ -35,45 +36,60 @@ interface Manga : SManga {
     }
 
     fun mangaType(): Int {
-        val sourceManager: SourceManager by injectLazy()
+        val sourceName = Injekt.get<SourceManager>().getOrStub(source).name
         val currentTags = currentGenres()?.split(",")?.map { it.trim().toLowerCase(Locale.US) }
         return if (currentTags?.any
             { tag ->
                 tag.startsWith("english") || tag == "comic"
-            } == true)
+            } == true || isComicSource(sourceName))
             TYPE_COMIC
         else if (currentTags?.any
             { tag ->
                 tag.startsWith("chinese") || tag == "manhua"
-            } == true)
+            } == true ||
+            sourceName.contains("manhua", true))
             TYPE_MANHUA
         else if (currentTags?.any
             { tag ->
                 tag == "long strip" || tag == "manhwa" ||
                     tag.contains("webtoon")
-            } == true ||
-            sourceManager.getOrStub(source).name.contains("webtoon", true))
+            } == true || isWebtoonSource(sourceName))
             TYPE_MANHWA
         else TYPE_MANGA
     }
 
     fun defaultReaderType(): Int {
-        val sourceManager: SourceManager by injectLazy()
+        val sourceName = Injekt.get<SourceManager>().getOrStub(source).name
         val currentTags = currentGenres()?.split(",")?.map { it.trim().toLowerCase(Locale.US) }
         return if (currentTags?.any
             { tag ->
                 tag == "long strip" || tag == "manhwa" ||
                     tag.contains("webtoon")
-            } == true ||
-            sourceManager.getOrStub(source).name.contains("webtoon", true))
+            } == true || isWebtoonSource(sourceName))
             ReaderActivity.WEBTOON
         else if (currentTags?.any
             { tag ->
                 tag.startsWith("chinese") || tag == "manhua" ||
                     tag.startsWith("english") || tag == "comic"
-            } == true)
+            } == true || isComicSource(sourceName) ||
+            sourceName.contains("manhua", true) )
             ReaderActivity.LEFT_TO_RIGHT
         else 0
+    }
+
+    fun isWebtoonSource(sourceName: String): Boolean {
+        return sourceName.contains("webtoon", true) ||
+            sourceName.contains("manwha", true) ||
+            sourceName.contains("toonily", true)
+    }
+
+    fun isComicSource(sourceName: String): Boolean {
+        return sourceName.contains("gunnerkrigg", true) ||
+            sourceName.contains("gunnerkrigg", true) ||
+            sourceName.contains("dilbert", true) ||
+            sourceName.contains("cyanide", true) ||
+            sourceName.contains("xkcd", true) ||
+            sourceName.contains("tapastic", true)
     }
 
     // Used to display the chapter's title one way or another

@@ -44,6 +44,7 @@ import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
+import eu.kanade.tachiyomi.ui.base.controller.NoToolbarElevationController
 import eu.kanade.tachiyomi.ui.catalogue.CatalogueController
 import eu.kanade.tachiyomi.ui.library.ChangeMangaCategoriesDialog
 import eu.kanade.tachiyomi.ui.library.LibraryController
@@ -75,7 +76,8 @@ class MangaChaptersController : BaseController,
     FlexibleAdapter.OnItemClickListener,
     FlexibleAdapter.OnItemLongClickListener,
     ChaptersAdapter.MangaHeaderInterface,
-    ChangeMangaCategoriesDialog.Listener {
+    ChangeMangaCategoriesDialog.Listener,
+    NoToolbarElevationController {
 
     constructor(manga: Manga?,
         fromCatalogue: Boolean = false,
@@ -148,11 +150,11 @@ class MangaChaptersController : BaseController,
         val array = view.context.obtainStyledAttributes(attrsArray)
         val appbarHeight = array.getDimensionPixelSize(0, 0)
         array.recycle()
-        val offset = 20.dpToPx
+        val offset = 10.dpToPx
 
         recycler.doOnApplyWindowInsets { v, insets, _ ->
-            headerHeight = appbarHeight + insets.systemWindowInsetTop + offset
-            swipe_refresh.setProgressViewOffset(false, (-40).dpToPx, headerHeight)
+            headerHeight = appbarHeight + insets.systemWindowInsetTop
+            swipe_refresh.setProgressViewOffset(false, (-40).dpToPx, headerHeight + offset)
             (recycler.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder)
                 ?.setTopHeight(headerHeight)
             fast_scroller?.updateLayoutParams<ViewGroup.MarginLayoutParams>  {
@@ -169,15 +171,18 @@ class MangaChaptersController : BaseController,
                 val atTop = !recycler.canScrollVertically(-1)
                 if ((!atTop && !toolbarIsColored) || (atTop && toolbarIsColored)) {
                     toolbarIsColored = !atTop
-                    colorAnimator?.cancel()
                     val color =
                         coverColor ?: activity!!.getResourceColor(android.R.attr.colorPrimary)
-                    val colorFrom = ColorUtils.setAlphaComponent(
-                        color, if (toolbarIsColored) 0 else 255
-                    )
+                    val colorFrom =
+                        if (colorAnimator?.isRunning == true) activity?.window?.statusBarColor
+                            ?: color
+                        else ColorUtils.setAlphaComponent(
+                            color, if (toolbarIsColored) 0 else 255
+                        )
                     val colorTo = ColorUtils.setAlphaComponent(
                         color, if (toolbarIsColored) 255 else 0
                     )
+                    colorAnimator?.cancel()
                     colorAnimator = ValueAnimator.ofObject(
                         ArgbEvaluator(), colorFrom, colorTo
                     )
@@ -192,6 +197,15 @@ class MangaChaptersController : BaseController,
                 }
             }
         }
+        setPaletteColor()
+
+        swipe_refresh.setOnRefreshListener {
+            presenter.refreshAll()
+        }
+    }
+
+    fun setPaletteColor() {
+        val view = view ?: return
         GlideApp.with(view.context).load(manga)
             .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
             .signature(ObjectKey(MangaImpl.getLastCoverFetch(manga!!.id!!).toString()))
@@ -224,19 +238,17 @@ class MangaChaptersController : BaseController,
 
                 override fun onLoadCleared(placeholder: Drawable?) { }
             })
-
-        swipe_refresh.setOnRefreshListener {
-            presenter.refreshAll()
-        }
     }
 
     override fun onActivityResumed(activity: Activity) {
         super.onActivityResumed(activity)
+        presenter.isLockedFromSearch = SecureActivityDelegate.shouldBeLocked()
+        presenter.headerItem.isLocked = presenter.isLockedFromSearch
         presenter.fetchChapters()
     }
 
     fun showError(message: String) {
-        swipe_refresh?.isRefreshing = false
+        swipe_refresh?.isRefreshing = presenter.isLoading
         view?.snack(message)
     }
 
@@ -275,25 +287,25 @@ class MangaChaptersController : BaseController,
 
     fun updateHeader() {
         if (presenter.chapters.isEmpty()) {
-            adapter?.updateDataSet(listOf(ChapterItem(Chapter.createH(), presenter.manga)))
+            adapter?.updateDataSet(listOf(presenter.headerItem))
         }
         else {
-            swipe_refresh?.isRefreshing = false
+            swipe_refresh?.isRefreshing = presenter.isLoading
             adapter?.updateDataSet(
-                listOf(ChapterItem(Chapter.createH(), presenter.manga)) + presenter.chapters
+                listOf(ChapterItem(presenter.headerItem, presenter.manga)) + presenter.chapters
             )
         }
     }
 
 
     fun updateChapters(chapters: List<ChapterItem>) {
-        swipe_refresh?.isRefreshing = false
+        swipe_refresh?.isRefreshing = presenter.isLoading
         if (presenter.chapters.isEmpty() && fromCatalogue && !presenter.hasRequested) {
             launchUI { swipe_refresh?.isRefreshing = true }
             presenter.fetchChaptersFromSource()
         }
-        adapter?.updateDataSet(listOf(ChapterItem(Chapter.createH(), presenter.manga)) + chapters)
-    }
+        adapter?.updateDataSet(listOf(presenter.headerItem) + chapters)
+}
 
     override fun onItemClick(view: View?, position: Int): Boolean {
         val adapter = adapter ?: return false
@@ -442,10 +454,15 @@ class MangaChaptersController : BaseController,
         val adapter = adapter ?: return
         val chapter = adapter.getItem(position) ?: return
         if (chapter.isHeader) return
-        if (chapter.status != Download.NOT_DOWNLOADED) {
+        if (chapter.status != Download.NOT_DOWNLOADED && chapter.status != Download.ERROR) {
             presenter.deleteChapters(listOf(chapter))
         }
-        else presenter.downloadChapters(listOf(chapter))
+        else {
+            val isError = chapter.status == Download.ERROR
+            presenter.downloadChapters(listOf(chapter))
+            if (isError)
+                presenter.restartDownloads()
+        }
     }
 
     override fun tagClicked(text: String) {
@@ -463,6 +480,10 @@ class MangaChaptersController : BaseController,
     override fun chapterCount():Int = presenter.chapters.size
 
     override fun favoriteManga(longPress: Boolean) {
+        if (presenter.isLockedFromSearch) {
+            SecureActivityDelegate.promptLockIfNeeded(activity)
+            return
+        }
         val manga = presenter.manga
         if (longPress) {
             if (!manga.favorite) {

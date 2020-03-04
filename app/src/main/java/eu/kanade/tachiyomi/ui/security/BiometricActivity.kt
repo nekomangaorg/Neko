@@ -13,12 +13,14 @@ class BiometricActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val fromSearch = intent.getBooleanExtra("fromSearch", false)
         val biometricPrompt = BiometricPrompt(this, executor, object : BiometricPrompt
         .AuthenticationCallback() {
 
             override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
                 super.onAuthenticationError(errorCode, errString)
-                finishAffinity()
+                if (fromSearch) finish()
+                else finishAffinity()
             }
 
             override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {

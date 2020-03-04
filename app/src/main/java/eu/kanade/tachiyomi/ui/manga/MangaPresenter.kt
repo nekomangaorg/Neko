@@ -5,12 +5,15 @@ import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Chapter
+import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.download.model.DownloadQueue
+import eu.kanade.tachiyomi.data.library.LibraryServiceListener
+import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.Source
@@ -21,7 +24,6 @@ import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.system.launchUI
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
@@ -39,19 +41,25 @@ class MangaPresenter(private val controller: MangaChaptersController,
     private val db: DatabaseHelper = Injekt.get(),
     private val downloadManager: DownloadManager = Injekt.get()):
     CoroutineScope,
-    DownloadQueue.DownloadListener {
+    DownloadQueue.DownloadListener,
+    LibraryServiceListener   {
 
     override var coroutineContext:CoroutineContext = Job() + Dispatchers.Default
 
     var isLockedFromSearch = false
     var hasRequested = false
+    var isLoading = false
 
     var chapters:List<ChapterItem> = emptyList()
         private set
 
+    var headerItem = ChapterItem(Chapter.createH(), manga)
+
     fun onCreate() {
         isLockedFromSearch = SecureActivityDelegate.shouldBeLocked()
+        headerItem.isLocked = isLockedFromSearch
         downloadManager.addListener(this)
+        LibraryUpdateService.setListener(this)
         if (!manga.initialized) {
             controller.updateHeader()
             launchUI {
@@ -67,31 +75,7 @@ class MangaPresenter(private val controller: MangaChaptersController,
 
     fun onDestroy() {
         downloadManager.removeListener(this)
-    }
-
-    fun fetchMangaFromSource() {
-        GlobalScope.launch(Dispatchers.IO) {
-            withContext(Dispatchers.Main) {
-                controller.setRefresh(true)
-            }
-            val thumbnailUrl = manga.thumbnail_url
-            val networkManga = try {
-                source.fetchMangaDetails(manga).toBlocking().single()
-            } catch (e: java.lang.Exception) {
-                controller.showError(trimException(e))
-                return@launch
-            }
-            if (networkManga != null) {
-                manga.copyFrom(networkManga)
-                manga.initialized = true
-                db.insertManga(manga).executeAsBlocking()
-                if (thumbnailUrl != networkManga.thumbnail_url)
-                    MangaImpl.setLastCoverFetch(manga.id!!, Date().time)
-                withContext(Dispatchers.Main) {
-                    controller.updateHeader()
-                }
-            }
-        }
+        LibraryUpdateService.removeListener(this)
     }
 
     fun fetchChapters() {
@@ -275,6 +259,11 @@ class MangaPresenter(private val controller: MangaChaptersController,
         downloadManager.downloadChapters(manga, chapters)
     }
 
+    fun restartDownloads() {
+        if (downloadManager.isPaused())
+            downloadManager.startDownloads()
+    }
+
     /**
      * Deletes the given list of chapter.
      * @param chapters the list of chapters to delete.
@@ -304,6 +293,7 @@ class MangaPresenter(private val controller: MangaChaptersController,
 
     fun refreshAll() {
         launch {
+            isLoading = true
             var mangaError: java.lang.Exception? = null
             var chapterError: java.lang.Exception? = null
             val chapters = async(Dispatchers.IO) {
@@ -338,6 +328,7 @@ class MangaPresenter(private val controller: MangaChaptersController,
                 syncChaptersWithSource(db, finChapters, manga, source)
                 withContext(Dispatchers.IO) {  updateChapters() }
             }
+            isLoading = false
             if (chapterError == null)
                 withContext(Dispatchers.Main) { controller.updateChapters(this@MangaPresenter.chapters) }
             if (mangaError != null)
@@ -350,6 +341,7 @@ class MangaPresenter(private val controller: MangaChaptersController,
      */
     fun fetchChaptersFromSource() {
         hasRequested = true
+        isLoading = true
 
         launch(Dispatchers.IO) {
             val chapters = try {
@@ -359,6 +351,7 @@ class MangaPresenter(private val controller: MangaChaptersController,
                 withContext(Dispatchers.Main) { controller.showError(trimException(e)) }
                 return@launch
             } ?: listOf()
+            isLoading = false
             try {
                 syncChaptersWithSource(db, chapters, manga, source)
 
@@ -479,5 +472,11 @@ class MangaPresenter(private val controller: MangaChaptersController,
             return
         }
         toggleFavorite()
+    }
+
+    override fun onUpdateManga(manga: LibraryManga) {
+        if (manga.id == this.manga.id) {
+            fetchChapters()
+        }
     }
 }

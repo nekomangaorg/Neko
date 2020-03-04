@@ -80,8 +80,6 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
     private var currentGestureDelegate:SwipeGestureInterface? = null
     private lateinit var gestureDetector:GestureDetectorCompat
 
-    protected open var trulyGoBack = false
-
     private var secondaryDrawer: ViewGroup? = null
 
     private var snackBar:Snackbar? = null
@@ -112,7 +110,6 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             Timber.e(e, "Exception when creating webview at start")
         }
         super.onCreate(savedInstanceState)
-        if (trulyGoBack) return
 
         // Do not let the launcher create a new activity http://stackoverflow.com/questions/16283079
         if (!isTaskRoot) {
@@ -314,8 +311,6 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                                          container: ViewGroup, handler: ControllerChangeHandler) {
 
                 syncActivityViewWithController(to, from)
-                if (to !is DialogController)
-                    navigationView.visibility = if (router.backstackSize > 1) View.GONE else View.VISIBLE
             }
 
             override fun onChangeCompleted(to: Controller?, from: Controller?, isPush: Boolean,
@@ -394,7 +389,6 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
     override fun onResume() {
         super.onResume()
         // setting in case someone comes from the search activity to main
-        usingBottomNav = true
         getExtensionUpdates()
         DownloadService.callListeners()
     }
@@ -501,10 +495,10 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
     }
 
     override fun onBackPressed() {
-        if (trulyGoBack) {
+        /*if (trulyGoBack) {
             super.onBackPressed()
             return
-        }
+        }*/
         /*if (drawer.isDrawerOpen(GravityCompat.START) || drawer.isDrawerOpen(GravityCompat.END)) {
             drawer.closeDrawers()
         } else  {*/
@@ -560,17 +554,6 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         }
         drawerArrow?.progress = 1f
 
-       /* if (from is TabbedController) {
-            from.cleanupTabs(tabs)
-        }
-        if (to is TabbedController) {
-            tabAnimator.expand()
-            to.configureTabs(tabs)
-        } else {
-            tabAnimator.collapse()
-            tabs.setupWithViewPager(null)
-        }*/
-
         currentGestureDelegate = to as? SwipeGestureInterface
 
         /*if (from is SecondaryDrawerController) {
@@ -593,6 +576,9 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         } else {
             appbar.enableElevation()
         }
+
+        if (to !is DialogController)
+            navigationView.visibility = if (router.backstackSize > 1) View.GONE else View.VISIBLE
     }
 
     override fun downloadStatusChanged(downloading: Boolean) {
@@ -672,8 +658,6 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         const val INTENT_SEARCH_QUERY = "query"
         const val INTENT_SEARCH_FILTER = "filter"
 
-        var usingBottomNav = true
-            internal set
     }
 }
 

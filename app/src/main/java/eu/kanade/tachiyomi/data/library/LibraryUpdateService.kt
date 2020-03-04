@@ -196,8 +196,9 @@ class LibraryUpdateService(
             this.listener = listener
         }
 
-        fun removeListener() {
-            listener = null
+        fun removeListener(listener: LibraryServiceListener) {
+            if (this.listener == listener)
+                this.listener = null
         }
     }
 

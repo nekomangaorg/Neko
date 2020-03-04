@@ -299,7 +299,7 @@ open class LibraryController(
     override fun onDestroyView(view: View) {
         pagerAdapter?.onDestroy()
         DownloadService.removeListener(this)
-        LibraryUpdateService.removeListener()
+        LibraryUpdateService.removeListener(this)
         pagerAdapter = null
         actionMode = null
         tabsVisibilitySubscription?.unsubscribe()

@@ -1,10 +1,8 @@
 package eu.kanade.tachiyomi.widget
 
-import android.animation.ObjectAnimator
 import android.animation.StateListAnimator
 import android.content.Context
 import android.util.AttributeSet
-import com.google.android.material.R
 import com.google.android.material.appbar.AppBarLayout
 
 class ElevationAppBarLayout @JvmOverloads constructor(
@@ -13,29 +11,24 @@ class ElevationAppBarLayout @JvmOverloads constructor(
 ) : AppBarLayout(context, attrs) {
 
     private var origStateAnimator: StateListAnimator? = null
+    private var origElevation: Float
 
     init {
         origStateAnimator = stateListAnimator
+        origElevation = elevation
     }
 
     fun enableElevation() {
-        stateListAnimator = origStateAnimator
+        if (stateListAnimator == null) {
+            stateListAnimator = origStateAnimator
+            elevation = origElevation
+        }
     }
 
     fun disableElevation() {
-        stateListAnimator = StateListAnimator().apply {
-            val objAnimator = ObjectAnimator.ofFloat(this, "elevation", 0f)
-
-            // Enabled and collapsible, but not collapsed means not elevated
-            addState(intArrayOf(android.R.attr.enabled, R.attr.state_collapsible, -R.attr.state_collapsed),
-                    objAnimator)
-
-            // Default enabled state
-            addState(intArrayOf(android.R.attr.enabled), objAnimator)
-
-            // Disabled state
-            addState(IntArray(0), objAnimator)
-        }
+        stateListAnimator = null
+        elevation = 0f
+        //translationZ = 0.1f.dpToPx
     }
 
 }

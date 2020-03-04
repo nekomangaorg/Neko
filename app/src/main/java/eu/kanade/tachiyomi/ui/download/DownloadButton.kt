@@ -17,6 +17,8 @@ class DownloadButton @JvmOverloads constructor(context: Context, attrs: Attribut
     : FrameLayout(context, attrs) {
 
     private val activeColor = context.getResourceColor(R.attr.colorAccent)
+    private val progressBGColor = ContextCompat.getColor(context,
+        R.color.divider)
     private val disabledColor = ContextCompat.getColor(context,
         R.color.material_on_surface_disabled)
     private val downloadedColor = ContextCompat.getColor(context,
@@ -60,7 +62,7 @@ class DownloadButton @JvmOverloads constructor(context: Context, attrs: Attribut
                 download_border.setImageDrawable(borderCircle)
                 download_progress.isIndeterminate = false
                 download_progress.progress = progress
-                download_border.drawable.setTint(disabledColor)
+                download_border.drawable.setTint(progressBGColor)
                 download_progress.progressDrawable?.setTint(downloadedColor)
                 download_icon.drawable.setTint(disabledColor)
                 if (!isAnimating) {

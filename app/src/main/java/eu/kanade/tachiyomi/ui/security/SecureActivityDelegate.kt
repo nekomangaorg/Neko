@@ -6,6 +6,7 @@ import android.view.WindowManager
 import androidx.biometric.BiometricManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
+import eu.kanade.tachiyomi.ui.main.SearchActivity
 import uy.kohesive.injekt.injectLazy
 import java.util.Date
 
@@ -33,6 +34,7 @@ object SecureActivityDelegate {
         if (lockApp && BiometricManager.from(activity).canAuthenticate() == BiometricManager.BIOMETRIC_SUCCESS) {
             if (isAppLocked()) {
                 val intent = Intent(activity, BiometricActivity::class.java)
+                intent.putExtra("fromSearch", (activity is SearchActivity))
                 activity.startActivity(intent)
                 activity.overridePendingTransition(0, 0)
             }

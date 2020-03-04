@@ -170,13 +170,8 @@ class LibraryPresenter(
             if (filterUnread == STATE_REALLY_EXCLUDE && item.manga.unread > 0) return@f false
 
             if (filterMangaType > 0) {
-                val mangaType = item.manga.mangaType()
-                if ((filterMangaType == Manga.TYPE_MANHUA) && mangaType != Manga.TYPE_MANHUA)
-                    return@f false
-                if ((filterMangaType == Manga.TYPE_COMIC) && mangaType != Manga.TYPE_COMIC) return@f false
-                if ((filterMangaType == Manga.TYPE_MANHWA) && mangaType != Manga.TYPE_MANHWA) return@f false
+                if (filterMangaType != item.manga.mangaType()) return@f false
             }
-
 
             if (filterCompleted == STATE_INCLUDE && item.manga.status != SManga.COMPLETED)
                 return@f false

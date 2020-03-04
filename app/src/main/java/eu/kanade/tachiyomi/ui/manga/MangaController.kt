@@ -35,9 +35,7 @@ import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationListController
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.applyWindowInsetsForController
-import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.android.synthetic.main.manga_controller.*
-import kotlinx.android.synthetic.main.search_activity.*
 import rx.Subscription
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -178,8 +176,7 @@ class MangaController : RxController, TabbedController, BottomNavBarInterface {
     }
 
     fun tabLayout():TabLayout? {
-        return if (activity is SearchActivity) activity?.sTabs
-        else activity?.tabs
+        return null
     }
 
     fun updateTitle(manga: Manga) {
