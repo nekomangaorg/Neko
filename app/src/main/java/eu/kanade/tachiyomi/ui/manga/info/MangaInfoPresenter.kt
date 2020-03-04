@@ -14,10 +14,6 @@ import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
 import eu.kanade.tachiyomi.util.DiskUtil
-import java.io.File
-import java.io.FileOutputStream
-import java.io.OutputStream
-import java.util.Date
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -29,6 +25,10 @@ import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.io.File
+import java.io.FileOutputStream
+import java.io.OutputStream
+import java.util.Date
 
 /**
  * Presenter of MangaInfoFragment.
@@ -74,7 +74,7 @@ class MangaInfoPresenter(
      * Sends the active manga to the view.
      */
     fun sendMangaToView() {
-        view?.onNextManga(manga, source)
+        view?.onNextManga(manga)
     }
 
     /**
@@ -89,10 +89,10 @@ class MangaInfoPresenter(
         job = launch(CoroutineExceptionHandler { _, _ ->
             GlobalScope.launch(Dispatchers.Main) { MangaInfoController::onFetchMangaError }
         }) {
-            coverCache.deleteFromCache(manga.thumbnail_url)
             val networkManga = source.fetchMangaDetails(manga)
             manga.copyFrom(networkManga)
             manga.initialized = true
+            coverCache.deleteFromCache(manga.thumbnail_url)
             db.insertManga(manga).executeAsBlocking()
 
             withContext(Dispatchers.Main) {

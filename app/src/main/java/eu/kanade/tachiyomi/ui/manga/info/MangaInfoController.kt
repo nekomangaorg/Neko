@@ -50,7 +50,6 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
@@ -64,17 +63,17 @@ import eu.kanade.tachiyomi.util.getUriCompat
 import eu.kanade.tachiyomi.util.snack
 import eu.kanade.tachiyomi.util.toast
 import eu.kanade.tachiyomi.util.truncateCenter
-import java.io.File
-import java.text.DecimalFormat
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 import jp.wasabeef.glide.transformations.CropSquareTransformation
 import jp.wasabeef.glide.transformations.MaskTransformation
 import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.android.synthetic.main.manga_info_controller.*
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
+import java.io.File
+import java.text.DecimalFormat
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 /**
  * Fragment that shows manga information.
@@ -207,7 +206,7 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
      * @param manga manga object containing information about manga.
      * @param source the source of the manga.
      */
-    fun onNextManga(manga: Manga, source: Source) {
+    fun onNextManga(manga: Manga) {
         if (manga.initialized) {
             // Update view.
             setMangaInfo(manga)
