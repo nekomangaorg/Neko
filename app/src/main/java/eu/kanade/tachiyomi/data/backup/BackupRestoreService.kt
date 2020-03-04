@@ -455,7 +455,7 @@ class BackupRestoreService : Service() {
      *
      */
     private fun getErrorLogIntent(path: String, file: String): PendingIntent {
-        val destFile = File(path, file!!)
+        val destFile = File(path, file)
         val uri = destFile.getUriCompat(applicationContext)
         return NotificationReceiver.openFileExplorerPendingActivity(this@BackupRestoreService, uri)
     }

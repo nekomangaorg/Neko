@@ -135,6 +135,7 @@
     <string name="pref_category_library_display">Display</string>
     <string name="pref_category_library_update">Update</string>
     <string name="pref_category_library_categories">Categories</string>
+    <string name="pref_category_security">Security</string>
 
 
     <!-- General section -->
@@ -281,7 +282,7 @@
     <string name="pref_related_broken_file">Unable to parse. Is it a valid JSON?</string>
     <string name="pref_related_file_error">Unable Open File %s</string>
     <string name="pref_related_show_tab">Show Related Manga Tab</string>
-    <string name="pref_related_loading_percent">Loading Related Mangas (%d / %d loaded)</string>
+    <string name="pref_related_loading_percent">Loading Related Mangas (%1$d / %2$d loaded)</string>
     <string name="pref_related_loading_welcome">Loading JSON From File!</string>
     <string name="pref_related_loading_complete">Done Loading %d Related Mangas!</string>
     <string name="pref_related_notify_start">Starting to parse %d mangas from file</string>

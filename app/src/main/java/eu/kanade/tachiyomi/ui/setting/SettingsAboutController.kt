@@ -37,8 +37,6 @@ class SettingsAboutController : SettingsController() {
      */
     private var releaseSubscription: Subscription? = null
 
-    private val isUpdaterEnabled = !BuildConfig.DEBUG && BuildConfig.INCLUDE_UPDATER
-
     override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
         titleRes = R.string.pref_category_about
 
@@ -63,14 +61,9 @@ class SettingsAboutController : SettingsController() {
         }
         preference {
             titleRes = R.string.version
-            summary = if (BuildConfig.DEBUG)
-                "r" + BuildConfig.COMMIT_COUNT
-            else
-                BuildConfig.VERSION_NAME
+            summary = BuildConfig.VERSION_NAME
+            onClick { checkVersion() }
 
-            if (isUpdaterEnabled) {
-                onClick { checkVersion() }
-            }
             isIconSpaceReserved = true
         }
         preference {
@@ -149,9 +142,9 @@ class SettingsAboutController : SettingsController() {
 
     private fun getFormattedBuildTime(): String {
         try {
-            val inputDf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'", Locale.US)
+            val inputDf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US)
             inputDf.timeZone = TimeZone.getTimeZone("UTC")
-            val date = inputDf.parse(BuildConfig.BUILD_TIME)
+            val date = inputDf.parse(BuildConfig.BUILD_TIME)!!
 
             val outputDf = DateFormat.getDateTimeInstance(
                 DateFormat.MEDIUM, DateFormat.SHORT, Locale.getDefault()

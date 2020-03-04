@@ -13,13 +13,12 @@ object Migrations {
      * @return true if a migration is performed, false otherwise.
      */
     fun upgrade(preferences: PreferencesHelper): Boolean {
-        val context = preferences.context
         val oldVersion = preferences.lastVersionCode().getOrDefault()
         if (oldVersion < BuildConfig.VERSION_CODE) {
             preferences.lastVersionCode().set(BuildConfig.VERSION_CODE)
 
             if (oldVersion < 38) {
-                if (BuildConfig.INCLUDE_UPDATER && preferences.automaticUpdates()) {
+                if (preferences.automaticUpdates()) {
                     UpdaterJob.setupTask()
                 }
             }

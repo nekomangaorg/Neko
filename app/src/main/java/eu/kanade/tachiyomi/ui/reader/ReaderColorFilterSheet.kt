@@ -28,7 +28,7 @@ class ReaderColorFilterSheet(activity: ReaderActivity) : BottomSheetDialog(activ
 
     private val preferences by injectLazy<PreferencesHelper>()
 
-    private var behavior: BottomSheetBehavior<*>? = null
+    private var bottomSheetBehavior: BottomSheetBehavior<*>? = null
 
     /**
      * Subscriptions used for this dialog
@@ -49,17 +49,17 @@ class ReaderColorFilterSheet(activity: ReaderActivity) : BottomSheetDialog(activ
         val view = activity.layoutInflater.inflate(R.layout.reader_color_filter_sheet, null)
         setContentView(view)
 
-        behavior = BottomSheetBehavior.from(view.parent as ViewGroup)
+        bottomSheetBehavior = BottomSheetBehavior.from(view.parent as ViewGroup)
 
         // Initialize subscriptions.
         subscriptions += preferences.colorFilter().asObservable()
-                .subscribe { setColorFilter(it, view) }
+            .subscribe { setColorFilter(it, view) }
 
         subscriptions += preferences.colorFilterMode().asObservable()
-                .subscribe { setColorFilter(preferences.colorFilter().getOrDefault(), view) }
+            .subscribe { setColorFilter(preferences.colorFilter().getOrDefault(), view) }
 
         subscriptions += preferences.customBrightness().asObservable()
-                .subscribe { setCustomBrightness(it, view) }
+            .subscribe { setCustomBrightness(it, view) }
 
         // Get color and update values
         val color = preferences.colorFilterValue().getOrDefault()
@@ -136,8 +136,8 @@ class ReaderColorFilterSheet(activity: ReaderActivity) : BottomSheetDialog(activ
 
     override fun onStart() {
         super.onStart()
-        behavior?.skipCollapsed = true
-        behavior?.state = BottomSheetBehavior.STATE_EXPANDED
+        bottomSheetBehavior?.skipCollapsed = true
+        bottomSheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
     }
 
     override fun onDetachedFromWindow() {
@@ -200,8 +200,8 @@ class ReaderColorFilterSheet(activity: ReaderActivity) : BottomSheetDialog(activ
     private fun setCustomBrightness(enabled: Boolean, view: View) {
         if (enabled) {
             customBrightnessSubscription = preferences.customBrightnessValue().asObservable()
-                    .sample(100, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
-                    .subscribe { setCustomBrightnessValue(it, view) }
+                .sample(100, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
+                .subscribe { setCustomBrightnessValue(it, view) }
 
             subscriptions.add(customBrightnessSubscription)
         } else {
@@ -217,19 +217,20 @@ class ReaderColorFilterSheet(activity: ReaderActivity) : BottomSheetDialog(activ
      * From 1 to 100 it sets that value as brightness.
      * 0 sets system brightness and hides the overlay.
      */
-    private fun setCustomBrightnessValue(value: Int, view: View, isDisabled: Boolean = false) = with(view) {
-        // Set black overlay visibility.
-        if (value < 0) {
-            brightness_overlay.visibility = View.VISIBLE
-            val alpha = (Math.abs(value) * 2.56).toInt()
-            brightness_overlay.setBackgroundColor(Color.argb(alpha, 0, 0, 0))
-        } else {
-            brightness_overlay.visibility = View.GONE
-        }
+    private fun setCustomBrightnessValue(value: Int, view: View, isDisabled: Boolean = false) =
+        with(view) {
+            // Set black overlay visibility.
+            if (value < 0) {
+                brightness_overlay.visibility = View.VISIBLE
+                val alpha = (Math.abs(value) * 2.56).toInt()
+                brightness_overlay.setBackgroundColor(Color.argb(alpha, 0, 0, 0))
+            } else {
+                brightness_overlay.visibility = View.GONE
+            }
 
-        if (!isDisabled)
-            txt_brightness_seekbar_value.text = value.toString()
-    }
+            if (!isDisabled)
+                txt_brightness_seekbar_value.text = value.toString()
+        }
 
     /**
      * Manages the color filter value subscription
@@ -239,8 +240,8 @@ class ReaderColorFilterSheet(activity: ReaderActivity) : BottomSheetDialog(activ
     private fun setColorFilter(enabled: Boolean, view: View) {
         if (enabled) {
             customFilterColorSubscription = preferences.colorFilterValue().asObservable()
-                    .sample(100, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
-                    .subscribe { setColorFilterValue(it, view) }
+                .sample(100, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
+                .subscribe { setColorFilterValue(it, view) }
 
             subscriptions.add(customFilterColorSubscription)
         } else {

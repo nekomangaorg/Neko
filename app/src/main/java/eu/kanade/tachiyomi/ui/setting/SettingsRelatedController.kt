@@ -15,11 +15,11 @@ import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 import eu.kanade.tachiyomi.util.getFilePicker
 import eu.kanade.tachiyomi.util.toast
+import java.io.InputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import kotlin.system.exitProcess
-import kotlinx.io.InputStream
 import org.json.JSONException
 import org.json.JSONObject
 import uy.kohesive.injekt.Injekt
@@ -67,8 +67,9 @@ class SettingsRelatedController : SettingsController() {
 
         preference {
             title = "Github"
-            val url = "https://github.com/goldbattle/MangadexRecomendations"
-            summary = url
+            val url =
+                "https://github.com/goldbattle/MangadexRecomendations/blob/master/output"
+            summary = "Download latest manga compressed json for recommendations (updated daily)"
             onClick {
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
                 startActivity(intent)
@@ -88,6 +89,7 @@ class SettingsRelatedController : SettingsController() {
                 val context = applicationContext ?: return
                 val activity = activity ?: return
                 val selectedFile = data.data
+
                 val input: InputStream? = context.getContentResolver()?.openInputStream(data.data!!)
 
                 // Check if we where able to open it
@@ -131,6 +133,7 @@ class SettingsRelatedController : SettingsController() {
 
                 // Now in a second thread lets insert into the database
                 // This takes some time so display it all to the user
+
                 Thread(Runnable {
 
                     // Get our current database
@@ -161,7 +164,7 @@ class SettingsRelatedController : SettingsController() {
                         // Loop through each and insert into the database
                         var counter: Int = 0
                         val batchMultiple = 1000
-                        var dataToInsert = mutableListOf<MangaRelatedImpl>()
+                        val dataToInsert = mutableListOf<MangaRelatedImpl>()
                         for (key in relatedPageResult.keys()) {
 
                             // check if activity is still running
@@ -182,7 +185,7 @@ class SettingsRelatedController : SettingsController() {
                             }
 
                             // create the implementation and insert
-                            var related = MangaRelatedImpl()
+                            val related = MangaRelatedImpl()
                             related.id = counter.toLong()
                             related.manga_id = key.toLong()
                             related.matched_ids = matchedIds.toString()
@@ -234,7 +237,7 @@ class SettingsRelatedController : SettingsController() {
                         .cancel(Notifications.ID_MANGA_RELATED_IMPORT)
 
                     // Show the finished notification
-                    val builder_done =
+                    val builderDone =
                         NotificationCompat.Builder(context, Notifications.CHANNEL_MANGA_RELATED)
                             .apply {
                                 setContentTitle(
@@ -249,7 +252,7 @@ class SettingsRelatedController : SettingsController() {
                                 setColor(ContextCompat.getColor(context, R.color.colorPrimary))
                             }
                     NotificationManagerCompat.from(context)
-                        .notify(Notifications.ID_MANGA_RELATED_IMPORT, builder_done.build())
+                        .notify(Notifications.ID_MANGA_RELATED_IMPORT, builderDone.build())
                 }).start()
             }
         }
