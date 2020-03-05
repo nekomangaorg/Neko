@@ -8,7 +8,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
-import eu.kanade.tachiyomi.ui.manga.MangaPresenter
+import eu.kanade.tachiyomi.ui.manga.MangaDetailsPresenter
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import uy.kohesive.injekt.injectLazy
@@ -59,7 +59,7 @@ class ChaptersAdapter(
 
     interface MangaHeaderInterface {
         fun coverColor(): Int?
-        fun mangaPresenter(): MangaPresenter
+        fun mangaPresenter(): MangaDetailsPresenter
         fun prepareToShareManga()
         fun readNextChapter()
         fun downloadChapter(position: Int)

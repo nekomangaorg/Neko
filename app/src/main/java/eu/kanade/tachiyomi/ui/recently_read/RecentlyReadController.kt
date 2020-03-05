@@ -20,7 +20,7 @@ import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.catalogue.browse.ProgressItem
 import eu.kanade.tachiyomi.ui.main.MainActivity
-import eu.kanade.tachiyomi.ui.manga.MangaChaptersController
+import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.recent_updates.RecentChaptersController
 import eu.kanade.tachiyomi.util.system.launchUI
@@ -179,7 +179,7 @@ class RecentlyReadController(bundle: Bundle? = null) : BaseController(bundle),
 
     override fun onCoverClick(position: Int, lastTouchY: Float) {
         val manga = (adapter?.getItem(position) as? RecentlyReadItem)?.mch?.manga ?: return
-        router.pushController(MangaChaptersController(manga).withFadeTransaction())
+        router.pushController(MangaDetailsController(manga).withFadeTransaction())
     }
 
     override fun removeHistory(manga: Manga, history: History, all: Boolean) {

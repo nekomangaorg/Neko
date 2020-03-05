@@ -50,7 +50,7 @@ import eu.kanade.tachiyomi.ui.download.DownloadController
 import eu.kanade.tachiyomi.ui.extension.ExtensionController
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.library.LibraryListController
-import eu.kanade.tachiyomi.ui.manga.MangaChaptersController
+import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.recent_updates.RecentChaptersController
 import eu.kanade.tachiyomi.ui.recently_read.RecentlyReadController
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
@@ -452,7 +452,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                 if (router.backstack.isEmpty()) {
                     navigationView.selectedItemId = R.id.nav_library
                 }
-                router.pushController(MangaChaptersController(extras).withFadeTransaction())
+                router.pushController(MangaDetailsController(extras).withFadeTransaction())
             }
             SHORTCUT_DOWNLOADS -> {
                 if (router.backstack.none { it.controller() is DownloadController }) {

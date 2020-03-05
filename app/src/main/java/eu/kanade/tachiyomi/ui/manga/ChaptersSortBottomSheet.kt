@@ -16,7 +16,7 @@ import eu.kanade.tachiyomi.util.view.setEdgeToEdge
 import eu.kanade.tachiyomi.util.view.visibleIf
 import kotlinx.android.synthetic.main.chapter_sort_bottom_sheet.*
 
-class ChaptersSortBottomSheet(controller: MangaChaptersController) : BottomSheetDialog
+class ChaptersSortBottomSheet(controller: MangaDetailsController) : BottomSheetDialog
     (controller.activity!!, R.style.BottomSheetDialogTheme) {
 
     val activity = controller.activity!!

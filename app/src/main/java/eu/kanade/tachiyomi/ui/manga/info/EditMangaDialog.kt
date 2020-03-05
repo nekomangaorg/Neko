@@ -17,7 +17,7 @@ import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
-import eu.kanade.tachiyomi.ui.manga.MangaChaptersController
+import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.util.lang.chop
 import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.android.synthetic.main.edit_manga_dialog.view.*
@@ -35,9 +35,9 @@ class EditMangaDialog : DialogController {
     private var customCoverUri:Uri? = null
 
     private val infoController
-        get() = targetController as MangaChaptersController
+        get() = targetController as MangaDetailsController
 
-    constructor(target: MangaChaptersController, manga: Manga) : super(Bundle()
+    constructor(target: MangaDetailsController, manga: Manga) : super(Bundle()
         .apply {
             putLong(KEY_MANGA, manga.id!!)
         }) {

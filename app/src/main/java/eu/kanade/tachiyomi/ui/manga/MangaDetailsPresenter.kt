@@ -41,7 +41,7 @@ import java.io.OutputStream
 import java.util.Date
 import kotlin.coroutines.CoroutineContext
 
-class MangaPresenter(private val controller: MangaChaptersController,
+class MangaDetailsPresenter(private val controller: MangaDetailsController,
     val manga: Manga,
     val source: Source,
     val preferences: PreferencesHelper = Injekt.get(),
@@ -346,7 +346,7 @@ class MangaPresenter(private val controller: MangaChaptersController,
             }
             isLoading = false
             if (chapterError == null)
-                withContext(Dispatchers.Main) { controller.updateChapters(this@MangaPresenter.chapters) }
+                withContext(Dispatchers.Main) { controller.updateChapters(this@MangaDetailsPresenter.chapters) }
             if (mangaError != null)
                 withContext(Dispatchers.Main) { controller.showError(trimException(mangaError!!)) }
         }
@@ -372,7 +372,7 @@ class MangaPresenter(private val controller: MangaChaptersController,
                 syncChaptersWithSource(db, chapters, manga, source)
 
                 updateChapters()
-                withContext(Dispatchers.Main) { controller.updateChapters(this@MangaPresenter.chapters) }
+                withContext(Dispatchers.Main) { controller.updateChapters(this@MangaDetailsPresenter.chapters) }
             }
             catch(e: java.lang.Exception) {
                 controller.showError(trimException(e))

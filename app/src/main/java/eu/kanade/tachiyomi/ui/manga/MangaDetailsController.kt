@@ -81,15 +81,15 @@ import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import jp.wasabeef.glide.transformations.CropSquareTransformation
 import jp.wasabeef.glide.transformations.MaskTransformation
-import kotlinx.android.synthetic.main.big_manga_controller.*
-import kotlinx.android.synthetic.main.big_manga_controller.swipe_refresh
 import kotlinx.android.synthetic.main.main_activity.*
+import kotlinx.android.synthetic.main.manga_details_controller.*
+import kotlinx.android.synthetic.main.manga_details_controller.swipe_refresh
 import kotlinx.android.synthetic.main.manga_info_controller.*
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File
 
-class MangaChaptersController : BaseController,
+class MangaDetailsController : BaseController,
     FlexibleAdapter.OnItemClickListener,
     FlexibleAdapter.OnItemLongClickListener,
     ChaptersAdapter.MangaHeaderInterface,
@@ -125,7 +125,7 @@ class MangaChaptersController : BaseController,
     private var manga: Manga? = null
     private var source: Source? = null
     var colorAnimator:ValueAnimator? = null
-    lateinit var presenter:MangaPresenter
+    lateinit var presenter:MangaDetailsPresenter
     var coverColor:Int? = null
     var toolbarIsColored = false
     private var snack: Snackbar? = null
@@ -148,7 +148,7 @@ class MangaChaptersController : BaseController,
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
         coverColor = null
-        if (!::presenter.isInitialized) presenter = MangaPresenter(this, manga!!, source!!)
+        if (!::presenter.isInitialized) presenter = MangaDetailsPresenter(this, manga!!, source!!)
 
         // Init RecyclerView and adapter
         adapter = ChaptersAdapter(this, view.context)
@@ -221,7 +221,7 @@ class MangaChaptersController : BaseController,
         }
     }
 
-    fun setPaletteColor() {
+    private fun setPaletteColor() {
         val view = view ?: return
         GlideApp.with(view.context).load(manga)
             .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
@@ -636,7 +636,7 @@ class MangaChaptersController : BaseController,
     }
 
     override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
-        return inflater.inflate(R.layout.big_manga_controller, container, false)
+        return inflater.inflate(R.layout.manga_details_controller, container, false)
     }
 
     override fun coverColor(): Int? = coverColor
@@ -771,7 +771,7 @@ class MangaChaptersController : BaseController,
         (activity as? MainActivity)?.setUndoSnackBar(snack, fab_favorite)
     }
 
-    override fun mangaPresenter(): MangaPresenter = presenter
+    override fun mangaPresenter(): MangaDetailsPresenter = presenter
 
     override fun updateCategoriesForMangas(mangas: List<Manga>, categories: List<Category>) {
         val manga = mangas.firstOrNull() ?: return

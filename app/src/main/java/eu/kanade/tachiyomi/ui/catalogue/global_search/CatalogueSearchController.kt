@@ -14,7 +14,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.CatalogueSource
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
-import eu.kanade.tachiyomi.ui.manga.MangaChaptersController
+import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
 import eu.kanade.tachiyomi.util.view.applyWindowInsetsForController
 import kotlinx.android.synthetic.main.catalogue_global_search_controller.*
@@ -80,7 +80,7 @@ open class CatalogueSearchController(
      */
     override fun onMangaClick(manga: Manga) {
         // Open MangaController.
-        router.pushController(MangaChaptersController(manga, true).withFadeTransaction())
+        router.pushController(MangaDetailsController(manga, true).withFadeTransaction())
     }
 
     /**
@@ -195,7 +195,7 @@ open class CatalogueSearchController(
             val results = searchResult.first().results
             if (results != null && results.size == 1) {
                 val manga = results.first().manga
-                router.replaceTopController(MangaChaptersController(manga, true)
+                router.replaceTopController(MangaDetailsController(manga, true)
                     .withFadeTransaction()
                 )
                 return

@@ -24,7 +24,7 @@ import eu.kanade.tachiyomi.ui.base.controller.NoToolbarElevationController
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.main.MainActivity
-import eu.kanade.tachiyomi.ui.manga.MangaChaptersController
+import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.recently_read.RecentlyReadController
 import eu.kanade.tachiyomi.util.system.notificationManager
@@ -274,7 +274,7 @@ class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
     }
 
     fun openManga(chapter: RecentChapterItem) {
-        router.pushController(MangaChaptersController(chapter.manga).withFadeTransaction())
+        router.pushController(MangaDetailsController(chapter.manga).withFadeTransaction())
     }
 
     /**

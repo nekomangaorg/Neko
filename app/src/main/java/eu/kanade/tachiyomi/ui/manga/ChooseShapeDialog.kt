@@ -17,7 +17,7 @@ class ChooseShapeDialog(bundle: Bundle? = null) : DialogController(bundle) {
         targetController = target
     }
 
-    constructor(target: MangaChaptersController) : this() {
+    constructor(target: MangaDetailsController) : this() {
         targetController = target
     }
 
@@ -36,7 +36,7 @@ class ChooseShapeDialog(bundle: Bundle? = null) : DialogController(bundle) {
                 waitForPositiveButton = false)
             { _, i, _ ->
                 (targetController as? MangaInfoController)?.createShortcutForShape(i)
-                (targetController as? MangaChaptersController)?.createShortcutForShape(i)
+                (targetController as? MangaDetailsController)?.createShortcutForShape(i)
                 dismissDialog()
             }
     }
