@@ -194,7 +194,7 @@
     <string name="download_notifier_download_paused">Stahování pozastaveno</string>
     <string name="label_download_queue">Stahovací fronta</string>
     <string name="name">Název</string>
-    <string name="track">Sledování</string>
+    <string name="tracking">Sledování</string>
     <string name="label_catalogues">Katalogy</string>
     <string name="label_recent_updates">Aktualizace knihovny</string>
     <string name="action_filter_bookmarked">Založeno</string>

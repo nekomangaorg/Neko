@@ -3,7 +3,7 @@
     <string name="name">Nimi</string>
     <string name="categories">Kategoriat</string>
     <string name="manga">Manga</string>
-    <string name="track">Seuranta</string>
+    <string name="tracking">Seuranta</string>
     <string name="history">Historia</string>
     <string name="label_settings">Asetukset</string>
     <string name="label_download_queue">Latausjono</string>

@@ -4,7 +4,7 @@
     <string name="categories">Categorias</string>
     <string name="manga">Mangá</string>
     <string name="chapters">Capítulos</string>
-    <string name="track">Monitoramento</string>
+    <string name="tracking">Monitoramento</string>
     <string name="history">Histórico</string>
     <string name="label_settings">Configurações</string>
     <string name="label_download_queue">Fila de download</string>

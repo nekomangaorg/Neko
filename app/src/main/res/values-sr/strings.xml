@@ -4,7 +4,7 @@
     <string name="categories">Kategorije</string>
     <string name="manga">Manga</string>
     <string name="chapters">Poglavlje</string>
-    <string name="track">Praćenje</string>
+    <string name="tracking">Praćenje</string>
     <string name="history">Istorija</string>
     <string name="label_settings">Podešavanja</string>
     <string name="label_download_queue">Redosled preuzimanja</string>

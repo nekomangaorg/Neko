@@ -4,7 +4,7 @@
     <string name="categories">카테고리</string>
     <string name="manga">만화</string>
     <string name="chapters">챕터</string>
-    <string name="track">동기화</string>
+    <string name="tracking">동기화</string>
     <string name="label_selected">%1$d 선택됨</string>
     <string name="action_filter">필터</string>
     <string name="action_filter_downloaded">다운로드됨</string>

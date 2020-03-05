@@ -64,7 +64,7 @@
     <string name="action_save">保存</string>
     <string name="action_reset">重置</string>
     <string name="action_undo">撤销</string>
-    <string name="track">同步</string>
+    <string name="tracking">同步</string>
     <string name="label_migration">来源迁移</string>
     <string name="action_mark_previous_as_read">标记之前章节已读</string>
     <string name="action_create">创建</string>

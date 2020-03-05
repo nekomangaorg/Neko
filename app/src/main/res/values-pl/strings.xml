@@ -117,7 +117,7 @@
     <string name="download_notifier_download_paused">Pobieranie wstrzymane</string>
     <string name="label_selected">Zaznaczono: %1$d</string>
     <string name="action_sort_alpha">Alfabetycznie</string>
-    <string name="track">Śledzenie</string>
+    <string name="tracking">Śledzenie</string>
     <string name="action_reset">Reset</string>
     <string name="services">Usługi śledzenia</string>
     <string name="version">Wersja</string>

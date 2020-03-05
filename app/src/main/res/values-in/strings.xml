@@ -3,7 +3,7 @@
     <string name="categories">Kategori</string>
     <string name="manga">Manga</string>
     <string name="chapters">Bab</string>
-    <string name="track">Pelacakan</string>
+    <string name="tracking">Pelacakan</string>
     <string name="history">Riwayat</string>
     <string name="label_settings">Pengaturan</string>
     <string name="label_download_queue">Sedang diunduh</string>

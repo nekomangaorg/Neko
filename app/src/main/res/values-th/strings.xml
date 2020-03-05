@@ -4,7 +4,7 @@
     <string name="categories">หมวดหมู่</string>
     <string name="manga">มังงะ</string>
     <string name="chapters">ตอน</string>
-    <string name="track">ดังต่อไปนี้</string>
+    <string name="tracking">ดังต่อไปนี้</string>
     <string name="history">ประวัติศาสตร์</string>
     <string name="label_settings">ตั้งค่า</string>
     <string name="label_download_queue">คิวดาวน์โหลด</string>

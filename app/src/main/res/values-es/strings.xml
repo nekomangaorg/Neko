@@ -233,7 +233,7 @@
     <string name="download_notifier_text_only_wifi">Conexión Wi-Fi no disponible</string>
     <string name="categories">Categorías</string>
     <string name="manga">Manga</string>
-    <string name="track">Seguimiento</string>
+    <string name="tracking">Seguimiento</string>
     <string name="history">Historial</string>
     <string name="action_filter_bookmarked">Marcado</string>
     <string name="action_filter_read">Leído</string>

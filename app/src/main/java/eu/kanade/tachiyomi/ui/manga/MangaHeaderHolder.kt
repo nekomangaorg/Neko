@@ -9,6 +9,7 @@ import androidx.core.graphics.ColorUtils
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.signature.ObjectKey
+import com.google.android.material.button.MaterialButton
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
@@ -47,6 +48,7 @@ class MangaHeaderHolder(
         }
         filter_button.setOnClickListener { adapter.coverListener?.showChapterFilter() }
         filters_text.setOnClickListener { adapter.coverListener?.showChapterFilter() }
+        chapters_title.setOnClickListener { adapter.coverListener?.showChapterFilter() }
         share_button.setOnClickListener { adapter.coverListener?.prepareToShareManga() }
         favorite_button.setOnClickListener {
             adapter.coverListener?.favoriteManga(false)
@@ -116,22 +118,21 @@ class MangaHeaderHolder(
                     else -> R.string.add_to_library
                 }
             )
-            backgroundTintList =
-                ContextCompat.getColorStateList(context, android.R.color.transparent)
-            if (!item.isLocked && manga.favorite) {
-                backgroundTintList =
-                    ColorStateList.valueOf(
-                        ColorUtils.setAlphaComponent(
-                            context.getResourceColor(R.attr.colorAccent), 75))
-                strokeColor = ColorStateList.valueOf(Color.TRANSPARENT)
-            }
-            else strokeColor = ColorStateList.valueOf(
-                ColorUtils.setAlphaComponent(
-                itemView.context.getResourceColor(R.attr
-                .colorOnSurface), 31))
+            checked(!item.isLocked && manga.favorite)
         }
         true_backdrop.setBackgroundColor(adapter.coverListener.coverColor() ?:
         itemView.context.getResourceColor(android.R.attr.colorBackground))
+
+        val tracked = presenter.isTracked() && !item.isLocked
+
+        with(track_button) {
+            text = itemView.context.getString(if (tracked) R.string.action_filter_tracked
+            else R.string.tracking)
+
+            icon = ContextCompat.getDrawable(itemView.context, if (tracked) R.drawable
+                .ic_check_white_24dp else R.drawable.ic_sync_black_24dp)
+            checked(tracked)
+        }
 
         with(start_reading_button) {
             val nextChapter = presenter.getNextUnreadChapter()
@@ -178,6 +179,27 @@ class MangaHeaderHolder(
             .centerCrop()
             .transition(DrawableTransitionOptions.withCrossFade())
             .into(backdrop)
+    }
+
+    private fun MaterialButton.checked(checked: Boolean) {
+        if (checked) {
+            backgroundTintList = ColorStateList.valueOf(
+                ColorUtils.setAlphaComponent(
+                    context.getResourceColor(R.attr.colorAccent), 75
+                )
+            )
+            strokeColor = ColorStateList.valueOf(Color.TRANSPARENT)
+        } else {
+            strokeColor = ColorStateList.valueOf(
+                ColorUtils.setAlphaComponent(
+                    itemView.context.getResourceColor(
+                        R.attr.colorOnSurface
+                    ), 31
+                )
+            )
+            backgroundTintList =
+                ContextCompat.getColorStateList(context, android.R.color.transparent)
+        }
     }
 
     fun setTopHeight(newHeight: Int) {

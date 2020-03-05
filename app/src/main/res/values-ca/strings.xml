@@ -4,7 +4,7 @@
     <string name="categories">Categories</string>
     <string name="manga">Manga</string>
     <string name="chapters">Capítols</string>
-    <string name="track">En seguiment</string>
+    <string name="tracking">En seguiment</string>
     <string name="history">Historial</string>
     <string name="label_settings">Configuració</string>
     <string name="label_download_queue">Cua de descàrregues</string>

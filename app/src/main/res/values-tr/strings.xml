@@ -4,7 +4,7 @@
     <string name="categories">Kategoriler</string>
     <string name="manga">Manga</string>
     <string name="chapters">Bölümler</string>
-    <string name="track">İzleme</string>
+    <string name="tracking">İzleme</string>
     <string name="history">Geçmiş</string>
     <string name="label_settings">Ayarlar</string>
     <string name="label_download_queue">İndirme kuyruğu</string>

@@ -4,7 +4,7 @@
     <string name="categories">Категорії</string>
     <string name="manga">Манга</string>
     <string name="chapters">Глави</string>
-    <string name="track">Відстеження</string>
+    <string name="tracking">Відстеження</string>
     <string name="history">Історія</string>
     <string name="label_settings">Налаштування</string>
     <string name="label_download_queue">Черга завантаження</string>

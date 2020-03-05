@@ -12,7 +12,7 @@ object MigrationFlags {
     private const val CATEGORIES2 = 0x2
     private const val TRACK2      = 0x4
 
-    val titles get() = arrayOf(R.string.chapters, R.string.categories, R.string.track)
+    val titles get() = arrayOf(R.string.chapters, R.string.categories, R.string.tracking)
 
     val flags get() = arrayOf(CHAPTERS, CATEGORIES, TRACK)
 

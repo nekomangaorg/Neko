@@ -10,7 +10,7 @@
     <string name="manhua">Manhua</string>
     <string name="comic">Comic</string>
     <string name="chapters">Chapters</string>
-    <string name="track">Tracking</string>
+    <string name="tracking">Tracking</string>
     <string name="history">History</string>
 
     <!-- Activities and fragments labels (toolbar title) -->

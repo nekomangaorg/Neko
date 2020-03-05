@@ -12,12 +12,14 @@ import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
+import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.download.model.DownloadQueue
 import eu.kanade.tachiyomi.data.library.LibraryServiceListener
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.SChapter
@@ -58,6 +60,10 @@ class MangaDetailsPresenter(private val controller: MangaDetailsController,
     var hasRequested = false
     var isLoading = false
 
+    private val loggedServices by lazy { Injekt.get<TrackManager>().services.filter { it.isLogged } }
+    var tracks = emptyList<Track>()
+
+
     var chapters:List<ChapterItem> = emptyList()
         private set
 
@@ -77,6 +83,7 @@ class MangaDetailsPresenter(private val controller: MangaDetailsController,
         }
         else {
             updateChapters()
+            tracks = db.getTracks(manga).executeAsBlocking()
             controller.updateChapters(this.chapters)
         }
     }
@@ -449,9 +456,10 @@ class MangaDetailsPresenter(private val controller: MangaDetailsController,
         asyncUpdateMangaAndChapters()
     }
 
-    private fun asyncUpdateMangaAndChapters() {
+    private fun asyncUpdateMangaAndChapters(justChapters:Boolean = false) {
         launch {
-            withContext(Dispatchers.IO) { db.updateFlags(manga).executeAsBlocking() }
+            if (!justChapters)
+                withContext(Dispatchers.IO) { db.updateFlags(manga).executeAsBlocking() }
             updateChapters()
             withContext(Dispatchers.Main) { controller.updateChapters(chapters) }
         }
@@ -518,6 +526,7 @@ class MangaDetailsPresenter(private val controller: MangaDetailsController,
         coverCache.deleteFromCache(manga.thumbnail_url)
         db.resetMangaInfo(manga).executeAsBlocking()
         downloadManager.deleteManga(manga, source)
+        asyncUpdateMangaAndChapters(true)
     }
 
     fun setFavorite(favorite: Boolean) {
@@ -649,5 +658,9 @@ class MangaDetailsPresenter(private val controller: MangaDetailsController,
             return true
         }
         return false
+    }
+
+    fun isTracked(): Boolean {
+        return loggedServices.any { service -> tracks.any { it.sync_id == service.id } }
     }
 }

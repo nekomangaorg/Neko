@@ -4,7 +4,7 @@
     <string name="categories">Kategorier</string>
     <string name="manga">Manga</string>
     <string name="chapters">Kapitel</string>
-    <string name="track">Spårning</string>
+    <string name="tracking">Spårning</string>
     <string name="history">Historik</string>
     <string name="label_settings">Inställningar</string>
     <string name="label_download_queue">Nedladdningskö</string>

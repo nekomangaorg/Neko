@@ -4,7 +4,7 @@
     <string name="categories">Kategori</string>
     <string name="manga">Manga</string>
     <string name="chapters">Bab-bab</string>
-    <string name="track">Penjejakan</string>
+    <string name="tracking">Penjejakan</string>
     <string name="history">Sejarah</string>
     <string name="label_settings">Tetapan</string>
     <string name="label_download_queue">Giliran muat turun</string>

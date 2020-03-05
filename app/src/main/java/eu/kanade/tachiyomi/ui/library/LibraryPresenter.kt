@@ -179,7 +179,6 @@ class LibraryPresenter(
                 return@f false
 
             if (filterTracked != STATE_IGNORE) {
-                val db = Injekt.get<DatabaseHelper>()
                 val tracks = db.getTracks(item.manga).executeAsBlocking()
 
                 val trackCount = loggedServices.count { service ->

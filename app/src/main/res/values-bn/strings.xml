@@ -4,7 +4,7 @@
     <string name="categories">ধরণ</string>
     <string name="manga">মাংগা</string>
     <string name="chapters">অধ্যায়গুলো</string>
-    <string name="track">অনুসরণকরণ</string>
+    <string name="tracking">অনুসরণকরণ</string>
     <string name="history">ইতিহাস</string>
     <string name="label_settings">সেটিংস</string>
     <string name="label_download_queue">ডাউনলোড</string>

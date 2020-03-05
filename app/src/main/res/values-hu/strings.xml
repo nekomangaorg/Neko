@@ -4,7 +4,7 @@
     <string name="categories">Kategóriák</string>
     <string name="manga">Manga</string>
     <string name="chapters">Fejezetek</string>
-    <string name="track">Nyilvántartás</string>
+    <string name="tracking">Nyilvántartás</string>
     <string name="history">Előzmények</string>
     <string name="label_settings">Beállítások</string>
     <string name="label_recent_manga">Legutóbb olvasott</string>

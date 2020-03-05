@@ -583,7 +583,7 @@
 
     <string name="title">Название</string>
 
-    <string name="track">Отслеживание</string>
+    <string name="tracking">Отслеживание</string>
     <string name="track_start_date">Начато</string>
     <string name="track_status">Статус</string>
     <string name="track_type">Тип</string>

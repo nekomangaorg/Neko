@@ -241,7 +241,7 @@
     <string name="download_notifier_text_only_wifi">Sem ligação de Wi-Fi disponível</string>
     <string name="categories">Categorias</string>
     <string name="manga">Mangá</string>
-    <string name="track">Manutenção</string>
+    <string name="tracking">Manutenção</string>
     <string name="history">Histórico</string>
     <string name="label_extensions">Extensões</string>
     <string name="label_extension_info">Info. da extensão</string>

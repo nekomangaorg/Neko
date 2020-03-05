@@ -297,7 +297,7 @@
     <string name="update_weekly">Settimanalmente</string>
     <string name="amoled_theme">Tema AMOLED</string>
     <string name="default_category">Categoria predefinita</string>
-    <string name="track">Monitoraggio</string>
+    <string name="tracking">Monitoraggio</string>
     <string name="pref_category_tracking">Monitoraggio</string>
     <string name="default_category_summary">Chiedi sempre</string>
     <string name="pref_crop_borders">Ritaglia bordi</string>

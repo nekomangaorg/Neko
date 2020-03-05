@@ -311,7 +311,7 @@
     <string name="restore_completed">Restauration terminée</string>
     <string name="file_saved">Fichier enregistré dans %1$s</string>
     <string name="backup_choice">Que voulez-vous sauvegarder ?</string>
-    <string name="track">Suivi</string>
+    <string name="tracking">Suivi</string>
     <string name="action_sort_total">Nombre de chapitres</string>
     <string name="short_recent_updates">Mises à jour</string>
     <string name="pref_download_new_categories">Catégories à inclure dans le téléchargement</string>

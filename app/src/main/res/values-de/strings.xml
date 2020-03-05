@@ -296,7 +296,7 @@
     <string name="download_notifier_text_only_wifi">Keine WLAN-Verbindung verfügbar</string>
     <string name="download_notifier_no_network">Kein Netzwerk verfügbar</string>
     <string name="download_notifier_download_paused">Herunterladen pausiert</string>
-    <string name="track">Synchronisation</string>
+    <string name="tracking">Synchronisation</string>
     <string name="label_recent_updates">Neu verfügbare Kapitel</string>
     <string name="other_source">Andere</string>
     <string name="action_global_search_hint">Globale Suche…</string>

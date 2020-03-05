@@ -298,7 +298,7 @@
     <string name="download_notifier_no_network">Няма налична мрежова връзка</string>
     <string name="categories">Категории</string>
     <string name="manga">Манга</string>
-    <string name="track">Следене</string>
+    <string name="tracking">Следене</string>
     <string name="history">История</string>
     <string name="action_sort_total">Общ брой глави</string>
     <string name="action_close">Затвори</string>
