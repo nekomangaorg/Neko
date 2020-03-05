@@ -455,12 +455,13 @@ class LibraryUpdateService(
                 .concatMap { manga ->
                     val source = sourceManager.get(manga.source) as? HttpSource
                             ?: return@concatMap Observable.empty<LibraryManga>()
-
                     source.fetchMangaDetails(manga)
                             .map { networkManga ->
+                                val thumbnailUrl = manga.thumbnail_url
                                 manga.copyFrom(networkManga)
                                 db.insertManga(manga).executeAsBlocking()
-                                MangaImpl.setLastCoverFetch(manga.id!!, Date().time)
+                                if (thumbnailUrl != networkManga.thumbnail_url)
+                                    MangaImpl.setLastCoverFetch(manga.id!!, Date().time)
                                 manga
                             }
                             .onErrorReturn { manga }

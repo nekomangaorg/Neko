@@ -165,7 +165,7 @@
             app:icon="@drawable/ic_sync_black_24dp" />
 
         <ImageView
-            android:id="@+id/edit_button"
+            android:id="@+id/share_button"
             style="@style/Theme.Widget.CustomImageButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -173,8 +173,8 @@
             android:layout_marginStart="6dp"
             android:layout_marginEnd="6dp"
             android:padding="5dp"
-            android:src="@drawable/ic_edit_white_24dp"
-            app:layout_constraintBottom_toBottomOf="@id/chapters_title" />
+            android:contentDescription="@string/action_share"
+            android:src="@drawable/ic_share_white_24dp" />
     </LinearLayout>
 
     <com.google.android.material.textview.MaterialTextView
@@ -312,16 +312,17 @@
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/chapters_title"
         style="@style/TextAppearance.MaterialComponents.Headline6"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="18dp"
         android:layout_marginBottom="12dp"
+        android:maxLines="1"
         android:text="@string/chapters"
         android:textSize="17sp"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/filters_text"
         app:layout_constraintStart_toStartOf="@id/manga_summary_label"
-        app:layout_constraintTop_toBottomOf="@id/start_reading_button"
-        app:layout_constraintEnd_toStartOf="@id/filters_text"/>
+        app:layout_constraintTop_toBottomOf="@id/start_reading_button" />
 
     <ImageView
         android:id="@+id/filter_button"
@@ -332,17 +333,22 @@
         android:padding="5dp"
         android:src="@drawable/ic_filter_list_white_24dp"
         app:layout_constraintBottom_toBottomOf="@id/chapters_title"
-        app:layout_constraintTop_toTopOf="@id/chapters_title"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/chapters_title" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/filters_text"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
         android:layout_marginEnd="6dp"
+        android:maxLines="2"
         android:padding="5dp"
-        tools:text="Read"
-        app:layout_constraintTop_toTopOf="@id/filter_button"
+        android:textColor="?android:textColorHint"
+        android:textAlignment="textEnd"
         app:layout_constraintBottom_toBottomOf="@id/filter_button"
-        app:layout_constraintEnd_toStartOf="@id/filter_button" />
+        app:layout_constraintEnd_toStartOf="@id/filter_button"
+        app:layout_constraintStart_toEndOf="@+id/chapters_title"
+        app:layout_constraintTop_toTopOf="@id/filter_button"
+        tools:text="Read, Unread, Bookmarked, Downloaded, All" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,5 +1,8 @@
 package eu.kanade.tachiyomi.ui.manga
 
+import android.app.Application
+import android.graphics.Bitmap
+import android.net.Uri
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -18,9 +21,11 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.SChapter
+import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
+import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.system.launchUI
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -30,6 +35,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.io.File
+import java.io.FileOutputStream
+import java.io.OutputStream
 import java.util.Date
 import kotlin.coroutines.CoroutineContext
 
@@ -89,22 +97,24 @@ class MangaPresenter(private val controller: MangaChaptersController,
         val chapters = withContext(Dispatchers.IO) {
             db.getChapters(manga).executeAsBlocking().map { it.toModel() }
         }
-        // Store the last emission
-        this.chapters = applyChapterFilters(chapters)
 
         // Find downloaded chapters
         setDownloadedChapters(chapters)
+
+        // Store the last emission
+        this.chapters = applyChapterFilters(chapters)
+
     }
 
     private fun updateChapters(fetchedChapters: List<Chapter>? = null) {
         val chapters = (fetchedChapters ?:
         db.getChapters(manga).executeAsBlocking()).map { it.toModel() }
 
-        // Store the last emission
-        this.chapters = applyChapterFilters(chapters)
-
         // Find downloaded chapters
         setDownloadedChapters(chapters)
+
+        // Store the last emission
+        this.chapters = applyChapterFilters(chapters)
     }
 
     /**
@@ -148,9 +158,10 @@ class MangaPresenter(private val controller: MangaChaptersController,
      * Sets the active display mode.
      * @param mode the mode to set.
      */
-    fun setDisplayMode(mode: Int) {
-        manga.displayMode = mode
+    fun hideTitle(hide: Boolean) {
+        manga.displayMode = if (hide) Manga.DISPLAY_NUMBER else Manga.DISPLAY_NAME
         db.updateFlags(manga).executeAsBlocking()
+        controller.refreshAdapter()
     }
 
     /**
@@ -239,6 +250,11 @@ class MangaPresenter(private val controller: MangaChaptersController,
     fun getNextUnreadChapter(): ChapterItem? {
         return chapters.sortedByDescending { it.source_order }.find { !it.read }
     }
+
+    fun getUnreadChaptersSorted() = chapters
+        .filter { !it.read && it.status == Download.NOT_DOWNLOADED }
+        .distinctBy { it.name }
+        .sortedByDescending { it.source_order }
 
     /**
      * Returns the next unread chapter or null if everything is read.
@@ -404,13 +420,50 @@ class MangaPresenter(private val controller: MangaChaptersController,
     }
 
     /**
-     * Reverses the sorting and requests an UI update.
+     * Sets the sorting order and requests an UI update.
      */
     fun setSortOrder(desend: Boolean) {
         manga.setChapterOrder(if (desend) Manga.SORT_ASC else Manga.SORT_DESC)
-        db.updateFlags(manga).executeAsBlocking()
-        updateChapters()
-        controller.updateChapters(chapters)
+        asyncUpdateMangaAndChapters()
+    }
+
+    /**
+     * Sets the sorting method and requests an UI update.
+     */
+    fun setSortMethod(bySource: Boolean) {
+        manga.sorting = if (bySource) Manga.SORTING_SOURCE else Manga.SORTING_NUMBER
+        asyncUpdateMangaAndChapters()
+    }
+
+    /**
+     * Removes all filters and requests an UI update.
+     */
+    fun setFilters(read: Boolean, unread: Boolean, downloaded: Boolean, bookmarked: Boolean) {
+        manga.readFilter = when {
+            read -> Manga.SHOW_READ
+            unread -> Manga.SHOW_UNREAD
+            else -> Manga.SHOW_ALL
+        }
+        manga.downloadedFilter = if (downloaded) Manga.SHOW_DOWNLOADED else Manga.SHOW_ALL
+        manga.bookmarkedFilter = if (bookmarked) Manga.SHOW_BOOKMARKED else Manga.SHOW_ALL
+        asyncUpdateMangaAndChapters()
+    }
+
+    private fun asyncUpdateMangaAndChapters() {
+        launch {
+            withContext(Dispatchers.IO) { db.updateFlags(manga).executeAsBlocking() }
+            updateChapters()
+            withContext(Dispatchers.Main) { controller.updateChapters(chapters) }
+        }
+    }
+
+    fun currentFilters(): String {
+        val filtersId = mutableListOf<Int?>()
+        filtersId.add(if (onlyRead()) R.string.action_filter_read else null)
+        filtersId.add(if (onlyUnread()) R.string.action_filter_unread else null)
+        filtersId.add(if (onlyDownloaded()) R.string.action_filter_downloaded else null)
+        filtersId.add(if (onlyBookmarked()) R.string.action_filter_bookmarked else null)
+        return filtersId.filterNotNull().joinToString(", ") { preferences.context.getString(it) }
     }
 
     fun toggleFavorite(): Boolean {
@@ -478,5 +531,123 @@ class MangaPresenter(private val controller: MangaChaptersController,
         if (manga.id == this.manga.id) {
             fetchChapters()
         }
+    }
+
+    fun shareManga(cover: Bitmap) {
+        val context = Injekt.get<Application>()
+
+        val destDir = File(context.cacheDir, "shared_image")
+
+        launch(Dispatchers.IO) {
+            destDir.deleteRecursively()
+            try {
+                val image = saveImage(cover, destDir, manga)
+                if (image != null)
+                    controller.shareManga(image)
+                else controller.shareManga()
+            }
+            catch (e:java.lang.Exception) { }
+        }
+    }
+
+    private fun saveImage(cover:Bitmap, directory: File, manga: Manga): File? {
+        directory.mkdirs()
+
+        // Build destination file.
+        val filename = DiskUtil.buildValidFilename("${manga.originalTitle()} - Cover.jpg")
+
+        val destFile = File(directory, filename)
+        val stream: OutputStream = FileOutputStream(destFile)
+        cover.compress(Bitmap.CompressFormat.JPEG, 75, stream)
+        stream.flush()
+        stream.close()
+        return destFile
+    }
+
+    fun updateManga(title:String?, author:String?, artist: String?, uri: Uri?,
+        description: String?, tags: Array<String>?) {
+        if (manga.source == LocalSource.ID) {
+            manga.title = if (title.isNullOrBlank()) manga.url else title.trim()
+            manga.author = author?.trim()
+            manga.artist = artist?.trim()
+            manga.description = description?.trim()
+            val tagsString = tags?.joinToString(", ") { it.capitalize() }
+            manga.genre = if (tags.isNullOrEmpty()) null else tagsString?.trim()
+            LocalSource(downloadManager.context).updateMangaInfo(manga)
+            db.updateMangaInfo(manga).executeAsBlocking()
+        }
+        else {
+            var changed = false
+            val title = title?.trim()
+            if (!title.isNullOrBlank() && manga.originalTitle().isBlank()) {
+                manga.title = title
+                changed = true
+            }
+            else if (title.isNullOrBlank() && manga.currentTitle() != manga.originalTitle()) {
+                manga.title = manga.originalTitle()
+                changed = true
+            } else if (!title.isNullOrBlank() && title != manga.currentTitle()) {
+                manga.title = "${title}${SManga.splitter}${manga.originalTitle()}"
+                changed = true
+            }
+
+            val author = author?.trim()
+            if (author.isNullOrBlank() && manga.currentAuthor() != manga.originalAuthor()) {
+                manga.author = manga.originalAuthor()
+                changed = true
+            } else if (!author.isNullOrBlank() && author != manga.currentAuthor()) {
+                manga.author = "${author}${SManga.splitter}${manga.originalAuthor() ?: ""}"
+                changed = true
+            }
+
+            val artist = artist?.trim()
+            if (artist.isNullOrBlank() && manga.currentArtist() != manga.originalArtist()) {
+                manga.artist = manga.originalArtist()
+                changed = true
+            } else if (!artist.isNullOrBlank() && artist != manga.currentArtist()) {
+                manga.artist = "${artist}${SManga.splitter}${manga.originalArtist() ?: ""}"
+                changed = true
+            }
+
+            val description = description?.trim()
+            if (description.isNullOrBlank() && manga.currentDesc() != manga.originalDesc()) {
+                manga.description = manga.originalDesc()
+                changed = true
+            } else if (!description.isNullOrBlank() && description != manga.currentDesc()) {
+                manga.description = "${description}${SManga.splitter}${manga.originalDesc() ?: ""}"
+                changed = true
+            }
+
+            var tagsString = tags?.joinToString(", ")
+            if ((tagsString.isNullOrBlank() && manga.currentGenres() != manga.originalGenres())
+                || tagsString == manga.originalGenres()) {
+                manga.genre = manga.originalGenres()
+                changed = true
+            } else if (!tagsString.isNullOrBlank() && tagsString != manga.currentGenres()) {
+                tagsString = tags?.joinToString(", ") { it.capitalize() }
+                manga.genre = "${tagsString}${SManga.splitter}${manga.originalGenres() ?: ""}"
+                changed = true
+            }
+            if (changed) db.updateMangaInfo(manga).executeAsBlocking()
+        }
+        if (uri != null) editCoverWithStream(uri)
+        controller.updateHeader()
+    }
+
+    private fun editCoverWithStream(uri: Uri): Boolean {
+        val inputStream = downloadManager.context.contentResolver.openInputStream(uri) ?:
+        return false
+        if (manga.source == LocalSource.ID) {
+            LocalSource.updateCover(downloadManager.context, manga, inputStream)
+            return true
+        }
+
+        if (manga.thumbnail_url != null && manga.favorite) {
+            Injekt.get<PreferencesHelper>().refreshCoversToo().set(false)
+            coverCache.copyToCache(manga.thumbnail_url!!, inputStream)
+            MangaImpl.setLastCoverFetch(manga.id!!, Date().time)
+            return true
+        }
+        return false
     }
 }

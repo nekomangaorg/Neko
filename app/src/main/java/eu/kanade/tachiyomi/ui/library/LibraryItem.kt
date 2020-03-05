@@ -5,6 +5,7 @@ import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import android.widget.ImageView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
@@ -21,6 +22,7 @@ import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import kotlinx.android.synthetic.main.catalogue_grid_item.view.*
+import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 
 class LibraryItem(val manga: LibraryManga,
@@ -70,7 +72,9 @@ class LibraryItem(val manga: LibraryManga,
                             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
                         )
                         cover_thumbnail.maxHeight = (parent.itemWidth / 3f * 3.7f).toInt()
+                        cover_thumbnail.minimumHeight = (parent.itemWidth / 3f * 3.7f).toInt()
                         constraint_layout.minHeight = 0
+                        cover_thumbnail.scaleType = ImageView.ScaleType.CENTER_CROP
                         cover_thumbnail.adjustViewBounds = false
                         cover_thumbnail.layoutParams = FrameLayout.LayoutParams(
                             ViewGroup.LayoutParams.MATCH_PARENT,

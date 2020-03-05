@@ -52,6 +52,7 @@
         android:imeOptions="actionDone"
         android:inputType="none"
         android:maxLines="1"
+        android:singleLine="true"
         android:textColor="@color/textColorPrimary"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="@id/title"

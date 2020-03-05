@@ -5,7 +5,6 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.app.Activity
-import android.app.Dialog
 import android.app.PendingIntent
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -15,7 +14,6 @@ import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.os.Build
-import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -31,8 +29,6 @@ import androidx.transition.ChangeBounds
 import androidx.transition.ChangeImageTransform
 import androidx.transition.TransitionManager
 import androidx.transition.TransitionSet
-import com.afollestad.materialdialogs.MaterialDialog
-import com.afollestad.materialdialogs.list.listItemsSingleChoice
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
@@ -55,13 +51,13 @@ import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.HttpSource
-import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.catalogue.global_search.CatalogueSearchController
 import eu.kanade.tachiyomi.ui.library.ChangeMangaCategoriesDialog
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.main.MainActivity
+import eu.kanade.tachiyomi.ui.manga.ChooseShapeDialog
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
@@ -236,7 +232,7 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.action_edit -> EditMangaDialog(this, presenter.manga).showDialog(router)
+            //R.id.action_edit -> EditMangaDialog(this, presenter.manga).showDialog(router)
             R.id.action_open_in_web_view -> openInWebView()
             R.id.action_share -> prepareToShareManga()
             R.id.action_add_to_home_screen -> addToHomeScreen()
@@ -609,40 +605,12 @@ class MangaInfoController : NucleusController<MangaInfoPresenter>(),
     }
 
     /**
-     * Dialog to choose a shape for the icon.
-     */
-    private class ChooseShapeDialog(bundle: Bundle? = null) : DialogController(bundle) {
-
-        constructor(target: MangaInfoController) : this() {
-            targetController = target
-        }
-
-        override fun onCreateDialog(savedViewState: Bundle?): Dialog {
-            val modes = intArrayOf(R.string.circular_icon,
-                    R.string.rounded_icon,
-                    R.string.square_icon,
-                    R.string.star_icon)
-
-            return MaterialDialog(activity!!)
-                    .title(R.string.icon_shape)
-                    .negativeButton(android.R.string.cancel)
-                    .listItemsSingleChoice (
-                        items = modes.map { activity?.getString(it) as CharSequence },
-                        waitForPositiveButton = false)
-                    { _, i, _ ->
-                        (targetController as? MangaInfoController)?.createShortcutForShape(i)
-                        dismissDialog()
-                    }
-        }
-    }
-
-    /**
      * Retrieves the bitmap of the shortcut with the requested shape and calls [createShortcut] when
      * the resource is available.
      *
      * @param i The shape index to apply. Defaults to circle crop transformation.
      */
-    private fun createShortcutForShape(i: Int = 0) {
+    fun createShortcutForShape(i: Int = 0) {
         if (activity == null) return
         GlideApp.with(activity!!)
                 .asBitmap()

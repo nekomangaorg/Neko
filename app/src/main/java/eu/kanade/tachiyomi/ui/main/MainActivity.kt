@@ -1,5 +1,8 @@
 package eu.kanade.tachiyomi.ui.main
 
+import android.animation.Animator
+import android.animation.AnimatorSet
+import android.animation.ValueAnimator
 import android.app.SearchManager
 import android.content.Intent
 import android.content.res.Configuration
@@ -7,7 +10,6 @@ import android.graphics.Color
 import android.graphics.Rect
 import android.os.Build
 import android.os.Bundle
-import android.provider.Settings
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
@@ -85,6 +87,10 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
     private var snackBar:Snackbar? = null
     private var extraViewForUndo:View? = null
     private var canDismissSnackBar = false
+
+    private var animationSet: AnimatorSet? = null
+
+    private  var bottomNavHeight = 0
 
     fun setUndoSnackBar(snackBar: Snackbar?, extraViewToCheck: View? = null) {
         this.snackBar = snackBar
@@ -306,11 +312,12 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         }
 
         navigationView.visibility = if (router.backstackSize > 1) View.GONE else View.VISIBLE
+        navigationView.alpha = if (router.backstackSize > 1) 0f else 1f
         router.addChangeListener(object : ControllerChangeHandler.ControllerChangeListener {
             override fun onChangeStarted(to: Controller?, from: Controller?, isPush: Boolean,
                                          container: ViewGroup, handler: ControllerChangeHandler) {
 
-                syncActivityViewWithController(to, from)
+                syncActivityViewWithController(to, from, isPush)
             }
 
             override fun onChangeCompleted(to: Controller?, from: Controller?, isPush: Boolean,
@@ -360,7 +367,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         return super.startSupportActionMode(callback)
     }
 
-    override fun onSupportActionModeFinished(mode: androidx.appcompat.view.ActionMode) {
+   /* override fun onSupportActionModeFinished(mode: androidx.appcompat.view.ActionMode) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) launchUI {
             val scale = Settings.Global.getFloat(
                 contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1.0f
@@ -371,7 +378,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             window?.statusBarColor = getResourceColor(android.R.attr.statusBarColor)
         }
         super.onSupportActionModeFinished(mode)
-    }
+    }*/
 
     private fun setExtensionsBadge() {
         val updates = preferences.extensionUpdatesCount().getOrDefault()
@@ -542,7 +549,8 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         return super.dispatchTouchEvent(ev)
     }
 
-    protected open fun syncActivityViewWithController(to: Controller?, from: Controller? = null) {
+    protected open fun syncActivityViewWithController(to: Controller?, from: Controller? = null,
+        isPush: Boolean = false) {
         if (from is DialogController || to is DialogController) {
             return
         }
@@ -577,8 +585,35 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             appbar.enableElevation()
         }
 
-        if (to !is DialogController)
-            navigationView.visibility = if (router.backstackSize > 1) View.GONE else View.VISIBLE
+        if (to !is DialogController) {
+            navigationView.visibility = if (router.backstackSize == 0 ||
+                (router.backstackSize <= 1 && !isPush))
+                View.VISIBLE else  navigationView.visibility
+            animationSet?.cancel()
+            animationSet = AnimatorSet()
+            val alphaAnimation = ValueAnimator.ofFloat(
+                navigationView.alpha,
+                if (router.backstackSize > 1) 0f else 1f
+            )
+            alphaAnimation.addUpdateListener { valueAnimator ->
+                navigationView.alpha = valueAnimator.animatedValue as Float
+            }
+            alphaAnimation.addListener(object : Animator.AnimatorListener {
+                override fun onAnimationEnd(animation: Animator?) {
+                    navigationView.visibility = if (router.backstackSize > 1) View.GONE else View.VISIBLE
+                }
+
+                override fun onAnimationCancel(animation: Animator?) { }
+
+                override fun onAnimationRepeat(animation: Animator?) { }
+
+                override fun onAnimationStart(animation: Animator?) { }
+            })
+            alphaAnimation.duration = 200
+            alphaAnimation.startDelay = 50
+            animationSet?.playTogether(alphaAnimation)
+            animationSet?.start()
+        }
     }
 
     override fun downloadStatusChanged(downloading: Boolean) {

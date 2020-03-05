@@ -7,6 +7,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.signature.ObjectKey
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -44,9 +45,9 @@ class MangaHeaderHolder(
         manga_genres_tags.setOnTagClickListener {
             adapter.coverListener?.tagClicked(it)
         }
-        filter_button.setOnClickListener {
-            adapter.coverListener?.showChapterFilter()
-        }
+        filter_button.setOnClickListener { adapter.coverListener?.showChapterFilter() }
+        filters_text.setOnClickListener { adapter.coverListener?.showChapterFilter() }
+        share_button.setOnClickListener { adapter.coverListener?.prepareToShareManga() }
         favorite_button.setOnClickListener {
             adapter.coverListener?.favoriteManga(false)
         }
@@ -66,6 +67,7 @@ class MangaHeaderHolder(
     }
 
     override fun bind(item: ChapterItem, manga: Manga) {
+        val presenter = adapter.coverListener?.mangaPresenter() ?: return
         manga_full_title.text = manga.currentTitle()
 
         if (manga.currentGenres().isNullOrBlank().not())
@@ -83,7 +85,8 @@ class MangaHeaderHolder(
             .no_description)
 
         manga_summary.post {
-            if (manga_summary.lineCount < 3 && manga.currentGenres().isNullOrBlank()) {
+            if ((manga_summary.lineCount < 3 && manga.currentGenres().isNullOrBlank())
+                || less_button.visibility == View.VISIBLE) {
                 more_button_group.gone()
             }
             else
@@ -127,11 +130,11 @@ class MangaHeaderHolder(
                 itemView.context.getResourceColor(R.attr
                 .colorOnSurface), 31))
         }
-        true_backdrop.setBackgroundColor(adapter.coverListener?.coverColor() ?:
+        true_backdrop.setBackgroundColor(adapter.coverListener.coverColor() ?:
         itemView.context.getResourceColor(android.R.attr.colorBackground))
 
         with(start_reading_button) {
-            val nextChapter = adapter.coverListener?.nextChapter()
+            val nextChapter = presenter.getNextUnreadChapter()
             visibleIf(nextChapter != null && !item.isLocked)
             if (nextChapter != null) {
                 val number = adapter.decimalFormat.format(nextChapter.chapter_number.toDouble())
@@ -147,11 +150,11 @@ class MangaHeaderHolder(
             }
         }
 
-        val count = adapter.coverListener?.chapterCount() ?: 0
+        val count = presenter.chapters.size
         chapters_title.text = itemView.resources.getQuantityString(R.plurals.chapters, count, count)
 
         top_view.updateLayoutParams<ConstraintLayout.LayoutParams> {
-            height = adapter.coverListener?.topCoverHeight() ?: 0
+            height = adapter.coverListener.topCoverHeight() ?: 0
         }
 
         manga_status.text = (itemView.context.getString( when (manga.status) {
@@ -160,7 +163,9 @@ class MangaHeaderHolder(
             SManga.LICENSED -> R.string.licensed
             else -> R.string.unknown_status
         }))
-        manga_source.text = adapter.coverListener?.mangaSource()?.toString()
+        manga_source.text = presenter.source.toString()
+
+        filters_text.text = presenter.currentFilters()
 
         if (!manga.initialized) return
         GlideApp.with(view.context).load(manga)
@@ -171,6 +176,7 @@ class MangaHeaderHolder(
             .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
             .signature(ObjectKey(MangaImpl.getLastCoverFetch(manga.id!!).toString()))
             .centerCrop()
+            .transition(DrawableTransitionOptions.withCrossFade())
             .into(backdrop)
     }
 

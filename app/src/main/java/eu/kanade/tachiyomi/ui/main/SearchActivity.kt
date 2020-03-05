@@ -39,7 +39,8 @@ class SearchActivity: MainActivity() {
         }
     }
 
-    override fun syncActivityViewWithController(to: Controller?, from: Controller?) {
+    override fun syncActivityViewWithController(to: Controller?, from: Controller?, isPush:
+    Boolean) {
         if (from is DialogController || to is DialogController) {
             return
         }

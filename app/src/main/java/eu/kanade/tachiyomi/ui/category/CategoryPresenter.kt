@@ -59,7 +59,7 @@ class CategoryPresenter(
      */
     fun createCategory(name: String): Boolean {
         // Do not allow duplicate categories.
-        if (categoryExists(name)) {
+        if (categoryExists(name, null)) {
             controller.onCategoryExistsError()
             return false
         }
@@ -116,7 +116,7 @@ class CategoryPresenter(
      */
     fun renameCategory(category: Category, name: String): Boolean {
         // Do not allow duplicate categories.
-        if (categoryExists(name)) {
+        if (categoryExists(name, category.id)) {
             controller.onCategoryExistsError()
             return false
         }
@@ -131,8 +131,8 @@ class CategoryPresenter(
     /**
      * Returns true if a category with the given name already exists.
      */
-    private fun categoryExists(name: String): Boolean {
-        return categories.any { it.name.equals(name, true) }
+    private fun categoryExists(name: String, id: Int?): Boolean {
+        return categories.any { it.name.equals(name, true) && id != it.id }
     }
 
     companion object {

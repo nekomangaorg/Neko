@@ -5,11 +5,10 @@ import android.view.MenuItem
 import androidx.fragment.app.FragmentActivity
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
-import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
+import eu.kanade.tachiyomi.ui.manga.MangaPresenter
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import uy.kohesive.injekt.injectLazy
@@ -60,13 +59,12 @@ class ChaptersAdapter(
 
     interface MangaHeaderInterface {
         fun coverColor(): Int?
-        fun nextChapter(): Chapter?
+        fun mangaPresenter(): MangaPresenter
+        fun prepareToShareManga()
         fun readNextChapter()
         fun downloadChapter(position: Int)
         fun topCoverHeight(): Int
-        fun chapterCount(): Int
         fun tagClicked(text: String)
-        fun mangaSource(): Source
         fun showChapterFilter()
         fun favoriteManga(longPress: Boolean)
     }

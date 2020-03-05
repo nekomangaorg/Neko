@@ -25,7 +25,7 @@ object Migrations {
                 if (BuildConfig.INCLUDE_UPDATER && preferences.automaticUpdates()) {
                     UpdaterJob.setupTask()
                 }
-                return false
+                return BuildConfig.DEBUG
             }
 
             if (oldVersion < 14) {

@@ -30,7 +30,7 @@
 
             <RadioGroup
                 android:id="@+id/sort_group"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:paddingStart="12dp"
@@ -39,33 +39,18 @@
                 <com.google.android.material.radiobutton.MaterialRadioButton
                     android:id="@+id/sort_newest"
                     android:layout_width="wrap_content"
+                    android:layout_weight="1"
                     android:layout_height="wrap_content"
-                    android:text="Newest first" />
+                    android:text="@string/newest_first" />
 
                 <com.google.android.material.radiobutton.MaterialRadioButton
                     android:id="@+id/sort_oldest"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
-                    android:text="Oldest first" />
+                    android:text="@string/oldest_first" />
             </RadioGroup>
-
-            <com.google.android.material.checkbox.MaterialCheckBox
-                android:id="@+id/sort_by_source"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
-                android:layout_marginEnd="12dp"
-                android:text="Sort by source's order" />
-
-
-            <com.google.android.material.checkbox.MaterialCheckBox
-                android:id="@+id/show_titles"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
-                android:layout_marginEnd="12dp"
-                android:text="Hide chapter titles" />
 
             <com.google.android.material.textview.MaterialTextView
                 style="@style/TextAppearance.MaterialComponents.Headline6"
@@ -82,7 +67,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
                 android:layout_marginEnd="12dp"
-                android:text="Show All" />
+                android:text="@string/show_all" />
 
             <com.google.android.material.checkbox.MaterialCheckBox
                 android:id="@+id/show_read"
@@ -90,7 +75,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
                 android:layout_marginEnd="12dp"
-                android:text="Show read chapters" />
+                android:text="@string/show_read_chapters" />
 
             <com.google.android.material.checkbox.MaterialCheckBox
                 android:id="@+id/show_unread"
@@ -98,7 +83,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
                 android:layout_marginEnd="12dp"
-                android:text="Show unread chapters" />
+                android:text="@string/show_unread_chapters" />
 
             <com.google.android.material.checkbox.MaterialCheckBox
                 android:id="@+id/show_download"
@@ -106,7 +91,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
                 android:layout_marginEnd="12dp"
-                android:text="Show downloaded chapters" />
+                android:text="@string/show_downloaded_chapters" />
 
             <com.google.android.material.checkbox.MaterialCheckBox
                 android:id="@+id/show_bookmark"
@@ -114,7 +99,45 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
                 android:layout_marginEnd="12dp"
-                android:text="Show bookmarked chapters" />
+                android:text="@string/show_bookmarked_chapters" />
+
+            <com.google.android.material.textview.MaterialTextView
+                style="@style/TextAppearance.MaterialComponents.Headline6"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="12dp"
+                android:text="@string/more" />
+
+            <RadioGroup
+                android:id="@+id/sort_method_group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp">
+
+                <com.google.android.material.radiobutton.MaterialRadioButton
+                    android:id="@+id/sort_by_source"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/sort_by_source_s_order" />
+
+                <com.google.android.material.radiobutton.MaterialRadioButton
+                    android:id="@+id/sort_by_number"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/sort_by_chapter_number" />
+            </RadioGroup>
+
+            <com.google.android.material.checkbox.MaterialCheckBox
+                android:id="@+id/hide_titles"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_marginEnd="12dp"
+                android:text="@string/hide_chapter_titles" />
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

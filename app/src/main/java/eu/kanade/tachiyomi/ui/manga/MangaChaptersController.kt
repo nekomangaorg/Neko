@@ -2,8 +2,13 @@ package eu.kanade.tachiyomi.ui.manga
 
 import android.animation.ValueAnimator
 import android.app.Activity
+import android.app.PendingIntent
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
+import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
@@ -16,16 +21,19 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.PopupMenu
+import androidx.core.content.pm.ShortcutInfoCompat
+import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.ColorUtils
+import androidx.core.graphics.drawable.IconCompat
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.vectordrawable.graphics.drawable.ArgbEvaluator
+import com.afollestad.materialdialogs.MaterialDialog
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import com.bumptech.glide.signature.ObjectKey
@@ -38,12 +46,15 @@ import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
+import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
+import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.base.controller.NoToolbarElevationController
 import eu.kanade.tachiyomi.ui.catalogue.CatalogueController
 import eu.kanade.tachiyomi.ui.library.ChangeMangaCategoriesDialog
@@ -54,25 +65,31 @@ import eu.kanade.tachiyomi.ui.manga.MangaController.Companion.FROM_CATALOGUE_EXT
 import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
 import eu.kanade.tachiyomi.ui.manga.chapter.ChapterMatHolder
 import eu.kanade.tachiyomi.ui.manga.chapter.ChaptersAdapter
+import eu.kanade.tachiyomi.ui.manga.info.EditMangaDialog
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
+import eu.kanade.tachiyomi.ui.webview.WebViewActivity
+import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.getText
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
+import jp.wasabeef.glide.transformations.CropSquareTransformation
+import jp.wasabeef.glide.transformations.MaskTransformation
 import kotlinx.android.synthetic.main.big_manga_controller.*
 import kotlinx.android.synthetic.main.big_manga_controller.swipe_refresh
 import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.android.synthetic.main.manga_info_controller.*
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.io.File
 
 class MangaChaptersController : BaseController,
-    ActionMode.Callback,
     FlexibleAdapter.OnItemClickListener,
     FlexibleAdapter.OnItemLongClickListener,
     ChaptersAdapter.MangaHeaderInterface,
@@ -184,7 +201,7 @@ class MangaChaptersController : BaseController,
                     )
                     colorAnimator?.cancel()
                     colorAnimator = ValueAnimator.ofObject(
-                        ArgbEvaluator(), colorFrom, colorTo
+                        android.animation.ArgbEvaluator(), colorFrom, colorTo
                     )
                     colorAnimator?.duration = 250 // milliseconds
                     colorAnimator?.addUpdateListener { animator ->
@@ -226,7 +243,7 @@ class MangaChaptersController : BaseController,
                                 colorBack
                             )
                             else it?.getDarkMutedColor(colorBack)) ?: colorBack
-                        onCoverLoaded(backDropColor)
+                        coverColor = backDropColor
                         (recycler.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder)
                             ?.setBackDrop(backDropColor)
                         if (toolbarIsColored) {
@@ -264,11 +281,15 @@ class MangaChaptersController : BaseController,
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
         super.onChangeStarted(handler, type)
         if (type == ControllerChangeType.PUSH_ENTER || type == ControllerChangeType.POP_ENTER) {
+            if (type == ControllerChangeType.POP_ENTER)
+                    return
             (activity as MainActivity).appbar.setBackgroundColor(Color.TRANSPARENT)
             (activity as MainActivity).toolbar.setBackgroundColor(Color.TRANSPARENT)
             activity?.window?.statusBarColor = Color.TRANSPARENT
         }
         else if (type == ControllerChangeType.PUSH_EXIT || type == ControllerChangeType.POP_EXIT) {
+            if (router.backstack.lastOrNull()?.controller() is DialogController)
+                return
             colorAnimator?.cancel()
 
             (activity as MainActivity).toolbar.setBackgroundColor(activity?.getResourceColor(
@@ -295,6 +316,7 @@ class MangaChaptersController : BaseController,
                 listOf(ChapterItem(presenter.headerItem, presenter.manga)) + presenter.chapters
             )
         }
+        activity?.invalidateOptionsMenu()
     }
 
 
@@ -305,7 +327,10 @@ class MangaChaptersController : BaseController,
             presenter.fetchChaptersFromSource()
         }
         adapter?.updateDataSet(listOf(presenter.headerItem) + chapters)
-}
+        activity?.invalidateOptionsMenu()
+    }
+
+    fun refreshAdapter() = adapter?.notifyDataSetChanged()
 
     override fun onItemClick(view: View?, position: Int): Boolean {
         val adapter = adapter ?: return false
@@ -392,42 +417,230 @@ class MangaChaptersController : BaseController,
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.chapters, menu)
+        inflater.inflate(R.menu.manga_details, menu)
+        val editItem = menu.findItem(R.id.action_edit)
+        editItem.isVisible = presenter.manga.favorite && !presenter.isLockedFromSearch
+        menu.findItem(R.id.action_download).isVisible = !presenter.isLockedFromSearch
+        menu.findItem(R.id.action_mark_all_as_read).isVisible =
+            presenter.getNextUnreadChapter() != null && !presenter.isLockedFromSearch
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.action_edit -> EditMangaDialog(this, presenter.manga).showDialog(router)
+            R.id.action_open_in_web_view -> openInWebView()
+            R.id.action_share -> prepareToShareManga()
+            R.id.action_add_to_home_screen -> addToHomeScreen()
+            R.id.action_mark_all_as_read -> {
+                MaterialDialog(view!!.context)
+                    .message(R.string.mark_all_as_read_message)
+                    .positiveButton(R.string.action_mark_as_read) {
+                        markAsRead(presenter.chapters)
+                    }
+                    .negativeButton(android.R.string.cancel)
+                    .show()
+            }
+            R.id.download_next, R.id.download_next_5, R.id.download_next_10,
+            R.id.download_custom, R.id.download_unread, R.id.download_all
+            -> downloadChapters(item.itemId)
+            else -> return super.onOptionsItemSelected(item)
+        }
+        return true
+    }
+
+    /**
+     * Called to run Intent with [Intent.ACTION_SEND], which show share dialog.
+     */
+    override fun prepareToShareManga() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && manga_cover.drawable != null)
+            GlideApp.with(activity!!).asBitmap().load(presenter.manga).into(object :
+                CustomTarget<Bitmap>() {
+                override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+                    presenter.shareManga(resource)
+                }
+                override fun onLoadCleared(placeholder: Drawable?) {}
+
+                override fun onLoadFailed(errorDrawable: Drawable?) {
+                    shareManga()
+                }
+            })
+        else shareManga()
+    }
+
+    /**
+     * Called to run Intent with [Intent.ACTION_SEND], which show share dialog.
+     */
+    fun shareManga(cover: File? = null) {
+        val context = view?.context ?: return
+
+        val source = presenter.source as? HttpSource ?: return
+        val stream = cover?.getUriCompat(context)
+        try {
+            val url = source.mangaDetailsRequest(presenter.manga).url.toString()
+            val intent = Intent(Intent.ACTION_SEND).apply {
+                type = "text/*"
+                putExtra(Intent.EXTRA_TEXT, url)
+                putExtra(Intent.EXTRA_TITLE, presenter.manga.currentTitle())
+                flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                if (stream != null) {
+                    clipData = ClipData.newRawUri(null, stream)
+                }
+            }
+            startActivity(Intent.createChooser(intent, context.getString(R.string.action_share)))
+        } catch (e: Exception) {
+            context.toast(e.message)
+        }
+    }
+
+    private fun openInWebView() {
+        val source = presenter.source as? HttpSource ?: return
+
+        val url = try {
+            source.mangaDetailsRequest(presenter.manga).url.toString()
+        } catch (e: Exception) {
+            return
+        }
+
+        val activity = activity ?: return
+        val intent = WebViewActivity.newIntent(activity.applicationContext, source.id, url, presenter.manga
+            .originalTitle())
+        startActivity(intent)
+    }
+
+    private fun downloadChapters(choice: Int) {
+        val chaptersToDownload = when (choice) {
+            R.id.download_next -> presenter.getUnreadChaptersSorted().take(1)
+            R.id.download_next_5 -> presenter.getUnreadChaptersSorted().take(5)
+            R.id.download_next_10 -> presenter.getUnreadChaptersSorted().take(10)
+            R.id.download_custom -> {
+                showCustomDownloadDialog()
+                return
+            }
+            R.id.download_unread -> presenter.chapters.filter { !it.read }
+            R.id.download_all -> presenter.chapters
+            else -> emptyList()
+        }
+        if (chaptersToDownload.isNotEmpty()) {
+            downloadChapters(chaptersToDownload)
+        }
+    }
+
+    private fun downloadChapters(chapters: List<ChapterItem>) {
+        val view = view
+        presenter.downloadChapters(chapters)
+        if (view != null && !presenter.manga.favorite && (snack == null ||
+                snack?.getText() != view.context.getString(R.string.snack_add_to_library))) {
+            snack = view.snack(view.context.getString(R.string.snack_add_to_library), Snackbar.LENGTH_INDEFINITE) {
+                setAction(R.string.action_add) {
+                    presenter.setFavorite(true)
+                }
+                addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
+                    override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+                        super.onDismissed(transientBottomBar, event)
+                        if (snack == transientBottomBar) snack = null
+                    }
+                })
+            }
+            (activity as? MainActivity)?.setUndoSnackBar(snack)
+        }
+    }
+
+    /**
+     * Add a shortcut of the manga to the home screen
+     */
+    private fun addToHomeScreen() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            // TODO are transformations really unsupported or is it just the Pixel Launcher?
+            createShortcutForShape()
+        } else {
+            ChooseShapeDialog(this).showDialog(router)
+        }
+    }
+
+    /**
+     * Retrieves the bitmap of the shortcut with the requested shape and calls [createShortcut] when
+     * the resource is available.
+     *
+     * @param i The shape index to apply. Defaults to circle crop transformation.
+     */
+    fun createShortcutForShape(i: Int = 0) {
+        if (activity == null) return
+        GlideApp.with(activity!!)
+            .asBitmap()
+            .load(presenter.manga)
+            .diskCacheStrategy(DiskCacheStrategy.NONE)
+            .apply {
+                when (i) {
+                    0 -> circleCrop()
+                    1 -> transform(RoundedCorners(5))
+                    2 -> transform(CropSquareTransformation())
+                    3 -> centerCrop().transform(MaskTransformation(R.drawable.mask_star))
+                }
+            }
+            .into(object : CustomTarget<Bitmap>(128, 128) {
+                override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+                    createShortcut(resource)
+                }
+
+                override fun onLoadCleared(placeholder: Drawable?) { }
+
+                override fun onLoadFailed(errorDrawable: Drawable?) {
+                    activity?.toast(R.string.icon_creation_fail)
+                }
+            })
+    }
+
+    /**
+     * Create shortcut using ShortcutManager.
+     *
+     * @param icon The image of the shortcut.
+     */
+    private fun createShortcut(icon: Bitmap) {
+        val activity = activity ?: return
+
+        // Create the shortcut intent.
+        val shortcutIntent = activity.intent
+            .setAction(MainActivity.SHORTCUT_MANGA)
+            .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            .putExtra(MangaController.MANGA_EXTRA, presenter.manga.id)
+
+        // Check if shortcut placement is supported
+        if (ShortcutManagerCompat.isRequestPinShortcutSupported(activity)) {
+            val shortcutId = "manga-shortcut-${presenter.manga.originalTitle()}-${presenter.source.name}"
+
+            // Create shortcut info
+            val shortcutInfo = ShortcutInfoCompat.Builder(activity, shortcutId)
+                .setShortLabel(presenter.manga.currentTitle())
+                .setIcon(IconCompat.createWithBitmap(icon))
+                .setIntent(shortcutIntent)
+                .build()
+
+            val successCallback = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                // Create the CallbackIntent.
+                val intent = ShortcutManagerCompat.createShortcutResultIntent(activity, shortcutInfo)
+
+                // Configure the intent so that the broadcast receiver gets the callback successfully.
+                PendingIntent.getBroadcast(activity, 0, intent, 0)
+            } else {
+                NotificationReceiver.shortcutCreatedBroadcast(activity)
+            }
+
+            // Request shortcut.
+            ShortcutManagerCompat.requestPinShortcut(activity, shortcutInfo,
+                successCallback.intentSender)
+        }
+    }
+
+    private fun showCustomDownloadDialog() {
+       // DownloadCustomChaptersDialog(this, presenter.chapters.size).showDialog(router)
     }
 
     override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
         return inflater.inflate(R.layout.big_manga_controller, container, false)
     }
 
-    override fun onActionItemClicked(mode: ActionMode?, item: MenuItem?): Boolean {
-        return true
-    }
-
-    override fun onCreateActionMode(mode: ActionMode?, menu: Menu?): Boolean {
-        return true
-
-    }
-
-    override fun onDestroyActionMode(mode: ActionMode?) {
-
-    }
-
-    override fun onPrepareActionMode(mode: ActionMode?, menu: Menu?): Boolean {
-        return true
-
-    }
-
-    fun onCoverLoaded(color: Int) {
-        if (view == null) return
-        coverColor = color
-        //activity?.window?.statusBarColor = color
-    }
-
     override fun coverColor(): Int? = coverColor
     override fun topCoverHeight(): Int = headerHeight
-
-    override fun nextChapter(): Chapter? = presenter.getNextUnreadChapter()
-    override fun mangaSource(): Source = presenter.source
 
     override fun readNextChapter() {
         if (activity is SearchActivity && presenter.isLockedFromSearch) {
@@ -451,17 +664,17 @@ class MangaChaptersController : BaseController,
     }
 
     override fun downloadChapter(position: Int) {
-        val adapter = adapter ?: return
-        val chapter = adapter.getItem(position) ?: return
+        val view = view ?: return
+        val chapter = adapter?.getItem(position) ?: return
         if (chapter.isHeader) return
         if (chapter.status != Download.NOT_DOWNLOADED && chapter.status != Download.ERROR) {
             presenter.deleteChapters(listOf(chapter))
         }
         else {
-            val isError = chapter.status == Download.ERROR
-            presenter.downloadChapters(listOf(chapter))
-            if (isError)
-                presenter.restartDownloads()
+            if (chapter.status == Download.ERROR)
+                DownloadService.start(view.context)
+            else
+                downloadChapters(listOf(chapter))
         }
     }
 
@@ -476,8 +689,6 @@ class MangaChaptersController : BaseController,
     override fun showChapterFilter() {
         ChaptersSortBottomSheet(this).show()
     }
-
-    override fun chapterCount():Int = presenter.chapters.size
 
     override fun favoriteManga(longPress: Boolean) {
         if (presenter.isLockedFromSearch) {
@@ -560,8 +771,29 @@ class MangaChaptersController : BaseController,
         (activity as? MainActivity)?.setUndoSnackBar(snack, fab_favorite)
     }
 
+    override fun mangaPresenter(): MangaPresenter = presenter
+
     override fun updateCategoriesForMangas(mangas: List<Manga>, categories: List<Category>) {
         val manga = mangas.firstOrNull() ?: return
         presenter.moveMangaToCategories(manga, categories)
+    }
+
+    /**
+     * Copies a string to clipboard
+     *
+     * @param label Label to show to the user describing the content
+     * @param content the actual text to copy to the board
+     */
+    private fun copyToClipboard(label: String, content: String, resId: Int) {
+        if (content.isBlank()) return
+
+        val activity = activity ?: return
+        val view = view ?: return
+
+        val clipboard = activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        clipboard.setPrimaryClip(ClipData.newPlainText(label, content))
+
+        snack = view.snack(view.context.getString(R.string.copied_to_clipboard, view.context
+            .getString(resId)))
     }
 }

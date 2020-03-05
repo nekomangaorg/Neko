@@ -28,7 +28,7 @@ import eu.kanade.tachiyomi.ui.manga.MangaChaptersController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.recently_read.RecentlyReadController
 import eu.kanade.tachiyomi.util.system.notificationManager
-import eu.kanade.tachiyomi.util.view.applyWindowInsetsForController
+import eu.kanade.tachiyomi.util.view.applyWindowInsetsForRootController
 import eu.kanade.tachiyomi.util.view.snack
 import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.android.synthetic.main.recent_chapters_controller.*
@@ -82,7 +82,8 @@ class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
      */
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
-        view.applyWindowInsetsForController()
+        view.applyWindowInsetsForRootController(activity!!.navigationView)
+        
         view.context.notificationManager.cancel(Notifications.ID_NEW_CHAPTERS)
         // Init RecyclerView and adapter
         val layoutManager = LinearLayoutManager(view.context)

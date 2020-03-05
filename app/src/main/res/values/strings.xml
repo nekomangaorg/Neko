@@ -68,6 +68,7 @@
     <string name="action_skip_manga">Don\'t migrate</string>
     <string name="action_select_all">Select all</string>
     <string name="action_mark_as_read">Mark as read</string>
+    <string name="action_mark_all_as_read">Mark all as read</string>
     <string name="action_mark_as_unread">Mark as unread</string>
     <string name="action_mark_previous_as_read">Mark previous as read</string>
     <string name="action_mark_multiple">Mark multiple</string>
@@ -507,6 +508,7 @@
         <item quantity="other">%1$d chapters</item>
     </plurals>
     <string name="no_description">No description</string>
+    <string name="mark_all_as_read_message">Mark all chapters as read?</string>
 
     <!-- Manga chapters fragment -->
     <string name="start_reading">Start reading</string>
@@ -710,5 +712,16 @@
     <string name="action_auto">Auto</string>
     <string name="more">More</string>
     <string name="less">Less</string>
+    <string name="more_options">More options</string>
+    <string name="show_bookmarked_chapters">Show bookmarked chapters</string>
+    <string name="show_downloaded_chapters">Show downloaded chapters</string>
+    <string name="show_unread_chapters">Show unread chapters</string>
+    <string name="show_read_chapters">Show read chapters</string>
+    <string name="show_all">Show All</string>
+    <string name="hide_chapter_titles">Hide chapter titles</string>
+    <string name="sort_by_source_s_order">Sort by source\'s order</string>
+    <string name="sort_by_chapter_number">Sort by chapter number</string>
+    <string name="newest_first">Newest to oldest</string>
+    <string name="oldest_first">Oldest to newest</string>
 
 </resources>

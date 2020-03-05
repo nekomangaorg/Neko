@@ -53,8 +53,8 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleVie
             title.setTextColor(ContextCompat.getColor(itemView.context, R.color.textColorHint))
             regularDrawable = ContextCompat.getDrawable(itemView.context, R.drawable
                 .ic_add_white_24dp)
-            edit_button.gone()
             image.gone()
+            edit_button.setImageDrawable(null)
             edit_text.setText("")
             edit_text.hint = title.text
         }
@@ -62,7 +62,6 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleVie
             title.setTextColor(ContextCompat.getColor(itemView.context, R.color.textColorPrimary))
             regularDrawable = ContextCompat.getDrawable(itemView.context, R.drawable
                 .ic_reorder_grey_24dp)
-            edit_button.visible()
             image.visible()
             edit_text.setText(title.text)
         }
@@ -94,12 +93,13 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleVie
         else {
             if (!createCategory) {
                 setDragHandleView(reorder)
+                edit_button.setImageDrawable(ContextCompat.getDrawable(itemView.context, R.drawable.ic_edit_white_24dp))
             }
             else {
+                edit_button.setImageDrawable(null)
                 reorder.setOnTouchListener { _, _ ->  true}
             }
             edit_text.clearFocus()
-            edit_button.setImageDrawable(ContextCompat.getDrawable(itemView.context, R.drawable.ic_edit_white_24dp))
             edit_button.drawable.mutate().setTint(ContextCompat.getColor(itemView.context, R
                 .color.gray_button))
             reorder.setImageDrawable(regularDrawable)

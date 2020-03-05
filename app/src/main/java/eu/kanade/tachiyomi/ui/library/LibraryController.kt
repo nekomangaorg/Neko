@@ -51,7 +51,7 @@ import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationProcedureConfig
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
-import eu.kanade.tachiyomi.util.view.applyWindowInsetsForController
+import eu.kanade.tachiyomi.util.view.applyWindowInsetsForRootController
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import eu.kanade.tachiyomi.util.view.snack
 import kotlinx.android.synthetic.main.filter_bottom_sheet.*
@@ -176,7 +176,7 @@ open class LibraryController(
 
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
-        view.applyWindowInsetsForController()
+        view.applyWindowInsetsForRootController(activity!!.navigationView)
         mangaPerRow = getColumnsPreferenceForCurrentOrientation().getOrDefault()
         if (!::presenter.isInitialized)
             presenter = LibraryPresenter(this)

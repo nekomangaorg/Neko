@@ -69,7 +69,8 @@ class LibraryGridHolder(
             var glide = GlideApp.with(adapter.recyclerView.context).load(item.manga)
                 .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                 .signature(ObjectKey(MangaImpl.getLastCoverFetch(id).toString()))
-            glide = if (fixedSize) glide.centerCrop() else glide.override(cover_thumbnail.maxHeight)
+            glide = if (fixedSize) glide.centerCrop().override(cover_thumbnail.maxHeight)
+            else glide.override(cover_thumbnail.maxHeight)
             glide.into(cover_thumbnail)
         }
     }

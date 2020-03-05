@@ -6,34 +6,24 @@ import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CompoundButton
-import android.widget.RadioButton
-import android.widget.RadioGroup
-import com.f2prateek.rx.preferences.Preference
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.setBottomEdge
 import eu.kanade.tachiyomi.util.view.setEdgeToEdge
 import eu.kanade.tachiyomi.util.view.visibleIf
 import kotlinx.android.synthetic.main.chapter_sort_bottom_sheet.*
-import uy.kohesive.injekt.injectLazy
 
-class ChaptersSortBottomSheet(private val controller: MangaChaptersController) : BottomSheetDialog
+class ChaptersSortBottomSheet(controller: MangaChaptersController) : BottomSheetDialog
     (controller.activity!!, R.style.BottomSheetDialogTheme) {
 
     val activity = controller.activity!!
 
-    /**
-     * Preferences helper.
-     */
-    private val preferences by injectLazy<PreferencesHelper>()
-
     private var sheetBehavior: BottomSheetBehavior<*>
 
+    private val presenter = controller.presenter
 
     init {
         // Use activity theme for this layout
@@ -45,7 +35,7 @@ class ChaptersSortBottomSheet(private val controller: MangaChaptersController) :
         val height = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             activity.window.decorView.rootWindowInsets.systemWindowInsetBottom
         } else 0
-        sheetBehavior.peekHeight = 220.dpToPx + height
+        sheetBehavior.peekHeight = 380.dpToPx + height
 
         sheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onSlide(bottomSheet: View, progress: Float) { }
@@ -62,7 +52,6 @@ class ChaptersSortBottomSheet(private val controller: MangaChaptersController) :
     override fun onStart() {
         super.onStart()
         sheetBehavior.skipCollapsed = true
-        sheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
     }
 
     /**
@@ -71,87 +60,79 @@ class ChaptersSortBottomSheet(private val controller: MangaChaptersController) :
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initGeneralPreferences()
-        setBottomEdge(show_bookmark, activity)
-        close_button.setOnClickListener {
-            dismiss()
-            true
-        }
+        setBottomEdge(hide_titles, activity)
+        close_button.setOnClickListener { dismiss() }
         settings_scroll_view.viewTreeObserver.addOnGlobalLayoutListener {
             val isScrollable =
                 settings_scroll_view!!.height < bottom_sheet.height +
                     settings_scroll_view.paddingTop + settings_scroll_view.paddingBottom
             close_button.visibleIf(isScrollable)
         }
+
+        setOnDismissListener {
+            presenter.setFilters(
+                show_read.isChecked,
+                show_unread.isChecked,
+                show_download.isChecked,
+                show_bookmark.isChecked
+            )
+        }
     }
 
 
     private fun initGeneralPreferences() {
-
-        show_read.isChecked = controller.presenter.onlyRead()
-        show_unread.isChecked = controller.presenter.onlyUnread()
-        show_download.isChecked = controller.presenter.onlyDownloaded()
-        show_bookmark.isChecked = controller.presenter.onlyBookmarked()
+        show_read.isChecked = presenter.onlyRead()
+        show_unread.isChecked = presenter.onlyUnread()
+        show_download.isChecked = presenter.onlyDownloaded()
+        show_bookmark.isChecked = presenter.onlyBookmarked()
 
         show_all.isChecked = !(show_read.isChecked || show_unread.isChecked ||
             show_download.isChecked || show_bookmark.isChecked)
 
-        if (controller.presenter.onlyRead())
-        //Disable unread filter option if read filter is enabled.
-            show_unread.isEnabled = false
-        if (controller.presenter.onlyUnread())
-        //Disable read filter option if unread filter is enabled.
-            show_read.isEnabled = false
-
-        sort_group.check(if (controller.presenter.manga.sortDescending()) R.id.sort_newest else
+        sort_group.check(if (presenter.manga.sortDescending()) R.id.sort_newest else
             R.id.sort_oldest)
 
-        show_titles.isChecked = controller.presenter.manga.displayMode == Manga.DISPLAY_NAME
-        sort_by_source.isChecked = controller.presenter.manga.sorting == Manga.SORTING_SOURCE
+        hide_titles.isChecked = presenter.manga.displayMode != Manga.DISPLAY_NAME
+        sort_method_group.check(if (presenter.manga.sorting == Manga.SORTING_SOURCE) R.id.sort_by_source else
+            R.id.sort_by_number)
 
         sort_group.setOnCheckedChangeListener { _, checkedId ->
-            controller.presenter.setSortOrder(checkedId == R.id.sort_oldest)
+            presenter.setSortOrder(checkedId == R.id.sort_oldest)
             dismiss()
         }
 
-        /*sort_group.bindToPreference(preferences.libraryLayout()) {
-            controller.reattachAdapter()
-            if (sheetBehavior.state == BottomSheetBehavior.STATE_COLLAPSED)
-                dismiss()
+        sort_method_group.setOnCheckedChangeListener { _, checkedId ->
+            presenter.setSortMethod(checkedId == R.id.sort_by_source)
         }
-        uniform_grid.bindToPreference(preferences.uniformGrid()) {
-            controller.reattachAdapter()
+
+        hide_titles.setOnCheckedChangeListener { _, isChecked ->
+            presenter.hideTitle(isChecked)
         }
-        grid_size_toggle_group.bindToPreference(preferences.gridSize()) {
-            controller.reattachAdapter()
-        }
-        download_badge.bindToPreference(preferences.downloadBadge()) {
-            controller.presenter.requestDownloadBadgesUpdate()
-        }
-        unread_badge_group.bindToPreference(preferences.unreadBadgeType()) {
-            controller.presenter.requestUnreadBadgesUpdate()
-        }*/
+
+        show_all.setOnCheckedChangeListener(::checkedFilter)
+        show_read.setOnCheckedChangeListener(::checkedFilter)
+        show_unread.setOnCheckedChangeListener(::checkedFilter)
+        show_download.setOnCheckedChangeListener(::checkedFilter)
+        show_bookmark.setOnCheckedChangeListener(::checkedFilter)
     }
 
-    /**
-     * Binds a checkbox or switch view with a boolean preference.
-     */
-    private fun CompoundButton.bindToPreference(pref: Preference<Boolean>, block: () -> Unit) {
-        isChecked = pref.getOrDefault()
-        setOnCheckedChangeListener { _, isChecked ->
-            pref.set(isChecked)
-            block()
+    private fun checkedFilter(checkBox: CompoundButton, isChecked: Boolean) {
+        if (isChecked) {
+            if (show_all == checkBox) {
+                show_read.isChecked = false
+                show_unread.isChecked = false
+                show_download.isChecked = false
+                show_bookmark.isChecked = false
+            }
+            else {
+                show_all.isChecked = false
+                if (show_read == checkBox) show_unread.isChecked = false
+                else if (show_unread == checkBox) show_read.isChecked = false
+            }
         }
-    }
-
-    /**
-     * Binds a radio group with a int preference.
-     */
-    private fun RadioGroup.bindToPreference(pref: Preference<Int>, block: () -> Unit) {
-        (getChildAt(pref.getOrDefault()) as RadioButton).isChecked = true
-        setOnCheckedChangeListener { _, checkedId ->
-            val index = indexOfChild(findViewById(checkedId))
-            pref.set(index)
-            block()
+        else if (!show_read.isChecked && !show_unread.isChecked &&
+            !show_download.isChecked && !show_bookmark.isChecked) {
+            show_all.isChecked = true
         }
     }
 }

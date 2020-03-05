@@ -12,6 +12,7 @@ import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import android.view.WindowInsets
 import android.widget.Button
 import android.widget.FrameLayout
@@ -207,6 +208,28 @@ fun View.applyWindowInsetsForController() {
     requestApplyInsetsWhenAttached()
 }
 
+fun View.applyWindowInsetsForRootController(bottomNav: View) {
+    viewTreeObserver.addOnGlobalLayoutListener(
+        object : ViewTreeObserver.OnGlobalLayoutListener {
+            override fun onGlobalLayout() {
+                if (bottomNav.height > 0) {
+                    viewTreeObserver.removeOnGlobalLayoutListener(this)
+                    setOnApplyWindowInsetsListener { view, insets ->
+                        view.updateLayoutParams<FrameLayout.LayoutParams> {
+                            val attrsArray = intArrayOf(android.R.attr.actionBarSize)
+                            val array = view.context.obtainStyledAttributes(attrsArray)
+                            topMargin = insets.systemWindowInsetTop + array.getDimensionPixelSize(0, 0)
+                            bottomMargin = bottomNav.height
+                            array.recycle()
+                        }
+                        insets
+                    }
+                    requestApplyInsetsWhenAttached()
+                }
+            }
+        }
+    )
+}
 
 fun View.requestApplyInsetsWhenAttached() {
     if (isAttachedToWindow) {
