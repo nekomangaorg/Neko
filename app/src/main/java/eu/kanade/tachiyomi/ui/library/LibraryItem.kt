@@ -22,7 +22,6 @@ import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import kotlinx.android.synthetic.main.catalogue_grid_item.view.*
-import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 
 class LibraryItem(val manga: LibraryManga,
@@ -71,8 +70,8 @@ class LibraryItem(val manga: LibraryManga,
                         constraint_layout.layoutParams = FrameLayout.LayoutParams(
                             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
                         )
-                        cover_thumbnail.maxHeight = (parent.itemWidth / 3f * 3.7f).toInt()
-                        cover_thumbnail.minimumHeight = (parent.itemWidth / 3f * 3.7f).toInt()
+                        cover_thumbnail.maxHeight = Int.MAX_VALUE
+                        cover_thumbnail.minimumHeight = 0
                         constraint_layout.minHeight = 0
                         cover_thumbnail.scaleType = ImageView.ScaleType.CENTER_CROP
                         cover_thumbnail.adjustViewBounds = false

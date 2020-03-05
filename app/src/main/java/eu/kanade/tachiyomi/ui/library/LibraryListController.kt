@@ -96,31 +96,14 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
                 activeCategory = order
                 val category = presenter.categories.find { it.order == order }
 
-                //val categortPosition = presenter.categories.indexOf(category)
                 customTitleSpinner.category_title.text = category?.name ?: ""
-                /*if (spinner.selectedItemPosition != categortPosition) {
-                    updateScroll = true
-                    spinner.setSelection(categortPosition, true)
-                }*/
             }
         }
     }
 
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
-        /*launchUI {
-            view.updateLayoutParams<FrameLayout.LayoutParams> {
-                val attrsArray = intArrayOf(android.R.attr.actionBarSize)
-                val array = view.context.obtainStyledAttributes(attrsArray)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    topMargin =
-                        view.rootWindowInsets.systemWindowInsetTop + array.getDimensionPixelSize(
-                            0, 0
-                        )
-                }
-                array.recycle()
-            }
-        }*/
+
         // pad the recycler if the filter bottom sheet is visible
         if (!phoneLandscape) {
             val height = view.context.resources.getDimensionPixelSize(R.dimen.rounder_radius) + 4.dpToPx
@@ -135,19 +118,6 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
 
     override fun layoutView(view: View) {
         adapter = LibraryCategoryAdapter(this)
-       /* recycler =
-            (library_layout.inflate(R.layout.library_grid_recycler) as AutofitRecyclerView).apply {
-                spanCount = if (libraryLayout == 0) 1 else mangaPerRow
-                manager.spanSizeLookup = (object : GridLayoutManager.SpanSizeLookup() {
-                    override fun getSpanSize(position: Int): Int {
-                        if (libraryLayout == 0) return 1
-                        val item = this@LibraryListController.adapter.getItem(position)
-                        return if (item is LibraryHeaderItem) manager.spanCount else 1
-                    }
-                })
-            }*/
-
-        //recycler.spanCount = if (libraryLayout == 0) 1 else mangaPerRow
         if (libraryLayout == 0)recycler.spanCount =  1
         else recycler.columnWidth = (90 + (preferences.gridSize().getOrDefault() * 30)).dpToPx
         recycler.manager.spanSizeLookup = (object : GridLayoutManager.SpanSizeLookup() {
@@ -159,22 +129,12 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
         })
         recycler.setHasFixedSize(true)
         recycler.adapter = adapter
-        //recycler_layout.addView(recycler)
         adapter.fastScroller = fast_scroller
         recycler.addOnScrollListener(scrollListener)
-
-       /* val dropdown = library_layout.inflate(R.layout.expanded_dropdown_menu) as
-            TextInputLayout // ReSpinner(view .context)
-        spinner = dropdown.filled_exposed_dropdown*/
 
         val tv = TypedValue()
         activity!!.theme.resolveAttribute(R.attr.actionBarTintColor, tv, true)
 
-        /*spinner.backgroundTintList = ContextCompat.getColorStateList(
-            view.context, tv.resourceId
-        )
-        (spinner.parent.parent as ViewGroup).removeView(spinner.parent as View)
-        (activity as MainActivity).supportActionBar?.customView = spinner.parent as View*/
         customTitleSpinner = library_layout.inflate(R.layout.spinner_title) as LinearLayout
         (activity as MainActivity).supportActionBar?.setDisplayShowCustomEnabled(false)
         spinnerAdapter = SpinnerAdapter(
@@ -192,9 +152,6 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
             true
         }
         (activity as MainActivity).supportActionBar?.customView = customTitleSpinner
-        //spinnerAdapter?.setDropDownViewResource(R.layout.library_spinner_entry_text)
-        //spinner.setAdapter(spinnerAdapter)
-       // spinner.adapter = spinnerAdapter
     }
 
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
@@ -230,15 +187,11 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
         }
         adapter.setItems(mangaMap)
 
-
-        //spinner.onItemSelectedListener = null
         val categoryNames =  presenter.categories.map { it.name }.toTypedArray()
         spinnerAdapter = SpinnerAdapter(recyclerLayout.context, R.layout.library_spinner_textview,
             if (categoryNames.isNotEmpty()) categoryNames
             else arrayOf(recyclerLayout.context.getString(R.string.label_library))
         )
-        //spinnerAdapter?.setDropDownViewResource(R.layout.library_spinner_entry_text)
-        //spinner.setAdapter(spinnerAdapter)
 
         val isCurrentController = router?.backstack?.lastOrNull()?.controller() ==
             this
@@ -246,7 +199,6 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
             ?.setDisplayShowCustomEnabled(isCurrentController && presenter.categories.size > 1)
         if (isCurrentController) setTitle()
 
-        //spinner.setSelection(min(presenter.categories.size - 1, activeCategory))
         customTitleSpinner.category_title.text =
             presenter.categories[clamp(activeCategory,
                 0,
@@ -265,7 +217,6 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
             updateScroll = true
         }
         adapter.isLongPressDragEnabled = canDrag()
-        //tabsVisibilityRelay.call(false)
 
         titlePopupMenu.menu.clear()
         presenter.categories.forEach { category ->
@@ -275,13 +226,6 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
 
             titlePopupMenu.show()
         }
-        /*spinner.onItemSelectedListener = IgnoreFirstSpinnerListener { pos ->
-            if (updateScroll) {
-                updateScroll = false
-                return@IgnoreFirstSpinnerListener
-            }
-            scrollToHeader(presenter.categories[pos].order)
-        }*/
     }
 
     private fun scrollToHeader(pos: Int, fade:Boolean = false) {

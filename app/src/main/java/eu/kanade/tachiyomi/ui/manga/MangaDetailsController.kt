@@ -161,7 +161,7 @@ class MangaDetailsController : BaseController,
                 DividerItemDecoration.VERTICAL
             )
         )
-        recycler.setHasFixedSize(true)
+        recycler.setHasFixedSize(false)
         adapter?.fastScroller = fast_scroller
         val attrsArray = intArrayOf(android.R.attr.actionBarSize)
         val array = view.context.obtainStyledAttributes(attrsArray)
@@ -290,6 +290,7 @@ class MangaDetailsController : BaseController,
         else if (type == ControllerChangeType.PUSH_EXIT || type == ControllerChangeType.POP_EXIT) {
             if (router.backstack.lastOrNull()?.controller() is DialogController)
                 return
+            if (type == ControllerChangeType.POP_EXIT) setHasOptionsMenu(false)
             colorAnimator?.cancel()
 
             (activity as MainActivity).toolbar.setBackgroundColor(activity?.getResourceColor(
@@ -333,17 +334,10 @@ class MangaDetailsController : BaseController,
     fun refreshAdapter() = adapter?.notifyDataSetChanged()
 
     override fun onItemClick(view: View?, position: Int): Boolean {
-        val adapter = adapter ?: return false
-        val chapter = adapter.getItem(position)?.chapter ?: return false
+        val chapter = adapter?.getItem(position)?.chapter ?: return false
         if (chapter.isHeader) return false
-        /*if (actionMode != null && adapter.mode == SelectableAdapter.Mode.MULTI) {
-            lastClickPosition = position
-            toggleSelection(position)
-            return true
-        } else {*/
-            openChapter(chapter)
-            return false
-        //}
+        openChapter(chapter)
+        return false
     }
 
     override fun onItemLongClick(position: Int) {

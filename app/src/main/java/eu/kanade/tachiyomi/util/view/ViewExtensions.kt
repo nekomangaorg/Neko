@@ -208,6 +208,19 @@ fun View.applyWindowInsetsForController() {
     requestApplyInsetsWhenAttached()
 }
 
+fun View.checkHeightThen(f: () -> Unit) {
+    viewTreeObserver.addOnGlobalLayoutListener(
+        object : ViewTreeObserver.OnGlobalLayoutListener {
+            override fun onGlobalLayout() {
+                if (height > 0) {
+                    viewTreeObserver.removeOnGlobalLayoutListener(this)
+                    f()
+                }
+            }
+        }
+    )
+}
+
 fun View.applyWindowInsetsForRootController(bottomNav: View) {
     viewTreeObserver.addOnGlobalLayoutListener(
         object : ViewTreeObserver.OnGlobalLayoutListener {
@@ -279,10 +292,13 @@ fun Controller.setOnQueryTextChangeListener(searchView: SearchView, f: (text: St
             if (router.backstack.lastOrNull()?.controller() == this@setOnQueryTextChangeListener) {
                 return f(newText)
             }
-            return true
+            return false
         }
 
         override fun onQueryTextSubmit(query: String?): Boolean {
+            if (router.backstack.lastOrNull()?.controller() == this@setOnQueryTextChangeListener) {
+                return f(query)
+            }
             return true
         }
     })

@@ -507,7 +507,7 @@ class LibraryPresenter(
 
     suspend fun updateView(categories: List<Category>, mangaMap: LibraryMap, freshStart:Boolean
     = false) {
-        if (!preferences.libraryAsSingleList().getOrDefault()) {
+        if (view !is LibraryListController) {
             view.onNextLibraryUpdate(categories, mangaMap, freshStart)
         }
         else {
@@ -536,7 +536,7 @@ class LibraryPresenter(
 
     fun updateViewBlocking() {
         val mangaMap = currentMangaMap ?: return
-        if (!preferences.libraryAsSingleList().getOrDefault()) {
+        if (view !is LibraryListController) {
             if (mangaMap.values.firstOrNull()?.firstOrNull()?.header != null)
                 return
             view.onNextLibraryUpdate(categories, mangaMap, true)
