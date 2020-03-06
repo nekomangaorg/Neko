@@ -68,8 +68,8 @@ class SettingsRelatedController : SettingsController() {
         preference {
             title = "Github"
             val url =
-                "https://github.com/goldbattle/MangadexRecomendations/blob/master/output"
-            summary = "Download latest manga compressed json for recommendations (updated daily)"
+                "https://github.com/goldbattle/MangadexRecomendations/releases/download/v1.0.0/mangas_compressed.json"
+            summary = "Download latest manga compressed json for recommendations (updated daily)."
             onClick {
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
                 startActivity(intent)
@@ -148,7 +148,7 @@ class SettingsRelatedController : SettingsController() {
                             .apply {
                                 setContentTitle(context.resources.getString(R.string.pref_related_loading_welcome))
                                 setSmallIcon(R.drawable.ic_neko_notification)
-                                setPriority(NotificationCompat.PRIORITY_LOW)
+                                priority = NotificationCompat.PRIORITY_LOW
                                 setOngoing(true)
                                 setOnlyAlertOnce(true)
                                 setColor(ContextCompat.getColor(context, R.color.colorPrimary))

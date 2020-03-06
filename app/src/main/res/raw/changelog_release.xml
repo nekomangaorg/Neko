@@ -2,9 +2,15 @@
 <changelog bulletedList="true">
     <changelogversion
         changeDate=""
+        versionName="v1.6.4.1">
+        <changelogtext>Changed link for related manga
+        </changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
         versionName="v1.6.4">
         <changelogtext>Added recommendations tab in manga info (alpha) Requires download a json and
-            loading it manually for now
+            loading it manually for now. Enable in settings
         </changelogtext>
         <changelogtext>add setting to manage notifications</changelogtext>
         <changelogtext>refresh webtoon adapter on image property changes</changelogtext>
