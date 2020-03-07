@@ -1,5 +1,9 @@
 package eu.kanade.tachiyomi.ui.manga
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.app.Activity
 import android.app.PendingIntent
@@ -10,6 +14,7 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.graphics.Rect
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Build
@@ -21,6 +26,7 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.DecelerateInterpolator
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
@@ -29,6 +35,11 @@ import androidx.core.graphics.drawable.IconCompat
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.transition.ChangeBounds
+import androidx.transition.ChangeImageTransform
+import androidx.transition.TransitionManager
+import androidx.transition.TransitionSet
 import com.afollestad.materialdialogs.MaterialDialog
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
@@ -65,6 +76,7 @@ import eu.kanade.tachiyomi.ui.manga.MangaController.Companion.FROM_CATALOGUE_EXT
 import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
 import eu.kanade.tachiyomi.ui.manga.chapter.ChapterMatHolder
 import eu.kanade.tachiyomi.ui.manga.chapter.ChaptersAdapter
+import eu.kanade.tachiyomi.ui.manga.chapter.DownloadCustomChaptersDialog
 import eu.kanade.tachiyomi.ui.manga.info.EditMangaDialog
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
@@ -83,8 +95,7 @@ import jp.wasabeef.glide.transformations.CropSquareTransformation
 import jp.wasabeef.glide.transformations.MaskTransformation
 import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.android.synthetic.main.manga_details_controller.*
-import kotlinx.android.synthetic.main.manga_details_controller.swipe_refresh
-import kotlinx.android.synthetic.main.manga_info_controller.*
+import kotlinx.android.synthetic.main.manga_header_item.*
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File
@@ -94,6 +105,7 @@ class MangaDetailsController : BaseController,
     FlexibleAdapter.OnItemLongClickListener,
     ChaptersAdapter.MangaHeaderInterface,
     ChangeMangaCategoriesDialog.Listener,
+    DownloadCustomChaptersDialog.Listener,
     NoToolbarElevationController {
 
     constructor(manga: Manga?,
@@ -129,11 +141,16 @@ class MangaDetailsController : BaseController,
     var coverColor:Int? = null
     var toolbarIsColored = false
     private var snack: Snackbar? = null
-    private val fromCatalogue = args.getBoolean(FROM_CATALOGUE_EXTRA, false)
+    val fromCatalogue = args.getBoolean(FROM_CATALOGUE_EXTRA, false)
+    var coverDrawable:Drawable? = null
     /**
      * Adapter containing a list of chapters.
      */
     private var adapter: ChaptersAdapter? = null
+
+    // Hold a reference to the current animator,
+    // so that it can be canceled mid-way.
+    private var currentAnimator: Animator? = null
 
     var headerHeight = 0
 
@@ -183,8 +200,10 @@ class MangaDetailsController : BaseController,
         }
 
         presenter.onCreate()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            recycler.setOnScrollChangeListener { _, _, _, _, _ ->
+
+        recycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
                 val atTop = !recycler.canScrollVertically(-1)
                 if ((!atTop && !toolbarIsColored) || (atTop && toolbarIsColored)) {
                     toolbarIsColored = !atTop
@@ -194,10 +213,10 @@ class MangaDetailsController : BaseController,
                         if (colorAnimator?.isRunning == true) activity?.window?.statusBarColor
                             ?: color
                         else ColorUtils.setAlphaComponent(
-                            color, if (toolbarIsColored) 0 else 255
+                            color, if (toolbarIsColored) 0 else 175
                         )
                     val colorTo = ColorUtils.setAlphaComponent(
-                        color, if (toolbarIsColored) 255 else 0
+                        color, if (toolbarIsColored) 175 else 0
                     )
                     colorAnimator?.cancel()
                     colorAnimator = ValueAnimator.ofObject(
@@ -209,12 +228,18 @@ class MangaDetailsController : BaseController,
                         activity?.window?.statusBarColor = (animator.animatedValue as Int)
                     }
                     colorAnimator?.start()
-                    val isCurrentController = router?.backstack?.lastOrNull()?.controller() == this
+                    val isCurrentController =
+                        router?.backstack?.lastOrNull()?.controller() == this@MangaDetailsController
                     if (isCurrentController) setTitle()
                 }
             }
-        }
+        })
         setPaletteColor()
+
+        if (manga?.initialized != true)
+            swipe_refresh.post {
+                swipe_refresh.isRefreshing = true
+            }
 
         swipe_refresh.setOnRefreshListener {
             presenter.refreshAll()
@@ -230,6 +255,7 @@ class MangaDetailsController : BaseController,
                 override fun onResourceReady(resource: Drawable,
                     transition: Transition<in Drawable>?
                 ) {
+                    coverDrawable = resource
                     Palette.from(
                         (resource as BitmapDrawable).bitmap).generate {
                         if (recycler == null) return@generate
@@ -247,8 +273,9 @@ class MangaDetailsController : BaseController,
                         (recycler.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder)
                             ?.setBackDrop(backDropColor)
                         if (toolbarIsColored) {
-                            (activity as MainActivity).toolbar.setBackgroundColor(backDropColor)
-                            activity?.window?.statusBarColor = backDropColor
+                            val translucentColor = ColorUtils.setAlphaComponent(backDropColor, 175)
+                            (activity as MainActivity).toolbar.setBackgroundColor(translucentColor)
+                            activity?.window?.statusBarColor = translucentColor
                         }
                     }
                 }
@@ -370,6 +397,7 @@ class MangaDetailsController : BaseController,
                 R.id.action_bookmark -> bookmarkChapters(chapters, true)
                 R.id.action_remove_bookmark -> bookmarkChapters(chapters, false)
                 R.id.action_mark_as_read -> markAsRead(chapters)
+                R.id.action_mark_previous_as_read -> markPreviousAsRead(item)
                 R.id.action_mark_as_unread -> markAsUnread(chapters)
             }
             true
@@ -377,6 +405,15 @@ class MangaDetailsController : BaseController,
 
         // Finally show the PopupMenu
         popup.show()
+    }
+
+    private fun markPreviousAsRead(chapter: ChapterItem) {
+        val adapter = adapter ?: return
+        val chapters = if (presenter.sortDescending()) adapter.items.reversed() else adapter.items
+        val chapterPos = chapters.indexOf(chapter)
+        if (chapterPos != -1) {
+            markAsRead(chapters.take(chapterPos))
+        }
     }
 
     private fun bookmarkChapters(chapters: List<ChapterItem>, bookmarked: Boolean) {
@@ -417,6 +454,8 @@ class MangaDetailsController : BaseController,
         menu.findItem(R.id.action_download).isVisible = !presenter.isLockedFromSearch
         menu.findItem(R.id.action_mark_all_as_read).isVisible =
             presenter.getNextUnreadChapter() != null && !presenter.isLockedFromSearch
+        menu.findItem(R.id.action_mark_all_as_unread).isVisible =
+            !presenter.allUnread() && !presenter.isLockedFromSearch
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -434,6 +473,7 @@ class MangaDetailsController : BaseController,
                     .negativeButton(android.R.string.cancel)
                     .show()
             }
+            R.id.action_mark_all_as_unread -> markAsUnread(presenter.chapters)
             R.id.download_next, R.id.download_next_5, R.id.download_next_10,
             R.id.download_custom, R.id.download_unread, R.id.download_all
             -> downloadChapters(item.itemId)
@@ -446,7 +486,7 @@ class MangaDetailsController : BaseController,
      * Called to run Intent with [Intent.ACTION_SEND], which show share dialog.
      */
     override fun prepareToShareManga() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && manga_cover.drawable != null)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && coverDrawable != null)
             GlideApp.with(activity!!).asBitmap().load(presenter.manga).into(object :
                 CustomTarget<Bitmap>() {
                 override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
@@ -486,7 +526,7 @@ class MangaDetailsController : BaseController,
         }
     }
 
-    private fun openInWebView() {
+    override fun openInWebView() {
         val source = presenter.source as? HttpSource ?: return
 
         val url = try {
@@ -626,7 +666,14 @@ class MangaDetailsController : BaseController,
     }
 
     private fun showCustomDownloadDialog() {
-       // DownloadCustomChaptersDialog(this, presenter.chapters.size).showDialog(router)
+        DownloadCustomChaptersDialog(this, presenter.chapters.size).showDialog(router)
+    }
+
+    override fun downloadCustomChapters(amount: Int) {
+        val chaptersToDownload = presenter.getUnreadChaptersSorted().take(amount)
+        if (chaptersToDownload.isNotEmpty()) {
+            downloadChapters(chaptersToDownload)
+        }
     }
 
     override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
@@ -710,32 +757,52 @@ class MangaDetailsController : BaseController,
             }
         }
         else {
-            if (presenter.toggleFavorite()) {
-                val categories = presenter.getCategories()
-                val defaultCategoryId = presenter.preferences.defaultCategory()
-                val defaultCategory = categories.find { it.id == defaultCategoryId }
-                when {
-                    defaultCategory != null -> presenter.moveMangaToCategory(manga, defaultCategory)
-                    defaultCategoryId == 0 || categories.isEmpty() -> // 'Default' or no category
-                        presenter.moveMangaToCategory(manga, null)
-                    else -> {
-                        val ids = presenter.getMangaCategoryIds(manga)
-                        val preselected = ids.mapNotNull { id ->
-                            categories.indexOfFirst { it.id == id }.takeIf { it != -1 }
-                        }.toTypedArray()
-
-                        ChangeMangaCategoriesDialog(
-                            this,
-                            listOf(manga),
-                            categories,
-                            preselected
-                        ).showDialog(router)
-                    }
-                }
-                showAddedSnack()
-            } else {
-                showRemovedSnack()
+            if (!manga.favorite) {
+                toggleMangaFavorite()
             }
+            else {
+                val headerHolder = recycler.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder ?:
+                return
+                val popup = PopupMenu(view!!.context, headerHolder.favorite_button)
+                popup.menu.add(R.string.remove_from_library)
+
+                // Set a listener so we are notified if a menu item is clicked
+                popup.setOnMenuItemClickListener {
+                    toggleMangaFavorite()
+                    true
+                }
+                popup.show()
+            }
+        }
+    }
+
+    private fun toggleMangaFavorite() {
+        val manga = presenter.manga
+        if (presenter.toggleFavorite()) {
+            val categories = presenter.getCategories()
+            val defaultCategoryId = presenter.preferences.defaultCategory()
+            val defaultCategory = categories.find { it.id == defaultCategoryId }
+            when {
+                defaultCategory != null -> presenter.moveMangaToCategory(manga, defaultCategory)
+                defaultCategoryId == 0 || categories.isEmpty() -> // 'Default' or no category
+                    presenter.moveMangaToCategory(manga, null)
+                else -> {
+                    val ids = presenter.getMangaCategoryIds(manga)
+                    val preselected = ids.mapNotNull { id ->
+                        categories.indexOfFirst { it.id == id }.takeIf { it != -1 }
+                    }.toTypedArray()
+
+                    ChangeMangaCategoriesDialog(
+                        this,
+                        listOf(manga),
+                        categories,
+                        preselected
+                    ).showDialog(router)
+                }
+            }
+            showAddedSnack()
+        } else {
+            showRemovedSnack()
         }
     }
 
@@ -762,7 +829,9 @@ class MangaDetailsController : BaseController,
                 }
             })
         }
-        (activity as? MainActivity)?.setUndoSnackBar(snack, fab_favorite)
+        val favButton = (recycler.findViewHolderForAdapterPosition(0)
+            as? MangaHeaderHolder)?.favorite_button
+        (activity as? MainActivity)?.setUndoSnackBar(snack, favButton)
     }
 
     override fun mangaPresenter(): MangaDetailsPresenter = presenter
@@ -775,19 +844,158 @@ class MangaDetailsController : BaseController,
     /**
      * Copies a string to clipboard
      *
-     * @param label Label to show to the user describing the content
      * @param content the actual text to copy to the board
+     * @param label Label to show to the user describing the content
      */
-    private fun copyToClipboard(label: String, content: String, resId: Int) {
+    override fun copyToClipboard(content: String, label: Int) {
         if (content.isBlank()) return
 
         val activity = activity ?: return
         val view = view ?: return
 
+        val contentType = view.context.getString(label)
         val clipboard = activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        clipboard.setPrimaryClip(ClipData.newPlainText(label, content))
+        clipboard.setPrimaryClip(ClipData.newPlainText(contentType, content))
 
-        snack = view.snack(view.context.getString(R.string.copied_to_clipboard, view.context
-            .getString(resId)))
+        snack = view.snack(view.context.getString(R.string.copied_to_clipboard, contentType))
+    }
+
+    override fun handleBack(): Boolean {
+        if (manga_cover_full?.visibility == View.VISIBLE)
+        {
+            manga_cover_full?.performClick()
+            return true
+        }
+        return super.handleBack()
+    }
+
+    override fun zoomImageFromThumb(thumbView: View) {
+        // If there's an animation in progress, cancel it immediately and proceed with this one.
+        currentAnimator?.cancel()
+
+        // Load the high-resolution "zoomed-in" image.
+        val expandedImageView = manga_cover_full ?: return
+        val fullBackdrop = full_backdrop
+        val image = coverDrawable ?: return
+        expandedImageView.setImageDrawable(image)
+
+        // Hide the thumbnail and show the zoomed-in view. When the animation
+        // begins, it will position the zoomed-in view in the place of the
+        // thumbnail.
+        thumbView.alpha = 0f
+        expandedImageView.visibility = View.VISIBLE
+        fullBackdrop.visibility = View.VISIBLE
+
+        // Set the pivot point to 0 to match thumbnail
+
+        swipe_refresh.isEnabled = false
+
+        val rect = Rect()
+        thumbView.getGlobalVisibleRect(rect)
+        expandedImageView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            height = thumbView.height
+            width = thumbView.width
+            topMargin = rect.top
+            leftMargin = rect.left
+            rightMargin = rect.right
+            bottomMargin = rect.bottom
+        }
+        expandedImageView.requestLayout()
+
+        expandedImageView.post {
+            val defMargin = 16.dpToPx
+            expandedImageView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                height = ViewGroup.LayoutParams.MATCH_PARENT
+                width = ViewGroup.LayoutParams.MATCH_PARENT
+                topMargin = defMargin + headerHeight
+                leftMargin = defMargin
+                rightMargin = defMargin
+                bottomMargin = defMargin + recycler.paddingBottom
+            }
+            val shortAnimationDuration = resources?.getInteger(
+                android.R.integer.config_shortAnimTime
+            ) ?: 0
+
+            // TransitionSet for the full cover because using animation for this SUCKS
+            val transitionSet = TransitionSet()
+            val bound = ChangeBounds()
+            transitionSet.addTransition(bound)
+            val changeImageTransform = ChangeImageTransform()
+            transitionSet.addTransition(changeImageTransform)
+            transitionSet.duration = shortAnimationDuration.toLong()
+            TransitionManager.beginDelayedTransition(frame_layout, transitionSet)
+
+            // AnimationSet for backdrop because idk how to use TransitionSet
+            currentAnimator = AnimatorSet().apply {
+                play(
+                    ObjectAnimator.ofFloat(fullBackdrop, View.ALPHA, 0f, 0.5f)
+                )
+                duration = shortAnimationDuration.toLong()
+                interpolator = DecelerateInterpolator()
+                addListener(object : AnimatorListenerAdapter() {
+
+                    override fun onAnimationEnd(animation: Animator) {
+                        TransitionManager.endTransitions(frame_layout)
+                        currentAnimator = null
+                    }
+
+                    override fun onAnimationCancel(animation: Animator) {
+                        TransitionManager.endTransitions(frame_layout)
+                        currentAnimator = null
+                    }
+                })
+                start()
+            }
+
+            expandedImageView.setOnClickListener {
+                currentAnimator?.cancel()
+
+                val rect = Rect()
+                thumbView.getGlobalVisibleRect(rect)
+                expandedImageView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    height = thumbView.height
+                    width = thumbView.width
+                    topMargin = rect.top
+                    leftMargin = rect.left
+                    rightMargin = rect.right
+                    bottomMargin = rect.bottom
+                }
+
+                // Zoom out back to tc thumbnail
+                val transitionSet = TransitionSet()
+                val bound = ChangeBounds()
+                transitionSet.addTransition(bound)
+                val changeImageTransform = ChangeImageTransform()
+                transitionSet.addTransition(changeImageTransform)
+                transitionSet.duration = shortAnimationDuration.toLong()
+                TransitionManager.beginDelayedTransition(frame_layout, transitionSet)
+
+                // Animation to remove backdrop and hide the full cover
+                currentAnimator = AnimatorSet().apply {
+                    play(ObjectAnimator.ofFloat(fullBackdrop, View.ALPHA, 0f))
+                    duration = shortAnimationDuration.toLong()
+                    interpolator = DecelerateInterpolator()
+                    addListener(object : AnimatorListenerAdapter() {
+
+                        override fun onAnimationEnd(animation: Animator) {
+                            thumbView.alpha = 1f
+                            expandedImageView.visibility = View.GONE
+                            fullBackdrop.visibility = View.GONE
+                            swipe_refresh.isEnabled = true
+                            currentAnimator = null
+                        }
+
+                        override fun onAnimationCancel(animation: Animator) {
+                            thumbView.alpha = 1f
+                            expandedImageView.visibility = View.GONE
+                            fullBackdrop.visibility = View.GONE
+                            swipe_refresh.isEnabled = true
+                            currentAnimator = null
+                        }
+                    })
+                    start()
+                }
+            }
+        }
     }
 }

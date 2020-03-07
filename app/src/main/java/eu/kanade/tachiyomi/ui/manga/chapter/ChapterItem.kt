@@ -45,7 +45,8 @@ class ChapterItem(val chapter: Chapter, val manga: Manga) :
     }
 
     override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): MangaChapterHolder {
-        return if (chapter.isHeader) MangaHeaderHolder(view, adapter as ChaptersAdapter)
+        return if (chapter.isHeader) MangaHeaderHolder(view, adapter as ChaptersAdapter,
+            startExpanded = chapter.read)
         else ChapterMatHolder(view, adapter as ChaptersAdapter)
     }
 

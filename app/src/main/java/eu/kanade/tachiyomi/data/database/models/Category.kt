@@ -31,7 +31,7 @@ interface Category : Serializable {
 
     fun sortingMode(): Int? = when (mangaSort) {
         ALPHA_ASC, ALPHA_DSC -> LibrarySort.ALPHA
-        UPDATED_ASC, UPDATED_DSC -> LibrarySort.LAST_UPDATED
+        UPDATED_ASC, UPDATED_DSC -> LibrarySort.LATEST_CHAPTER
         UNREAD_ASC, UNREAD_DSC -> LibrarySort.UNREAD
         LAST_READ_ASC, LAST_READ_DSC -> LibrarySort.LAST_READ
         TOTAL_ASC, TOTAL_DSC -> LibrarySort.TOTAL
@@ -41,7 +41,7 @@ interface Category : Serializable {
 
     fun sortRes(): Int = when (mangaSort) {
         ALPHA_ASC, ALPHA_DSC -> R.string.title
-        UPDATED_ASC, UPDATED_DSC -> R.string.action_sort_last_updated
+        UPDATED_ASC, UPDATED_DSC -> R.string.action_sort_latest_chapter
         UNREAD_ASC, UNREAD_DSC ->  R.string.action_filter_unread
         LAST_READ_ASC, LAST_READ_DSC ->  R.string.action_sort_last_read
         TOTAL_ASC, TOTAL_DSC ->  R.string.action_sort_total
@@ -60,7 +60,7 @@ interface Category : Serializable {
     fun changeSortTo(sort: Int) {
         mangaSort = when (sort) {
             LibrarySort.ALPHA -> ALPHA_ASC
-            LibrarySort.LAST_UPDATED -> UPDATED_ASC
+            LibrarySort.LATEST_CHAPTER -> UPDATED_ASC
             LibrarySort.UNREAD -> UNREAD_ASC
             LibrarySort.LAST_READ -> LAST_READ_ASC
             LibrarySort.TOTAL -> ALPHA_ASC
@@ -96,7 +96,7 @@ interface Category : Serializable {
                 id = -1
                 mangaSort = when (libSort) {
                     LibrarySort.ALPHA -> ALPHA_ASC
-                    LibrarySort.LAST_UPDATED -> UPDATED_ASC
+                    LibrarySort.LATEST_CHAPTER -> UPDATED_ASC
                     LibrarySort.UNREAD -> UNREAD_ASC
                     LibrarySort.LAST_READ -> LAST_READ_ASC
                     LibrarySort.TOTAL -> TOTAL_ASC

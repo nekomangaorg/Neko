@@ -245,11 +245,11 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
     }
 
     override fun reattachAdapter() {
+        libraryLayout = preferences.libraryLayout().getOrDefault()
         if (libraryLayout == 0) recycler.spanCount = 1
         else recycler.columnWidth = (90 + (preferences.gridSize().getOrDefault() * 30)).dpToPx
         val position =
             (recycler.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
-        libraryLayout = preferences.libraryLayout().getOrDefault()
         recycler.adapter = adapter
 
         (recycler.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(position, 0)

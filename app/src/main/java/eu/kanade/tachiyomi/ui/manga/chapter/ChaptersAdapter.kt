@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.manga.chapter
 
 import android.content.Context
 import android.view.MenuItem
+import android.view.View
 import androidx.fragment.app.FragmentActivity
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.kanade.tachiyomi.R
@@ -61,11 +62,14 @@ class ChaptersAdapter(
         fun coverColor(): Int?
         fun mangaPresenter(): MangaDetailsPresenter
         fun prepareToShareManga()
+        fun openInWebView()
         fun readNextChapter()
         fun downloadChapter(position: Int)
         fun topCoverHeight(): Int
         fun tagClicked(text: String)
         fun showChapterFilter()
         fun favoriteManga(longPress: Boolean)
+        fun copyToClipboard(content: String, label: Int)
+        fun zoomImageFromThumb(thumbView: View)
     }
 }

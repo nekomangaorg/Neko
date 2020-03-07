@@ -130,7 +130,7 @@
     <string name="left_to_right_viewer">বাম থেকে ডানে</string>
     <string name="right_to_left_viewer">ডান থেকে বামে</string>
     <string name="vertical_viewer">সোঁজাসুজি</string>
-    <string name="webtoon_viewer">ওয়েবটুন</string>
+    <string name="webtoon">ওয়েবটুন</string>
     <string name="pref_image_scale_type">স্কেল ধরণ</string>
     <string name="scale_type_fit_screen">সম্পূর্ণ স্ক্রিন</string>
     <string name="scale_type_stretch">ছড়ানো</string>

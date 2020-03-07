@@ -153,7 +153,7 @@
     <string name="left_to_right_viewer">Dae manca a destra</string>
     <string name="right_to_left_viewer">Dae destra a manca</string>
     <string name="vertical_viewer">Verticale</string>
-    <string name="webtoon_viewer">Webtoon</string>
+    <string name="webtoon">Webtoon</string>
     <string name="pager_viewer">Impaginadore</string>
     <string name="pref_image_scale_type">Casta de iscala</string>
     <string name="scale_type_fit_screen">Adata a s\'ischermu</string>

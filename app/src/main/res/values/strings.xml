@@ -69,6 +69,7 @@
     <string name="action_select_all">Select all</string>
     <string name="action_mark_as_read">Mark as read</string>
     <string name="action_mark_all_as_read">Mark all as read</string>
+    <string name="action_mark_all_as_unread">Mark all as unread</string>
     <string name="action_mark_as_unread">Mark as unread</string>
     <string name="action_mark_previous_as_read">Mark previous as read</string>
     <string name="action_mark_multiple">Mark multiple</string>
@@ -126,7 +127,8 @@
     <string name="action_copy_now">Copy now</string>
     <string name="action_reorganize_by">Reorder</string>
     <string name="action_reverse_order">Reverse order</string>
-    <string name="action_sort_last_updated">Last updated</string>
+    <string name="action_sort_last_updated">Last Updated</string>
+    <string name="action_sort_latest_chapter">Latest chapter</string>
     <string name="action_hide_title">Hide title</string>
     <string name="action_show_title">Show title</string>
     <string name="action_newest">Newest</string>
@@ -298,7 +300,7 @@
     <string name="left_to_right_viewer">Left to right</string>
     <string name="right_to_left_viewer">Right to left</string>
     <string name="vertical_viewer">Vertical</string>
-    <string name="webtoon_viewer">Webtoon</string>
+    <string name="webtoon">Webtoon</string>
     <string name="pager_viewer">Pager</string>
     <string name="pref_image_scale_type">Scale type</string>
     <string name="scale_type_fit_screen">Fit screen</string>
@@ -509,6 +511,7 @@
     </plurals>
     <string name="no_description">No description</string>
     <string name="mark_all_as_read_message">Mark all chapters as read?</string>
+    <string name="remove_from_library">Remove from library</string>
 
     <!-- Manga chapters fragment -->
     <string name="start_reading">Start reading</string>

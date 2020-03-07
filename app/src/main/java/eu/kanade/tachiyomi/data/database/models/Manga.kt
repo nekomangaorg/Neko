@@ -40,6 +40,11 @@ interface Manga : SManga {
         val currentTags = currentGenres()?.split(",")?.map { it.trim().toLowerCase(Locale.US) }
         return if (currentTags?.any
             { tag ->
+                tag.startsWith("japanese") || tag == "manga"
+            } == true)
+            TYPE_MANGA
+        else if (currentTags?.any
+            { tag ->
                 tag.startsWith("english") || tag == "comic"
             } == true || isComicSource(sourceName))
             TYPE_COMIC
@@ -51,10 +56,14 @@ interface Manga : SManga {
             TYPE_MANHUA
         else if (currentTags?.any
             { tag ->
-                tag == "long strip" || tag == "manhwa" ||
-                    tag.contains("webtoon")
+                tag == "long strip" || tag == "manhwa"
             } == true || isWebtoonSource(sourceName))
             TYPE_MANHWA
+        else if (currentTags?.any
+            { tag ->
+                tag.startsWith("webtoon")
+            } == true)
+            TYPE_WEBTOON
         else TYPE_MANGA
     }
 
@@ -65,7 +74,8 @@ interface Manga : SManga {
             { tag ->
                 tag == "long strip" || tag == "manhwa" ||
                     tag.contains("webtoon")
-            } == true || isWebtoonSource(sourceName))
+            } == true || isWebtoonSource(sourceName) ||
+            sourceName.contains("tapastic", true))
             ReaderActivity.WEBTOON
         else if (currentTags?.any
             { tag ->
@@ -142,14 +152,11 @@ interface Manga : SManga {
         const val DISPLAY_NUMBER = 0x00100000
         const val DISPLAY_MASK = 0x00100000
 
-        const val READ_WEBTOON = 0
-        const val READ_LTR = 1
-        const val READ_RTL = 2
-
         const val TYPE_MANGA = 0
         const val TYPE_MANHWA = 1
         const val TYPE_MANHUA = 2
         const val TYPE_COMIC = 3
+        const val TYPE_WEBTOON = 4
 
         fun create(source: Long): Manga = MangaImpl().apply {
             this.source = source

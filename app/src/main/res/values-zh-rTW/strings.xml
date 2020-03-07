@@ -222,7 +222,7 @@
     <string name="left_to_right_viewer">由左至右</string>
     <string name="right_to_left_viewer">由右至左</string>
     <string name="vertical_viewer">由上至下</string>
-    <string name="webtoon_viewer">Webtoon 式</string>
+    <string name="webtoon">Webtoon 式</string>
     <string name="pager_viewer">單頁式</string>
     <string name="pref_image_scale_type">縮放模式</string>
     <string name="scale_type_fit_screen">符合螢幕</string>

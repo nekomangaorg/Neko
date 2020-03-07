@@ -152,7 +152,7 @@
     <string name="left_to_right_viewer">De la stânga la dreapta</string>
     <string name="right_to_left_viewer">De la dreapta la stânga</string>
     <string name="vertical_viewer">Vertical</string>
-    <string name="webtoon_viewer">Benzi desenate web</string>
+    <string name="webtoon">Benzi desenate web</string>
     <string name="pager_viewer">Setări pagini</string>
     <string name="pref_image_scale_type">Tip de mărime</string>
     <string name="scale_type_fit_screen">Potrivire ecran</string>

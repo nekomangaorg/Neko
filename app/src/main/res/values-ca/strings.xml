@@ -151,7 +151,7 @@
     <string name="left_to_right_viewer">D\'esquerra a dreta</string>
     <string name="right_to_left_viewer">De dreta a esquerra</string>
     <string name="vertical_viewer">Vertical</string>
-    <string name="webtoon_viewer">Webtoons</string>
+    <string name="webtoon">Webtoons</string>
     <string name="pager_viewer">Paginat</string>
     <string name="pref_image_scale_type">Tipus d\'escalat</string>
     <string name="scale_type_fit_screen">Ajusta a la pantalla</string>

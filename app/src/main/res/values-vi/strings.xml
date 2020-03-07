@@ -115,7 +115,7 @@
     <string name="left_to_right_viewer">Trái sang phải</string>
     <string name="right_to_left_viewer">Phải sang trái</string>
     <string name="vertical_viewer">Theo chiều dọc</string>
-    <string name="webtoon_viewer">Chế độ cuộn</string>
+    <string name="webtoon">Chế độ cuộn</string>
     <string name="pref_image_scale_type">Kiểu tỉ lệ</string>
     <string name="scale_type_fit_screen">Vừa màn hình</string>
     <string name="scale_type_stretch">Kéo dãn</string>

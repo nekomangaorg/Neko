@@ -120,7 +120,7 @@
     <string name="left_to_right_viewer">От ляво надясно</string>
     <string name="right_to_left_viewer">От дясно наляво</string>
     <string name="vertical_viewer">Вертикално</string>
-    <string name="webtoon_viewer">Уебкомикс</string>
+    <string name="webtoon">Уебкомикс</string>
     <string name="pref_image_scale_type">Увеличение</string>
     <string name="scale_type_fit_screen">Запълване</string>
     <string name="scale_type_stretch">Разтегляне</string>

@@ -151,7 +151,7 @@
     <string name="left_to_right_viewer">Soldan sağa</string>
     <string name="right_to_left_viewer">Sağdan sola</string>
     <string name="vertical_viewer">Dikey</string>
-    <string name="webtoon_viewer">Webtoon</string>
+    <string name="webtoon">Webtoon</string>
     <string name="pager_viewer">Sayfalama</string>
     <string name="pref_image_scale_type">Boyutlandırma türü</string>
     <string name="scale_type_fit_screen">Ekrana sığdır</string>

@@ -15,4 +15,7 @@
     <item android:id="@+id/action_remove_bookmark"
         android:title="@string/action_remove_bookmark"
         android:visible="true" />
+    
+    <item android:id="@+id/action_mark_previous_as_read"
+        android:title="@string/action_mark_previous_as_read"/>
 </menu>

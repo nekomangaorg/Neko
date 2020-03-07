@@ -139,7 +139,7 @@ class LibraryCategoryAdapter(val libraryListener: LibraryListener) :
                     else
                         "Read"
                 }
-                LibrarySort.LAST_UPDATED -> {
+                LibrarySort.LATEST_CHAPTER -> {
                     val lastUpdate = (iFlexible as LibraryItem).manga.last_update
                     if (lastUpdate > 0)
                         getShortDate(Date(lastUpdate))

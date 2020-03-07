@@ -156,7 +156,7 @@
     <string name="left_to_right_viewer">Kaliwa pakanan</string>
     <string name="right_to_left_viewer">Kanan pakaliwa</string>
     <string name="vertical_viewer">Patayo</string>
-    <string name="webtoon_viewer">Pa-webtoon</string>
+    <string name="webtoon">Pa-webtoon</string>
     <string name="pager_viewer">Pager</string>
     <string name="pref_image_scale_type">Uri ng pag-scale</string>
     <string name="scale_type_fit_screen">Pagkasyahin sa screen</string>

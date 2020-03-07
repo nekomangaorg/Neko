@@ -184,7 +184,7 @@
     <string name="left_to_right_viewer">Od lewej do prawej</string>
     <string name="right_to_left_viewer">Od prawej do lewej</string>
     <string name="vertical_viewer">Pionowo</string>
-    <string name="webtoon_viewer">Web-komiks</string>
+    <string name="webtoon">Web-komiks</string>
     <string name="pref_viewer_type">Domyślny styl czytania</string>
     <string name="scale_type_fit_screen">Dopasuj do ekranu</string>
     <string name="scale_type_stretch">Rozciągnij</string>

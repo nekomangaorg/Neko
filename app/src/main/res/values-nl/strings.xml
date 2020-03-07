@@ -105,7 +105,7 @@
     <string name="left_to_right_viewer">Links naar rechts</string>
     <string name="right_to_left_viewer">Rechts naar links</string>
     <string name="vertical_viewer">Verticaal</string>
-    <string name="webtoon_viewer">Webtoon</string>
+    <string name="webtoon">Webtoon</string>
     <string name="scale_type_stretch">Uitrekken</string>
     <string name="scale_type_fit_width">Aanpassen aan de breedte</string>
     <string name="scale_type_fit_height">Aanpassen aan de hoogte</string>

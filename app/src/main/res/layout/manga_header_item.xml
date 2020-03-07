@@ -64,6 +64,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:adjustViewBounds="true"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?android:attr/selectableItemBackground"
             android:contentDescription="@string/description_cover"
             android:maxHeight="300dp"
             tools:background="@color/material_grey_700"
@@ -164,14 +167,29 @@
             android:text="@string/manga_tracking_tab"
             app:icon="@drawable/ic_sync_black_24dp" />
 
+
         <ImageView
-            android:id="@+id/share_button"
+            android:id="@+id/webview_button"
             style="@style/Theme.Widget.CustomImageButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginStart="6dp"
             android:layout_marginEnd="6dp"
+            android:tooltipText="@string/action_open_in_web_view"
+            android:padding="5dp"
+            android:contentDescription="@string/action_open_in_web_view"
+            android:src="@drawable/ic_open_in_webview_white_24dp" />
+
+        <ImageView
+            android:id="@+id/share_button"
+            style="@style/Theme.Widget.CustomImageButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginStart="0dp"
+            android:layout_marginEnd="6dp"
+            android:tooltipText="@string/action_share"
             android:padding="5dp"
             android:contentDescription="@string/action_share"
             android:src="@drawable/ic_share_white_24dp" />
@@ -214,7 +232,7 @@
     <View
         android:id="@+id/more_bg_gradient"
         android:layout_width="50dp"
-        android:layout_height="20sp"
+        android:layout_height="16sp"
         android:layout_marginEnd="30dp"
         android:background="@drawable/full_gradient"
         android:backgroundTint="?android:attr/colorBackground"
@@ -224,7 +242,7 @@
     <View
         android:id="@+id/more_bg_solid"
         android:layout_width="0dp"
-        android:layout_height="20sp"
+        android:layout_height="16sp"
         android:layout_marginStart="45dp"
         android:background="?android:attr/colorBackground"
         app:layout_constraintBottom_toBottomOf="@id/manga_summary"
@@ -331,6 +349,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
         android:padding="5dp"
+        android:tooltipText="@string/action_filter"
         android:src="@drawable/ic_filter_list_white_24dp"
         app:layout_constraintBottom_toBottomOf="@id/chapters_title"
         app:layout_constraintEnd_toEndOf="parent"

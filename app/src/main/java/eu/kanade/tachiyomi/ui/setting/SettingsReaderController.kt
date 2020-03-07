@@ -14,7 +14,7 @@ class SettingsReaderController : SettingsController() {
             key = Keys.defaultViewer
             titleRes = R.string.pref_viewer_type
             entriesRes = arrayOf(R.string.left_to_right_viewer, R.string.right_to_left_viewer,
-                    R.string.vertical_viewer, R.string.webtoon_viewer)
+                    R.string.vertical_viewer, R.string.webtoon)
             entryRange = 1..4
             defaultValue = 1
         }
@@ -102,7 +102,7 @@ class SettingsReaderController : SettingsController() {
             }
         }
         preferenceCategory {
-            titleRes = R.string.webtoon_viewer
+            titleRes = R.string.webtoon
 
             switchPreference {
                 key = Keys.cropBordersWebtoon

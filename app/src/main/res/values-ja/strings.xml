@@ -130,7 +130,7 @@
     <string name="left_to_right_viewer">左から右</string>
     <string name="right_to_left_viewer">右から左</string>
     <string name="vertical_viewer">縦反転</string>
-    <string name="webtoon_viewer">Webtoon</string>
+    <string name="webtoon">Webtoon</string>
     <string name="pager_viewer">ページャ</string>
     <string name="pref_image_scale_type">スケールの種類</string>
     <string name="scale_type_fit_screen">フィット画面</string>

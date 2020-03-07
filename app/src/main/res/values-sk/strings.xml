@@ -166,7 +166,7 @@
     <string name="left_to_right_viewer">Zľava doprava</string>
     <string name="right_to_left_viewer">Sprava doľava</string>
     <string name="vertical_viewer">Vertikálne</string>
-    <string name="webtoon_viewer">Ako Webtoon - Zhora dole a strany sa spájajú do jednej dlhej</string>
+    <string name="webtoon">Ako Webtoon - Zhora dole a strany sa spájajú do jednej dlhej</string>
     <string name="pager_viewer">pager</string>
     <string name="pref_image_scale_type">Mód škálovania</string>
     <string name="scale_type_fit_screen">Prispôsobiť obrazovke</string>

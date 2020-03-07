@@ -100,7 +100,7 @@ class LibraryHeaderItem(private val categoryF: (Int) -> Category, val catId: Int
             sortText.text = itemView.context.getString(R.string.sort_by_,
                 itemView.context.getString(
                 when (category.sortingMode()) {
-                    LibrarySort.LAST_UPDATED -> R.string.action_sort_last_updated
+                    LibrarySort.LATEST_CHAPTER -> R.string.action_sort_latest_chapter
                     LibrarySort.DRAG_AND_DROP ->
                         if (category.id == -1) R.string.category
                         else R.string.action_sort_drag_and_drop
@@ -168,7 +168,7 @@ class LibraryHeaderItem(private val categoryF: (Int) -> Category, val catId: Int
                     LibrarySort.TOTAL -> R.id.action_total_chaps
                     LibrarySort.LAST_READ -> R.id.action_last_read
                     LibrarySort.UNREAD -> R.id.action_unread
-                    LibrarySort.LAST_UPDATED -> R.id.action_update
+                    LibrarySort.LATEST_CHAPTER -> R.id.action_update
                     else -> R.id.action_alpha
                 }
             )

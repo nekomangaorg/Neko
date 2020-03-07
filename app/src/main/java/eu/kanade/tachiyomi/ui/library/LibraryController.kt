@@ -86,8 +86,6 @@ open class LibraryController(
      */
     protected var query = ""
 
-    var customQuery = ""
-
     /**
      * Currently selected mangas.
      */
@@ -255,24 +253,6 @@ open class LibraryController(
             DownloadService.addListener(this)
             DownloadService.callListeners()
             LibraryUpdateService.setListener(this)
-        }
-    }
-
-    override fun onChangeEnded(
-        changeHandler: ControllerChangeHandler,
-        changeType: ControllerChangeType
-    ) {
-        super.onChangeEnded(changeHandler, changeType)
-        if (changeType.isEnter) {
-            if (customQuery.isNotEmpty()) {
-                query = customQuery
-                ((activity as MainActivity).toolbar.menu.findItem(
-                    R.id.action_search
-                )?.actionView as? SearchView)?.setQuery(
-                    customQuery, true
-                )
-            }
-            customQuery = ""
         }
     }
 
@@ -509,7 +489,7 @@ open class LibraryController(
     }
 
     open fun search(query: String) {
-        this.customQuery = query
+        onSearch(query)
     }
 
     override fun handleRootBack(): Boolean {

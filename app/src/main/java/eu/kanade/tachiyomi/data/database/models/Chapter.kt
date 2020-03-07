@@ -33,8 +33,9 @@ interface Chapter : SChapter, Serializable {
             chapter_number = -1f
         }
 
-        fun createH(): Chapter = ChapterImpl().apply {
+        fun createHeader(isExpanded: Boolean): Chapter = ChapterImpl().apply {
             id = Long.MIN_VALUE
+            read = isExpanded
             manga_id = null
         }
     }

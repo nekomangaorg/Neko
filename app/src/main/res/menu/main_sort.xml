@@ -15,7 +15,7 @@
 
         <item
             android:id="@+id/action_update"
-            android:title="@string/action_sort_last_updated"
+            android:title="@string/action_sort_latest_chapter"
             android:icon="@drawable/ic_blank_24dp"/>
         <item
             android:id="@+id/action_unread"

@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.manga
 
+import android.annotation.SuppressLint
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.view.View
@@ -27,8 +28,11 @@ import java.util.Locale
 
 class MangaHeaderHolder(
     private val view: View,
-    private val adapter: ChaptersAdapter
+    private val adapter: ChaptersAdapter,
+    startExpanded: Boolean
 ) : MangaChapterHolder(view, adapter) {
+
+
 
     init {
         start_reading_button.setOnClickListener { adapter.coverListener?.readNextChapter() }
@@ -49,7 +53,8 @@ class MangaHeaderHolder(
         filter_button.setOnClickListener { adapter.coverListener?.showChapterFilter() }
         filters_text.setOnClickListener { adapter.coverListener?.showChapterFilter() }
         chapters_title.setOnClickListener { adapter.coverListener?.showChapterFilter() }
-        share_button.setOnClickListener { adapter.coverListener?.prepareToShareManga() }
+        webview_button.setOnClickListener { adapter.coverListener?.openInWebView() }
+        share_button.setOnClickListener { adapter.coverListener?.prepareToShareManga()  }
         favorite_button.setOnClickListener {
             adapter.coverListener?.favoriteManga(false)
         }
@@ -57,6 +62,17 @@ class MangaHeaderHolder(
             adapter.coverListener?.favoriteManga(true)
             true
         }
+        manga_full_title.setOnLongClickListener {
+            adapter.coverListener?.copyToClipboard(manga_full_title.text.toString(), R.string.manga_info_full_title_label)
+            true
+        }
+        manga_author.setOnLongClickListener {
+            adapter.coverListener?.copyToClipboard(manga_author.text.toString(), R.string.manga_info_author_label)
+            true
+        }
+        manga_cover.setOnClickListener { adapter.coverListener?.zoomImageFromThumb(cover_card) }
+        if (startExpanded)
+            expandDesc()
     }
 
     private fun expandDesc() {
@@ -68,6 +84,7 @@ class MangaHeaderHolder(
         }
     }
 
+    @SuppressLint("SetTextI18n")
     override fun bind(item: ChapterItem, manga: Manga) {
         val presenter = adapter.coverListener?.mangaPresenter() ?: return
         manga_full_title.text = manga.currentTitle()
@@ -79,11 +96,11 @@ class MangaHeaderHolder(
 
         if (manga.currentAuthor() == manga.currentArtist() ||
             manga.currentArtist().isNullOrBlank())
-            manga_author.text = manga.currentAuthor()
+            manga_author.text = manga.currentAuthor()?.trim()
         else {
             manga_author.text = "${manga.currentAuthor()?.trim()}, ${manga.currentArtist()}"
         }
-        manga_summary.text = manga.currentDesc() ?: itemView.context.getString(R.string
+        manga_summary.text = manga.currentDesc()?.trim() ?: itemView.context.getString(R.string
             .no_description)
 
         manga_summary.post {
@@ -100,6 +117,7 @@ class MangaHeaderHolder(
                     manga.mangaType() == Manga.TYPE_MANHWA -> R.string.manhwa
                     manga.mangaType() == Manga.TYPE_MANHUA -> R.string.manhua
                     manga.mangaType() == Manga.TYPE_COMIC -> R.string.comic
+                    manga.mangaType() == Manga.TYPE_WEBTOON -> R.string.webtoon
                     else -> R.string.manga
                 }
             ).toLowerCase(Locale.getDefault()))

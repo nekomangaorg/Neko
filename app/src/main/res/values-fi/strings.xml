@@ -209,7 +209,7 @@
     <string name="left_to_right_viewer">Vasemmalta oikealle</string>
     <string name="right_to_left_viewer">Oikealta vasemmalle</string>
     <string name="vertical_viewer">Pystysuora</string>
-    <string name="webtoon_viewer">Webtoon-tyylinen</string>
+    <string name="webtoon">Webtoon-tyylinen</string>
     <string name="pager_viewer">Sivut</string>
     <string name="pref_image_scale_type">Skaalauksen tyyppi</string>
     <string name="scale_type_fit_screen">Sovita näyttöön</string>

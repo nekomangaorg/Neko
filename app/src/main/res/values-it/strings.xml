@@ -111,7 +111,7 @@
     <string name="left_to_right_viewer">Da sinistra a destra</string>
     <string name="right_to_left_viewer">Da destra a sinistra</string>
     <string name="vertical_viewer">Verticale</string>
-    <string name="webtoon_viewer">Webtoon</string>
+    <string name="webtoon">Webtoon</string>
     <string name="pref_image_scale_type">Scala</string>
     <string name="scale_type_fit_screen">Adatta a schermo</string>
     <string name="scale_type_stretch">Riempi schermo</string>

@@ -140,7 +140,7 @@
     <string name="left_to_right_viewer">왼쪽에서 오른쪽으로</string>
     <string name="right_to_left_viewer">오른쪽에서 왼쪽으로</string>
     <string name="vertical_viewer">수직으로</string>
-    <string name="webtoon_viewer">웹툰</string>
+    <string name="webtoon">웹툰</string>
     <string name="scale_type_stretch">늘리기</string>
     <string name="scale_type_fit_width">가로 맞추기</string>
     <string name="scale_type_fit_height">세로 맞추기</string>

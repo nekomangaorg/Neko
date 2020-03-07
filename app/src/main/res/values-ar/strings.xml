@@ -131,7 +131,7 @@
     <string name="left_to_right_viewer">من اليسار لليمين</string>
     <string name="right_to_left_viewer">من اليمين لليسار</string>
     <string name="vertical_viewer">عموديا</string>
-    <string name="webtoon_viewer">ويبتون</string>
+    <string name="webtoon">ويبتون</string>
     <string name="pref_image_scale_type">كيفية ضبط الأبعاد</string>
     <string name="scale_type_fit_screen">ملائمة الشاشة</string>
     <string name="scale_type_stretch">التمدد</string>

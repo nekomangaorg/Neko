@@ -170,7 +170,10 @@ class LibraryPresenter(
             if (filterUnread == STATE_REALLY_EXCLUDE && item.manga.unread > 0) return@f false
 
             if (filterMangaType > 0) {
-                if (filterMangaType != item.manga.mangaType()) return@f false
+                if (if (filterMangaType == Manga.TYPE_MANHWA)
+                        (filterMangaType != item.manga.mangaType() &&
+                            filterMangaType != Manga.TYPE_WEBTOON)
+                    else filterMangaType != item.manga.mangaType()) return@f false
             }
 
             if (filterCompleted == STATE_INCLUDE && item.manga.status != SManga.COMPLETED)
@@ -297,7 +300,7 @@ class LibraryPresenter(
                     val manga2LastRead = lastReadManga[i2.manga.id!!] ?: lastReadManga.size
                     manga1LastRead.compareTo(manga2LastRead)
                 }
-                sortingMode == LibrarySort.LAST_UPDATED -> i2.manga.last_update.compareTo(i1
+                sortingMode == LibrarySort.LATEST_CHAPTER -> i2.manga.last_update.compareTo(i1
                     .manga.last_update)
                 sortingMode == LibrarySort.UNREAD ->
                     when {
@@ -364,7 +367,7 @@ class LibraryPresenter(
                 category.mangaSort != null -> {
                     var sort = when (category.sortingMode()) {
                         LibrarySort.ALPHA -> sortAlphabetical(i1, i2)
-                        LibrarySort.LAST_UPDATED -> i2.manga.last_update.compareTo(i1.manga.last_update)
+                        LibrarySort.LATEST_CHAPTER -> i2.manga.last_update.compareTo(i1.manga.last_update)
                         LibrarySort.UNREAD -> when {
                             i1.manga.unread == i2.manga.unread -> 0
                             i1.manga.unread == 0 -> if (category.isAscending()) 1 else -1

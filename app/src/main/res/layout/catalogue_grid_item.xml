@@ -125,7 +125,7 @@
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
             android:orientation="vertical"
-            android:layout_height="32sp">
+            android:layout_height="30sp">
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/title"
                 style="@style/TextAppearance.Regular.Body1.Light"

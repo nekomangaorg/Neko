@@ -28,7 +28,6 @@ import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.storage.DiskUtil
-import eu.kanade.tachiyomi.util.system.launchUI
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -67,7 +66,7 @@ class MangaDetailsPresenter(private val controller: MangaDetailsController,
     var chapters:List<ChapterItem> = emptyList()
         private set
 
-    var headerItem = ChapterItem(Chapter.createH(), manga)
+    var headerItem = ChapterItem(Chapter.createHeader(controller.fromCatalogue), manga)
 
     fun onCreate() {
         isLockedFromSearch = SecureActivityDelegate.shouldBeLocked()
@@ -75,10 +74,9 @@ class MangaDetailsPresenter(private val controller: MangaDetailsController,
         downloadManager.addListener(this)
         LibraryUpdateService.setListener(this)
         if (!manga.initialized) {
+            isLoading = true
+            controller.setRefresh(true)
             controller.updateHeader()
-            launchUI {
-                controller.setRefresh(true)
-            }
             refreshAll()
         }
         else {
@@ -243,11 +241,9 @@ class MangaDetailsPresenter(private val controller: MangaDetailsController,
                 true -> { c1, c2 -> c2.chapter_number.compareTo(c1.chapter_number) }
                 false -> { c1, c2 -> c1.chapter_number.compareTo(c2.chapter_number) }
             }
-            else -> throw NotImplementedError("Unimplemented sorting method")
+            else -> { c1, c2 -> c1.source_order.compareTo(c2.source_order) }
         }
         chapters = chapters.sortedWith(Comparator(sortFunction))
-        //if (sortDescending())
-           // chapters = chapters.reversed()
         return chapters
     }
 
@@ -257,6 +253,8 @@ class MangaDetailsPresenter(private val controller: MangaDetailsController,
     fun getNextUnreadChapter(): ChapterItem? {
         return chapters.sortedByDescending { it.source_order }.find { !it.read }
     }
+
+    fun allUnread(): Boolean = chapters.none { it.read }
 
     fun getUnreadChaptersSorted() = chapters
         .filter { !it.read && it.status == Download.NOT_DOWNLOADED }

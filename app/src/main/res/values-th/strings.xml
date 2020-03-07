@@ -155,7 +155,7 @@
     <string name="left_to_right_viewer">จากซ้ายไปขวา</string>
     <string name="right_to_left_viewer">จากขวาไปซ้าย</string>
     <string name="vertical_viewer">แนวตั้ง</string>
-    <string name="webtoon_viewer">เว็บตูน</string>
+    <string name="webtoon">เว็บตูน</string>
     <string name="pager_viewer">การแสดงหน้า</string>
     <string name="pref_image_scale_type">ชนิดของมาตราส่วน</string>
     <string name="scale_type_fit_screen">หน้าจอพอดี</string>
