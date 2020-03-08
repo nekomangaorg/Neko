@@ -686,9 +686,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
             subscriptions += preferences.colorFilterMode().asObservable()
                 .subscribe { setColorFilter(preferences.colorFilter().getOrDefault()) }
 
-            subscriptions += preferences.notchDefaultCutoutMode().asObservable()
-                .subscribe { setNotchCutoutMode(preferences.notchDefaultCutoutMode().getOrDefault()) }
-
+            this.setNotchCutoutMode()
         }
 
         /**
@@ -803,12 +801,11 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
 
 
         /**
-         * Sets notch cutout mode to "DEFAULT" mode if true and "NEVER" mode if false.
-         * In "NEVER" mode the space next to the notch won't be used and filled with a black background.
+         * Sets notch cutout mode to "NEVER", if mobile is in a landscape view
          */
-        private fun setNotchCutoutMode(isDefault: Boolean) {
+        private fun setNotchCutoutMode() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                if (!isDefault) {
+
                     val currentOrientation = resources.configuration.orientation
 
                     if(currentOrientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -817,7 +814,6 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
                                 WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER
                     }
 
-                }
             }
         }
 

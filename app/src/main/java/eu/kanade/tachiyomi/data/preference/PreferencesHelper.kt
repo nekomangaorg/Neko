@@ -72,8 +72,6 @@ class PreferencesHelper(val context: Context) {
 
     fun fullscreen() = rxPrefs.getBoolean(Keys.fullscreen, true)
 
-    fun notchDefaultCutoutMode() = rxPrefs.getBoolean(Keys.isDefaultNotchMode, false)
-
     fun keepScreenOn() = rxPrefs.getBoolean(Keys.keepScreenOn, true)
 
     fun customBrightness() = rxPrefs.getBoolean(Keys.customBrightness, false)
