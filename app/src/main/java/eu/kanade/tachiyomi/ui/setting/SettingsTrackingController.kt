@@ -50,7 +50,7 @@ class SettingsTrackingController : SettingsController(),
             }
             trackPreference(trackManager.kitsu) {
                 onClick {
-                    val dialog = TrackLoginDialog(trackManager.kitsu)
+                    val dialog = TrackLoginDialog(trackManager.kitsu, context.getString(R.string.email))
                     dialog.targetController = this@SettingsTrackingController
                     dialog.showDialog(router)
                 }
