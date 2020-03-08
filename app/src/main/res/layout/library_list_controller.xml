@@ -13,7 +13,6 @@
         <include layout="@layout/library_grid_recycler"/>
     </FrameLayout>
 
-
     <eu.davidea.fastscroller.FastScroller
         android:id="@+id/fast_scroller"
         android:layout_width="wrap_content"
