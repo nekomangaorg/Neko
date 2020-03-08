@@ -27,6 +27,7 @@ import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.getOrDefault
+import eu.kanade.tachiyomi.ui.main.SpinnerTitleInterface
 import eu.kanade.tachiyomi.ui.main.SwipeGestureInterface
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.launchUI
@@ -49,6 +50,7 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
     FlexibleAdapter.OnItemLongClickListener,
     FlexibleAdapter.OnItemMoveListener,
     LibraryCategoryAdapter.LibraryListener,
+    SpinnerTitleInterface,
     SwipeGestureInterface {
 
     private lateinit var adapter: LibraryCategoryAdapter
@@ -108,7 +110,6 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
 
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
-
         // pad the recycler if the filter bottom sheet is visible
         if (!phoneLandscape) {
             val height = view.context.resources.getDimensionPixelSize(R.dimen.rounder_radius) + 4.dpToPx
@@ -166,6 +167,13 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
 
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
         super.onChangeStarted(handler, type)
+        if (type.isEnter) {
+            if (presenter.categories.size > 1) {
+                activity?.toolbar?.showSpinner()
+            } else {
+                activity?.toolbar?.removeSpinner()
+            }
+        }
         /*if (type.isEnter) {
             (activity as MainActivity).supportActionBar
                 ?.setDisplayShowCustomEnabled(router?.backstack?.lastOrNull()?.controller() ==
@@ -228,9 +236,23 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
         }
         adapter.isLongPressDragEnabled = canDrag()
 
+       val popupMenu = if (presenter.categories.size > 1) {
+            activity?.toolbar?.showSpinner()
+        }
+        else  {
+           activity?.toolbar?.removeSpinner()
+           null
+       }
+
         titlePopupMenu.menu.clear()
         presenter.categories.forEach { category ->
             titlePopupMenu.menu.add(0, category.order, max(0, category.order), category.name)
+            popupMenu?.menu?.add(0, category.order, max(0, category.order), category.name)
+        }
+
+        popupMenu?.setOnMenuItemClickListener { item ->
+            scrollToHeader(item.itemId)
+            true
         }
         customTitleSpinner.setOnClickListener {
 
@@ -591,4 +613,6 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
             scrollToHeader (newOffset, true)
         }
     }
+
+    override fun popUpMenu(): PopupMenu = titlePopupMenu
 }

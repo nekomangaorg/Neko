@@ -20,6 +20,7 @@ import android.view.WindowManager
 import android.webkit.WebView
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
+import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.GestureDetectorCompat
@@ -619,6 +620,8 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             }*/
         }
 
+        if (to !is SpinnerTitleInterface) toolbar.removeSpinner()
+
         if (to !is DialogController) {
             navigationView.visibility = if (router.backstackSize == 0 ||
                 (router.backstackSize <= 1 && !isPush))
@@ -735,6 +738,10 @@ interface BottomNavBarInterface {
 }
 
 interface RootSearchInterface
+
+interface SpinnerTitleInterface {
+    fun popUpMenu(): PopupMenu
+}
 
 interface SwipeGestureInterface {
     fun onSwipeRight(x: Float, y: Float)

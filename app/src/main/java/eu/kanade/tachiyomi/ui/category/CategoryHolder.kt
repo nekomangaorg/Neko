@@ -100,7 +100,7 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleVie
                 reorder.setOnTouchListener { _, _ ->  true}
             }
             edit_text.clearFocus()
-            edit_button.drawable.mutate().setTint(ContextCompat.getColor(itemView.context, R
+            edit_button.drawable?.mutate()?.setTint(ContextCompat.getColor(itemView.context, R
                 .color.gray_button))
             reorder.setImageDrawable(regularDrawable)
         }

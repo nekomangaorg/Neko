@@ -8,13 +8,13 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
+import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.jakewharton.rxbinding.support.v4.widget.refreshes
 import com.jakewharton.rxbinding.support.v7.widget.scrollStateChanges
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.SelectableAdapter
-import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
@@ -23,12 +23,14 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.main.MainActivity
+import eu.kanade.tachiyomi.ui.main.RootSearchInterface
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.recently_read.RecentlyReadController
 import eu.kanade.tachiyomi.util.system.notificationManager
 import eu.kanade.tachiyomi.util.view.applyWindowInsetsForRootController
 import eu.kanade.tachiyomi.util.view.scrollViewWith
+import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import eu.kanade.tachiyomi.util.view.snack
 import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.android.synthetic.main.recent_chapters_controller.*
@@ -47,6 +49,7 @@ class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
         FlexibleAdapter.OnItemLongClickListener,
         FlexibleAdapter.OnUpdateListener,
         ConfirmDeleteChaptersDialog.Listener,
+        RootSearchInterface,
         RecentChaptersAdapter.OnCoverClickListener {
 
     init {
@@ -62,6 +65,8 @@ class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
      */
     var adapter: RecentChaptersAdapter? = null
         private set
+
+    private var query = ""
 
     override fun getTitle(): String? {
         return resources?.getString(R.string.label_recent_updates)
@@ -191,9 +196,9 @@ class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
      * Populate adapter with chapters
      * @param chapters list of [Any]
      */
-    fun onNextRecentChapters(chapters: List<IFlexible<*>>) {
+    fun onNextRecentChapters(chapters: List<RecentChapterItem>) {
         destroyActionModeIfNeeded()
-        adapter?.updateDataSet(chapters)
+        adapter?.setItems(chapters)
     }
 
     override fun onUpdateEmptyView(size: Int) {
@@ -344,6 +349,34 @@ class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.recent_updates, menu)
+        val searchItem = menu.findItem(R.id.action_search)
+        val searchView = searchItem.actionView as SearchView
+        searchView.queryHint = resources?.getString(R.string.action_search)
+        if (query.isNotEmpty()) {
+            searchItem.expandActionView()
+            searchView.setQuery(query, true)
+            searchView.clearFocus()
+        }
+        setOnQueryTextChangeListener(searchView) {
+            if (query != it) {
+                query = it ?: return@setOnQueryTextChangeListener false
+                adapter?.setFilter(query)
+                adapter?.performFilter()
+            }
+            true
+        }
+
+        // Fixes problem with the overflow icon showing up in lieu of search
+        searchItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
+            override fun onMenuItemActionExpand(item: MenuItem): Boolean {
+                return true
+            }
+
+            override fun onMenuItemActionCollapse(item: MenuItem): Boolean {
+                activity?.invalidateOptionsMenu()
+                return true
+            }
+        })
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
