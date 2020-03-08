@@ -43,6 +43,7 @@ import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.download.DownloadController
 import eu.kanade.tachiyomi.ui.library.filter.SortFilterBottomSheet
 import eu.kanade.tachiyomi.ui.main.MainActivity
+import eu.kanade.tachiyomi.ui.main.RootSearchInterface
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.migration.MigrationInterface
 import eu.kanade.tachiyomi.ui.migration.manga.design.PreMigrationController
@@ -69,6 +70,7 @@ open class LibraryController(
         ChangeMangaCategoriesDialog.Listener,
         MigrationInterface,
         DownloadServiceListener,
+        RootSearchInterface,
         LibraryServiceListener {
 
     /**

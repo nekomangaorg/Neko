@@ -309,7 +309,7 @@ class MangaDetailsController : BaseController,
         super.onChangeStarted(handler, type)
         if (type == ControllerChangeType.PUSH_ENTER || type == ControllerChangeType.POP_ENTER) {
             if (type == ControllerChangeType.POP_ENTER)
-                    return
+                return
             (activity as MainActivity).appbar.setBackgroundColor(Color.TRANSPARENT)
             (activity as MainActivity).toolbar.setBackgroundColor(Color.TRANSPARENT)
             activity?.window?.statusBarColor = Color.TRANSPARENT
@@ -320,13 +320,13 @@ class MangaDetailsController : BaseController,
             if (type == ControllerChangeType.POP_EXIT) setHasOptionsMenu(false)
             colorAnimator?.cancel()
 
-            (activity as MainActivity).toolbar.setBackgroundColor(activity?.getResourceColor(
-                android.R.attr.colorPrimary
-            ) ?: Color.BLACK)
-
-            activity?.window?.statusBarColor = activity?.getResourceColor(
-                android.R.attr.colorPrimary
+            val colorPrimary = activity?.getResourceColor(
+                android.R.attr.colorBackground
             ) ?: Color.BLACK
+            (activity as MainActivity).appbar.setBackgroundColor(colorPrimary)
+            (activity as MainActivity).toolbar.setBackgroundColor(colorPrimary)
+
+            activity?.window?.statusBarColor = ColorUtils.setAlphaComponent(colorPrimary, 175)
         }
     }
 

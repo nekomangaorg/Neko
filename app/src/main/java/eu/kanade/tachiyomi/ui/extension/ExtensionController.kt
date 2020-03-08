@@ -23,7 +23,7 @@ import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
-import eu.kanade.tachiyomi.util.view.applyWindowInsetsForController
+import eu.kanade.tachiyomi.util.view.scrollViewWith
 import kotlinx.android.synthetic.main.extension_controller.*
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -64,7 +64,7 @@ open class ExtensionController : NucleusController<ExtensionPresenter>(),
 
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
-        view.applyWindowInsetsForController()
+        //view.applyWindowInsetsForController()
 
         ext_swipe_refresh.isRefreshing = true
         ext_swipe_refresh.refreshes().subscribeUntilDestroy {
@@ -78,6 +78,7 @@ open class ExtensionController : NucleusController<ExtensionPresenter>(),
         ext_recycler.adapter = adapter
         ext_recycler.addItemDecoration(ExtensionDividerItemDecoration(view.context))
         ext_recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
+        scrollViewWith(ext_recycler, true, ext_swipe_refresh)
     }
 
     override fun onDestroyView(view: View) {

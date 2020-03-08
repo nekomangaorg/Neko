@@ -10,7 +10,7 @@ class RecentChaptersAdapter(val controller: RecentChaptersController) :
 
     init {
         setDisplayHeadersAtStartUp(true)
-        setStickyHeaders(true)
+        //setStickyHeaders(true)
     }
 
     interface OnCoverClickListener {

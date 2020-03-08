@@ -37,11 +37,11 @@ import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.system.connectivityManager
 import eu.kanade.tachiyomi.util.view.HeightTopWindowInsetsListener
 import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
-import eu.kanade.tachiyomi.util.view.applyWindowInsetsForController
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.inflate
 import eu.kanade.tachiyomi.util.view.marginBottom
 import eu.kanade.tachiyomi.util.view.marginTop
+import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
@@ -140,13 +140,13 @@ open class BrowseCatalogueController(bundle: Bundle) :
 
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
-        view.applyWindowInsetsForController()
 
         // Initialize adapter, scroll listener and recycler views
         adapter = FlexibleAdapter(null, this)
         setupRecycler(view)
 
         navView?.setFilters(presenter.filterItems)
+        scrollViewWith(recycler!!, true)
 
         progress?.visible()
     }
@@ -246,6 +246,7 @@ open class BrowseCatalogueController(bundle: Bundle) :
                 }
             }
         }
+        recycler.clipToPadding = false
         recycler.setHasFixedSize(true)
         recycler.adapter = adapter
 

@@ -21,7 +21,11 @@ import androidx.annotation.Px
 import androidx.appcompat.widget.SearchView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.graphics.ColorUtils
+import androidx.core.math.MathUtils.clamp
 import androidx.core.view.ViewCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.amulyakhare.textdrawable.TextDrawable
 import com.amulyakhare.textdrawable.util.ColorGenerator
 import com.bluelinelabs.conductor.Controller
@@ -29,9 +33,12 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.snackbar.Snackbar
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import kotlinx.android.synthetic.main.main_activity.*
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import kotlin.math.abs
 import kotlin.math.min
 
 /**
@@ -231,7 +238,8 @@ fun View.applyWindowInsetsForRootController(bottomNav: View) {
                         view.updateLayoutParams<FrameLayout.LayoutParams> {
                             val attrsArray = intArrayOf(android.R.attr.actionBarSize)
                             val array = view.context.obtainStyledAttributes(attrsArray)
-                            topMargin = insets.systemWindowInsetTop + array.getDimensionPixelSize(0, 0)
+                            //topMargin = insets.systemWindowInsetTop + array
+                                //.getDimensionPixelSize(0, 0)
                             bottomMargin = bottomNav.height
                             array.recycle()
                         }
@@ -300,6 +308,66 @@ fun Controller.setOnQueryTextChangeListener(searchView: SearchView, f: (text: St
                 return f(query)
             }
             return true
+        }
+    })
+}
+
+fun Controller.scrollViewWith(recycler: RecyclerView,
+    padBottom: Boolean = false,
+    swipeRefreshLayout: SwipeRefreshLayout? = null,
+    f: ((WindowInsets) -> Unit)? = null) {
+    var statusBarHeight = -1
+    activity!!.appbar.y = 0f
+    recycler.doOnApplyWindowInsets { view, insets, _ ->
+        val attrsArray = intArrayOf(android.R.attr.actionBarSize)
+        val array = view.context.obtainStyledAttributes(attrsArray)
+        val headerHeight = insets.systemWindowInsetTop + array.getDimensionPixelSize(0, 0)
+        view.updatePaddingRelative(
+            top = headerHeight,
+            bottom = if (padBottom) insets.systemWindowInsetBottom else 0
+        )
+        swipeRefreshLayout?.setProgressViewOffset(false, headerHeight + (-60).dpToPx,
+            headerHeight + 10.dpToPx)
+        statusBarHeight = insets.systemWindowInsetTop
+        array.recycle()
+        f?.invoke(insets)
+    }
+    recycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+            super.onScrolled(recyclerView, dx, dy)
+            if (router.backstack.lastOrNull()?.controller() == this@scrollViewWith &&
+                statusBarHeight > -1 &&
+                activity!!.appbar.height > 0) {
+                activity!!.appbar.y -= dy
+                activity!!.appbar.y = clamp(
+                    activity!!.appbar.y,
+                    -activity!!.appbar.height.toFloat(),// + statusBarHeight,
+                    0f
+                )
+            }
+        }
+
+        override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+            super.onScrollStateChanged(recyclerView, newState)
+            if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                if (router.backstack.lastOrNull()?.controller() == this@scrollViewWith &&
+                    statusBarHeight > -1 &&
+                    activity!!.appbar.height > 0) {
+                    val halfWay = abs((-activity!!.appbar.height.toFloat()) / 2)
+                    val shortAnimationDuration = resources?.getInteger(
+                        android.R.integer.config_shortAnimTime
+                    ) ?: 0
+                    val closerToTop =  abs(activity!!.appbar.y) - halfWay > 0
+                    val atTop = (recycler.layoutManager as LinearLayoutManager)
+                        .findFirstVisibleItemPosition() < 2
+                    activity!!.appbar.animate()
+                        .y(if (closerToTop && !atTop)
+                            (-activity!!.appbar.height.toFloat())
+                        else 0f)
+                        .setDuration(shortAnimationDuration.toLong())
+                        .start()
+                }
+            }
         }
     })
 }

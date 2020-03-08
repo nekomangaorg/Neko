@@ -20,7 +20,6 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.ui.base.controller.NoToolbarElevationController
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.main.MainActivity
@@ -29,6 +28,7 @@ import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.recently_read.RecentlyReadController
 import eu.kanade.tachiyomi.util.system.notificationManager
 import eu.kanade.tachiyomi.util.view.applyWindowInsetsForRootController
+import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.snack
 import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.android.synthetic.main.recent_chapters_controller.*
@@ -42,7 +42,6 @@ import uy.kohesive.injekt.api.get
  * UI related actions should be called from here.
  */
 class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
-        NoToolbarElevationController,
         ActionMode.Callback,
         FlexibleAdapter.OnItemClickListener,
         FlexibleAdapter.OnItemLongClickListener,
@@ -111,7 +110,8 @@ class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
             // It can be a very long operation, so we disable swipe refresh and show a snackbar.
             swipe_refresh.isRefreshing = false
         }
-        //recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
+
+        scrollViewWith(recycler, swipeRefreshLayout = swipe_refresh)
     }
 
     override fun onDestroyView(view: View) {

@@ -4,6 +4,7 @@
         android:id="@+id/action_search"
         android:icon="@drawable/ic_search_white_24dp"
         android:title="@string/action_search"
+        android:visible="false"
         app:actionViewClass="androidx.appcompat.widget.SearchView"
         app:showAsAction="ifRoom|collapseActionView" />
 
@@ -11,6 +12,12 @@
         android:id="@+id/action_recents"
         android:icon="@drawable/ic_update_black_24dp"
         android:title="@string/label_recent_updates"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="never" />
 
+    <item
+        android:id="@+id/action_settings"
+        android:icon="@drawable/ic_settings_white_24dp"
+        android:title="@string/label_settings"
+        app:showAsAction="never"
+        />
 </menu>

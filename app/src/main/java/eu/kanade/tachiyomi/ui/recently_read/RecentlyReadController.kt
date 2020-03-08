@@ -20,6 +20,7 @@ import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.catalogue.browse.ProgressItem
 import eu.kanade.tachiyomi.ui.main.MainActivity
+import eu.kanade.tachiyomi.ui.main.RootSearchInterface
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.recent_updates.RecentChaptersController
@@ -27,6 +28,7 @@ import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
 import eu.kanade.tachiyomi.util.view.applyWindowInsetsForRootController
+import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.android.synthetic.main.recently_read_controller.*
@@ -44,6 +46,7 @@ class RecentlyReadController(bundle: Bundle? = null) : BaseController(bundle),
         RecentlyReadAdapter.OnRemoveClickListener,
         RecentlyReadAdapter.OnResumeClickListener,
         RecentlyReadAdapter.OnCoverClickListener,
+        RootSearchInterface,
         RemoveHistoryDialog.Listener {
 
     init {
@@ -89,6 +92,7 @@ class RecentlyReadController(bundle: Bundle? = null) : BaseController(bundle),
         recycler.setHasFixedSize(true)
         recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
         resetProgressItem()
+        scrollViewWith(recycler)
 
         if (recentItems != null)
             adapter?.updateDataSet(recentItems!!.toList())
@@ -132,9 +136,10 @@ class RecentlyReadController(bundle: Bundle? = null) : BaseController(bundle),
 
     override fun onUpdateEmptyView(size: Int) {
         if (size > 0) {
-            empty_view?.hide()
+           // empty_view?.hide()
         } else {
-            empty_view.show(R.drawable.ic_history_white_128dp, R.string.information_no_recent_manga)
+           // empty_view.show(R.drawable.ic_history_white_128dp, R.string
+                //.information_no_recent_manga)
         }
     }
 

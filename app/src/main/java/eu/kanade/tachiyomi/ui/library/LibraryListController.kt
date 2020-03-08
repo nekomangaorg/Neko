@@ -7,10 +7,9 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.PopupMenu
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.math.MathUtils.clamp
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -28,12 +27,13 @@ import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.getOrDefault
-import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.SwipeGestureInterface
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.inflate
+import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.snack
+import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import kotlinx.android.synthetic.main.filter_bottom_sheet.*
 import kotlinx.android.synthetic.main.library_grid_recycler.*
@@ -61,7 +61,7 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
 
     private var lastItemPosition:Int? = null
     private var lastItem:IFlexible<*>? = null
-    private lateinit var customTitleSpinner: LinearLayout
+    private lateinit var customTitleSpinner: ViewGroup
     private lateinit var titlePopupMenu:PopupMenu
 
     private var switchingCategories = false
@@ -73,13 +73,15 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
 
     override fun contentView():View = recycler_layout
 
-    override fun getTitle(): String? {
-        return when {
-            spinnerAdapter?.array?.size ?: 0 > 1 -> null
-            spinnerAdapter?.array?.size == 1 -> return spinnerAdapter?.array?.firstOrNull()
-            else -> return super.getTitle()
-        }
-    }
+   /* override fun getTitle(): String? {
+        return if (::customTitleSpinner.isInitialized) customTitleSpinner.category_title.text.toString()
+        else super.getTitle()
+//        when {
+//            spinnerAdapter?.array?.size ?: 0 > 1 -> null
+//            spinnerAdapter?.array?.size == 1 -> return spinnerAdapter?.array?.firstOrNull()
+//            else -> return super.getTitle()
+//        }
+    }*/
 
     private var scrollListener = object : RecyclerView.OnScrollListener () {
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
@@ -97,6 +99,9 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
                 val category = presenter.categories.find { it.order == order }
 
                 customTitleSpinner.category_title.text = category?.name ?: ""
+                val isCurrentController = router?.backstack?.lastOrNull()?.controller() ==
+                    this@LibraryListController
+                if (isCurrentController) setTitle()
             }
         }
     }
@@ -135,8 +140,8 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
         val tv = TypedValue()
         activity!!.theme.resolveAttribute(R.attr.actionBarTintColor, tv, true)
 
-        customTitleSpinner = library_layout.inflate(R.layout.spinner_title) as LinearLayout
-        (activity as MainActivity).supportActionBar?.setDisplayShowCustomEnabled(false)
+        customTitleSpinner = library_layout.inflate(R.layout.spinner_title) as ViewGroup
+//        (activity as MainActivity).supportActionBar?.setDisplayShowCustomEnabled(false)
         spinnerAdapter = SpinnerAdapter(
             view.context,
             R.layout.library_spinner_textview,
@@ -151,12 +156,17 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
             scrollToHeader(item.itemId)
             true
         }
-        (activity as MainActivity).supportActionBar?.customView = customTitleSpinner
+        //(activity as MainActivity).supportActionBar?.customView = customTitleSpinner
+        scrollViewWith(recycler) { insets ->
+            fast_scroller.updateLayoutParams<CoordinatorLayout.LayoutParams> {
+                topMargin = insets.systemWindowInsetTop
+            }
+        }
     }
 
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
         super.onChangeStarted(handler, type)
-        if (type.isEnter) {
+        /*if (type.isEnter) {
             (activity as MainActivity).supportActionBar
                 ?.setDisplayShowCustomEnabled(router?.backstack?.lastOrNull()?.controller() ==
                     this && spinnerAdapter?.array?.size ?: 0 > 1)
@@ -165,11 +175,11 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
             (activity as MainActivity).toolbar.menu.findItem(R.id
                 .action_search)?.collapseActionView()
             (activity as MainActivity).supportActionBar?.setDisplayShowCustomEnabled(false)
-        }
+        }*/
     }
 
     override fun onDestroy() {
-        (activity as MainActivity).supportActionBar?.setDisplayShowCustomEnabled(false)
+       // (activity as MainActivity).supportActionBar?.setDisplayShowCustomEnabled(false)
         super.onDestroy()
     }
 
@@ -195,14 +205,14 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
 
         val isCurrentController = router?.backstack?.lastOrNull()?.controller() ==
             this
-        (activity as AppCompatActivity).supportActionBar
-            ?.setDisplayShowCustomEnabled(isCurrentController && presenter.categories.size > 1)
-        if (isCurrentController) setTitle()
+//        (activity as AppCompatActivity).supportActionBar
+//            ?.setDisplayShowCustomEnabled(isCurrentController && presenter.categories.size > 1)
 
         customTitleSpinner.category_title.text =
             presenter.categories[clamp(activeCategory,
                 0,
                 presenter.categories.size - 1)].name
+        if (isCurrentController) setTitle()
         updateScroll = false
         if (!freshStart) {
             justStarted = false
@@ -232,6 +242,7 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
         val headerPosition = adapter.indexOf(pos)
         switchingCategories = true
         if (headerPosition > -1) {
+            activity?.appbar?.y = 0f
             recycler.suppressLayout(true)
             (recycler.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
                 headerPosition, if (headerPosition == 0) 0 else (-30).dpToPx
@@ -544,7 +555,13 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
     }
 
     override fun onSwipeBottom(x: Float, y: Float) { }
-    override fun onSwipeTop(x: Float, y: Float) { }
+
+    override fun onSwipeTop(x: Float, y: Float) {
+        val sheetRect = Rect()
+        activity!!.navigationView.getGlobalVisibleRect(sheetRect)
+        if (sheetRect.contains(x.toInt(), y.toInt()))
+            showFiltersBottomSheet()
+    }
     override fun onSwipeLeft(x: Float, y: Float) = goToNextCategory(x, y,-1)
     override fun onSwipeRight(x: Float, y: Float) = goToNextCategory(x, y,1)
 

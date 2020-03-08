@@ -6,5 +6,12 @@
         android:id="@+id/action_recents"
         android:icon="@drawable/ic_history_black_24dp"
         android:title="@string/label_recent_manga"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_settings"
+        android:icon="@drawable/ic_settings_white_24dp"
+        android:title="@string/label_settings"
+        app:showAsAction="never"
+        />
 </menu>

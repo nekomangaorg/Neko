@@ -19,15 +19,15 @@ class ElevationAppBarLayout @JvmOverloads constructor(
     }
 
     fun enableElevation() {
-        if (stateListAnimator == null) {
+       /* if (stateListAnimator == null) {
             stateListAnimator = origStateAnimator
             elevation = origElevation
-        }
+        }*/
     }
 
     fun disableElevation() {
-        stateListAnimator = null
-        elevation = 0f
+       // stateListAnimator = null
+        //elevation = 0f
         //translationZ = 0.1f.dpToPx
     }
 

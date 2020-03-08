@@ -8,9 +8,11 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.Rect
+import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
 import android.view.GestureDetector
+import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -18,6 +20,7 @@ import android.view.WindowManager
 import android.webkit.WebView
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
+import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.GestureDetectorCompat
 import com.afollestad.materialdialogs.MaterialDialog
@@ -79,6 +82,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
     protected lateinit var router: Router
 
     protected var drawerArrow: DrawerArrowDrawable? = null
+    private var searchDrawable:Drawable? = null
     private var currentGestureDelegate:SwipeGestureInterface? = null
     private lateinit var gestureDetector:GestureDetectorCompat
 
@@ -130,7 +134,8 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
 
         drawerArrow = DrawerArrowDrawable(this)
         drawerArrow?.color = getResourceColor(R.attr.actionBarTintColor)
-        toolbar.navigationIcon = drawerArrow
+        searchDrawable = ContextCompat.getDrawable(this, R.drawable
+            .ic_search_white_24dp)
 
        // tabAnimator = TabsAnimator(tabs)
 
@@ -160,7 +165,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                             setRoot(RecentlyReadController(), id)
                     }
                     R.id.nav_catalogues -> setRoot(CatalogueController(), id)
-                    R.id.nav_settings -> setRoot(SettingsMainController(), id)
+                    //R.id.nav_settings -> setRoot(SettingsMainController(), id)
                 }
             }
             else if (currentRoot.tag()?.toIntOrNull() == id)  {
@@ -183,7 +188,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                             controller?.showFiltersBottomSheet()
                         }
                     }
-                    R.id.nav_catalogues, R.id.nav_settings -> router.popToRoot()
+                    R.id.nav_catalogues -> router.popToRoot()
                 }
             }
             true
@@ -221,7 +226,8 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
 
         supportActionBar?.setDisplayShowCustomEnabled(true)
 
-        window.statusBarColor = getResourceColor(android.R.attr.colorPrimary)
+        window.statusBarColor = ColorUtils.setAlphaComponent(getResourceColor(android.R.attr
+            .colorBackground), 175)
         content.setOnApplyWindowInsetsListener { v, insets ->
                 // if device doesn't support light nav bar
             window.navigationBarColor = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
@@ -307,8 +313,15 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             }
         }
 
+        toolbar.navigationIcon = if (router.backstackSize > 1) drawerArrow else searchDrawable
+        (router.backstack.lastOrNull()?.controller() as? BaseController)?.setTitle()
+
         toolbar.setNavigationOnClickListener {
-            onBackPressed()
+            val rootSearchController = router.backstack.lastOrNull()?.controller()
+            if (rootSearchController is RootSearchInterface) {
+                toolbar.menu.findItem(R.id.action_search)?.expandActionView()
+            }
+            else onBackPressed()
         }
 
         navigationView.visibility = if (router.backstackSize > 1) View.GONE else View.VISIBLE
@@ -318,10 +331,12 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                                          container: ViewGroup, handler: ControllerChangeHandler) {
 
                 syncActivityViewWithController(to, from, isPush)
+                appbar.y = 0f
             }
 
             override fun onChangeCompleted(to: Controller?, from: Controller?, isPush: Boolean,
                                            container: ViewGroup, handler: ControllerChangeHandler) {
+                appbar.y = 0f
             }
 
         })
@@ -383,13 +398,13 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
     private fun setExtensionsBadge() {
         val updates = preferences.extensionUpdatesCount().getOrDefault()
         if (updates > 0) {
-            val badge = navigationView.getOrCreateBadge(R.id.nav_settings)
+            val badge = navigationView.getOrCreateBadge(R.id.nav_catalogues)
             badge.number = updates
             badge.backgroundColor = getResourceColor(R.attr.badgeColor)
             badge.badgeTextColor = Color.WHITE
         }
         else {
-            navigationView.removeBadge(R.id.nav_settings)
+            navigationView.removeBadge(R.id.nav_catalogues)
         }
     }
 
@@ -522,6 +537,19 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         router.setRoot(controller.withFadeTransaction().tag(id.toString()))
     }
 
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            // Initialize option to open catalogue settings.
+            R.id.action_settings -> {
+                router.pushController((RouterTransaction.with(SettingsMainController()))
+                    .popChangeHandler(FadeChangeHandler())
+                    .pushChangeHandler(FadeChangeHandler()))
+            }
+            else -> return super.onOptionsItemSelected(item)
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
     override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
         gestureDetector.onTouchEvent(ev)
         if (ev?.action == MotionEvent.ACTION_DOWN) {
@@ -556,7 +584,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         }
         val onRoot = router.backstackSize == 1
         if (onRoot) {
-            toolbar.navigationIcon = null
+            toolbar.navigationIcon = searchDrawable
         } else {
             toolbar.navigationIcon = drawerArrow
         }
@@ -581,8 +609,14 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
 
         if (to is NoToolbarElevationController) {
             appbar.disableElevation()
+            /*controller_container.updateLayoutParams<CoordinatorLayout.LayoutParams> {
+                behavior = null
+            }*/
         } else {
             appbar.enableElevation()
+            /*controller_container.updateLayoutParams<CoordinatorLayout.LayoutParams> {
+                behavior = AppBarLayout.ScrollingViewBehavior()
+            }*/
         }
 
         if (to !is DialogController) {
@@ -699,6 +733,8 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
 interface BottomNavBarInterface {
     fun canChangeTabs(block: () -> Unit): Boolean
 }
+
+interface RootSearchInterface
 
 interface SwipeGestureInterface {
     fun onSwipeRight(x: Float, y: Float)
