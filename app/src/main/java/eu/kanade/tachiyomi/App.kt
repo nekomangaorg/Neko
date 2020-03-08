@@ -17,6 +17,7 @@ import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
+import eu.kanade.tachiyomi.data.related.RelatedJob
 import eu.kanade.tachiyomi.data.updater.UpdaterJob
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import org.acra.ACRA
@@ -32,15 +33,23 @@ import uy.kohesive.injekt.injectLazy
 import uy.kohesive.injekt.registry.default.DefaultRegistrar
 
 @AcraCore(
-        buildConfigClass = BuildConfig::class,
-        reportFormat = StringFormat.JSON,
-        excludeMatchingSharedPreferencesKeys = arrayOf(".*username.*", ".*password.*", ".*token.*"),
-        reportContent = arrayOf(ReportField.ANDROID_VERSION, ReportField.APP_VERSION_CODE, ReportField.APP_VERSION_NAME,
-                ReportField.PACKAGE_NAME, ReportField.REPORT_ID, ReportField.STACK_TRACE, ReportField.USER_APP_START_DATE, ReportField.USER_CRASH_DATE)
+    buildConfigClass = BuildConfig::class,
+    reportFormat = StringFormat.JSON,
+    excludeMatchingSharedPreferencesKeys = arrayOf(".*username.*", ".*password.*", ".*token.*"),
+    reportContent = arrayOf(
+        ReportField.ANDROID_VERSION,
+        ReportField.APP_VERSION_CODE,
+        ReportField.APP_VERSION_NAME,
+        ReportField.PACKAGE_NAME,
+        ReportField.REPORT_ID,
+        ReportField.STACK_TRACE,
+        ReportField.USER_APP_START_DATE,
+        ReportField.USER_CRASH_DATE
+    )
 )
 @AcraHttpSender(
-        uri = "https://collector.tracepot.com/0ebf5ef8",
-        httpMethod = HttpSender.Method.PUT
+    uri = "https://collector.tracepot.com/0ebf5ef8",
+    httpMethod = HttpSender.Method.PUT
 )
 
 open class App : Application(), LifecycleObserver {
@@ -87,6 +96,7 @@ open class App : Application(), LifecycleObserver {
                     LibraryUpdateJob.TAG -> LibraryUpdateJob()
                     UpdaterJob.TAG -> UpdaterJob()
                     BackupCreatorJob.TAG -> BackupCreatorJob()
+                    RelatedJob.TAG -> RelatedJob()
                     else -> null
                 }
             }

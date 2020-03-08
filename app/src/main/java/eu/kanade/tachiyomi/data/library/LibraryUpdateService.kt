@@ -88,11 +88,7 @@ class LibraryUpdateService(
     private val cancelIntent by lazy {
         NotificationReceiver.cancelLibraryUpdatePendingBroadcast(this)
     }
-
-    /**
-     * Bitmap of the app for notifications.
-     */
-    private val notificationBitmap by lazy {
+    val notificationBitmap by lazy {
         BitmapFactory.decodeResource(resources, R.mipmap.ic_launcher)
     }
 
@@ -392,8 +388,8 @@ class LibraryUpdateService(
         val listManga = sourceManager.getMangadex().fetchAllFollows()
         // filter all follows from Mangadex and only add reading or rereading manga to library
         listManga.filter { it ->
-            it.follow_status == FollowStatus.RE_READING || it.follow_status == FollowStatus.READING
-        }
+                it.follow_status == FollowStatus.RE_READING || it.follow_status == FollowStatus.READING
+            }
             .forEach { networkManga ->
                 showProgressNotification(networkManga, count.andIncrement, listManga.size)
 

@@ -101,10 +101,11 @@ dependencies {
     implementation("com.squareup.okio:okio:2.4.3")
 
 // REST
-    val retrofit_version = "2.6.2"
+    val retrofit_version = "2.7.2"
     implementation("com.squareup.retrofit2:retrofit:$retrofit_version")
     implementation("com.squareup.retrofit2:converter-gson:$retrofit_version")
     implementation("com.squareup.retrofit2:adapter-rxjava:$retrofit_version")
+    implementation("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:0.5.0")
 
 // JSON
     implementation("com.google.code.gson:gson:2.8.6")

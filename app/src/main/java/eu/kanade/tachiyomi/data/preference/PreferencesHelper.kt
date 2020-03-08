@@ -23,14 +23,20 @@ class PreferencesHelper(val context: Context) {
     private val rxPrefs = RxSharedPreferences.create(prefs)
 
     private val defaultDownloadsDir = Uri.fromFile(
-            File(Environment.getExternalStorageDirectory().absolutePath + File.separator +
-                    context.getString(R.string.app_name), "downloads"))
+        File(
+            Environment.getExternalStorageDirectory().absolutePath + File.separator +
+                context.getString(R.string.app_name), "downloads"
+        )
+    )
 
     private val defaultRelatedLastUpdated = "Unknown"
 
     private val defaultBackupDir = Uri.fromFile(
-            File(Environment.getExternalStorageDirectory().absolutePath + File.separator +
-                    context.getString(R.string.app_name), "backup"))
+        File(
+            Environment.getExternalStorageDirectory().absolutePath + File.separator +
+                context.getString(R.string.app_name), "backup"
+        )
+    )
 
     fun getInt(key: String, default: Int?) = rxPrefs.getInteger(key, default)
     fun getStringPref(key: String, default: String?) = rxPrefs.getString(key, default)
@@ -118,9 +124,9 @@ class PreferencesHelper(val context: Context) {
 
     fun setSourceCredentials(source: Source, username: String, password: String) {
         prefs.edit()
-                .putString(Keys.sourceUsername(source.id), username)
-                .putString(Keys.sourcePassword(source.id), password)
-                .apply()
+            .putString(Keys.sourceUsername(source.id), username)
+            .putString(Keys.sourcePassword(source.id), password)
+            .apply()
     }
 
     fun trackUsername(sync: TrackService) = prefs.getString(Keys.trackUsername(sync.id), "")
@@ -129,9 +135,9 @@ class PreferencesHelper(val context: Context) {
 
     fun setTrackCredentials(sync: TrackService, username: String, password: String) {
         prefs.edit()
-                .putString(Keys.trackUsername(sync.id), username)
-                .putString(Keys.trackPassword(sync.id), password)
-                .apply()
+            .putString(Keys.trackUsername(sync.id), username)
+            .putString(Keys.trackPassword(sync.id), password)
+            .apply()
     }
 
     fun trackToken(sync: TrackService) = rxPrefs.getString(Keys.trackToken(sync.id), "")
@@ -140,11 +146,10 @@ class PreferencesHelper(val context: Context) {
 
     fun backupsDirectory() = rxPrefs.getString(Keys.backupDirectory, defaultBackupDir.toString())
 
-    fun downloadsDirectory() = rxPrefs.getString(Keys.downloadsDirectory, defaultDownloadsDir.toString())
+    fun downloadsDirectory() =
+        rxPrefs.getString(Keys.downloadsDirectory, defaultDownloadsDir.toString())
 
     fun downloadOnlyOverWifi() = prefs.getBoolean(Keys.downloadOnlyOverWifi, true)
-
-    fun relatedLastUpdated() = rxPrefs.getString(Keys.relatedLastUpdated, defaultRelatedLastUpdated.toString())
 
     fun relatedShowTab() = prefs.getBoolean(Keys.relatedShowTab, false)
 

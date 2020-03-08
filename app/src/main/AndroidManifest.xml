@@ -103,6 +103,10 @@
             android:name=".data.backup.BackupRestoreService"
             android:exported="false" />
 
+        <service
+            android:name=".data.related.RelatedUpdateService"
+            android:exported="false" />
+
     </application>
 
 </manifest>

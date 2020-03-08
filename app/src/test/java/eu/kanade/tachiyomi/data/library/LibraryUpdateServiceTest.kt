@@ -78,7 +78,7 @@ class LibraryUpdateServiceTest {
 
         `when`(source.fetchChapterListObservable(manga)).thenReturn(Observable.just(sourceChapters))
 
-        service.updateManga(manga).subscribe()
+        service.updateManga(manga)
 
         assertThat(service.db.getChapters(manga).executeAsBlocking()).hasSize(2)
     }
