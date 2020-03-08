@@ -87,6 +87,19 @@ class SettingsReaderController : SettingsController() {
                 defaultValue = false
             }
         }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+        val cutout = activity?.window?.decorView?.rootWindowInsets?.displayCutout
+
+            switchPreference {
+                key = Keys.isDefaultNotchMode
+                titleRes = R.string.pref_notch_display
+                summaryRes = R.string.pref_notch_display_summary
+                defaultValue = false
+                isEnabled = cutout != null // display option only when a mobile has a notch
+            }
+        }
+
         preferenceCategory {
             titleRes = R.string.pager_viewer
 

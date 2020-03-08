@@ -11,12 +11,7 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
-import android.view.KeyEvent
-import android.view.Menu
-import android.view.MenuItem
-import android.view.MotionEvent
-import android.view.View
-import android.view.WindowManager
+import android.view.*
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.SeekBar
@@ -34,9 +29,7 @@ import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.base.activity.BaseRxActivity
 import eu.kanade.tachiyomi.ui.main.BiometricActivity
 import eu.kanade.tachiyomi.ui.main.MainActivity
-import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.AddToLibraryFirst
-import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.Error
-import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.Success
+import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.*
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
@@ -45,11 +38,11 @@ import eu.kanade.tachiyomi.ui.reader.viewer.pager.L2RPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.R2LPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.VerticalPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
-import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.lang.plusAssign
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.GLUtil
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.visible
@@ -67,7 +60,7 @@ import rx.subscriptions.CompositeSubscription
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 import java.io.File
-import java.util.Date
+import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 
@@ -692,6 +685,10 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
 
             subscriptions += preferences.colorFilterMode().asObservable()
                 .subscribe { setColorFilter(preferences.colorFilter().getOrDefault()) }
+
+            subscriptions += preferences.notchDefaultCutoutMode().asObservable()
+                .subscribe { setNotchCutoutMode(preferences.notchDefaultCutoutMode().getOrDefault()) }
+
         }
 
         /**
@@ -801,6 +798,26 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
             } else {
                 customFilterColorSubscription?.let { subscriptions.remove(it) }
                 color_overlay.visibility = View.GONE
+            }
+        }
+
+
+        /**
+         * Sets notch cutout mode to "DEFAULT" mode if true and "NEVER" mode if false.
+         * In "NEVER" mode the space next to the notch won't be used and filled with a black background.
+         */
+        private fun setNotchCutoutMode(isDefault: Boolean) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                if (!isDefault) {
+                    val currentOrientation = resources.configuration.orientation
+
+                    if(currentOrientation == Configuration.ORIENTATION_LANDSCAPE) {
+                        val params = window.attributes
+                        params.layoutInDisplayCutoutMode =
+                                WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER
+                    }
+
+                }
             }
         }
 

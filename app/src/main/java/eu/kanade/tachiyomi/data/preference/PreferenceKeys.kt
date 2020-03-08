@@ -19,6 +19,8 @@ object PreferenceKeys {
 
     const val fullscreen = "fullscreen"
 
+    const val isDefaultNotchMode = "pref_notch_mode"
+
     const val keepScreenOn = "pref_keep_screen_on_key"
 
     const val customBrightness = "pref_custom_brightness_key"

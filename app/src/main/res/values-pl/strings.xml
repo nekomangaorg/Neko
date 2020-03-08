@@ -215,6 +215,8 @@
     <string name="pref_double_tap_anim_speed">Szybkość podwójnego stuknięcia</string>
     <string name="pref_show_page_number">Pokazuj numer strony</string>
     <string name="pref_true_color">Kolor 32 bitowy</string>
+    <string name="pref_notch_display">Użyj przestrzeni sąsiadującej z notchem</string>
+    <string name="pref_notch_display_summary">Działa tylko w widoku horyzontalnym, tak by notch nachodził na wyświetlaną stronę</string>
     <string name="pref_crop_borders">Przycinaj krawędzie</string>
     <string name="pref_custom_brightness">Niestandardowa jasność</string>
     <string name="pref_custom_color_filter">Niestandardowy filtr kolorów</string>
