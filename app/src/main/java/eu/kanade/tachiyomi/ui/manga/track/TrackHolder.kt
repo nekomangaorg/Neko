@@ -9,12 +9,13 @@ import eu.kanade.tachiyomi.util.setVectorCompat
 import eu.kanade.tachiyomi.util.visibleIf
 import kotlinx.android.synthetic.main.track_item.*
 
-class TrackHolder(val view: View, adapter: TrackAdapter) : BaseViewHolder(view) {
-    val listener = adapter.rowClickListener
+class TrackHolder(view: View, adapter: TrackAdapter) : BaseViewHolder(view) {
 
     init {
+        val listener = adapter.rowClickListener
+
         logo_container.setOnClickListener { listener.onLogoClick(adapterPosition) }
-        title_container.setOnClickListener { listener.onTitleClick(adapterPosition) }
+        track_set.setOnClickListener { listener.onSetClick(adapterPosition) }
         status_container.setOnClickListener { listener.onStatusClick(adapterPosition) }
         chapters_container.setOnClickListener { listener.onChaptersClick(adapterPosition) }
         score_container.setOnClickListener { listener.onScoreClick(adapterPosition) }
@@ -22,7 +23,6 @@ class TrackHolder(val view: View, adapter: TrackAdapter) : BaseViewHolder(view) 
     }
 
     @SuppressLint("SetTextI18n")
-    @Suppress("DEPRECATION")
     fun bind(item: TrackItem) {
         val track = item.track
         track_logo.setVectorCompat(item.service.getLogo())
@@ -42,9 +42,8 @@ class TrackHolder(val view: View, adapter: TrackAdapter) : BaseViewHolder(view) 
                 track_set.setOnClickListener { listener.onTitleClick(adapterPosition) }
             } else {
 
-                track_title.text = track.title
                 track_chapters.text = "${track.last_chapter_read}/" +
-                        if (track.total_chapters > 0) track.total_chapters else "-"
+                    if (track.total_chapters > 0) track.total_chapters else "-"
                 track_status.text = item.service.getStatus(track.status)
                 track_score.text = if (track.score == 0f) "-" else item.service.displayScore(track)
 
@@ -53,6 +52,12 @@ class TrackHolder(val view: View, adapter: TrackAdapter) : BaseViewHolder(view) 
                     score_container.gone()
                 }
             }
+        }
+        if (track != null) {
+            track_chapters.text = "${track.last_chapter_read}/" +
+                    if (track.total_chapters > 0) track.total_chapters else "-"
+            track_status.text = item.service.getStatus(track.status)
+            track_score.text = if (track.score == 0f) "-" else item.service.displayScore(track)
         }
     }
 }
