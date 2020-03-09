@@ -10,20 +10,21 @@ import androidx.core.app.NotificationManagerCompat
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.MangaRelatedImpl
-import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
-import eu.kanade.tachiyomi.util.customOngoing
+import eu.kanade.tachiyomi.util.customize
 import eu.kanade.tachiyomi.util.isServiceRunning
 import eu.kanade.tachiyomi.util.notificationManager
-import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.util.concurrent.TimeUnit
 
 class RelatedUpdateService(
     val db: DatabaseHelper = Injekt.get()
@@ -34,22 +35,17 @@ class RelatedUpdateService(
      */
     private lateinit var wakeLock: PowerManager.WakeLock
 
-    var job: Job? = null
+    var relatedServiceScope = CoroutineScope(Dispatchers.IO + Job())
 
-    /**
-     * Pending intent of action that cancels the library update
-     */
-    private val cancelIntent by lazy {
-        NotificationReceiver.cancelLibraryUpdatePendingBroadcast(this)
-    }
-
-    /**
-     * Cached progress notification to avoid creating a lot.
-     */
     private val progressNotification by lazy {
-        NotificationCompat.Builder(this, Notifications.CHANNEL_MANGA_RELATED)
-            .customOngoing(this, getString(R.string.app_name), R.drawable.ic_neko_notification)
-            .addAction(R.drawable.ic_clear_grey, getString(android.R.string.cancel), cancelIntent)
+        NotificationCompat.Builder(this, Notifications.CHANNEL_RELATED)
+            .customize(
+                this,
+                getString(R.string.pref_related_loading_progress_start),
+                R.drawable.ic_neko_notification,
+                true
+            )
+            .setAutoCancel(true)
     }
 
     /**
@@ -58,6 +54,7 @@ class RelatedUpdateService(
      */
     override fun onCreate() {
         super.onCreate()
+
         startForeground(Notifications.ID_RELATED_PROGRESS, progressNotification.build())
         wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).newWakeLock(
             PowerManager.PARTIAL_WAKE_LOCK, "RelatedUpdateService:WakeLock"
@@ -70,7 +67,7 @@ class RelatedUpdateService(
      * lock.
      */
     override fun onDestroy() {
-        job?.cancel()
+        relatedServiceScope.cancel()
         if (wakeLock.isHeld) {
             wakeLock.release()
         }
@@ -95,20 +92,23 @@ class RelatedUpdateService(
 
         val handler = CoroutineExceptionHandler { _, exception ->
             Timber.e(exception)
-            showResultNotification(0, true)
-            cancelProgressNotification()
             stopSelf(startId)
+            showResultNotification(true)
+            cancelProgressNotification()
         }
-        job = GlobalScope.launch(handler) {
+        val job = relatedServiceScope.launch(handler) {
             updateRelated()
         }
-        return Service.START_REDELIVER_INTENT
+        job.invokeOnCompletion { stopSelf(startId) }
+
+        return START_REDELIVER_INTENT
     }
 
     /**
-     * Method that updates the syncs reading and rereading manga into neko library
+     * Method that updates the related database for manga
      */
-    private fun updateRelated() {
+    @Suppress("BlockingMethodInNonBlockingContext")
+    private suspend fun updateRelated() {
         val jsonString =
             RelatedHttpService.create().getRelatedResults().execute().body().toString()
         val relatedPageResult = JSONObject(jsonString)
@@ -156,8 +156,8 @@ class RelatedUpdateService(
             db.insertManyRelated(dataToInsert).executeAsBlocking()
             dataToInsert.clear()
         }
-        showResultNotification(totalManga)
         cancelProgressNotification()
+        showResultNotification()
     }
 
     /**
@@ -170,7 +170,13 @@ class RelatedUpdateService(
     private fun showProgressNotification(current: Int, total: Int) {
         notificationManager.notify(
             Notifications.ID_RELATED_PROGRESS, progressNotification
-                .setContentTitle(getString(R.string.pref_related_loading_percent, current, total))
+                .setContentTitle(
+                    getString(
+                        R.string.pref_related_loading_percent,
+                        current,
+                        total
+                    )
+                )
                 .setProgress(total, current, false)
                 .build()
         )
@@ -181,20 +187,19 @@ class RelatedUpdateService(
      *
      * @param updates a list of manga with new updates.
      */
-    private fun showResultNotification(totalManga: Int, error: Boolean = false) {
+    private fun showResultNotification(error: Boolean = false) {
 
         val title = if (error) {
-            "Error loading json"
+            getString(R.string.pref_related_loading_complete_error)
         } else {
             getString(
-                R.string.pref_related_loading_complete,
-                totalManga
+                R.string.pref_related_loading_complete
             )
         }
 
-        val result = NotificationCompat.Builder(this, Notifications.CHANNEL_MANGA_RELATED)
-            .customOngoing(this, title, R.drawable.ic_neko_notification)
-
+        val result = NotificationCompat.Builder(this, Notifications.CHANNEL_RELATED)
+            .customize(this, title, R.drawable.ic_neko_notification)
+            .setAutoCancel(true)
         NotificationManagerCompat.from(this)
             .notify(Notifications.ID_RELATED_COMPLETE, result.build())
     }
@@ -227,17 +232,13 @@ class RelatedUpdateService(
          * @param target defines what should be updated.
          */
         fun start(context: Context) {
-            try {
-                if (!isRunning(context)) {
-                    val intent = Intent(context, RelatedUpdateService::class.java)
-                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-                        context.startService(intent)
-                    } else {
-                        context.startForegroundService(intent)
-                    }
+            if (!isRunning(context)) {
+                val intent = Intent(context, RelatedUpdateService::class.java)
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                    context.startService(intent)
+                } else {
+                    context.startForegroundService(intent)
                 }
-            } catch (e: Exception) {
-                Timber.e(e)
             }
         }
 

@@ -278,8 +278,10 @@
 
     <!-- Related Mangas section -->
     <string name="pref_related_show_tab">Show Related Manga Tab</string>
-    <string name="pref_related_loading_percent">Loading Related Manga (%1$d / %2$d loaded)</string>
-    <string name="pref_related_loading_complete">Done Loading %d Related Manga</string>
+    <string name="pref_related_loading_percent">Updating related manga (%1$d / %2$d updated)</string>
+    <string name="pref_related_loading_complete">Updating related manga complete</string>
+    <string name="pref_related_loading_complete_error">Error trying to load/process related manga</string>
+    <string name="pref_related_loading_progress_start">Updating related manga</string>
 
     <!-- Backup section -->
     <string name="backup">Backup</string>

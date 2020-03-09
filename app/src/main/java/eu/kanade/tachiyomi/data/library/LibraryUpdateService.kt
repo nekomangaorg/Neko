@@ -107,69 +107,6 @@ class LibraryUpdateService(
     }
 
     /**
-     * Defines what should be updated within a service execution.
-     */
-    enum class Target {
-        CHAPTERS, // Manga meta data and  chapters
-        SYNC_FOLLOWS, // Manga in reading, rereading
-        TRACKING // Tracking metadata
-    }
-
-    companion object {
-
-        /**
-         * Key for category to update.
-         */
-        const val KEY_CATEGORY = "category"
-
-        /**
-         * Key that defines what should be updated.
-         */
-        const val KEY_TARGET = "target"
-
-        /**
-         * Returns the status of the service.
-         *
-         * @param context the application context.
-         * @return true if the service is running, false otherwise.
-         */
-        fun isRunning(context: Context): Boolean {
-            return context.isServiceRunning(LibraryUpdateService::class.java)
-        }
-
-        /**
-         * Starts the service. It will be started only if there isn't another instance already
-         * running.
-         *
-         * @param context the application context.
-         * @param category a specific category to update, or null for global update.
-         * @param target defines what should be updated.
-         */
-        fun start(context: Context, category: Category? = null, target: Target = Target.CHAPTERS) {
-            if (!isRunning(context)) {
-                val intent = Intent(context, LibraryUpdateService::class.java).apply {
-                    putExtra(KEY_TARGET, target)
-                    category?.let { putExtra(KEY_CATEGORY, it.id) }
-                }
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-                    context.startService(intent)
-                } else {
-                    context.startForegroundService(intent)
-                }
-            }
-        }
-
-        /**
-         * Stops the service.
-         *
-         * @param context the application context.
-         */
-        fun stop(context: Context) {
-            context.stopService(Intent(context, LibraryUpdateService::class.java))
-        }
-    }
-
-    /**
      * Method called when the service is created. It injects dagger dependencies and acquire
      * the wake lock.
      */
@@ -250,7 +187,7 @@ class LibraryUpdateService(
                     stopSelf(startId)
                 })
         }
-        return Service.START_REDELIVER_INTENT
+        return START_REDELIVER_INTENT
     }
 
     /**
@@ -481,7 +418,6 @@ class LibraryUpdateService(
                         .override(256, 256).submit().get()
                     setLargeIcon(icon)
                 } catch (e: Exception) {
-                } catch (e: Exception) {
                 }
                 setGroupAlertBehavior(GROUP_ALERT_SUMMARY)
                 setContentTitle(manga.title)
@@ -554,5 +490,68 @@ class LibraryUpdateService(
         intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
         intent.action = MainActivity.SHORTCUT_RECENTLY_UPDATED
         return PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+    }
+
+    /**
+     * Defines what should be updated within a service execution.
+     */
+    enum class Target {
+        CHAPTERS, // Manga meta data and  chapters
+        SYNC_FOLLOWS, // Manga in reading, rereading
+        TRACKING // Tracking metadata
+    }
+
+    companion object {
+
+        /**
+         * Key for category to update.
+         */
+        const val KEY_CATEGORY = "category"
+
+        /**
+         * Key that defines what should be updated.
+         */
+        const val KEY_TARGET = "target"
+
+        /**
+         * Returns the status of the service.
+         *
+         * @param context the application context.
+         * @return true if the service is running, false otherwise.
+         */
+        fun isRunning(context: Context): Boolean {
+            return context.isServiceRunning(LibraryUpdateService::class.java)
+        }
+
+        /**
+         * Starts the service. It will be started only if there isn't another instance already
+         * running.
+         *
+         * @param context the application context.
+         * @param category a specific category to update, or null for global update.
+         * @param target defines what should be updated.
+         */
+        fun start(context: Context, category: Category? = null, target: Target = Target.CHAPTERS) {
+            if (!isRunning(context)) {
+                val intent = Intent(context, LibraryUpdateService::class.java).apply {
+                    putExtra(KEY_TARGET, target)
+                    category?.let { putExtra(KEY_CATEGORY, it.id) }
+                }
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                    context.startService(intent)
+                } else {
+                    context.startForegroundService(intent)
+                }
+            }
+        }
+
+        /**
+         * Stops the service.
+         *
+         * @param context the application context.
+         */
+        fun stop(context: Context) {
+            context.stopService(Intent(context, LibraryUpdateService::class.java))
+        }
     }
 }
