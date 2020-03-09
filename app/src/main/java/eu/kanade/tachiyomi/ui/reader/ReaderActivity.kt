@@ -159,6 +159,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
         super.onCreate(savedState)
         setContentView(R.layout.reader_activity)
 
+        setNotchCutoutMode()
+
         if (presenter.needsInit()) {
             val manga = intent.extras!!.getLong("manga", -1)
             val chapter = intent.extras!!.getLong("chapter", -1)
@@ -628,6 +630,23 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
         }
     }
 
+    /**
+     * Sets notch cutout mode to "NEVER", if mobile is in a landscape view
+     */
+    private fun setNotchCutoutMode() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+
+            val currentOrientation = resources.configuration.orientation
+
+            if(currentOrientation == Configuration.ORIENTATION_LANDSCAPE) {
+                val params = window.attributes
+                params.layoutInDisplayCutoutMode =
+                        WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER
+            }
+
+        }
+    }
+
 
     /**
      * Class that handles the user preferences of the reader.
@@ -685,8 +704,6 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
 
             subscriptions += preferences.colorFilterMode().asObservable()
                 .subscribe { setColorFilter(preferences.colorFilter().getOrDefault()) }
-
-            this.setNotchCutoutMode()
         }
 
         /**
@@ -796,24 +813,6 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
             } else {
                 customFilterColorSubscription?.let { subscriptions.remove(it) }
                 color_overlay.visibility = View.GONE
-            }
-        }
-
-
-        /**
-         * Sets notch cutout mode to "NEVER", if mobile is in a landscape view
-         */
-        private fun setNotchCutoutMode() {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-
-                    val currentOrientation = resources.configuration.orientation
-
-                    if(currentOrientation == Configuration.ORIENTATION_LANDSCAPE) {
-                        val params = window.attributes
-                        params.layoutInDisplayCutoutMode =
-                                WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER
-                    }
-
             }
         }
 
