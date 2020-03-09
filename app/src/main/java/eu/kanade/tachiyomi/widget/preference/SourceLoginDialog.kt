@@ -16,7 +16,7 @@ import rx.schedulers.Schedulers
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class SourceLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle) {
+class SourceLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle = bundle) {
 
     private val source = Injekt.get<SourceManager>().get(args.getLong("key")) as LoginSource
 

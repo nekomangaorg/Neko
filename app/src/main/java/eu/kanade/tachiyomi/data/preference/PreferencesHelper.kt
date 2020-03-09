@@ -248,4 +248,6 @@ class PreferencesHelper(val context: Context) {
     fun keepCatSort() = rxPrefs.getInteger(Keys.keepCatSort, 0)
 
     fun hideFiltersAtStart() = rxPrefs.getBoolean("hide_filters_at_start", false)
+
+    fun alwaysShowChapterTransition() = rxPrefs.getBoolean(Keys.alwaysShowChapterTransition, true)
 }

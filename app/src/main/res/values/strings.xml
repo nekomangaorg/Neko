@@ -328,6 +328,7 @@
     <string name="color_filter_a_value">A</string>
     <string name="reader_theme_smart">Smart (based on page)</string>
     <string name="reader_theme_smart_theme">Smart (based on page and theme)</string>
+    <string name="pref_always_show_chapter_transition">Always show chapter transition</string>
 
       <!-- Downloads section -->
     <string name="pref_download_directory">Download location</string>
@@ -415,7 +416,7 @@
 
 
     <!-- Login dialog -->
-    <string name="login_title">Login for %1$s</string>
+    <string name="login_title">Log in to %1$s</string>
     <string name="username">Username</string>
     <string name="email">Email address</string>
     <string name="password">Password</string>
@@ -678,6 +679,7 @@
     </plurals>
 
     <!--Content Description-->
+    <string name="description_backdrop">Backdrop image of manga</string>
     <string name="description_cover">Cover of manga</string>
 
     <!-- Information Text -->
@@ -688,6 +690,8 @@
     <string name="information_empty_library_filtered">No matches found for your current
         filters</string>
     <string name="information_empty_category">You have no categories. Hit the plus button to create one for organizing your library.</string>
+    <string name="information_cloudflare_bypass_failure">Failed to bypass Cloudflare</string>
+    <string name="information_webview_outdated">Please update the WebView app for better compatibility</string>
 
     <!-- Download Notification -->
     <string name="download_notifier_downloader_title">Downloader</string>
