@@ -74,7 +74,7 @@ abstract class HttpSource : CatalogueSource {
      * Headers builder for requests. Implementations can override this method for custom headers.
      */
     protected open fun headersBuilder() = Headers.Builder().apply {
-        add("User-Agent", "Mozilla/5.0 (Windows NT 6.3; WOW64)")
+        add("User-Agent", DEFAULT_USERAGENT)
     }
 
     /**
@@ -207,14 +207,14 @@ abstract class HttpSource : CatalogueSource {
      * @param manga the manga to look for chapters.
      */
     override fun fetchChapterList(manga: SManga): Observable<List<SChapter>> {
-        if (manga.status != SManga.LICENSED) {
-            return client.newCall(chapterListRequest(manga))
+        return if (manga.status != SManga.LICENSED) {
+            client.newCall(chapterListRequest(manga))
                     .asObservableSuccess()
                     .map { response ->
                         chapterListParse(response)
                     }
         } else {
-            return Observable.error(Exception("Licensed - No chapters to show"))
+            Observable.error(Exception("Licensed - No chapters to show"))
         }
     }
 
@@ -340,16 +340,14 @@ abstract class HttpSource : CatalogueSource {
      * @param orig the full url.
      */
     private fun getUrlWithoutDomain(orig: String): String {
-        try {
+        return try {
             val uri = URI(orig)
             var out = uri.path
-            if (uri.query != null)
-                out += "?" + uri.query
-            if (uri.fragment != null)
-                out += "#" + uri.fragment
-            return out
+            if (uri.query != null) out += "?" + uri.query
+            if (uri.fragment != null) out += "#" + uri.fragment
+            out
         } catch (e: URISyntaxException) {
-            return orig
+            orig
         }
     }
 
@@ -367,4 +365,8 @@ abstract class HttpSource : CatalogueSource {
      * Returns the list of filters for the source.
      */
     override fun getFilterList() = FilterList()
+
+    companion object {
+        const val DEFAULT_USERAGENT = "Mozilla/5.0 (Windows NT 6.3; WOW64)"
+    }
 }

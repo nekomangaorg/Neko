@@ -8,6 +8,7 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.widget.Toast
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.util.system.WebViewClientCompat
 import eu.kanade.tachiyomi.util.system.isOutdated
 import eu.kanade.tachiyomi.util.system.toast
@@ -55,18 +56,7 @@ class CloudflareInterceptor(private val context: Context) : Interceptor {
                 .firstOrNull { it.name == "cf_clearance" }
             resolveWithWebView(originalRequest, oldCookie)
 
-            // Avoid use empty User-Agent
-            return if (originalRequest.header("User-Agent").isNullOrEmpty()) {
-                val newRequest = originalRequest
-                    .newBuilder()
-                    .removeHeader("User-Agent")
-                    .addHeader("User-Agent",
-                        DEFAULT_USERAGENT)
-                    .build()
-                chain.proceed(newRequest)
-            } else {
-                chain.proceed(originalRequest)
-            }
+            return chain.proceed(originalRequest)
         } catch (e: Exception) {
             // Because OkHttp's enqueue only handles IOExceptions, wrap the exception so that
             // we don't crash the entire app
@@ -84,11 +74,10 @@ class CloudflareInterceptor(private val context: Context) : Interceptor {
 
         var challengeFound = false
         var cloudflareBypassed = false
-        var isWebviewOutdated = false
+        var isWebViewOutdated = false
 
         val origRequestUrl = request.url.toString()
         val headers = request.headers.toMultimap().mapValues { it.value.getOrNull(0) ?: "" }
-        val withUserAgent = request.header("User-Agent").isNullOrEmpty()
 
         handler.post {
             val webview = WebView(context)
@@ -96,15 +85,15 @@ class CloudflareInterceptor(private val context: Context) : Interceptor {
             webview.settings.javaScriptEnabled = true
 
             // Avoid set empty User-Agent, Chromium WebView will reset to default if empty
-            webview.settings.userAgentString = request.header("User-Agent")
-                ?: DEFAULT_USERAGENT
+            webview.settings.userAgentString =
+                request.header("User-Agent") ?: HttpSource.DEFAULT_USERAGENT
 
             webview.webViewClient = object : WebViewClientCompat() {
                 override fun onPageFinished(view: WebView, url: String) {
                     fun isCloudFlareBypassed(): Boolean {
                         return networkHelper.cookieManager.get(origRequestUrl.toHttpUrl())
                             .firstOrNull { it.name == "cf_clearance" }
-                            .let { it != null && (it != oldCookie || withUserAgent) }
+                            .let { it != null && it != oldCookie }
                     }
 
                     if (isCloudFlareBypassed()) {
@@ -147,7 +136,7 @@ class CloudflareInterceptor(private val context: Context) : Interceptor {
 
         handler.post {
             if (!cloudflareBypassed) {
-                isWebviewOutdated = webView?.isOutdated() == true
+                isWebViewOutdated = webView?.isOutdated() == true
             }
 
             webView?.stopLoading()
@@ -157,7 +146,7 @@ class CloudflareInterceptor(private val context: Context) : Interceptor {
         // Throw exception if we failed to bypass Cloudflare
         if (!cloudflareBypassed) {
             // Prompt user to update WebView if it seems too outdated
-            if (isWebviewOutdated) {
+            if (isWebViewOutdated) {
                 context.toast(R.string.please_update_webview, Toast.LENGTH_LONG)
             }
 
@@ -168,6 +157,5 @@ class CloudflareInterceptor(private val context: Context) : Interceptor {
     companion object {
         private val SERVER_CHECK = arrayOf("cloudflare-nginx", "cloudflare")
         private val COOKIE_NAMES = listOf("__cfduid", "cf_clearance")
-        private const val DEFAULT_USERAGENT = "Mozilla/5.0 (Windows NT 6.3; WOW64)"
     }
 }
