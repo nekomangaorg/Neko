@@ -3,6 +3,16 @@
     <changelogversion
         changeDate=""
         versionName="v1.6.4.1">
+        <changelogtext>Make related manga a scheduled job when enabled
+        </changelogtext>
+        <changelogtext>Fix bug where covers were force reloaded in library
+        </changelogtext>
+        <changelogtext>Condensed tracking page
+        </changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
+        versionName="v1.6.4.1">
         <changelogtext>Changed link for related manga
         </changelogtext>
     </changelogversion>
