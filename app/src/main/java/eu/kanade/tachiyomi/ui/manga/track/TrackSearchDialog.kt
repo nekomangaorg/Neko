@@ -15,11 +15,10 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
-import kotlinx.android.synthetic.main.track_controller.*
+import eu.kanade.tachiyomi.ui.manga.MangaDetailsPresenter
+import eu.kanade.tachiyomi.ui.manga.TrackingBottomSheet
 import eu.kanade.tachiyomi.util.lang.plusAssign
-import kotlinx.android.synthetic.main.track_search_dialog.view.progress
-import kotlinx.android.synthetic.main.track_search_dialog.view.track_search
-import kotlinx.android.synthetic.main.track_search_dialog.view.track_search_list
+import kotlinx.android.synthetic.main.track_search_dialog.view.*
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.subscriptions.CompositeSubscription
@@ -41,10 +40,14 @@ class TrackSearchDialog : DialogController {
 
     private var searchTextSubscription: Subscription? = null
 
-    private val trackController
-        get() = targetController as TrackController
+    private lateinit var bottomSheet: TrackingBottomSheet
+    //private val trackController
+       // get() = targetController as TrackController
+
+
 
     private var wasPreviouslyTracked:Boolean = false
+    private lateinit var presenter:MangaDetailsPresenter
 
     constructor(target: TrackController, service: TrackService, wasTracked:Boolean) : super(Bundle()
         .apply {
@@ -52,6 +55,16 @@ class TrackSearchDialog : DialogController {
     }) {
         wasPreviouslyTracked = wasTracked
         targetController = target
+        this.service = service
+    }
+
+    constructor(target: TrackingBottomSheet, service: TrackService, wasTracked:Boolean) : super(Bundle()
+        .apply {
+            putInt(KEY_SERVICE, service.id)
+        }) {
+        wasPreviouslyTracked = wasTracked
+        bottomSheet = target
+        presenter = target.presenter
         this.service = service
     }
 
@@ -97,7 +110,7 @@ class TrackSearchDialog : DialogController {
 
         // Do an initial search based on the manga's title
         if (savedState == null) {
-            val title = trackController.presenter.manga.originalTitle()
+            val title = presenter.manga.originalTitle()
             view.track_search.append(title)
             search(title)
         }
@@ -129,7 +142,7 @@ class TrackSearchDialog : DialogController {
         val view = dialogView ?: return
         view.progress.visibility = View.VISIBLE
         view.track_search_list.visibility = View.INVISIBLE
-        trackController.presenter.search(query, service)
+        presenter.trackSearch(query, service)
     }
 
     fun onSearchResults(results: List<TrackSearch>) {
@@ -153,8 +166,10 @@ class TrackSearchDialog : DialogController {
     }
 
     private fun onPositiveButtonClick() {
-        trackController.swipe_refresh.isRefreshing = true
-        trackController.presenter.registerTracking(selectedItem, service)
+       // trackController.swipe_refresh.isRefreshing = true
+        bottomSheet.refreshTrack(service)
+        presenter.registerTracking(selectedItem,
+            service)
     }
 
     private companion object {

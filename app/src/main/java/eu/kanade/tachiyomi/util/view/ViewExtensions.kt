@@ -169,7 +169,7 @@ inline val View.marginLeft: Int
 
 object RecyclerWindowInsetsListener : View.OnApplyWindowInsetsListener {
     override fun onApplyWindowInsets(v: View, insets: WindowInsets): WindowInsets {
-        v.setPadding(0,0,0,insets.systemWindowInsetBottom)
+        v.updatePaddingRelative(bottom = insets.systemWindowInsetBottom)
         //v.updatePaddingRelative(bottom = v.paddingBottom + insets.systemWindowInsetBottom)
         return insets
     }

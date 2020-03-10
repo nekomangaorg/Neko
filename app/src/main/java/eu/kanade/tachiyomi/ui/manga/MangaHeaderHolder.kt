@@ -54,7 +54,7 @@ class MangaHeaderHolder(
         filters_text.setOnClickListener { adapter.coverListener?.showChapterFilter() }
         chapters_title.setOnClickListener { adapter.coverListener?.showChapterFilter() }
         webview_button.setOnClickListener { adapter.coverListener?.openInWebView() }
-        share_button.setOnClickListener { adapter.coverListener?.prepareToShareManga()  }
+        share_button.setOnClickListener { adapter.coverListener?.prepareToShareManga() }
         favorite_button.setOnClickListener {
             adapter.coverListener?.favoriteManga(false)
         }
@@ -71,6 +71,7 @@ class MangaHeaderHolder(
             true
         }
         manga_cover.setOnClickListener { adapter.coverListener?.zoomImageFromThumb(cover_card) }
+        track_button.setOnClickListener { adapter.coverListener?.showTrackingSheet() }
         if (startExpanded)
             expandDesc()
     }
@@ -144,6 +145,7 @@ class MangaHeaderHolder(
         val tracked = presenter.isTracked() && !item.isLocked
 
         with(track_button) {
+            visibleIf(presenter.hasTrackers())
             text = itemView.context.getString(if (tracked) R.string.action_filter_tracked
             else R.string.tracking)
 
@@ -230,6 +232,19 @@ class MangaHeaderHolder(
 
     fun setBackDrop(color: Int) {
         true_backdrop.setBackgroundColor(color)
+    }
+
+    fun updateTracking() {
+        val presenter = adapter.coverListener?.mangaPresenter() ?: return
+        val tracked = presenter.isTracked()
+        with(track_button) {
+            text = itemView.context.getString(if (tracked) R.string.action_filter_tracked
+            else R.string.tracking)
+
+            icon = ContextCompat.getDrawable(itemView.context, if (tracked) R.drawable
+                .ic_check_white_24dp else R.drawable.ic_sync_black_24dp)
+            checked(tracked)
+        }
     }
 
     override fun onLongClick(view: View?): Boolean {

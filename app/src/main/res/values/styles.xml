@@ -149,7 +149,7 @@
         <item name="layout_behavior">eu.kanade.tachiyomi.widget.FABMoveBehaviour</item>
     </style>
 
-    <style name="Theme.Widget.CardView" parent="CardView">
+    <style name="Theme.Widget.CardView" parent="Widget.MaterialComponents.CardView">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:padding">@dimen/material_component_cards_top_and_bottom_padding</item>

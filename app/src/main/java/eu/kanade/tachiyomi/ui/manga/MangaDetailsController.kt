@@ -61,6 +61,7 @@ import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
+import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
@@ -78,6 +79,7 @@ import eu.kanade.tachiyomi.ui.manga.chapter.ChapterMatHolder
 import eu.kanade.tachiyomi.ui.manga.chapter.ChaptersAdapter
 import eu.kanade.tachiyomi.ui.manga.chapter.DownloadCustomChaptersDialog
 import eu.kanade.tachiyomi.ui.manga.info.EditMangaDialog
+import eu.kanade.tachiyomi.ui.manga.track.TrackItem
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
@@ -143,6 +145,7 @@ class MangaDetailsController : BaseController,
     private var snack: Snackbar? = null
     val fromCatalogue = args.getBoolean(FROM_CATALOGUE_EXTRA, false)
     var coverDrawable:Drawable? = null
+    var trackingBottomSheet: TrackingBottomSheet? = null
     /**
      * Adapter containing a list of chapters.
      */
@@ -444,6 +447,8 @@ class MangaDetailsController : BaseController,
     override fun onDestroyView(view: View) {
         snack?.dismiss()
         presenter.onDestroy()
+        adapter = null
+        trackingBottomSheet = null
         super.onDestroyView(view)
     }
 
@@ -867,6 +872,36 @@ class MangaDetailsController : BaseController,
             return true
         }
         return super.handleBack()
+    }
+
+    override fun showTrackingSheet() {
+        trackingBottomSheet = TrackingBottomSheet(this)
+        trackingBottomSheet?.show()
+    }
+
+    fun refreshTracking(trackings: List<TrackItem>) {
+        trackingBottomSheet?.onNextTrackings(trackings)
+    }
+
+    fun onTrackSearchResults(results: List<TrackSearch>) {
+        trackingBottomSheet?.onSearchResults(results)
+    }
+
+    fun refreshTracker() {
+        (recycler.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder)
+            ?.updateTracking()
+    }
+
+    fun trackRefreshDone() {
+        trackingBottomSheet?.onRefreshDone()
+    }
+
+    fun trackRefreshError(error: Exception) {
+        trackingBottomSheet?.onRefreshError(error)
+    }
+
+    fun trackSearchError(error: Exception) {
+        trackingBottomSheet?.onSearchResultsError(error)
     }
 
     override fun zoomImageFromThumb(thumbView: View) {
