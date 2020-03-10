@@ -52,7 +52,7 @@ class TrackHolder(val view: View, adapter: TrackAdapter) : BaseViewHolder(view) 
             logo_container.setBackgroundColor(item.service.getLogoColor())
 
             track_details.visibleIf { track != null && !item.service.isExternalLink() }
-            external_name.visibleIf { item.service.isExternalLink() }
+            external_name.visibleIf { item.service.isExternalLink() || track == null }
 
             if (item.service.isExternalLink()) {
                 external_name.text = item.service.name
@@ -77,6 +77,7 @@ class TrackHolder(val view: View, adapter: TrackAdapter) : BaseViewHolder(view) 
                 if (item.service.isMdList()) {
                     modifyTrackButton()
                 } else {
+                    external_name.text = item.service.name
                     track_button.icon = createIcon(MaterialDesignDx.Icon.gmf_edit)
                     track_button.setOnClickListener { listener.onSetClick(adapterPosition) }
                 }
