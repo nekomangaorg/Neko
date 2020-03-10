@@ -317,7 +317,7 @@ fun Controller.scrollViewWith(recycler: RecyclerView,
     swipeRefreshLayout: SwipeRefreshLayout? = null,
     f: ((WindowInsets) -> Unit)? = null) {
     var statusBarHeight = -1
-    activity!!.appbar.y = 0f
+    activity?.appbar?.y = 0f
     recycler.doOnApplyWindowInsets { view, insets, _ ->
         val attrsArray = intArrayOf(android.R.attr.actionBarSize)
         val array = view.context.obtainStyledAttributes(attrsArray)
@@ -335,13 +335,13 @@ fun Controller.scrollViewWith(recycler: RecyclerView,
     recycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
             super.onScrolled(recyclerView, dx, dy)
-            if (router.backstack.lastOrNull()?.controller() == this@scrollViewWith &&
+            if (router?.backstack?.lastOrNull()?.controller() == this@scrollViewWith &&
                 statusBarHeight > -1 &&
                 activity!!.appbar.height > 0) {
                 activity!!.appbar.y -= dy
                 activity!!.appbar.y = clamp(
                     activity!!.appbar.y,
-                    -activity!!.appbar.height.toFloat(),// + statusBarHeight,
+                    -activity!!.appbar.height.toFloat(),
                     0f
                 )
             }
@@ -350,7 +350,7 @@ fun Controller.scrollViewWith(recycler: RecyclerView,
         override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
             super.onScrollStateChanged(recyclerView, newState)
             if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                if (router.backstack.lastOrNull()?.controller() == this@scrollViewWith &&
+                if (router?.backstack?.lastOrNull()?.controller() == this@scrollViewWith &&
                     statusBarHeight > -1 &&
                     activity!!.appbar.height > 0) {
                     val halfWay = abs((-activity!!.appbar.height.toFloat()) / 2)

@@ -11,6 +11,7 @@ import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.view.GestureDetector
 import android.view.MenuItem
 import android.view.MotionEvent
@@ -383,7 +384,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         return super.startSupportActionMode(callback)
     }
 
-   /* override fun onSupportActionModeFinished(mode: androidx.appcompat.view.ActionMode) {
+    override fun onSupportActionModeFinished(mode: androidx.appcompat.view.ActionMode) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) launchUI {
             val scale = Settings.Global.getFloat(
                 contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1.0f
@@ -391,10 +392,11 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             val duration = resources.getInteger(android.R.integer.config_mediumAnimTime) * scale
             delay(duration.toLong())
             delay(100)
-            window?.statusBarColor = getResourceColor(android.R.attr.statusBarColor)
+            window?.statusBarColor = ColorUtils.setAlphaComponent(getResourceColor(android.R.attr
+                .colorBackground), 175)
         }
         super.onSupportActionModeFinished(mode)
-    }*/
+    }
 
     private fun setExtensionsBadge() {
         val updates = preferences.extensionUpdatesCount().getOrDefault()
@@ -553,6 +555,9 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
 
     override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
         gestureDetector.onTouchEvent(ev)
+        val controller = router.backstack.lastOrNull()?.controller()
+        if (controller is OnTouchEventInterface)
+            controller.onTouchEvent(ev)
         if (ev?.action == MotionEvent.ACTION_DOWN) {
             if (snackBar != null && snackBar!!.isShown) {
                 val sRect = Rect()
@@ -687,9 +692,9 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                         && abs(diffY) <= Companion.SWIPE_THRESHOLD * 0.75f
                     ) {
                         if (diffX > 0) {
-                            currentGestureDelegate?.onSwipeRight(e1.x,  e1.y)
+                            currentGestureDelegate?.onSwipeRight(velocityX,  e1.y)
                         } else {
-                            currentGestureDelegate?.onSwipeLeft(e1.x,  e1.y)
+                            currentGestureDelegate?.onSwipeLeft(velocityX,  e1.y)
                         }
                         result = true
                     }
@@ -738,6 +743,10 @@ interface BottomNavBarInterface {
 }
 
 interface RootSearchInterface
+
+interface OnTouchEventInterface {
+    fun onTouchEvent(event: MotionEvent?)
+}
 
 interface SpinnerTitleInterface {
     fun popUpMenu(): PopupMenu

@@ -183,5 +183,6 @@ class LibraryCategoryAdapter(val libraryListener: LibraryListener) :
         fun selectAll(position: Int)
         fun allSelected(position: Int): Boolean
         fun showCategories(position: Int, view: View)
+        fun recyclerIsScrolling(): Boolean
     }
 }
