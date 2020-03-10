@@ -157,15 +157,17 @@ class MangaHeaderHolder(
             visibleIf(nextChapter != null && !item.isLocked)
             if (nextChapter != null) {
                 val number = adapter.decimalFormat.format(nextChapter.chapter_number.toDouble())
-                text = resources.getString(
-                    when {
-                        nextChapter.last_page_read > 0 && nextChapter.chapter_number <= 0 ->
-                            R.string.continue_reading
-                        nextChapter.chapter_number <= 0 -> R.string.start_reading
-                        nextChapter.last_page_read > 0 -> R.string.continue_reading_chapter
-                        else -> R.string.start_reader_chapter
-                    }, number
+                text = if (nextChapter.chapter_number > 0) resources.getString(
+                    if (nextChapter.last_page_read > 0) R.string.continue_reading_chapter
+                    else R.string.start_reading_chapter, number
                 )
+                else {
+                    val name = nextChapter.name
+                    resources.getString(
+                        if (nextChapter.last_page_read > 0) R.string.continue_reading_x
+                        else R.string.start_reading_x, name
+                    )
+                }
             }
         }
 
@@ -173,7 +175,7 @@ class MangaHeaderHolder(
         chapters_title.text = itemView.resources.getQuantityString(R.plurals.chapters, count, count)
 
         top_view.updateLayoutParams<ConstraintLayout.LayoutParams> {
-            height = adapter.coverListener.topCoverHeight() ?: 0
+            height = adapter.coverListener.topCoverHeight()
         }
 
         manga_status.text = (itemView.context.getString( when (manga.status) {
