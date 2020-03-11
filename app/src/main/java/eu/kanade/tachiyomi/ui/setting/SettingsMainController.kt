@@ -8,7 +8,6 @@ import com.bluelinelabs.conductor.Controller
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
-import eu.kanade.tachiyomi.ui.extension.ExtensionController
 import eu.kanade.tachiyomi.ui.migration.MigrationController
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.openInBrowser
@@ -23,13 +22,6 @@ class SettingsMainController : SettingsController() {
         titleRes = R.string.label_settings
 
         val tintColor = context.getResourceColor(R.attr.colorAccent)
-
-        extensionPreference {
-            iconRes = R.drawable.ic_extension_black_24dp
-            iconTint = tintColor
-            titleRes = R.string.label_extensions
-            onClick { navigateTo(ExtensionController()) }
-        }
 
         preference {
             iconRes = R.drawable.ic_tune_white_24dp

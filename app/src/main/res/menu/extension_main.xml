@@ -4,6 +4,7 @@
     <item
         android:id="@+id/action_search"
         android:icon="@drawable/ic_search_white_24dp"
+        android:visible="false"
         android:title="@string/action_search"
         app:actionViewClass="androidx.appcompat.widget.SearchView"
         app:showAsAction="collapseActionView|ifRoom" />
@@ -12,13 +13,20 @@
         android:id="@+id/action_filter"
         android:title="@string/action_filter"
         android:icon="@drawable/ic_filter_list_white_24dp"
-        app:showAsAction="ifRoom"/>
+        app:showAsAction="always"/>
 
     <item
         android:id="@+id/action_auto_check"
         android:title="@string/action_auto_check_extensions"
-        android:icon="@drawable/ic_filter_list_white_24dp"
+        android:icon="@drawable/ic_sync_black_24dp"
+        android:visible="false"
         android:checkable="true"
         app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/action_dismiss"
+        android:title="@string/action_dismiss"
+        android:icon="@drawable/ic_close_white_24dp"
+        app:showAsAction="always"/>
 
 </menu>

@@ -27,9 +27,13 @@
     <string name="label_help">Help</string>
     <string name="unlock">Unlock</string>
     <string name="unlock_library">Unlock to access Library</string>
-    <plurals name="extensions_updates_available">
+    <plurals name="updates_available">
         <item quantity="one">Update available</item>
         <item quantity="other">%d updates available</item>
+    </plurals>
+    <plurals name="extensions_updates_available">
+        <item quantity="one">Extension update available</item>
+        <item quantity="other">%d extension updates available</item>
     </plurals>
     <plurals name="downloads_pending">
         <item quantity="one">1 in queue</item>
@@ -139,6 +143,7 @@
     <string name="action_sort_by">Sort category by…</string>
     <string name="action_switch">Switch</string>
     <string name="action_bug_report">Report a Bug</string>
+    <string name="action_dismiss">Dismiss</string>
 
     <!-- Operations -->
     <string name="loading">Loading…</string>
@@ -474,6 +479,7 @@
     <string name="latest">Latest</string>
     <string name="browse">Browse</string>
     <string name="in_library">In Library</string>
+    <string name="search_extensions">Search extensions…</string>
 
     <!-- Manga activity -->
     <string name="manga_not_in_db">This manga has been removed from the database.</string>

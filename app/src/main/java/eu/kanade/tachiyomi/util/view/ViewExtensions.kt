@@ -294,10 +294,12 @@ data class ViewPaddingState(
 )
 
 
-fun Controller.setOnQueryTextChangeListener(searchView: SearchView, f: (text: String?) -> Boolean) {
+fun Controller.setOnQueryTextChangeListener(searchView: SearchView, onlyOnSubmit:Boolean = false,
+    f: (text: String?) -> Boolean) {
     searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
         override fun onQueryTextChange(newText: String?): Boolean {
-            if (router.backstack.lastOrNull()?.controller() == this@setOnQueryTextChangeListener) {
+            if (!onlyOnSubmit && router.backstack.lastOrNull()?.controller() ==
+                this@setOnQueryTextChangeListener) {
                 return f(newText)
             }
             return false
@@ -324,10 +326,10 @@ fun Controller.scrollViewWith(recycler: RecyclerView,
         val headerHeight = insets.systemWindowInsetTop + array.getDimensionPixelSize(0, 0)
         view.updatePaddingRelative(
             top = headerHeight,
-            bottom = if (padBottom) insets.systemWindowInsetBottom else 0
+            bottom = if (padBottom) insets.systemWindowInsetBottom else view.paddingBottom
         )
         swipeRefreshLayout?.setProgressViewOffset(false, headerHeight + (-60).dpToPx,
-            headerHeight + 10.dpToPx)
+            headerHeight)
         statusBarHeight = insets.systemWindowInsetTop
         array.recycle()
         f?.invoke(insets)
