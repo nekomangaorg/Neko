@@ -53,6 +53,7 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
         FlexibleAdapter.OnItemClickListener,
         CatalogueAdapter.OnBrowseClickListener,
         RootSearchInterface,
+
         CatalogueAdapter.OnLatestClickListener {
 
     /**
@@ -161,6 +162,14 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
             }
         })
 
+    }
+
+    override fun handleRootBack(): Boolean {
+        if (ext_bottom_sheet.sheetBehavior?.state != BottomSheetBehavior.STATE_COLLAPSED) {
+            ext_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
+            return true
+        }
+        return false
     }
 
     override fun onDestroyView(view: View) {
