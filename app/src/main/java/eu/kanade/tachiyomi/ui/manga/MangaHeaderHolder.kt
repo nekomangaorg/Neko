@@ -156,7 +156,8 @@ class MangaHeaderHolder(
 
         with(start_reading_button) {
             val nextChapter = presenter.getNextUnreadChapter()
-            visibleIf(nextChapter != null && !item.isLocked)
+            visibleIf(presenter.chapters.isNotEmpty() && !item.isLocked)
+            isEnabled = (nextChapter != null)
             if (nextChapter != null) {
                 val number = adapter.decimalFormat.format(nextChapter.chapter_number.toDouble())
                 text = if (nextChapter.chapter_number > 0) resources.getString(
@@ -170,6 +171,9 @@ class MangaHeaderHolder(
                         else R.string.start_reading_x, name
                     )
                 }
+            }
+            else {
+                text = resources.getString(R.string.all_caught_up)
             }
         }
 

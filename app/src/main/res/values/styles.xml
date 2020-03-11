@@ -247,8 +247,8 @@
 
     <style name="Theme.Widget.Button.Primary" parent="Widget.MaterialComponents.Button">
         <item name="android:textAllCaps">false</item>
-        <item name="backgroundTint">?colorAccent</item>
-        <item name="android:textColor">@android:color/white</item>
+        <item name="backgroundTint">@color/mtrl_btn_bg_selector</item>
+        <item name="android:textColor">@color/primary_button_text_color_selector</item>
         <item name="android:letterSpacing">0.0</item>
     </style>
 

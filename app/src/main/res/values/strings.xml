@@ -514,6 +514,7 @@
     <string name="no_description">No description</string>
     <string name="mark_all_as_read_message">Mark all chapters as read?</string>
     <string name="remove_from_library">Remove from library</string>
+    <string name="all_caught_up">All caught up</string>
 
     <!-- Manga chapters fragment -->
     <string name="start_reading">Start reading</string>

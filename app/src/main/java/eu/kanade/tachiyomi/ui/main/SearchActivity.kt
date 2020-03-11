@@ -47,6 +47,8 @@ class SearchActivity: MainActivity() {
         toolbar.navigationIcon = drawerArrow
         drawerArrow?.progress = 1f
 
+        if (to !is SpinnerTitleInterface) toolbar.removeSpinner()
+
         if (to is NoToolbarElevationController) {
             appbar.disableElevation()
         } else {

@@ -53,6 +53,7 @@ import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.pow
 import kotlin.math.roundToInt
 import kotlin.math.sign
 
@@ -152,10 +153,7 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
         bottom_sheet.getGlobalVisibleRect(sheetRect)
         view?.getGlobalVisibleRect(recyclerRect)
 
-        if (sheetRect.contains(event.x.toInt(), event.y.toInt()) ||
-            !recyclerRect.contains(event.x.toInt(), event.y.toInt())) {
-            return
-        }
+
         if (startPosX == null) {
             startPosX = event.rawX
             startPosY = event.rawY
@@ -185,8 +183,14 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
                         prevCategory = newOffsetP
                 }
             }
+            return
         }
-        else if (event.actionMasked != MotionEvent.ACTION_UP && startPosX != null) {
+        if (startPosX != null && startPosY != null &&
+            (sheetRect.contains(startPosX!!.toInt(), startPosY!!.toInt()) ||
+                !recyclerRect.contains(startPosX!!.toInt(), startPosY!!.toInt()))) {
+            return
+        }
+        if (event.actionMasked != MotionEvent.ACTION_UP && startPosX != null) {
             val distance = abs(event.rawX - startPosX!!)
             val sign = sign(event.rawX - startPosX!!)
 
@@ -196,26 +200,21 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
                 !lockedRecycler) {
                 lockedRecycler = true
                 switchingCategories = true
-                if ((prevCategory == null  && sign > 0) || (nextCategory == null && sign < 0)) {
-                    recycler_layout.x = 0f
-                    recycler_layout.alpha = 1f
-                    return
-                }
-                else
-                    recycler.suppressLayout(true)
+                recycler.suppressLayout(true)
             }
             else if (!lockedRecycler && abs(event.rawY - startPosY!!) > 30) {
                 lockedY = true
                 resetRecyclerY()
                 return
             }
-            if ((prevCategory == null && sign > 0) || (nextCategory == null && sign < 0)) {
-                resetRecyclerY()
-                return
-            }
             if (abs(event.rawY - startPosY!!) <= 30 || recycler.isLayoutSuppressed
                 || lockedRecycler) {
-                if (distance <= swipeDistance * 1.1f) {
+
+                if ((prevCategory == null && sign > 0) || (nextCategory == null && sign < 0)) {
+                    recycler_layout.x = sign * distance.pow(0.6f)
+                    recycler_layout.alpha = 1f
+                }
+                else if (distance <= swipeDistance * 1.1f) {
                     recycler_layout.x = (max(0f, distance - 50f) * sign) / 3
                     recycler_layout.alpha =
                         (1f - (distance - (swipeDistance * 0.1f)) / swipeDistance)
@@ -454,6 +453,14 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
                 headerPosition, (if (headerPosition == 0) 0 else (-28).dpToPx)
                     + appbarOffset
             )
+            val isCurrentController = router?.backstack?.lastOrNull()?.controller() ==
+                this
+
+            val headerItem = adapter.getItem(headerPosition) as? LibraryHeaderItem
+            if (headerItem != null) {
+                customTitleSpinner.category_title.text = headerItem.category.name
+                if (isCurrentController) setTitle()
+            }
             recycler.suppressLayout(false)
         }
         launchUI {
@@ -790,6 +797,8 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
 
         if (lockedRecycler && abs(x) > 1000f)  {
             val sign = sign(x).roundToInt()
+            if ((sign < 0 && nextCategory == null) || (sign > 0) && prevCategory == null)
+                return
             val distance = recycler_layout.alpha
             val speed = max(3000f / abs(x), 0.75f)
             Timber.d("Flinged $distance, velo ${abs(x)}, speed $speed")

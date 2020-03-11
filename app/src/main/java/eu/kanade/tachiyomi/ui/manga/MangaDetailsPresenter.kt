@@ -98,6 +98,7 @@ class MangaDetailsPresenter(private val controller: MangaDetailsController,
     fun fetchChapters() {
         launch {
             getChapters()
+            refreshTracking()
             withContext(Dispatchers.Main) { controller.updateChapters(chapters) }
         }
     }
