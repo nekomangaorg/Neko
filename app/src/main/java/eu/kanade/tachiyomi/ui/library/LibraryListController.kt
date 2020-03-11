@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.library
 import android.animation.Animator
 import android.animation.AnimatorSet
 import android.animation.ValueAnimator
+import android.app.Activity
 import android.graphics.Rect
 import android.os.Build
 import android.os.Bundle
@@ -356,6 +357,12 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
                 .action_search)?.collapseActionView()
             (activity as MainActivity).supportActionBar?.setDisplayShowCustomEnabled(false)
         }*/
+    }
+
+    override fun onActivityResumed(activity: Activity) {
+        super.onActivityResumed(activity)
+        resetScrollingValues()
+        resetRecyclerY()
     }
 
     override fun onDestroy() {
