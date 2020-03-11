@@ -339,6 +339,7 @@ fun Controller.scrollViewWith(recycler: RecyclerView,
             super.onScrolled(recyclerView, dx, dy)
             if (router?.backstack?.lastOrNull()?.controller() == this@scrollViewWith &&
                 statusBarHeight > -1 &&
+                activity != null &&
                 activity!!.appbar.height > 0) {
                 activity!!.appbar.y -= dy
                 activity!!.appbar.y = clamp(
@@ -353,7 +354,7 @@ fun Controller.scrollViewWith(recycler: RecyclerView,
             super.onScrollStateChanged(recyclerView, newState)
             if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                 if (router?.backstack?.lastOrNull()?.controller() == this@scrollViewWith &&
-                    statusBarHeight > -1 &&
+                    statusBarHeight > -1 && activity != null &&
                     activity!!.appbar.height > 0) {
                     val halfWay = abs((-activity!!.appbar.height.toFloat()) / 2)
                     val shortAnimationDuration = resources?.getInteger(

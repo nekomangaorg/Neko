@@ -42,6 +42,7 @@
 
     <!-- Actions -->
     <string name="action_filter">Filter</string>
+    <string name="action_view_all_sources">View all sources</string>
     <string name="action_view_options">View options</string>
     <string name="action_filter_downloaded">Downloaded</string>
     <string name="action_filter_not_downloaded">Not downloaded</string>
