@@ -38,10 +38,6 @@ class SettingsRelatedController : SettingsController() {
             entriesRes = arrayOf(R.string.wifi, R.string.charging)
             entryValues = listOf("wifi", "ac")
             customSummaryRes = R.string.pref_related_update_restriction_summary
-
-            preferences.libraryUpdateInterval().asObservable()
-                    .subscribeUntilDestroy { isVisible = it > 0 }
-
             onChange {
                 RelatedUpdateJob.setupTask()
                 true
