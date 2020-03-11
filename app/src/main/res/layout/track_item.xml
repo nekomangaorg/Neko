@@ -9,6 +9,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/track_constraint"
         android:layout_width="match_parent"
+        android:background="?attr/selectable_list_drawable"
         android:layout_height="96dp">
 
         <FrameLayout
@@ -155,7 +156,6 @@
             android:layout_height="wrap_content"
             android:background="?selectableItemBackgroundBorderless"
             android:contentDescription="@string/action_edit"
-            android:tint="?android:attr/textColorSecondary"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

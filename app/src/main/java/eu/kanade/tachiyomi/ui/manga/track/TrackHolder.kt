@@ -8,7 +8,9 @@ import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.typeface.IIcon
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
+import com.mikepenz.iconics.utils.colorInt
 import eu.kanade.tachiyomi.ui.base.holder.BaseViewHolder
+import eu.kanade.tachiyomi.util.getResourceColor
 import eu.kanade.tachiyomi.util.invisible
 import eu.kanade.tachiyomi.util.setVectorCompat
 import eu.kanade.tachiyomi.util.visibleIf
@@ -105,6 +107,8 @@ class TrackHolder(val view: View, adapter: TrackAdapter) : BaseViewHolder(view) 
     }
 
     fun createIcon(icon: IIcon): IconicsDrawable {
-        return IconicsDrawable(view.context, icon)
+        return IconicsDrawable(view.context, icon).apply {
+            colorInt(view.context.getResourceColor(android.R.attr.textColorSecondary))
+        }
     }
 }
