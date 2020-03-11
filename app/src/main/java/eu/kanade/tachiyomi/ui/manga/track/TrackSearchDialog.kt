@@ -49,15 +49,6 @@ class TrackSearchDialog : DialogController {
     private var wasPreviouslyTracked:Boolean = false
     private lateinit var presenter:MangaDetailsPresenter
 
-    constructor(target: TrackController, service: TrackService, wasTracked:Boolean) : super(Bundle()
-        .apply {
-        putInt(KEY_SERVICE, service.id)
-    }) {
-        wasPreviouslyTracked = wasTracked
-        targetController = target
-        this.service = service
-    }
-
     constructor(target: TrackingBottomSheet, service: TrackService, wasTracked:Boolean) : super(Bundle()
         .apply {
             putInt(KEY_SERVICE, service.id)

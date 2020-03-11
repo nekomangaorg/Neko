@@ -73,7 +73,6 @@ import eu.kanade.tachiyomi.ui.library.ChangeMangaCategoriesDialog
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.SearchActivity
-import eu.kanade.tachiyomi.ui.manga.MangaController.Companion.FROM_CATALOGUE_EXTRA
 import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
 import eu.kanade.tachiyomi.ui.manga.chapter.ChapterMatHolder
 import eu.kanade.tachiyomi.ui.manga.chapter.ChaptersAdapter
@@ -114,10 +113,10 @@ class MangaDetailsController : BaseController,
         fromCatalogue: Boolean = false,
         smartSearchConfig: CatalogueController.SmartSearchConfig? = null,
         update: Boolean = false) : super(Bundle().apply {
-        putLong(MangaController.MANGA_EXTRA, manga?.id ?: 0)
+        putLong(MANGA_EXTRA, manga?.id ?: 0)
         putBoolean(FROM_CATALOGUE_EXTRA, fromCatalogue)
-        putParcelable(MangaController.SMART_SEARCH_CONFIG_EXTRA, smartSearchConfig)
-        putBoolean(MangaController.UPDATE_EXTRA, update)
+        putParcelable(SMART_SEARCH_CONFIG_EXTRA, smartSearchConfig)
+        putBoolean(UPDATE_EXTRA, update)
     }) {
         this.manga = manga
         if (manga != null) {
@@ -128,7 +127,7 @@ class MangaDetailsController : BaseController,
     constructor(mangaId: Long) : this(
         Injekt.get<DatabaseHelper>().getManga(mangaId).executeAsBlocking())
 
-    constructor(bundle: Bundle) : this(bundle.getLong(MangaController.MANGA_EXTRA)) {
+    constructor(bundle: Bundle) : this(bundle.getLong(MANGA_EXTRA)) {
         val notificationId = bundle.getInt("notificationId", -1)
         val context = applicationContext ?: return
         if (notificationId > -1) NotificationReceiver.dismissNotification(
@@ -641,7 +640,7 @@ class MangaDetailsController : BaseController,
         val shortcutIntent = activity.intent
             .setAction(MainActivity.SHORTCUT_MANGA)
             .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            .putExtra(MangaController.MANGA_EXTRA, presenter.manga.id)
+            .putExtra(MANGA_EXTRA, presenter.manga.id)
 
         // Check if shortcut placement is supported
         if (ShortcutManagerCompat.isRequestPinShortcutSupported(activity)) {
@@ -1032,5 +1031,18 @@ class MangaDetailsController : BaseController,
                 }
             }
         }
+    }
+
+    companion object {
+
+        const val UPDATE_EXTRA = "update"
+        const val SMART_SEARCH_CONFIG_EXTRA = "smartSearchConfig"
+
+        const val FROM_CATALOGUE_EXTRA = "from_catalogue"
+        const val MANGA_EXTRA = "manga"
+
+        const val INFO_CONTROLLER = 0
+        const val CHAPTERS_CONTROLLER = 1
+        const val TRACK_CONTROLLER = 2
     }
 }
