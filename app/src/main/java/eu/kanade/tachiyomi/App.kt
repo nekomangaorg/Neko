@@ -17,7 +17,7 @@ import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
-import eu.kanade.tachiyomi.data.related.RelatedJob
+import eu.kanade.tachiyomi.data.related.RelatedUpdateJob
 import eu.kanade.tachiyomi.data.updater.UpdaterJob
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import org.acra.ACRA
@@ -96,7 +96,7 @@ open class App : Application(), LifecycleObserver {
                     LibraryUpdateJob.TAG -> LibraryUpdateJob()
                     UpdaterJob.TAG -> UpdaterJob()
                     BackupCreatorJob.TAG -> BackupCreatorJob()
-                    RelatedJob.TAG -> RelatedJob()
+                    RelatedUpdateJob.TAG -> RelatedUpdateJob()
                     else -> null
                 }
             }

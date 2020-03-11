@@ -10,6 +10,7 @@ import androidx.core.app.NotificationManagerCompat
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.MangaRelatedImpl
+import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.util.customize
 import eu.kanade.tachiyomi.util.isServiceRunning
@@ -37,6 +38,18 @@ class RelatedUpdateService(
 
     var relatedServiceScope = CoroutineScope(Dispatchers.IO + Job())
 
+    /**
+     * Subscription where the update is done.
+     */
+    private var job: Job? = null
+
+    /**
+     * Pending intent of action that cancels the library update
+     */
+    private val cancelIntent by lazy {
+        NotificationReceiver.cancelRelatedUpdatePendingBroadcast(this)
+    }
+
     private val progressNotification by lazy {
         NotificationCompat.Builder(this, Notifications.CHANNEL_RELATED)
             .customize(
@@ -46,6 +59,7 @@ class RelatedUpdateService(
                 true
             )
             .setAutoCancel(true)
+            .addAction(R.drawable.ic_clear_grey, getString(android.R.string.cancel), cancelIntent)
     }
 
     /**
@@ -54,7 +68,6 @@ class RelatedUpdateService(
      */
     override fun onCreate() {
         super.onCreate()
-
         startForeground(Notifications.ID_RELATED_PROGRESS, progressNotification.build())
         wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).newWakeLock(
             PowerManager.PARTIAL_WAKE_LOCK, "RelatedUpdateService:WakeLock"
@@ -67,6 +80,7 @@ class RelatedUpdateService(
      * lock.
      */
     override fun onDestroy() {
+        job?.cancel()
         relatedServiceScope.cancel()
         if (wakeLock.isHeld) {
             wakeLock.release()
@@ -90,16 +104,18 @@ class RelatedUpdateService(
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent == null) return Service.START_NOT_STICKY
 
+        // Unsubscribe from any previous subscription if needed.
+        job?.cancel()
         val handler = CoroutineExceptionHandler { _, exception ->
             Timber.e(exception)
             stopSelf(startId)
             showResultNotification(true)
             cancelProgressNotification()
         }
-        val job = relatedServiceScope.launch(handler) {
+        job = relatedServiceScope.launch(handler) {
             updateRelated()
         }
-        job.invokeOnCompletion { stopSelf(startId) }
+        job?.invokeOnCompletion { stopSelf(startId) }
 
         return START_REDELIVER_INTENT
     }
@@ -107,8 +123,7 @@ class RelatedUpdateService(
     /**
      * Method that updates the related database for manga
      */
-    @Suppress("BlockingMethodInNonBlockingContext")
-    private suspend fun updateRelated() {
+    private fun updateRelated() {
         val jsonString =
             RelatedHttpService.create().getRelatedResults().execute().body().toString()
         val relatedPageResult = JSONObject(jsonString)
@@ -122,6 +137,13 @@ class RelatedUpdateService(
         val batchMultiple = 1000
         val dataToInsert = mutableListOf<MangaRelatedImpl>()
         for (key in relatedPageResult.keys()) {
+
+            // Check if the service is currently running
+            if (job?.isCancelled!!) {
+                cancelProgressNotification()
+                showResultNotification(true)
+                return
+            }
 
             // Get our two arrays of ids and titles
             val matchedIds =

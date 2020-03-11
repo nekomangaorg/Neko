@@ -1,9 +1,11 @@
 package eu.kanade.tachiyomi.ui.setting
 
+import android.content.Intent
+import android.net.Uri
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
-import eu.kanade.tachiyomi.data.related.RelatedJob
+import eu.kanade.tachiyomi.data.related.RelatedUpdateJob
 
 class SettingsRelatedController : SettingsController() {
 
@@ -22,12 +24,39 @@ class SettingsRelatedController : SettingsController() {
             defaultValue = false
             onClick {
                 if (isChecked) {
-                    RelatedJob.setupTask()
-                    RelatedJob.runTaskNow()
+                    RelatedUpdateJob.setupTask()
+                    RelatedUpdateJob.runTaskNow()
                 } else {
-                    RelatedJob.cancelTask()
+                    RelatedUpdateJob.cancelTask()
                 }
             }
+        }
+
+        multiSelectListPreferenceMat(activity) {
+            key = Keys.relatedUpdateRestriction
+            titleRes = R.string.pref_related_update_restriction
+            entriesRes = arrayOf(R.string.wifi, R.string.charging)
+            entryValues = listOf("wifi", "ac")
+            customSummaryRes = R.string.pref_related_update_restriction_summary
+
+            preferences.libraryUpdateInterval().asObservable()
+                    .subscribeUntilDestroy { isVisible = it > 0 }
+
+            onChange {
+                RelatedUpdateJob.setupTask()
+                true
+            }
+        }
+
+        preference {
+            title = "Github"
+            val url = "https://github.com/goldbattle/MangadexRecomendations"
+            summary = url
+            onClick {
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                startActivity(intent)
+            }
+            isIconSpaceReserved = true
         }
     }
 }
