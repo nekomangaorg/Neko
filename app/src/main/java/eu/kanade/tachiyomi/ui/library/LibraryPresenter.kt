@@ -18,6 +18,7 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.HttpSource
+import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet
 import eu.kanade.tachiyomi.ui.migration.MigrationFlags
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.lang.removeArticles
@@ -158,6 +159,8 @@ class LibraryPresenter(
 
         val filterMangaType by lazy { preferences.filterMangaType().getOrDefault() }
 
+        val filterTrackers = FilterBottomSheet.FILTER_TRACKER
+
         val filterFn: (LibraryItem) -> Boolean = f@ { item ->
             // Filter when there isn't unread chapters.
             if (filterUnread == STATE_INCLUDE &&
@@ -184,11 +187,18 @@ class LibraryPresenter(
             if (filterTracked != STATE_IGNORE) {
                 val tracks = db.getTracks(item.manga).executeAsBlocking()
 
-                val trackCount = loggedServices.count { service ->
+                val trackCount = loggedServices.any { service ->
                     tracks.any { it.sync_id == service.id }
                 }
-                if (filterTracked == STATE_INCLUDE && trackCount == 0) return@f false
-                if (filterTracked == STATE_EXCLUDE && trackCount > 0) return@f false
+                if (filterTracked == STATE_INCLUDE && !trackCount) return@f false
+                if (filterTracked == STATE_EXCLUDE && trackCount) return@f false
+
+                if (filterTrackers.isNotEmpty()) {
+                    val service = loggedServices.find { it.name == filterTrackers }
+                    if (service != null) {
+                        if (tracks.none { it.sync_id == service.id }) return@f false
+                    }
+                }
             }
             // Filter when there are no downloads.
             if (filterDownloaded != STATE_IGNORE) {

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<eu.kanade.tachiyomi.ui.library.filter.SortFilterBottomSheet xmlns:android="http://schemas.android.com/apk/res/android"
+<eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/bottom_sheet"
     style="@style/BottomSheetDialogTheme"
@@ -105,4 +105,4 @@
                 app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
-</eu.kanade.tachiyomi.ui.library.filter.SortFilterBottomSheet>
+</eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet>

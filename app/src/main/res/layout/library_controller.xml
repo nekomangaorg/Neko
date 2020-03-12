@@ -50,6 +50,7 @@
         android:focusable="false"
         android:scaleX="0"
         android:scaleY="0"
+        android:visibility="gone"
         app:layout_anchor="@id/bottom_sheet"
         app:layout_anchorGravity="end|top"
         app:srcCompat="@drawable/ic_file_download_white_24dp" />

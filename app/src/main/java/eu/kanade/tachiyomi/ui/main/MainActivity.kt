@@ -659,7 +659,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
     }
 
     override fun downloadStatusChanged(downloading: Boolean) {
-        val downloadManager = Injekt.get<DownloadManager>()
+        /*val downloadManager = Injekt.get<DownloadManager>()
         val hasQueue = downloading || downloadManager.hasQueue()
         launchUI {
             if (hasQueue) {
@@ -669,7 +669,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             } else {
                 navigationView?.removeBadge(R.id.nav_library)
             }
-        }
+        }*/
     }
 
 

@@ -16,7 +16,6 @@ import android.view.ViewGroup
 import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.PopupMenu
 import androidx.coordinatorlayout.widget.CoordinatorLayout
-import androidx.core.math.MathUtils.clamp
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -384,11 +383,11 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
         val isCurrentController = router?.backstack?.lastOrNull()?.controller() ==
             this
 
-        customTitleSpinner.category_title.text =
+        /*customTitleSpinner.category_title.text =
             presenter.categories[clamp(activeCategory,
                 0,
                 presenter.categories.size - 1)].name
-        if (isCurrentController) setTitle()
+        if (isCurrentController) setTitle()*/
         updateScroll = false
         if (!freshStart) {
             justStarted = false

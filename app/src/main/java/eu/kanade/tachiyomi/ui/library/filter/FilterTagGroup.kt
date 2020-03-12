@@ -30,6 +30,8 @@ class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: Attribute
         return buttons.any { it.isActivated }
     }
 
+    fun nameOf(index: Int):String? = buttons.getOrNull(index)?.text as? String
+
     fun setup(root: ViewGroup, firstText: Int, secondText: Int? = null, thirdText: Int? = null) {
         val text1 = context.getString(firstText)
         val text2 = if (secondText != null) context.getString(secondText) else null

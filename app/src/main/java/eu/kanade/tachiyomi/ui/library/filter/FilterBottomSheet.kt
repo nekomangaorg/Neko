@@ -33,7 +33,7 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
 
-class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null)
+class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null)
     : LinearLayout(context, attrs),
     FilterTagGroupListener {
 
@@ -50,7 +50,7 @@ class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: A
 
     private lateinit var tracked: FilterTagGroup
 
-   // private lateinit var categories: FilterTagGroup
+    private var trackers: FilterTagGroup? = null
 
     private var mangaType: FilterTagGroup? = null
 
@@ -223,17 +223,19 @@ class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: A
                 launchUI {
                     val mangaType = inflate(R.layout.filter_buttons) as FilterTagGroup
                     mangaType.setup(
-                        this@SortFilterBottomSheet,
+                        this@FilterBottomSheet,
                         types.first(),
                         types.getOrNull(1),
                         types.getOrNull(2)
                     )
-                    this@SortFilterBottomSheet.mangaType = mangaType
+                    this@FilterBottomSheet.mangaType = mangaType
                     filter_layout.addView(mangaType)
+                    filterItems.remove(tracked)
                     filterItems.add(mangaType)
+                    filterItems.add(tracked)
                 }
             }
-            launchUI {
+            withContext(Dispatchers.Main)  {
                 hide_categories.visibleIf(showCategoriesCheckBox)
                // categories.setState(preferences.hideCategories().getOrDefault())
                 downloaded.setState(preferences.filterDownloaded())
@@ -244,11 +246,34 @@ class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: A
                 reSortViews()
             }
 
+            if (filterItems.contains(tracked)) {
+                val loggedServices = Injekt.get<TrackManager>().services.filter { it.isLogged }
+                if (loggedServices.size > 1) {
+                    val serviceNames = loggedServices.map { it.name }
+                    withContext(Dispatchers.Main) {
+                        trackers = inflate(R.layout.filter_buttons) as FilterTagGroup
+                        trackers?.setup(
+                            this@FilterBottomSheet,
+                            serviceNames.first(),
+                            serviceNames.getOrNull(1),
+                            serviceNames.getOrNull(2)
+                        )
+                        if (tracked.isActivated) {
+                            filter_layout.addView(trackers)
+                            filterItems.add(trackers!!)
+                        }
+                    }
+                }
+            }
+
         }
     }
 
     override fun onFilterClicked(view: FilterTagGroup, index: Int, updatePreference:Boolean) {
         if (updatePreference) {
+            if (view == trackers) {
+                FILTER_TRACKER = view.nameOf(index) ?: ""
+            } else {
                 when (view) {
                     downloaded -> preferences.filterDownloaded()
                     unread -> preferences.filterUnread()
@@ -257,7 +282,18 @@ class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: A
                     mangaType -> preferences.filterMangaType()
                     else -> null
                 }?.set(index + 1)
-                onGroupClicked(ACTION_FILTER)
+            }
+            onGroupClicked(ACTION_FILTER)
+        }
+        if (preferences.filterTracked().getOrDefault() == 1 &&
+            trackers != null && trackers?.parent == null) {
+            filter_layout.addView(trackers)
+            filterItems.add(trackers!!)
+        }
+        else if (preferences.filterTracked().getOrDefault() != 1 &&
+            trackers?.parent != null) {
+            filter_layout.removeView(trackers)
+            filterItems.remove(trackers!!)
         }
         val hasFilters = hasActiveFilters()
         if (hasFilters && clearButton.parent == null)
@@ -276,6 +312,7 @@ class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: A
         preferences.filterCompleted().set(0)
         preferences.filterTracked().set(0)
         preferences.filterMangaType().set(0)
+        FILTER_TRACKER = ""
 
         val transition = androidx.transition.AutoTransition()
         transition.duration = 150
@@ -308,5 +345,7 @@ class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: A
         const val ACTION_REFRESH = 0
         const val ACTION_FILTER = 1
         const val ACTION_HIDE_FILTER_TIP = 2
+        var FILTER_TRACKER = ""
+            private set
     }
 }
