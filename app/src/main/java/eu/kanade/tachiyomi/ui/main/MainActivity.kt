@@ -743,13 +743,10 @@ interface BottomNavBarInterface {
 }
 
 interface RootSearchInterface
+interface SpinnerTitleInterface
 
 interface OnTouchEventInterface {
     fun onTouchEvent(event: MotionEvent?)
-}
-
-interface SpinnerTitleInterface {
-    fun popUpMenu(): PopupMenu
 }
 
 interface SwipeGestureInterface {

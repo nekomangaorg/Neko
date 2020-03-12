@@ -314,25 +314,28 @@ fun Controller.setOnQueryTextChangeListener(searchView: SearchView, onlyOnSubmit
     })
 }
 
-fun Controller.scrollViewWith(recycler: RecyclerView,
+fun Controller.scrollViewWith(
+    recycler: RecyclerView,
     padBottom: Boolean = false,
     swipeRefreshLayout: SwipeRefreshLayout? = null,
-    f: ((WindowInsets) -> Unit)? = null) {
+    afterInsets: ((WindowInsets) -> Unit)? = null) {
     var statusBarHeight = -1
     activity?.appbar?.y = 0f
+    val attrsArray = intArrayOf(android.R.attr.actionBarSize)
+    val array = recycler.context.obtainStyledAttributes(attrsArray)
+    val appBarHeight = array.getDimensionPixelSize(0, 0)
+    array.recycle()
     recycler.doOnApplyWindowInsets { view, insets, _ ->
-        val attrsArray = intArrayOf(android.R.attr.actionBarSize)
-        val array = view.context.obtainStyledAttributes(attrsArray)
-        val headerHeight = insets.systemWindowInsetTop + array.getDimensionPixelSize(0, 0)
+        val headerHeight = insets.systemWindowInsetTop + appBarHeight
         view.updatePaddingRelative(
             top = headerHeight,
             bottom = if (padBottom) insets.systemWindowInsetBottom else view.paddingBottom
         )
-        swipeRefreshLayout?.setProgressViewOffset(false, headerHeight + (-60).dpToPx,
-            headerHeight)
+        swipeRefreshLayout?.setProgressViewOffset(
+            false, headerHeight + (-60).dpToPx, headerHeight
+        )
         statusBarHeight = insets.systemWindowInsetTop
-        array.recycle()
-        f?.invoke(insets)
+        afterInsets?.invoke(insets)
     }
     recycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {

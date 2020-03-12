@@ -92,6 +92,7 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
     var prevCategory:Int? = null
     private val swipeDistance = 300f
     var flinging = false
+    var isDragging = false
 
     /**
      * Recycler view of the list of manga.
@@ -149,6 +150,11 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
             return
         }
         if (flinging) return
+        if (isDragging) {
+            resetScrollingValues()
+            resetRecyclerY(false)
+            return
+        }
         val sheetRect = Rect()
         val recyclerRect = Rect()
         bottom_sheet.getGlobalVisibleRect(sheetRect)
@@ -600,6 +606,8 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
     override fun onActionStateChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
         val position = viewHolder?.adapterPosition ?: return
         if (actionState == 2) {
+            isDragging = true
+            activity?.appbar?.y = 0f
             if (lastItemPosition != null && position != lastItemPosition
                 && lastItem == adapter.getItem(position)) {
                 // because for whatever reason you can repeatedly tap on a currently dragging manga
@@ -627,13 +635,31 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
         invalidateActionMode()
     }
     override fun onItemMove(fromPosition: Int, toPosition: Int) {
+        // Because padding a recycler causes it to scroll up we have to scroll it back down... wild
+        if ((adapter.getItem(fromPosition) is LibraryItem &&
+            adapter.getItem(fromPosition) is LibraryItem) ||
+            adapter.getItem(fromPosition) == null)
+            recycler.scrollBy(0, recycler.paddingTop)
+        activity?.appbar?.y = 0f
         if (lastItemPosition == toPosition)
             lastItemPosition = null
         else if (lastItemPosition == null)
             lastItemPosition = fromPosition
     }
 
+    override fun shouldMoveItem(fromPosition: Int, toPosition: Int): Boolean {
+        if (adapter.isSelected(fromPosition))
+            toggleSelection(fromPosition)
+        val item = adapter.getItem(fromPosition) as? LibraryItem ?: return false
+        val newHeader = adapter.getSectionHeader(toPosition) as? LibraryHeaderItem
+        if (toPosition <= 1) return false
+        return (adapter.getItem(toPosition) !is LibraryHeaderItem)&&
+            (newHeader?.category?.id == item.manga.category ||
+            !presenter.mangaIsInCategory(item.manga, newHeader?.category?.id))
+    }
+
     override fun onItemReleased(position: Int) {
+        isDragging = false
         if (adapter.selectedItemCount > 0) {
             lastItemPosition = null
             return
@@ -692,18 +718,6 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
             }
         }
         lastItemPosition = null
-    }
-
-    override fun shouldMoveItem(fromPosition: Int, toPosition: Int): Boolean {
-        //if (adapter.selectedItemCount > 1)
-           // return false
-        if (adapter.isSelected(fromPosition))
-            toggleSelection(fromPosition)
-        val item = adapter.getItem(fromPosition) as? LibraryItem ?: return false
-        val newHeader = adapter.getSectionHeader(toPosition) as? LibraryHeaderItem
-        //if (adapter.getItem(toPosition) is LibraryHeaderItem) return false
-        return newHeader?.category?.id == item.manga.category ||
-            !presenter.mangaIsInCategory(item.manga, newHeader?.category?.id)
     }
 
     override fun updateCategory(catId: Int): Boolean {
@@ -768,23 +782,10 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
         if (sheetRect.contains(x.toInt(), y.toInt()))
             showFiltersBottomSheet()
     }
-    override fun onSwipeLeft(x: Float, y: Float) = goToNextCategory(x, y,-1)
-    override fun onSwipeRight(x: Float, y: Float) = goToNextCategory(x, y,1)
+    override fun onSwipeLeft(x: Float, y: Float) = goToNextCategory(x)
+    override fun onSwipeRight(x: Float, y: Float) = goToNextCategory(x)
 
-    private fun goToNextCategory(x: Float, y: Float, offset: Int) {
-        /*
-        val sheetRect = Rect()
-        val recyclerRect = Rect()
-        bottom_sheet.getGlobalVisibleRect(sheetRect)
-        recycler.getGlobalVisibleRect(recyclerRect)
-
-        if (sheetRect.contains(x.toInt(), y.toInt()) ||
-            !recyclerRect.contains(x.toInt(), y.toInt())) {
-           return
-        }*/
-        //jumpToCategory(offset)
-
-
+    private fun goToNextCategory(x: Float) {
         if (lockedRecycler && abs(x) > 1000f)  {
             val sign = sign(x).roundToInt()
             if ((sign < 0 && nextCategory == null) || (sign > 0) && prevCategory == null)
@@ -828,25 +829,6 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
             }
         }
     }
-
-    private fun jumpToCategory(offset: Int) {
-        val position =
-            (recycler.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
-        val order = when (val item = adapter.getItem(position)) {
-            is LibraryHeaderItem -> item.category.order
-            is LibraryItem -> presenter.categories.find { it.id == item.manga.category }?.order
-            else -> null
-        }
-        if (order != null) {
-            var newOffset = order + offset
-            while (adapter.indexOf(newOffset) == -1 && presenter.categories.any { it.order == newOffset }) {
-                newOffset += offset
-            }
-            scrollToHeader(newOffset)
-        }
-    }
-
-    override fun popUpMenu(): PopupMenu = titlePopupMenu
 
     override fun recyclerIsScrolling() = switchingCategories || lockedRecycler || lockedY
 }
