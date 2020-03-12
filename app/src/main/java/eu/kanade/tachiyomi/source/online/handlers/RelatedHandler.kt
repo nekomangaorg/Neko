@@ -30,15 +30,17 @@ class RelatedHandler {
         }
 
         // Loop through and create a manga for each match
-        var relatedMangaTitles = JSONArray(relatedMangasDb.matched_titles)
-        var relatedMangaIds = JSONArray(relatedMangasDb.matched_ids)
-        var relatedMangas = mutableListOf<SManga>()
+        // Note: we say this is not initialized so the browser presenter can load it
+        // Note: the browser presenter will load the one from db or pull the latest details
+        val relatedMangaTitles = JSONArray(relatedMangasDb.matched_titles)
+        val relatedMangaIds = JSONArray(relatedMangasDb.matched_ids)
+        val relatedMangas = mutableListOf<SManga>()
         for (i in 0 until relatedMangaIds.length()) {
             val matchedManga = SManga.create()
             val id = relatedMangaIds.getLong(i)
             matchedManga.title = relatedMangaTitles.getString(i)
-            matchedManga.thumbnail_url = "${MdUtil.cdnUrl}/images/manga/$id.jpg"
             matchedManga.url = "/manga/$id/"
+            matchedManga.initialized = false
             relatedMangas.add(matchedManga)
         }
 

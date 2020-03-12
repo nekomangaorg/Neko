@@ -13,6 +13,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.GROUP_ALERT_SUMMARY
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -309,8 +310,17 @@ class LibraryUpdateService(
         val details = source.fetchMangaAndChapterDetails(manga)
 
         // delete cover cache image if the thumbnail from network is not empty
+        // note: we preload the covers here so we can view everything offline if they change
         if (!details.first.thumbnail_url.isNullOrEmpty()) {
+            // clear the old url from the cache
             coverCache.deleteFromCache(manga.thumbnail_url)
+            // download the glide image cache (used in library and manga info)
+            // the coverCache should be auto populated if we preload into glide
+            manga.thumbnail_url = details.first.thumbnail_url
+            GlideApp.with(this@LibraryUpdateService)
+                    .load(manga)
+                    .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+                    .preload()
         }
         manga.copyFrom(details.first)
         db.insertManga(manga).executeAsBlocking()

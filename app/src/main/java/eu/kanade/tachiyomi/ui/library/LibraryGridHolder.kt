@@ -60,7 +60,7 @@ class LibraryGridHolder(
             text = badge.toSpannable()
         }
 
-// Update the cover.
+        // Update the cover.
         GlideApp.with(view.context)
             .load(item.manga)
             .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
