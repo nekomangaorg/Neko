@@ -39,6 +39,7 @@ class SettingsRelatedController : SettingsController() {
             entryValues = listOf("wifi", "ac")
             customSummaryRes = R.string.pref_related_update_restriction_summary
             onChange {
+                RelatedUpdateJob.cancelTask()
                 RelatedUpdateJob.setupTask()
                 true
             }

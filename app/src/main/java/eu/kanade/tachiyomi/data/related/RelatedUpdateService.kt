@@ -141,8 +141,9 @@ class RelatedUpdateService(
         for (key in relatedPageResult.keys()) {
 
             // Check if the service is currently running
-            if (!this.isActive)
+            if (!this.isActive) {
                 break
+            }
 
             // Get our two arrays of ids and titles
             val matchedIds =
