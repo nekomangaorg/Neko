@@ -524,6 +524,8 @@
     <string name="mark_all_as_read_message">Mark all chapters as read?</string>
     <string name="remove_from_library">Remove from library</string>
     <string name="all_caught_up">All caught up</string>
+    <string name="select_start_chapter">Select starting chapter</string>
+    <string name="select_end_chapter">Select ending chapter</string>
 
     <!-- Manga chapters fragment -->
     <string name="start_reading">Start reading</string>
@@ -549,11 +551,12 @@
     <string name="manga_download">Download</string>
     <string name="custom_download">Download custom amount</string>
     <string name="download_1">Next chapter</string>
+    <string name="download_first">First unread chapter</string>
     <string name="download_5">Next 5 chapters</string>
     <string name="download_10">Next 10 chapters</string>
-    <string name="download_custom">Custom</string>
-    <string name="download_all">All</string>
-    <string name="download_unread">Unread</string>
+    <string name="download_custom">Custom range</string>
+    <string name="download_all">All chapters</string>
+    <string name="download_unread">All unread chapters</string>
     <string name="confirm_delete_chapters">Are you sure you want to delete selected chapters?</string>
     <plurals name="confirm_migration">
         <item quantity="one">Migrate %1$d%2$s manga?</item>
@@ -743,5 +746,4 @@
     <string name="sort_by_chapter_number">Sort by chapter number</string>
     <string name="newest_first">Newest to oldest</string>
     <string name="oldest_first">Oldest to newest</string>
-
 </resources>

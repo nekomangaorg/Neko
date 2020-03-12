@@ -21,7 +21,6 @@ import android.view.WindowManager
 import android.webkit.WebView
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
-import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.GestureDetectorCompat
@@ -392,7 +391,8 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             val duration = resources.getInteger(android.R.integer.config_mediumAnimTime) * scale
             delay(duration.toLong())
             delay(100)
-            window?.statusBarColor = ColorUtils.setAlphaComponent(getResourceColor(android.R.attr
+            if (Color.alpha(window?.statusBarColor ?: Color.BLACK) >= 255)
+                window?.statusBarColor = ColorUtils.setAlphaComponent(getResourceColor(android.R.attr
                 .colorBackground), 175)
         }
         super.onSupportActionModeFinished(mode)

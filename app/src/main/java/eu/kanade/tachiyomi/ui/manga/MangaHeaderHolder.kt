@@ -32,12 +32,10 @@ class MangaHeaderHolder(
     startExpanded: Boolean
 ) : MangaChapterHolder(view, adapter) {
 
-
-
     init {
-        start_reading_button.setOnClickListener { adapter.coverListener?.readNextChapter() }
+        start_reading_button.setOnClickListener { adapter.coverListener.readNextChapter() }
         top_view.updateLayoutParams<ConstraintLayout.LayoutParams> {
-            height = adapter.coverListener?.topCoverHeight() ?: 0
+            height = adapter.coverListener.topCoverHeight()
         }
         more_button.setOnClickListener { expandDesc() }
         manga_summary.setOnClickListener { expandDesc() }
@@ -48,30 +46,30 @@ class MangaHeaderHolder(
             more_button_group.visible()
         }
         manga_genres_tags.setOnTagClickListener {
-            adapter.coverListener?.tagClicked(it)
+            adapter.coverListener.tagClicked(it)
         }
-        filter_button.setOnClickListener { adapter.coverListener?.showChapterFilter() }
-        filters_text.setOnClickListener { adapter.coverListener?.showChapterFilter() }
-        chapters_title.setOnClickListener { adapter.coverListener?.showChapterFilter() }
-        webview_button.setOnClickListener { adapter.coverListener?.openInWebView() }
-        share_button.setOnClickListener { adapter.coverListener?.prepareToShareManga() }
+        filter_button.setOnClickListener { adapter.coverListener.showChapterFilter() }
+        filters_text.setOnClickListener { adapter.coverListener.showChapterFilter() }
+        chapters_title.setOnClickListener { adapter.coverListener.showChapterFilter() }
+        webview_button.setOnClickListener { adapter.coverListener.openInWebView() }
+        share_button.setOnClickListener { adapter.coverListener.prepareToShareManga() }
         favorite_button.setOnClickListener {
-            adapter.coverListener?.favoriteManga(false)
+            adapter.coverListener.favoriteManga(false)
         }
         favorite_button.setOnLongClickListener {
-            adapter.coverListener?.favoriteManga(true)
+            adapter.coverListener.favoriteManga(true)
             true
         }
         manga_full_title.setOnLongClickListener {
-            adapter.coverListener?.copyToClipboard(manga_full_title.text.toString(), R.string.manga_info_full_title_label)
+            adapter.coverListener.copyToClipboard(manga_full_title.text.toString(), R.string.manga_info_full_title_label)
             true
         }
         manga_author.setOnLongClickListener {
-            adapter.coverListener?.copyToClipboard(manga_author.text.toString(), R.string.manga_info_author_label)
+            adapter.coverListener.copyToClipboard(manga_author.text.toString(), R.string.manga_info_author_label)
             true
         }
-        manga_cover.setOnClickListener { adapter.coverListener?.zoomImageFromThumb(cover_card) }
-        track_button.setOnClickListener { adapter.coverListener?.showTrackingSheet() }
+        manga_cover.setOnClickListener { adapter.coverListener.zoomImageFromThumb(cover_card) }
+        track_button.setOnClickListener { adapter.coverListener.showTrackingSheet() }
         if (startExpanded)
             expandDesc()
     }

@@ -27,6 +27,9 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.DecelerateInterpolator
+import android.view.inputmethod.InputMethodManager
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
@@ -51,6 +54,7 @@ import com.bumptech.glide.signature.ObjectKey
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import eu.davidea.flexibleadapter.FlexibleAdapter
+import eu.davidea.flexibleadapter.SelectableAdapter
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
@@ -68,6 +72,7 @@ import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.base.controller.NoToolbarElevationController
+import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.ui.catalogue.CatalogueController
 import eu.kanade.tachiyomi.ui.library.ChangeMangaCategoriesDialog
 import eu.kanade.tachiyomi.ui.library.LibraryController
@@ -76,7 +81,6 @@ import eu.kanade.tachiyomi.ui.main.SearchActivity
 import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
 import eu.kanade.tachiyomi.ui.manga.chapter.ChapterMatHolder
 import eu.kanade.tachiyomi.ui.manga.chapter.ChaptersAdapter
-import eu.kanade.tachiyomi.ui.manga.chapter.DownloadCustomChaptersDialog
 import eu.kanade.tachiyomi.ui.manga.info.EditMangaDialog
 import eu.kanade.tachiyomi.ui.manga.track.TrackItem
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
@@ -101,12 +105,12 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File
 
-class MangaDetailsController : BaseController,
+open class MangaDetailsController : BaseController,
     FlexibleAdapter.OnItemClickListener,
     FlexibleAdapter.OnItemLongClickListener,
+    ActionMode.Callback,
     ChaptersAdapter.MangaHeaderInterface,
     ChangeMangaCategoriesDialog.Listener,
-    DownloadCustomChaptersDialog.Listener,
     NoToolbarElevationController {
 
     constructor(manga: Manga?,
@@ -145,10 +149,17 @@ class MangaDetailsController : BaseController,
     val fromCatalogue = args.getBoolean(FROM_CATALOGUE_EXTRA, false)
     var coverDrawable:Drawable? = null
     var trackingBottomSheet: TrackingBottomSheet? = null
+
+    var startingDLChapterPos:Int? = null
     /**
      * Adapter containing a list of chapters.
      */
     private var adapter: ChaptersAdapter? = null
+
+    /**
+     * Action mode for selections.
+     */
+    private var actionMode: ActionMode? = null
 
     // Hold a reference to the current animator,
     // so that it can be canceled mid-way.
@@ -209,6 +220,13 @@ class MangaDetailsController : BaseController,
                 val atTop = !recycler.canScrollVertically(-1)
                 if ((!atTop && !toolbarIsColored) || (atTop && toolbarIsColored)) {
                     toolbarIsColored = !atTop
+                    val isCurrentController =
+                        router?.backstack?.lastOrNull()?.controller() == this@MangaDetailsController
+                    if (isCurrentController) setTitle()
+                    if (actionMode != null) {
+                        (activity as MainActivity).toolbar.setBackgroundColor(Color.TRANSPARENT)
+                        return
+                    }
                     val color =
                         coverColor ?: activity!!.getResourceColor(android.R.attr.colorPrimary)
                     val colorFrom =
@@ -230,9 +248,6 @@ class MangaDetailsController : BaseController,
                         activity?.window?.statusBarColor = (animator.animatedValue as Int)
                     }
                     colorAnimator?.start()
-                    val isCurrentController =
-                        router?.backstack?.lastOrNull()?.controller() == this@MangaDetailsController
-                    if (isCurrentController) setTitle()
                 }
             }
         })
@@ -310,11 +325,10 @@ class MangaDetailsController : BaseController,
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
         super.onChangeStarted(handler, type)
         if (type == ControllerChangeType.PUSH_ENTER || type == ControllerChangeType.POP_ENTER) {
-            if (type == ControllerChangeType.POP_ENTER)
-                return
+            setStatusBar()
             (activity as MainActivity).appbar.setBackgroundColor(Color.TRANSPARENT)
-            (activity as MainActivity).toolbar.setBackgroundColor(Color.TRANSPARENT)
-            activity?.window?.statusBarColor = Color.TRANSPARENT
+            (activity as MainActivity).toolbar.setBackgroundColor(activity?.window?.statusBarColor
+                ?: Color.TRANSPARENT)
         }
         else if (type == ControllerChangeType.PUSH_EXIT || type == ControllerChangeType.POP_EXIT) {
             if (router.backstack.lastOrNull()?.controller() is DialogController)
@@ -349,7 +363,6 @@ class MangaDetailsController : BaseController,
         activity?.invalidateOptionsMenu()
     }
 
-
     fun updateChapters(chapters: List<ChapterItem>) {
         swipe_refresh?.isRefreshing = presenter.isLoading
         if (presenter.chapters.isEmpty() && fromCatalogue && !presenter.hasRequested) {
@@ -365,6 +378,32 @@ class MangaDetailsController : BaseController,
     override fun onItemClick(view: View?, position: Int): Boolean {
         val chapter = adapter?.getItem(position)?.chapter ?: return false
         if (chapter.isHeader) return false
+        if (actionMode != null) {
+            if (startingDLChapterPos == null) {
+                adapter?.addSelection(position)
+                (recycler.findViewHolderForAdapterPosition(position) as? BaseFlexibleViewHolder)
+                    ?.toggleActivation()
+                startingDLChapterPos = position
+                actionMode?.invalidate()
+            }
+            else {
+                val startingPosition = startingDLChapterPos ?: return false
+                var chapterList = listOf<ChapterItem>()
+                when {
+                    startingPosition > position ->
+                        chapterList = presenter.chapters.subList(position - 1, startingPosition)
+                    startingPosition <= position ->
+                        chapterList = presenter.chapters.subList(startingPosition - 1, position)
+                }
+                downloadChapters(chapterList)
+                adapter?.removeSelection(startingPosition)
+                (recycler.findViewHolderForAdapterPosition(startingPosition) as? BaseFlexibleViewHolder)
+                    ?.toggleActivation()
+                startingDLChapterPos = null
+                destroyActionModeIfNeeded()
+            }
+            return false
+        }
         openChapter(chapter)
         return false
     }
@@ -551,7 +590,7 @@ class MangaDetailsController : BaseController,
             R.id.download_next_5 -> presenter.getUnreadChaptersSorted().take(5)
             R.id.download_next_10 -> presenter.getUnreadChaptersSorted().take(10)
             R.id.download_custom -> {
-                showCustomDownloadDialog()
+                createActionModeIfNeeded()
                 return
             }
             R.id.download_unread -> presenter.chapters.filter { !it.read }
@@ -669,15 +708,9 @@ class MangaDetailsController : BaseController,
         }
     }
 
-    private fun showCustomDownloadDialog() {
-        DownloadCustomChaptersDialog(this, presenter.chapters.size).showDialog(router)
-    }
-
-    override fun downloadCustomChapters(amount: Int) {
-        val chaptersToDownload = presenter.getUnreadChaptersSorted().take(amount)
-        if (chaptersToDownload.isNotEmpty()) {
-            downloadChapters(chaptersToDownload)
-        }
+    override fun startDownloadRange(position: Int) {
+        createActionModeIfNeeded()
+        onItemClick(null, position)
     }
 
     override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
@@ -903,6 +936,61 @@ class MangaDetailsController : BaseController,
         trackingBottomSheet?.onSearchResultsError(error)
     }
 
+    /**
+     * Creates the action mode if it's not created already.
+     */
+    private fun createActionModeIfNeeded() {
+        if (actionMode == null) {
+            actionMode = (activity as AppCompatActivity).startSupportActionMode(this)
+            (activity as MainActivity).toolbar.setBackgroundColor(Color.TRANSPARENT)
+            val view = activity?.window?.currentFocus ?: return
+            val imm = activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+                ?: return
+            imm.hideSoftInputFromWindow(view.windowToken, 0)
+            if (adapter?.mode != SelectableAdapter.Mode.MULTI) {
+                adapter?.mode = SelectableAdapter.Mode.MULTI
+            }
+        }
+    }
+
+    /**
+     * Destroys the action mode.
+     */
+    private fun destroyActionModeIfNeeded() {
+        actionMode?.finish()
+    }
+
+    override fun onActionItemClicked(mode: ActionMode?, item: MenuItem?): Boolean {
+        return true
+    }
+
+    override fun onCreateActionMode(mode: ActionMode?, menu: Menu?): Boolean {
+        return true
+    }
+
+    override fun onDestroyActionMode(mode: ActionMode?) {
+        actionMode = null
+        setStatusBar()
+        startingDLChapterPos = null
+        adapter?.mode = SelectableAdapter.Mode.IDLE
+        adapter?.clearSelection()
+        return
+    }
+
+    private fun setStatusBar() {
+        activity?.window?.statusBarColor = if (toolbarIsColored) {
+            val translucentColor = ColorUtils.setAlphaComponent(coverColor ?: Color.TRANSPARENT, 175)
+            (activity as MainActivity).toolbar.setBackgroundColor(translucentColor)
+            translucentColor
+        } else Color.TRANSPARENT
+    }
+
+    override fun onPrepareActionMode(mode: ActionMode?, menu: Menu?): Boolean {
+        mode?.title = view?.context?.getString(if (startingDLChapterPos == null)
+            R.string.select_start_chapter else R.string.select_end_chapter)
+        return false
+    }
+
     override fun zoomImageFromThumb(thumbView: View) {
         // If there's an animation in progress, cancel it immediately and proceed with this one.
         currentAnimator?.cancel()
@@ -1040,9 +1128,5 @@ class MangaDetailsController : BaseController,
 
         const val FROM_CATALOGUE_EXTRA = "from_catalogue"
         const val MANGA_EXTRA = "manga"
-
-        const val INFO_CONTROLLER = 0
-        const val CHAPTERS_CONTROLLER = 1
-        const val TRACK_CONTROLLER = 2
     }
 }
