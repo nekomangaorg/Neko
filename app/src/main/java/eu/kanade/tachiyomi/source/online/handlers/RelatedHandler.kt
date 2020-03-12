@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.source.online.handlers
 
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
@@ -9,8 +10,11 @@ import org.json.JSONArray
 import rx.Observable
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import uy.kohesive.injekt.injectLazy
 
 class RelatedHandler {
+
+    private val preferences: PreferencesHelper by injectLazy()
 
     /**
      * fetch our related mangas
@@ -18,11 +22,11 @@ class RelatedHandler {
     fun fetchRelated(manga: Manga): Observable<MangasPage> {
 
         // Parse the Mangadex id from the URL
-        var mangaid = MdUtil.getMangaId(manga.url).toLong()
+        val mangaid = MdUtil.getMangaId(manga.url).toLong()
 
         // Get our current database
-        var db = Injekt.get<DatabaseHelper>()
-        var relatedMangasDb = db.getRelated(mangaid).executeAsBlocking()
+        val db = Injekt.get<DatabaseHelper>()
+        val relatedMangasDb = db.getRelated(mangaid).executeAsBlocking()
 
         // Check if we have a result
         if (relatedMangasDb == null) {

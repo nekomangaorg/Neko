@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
 import eu.kanade.tachiyomi.data.database.models.Track
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.POST
@@ -25,8 +26,11 @@ import okhttp3.Request
 import okhttp3.Response
 import rx.Observable
 import timber.log.Timber
+import uy.kohesive.injekt.injectLazy
 
 class FollowsHandler(val client: OkHttpClient, val headers: Headers) {
+
+    private val preferences: PreferencesHelper by injectLazy()
 
     /**
      * fetch follows by page
@@ -94,8 +98,8 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers) {
     private fun followFromElement(result: Result): SManga {
         val manga = SManga.create()
         manga.title = MdUtil.cleanString(result.title)
-        manga.thumbnail_url = "${MdUtil.cdnUrl}/images/manga/${result.manga_id}.jpg"
         manga.url = "/manga/${result.manga_id}/"
+        manga.thumbnail_url = MdUtil.formThumbUrl(manga.url, preferences.lowQualityCovers())
         manga.follow_status = FollowStatus.fromInt(result.follow_type)
         return manga
     }
