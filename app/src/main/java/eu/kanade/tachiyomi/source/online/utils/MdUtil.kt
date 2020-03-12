@@ -39,11 +39,7 @@ class MdUtil {
         fun modifyMangaUrl(url: String): String = url.replace("/title/", "/manga/").substringBeforeLast("/") + "/"
 
         // Removes the ?timestamp from image urls
-        fun removeTimeParamUrl(url: String): String {
-            val index = url.indexOf("?")
-            return if (index < 0) url
-            else url.substring(0, index)
-        }
+        fun removeTimeParamUrl(url: String): String = url.substringBeforeLast("?")
 
         fun cleanString(string: String): String {
             val bbRegex = """\[(\w+)[^]]*](.*?)\[/\1]""".toRegex()

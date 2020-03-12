@@ -97,9 +97,9 @@ class SettingsAdvancedController : SettingsController() {
     }
 
     private fun cleanupDownloads() {
-        if (job?.isActive == true) return
+        if (job_downloads?.isActive == true) return
         activity?.toast(R.string.starting_cleanup)
-        job = GlobalScope.launch(Dispatchers.IO, CoroutineStart.DEFAULT) {
+        job_downloads = GlobalScope.launch(Dispatchers.IO, CoroutineStart.DEFAULT) {
             val mangaList = db.getMangas().executeAsBlocking()
             val sourceManager: SourceManager = Injekt.get()
             val downloadManager: DownloadManager = Injekt.get()
@@ -131,42 +131,34 @@ class SettingsAdvancedController : SettingsController() {
     }
 
     private fun clearImageCache() {
-        if (activity == null) return
-
-        // Clear the glide disk cache for our chapters
-        // Note: small hack since we require the glide clear to be in a background thread
-        // https://stackoverflow.com/a/46292711
-        val thread = Thread(Runnable {
-            GlideApp.get(activity!!).clearDiskCache()
-        })
-        thread.start()
-        GlideApp.get(activity!!).clearMemory()
-        thread.join()
-
-        // Delete all files from the image cache folder
-        val files = coverCache.cacheDir.listFiles() ?: return
-        var deletedFiles = 0
-        Observable.defer { Observable.from(files) }
-                .doOnNext { file ->
+        if (job_covercache?.isActive == true) return
+        job_covercache = GlobalScope.launch(Dispatchers.IO, CoroutineStart.DEFAULT) {
+            // Delete all files from the image cache folder
+            val files = coverCache.cacheDir.listFiles()
+            var deletedFiles = 0
+            if (files != null) {
+                for (file in files) {
                     if (file.delete()) {
                         deletedFiles++
                     }
                 }
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({
-                }, {
-                    activity?.toast(R.string.cache_delete_error)
-                }, {
-                    activity?.toast(
-                            resources?.getQuantityString(
-                                    R.plurals.cache_deleted,
-                                    deletedFiles, deletedFiles
-                            )
-                    )
-                    findPreference(CLEAR_CACHE_IMAGES_KEY)?.summary =
-                            resources?.getString(R.string.used_cache, getChaperCacheSize())
-                })
+            }
+            // Clear the glide disk cache for our chapters
+            GlideApp.get(activity!!).clearDiskCache()
+            // Sync back to the ui thread to display the toast
+            launchUI {
+                val activity = activity ?: return@launchUI
+                GlideApp.get(activity).clearMemory()
+                activity?.toast(
+                        resources?.getQuantityString(
+                                R.plurals.cache_deleted,
+                                deletedFiles, deletedFiles
+                        ), Toast.LENGTH_LONG
+                )
+                findPreference(CLEAR_CACHE_IMAGES_KEY)?.summary =
+                        resources?.getString(R.string.used_cache, getChaperCacheSize())
+            }
+        }
     }
 
     private fun clearChapterCache() {
@@ -224,6 +216,7 @@ class SettingsAdvancedController : SettingsController() {
         const val CLEAR_CACHE_KEY = "pref_clear_cache_key"
         const val CLEAR_CACHE_IMAGES_KEY = "pref_clear_cache_images_key"
 
-        private var job: Job? = null
+        private var job_downloads: Job? = null
+        private var job_covercache: Job? = null
     }
 }
