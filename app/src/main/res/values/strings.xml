@@ -319,6 +319,7 @@
 
     <!-- Advanced section -->
     <string name="pref_clear_chapter_cache">Clear chapter cache</string>
+    <string name="pref_clear_image_cache">Clear image cover cache</string>
     <string name="used_cache">Used: %1$s</string>
     <plurals name="cache_deleted">
         <item quantity="one">Cache cleared. %d file has been deleted</item>

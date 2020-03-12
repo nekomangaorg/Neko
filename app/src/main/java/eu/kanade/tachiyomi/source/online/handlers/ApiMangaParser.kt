@@ -26,7 +26,7 @@ class ApiMangaParser(val lang: String) {
             val networkApiManga = Json.nonstrict.parse(ApiMangaSerializer.serializer(), jsonData)
             val networkManga = networkApiManga.manga
             manga.title = MdUtil.cleanString(networkManga.title)
-            manga.thumbnail_url = MdUtil.cdnUrl + networkManga.cover_url
+            manga.thumbnail_url = MdUtil.cdnUrl + MdUtil.removeTimeParamUrl(networkManga.cover_url)
             manga.description = MdUtil.cleanString(networkManga.description)
             manga.author = networkManga.author
             manga.artist = networkManga.artist
