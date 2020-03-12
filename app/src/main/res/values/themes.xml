@@ -30,7 +30,7 @@
 
         <!-- Themes -->
         <item name="windowActionModeOverlay">true</item>
-        <item name="actionBarTheme">@style/Theme.ActionBar.DayNight</item>
+        <item name="actionBarTheme">@style/ThemeOverlay.AppCompat.DayNight.ActionBar</item>
         <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
         <item name="alertDialogTheme">@style/Theme.AlertDialog.DayNight</item>
 
@@ -44,7 +44,7 @@
         <item name="icon_color">@color/iconColor</item>
         <item name="snackbar_background">@color/snackbarBackground</item>
         <item name="snackbar_text">@color/textColorPrimaryInverse</item>
-        <item name="actionBarTintColor">@color/md_white_1000</item>
+        <item name="actionBarTintColor">@color/textColorPrimary</item>
         <item name="badgeColor">@color/badgeColor</item>
 
         <item name="android:statusBarColor">@android:color/transparent</item>
@@ -64,8 +64,6 @@
         <item name="colorPrimary">@color/purePrimary</item>
         <item name="colorPrimaryDark">@color/purePrimary</item>
         <item name="colorOnPrimary">@color/colorPrimary</item>
-        <item name="actionBarTintColor">@color/textColorPrimary</item>
-        <item name="actionBarTheme">@style/ThemeOverlay.AppCompat.DayNight.ActionBar</item>
         <item name="tabBarIconColor">@color/colorPrimary</item>
         <item name="tabBarIconInactive">@color/colorPrimaryInactive</item>
         <item name="android:statusBarColor">@color/md_black_1000_54</item>
@@ -80,6 +78,8 @@
         <item name="colorPrimary">@color/darkPrimaryTranslucent</item>
         <item name="colorPrimaryDark">@color/darkPrimaryTranslucent</item>
         <item name="android:colorBackground">@android:color/white</item>
+        <item name="actionBarTheme">@style/ThemeOverlay.AppCompat.Dark.ActionBar</item>
+        <item name="actionBarTintColor">@color/md_white_1000</item>
         <item name="android:statusBarColor">?colorPrimaryDark</item>
         <item name="android:navigationBarColor">?colorPrimaryDark</item>
     </style>

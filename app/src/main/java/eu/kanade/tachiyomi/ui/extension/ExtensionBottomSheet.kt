@@ -17,6 +17,7 @@ import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.catalogue.CatalogueController
+import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
@@ -53,10 +54,7 @@ ExtensionAdapter.OnButtonClickListener,
         ext_recycler.adapter = adapter
         ext_recycler.addItemDecoration(ExtensionDividerItemDecoration(context))
         ext_recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
-       // scrollViewWith(ext_recycler, true, ext_swipe_refresh)
         this.controller = controller
-        //ext_swipe_refresh.refreshes().subscribeUntilDestroy {
-          //  presenter.findAvailableExtensions()
         presenter.onCreate()
         updateExtTitle()
 
@@ -85,6 +83,9 @@ ExtensionAdapter.OnButtonClickListener,
         title_text.text = if (extCount == 0) context.getString(R.string.label_extensions)
         else resources.getQuantityString(R.plurals.extensions_updates_available, extCount,
             extCount)
+
+        title_text.setTextColor(context.getResourceColor(
+            if (extCount == 0) R.attr.actionBarTintColor else R.attr.colorAccent))
     }
 
     override fun onButtonClick(position: Int) {

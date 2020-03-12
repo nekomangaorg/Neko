@@ -316,7 +316,6 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
         activity!!.theme.resolveAttribute(R.attr.actionBarTintColor, tv, true)
 
         customTitleSpinner = library_layout.inflate(R.layout.spinner_title) as ViewGroup
-//        (activity as MainActivity).supportActionBar?.setDisplayShowCustomEnabled(false)
         spinnerAdapter = SpinnerAdapter(
             view.context,
             R.layout.library_spinner_textview,
@@ -331,7 +330,6 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
             scrollToHeader(item.itemId)
             true
         }
-        //(activity as MainActivity).supportActionBar?.customView = customTitleSpinner
         scrollViewWith(recycler) { insets ->
             fast_scroller.updateLayoutParams<CoordinatorLayout.LayoutParams> {
                 topMargin = insets.systemWindowInsetTop
@@ -348,27 +346,13 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
                 activity?.toolbar?.removeSpinner()
             }
         }
-        /*if (type.isEnter) {
-            (activity as MainActivity).supportActionBar
-                ?.setDisplayShowCustomEnabled(router?.backstack?.lastOrNull()?.controller() ==
-                    this && spinnerAdapter?.array?.size ?: 0 > 1)
-        }
-        else if (type == ControllerChangeType.PUSH_EXIT) {
-            (activity as MainActivity).toolbar.menu.findItem(R.id
-                .action_search)?.collapseActionView()
-            (activity as MainActivity).supportActionBar?.setDisplayShowCustomEnabled(false)
-        }*/
     }
 
     override fun onActivityResumed(activity: Activity) {
         super.onActivityResumed(activity)
+        if (view == null) return
         resetScrollingValues()
         resetRecyclerY()
-    }
-
-    override fun onDestroy() {
-       // (activity as MainActivity).supportActionBar?.setDisplayShowCustomEnabled(false)
-        super.onDestroy()
     }
 
     override fun onNextLibraryUpdate(mangaMap: List<LibraryItem>, freshStart: Boolean) {
@@ -393,8 +377,6 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
 
         val isCurrentController = router?.backstack?.lastOrNull()?.controller() ==
             this
-//        (activity as AppCompatActivity).supportActionBar
-//            ?.setDisplayShowCustomEnabled(isCurrentController && presenter.categories.size > 1)
 
         customTitleSpinner.category_title.text =
             presenter.categories[clamp(activeCategory,

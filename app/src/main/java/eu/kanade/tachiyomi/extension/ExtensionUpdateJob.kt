@@ -23,7 +23,7 @@ class ExtensionUpdateJob : Job() {
 
     override fun onRunJob(params: Params): Result {
         GlobalScope.launch(Dispatchers.IO) {
-            val pendingUpdates = ExtensionGithubApi().checkforUpdates(context)
+            val pendingUpdates = ExtensionGithubApi().checkForUpdates(context)
             if (pendingUpdates.isNotEmpty()) {
                 val names = pendingUpdates.map { it.name }
                 val preferences: PreferencesHelper by injectLazy()

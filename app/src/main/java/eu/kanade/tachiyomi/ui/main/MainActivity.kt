@@ -301,7 +301,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                 .SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR)
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && currentNightMode == Configuration
-                .UI_MODE_NIGHT_NO && preferences.theme() >= 8)
+                .UI_MODE_NIGHT_NO)
             content.systemUiVisibility = content.systemUiVisibility.or(View
                 .SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
 
@@ -424,7 +424,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             GlobalScope.launch(Dispatchers.IO) {
                 val preferences: PreferencesHelper by injectLazy()
                 try {
-                    val pendingUpdates = ExtensionGithubApi().checkforUpdates(this@MainActivity)
+                    val pendingUpdates = ExtensionGithubApi().checkForUpdates(this@MainActivity)
                     preferences.extensionUpdatesCount().set(pendingUpdates.size)
                     preferences.lastExtCheck().set(Date().time)
                 } catch (e: java.lang.Exception) { }
