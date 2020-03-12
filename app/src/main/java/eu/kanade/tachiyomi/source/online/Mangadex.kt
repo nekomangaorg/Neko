@@ -241,7 +241,7 @@ open class Mangadex(
         private const val ONLY_R18 = 2
         private const val REMEMBER_ME = "mangadex_rememberme_token"
 
-        val SERVER_PREF_ENTRIES = listOf("Automatic", "NA/EU 1", "NA/EU 2", "Rest of the world")
-        val SERVER_PREF_ENTRY_VALUES = listOf("0", "na", "na2", "row")
+        val SERVER_PREF_ENTRIES = listOf("Automatic", "NA/EU 1", "NA/EU 2")
+        val SERVER_PREF_ENTRY_VALUES = listOf("0", "na", "na2")
     }
 }
