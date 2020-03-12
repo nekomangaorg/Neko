@@ -115,9 +115,6 @@ class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: A
                     else
                         shadow.alpha = 1f
                     pager?.updatePaddingRelative(bottom = sheetBehavior?.peekHeight ?: 0)
-//                    snackbarLayout.updatePaddingRelative(bottom = sheetBehavior?.peekHeight ?: 0)
-                    if (!phoneLandscape)
-                        preferences.hideFiltersAtStart().set(false)
                 }
                 if (state == BottomSheetBehavior.STATE_EXPANDED) {
                     top_bar.alpha = 0f
@@ -129,8 +126,6 @@ class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: A
                     shadow.alpha = 0f
                     pager?.updatePaddingRelative(bottom = 0)
 //                    snackbarLayout.updatePaddingRelative(bottom = 0)
-                    if (!phoneLandscape)
-                        preferences.hideFiltersAtStart().set(true)
                 }
                 //top_bar.isClickable = state == BottomSheetBehavior.STATE_COLLAPSED
                 //top_bar.isFocusable = state == BottomSheetBehavior.STATE_COLLAPSED
@@ -146,6 +141,12 @@ class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: A
         }
         if (phoneLandscape && shadow2.visibility != View.GONE) {
             shadow2.gone()
+        }
+        hide_filters.isChecked = preferences.hideFiltersAtStart().getOrDefault()
+        hide_filters.setOnCheckedChangeListener { _, isChecked ->
+            preferences.hideFiltersAtStart().set(isChecked)
+            if (isChecked)
+                onGroupClicked(ACTION_HIDE_FILTER_TIP)
         }
         createTags()
         clearButton.setOnClickListener { clearFilters() }
@@ -305,11 +306,7 @@ class SortFilterBottomSheet @JvmOverloads constructor(context: Context, attrs: A
 
     companion object {
         const val ACTION_REFRESH = 0
-        const val ACTION_SORT = 1
-        const val ACTION_FILTER = 2
-        const val ACTION_DISPLAY = 3
-        const val ACTION_DOWNLOAD_BADGE = 4
-        const val ACTION_UNREAD_BADGE = 5
-        const val ACTION_CAT_SORT = 6
+        const val ACTION_FILTER = 1
+        const val ACTION_HIDE_FILTER_TIP = 2
     }
 }

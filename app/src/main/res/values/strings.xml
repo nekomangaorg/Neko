@@ -54,6 +54,7 @@
     <string name="action_filter_tracked">Tracked</string>
     <string name="action_filter_not_tracked">Not tracked</string>
     <string name="action_hide_categories">Hide categories</string>
+    <string name="action_start_filters_hidden">Hide filters on startup</string>
     <string name="hiding_categories">Hiding categories</string>
     <string name="manga_only">Manga only</string>
     <string name="manhwa_only">Manhwa only</string>
@@ -468,7 +469,8 @@
     <string name="hide_unread">Hide unread badges</string>
     <string name="show_unread">Show unread badges</string>
     <string name="show_unread_count">Show unread count</string>
-
+    <string name="hide_filters_tip">You can show filters by again tapping the Library tab when
+        hidden</string>
 
     <!-- Catalogue fragment -->
     <string name="source_search_options">Search filters</string>

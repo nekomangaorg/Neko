@@ -52,6 +52,7 @@ import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationProcedureConfig
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.applyWindowInsetsForRootController
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import eu.kanade.tachiyomi.util.view.snack
@@ -194,11 +195,7 @@ open class LibraryController(
             when (it) {
                 SortFilterBottomSheet.ACTION_REFRESH -> onRefresh()
                 SortFilterBottomSheet.ACTION_FILTER -> onFilterChanged()
-                SortFilterBottomSheet.ACTION_SORT -> onSortChanged()
-                SortFilterBottomSheet.ACTION_DISPLAY -> reattachAdapter()
-                SortFilterBottomSheet.ACTION_DOWNLOAD_BADGE -> presenter.requestDownloadBadgesUpdate()
-                SortFilterBottomSheet.ACTION_UNREAD_BADGE -> presenter.requestUnreadBadgesUpdate()
-                SortFilterBottomSheet.ACTION_CAT_SORT -> onCatSortChanged()
+                SortFilterBottomSheet.ACTION_HIDE_FILTER_TIP -> activity?.toast(R.string.hide_filters_tip)
             }
         }
 

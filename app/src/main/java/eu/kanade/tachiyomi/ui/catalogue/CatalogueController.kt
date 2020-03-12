@@ -303,7 +303,7 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
                     (RouterTransaction.with(controller)).popChangeHandler(
                         SettingsSourcesFadeChangeHandler()
                     ).pushChangeHandler(FadeChangeHandler())
-                )
+                    )
             }
             R.id.action_dismiss -> {
                 ext_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED

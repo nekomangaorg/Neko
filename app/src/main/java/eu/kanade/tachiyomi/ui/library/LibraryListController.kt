@@ -186,6 +186,15 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
             }
             return
         }
+        if (event.actionMasked == MotionEvent.ACTION_UP) {
+            recycler_layout.post {
+                if (!flinging) {
+                    resetScrollingValues()
+                    resetRecyclerY(true)
+                }
+            }
+            return
+        }
         if (startPosX != null && startPosY != null &&
             (sheetRect.contains(startPosX!!.toInt(), startPosY!!.toInt()) ||
                 !recyclerRect.contains(startPosX!!.toInt(), startPosY!!.toInt()))) {
@@ -236,14 +245,6 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
                         recycler_layout.x = max(0f, recycler_layout.x)
                     }
                     recycler_layout.alpha = min(1f, recycler_layout.alpha)
-                }
-            }
-        }
-        else if (event.actionMasked == MotionEvent.ACTION_UP) {
-            recycler_layout.post {
-                if (!flinging) {
-                    resetScrollingValues()
-                    resetRecyclerY(true)
                 }
             }
         }
