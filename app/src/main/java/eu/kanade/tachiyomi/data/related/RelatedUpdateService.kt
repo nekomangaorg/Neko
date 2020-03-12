@@ -21,7 +21,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
@@ -123,7 +125,7 @@ class RelatedUpdateService(
     /**
      * Method that updates the related database for manga
      */
-    private fun updateRelated() {
+    private suspend fun updateRelated() = withContext(Dispatchers.IO) {
         val jsonString =
             RelatedHttpService.create().getRelatedResults().execute().body().toString()
         val relatedPageResult = JSONObject(jsonString)
@@ -139,11 +141,8 @@ class RelatedUpdateService(
         for (key in relatedPageResult.keys()) {
 
             // Check if the service is currently running
-            if (job?.isCancelled!!) {
-                cancelProgressNotification()
-                showResultNotification(true)
-                return
-            }
+            if (!this.isActive)
+                break
 
             // Get our two arrays of ids and titles
             val matchedIds =
@@ -179,7 +178,7 @@ class RelatedUpdateService(
             dataToInsert.clear()
         }
         cancelProgressNotification()
-        showResultNotification()
+        showResultNotification(!this.isActive)
     }
 
     /**

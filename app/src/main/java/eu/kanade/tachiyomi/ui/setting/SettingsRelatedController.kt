@@ -45,9 +45,9 @@ class SettingsRelatedController : SettingsController() {
         }
 
         preference {
-            title = "Github"
+            title = "Credits"
             val url = "https://github.com/goldbattle/MangadexRecomendations"
-            summary = url
+            summary = context.resources.getString(R.string.pref_related_credit_message, url)
             onClick {
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
                 startActivity(intent)
