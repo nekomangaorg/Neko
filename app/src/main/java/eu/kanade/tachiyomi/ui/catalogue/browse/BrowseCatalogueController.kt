@@ -504,7 +504,6 @@ open class BrowseCatalogueController(bundle: Bundle) :
      */
     override fun onItemClick(view: View, position: Int): Boolean {
         val item = adapter?.getItem(position) as? CatalogueItem ?: return false
-        item.manga.initialized = false
 
         // We should check if the parent is the base controller
         // If it is, then we are in a nested view, thus we should append
