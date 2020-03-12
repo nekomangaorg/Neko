@@ -153,6 +153,8 @@ class PreferencesHelper(val context: Context) {
 
     fun relatedShowTab() = prefs.getBoolean(Keys.relatedShowTab, false)
 
+    fun relatedUpdateRestriction() = prefs.getStringSet(Keys.relatedUpdateRestriction, emptySet())
+
     fun numberOfBackups() = rxPrefs.getInteger(Keys.numberOfBackups, 1)
 
     fun backupInterval() = rxPrefs.getInteger(Keys.backupInterval, 0)

@@ -75,6 +75,8 @@ object PreferenceKeys {
 
     const val relatedShowTab = "pref_related_show_tab_key"
 
+    const val relatedUpdateRestriction = "related_update_restriction"
+
     const val numberOfBackups = "backup_slots"
 
     const val backupInterval = "backup_interval"

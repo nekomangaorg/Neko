@@ -128,8 +128,11 @@
         This is an beta feature where one can get manga recommendations.
         This is a recommendation system outside of MangaDex, and works by matching by genres,
         demographics, and then using term frequency–inverse document frequency (Tfidf) to get the
-        similarity of two manga\'s descriptions. You will need to download from the below
-        github the recommendation JSON manually.
+        similarity of two manga\'s descriptions. When enabled this file will download immediately
+        and then auto download a refreshed file every 24 hours. The file is about 20mb in size.
+    </string>
+    <string name="pref_related_credit_message">
+        For more information and to view the source code:\n%s
     </string>
 
     <string name="pref_category_library_display">Display</string>
@@ -278,10 +281,12 @@
 
     <!-- Related Mangas section -->
     <string name="pref_related_show_tab">Show Related Manga Tab</string>
+    <string name="pref_related_update_restriction">Related update restrictions</string>
+    <string name="pref_related_update_restriction_summary">Update only when the conditions are met</string>
     <string name="pref_related_loading_percent">Updating related manga (%1$d / %2$d updated)</string>
     <string name="pref_related_loading_complete">Updating related manga complete</string>
     <string name="pref_related_loading_complete_error">Error trying to load/process related manga</string>
-    <string name="pref_related_loading_progress_start">Updating related manga</string>
+    <string name="pref_related_loading_progress_start">Downloading related manga data file…</string>
 
     <!-- Backup section -->
     <string name="backup">Backup</string>
