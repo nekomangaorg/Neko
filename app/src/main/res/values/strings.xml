@@ -474,7 +474,7 @@
     <string name="invalid_download_dir">Invalid download directory</string>
 
     <!-- Tracking Screen -->
-    <string name="manga_external_tab">External</string>
+    <string name="manga_other_tab">Other</string>
     <string name="reading">Reading</string>
     <string name="currently_reading">Currently Reading</string>
     <string name="completed">Completed</string>
@@ -496,7 +496,7 @@
 
 
     <!-- Related Manga Screen -->
-    <string name="manga_related_tab">Related</string>
+    <string name="manga_similar_tab">Similar</string>
 
     <!-- Category activity -->
     <string name="error_category_exists">A category with this name already exists!</string>

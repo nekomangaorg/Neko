@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.ui.manga
 
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -14,10 +13,6 @@ import com.bluelinelabs.conductor.support.RouterPagerAdapter
 import com.google.android.material.tabs.TabLayout
 import com.jakewharton.rxrelay.BehaviorRelay
 import com.jakewharton.rxrelay.PublishRelay
-import com.mikepenz.iconics.IconicsDrawable
-import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
-import com.mikepenz.iconics.utils.colorInt
-import com.mikepenz.iconics.utils.sizeDp
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -78,8 +73,6 @@ class MangaController : RxController, TabbedController {
 
     val mangaFavoriteRelay: PublishRelay<Boolean> = PublishRelay.create()
 
-    private val trackingIconRelay: BehaviorRelay<Boolean> = BehaviorRelay.create()
-
     private var trackingIconSubscription: Subscription? = null
 
     override fun getTitle(): String? {
@@ -115,19 +108,6 @@ class MangaController : RxController, TabbedController {
         super.onChangeStarted(handler, type)
         if (type.isEnter) {
             activity?.tabs?.setupWithViewPager(manga_pager)
-            checkInitialTrackState()
-            trackingIconSubscription = trackingIconRelay.subscribe { setTrackingIconInternal(it) }
-        }
-    }
-
-    private fun checkInitialTrackState() {
-        val manga = manga ?: return
-        val loggedServices by lazy { Injekt.get<TrackManager>().services.filter { it.isLogged } }
-        val db = Injekt.get<DatabaseHelper>()
-        val tracks = db.getTracks(manga).executeAsBlocking()
-
-        if (loggedServices.any { service -> tracks.any { it.sync_id == service.id } }) {
-            setTrackingIcon(true)
         }
     }
 
@@ -148,24 +128,6 @@ class MangaController : RxController, TabbedController {
 
     override fun cleanupTabs(tabs: TabLayout) {
         trackingIconSubscription?.unsubscribe()
-        setTrackingIconInternal(false)
-    }
-
-    fun setTrackingIcon(visible: Boolean) {
-        trackingIconRelay.call(visible)
-    }
-
-    private fun setTrackingIconInternal(visible: Boolean) {
-        if (!Injekt.get<TrackManager>().hasLoggedServices()) return
-        val tab = activity?.tabs?.getTabAt(adapter!!.getCount() - 1) ?: return
-        val drawable = if (visible)
-            IconicsDrawable(applicationContext!!)
-                .icon(CommunityMaterial.Icon.cmd_check)
-                .colorInt(Color.WHITE)
-                .sizeDp(12)
-        else null
-
-        tab.icon = drawable
     }
 
     private inner class MangaDetailAdapter : RouterPagerAdapter(this@MangaController) {
@@ -177,8 +139,8 @@ class MangaController : RxController, TabbedController {
         private val tabTitles = listOf(
             R.string.manga_detail_tab,
             R.string.manga_chapters_tab,
-            if (preferences.relatedShowTab()) R.string.manga_related_tab else R.string.manga_external_tab,
-            R.string.manga_external_tab
+            if (preferences.relatedShowTab()) R.string.manga_similar_tab else R.string.manga_other_tab,
+            R.string.manga_other_tab
         )
             .map { resources!!.getString(it) }
 

@@ -16,10 +16,10 @@ import kotlinx.android.synthetic.main.track_controller.*
 import timber.log.Timber
 
 class TrackController : NucleusController<TrackPresenter>(),
-        TrackAdapter.OnClickListener,
-        SetTrackStatusDialog.Listener,
-        SetTrackChaptersDialog.Listener,
-        SetTrackScoreDialog.Listener {
+    TrackAdapter.OnClickListener,
+    SetTrackStatusDialog.Listener,
+    SetTrackChaptersDialog.Listener,
+    SetTrackScoreDialog.Listener {
 
     private var adapter: TrackAdapter? = null
 
@@ -57,7 +57,6 @@ class TrackController : NucleusController<TrackPresenter>(),
     fun onNextTrackings(trackings: List<TrackItem>) {
         val atLeastOneLink = trackings.any { it.track != null }
         adapter?.items = trackings
-        (parentController as? MangaController)?.setTrackingIcon(atLeastOneLink)
     }
 
     fun onSearchResults(results: List<TrackSearch>) {
@@ -94,8 +93,10 @@ class TrackController : NucleusController<TrackPresenter>(),
 
     override fun onSetClick(position: Int) {
         val item = adapter?.getItem(position) ?: return
-        TrackSearchDialog(this, item.service, item.track != null).showDialog(router,
-                TAG_SEARCH_CONTROLLER)
+        TrackSearchDialog(this, item.service, item.track != null).showDialog(
+            router,
+            TAG_SEARCH_CONTROLLER
+        )
     }
 
     override fun onStatusClick(position: Int) {
