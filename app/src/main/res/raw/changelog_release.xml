@@ -2,7 +2,18 @@
 <changelog bulletedList="true">
     <changelogversion
         changeDate=""
-        versionName="v1.6.4.1">
+        versionName="v1.7.0">
+        <changelogtext>Changed external tab name to other</changelogtext>
+        <changelogtext>Changed related tab name to similar</changelogtext>
+        <changelogtext>improved similar tabs background work</changelogtext>
+        <changelogtext>improved cache and cover updating when library updates</changelogtext>
+        <changelogtext>remove image server option that doesnt exist anymore</changelogtext>
+        <changelogtext>fix color issues on tracking cards</changelogtext>
+        <changelogtext>low quality covers now work on follows and similar pages</changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
+        versionName="v1.6.5">
         <changelogtext>Make related manga a scheduled job when enabled
         </changelogtext>
         <changelogtext>Fix bug where covers were force reloaded in library
