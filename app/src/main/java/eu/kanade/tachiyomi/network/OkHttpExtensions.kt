@@ -5,8 +5,11 @@ import okhttp3.*
 import rx.Observable
 import rx.Producer
 import rx.Subscription
+import java.io.BufferedReader
 import java.io.IOException
+import java.io.InputStreamReader
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.zip.GZIPInputStream
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
@@ -93,4 +96,24 @@ fun OkHttpClient.newCallWithProgress(request: Request, listener: ProgressListene
             .build()
 
     return progressClient.newCall(request)
+}
+
+fun Response.consumeBody(): String? {
+    use {
+        if (it.code != 200) throw Exception("HTTP error ${it.code}")
+        return it.body?.string()
+    }
+}
+
+fun Response.consumeXmlBody(): String? {
+    use { res ->
+        if (res.code != 200) throw Exception("Export list error")
+        BufferedReader(InputStreamReader(GZIPInputStream(res.body?.source()?.inputStream()))).use { reader ->
+            val sb = StringBuilder()
+            reader.forEachLine { line ->
+                sb.append(line)
+            }
+            return sb.toString()
+        }
+    }
 }

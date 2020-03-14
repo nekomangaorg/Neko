@@ -13,7 +13,7 @@ import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
 import com.bluelinelabs.conductor.RouterTransaction
 import com.bluelinelabs.conductor.changehandler.FadeChangeHandler
-import com.jakewharton.rxbinding.support.v7.widget.queryTextChangeEvents
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
@@ -26,17 +26,20 @@ import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.catalogue.browse.BrowseCatalogueController
 import eu.kanade.tachiyomi.ui.catalogue.global_search.CatalogueSearchController
 import eu.kanade.tachiyomi.ui.catalogue.latest.LatestUpdatesController
+import eu.kanade.tachiyomi.ui.extension.SettingsExtensionsController
 import eu.kanade.tachiyomi.ui.main.RootSearchInterface
 import eu.kanade.tachiyomi.ui.setting.SettingsSourcesController
-import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
 import eu.kanade.tachiyomi.util.view.applyWindowInsetsForRootController
 import eu.kanade.tachiyomi.util.view.scrollViewWith
+import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import eu.kanade.tachiyomi.widget.preference.SourceLoginDialog
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.catalogue_main_controller.*
+import kotlinx.android.synthetic.main.extensions_bottom_sheet.*
 import kotlinx.android.synthetic.main.main_activity.*
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import kotlin.math.max
 
 /**
  * This controller shows and manages the different catalogues enabled by the user.
@@ -50,6 +53,7 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
         FlexibleAdapter.OnItemClickListener,
         CatalogueAdapter.OnBrowseClickListener,
         RootSearchInterface,
+
         CatalogueAdapter.OnLatestClickListener {
 
     /**
@@ -61,6 +65,13 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
      * Adapter containing sources.
      */
     private var adapter: CatalogueAdapter? = null
+
+    var extQuery = ""
+        private set
+
+    var headerHeight = 0
+
+    var customTitle = ""
 
     /**
      * Called when controller is initialized.
@@ -76,7 +87,9 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
      * @return title.
      */
     override fun getTitle(): String? {
-        return applicationContext?.getString(R.string.label_catalogues)
+        return if (ext_bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED)
+            applicationContext?.getString(R.string.label_extensions)
+        else applicationContext?.getString(R.string.label_catalogues)
     }
 
     /**
@@ -114,11 +127,49 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
         recycler.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(view.context)
         recycler.adapter = adapter
         recycler.addItemDecoration(SourceDividerItemDecoration(view.context))
-        recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
-
-        scrollViewWith(recycler)
+        val attrsArray = intArrayOf(android.R.attr.actionBarSize)
+        val array = view.context.obtainStyledAttributes(attrsArray)
+        val appBarHeight =  array.getDimensionPixelSize(0, 0)
+        array.recycle()
+        scrollViewWith(recycler) {
+            headerHeight = it.systemWindowInsetTop + appBarHeight
+        }
 
         requestPermissionsSafe(arrayOf(WRITE_EXTERNAL_STORAGE), 301)
+        ext_bottom_sheet.onCreate(this)
+
+        ext_bottom_sheet.sheetBehavior?.addBottomSheetCallback(object : BottomSheetBehavior
+        .BottomSheetCallback() {
+            override fun onSlide(bottomSheet: View, progress: Float) {
+                shadow2.alpha = (1 - max(0f, progress)) * 0.25f
+                sheet_layout.alpha = 1 - progress
+                activity?.appbar?.y = max(activity!!.appbar.y, -headerHeight * (1 - progress))
+            }
+
+            override fun onStateChanged(p0: View, state: Int) {
+                if (state == BottomSheetBehavior.STATE_EXPANDED) activity?.appbar?.y = 0f
+                if (state == BottomSheetBehavior.STATE_EXPANDED ||
+                    state == BottomSheetBehavior.STATE_COLLAPSED)
+                    sheet_layout.alpha =
+                        if (state == BottomSheetBehavior.STATE_COLLAPSED) 1f else 0f
+
+                retainViewMode = if (state == BottomSheetBehavior.STATE_EXPANDED)
+                    RetainViewMode.RETAIN_DETACH else RetainViewMode.RELEASE_DETACH
+                activity?.invalidateOptionsMenu()
+                setTitle()
+                sheet_layout.isClickable = state == BottomSheetBehavior.STATE_COLLAPSED
+                sheet_layout.isFocusable = state == BottomSheetBehavior.STATE_COLLAPSED
+            }
+        })
+
+    }
+
+    override fun handleRootBack(): Boolean {
+        if (ext_bottom_sheet.sheetBehavior?.state != BottomSheetBehavior.STATE_COLLAPSED) {
+            ext_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
+            return true
+        }
+        return false
     }
 
     override fun onDestroyView(view: View) {
@@ -129,6 +180,7 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
         super.onChangeStarted(handler, type)
         if (!type.isPush && handler is SettingsSourcesFadeChangeHandler) {
+            ext_bottom_sheet.updateExtTitle()
             presenter.updateSources()
         }
     }
@@ -192,20 +244,41 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
      * @param inflater used to load the menu xml.
      */
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        // Inflate menu
-        inflater.inflate(R.menu.catalogue_main, menu)
+        if (ext_bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) {
+            // Inflate menu
+            inflater.inflate(R.menu.extension_main, menu)
 
-        // Initialize search option.
-        val searchItem = menu.findItem(R.id.action_search)
-        val searchView = searchItem.actionView as SearchView
+            // Initialize search option.
+            val searchItem = menu.findItem(R.id.action_search)
+            val searchView = searchItem.actionView as SearchView
 
-        // Change hint to show global search.
-        searchView.queryHint = applicationContext?.getString(R.string.action_global_search_hint)
+            // Change hint to show global search.
+            searchView.queryHint = applicationContext?.getString(R.string.search_extensions)
 
-        // Create query listener which opens the global search view.
-        searchView.queryTextChangeEvents()
-                .filter { it.isSubmitted }
-                .subscribeUntilDestroy { performGlobalSearch(it.queryText().toString()) }
+            // Create query listener which opens the global search view.
+            setOnQueryTextChangeListener(searchView) {
+                extQuery = it ?: ""
+                ext_bottom_sheet.drawExtensions()
+                true
+            }
+        }
+        else {
+            // Inflate menu
+            inflater.inflate(R.menu.catalogue_main, menu)
+
+            // Initialize search option.
+            val searchItem = menu.findItem(R.id.action_search)
+            val searchView = searchItem.actionView as SearchView
+
+            // Change hint to show global search.
+            searchView.queryHint = applicationContext?.getString(R.string.action_global_search_hint)
+
+            // Create query listener which opens the global search view.
+            setOnQueryTextChangeListener(searchView, true) {
+                if (!it.isNullOrBlank()) performGlobalSearch(it)
+                true
+            }
+        }
     }
 
     private fun performGlobalSearch(query: String){
@@ -222,9 +295,18 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
         when (item.itemId) {
             // Initialize option to open catalogue settings.
             R.id.action_filter -> {
-                router.pushController((RouterTransaction.with(SettingsSourcesController()))
-                        .popChangeHandler(SettingsSourcesFadeChangeHandler())
-                        .pushChangeHandler(FadeChangeHandler()))
+                val controller =
+                    if (ext_bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED)
+                        SettingsExtensionsController()
+                    else SettingsSourcesController()
+                router.pushController(
+                    (RouterTransaction.with(controller)).popChangeHandler(
+                        SettingsSourcesFadeChangeHandler()
+                    ).pushChangeHandler(FadeChangeHandler())
+                    )
+            }
+            R.id.action_dismiss -> {
+                ext_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
             }
             else -> return super.onOptionsItemSelected(item)
         }

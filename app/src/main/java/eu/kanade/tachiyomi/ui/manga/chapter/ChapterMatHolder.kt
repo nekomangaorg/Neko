@@ -20,17 +20,17 @@ class ChapterMatHolder(
 ) : MangaChapterHolder(view, adapter) {
 
     init {
-        // We need to post a Runnable to show the popup to make sure that the PopupMenu is
-        // correctly positioned. The reason being that the view may change position before the
-        // PopupMenu is shown.
-        //chapter_menu.setOnClickListener { it.post { showPopupMenu(it) } }
         download_button.setOnClickListener { downloadOrRemoveMenu() }
+        download_button.setOnLongClickListener {
+            adapter.coverListener.startDownloadRange(adapterPosition)
+            true
+        }
     }
 
     private fun downloadOrRemoveMenu() {
         val chapter = adapter.getItem(adapterPosition) ?: return
         if (chapter.status == Download.NOT_DOWNLOADED || chapter.status == Download.ERROR) {
-            adapter.coverListener?.downloadChapter(adapterPosition)
+            adapter.coverListener.downloadChapter(adapterPosition)
         } else {
             download_button.post {
                 // Create a PopupMenu, giving it the clicked view for an anchor
@@ -46,7 +46,7 @@ class ChapterMatHolder(
 
                 // Set a listener so we are notified if a menu item is clicked
                 popup.setOnMenuItemClickListener { _ ->
-                    adapter.coverListener?.downloadChapter(adapterPosition)
+                    adapter.coverListener.downloadChapter(adapterPosition)
                     true
                 }
 

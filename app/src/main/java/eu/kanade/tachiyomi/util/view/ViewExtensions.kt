@@ -169,7 +169,7 @@ inline val View.marginLeft: Int
 
 object RecyclerWindowInsetsListener : View.OnApplyWindowInsetsListener {
     override fun onApplyWindowInsets(v: View, insets: WindowInsets): WindowInsets {
-        v.setPadding(0,0,0,insets.systemWindowInsetBottom)
+        v.updatePaddingRelative(bottom = insets.systemWindowInsetBottom)
         //v.updatePaddingRelative(bottom = v.paddingBottom + insets.systemWindowInsetBottom)
         return insets
     }
@@ -294,10 +294,12 @@ data class ViewPaddingState(
 )
 
 
-fun Controller.setOnQueryTextChangeListener(searchView: SearchView, f: (text: String?) -> Boolean) {
+fun Controller.setOnQueryTextChangeListener(searchView: SearchView, onlyOnSubmit:Boolean = false,
+    f: (text: String?) -> Boolean) {
     searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
         override fun onQueryTextChange(newText: String?): Boolean {
-            if (router.backstack.lastOrNull()?.controller() == this@setOnQueryTextChangeListener) {
+            if (!onlyOnSubmit && router.backstack.lastOrNull()?.controller() ==
+                this@setOnQueryTextChangeListener) {
                 return f(newText)
             }
             return false
@@ -312,36 +314,40 @@ fun Controller.setOnQueryTextChangeListener(searchView: SearchView, f: (text: St
     })
 }
 
-fun Controller.scrollViewWith(recycler: RecyclerView,
+fun Controller.scrollViewWith(
+    recycler: RecyclerView,
     padBottom: Boolean = false,
     swipeRefreshLayout: SwipeRefreshLayout? = null,
-    f: ((WindowInsets) -> Unit)? = null) {
+    afterInsets: ((WindowInsets) -> Unit)? = null) {
     var statusBarHeight = -1
-    activity!!.appbar.y = 0f
+    activity?.appbar?.y = 0f
+    val attrsArray = intArrayOf(android.R.attr.actionBarSize)
+    val array = recycler.context.obtainStyledAttributes(attrsArray)
+    val appBarHeight = array.getDimensionPixelSize(0, 0)
+    array.recycle()
     recycler.doOnApplyWindowInsets { view, insets, _ ->
-        val attrsArray = intArrayOf(android.R.attr.actionBarSize)
-        val array = view.context.obtainStyledAttributes(attrsArray)
-        val headerHeight = insets.systemWindowInsetTop + array.getDimensionPixelSize(0, 0)
+        val headerHeight = insets.systemWindowInsetTop + appBarHeight
         view.updatePaddingRelative(
             top = headerHeight,
-            bottom = if (padBottom) insets.systemWindowInsetBottom else 0
+            bottom = if (padBottom) insets.systemWindowInsetBottom else view.paddingBottom
         )
-        swipeRefreshLayout?.setProgressViewOffset(false, headerHeight + (-60).dpToPx,
-            headerHeight + 10.dpToPx)
+        swipeRefreshLayout?.setProgressViewOffset(
+            false, headerHeight + (-60).dpToPx, headerHeight
+        )
         statusBarHeight = insets.systemWindowInsetTop
-        array.recycle()
-        f?.invoke(insets)
+        afterInsets?.invoke(insets)
     }
     recycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
             super.onScrolled(recyclerView, dx, dy)
-            if (router.backstack.lastOrNull()?.controller() == this@scrollViewWith &&
+            if (router?.backstack?.lastOrNull()?.controller() == this@scrollViewWith &&
                 statusBarHeight > -1 &&
+                activity != null &&
                 activity!!.appbar.height > 0) {
                 activity!!.appbar.y -= dy
                 activity!!.appbar.y = clamp(
                     activity!!.appbar.y,
-                    -activity!!.appbar.height.toFloat(),// + statusBarHeight,
+                    -activity!!.appbar.height.toFloat(),
                     0f
                 )
             }
@@ -350,8 +356,8 @@ fun Controller.scrollViewWith(recycler: RecyclerView,
         override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
             super.onScrollStateChanged(recyclerView, newState)
             if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                if (router.backstack.lastOrNull()?.controller() == this@scrollViewWith &&
-                    statusBarHeight > -1 &&
+                if (router?.backstack?.lastOrNull()?.controller() == this@scrollViewWith &&
+                    statusBarHeight > -1 && activity != null &&
                     activity!!.appbar.height > 0) {
                     val halfWay = abs((-activity!!.appbar.height.toFloat()) / 2)
                     val shortAnimationDuration = resources?.getInteger(

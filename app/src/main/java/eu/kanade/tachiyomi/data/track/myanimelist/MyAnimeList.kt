@@ -7,10 +7,7 @@ import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
-import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
-import rx.Completable
-import rx.Observable
 
 class Myanimelist(private val context: Context, id: Int) : TrackService(id) {
 
@@ -62,11 +59,11 @@ class Myanimelist(private val context: Context, id: Int) : TrackService(id) {
         return track.score.toInt().toString()
     }
 
-    override fun add(track: Track): Observable<Track> {
+    override suspend fun add(track: Track): Track {
         return api.addLibManga(track)
     }
 
-    override fun update(track: Track): Observable<Track> {
+    override suspend fun update(track: Track): Track {
         if (track.total_chapters != 0 && track.last_chapter_read == track.total_chapters) {
             track.status = COMPLETED
         }
@@ -74,42 +71,42 @@ class Myanimelist(private val context: Context, id: Int) : TrackService(id) {
         return api.updateLibManga(track)
     }
 
-    override fun bind(track: Track): Observable<Track> {
-        return api.findLibManga(track)
-                .flatMap { remoteTrack ->
-                    if (remoteTrack != null) {
-                        track.copyPersonalFrom(remoteTrack)
-                        update(track)
-                    } else {
-                        // Set default fields if it's not found in the list
-                        track.score = DEFAULT_SCORE.toFloat()
-                        track.status = DEFAULT_STATUS
-                        add(track)
-                    }
-                }
+    override suspend fun bind(track: Track): Track {
+        val remoteTrack = api.findLibManga(track)
+        if (remoteTrack != null) {
+            track.copyPersonalFrom(remoteTrack)
+            update(track)
+        } else {
+            // Set default fields if it's not found in the list
+            track.score = DEFAULT_SCORE.toFloat()
+            track.status = DEFAULT_STATUS
+            add(track)
+        }
+        return track
     }
 
-    override fun search(query: String): Observable<List<TrackSearch>> {
+    override suspend fun search(query: String): List<TrackSearch> {
         return api.search(query)
     }
 
-    override fun refresh(track: Track): Observable<Track> {
-        return api.getLibManga(track)
-                .map { remoteTrack ->
-                    track.copyPersonalFrom(remoteTrack)
-                    track.total_chapters = remoteTrack.total_chapters
-                    track
-                }
+    override suspend fun refresh(track: Track): Track {
+        val remoteTrack = api.getLibManga(track)
+        track.copyPersonalFrom(remoteTrack)
+        track.total_chapters = remoteTrack.total_chapters
+        return track
     }
 
-    override fun login(username: String, password: String): Completable {
+    override suspend fun login(username: String, password: String): Boolean {
         logout()
-
-        return Observable.fromCallable { api.login(username, password) }
-                .doOnNext { csrf -> saveCSRF(csrf) }
-                .doOnNext { saveCredentials(username, password) }
-                .doOnError { logout() }
-                .toCompletable()
+        try {
+            val csrf = api.login(username, password)
+            saveCSRF(csrf)
+            saveCredentials(username, password)
+            return true
+        } catch (e: Exception) {
+            logout()
+            return false
+        }
     }
 
     fun refreshLogin() {
@@ -143,8 +140,8 @@ class Myanimelist(private val context: Context, id: Int) : TrackService(id) {
 
     val isAuthorized: Boolean
         get() = super.isLogged &&
-                getCSRF().isNotEmpty() &&
-                checkCookies()
+            getCSRF().isNotEmpty() &&
+            checkCookies()
 
     fun getCSRF(): String = preferences.trackToken(this).getOrDefault()
 
@@ -160,5 +157,4 @@ class Myanimelist(private val context: Context, id: Int) : TrackService(id) {
 
         return ckCount == 2
     }
-
 }

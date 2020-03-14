@@ -399,4 +399,5 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
     override fun selectAll(position: Int) { }
     override fun allSelected(position: Int): Boolean = false
     override fun showCategories(position: Int, view: View) { }
+    override fun recyclerIsScrolling() = false
 }

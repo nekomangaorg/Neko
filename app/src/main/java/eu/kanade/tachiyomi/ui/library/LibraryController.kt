@@ -40,8 +40,7 @@ import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.TabbedController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
-import eu.kanade.tachiyomi.ui.download.DownloadController
-import eu.kanade.tachiyomi.ui.library.filter.SortFilterBottomSheet
+import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.RootSearchInterface
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
@@ -51,7 +50,7 @@ import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationListController
 import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationProcedureConfig
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.system.getResourceColor
-import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.applyWindowInsetsForRootController
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import eu.kanade.tachiyomi.util.view.snack
@@ -192,26 +191,22 @@ open class LibraryController(
 
         bottom_sheet.onGroupClicked = {
             when (it) {
-                SortFilterBottomSheet.ACTION_REFRESH -> onRefresh()
-                SortFilterBottomSheet.ACTION_FILTER -> onFilterChanged()
-                SortFilterBottomSheet.ACTION_SORT -> onSortChanged()
-                SortFilterBottomSheet.ACTION_DISPLAY -> reattachAdapter()
-                SortFilterBottomSheet.ACTION_DOWNLOAD_BADGE -> presenter.requestDownloadBadgesUpdate()
-                SortFilterBottomSheet.ACTION_UNREAD_BADGE -> presenter.requestUnreadBadgesUpdate()
-                SortFilterBottomSheet.ACTION_CAT_SORT -> onCatSortChanged()
+                FilterBottomSheet.ACTION_REFRESH -> onRefresh()
+                FilterBottomSheet.ACTION_FILTER -> onFilterChanged()
+                FilterBottomSheet.ACTION_HIDE_FILTER_TIP -> activity?.toast(R.string.hide_filters_tip)
             }
         }
 
-        fab.setOnClickListener {
+       /* fab.setOnClickListener {
             router.pushController(DownloadController().withFadeTransaction())
-        }
+        }*/
 
-        if (presenter.isDownloading()) {
+       /* if (presenter.isDownloading()) {
             fab.scaleY = 1f
             fab.scaleX = 1f
             fab.isClickable = true
             fab.isFocusable = true
-        }
+        }*/
 
         val config = resources?.configuration
         phoneLandscape = (config?.orientation == Configuration.ORIENTATION_LANDSCAPE &&
@@ -290,14 +285,14 @@ open class LibraryController(
     }
 
     override fun downloadStatusChanged(downloading: Boolean) {
-        launchUI {
+       /* launchUI {
             val scale = if (downloading) 1f else 0f
             val fab = fab ?: return@launchUI
             fab.animate().scaleX(scale).scaleY(scale).setDuration(200).start()
             fab.isClickable = downloading
             fab.isFocusable = downloading
             bottom_sheet?.adjustFiltersMargin(downloading)
-        }
+        }*/
     }
 
     override fun onUpdateManga(manga: LibraryManga) {

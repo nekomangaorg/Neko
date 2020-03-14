@@ -7,18 +7,16 @@ import com.github.salomonbrys.kotson.int
 import com.github.salomonbrys.kotson.string
 import com.google.gson.Gson
 import com.google.gson.JsonArray
-import eu.kanade.tachiyomi.extension.ExtensionManager
 import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.extension.model.LoadResult
 import eu.kanade.tachiyomi.extension.util.ExtensionLoader
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.NetworkHelper
+import eu.kanade.tachiyomi.network.await
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import eu.kanade.tachiyomi.network.await
 import okhttp3.Response
 import uy.kohesive.injekt.injectLazy
-import java.lang.Exception
 
 internal class ExtensionGithubApi {
 
@@ -34,7 +32,7 @@ internal class ExtensionGithubApi {
         }
     }
 
-    suspend fun checkforUpdates(context: Context): List<Extension.Installed> {
+    suspend fun checkForUpdates(context: Context): List<Extension.Installed> {
         return withContext(Dispatchers.IO) {
             val call = GET("$REPO_URL/index.json")
             val response = network.client.newCall(call).await()

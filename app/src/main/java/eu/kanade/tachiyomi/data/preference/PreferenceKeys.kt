@@ -145,6 +145,8 @@ object PreferenceKeys {
 
     const val keepCatSort = "keep_cat_sort"
 
+    const val alwaysShowChapterTransition = "always_show_chapter_transition"
+
     @Deprecated("Use the preferences of the source")
     fun sourceUsername(sourceId: Long) = "pref_source_username_$sourceId"
 
@@ -152,6 +154,7 @@ object PreferenceKeys {
     fun sourcePassword(sourceId: Long) = "pref_source_password_$sourceId"
 
     fun sourceSharedPref(sourceId: Long) = "source_$sourceId"
+
 
     fun trackUsername(syncId: Int) = "pref_mangasync_username_$syncId"
 

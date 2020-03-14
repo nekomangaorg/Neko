@@ -2,20 +2,24 @@ package eu.kanade.tachiyomi.ui.setting.track
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import android.view.Gravity.CENTER
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.FrameLayout
 import android.widget.ProgressBar
+import androidx.appcompat.app.AppCompatActivity
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.ui.main.MainActivity
-import rx.android.schedulers.AndroidSchedulers
-import rx.schedulers.Schedulers
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import uy.kohesive.injekt.injectLazy
 
 class ShikimoriLoginActivity : AppCompatActivity() {
 
     private val trackManager: TrackManager by injectLazy()
+
+    private val scope = CoroutineScope(Job() + Dispatchers.Main)
 
     override fun onCreate(savedState: Bundle?) {
         super.onCreate(savedState)
@@ -25,14 +29,10 @@ class ShikimoriLoginActivity : AppCompatActivity() {
 
         val code = intent.data?.getQueryParameter("code")
         if (code != null) {
-            trackManager.shikimori.login(code)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe({
-                        returnToSettings()
-                    }, {
-                        returnToSettings()
-                    })
+            scope.launch {
+                trackManager.shikimori.login(code)
+                returnToSettings()
+            }
         } else {
             trackManager.shikimori.logout()
             returnToSettings()
@@ -46,5 +46,4 @@ class ShikimoriLoginActivity : AppCompatActivity() {
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
         startActivity(intent)
     }
-
 }

@@ -7,8 +7,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
-import rx.Completable
-import rx.Observable
+import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 
 class Shikimori(private val context: Context, id: Int) : TrackService(id) {
@@ -21,46 +20,45 @@ class Shikimori(private val context: Context, id: Int) : TrackService(id) {
         return track.score.toInt().toString()
     }
 
-    override fun add(track: Track): Observable<Track> {
+    override suspend fun add(track: Track): Track {
         return api.addLibManga(track, getUsername())
     }
 
-    override fun update(track: Track): Observable<Track> {
+    override suspend fun update(track: Track): Track {
         if (track.total_chapters != 0 && track.last_chapter_read == track.total_chapters) {
             track.status = COMPLETED
         }
         return api.updateLibManga(track, getUsername())
     }
 
-    override fun bind(track: Track): Observable<Track> {
-        return api.findLibManga(track, getUsername())
-                .flatMap { remoteTrack ->
-                    if (remoteTrack != null) {
-                        track.copyPersonalFrom(remoteTrack)
-                        track.library_id = remoteTrack.library_id
-                        update(track)
-                    } else {
-                        // Set default fields if it's not found in the list
-                        track.score = DEFAULT_SCORE.toFloat()
-                        track.status = DEFAULT_STATUS
-                        add(track)
-                    }
-                }
+    override suspend fun bind(track: Track): Track {
+        val remoteTrack = api.findLibManga(track, getUsername())
+
+        if (remoteTrack != null) {
+            track.copyPersonalFrom(remoteTrack)
+            track.library_id = remoteTrack.library_id
+            update(track)
+        } else {
+            // Set default fields if it's not found in the list
+            track.score = DEFAULT_SCORE.toFloat()
+            track.status = DEFAULT_STATUS
+            add(track)
+        }
+        return track
     }
 
-    override fun search(query: String): Observable<List<TrackSearch>> {
+    override suspend fun search(query: String): List<TrackSearch> {
         return api.search(query)
     }
 
-    override fun refresh(track: Track): Observable<Track> {
-        return api.findLibManga(track, getUsername())
-                .map { remoteTrack ->
-                    if (remoteTrack != null) {
-                        track.copyPersonalFrom(remoteTrack)
-                        track.total_chapters = remoteTrack.total_chapters
-                    }
-                    track
-                }
+    override suspend fun refresh(track: Track): Track {
+        val remoteTrack = api.findLibManga(track, getUsername())
+
+        if (remoteTrack != null) {
+            track.copyPersonalFrom(remoteTrack)
+            track.total_chapters = remoteTrack.total_chapters
+        }
+        return track
     }
 
     companion object {
@@ -103,18 +101,21 @@ class Shikimori(private val context: Context, id: Int) : TrackService(id) {
         }
     }
 
-    override fun login(username: String, password: String) = login(password)
+    override suspend fun login(username: String, password: String) = login(password)
 
-    fun login(code: String): Completable {
-        return api.accessToken(code).map { oauth: OAuth? ->
+    suspend fun login(code: String): Boolean {
+        try {
+            val oauth = api.accessToken(code)
+
             interceptor.newAuth(oauth)
-            if (oauth != null) {
-                val user = api.getCurrentUser()
-                saveCredentials(user.toString(), oauth.access_token)
-            }
-        }.doOnError {
+            val user = api.getCurrentUser()
+            saveCredentials(user.toString(), oauth.access_token)
+            return true
+        } catch (e: java.lang.Exception) {
+            Timber.e(e)
             logout()
-        }.toCompletable()
+            return false
+        }
     }
 
     fun saveToken(oauth: OAuth?) {

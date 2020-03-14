@@ -6,7 +6,6 @@ import android.widget.NumberPicker
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.customview.customView
 import com.afollestad.materialdialogs.customview.getCustomView
-import com.bluelinelabs.conductor.Controller
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackManager
@@ -15,14 +14,15 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 class SetTrackChaptersDialog<T> : DialogController
-        where T : Controller, T : SetTrackChaptersDialog.Listener {
+        where T : SetTrackChaptersDialog.Listener {
 
     private val item: TrackItem
+    private  lateinit var listener: Listener
 
     constructor(target: T, item: TrackItem) : super(Bundle().apply {
         putSerializable(KEY_ITEM_TRACK, item.track)
     }) {
-        targetController = target
+        listener = target
         this.item = item
     }
 
@@ -45,7 +45,7 @@ class SetTrackChaptersDialog<T> : DialogController
                 // Remove focus to update selected number
                 val np: NumberPicker = view.findViewById(R.id.chapters_picker)
                 np.clearFocus()
-                (targetController as? Listener)?.setChaptersRead(item, np.value)
+                listener.setChaptersRead(item, np.value)
             }
 
         val view = dialog.getCustomView()

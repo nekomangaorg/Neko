@@ -28,7 +28,7 @@ class ExtensionPreference @JvmOverloads constructor(context: Context, attrs: Att
         val updates = Injekt.get<PreferencesHelper>().extensionUpdatesCount().getOrDefault()
         if (updates > 0) {
             extUpdateText.text = context.resources.getQuantityString(R.plurals
-                .extensions_updates_available, updates, updates)
+                .updates_available, updates, updates)
             extUpdateText.visible()
         }
         else {

@@ -1,14 +1,13 @@
 package eu.kanade.tachiyomi.ui.manga.chapter
 
 import android.content.Context
-import android.view.MenuItem
 import android.view.View
 import androidx.fragment.app.FragmentActivity
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
-import eu.kanade.tachiyomi.ui.base.controller.BaseController
+import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsPresenter
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.system.getResourceColor
@@ -18,7 +17,7 @@ import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 
 class ChaptersAdapter(
-        val controller: BaseController,
+        val controller: MangaDetailsController,
         context: Context
 ) : FlexibleAdapter<ChapterItem>(null, controller, true) {
 
@@ -26,8 +25,7 @@ class ChaptersAdapter(
 
     var items: List<ChapterItem> = emptyList()
 
-    val menuItemListener: OnMenuItemClickListener? = controller as? OnMenuItemClickListener
-    val coverListener: MangaHeaderInterface? = controller as? MangaHeaderInterface
+    val coverListener: MangaHeaderInterface = controller
 
     val readColor = context.getResourceColor(android.R.attr.textColorHint)
 
@@ -54,10 +52,6 @@ class ChaptersAdapter(
         SecureActivityDelegate.promptLockIfNeeded(activity)
     }
 
-    interface OnMenuItemClickListener {
-        fun onMenuItemClick(position: Int, item: MenuItem)
-    }
-
     interface MangaHeaderInterface {
         fun coverColor(): Int?
         fun mangaPresenter(): MangaDetailsPresenter
@@ -71,5 +65,7 @@ class ChaptersAdapter(
         fun favoriteManga(longPress: Boolean)
         fun copyToClipboard(content: String, label: Int)
         fun zoomImageFromThumb(thumbView: View)
+        fun showTrackingSheet()
+        fun startDownloadRange(position: Int)
     }
 }

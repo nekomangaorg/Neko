@@ -7,10 +7,10 @@
     android:id="@+id/ext_swipe_refresh">
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/ext_recycler"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:clipToPadding="false"
-        tools:listitem="@layout/extension_card_header"/>
+    android:id="@+id/ext_recycler"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clipToPadding="false"
+    tools:listitem="@layout/extension_card_header"/>
 
 </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

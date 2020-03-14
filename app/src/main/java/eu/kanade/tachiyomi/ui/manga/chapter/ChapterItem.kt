@@ -41,7 +41,7 @@ class ChapterItem(val chapter: Chapter, val manga: Manga) :
     }
 
     override fun isSelectable(): Boolean {
-        return chapter.isHeader
+        return !chapter.isHeader
     }
 
     override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): MangaChapterHolder {

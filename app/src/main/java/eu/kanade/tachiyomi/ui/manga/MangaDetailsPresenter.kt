@@ -20,11 +20,13 @@ import eu.kanade.tachiyomi.data.library.LibraryServiceListener
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
+import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
+import eu.kanade.tachiyomi.ui.manga.track.TrackItem
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.storage.DiskUtil
@@ -62,6 +64,7 @@ class MangaDetailsPresenter(private val controller: MangaDetailsController,
     private val loggedServices by lazy { Injekt.get<TrackManager>().services.filter { it.isLogged } }
     var tracks = emptyList<Track>()
 
+    var trackList: List<TrackItem> = emptyList()
 
     var chapters:List<ChapterItem> = emptyList()
         private set
@@ -73,6 +76,7 @@ class MangaDetailsPresenter(private val controller: MangaDetailsController,
         headerItem.isLocked = isLockedFromSearch
         downloadManager.addListener(this)
         LibraryUpdateService.setListener(this)
+        tracks = db.getTracks(manga).executeAsBlocking()
         if (!manga.initialized) {
             isLoading = true
             controller.setRefresh(true)
@@ -81,9 +85,9 @@ class MangaDetailsPresenter(private val controller: MangaDetailsController,
         }
         else {
             updateChapters()
-            tracks = db.getTracks(manga).executeAsBlocking()
             controller.updateChapters(this.chapters)
         }
+        fetchTrackings()
     }
 
     fun onDestroy() {
@@ -94,6 +98,7 @@ class MangaDetailsPresenter(private val controller: MangaDetailsController,
     fun fetchChapters() {
         launch {
             getChapters()
+            refreshTracking()
             withContext(Dispatchers.Main) { controller.updateChapters(chapters) }
         }
     }
@@ -161,7 +166,7 @@ class MangaDetailsPresenter(private val controller: MangaDetailsController,
     }
     /**
      * Sets the active display mode.
-     * @param mode the mode to set.
+     * @param hide set title to hidden
      */
     fun hideTitle(hide: Boolean) {
         manga.displayMode = if (hide) Manga.DISPLAY_NUMBER else Manga.DISPLAY_NAME
@@ -658,7 +663,124 @@ class MangaDetailsPresenter(private val controller: MangaDetailsController,
         return false
     }
 
-    fun isTracked(): Boolean {
-        return loggedServices.any { service -> tracks.any { it.sync_id == service.id } }
+    fun isTracked(): Boolean = loggedServices.any { service -> tracks.any { it.sync_id == service.id } }
+
+    fun hasTrackers(): Boolean = loggedServices.isNotEmpty()
+
+
+    // Tracking
+
+    private fun fetchTrackings() {
+        launch {
+            trackList = loggedServices.map { service ->
+                TrackItem(tracks.find { it.sync_id == service.id }, service)
+            }
+        }
+    }
+
+    private suspend fun refreshTracking() {
+        tracks = withContext(Dispatchers.IO) { db.getTracks(manga).executeAsBlocking() }
+        trackList = loggedServices.map { service ->
+            TrackItem(tracks.find { it.sync_id == service.id }, service)
+        }
+        withContext(Dispatchers.Main) { controller.refreshTracking(trackList) }
+    }
+
+    fun refreshTrackers() {
+        launch {
+            val list = trackList.filter { it.track != null }.map { item ->
+                withContext(Dispatchers.IO) {
+                    val trackItem = try {
+                        item.service.refresh(item.track!!)
+                    } catch (e: Exception) {
+                        trackError(e)
+                        null
+                    }
+                    if (trackItem != null) {
+                        db.insertTrack(trackItem).executeAsBlocking()
+                        trackItem
+                    }
+                    else
+                        item.track
+                }
+            }
+            refreshTracking()
+        }
+    }
+
+    fun trackSearch(query: String, service: TrackService) {
+        launch(Dispatchers.IO) {
+            val results = try {service.search(query) }
+            catch (e: Exception) {
+                withContext(Dispatchers.Main) { controller.trackSearchError(e) }
+                null }
+             if (!results.isNullOrEmpty()) {
+                 withContext(Dispatchers.Main) { controller.onTrackSearchResults(results) }
+             }
+        }
+    }
+
+    fun registerTracking(item: Track?, service: TrackService) {
+        if (item != null) {
+            item.manga_id = manga.id!!
+
+            launch {
+                val binding =  try { service.bind(item) }
+                catch (e: Exception) {
+                    trackError(e)
+                    null
+                }
+                withContext(Dispatchers.IO) {
+                    if (binding != null) db.insertTrack(binding).executeAsBlocking() }
+                refreshTracking()
+            }
+        } else {
+            launch {
+                withContext(Dispatchers.IO) { db.deleteTrackForManga(manga, service)
+                    .executeAsBlocking() }
+                refreshTracking()
+            }
+        }
+    }
+
+    private fun updateRemote(track: Track, service: TrackService) {
+        launch {
+            val binding = try { service.update(track) }
+            catch (e: Exception) {
+                trackError(e)
+                null
+            }
+            if (binding != null) {
+                withContext(Dispatchers.IO) { db.insertTrack(binding).executeAsBlocking() }
+                refreshTracking()
+            }
+            else trackRefreshDone()
+        }
+    }
+
+    private suspend fun trackRefreshDone() {
+        async(Dispatchers.Main) { controller.trackRefreshDone() }
+    }
+
+    private suspend fun trackError(error: Exception) {
+        async(Dispatchers.Main) { controller.trackRefreshError(error) }
+    }
+
+    fun setStatus(item: TrackItem, index: Int) {
+        val track = item.track!!
+        track.status = item.service.getStatusList()[index]
+        updateRemote(track, item.service)
+    }
+
+    fun setScore(item: TrackItem, index: Int) {
+        val track = item.track!!
+        track.score = item.service.indexToScore(index)
+        updateRemote(track, item.service)
+    }
+
+    fun setLastChapterRead(item: TrackItem, chapterNumber: Int) {
+        val track = item.track!!
+        track.last_chapter_read = chapterNumber
+        updateRemote(track, item.service)
     }
 }

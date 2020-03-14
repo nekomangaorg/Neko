@@ -11,7 +11,6 @@ import androidx.core.content.ContextCompat
 import androidx.preference.PreferenceScreen
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.list.listItemsSingleChoice
-import com.bluelinelabs.conductor.RouterTransaction
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -33,6 +32,13 @@ class SettingsDownloadController : SettingsController() {
 
     override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
         titleRes = R.string.pref_category_downloads
+
+        preference {
+            titleRes = R.string.label_download_queue
+            onClick {
+                router.pushController(DownloadController().withFadeTransaction())
+            }
+        }
 
         preference {
             key = Keys.downloadsDirectory

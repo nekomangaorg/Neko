@@ -15,14 +15,15 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 class SetTrackScoreDialog<T> : DialogController
-        where T : Controller, T : SetTrackScoreDialog.Listener {
+        where T : SetTrackScoreDialog.Listener {
 
     private val item: TrackItem
+    private lateinit var listener: Listener
 
     constructor(target: T, item: TrackItem) : super(Bundle().apply {
         putSerializable(KEY_ITEM_TRACK, item.track)
     }) {
-        targetController = target
+        listener = target
         this.item = item
     }
 
@@ -46,8 +47,7 @@ class SetTrackScoreDialog<T> : DialogController
                 val np: NumberPicker = view.findViewById(R.id.score_picker)
                 np.clearFocus()
 
-                (targetController as? Listener)?.setScore(item, np.value)
-
+               listener.setScore(item, np.value)
             }
 
 

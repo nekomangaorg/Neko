@@ -11,6 +11,7 @@ import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.view.GestureDetector
 import android.view.MenuItem
 import android.view.MotionEvent
@@ -20,7 +21,6 @@ import android.view.WindowManager
 import android.webkit.WebView
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
-import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.GestureDetectorCompat
@@ -300,7 +300,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                 .SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR)
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && currentNightMode == Configuration
-                .UI_MODE_NIGHT_NO && preferences.theme() >= 8)
+                .UI_MODE_NIGHT_NO)
             content.systemUiVisibility = content.systemUiVisibility.or(View
                 .SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
 
@@ -383,7 +383,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         return super.startSupportActionMode(callback)
     }
 
-   /* override fun onSupportActionModeFinished(mode: androidx.appcompat.view.ActionMode) {
+    override fun onSupportActionModeFinished(mode: androidx.appcompat.view.ActionMode) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) launchUI {
             val scale = Settings.Global.getFloat(
                 contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1.0f
@@ -391,10 +391,12 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             val duration = resources.getInteger(android.R.integer.config_mediumAnimTime) * scale
             delay(duration.toLong())
             delay(100)
-            window?.statusBarColor = getResourceColor(android.R.attr.statusBarColor)
+            if (Color.alpha(window?.statusBarColor ?: Color.BLACK) >= 255)
+                window?.statusBarColor = ColorUtils.setAlphaComponent(getResourceColor(android.R.attr
+                .colorBackground), 175)
         }
         super.onSupportActionModeFinished(mode)
-    }*/
+    }
 
     private fun setExtensionsBadge() {
         val updates = preferences.extensionUpdatesCount().getOrDefault()
@@ -422,7 +424,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             GlobalScope.launch(Dispatchers.IO) {
                 val preferences: PreferencesHelper by injectLazy()
                 try {
-                    val pendingUpdates = ExtensionGithubApi().checkforUpdates(this@MainActivity)
+                    val pendingUpdates = ExtensionGithubApi().checkForUpdates(this@MainActivity)
                     preferences.extensionUpdatesCount().set(pendingUpdates.size)
                     preferences.lastExtCheck().set(Date().time)
                 } catch (e: java.lang.Exception) { }
@@ -553,6 +555,9 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
 
     override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
         gestureDetector.onTouchEvent(ev)
+        val controller = router.backstack.lastOrNull()?.controller()
+        if (controller is OnTouchEventInterface)
+            controller.onTouchEvent(ev)
         if (ev?.action == MotionEvent.ACTION_DOWN) {
             if (snackBar != null && snackBar!!.isShown) {
                 val sRect = Rect()
@@ -654,7 +659,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
     }
 
     override fun downloadStatusChanged(downloading: Boolean) {
-        val downloadManager = Injekt.get<DownloadManager>()
+        /*val downloadManager = Injekt.get<DownloadManager>()
         val hasQueue = downloading || downloadManager.hasQueue()
         launchUI {
             if (hasQueue) {
@@ -664,7 +669,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             } else {
                 navigationView?.removeBadge(R.id.nav_library)
             }
-        }
+        }*/
     }
 
 
@@ -687,9 +692,9 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                         && abs(diffY) <= Companion.SWIPE_THRESHOLD * 0.75f
                     ) {
                         if (diffX > 0) {
-                            currentGestureDelegate?.onSwipeRight(e1.x,  e1.y)
+                            currentGestureDelegate?.onSwipeRight(velocityX,  e1.y)
                         } else {
-                            currentGestureDelegate?.onSwipeLeft(e1.x,  e1.y)
+                            currentGestureDelegate?.onSwipeLeft(velocityX,  e1.y)
                         }
                         result = true
                     }
@@ -738,9 +743,10 @@ interface BottomNavBarInterface {
 }
 
 interface RootSearchInterface
+interface SpinnerTitleInterface
 
-interface SpinnerTitleInterface {
-    fun popUpMenu(): PopupMenu
+interface OnTouchEventInterface {
+    fun onTouchEvent(event: MotionEvent?)
 }
 
 interface SwipeGestureInterface {

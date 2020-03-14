@@ -1,71 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
-<eu.kanade.tachiyomi.ui.library.filter.SortFilterBottomSheet xmlns:android="http://schemas.android.com/apk/res/android"
+<eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/bottom_sheet"
     style="@style/BottomSheetDialogTheme"
     android:layout_width="match_parent"
-    app:behavior_peekHeight="60dp"
     android:layout_height="wrap_content"
     android:background="@drawable/bg_bottom_sheet_dialog_fragment"
     android:orientation="vertical"
+    app:behavior_peekHeight="60dp"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-            <LinearLayout
-                android:id="@+id/sheet_layout"
-                android:layout_width="match_parent"
+        <LinearLayout
+            android:id="@+id/sheet_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <HorizontalScrollView
+                android:id="@+id/filter_scroll"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                android:orientation="vertical">
-
-                <HorizontalScrollView
-                    android:id="@+id/filter_scroll"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:clipToPadding="false"
-                    android:paddingStart="20dp"
-                    android:paddingTop="8dp"
-                    android:paddingBottom="6dp"
-                    android:paddingEnd="20dp"
-                    android:scrollbars="none">
-
-                    <LinearLayout
-                        android:id="@+id/filter_layout"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
-                        <ImageView
-                            android:id="@+id/clear_button"
-                            android:layout_width="32dp"
-                            android:layout_height="32dp"
-                            android:layout_marginStart="10dp"
-                            android:layout_marginEnd="10dp"
-                            android:background="@drawable/round_clear_border"
-                            android:clickable="true"
-                            android:contentDescription="@string/action_clear"
-                            android:focusable="true"
-                            android:padding="3dp"
-                            android:src="@drawable/ic_close_white_24dp"
-                            android:tint="@color/gray_button" />
-
-                    </LinearLayout>
-                </HorizontalScrollView>
+                android:layout_marginTop="2dp"
+                android:clipToPadding="false"
+                android:paddingStart="20dp"
+                android:paddingTop="8dp"
+                android:paddingEnd="20dp"
+                android:paddingBottom="6dp"
+                android:scrollbars="none">
 
                 <LinearLayout
+                    android:id="@+id/filter_layout"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="23dp"
+                    android:gravity="center_vertical"
                     android:orientation="horizontal">
+
+                    <ImageView
+                        android:id="@+id/clear_button"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginEnd="10dp"
+                        android:background="@drawable/round_clear_border"
+                        android:clickable="true"
+                        android:contentDescription="@string/action_clear"
+                        android:focusable="true"
+                        android:padding="3dp"
+                        android:src="@drawable/ic_close_white_24dp"
+                        android:tint="@color/gray_button" />
+
+                </LinearLayout>
+            </HorizontalScrollView>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="23dp"
+                android:orientation="horizontal">
+
                 <com.google.android.material.checkbox.MaterialCheckBox
                     android:id="@+id/hide_categories"
                     android:layout_width="wrap_content"
@@ -73,24 +73,15 @@
                     android:layout_marginEnd="20dp"
                     android:text="@string/action_hide_categories" />
 
-                <TextView
-                    android:layout_marginStart="12dp"
-                    android:id="@+id/reorder_filters"
+
+                <com.google.android.material.checkbox.MaterialCheckBox
+                    android:id="@+id/hide_filters"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="10dp"
-                    android:clickable="true"
-                    android:background="@drawable/square_ripple"
-                    android:focusable="true"
-                    android:gravity="start|center"
-                    android:padding="10dp"
-                    android:text="Reorder Filters"
-                    android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
-                    android:textColor="?android:attr/textColorPrimary"
-                    android:textSize="15sp"
-                    android:textStyle="normal" />
-                </LinearLayout>
+                    android:layout_marginEnd="20dp"
+                    android:text="@string/action_start_filters_hidden" />
             </LinearLayout>
+        </LinearLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/top_bar"
@@ -106,12 +97,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
-                android:src="@drawable/draggable_pill"
                 android:alpha="0.25"
                 android:contentDescription="@string/drag_handle"
-                app:layout_constraintStart_toStartOf="parent"
+                android:src="@drawable/draggable_pill"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
-</eu.kanade.tachiyomi.ui.library.filter.SortFilterBottomSheet>
+</eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet>

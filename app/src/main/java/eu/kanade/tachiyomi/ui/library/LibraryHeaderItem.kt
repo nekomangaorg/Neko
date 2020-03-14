@@ -144,6 +144,7 @@ class LibraryHeaderItem(private val categoryF: (Int) -> Category, val catId: Int
             }
         }
         private fun showCatSortOptions() {
+            if (adapter.libraryListener.recyclerIsScrolling()) return
             val category =
                 (adapter.getItem(adapterPosition) as? LibraryHeaderItem)?.category ?: return
             // Create a PopupMenu, giving it the clicked view for an anchor

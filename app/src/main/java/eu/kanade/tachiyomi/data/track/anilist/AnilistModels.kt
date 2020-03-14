@@ -1,18 +1,13 @@
 package eu.kanade.tachiyomi.data.track.anilist
 
-import android.app.DownloadManager
-import android.content.Context
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Locale
 
 data class ALManga(
         val media_id: Int,
@@ -45,12 +40,11 @@ data class ALManga(
 }
 
 data class ALUserManga(
-        val library_id: Long,
-        val list_status: String,
-        val score_raw: Int,
-        val chapters_read: Int,
-        val manga: ALManga,
-        val context: Context = Injekt.get<PreferencesHelper>().context
+    val library_id: Long,
+    val list_status: String,
+    val score_raw: Int,
+    val chapters_read: Int,
+    val manga: ALManga
 ) {
 
     fun toTrack() = Track.create(TrackManager.ANILIST).apply {
@@ -62,16 +56,14 @@ data class ALUserManga(
         total_chapters = manga.total_chapters
     }
 
-    fun toTrackStatus() = with(context) {
-        when (list_status) {
-            getString(R.string.reading) -> Anilist.READING
-            getString(R.string.completed) -> Anilist.COMPLETED
-            getString(R.string.paused) -> Anilist.PAUSED
-            getString(R.string.dropped) -> Anilist.DROPPED
-            getString(R.string.plan_to_read) -> Anilist.PLANNING
-            getString(R.string.repeating)-> Anilist.REPEATING
-            else -> throw NotImplementedError("Unknown status")
-        }
+    fun toTrackStatus() = when (list_status) {
+        "CURRENT" -> Anilist.READING
+        "COMPLETED" -> Anilist.COMPLETED
+        "PAUSED" -> Anilist.PAUSED
+        "DROPPED" -> Anilist.DROPPED
+        "PLANNING" -> Anilist.PLANNING
+        "REPEATING" -> Anilist.REPEATING
+        else -> throw NotImplementedError("Unknown status")
     }
 }
 

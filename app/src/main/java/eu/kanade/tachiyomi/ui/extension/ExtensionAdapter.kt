@@ -3,17 +3,19 @@ package eu.kanade.tachiyomi.ui.extension
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.ui.extension.ExtensionAdapter.OnButtonClickListener
 import eu.kanade.tachiyomi.util.system.getResourceColor
 
 /**
  * Adapter that holds the catalogue cards.
  *
- * @param controller instance of [ExtensionController].
+ * @param listener instance of [OnButtonClickListener].
  */
-class ExtensionAdapter(val controller: ExtensionController) :
-        FlexibleAdapter<IFlexible<*>>(null, controller, true) {
+class ExtensionAdapter(val listener: OnButtonClickListener) :
+        FlexibleAdapter<IFlexible<*>>(null, listener, true) {
 
-    val cardBackground = controller.activity!!.getResourceColor(R.attr.background_card)
+    val cardBackground = (listener as ExtensionBottomSheet).context.getResourceColor(R.attr
+        .background_card)
 
     init {
         setDisplayHeadersAtStartUp(true)
@@ -22,7 +24,7 @@ class ExtensionAdapter(val controller: ExtensionController) :
     /**
      * Listener for browse item clicks.
      */
-    val buttonClickListener: ExtensionAdapter.OnButtonClickListener = controller
+    val buttonClickListener: ExtensionAdapter.OnButtonClickListener = listener
 
     interface OnButtonClickListener {
         fun onButtonClick(position: Int)

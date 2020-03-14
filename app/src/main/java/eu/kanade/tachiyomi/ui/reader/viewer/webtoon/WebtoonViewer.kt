@@ -142,9 +142,11 @@ class WebtoonViewer(val activity: ReaderActivity) : BaseViewer {
         Timber.d("onPageSelected: ${page.number}/${pages.size}")
         activity.onPageSelected(page)
 
-        if (page === pages.last()) {
-            Timber.d("Request preload next chapter because we're at the last page")
-            val transition = adapter.items.getOrNull(position + 1) as? ChapterTransition.Next
+        // Preload next chapter once we're within the last 3 pages of the current chapter
+        val inPreloadRange = pages.size - page.number < 3
+        if (inPreloadRange) {
+            Timber.d("Request preload next chapter because we're at page ${page.number} of ${pages.size}")
+            val transition = adapter.items.getOrNull(pages.size + 1) as? ChapterTransition.Next
             if (transition?.to != null) {
                 activity.requestPreloadChapter(transition.to)
             }
@@ -172,7 +174,8 @@ class WebtoonViewer(val activity: ReaderActivity) : BaseViewer {
      */
     override fun setChapters(chapters: ViewerChapters) {
         Timber.d("setChapters")
-        adapter.setChapters(chapters)
+        var forceTransition = config.alwaysShowChapterTransition || currentPage is ChapterTransition
+        adapter.setChapters(chapters, forceTransition)
 
         if (recycler.visibility == View.GONE) {
             Timber.d("Recycler first layout")

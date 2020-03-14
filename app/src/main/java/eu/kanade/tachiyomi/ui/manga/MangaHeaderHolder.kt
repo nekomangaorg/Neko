@@ -32,12 +32,10 @@ class MangaHeaderHolder(
     startExpanded: Boolean
 ) : MangaChapterHolder(view, adapter) {
 
-
-
     init {
-        start_reading_button.setOnClickListener { adapter.coverListener?.readNextChapter() }
+        start_reading_button.setOnClickListener { adapter.coverListener.readNextChapter() }
         top_view.updateLayoutParams<ConstraintLayout.LayoutParams> {
-            height = adapter.coverListener?.topCoverHeight() ?: 0
+            height = adapter.coverListener.topCoverHeight()
         }
         more_button.setOnClickListener { expandDesc() }
         manga_summary.setOnClickListener { expandDesc() }
@@ -48,29 +46,30 @@ class MangaHeaderHolder(
             more_button_group.visible()
         }
         manga_genres_tags.setOnTagClickListener {
-            adapter.coverListener?.tagClicked(it)
+            adapter.coverListener.tagClicked(it)
         }
-        filter_button.setOnClickListener { adapter.coverListener?.showChapterFilter() }
-        filters_text.setOnClickListener { adapter.coverListener?.showChapterFilter() }
-        chapters_title.setOnClickListener { adapter.coverListener?.showChapterFilter() }
-        webview_button.setOnClickListener { adapter.coverListener?.openInWebView() }
-        share_button.setOnClickListener { adapter.coverListener?.prepareToShareManga()  }
+        filter_button.setOnClickListener { adapter.coverListener.showChapterFilter() }
+        filters_text.setOnClickListener { adapter.coverListener.showChapterFilter() }
+        chapters_title.setOnClickListener { adapter.coverListener.showChapterFilter() }
+        webview_button.setOnClickListener { adapter.coverListener.openInWebView() }
+        share_button.setOnClickListener { adapter.coverListener.prepareToShareManga() }
         favorite_button.setOnClickListener {
-            adapter.coverListener?.favoriteManga(false)
+            adapter.coverListener.favoriteManga(false)
         }
         favorite_button.setOnLongClickListener {
-            adapter.coverListener?.favoriteManga(true)
+            adapter.coverListener.favoriteManga(true)
             true
         }
         manga_full_title.setOnLongClickListener {
-            adapter.coverListener?.copyToClipboard(manga_full_title.text.toString(), R.string.manga_info_full_title_label)
+            adapter.coverListener.copyToClipboard(manga_full_title.text.toString(), R.string.manga_info_full_title_label)
             true
         }
         manga_author.setOnLongClickListener {
-            adapter.coverListener?.copyToClipboard(manga_author.text.toString(), R.string.manga_info_author_label)
+            adapter.coverListener.copyToClipboard(manga_author.text.toString(), R.string.manga_info_author_label)
             true
         }
-        manga_cover.setOnClickListener { adapter.coverListener?.zoomImageFromThumb(cover_card) }
+        manga_cover.setOnClickListener { adapter.coverListener.zoomImageFromThumb(cover_card) }
+        track_button.setOnClickListener { adapter.coverListener.showTrackingSheet() }
         if (startExpanded)
             expandDesc()
     }
@@ -144,6 +143,7 @@ class MangaHeaderHolder(
         val tracked = presenter.isTracked() && !item.isLocked
 
         with(track_button) {
+            visibleIf(presenter.hasTrackers())
             text = itemView.context.getString(if (tracked) R.string.action_filter_tracked
             else R.string.tracking)
 
@@ -154,18 +154,24 @@ class MangaHeaderHolder(
 
         with(start_reading_button) {
             val nextChapter = presenter.getNextUnreadChapter()
-            visibleIf(nextChapter != null && !item.isLocked)
+            visibleIf(presenter.chapters.isNotEmpty() && !item.isLocked)
+            isEnabled = (nextChapter != null)
             if (nextChapter != null) {
                 val number = adapter.decimalFormat.format(nextChapter.chapter_number.toDouble())
-                text = resources.getString(
-                    when {
-                        nextChapter.last_page_read > 0 && nextChapter.chapter_number <= 0 ->
-                            R.string.continue_reading
-                        nextChapter.chapter_number <= 0 -> R.string.start_reading
-                        nextChapter.last_page_read > 0 -> R.string.continue_reading_chapter
-                        else -> R.string.start_reader_chapter
-                    }, number
+                text = if (nextChapter.chapter_number > 0) resources.getString(
+                    if (nextChapter.last_page_read > 0) R.string.continue_reading_chapter
+                    else R.string.start_reading_chapter, number
                 )
+                else {
+                    val name = nextChapter.name
+                    resources.getString(
+                        if (nextChapter.last_page_read > 0) R.string.continue_reading_x
+                        else R.string.start_reading_x, name
+                    )
+                }
+            }
+            else {
+                text = resources.getString(R.string.all_caught_up)
             }
         }
 
@@ -173,7 +179,7 @@ class MangaHeaderHolder(
         chapters_title.text = itemView.resources.getQuantityString(R.plurals.chapters, count, count)
 
         top_view.updateLayoutParams<ConstraintLayout.LayoutParams> {
-            height = adapter.coverListener.topCoverHeight() ?: 0
+            height = adapter.coverListener.topCoverHeight()
         }
 
         manga_status.text = (itemView.context.getString( when (manga.status) {
@@ -228,6 +234,19 @@ class MangaHeaderHolder(
 
     fun setBackDrop(color: Int) {
         true_backdrop.setBackgroundColor(color)
+    }
+
+    fun updateTracking() {
+        val presenter = adapter.coverListener?.mangaPresenter() ?: return
+        val tracked = presenter.isTracked()
+        with(track_button) {
+            text = itemView.context.getString(if (tracked) R.string.action_filter_tracked
+            else R.string.tracking)
+
+            icon = ContextCompat.getDrawable(itemView.context, if (tracked) R.drawable
+                .ic_check_white_24dp else R.drawable.ic_sync_black_24dp)
+            checked(tracked)
+        }
     }
 
     override fun onLongClick(view: View?): Boolean {
