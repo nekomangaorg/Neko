@@ -164,6 +164,15 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
 
     }
 
+    fun toggleExtensions() {
+        if (ext_bottom_sheet.sheetBehavior?.state != BottomSheetBehavior.STATE_COLLAPSED) {
+            ext_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
+        }
+        else {
+            ext_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
+        }
+    }
+
     override fun handleRootBack(): Boolean {
         if (ext_bottom_sheet.sheetBehavior?.state != BottomSheetBehavior.STATE_COLLAPSED) {
             ext_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED

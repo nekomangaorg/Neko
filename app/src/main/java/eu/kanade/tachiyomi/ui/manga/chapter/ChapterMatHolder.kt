@@ -6,10 +6,10 @@ import androidx.appcompat.widget.PopupMenu
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.model.Download
-import eu.kanade.tachiyomi.ui.manga.MangaChapterHolder
+import eu.kanade.tachiyomi.source.LocalSource
+import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.view.gone
-import eu.kanade.tachiyomi.util.view.invisible
-import eu.kanade.tachiyomi.util.view.visible
+import eu.kanade.tachiyomi.util.view.visibleIf
 import kotlinx.android.synthetic.main.chapters_mat_item.*
 import kotlinx.android.synthetic.main.download_button.*
 import java.util.Date
@@ -17,8 +17,9 @@ import java.util.Date
 class ChapterMatHolder(
     private val view: View,
     private val adapter: ChaptersAdapter
-) : MangaChapterHolder(view, adapter) {
+) : BaseFlexibleViewHolder(view, adapter)  {
 
+    private var localSource = false
     init {
         download_button.setOnClickListener { downloadOrRemoveMenu() }
         download_button.setOnLongClickListener {
@@ -28,7 +29,7 @@ class ChapterMatHolder(
     }
 
     private fun downloadOrRemoveMenu() {
-        val chapter = adapter.getItem(adapterPosition) ?: return
+        val chapter = adapter.getItem(adapterPosition) as? ChapterItem ?: return
         if (chapter.status == Download.NOT_DOWNLOADED || chapter.status == Download.ERROR) {
             adapter.coverListener.downloadChapter(adapterPosition)
         } else {
@@ -56,7 +57,7 @@ class ChapterMatHolder(
         }
     }
 
-    override fun bind(item: ChapterItem, manga: Manga) {
+    fun bind(item: ChapterItem, manga: Manga) {
         val chapter = item.chapter
         val isLocked = item.isLocked
         chapter_title.text = when (manga.displayMode) {
@@ -67,12 +68,10 @@ class ChapterMatHolder(
             else -> chapter.name
         }
 
-        //chapter_menu.visible()
-        // Set the correct drawable for dropdown and update the tint to match theme.
-        //chapter_menu.setVectorCompat(R.drawable.ic_more_vert_black_24dp, view.context
-           // .getResourceColor(R.attr.icon_color))
+        localSource = manga.source == LocalSource.ID
+        download_button.visibleIf(!localSource)
 
-        if (isLocked) download_button.invisible()
+        if (isLocked) download_button.gone()
 
 
         // Set correct text color
@@ -110,7 +109,7 @@ class ChapterMatHolder(
             gone()
             return
         }
-        visible()
+        download_button.visibleIf(!localSource)
         setDownloadStatus(status, progress)
     }
 }

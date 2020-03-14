@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.library.filter
 import android.content.Context
 import android.graphics.Color
 import android.util.AttributeSet
+import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import com.f2prateek.rx.preferences.Preference
@@ -76,9 +77,10 @@ class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: Attribute
             toggleButton(index, false)
     }
 
-    fun setState(enabled: Boolean) {
-        if (enabled)
-            toggleButton(0, false)
+    fun setState(text: String) {
+        val index = buttons.indexOfFirst { it.text == text && it.visibility == View.VISIBLE }
+        if (index > -1)
+            toggleButton(index, false)
     }
 
     fun reset() {

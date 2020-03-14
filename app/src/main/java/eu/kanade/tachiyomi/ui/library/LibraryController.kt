@@ -514,13 +514,7 @@ open class LibraryController(
         when (item.itemId) {
             R.id.action_search -> expandActionViewFromInteraction = true
             R.id.action_library_filter -> {
-                if (bottom_sheet.sheetBehavior?.isHideable == true &&
-                    bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED)
-                    bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_HIDDEN
-                else if (bottom_sheet.sheetBehavior?.state != BottomSheetBehavior.STATE_COLLAPSED
-                    && bottom_sheet.sheetBehavior?.skipCollapsed == false)
-                    bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
-                else bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
+                toggleFilters()
             }
             R.id.action_library_display -> {
                 DisplayBottomSheet(this).show()
@@ -531,12 +525,14 @@ open class LibraryController(
         return true
     }
 
-    fun showFiltersBottomSheet() {
-        if (bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_HIDDEN)
-            bottom_sheet.sheetBehavior?.state =
-                if (bottom_sheet.sheetBehavior?.skipCollapsed == false)
-                    BottomSheetBehavior.STATE_COLLAPSED
-                else  BottomSheetBehavior.STATE_EXPANDED
+    fun toggleFilters() {
+        if (bottom_sheet.sheetBehavior?.isHideable == true &&
+            bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED)
+            bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_HIDDEN
+        else if (bottom_sheet.sheetBehavior?.state != BottomSheetBehavior.STATE_COLLAPSED
+            && bottom_sheet.sheetBehavior?.skipCollapsed == false)
+            bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
+        else bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
     }
 
 

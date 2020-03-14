@@ -105,7 +105,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File
 
-open class MangaDetailsController : BaseController,
+class MangaDetailsController : BaseController,
     FlexibleAdapter.OnItemClickListener,
     FlexibleAdapter.OnItemLongClickListener,
     ActionMode.Callback,
@@ -126,6 +126,7 @@ open class MangaDetailsController : BaseController,
         if (manga != null) {
             source = Injekt.get<SourceManager>().getOrStub(manga.source)
         }
+        presenter = MangaDetailsPresenter(this, manga!!, source!!)
     }
 
     constructor(mangaId: Long) : this(
@@ -142,15 +143,15 @@ open class MangaDetailsController : BaseController,
     private var manga: Manga? = null
     private var source: Source? = null
     var colorAnimator:ValueAnimator? = null
-    lateinit var presenter:MangaDetailsPresenter
+    val presenter:MangaDetailsPresenter
     var coverColor:Int? = null
     var toolbarIsColored = false
     private var snack: Snackbar? = null
     val fromCatalogue = args.getBoolean(FROM_CATALOGUE_EXTRA, false)
     var coverDrawable:Drawable? = null
-    var trackingBottomSheet: TrackingBottomSheet? = null
+    private var trackingBottomSheet: TrackingBottomSheet? = null
+    private var startingDLChapterPos:Int? = null
 
-    var startingDLChapterPos:Int? = null
     /**
      * Adapter containing a list of chapters.
      */
@@ -178,7 +179,6 @@ open class MangaDetailsController : BaseController,
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
         coverColor = null
-        if (!::presenter.isInitialized) presenter = MangaDetailsPresenter(this, manga!!, source!!)
 
         // Init RecyclerView and adapter
         adapter = ChaptersAdapter(this, view.context)
@@ -191,7 +191,7 @@ open class MangaDetailsController : BaseController,
                 DividerItemDecoration.VERTICAL
             )
         )
-        recycler.setHasFixedSize(false)
+        recycler.setHasFixedSize(true)
         adapter?.fastScroller = fast_scroller
         val attrsArray = intArrayOf(android.R.attr.actionBarSize)
         val array = view.context.obtainStyledAttributes(attrsArray)
@@ -208,7 +208,6 @@ open class MangaDetailsController : BaseController,
                 topMargin = appbarHeight + insets.systemWindowInsetTop
                 bottomMargin = insets.systemWindowInsetBottom
             }
-            // offset the recycler by the fab's inset + some inset on top
             v.updatePaddingRelative(bottom = insets.systemWindowInsetBottom)
         }
 
@@ -306,6 +305,11 @@ open class MangaDetailsController : BaseController,
         presenter.isLockedFromSearch = SecureActivityDelegate.shouldBeLocked()
         presenter.headerItem.isLocked = presenter.isLockedFromSearch
         presenter.fetchChapters()
+        val isCurrentController = router?.backstack?.lastOrNull()?.controller() ==
+            this
+        if (isCurrentController)  {
+            setStatusBarAndToolbar()
+        }
     }
 
     fun showError(message: String) {
@@ -325,10 +329,7 @@ open class MangaDetailsController : BaseController,
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
         super.onChangeStarted(handler, type)
         if (type == ControllerChangeType.PUSH_ENTER || type == ControllerChangeType.POP_ENTER) {
-            setStatusBar()
-            (activity as MainActivity).appbar.setBackgroundColor(Color.TRANSPARENT)
-            (activity as MainActivity).toolbar.setBackgroundColor(activity?.window?.statusBarColor
-                ?: Color.TRANSPARENT)
+            setStatusBarAndToolbar()
         }
         else if (type == ControllerChangeType.PUSH_EXIT || type == ControllerChangeType.POP_EXIT) {
             if (router.backstack.lastOrNull()?.controller() is DialogController)
@@ -351,15 +352,9 @@ open class MangaDetailsController : BaseController,
     }
 
     fun updateHeader() {
-        if (presenter.chapters.isEmpty()) {
-            adapter?.updateDataSet(listOf(presenter.headerItem))
-        }
-        else {
-            swipe_refresh?.isRefreshing = presenter.isLoading
-            adapter?.updateDataSet(
-                listOf(ChapterItem(presenter.headerItem, presenter.manga)) + presenter.chapters
-            )
-        }
+        swipe_refresh?.isRefreshing = presenter.isLoading
+        adapter?.setChapters(presenter.chapters)
+        addMangaHeader()
         activity?.invalidateOptionsMenu()
     }
 
@@ -369,15 +364,15 @@ open class MangaDetailsController : BaseController,
             launchUI { swipe_refresh?.isRefreshing = true }
             presenter.fetchChaptersFromSource()
         }
-        adapter?.updateDataSet(listOf(presenter.headerItem) + chapters)
+        adapter?.setChapters(chapters)
+        addMangaHeader()
         activity?.invalidateOptionsMenu()
     }
 
     fun refreshAdapter() = adapter?.notifyDataSetChanged()
 
     override fun onItemClick(view: View?, position: Int): Boolean {
-        val chapter = adapter?.getItem(position)?.chapter ?: return false
-        if (chapter.isHeader) return false
+        val chapter = (adapter?.getItem(position) as? ChapterItem)?.chapter ?: return false
         if (actionMode != null) {
             if (startingDLChapterPos == null) {
                 adapter?.addSelection(position)
@@ -410,7 +405,7 @@ open class MangaDetailsController : BaseController,
 
     override fun onItemLongClick(position: Int) {
         val adapter = adapter ?: return
-        val item = adapter.getItem(position) ?: return
+        val item = (adapter.getItem(position) as? ChapterItem) ?: return
         val itemView = getHolder(item)?.itemView ?: return
         val popup = PopupMenu(itemView.context, itemView, Gravity.END)
 
@@ -709,7 +704,7 @@ open class MangaDetailsController : BaseController,
     }
 
     override fun startDownloadRange(position: Int) {
-        createActionModeIfNeeded()
+        if (actionMode == null) createActionModeIfNeeded()
         onItemClick(null, position)
     }
 
@@ -743,8 +738,11 @@ open class MangaDetailsController : BaseController,
 
     override fun downloadChapter(position: Int) {
         val view = view ?: return
-        val chapter = adapter?.getItem(position) ?: return
-        if (chapter.isHeader) return
+        val chapter = (adapter?.getItem(position) as? ChapterItem) ?: return
+        if (actionMode != null) {
+            onItemClick(null, position)
+            return
+        }
         if (chapter.status != Download.NOT_DOWNLOADED && chapter.status != Download.ERROR) {
             presenter.deleteChapters(listOf(chapter))
         }
@@ -970,19 +968,30 @@ open class MangaDetailsController : BaseController,
 
     override fun onDestroyActionMode(mode: ActionMode?) {
         actionMode = null
-        setStatusBar()
+        setStatusBarAndToolbar()
         startingDLChapterPos = null
         adapter?.mode = SelectableAdapter.Mode.IDLE
         adapter?.clearSelection()
         return
     }
 
-    private fun setStatusBar() {
+    /**
+     * Called to set the last used catalogue at the top of the view.
+     */
+    private fun addMangaHeader() {
+        adapter?.removeAllScrollableHeaders()
+        adapter?.addScrollableHeader(presenter.headerItem)
+    }
+
+    private fun setStatusBarAndToolbar() {
         activity?.window?.statusBarColor = if (toolbarIsColored) {
             val translucentColor = ColorUtils.setAlphaComponent(coverColor ?: Color.TRANSPARENT, 175)
             (activity as MainActivity).toolbar.setBackgroundColor(translucentColor)
             translucentColor
         } else Color.TRANSPARENT
+            (activity as MainActivity).appbar.setBackgroundColor(Color.TRANSPARENT)
+            (activity as MainActivity).toolbar.setBackgroundColor(activity?.window?.statusBarColor
+                ?: Color.TRANSPARENT)
     }
 
     override fun onPrepareActionMode(mode: ActionMode?, menu: Menu?): Boolean {

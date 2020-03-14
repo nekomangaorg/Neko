@@ -18,7 +18,7 @@
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/download_text"
-            style="@style/TextAppearance.Regular.Caption.Light"
+            style="@style/TextAppearance.MaterialComponents.Caption"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@color/pale_red"
@@ -48,7 +48,7 @@
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/unread_text"
-            style="@style/TextAppearance.Regular.Caption.Light"
+            style="@style/TextAppearance.MaterialComponents.Caption"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@color/colorAccent"

@@ -1,0 +1,44 @@
+package eu.kanade.tachiyomi.ui.manga
+
+import android.view.View
+import androidx.recyclerview.widget.RecyclerView
+import eu.davidea.flexibleadapter.FlexibleAdapter
+import eu.davidea.flexibleadapter.items.AbstractFlexibleItem
+import eu.davidea.flexibleadapter.items.IFlexible
+import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.ui.manga.chapter.ChaptersAdapter
+
+class MangaHeaderItem(val manga: Manga, private val startExpanded: Boolean):
+    AbstractFlexibleItem<MangaHeaderHolder>(){
+
+    var isLocked = false
+
+    override fun getLayoutRes(): Int {
+        return R.layout.manga_header_item
+    }
+
+    override fun isSelectable(): Boolean {
+        return false
+    }
+
+    override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): MangaHeaderHolder {
+        return MangaHeaderHolder(view, adapter as ChaptersAdapter, startExpanded)
+    }
+
+    override fun bindViewHolder(adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
+        holder: MangaHeaderHolder,
+        position: Int,
+        payloads: MutableList<Any?>?) {
+        holder.bind(this, manga)
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return (this === other)
+    }
+
+    override fun hashCode(): Int {
+        return manga.id!!.hashCode()
+    }
+
+}

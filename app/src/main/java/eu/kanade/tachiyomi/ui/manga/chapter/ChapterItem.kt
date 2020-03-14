@@ -10,11 +10,9 @@ import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.model.Page
-import eu.kanade.tachiyomi.ui.manga.MangaChapterHolder
-import eu.kanade.tachiyomi.ui.manga.MangaHeaderHolder
 
 class ChapterItem(val chapter: Chapter, val manga: Manga) :
-    AbstractFlexibleItem<MangaChapterHolder>(),
+    AbstractFlexibleItem<ChapterMatHolder>(),
     Chapter by chapter {
 
     private var _status: Int = 0
@@ -36,22 +34,19 @@ class ChapterItem(val chapter: Chapter, val manga: Manga) :
         get() = status == Download.DOWNLOADED
 
     override fun getLayoutRes(): Int {
-        return if (chapter.isHeader) R.layout.manga_header_item
-        else R.layout.chapters_mat_item
+        return R.layout.chapters_mat_item
     }
 
     override fun isSelectable(): Boolean {
-        return !chapter.isHeader
+        return true
     }
 
-    override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): MangaChapterHolder {
-        return if (chapter.isHeader) MangaHeaderHolder(view, adapter as ChaptersAdapter,
-            startExpanded = chapter.read)
-        else ChapterMatHolder(view, adapter as ChaptersAdapter)
+    override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): ChapterMatHolder {
+        return ChapterMatHolder(view, adapter as ChaptersAdapter)
     }
 
     override fun bindViewHolder(adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
-                                holder: MangaChapterHolder,
+                                holder: ChapterMatHolder,
                                 position: Int,
                                 payloads: MutableList<Any?>?) {
         holder.bind(this, manga)

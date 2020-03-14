@@ -246,6 +246,9 @@ class LibraryHeaderItem(private val categoryF: (Int) -> Category, val catId: Int
             checkboxImage.setImageDrawable(tintedDrawable)
         }
 
-
+        override fun onLongClick(view: View?): Boolean {
+            super.onLongClick(view)
+            return false
+        }
     }
 }

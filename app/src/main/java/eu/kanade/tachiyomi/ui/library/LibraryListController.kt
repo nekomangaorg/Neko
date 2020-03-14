@@ -24,6 +24,7 @@ import com.afollestad.materialdialogs.checkbox.checkBoxPrompt
 import com.afollestad.materialdialogs.checkbox.isCheckPromptChecked
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.SelectableAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
@@ -113,13 +114,7 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
     private var scrollListener = object : RecyclerView.OnScrollListener () {
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
             super.onScrolled(recyclerView, dx, dy)
-            val position =
-                (recycler.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
-            val order = when (val item = adapter.getItem(position)) {
-                is LibraryHeaderItem -> item.category.order
-                is LibraryItem -> presenter.categories.find { it.id == item.manga.category }?.order
-                else -> null
-            }
+            val order = getCategoryOrder()
             if (order != null && order != activeCategory) {
                 preferences.lastUsedCategory().set(order)
                 activeCategory = order
@@ -163,13 +158,9 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
         if (startPosX == null) {
             startPosX = event.rawX
             startPosY = event.rawY
-            val position =
-                (recycler.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
-            val order = when (val item = adapter.getItem(position)) {
-                is LibraryHeaderItem -> item.category.order
-                is LibraryItem -> presenter.categories.find { it.id == item.manga.category }?.order
-                else -> null
-            }
+            val position = (recycler.layoutManager as LinearLayoutManager)
+                .findFirstVisibleItemPosition()
+            val order = getCategoryOrder()
             if (order != null) {
                 ogCategory = order
                 var newOffsetN = order + 1
@@ -253,6 +244,26 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
                 }
             }
         }
+    }
+
+    private fun getCategoryOrder(): Int? {
+        val position =
+            (recycler.layoutManager as LinearLayoutManager).findFirstCompletelyVisibleItemPosition()
+        var order = when (val item = adapter.getItem(position)) {
+            is LibraryHeaderItem -> item.category.order
+            is LibraryItem -> presenter.categories.find { it.id == item.manga.category }?.order
+            else -> null
+        }
+        if (order == null) {
+            val fPosition =
+                (recycler.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+            order = when (val item = adapter.getItem(fPosition)) {
+                is LibraryHeaderItem -> item.category.order
+                is LibraryItem -> presenter.categories.find { it.id == item.manga.category }?.order
+                else -> null
+            }
+        }
+        return order
     }
 
     private fun resetScrollingValues() {
@@ -448,13 +459,11 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
                 headerPosition, (if (headerPosition == 0) 0 else (-28).dpToPx)
                     + appbarOffset
             )
-            val isCurrentController = router?.backstack?.lastOrNull()?.controller() ==
-                this
 
             val headerItem = adapter.getItem(headerPosition) as? LibraryHeaderItem
             if (headerItem != null) {
                 customTitleSpinner.category_title.text = headerItem.category.name
-                if (isCurrentController) setTitle()
+                setTitle()
             }
             recycler.suppressLayout(false)
         }
@@ -590,6 +599,7 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
      */
     override fun onItemLongClick(position: Int) {
         if (recyclerIsScrolling()) return
+        if (adapter.getItem(position) is LibraryHeaderItem) return
         createActionModeIfNeeded()
         when {
             lastClickPosition == -1 -> setSelection(position)
@@ -778,8 +788,10 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
     override fun onSwipeTop(x: Float, y: Float) {
         val sheetRect = Rect()
         activity!!.navigationView.getGlobalVisibleRect(sheetRect)
-        if (sheetRect.contains(x.toInt(), y.toInt()))
-            showFiltersBottomSheet()
+        if (sheetRect.contains(x.toInt(), y.toInt())) {
+            if (bottom_sheet.sheetBehavior?.state != BottomSheetBehavior.STATE_EXPANDED)
+                toggleFilters()
+        }
     }
     override fun onSwipeLeft(x: Float, y: Float) = goToNextCategory(x)
     override fun onSwipeRight(x: Float, y: Float) = goToNextCategory(x)

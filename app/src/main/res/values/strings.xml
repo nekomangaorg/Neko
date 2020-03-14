@@ -551,8 +551,8 @@
     <string name="manga_download">Download</string>
     <string name="custom_download">Download custom amount</string>
     <string name="download_1">Next chapter</string>
-    <string name="download_first">First unread chapter</string>
-    <string name="download_5">Next 5 chapters</string>
+    <string name="download_first">Next unread chapter</string>
+    <string name="download_5">Next 5 unread</string>
     <string name="download_10">Next 10 chapters</string>
     <string name="download_custom">Custom range</string>
     <string name="download_all">All chapters</string>

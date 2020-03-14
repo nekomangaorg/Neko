@@ -24,19 +24,10 @@ interface Chapter : SChapter, Serializable {
     val isRecognizedNumber: Boolean
         get() = chapter_number >= 0f
 
-    val isHeader: Boolean
-        get() = id == Long.MIN_VALUE
-
     companion object {
 
         fun create(): Chapter = ChapterImpl().apply {
             chapter_number = -1f
-        }
-
-        fun createHeader(isExpanded: Boolean): Chapter = ChapterImpl().apply {
-            id = Long.MIN_VALUE
-            read = isExpanded
-            manga_id = null
         }
     }
 }

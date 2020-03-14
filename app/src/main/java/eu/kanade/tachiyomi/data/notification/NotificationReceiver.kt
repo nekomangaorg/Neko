@@ -395,7 +395,7 @@ class NotificationReceiver : BroadcastReceiver() {
         }
 
         /**
-         * Returns [PendingIntent] that opens the manga info controller.
+         * Returns [PendingIntent] that opens the manga details controller.
          *
          * @param context context of application
          * @param manga manga of chapter
@@ -404,7 +404,7 @@ class NotificationReceiver : BroadcastReceiver() {
             PendingIntent {
             val newIntent =
                 Intent(context, MainActivity::class.java).setAction(MainActivity.SHORTCUT_MANGA)
-                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
                     .putExtra(MangaDetailsController.MANGA_EXTRA, manga.id)
                     .putExtra("notificationId", manga.id.hashCode())
                     .putExtra("groupId", groupId)
@@ -422,7 +422,7 @@ class NotificationReceiver : BroadcastReceiver() {
         internal fun openExtensionsPendingActivity(context: Context): PendingIntent {
             val newIntent =
                 Intent(context, MainActivity::class.java).setAction(MainActivity.SHORTCUT_EXTENSIONS)
-                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
             return PendingIntent.getActivity(
                 context, 0, newIntent, PendingIntent.FLAG_UPDATE_CURRENT
             )

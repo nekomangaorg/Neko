@@ -69,7 +69,7 @@ class MangaDetailsPresenter(private val controller: MangaDetailsController,
     var chapters:List<ChapterItem> = emptyList()
         private set
 
-    var headerItem = ChapterItem(Chapter.createHeader(controller.fromCatalogue), manga)
+    var headerItem = MangaHeaderItem(manga, controller.fromCatalogue)
 
     fun onCreate() {
         isLockedFromSearch = SecureActivityDelegate.shouldBeLocked()

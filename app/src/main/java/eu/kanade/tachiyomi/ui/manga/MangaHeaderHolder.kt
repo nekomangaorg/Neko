@@ -16,7 +16,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
+import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.ui.manga.chapter.ChaptersAdapter
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.gone
@@ -30,7 +30,7 @@ class MangaHeaderHolder(
     private val view: View,
     private val adapter: ChaptersAdapter,
     startExpanded: Boolean
-) : MangaChapterHolder(view, adapter) {
+) : BaseFlexibleViewHolder(view, adapter)  {
 
     init {
         start_reading_button.setOnClickListener { adapter.coverListener.readNextChapter() }
@@ -84,8 +84,8 @@ class MangaHeaderHolder(
     }
 
     @SuppressLint("SetTextI18n")
-    override fun bind(item: ChapterItem, manga: Manga) {
-        val presenter = adapter.coverListener?.mangaPresenter() ?: return
+    fun bind(item: MangaHeaderItem, manga: Manga) {
+        val presenter = adapter.coverListener.mangaPresenter()
         manga_full_title.text = manga.currentTitle()
 
         if (manga.currentGenres().isNullOrBlank().not())

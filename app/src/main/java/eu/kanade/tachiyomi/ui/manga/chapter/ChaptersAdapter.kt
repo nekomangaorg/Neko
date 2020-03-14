@@ -4,22 +4,21 @@ import android.content.Context
 import android.view.View
 import androidx.fragment.app.FragmentActivity
 import eu.davidea.flexibleadapter.FlexibleAdapter
+import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsPresenter
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import uy.kohesive.injekt.injectLazy
-import java.text.DateFormat
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 
 class ChaptersAdapter(
         val controller: MangaDetailsController,
         context: Context
-) : FlexibleAdapter<ChapterItem>(null, controller, true) {
+) : FlexibleAdapter<IFlexible<*>>(null, controller, true) {
 
     val preferences: PreferencesHelper by injectLazy()
 
@@ -36,9 +35,7 @@ class ChaptersAdapter(
     val decimalFormat = DecimalFormat("#.###", DecimalFormatSymbols()
             .apply { decimalSeparator = '.' })
 
-    val dateFormat: DateFormat = preferences.dateFormat().getOrDefault()
-
-    override fun updateDataSet(items: List<ChapterItem>?) {
+    fun setChapters(items: List<ChapterItem>?) {
         this.items = items ?: emptyList()
         super.updateDataSet(items)
     }

@@ -60,11 +60,9 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
     private val filterItems:MutableList<FilterTagGroup> by lazy {
         val list = mutableListOf<FilterTagGroup>()
-        list.add(downloaded)
         list.add(unread)
+        list.add(downloaded)
         list.add(completed)
-        //if (Injekt.get<DatabaseHelper>().getCategories().executeAsBlocking().isNotEmpty())
-          //  list.add(categories)
         if (Injekt.get<TrackManager>().hasLoggedServices())
             list.add(tracked)
         list
@@ -261,6 +259,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                         if (tracked.isActivated) {
                             filter_layout.addView(trackers)
                             filterItems.add(trackers!!)
+                            trackers?.setState(FILTER_TRACKER)
+                            reSortViews()
                         }
                     }
                 }
@@ -293,6 +293,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         else if (preferences.filterTracked().getOrDefault() != 1 &&
             trackers?.parent != null) {
             filter_layout.removeView(trackers)
+            trackers?.reset()
+            FILTER_TRACKER = ""
             filterItems.remove(trackers!!)
         }
         val hasFilters = hasActiveFilters()

@@ -156,6 +156,5 @@
                 tools:text="Sample artist" />
         </LinearLayout>
 
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 </FrameLayout>

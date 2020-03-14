@@ -21,8 +21,10 @@ class CenteredToolbar@JvmOverloads constructor(context: Context, attrs: Attribut
         else {
             toolbar_title.text = context.getString(resId)
             post {
-                toolbar_title.text = context.getString(resId)
-                requestLayout()
+                if (navigationIcon !is DrawerArrowDrawable) {
+                    toolbar_title.text = context.getString(resId)
+                    requestLayout()
+                }
             }
             super.setTitle(null)
         }
@@ -31,13 +33,15 @@ class CenteredToolbar@JvmOverloads constructor(context: Context, attrs: Attribut
     override fun setTitle(title: CharSequence?) {
         if (navigationIcon is DrawerArrowDrawable) {
             super.setTitle(title)
-            toolbar_title.text = null
+            toolbar_title.text = ""
         }
         else {
             toolbar_title.text = title
             post {
-                toolbar_title.text = title
-                requestLayout()
+                if (navigationIcon !is DrawerArrowDrawable) {
+                    toolbar_title.text = title
+                    requestLayout()
+                }
             }
             super.setTitle(null)
         }

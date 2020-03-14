@@ -30,7 +30,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
                 android:clipToPadding="false"
-                android:paddingStart="20dp"
+                android:paddingStart="10dp"
                 android:paddingTop="8dp"
                 android:paddingEnd="20dp"
                 android:paddingBottom="6dp"
@@ -63,7 +63,7 @@
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="23dp"
+                android:layout_marginStart="10dp"
                 android:orientation="horizontal">
 
                 <com.google.android.material.checkbox.MaterialCheckBox

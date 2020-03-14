@@ -36,7 +36,6 @@ import com.google.android.material.snackbar.Snackbar
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.Migrations
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.download.DownloadServiceListener
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
@@ -58,6 +57,7 @@ import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.recent_updates.RecentChaptersController
 import eu.kanade.tachiyomi.ui.recently_read.RecentlyReadController
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
+import eu.kanade.tachiyomi.ui.setting.SettingsController
 import eu.kanade.tachiyomi.ui.setting.SettingsMainController
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
@@ -71,8 +71,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 import java.util.Date
 import java.util.concurrent.TimeUnit
@@ -169,27 +167,27 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                     //R.id.nav_settings -> setRoot(SettingsMainController(), id)
                 }
             }
-            else if (currentRoot.tag()?.toIntOrNull() == id)  {
-                when (id) {
-                    R.id.nav_recents -> {
-                        if (router.backstack.size > 1) router.popToRoot()
-                        else {
+            else if (currentRoot.tag()?.toIntOrNull() == id) {
+                if (router.backstackSize == 1) {
+                    when (id) {
+                        R.id.nav_recents -> {
                             val showRecents = preferences.showRecentUpdates().getOrDefault()
                             if (!showRecents) setRoot(RecentChaptersController(), id)
                             else setRoot(RecentlyReadController(), id)
                             preferences.showRecentUpdates().set(!showRecents)
                             updateRecentsIcon()
                         }
-                    }
-                    R.id.nav_library -> {
-                        if (router.backstack.size > 1) router.popToRoot()
-                        else {
-                            val controller = router.getControllerWithTag(id.toString()) as?
-                                LibraryController
-                            controller?.showFiltersBottomSheet()
+                        R.id.nav_library -> {
+                            val controller =
+                                router.getControllerWithTag(id.toString()) as? LibraryController
+                            controller?.toggleFilters()
+                        }
+                        R.id.nav_catalogues -> {
+                            val controller =
+                                router.getControllerWithTag(id.toString()) as? CatalogueController
+                            controller?.toggleExtensions()
                         }
                     }
-                    R.id.nav_catalogues -> router.popToRoot()
                 }
             }
             true
@@ -314,9 +312,6 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             }
         }
 
-        toolbar.navigationIcon = if (router.backstackSize > 1) drawerArrow else searchDrawable
-        (router.backstack.lastOrNull()?.controller() as? BaseController)?.setTitle()
-
         toolbar.setNavigationOnClickListener {
             val rootSearchController = router.backstack.lastOrNull()?.controller()
             if (rootSearchController is RootSearchInterface) {
@@ -343,6 +338,10 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         })
 
         syncActivityViewWithController(router.backstack.lastOrNull()?.controller())
+
+        toolbar.navigationIcon = if (router.backstackSize > 1) drawerArrow else searchDrawable
+        (router.backstack.lastOrNull()?.controller() as? BaseController)?.setTitle()
+        (router.backstack.lastOrNull()?.controller() as? SettingsController)?.setTitle()
 
         if (savedInstanceState == null) {
             // Show changelog if needed
