@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.data.related
+package eu.kanade.tachiyomi.data.similar
 
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import eu.kanade.tachiyomi.network.NetworkHelper
@@ -11,9 +11,9 @@ import retrofit2.http.GET
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-interface RelatedHttpService {
+interface SimilarHttpService {
     companion object {
-        fun create(): RelatedHttpService {
+        fun create(): SimilarHttpService {
             val contentType = "application/json".toMediaType()
             val restAdapter = Retrofit.Builder()
                 .baseUrl("https://github.com")
@@ -21,10 +21,10 @@ interface RelatedHttpService {
                 .client(Injekt.get<NetworkHelper>().client)
                 .build()
 
-            return restAdapter.create(RelatedHttpService::class.java)
+            return restAdapter.create(SimilarHttpService::class.java)
         }
     }
 
     @GET("/goldbattle/MangadexRecomendations/releases/download/v1.0.0/mangas_compressed.json")
-    fun getRelatedResults(): Call<JsonObject>
+    fun getSimilarResults(): Call<JsonObject>
 }

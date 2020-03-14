@@ -25,7 +25,7 @@ import eu.kanade.tachiyomi.ui.base.controller.TabbedController
 import eu.kanade.tachiyomi.ui.base.controller.requestPermissionsSafe
 import eu.kanade.tachiyomi.ui.manga.chapter.ChaptersController
 import eu.kanade.tachiyomi.ui.manga.info.MangaInfoController
-import eu.kanade.tachiyomi.ui.manga.related.RelatedController
+import eu.kanade.tachiyomi.ui.manga.similar.SimilarController
 import eu.kanade.tachiyomi.ui.manga.track.TrackController
 import eu.kanade.tachiyomi.util.toast
 import java.util.Date
@@ -133,13 +133,13 @@ class MangaController : RxController, TabbedController {
     private inner class MangaDetailAdapter : RouterPagerAdapter(this@MangaController) {
 
         private val tabCount = 2 +
-            (if (preferences.relatedShowTab()) 1 else 0) +
+            (if (preferences.similarShowTab()) 1 else 0) +
             (if (Injekt.get<TrackManager>().hasLoggedServices()) 1 else 0)
 
         private val tabTitles = listOf(
             R.string.manga_detail_tab,
             R.string.manga_chapters_tab,
-            if (preferences.relatedShowTab()) R.string.manga_similar_tab else R.string.manga_other_tab,
+            if (preferences.similarShowTab()) R.string.manga_similar_tab else R.string.manga_other_tab,
             R.string.manga_other_tab
         )
             .map { resources!!.getString(it) }
@@ -157,11 +157,11 @@ class MangaController : RxController, TabbedController {
                 } else if (position == CHAPTERS_CONTROLLER) {
                     router.setRoot(RouterTransaction.with(ChaptersController()))
                     return
-                } else if (position == TAB_3 && preferences.relatedShowTab()) {
+                } else if (position == TAB_3 && preferences.similarShowTab()) {
                     // For the 3rd tab display the related if enabled, else show the tracked
-                    router.setRoot(RouterTransaction.with(RelatedController(manga!!, source!!)))
+                    router.setRoot(RouterTransaction.with(SimilarController(manga!!, source!!)))
                 } else if (position == TAB_3 &&
-                    !preferences.relatedShowTab() &&
+                    !preferences.similarShowTab() &&
                     Injekt.get<TrackManager>().hasLoggedServices()
                 ) {
                     router.setRoot(RouterTransaction.with(TrackController()))

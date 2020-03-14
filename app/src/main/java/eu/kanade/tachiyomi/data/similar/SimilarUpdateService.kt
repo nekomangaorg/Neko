@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.data.related
+package eu.kanade.tachiyomi.data.similar
 
 import android.app.Service
 import android.content.Context
@@ -9,7 +9,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
-import eu.kanade.tachiyomi.data.database.models.MangaRelatedImpl
+import eu.kanade.tachiyomi.data.database.models.MangaSimilarImpl
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.util.customize
@@ -29,7 +29,7 @@ import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class RelatedUpdateService(
+class SimilarUpdateService(
     val db: DatabaseHelper = Injekt.get()
 ) : Service() {
 
@@ -38,7 +38,7 @@ class RelatedUpdateService(
      */
     private lateinit var wakeLock: PowerManager.WakeLock
 
-    var relatedServiceScope = CoroutineScope(Dispatchers.IO + Job())
+    var similarServiceScope = CoroutineScope(Dispatchers.IO + Job())
 
     /**
      * Subscription where the update is done.
@@ -49,14 +49,14 @@ class RelatedUpdateService(
      * Pending intent of action that cancels the library update
      */
     private val cancelIntent by lazy {
-        NotificationReceiver.cancelRelatedUpdatePendingBroadcast(this)
+        NotificationReceiver.cancelSimilarUpdatePendingBroadcast(this)
     }
 
     private val progressNotification by lazy {
-        NotificationCompat.Builder(this, Notifications.CHANNEL_RELATED)
+        NotificationCompat.Builder(this, Notifications.CHANNEL_SIMILAR)
             .customize(
                 this,
-                getString(R.string.pref_related_loading_progress_start),
+                getString(R.string.pref_similar_loading_progress_start),
                 R.drawable.ic_neko_notification,
                 true
             )
@@ -70,9 +70,9 @@ class RelatedUpdateService(
      */
     override fun onCreate() {
         super.onCreate()
-        startForeground(Notifications.ID_RELATED_PROGRESS, progressNotification.build())
+        startForeground(Notifications.ID_SIMILAR_PROGRESS, progressNotification.build())
         wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).newWakeLock(
-            PowerManager.PARTIAL_WAKE_LOCK, "RelatedUpdateService:WakeLock"
+            PowerManager.PARTIAL_WAKE_LOCK, "SimilarUpdateService:WakeLock"
         )
         wakeLock.acquire(TimeUnit.MINUTES.toMillis(30))
     }
@@ -83,7 +83,7 @@ class RelatedUpdateService(
      */
     override fun onDestroy() {
         job?.cancel()
-        relatedServiceScope.cancel()
+        similarServiceScope.cancel()
         if (wakeLock.isHeld) {
             wakeLock.release()
         }
@@ -114,8 +114,8 @@ class RelatedUpdateService(
             showResultNotification(true)
             cancelProgressNotification()
         }
-        job = relatedServiceScope.launch(handler) {
-            updateRelated()
+        job = similarServiceScope.launch(handler) {
+            updateSimilar()
         }
         job?.invokeOnCompletion { stopSelf(startId) }
 
@@ -123,22 +123,22 @@ class RelatedUpdateService(
     }
 
     /**
-     * Method that updates the related database for manga
+     * Method that updates the similar database for manga
      */
-    private suspend fun updateRelated() = withContext(Dispatchers.IO) {
+    private suspend fun updateSimilar() = withContext(Dispatchers.IO) {
         val jsonString =
-            RelatedHttpService.create().getRelatedResults().execute().body().toString()
-        val relatedPageResult = JSONObject(jsonString)
-        val totalManga = relatedPageResult.length()
+            SimilarHttpService.create().getSimilarResults().execute().body().toString()
+        val similarPageResult = JSONObject(jsonString)
+        val totalManga = similarPageResult.length()
 
-        // Delete the old related table
-        db.deleteAllRelated().executeAsBlocking()
+        // Delete the old similar table
+        db.deleteAllSimilar().executeAsBlocking()
 
         // Loop through each and insert into the database
         var counter: Int = 0
         val batchMultiple = 1000
-        val dataToInsert = mutableListOf<MangaRelatedImpl>()
-        for (key in relatedPageResult.keys()) {
+        val dataToInsert = mutableListOf<MangaSimilarImpl>()
+        for (key in similarPageResult.keys()) {
 
             // Check if the service is currently running
             if (!this.isActive) {
@@ -147,20 +147,20 @@ class RelatedUpdateService(
 
             // Get our two arrays of ids and titles
             val matchedIds =
-                relatedPageResult.getJSONObject(key).getJSONArray("m_ids")
+                similarPageResult.getJSONObject(key).getJSONArray("m_ids")
             val matchedTitles =
-                relatedPageResult.getJSONObject(key).getJSONArray("m_titles")
+                similarPageResult.getJSONObject(key).getJSONArray("m_titles")
             if (matchedIds.length() != matchedTitles.length()) {
                 continue
             }
 
             // create the implementation and insert
-            val related = MangaRelatedImpl()
-            related.id = counter.toLong()
-            related.manga_id = key.toLong()
-            related.matched_ids = matchedIds.toString()
-            related.matched_titles = matchedTitles.toString()
-            dataToInsert.add(related)
+            val similar = MangaSimilarImpl()
+            similar.id = counter.toLong()
+            similar.manga_id = key.toLong()
+            similar.matched_ids = matchedIds.toString()
+            similar.matched_titles = matchedTitles.toString()
+            dataToInsert.add(similar)
 
             // display to the user
             counter++
@@ -168,14 +168,14 @@ class RelatedUpdateService(
 
             // Every batch of manga, insert into the database
             if (counter % batchMultiple == 0) {
-                db.insertManyRelated(dataToInsert).executeAsBlocking()
+                db.insertSimilar(dataToInsert).executeAsBlocking()
                 dataToInsert.clear()
             }
         }
 
         // Insert the last bit in the case we are not divisable by 1000
         if (dataToInsert.isNotEmpty()) {
-            db.insertManyRelated(dataToInsert).executeAsBlocking()
+            db.insertSimilar(dataToInsert).executeAsBlocking()
             dataToInsert.clear()
         }
         cancelProgressNotification()
@@ -191,10 +191,10 @@ class RelatedUpdateService(
      */
     private fun showProgressNotification(current: Int, total: Int) {
         notificationManager.notify(
-            Notifications.ID_RELATED_PROGRESS, progressNotification
+            Notifications.ID_SIMILAR_PROGRESS, progressNotification
                 .setContentTitle(
                     getString(
-                        R.string.pref_related_loading_percent,
+                        R.string.pref_similar_loading_percent,
                         current,
                         total
                     )
@@ -212,25 +212,25 @@ class RelatedUpdateService(
     private fun showResultNotification(error: Boolean = false) {
 
         val title = if (error) {
-            getString(R.string.pref_related_loading_complete_error)
+            getString(R.string.pref_similar_loading_complete_error)
         } else {
             getString(
-                R.string.pref_related_loading_complete
+                R.string.pref_similar_loading_complete
             )
         }
 
-        val result = NotificationCompat.Builder(this, Notifications.CHANNEL_RELATED)
+        val result = NotificationCompat.Builder(this, Notifications.CHANNEL_SIMILAR)
             .customize(this, title, R.drawable.ic_neko_notification)
             .setAutoCancel(true)
         NotificationManagerCompat.from(this)
-            .notify(Notifications.ID_RELATED_COMPLETE, result.build())
+            .notify(Notifications.ID_SIMILAR_COMPLETE, result.build())
     }
 
     /**
      * Cancels the progress notification.
      */
     private fun cancelProgressNotification() {
-        notificationManager.cancel(Notifications.ID_RELATED_PROGRESS)
+        notificationManager.cancel(Notifications.ID_SIMILAR_PROGRESS)
     }
 
     companion object {
@@ -242,7 +242,7 @@ class RelatedUpdateService(
          * @return true if the service is running, false otherwise.
          */
         fun isRunning(context: Context): Boolean {
-            return context.isServiceRunning(RelatedUpdateService::class.java)
+            return context.isServiceRunning(SimilarUpdateService::class.java)
         }
 
         /**
@@ -255,7 +255,7 @@ class RelatedUpdateService(
          */
         fun start(context: Context) {
             if (!isRunning(context)) {
-                val intent = Intent(context, RelatedUpdateService::class.java)
+                val intent = Intent(context, SimilarUpdateService::class.java)
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
                     context.startService(intent)
                 } else {
@@ -270,7 +270,7 @@ class RelatedUpdateService(
          * @param context the application context.
          */
         fun stop(context: Context) {
-            context.stopService(Intent(context, RelatedUpdateService::class.java))
+            context.stopService(Intent(context, SimilarUpdateService::class.java))
         }
     }
 }

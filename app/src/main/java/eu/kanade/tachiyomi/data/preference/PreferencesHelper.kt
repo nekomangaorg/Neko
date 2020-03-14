@@ -29,8 +29,6 @@ class PreferencesHelper(val context: Context) {
         )
     )
 
-    private val defaultRelatedLastUpdated = "Unknown"
-
     private val defaultBackupDir = Uri.fromFile(
         File(
             Environment.getExternalStorageDirectory().absolutePath + File.separator +
@@ -151,9 +149,9 @@ class PreferencesHelper(val context: Context) {
 
     fun downloadOnlyOverWifi() = prefs.getBoolean(Keys.downloadOnlyOverWifi, true)
 
-    fun relatedShowTab() = prefs.getBoolean(Keys.relatedShowTab, false)
+    fun similarShowTab() = prefs.getBoolean(Keys.similarShowTab, false)
 
-    fun relatedUpdateRestriction() = prefs.getStringSet(Keys.relatedUpdateRestriction, emptySet())
+    fun similarUpdateRestriction() = prefs.getStringSet(Keys.similarUpdateRestriction, emptySet())
 
     fun numberOfBackups() = rxPrefs.getInteger(Keys.numberOfBackups, 1)
 

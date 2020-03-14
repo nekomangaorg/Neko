@@ -19,7 +19,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
-import eu.kanade.tachiyomi.data.related.RelatedUpdateService
+import eu.kanade.tachiyomi.data.similar.SimilarUpdateService
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
@@ -71,7 +71,7 @@ class NotificationReceiver : BroadcastReceiver() {
             )
             // Cancel library update and dismiss notification
             ACTION_CANCEL_LIBRARY_UPDATE -> cancelLibraryUpdate(context)
-            ACTION_CANCEL_RELATED_UPDATE -> cancelRelatedUpdate(context)
+            ACTION_CANCEL_SIMILAR_UPDATE -> cancelSimilarUpdate(context)
             ACTION_CANCEL_RESTORE -> cancelRestoreUpdate(context)
             // Open reader activity
             ACTION_OPEN_CHAPTER -> {
@@ -164,14 +164,14 @@ class NotificationReceiver : BroadcastReceiver() {
     }
 
     /**
-     * Method called when user wants to stop a related manga update
+     * Method called when user wants to stop a similar manga update
      *
      * @param context context of application
      * @param notificationId id of notification
      */
-    private fun cancelRelatedUpdate(context: Context) {
-        RelatedUpdateService.stop(context)
-        Handler().post { dismissNotification(context, Notifications.ID_RELATED_PROGRESS) }
+    private fun cancelSimilarUpdate(context: Context) {
+        SimilarUpdateService.stop(context)
+        Handler().post { dismissNotification(context, Notifications.ID_SIMILAR_PROGRESS) }
     }
 
     /**
@@ -198,7 +198,7 @@ class NotificationReceiver : BroadcastReceiver() {
         private const val ACTION_CANCEL_LIBRARY_UPDATE = "$ID.$NAME.CANCEL_LIBRARY_UPDATE"
 
         // Called to cancel library update.
-        private const val ACTION_CANCEL_RELATED_UPDATE = "$ID.$NAME.CANCEL_RELATED_UPDATE"
+        private const val ACTION_CANCEL_SIMILAR_UPDATE = "$ID.$NAME.CANCEL_SIMILAR_UPDATE"
 
         // Called to cancel library update.
         private const val ACTION_CANCEL_RESTORE = "$ID.$NAME.CANCEL_RESTORE"
@@ -447,14 +447,14 @@ class NotificationReceiver : BroadcastReceiver() {
         }
 
         /**
-         * Returns [PendingIntent] that starts a service which stops the related update
+         * Returns [PendingIntent] that starts a service which stops the similar update
          *
          * @param context context of application
          * @return [PendingIntent]
          */
-        internal fun cancelRelatedUpdatePendingBroadcast(context: Context): PendingIntent {
+        internal fun cancelSimilarUpdatePendingBroadcast(context: Context): PendingIntent {
             val intent = Intent(context, NotificationReceiver::class.java).apply {
-                action = ACTION_CANCEL_RELATED_UPDATE
+                action = ACTION_CANCEL_SIMILAR_UPDATE
             }
             return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
         }

@@ -50,9 +50,9 @@ object Notifications {
     /**
      * Notification channel and ids used for backup and restore.
      */
-    const val CHANNEL_RELATED = "related_channel"
-    const val ID_RELATED_PROGRESS = -501
-    const val ID_RELATED_COMPLETE = -502
+    const val CHANNEL_SIMILAR = "similar_channel"
+    const val ID_SIMILAR_PROGRESS = -501
+    const val ID_SIMILAR_COMPLETE = -502
 
     /**
      * Creates the notification channels introduced in Android Oreo.
@@ -95,8 +95,8 @@ object Notifications {
                 setShowBadge(false)
             },
             NotificationChannel(
-                CHANNEL_RELATED,
-                context.getString(R.string.channel_manga_related),
+                CHANNEL_SIMILAR,
+                context.getString(R.string.channel_manga_similar),
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
                 setShowBadge(false)

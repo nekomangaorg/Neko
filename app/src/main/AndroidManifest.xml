@@ -104,7 +104,7 @@
             android:exported="false" />
 
         <service
-            android:name=".data.related.RelatedUpdateService"
+            android:name=".data.similar.SimilarUpdateService"
             android:exported="false" />
 
     </application>

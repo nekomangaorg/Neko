@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.data.related
+package eu.kanade.tachiyomi.data.similar
 
 import com.evernote.android.job.Job
 import com.evernote.android.job.JobManager
@@ -8,10 +8,10 @@ import java.util.concurrent.TimeUnit
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class RelatedUpdateJob : Job() {
+class SimilarUpdateJob : Job() {
 
     override fun onRunJob(params: Params): Result {
-        RelatedUpdateService.start(context)
+        SimilarUpdateService.start(context)
         return Result.SUCCESS
     }
 
@@ -22,7 +22,7 @@ class RelatedUpdateJob : Job() {
 
             // Get if we should have any download restrictions
             val preferences = Injekt.get<PreferencesHelper>()
-            val restrictions = preferences.relatedUpdateRestriction()!!
+            val restrictions = preferences.similarUpdateRestriction()!!
             val acRestriction = "ac" in restrictions
             val wifiRestriction = if ("wifi" in restrictions)
                 JobRequest.NetworkType.UNMETERED

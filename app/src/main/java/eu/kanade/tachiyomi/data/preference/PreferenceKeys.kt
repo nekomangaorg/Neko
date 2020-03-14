@@ -73,9 +73,9 @@ object PreferenceKeys {
 
     const val downloadOnlyOverWifi = "pref_download_only_over_wifi_key"
 
-    const val relatedShowTab = "pref_related_show_tab_key"
+    const val similarShowTab = "pref_related_show_tab_key"
 
-    const val relatedUpdateRestriction = "related_update_restriction"
+    const val similarUpdateRestriction = "related_update_restriction"
 
     const val numberOfBackups = "backup_slots"
 

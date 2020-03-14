@@ -8,21 +8,21 @@ import eu.kanade.tachiyomi.data.database.mappers.ChapterTypeMapping
 import eu.kanade.tachiyomi.data.database.mappers.HistoryTypeMapping
 import eu.kanade.tachiyomi.data.database.mappers.MangaCategoryTypeMapping
 import eu.kanade.tachiyomi.data.database.mappers.MangaTypeMapping
-import eu.kanade.tachiyomi.data.database.mappers.RelatedTypeMapping
+import eu.kanade.tachiyomi.data.database.mappers.SimilarTypeMapping
 import eu.kanade.tachiyomi.data.database.mappers.TrackTypeMapping
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
-import eu.kanade.tachiyomi.data.database.models.MangaRelated
+import eu.kanade.tachiyomi.data.database.models.MangaSimilar
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.database.queries.CategoryQueries
 import eu.kanade.tachiyomi.data.database.queries.ChapterQueries
 import eu.kanade.tachiyomi.data.database.queries.HistoryQueries
 import eu.kanade.tachiyomi.data.database.queries.MangaCategoryQueries
 import eu.kanade.tachiyomi.data.database.queries.MangaQueries
-import eu.kanade.tachiyomi.data.database.queries.RelatedQueries
+import eu.kanade.tachiyomi.data.database.queries.SimilarQueries
 import eu.kanade.tachiyomi.data.database.queries.TrackQueries
 import io.requery.android.database.sqlite.RequerySQLiteOpenHelperFactory
 
@@ -31,7 +31,7 @@ import io.requery.android.database.sqlite.RequerySQLiteOpenHelperFactory
  */
 open class DatabaseHelper(context: Context) :
     MangaQueries, ChapterQueries, TrackQueries, CategoryQueries,
-    MangaCategoryQueries, HistoryQueries, RelatedQueries {
+    MangaCategoryQueries, HistoryQueries, SimilarQueries {
 
     private val configuration = SupportSQLiteOpenHelper.Configuration.builder(context)
         .name(DbOpenCallback.DATABASE_NAME)
@@ -46,7 +46,7 @@ open class DatabaseHelper(context: Context) :
         .addTypeMapping(Category::class.java, CategoryTypeMapping())
         .addTypeMapping(MangaCategory::class.java, MangaCategoryTypeMapping())
         .addTypeMapping(History::class.java, HistoryTypeMapping())
-        .addTypeMapping(MangaRelated::class.java, RelatedTypeMapping())
+        .addTypeMapping(MangaSimilar::class.java, SimilarTypeMapping())
         .build()
 
     inline fun inTransaction(block: () -> Unit) = db.inTransaction(block)

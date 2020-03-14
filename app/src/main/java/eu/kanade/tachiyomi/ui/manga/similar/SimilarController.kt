@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.manga.related
+package eu.kanade.tachiyomi.ui.manga.similar
 
 import android.os.Bundle
 import android.view.Menu
@@ -13,7 +13,7 @@ import eu.kanade.tachiyomi.ui.catalogue.browse.BrowseCataloguePresenter
 /**
  * Controller that shows the latest manga from the catalogue. Inherit [BrowseCatalogueController].
  */
-class RelatedController(bundle: Bundle) : BrowseCatalogueController(bundle) {
+class SimilarController(bundle: Bundle) : BrowseCatalogueController(bundle) {
 
     var manga: Manga? = null
         private set
@@ -25,7 +25,7 @@ class RelatedController(bundle: Bundle) : BrowseCatalogueController(bundle) {
     }
 
     override fun createPresenter(): BrowseCataloguePresenter {
-        return RelatedPresenter(this.manga!!, args.getLong(SOURCE_ID_KEY))
+        return SimilarPresenter(this.manga!!, args.getLong(SOURCE_ID_KEY))
     }
 
     override fun onPrepareOptionsMenu(menu: Menu) {

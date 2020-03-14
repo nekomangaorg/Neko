@@ -5,42 +5,42 @@ import android.net.Uri
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
-import eu.kanade.tachiyomi.data.related.RelatedUpdateJob
+import eu.kanade.tachiyomi.data.similar.SimilarUpdateJob
 
-class SettingsRelatedController : SettingsController() {
+class SettingsSimilarController : SettingsController() {
 
     override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
-        titleRes = R.string.pref_category_related
+        titleRes = R.string.pref_category_similar
 
         preference {
-            titleRes = R.string.pref_related_info_tab
-            summary = context.resources.getString(R.string.pref_related_summary_message)
+            titleRes = R.string.pref_similar_info_tab
+            summary = context.resources.getString(R.string.pref_similar_summary_message)
             isIconSpaceReserved = true
         }
 
         switchPreference {
-            key = Keys.relatedShowTab
-            titleRes = R.string.pref_related_show_tab
+            key = Keys.similarShowTab
+            titleRes = R.string.pref_similar_show_tab
             defaultValue = false
             onClick {
                 if (isChecked) {
-                    RelatedUpdateJob.setupTask()
-                    RelatedUpdateJob.runTaskNow()
+                    SimilarUpdateJob.setupTask()
+                    SimilarUpdateJob.runTaskNow()
                 } else {
-                    RelatedUpdateJob.cancelTask()
+                    SimilarUpdateJob.cancelTask()
                 }
             }
         }
 
         multiSelectListPreferenceMat(activity) {
-            key = Keys.relatedUpdateRestriction
-            titleRes = R.string.pref_related_update_restriction
+            key = Keys.similarUpdateRestriction
+            titleRes = R.string.pref_similar_update_restriction
             entriesRes = arrayOf(R.string.wifi, R.string.charging)
             entryValues = listOf("wifi", "ac")
-            customSummaryRes = R.string.pref_related_update_restriction_summary
+            customSummaryRes = R.string.pref_similar_update_restriction_summary
             onChange {
-                RelatedUpdateJob.cancelTask()
-                RelatedUpdateJob.setupTask()
+                SimilarUpdateJob.cancelTask()
+                SimilarUpdateJob.setupTask()
                 true
             }
         }
@@ -48,7 +48,7 @@ class SettingsRelatedController : SettingsController() {
         preference {
             title = "Credits"
             val url = "https://github.com/goldbattle/MangadexRecomendations"
-            summary = context.resources.getString(R.string.pref_related_credit_message, url)
+            summary = context.resources.getString(R.string.pref_similar_credit_message, url)
             onClick {
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
                 startActivity(intent)

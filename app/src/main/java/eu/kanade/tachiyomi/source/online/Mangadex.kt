@@ -16,8 +16,8 @@ import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
 import eu.kanade.tachiyomi.source.online.handlers.MangaHandler
 import eu.kanade.tachiyomi.source.online.handlers.PageHandler
 import eu.kanade.tachiyomi.source.online.handlers.PopularHandler
-import eu.kanade.tachiyomi.source.online.handlers.RelatedHandler
 import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
+import eu.kanade.tachiyomi.source.online.handlers.SimilarHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import java.net.URLEncoder
 import kotlin.collections.set
@@ -166,8 +166,8 @@ open class Mangadex(
         return FollowsHandler(clientBuilder(), headers).fetchTrackingInfo(manga)
     }
 
-    override fun fetchMangaRelatedObservable(page: Int, manga: Manga): Observable<MangasPage> {
-        return RelatedHandler().fetchRelated(manga)
+    override fun fetchMangaSimilarObservable(page: Int, manga: Manga): Observable<MangasPage> {
+        return SimilarHandler().fetchSimilar(manga)
     }
 
     override fun isLogged(): Boolean {
@@ -191,12 +191,12 @@ open class Mangadex(
         }
 
         return clientBuilder().newCall(
-            POST(
-                "$baseUrl/ajax/actions.ajax.php?function=login",
-                headers,
-                formBody.build()
+                POST(
+                    "$baseUrl/ajax/actions.ajax.php?function=login",
+                    headers,
+                    formBody.build()
+                )
             )
-        )
             .asObservable()
             .map { it.body!!.string().isEmpty() }
     }

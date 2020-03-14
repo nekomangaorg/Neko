@@ -1,6 +1,6 @@
 package eu.kanade.tachiyomi.data.database.models
 
-class MangaRelatedImpl : MangaRelated {
+class MangaSimilarImpl : MangaSimilar {
 
     override var id: Long? = null
 
@@ -14,7 +14,7 @@ class MangaRelatedImpl : MangaRelated {
         if (this === other) return true
         if (other == null || javaClass != other.javaClass) return false
 
-        other as MangaRelated
+        other as MangaSimilar
 
         if (id != other.id) return false
         if (manga_id != other.manga_id) return false

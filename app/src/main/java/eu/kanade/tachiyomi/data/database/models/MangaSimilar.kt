@@ -5,10 +5,10 @@ import java.io.Serializable
 /**
  * Object containing the history statistics of a chapter
  */
-interface MangaRelated : Serializable {
+interface MangaSimilar : Serializable {
 
     /**
-     * Id of this related manga object.
+     * Id of this similar manga object.
      */
     var id: Long?
 

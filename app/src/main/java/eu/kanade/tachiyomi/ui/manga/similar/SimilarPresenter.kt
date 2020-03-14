@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.manga.related
+package eu.kanade.tachiyomi.ui.manga.similar
 
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.model.FilterList
@@ -6,9 +6,9 @@ import eu.kanade.tachiyomi.ui.catalogue.browse.BrowseCataloguePresenter
 import eu.kanade.tachiyomi.ui.catalogue.browse.Pager
 
 /**
- * Presenter of [RelatedController]. Inherit BrowseCataloguePresenter.
+ * Presenter of [SimilarController]. Inherit BrowseCataloguePresenter.
  */
-class RelatedPresenter(sourceId: Long) : BrowseCataloguePresenter(sourceId) {
+class SimilarPresenter(sourceId: Long) : BrowseCataloguePresenter(sourceId) {
 
     var manga: Manga? = null
         private set
@@ -18,6 +18,6 @@ class RelatedPresenter(sourceId: Long) : BrowseCataloguePresenter(sourceId) {
     }
 
     override fun createPager(query: String, filters: FilterList): Pager {
-        return RelatedPager(this.manga!!, source)
+        return SimilarPager(this.manga!!, source)
     }
 }

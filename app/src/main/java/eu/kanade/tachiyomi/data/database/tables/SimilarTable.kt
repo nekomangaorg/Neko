@@ -1,6 +1,6 @@
 package eu.kanade.tachiyomi.data.database.tables
 
-object RelatedTable {
+object SimilarTable {
 
     const val TABLE = "manga_related"
 
@@ -8,19 +8,19 @@ object RelatedTable {
 
     const val COL_MANGA_ID = "manga_id"
 
-    const val COL_MANGA_RELATED_MATCHED_IDS = "matched_ids"
+    const val COL_MANGA_SIMILAR_MATCHED_IDS = "matched_ids"
 
-    const val COL_MANGA_RELATED_MATCHED_TITLES = "matched_titles"
+    const val COL_MANGA_SIMILAR_MATCHED_TITLES = "matched_titles"
 
     val createTableQuery: String
         get() = """CREATE TABLE $TABLE(
             $COL_ID INTEGER NOT NULL PRIMARY KEY,
             $COL_MANGA_ID INTEGER NOT NULL,
-            $COL_MANGA_RELATED_MATCHED_IDS TEXT NOT NULL,
-            $COL_MANGA_RELATED_MATCHED_TITLES TEXT NOT NULL,
+            $COL_MANGA_SIMILAR_MATCHED_IDS TEXT NOT NULL,
+            $COL_MANGA_SIMILAR_MATCHED_TITLES TEXT NOT NULL,
             UNIQUE ($COL_ID) ON CONFLICT REPLACE
             )"""
 
     val createMangaIdIndexQuery: String
-        get() = "CREATE INDEX ${TABLE}_${COL_MANGA_RELATED_MATCHED_IDS}_index ON $TABLE($COL_MANGA_RELATED_MATCHED_IDS)"
+        get() = "CREATE INDEX ${TABLE}_${COL_MANGA_SIMILAR_MATCHED_IDS}_index ON $TABLE($COL_MANGA_SIMILAR_MATCHED_IDS)"
 }
