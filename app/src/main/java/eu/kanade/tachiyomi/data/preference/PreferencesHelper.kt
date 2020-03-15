@@ -92,8 +92,6 @@ class PreferencesHelper(val context: Context) {
 
     fun marginRatioWebtoon() = rxPrefs.getInteger(Keys.marginRatioWebtoon, 0)
 
-    fun marginBetweenPagesWebtoon() = rxPrefs.getBoolean(Keys.marginBetweenPagesWebtoon, false)
-
     fun readWithTapping() = rxPrefs.getBoolean(Keys.readWithTapping, true)
 
     fun readWithLongTap() = rxPrefs.getBoolean(Keys.readWithLongTap, true)

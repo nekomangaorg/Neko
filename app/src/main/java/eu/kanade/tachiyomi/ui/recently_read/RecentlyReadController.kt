@@ -24,12 +24,12 @@ import kotlinx.android.synthetic.main.recently_read_controller.*
  * UI related actions should be called from here.
  */
 class RecentlyReadController : NucleusController<RecentlyReadPresenter>(),
-        FlexibleAdapter.OnUpdateListener,
-        FlexibleAdapter.EndlessScrollListener,
-        RecentlyReadAdapter.OnRemoveClickListener,
-        RecentlyReadAdapter.OnResumeClickListener,
-        RecentlyReadAdapter.OnCoverClickListener,
-        RemoveHistoryDialog.Listener {
+    FlexibleAdapter.OnUpdateListener,
+    FlexibleAdapter.EndlessScrollListener,
+    RecentlyReadAdapter.OnRemoveClickListener,
+    RecentlyReadAdapter.OnResumeClickListener,
+    RecentlyReadAdapter.OnCoverClickListener,
+    RemoveHistoryDialog.Listener {
 
     /**
      * Adapter containing the recent manga.
@@ -95,7 +95,10 @@ class RecentlyReadController : NucleusController<RecentlyReadPresenter>(),
         if (size > 0) {
             empty_view.hide()
         } else {
-            empty_view.show(CommunityMaterial.Icon.cmd_glasses, R.string.information_no_recent_manga)
+            empty_view.show(
+                CommunityMaterial.Icon.cmd_glasses,
+                R.string.information_no_recent_manga
+            )
         }
     }
 

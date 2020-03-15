@@ -223,6 +223,6 @@ tasks.lintKotlin {
     dependsOn(tasks.formatKotlin)
 }
 
-if (getGradle().getStartParameter().getTaskRequests().toString().contains("Standard")) {
+if (gradle.startParameter.taskRequests.toString().contains("Standard")) {
     apply(mapOf("plugin" to "com.google.gms.google-services"))
 }

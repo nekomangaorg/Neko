@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
+import eu.kanade.tachiyomi.data.database.models.isWebtoon
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
@@ -439,7 +440,10 @@ class ReaderPresenter(
      * Returns the viewer position used by this manga or the default one.
      */
     fun getMangaViewer(): Int {
-        val manga = manga ?: return preferences.defaultViewer()
+        val manga = manga!!
+        if (manga.isWebtoon()) {
+            return ReaderActivity.WEBTOON_WITHOUT_MARGIN
+        }
         return if (manga.viewer == 0) preferences.defaultViewer() else manga.viewer
     }
 

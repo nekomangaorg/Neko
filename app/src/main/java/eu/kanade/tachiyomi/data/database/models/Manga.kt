@@ -91,3 +91,5 @@ interface Manga : SManga {
         }
     }
 }
+
+fun Manga.isWebtoon() = this.genre?.contains("long strip", true) ?: false

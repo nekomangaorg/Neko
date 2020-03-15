@@ -303,7 +303,11 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
 
     fun openChapter(chapter: Chapter, hasAnimation: Boolean = false) {
         val activity = activity ?: return
-        val intent = ReaderActivity.newIntent(activity, presenter.manga, chapter)
+        val intent = ReaderActivity.newIntent(
+            activity,
+            presenter.manga,
+            chapter
+        )
         if (hasAnimation) {
             intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
         }

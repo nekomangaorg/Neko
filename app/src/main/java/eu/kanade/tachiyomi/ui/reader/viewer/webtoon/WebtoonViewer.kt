@@ -20,7 +20,7 @@ import timber.log.Timber
 /**
  * Implementation of a [BaseViewer] to display pages with a [RecyclerView].
  */
-class WebtoonViewer(val activity: ReaderActivity) : BaseViewer {
+class WebtoonViewer(val activity: ReaderActivity, val showMargins: Boolean = false) : BaseViewer {
 
     /**
      * Recycler view used by this viewer.
@@ -118,6 +118,7 @@ class WebtoonViewer(val activity: ReaderActivity) : BaseViewer {
         config.imagePropertyChangedListener = {
             refreshAdapter()
         }
+        config.marginBetweenPagesWebtoon = showMargins
 
         frame.layoutParams = ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT)
         frame.addView(recycler)

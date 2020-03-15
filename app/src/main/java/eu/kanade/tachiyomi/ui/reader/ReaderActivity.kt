@@ -117,8 +117,13 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         const val RIGHT_TO_LEFT = 2
         const val VERTICAL = 3
         const val WEBTOON = 4
+        const val WEBTOON_WITHOUT_MARGIN = 5
 
-        fun newIntent(context: Context, manga: Manga, chapter: Chapter): Intent {
+        fun newIntent(
+            context: Context,
+            manga: Manga,
+            chapter: Chapter
+        ): Intent {
             val intent = Intent(context, ReaderActivity::class.java)
             intent.putExtra("manga", manga.id)
             intent.putExtra("chapter", chapter.id)
@@ -357,7 +362,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         val newViewer = when (presenter.getMangaViewer()) {
             RIGHT_TO_LEFT -> R2LPagerViewer(this)
             VERTICAL -> VerticalPagerViewer(this)
-            WEBTOON -> WebtoonViewer(this)
+            WEBTOON -> WebtoonViewer(this, true)
+            WEBTOON_WITHOUT_MARGIN -> WebtoonViewer(this)
             else -> L2RPagerViewer(this)
         }
 
@@ -515,7 +521,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         ) {
             if (!MainActivity.unlocked && (preferences.lockAfter().getOrDefault() <= 0 || Date()
                     .time >=
-                    preferences.lastUnlock().getOrDefault() + 60 * 1000 * preferences.lockAfter().getOrDefault())
+                    preferences.lastUnlock().getOrDefault() + 60 * 1000 * preferences.lockAfter()
+                    .getOrDefault())
             ) {
                 val intent = Intent(this, BiometricActivity::class.java)
                 startActivity(intent)

@@ -83,8 +83,10 @@ class ReaderSettingsSheet(private val activity: ReaderActivity) : BottomSheetDia
     private fun initWebtoonPreferences() {
         webtoon_prefs_group.visible()
         crop_borders_webtoon.bindToPreference(preferences.cropBordersWebtoon())
-        margin_between_webtoon.bindToPreference(preferences.marginBetweenPagesWebtoon())
-        margin_ratio_webtoon.bindToIntPreference(preferences.marginRatioWebtoon(), R.array.webtoon_margin_ratio_values)
+        margin_ratio_webtoon.bindToIntPreference(
+            preferences.marginRatioWebtoon(),
+            R.array.webtoon_margin_ratio_values
+        )
     }
 
     /**
@@ -110,7 +112,10 @@ class ReaderSettingsSheet(private val activity: ReaderActivity) : BottomSheetDia
      * correlate with the [Int value] resource item (in arrays.xml), which is a <string-array>
      * of float values that will be parsed here and applied to the preference.
      */
-    private fun Spinner.bindToIntPreference(pref: Preference<Int>, @ArrayRes intValuesResource: Int) {
+    private fun Spinner.bindToIntPreference(
+        pref: Preference<Int>,
+        @ArrayRes intValuesResource: Int
+    ) {
         val intValues = resources.getStringArray(intValuesResource).map { it.toInt() }
         onItemSelectedListener = IgnoreFirstSpinnerListener { position ->
             pref.set(intValues[position])

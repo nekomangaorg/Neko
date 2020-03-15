@@ -126,9 +126,10 @@ class NotificationReceiver : BroadcastReceiver() {
         val chapter = db.getChapter(chapterId).executeAsBlocking()
         context.sendBroadcast(Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS))
         if (manga != null && chapter != null) {
-            val intent = ReaderActivity.newIntent(context, manga, chapter).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-            }
+            val intent =
+                ReaderActivity.newIntent(context, manga, chapter).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                }
             context.startActivity(intent)
         } else {
             context.toast(context.getString(R.string.no_next_chapter))
