@@ -54,11 +54,7 @@ class MangaDetailsPresenter(private val controller: MangaDetailsController,
     DownloadQueue.DownloadListener,
     LibraryServiceListener   {
 
-<<<<<<< Updated upstream
     private var scope = CoroutineScope(Job() + Dispatchers.Default)
-=======
-    var scope = CoroutineScope(Job() + Dispatchers.Default)
->>>>>>> Stashed changes
 
     var isLockedFromSearch = false
     var hasRequested = false
@@ -715,17 +711,15 @@ class MangaDetailsPresenter(private val controller: MangaDetailsController,
 
     fun trackSearch(query: String, service: TrackService) {
         scope.launch(Dispatchers.IO) {
-<<<<<<< Updated upstream
-            val results = try {service.search(query) }
-=======
-            val results = try {service.search(query).toBlocking().single() }
->>>>>>> Stashed changes
-            catch (e: Exception) {
+            val results = try {
+                service.search(query)
+            } catch (e: Exception) {
                 withContext(Dispatchers.Main) { controller.trackSearchError(e) }
-                null }
-             if (!results.isNullOrEmpty()) {
-                 withContext(Dispatchers.Main) { controller.onTrackSearchResults(results) }
-             }
+                null
+            }
+            if (!results.isNullOrEmpty()) {
+                withContext(Dispatchers.Main) { controller.onTrackSearchResults(results) }
+            }
         }
     }
 
@@ -734,11 +728,7 @@ class MangaDetailsPresenter(private val controller: MangaDetailsController,
             item.manga_id = manga.id!!
 
             scope.launch {
-<<<<<<< Updated upstream
                 val binding =  try { service.bind(item) }
-=======
-                val binding =  try { service.bind(item).toBlocking().single() }
->>>>>>> Stashed changes
                 catch (e: Exception) {
                     trackError(e)
                     null
@@ -758,11 +748,7 @@ class MangaDetailsPresenter(private val controller: MangaDetailsController,
 
     private fun updateRemote(track: Track, service: TrackService) {
         scope.launch {
-<<<<<<< Updated upstream
             val binding = try { service.update(track) }
-=======
-            val binding = try { service.update(track).toBlocking().single() }
->>>>>>> Stashed changes
             catch (e: Exception) {
                 trackError(e)
                 null

@@ -95,6 +95,7 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) : Bott
 
     fun onSearchResultsError(error: Throwable) {
         Timber.e(error)
+        activity.toast(error.message)
         getSearchDialog()?.onSearchResultsError()
     }
 

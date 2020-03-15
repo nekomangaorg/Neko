@@ -1,8 +1,6 @@
 package eu.kanade.tachiyomi.data.updater
 
-import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.data.updater.github.GithubUpdateChecker
-import rx.Observable
 
 abstract class UpdateChecker {
 
@@ -11,8 +9,8 @@ abstract class UpdateChecker {
     }
 
     /**
-     * Returns observable containing release information
+     * Returns suspended result containing release information
      */
-    abstract fun checkForUpdate(): Observable<UpdateResult>
+    abstract suspend fun checkForUpdate(): UpdateResult
 
 }

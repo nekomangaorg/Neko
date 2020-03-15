@@ -88,7 +88,7 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
             val netResponse = authClient.newCall(request).execute()
             val response = responseToJson(netResponse)
 
-            val media = response["data"]!!.obj["Page"].obj["mediaList"].array
+            val media = response["data"]!!.obj["Page"].obj["media"].array
             val entries = media.map { jsonToALManga(it.obj) }
             entries.map { it.toTrack() }
         }
