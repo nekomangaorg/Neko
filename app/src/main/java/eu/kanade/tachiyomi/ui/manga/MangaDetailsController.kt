@@ -163,8 +163,7 @@ class MangaDetailsController : BaseController,
      */
     private var actionMode: ActionMode? = null
 
-    // Hold a reference to the current animator,
-    // so that it can be canceled mid-way.
+    // Hold a reference to the current animator, so that it can be canceled mid-way.
     private var currentAnimator: Animator? = null
 
     var headerHeight = 0
@@ -206,7 +205,7 @@ class MangaDetailsController : BaseController,
             (recycler.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder)
                 ?.setTopHeight(headerHeight)
             fast_scroller?.updateLayoutParams<ViewGroup.MarginLayoutParams>  {
-                topMargin = appbarHeight + insets.systemWindowInsetTop
+                topMargin = headerHeight
                 bottomMargin = insets.systemWindowInsetBottom
             }
             v.updatePaddingRelative(bottom = insets.systemWindowInsetBottom)
@@ -254,16 +253,12 @@ class MangaDetailsController : BaseController,
         setPaletteColor()
 
         if (manga?.initialized != true)
-            swipe_refresh.post {
-                swipe_refresh.isRefreshing = true
-            }
+            swipe_refresh.post { swipe_refresh.isRefreshing = true }
 
-        swipe_refresh.setOnRefreshListener {
-            presenter.refreshAll()
-        }
+        swipe_refresh.setOnRefreshListener { presenter.refreshAll() }
     }
 
-    private fun setPaletteColor() {
+    fun setPaletteColor() {
         val view = view ?: return
         GlideApp.with(view.context).load(manga)
             .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
@@ -454,7 +449,6 @@ class MangaDetailsController : BaseController,
     }
 
     private fun bookmarkChapters(chapters: List<ChapterItem>, bookmarked: Boolean) {
-        //destroyActionModeIfNeeded()
         presenter.bookmarkChapters(chapters, bookmarked)
     }
 
@@ -469,12 +463,9 @@ class MangaDetailsController : BaseController,
         presenter.markChaptersRead(chapters, false)
     }
 
-    private fun openChapter(chapter: Chapter, hasAnimation: Boolean = false) {
+    private fun openChapter(chapter: Chapter) {
         val activity = activity ?: return
         val intent = ReaderActivity.newIntent(activity, manga!!, chapter)
-        if (hasAnimation) {
-            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
-        }
         startActivity(intent)
     }
 
@@ -1134,7 +1125,6 @@ class MangaDetailsController : BaseController,
     }
 
     companion object {
-
         const val UPDATE_EXTRA = "update"
         const val SMART_SEARCH_CONFIG_EXTRA = "smartSearchConfig"
 

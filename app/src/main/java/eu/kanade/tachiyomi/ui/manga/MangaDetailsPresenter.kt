@@ -34,6 +34,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.Injekt
@@ -42,7 +43,6 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
 import java.util.Date
-import kotlin.coroutines.CoroutineContext
 
 class MangaDetailsPresenter(private val controller: MangaDetailsController,
     val manga: Manga,
@@ -51,11 +51,10 @@ class MangaDetailsPresenter(private val controller: MangaDetailsController,
     private val coverCache: CoverCache = Injekt.get(),
     private val db: DatabaseHelper = Injekt.get(),
     private val downloadManager: DownloadManager = Injekt.get()):
-    CoroutineScope,
     DownloadQueue.DownloadListener,
     LibraryServiceListener   {
 
-    override var coroutineContext:CoroutineContext = Job() + Dispatchers.Default
+    private var scope = CoroutineScope(Job() + Dispatchers.Default)
 
     var isLockedFromSearch = false
     var hasRequested = false
@@ -93,10 +92,11 @@ class MangaDetailsPresenter(private val controller: MangaDetailsController,
     fun onDestroy() {
         downloadManager.removeListener(this)
         LibraryUpdateService.removeListener(this)
+        scope.cancel()
     }
 
     fun fetchChapters() {
-        launch {
+        scope.launch {
             getChapters()
             refreshTracking()
             withContext(Dispatchers.Main) { controller.updateChapters(chapters) }
@@ -142,7 +142,7 @@ class MangaDetailsPresenter(private val controller: MangaDetailsController,
 
     override fun updateDownload(download: Download) {
         chapters.find { it.id == download.chapter.id }?.download = download
-        launch(Dispatchers.Main) {
+        scope.launch(Dispatchers.Main) {
             controller.updateChapterDownload(download)
         }
     }
@@ -318,7 +318,7 @@ class MangaDetailsPresenter(private val controller: MangaDetailsController,
     }
 
     fun refreshAll() {
-        launch {
+        scope.launch {
             isLoading = true
             var mangaError: java.lang.Exception? = null
             var chapterError: java.lang.Exception? = null
@@ -346,8 +346,10 @@ class MangaDetailsPresenter(private val controller: MangaDetailsController,
                 manga.copyFrom(networkManga)
                 manga.initialized = true
                 db.insertManga(manga).executeAsBlocking()
-                if (thumbnailUrl != networkManga.thumbnail_url)
+                if (thumbnailUrl != networkManga.thumbnail_url) {
                     MangaImpl.setLastCoverFetch(manga.id!!, Date().time)
+                    withContext(Dispatchers.Main) { controller.setPaletteColor() }
+                }
             }
             val finChapters = chapters.await()
             if (finChapters.isNotEmpty()) {
@@ -369,7 +371,7 @@ class MangaDetailsPresenter(private val controller: MangaDetailsController,
         hasRequested = true
         isLoading = true
 
-        launch(Dispatchers.IO) {
+        scope.launch(Dispatchers.IO) {
             val chapters = try {
                 source.fetchChapterList(manga).toBlocking().single()
             }
@@ -401,7 +403,7 @@ class MangaDetailsPresenter(private val controller: MangaDetailsController,
      * @param selectedChapters the list of chapters to bookmark.
      */
     fun bookmarkChapters(selectedChapters: List<ChapterItem>, bookmarked: Boolean) {
-        launch(Dispatchers.IO) {
+        scope.launch(Dispatchers.IO) {
             selectedChapters.forEach {
                 it.bookmark = bookmarked
             }
@@ -416,7 +418,7 @@ class MangaDetailsPresenter(private val controller: MangaDetailsController,
      * @param read whether to mark chapters as read or unread.
      */
     fun markChaptersRead(selectedChapters: List<ChapterItem>, read: Boolean) {
-        launch(Dispatchers.IO) {
+        scope.launch(Dispatchers.IO) {
             selectedChapters.forEach {
                 it.read = read
                 if (!read) {
@@ -460,7 +462,7 @@ class MangaDetailsPresenter(private val controller: MangaDetailsController,
     }
 
     private fun asyncUpdateMangaAndChapters(justChapters:Boolean = false) {
-        launch {
+        scope.launch {
             if (!justChapters)
                 withContext(Dispatchers.IO) { db.updateFlags(manga).executeAsBlocking() }
             updateChapters()
@@ -550,7 +552,7 @@ class MangaDetailsPresenter(private val controller: MangaDetailsController,
 
         val destDir = File(context.cacheDir, "shared_image")
 
-        launch(Dispatchers.IO) {
+        scope.launch(Dispatchers.IO) {
             destDir.deleteRecursively()
             try {
                 val image = saveImage(cover, destDir, manga)
@@ -669,9 +671,8 @@ class MangaDetailsPresenter(private val controller: MangaDetailsController,
 
 
     // Tracking
-
     private fun fetchTrackings() {
-        launch {
+        scope.launch {
             trackList = loggedServices.map { service ->
                 TrackItem(tracks.find { it.sync_id == service.id }, service)
             }
@@ -687,7 +688,7 @@ class MangaDetailsPresenter(private val controller: MangaDetailsController,
     }
 
     fun refreshTrackers() {
-        launch {
+        scope.launch {
             val list = trackList.filter { it.track != null }.map { item ->
                 withContext(Dispatchers.IO) {
                     val trackItem = try {
@@ -709,7 +710,7 @@ class MangaDetailsPresenter(private val controller: MangaDetailsController,
     }
 
     fun trackSearch(query: String, service: TrackService) {
-        launch(Dispatchers.IO) {
+        scope.launch(Dispatchers.IO) {
             val results = try {service.search(query) }
             catch (e: Exception) {
                 withContext(Dispatchers.Main) { controller.trackSearchError(e) }
@@ -724,7 +725,7 @@ class MangaDetailsPresenter(private val controller: MangaDetailsController,
         if (item != null) {
             item.manga_id = manga.id!!
 
-            launch {
+            scope.launch {
                 val binding =  try { service.bind(item) }
                 catch (e: Exception) {
                     trackError(e)
@@ -735,7 +736,7 @@ class MangaDetailsPresenter(private val controller: MangaDetailsController,
                 refreshTracking()
             }
         } else {
-            launch {
+            scope.launch {
                 withContext(Dispatchers.IO) { db.deleteTrackForManga(manga, service)
                     .executeAsBlocking() }
                 refreshTracking()
@@ -744,7 +745,7 @@ class MangaDetailsPresenter(private val controller: MangaDetailsController,
     }
 
     private fun updateRemote(track: Track, service: TrackService) {
-        launch {
+        scope.launch {
             val binding = try { service.update(track) }
             catch (e: Exception) {
                 trackError(e)
@@ -758,12 +759,12 @@ class MangaDetailsPresenter(private val controller: MangaDetailsController,
         }
     }
 
-    private suspend fun trackRefreshDone() {
-        async(Dispatchers.Main) { controller.trackRefreshDone() }
+    private fun trackRefreshDone() {
+        scope.launch(Dispatchers.Main) { controller.trackRefreshDone() }
     }
 
-    private suspend fun trackError(error: Exception) {
-        async(Dispatchers.Main) { controller.trackRefreshError(error) }
+    private fun trackError(error: Exception) {
+        scope.launch(Dispatchers.Main) { controller.trackRefreshError(error) }
     }
 
     fun setStatus(item: TrackItem, index: Int) {

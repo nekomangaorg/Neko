@@ -48,16 +48,16 @@ class SettingsMainController : SettingsController() {
             onClick { navigateTo(SettingsDownloadController()) }
         }
         preference {
-            iconRes = R.drawable.ic_sync_black_24dp
-            iconTint = tintColor
-            titleRes = R.string.pref_category_tracking
-            onClick { navigateTo(SettingsTrackingController()) }
-        }
-        preference {
             iconRes = R.drawable.ic_swap_calls_white_24dp
             iconTint = tintColor
             titleRes = R.string.label_migration
             onClick { navigateTo(MigrationController()) }
+        }
+        preference {
+            iconRes = R.drawable.ic_sync_black_24dp
+            iconTint = tintColor
+            titleRes = R.string.pref_category_tracking
+            onClick { navigateTo(SettingsTrackingController()) }
         }
         preference {
             iconRes = R.drawable.ic_backup_black_24dp

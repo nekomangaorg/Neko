@@ -165,13 +165,13 @@ class MangaHeaderHolder(
                 else {
                     val name = nextChapter.name
                     resources.getString(
-                        if (nextChapter.last_page_read > 0) R.string.continue_reading_x
-                        else R.string.start_reading_x, name
+                        if (nextChapter.last_page_read > 0) R.string.continue_reading
+                        else R.string.start_reading
                     )
                 }
             }
             else {
-                text = resources.getString(R.string.all_caught_up)
+                text = resources.getString(R.string.start_reading)
             }
         }
 
@@ -237,7 +237,7 @@ class MangaHeaderHolder(
     }
 
     fun updateTracking() {
-        val presenter = adapter.coverListener?.mangaPresenter() ?: return
+        val presenter = adapter.coverListener.mangaPresenter() ?: return
         val tracked = presenter.isTracked()
         with(track_button) {
             text = itemView.context.getString(if (tracked) R.string.action_filter_tracked
