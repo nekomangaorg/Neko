@@ -66,6 +66,7 @@ class MdUtil {
                 .substringBefore("Portuguese (BR) / Portugu")
                 .substringBefore("Portuguese / Portugu")
                 .substringBefore("Turkish/ T&uuml")
+                .substringBefore("German/Deutsch:")
         }
 
         fun getImageUrl(attr: String): String {
