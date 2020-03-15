@@ -28,10 +28,6 @@ class Bangumi(private val context: Context, id: Int) : TrackService(id) {
         return track.score.toInt().toString()
     }
 
-    override suspend fun add(track: Track): Track {
-        return api.addLibManga(track)
-    }
-
     override suspend fun update(track: Track): Track {
         if (track.total_chapters != 0 && track.last_chapter_read == track.total_chapters) {
             track.status = COMPLETED
@@ -51,7 +47,7 @@ class Bangumi(private val context: Context, id: Int) : TrackService(id) {
         } else {
             track.score = DEFAULT_SCORE.toFloat()
             track.status = DEFAULT_STATUS
-            add(track)
+            api.addLibManga(track)
             update(track)
         }
         return track

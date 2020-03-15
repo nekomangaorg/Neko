@@ -8,27 +8,10 @@ import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
+import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 
 class Anilist(private val context: Context, id: Int) : TrackService(id) {
-
-    companion object {
-        const val READING = 1
-        const val COMPLETED = 2
-        const val PAUSED = 3
-        const val DROPPED = 4
-        const val PLANNING = 5
-        const val REPEATING = 6
-
-        const val DEFAULT_STATUS = READING
-        const val DEFAULT_SCORE = 0
-
-        const val POINT_100 = "POINT_100"
-        const val POINT_10 = "POINT_10"
-        const val POINT_10_DECIMAL = "POINT_10_DECIMAL"
-        const val POINT_5 = "POINT_5"
-        const val POINT_3 = "POINT_3"
-    }
 
     override val name = "AniList"
 
@@ -54,9 +37,7 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
 
     override fun getLogoColor() = Color.rgb(18, 25, 35)
 
-    override fun getStatusList(): List<Int> {
-        return listOf(READING, PLANNING, COMPLETED, REPEATING, PAUSED, DROPPED)
-    }
+    override fun getStatusList() = listOf(READING, PLANNING, COMPLETED, REPEATING, PAUSED, DROPPED)
 
     override fun getStatus(status: Int): String = with(context) {
         when (status) {
@@ -93,13 +74,13 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
             // 100 point
             POINT_100 -> index.toFloat()
             // 5 stars
-            POINT_5 -> when {
-                index == 0 -> 0f
+            POINT_5 -> when (index) {
+                0 -> 0f
                 else -> index * 20f - 10f
             }
             // Smiley
-            POINT_3 -> when {
-                index == 0 -> 0f
+            POINT_3 -> when (index) {
+                0 -> 0f
                 else -> index * 25f + 10f
             }
             // 10 point decimal
@@ -112,8 +93,8 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
         val score = track.score
 
         return when (scorePreference.getOrDefault()) {
-            POINT_5 -> when {
-                score == 0f -> "0 ★"
+            POINT_5 -> when (score) {
+                0f -> "0 ★"
                 else -> "${((score + 10) / 20).toInt()} ★"
             }
             POINT_3 -> when {
@@ -126,10 +107,6 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
         }
     }
 
-    override suspend fun add(track: Track): Track {
-        return api.addLibManga(track)
-    }
-
     override suspend fun update(track: Track): Track {
         if (track.total_chapters != 0 && track.last_chapter_read == track.total_chapters) {
             track.status = COMPLETED
@@ -137,34 +114,30 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
         // If user was using API v1 fetch library_id
         if (track.library_id == null || track.library_id!! == 0L) {
             val libManga = api.findLibManga(track, getUsername().toInt())
+                ?: throw Exception("$track not found on user library")
 
-            if (libManga == null) {
-                throw Exception("$track not found on user library")
-            }
             track.library_id = libManga.library_id
         }
 
-        return api.updateLibManga(track)
+        return api.updateLibraryManga(track)
     }
 
     override suspend fun bind(track: Track): Track {
         val remoteTrack = api.findLibManga(track, getUsername().toInt())
 
-        if (remoteTrack != null) {
+        return if (remoteTrack != null) {
             track.copyPersonalFrom(remoteTrack)
             track.library_id = remoteTrack.library_id
-            return update(track)
+            update(track)
         } else {
             // Set default fields if it's not found in the list
             track.score = DEFAULT_SCORE.toFloat()
             track.status = DEFAULT_STATUS
-            return add(track)
+            api.addLibManga(track)
         }
     }
 
-    override suspend fun search(query: String): List<TrackSearch> {
-        return api.search(query)
-    }
+    override suspend fun search(query: String) = api.search(query)
 
     override suspend fun refresh(track: Track): Track {
         val remoteTrack = api.getLibManga(track, getUsername().toInt())
@@ -180,15 +153,16 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
         val oauth = api.createOAuth(token)
         interceptor.setAuth(oauth)
 
-        try {
-            val currentUser = api.getCurrentUser()
-            scorePreference.set(currentUser.second)
-            saveCredentials(currentUser.first.toString(), oauth.access_token)
-            return true
-        } catch (e: Exception) {
-            logout()
-            return false
-        }
+         return try {
+             val currentUser = api.getCurrentUser()
+             scorePreference.set(currentUser.second)
+             saveCredentials(currentUser.first.toString(), oauth.access_token)
+             true
+         } catch (e: Exception) {
+             Timber.e(e)
+             logout()
+             false
+         }
     }
 
     override fun logout() {
@@ -205,8 +179,28 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
         return try {
             gson.fromJson(preferences.trackToken(this).get(), OAuth::class.java)
         } catch (e: Exception) {
+            Timber.e(e)
             null
         }
+    }
+
+
+    companion object {
+        const val READING = 1
+        const val COMPLETED = 2
+        const val PAUSED = 3
+        const val DROPPED = 4
+        const val PLANNING = 5
+        const val REPEATING = 6
+
+        const val DEFAULT_STATUS = READING
+        const val DEFAULT_SCORE = 0
+
+        const val POINT_100 = "POINT_100"
+        const val POINT_10 = "POINT_10"
+        const val POINT_10_DECIMAL = "POINT_10_DECIMAL"
+        const val POINT_5 = "POINT_5"
+        const val POINT_3 = "POINT_3"
     }
 
 }

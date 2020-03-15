@@ -7,12 +7,9 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.android.synthetic.main.pref_account_login.view.*
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import kotlin.coroutines.CoroutineContext
 
 class TrackLoginDialog(usernameLabel: String? = null, bundle: Bundle? = null) :
     LoginDialogPreference(usernameLabel, bundle) {
@@ -32,11 +29,7 @@ class TrackLoginDialog(usernameLabel: String? = null, bundle: Bundle? = null) :
         password.setText(service.getPassword())
     }
 
-    override val coroutineContext: CoroutineContext
-        get() = TODO("Not yet implemented")
-
     override fun checkLogin() {
-        requestSubscription?.unsubscribe()
 
         v?.apply {
             if (username.text.isEmpty() || password.text.isEmpty())
@@ -46,21 +39,27 @@ class TrackLoginDialog(usernameLabel: String? = null, bundle: Bundle? = null) :
             val user = username.text.toString()
             val pass = password.text.toString()
 
-            launch {
+            scope.launch {
                 try {
-                    withContext(Dispatchers.IO) {
-                        service.login(user, pass)
-                    }
-                    withContext(Dispatchers.Main) {
+                    val result = service.login(user, pass)
+                    if (result) {
                         dialog?.dismiss()
                         context.toast(R.string.login_success)
+                    } else {
+                        errorResult(this@apply)
                     }
                 } catch (error: Exception) {
-                    login.progress = -1
-                    login.setText(R.string.unknown_error)
+                    errorResult(this@apply)
                     error.message?.let { context.toast(it) }
                 }
             }
+        }
+    }
+
+    fun errorResult(view: View?) {
+        v?.apply {
+            login.progress = -1
+            login.setText(R.string.unknown_error)
         }
     }
 

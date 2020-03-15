@@ -13,23 +13,26 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.widget.SimpleTextWatcher
-import kotlinx.android.synthetic.main.pref_account_login.view.login
-import kotlinx.android.synthetic.main.pref_account_login.view.password
-import kotlinx.android.synthetic.main.pref_account_login.view.show_password
-import kotlinx.android.synthetic.main.pref_account_login.view.username_label
+import kotlinx.android.synthetic.main.pref_account_login.view.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import rx.Subscription
 import uy.kohesive.injekt.injectLazy
 
-abstract class LoginDialogPreference(private val usernameLabel: String? = null, bundle: Bundle? = null) :
-        DialogController(bundle), CoroutineScope {
+abstract class LoginDialogPreference(
+    private val usernameLabel: String? = null,
+    bundle: Bundle? = null
+) :
+    DialogController(bundle) {
 
     var v: View? = null
         private set
 
     val preferences: PreferencesHelper by injectLazy()
+
+    val scope = CoroutineScope(Job() + Dispatchers.Main)
 
     var requestSubscription: Subscription? = null
 
@@ -49,7 +52,7 @@ abstract class LoginDialogPreference(private val usernameLabel: String? = null, 
         return dialog
     }
 
-    open fun logout() { }
+    open fun logout() {}
 
     fun onViewCreated(view: View) {
         v = view.apply {
@@ -79,7 +82,6 @@ abstract class LoginDialogPreference(private val usernameLabel: String? = null, 
                 }
             })
         }
-
     }
 
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
@@ -90,11 +92,11 @@ abstract class LoginDialogPreference(private val usernameLabel: String? = null, 
     }
 
     open fun onDialogClosed() {
+        scope.cancel()
         requestSubscription?.unsubscribe()
     }
 
     protected abstract fun checkLogin()
 
     protected abstract fun setCredentialsOnView(view: View)
-
 }

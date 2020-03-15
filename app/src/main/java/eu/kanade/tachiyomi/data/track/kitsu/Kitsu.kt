@@ -69,10 +69,6 @@ class Kitsu(private val context: Context, id: Int) : TrackService(id) {
         return df.format(track.score)
     }
 
-    override suspend fun add(track: Track): Track {
-        return api.addLibManga(track, getUserId())
-    }
-
     override suspend fun update(track: Track): Track {
         if (track.total_chapters != 0 && track.last_chapter_read == track.total_chapters) {
             track.status = COMPLETED
@@ -90,7 +86,7 @@ class Kitsu(private val context: Context, id: Int) : TrackService(id) {
         } else {
             track.score = DEFAULT_SCORE
             track.status = DEFAULT_STATUS
-            return add(track)
+            return api.addLibManga(track, getUserId())
         }
     }
 

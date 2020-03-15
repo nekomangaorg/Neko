@@ -12,67 +12,6 @@ import uy.kohesive.injekt.injectLazy
 
 class Shikimori(private val context: Context, id: Int) : TrackService(id) {
 
-    override fun getScoreList(): List<String> {
-        return IntRange(0, 10).map(Int::toString)
-    }
-
-    override fun displayScore(track: Track): String {
-        return track.score.toInt().toString()
-    }
-
-    override suspend fun add(track: Track): Track {
-        return api.addLibManga(track, getUsername())
-    }
-
-    override suspend fun update(track: Track): Track {
-        if (track.total_chapters != 0 && track.last_chapter_read == track.total_chapters) {
-            track.status = COMPLETED
-        }
-        return api.updateLibManga(track, getUsername())
-    }
-
-    override suspend fun bind(track: Track): Track {
-        val remoteTrack = api.findLibManga(track, getUsername())
-
-        if (remoteTrack != null) {
-            track.copyPersonalFrom(remoteTrack)
-            track.library_id = remoteTrack.library_id
-            update(track)
-        } else {
-            // Set default fields if it's not found in the list
-            track.score = DEFAULT_SCORE.toFloat()
-            track.status = DEFAULT_STATUS
-            add(track)
-        }
-        return track
-    }
-
-    override suspend fun search(query: String): List<TrackSearch> {
-        return api.search(query)
-    }
-
-    override suspend fun refresh(track: Track): Track {
-        val remoteTrack = api.findLibManga(track, getUsername())
-
-        if (remoteTrack != null) {
-            track.copyPersonalFrom(remoteTrack)
-            track.total_chapters = remoteTrack.total_chapters
-        }
-        return track
-    }
-
-    companion object {
-        const val READING = 1
-        const val COMPLETED = 2
-        const val ON_HOLD = 3
-        const val DROPPED = 4
-        const val PLANNING = 5
-        const val REPEATING = 6
-
-        const val DEFAULT_STATUS = READING
-        const val DEFAULT_SCORE = 0
-    }
-
     override val name = "Shikimori"
 
     private val gson: Gson by injectLazy()
@@ -99,6 +38,49 @@ class Shikimori(private val context: Context, id: Int) : TrackService(id) {
             REPEATING -> getString(R.string.repeating)
             else -> ""
         }
+    }
+
+    override fun getScoreList(): List<String> {
+        return IntRange(0, 10).map(Int::toString)
+    }
+
+    override fun displayScore(track: Track): String {
+        return track.score.toInt().toString()
+    }
+
+    override suspend fun update(track: Track): Track {
+        if (track.total_chapters != 0 && track.last_chapter_read == track.total_chapters) {
+            track.status = COMPLETED
+        }
+        return api.updateLibManga(track, getUsername())
+    }
+
+    override suspend fun bind(track: Track): Track {
+        val remoteTrack = api.findLibManga(track, getUsername())
+
+        if (remoteTrack != null) {
+            track.copyPersonalFrom(remoteTrack)
+            track.library_id = remoteTrack.library_id
+            update(track)
+        } else {
+            // Set default fields if it's not found in the list
+            track.score = DEFAULT_SCORE.toFloat()
+            track.status = DEFAULT_STATUS
+            return api.addLibManga(track, getUsername())
+        }
+        return track
+    }
+
+    override suspend fun search(query: String) = api.search(query)
+
+    override suspend fun refresh(track: Track): Track {
+        val remoteTrack = api.findLibManga(track, getUsername())
+
+        if (remoteTrack != null) {
+            track.copyPersonalFrom(remoteTrack)
+            track.total_chapters = remoteTrack.total_chapters
+        }
+        return track
     }
 
     override suspend fun login(username: String, password: String) = login(password)
@@ -135,5 +117,17 @@ class Shikimori(private val context: Context, id: Int) : TrackService(id) {
         super.logout()
         preferences.trackToken(this).set(null)
         interceptor.newAuth(null)
+    }
+
+    companion object {
+        const val READING = 1
+        const val COMPLETED = 2
+        const val ON_HOLD = 3
+        const val DROPPED = 4
+        const val PLANNING = 5
+        const val REPEATING = 6
+
+        const val DEFAULT_STATUS = READING
+        const val DEFAULT_SCORE = 0
     }
 }

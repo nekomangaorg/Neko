@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.ui.main.MainActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import uy.kohesive.injekt.injectLazy
 
@@ -38,6 +39,11 @@ class AnilistLoginActivity : AppCompatActivity() {
             trackManager.aniList.logout()
             returnToSettings()
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        scope.cancel()
     }
 
     private fun returnToSettings() {

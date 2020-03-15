@@ -11,6 +11,8 @@ import eu.kanade.tachiyomi.network.consumeBody
 import eu.kanade.tachiyomi.network.consumeXmlBody
 import eu.kanade.tachiyomi.util.selectInt
 import eu.kanade.tachiyomi.util.selectText
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import okhttp3.FormBody
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
@@ -27,33 +29,39 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
     private val authClient = client.newBuilder().addInterceptor(interceptor).build()
 
     suspend fun search(query: String): List<TrackSearch> {
-        if (query.startsWith(PREFIX_MY)) {
-            val realQuery = query.removePrefix(PREFIX_MY)
-            return getList().filter { it.title.contains(realQuery, true) }.toList()
-        } else {
-            val realQuery = query.take(100)
-            val response = client.newCall(GET(searchUrl(realQuery))).await()
-            val matches = Jsoup.parse(response.consumeBody())
-                .select("div.js-categories-seasonal.js-block-list.list")
-                .select("table").select("tbody")
-                .select("tr").drop(1)
+        return withContext(Dispatchers.IO) {
+            if (query.startsWith(PREFIX_MY)) {
+                queryUsersList(query)
+            } else {
+                val realQuery = query.take(100)
+                val response = client.newCall(GET(searchUrl(realQuery))).await()
+                val matches = Jsoup.parse(response.consumeBody())
+                    .select("div.js-categories-seasonal.js-block-list.list")
+                    .select("table").select("tbody")
+                    .select("tr").drop(1)
 
-            return matches.filter { row -> row.select(TD)[2].text() != "Novel" }
-                .map { row ->
-                    TrackSearch.create(TrackManager.MYANIMELIST).apply {
-                        title = row.searchTitle()
-                        media_id = row.searchMediaId()
-                        total_chapters = row.searchTotalChapters()
-                        summary = row.searchSummary()
-                        cover_url = row.searchCoverUrl()
-                        tracking_url = mangaUrl(media_id)
-                        publishing_status = row.searchPublishingStatus()
-                        publishing_type = row.searchPublishingType()
-                        start_date = row.searchStartDate()
+                matches.filter { row -> row.select(TD)[2].text() != "Novel" }
+                    .map { row ->
+                        TrackSearch.create(TrackManager.MYANIMELIST).apply {
+                            title = row.searchTitle()
+                            media_id = row.searchMediaId()
+                            total_chapters = row.searchTotalChapters()
+                            summary = row.searchSummary()
+                            cover_url = row.searchCoverUrl()
+                            tracking_url = mangaUrl(media_id)
+                            publishing_status = row.searchPublishingStatus()
+                            publishing_type = row.searchPublishingType()
+                            start_date = row.searchStartDate()
+                        }
                     }
-                }
-                .toList()
+                    .toList()
+            }
         }
+    }
+
+    private suspend fun queryUsersList(query: String): List<TrackSearch> {
+        val realQuery = query.removePrefix(PREFIX_MY).take(100)
+        return getList().filter { it.title.contains(realQuery, true) }.toList()
     }
 
     suspend fun addLibManga(track: Track): Track {
@@ -67,24 +75,26 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
     }
 
     suspend fun findLibManga(track: Track): Track? {
-        val response = authClient.newCall(GET(url = listEntryUrl(track.media_id))).await()
-        var libTrack: Track? = null
-        response.use {
-            if (it.priorResponse?.isRedirect != true) {
-                val trackForm = Jsoup.parse(it.consumeBody())
+        return withContext(Dispatchers.IO) {
+            val response = authClient.newCall(GET(url = listEntryUrl(track.media_id))).await()
+            var remoteTrack: Track? = null
+            response.use {
+                if (it.priorResponse?.isRedirect != true) {
+                    val trackForm = Jsoup.parse(it.consumeBody())
 
-                libTrack = Track.create(TrackManager.MYANIMELIST).apply {
-                    last_chapter_read =
-                        trackForm.select("#add_manga_num_read_chapters").`val`().toInt()
-                    total_chapters = trackForm.select("#totalChap").text().toInt()
-                    status =
-                        trackForm.select("#add_manga_status > option[selected]").`val`().toInt()
-                    score = trackForm.select("#add_manga_score > option[selected]").`val`()
-                        .toFloatOrNull() ?: 0f
+                    remoteTrack = Track.create(TrackManager.MYANIMELIST).apply {
+                        last_chapter_read =
+                            trackForm.select("#add_manga_num_read_chapters").`val`().toInt()
+                        total_chapters = trackForm.select("#totalChap").text().toInt()
+                        status =
+                            trackForm.select("#add_manga_status > option[selected]").`val`().toInt()
+                        score = trackForm.select("#add_manga_score > option[selected]").`val`()
+                            .toFloatOrNull() ?: 0f
+                    }
                 }
             }
+            remoteTrack
         }
-        return libTrack
     }
 
     suspend fun getLibManga(track: Track): Track {
@@ -96,15 +106,15 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
         }
     }
 
-    fun login(username: String, password: String): String {
-        val csrf = getSessionInfo()
-
-        login(username, password, csrf)
-
-        return csrf
+    suspend fun login(username: String, password: String): String {
+        return withContext(Dispatchers.IO) {
+            val csrf = getSessionInfo()
+            login(username, password, csrf)
+            csrf
+        }
     }
 
-    private fun getSessionInfo(): String {
+    private suspend fun getSessionInfo(): String {
         val response = client.newCall(GET(loginUrl())).execute()
 
         return Jsoup.parse(response.consumeBody())
@@ -112,13 +122,15 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
             .attr("content")
     }
 
-    private fun login(username: String, password: String, csrf: String) {
-        val response =
-            client.newCall(POST(url = loginUrl(), body = loginPostBody(username, password, csrf)))
-                .execute()
+    private suspend fun login(username: String, password: String, csrf: String) {
+        withContext(Dispatchers.IO) {
+            val response =
+                client.newCall(POST(loginUrl(), body = loginPostBody(username, password, csrf)))
+                    .execute()
 
-        response.use {
-            if (response.priorResponse?.code != 302) throw Exception("Authentication error")
+            response.use {
+                if (response.priorResponse?.code != 302) throw Exception("Authentication error")
+            }
         }
     }
 
@@ -140,13 +152,15 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
     }
 
     private suspend fun getListUrl(): String {
-        val response =
-            authClient.newCall(POST(url = exportListUrl(), body = exportPostBody())).await()
+       return  withContext(Dispatchers.IO) {
+            val response =
+                authClient.newCall(POST(url = exportListUrl(), body = exportPostBody())).execute()
 
-        return baseUrl + Jsoup.parse(response.consumeBody())
-            .select("div.goodresult")
-            .select("a")
-            .attr("href")
+             baseUrl + Jsoup.parse(response.consumeBody())
+                .select("div.goodresult")
+                .select("a")
+                .attr("href")
+        }
     }
 
     private suspend fun getListXml(url: String): Document {

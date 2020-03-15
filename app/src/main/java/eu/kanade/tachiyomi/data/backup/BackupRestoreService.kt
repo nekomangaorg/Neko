@@ -181,7 +181,7 @@ class BackupRestoreService : Service() {
      */
     private suspend fun restoreBackup(uri: Uri) {
         val reader = JsonReader(contentResolver.openInputStream(uri)!!.bufferedReader())
-        val json = JsonParser().parse(reader).asJsonObject
+        val json = JsonParser.parseReader(reader).asJsonObject
 
         // Get parser version
         val version = json.get(VERSION)?.asInt ?: 1
@@ -296,16 +296,16 @@ class BackupRestoreService : Service() {
      * @param manga manga that needs updating.
      * @param tracks list containing tracks from restore file.
      */
-    private fun trackingFetch(manga: Manga, tracks: List<Track>) {
+    private suspend fun trackingFetch(manga: Manga, tracks: List<Track>) {
         tracks.forEach { track ->
             val service = trackManager.getService(track.sync_id)
             if (service != null && service.isLogged) {
-                service.refresh(track)
-                        .doOnNext { db.insertTrack(it).executeAsBlocking() }
-                        .onErrorReturn {
-                            errors.add("${manga.title} - ${it.message}")
-                            track
-                        }
+                try {
+                    service.refresh(track)
+                    db.insertTrack(track).executeAsBlocking()
+                }catch (e : Exception){
+                    errors.add("${manga.title} - ${e.message}")
+                }
             } else {
                 errors.add("${manga.title} - ${service?.name} not logged in")
                 val notLoggedIn = getString(R.string.not_logged_into, service?.name)

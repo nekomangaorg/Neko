@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.network
 
 import kotlinx.coroutines.suspendCancellableCoroutine
 import okhttp3.*
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import rx.Observable
 import rx.Producer
 import rx.Subscription
@@ -97,6 +98,8 @@ fun OkHttpClient.newCallWithProgress(request: Request, listener: ProgressListene
 
     return progressClient.newCall(request)
 }
+
+fun MediaType.Companion.jsonType() : MediaType = "application/json; charset=utf-8".toMediaTypeOrNull()!!
 
 fun Response.consumeBody(): String? {
     use {
