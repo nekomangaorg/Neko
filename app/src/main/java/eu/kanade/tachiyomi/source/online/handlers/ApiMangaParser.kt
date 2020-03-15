@@ -27,7 +27,7 @@ class ApiMangaParser(val lang: String) {
             val networkManga = networkApiManga.manga
             manga.title = MdUtil.cleanString(networkManga.title)
             manga.thumbnail_url = MdUtil.cdnUrl + MdUtil.removeTimeParamUrl(networkManga.cover_url)
-            manga.description = MdUtil.cleanString(networkManga.description)
+            manga.description = MdUtil.cleanDescription(networkManga.description)
             manga.author = networkManga.author
             manga.artist = networkManga.artist
             manga.lang_flag = networkManga.lang_flag

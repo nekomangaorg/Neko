@@ -36,7 +36,8 @@ class MdUtil {
         }
 
         // creates the manga url from the browse for the api
-        fun modifyMangaUrl(url: String): String = url.replace("/title/", "/manga/").substringBeforeLast("/") + "/"
+        fun modifyMangaUrl(url: String): String =
+            url.replace("/title/", "/manga/").substringBeforeLast("/") + "/"
 
         // Removes the ?timestamp from image urls
         fun removeTimeParamUrl(url: String): String = url.substringBeforeLast("?")
@@ -44,14 +45,27 @@ class MdUtil {
         fun cleanString(string: String): String {
             val bbRegex = """\[(\w+)[^]]*](.*?)\[/\1]""".toRegex()
             var intermediate = string
-                    .replace("[list]", "")
-                    .replace("[/list]", "")
-                    .replace("[*]", "")
+                .replace("[list]", "")
+                .replace("[/list]", "")
+                .replace("[*]", "")
+                .replace("[hr]", "")
+
             // Recursively remove nested bbcode
             while (bbRegex.containsMatchIn(intermediate)) {
                 intermediate = intermediate.replace(bbRegex, "$2")
             }
             return Parser.unescapeEntities(intermediate, false)
+        }
+
+        fun cleanDescription(string: String): String {
+            val description = cleanString(string)
+            return description
+                .substringBefore("Russian / Русский")
+                .substringBefore("German / Deutsch")
+                .substringBefore("Italian / Italiano")
+                .substringBefore("Portuguese (BR) / Portugu")
+                .substringBefore("Portuguese / Portugu")
+                .substringBefore("Turkish/ T&uuml")
         }
 
         fun getImageUrl(attr: String): String {
