@@ -87,6 +87,7 @@ class SettingsReaderController : SettingsController() {
                 defaultValue = false
             }
         }
+
         preferenceCategory {
             titleRes = R.string.pager_viewer
 
