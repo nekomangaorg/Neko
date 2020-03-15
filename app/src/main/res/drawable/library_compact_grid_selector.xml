@@ -2,20 +2,20 @@
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
     android:color="@color/fullRippleColor">
     <item android:id="@android:id/mask"
-        android:top="4dp"
-        android:bottom="0dp"
-        android:left="2dp"
-        android:right="2dp">
+        android:top="6dp"
+        android:bottom="2dp"
+        android:left="6dp"
+        android:right="6dp">
         <shape android:shape="rectangle">
             <corners android:radius="4dp" />
             <solid android:color="@color/fullRippleColor" />
         </shape>
     </item>
     <item
-        android:top="4dp"
-        android:bottom="0dp"
-        android:left="2dp"
-        android:right="2dp">
+        android:top="6dp"
+        android:bottom="2dp"
+        android:left="6dp"
+        android:right="6dp">
         <selector>
             <item android:state_selected="true">
                 <shape android:shape="rectangle">
