@@ -53,9 +53,6 @@ import eu.kanade.tachiyomi.util.toast
 import eu.kanade.tachiyomi.util.visible
 import eu.kanade.tachiyomi.widget.SimpleAnimationListener
 import eu.kanade.tachiyomi.widget.SimpleSeekBarListener
-import java.io.File
-import java.util.Date
-import java.util.concurrent.TimeUnit
 import kotlinx.android.synthetic.main.reader_activity.*
 import me.zhanghai.android.systemuihelper.SystemUiHelper
 import nucleus.factory.RequiresPresenter
@@ -65,6 +62,9 @@ import rx.android.schedulers.AndroidSchedulers
 import rx.subscriptions.CompositeSubscription
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
+import java.io.File
+import java.util.Date
+import java.util.concurrent.TimeUnit
 
 /**
  * Activity containing the reader of Tachiyomi. This activity is mostly a container of the
