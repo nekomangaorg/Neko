@@ -52,7 +52,9 @@ abstract class LibraryHolder(
     }
 
     override fun onLongClick(view: View?): Boolean {
-        super.onLongClick(view)
-        return false // !adapter.libraryListener.recyclerIsScrolling()
+        return if (adapter.isLongPressDragEnabled) {
+            super.onLongClick(view)
+            false
+        } else super.onLongClick(view)
     }
 }

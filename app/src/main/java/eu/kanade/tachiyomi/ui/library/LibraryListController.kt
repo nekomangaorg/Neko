@@ -355,11 +355,11 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
     private fun setRecyclerLayout() {
         if (libraryLayout == 0) {
             recycler.spanCount = 1
-            recycler.setPaddingRelative(0,0,0,0)
+            recycler.updatePaddingRelative(start = 0, end = 0)
         }
         else {
             recycler.columnWidth = (90 + (preferences.gridSize().getOrDefault() * 30)).dpToPx
-            recycler.setPaddingRelative(3.dpToPx,0,3.dpToPx, 0)
+            recycler.updatePaddingRelative(start = 5.dpToPx, end = 5.dpToPx)
         }
     }
 
@@ -594,7 +594,7 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
         return if (adapter.mode == SelectableAdapter.Mode.MULTI) {
             lastClickPosition = position
             toggleSelection(position)
-            true
+            false
         } else {
             openManga(item.manga, null)
             false
@@ -812,7 +812,6 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
                 return
             val distance = recycler_layout.alpha
             val speed = max(3000f / abs(x), 0.75f)
-            Timber.d("Flinged $distance, velo ${abs(x)}, speed $speed")
             if (sign(recycler_layout.x) == sign(x)) {
                 flinging = true
                 val duration = (distance * 100 * speed).toLong()
