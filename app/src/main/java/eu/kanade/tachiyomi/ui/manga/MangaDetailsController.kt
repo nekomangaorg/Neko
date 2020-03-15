@@ -101,6 +101,7 @@ import jp.wasabeef.glide.transformations.MaskTransformation
 import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.android.synthetic.main.manga_details_controller.*
 import kotlinx.android.synthetic.main.manga_header_item.*
+import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File
@@ -927,10 +928,12 @@ class MangaDetailsController : BaseController,
     }
 
     fun trackRefreshError(error: Exception) {
+        Timber.e(error)
         trackingBottomSheet?.onRefreshError(error)
     }
 
     fun trackSearchError(error: Exception) {
+        Timber.e(error)
         trackingBottomSheet?.onSearchResultsError(error)
     }
 

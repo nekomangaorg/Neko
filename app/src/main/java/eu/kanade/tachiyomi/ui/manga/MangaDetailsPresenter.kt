@@ -691,7 +691,7 @@ class MangaDetailsPresenter(private val controller: MangaDetailsController,
             val list = trackList.filter { it.track != null }.map { item ->
                 withContext(Dispatchers.IO) {
                     val trackItem = try {
-                        item.service.refresh(item.track!!).toBlocking().single()
+                        item.service.refresh(item.track!!)
                     } catch (e: Exception) {
                         trackError(e)
                         null
@@ -710,7 +710,7 @@ class MangaDetailsPresenter(private val controller: MangaDetailsController,
 
     fun trackSearch(query: String, service: TrackService) {
         launch(Dispatchers.IO) {
-            val results = try {service.search(query).toBlocking().single() }
+            val results = try {service.search(query) }
             catch (e: Exception) {
                 withContext(Dispatchers.Main) { controller.trackSearchError(e) }
                 null }
@@ -725,7 +725,7 @@ class MangaDetailsPresenter(private val controller: MangaDetailsController,
             item.manga_id = manga.id!!
 
             launch {
-                val binding =  try { service.bind(item).toBlocking().single() }
+                val binding =  try { service.bind(item) }
                 catch (e: Exception) {
                     trackError(e)
                     null
@@ -745,7 +745,7 @@ class MangaDetailsPresenter(private val controller: MangaDetailsController,
 
     private fun updateRemote(track: Track, service: TrackService) {
         launch {
-            val binding = try { service.update(track).toBlocking().single() }
+            val binding = try { service.update(track) }
             catch (e: Exception) {
                 trackError(e)
                 null

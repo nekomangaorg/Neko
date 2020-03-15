@@ -9,6 +9,15 @@ import uy.kohesive.injekt.injectLazy
 import java.text.SimpleDateFormat
 import java.util.Locale
 
+data class OAuth(
+    val access_token: String,
+    val token_type: String,
+    val expires: Long,
+    val expires_in: Long) {
+
+    fun isExpired() = System.currentTimeMillis() > expires
+}
+
 data class ALManga(
         val media_id: Int,
         val title_romaji: String,
@@ -56,7 +65,7 @@ data class ALUserManga(
         total_chapters = manga.total_chapters
     }
 
-    fun toTrackStatus() = when (list_status) {
+    private fun toTrackStatus() = when (list_status) {
         "CURRENT" -> Anilist.READING
         "COMPLETED" -> Anilist.COMPLETED
         "PAUSED" -> Anilist.PAUSED

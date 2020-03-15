@@ -135,7 +135,6 @@ dependencies {
     val retrofit_version = "2.7.1"
     implementation("com.squareup.retrofit2:retrofit:$retrofit_version")
     implementation("com.squareup.retrofit2:converter-gson:$retrofit_version")
-    implementation("com.squareup.retrofit2:adapter-rxjava:$retrofit_version")
 
 // JSON
     implementation("com.google.code.gson:gson:2.8.6")
