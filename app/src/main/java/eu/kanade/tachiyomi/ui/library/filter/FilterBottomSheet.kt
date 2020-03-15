@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.library.filter
 
 import android.content.Context
 import android.content.res.Configuration
+import android.os.Parcelable
 import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
@@ -14,7 +15,6 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackManager
-import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.inflate
@@ -70,25 +70,18 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
     var onGroupClicked: (Int) -> Unit = { _ ->  }
     var pager:View? = null
+    var phoneLandscape = false
 
     fun onCreate(pagerView:View) {
         clearButton = clear_button
         filter_layout.removeView(clearButton)
         sheetBehavior = BottomSheetBehavior.from(this)
-        val phoneLandscape = (isLandscape() && !isTablet())
+        phoneLandscape = (isLandscape() && !isTablet())
         sheetBehavior?.isHideable = true
         sheetBehavior?.skipCollapsed = phoneLandscape
-        top_bar.setOnClickListener {
-            if (sheetBehavior?.state != BottomSheetBehavior.STATE_EXPANDED) {
-                sheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
-            } else {
-                sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
-            }
-        }
         pager = pagerView
         val shadow2:View = (pagerView.parent as ViewGroup).findViewById(R.id.shadow2)
         val shadow:View = (pagerView.parent as ViewGroup).findViewById(R.id.shadow)
-//        val snackbarLayout:View = (pagerView.parent as ViewGroup).findViewById(R.id.snackbar_layout)
         if (phoneLandscape) {
             sheetBehavior?.state = BottomSheetBehavior.STATE_HIDDEN
         }
@@ -96,47 +89,24 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             override fun onSlide(bottomSheet: View, progress: Float) {
                 top_bar.alpha = 1 - max(0f, progress)
                 shadow2.alpha = (1 - max(0f, progress)) * 0.25f
-                if (phoneLandscape)
-                    shadow.alpha = progress
-                else
-                    shadow.alpha = 1 + min(0f, progress)
-                //if (progress >= 0)
-                    updateRootPadding(progress)
+                if (phoneLandscape) shadow.alpha = progress
+                else shadow.alpha = 1 + min(0f, progress)
+                updateRootPadding(progress)
             }
 
             override fun onStateChanged(p0: View, state: Int) {
-                if (state == BottomSheetBehavior.STATE_COLLAPSED) {
-                    if (phoneLandscape)
-                        reSortViews()
-                    if (phoneLandscape)
-                        shadow.alpha = 0f
-                    else
-                        shadow.alpha = 1f
-                    pager?.updatePaddingRelative(bottom = sheetBehavior?.peekHeight ?: 0)
-                }
-                if (state == BottomSheetBehavior.STATE_EXPANDED) {
-                    top_bar.alpha = 0f
-                    if (phoneLandscape)
-                        shadow.alpha = 1f
-                }
-                if (state == BottomSheetBehavior.STATE_HIDDEN) {
-                    reSortViews()
-                    shadow.alpha = 0f
-                    pager?.updatePaddingRelative(bottom = 0)
-//                    snackbarLayout.updatePaddingRelative(bottom = 0)
-                }
-                //top_bar.isClickable = state == BottomSheetBehavior.STATE_COLLAPSED
-                //top_bar.isFocusable = state == BottomSheetBehavior.STATE_COLLAPSED
+                stateChanged(state)
             }
         })
         if (preferences.hideFiltersAtStart().getOrDefault()) {
             sheetBehavior?.state = BottomSheetBehavior.STATE_HIDDEN
-            shadow.alpha = 0f
         }
-        else {
-            pager?.updatePaddingRelative(bottom = sheetBehavior?.peekHeight ?: 0)
-//            snackbarLayout.updatePaddingRelative(bottom = sheetBehavior?.peekHeight ?: 0)
-        }
+        updateRootPadding(when (sheetBehavior?.state) {
+            BottomSheetBehavior.STATE_HIDDEN -> -1f
+            BottomSheetBehavior.STATE_EXPANDED -> 1f
+            else -> 0f
+        })
+        shadow.alpha = if (sheetBehavior?.state == BottomSheetBehavior.STATE_HIDDEN) 0f else 1f
         if (phoneLandscape && shadow2.visibility != View.GONE) {
             shadow2.gone()
         }
@@ -148,6 +118,30 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         }
         createTags()
         clearButton.setOnClickListener { clearFilters() }
+    }
+
+    private fun stateChanged(state: Int) {
+        val shadow = ((pager?.parent as? ViewGroup)?.findViewById(R.id.shadow) as? View)
+        if (state == BottomSheetBehavior.STATE_COLLAPSED) {
+            shadow?.alpha = 1f
+            pager?.updatePaddingRelative(bottom = sheetBehavior?.peekHeight ?: 0)
+        }
+        if (state == BottomSheetBehavior.STATE_EXPANDED) {
+            top_bar.alpha = 0f
+            if (phoneLandscape)
+                shadow?.alpha = 1f
+        }
+        if (state == BottomSheetBehavior.STATE_HIDDEN) {
+            reSortViews()
+            shadow?.alpha = 0f
+            pager?.updatePaddingRelative(bottom = 0)
+        }
+    }
+
+    override fun onRestoreInstanceState(state: Parcelable?) {
+        super.onRestoreInstanceState(state)
+        val sheetBehavior = BottomSheetBehavior.from(this)
+        stateChanged(sheetBehavior.state)
     }
 
     private fun isLandscape(): Boolean {
@@ -176,11 +170,6 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
     fun hasActiveFilters() = filterItems.any { it.isActivated }
 
     private fun createTags() {
-        //categories = inflate(R.layout.filter_buttons) as FilterTagGroup
-       // categories.setup(this, R.string.action_hide_categories)
-
-        //  list.add(categories)
-
         hide_categories.isChecked = preferences.hideCategories().getOrDefault()
         hide_categories.setOnCheckedChangeListener { _, isChecked ->
             preferences.hideCategories().set(isChecked)
@@ -212,11 +201,12 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                 db.getCategories().executeAsBlocking()
                     .isNotEmpty()
             }
-            val librryManga = db.getLibraryMangas().executeAsBlocking()
+            val libraryManga = db.getLibraryMangas().executeAsBlocking()
             val types = mutableListOf<Int>()
-            if (librryManga.any { it.mangaType() == Manga.TYPE_MANHWA }) types.add(R.string.manhwa)
-            if (librryManga.any { it.mangaType() == Manga.TYPE_MANHUA }) types.add(R.string.manhua)
-            if (librryManga.any { it.mangaType() == Manga.TYPE_COMIC }) types.add(R.string.comic)
+            if (libraryManga.any { it.mangaType() == Manga.TYPE_MANHWA }) types.add(R.string.manhwa)
+            if (libraryManga.any { it.mangaType() == Manga.TYPE_MANHUA }) types.add(R.string.manhua)
+            if (libraryManga.any { it.mangaType() == Manga.TYPE_COMIC }) types.add(R.string.comic)
+            val hasTracking = Injekt.get<TrackManager>().hasLoggedServices()
             if (types.isNotEmpty()) {
                 launchUI {
                     val mangaType = inflate(R.layout.filter_buttons) as FilterTagGroup
@@ -230,12 +220,12 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                     filter_layout.addView(mangaType)
                     filterItems.remove(tracked)
                     filterItems.add(mangaType)
-                    filterItems.add(tracked)
+                    if (hasTracking)
+                        filterItems.add(tracked)
                 }
             }
             withContext(Dispatchers.Main)  {
                 hide_categories.visibleIf(showCategoriesCheckBox)
-               // categories.setState(preferences.hideCategories().getOrDefault())
                 downloaded.setState(preferences.filterDownloaded())
                 completed.setState(preferences.filterCompleted())
                 unread.setState(preferences.filterUnread())
@@ -305,10 +295,6 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
     }
 
     private fun clearFilters() {
-        val action = if (preferences.hideCategories().getOrDefault()) ACTION_REFRESH
-        else ACTION_FILTER
-
-        preferences.hideCategories().set(false)
         preferences.filterDownloaded().set(0)
         preferences.filterUnread().set(0)
         preferences.filterCompleted().set(0)
@@ -322,8 +308,10 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         filterItems.forEach {
             it.reset()
         }
+        if (trackers != null)
+            filterItems.remove(trackers!!)
         reSortViews()
-        onGroupClicked(action)
+        onGroupClicked(ACTION_FILTER)
     }
 
     private fun reSortViews() {
@@ -337,10 +325,6 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             filter_layout.addView(it)
         }
         filter_scroll.scrollTo(0, 0)
-    }
-
-    fun adjustFiltersMargin(downloading: Boolean) {
-        filter_scroll.updatePaddingRelative(end = (if (downloading) 80 else 20).dpToPx)
     }
 
     companion object {

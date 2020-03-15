@@ -86,7 +86,7 @@ class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
      */
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
-        view.applyWindowInsetsForRootController(activity!!.navigationView)
+        view.applyWindowInsetsForRootController(activity!!.bottom_nav)
         
         view.context.notificationManager.cancel(Notifications.ID_NEW_CHAPTERS)
         // Init RecyclerView and adapter
@@ -109,7 +109,7 @@ class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
                 LibraryUpdateService.start(view.context)
                 view.snack(R.string.updating_library) {
                     anchorView = (this@RecentChaptersController.activity as? MainActivity)
-                        ?.navigationView
+                        ?.bottom_nav
                 }
             }
             // It can be a very long operation, so we disable swipe refresh and show a snackbar.
@@ -385,7 +385,7 @@ class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
                 router.setRoot(
                     RecentlyReadController().withFadeTransaction().tag(R.id.nav_recents.toString()))
                 Injekt.get<PreferencesHelper>().showRecentUpdates().set(false)
-                (activity as? MainActivity)?.updateRecentsIcon()
+                (activity as? MainActivity)?.updateIcons(R.id.nav_recents)
             }
         }
         return super.onOptionsItemSelected(item)

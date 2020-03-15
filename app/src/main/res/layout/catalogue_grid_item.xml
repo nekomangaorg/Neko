@@ -125,13 +125,13 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
             android:orientation="vertical"
             android:layout_height="30sp">
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/title"
-                style="@style/TextAppearance.MaterialComponents.Body1"
+                style="@style/TextAppearance.Regular.Body1.Light"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
@@ -143,13 +143,12 @@
 
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/subtitle"
-                style="@style/TextAppearance.MaterialComponents.Body1"
+                style="@style/TextAppearance.Regular.Body1.Secondary"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="-1dp"
                 android:ellipsize="end"
                 android:singleLine="true"
-                android:textColor="?android:attr/textColorSecondary"
                 android:textSize="12sp"
                 tools:text="Sample artist" />
         </LinearLayout>

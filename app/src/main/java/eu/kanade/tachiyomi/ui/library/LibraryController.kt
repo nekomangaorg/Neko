@@ -12,6 +12,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.SearchView
@@ -175,7 +176,7 @@ open class LibraryController(
 
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
-        view.applyWindowInsetsForRootController(activity!!.navigationView)
+        view.applyWindowInsetsForRootController(activity!!.bottom_nav)
         mangaPerRow = getColumnsPreferenceForCurrentOrientation().getOrDefault()
         if (!::presenter.isInitialized)
             presenter = LibraryPresenter(this)
@@ -193,7 +194,8 @@ open class LibraryController(
             when (it) {
                 FilterBottomSheet.ACTION_REFRESH -> onRefresh()
                 FilterBottomSheet.ACTION_FILTER -> onFilterChanged()
-                FilterBottomSheet.ACTION_HIDE_FILTER_TIP -> activity?.toast(R.string.hide_filters_tip)
+                FilterBottomSheet.ACTION_HIDE_FILTER_TIP -> activity?.toast(R.string
+                    .hide_filters_tip, Toast.LENGTH_LONG)
             }
         }
 

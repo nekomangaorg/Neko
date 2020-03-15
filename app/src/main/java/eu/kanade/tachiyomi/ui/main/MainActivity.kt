@@ -139,13 +139,13 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
        // tabAnimator = TabsAnimator(tabs)
 
         var continueSwitchingTabs = false
-        navigationView.setOnNavigationItemSelectedListener { item ->
+        bottom_nav.setOnNavigationItemSelectedListener { item ->
             val id = item.itemId
             val currentController = router.backstack.lastOrNull()?.controller()
             if (!continueSwitchingTabs && currentController is BottomNavBarInterface) {
                 if (!currentController.canChangeTabs {
                     continueSwitchingTabs = true
-                    this@MainActivity.navigationView.selectedItemId = id
+                    this@MainActivity.bottom_nav.selectedItemId = id
                 }) return@setOnNavigationItemSelectedListener false
             }
             continueSwitchingTabs = false
@@ -175,7 +175,6 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                             if (!showRecents) setRoot(RecentChaptersController(), id)
                             else setRoot(RecentlyReadController(), id)
                             preferences.showRecentUpdates().set(!showRecents)
-                            updateRecentsIcon()
                         }
                         R.id.nav_library -> {
                             val controller =
@@ -190,6 +189,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                     }
                 }
             }
+            updateIcons(id)
             true
         }
         val container: ViewGroup = findViewById(R.id.controller_container)
@@ -206,19 +206,18 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         /*dwawerContainer.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
             View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
             View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION*/
-        updateRecentsIcon()
         content.viewTreeObserver.addOnGlobalLayoutListener {
             val heightDiff: Int = content.rootView.height - content.height
             if (heightDiff > 200 &&
                 window.attributes.softInputMode == WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE) {
                 //keyboard is open, hide layout
-                navigationView.gone()
-            } else if (navigationView.visibility == View.GONE
+                bottom_nav.gone()
+            } else if (bottom_nav.visibility == View.GONE
                 && window.attributes.softInputMode == WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE) {
                 //keyboard is hidden, show layout
                 // use coroutine to delay so the bottom bar doesn't flash on top of the keyboard
                 launchUI {
-                    navigationView.visible()
+                    bottom_nav.visible()
                 }
             }
         }
@@ -272,7 +271,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             appbar.updatePadding(
                 top = insets.systemWindowInsetTop
             )
-            navigationView.updatePadding(bottom = insets.systemWindowInsetBottom)
+            bottom_nav.updatePadding(bottom = insets.systemWindowInsetBottom)
 
             /*controller_container.updateLayoutParams<ConstraintLayout.LayoutParams> {
                 val attrsArray = intArrayOf(android.R.attr.actionBarSize)
@@ -308,7 +307,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         if (!router.hasRootController()) {
             // Set start screen
             if (!handleIntentAction(intent)) {
-                navigationView.selectedItemId = R.id.nav_library
+                bottom_nav.selectedItemId = R.id.nav_library
             }
         }
 
@@ -320,8 +319,8 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             else onBackPressed()
         }
 
-        navigationView.visibility = if (router.backstackSize > 1) View.GONE else View.VISIBLE
-        navigationView.alpha = if (router.backstackSize > 1) 0f else 1f
+        bottom_nav.visibility = if (router.backstackSize > 1) View.GONE else View.VISIBLE
+        bottom_nav.alpha = if (router.backstackSize > 1) 0f else 1f
         router.addChangeListener(object : ControllerChangeHandler.ControllerChangeListener {
             override fun onChangeStarted(to: Controller?, from: Controller?, isPush: Boolean,
                                          container: ViewGroup, handler: ControllerChangeHandler) {
@@ -369,11 +368,31 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         setExtensionsBadge()
     }
 
-    fun updateRecentsIcon() {
-        navigationView.menu.findItem(R.id.nav_recents).icon =
-            AppCompatResources.getDrawable(this,
-                if (preferences.showRecentUpdates().getOrDefault()) R.drawable.ic_update_black_24dp
-                else R.drawable.ic_history_black_24dp)
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        updateIcons(bottom_nav.selectedItemId)
+    }
+
+    fun updateIcons(id: Int) {
+        bottom_nav.menu.findItem(R.id.nav_library).icon = AppCompatResources.getDrawable(
+            this, if (id == R.id.nav_library) R.drawable.library_24dp
+            else R.drawable.library_outline_24dp
+        )
+        bottom_nav.menu.findItem(R.id.nav_recents).icon = AppCompatResources.getDrawable(
+            this, if (id == R.id.nav_recents) {
+                if (preferences.showRecentUpdates().getOrDefault()) R.drawable.recent_updates_24dp
+                else R.drawable.recent_read_24dp
+            } else {
+                if (preferences.showRecentUpdates()
+                        .getOrDefault()
+                ) R.drawable.recent_updates_outline_24dp
+                else R.drawable.recent_read_outline_24dp
+            }
+        )
+        bottom_nav.menu.findItem(R.id.nav_catalogues).icon = AppCompatResources.getDrawable(
+            this, if (id == R.id.nav_catalogues) R.drawable.browse_24dp
+            else R.drawable.browse_outline_24dp
+        )
     }
 
     override fun startSupportActionMode(callback: androidx.appcompat.view.ActionMode.Callback): androidx.appcompat.view.ActionMode? {
@@ -400,13 +419,13 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
     private fun setExtensionsBadge() {
         val updates = preferences.extensionUpdatesCount().getOrDefault()
         if (updates > 0) {
-            val badge = navigationView.getOrCreateBadge(R.id.nav_catalogues)
+            val badge = bottom_nav.getOrCreateBadge(R.id.nav_catalogues)
             badge.number = updates
             badge.backgroundColor = getResourceColor(R.attr.badgeColor)
             badge.badgeTextColor = Color.WHITE
         }
         else {
-            navigationView.removeBadge(R.id.nav_catalogues)
+            bottom_nav.removeBadge(R.id.nav_catalogues)
         }
     }
 
@@ -443,17 +462,16 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             applicationContext, notificationId, intent.getIntExtra("groupId", 0)
         )
         when (intent.action) {
-            SHORTCUT_LIBRARY -> navigationView.selectedItemId = R.id.nav_library
+            SHORTCUT_LIBRARY -> bottom_nav.selectedItemId = R.id.nav_library
             SHORTCUT_RECENTLY_UPDATED, SHORTCUT_RECENTLY_READ -> {
                 preferences.showRecentUpdates().set(intent.action == SHORTCUT_RECENTLY_UPDATED)
-                navigationView.selectedItemId = R.id.nav_recents
-                updateRecentsIcon()
+                bottom_nav.selectedItemId = R.id.nav_recents
             }
-            SHORTCUT_CATALOGUES -> navigationView.selectedItemId = R.id.nav_catalogues
+            SHORTCUT_CATALOGUES -> bottom_nav.selectedItemId = R.id.nav_catalogues
             SHORTCUT_EXTENSIONS -> {
                 if (router.backstack.none { it.controller() is ExtensionController }) {
                     if (router.backstack.isEmpty()) {
-                        navigationView.selectedItemId = R.id.nav_library
+                        bottom_nav.selectedItemId = R.id.nav_library
                         router.pushController(
                             RouterTransaction.with(ExtensionController()).pushChangeHandler(
                                 SimpleSwapChangeHandler()
@@ -467,14 +485,14 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             SHORTCUT_MANGA -> {
                 val extras = intent.extras ?: return false
                 if (router.backstack.isEmpty()) {
-                    navigationView.selectedItemId = R.id.nav_library
+                    bottom_nav.selectedItemId = R.id.nav_library
                 }
                 router.pushController(MangaDetailsController(extras).withFadeTransaction())
             }
             SHORTCUT_DOWNLOADS -> {
                 if (router.backstack.none { it.controller() is DownloadController }) {
                     if (router.backstack.isEmpty()) {
-                        navigationView.selectedItemId = R.id.nav_library
+                        bottom_nav.selectedItemId = R.id.nav_library
                         router.pushController(RouterTransaction.with(DownloadController())
                             .pushChangeHandler(SimpleSwapChangeHandler())
                             .popChangeHandler(FadeChangeHandler()))
@@ -627,21 +645,21 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         if (to !is SpinnerTitleInterface) toolbar.removeSpinner()
 
         if (to !is DialogController) {
-            navigationView.visibility = if (router.backstackSize == 0 ||
+            bottom_nav.visibility = if (router.backstackSize == 0 ||
                 (router.backstackSize <= 1 && !isPush))
-                View.VISIBLE else  navigationView.visibility
+                View.VISIBLE else  bottom_nav.visibility
             animationSet?.cancel()
             animationSet = AnimatorSet()
             val alphaAnimation = ValueAnimator.ofFloat(
-                navigationView.alpha,
+                bottom_nav.alpha,
                 if (router.backstackSize > 1) 0f else 1f
             )
             alphaAnimation.addUpdateListener { valueAnimator ->
-                navigationView.alpha = valueAnimator.animatedValue as Float
+                bottom_nav.alpha = valueAnimator.animatedValue as Float
             }
             alphaAnimation.addListener(object : Animator.AnimatorListener {
                 override fun onAnimationEnd(animation: Animator?) {
-                    navigationView.visibility = if (router.backstackSize > 1) View.GONE else View.VISIBLE
+                    bottom_nav.visibility = if (router.backstackSize > 1) View.GONE else View.VISIBLE
                 }
 
                 override fun onAnimationCancel(animation: Animator?) { }

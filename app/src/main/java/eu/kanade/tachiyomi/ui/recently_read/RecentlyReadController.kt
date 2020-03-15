@@ -84,7 +84,7 @@ class RecentlyReadController(bundle: Bundle? = null) : BaseController(bundle),
      */
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
-        view.applyWindowInsetsForRootController(activity!!.navigationView)
+        view.applyWindowInsetsForRootController(activity!!.bottom_nav)
         // Initialize adapter
         adapter = RecentlyReadAdapter(this)
         recycler.adapter = adapter
@@ -239,7 +239,7 @@ class RecentlyReadController(bundle: Bundle? = null) : BaseController(bundle),
                 router.setRoot(
                     RecentChaptersController().withFadeTransaction().tag(R.id.nav_recents.toString()))
                 Injekt.get<PreferencesHelper>().showRecentUpdates().set(true)
-                (activity as? MainActivity)?.updateRecentsIcon()
+                (activity as? MainActivity)?.updateIcons(R.id.nav_recents)
             }
         }
         return super.onOptionsItemSelected(item)

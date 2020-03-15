@@ -121,7 +121,7 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
      */
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
-        view.applyWindowInsetsForRootController(activity!!.navigationView)
+        view.applyWindowInsetsForRootController(activity!!.bottom_nav)
 
         adapter = CatalogueAdapter(this)
 

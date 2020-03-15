@@ -182,7 +182,6 @@ class LibraryCategoryAdapter(val libraryListener: LibraryListener) :
         fun sortCategory(catId: Int, sortBy: Int)
         fun selectAll(position: Int)
         fun allSelected(position: Int): Boolean
-        fun showCategories(position: Int, view: View)
         fun recyclerIsScrolling(): Boolean
     }
 }

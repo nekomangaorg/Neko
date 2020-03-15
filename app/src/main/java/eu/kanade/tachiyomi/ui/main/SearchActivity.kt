@@ -54,7 +54,7 @@ class SearchActivity: MainActivity() {
         } else {
             appbar.enableElevation()
         }
-        navigationView.gone()
+        bottom_nav.gone()
     }
 
     override fun handleIntentAction(intent: Intent): Boolean {
