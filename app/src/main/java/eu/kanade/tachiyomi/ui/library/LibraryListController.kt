@@ -314,8 +314,7 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
 
     override fun layoutView(view: View) {
         adapter = LibraryCategoryAdapter(this)
-        if (libraryLayout == 0)recycler.spanCount =  1
-        else recycler.columnWidth = (90 + (preferences.gridSize().getOrDefault() * 30)).dpToPx
+        setRecyclerLayout()
         recycler.manager.spanSizeLookup = (object : GridLayoutManager.SpanSizeLookup() {
             override fun getSpanSize(position: Int): Int {
                 if (libraryLayout == 0) return 1
@@ -350,6 +349,17 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
             fast_scroller.updateLayoutParams<CoordinatorLayout.LayoutParams> {
                 topMargin = insets.systemWindowInsetTop
             }
+        }
+    }
+
+    private fun setRecyclerLayout() {
+        if (libraryLayout == 0) {
+            recycler.spanCount = 1
+            recycler.setPaddingRelative(0,0,0,0)
+        }
+        else {
+            recycler.columnWidth = (90 + (preferences.gridSize().getOrDefault() * 30)).dpToPx
+            recycler.setPaddingRelative(3.dpToPx,0,3.dpToPx, 0)
         }
     }
 
@@ -475,8 +485,7 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
 
     override fun reattachAdapter() {
         libraryLayout = preferences.libraryLayout().getOrDefault()
-        if (libraryLayout == 0) recycler.spanCount = 1
-        else recycler.columnWidth = (90 + (preferences.gridSize().getOrDefault() * 30)).dpToPx
+        setRecyclerLayout()
         val position =
             (recycler.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
         recycler.adapter = adapter

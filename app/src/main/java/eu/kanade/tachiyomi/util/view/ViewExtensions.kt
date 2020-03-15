@@ -210,7 +210,6 @@ fun View.doOnApplyWindowInsets(f: (View, WindowInsets, ViewPaddingState) -> Unit
 }
 
 fun View.applyWindowInsetsForController() {
-    // Create a snapshot of the view's padding state
     setOnApplyWindowInsetsListener(ControllerViewWindowInsetsListener)
     requestApplyInsetsWhenAttached()
 }

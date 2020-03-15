@@ -73,6 +73,8 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
 
     var customTitle = ""
 
+    var showingExtenions = false
+
     /**
      * Called when controller is initialized.
      */
@@ -87,7 +89,7 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
      * @return title.
      */
     override fun getTitle(): String? {
-        return if (ext_bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED)
+        return if (showingExtenions)
             applicationContext?.getString(R.string.label_extensions)
         else applicationContext?.getString(R.string.label_catalogues)
     }
@@ -144,23 +146,35 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
                 shadow2.alpha = (1 - max(0f, progress)) * 0.25f
                 sheet_layout.alpha = 1 - progress
                 activity?.appbar?.y = max(activity!!.appbar.y, -headerHeight * (1 - progress))
+                val oldShow = showingExtenions
+                showingExtenions = progress > 0.92f
+                if (oldShow != showingExtenions) {
+                    setTitle()
+                    activity?.invalidateOptionsMenu()
+                }
             }
 
             override fun onStateChanged(p0: View, state: Int) {
                 if (state == BottomSheetBehavior.STATE_EXPANDED) activity?.appbar?.y = 0f
                 if (state == BottomSheetBehavior.STATE_EXPANDED ||
-                    state == BottomSheetBehavior.STATE_COLLAPSED)
+                    state == BottomSheetBehavior.STATE_COLLAPSED) {
                     sheet_layout.alpha =
                         if (state == BottomSheetBehavior.STATE_COLLAPSED) 1f else 0f
+                    showingExtenions = state ==  BottomSheetBehavior.STATE_EXPANDED
+                    setTitle()
+                    activity?.invalidateOptionsMenu()
+                }
 
                 retainViewMode = if (state == BottomSheetBehavior.STATE_EXPANDED)
                     RetainViewMode.RETAIN_DETACH else RetainViewMode.RELEASE_DETACH
-                activity?.invalidateOptionsMenu()
-                setTitle()
                 sheet_layout.isClickable = state == BottomSheetBehavior.STATE_COLLAPSED
                 sheet_layout.isFocusable = state == BottomSheetBehavior.STATE_COLLAPSED
             }
         })
+
+        if (showingExtenions) {
+            ext_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
+        }
 
     }
 
@@ -253,7 +267,7 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
      * @param inflater used to load the menu xml.
      */
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        if (ext_bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) {
+        if (showingExtenions) {
             // Inflate menu
             inflater.inflate(R.menu.extension_main, menu)
 
@@ -305,7 +319,7 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
             // Initialize option to open catalogue settings.
             R.id.action_filter -> {
                 val controller =
-                    if (ext_bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED)
+                    if (showingExtenions)
                         SettingsExtensionsController()
                     else SettingsSourcesController()
                 router.pushController(
