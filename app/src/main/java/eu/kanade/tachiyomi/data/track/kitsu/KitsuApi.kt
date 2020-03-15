@@ -14,7 +14,6 @@ import eu.kanade.tachiyomi.network.POST
 import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
-import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.Field
@@ -35,7 +34,6 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
         .baseUrl(baseUrl)
         .client(authClient)
         .addConverterFactory(GsonConverterFactory.create(GsonBuilder().serializeNulls().create()))
-        .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
         .build()
         .create(KitsuApi.Rest::class.java)
 
@@ -43,7 +41,6 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
         .baseUrl(algoliaKeyUrl)
         .client(authClient)
         .addConverterFactory(GsonConverterFactory.create())
-        .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
         .build()
         .create(KitsuApi.SearchKeyRest::class.java)
 
@@ -51,7 +48,6 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
         .baseUrl(algoliaUrl)
         .client(client)
         .addConverterFactory(GsonConverterFactory.create())
-        .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
         .build()
         .create(KitsuApi.AgoliaSearchRest::class.java)
 
@@ -142,7 +138,6 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
             .baseUrl(loginUrl)
             .client(client)
             .addConverterFactory(GsonConverterFactory.create())
-            .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
             .build()
             .create(KitsuApi.LoginRest::class.java)
             .requestAccessToken(username, password)

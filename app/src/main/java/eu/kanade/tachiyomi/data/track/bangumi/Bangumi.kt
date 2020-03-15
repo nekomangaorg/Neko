@@ -123,11 +123,11 @@ class Bangumi(private val context: Context, id: Int) : TrackService(id) {
     }
 
     companion object {
-        const val READING = 3
+        const val PLANNING = 1
         const val COMPLETED = 2
+        const val READING = 3
         const val ON_HOLD = 4
         const val DROPPED = 5
-        const val PLANNING = 1
 
         const val DEFAULT_STATUS = READING
         const val DEFAULT_SCORE = 0
