@@ -44,6 +44,7 @@ import androidx.transition.ChangeImageTransform
 import androidx.transition.TransitionManager
 import androidx.transition.TransitionSet
 import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.list.listItems
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
 import com.bumptech.glide.load.engine.DiskCacheStrategy
@@ -66,6 +67,7 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
+import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
@@ -96,6 +98,7 @@ import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import java.io.File
+import java.io.IOException
 import jp.wasabeef.glide.transformations.CropSquareTransformation
 import jp.wasabeef.glide.transformations.MaskTransformation
 import kotlinx.android.synthetic.main.main_activity.*
@@ -152,6 +155,7 @@ class MangaDetailsController : BaseController,
     var coverDrawable: Drawable? = null
     private var trackingBottomSheet: TrackingBottomSheet? = null
     private var startingDLChapterPos: Int? = null
+    private var editMangaDialog: EditMangaDialog? = null
 
     /**
      * Adapter containing a list of chapters.
@@ -173,7 +177,7 @@ class MangaDetailsController : BaseController,
     }
 
     override fun getTitle(): String? {
-        return if (toolbarIsColored) manga?.currentTitle() else null
+        return if (toolbarIsColored) manga?.title else null
     }
 
     override fun onViewCreated(view: View) {
@@ -480,6 +484,8 @@ class MangaDetailsController : BaseController,
         inflater.inflate(R.menu.manga_details, menu)
         val editItem = menu.findItem(R.id.action_edit)
         editItem.isVisible = presenter.manga.favorite && !presenter.isLockedFromSearch
+        editItem.title = view?.context?.getString(if (manga?.source == LocalSource.ID)
+            R.string.action_edit else R.string.action_edit_cover)
         menu.findItem(R.id.action_download).isVisible = !presenter.isLockedFromSearch
         menu.findItem(R.id.action_mark_all_as_read).isVisible =
             presenter.getNextUnreadChapter() != null && !presenter.isLockedFromSearch
@@ -489,7 +495,32 @@ class MangaDetailsController : BaseController,
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.action_edit -> EditMangaDialog(this, presenter.manga).showDialog(router)
+            R.id.action_edit -> {
+                if (manga?.source == LocalSource.ID) {
+                    editMangaDialog = EditMangaDialog(this, presenter.manga)
+                    editMangaDialog?.showDialog(router)
+                } else {
+                    if (manga?.hasCustomCover() == true) {
+                        MaterialDialog(activity!!).listItems(items = listOf(
+                                view!!.context.getString(
+                                    R.string.action_edit_cover
+                                ), view!!.context.getString(
+                                    R.string.action_reset_cover
+                                )
+                            ),
+                                waitForPositiveButton = false,
+                                selection = { _, index, _ ->
+                                    when (index) {
+                                        0 -> changeCover()
+                                        else -> presenter.clearCover()
+                                    }
+                                })
+                            .show()
+                    } else {
+                        changeCover()
+                    }
+                }
+            }
             R.id.action_open_in_web_view -> openInWebView()
             R.id.action_share -> prepareToShareManga()
             R.id.action_add_to_home_screen -> addToHomeScreen()
@@ -543,7 +574,7 @@ class MangaDetailsController : BaseController,
             val intent = Intent(Intent.ACTION_SEND).apply {
                 type = "text/*"
                 putExtra(Intent.EXTRA_TEXT, url)
-                putExtra(Intent.EXTRA_TITLE, presenter.manga.currentTitle())
+                putExtra(Intent.EXTRA_TITLE, presenter.manga.title)
                 flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
                 if (stream != null) {
                     clipData = ClipData.newRawUri(null, stream)
@@ -566,7 +597,7 @@ class MangaDetailsController : BaseController,
 
         val activity = activity ?: return
         val intent = WebViewActivity.newIntent(activity.applicationContext, source.id, url, presenter.manga
-            .originalTitle())
+            .title)
         startActivity(intent)
     }
 
@@ -669,11 +700,11 @@ class MangaDetailsController : BaseController,
 
         // Check if shortcut placement is supported
         if (ShortcutManagerCompat.isRequestPinShortcutSupported(activity)) {
-            val shortcutId = "manga-shortcut-${presenter.manga.originalTitle()}-${presenter.source.name}"
+            val shortcutId = "manga-shortcut-${presenter.manga.title}-${presenter.source.name}"
 
             // Create shortcut info
             val shortcutInfo = ShortcutInfoCompat.Builder(activity, shortcutId)
-                .setShortLabel(presenter.manga.currentTitle())
+                .setShortLabel(presenter.manga.title)
                 .setIcon(IconCompat.createWithBitmap(icon))
                 .setIntent(shortcutIntent)
                 .build()
@@ -987,6 +1018,38 @@ class MangaDetailsController : BaseController,
         mode?.title = view?.context?.getString(if (startingDLChapterPos == null)
             R.string.select_start_chapter else R.string.select_end_chapter)
         return false
+    }
+
+    fun changeCover() {
+        if (manga?.favorite == true) {
+            val intent = Intent(Intent.ACTION_GET_CONTENT)
+            intent.type = "image/*"
+            startActivityForResult(
+                Intent.createChooser(intent,
+                    resources?.getString(R.string.file_select_cover)),
+                101
+            )
+        } else {
+            activity?.toast(R.string.notification_first_add_to_library)
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == 101) {
+            if (data == null || resultCode != Activity.RESULT_OK) return
+            val activity = activity ?: return
+            try {
+                val uri = data.data ?: return
+                if (editMangaDialog != null) editMangaDialog?.updateCover(uri)
+                else {
+                    presenter.editCoverWithStream(uri)
+                    setPaletteColor()
+                }
+            } catch (error: IOException) {
+                activity.toast(R.string.notification_cover_update_failed)
+                Timber.e(error)
+            }
+        }
     }
 
     override fun zoomImageFromThumb(thumbView: View) {

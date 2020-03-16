@@ -163,7 +163,7 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
                                              } else {*/
                                             val searchResult = smartSearchEngine.normalSearch(
                                                     source,
-                                                    mangaObj.originalTitle()
+                                                    mangaObj.title
                                                 )
 
                                             if (searchResult != null) {
@@ -206,7 +206,7 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
                                 val searchResult = try {
                                     val searchResult = smartSearchEngine.normalSearch(
                                             source,
-                                            mangaObj.originalTitle()
+                                            mangaObj.title
                                         )
 
                                     if (searchResult != null) {

@@ -86,6 +86,8 @@
     <string name="action_remove_download">Remove download</string>
     <string name="action_update_library">Update library</string>
     <string name="action_edit">Edit</string>
+    <string name="action_edit_cover">Edit cover</string>
+    <string name="action_reset_cover">Reset cover</string>
     <string name="action_add">Add</string>
     <string name="action_add_category">Add category</string>
     <string name="action_edit_categories">Edit categories</string>
@@ -662,7 +664,7 @@
         <item quantity="other">and %1$d more extensions</item>
     </plurals>
     <string name="notification_cover_update_failed">Failed to update cover</string>
-    <string name="notification_first_add_to_library">Please add the manga to your library before doing this</string>
+    <string name="notification_first_add_to_library">Manga must be in your library to edit</string>
 
     <string name="notification_action_error_log">View all errors</string>
 
@@ -726,7 +728,7 @@
     <string name="use_first_source">Use first source with alternative</string>
     <string name="skip_this_step_next_time">Skip this step next time</string>
     <string name="pre_migration_skip_toast">To show this screen again, go to Settings -> Library.</string>
-    <string name="reset_tags">Reset Tags</string>
+    <string name="clear_tags">Clear Tags</string>
     <string name="display_as">Display as</string>
     <string name="action_auto">Auto</string>
     <string name="more">More</string>

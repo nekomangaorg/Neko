@@ -24,7 +24,7 @@ import uy.kohesive.injekt.injectLazy
 
 class SearchController(
     private var manga: Manga? = null
-) : CatalogueSearchController(manga?.originalTitle()), BottomNavBarInterface {
+) : CatalogueSearchController(manga?.title), BottomNavBarInterface {
 
     private var newManga: Manga? = null
     private var progress = 1

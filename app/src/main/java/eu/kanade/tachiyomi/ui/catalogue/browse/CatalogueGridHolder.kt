@@ -37,7 +37,7 @@ class CatalogueGridHolder(
      */
     override fun onSetValues(manga: Manga) {
         // Update the title of the manga.
-        compact_title.text = manga.currentTitle()
+        compact_title.text = manga.title
         badge_view.setInLibrary(manga.favorite)
 
         // Update the cover.

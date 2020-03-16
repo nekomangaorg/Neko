@@ -15,6 +15,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.glide.GlideApp
+import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.ui.manga.chapter.ChaptersAdapter
@@ -86,24 +87,24 @@ class MangaHeaderHolder(
     @SuppressLint("SetTextI18n")
     fun bind(item: MangaHeaderItem, manga: Manga) {
         val presenter = adapter.coverListener.mangaPresenter()
-        manga_full_title.text = manga.currentTitle()
+        manga_full_title.text = manga.title
 
-        if (manga.currentGenres().isNullOrBlank().not())
-            manga_genres_tags.setTags(manga.currentGenres()?.split(", ")?.map(String::trim))
+        if (manga.genre.isNullOrBlank().not())
+            manga_genres_tags.setTags(manga.genre?.split(", ")?.map(String::trim))
         else
             manga_genres_tags.setTags(emptyList())
 
-        if (manga.currentAuthor() == manga.currentArtist() ||
-            manga.currentArtist().isNullOrBlank())
-            manga_author.text = manga.currentAuthor()?.trim()
+        if (manga.author == manga.artist ||
+            manga.artist.isNullOrBlank())
+            manga_author.text = manga.author?.trim()
         else {
-            manga_author.text = "${manga.currentAuthor()?.trim()}, ${manga.currentArtist()}"
+            manga_author.text = "${manga.author?.trim()}, ${manga.artist}"
         }
-        manga_summary.text = manga.currentDesc()?.trim() ?: itemView.context.getString(R.string
+        manga_summary.text = manga.description?.trim() ?: itemView.context.getString(R.string
             .no_description)
 
         manga_summary.post {
-            if ((manga_summary.lineCount < 3 && manga.currentGenres().isNullOrBlank()) ||
+            if ((manga_summary.lineCount < 3 && manga.genre.isNullOrBlank()) ||
                 less_button.visibility == View.VISIBLE) {
                 more_button_group.gone()
             } else
@@ -189,6 +190,11 @@ class MangaHeaderHolder(
         manga_source.text = presenter.source.toString()
 
         filters_text.text = presenter.currentFilters()
+
+        if (manga.source == LocalSource.ID) {
+            webview_button.gone()
+            share_button.gone()
+        }
 
         if (!manga.initialized) return
         GlideApp.with(view.context).load(manga)

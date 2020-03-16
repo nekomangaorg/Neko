@@ -53,8 +53,8 @@ class LibraryGridHolder(
      */
     override fun onSetValues(item: LibraryItem) {
         // Update the title and subtitle of the manga.
-        title.text = item.manga.currentTitle()
-        subtitle.text = item.manga.originalAuthor()?.trim()
+        title.text = item.manga.title
+        subtitle.text = item.manga.author?.trim()
 
         compact_title.text = title.text
 

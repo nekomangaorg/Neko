@@ -34,10 +34,11 @@ class MangaInfoPutResolver(val reset: Boolean = false) : PutResolver<Manga>() {
     }
 
     fun resetToContentValues(manga: Manga) = ContentValues(1).apply {
-        put(MangaTable.COL_TITLE, manga.originalTitle())
-        put(MangaTable.COL_GENRE, manga.originalGenres())
-        put(MangaTable.COL_AUTHOR, manga.originalAuthor())
-        put(MangaTable.COL_ARTIST, manga.originalArtist())
-        put(MangaTable.COL_DESCRIPTION, manga.originalDesc())
+        val splitter = "▒ ▒∩▒"
+        put(MangaTable.COL_TITLE, manga.title.split(splitter).last())
+        put(MangaTable.COL_GENRE, manga.genre?.split(splitter)?.lastOrNull())
+        put(MangaTable.COL_AUTHOR, manga.author?.split(splitter)?.lastOrNull())
+        put(MangaTable.COL_ARTIST, manga.artist?.split(splitter)?.lastOrNull())
+        put(MangaTable.COL_DESCRIPTION, manga.description?.split(splitter)?.lastOrNull())
     }
 }

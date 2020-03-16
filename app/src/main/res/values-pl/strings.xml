@@ -622,6 +622,6 @@
     <string name="use_first_source">Używaj pierwszego źródła z alternatywą</string>
     <string name="skip_this_step_next_time">Pomiń ten krok następnym razem</string>
     <string name="pre_migration_skip_toast">By pokazać ten ekran ponownie, przejdź do Ustawienia -> Biblioteka.</string>
-    <string name="reset_tags">Resetuj tagi</string>
+    <string name="clear_tags">Resetuj tagi</string>
 
 </resources>

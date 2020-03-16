@@ -24,7 +24,6 @@ import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.SChapter
-import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
 import eu.kanade.tachiyomi.ui.manga.track.TrackItem
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
@@ -340,7 +339,7 @@ class MangaDetailsPresenter(
                 manga.copyFrom(networkManga)
                 manga.initialized = true
                 db.insertManga(manga).executeAsBlocking()
-                if (thumbnailUrl != networkManga.thumbnail_url) {
+                if (thumbnailUrl != networkManga.thumbnail_url && !manga.hasCustomCover()) {
                     MangaImpl.setLastCoverFetch(manga.id!!, Date().time)
                     withContext(Dispatchers.Main) { controller.setPaletteColor() }
                 }
@@ -562,7 +561,7 @@ class MangaDetailsPresenter(
         directory.mkdirs()
 
         // Build destination file.
-        val filename = DiskUtil.buildValidFilename("${manga.originalTitle()} - Cover.jpg")
+        val filename = DiskUtil.buildValidFilename("${manga.title} - Cover.jpg")
 
         val destFile = File(directory, filename)
         val stream: OutputStream = FileOutputStream(destFile)
@@ -589,63 +588,23 @@ class MangaDetailsPresenter(
             manga.genre = if (tags.isNullOrEmpty()) null else tagsString?.trim()
             LocalSource(downloadManager.context).updateMangaInfo(manga)
             db.updateMangaInfo(manga).executeAsBlocking()
-        } else {
-            var changed = false
-            val title = title?.trim()
-            if (!title.isNullOrBlank() && manga.originalTitle().isBlank()) {
-                manga.title = title
-                changed = true
-            } else if (title.isNullOrBlank() && manga.currentTitle() != manga.originalTitle()) {
-                manga.title = manga.originalTitle()
-                changed = true
-            } else if (!title.isNullOrBlank() && title != manga.currentTitle()) {
-                manga.title = "${title}${SManga.splitter}${manga.originalTitle()}"
-                changed = true
-            }
-
-            val author = author?.trim()
-            if (author.isNullOrBlank() && manga.currentAuthor() != manga.originalAuthor()) {
-                manga.author = manga.originalAuthor()
-                changed = true
-            } else if (!author.isNullOrBlank() && author != manga.currentAuthor()) {
-                manga.author = "${author}${SManga.splitter}${manga.originalAuthor() ?: ""}"
-                changed = true
-            }
-
-            val artist = artist?.trim()
-            if (artist.isNullOrBlank() && manga.currentArtist() != manga.originalArtist()) {
-                manga.artist = manga.originalArtist()
-                changed = true
-            } else if (!artist.isNullOrBlank() && artist != manga.currentArtist()) {
-                manga.artist = "${artist}${SManga.splitter}${manga.originalArtist() ?: ""}"
-                changed = true
-            }
-
-            val description = description?.trim()
-            if (description.isNullOrBlank() && manga.currentDesc() != manga.originalDesc()) {
-                manga.description = manga.originalDesc()
-                changed = true
-            } else if (!description.isNullOrBlank() && description != manga.currentDesc()) {
-                manga.description = "${description}${SManga.splitter}${manga.originalDesc() ?: ""}"
-                changed = true
-            }
-
-            var tagsString = tags?.joinToString(", ")
-            if ((tagsString.isNullOrBlank() && manga.currentGenres() != manga.originalGenres()) || tagsString == manga.originalGenres()) {
-                manga.genre = manga.originalGenres()
-                changed = true
-            } else if (!tagsString.isNullOrBlank() && tagsString != manga.currentGenres()) {
-                tagsString = tags?.joinToString(", ") { it.capitalize() }
-                manga.genre = "${tagsString}${SManga.splitter}${manga.originalGenres() ?: ""}"
-                changed = true
-            }
-            if (changed) db.updateMangaInfo(manga).executeAsBlocking()
         }
         if (uri != null) editCoverWithStream(uri)
         controller.updateHeader()
     }
 
-    private fun editCoverWithStream(uri: Uri): Boolean {
+    fun clearCover() {
+        if (manga.hasCustomCover()) {
+            coverCache.deleteFromCache(manga.thumbnail_url!!)
+            manga.thumbnail_url = manga.thumbnail_url?.removePrefix("Custom-")
+            db.insertManga(manga).executeAsBlocking()
+            MangaImpl.setLastCoverFetch(manga.id!!, Date().time)
+            controller.updateHeader()
+            controller.setPaletteColor()
+        }
+    }
+
+    fun editCoverWithStream(uri: Uri): Boolean {
         val inputStream =
             downloadManager.context.contentResolver.openInputStream(uri) ?: return false
         if (manga.source == LocalSource.ID) {
@@ -653,8 +612,11 @@ class MangaDetailsPresenter(
             return true
         }
 
-        if (manga.thumbnail_url != null && manga.favorite) {
-            Injekt.get<PreferencesHelper>().refreshCoversToo().set(false)
+        if (manga.favorite) {
+            if (!manga.hasCustomCover()) {
+                manga.thumbnail_url = "Custom-${manga.thumbnail_url ?: manga.id!!}"
+                db.insertManga(manga).executeAsBlocking()
+            }
             coverCache.copyToCache(manga.thumbnail_url!!, inputStream)
             MangaImpl.setLastCoverFetch(manga.id!!, Date().time)
             return true

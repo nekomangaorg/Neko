@@ -124,15 +124,14 @@ class LibraryItem(
         val sourceManager by injectLazy<SourceManager>()
         val sourceName = if (manga.source == 0L) "Local" else
             sourceManager.getOrStub(manga.source).name
-        return manga.currentTitle().contains(constraint, true) ||
-            manga.originalTitle().contains(constraint, true) ||
-            (manga.currentAuthor()?.contains(constraint, true) ?: false) ||
-            (manga.currentArtist()?.contains(constraint, true) ?: false) ||
+        return manga.title.contains(constraint, true) ||
+            (manga.author?.contains(constraint, true) ?: false) ||
+            (manga.artist?.contains(constraint, true) ?: false) ||
             sourceName.contains(constraint, true) ||
             if (constraint.contains(",")) {
-                val genres = manga.currentGenres()?.split(", ")
+                val genres = manga.genre?.split(", ")
                 constraint.split(",").all { containsGenre(it.trim(), genres) }
-            } else containsGenre(constraint, manga.currentGenres()?.split(", "))
+            } else containsGenre(constraint, manga.genre?.split(", "))
     }
 
     @SuppressLint("DefaultLocale")

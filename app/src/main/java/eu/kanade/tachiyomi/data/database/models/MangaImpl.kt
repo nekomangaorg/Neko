@@ -42,13 +42,9 @@ open class MangaImpl : Manga {
 
     override fun copyFrom(other: SManga) {
         if (other is MangaImpl && (other as MangaImpl)::title.isInitialized &&
-            !other.title.isBlank() && other.title != originalTitle()) {
-            val oldTitle = originalTitle()
-            title = if (currentTitle() != originalTitle()) {
-                val customTitle = currentTitle()
-                val trueTitle = other.title
-                "${customTitle}${SManga.splitter}$trueTitle"
-            } else other.title
+            !other.title.isBlank() && other.title != title) {
+            val oldTitle = title
+            title = other.title
             val db: DownloadManager by injectLazy()
             val provider = DownloadProvider(db.context)
             provider.renameMangaFolder(oldTitle, title, source)

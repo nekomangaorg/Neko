@@ -1,8 +1,6 @@
 package eu.kanade.tachiyomi.ui.manga.info
 
-import android.app.Activity
 import android.app.Dialog
-import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
@@ -18,11 +16,7 @@ import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
-import eu.kanade.tachiyomi.util.lang.chop
-import eu.kanade.tachiyomi.util.system.toast
-import java.io.IOException
 import kotlinx.android.synthetic.main.edit_manga_dialog.view.*
-import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -84,77 +78,24 @@ class EditMangaDialog : DialogController {
             view.manga_artist.append(manga.artist ?: "")
             view.manga_description.append(manga.description ?: "")
             view.manga_genres_tags.setTags(manga.genre?.split(", ") ?: emptyList())
-        } else {
-            if (manga.currentTitle() != manga.originalTitle())
-                view.manga_full_title.append(manga.currentTitle())
-            view.manga_full_title.hint = "${resources?.getString(R.string.title)}: ${manga
-                .originalTitle()}"
-
-            if (manga.currentAuthor() != manga.originalAuthor())
-                view.manga_author.append(manga.currentAuthor())
-            if (!manga.originalAuthor().isNullOrBlank())
-                view.manga_author.hint = "${resources?.getString(R.string
-                    .manga_info_author_label)}: ${manga.originalAuthor()}"
-
-            if (manga.currentArtist() != manga.originalArtist())
-                view.manga_artist.append(manga.currentArtist())
-            if (!manga.originalArtist().isNullOrBlank())
-                view.manga_artist.hint = "${resources?.getString(R.string
-                    .manga_info_artist_label)}: ${manga.originalArtist()}"
-
-            if (manga.currentDesc() != manga.originalDesc())
-                view.manga_description.append(manga.currentDesc())
-            if (!manga.originalDesc().isNullOrBlank())
-                view.manga_description.hint = "${resources?.getString(R.string.description)}: ${manga
-                    .originalDesc()?.chop(15)}"
-            if (manga.currentGenres().isNullOrBlank().not()) {
-                view.manga_genres_tags.setTags(manga.currentGenres()?.split(", "))
-            }
         }
         view.manga_genres_tags.clearFocus()
         view.cover_layout.setOnClickListener {
-            changeCover()
+            infoController.changeCover()
         }
         view.reset_tags.setOnClickListener { resetTags() }
     }
 
     private fun resetTags() {
-        if (manga.originalGenres().isNullOrBlank() || manga.source == LocalSource.ID)
-            dialogView?.manga_genres_tags?.setTags(emptyList())
-        else
-            dialogView?.manga_genres_tags?.setTags(manga.originalGenres()?.split(", "))
+        if (manga.genre.isNullOrBlank() || manga.source == LocalSource.ID) dialogView?.manga_genres_tags?.setTags(
+            emptyList()
+        )
+        else dialogView?.manga_genres_tags?.setTags(manga.genre?.split(", "))
     }
 
-    private fun changeCover() {
-        if (manga.favorite) {
-            val intent = Intent(Intent.ACTION_GET_CONTENT)
-            intent.type = "image/*"
-            startActivityForResult(
-                Intent.createChooser(intent,
-                    resources?.getString(R.string.file_select_cover)),
-                101
-            )
-        } else {
-            activity?.toast(R.string.notification_first_add_to_library)
-        }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode == 101) {
-            if (data == null || resultCode != Activity.RESULT_OK) return
-            val activity = activity ?: return
-
-            try {
-                // Get the file's input stream from the incoming Intent
-                GlideApp.with(dialogView!!.context)
-                    .load(data.data ?: Uri.EMPTY)
-                    .into(dialogView!!.manga_cover)
-                customCoverUri = data.data
-            } catch (error: IOException) {
-                activity.toast(R.string.notification_cover_update_failed)
-                Timber.e(error)
-            }
-        }
+    fun updateCover(uri: Uri) {
+        GlideApp.with(dialogView!!.context).load(uri).into(dialogView!!.manga_cover)
+        customCoverUri = uri
     }
 
     override fun onDestroyView(view: View) {

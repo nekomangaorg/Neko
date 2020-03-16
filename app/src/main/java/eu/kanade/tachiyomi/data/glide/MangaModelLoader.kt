@@ -90,11 +90,8 @@ class MangaModelLoader : ModelLoader<Manga, InputStream> {
     ): ModelLoader.LoadData<InputStream>? {
         // Check thumbnail is not null or empty
         val url = manga.thumbnail_url
-        if (url == null || url.isEmpty()) {
-            return null
-        }
 
-        if (url.startsWith("http")) {
+        if (url?.startsWith("http") == true) {
             val source = sourceManager.get(manga.source) as? HttpSource
             val glideUrl = GlideUrl(url, getHeaders(manga, source))
 
@@ -113,8 +110,14 @@ class MangaModelLoader : ModelLoader<Manga, InputStream> {
             // Return an instance of the fetcher providing the needed elements.
             return ModelLoader.LoadData(MangaSignature(manga, file), libraryFetcher)
         } else {
-            // Get the file from the url, removing the scheme if present.
-            val file = File(url.substringAfter("file://"))
+            // Get the file from the url, removing the scheme if present, or from the cache if no url.
+            val file = when {
+                manga.hasCustomCover() -> coverCache.getCoverFile(manga.thumbnail_url!!)
+                url != null -> File(url.substringAfter("file://"))
+                else -> null
+            }
+
+            if (file?.exists() != true) return null
 
             // Return an instance of the fetcher providing the needed elements.
             return ModelLoader.LoadData(MangaSignature(manga, file), FileFetcher(file))

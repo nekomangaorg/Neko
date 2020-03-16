@@ -31,7 +31,7 @@ class CatalogueListHolder(private val view: View, adapter: FlexibleAdapter<IFlex
      * @param manga the manga to bind.
      */
     override fun onSetValues(manga: Manga) {
-        title.text = manga.originalTitle()
+        title.text = manga.title
         with(subtitle) {
             visibility = if (manga.favorite) View.VISIBLE else View.GONE
             text = view.resources.getString(R.string.in_library)

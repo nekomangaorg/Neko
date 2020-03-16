@@ -108,7 +108,7 @@ class LibraryCategoryAdapter(val libraryListener: LibraryListener) :
             when (preferences.librarySortingMode().getOrDefault()) {
                 LibrarySort.DRAG_AND_DROP -> {
                     if (!preferences.hideCategories().getOrDefault()) {
-                        val title = (iFlexible as LibraryItem).manga.currentTitle()
+                        val title = (iFlexible as LibraryItem).manga.title
                         if (preferences.removeArticles().getOrDefault())
                             title.removeArticles().substring(0, 1).toUpperCase(Locale.US)
                         else title.substring(0, 1).toUpperCase(Locale.US)
@@ -144,7 +144,7 @@ class LibraryCategoryAdapter(val libraryListener: LibraryListener) :
                         "N/A"
                 }
                 else -> {
-                    val title = (iFlexible as LibraryItem).manga.currentTitle()
+                    val title = (iFlexible as LibraryItem).manga.title
                     if (preferences.removeArticles().getOrDefault())
                         title.removeArticles().substring(0, 1).toUpperCase(Locale.US)
                     else title.substring(0, 1).toUpperCase(Locale.US)

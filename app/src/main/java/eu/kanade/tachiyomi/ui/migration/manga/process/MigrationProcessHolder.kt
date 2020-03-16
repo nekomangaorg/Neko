@@ -144,10 +144,10 @@ class MigrationProcessHolder(
 
         compact_title.visible()
         gradient.visible()
-        compact_title.text = if (manga.currentTitle().isBlank()) {
+        compact_title.text = if (manga.title.isBlank()) {
             view.context.getString(R.string.unknown)
         } else {
-            manga.currentTitle()
+            manga.title
         }
 
         gradient.visible()

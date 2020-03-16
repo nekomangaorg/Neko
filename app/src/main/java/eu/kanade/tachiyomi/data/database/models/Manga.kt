@@ -37,7 +37,7 @@ interface Manga : SManga {
 
     fun mangaType(): Int {
         val sourceName = Injekt.get<SourceManager>().getOrStub(source).name
-        val currentTags = currentGenres()?.split(",")?.map { it.trim().toLowerCase(Locale.US) }
+        val currentTags = genre?.split(",")?.map { it.trim().toLowerCase(Locale.US) }
         return if (currentTags?.any
             { tag ->
                 tag.startsWith("japanese") || tag == "manga"
@@ -69,7 +69,7 @@ interface Manga : SManga {
 
     fun defaultReaderType(): Int {
         val sourceName = Injekt.get<SourceManager>().getOrStub(source).name
-        val currentTags = currentGenres()?.split(",")?.map { it.trim().toLowerCase(Locale.US) }
+        val currentTags = genre?.split(",")?.map { it.trim().toLowerCase(Locale.US) }
         return if (currentTags?.any
             { tag ->
                 tag == "long strip" || tag == "manhwa" ||

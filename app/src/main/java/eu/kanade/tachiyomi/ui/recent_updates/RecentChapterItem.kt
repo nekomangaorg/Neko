@@ -44,7 +44,7 @@ class RecentChapterItem(val chapter: Chapter, val manga: Manga, header: DateItem
 
     fun filter(text: String): Boolean {
         return chapter.name.contains(text, false) ||
-            manga.currentTitle().contains(text, false)
+            manga.title.contains(text, false)
     }
 
     override fun equals(other: Any?): Boolean {

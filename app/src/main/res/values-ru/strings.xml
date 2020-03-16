@@ -493,7 +493,7 @@
 
     <string name="repeating">Перечитываю</string>
 
-    <string name="reset_tags">Сбросить теги</string>
+    <string name="clear_tags">Сбросить теги</string>
 
     <string name="restore_completed">Восстановление закончено</string>
     <string name="restore_completed_content">%1$s восстановлено. %2$s ошибок обнаружено.</string>

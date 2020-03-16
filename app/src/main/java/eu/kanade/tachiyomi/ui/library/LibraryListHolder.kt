@@ -34,11 +34,11 @@ class LibraryListHolder(
      */
     override fun onSetValues(item: LibraryItem) {
         // Update the title of the manga.
-        title.text = item.manga.currentTitle()
+        title.text = item.manga.title
         setUnreadBadge(badge_view, item)
 
-        subtitle.text = item.manga.originalAuthor()?.trim()
-        subtitle.visibility = if (!item.manga.originalAuthor().isNullOrBlank()) View.VISIBLE
+        subtitle.text = item.manga.author?.trim()
+        subtitle.visibility = if (!item.manga.author.isNullOrBlank()) View.VISIBLE
         else View.GONE
 
         play_layout.visibility = if (item.manga.unread > 0 && item.unreadType > 0)

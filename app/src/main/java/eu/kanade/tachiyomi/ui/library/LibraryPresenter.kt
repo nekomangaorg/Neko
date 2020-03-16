@@ -430,8 +430,8 @@ class LibraryPresenter(
 
     private fun sortAlphabetical(i1: LibraryItem, i2: LibraryItem): Int {
         return if (preferences.removeArticles().getOrDefault())
-            i1.manga.currentTitle().removeArticles().compareTo(i2.manga.currentTitle().removeArticles(), true)
-        else i1.manga.currentTitle().compareTo(i2.manga.currentTitle(), true)
+            i1.manga.title.removeArticles().compareTo(i2.manga.title.removeArticles(), true)
+        else i1.manga.title.compareTo(i2.manga.title, true)
     }
 
     /**
@@ -876,7 +876,17 @@ class LibraryPresenter(
         return catId in categories
     }
 
-    private companion object {
-        var currentLibrary: Library? = null
+    companion object {
+        private var currentLibrary: Library? = null
+
+        fun resetCustomManga() {
+            val db: DatabaseHelper = Injekt.get()
+            db.inTransaction {
+                val libraryManga = db.getLibraryMangas().executeAsBlocking()
+                libraryManga.forEach { manga ->
+                    db.resetMangaInfo(manga).executeAsBlocking()
+                }
+            }
+        }
     }
 }

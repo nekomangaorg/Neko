@@ -15,7 +15,7 @@ object MangaTypeAdapter {
             write {
                 beginArray()
                 value(it.url)
-                value(it.originalTitle())
+                value(it.title)
                 value(it.source)
                 value(max(0, it.viewer))
                 value(it.chapter_flags)
