@@ -178,6 +178,10 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
 
     }
 
+    fun showExtensions() {
+        ext_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
+    }
+
     fun toggleExtensions() {
         if (ext_bottom_sheet.sheetBehavior?.state != BottomSheetBehavior.STATE_COLLAPSED) {
             ext_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED

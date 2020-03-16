@@ -5,15 +5,15 @@
         <item
             android:checked="true"
             android:id="@+id/nav_library"
-            android:icon="@drawable/library_outline_24dp"
+            android:icon="@drawable/library_selector_24dp"
             android:title="@string/label_library" />
         <item
             android:id="@+id/nav_recents"
-            android:icon="@drawable/recent_updates_outline_24dp"
+            android:icon="@drawable/recent_updates_selector_24dp"
             android:title="@string/short_recents" />
         <item
             android:id="@+id/nav_catalogues"
-            android:icon="@drawable/browse_outline_24dp"
+            android:icon="@drawable/browse_selector_24dp"
             android:title="@string/short_catalogues" />
     </group>
 </menu>

@@ -239,7 +239,7 @@ class RecentlyReadController(bundle: Bundle? = null) : BaseController(bundle),
                 router.setRoot(
                     RecentChaptersController().withFadeTransaction().tag(R.id.nav_recents.toString()))
                 Injekt.get<PreferencesHelper>().showRecentUpdates().set(true)
-                (activity as? MainActivity)?.updateIcons(R.id.nav_recents)
+                (activity as? MainActivity)?.updateRecentsIcon()
             }
         }
         return super.onOptionsItemSelected(item)

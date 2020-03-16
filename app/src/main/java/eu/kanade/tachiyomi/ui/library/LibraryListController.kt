@@ -300,7 +300,7 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
         })
         recycler.setHasFixedSize(true)
         recycler.adapter = adapter
-        //adapter.fastScroller = fast_scroller
+        adapter.fastScroller = fast_scroller
         recycler.addOnScrollListener(scrollListener)
 
         val tv = TypedValue()

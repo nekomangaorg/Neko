@@ -50,7 +50,6 @@ import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.catalogue.CatalogueController
 import eu.kanade.tachiyomi.ui.catalogue.global_search.CatalogueSearchController
 import eu.kanade.tachiyomi.ui.download.DownloadController
-import eu.kanade.tachiyomi.ui.extension.ExtensionController
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.library.LibraryListController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
@@ -164,7 +163,6 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                             setRoot(RecentlyReadController(), id)
                     }
                     R.id.nav_catalogues -> setRoot(CatalogueController(), id)
-                    //R.id.nav_settings -> setRoot(SettingsMainController(), id)
                 }
             }
             else if (currentRoot.tag()?.toIntOrNull() == id) {
@@ -175,6 +173,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                             if (!showRecents) setRoot(RecentChaptersController(), id)
                             else setRoot(RecentlyReadController(), id)
                             preferences.showRecentUpdates().set(!showRecents)
+                            updateRecentsIcon()
                         }
                         R.id.nav_library -> {
                             val controller =
@@ -189,13 +188,11 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                     }
                 }
             }
-            updateIcons(id)
             true
         }
         val container: ViewGroup = findViewById(R.id.controller_container)
 
         val content: ViewGroup = findViewById(R.id.main_content)
-        //val dwawerContainer: ViewGroup = findViewById(R.id.drawer_container)
         DownloadService.addListener(this)
         content.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
             View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
@@ -203,9 +200,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         container.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
             View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
             View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-        /*dwawerContainer.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
-            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
-            View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION*/
+        updateRecentsIcon()
         content.viewTreeObserver.addOnGlobalLayoutListener {
             val heightDiff: Int = content.rootView.height - content.height
             if (heightDiff > 200 &&
@@ -368,31 +363,11 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         setExtensionsBadge()
     }
 
-    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        super.onRestoreInstanceState(savedInstanceState)
-        updateIcons(bottom_nav.selectedItemId)
-    }
-
-    fun updateIcons(id: Int) {
-        bottom_nav.menu.findItem(R.id.nav_library).icon = AppCompatResources.getDrawable(
-            this, if (id == R.id.nav_library) R.drawable.library_24dp
-            else R.drawable.library_outline_24dp
-        )
-        bottom_nav.menu.findItem(R.id.nav_recents).icon = AppCompatResources.getDrawable(
-            this, if (id == R.id.nav_recents) {
-                if (preferences.showRecentUpdates().getOrDefault()) R.drawable.recent_updates_24dp
-                else R.drawable.recent_read_24dp
-            } else {
-                if (preferences.showRecentUpdates()
-                        .getOrDefault()
-                ) R.drawable.recent_updates_outline_24dp
-                else R.drawable.recent_read_outline_24dp
-            }
-        )
-        bottom_nav.menu.findItem(R.id.nav_catalogues).icon = AppCompatResources.getDrawable(
-            this, if (id == R.id.nav_catalogues) R.drawable.browse_24dp
-            else R.drawable.browse_outline_24dp
-        )
+    fun updateRecentsIcon() {
+        bottom_nav.menu.findItem(R.id.nav_recents).icon =
+            AppCompatResources.getDrawable(this,
+                if (preferences.showRecentUpdates().getOrDefault()) R.drawable.recent_updates_selector_24dp
+                else R.drawable.recent_read_selector_24dp)
     }
 
     override fun startSupportActionMode(callback: androidx.appcompat.view.ActionMode.Callback): androidx.appcompat.view.ActionMode? {
@@ -466,21 +441,18 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             SHORTCUT_RECENTLY_UPDATED, SHORTCUT_RECENTLY_READ -> {
                 preferences.showRecentUpdates().set(intent.action == SHORTCUT_RECENTLY_UPDATED)
                 bottom_nav.selectedItemId = R.id.nav_recents
+                updateRecentsIcon()
             }
             SHORTCUT_CATALOGUES -> bottom_nav.selectedItemId = R.id.nav_catalogues
             SHORTCUT_EXTENSIONS -> {
-                if (router.backstack.none { it.controller() is ExtensionController }) {
                     if (router.backstack.isEmpty()) {
-                        bottom_nav.selectedItemId = R.id.nav_library
-                        router.pushController(
-                            RouterTransaction.with(ExtensionController()).pushChangeHandler(
-                                SimpleSwapChangeHandler()
-                            ).popChangeHandler(FadeChangeHandler())
-                        )
-                    } else {
-                        router.pushController(ExtensionController().withFadeTransaction())
+                        bottom_nav.selectedItemId = R.id.nav_catalogues
+                        bottom_nav.post {
+                            val controller =
+                                router.backstack.firstOrNull()?.controller() as? CatalogueController
+                            controller?.showExtensions()
+                        }
                     }
-                }
             }
             SHORTCUT_MANGA -> {
                 val extras = intent.extras ?: return false

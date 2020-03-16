@@ -19,8 +19,11 @@ import uy.kohesive.injekt.api.get
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.CoroutineContext
 
+typealias ExtensionTuple
+    = Triple<List<Extension.Installed>, List<Extension.Untrusted>, List<Extension.Available>>
+
 /**
- * Presenter of [ExtensionController].
+ * Presenter of [ExtensionBottomSheet].
  */
 open class ExtensionBottomPresenter(
     private val bottomSheet: ExtensionBottomSheet,
