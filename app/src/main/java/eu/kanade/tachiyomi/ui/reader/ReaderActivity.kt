@@ -54,6 +54,10 @@ import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.widget.SimpleAnimationListener
 import eu.kanade.tachiyomi.widget.SimpleSeekBarListener
+import java.io.File
+import java.util.Locale
+import java.util.concurrent.TimeUnit
+import kotlin.math.abs
 import kotlinx.android.synthetic.main.reader_activity.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -65,10 +69,6 @@ import rx.android.schedulers.AndroidSchedulers
 import rx.subscriptions.CompositeSubscription
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
-import java.io.File
-import java.util.Locale
-import java.util.concurrent.TimeUnit
-import kotlin.math.abs
 
 /**
  * Activity containing the reader of Tachiyomi. This activity is mostly a container of the
@@ -128,7 +128,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
     @Suppress("DEPRECATION")
     private var progressDialog: ProgressDialog? = null
 
-    private var snackbar:Snackbar? = null
+    private var snackbar: Snackbar? = null
 
     companion object {
         @Suppress("unused")
@@ -365,8 +365,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
                     val bottomAnimation = AnimationUtils.loadAnimation(this, R.anim.exit_to_bottom)
                     reader_menu_bottom.startAnimation(bottomAnimation)
                 }
-            }
-            else
+            } else
                 reader_menu.visibility = View.GONE
         }
         menuStickyVisible = false
@@ -634,15 +633,13 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
                 })
                 toolbar.startAnimation(toolbarAnimation)
             }
-        }
-        else {
+        } else {
             if (menuStickyVisible && !menuVisible) {
                 setMenuVisibility(false, animate = false)
             }
             coroutine?.cancel()
         }
     }
-
 
     /**
      * Class that handles the user preferences of the reader.
@@ -849,7 +846,5 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
             color_overlay.visibility = View.VISIBLE
             color_overlay.setFilterColor(value, preferences.colorFilterMode().getOrDefault())
         }
-
     }
-
 }

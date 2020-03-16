@@ -37,9 +37,8 @@ class DownloadProvider(private val context: Context) {
     }
 
     init {
-        preferences.downloadsDirectory().asObservable()
-                .skip(1)
-                .subscribe { downloadsDir = UniFile.fromUri(context, Uri.parse(it)) }
+        preferences.downloadsDirectory().asObservable().skip(1)
+            .subscribe { downloadsDir = UniFile.fromUri(context, Uri.parse(it)) }
     }
 
     /**
@@ -50,9 +49,8 @@ class DownloadProvider(private val context: Context) {
      */
     internal fun getMangaDir(manga: Manga, source: Source): UniFile {
         try {
-            return downloadsDir
-                    .createDirectory(getSourceDirName(source))
-                    .createDirectory(getMangaDirName(manga))
+            return downloadsDir.createDirectory(getSourceDirName(source))
+                .createDirectory(getMangaDirName(manga))
         } catch (e: NullPointerException) {
             throw Exception(context.getString(R.string.invalid_download_dir))
         }
@@ -136,8 +134,6 @@ class DownloadProvider(private val context: Context) {
         val sourceDir = findSourceDir(source)
         val mangaDir = sourceDir?.findFile(DiskUtil.buildValidFilename(from))
         mangaDir?.renameTo(to)
-       // val downloadManager:DownloadManager by injectLazy()
-       // downloadManager.renameCache(from, to, sourceId)
     }
 
     /**
@@ -147,7 +143,11 @@ class DownloadProvider(private val context: Context) {
      * @param manga the manga of the chapter.
      * @param source the source of the chapter.
      */
-    fun findUnmatchedChapterDirs(chapters: List<Chapter>, manga: Manga, source: Source): List<UniFile> {
+    fun findUnmatchedChapterDirs(
+        chapters: List<Chapter>,
+        manga: Manga,
+        source: Source
+    ): List<UniFile> {
         val mangaDir = findMangaDir(manga, source) ?: return emptyList()
         return mangaDir.listFiles()!!.asList().filter {
             (chapters.find { chp ->
@@ -169,7 +169,6 @@ class DownloadProvider(private val context: Context) {
         val mangaDir = findMangaDir(manga, source) ?: return emptyList()
         return chapters.mapNotNull { mangaDir.findFile("${getChapterDirName(it)}_tmp") }
     }
-
 
     /**
      * Returns the download directory name for a source.
@@ -213,5 +212,4 @@ class DownloadProvider(private val context: Context) {
             DiskUtil.buildValidFilename(chapter.name)
         )
     }
-
 }

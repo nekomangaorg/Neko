@@ -39,7 +39,7 @@ class SourceHolder(view: View, override val adapter: SourceAdapter) :
 
         // Set circle letter image.
         itemView.post {
-            edit_button.setImageDrawable(edit_button.getRound(source.name.take(1).toUpperCase(),false))
+            edit_button.setImageDrawable(edit_button.getRound(source.name.take(1).toUpperCase(), false))
         }
     }
 }

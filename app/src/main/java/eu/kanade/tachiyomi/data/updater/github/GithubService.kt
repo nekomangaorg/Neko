@@ -4,7 +4,6 @@ import eu.kanade.tachiyomi.network.NetworkHelper
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
-import rx.Observable
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -27,5 +26,4 @@ interface GithubService {
 
     @GET("/repos/Jays2Kings/tachiyomiJ2K/releases/latest")
     suspend fun getLatestVersion(): GithubRelease
-
 }

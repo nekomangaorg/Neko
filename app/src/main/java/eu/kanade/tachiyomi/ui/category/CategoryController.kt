@@ -218,5 +218,4 @@ class CategoryController(bundle: Bundle? = null) : BaseController(bundle),
     fun onCategoryExistsError() {
         activity?.toast(R.string.error_category_exists)
     }
-
 }

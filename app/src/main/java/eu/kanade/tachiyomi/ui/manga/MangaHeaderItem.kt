@@ -9,8 +9,8 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.ui.manga.chapter.ChaptersAdapter
 
-class MangaHeaderItem(val manga: Manga, private val startExpanded: Boolean):
-    AbstractFlexibleItem<MangaHeaderHolder>(){
+class MangaHeaderItem(val manga: Manga, private val startExpanded: Boolean) :
+    AbstractFlexibleItem<MangaHeaderHolder>() {
 
     var isLocked = false
 
@@ -26,10 +26,12 @@ class MangaHeaderItem(val manga: Manga, private val startExpanded: Boolean):
         return MangaHeaderHolder(view, adapter as ChaptersAdapter, startExpanded)
     }
 
-    override fun bindViewHolder(adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
+    override fun bindViewHolder(
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
         holder: MangaHeaderHolder,
         position: Int,
-        payloads: MutableList<Any?>?) {
+        payloads: MutableList<Any?>?
+    ) {
         holder.bind(this, manga)
     }
 
@@ -40,5 +42,4 @@ class MangaHeaderItem(val manga: Manga, private val startExpanded: Boolean):
     override fun hashCode(): Int {
         return manga.id!!.hashCode()
     }
-
 }

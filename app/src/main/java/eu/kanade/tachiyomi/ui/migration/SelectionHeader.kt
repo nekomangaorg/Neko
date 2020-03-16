@@ -31,8 +31,12 @@ class SelectionHeader : AbstractHeaderItem<SelectionHeader.Holder>() {
     /**
      * Binds this item to the given view holder.
      */
-    override fun bindViewHolder(adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>, holder: Holder,
-                                position: Int, payloads: MutableList<Any?>?) {
+    override fun bindViewHolder(
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
+        holder: Holder,
+        position: Int,
+        payloads: MutableList<Any?>?
+    ) {
         // Intentionally empty
     }
 

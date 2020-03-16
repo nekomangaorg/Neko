@@ -8,8 +8,11 @@ import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
-import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.lang.plusAssign
+import eu.kanade.tachiyomi.util.system.ImageUtil
+import java.util.concurrent.PriorityBlockingQueue
+import java.util.concurrent.atomic.AtomicInteger
+import kotlin.math.min
 import rx.Completable
 import rx.Observable
 import rx.schedulers.Schedulers
@@ -20,17 +23,14 @@ import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
-import java.util.concurrent.PriorityBlockingQueue
-import java.util.concurrent.atomic.AtomicInteger
-import kotlin.math.min
 
 /**
  * Loader used to load chapters from an online source.
  */
 class HttpPageLoader(
-        private val chapter: ReaderChapter,
-        private val source: HttpSource,
-        private val chapterCache: ChapterCache = Injekt.get()
+    private val chapter: ReaderChapter,
+    private val source: HttpSource,
+    private val chapterCache: ChapterCache = Injekt.get()
 ) : PageLoader() {
 
     /**
@@ -173,9 +173,9 @@ class HttpPageLoader(
      * Data class used to keep ordering of pages in order to maintain priority.
      */
     private class PriorityPage(
-            val page: ReaderPage,
-            val priority: Int
-    ): Comparable<PriorityPage> {
+        val page: ReaderPage,
+        val priority: Int
+    ) : Comparable<PriorityPage> {
 
         companion object {
             private val idGenerator = AtomicInteger()
@@ -187,7 +187,6 @@ class HttpPageLoader(
             val p = other.priority.compareTo(priority)
             return if (p != 0) p else identifier.compareTo(other.identifier)
         }
-
     }
 
     /**

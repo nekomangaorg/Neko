@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.migration.manga.process
 
-import android.content.Context
 import android.view.MenuItem
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -19,10 +18,9 @@ class MigrationProcessAdapter(
     val controller: MigrationListController
 ) : FlexibleAdapter<MigrationProcessItem>(null, controller, true) {
 
-
     private val db: DatabaseHelper by injectLazy()
     var items: List<MigrationProcessItem> = emptyList()
-    val preferences:PreferencesHelper by injectLazy()
+    val preferences: PreferencesHelper by injectLazy()
 
     val menuItemListener: MigrationProcessInterface = controller
 
@@ -46,7 +44,7 @@ class MigrationProcessAdapter(
     }
 
     fun allMangasDone() = (items.all { it.manga.migrationStatus != MigrationStatus
-        .RUNNUNG } && items.any {  it.manga.migrationStatus == MigrationStatus.MANGA_FOUND })
+        .RUNNUNG } && items.any { it.manga.migrationStatus == MigrationStatus.MANGA_FOUND })
 
     fun mangasSkipped() = (items.count { it.manga.migrationStatus == MigrationStatus.MANGA_NOT_FOUND })
 
@@ -93,9 +91,11 @@ class MigrationProcessAdapter(
         sourceFinished()
     }
 
-    private fun migrateMangaInternal(prevManga: Manga,
+    private fun migrateMangaInternal(
+        prevManga: Manga,
         manga: Manga,
-        replace: Boolean) {
+        replace: Boolean
+    ) {
         if (controller.config == null) return
         val flags = preferences.migrateFlags().getOrDefault()
         // Update chapters read
@@ -138,6 +138,6 @@ class MigrationProcessAdapter(
 
         // SearchPresenter#networkToLocalManga may have updated the manga title, so ensure db gets updated title
         db.updateMangaTitle(manga).executeAsBlocking()
-        //}
+        // }
     }
 }

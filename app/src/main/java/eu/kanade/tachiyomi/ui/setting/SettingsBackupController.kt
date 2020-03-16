@@ -3,7 +3,11 @@ package eu.kanade.tachiyomi.ui.setting
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.app.Activity
 import android.app.Dialog
-import android.content.*
+import android.content.ActivityNotFoundException
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
@@ -17,6 +21,7 @@ import eu.kanade.tachiyomi.data.backup.BackupCreateService
 import eu.kanade.tachiyomi.data.backup.BackupCreatorJob
 import eu.kanade.tachiyomi.data.backup.BackupRestoreService
 import eu.kanade.tachiyomi.data.backup.models.Backup
+import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.base.controller.popControllerWithTag
@@ -25,7 +30,6 @@ import eu.kanade.tachiyomi.util.system.getFilePicker
 import eu.kanade.tachiyomi.util.system.registerLocalReceiver
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.system.unregisterLocalReceiver
-import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 
 class SettingsBackupController : SettingsController() {
 
@@ -105,10 +109,10 @@ class SettingsBackupController : SettingsController() {
 
                 onClick {
                     val currentDir = preferences.backupsDirectory().getOrDefault()
-                    try{
+                    try {
                         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
                         startActivityForResult(intent, CODE_BACKUP_DIR)
-                    } catch (e: ActivityNotFoundException){
+                    } catch (e: ActivityNotFoundException) {
                         // Fall back to custom picker on error
                         startActivityForResult(preferences.context.getFilePicker(currentDir), CODE_BACKUP_DIR)
                     }
@@ -134,7 +138,6 @@ class SettingsBackupController : SettingsController() {
                         backupNumber.isVisible = it > 0
                     }
         }
-
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -210,8 +213,7 @@ class SettingsBackupController : SettingsController() {
                     .title(R.string.pref_create_backup)
                     .message(R.string.backup_choice)
                 .listItemsMultiChoice(items = options, disabledIndices = intArrayOf(0),
-                    initialSelection = intArrayOf(0))
-                    { _, positions, _ ->
+                    initialSelection = intArrayOf(0)) { _, positions, _ ->
                         var flags = 0
                         for (i in 1 until positions.size) {
                             when (positions[i]) {
@@ -307,5 +309,4 @@ class SettingsBackupController : SettingsController() {
         const val TAG_CREATING_BACKUP_DIALOG = "CreatingBackupDialog"
         const val TAG_RESTORING_BACKUP_DIALOG = "RestoringBackupDialog"
     }
-
 }

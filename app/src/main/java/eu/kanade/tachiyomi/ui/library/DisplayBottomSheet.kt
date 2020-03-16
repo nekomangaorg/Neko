@@ -32,7 +32,6 @@ class DisplayBottomSheet(private val controller: LibraryController) : BottomShee
 
     private var sheetBehavior: BottomSheetBehavior<*>
 
-
     init {
         // Use activity theme for this layout
         val view = activity.layoutInflater.inflate(R.layout.display_bottom_sheet, null)
@@ -54,7 +53,6 @@ class DisplayBottomSheet(private val controller: LibraryController) : BottomShee
                 }
             }
         })
-
     }
 
     override fun onStart() {
@@ -81,7 +79,6 @@ class DisplayBottomSheet(private val controller: LibraryController) : BottomShee
             close_button.visibleIf(isScrollable)
         }
     }
-
 
     private fun initGeneralPreferences() {
         display_group.bindToPreference(preferences.libraryLayout()) {

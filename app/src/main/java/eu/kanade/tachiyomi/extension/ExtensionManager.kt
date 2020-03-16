@@ -29,8 +29,8 @@ import uy.kohesive.injekt.api.get
  * @param preferences The application preferences.
  */
 class ExtensionManager(
-        private val context: Context,
-        private val preferences: PreferencesHelper = Injekt.get()
+    private val context: Context,
+    private val preferences: PreferencesHelper = Injekt.get()
 ) {
 
     /**
@@ -159,8 +159,7 @@ class ExtensionManager(
      * @param availableExtensions The list of extensions given by the [api].
      */
     private fun updatedInstalledExtensionsStatuses(availableExtensions: List<Extension.Available>) {
-        if (availableExtensions.isEmpty())
-        {
+        if (availableExtensions.isEmpty()) {
             preferences.extensionUpdatesCount().set(0)
             return
         }
@@ -208,7 +207,7 @@ class ExtensionManager(
      *
      * @param extension The extension to be updated.
      */
-    fun updateExtension(extension: Extension.Installed): Observable<InstallStep>  {
+    fun updateExtension(extension: Extension.Installed): Observable<InstallStep> {
         val availableExt = availableExtensions.find { it.pkgName == extension.pkgName }
                 ?: return Observable.empty()
         return installExtension(availableExt)
@@ -343,5 +342,4 @@ class ExtensionManager(
         }
         return this
     }
-
 }

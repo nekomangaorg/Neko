@@ -8,6 +8,8 @@ import eu.kanade.tachiyomi.extension.ExtensionManager
 import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.extension.model.InstallStep
 import eu.kanade.tachiyomi.util.system.LocaleHelper
+import java.util.concurrent.TimeUnit
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -16,11 +18,9 @@ import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import java.util.concurrent.TimeUnit
-import kotlin.coroutines.CoroutineContext
 
-typealias ExtensionTuple
-    = Triple<List<Extension.Installed>, List<Extension.Untrusted>, List<Extension.Available>>
+typealias ExtensionTuple =
+    Triple<List<Extension.Installed>, List<Extension.Untrusted>, List<Extension.Available>>
 
 /**
  * Presenter of [ExtensionBottomSheet].
@@ -48,8 +48,7 @@ open class ExtensionBottomPresenter(
         val availableObservable = extensionManager.getAvailableExtensionsObservable()
             .startWith(emptyList<Extension.Available>())
 
-        return Observable.combineLatest(installedObservable, untrustedObservable, availableObservable)
-            { installed, untrusted, available -> Triple(installed, untrusted, available) }
+        return Observable.combineLatest(installedObservable, untrustedObservable, availableObservable) { installed, untrusted, available -> Triple(installed, untrusted, available) }
             .debounce(100, TimeUnit.MILLISECONDS)
             .map(::toItems)
             .observeOn(AndroidSchedulers.mainThread())
@@ -71,9 +70,9 @@ open class ExtensionBottomPresenter(
         val untrustedSorted = untrusted.sortedBy { it.pkgName }
         val availableSorted = available
             // Filter out already installed extensions and disabled languages
-            .filter { avail -> installed.none { it.pkgName == avail.pkgName }
-                && untrusted.none { it.pkgName == avail.pkgName }
-                && (avail.lang in activeLangs || avail.lang == "all")}
+            .filter { avail -> installed.none { it.pkgName == avail.pkgName } &&
+                untrusted.none { it.pkgName == avail.pkgName } &&
+                (avail.lang in activeLangs || avail.lang == "all") }
             .sortedBy { it.pkgName }
 
         if (installedSorted.isNotEmpty() || untrustedSorted.isNotEmpty()) {
@@ -103,7 +102,7 @@ open class ExtensionBottomPresenter(
         return items
     }
 
-    fun getExtensionUpdateCount():Int = preferences.extensionUpdatesCount().getOrDefault()
+    fun getExtensionUpdateCount(): Int = preferences.extensionUpdatesCount().getOrDefault()
     fun getAutoCheckPref() = preferences.automaticExtUpdates()
 
     @Synchronized
@@ -152,5 +151,4 @@ open class ExtensionBottomPresenter(
     fun trustSignature(signatureHash: String) {
         extensionManager.trustSignature(signatureHash)
     }
-
 }

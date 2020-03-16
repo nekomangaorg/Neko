@@ -37,7 +37,7 @@ class PreMigrationController(bundle: Bundle? = null) : BaseController(bundle), F
 
     private var showingOptions = false
 
-    private var dialog:BottomSheetDialog? = null
+    private var dialog: BottomSheetDialog? = null
 
     override fun getTitle() = "Select target sources"
 
@@ -63,7 +63,7 @@ class PreMigrationController(bundle: Bundle? = null) : BaseController(bundle), F
         val fabBaseMarginBottom = fab?.marginBottom ?: 0
         recycler.doOnApplyWindowInsets { v, insets, padding ->
 
-            fab?.updateLayoutParams<ViewGroup.MarginLayoutParams>  {
+            fab?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 bottomMargin = fabBaseMarginBottom + insets.systemWindowInsetBottom
             }
             // offset the recycler by the fab's inset + some inset on top
@@ -73,7 +73,7 @@ class PreMigrationController(bundle: Bundle? = null) : BaseController(bundle), F
 
         fab.setOnClickListener {
             if (dialog?.isShowing != true) {
-                dialog = MigrationBottomSheetDialog(activity!!,  this)
+                dialog = MigrationBottomSheetDialog(activity!!, this)
                 dialog?.show()
                 val bottomSheet = dialog?.findViewById<FrameLayout>(
                     com.google.android.material.R.id.design_bottom_sheet
@@ -87,7 +87,7 @@ class PreMigrationController(bundle: Bundle? = null) : BaseController(bundle), F
         }
     }
 
-    override fun startMigration(extraParam:String?) {
+    override fun startMigration(extraParam: String?) {
         val listOfSources = adapter?.items?.filter {
             it.sourceEnabled
         }?.joinToString("/") { it.source.id.toString() }
@@ -113,7 +113,6 @@ class PreMigrationController(bundle: Bundle? = null) : BaseController(bundle), F
         adapter?.onRestoreInstanceState(savedInstanceState)
     }
 
-
     override fun onItemClick(view: View, position: Int): Boolean {
         adapter?.getItem(position)?.let {
             it.sourceEnabled = !it.sourceEnabled
@@ -136,14 +135,14 @@ class PreMigrationController(bundle: Bundle? = null) : BaseController(bundle), F
             .sortedBy { "(${it.lang}) ${it.name}" }
         sources =
             sources.filter { isEnabled(it.id.toString()) }.sortedBy { sourcesSaved.indexOf(it.id
-                .toString() )
+                .toString())
             } +
                 sources.filterNot { isEnabled(it.id.toString()) }
 
         return sources
     }
 
-    fun isEnabled(id:String): Boolean {
+    fun isEnabled(id: String): Boolean {
         val sourcesSaved = prefs.migrationSources().getOrDefault()
         val hiddenCatalogues = prefs.hiddenCatalogues().getOrDefault()
         return if (sourcesSaved.isEmpty()) id !in hiddenCatalogues

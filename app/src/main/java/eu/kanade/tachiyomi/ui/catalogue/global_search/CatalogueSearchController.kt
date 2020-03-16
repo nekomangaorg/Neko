@@ -25,8 +25,8 @@ import kotlinx.android.synthetic.main.catalogue_global_search_controller.*
  * [CatalogueSearchCardAdapter.OnMangaClickListener] called when manga is clicked in global search
  */
 open class CatalogueSearchController(
-        protected val initialQuery: String? = null,
-        protected val extensionFilter: String? = null
+    protected val initialQuery: String? = null,
+    protected val extensionFilter: String? = null
 ) : NucleusController<CatalogueSearchPresenter>(),
         CatalogueSearchCardAdapter.OnMangaClickListener {
 
@@ -35,7 +35,7 @@ open class CatalogueSearchController(
      */
     protected var adapter: CatalogueSearchAdapter? = null
 
-    private var customTitle:String? = null
+    private var customTitle: String? = null
 
     /**
      * Called when controller is initialized.
@@ -144,8 +144,7 @@ open class CatalogueSearchController(
         recycler.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(view.context)
         recycler.adapter = adapter
         recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
-        if (extensionFilter != null)
-        {
+        if (extensionFilter != null) {
             customTitle = view.context?.getString(R.string.loading)
             setTitle()
         }
@@ -199,8 +198,7 @@ open class CatalogueSearchController(
                     .withFadeTransaction()
                 )
                 return
-            }
-            else if (results != null) {
+            } else if (results != null) {
                 customTitle = null
                 setTitle()
                 activity?.invalidateOptionsMenu()
@@ -217,5 +215,4 @@ open class CatalogueSearchController(
     fun onMangaInitialized(source: CatalogueSource, manga: Manga) {
         getHolder(source)?.setImage(manga)
     }
-
 }

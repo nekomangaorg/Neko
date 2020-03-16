@@ -28,8 +28,8 @@ import uy.kohesive.injekt.injectLazy
 /**
  * Sheet to show reader and viewer preferences.
  */
-class ReaderSettingsSheet(private val activity: ReaderActivity) : BottomSheetDialog
-    (activity, R.style.BottomSheetDialogTheme) {
+class ReaderSettingsSheet(private val activity: ReaderActivity) :
+    BottomSheetDialog(activity, R.style.BottomSheetDialogTheme) {
 
     /**
      * Preferences helper.
@@ -38,7 +38,7 @@ class ReaderSettingsSheet(private val activity: ReaderActivity) : BottomSheetDia
 
     private var sheetBehavior: BottomSheetBehavior<*>
 
-    val scroll:NestedScrollView
+    val scroll: NestedScrollView
 
     init {
         // Use activity theme for this layout
@@ -48,28 +48,29 @@ class ReaderSettingsSheet(private val activity: ReaderActivity) : BottomSheetDia
         setContentView(scroll)
 
         sheetBehavior = BottomSheetBehavior.from(scroll.parent as ViewGroup)
-        setEdgeToEdge(activity, constraint_layout, scroll,
-            context.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
-            preferences.readerTheme().getOrDefault() == 0 &&
-            activity.window.decorView.rootWindowInsets.systemWindowInsetRight == 0 &&
-            activity.window.decorView.rootWindowInsets.systemWindowInsetLeft == 0)
-            window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+        setEdgeToEdge(
+            activity,
+            constraint_layout,
+            scroll,
+            context.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+        )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && preferences.readerTheme()
+                .getOrDefault() == 0 && activity.window.decorView.rootWindowInsets.systemWindowInsetRight == 0 && activity.window.decorView.rootWindowInsets.systemWindowInsetLeft == 0
+        ) window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
         val height = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             activity.window.decorView.rootWindowInsets.systemWindowInsetBottom
         } else 0
         sheetBehavior.peekHeight = 200.dpToPx + height
 
         sheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
-            override fun onSlide(bottomSheet: View, progress: Float) { }
+            override fun onSlide(bottomSheet: View, progress: Float) {}
 
             override fun onStateChanged(p0: View, state: Int) {
                 if (state == BottomSheetBehavior.STATE_EXPANDED) {
-                   sheetBehavior.skipCollapsed = true
+                    sheetBehavior.skipCollapsed = true
                 }
             }
         })
-
     }
 
     /**
@@ -92,7 +93,6 @@ class ReaderSettingsSheet(private val activity: ReaderActivity) : BottomSheetDia
         close_button.setOnClickListener {
             dismiss()
         }
-
     }
 
     override fun onStart() {
@@ -150,15 +150,15 @@ class ReaderSettingsSheet(private val activity: ReaderActivity) : BottomSheetDia
     /**
      * Binds a spinner to an int preference with an optional offset for the value.
      */
-    private fun Spinner.bindToPreference(pref: Preference<Int>, offset: Int = 0, shouldDismiss:
-    Boolean
-    = false) {
+    private fun Spinner.bindToPreference(
+        pref: Preference<Int>,
+        offset: Int = 0,
+        shouldDismiss: Boolean = false
+    ) {
         onItemSelectedListener = IgnoreFirstSpinnerListener { position ->
             pref.set(position + offset)
-            if (shouldDismiss)
-                dismiss()
+            if (shouldDismiss) dismiss()
         }
         setSelection(pref.getOrDefault() - offset, false)
     }
-
 }

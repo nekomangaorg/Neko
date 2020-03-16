@@ -34,7 +34,6 @@ inline fun PreferenceGroup.extensionPreference(block: (@DSL Preference).() -> Un
     return initThenAdd(ExtensionPreference(context), block)
 }
 
-
 inline fun PreferenceGroup.switchPreference(block: (@DSL SwitchPreferenceCompat).() -> Unit): SwitchPreferenceCompat {
     return initThenAdd(SwitchPreferenceCompat(context), block)
 }
@@ -52,21 +51,30 @@ inline fun PreferenceGroup.dropDownPreference(block: (@DSL DropDownPreference).(
     return initThenAdd(DropDownPreference(context), block).also(::initDialog)
 }
 
-inline fun PreferenceGroup.listPreference(activity: Activity?, block: (@DSL ListMatPreference).()
--> Unit):
+inline fun PreferenceGroup.listPreference(
+    activity: Activity?,
+    block: (@DSL ListMatPreference).()
+    -> Unit
+):
     ListMatPreference {
     return initThenAdd(ListMatPreference(activity, context), block)
 }
 
-inline fun PreferenceGroup.intListPreference(activity: Activity?, block: (@DSL
-IntListMatPreference).() -> Unit):
+inline fun PreferenceGroup.intListPreference(
+    activity: Activity?,
+    block: (@DSL
+    IntListMatPreference).() -> Unit
+):
     IntListMatPreference {
     return initThenAdd(IntListMatPreference(activity, context), block)
 }
 
-inline fun PreferenceGroup.multiSelectListPreferenceMat(activity: Activity?, block: (@DSL
-MultiListMatPreference).()
--> Unit): MultiListMatPreference {
+inline fun PreferenceGroup.multiSelectListPreferenceMat(
+    activity: Activity?,
+    block: (@DSL
+    MultiListMatPreference).()
+    -> Unit
+): MultiListMatPreference {
     return initThenAdd(MultiListMatPreference(activity, context), block)
 }
 
@@ -98,7 +106,7 @@ inline fun <P : Preference> PreferenceGroup.initThenAdd(p: P, block: P.() -> Uni
 
 inline fun <P : Preference> PreferenceGroup.addThenInit(p: P, block: P.() -> Unit): P {
     return p.apply {
-        this.isIconSpaceReserved  = false
+        this.isIconSpaceReserved = false
         addPreference(this)
         block()
     }

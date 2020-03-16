@@ -18,9 +18,9 @@ import eu.kanade.tachiyomi.util.system.LocaleHelper
 import eu.kanade.tachiyomi.widget.preference.LoginCheckBoxPreference
 import eu.kanade.tachiyomi.widget.preference.SourceLoginDialog
 import eu.kanade.tachiyomi.widget.preference.SwitchPreferenceCategory
+import java.util.TreeMap
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import java.util.TreeMap
 
 class SettingsSourcesController : SettingsController(),
         SourceLoginDialog.Listener {
@@ -35,7 +35,7 @@ class SettingsSourcesController : SettingsController(),
 
     private var orderedLangs = listOf<String>()
     private var langPrefs = mutableListOf<Pair<String, SwitchPreferenceCategory>>()
-    private var sourcesByLang:TreeMap<String, MutableList<HttpSource>> = TreeMap()
+    private var sourcesByLang: TreeMap<String, MutableList<HttpSource>> = TreeMap()
     private var sorting = SourcesSort.Alpha
 
     override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {

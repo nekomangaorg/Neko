@@ -14,12 +14,12 @@ import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
 import eu.kanade.tachiyomi.util.view.applyWindowInsetsForController
+import java.util.HashMap
+import java.util.concurrent.TimeUnit
 import kotlinx.android.synthetic.main.download_controller.*
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
-import java.util.HashMap
-import java.util.concurrent.TimeUnit
 
 /**
  * Controller that shows the currently active downloads.
@@ -310,5 +310,4 @@ class DownloadController : NucleusController<DownloadPresenter>(),
             }
         }
     }
-
 }

@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.library
 
-import android.view.View
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -9,13 +8,13 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.util.lang.chop
 import eu.kanade.tachiyomi.util.lang.removeArticles
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
-import uy.kohesive.injekt.injectLazy
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
+import uy.kohesive.injekt.injectLazy
 
 /**
  * Adapter storing a list of manga in a certain category.
@@ -81,7 +80,7 @@ class LibraryCategoryAdapter(val libraryListener: LibraryListener) :
      */
     fun allIndexOf(manga: Manga): List<Int> {
         return currentItems.mapIndexedNotNull { index, it ->
-            if (it is LibraryItem &&  it.manga.id == manga.id) index
+            if (it is LibraryItem && it.manga.id == manga.id) index
             else null }
     }
 
@@ -89,14 +88,13 @@ class LibraryCategoryAdapter(val libraryListener: LibraryListener) :
         val s = getFilter(String::class.java)
         if (s.isNullOrBlank()) {
             updateDataSet(mangas)
-        }
-        else {
+        } else {
             updateDataSet(mangas.filter { it.filter(s) })
         }
         isLongPressDragEnabled = libraryListener.canDrag() && s.isNullOrBlank()
     }
 
-    override fun onCreateBubbleText(position: Int):String {
+    override fun onCreateBubbleText(position: Int): String {
         return if (position < scrollableHeaders.size) {
             "Top"
         } else if (position >= itemCount - scrollableFooters.size) {
@@ -106,7 +104,7 @@ class LibraryCategoryAdapter(val libraryListener: LibraryListener) :
             if (iFlexible is LibraryHeaderItem) {
                 return iFlexible.category.name
             }
-            val preferences:PreferencesHelper by injectLazy()
+            val preferences: PreferencesHelper by injectLazy()
             when (preferences.librarySortingMode().getOrDefault()) {
                 LibrarySort.DRAG_AND_DROP -> {
                     if (!preferences.hideCategories().getOrDefault()) {
@@ -114,16 +112,15 @@ class LibraryCategoryAdapter(val libraryListener: LibraryListener) :
                         if (preferences.removeArticles().getOrDefault())
                             title.removeArticles().substring(0, 1).toUpperCase(Locale.US)
                         else title.substring(0, 1).toUpperCase(Locale.US)
-                    }
-                    else {
-                        val db:DatabaseHelper by injectLazy()
+                    } else {
+                        val db: DatabaseHelper by injectLazy()
                         val category = db.getCategoriesForManga((iFlexible as LibraryItem).manga)
                             .executeAsBlocking().firstOrNull()?.name
                         category?.chop(10) ?: "Default"
                     }
                 }
                 LibrarySort.LAST_READ -> {
-                    val db:DatabaseHelper by injectLazy()
+                    val db: DatabaseHelper by injectLazy()
                     val id = (iFlexible as LibraryItem).manga.id ?: return ""
                     val history = db.getHistoryByMangaId(id).executeAsBlocking()
                     val last = history.maxBy { it.last_read }
@@ -156,7 +153,7 @@ class LibraryCategoryAdapter(val libraryListener: LibraryListener) :
         }
     }
 
-    private fun getShortDate(date:Date):String {
+    private fun getShortDate(date: Date): String {
         val cal = Calendar.getInstance()
         cal.time = Date()
 

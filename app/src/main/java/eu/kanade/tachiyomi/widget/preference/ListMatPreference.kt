@@ -9,19 +9,22 @@ import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.list.listItemsSingleChoice
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 
-open class ListMatPreference @JvmOverloads constructor(activity: Activity?, context: Context,
+open class ListMatPreference @JvmOverloads constructor(
+    activity: Activity?,
+    context: Context,
     attrs: AttributeSet? =
-    null) :
+    null
+) :
     MatPreference(activity, context, attrs) {
 
-    var sharedPref:String? = null
-    var otherPref:Preference? = null
-    var entryValues:List<String> = emptyList()
-    var entriesRes:Array<Int>
+    var sharedPref: String? = null
+    var otherPref: Preference? = null
+    var entryValues: List<String> = emptyList()
+    var entriesRes: Array<Int>
         get() = emptyArray()
         set(value) { entries = value.map { context.getString(it) } }
-    protected var defValue:String = ""
-    var entries:List<String> = emptyList()
+    protected var defValue: String = ""
+    var entries: List<String> = emptyList()
 
     override fun onSetInitialValue(defaultValue: Any?) {
         super.onSetInitialValue(defaultValue)
@@ -45,8 +48,7 @@ open class ListMatPreference @JvmOverloads constructor(activity: Activity?, cont
         val default = entryValues.indexOf(if (sharedPref != null) {
             val settings = context.getSharedPreferences(sharedPref, Context.MODE_PRIVATE)
             settings.getString(key, "")
-        }
-        else prefs.getStringPref(key, defValue).getOrDefault())
+        } else prefs.getStringPref(key, defValue).getOrDefault())
         listItemsSingleChoice(items = entries,
             waitForPositiveButton = false,
             initialSelection = default) { _, pos, _ ->
@@ -63,8 +65,7 @@ open class ListMatPreference @JvmOverloads constructor(activity: Activity?, cont
                 else otherPref?.summary = otherPref?.summary?.toString()?.replace(oldDef,
                     entries[pos]
                 ) ?: entries[pos]
-            }
-            else {
+            } else {
                 prefs.getStringPref(key, defValue).set(value)
                 this@ListMatPreference.summary = this@ListMatPreference.summary
                 callChangeListener(value)

@@ -3,9 +3,9 @@ package eu.kanade.tachiyomi.ui.reader
 import android.os.Build
 import android.os.Bundle
 import android.view.View
-import com.google.android.material.bottomsheet.BottomSheetDialog
 import android.view.ViewGroup
 import com.afollestad.materialdialogs.MaterialDialog
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
@@ -21,8 +21,8 @@ import uy.kohesive.injekt.api.get
  * Sheet to show when a page is long clicked.
  */
 class ReaderPageSheet(
-        private val activity: ReaderActivity,
-        private val page: ReaderPage
+    private val activity: ReaderActivity,
+    private val page: ReaderPage
 ) : BottomSheetDialog(activity, R.style.BottomSheetDialogTheme) {
 
     /**
@@ -40,7 +40,6 @@ class ReaderPageSheet(
             window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
 
         setBottomEdge(save_layout, activity)
-
 
         set_as_cover_layout.setOnClickListener { setAsCover() }
         share_layout.setOnClickListener { share() }
@@ -86,5 +85,4 @@ class ReaderPageSheet(
         activity.saveImage(page)
         dismiss()
     }
-
 }

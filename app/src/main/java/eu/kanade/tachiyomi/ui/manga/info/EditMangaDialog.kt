@@ -20,11 +20,11 @@ import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.util.lang.chop
 import eu.kanade.tachiyomi.util.system.toast
+import java.io.IOException
 import kotlinx.android.synthetic.main.edit_manga_dialog.view.*
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import java.io.IOException
 
 class EditMangaDialog : DialogController {
 
@@ -32,7 +32,7 @@ class EditMangaDialog : DialogController {
 
     private val manga: Manga
 
-    private var customCoverUri:Uri? = null
+    private var customCoverUri: Uri? = null
 
     private val infoController
         get() = targetController as MangaDetailsController
@@ -84,8 +84,7 @@ class EditMangaDialog : DialogController {
             view.manga_artist.append(manga.artist ?: "")
             view.manga_description.append(manga.description ?: "")
             view.manga_genres_tags.setTags(manga.genre?.split(", ") ?: emptyList())
-        }
-        else {
+        } else {
             if (manga.currentTitle() != manga.originalTitle())
                 view.manga_full_title.append(manga.currentTitle())
             view.manga_full_title.hint = "${resources?.getString(R.string.title)}: ${manga
@@ -158,7 +157,6 @@ class EditMangaDialog : DialogController {
         }
     }
 
-
     override fun onDestroyView(view: View) {
         super.onDestroyView(view)
         dialogView = null
@@ -174,5 +172,4 @@ class EditMangaDialog : DialogController {
     private companion object {
         const val KEY_MANGA = "manga_id"
     }
-
 }

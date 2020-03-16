@@ -7,7 +7,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 
 class ExtensionTrustDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
-        where T: ExtensionTrustDialog.Listener {
+        where T : ExtensionTrustDialog.Listener {
 
     lateinit var listener: Listener
     constructor(target: T, signatureHash: String, pkgName: String) : this(Bundle().apply {
@@ -24,7 +24,7 @@ class ExtensionTrustDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
                 .positiveButton(R.string.ext_trust) {
                     listener.trustSignature(args.getString(SIGNATURE_KEY)!!)
                 }
-                .negativeButton(R.string.ext_uninstall)  {
+                .negativeButton(R.string.ext_uninstall) {
                     listener.uninstallExtension(args.getString(PKGNAME_KEY)!!)
                 }
     }

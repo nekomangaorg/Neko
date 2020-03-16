@@ -7,8 +7,8 @@ import androidx.biometric.BiometricManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.main.SearchActivity
-import uy.kohesive.injekt.injectLazy
 import java.util.Date
+import uy.kohesive.injekt.injectLazy
 
 object SecureActivityDelegate {
 
@@ -16,7 +16,7 @@ object SecureActivityDelegate {
 
     var locked: Boolean = true
 
-    fun setSecure(activity: Activity?, force:Boolean? = null) {
+    fun setSecure(activity: Activity?, force: Boolean? = null) {
         val enabled = force ?: preferences.secureScreen().getOrDefault()
         if (enabled) {
             activity?.window?.setFlags(
@@ -51,9 +51,8 @@ object SecureActivityDelegate {
 
     private fun isAppLocked(): Boolean {
         return locked &&
-            (preferences.lockAfter().getOrDefault() <= 0
-                || Date().time >= preferences.lastUnlock().getOrDefault() + 60 * 1000 * preferences
+            (preferences.lockAfter().getOrDefault() <= 0 ||
+                Date().time >= preferences.lastUnlock().getOrDefault() + 60 * 1000 * preferences
                 .lockAfter().getOrDefault())
     }
-
 }

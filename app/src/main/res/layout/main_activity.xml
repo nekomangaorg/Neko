@@ -20,7 +20,7 @@
 
     </com.bluelinelabs.conductor.ChangeHandlerFrameLayout>
 
-    <eu.kanade.tachiyomi.widget.ElevationAppBarLayout
+    <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -85,7 +85,7 @@
             app:tabRippleColor="@color/rippleColor"
             app:tabTextColor="?attr/actionBarTintColor" />
 
-    </eu.kanade.tachiyomi.widget.ElevationAppBarLayout>
+    </com.google.android.material.appbar.AppBarLayout>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_nav"

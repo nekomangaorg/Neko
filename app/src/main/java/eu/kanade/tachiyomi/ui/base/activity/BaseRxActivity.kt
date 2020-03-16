@@ -22,5 +22,4 @@ abstract class BaseRxActivity<P : BasePresenter<*>> : NucleusAppCompatActivity<P
         super.onResume()
         SecureActivityDelegate.promptLockIfNeeded(this)
     }
-
 }

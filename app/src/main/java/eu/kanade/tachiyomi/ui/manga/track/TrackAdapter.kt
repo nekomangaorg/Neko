@@ -35,7 +35,7 @@ class TrackAdapter(controller: OnClickListener) : RecyclerView.Adapter<TrackHold
         holder.bind(items[position])
     }
 
-    fun indexOf(item: TrackService?):Int {
+    fun indexOf(item: TrackService?): Int {
         return items.indexOfFirst { item?.id == it.service.id }
     }
 
@@ -46,5 +46,4 @@ class TrackAdapter(controller: OnClickListener) : RecyclerView.Adapter<TrackHold
         fun onChaptersClick(position: Int)
         fun onScoreClick(position: Int)
     }
-
 }

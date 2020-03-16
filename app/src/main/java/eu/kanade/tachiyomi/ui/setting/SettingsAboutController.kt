@@ -17,6 +17,11 @@ import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.main.ChangelogDialogController
 import eu.kanade.tachiyomi.util.lang.toTimestampString
 import eu.kanade.tachiyomi.util.system.toast
+import java.text.DateFormat
+import java.text.ParseException
+import java.text.SimpleDateFormat
+import java.util.Locale
+import java.util.TimeZone
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -24,11 +29,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
-import java.text.DateFormat
-import java.text.ParseException
-import java.text.SimpleDateFormat
-import java.util.Locale
-import java.util.TimeZone
 
 class SettingsAboutController : SettingsController() {
 
@@ -140,7 +140,7 @@ class SettingsAboutController : SettingsController() {
             return MaterialDialog(activity!!)
                     .title(R.string.update_check_title)
                     .message(text = args.getString(BODY_KEY) ?: "")
-                    .positiveButton(R.string.update_check_confirm)  {
+                    .positiveButton(R.string.update_check_confirm) {
                         val appContext = applicationContext
                         if (appContext != null) {
                             // Start download

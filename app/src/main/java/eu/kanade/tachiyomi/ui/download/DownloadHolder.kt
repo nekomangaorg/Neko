@@ -57,7 +57,6 @@ class DownloadHolder(private val view: View, val adapter: DownloadAdapter) :
             .getResourceColor(R.attr.icon_color))
     }
 
-
     /**
      * Updates the progress bar of the download.
      */
@@ -82,7 +81,6 @@ class DownloadHolder(private val view: View, val adapter: DownloadAdapter) :
         adapter.downloadItemListener.onItemReleased(position)
     }
 
-
     private fun showPopupMenu(view: View) {
         val item = adapter.getItem(adapterPosition) ?: return
 
@@ -98,7 +96,6 @@ class DownloadHolder(private val view: View, val adapter: DownloadAdapter) :
         popup.menu.findItem(R.id.move_to_bottom).isVisible = adapterPosition != adapter
             .itemCount - 1
 
-
         // Set a listener so we are notified if a menu item is clicked
         popup.setOnMenuItemClickListener { menuItem ->
             adapter.downloadItemListener.onMenuItemClick(adapterPosition, menuItem)
@@ -108,5 +105,4 @@ class DownloadHolder(private val view: View, val adapter: DownloadAdapter) :
         // Finally show the PopupMenu
         popup.show()
     }
-
 }

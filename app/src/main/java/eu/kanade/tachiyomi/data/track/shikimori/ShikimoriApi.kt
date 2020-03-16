@@ -13,7 +13,6 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.POST
-import eu.kanade.tachiyomi.network.asObservableSuccess
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.FormBody
@@ -44,10 +43,7 @@ class ShikimoriApi(private val client: OkHttpClient, interceptor: ShikimoriInter
                 )
             )
             val body = payload.toString().toRequestBody(jsonime)
-            val request = Request.Builder()
-                .url("$apiUrl/v2/user_rates")
-                .post(body)
-                .build()
+            val request = Request.Builder().url("$apiUrl/v2/user_rates").post(body).build()
             authClient.newCall(request).execute()
             track
         }
@@ -55,15 +51,11 @@ class ShikimoriApi(private val client: OkHttpClient, interceptor: ShikimoriInter
 
     suspend fun search(search: String): List<TrackSearch> {
         return withContext(Dispatchers.IO) {
-            val url = Uri.parse("$apiUrl/mangas").buildUpon()
-                .appendQueryParameter("order", "popularity")
-                .appendQueryParameter("search", search)
-                .appendQueryParameter("limit", "20")
-                .build()
-            val request = Request.Builder()
-                .url(url.toString())
-                .get()
-                .build()
+            val url =
+                Uri.parse("$apiUrl/mangas").buildUpon().appendQueryParameter("order", "popularity")
+                    .appendQueryParameter("search", search).appendQueryParameter("limit", "20")
+                    .build()
+            val request = Request.Builder().url(url.toString()).get().build()
             val netResponse = authClient.newCall(request).execute()
 
             val responseBody = netResponse.body?.string().orEmpty()
@@ -73,7 +65,6 @@ class ShikimoriApi(private val client: OkHttpClient, interceptor: ShikimoriInter
             val response = JsonParser.parseString(responseBody).array
 
             response.map { jsonToSearch(it.obj) }
-
         }
     }
 
@@ -108,20 +99,13 @@ class ShikimoriApi(private val client: OkHttpClient, interceptor: ShikimoriInter
             val url = Uri.parse("$apiUrl/v2/user_rates").buildUpon()
                 .appendQueryParameter("user_id", user_id)
                 .appendQueryParameter("target_id", track.media_id.toString())
-                .appendQueryParameter("target_type", "Manga")
-                .build()
-            val request = Request.Builder()
-                .url(url.toString())
-                .get()
-                .build()
+                .appendQueryParameter("target_type", "Manga").build()
+            val request = Request.Builder().url(url.toString()).get().build()
 
-            val urlMangas = Uri.parse("$apiUrl/mangas").buildUpon()
-                .appendPath(track.media_id.toString())
-                .build()
-            val requestMangas = Request.Builder()
-                .url(urlMangas.toString())
-                .get()
-                .build()
+            val urlMangas =
+                Uri.parse("$apiUrl/mangas").buildUpon().appendPath(track.media_id.toString())
+                    .build()
+            val requestMangas = Request.Builder().url(urlMangas.toString()).get().build()
 
             val requestMangasResponse = authClient.newCall(requestMangas).execute()
             val requestMangasBody = requestMangasResponse.body?.string().orEmpty()
@@ -151,7 +135,7 @@ class ShikimoriApi(private val client: OkHttpClient, interceptor: ShikimoriInter
 
     suspend fun accessToken(code: String): OAuth {
         return withContext(Dispatchers.IO) {
-           val netResponse= client.newCall(accessTokenRequest(code)).execute()
+            val netResponse = client.newCall(accessTokenRequest(code)).execute()
             val responseBody = netResponse.body?.string().orEmpty()
             if (responseBody.isEmpty()) {
                 throw Exception("Null Response")
@@ -162,12 +146,8 @@ class ShikimoriApi(private val client: OkHttpClient, interceptor: ShikimoriInter
 
     private fun accessTokenRequest(code: String) = POST(
         oauthUrl,
-        body = FormBody.Builder()
-            .add("grant_type", "authorization_code")
-            .add("client_id", clientId)
-            .add("client_secret", clientSecret)
-            .add("code", code)
-            .add("redirect_uri", redirectUrl)
+        body = FormBody.Builder().add("grant_type", "authorization_code").add("client_id", clientId)
+            .add("client_secret", clientSecret).add("code", code).add("redirect_uri", redirectUrl)
             .build()
     )
 
@@ -189,21 +169,14 @@ class ShikimoriApi(private val client: OkHttpClient, interceptor: ShikimoriInter
             return "$baseMangaUrl/$remoteId"
         }
 
-        fun authUrl() =
-            Uri.parse(loginUrl).buildUpon()
-                .appendQueryParameter("client_id", clientId)
-                .appendQueryParameter("redirect_uri", redirectUrl)
-                .appendQueryParameter("response_type", "code")
-                .build()
+        fun authUrl() = Uri.parse(loginUrl).buildUpon().appendQueryParameter("client_id", clientId)
+            .appendQueryParameter("redirect_uri", redirectUrl)
+            .appendQueryParameter("response_type", "code").build()
 
         fun refreshTokenRequest(token: String) = POST(
             oauthUrl,
-            body = FormBody.Builder()
-                .add("grant_type", "refresh_token")
-                .add("client_id", clientId)
-                .add("client_secret", clientSecret)
-                .add("refresh_token", token)
-                .build()
+            body = FormBody.Builder().add("grant_type", "refresh_token").add("client_id", clientId)
+                .add("client_secret", clientSecret).add("refresh_token", token).build()
         )
     }
 }

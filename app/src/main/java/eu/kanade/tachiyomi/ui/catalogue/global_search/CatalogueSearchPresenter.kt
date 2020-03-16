@@ -34,11 +34,11 @@ import uy.kohesive.injekt.injectLazy
  * @param preferencesHelper manages the preference calls.
  */
 open class CatalogueSearchPresenter(
-        val initialQuery: String? = "",
-        val initialExtensionFilter: String? = null,
-        val sourceManager: SourceManager = Injekt.get(),
-        val db: DatabaseHelper = Injekt.get(),
-        val preferencesHelper: PreferencesHelper = Injekt.get()
+    val initialQuery: String? = "",
+    val initialExtensionFilter: String? = null,
+    val sourceManager: SourceManager = Injekt.get(),
+    val db: DatabaseHelper = Injekt.get(),
+    val preferencesHelper: PreferencesHelper = Injekt.get()
 ) : BasePresenter<CatalogueSearchController>() {
 
     /**
@@ -74,11 +74,13 @@ open class CatalogueSearchPresenter(
     override fun onCreate(savedState: Bundle?) {
         super.onCreate(savedState)
 
-        extensionFilter = savedState?.getString(CatalogueSearchPresenter::extensionFilter.name) ?:
-                          initialExtensionFilter
+        extensionFilter = savedState?.getString(CatalogueSearchPresenter::extensionFilter.name)
+            ?: initialExtensionFilter
 
         // Perform a search with previous or initial state
-        search(savedState?.getString(BrowseCataloguePresenter::query.name) ?: initialQuery.orEmpty())
+        search(
+            savedState?.getString(BrowseCataloguePresenter::query.name) ?: initialQuery.orEmpty()
+        )
     }
 
     override fun onDestroy() {
@@ -102,11 +104,10 @@ open class CatalogueSearchPresenter(
         val languages = preferencesHelper.enabledLanguages().getOrDefault()
         val hiddenCatalogues = preferencesHelper.hiddenCatalogues().getOrDefault()
 
-        return sourceManager.getCatalogueSources()
-                .filter { it.lang in languages }
-                .filterNot { it is LoginSource && !it.isLogged() }
-                .filterNot { it.id.toString() in hiddenCatalogues }
-                .sortedBy { "(${it.lang}) ${it.name}" }
+        return sourceManager.getCatalogueSources().filter { it.lang in languages }
+            .filterNot { it is LoginSource && !it.isLogged() }
+            .filterNot { it.id.toString() in hiddenCatalogues }
+            .sortedBy { "(${it.lang}) ${it.name}" }
     }
 
     private fun getSourcesToQuery(): List<CatalogueSource> {
@@ -116,10 +117,8 @@ open class CatalogueSearchPresenter(
             return enabledSources
         }
 
-        val filterSources = extensionManager.installedExtensions
-            .filter { it.pkgName == filter }
-            .flatMap { it.sources }
-            .filter { it in enabledSources }
+        val filterSources = extensionManager.installedExtensions.filter { it.pkgName == filter }
+            .flatMap { it.sources }.filter { it in enabledSources }
             .filterIsInstance<CatalogueSource>()
 
         if (filterSources.isEmpty()) {
@@ -132,7 +131,10 @@ open class CatalogueSearchPresenter(
     /**
      * Creates a catalogue search item
      */
-    protected open fun createCatalogueSearchItem(source: CatalogueSource, results: List<CatalogueSearchCardItem>?): CatalogueSearchItem {
+    protected open fun createCatalogueSearchItem(
+        source: CatalogueSource,
+        results: List<CatalogueSearchCardItem>?
+    ): CatalogueSearchItem {
         return CatalogueSearchItem(source, results)
     }
 
@@ -156,30 +158,42 @@ open class CatalogueSearchPresenter(
         var items = initialItems
 
         fetchSourcesSubscription?.unsubscribe()
-        fetchSourcesSubscription = Observable.from(sources)
-                .flatMap({ source ->
-                    Observable.defer { source.fetchSearchManga(1, query, FilterList()) }
-                            .subscribeOn(Schedulers.io())
-                            .onErrorReturn { MangasPage(emptyList(), false) } // Ignore timeouts or other exceptions
-                            .map { it.mangas.take(10) } // Get at most 10 manga from search result.
-                            .map { it.map { networkToLocalManga(it, source.id) } } // Convert to local manga.
-                            .doOnNext { fetchImage(it, source) } // Load manga covers.
-                            .map { createCatalogueSearchItem(source, it.map { CatalogueSearchCardItem(it) }) }
-                }, 5)
-                .observeOn(AndroidSchedulers.mainThread())
-                // Update matching source with the obtained results
-                .map { result ->
-                    items.map { item -> if (item.source == result.source) result else item }
-                }
-                // Update current state
-                .doOnNext { items = it }
-                // Deliver initial state
-                .startWith(initialItems)
-                .subscribeLatestCache({ view, manga ->
-                    view.setItems(manga)
-                }, { _, error ->
-                    Timber.e(error)
-                })
+        fetchSourcesSubscription = Observable.from(sources).flatMap({ source ->
+                Observable.defer { source.fetchSearchManga(1, query, FilterList()) }
+                    .subscribeOn(Schedulers.io()).onErrorReturn {
+                        MangasPage(
+                            emptyList(),
+                            false
+                        )
+                    } // Ignore timeouts or other exceptions
+                    .map { it.mangas.take(10) } // Get at most 10 manga from search result.
+                    .map {
+                        it.map {
+                            networkToLocalManga(
+                                it,
+                                source.id
+                            )
+                        }
+                    } // Convert to local manga.
+                    .doOnNext { fetchImage(it, source) } // Load manga covers.
+                    .map {
+                        createCatalogueSearchItem(
+                            source,
+                            it.map { CatalogueSearchCardItem(it) })
+                    }
+            }, 5).observeOn(AndroidSchedulers.mainThread())
+            // Update matching source with the obtained results
+            .map { result ->
+                items.map { item -> if (item.source == result.source) result else item }
+            }
+            // Update current state
+            .doOnNext { items = it }
+            // Deliver initial state
+            .startWith(initialItems).subscribeLatestCache({ view, manga ->
+                view.setItems(manga)
+            }, { _, error ->
+                Timber.e(error)
+            })
     }
 
     /**
@@ -196,23 +210,18 @@ open class CatalogueSearchPresenter(
      */
     private fun initializeFetchImageSubscription() {
         fetchImageSubscription?.unsubscribe()
-        fetchImageSubscription = fetchImageSubject.observeOn(Schedulers.io())
-                .flatMap {
-                    val source = it.second
-                    Observable.from(it.first).filter { it.thumbnail_url == null && !it.initialized }
-                            .map { Pair(it, source) }
-                            .concatMap { getMangaDetailsObservable(it.first, it.second) }
-                            .map { Pair(source as CatalogueSource, it) }
-
-                }
-                .onBackpressureBuffer()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ (source, manga) ->
-                    @Suppress("DEPRECATION")
-                    view?.onMangaInitialized(source, manga)
-                }, { error ->
-                    Timber.e(error)
-                })
+        fetchImageSubscription = fetchImageSubject.observeOn(Schedulers.io()).flatMap {
+                val source = it.second
+                Observable.from(it.first).filter { it.thumbnail_url == null && !it.initialized }
+                    .map { Pair(it, source) }
+                    .concatMap { getMangaDetailsObservable(it.first, it.second) }
+                    .map { Pair(source as CatalogueSource, it) }
+            }.onBackpressureBuffer().observeOn(AndroidSchedulers.mainThread())
+            .subscribe({ (source, manga) ->
+                @Suppress("DEPRECATION") view?.onMangaInitialized(source, manga)
+            }, { error ->
+                Timber.e(error)
+            })
     }
 
     /**
@@ -222,14 +231,12 @@ open class CatalogueSearchPresenter(
      * @return an observable of the manga to initialize
      */
     private fun getMangaDetailsObservable(manga: Manga, source: Source): Observable<Manga> {
-        return source.fetchMangaDetails(manga)
-                .flatMap { networkManga ->
-                    manga.copyFrom(networkManga)
-                    manga.initialized = true
-                    db.insertManga(manga).executeAsBlocking()
-                    Observable.just(manga)
-                }
-                .onErrorResumeNext { Observable.just(manga) }
+        return source.fetchMangaDetails(manga).flatMap { networkManga ->
+                manga.copyFrom(networkManga)
+                manga.initialized = true
+                db.insertManga(manga).executeAsBlocking()
+                Observable.just(manga)
+            }.onErrorResumeNext { Observable.just(manga) }
     }
 
     /**

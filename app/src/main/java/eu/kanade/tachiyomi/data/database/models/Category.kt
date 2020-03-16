@@ -15,18 +15,18 @@ interface Category : Serializable {
 
     var flags: Int
 
-    var mangaOrder:List<Long>
+    var mangaOrder: List<Long>
 
-    var mangaSort:Char?
+    var mangaSort: Char?
 
-    var isFirst:Boolean?
-    var isLast:Boolean?
+    var isFirst: Boolean?
+    var isLast: Boolean?
 
     val nameLower: String
         get() = name.toLowerCase()
 
     fun isAscending(): Boolean {
-       return ((mangaSort?.minus('a') ?: 0) % 2) != 1
+        return ((mangaSort?.minus('a') ?: 0) % 2) != 1
     }
 
     fun sortingMode(): Int? = when (mangaSort) {
@@ -42,9 +42,9 @@ interface Category : Serializable {
     fun sortRes(): Int = when (mangaSort) {
         ALPHA_ASC, ALPHA_DSC -> R.string.title
         UPDATED_ASC, UPDATED_DSC -> R.string.action_sort_latest_chapter
-        UNREAD_ASC, UNREAD_DSC ->  R.string.action_filter_unread
-        LAST_READ_ASC, LAST_READ_DSC ->  R.string.action_sort_last_read
-        TOTAL_ASC, TOTAL_DSC ->  R.string.action_sort_total
+        UNREAD_ASC, UNREAD_DSC -> R.string.action_filter_unread
+        LAST_READ_ASC, LAST_READ_DSC -> R.string.action_sort_last_read
+        TOTAL_ASC, TOTAL_DSC -> R.string.action_sort_total
         else -> R.string.action_sort_drag_and_drop
     }
 
@@ -111,5 +111,4 @@ interface Category : Serializable {
                 isLast = true
             }
     }
-
 }

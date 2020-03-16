@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.manga
 
-
 import android.os.Build
 import android.os.Bundle
 import android.view.View
@@ -46,7 +45,6 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) : BottomSheetD
                 }
             }
         })
-
     }
 
     override fun onStart() {
@@ -78,7 +76,6 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) : BottomSheetD
             )
         }
     }
-
 
     private fun initGeneralPreferences() {
         show_read.isChecked = presenter.onlyRead()
@@ -123,14 +120,12 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) : BottomSheetD
                 show_unread.isChecked = false
                 show_download.isChecked = false
                 show_bookmark.isChecked = false
-            }
-            else {
+            } else {
                 show_all.isChecked = false
                 if (show_read == checkBox) show_unread.isChecked = false
                 else if (show_unread == checkBox) show_read.isChecked = false
             }
-        }
-        else if (!show_read.isChecked && !show_unread.isChecked &&
+        } else if (!show_read.isChecked && !show_unread.isChecked &&
             !show_download.isChecked && !show_bookmark.isChecked) {
             show_all.isChecked = true
         }

@@ -24,10 +24,12 @@ import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import kotlinx.android.synthetic.main.catalogue_grid_item.view.*
 import uy.kohesive.injekt.injectLazy
 
-class LibraryItem(val manga: LibraryManga,
+class LibraryItem(
+    val manga: LibraryManga,
     private val libraryLayout: Preference<Int>,
     private val fixedSize: Preference<Boolean>,
-    header: LibraryHeaderItem?) :
+    header: LibraryHeaderItem?
+) :
     AbstractSectionableItem<LibraryHolder, LibraryHeaderItem?>(header), IFilterable<String> {
 
     var downloadCount = -1
@@ -48,8 +50,7 @@ class LibraryItem(val manga: LibraryManga,
             val isFixedSize = fixedSize.getOrDefault()
             if (libraryLayout == 0) {
                 LibraryListHolder(view, adapter as LibraryCategoryAdapter)
-            }
-            else {
+            } else {
                 view.apply {
                     val coverHeight = (parent.itemWidth / 3f * 4f).toInt()
                     if (libraryLayout == 1) {
@@ -60,8 +61,7 @@ class LibraryItem(val manga: LibraryManga,
                         card.updateLayoutParams<ConstraintLayout.LayoutParams> {
                             bottomMargin = 6.dpToPx
                         }
-                    }
-                    else if (libraryLayout == 2) {
+                    } else if (libraryLayout == 2) {
                         constraint_layout.background = ContextCompat.getDrawable(
                             context, R.drawable.library_item_selector
                         )
@@ -98,10 +98,12 @@ class LibraryItem(val manga: LibraryManga,
         }
     }
 
-    override fun bindViewHolder(adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
-                                holder: LibraryHolder,
-                                position: Int,
-                                payloads: MutableList<Any?>?) {
+    override fun bindViewHolder(
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
+        holder: LibraryHolder,
+        position: Int,
+        payloads: MutableList<Any?>?
+    ) {
         holder.onSetValues(this)
     }
 
@@ -130,8 +132,7 @@ class LibraryItem(val manga: LibraryManga,
             if (constraint.contains(",")) {
                 val genres = manga.currentGenres()?.split(", ")
                 constraint.split(",").all { containsGenre(it.trim(), genres) }
-            }
-           else containsGenre(constraint, manga.currentGenres()?.split(", "))
+            } else containsGenre(constraint, manga.currentGenres()?.split(", "))
     }
 
     @SuppressLint("DefaultLocale")
@@ -140,7 +141,7 @@ class LibraryItem(val manga: LibraryManga,
         return if (tag.startsWith("-"))
             genres?.find {
                 it.trim().toLowerCase() == tag.substringAfter("-").toLowerCase()
-            }                   == null
+            } == null
         else
             genres?.find {
                 it.trim().toLowerCase() == tag.toLowerCase() } != null
@@ -154,6 +155,6 @@ class LibraryItem(val manga: LibraryManga,
     }
 
     override fun hashCode(): Int {
-        return (manga.id!! + (manga.category shl 50).toLong()).hashCode()  //!!.hashCode()
+        return (manga.id!! + (manga.category shl 50).toLong()).hashCode() // !!.hashCode()
     }
 }

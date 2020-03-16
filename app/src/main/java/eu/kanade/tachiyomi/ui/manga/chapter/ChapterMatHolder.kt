@@ -10,14 +10,14 @@ import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.visibleIf
+import java.util.Date
 import kotlinx.android.synthetic.main.chapters_mat_item.*
 import kotlinx.android.synthetic.main.download_button.*
-import java.util.Date
 
 class ChapterMatHolder(
     private val view: View,
     private val adapter: ChaptersAdapter
-) : BaseFlexibleViewHolder(view, adapter)  {
+) : BaseFlexibleViewHolder(view, adapter) {
 
     private var localSource = false
     init {
@@ -73,7 +73,6 @@ class ChapterMatHolder(
 
         if (isLocked) download_button.gone()
 
-
         // Set correct text color
         chapter_title.setTextColor(if (chapter.read && !isLocked)
             adapter.readColor else adapter.unreadColor)
@@ -89,8 +88,7 @@ class ChapterMatHolder(
         if (!chapter.read && chapter.last_page_read > 0 && chapter.pages_left > 0 && !isLocked) {
             statuses.add(itemView.resources.getQuantityString(R.plurals.pages_left, chapter
                 .pages_left, chapter.pages_left))
-        }
-        else if (!chapter.read && chapter.last_page_read > 0 && !isLocked) {
+        } else if (!chapter.read && chapter.last_page_read > 0 && !isLocked) {
             statuses.add(itemView.context.getString(R.string.chapter_progress, chapter
                 .last_page_read + 1))
         }

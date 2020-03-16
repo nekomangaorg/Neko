@@ -68,5 +68,4 @@ class DownloadPresenter : BasePresenter<DownloadController>() {
     fun cancelDownload(download: Download) {
         downloadManager.deletePendingDownloads(download)
     }
-
 }

@@ -24,7 +24,7 @@ import kotlinx.android.synthetic.main.unread_download_badge.*
 class LibraryGridHolder(
     private val view: View,
     adapter: LibraryCategoryAdapter,
-    var width:Int,
+    var width: Int,
     compact: Boolean,
     private var fixedSize: Boolean
 ) : LibraryHolder(view, adapter) {
@@ -33,8 +33,7 @@ class LibraryGridHolder(
         play_layout.setOnClickListener { playButtonClicked() }
         if (compact) {
             text_layout.gone()
-        }
-        else {
+        } else {
             compact_title.gone()
             gradient.gone()
             val playLayout = play_layout.layoutParams as FrameLayout.LayoutParams
@@ -73,8 +72,7 @@ class LibraryGridHolder(
                     if (oldPos == adapterPosition)
                         setCover(item.manga, id)
                 }
-            }
-            else setCover(item.manga, id)
+            } else setCover(item.manga, id)
         }
     }
 
@@ -106,5 +104,4 @@ class LibraryGridHolder(
         card.isDragged = false
         badge_view.isDragged = false
     }
-
 }

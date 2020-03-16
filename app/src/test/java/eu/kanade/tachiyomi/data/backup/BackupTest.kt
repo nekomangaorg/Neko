@@ -11,7 +11,12 @@ import eu.kanade.tachiyomi.CustomRobolectricGradleTestRunner
 import eu.kanade.tachiyomi.data.backup.models.Backup
 import eu.kanade.tachiyomi.data.backup.models.DHistory
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
-import eu.kanade.tachiyomi.data.database.models.*
+import eu.kanade.tachiyomi.data.database.models.Category
+import eu.kanade.tachiyomi.data.database.models.Chapter
+import eu.kanade.tachiyomi.data.database.models.ChapterImpl
+import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.MangaImpl
+import eu.kanade.tachiyomi.data.database.models.TrackImpl
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
 import kotlinx.coroutines.GlobalScope
@@ -22,7 +27,10 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito
-import org.mockito.Mockito.*
+import org.mockito.Mockito.RETURNS_DEEP_STUBS
+import org.mockito.Mockito.`when`
+import org.mockito.Mockito.anyLong
+import org.mockito.Mockito.mock
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 import rx.Observable
@@ -213,7 +221,6 @@ class BackupTest {
             }
         }
 
-
         // Check if restore successful
         val dbCats = backupManager.databaseHelper.getFavoriteMangas().executeAsBlocking()
         assertThat(dbCats).hasSize(1)
@@ -232,7 +239,6 @@ class BackupTest {
         // Insert manga
         val manga = getSingleManga("One Piece")
         manga.id = backupManager.databaseHelper.insertManga(manga).executeAsBlocking().insertedId()
-
 
         // Create restore list
         val chapters = ArrayList<Chapter>()
@@ -330,7 +336,7 @@ class BackupTest {
 
         // Check parser and restore already in database
         var trackList = listOf(track)
-        //Check parser
+        // Check parser
         var trackListJson = backupManager.parser.toJsonTree(trackList)
         var trackListRestore = backupManager.parser.fromJson<List<TrackImpl>>(trackListJson)
         backupManager.restoreTrackForManga(manga, trackListRestore)
@@ -353,7 +359,7 @@ class BackupTest {
         // Check parser and restore, track not in database
         trackList = listOf(track2)
 
-        //Check parser
+        // Check parser
         trackListJson = backupManager.parser.toJsonTree(trackList)
         trackListRestore = backupManager.parser.fromJson<List<TrackImpl>>(trackListJson)
         backupManager.restoreTrackForManga(manga2, trackListRestore)

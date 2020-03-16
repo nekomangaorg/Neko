@@ -13,8 +13,8 @@ import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.visible
 import kotlinx.android.synthetic.main.download_button.view.*
 
-class DownloadButton @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null)
-    : FrameLayout(context, attrs) {
+class DownloadButton @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
+    FrameLayout(context, attrs) {
 
     private val activeColor = context.getResourceColor(R.attr.colorAccent)
     private val progressBGColor = ContextCompat.getColor(context,
@@ -30,8 +30,7 @@ class DownloadButton @JvmOverloads constructor(context: Context, attrs: Attribut
     private val borderCircle = ContextCompat.getDrawable(context,
         R.drawable.border_circle)?.mutate()
     private var isAnimating = false
-    private var iconAnimation:ObjectAnimator? = null
-
+    private var iconAnimation: ObjectAnimator? = null
 
     fun setDownloadStatus(state: Int, progress: Int = 0) {
         if (state != Download.DOWNLOADING) {

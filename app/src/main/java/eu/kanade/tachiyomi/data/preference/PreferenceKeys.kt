@@ -155,11 +155,9 @@ object PreferenceKeys {
 
     fun sourceSharedPref(sourceId: Long) = "source_$sourceId"
 
-
     fun trackUsername(syncId: Int) = "pref_mangasync_username_$syncId"
 
     fun trackPassword(syncId: Int) = "pref_mangasync_password_$syncId"
 
     fun trackToken(syncId: Int) = "track_token_$syncId"
-
 }

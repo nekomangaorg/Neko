@@ -1,8 +1,7 @@
 package eu.kanade.tachiyomi.ui.catalogue.global_search
 
-import androidx.recyclerview.widget.LinearLayoutManager
 import android.view.View
-import eu.kanade.tachiyomi.R
+import androidx.recyclerview.widget.LinearLayoutManager
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.view.gone
@@ -105,5 +104,4 @@ class CatalogueSearchHolder(view: View, val adapter: CatalogueSearchAdapter) :
         title.gone()
         source_card.gone()
     }
-
 }

@@ -25,7 +25,8 @@ import kotlinx.android.synthetic.main.unread_download_badge.*
  */
 class CatalogueGridHolder(
     private val view: View,
-    private val adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>) :
+    private val adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>
+) :
     CatalogueHolder(view, adapter) {
 
     /**

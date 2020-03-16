@@ -3,8 +3,8 @@ package eu.kanade.tachiyomi.data.database.models
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadProvider
 import eu.kanade.tachiyomi.source.model.SManga
-import uy.kohesive.injekt.injectLazy
 import kotlin.collections.set
+import uy.kohesive.injekt.injectLazy
 
 open class MangaImpl : Manga {
 
@@ -47,9 +47,9 @@ open class MangaImpl : Manga {
             title = if (currentTitle() != originalTitle()) {
                 val customTitle = currentTitle()
                 val trueTitle = other.title
-                "${customTitle}${SManga.splitter}${trueTitle}"
+                "${customTitle}${SManga.splitter}$trueTitle"
             } else other.title
-            val db:DownloadManager by injectLazy()
+            val db: DownloadManager by injectLazy()
             val provider = DownloadProvider(db.context)
             provider.renameMangaFolder(oldTitle, title, source)
         }
@@ -63,7 +63,6 @@ open class MangaImpl : Manga {
         val manga = other as Manga
 
         return url == manga.url
-
     }
 
     override fun hashCode(): Int {
@@ -71,7 +70,7 @@ open class MangaImpl : Manga {
     }
 
     companion object {
-        private var lastCoverFetch:HashMap<Long, Long> = hashMapOf()
+        private var lastCoverFetch: HashMap<Long, Long> = hashMapOf()
 
         fun setLastCoverFetch(id: Long, time: Long) {
             lastCoverFetch[id] = time
@@ -79,5 +78,4 @@ open class MangaImpl : Manga {
 
         fun getLastCoverFetch(id: Long) = lastCoverFetch[id] ?: 0
     }
-
 }

@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.data.database.mappers
 
-
 import android.content.ContentValues
 import android.database.Cursor
 import com.pushtorefresh.storio.sqlite.SQLiteTypeMapping

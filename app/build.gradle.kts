@@ -8,7 +8,7 @@ plugins {
     kotlin("android")
     kotlin("android.extensions")
     kotlin("kapt")
-    //id("org.jmailen.kotlinter") version "2.3.1"
+    id("org.jmailen.kotlinter") version "2.3.1"
     id("com.github.zellius.shortcut-helper")
     id("com.google.gms.google-services") apply false
 }
@@ -114,9 +114,9 @@ dependencies {
 
     implementation("com.google.firebase:firebase-core:17.2.3")
 
-    val lifecycle_version = "2.1.0"
-    implementation("androidx.lifecycle:lifecycle-extensions:$lifecycle_version")
-    implementation("androidx.lifecycle:lifecycle-common-java8:$lifecycle_version")
+    val lifecycleVersion = "2.1.0"
+    implementation("androidx.lifecycle:lifecycle-extensions:$lifecycleVersion")
+    implementation("androidx.lifecycle:lifecycle-common-java8:$lifecycleVersion")
 
 // ReactiveX
     implementation("io.reactivex:rxandroid:1.2.1")
@@ -126,15 +126,15 @@ dependencies {
     implementation("com.github.pwittchen:reactivenetwork:0.13.0")
 
 // Network client
-    val okhttp_version = "4.3.1"
-    implementation("com.squareup.okhttp3:okhttp:$okhttp_version")
-    implementation("com.squareup.okhttp3:logging-interceptor:$okhttp_version")
+    val okhttpVersion = "4.3.1"
+    implementation("com.squareup.okhttp3:okhttp:$okhttpVersion")
+    implementation("com.squareup.okhttp3:logging-interceptor:$okhttpVersion")
     implementation("com.squareup.okio:okio:2.4.3")
 
 // REST
-    val retrofit_version = "2.7.1"
-    implementation("com.squareup.retrofit2:retrofit:$retrofit_version")
-    implementation("com.squareup.retrofit2:converter-gson:$retrofit_version")
+    val retrofitVersion = "2.7.1"
+    implementation("com.squareup.retrofit2:retrofit:$retrofitVersion")
+    implementation("com.squareup.retrofit2:converter-gson:$retrofitVersion")
 
 // JSON
     implementation("com.google.code.gson:gson:2.8.6")
@@ -164,18 +164,18 @@ dependencies {
     implementation("io.requery:sqlite-android:3.31.0")
 
 // Model View Presenter
-    val nucleus_version = "3.0.0"
-    implementation("info.android15.nucleus:nucleus:$nucleus_version")
-    implementation("info.android15.nucleus:nucleus-support-v7:$nucleus_version")
+    val nucleusVersion = "3.0.0"
+    implementation("info.android15.nucleus:nucleus:$nucleusVersion")
+    implementation("info.android15.nucleus:nucleus-support-v7:$nucleusVersion")
 
 // Dependency injection
     implementation("com.github.inorichi.injekt:injekt-core:65b0440")
 
 // Image library
-    val glide_version = "4.11.0"
-    implementation("com.github.bumptech.glide:glide:$glide_version")
-    implementation("com.github.bumptech.glide:okhttp3-integration:$glide_version")
-    kapt("com.github.bumptech.glide:compiler:$glide_version")
+    val glideVersion = "4.11.0"
+    implementation("com.github.bumptech.glide:glide:$glideVersion")
+    implementation("com.github.bumptech.glide:okhttp3-integration:$glideVersion")
+    kapt("com.github.bumptech.glide:compiler:$glideVersion")
 
 // Transformations
     implementation("jp.wasabeef:glide-transformations:4.1.0")
@@ -208,28 +208,28 @@ dependencies {
     implementation("com.github.inorichi:conductor-support-preference:a32c357")
 
 // RxBindings
-    val rxbindings_version = "1.0.1"
-    implementation("com.jakewharton.rxbinding:rxbinding-kotlin:$rxbindings_version")
-    implementation("com.jakewharton.rxbinding:rxbinding-appcompat-v7-kotlin:$rxbindings_version")
-    implementation("com.jakewharton.rxbinding:rxbinding-support-v4-kotlin:$rxbindings_version")
-    implementation("com.jakewharton.rxbinding:rxbinding-recyclerview-v7-kotlin:$rxbindings_version")
+    val rxbindingsVersion = "1.0.1"
+    implementation("com.jakewharton.rxbinding:rxbinding-kotlin:$rxbindingsVersion")
+    implementation("com.jakewharton.rxbinding:rxbinding-appcompat-v7-kotlin:$rxbindingsVersion")
+    implementation("com.jakewharton.rxbinding:rxbinding-support-v4-kotlin:$rxbindingsVersion")
+    implementation("com.jakewharton.rxbinding:rxbinding-recyclerview-v7-kotlin:$rxbindingsVersion")
 
 // Tests
     testImplementation("junit:junit:4.13")
-    testImplementation("org.assertj:assertj-core:1.7.1")
+    testImplementation("org.assertj:assertj-core:3.12.2")
     testImplementation("org.mockito:mockito-core:1.10.19")
 
-    val robolectric_version = "3.1.4"
-    testImplementation("org.robolectric:robolectric:$robolectric_version")
-    testImplementation("org.robolectric:shadows-multidex:$robolectric_version")
-    testImplementation("org.robolectric:shadows-play-services:$robolectric_version")
+    val robolectricVersion = "3.1.4"
+    testImplementation("org.robolectric:robolectric:$robolectricVersion")
+    testImplementation("org.robolectric:shadows-multidex:$robolectricVersion")
+    testImplementation("org.robolectric:shadows-play-services:$robolectricVersion")
 
 
     implementation(kotlin("stdlib", org.jetbrains.kotlin.config.KotlinCompilerVersion.VERSION))
 
-    val coroutines_version = "1.3.3"
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version")
+    val coroutinesVersion = "1.3.3"
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion")
 
     //Crash reports
     val acraVersion = "4.9.2"
@@ -239,13 +239,13 @@ dependencies {
     implementation("info.debatty:java-string-similarity:1.2.1")
 }
 
-/*tasks.preBuild {
+tasks.preBuild {
     dependsOn(tasks.lintKotlin)
 }
 tasks.lintKotlin {
     dependsOn(tasks.formatKotlin)
-}*/
+}
 
-if (getGradle().getStartParameter().getTaskRequests().toString().contains("Standard")) {
+if (gradle.startParameter.taskRequests.toString().contains("Standard")) {
     apply(mapOf("plugin" to "com.google.gms.google-services"))
 }

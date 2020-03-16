@@ -22,5 +22,4 @@ class PreCachingLayoutManager(context: Context) : androidx.recyclerview.widget.L
         }
         return DEFAULT_EXTRA_LAYOUT_SPACE
     }
-
 }

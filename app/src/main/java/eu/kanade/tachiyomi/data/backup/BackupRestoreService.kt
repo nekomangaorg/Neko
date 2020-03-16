@@ -38,22 +38,21 @@ import eu.kanade.tachiyomi.util.lang.chop
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.isServiceRunning
 import eu.kanade.tachiyomi.util.system.notificationManager
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Locale
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
-import java.io.File
-import java.text.SimpleDateFormat
-import java.util.Locale
-import java.util.concurrent.TimeUnit
 
 /**
  * Restores backup from json file
  */
 class BackupRestoreService : Service() {
-
 
     /**
      * Wake lock that will be held until the service is destroyed.
@@ -87,7 +86,6 @@ class BackupRestoreService : Service() {
      */
     private val trackingErrors = mutableListOf<String>()
 
-
     /**
      * List containing missing sources
      */
@@ -112,7 +110,6 @@ class BackupRestoreService : Service() {
      * Tracking manager
      */
     internal val trackManager: TrackManager by injectLazy()
-
 
     /**
      * Method called when the service is created. It injects dependencies and acquire the wake lock.
@@ -216,7 +213,6 @@ class BackupRestoreService : Service() {
         showResultNotification(logFile.parent, logFile.name)
     }
 
-
     /**Restore categories if they were backed up
      *
      */
@@ -246,8 +242,7 @@ class BackupRestoreService : Service() {
             if (job?.isCancelled == false) {
                 showProgressNotification(restoreProgress, totalAmount, manga.title)
                 restoreProgress += 1
-            }
-            else {
+            } else {
                 throw java.lang.Exception("Job was cancelled")
             }
             val dbManga = backupManager.getMangaFromDatabase(manga)
@@ -262,7 +257,7 @@ class BackupRestoreService : Service() {
             }
 
             if (!dbMangaExists || !backupManager.restoreChaptersForManga(manga, chapters)) {
-                //manga gets chapters added
+                // manga gets chapters added
                 backupManager.restoreChapterFetch(source, manga, chapters)
             }
             // Restore categories
@@ -280,8 +275,7 @@ class BackupRestoreService : Service() {
                 val cause = e.cause
                 if (cause is SourceNotFoundException) {
                     sourcesMissing.add(cause.id)
-                }
-                else if (e.message?.contains("licensed", true) == true) {
+                } else if (e.message?.contains("licensed", true) == true) {
                     lincensedManga++
                 }
                 errors.add("${manga.title} - ${cause?.message ?: e.message}")
@@ -303,7 +297,7 @@ class BackupRestoreService : Service() {
                 try {
                     service.refresh(track)
                     db.insertTrack(track).executeAsBlocking()
-                }catch (e : Exception){
+                } catch (e: Exception) {
                     errors.add("${manga.title} - ${e.message}")
                 }
             } else {
@@ -356,7 +350,6 @@ class BackupRestoreService : Service() {
     private val cancelIntent by lazy {
         NotificationReceiver.cancelRestorePendingBroadcast(this)
     }
-
 
     /**
      * Shows the notification containing the currently updating manga and the progress.

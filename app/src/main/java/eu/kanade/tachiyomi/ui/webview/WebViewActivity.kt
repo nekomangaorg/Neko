@@ -15,7 +15,6 @@ import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.SourceManager
@@ -25,7 +24,6 @@ import eu.kanade.tachiyomi.util.system.WebViewClientCompat
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.toast
-import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.invisible
 import eu.kanade.tachiyomi.util.view.marginBottom
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
@@ -37,14 +35,14 @@ import uy.kohesive.injekt.injectLazy
 class WebViewActivity : BaseActivity() {
 
     private val sourceManager by injectLazy<SourceManager>()
-    private var bundle:Bundle? = null
+    private var bundle: Bundle? = null
 
     companion object {
         const val SOURCE_KEY = "source_key"
         const val URL_KEY = "url_key"
         const val TITLE_KEY = "title_key"
 
-        fun newIntent(context: Context, sourceId: Long, url: String, title:String?): Intent {
+        fun newIntent(context: Context, sourceId: Long, url: String, title: String?): Intent {
             val intent = Intent(context, WebViewActivity::class.java)
             intent.putExtra(SOURCE_KEY, sourceId)
             intent.putExtra(URL_KEY, url)
@@ -70,7 +68,7 @@ class WebViewActivity : BaseActivity() {
         }
         toolbar.navigationIcon?.setTint(getResourceColor(R.attr.actionBarTintColor))
 
-        val container:ViewGroup = findViewById(R.id.web_view_layout)
+        val container: ViewGroup = findViewById(R.id.web_view_layout)
         val content: LinearLayout = findViewById(R.id.web_linear_layout)
         container.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
             View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
@@ -166,7 +164,7 @@ class WebViewActivity : BaseActivity() {
 
                 override fun onPageCommitVisible(view: WebView?, url: String?) {
                     super.onPageCommitVisible(view, url)
-                    nested_view.scrollTo(0,0)
+                    nested_view.scrollTo(0, 0)
                 }
             }
             val marginB = webview.marginBottom
@@ -182,8 +180,7 @@ class WebViewActivity : BaseActivity() {
             webview.settings.javaScriptEnabled = true
             webview.settings.userAgentString = source.headers["User-Agent"]
             webview.loadUrl(url, headers)
-        }
-        else {
+        } else {
             webview.restoreState(bundle)
         }
     }
@@ -259,7 +256,7 @@ class WebViewActivity : BaseActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_web_back -> webview.goBack()
-            R.id.action_web_forward ->  webview.goForward()
+            R.id.action_web_forward -> webview.goForward()
             R.id.action_web_share -> shareWebpage()
             R.id.action_web_browser -> openInBrowser()
         }

@@ -12,7 +12,7 @@ import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
  */
 
 abstract class LibraryHolder(
-        view: View,
+    view: View,
     val adapter: LibraryCategoryAdapter
 ) : BaseFlexibleViewHolder(view, adapter) {
 
@@ -23,7 +23,6 @@ abstract class LibraryHolder(
      * @param item the manga item to bind.
      */
     abstract fun onSetValues(item: LibraryItem)
-
 
     fun setUnreadBadge(badge: LibraryBadge, item: LibraryItem) {
         badge.setUnreadDownload(
@@ -36,7 +35,7 @@ abstract class LibraryHolder(
             when {
                 item.downloadCount == -1 -> -1
                 item.manga.source == LocalSource.ID -> -2
-                else ->  item.downloadCount
+                else -> item.downloadCount
             },
             item.chapterCount > -1)
     }

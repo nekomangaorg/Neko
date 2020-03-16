@@ -12,7 +12,7 @@ import eu.kanade.tachiyomi.util.system.LocaleHelper
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class SettingsExtensionsController: SettingsController() {
+class SettingsExtensionsController : SettingsController() {
 
     override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
         titleRes = R.string.action_filter

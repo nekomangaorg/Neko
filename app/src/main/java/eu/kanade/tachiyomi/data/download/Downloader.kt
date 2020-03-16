@@ -21,6 +21,7 @@ import eu.kanade.tachiyomi.util.storage.saveTo
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.launchNow
 import eu.kanade.tachiyomi.util.system.launchUI
+import java.io.File
 import kotlinx.coroutines.async
 import okhttp3.Response
 import rx.Observable
@@ -28,7 +29,6 @@ import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 import rx.subscriptions.CompositeSubscription
 import timber.log.Timber
-import java.io.File
 
 /**
  * This class is the one in charge of downloading chapters.
@@ -45,10 +45,10 @@ import java.io.File
  * @param sourceManager the source manager.
  */
 class Downloader(
-        private val context: Context,
-        private val provider: DownloadProvider,
-        private val cache: DownloadCache,
-        private val sourceManager: SourceManager
+    private val context: Context,
+    private val provider: DownloadProvider,
+    private val cache: DownloadCache,
+    private val sourceManager: SourceManager
 ) {
 
     /**
@@ -129,12 +129,11 @@ class Downloader(
             if (notifier.paused) {
                 if (queue.isEmpty()) {
                     notifier.dismiss()
-                }
-                else {
+                } else {
                     notifier.paused = false
                     notifier.onDownloadPaused()
                 }
-            }else {
+            } else {
                 notifier.dismiss()
             }
         }
@@ -164,7 +163,7 @@ class Downloader(
     fun clearQueue(isNotification: Boolean = false) {
         destroySubscriptions()
 
-        //Needed to update the chapter view
+        // Needed to update the chapter view
         if (isNotification) {
             queue
                     .filter { it.status == Download.QUEUE }
@@ -180,7 +179,7 @@ class Downloader(
      * @param isNotification value that determines if status is set (needed for view updates)
      */
     fun clearQueue(manga: Manga, isNotification: Boolean = false) {
-        //Needed to update the chapter view
+        // Needed to update the chapter view
         if (isNotification) {
             queue
                 .filter { it.status == Download.QUEUE && it.manga.id == manga.id }
@@ -318,7 +317,6 @@ class Downloader(
                     notifier.onError(error.message, download.chapter.name)
                     download
                 }
-
     }
 
     /**
@@ -448,8 +446,12 @@ class Downloader(
      * @param tmpDir the directory where the download is currently stored.
      * @param dirname the real (non temporary) directory name of the download.
      */
-    private fun ensureSuccessfulDownload(download: Download, mangaDir: UniFile,
-                                         tmpDir: UniFile, dirname: String) {
+    private fun ensureSuccessfulDownload(
+        download: Download,
+        mangaDir: UniFile,
+        tmpDir: UniFile,
+        dirname: String
+    ) {
 
         // Ensure that the chapter folder has all the images.
         val downloadedImages = tmpDir.listFiles().orEmpty().filterNot { it.name!!.endsWith(".tmp") }
@@ -497,5 +499,4 @@ class Downloader(
     companion object {
         const val TMP_DIR_SUFFIX = "_tmp"
     }
-
 }

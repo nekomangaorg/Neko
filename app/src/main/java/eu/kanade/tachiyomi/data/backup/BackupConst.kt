@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.data.backup
 import eu.kanade.tachiyomi.BuildConfig.APPLICATION_ID as ID
 
-
 object BackupConst {
 
     const val INTENT_FILTER = "SettingsBackupFragment"
@@ -18,5 +17,5 @@ object BackupConst {
     const val EXTRA_TIME = "$ID.$INTENT_FILTER.EXTRA_TIME"
     const val EXTRA_ERROR_FILE_PATH = "$ID.$INTENT_FILTER.EXTRA_ERROR_FILE_PATH"
     const val EXTRA_ERROR_FILE = "$ID.$INTENT_FILTER.EXTRA_ERROR_FILE"
-    const val EXTRA_MINI_ERROR= "$ID.$INTENT_FILTER.EXTRA_MINI_ERROR"
+    const val EXTRA_MINI_ERROR = "$ID.$INTENT_FILTER.EXTRA_MINI_ERROR"
 }

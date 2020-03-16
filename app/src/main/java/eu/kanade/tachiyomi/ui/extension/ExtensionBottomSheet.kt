@@ -23,15 +23,15 @@ import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import kotlinx.android.synthetic.main.extensions_bottom_sheet.view.*
 
-class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null)
-: LinearLayout(context, attrs),
+class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
+LinearLayout(context, attrs),
 ExtensionAdapter.OnButtonClickListener,
     FlexibleAdapter.OnItemClickListener,
     FlexibleAdapter.OnItemLongClickListener,
     ExtensionTrustDialog.Listener {
 
     var sheetBehavior: BottomSheetBehavior<*>? = null
-    lateinit var autoCheckItem:AutoCheckItem
+    lateinit var autoCheckItem: AutoCheckItem
 
     /**
      * Adapter containing the list of manga from the catalogue.
@@ -60,7 +60,7 @@ ExtensionAdapter.OnButtonClickListener,
 
         val attrsArray = intArrayOf(android.R.attr.actionBarSize)
         val array = context.obtainStyledAttributes(attrsArray)
-        val headerHeight =  array.getDimensionPixelSize(0, 0)
+        val headerHeight = array.getDimensionPixelSize(0, 0)
         array.recycle()
         ext_recycler.doOnApplyWindowInsets { _, windowInsets, _ ->
             ext_recycler.updateLayoutParams<LayoutParams> {
@@ -136,7 +136,7 @@ ExtensionAdapter.OnButtonClickListener,
     }
 
     fun setExtensions(extensions: List<ExtensionItem>) {
-        //ext_swipe_refresh?.isRefreshing = false
+        // ext_swipe_refresh?.isRefreshing = false
         this.extensions = extensions
         controller.presenter.updateSources()
         drawExtensions()
@@ -183,7 +183,8 @@ class AutoCheckItem(private val autoCheck: Preference<Boolean>) : AbstractHeader
     }
 
     override fun createViewHolder(
-        view: View, adapter: FlexibleAdapter<IFlexible<*>>
+        view: View,
+        adapter: FlexibleAdapter<IFlexible<*>>
     ): AutoCheckHolder {
         return AutoCheckHolder(view, adapter, autoCheck)
     }
@@ -194,7 +195,7 @@ class AutoCheckItem(private val autoCheck: Preference<Boolean>) : AbstractHeader
         position: Int,
         payloads: MutableList<Any?>?
     ) {
-        //holder.bind(autoCheck.getOrDefault())
+        // holder.bind(autoCheck.getOrDefault())
     }
 
     override fun equals(other: Any?): Boolean {
@@ -205,8 +206,11 @@ class AutoCheckItem(private val autoCheck: Preference<Boolean>) : AbstractHeader
         return -1
     }
 
-    class AutoCheckHolder(val view: View, private val adapter: FlexibleAdapter<IFlexible<*>>,
-        autoCheck: Preference<Boolean>) :
+    class AutoCheckHolder(
+        val view: View,
+        private val adapter: FlexibleAdapter<IFlexible<*>>,
+        autoCheck: Preference<Boolean>
+    ) :
         FlexibleViewHolder(view, adapter, true) {
         private val autoCheckbox: CheckBox = view.findViewById(R.id.auto_checkbox)
 

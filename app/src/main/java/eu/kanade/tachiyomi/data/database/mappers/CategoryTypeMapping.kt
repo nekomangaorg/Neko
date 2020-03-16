@@ -47,7 +47,6 @@ class CategoryPutResolver : DefaultPutResolver<Category>() {
             val orderString = obj.mangaOrder.joinToString("/")
             put(COL_MANGA_ORDER, orderString)
         }
-
     }
 }
 

@@ -37,5 +37,4 @@ data class SourceItem(val source: CatalogueSource, val header: LangItem? = null)
     override fun bindViewHolder(adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>, holder: SourceHolder, position: Int, payloads: MutableList<Any>) {
         holder.bind(this)
     }
-
 }

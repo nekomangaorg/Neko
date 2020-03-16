@@ -63,15 +63,11 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 open class LibraryController(
-        bundle: Bundle? = null,
-        protected val preferences: PreferencesHelper = Injekt.get()
-) : BaseController(bundle), TabbedController,
-        ActionMode.Callback,
-        ChangeMangaCategoriesDialog.Listener,
-        MigrationInterface,
-        DownloadServiceListener,
-        RootSearchInterface,
-        LibraryServiceListener {
+    bundle: Bundle? = null,
+    protected val preferences: PreferencesHelper = Injekt.get()
+) : BaseController(bundle), TabbedController, ActionMode.Callback,
+    ChangeMangaCategoriesDialog.Listener, MigrationInterface, DownloadServiceListener,
+    RootSearchInterface, LibraryServiceListener {
 
     /**
      * Position of the active category.
@@ -145,20 +141,20 @@ open class LibraryController(
 
     private var tabsVisibilitySubscription: Subscription? = null
 
-    private var observeLater:Boolean = false
+    private var observeLater: Boolean = false
 
     var snack: Snackbar? = null
 
-    lateinit var presenter:LibraryPresenter
+    lateinit var presenter: LibraryPresenter
         private set
 
     protected var justStarted = true
 
-    var libraryLayout:Int = preferences.libraryLayout().getOrDefault()
+    var libraryLayout: Int = preferences.libraryLayout().getOrDefault()
 
     private var usePager: Boolean = !preferences.libraryAsSingleList().getOrDefault()
 
-    open fun contentView():View = pager_layout
+    open fun contentView(): View = pager_layout
 
     init {
         setHasOptionsMenu(true)
@@ -173,13 +169,11 @@ open class LibraryController(
         return inflater.inflate(R.layout.library_controller, container, false)
     }
 
-
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
         view.applyWindowInsetsForRootController(activity!!.bottom_nav)
         mangaPerRow = getColumnsPreferenceForCurrentOrientation().getOrDefault()
-        if (!::presenter.isInitialized)
-            presenter = LibraryPresenter(this)
+        if (!::presenter.isInitialized) presenter = LibraryPresenter(this)
 
         layoutView(view)
 
@@ -187,43 +181,33 @@ open class LibraryController(
             createActionModeIfNeeded()
         }
 
-        //bottom_sheet.onCreate(pager_layout)
+        // bottom_sheet.onCreate(pager_layout)
         bottom_sheet.onCreate(contentView())
 
         bottom_sheet.onGroupClicked = {
             when (it) {
                 FilterBottomSheet.ACTION_REFRESH -> onRefresh()
                 FilterBottomSheet.ACTION_FILTER -> onFilterChanged()
-                FilterBottomSheet.ACTION_HIDE_FILTER_TIP -> activity?.toast(R.string
-                    .hide_filters_tip, Toast.LENGTH_LONG)
+                FilterBottomSheet.ACTION_HIDE_FILTER_TIP -> activity?.toast(
+                    R.string.hide_filters_tip, Toast.LENGTH_LONG
+                )
             }
         }
 
-       /* fab.setOnClickListener {
-            router.pushController(DownloadController().withFadeTransaction())
-        }*/
-
-       /* if (presenter.isDownloading()) {
-            fab.scaleY = 1f
-            fab.scaleX = 1f
-            fab.isClickable = true
-            fab.isFocusable = true
-        }*/
-
         val config = resources?.configuration
-        phoneLandscape = (config?.orientation == Configuration.ORIENTATION_LANDSCAPE &&
-            (config.screenLayout.and(Configuration.SCREENLAYOUT_SIZE_MASK)) <
-            Configuration.SCREENLAYOUT_SIZE_LARGE)
+        phoneLandscape =
+            (config?.orientation == Configuration.ORIENTATION_LANDSCAPE && (config.screenLayout.and(
+                Configuration.SCREENLAYOUT_SIZE_MASK
+            )) < Configuration.SCREENLAYOUT_SIZE_LARGE)
 
         presenter.onRestore()
         val library = presenter.getAllManga()
-        if (library != null)  presenter.updateViewBlocking()
+        if (library != null) presenter.updateViewBlocking()
         else {
             contentView().alpha = 0f
             presenter.getLibraryBlocking()
         }
     }
-
 
     open fun layoutView(view: View) {
         pagerAdapter = LibraryAdapter(this)
@@ -235,7 +219,9 @@ open class LibraryController(
             }
 
             override fun onPageScrolled(
-                position: Int, positionOffset: Float, positionOffsetPixels: Int
+                position: Int,
+                positionOffset: Float,
+                positionOffsetPixels: Int
             ) {
             }
 
@@ -246,8 +232,8 @@ open class LibraryController(
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
         super.onChangeStarted(handler, type)
         if (type.isEnter) {
-            //if (library_pager != null)
-                //activity?.tabs?.setupWithViewPager(library_pager)
+            // if (library_pager != null)
+            // activity?.tabs?.setupWithViewPager(library_pager)
             presenter.getLibrary()
             DownloadService.addListener(this)
             DownloadService.callListeners()
@@ -265,13 +251,11 @@ open class LibraryController(
     override fun onActivityPaused(activity: Activity) {
         super.onActivityPaused(activity)
         observeLater = true
-        if (::presenter.isInitialized)
-            presenter.onDestroy()
+        if (::presenter.isInitialized) presenter.onDestroy()
     }
 
     override fun onDestroy() {
-        if (::presenter.isInitialized)
-            presenter.onDestroy()
+        if (::presenter.isInitialized) presenter.onDestroy()
         super.onDestroy()
     }
 
@@ -287,14 +271,14 @@ open class LibraryController(
     }
 
     override fun downloadStatusChanged(downloading: Boolean) {
-       /* launchUI {
-            val scale = if (downloading) 1f else 0f
-            val fab = fab ?: return@launchUI
-            fab.animate().scaleX(scale).scaleY(scale).setDuration(200).start()
-            fab.isClickable = downloading
-            fab.isFocusable = downloading
-            bottom_sheet?.adjustFiltersMargin(downloading)
-        }*/
+        /* launchUI {
+             val scale = if (downloading) 1f else 0f
+             val fab = fab ?: return@launchUI
+             fab.animate().scaleX(scale).scaleY(scale).setDuration(200).start()
+             fab.isClickable = downloading
+             fab.isFocusable = downloading
+             bottom_sheet?.adjustFiltersMargin(downloading)
+         }*/
     }
 
     override fun onUpdateManga(manga: LibraryManga) {
@@ -310,19 +294,19 @@ open class LibraryController(
     }
 
     override fun configureTabs(tabs: TabLayout) {
-       /* with(tabs) {
-            tabGravity = TabLayout.GRAVITY_CENTER
-            tabMode = TabLayout.MODE_SCROLLABLE
-        }
-        tabsVisibilitySubscription?.unsubscribe()
-        tabsVisibilitySubscription = tabsVisibilityRelay.subscribe { visible ->
-            val tabAnimator = (activity as? MainActivity)?.tabAnimator ?: return@subscribe
-            if (visible) {
-                tabAnimator.expand()
-            } else if (!visible) {
-                tabAnimator.collapse()
-            }
-        }*/
+        /* with(tabs) {
+             tabGravity = TabLayout.GRAVITY_CENTER
+             tabMode = TabLayout.MODE_SCROLLABLE
+         }
+         tabsVisibilitySubscription?.unsubscribe()
+         tabsVisibilitySubscription = tabsVisibilityRelay.subscribe { visible ->
+             val tabAnimator = (activity as? MainActivity)?.tabAnimator ?: return@subscribe
+             if (visible) {
+                 tabAnimator.expand()
+             } else if (!visible) {
+                 tabAnimator.collapse()
+             }
+         }*/
     }
 
     override fun cleanupTabs(tabs: TabLayout) {
@@ -330,10 +314,13 @@ open class LibraryController(
         tabsVisibilitySubscription = null
     }
 
-    open fun onNextLibraryUpdate(mangaMap: List<LibraryItem>, freshStart: Boolean = false) { }
+    open fun onNextLibraryUpdate(mangaMap: List<LibraryItem>, freshStart: Boolean = false) {}
 
-    fun onNextLibraryUpdate(categories: List<Category>, mangaMap: Map<Int, List<LibraryItem>>,
-        freshStart: Boolean = false) {
+    fun onNextLibraryUpdate(
+        categories: List<Category>,
+        mangaMap: Map<Int, List<LibraryItem>>,
+        freshStart: Boolean = false
+    ) {
         val view = view ?: return
         val adapter = pagerAdapter ?: return
 
@@ -345,10 +332,8 @@ open class LibraryController(
         }
 
         // Get the current active category.
-        val activeCat = if (adapter.categories.isNotEmpty())
-            library_pager.currentItem
-        else
-            activeCategory
+        val activeCat = if (adapter.categories.isNotEmpty()) library_pager.currentItem
+        else activeCategory
 
         categories.find { it.id == 0 }?.let {
             it.name = resources?.getString(
@@ -362,20 +347,21 @@ open class LibraryController(
         // Restore active category.
         library_pager.setCurrentItem(activeCat, false)
 
-        //tabsVisibilityRelay.call(categories.size > 1)
+        // tabsVisibilityRelay.call(categories.size > 1)
 
         libraryMangaRelay.call(LibraryMangaEvent(mangaMap))
 
         view.post {
-            //if (isAttached) {
-              //  activity?.tabs?.setScrollPosition(library_pager.currentItem, 0f, true)
-            //}
+            // if (isAttached) {
+            //  activity?.tabs?.setScrollPosition(library_pager.currentItem, 0f, true)
+            // }
         }
 
         if (!freshStart && justStarted) {
             if (!freshStart) {
                 justStarted = false
-                if (pager_layout.alpha == 0f) pager_layout.animate().alpha(1f).setDuration(500).start()
+                if (pager_layout.alpha == 0f) pager_layout.animate().alpha(1f).setDuration(500)
+                    .start()
             }
         }
         // Delay the scroll position to allow the view to be properly measured.
@@ -389,10 +375,8 @@ open class LibraryController(
      * @return the preference.
      */
     private fun getColumnsPreferenceForCurrentOrientation(): Preference<Int> {
-        return if (resources?.configuration?.orientation == Configuration.ORIENTATION_PORTRAIT)
-            preferences.portraitColumns()
-        else
-            preferences.landscapeColumns()
+        return if (resources?.configuration?.orientation == Configuration.ORIENTATION_PORTRAIT) preferences.portraitColumns()
+        else preferences.landscapeColumns()
     }
 
     /**
@@ -419,9 +403,9 @@ open class LibraryController(
     }
 
     open fun onCatSortChanged(id: Int? = null) {
-        val catId = (id ?: pagerAdapter?.categories?.getOrNull(library_pager.currentItem)?.id)
-                ?: return
-         presenter.requestCatSortUpdate(catId)
+        val catId =
+            (id ?: pagerAdapter?.categories?.getOrNull(library_pager.currentItem)?.id) ?: return
+        presenter.requestCatSortUpdate(catId)
     }
 
     /**
@@ -445,8 +429,9 @@ open class LibraryController(
         if (actionMode == null) {
             actionMode = (activity as AppCompatActivity).startSupportActionMode(this)
             val view = activity?.window?.currentFocus ?: return
-            val imm = activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as?
-            InputMethodManager ?: return
+            val imm =
+                activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+                    ?: return
             imm.hideSoftInputFromWindow(view.windowToken, 0)
         }
     }
@@ -493,8 +478,7 @@ open class LibraryController(
 
     override fun handleRootBack(): Boolean {
         val sheetBehavior = BottomSheetBehavior.from(bottom_sheet)
-        if (sheetBehavior.state != BottomSheetBehavior.STATE_COLLAPSED &&
-            sheetBehavior.state != BottomSheetBehavior.STATE_HIDDEN) {
+        if (sheetBehavior.state != BottomSheetBehavior.STATE_COLLAPSED && sheetBehavior.state != BottomSheetBehavior.STATE_HIDDEN) {
             sheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
             return true
         }
@@ -528,15 +512,12 @@ open class LibraryController(
     }
 
     fun toggleFilters() {
-        if (bottom_sheet.sheetBehavior?.isHideable == true &&
-            bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED)
-            bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_HIDDEN
-        else if (bottom_sheet.sheetBehavior?.state != BottomSheetBehavior.STATE_COLLAPSED
-            && bottom_sheet.sheetBehavior?.skipCollapsed == false)
-            bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
+        if (bottom_sheet.sheetBehavior?.isHideable == true && bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) bottom_sheet.sheetBehavior?.state =
+            BottomSheetBehavior.STATE_HIDDEN
+        else if (bottom_sheet.sheetBehavior?.state != BottomSheetBehavior.STATE_COLLAPSED && bottom_sheet.sheetBehavior?.skipCollapsed == false) bottom_sheet.sheetBehavior?.state =
+            BottomSheetBehavior.STATE_COLLAPSED
         else bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
     }
-
 
     /**
      * Invalidates the action mode, forcing it to refresh its content.
@@ -564,8 +545,7 @@ open class LibraryController(
                 val sameCat = /*(adapter?.categories?.getOrNull(library_pager.currentItem)?.id
                     == catId) &&*/ selectedMangas.all { (it as? LibraryManga)?.category == catId }
                 menu.findItem(R.id.action_move_manga).isVisible = sameCat
-            }
-            else menu.findItem(R.id.action_move_manga).isVisible = false
+            } else menu.findItem(R.id.action_move_manga).isVisible = false
         }
         return false
     }
@@ -574,13 +554,10 @@ open class LibraryController(
         when (item.itemId) {
             R.id.action_move_to_category -> showChangeMangaCategoriesDialog()
             R.id.action_delete -> {
-                MaterialDialog(activity!!)
-                    .message(R.string.confirm_manga_deletion)
+                MaterialDialog(activity!!).message(R.string.confirm_manga_deletion)
                     .positiveButton(R.string.action_remove) {
                         deleteMangasFromLibrary()
-                    }
-                    .negativeButton(android.R.string.no)
-                    .show()
+                    }.negativeButton(android.R.string.no).show()
             }
             R.id.action_select_all -> {
                 pagerAdapter?.categories?.getOrNull(library_pager.currentItem)?.id?.let {
@@ -592,14 +569,12 @@ open class LibraryController(
                 router.pushController(
                     if (skipPre) {
                         MigrationListController.create(
-                            MigrationProcedureConfig(
-                                selectedMangas.mapNotNull { it.id },null)
+                            MigrationProcedureConfig(selectedMangas.mapNotNull { it.id }, null)
                         )
-                    }
-                    else {
-                        PreMigrationController.create( selectedMangas.mapNotNull { it.id } )
-                    }
-                   .withFadeTransaction().tag(if (skipPre) MigrationListController.TAG else null))
+                    } else {
+                        PreMigrationController.create(selectedMangas.mapNotNull { it.id })
+                    }.withFadeTransaction().tag(if (skipPre) MigrationListController.TAG else null)
+                )
                 destroyActionModeIfNeeded()
             }
             /*R.id.action_to_top, R.id.action_to_bottom -> {
@@ -631,7 +606,7 @@ open class LibraryController(
 
     fun openManga(manga: Manga, startY: Float?) {
         router.pushController(MangaDetailsController(manga).withFadeTransaction())
-       // router.pushController(MangaController(manga, startY).withFadeTransaction())
+        // router.pushController(MangaController(manga, startY).withFadeTransaction())
     }
 
     /**
@@ -663,12 +638,12 @@ open class LibraryController(
         val categories = presenter.allCategories.filter { it.id != 0 }
 
         // Get indexes of the common categories to preselect.
-        val commonCategoriesIndexes = presenter.getCommonCategories(mangas)
-                .map { categories.indexOf(it) }
-                .toTypedArray()
+        val commonCategoriesIndexes =
+            presenter.getCommonCategories(mangas).map { categories.indexOf(it) }.toTypedArray()
 
-        ChangeMangaCategoriesDialog(this, mangas, categories, commonCategoriesIndexes)
-                .showDialog(router)
+        ChangeMangaCategoriesDialog(this, mangas, categories, commonCategoriesIndexes).showDialog(
+            router
+        )
     }
 
     private fun deleteMangasFromLibrary() {
@@ -676,8 +651,9 @@ open class LibraryController(
         presenter.removeMangaFromLibrary(mangas)
         destroyActionModeIfNeeded()
         snack?.dismiss()
-        snack = snackbar_layout?.snack(activity?.getString(R.string.manga_removed_library) ?: "", Snackbar
-            .LENGTH_INDEFINITE)  {
+        snack = snackbar_layout?.snack(
+            activity?.getString(R.string.manga_removed_library) ?: "", Snackbar.LENGTH_INDEFINITE
+        ) {
             var undoing = false
             setAction(R.string.action_undo) {
                 presenter.addMangas(mangas)
@@ -686,8 +662,7 @@ open class LibraryController(
             addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
                 override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
                     super.onDismissed(transientBottomBar, event)
-                    if (!undoing)
-                        presenter.confirmDeletion(mangas)
+                    if (!undoing) presenter.confirmDeletion(mangas)
                 }
             })
         }
@@ -699,7 +674,7 @@ open class LibraryController(
         destroyActionModeIfNeeded()
     }
 
-    /// Method for the category view
+    // / Method for the category view
     fun startReading(manga: Manga) {
         val activity = activity ?: return
         val chapter = presenter.getFirstUnread(manga) ?: return

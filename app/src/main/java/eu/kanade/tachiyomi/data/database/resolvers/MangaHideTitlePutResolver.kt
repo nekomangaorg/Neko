@@ -6,7 +6,6 @@ import com.pushtorefresh.storio.sqlite.operations.put.PutResolver
 import com.pushtorefresh.storio.sqlite.operations.put.PutResult
 import com.pushtorefresh.storio.sqlite.queries.UpdateQuery
 import eu.kanade.tachiyomi.data.database.inTransactionReturn
-import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.tables.MangaTable
 
@@ -29,5 +28,4 @@ class MangaHideTitlePutResolver : PutResolver<Manga>() {
     fun mapToContentValues(manga: Manga) = ContentValues(1).apply {
         put(MangaTable.COL_HIDE_TITLE, manga.hide_title)
     }
-
 }

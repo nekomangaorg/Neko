@@ -60,12 +60,12 @@ class Bangumi(private val context: Context, id: Int) : TrackService(id) {
     override suspend fun refresh(track: Track): Track {
         val statusTrack = api.statusLibManga(track)
         track.copyPersonalFrom(statusTrack!!)
-       val remoteTrack = api.findLibManga(track)
-        if(remoteTrack != null){
+        val remoteTrack = api.findLibManga(track)
+        if (remoteTrack != null) {
             track.total_chapters = remoteTrack.total_chapters
             track.status = remoteTrack.status
         }
-       return track
+        return track
     }
 
     override fun getLogo() = R.drawable.tracker_bangumi

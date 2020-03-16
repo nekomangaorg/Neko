@@ -108,7 +108,7 @@ class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
     }
 
     // Attempt to login again if cookies have been cleared but credentials are still filled
-     suspend fun ensureLoggedIn() {
+    suspend fun ensureLoggedIn() {
         if (isAuthorized) return
         if (!isLogged) throw Exception("MAL Login Credentials not found")
 
@@ -131,8 +131,7 @@ class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
         var ckCount = 0
         val url = BASE_URL.toHttpUrlOrNull()!!
         for (ck in networkService.cookieManager.get(url)) {
-            if (ck.name == USER_SESSION_COOKIE || ck.name == LOGGED_IN_COOKIE)
-                ckCount++
+            if (ck.name == USER_SESSION_COOKIE || ck.name == LOGGED_IN_COOKIE) ckCount++
         }
 
         return ckCount == 2

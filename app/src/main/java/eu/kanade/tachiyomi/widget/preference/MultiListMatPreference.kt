@@ -11,13 +11,16 @@ import com.afollestad.materialdialogs.list.listItemsMultiChoice
 import com.afollestad.materialdialogs.list.uncheckItem
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 
-class MultiListMatPreference @JvmOverloads constructor(activity: Activity?, context: Context,
+class MultiListMatPreference @JvmOverloads constructor(
+    activity: Activity?,
+    context: Context,
     attrs: AttributeSet? =
-    null) :
+    null
+) :
     ListMatPreference(activity, context, attrs) {
 
-    var allSelectionRes:Int? = null
-    var customSummaryRes:Int
+    var allSelectionRes: Int? = null
+    var customSummaryRes: Int
         get() = 0
         set(value) { customSummary = context.getString(value) }
 

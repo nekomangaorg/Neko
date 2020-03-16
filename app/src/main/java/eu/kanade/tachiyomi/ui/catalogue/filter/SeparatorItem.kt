@@ -1,9 +1,9 @@
 package eu.kanade.tachiyomi.ui.catalogue.filter
 
 import android.annotation.SuppressLint
-import com.google.android.material.R
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.R
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.AbstractHeaderItem
 import eu.davidea.flexibleadapter.items.IFlexible
@@ -21,9 +21,12 @@ class SeparatorItem(val filter: Filter.Separator) : AbstractHeaderItem<Separator
         return Holder(view, adapter)
     }
 
-    override fun bindViewHolder(adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
-        holder: Holder, position: Int, payloads: MutableList<Any?>?) {
-
+    override fun bindViewHolder(
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
+        holder: Holder,
+        position: Int,
+        payloads: MutableList<Any?>?
+    ) {
     }
 
     override fun equals(other: Any?): Boolean {

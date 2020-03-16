@@ -5,16 +5,14 @@ import android.os.Bundle
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.checkbox.checkBoxPrompt
 import com.afollestad.materialdialogs.checkbox.isCheckPromptChecked
-import com.afollestad.materialdialogs.customview.customView
 import com.bluelinelabs.conductor.Controller
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
-import eu.kanade.tachiyomi.widget.DialogCheckboxView
 
 class RemoveHistoryDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
-        where T : Controller, T: RemoveHistoryDialog.Listener {
+        where T : Controller, T : RemoveHistoryDialog.Listener {
 
     private var manga: Manga? = null
 
@@ -32,7 +30,7 @@ class RemoveHistoryDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
         return MaterialDialog(activity)
                 .title(R.string.action_remove)
                 .message(R.string.dialog_with_checkbox_remove_description)
-                .checkBoxPrompt(res = R.string.dialog_with_checkbox_reset){}
+                .checkBoxPrompt(res = R.string.dialog_with_checkbox_reset) {}
                 .negativeButton(android.R.string.cancel)
                 .positiveButton(R.string.action_remove) {
                     onPositive(it.isCheckPromptChecked())
@@ -50,5 +48,4 @@ class RemoveHistoryDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
     interface Listener {
         fun removeHistory(manga: Manga, history: History, all: Boolean)
     }
-
 }

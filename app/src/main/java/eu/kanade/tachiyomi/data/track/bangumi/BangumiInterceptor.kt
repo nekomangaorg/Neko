@@ -59,7 +59,7 @@ class BangumiInterceptor(val bangumi: Bangumi, val gson: Gson) : Interceptor {
         bangumi.saveToken(oauth)
     }
 
-    fun clearOauth(){
+    fun clearOauth() {
         bangumi.saveToken(null)
     }
 }

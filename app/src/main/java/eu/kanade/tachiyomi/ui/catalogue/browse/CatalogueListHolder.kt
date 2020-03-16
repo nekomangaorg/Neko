@@ -1,14 +1,14 @@
 package eu.kanade.tachiyomi.ui.catalogue.browse
 
 import android.view.View
-import com.bumptech.glide.load.engine.DiskCacheStrategy
-import eu.davidea.flexibleadapter.FlexibleAdapter
-import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.glide.GlideApp
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
+import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.widget.StateImageViewTarget
 import kotlinx.android.synthetic.main.catalogue_list_item.*
@@ -54,5 +54,4 @@ class CatalogueListHolder(private val view: View, adapter: FlexibleAdapter<IFlex
                 .into(StateImageViewTarget(cover_thumbnail, progress))
         }
     }
-
 }

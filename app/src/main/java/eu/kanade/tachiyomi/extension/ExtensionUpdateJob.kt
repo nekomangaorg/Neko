@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.extension
 
-
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
@@ -13,11 +12,11 @@ import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.extension.api.ExtensionGithubApi
 import eu.kanade.tachiyomi.util.system.notification
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import uy.kohesive.injekt.injectLazy
-import java.util.concurrent.TimeUnit
 
 class ExtensionUpdateJob : Job() {
 

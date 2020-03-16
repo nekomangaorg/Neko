@@ -71,7 +71,6 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
-import eu.kanade.tachiyomi.ui.base.controller.NoToolbarElevationController
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.ui.catalogue.CatalogueController
 import eu.kanade.tachiyomi.ui.library.ChangeMangaCategoriesDialog
@@ -96,6 +95,7 @@ import eu.kanade.tachiyomi.util.view.getText
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
+import java.io.File
 import jp.wasabeef.glide.transformations.CropSquareTransformation
 import jp.wasabeef.glide.transformations.MaskTransformation
 import kotlinx.android.synthetic.main.main_activity.*
@@ -104,20 +104,20 @@ import kotlinx.android.synthetic.main.manga_header_item.*
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import java.io.File
 
 class MangaDetailsController : BaseController,
     FlexibleAdapter.OnItemClickListener,
     FlexibleAdapter.OnItemLongClickListener,
     ActionMode.Callback,
     ChaptersAdapter.MangaHeaderInterface,
-    ChangeMangaCategoriesDialog.Listener,
-    NoToolbarElevationController {
+    ChangeMangaCategoriesDialog.Listener {
 
-    constructor(manga: Manga?,
+    constructor(
+        manga: Manga?,
         fromCatalogue: Boolean = false,
         smartSearchConfig: CatalogueController.SmartSearchConfig? = null,
-        update: Boolean = false) : super(Bundle().apply {
+        update: Boolean = false
+    ) : super(Bundle().apply {
         putLong(MANGA_EXTRA, manga?.id ?: 0)
         putBoolean(FROM_CATALOGUE_EXTRA, fromCatalogue)
         putParcelable(SMART_SEARCH_CONFIG_EXTRA, smartSearchConfig)
@@ -143,15 +143,15 @@ class MangaDetailsController : BaseController,
 
     private var manga: Manga? = null
     private var source: Source? = null
-    var colorAnimator:ValueAnimator? = null
-    val presenter:MangaDetailsPresenter
-    var coverColor:Int? = null
+    var colorAnimator: ValueAnimator? = null
+    val presenter: MangaDetailsPresenter
+    var coverColor: Int? = null
     var toolbarIsColored = false
     private var snack: Snackbar? = null
     val fromCatalogue = args.getBoolean(FROM_CATALOGUE_EXTRA, false)
-    var coverDrawable:Drawable? = null
+    var coverDrawable: Drawable? = null
     private var trackingBottomSheet: TrackingBottomSheet? = null
-    private var startingDLChapterPos:Int? = null
+    private var startingDLChapterPos: Int? = null
 
     /**
      * Adapter containing a list of chapters.
@@ -204,7 +204,7 @@ class MangaDetailsController : BaseController,
             swipe_refresh.setProgressViewOffset(false, (-40).dpToPx, headerHeight + offset)
             (recycler.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder)
                 ?.setTopHeight(headerHeight)
-            fast_scroller?.updateLayoutParams<ViewGroup.MarginLayoutParams>  {
+            fast_scroller?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 topMargin = headerHeight
                 bottomMargin = insets.systemWindowInsetBottom
             }
@@ -264,7 +264,8 @@ class MangaDetailsController : BaseController,
             .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
             .signature(ObjectKey(MangaImpl.getLastCoverFetch(manga!!.id!!).toString()))
             .into(object : CustomTarget<Drawable>() {
-                override fun onResourceReady(resource: Drawable,
+                override fun onResourceReady(
+                    resource: Drawable,
                     transition: Transition<in Drawable>?
                 ) {
                     coverDrawable = resource
@@ -303,7 +304,7 @@ class MangaDetailsController : BaseController,
         presenter.fetchChapters()
         val isCurrentController = router?.backstack?.lastOrNull()?.controller() ==
             this
-        if (isCurrentController)  {
+        if (isCurrentController) {
             setStatusBarAndToolbar()
         }
     }
@@ -326,8 +327,7 @@ class MangaDetailsController : BaseController,
         super.onChangeStarted(handler, type)
         if (type == ControllerChangeType.PUSH_ENTER || type == ControllerChangeType.POP_ENTER) {
             setStatusBarAndToolbar()
-        }
-        else if (type == ControllerChangeType.PUSH_EXIT || type == ControllerChangeType.POP_EXIT) {
+        } else if (type == ControllerChangeType.PUSH_EXIT || type == ControllerChangeType.POP_EXIT) {
             if (router.backstack.lastOrNull()?.controller() is DialogController)
                 return
             if (type == ControllerChangeType.POP_EXIT) setHasOptionsMenu(false)
@@ -376,8 +376,7 @@ class MangaDetailsController : BaseController,
                     ?.toggleActivation()
                 startingDLChapterPos = position
                 actionMode?.invalidate()
-            }
-            else {
+            } else {
                 val startingPosition = startingDLChapterPos ?: return false
                 var chapterList = listOf<ChapterItem>()
                 when {
@@ -737,8 +736,7 @@ class MangaDetailsController : BaseController,
         }
         if (chapter.status != Download.NOT_DOWNLOADED && chapter.status != Download.ERROR) {
             presenter.deleteChapters(listOf(chapter))
-        }
-        else {
+        } else {
             if (chapter.status == Download.ERROR)
                 DownloadService.start(view.context)
             else
@@ -782,14 +780,12 @@ class MangaDetailsController : BaseController,
                 ChangeMangaCategoriesDialog(this, listOf(manga), categories, preselected)
                     .showDialog(router)
             }
-        }
-        else {
+        } else {
             if (!manga.favorite) {
                 toggleMangaFavorite()
-            }
-            else {
-                val headerHolder = recycler.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder ?:
-                return
+            } else {
+                val headerHolder = recycler.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder
+                ?: return
                 val popup = PopupMenu(view!!.context, headerHolder.favorite_button)
                 popup.menu.add(R.string.remove_from_library)
 
@@ -888,8 +884,7 @@ class MangaDetailsController : BaseController,
     }
 
     override fun handleBack(): Boolean {
-        if (manga_cover_full?.visibility == View.VISIBLE)
-        {
+        if (manga_cover_full?.visibility == View.VISIBLE) {
             manga_cover_full?.performClick()
             return true
         }

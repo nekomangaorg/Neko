@@ -1,10 +1,10 @@
 package eu.kanade.tachiyomi.ui.catalogue.filter
 
-import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
-import androidx.core.content.ContextCompat
 import android.view.View
 import android.widget.CheckedTextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
+import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.AbstractSectionableItem
 import eu.davidea.flexibleadapter.items.IFlexible
@@ -72,5 +72,4 @@ class SortItem(val name: String, val group: SortGroup) : AbstractSectionableItem
 
         val text: CheckedTextView = itemView.findViewById(R.id.nav_view_item)
     }
-
 }

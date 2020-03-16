@@ -49,7 +49,7 @@ interface SManga : Serializable {
 
     fun originalArtist() = split(artist, false)
 
-    private fun split(string: String?, first: Boolean):String? {
+    private fun split(string: String?, first: Boolean): String? {
         val split = string?.split(splitter) ?: return null
         val s = if (first) split.first() else split.last()
         return if (s.isBlank()) null else s
@@ -60,28 +60,28 @@ interface SManga : Serializable {
             author = if (currentAuthor() != originalAuthor()) {
                 val current = currentAuthor()
                 val og = other.author
-                "${current}$splitter${og}"
+                "${current}$splitter$og"
             } else other.author
 
         if (other.artist != null)
             artist = if (currentArtist() != originalArtist()) {
                 val current = currentArtist()
                 val og = other.artist
-                "${current}$splitter${og}"
+                "${current}$splitter$og"
             } else other.artist
 
         if (other.description != null)
             description = if (currentDesc() != originalDesc()) {
                 val current = currentDesc()
                 val og = other.description
-                "${current}$splitter${og}"
+                "${current}$splitter$og"
             } else other.description
 
         if (other.genre != null)
             genre = if (currentGenres() != originalGenres()) {
                 val current = currentGenres()
                 val og = other.genre
-                "${current}$splitter${og}"
+                "${current}$splitter$og"
             } else other.genre
 
         if (other.thumbnail_url != null)
@@ -104,5 +104,4 @@ interface SManga : Serializable {
             return MangaImpl()
         }
     }
-
 }

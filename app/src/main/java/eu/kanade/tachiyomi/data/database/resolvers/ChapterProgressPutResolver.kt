@@ -31,6 +31,4 @@ class ChapterProgressPutResolver : PutResolver<Chapter>() {
         put(ChapterTable.COL_LAST_PAGE_READ, chapter.last_page_read)
         put(ChapterTable.COL_PAGES_LEFT, chapter.pages_left)
     }
-
 }
-

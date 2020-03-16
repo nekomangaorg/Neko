@@ -7,7 +7,6 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackService
-import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 
@@ -144,25 +143,24 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
         track.copyPersonalFrom(remoteTrack)
         track.total_chapters = remoteTrack.total_chapters
         return track
-
     }
 
     override suspend fun login(username: String, password: String) = login(password)
 
-     suspend fun login(token: String): Boolean {
+    suspend fun login(token: String): Boolean {
         val oauth = api.createOAuth(token)
         interceptor.setAuth(oauth)
 
-         return try {
-             val currentUser = api.getCurrentUser()
-             scorePreference.set(currentUser.second)
-             saveCredentials(currentUser.first.toString(), oauth.access_token)
-             true
-         } catch (e: Exception) {
-             Timber.e(e)
-             logout()
-             false
-         }
+        return try {
+            val currentUser = api.getCurrentUser()
+            scorePreference.set(currentUser.second)
+            saveCredentials(currentUser.first.toString(), oauth.access_token)
+            true
+        } catch (e: Exception) {
+            Timber.e(e)
+            logout()
+            false
+        }
     }
 
     override fun logout() {
@@ -184,7 +182,6 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
         }
     }
 
-
     companion object {
         const val READING = 1
         const val COMPLETED = 2
@@ -202,6 +199,4 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
         const val POINT_5 = "POINT_5"
         const val POINT_3 = "POINT_3"
     }
-
 }
-

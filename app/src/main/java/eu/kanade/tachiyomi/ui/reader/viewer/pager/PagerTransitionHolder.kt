@@ -27,8 +27,8 @@ import rx.android.schedulers.AndroidSchedulers
  */
 @SuppressLint("ViewConstructor")
 class PagerTransitionHolder(
-        val viewer: PagerViewer,
-        val transition: ChapterTransition
+    val viewer: PagerViewer,
+    val transition: ChapterTransition
 ) : LinearLayout(viewer.activity), ViewPagerAdapter.PositionableView {
 
     /**
@@ -46,8 +46,8 @@ class PagerTransitionHolder(
      * Text view used to display the text of the current and next/prev chapters.
      */
     private var textView = TextView(context).apply {
-        //if (Build.VERSION.SDK_INT >= 23)
-        //setTextColor(context.getResourceColor(R.attr.))
+        // if (Build.VERSION.SDK_INT >= 23)
+        // setTextColor(context.getResourceColor(R.attr.))
         textSize = 17.5F
         wrapContent()
     }
@@ -206,5 +206,4 @@ class PagerTransitionHolder(
     private fun View.wrapContent() {
         layoutParams = ViewGroup.LayoutParams(WRAP_CONTENT, WRAP_CONTENT)
     }
-
 }

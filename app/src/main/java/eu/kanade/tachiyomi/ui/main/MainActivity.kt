@@ -45,7 +45,6 @@ import eu.kanade.tachiyomi.extension.api.ExtensionGithubApi
 import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
-import eu.kanade.tachiyomi.ui.base.controller.NoToolbarElevationController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.catalogue.CatalogueController
 import eu.kanade.tachiyomi.ui.catalogue.global_search.CatalogueSearchController
@@ -80,19 +79,19 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
     protected lateinit var router: Router
 
     protected var drawerArrow: DrawerArrowDrawable? = null
-    private var searchDrawable:Drawable? = null
-    private var currentGestureDelegate:SwipeGestureInterface? = null
-    private lateinit var gestureDetector:GestureDetectorCompat
+    private var searchDrawable: Drawable? = null
+    private var currentGestureDelegate: SwipeGestureInterface? = null
+    private lateinit var gestureDetector: GestureDetectorCompat
 
     private var secondaryDrawer: ViewGroup? = null
 
-    private var snackBar:Snackbar? = null
-    private var extraViewForUndo:View? = null
+    private var snackBar: Snackbar? = null
+    private var extraViewForUndo: View? = null
     private var canDismissSnackBar = false
 
     private var animationSet: AnimatorSet? = null
 
-    private  var bottomNavHeight = 0
+    private var bottomNavHeight = 0
 
     fun setUndoSnackBar(snackBar: Snackbar?, extraViewToCheck: View? = null) {
         this.snackBar = snackBar
@@ -132,10 +131,9 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
 
         drawerArrow = DrawerArrowDrawable(this)
         drawerArrow?.color = getResourceColor(R.attr.actionBarTintColor)
-        searchDrawable = ContextCompat.getDrawable(this, R.drawable
-            .ic_search_white_24dp)
-
-       // tabAnimator = TabsAnimator(tabs)
+        searchDrawable = ContextCompat.getDrawable(
+            this, R.drawable.ic_search_white_24dp
+        )
 
         var continueSwitchingTabs = false
         bottom_nav.setOnNavigationItemSelectedListener { item ->
@@ -143,29 +141,30 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             val currentController = router.backstack.lastOrNull()?.controller()
             if (!continueSwitchingTabs && currentController is BottomNavBarInterface) {
                 if (!currentController.canChangeTabs {
-                    continueSwitchingTabs = true
-                    this@MainActivity.bottom_nav.selectedItemId = id
-                }) return@setOnNavigationItemSelectedListener false
+                        continueSwitchingTabs = true
+                        this@MainActivity.bottom_nav.selectedItemId = id
+                    }) return@setOnNavigationItemSelectedListener false
             }
             continueSwitchingTabs = false
             val currentRoot = router.backstack.firstOrNull()
             if (currentRoot?.tag()?.toIntOrNull() != id) {
                 when (id) {
                     R.id.nav_library -> setRoot(
-                        if (preferences.libraryAsSingleList().getOrDefault())
-                            LibraryListController()
-                        else
-                            LibraryController(), id)
-                    R.id.nav_recents ->  {
-                        if (preferences.showRecentUpdates().getOrDefault())
-                            setRoot(RecentChaptersController(), id)
-                        else
-                            setRoot(RecentlyReadController(), id)
+                        if (preferences.libraryAsSingleList()
+                                .getOrDefault()
+                        ) LibraryListController()
+                        else LibraryController(), id
+                    )
+                    R.id.nav_recents -> {
+                        if (preferences.showRecentUpdates().getOrDefault()) setRoot(
+                            RecentChaptersController(),
+                            id
+                        )
+                        else setRoot(RecentlyReadController(), id)
                     }
                     R.id.nav_catalogues -> setRoot(CatalogueController(), id)
                 }
-            }
-            else if (currentRoot.tag()?.toIntOrNull() == id) {
+            } else if (currentRoot.tag()?.toIntOrNull() == id) {
                 if (router.backstackSize == 1) {
                     when (id) {
                         R.id.nav_recents -> {
@@ -194,22 +193,18 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
 
         val content: ViewGroup = findViewById(R.id.main_content)
         DownloadService.addListener(this)
-        content.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
-            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
-            View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-        container.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
-            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
-            View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+        content.systemUiVisibility =
+            View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+        container.systemUiVisibility =
+            View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
         updateRecentsIcon()
         content.viewTreeObserver.addOnGlobalLayoutListener {
             val heightDiff: Int = content.rootView.height - content.height
-            if (heightDiff > 200 &&
-                window.attributes.softInputMode == WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE) {
-                //keyboard is open, hide layout
+            if (heightDiff > 200 && window.attributes.softInputMode == WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE) {
+                // keyboard is open, hide layout
                 bottom_nav.gone()
-            } else if (bottom_nav.visibility == View.GONE
-                && window.attributes.softInputMode == WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE) {
-                //keyboard is hidden, show layout
+            } else if (bottom_nav.visibility == View.GONE && window.attributes.softInputMode == WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE) {
+                // keyboard is hidden, show layout
                 // use coroutine to delay so the bottom bar doesn't flash on top of the keyboard
                 launchUI {
                     bottom_nav.visible()
@@ -219,39 +214,38 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
 
         supportActionBar?.setDisplayShowCustomEnabled(true)
 
-        window.statusBarColor = ColorUtils.setAlphaComponent(getResourceColor(android.R.attr
-            .colorBackground), 175)
+        window.statusBarColor = ColorUtils.setAlphaComponent(
+            getResourceColor(
+                android.R.attr.colorBackground
+            ), 175
+        )
         content.setOnApplyWindowInsetsListener { v, insets ->
-                // if device doesn't support light nav bar
+            // if device doesn't support light nav bar
             window.navigationBarColor = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-                    // basically if in landscape on a phone
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-                        (v.rootWindowInsets.systemWindowInsetLeft > 0 ||
-                            v.rootWindowInsets.systemWindowInsetRight > 0))
-                        // For lollipop, draw opaque nav bar
-                        Color.BLACK
-                    else Color.argb(179, 0, 0, 0)
-                }
-                /*else {
-                    getColor(android.R.color.transparent)
-                }*/
-                // if the android q+ device has gesture nav, transparent nav bar
-                // this is here incase some crazy with a notch uses landscape
-                else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
-                    && (v.rootWindowInsets.systemWindowInsetBottom != v.rootWindowInsets
-                    .tappableElementInsets.bottom)) {
-                    getColor(android.R.color.transparent)
-                }
-                // if in landscape with 2/3 button mode, fully opaque nav bar
-                else if (v.rootWindowInsets.systemWindowInsetLeft > 0
-                    || v.rootWindowInsets.systemWindowInsetRight > 0) {
-                    getResourceColor( android.R.attr.colorPrimary )
-                }
-                // if in portrait with 2/3 button mode, translucent nav bar
-                else {
-                    ColorUtils.setAlphaComponent(
-                        getResourceColor(android.R.attr.colorPrimary), 179)
-                }
+                // basically if in landscape on a phone
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && (v.rootWindowInsets.systemWindowInsetLeft > 0 || v.rootWindowInsets.systemWindowInsetRight > 0))
+                // For lollipop, draw opaque nav bar
+                    Color.BLACK
+                else Color.argb(179, 0, 0, 0)
+            }
+            /*else {
+                getColor(android.R.color.transparent)
+            }*/
+            // if the android q+ device has gesture nav, transparent nav bar
+            // this is here incase some crazy with a notch uses landscape
+            else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && (v.rootWindowInsets.systemWindowInsetBottom != v.rootWindowInsets.tappableElementInsets.bottom)) {
+                getColor(android.R.color.transparent)
+            }
+            // if in landscape with 2/3 button mode, fully opaque nav bar
+            else if (v.rootWindowInsets.systemWindowInsetLeft > 0 || v.rootWindowInsets.systemWindowInsetRight > 0) {
+                getResourceColor(android.R.attr.colorPrimary)
+            }
+            // if in portrait with 2/3 button mode, translucent nav bar
+            else {
+                ColorUtils.setAlphaComponent(
+                    getResourceColor(android.R.attr.colorPrimary), 179
+                )
+            }
             val contextView = window?.decorView?.findViewById<View>(R.id.action_mode_bar)
             contextView?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 leftMargin = insets.systemWindowInsetLeft
@@ -260,8 +254,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             // Consume any horizontal insets and pad all content in. There's not much we can do
             // with horizontal insets
             v.updatePadding(
-                left = insets.systemWindowInsetLeft,
-                right = insets.systemWindowInsetRight
+                left = insets.systemWindowInsetLeft, right = insets.systemWindowInsetRight
             )
             appbar.updatePadding(
                 top = insets.systemWindowInsetTop
@@ -279,24 +272,23 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                 height = 0//insets.systemWindowInsetBottom
             }*/
             insets.replaceSystemWindowInsets(
-                0, insets.systemWindowInsetTop,
-                0, insets.systemWindowInsetBottom
+                0, insets.systemWindowInsetTop, 0, insets.systemWindowInsetBottom
             )
 
             insets
         }
         val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        if (Build.VERSION.SDK_INT >= 26 && currentNightMode == Configuration.UI_MODE_NIGHT_NO &&
-            preferences.theme() >= 8) {
-            content.systemUiVisibility = content.systemUiVisibility.or(View
-                .SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR)
+        if (Build.VERSION.SDK_INT >= 26 && currentNightMode == Configuration.UI_MODE_NIGHT_NO && preferences.theme() >= 8) {
+            content.systemUiVisibility = content.systemUiVisibility.or(
+                View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+            )
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && currentNightMode == Configuration
-                .UI_MODE_NIGHT_NO)
-            content.systemUiVisibility = content.systemUiVisibility.or(View
-                .SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && currentNightMode == Configuration.UI_MODE_NIGHT_NO) content.systemUiVisibility =
+            content.systemUiVisibility.or(
+                View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+            )
 
-        //val drawerContainer: FrameLayout = findViewById(R.id.drawer_container)
+        // val drawerContainer: FrameLayout = findViewById(R.id.drawer_container)
 
         router = Conductor.attachRouter(this, container, savedInstanceState)
         if (!router.hasRootController()) {
@@ -310,25 +302,33 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             val rootSearchController = router.backstack.lastOrNull()?.controller()
             if (rootSearchController is RootSearchInterface) {
                 toolbar.menu.findItem(R.id.action_search)?.expandActionView()
-            }
-            else onBackPressed()
+            } else onBackPressed()
         }
 
         bottom_nav.visibility = if (router.backstackSize > 1) View.GONE else View.VISIBLE
         bottom_nav.alpha = if (router.backstackSize > 1) 0f else 1f
         router.addChangeListener(object : ControllerChangeHandler.ControllerChangeListener {
-            override fun onChangeStarted(to: Controller?, from: Controller?, isPush: Boolean,
-                                         container: ViewGroup, handler: ControllerChangeHandler) {
+            override fun onChangeStarted(
+                to: Controller?,
+                from: Controller?,
+                isPush: Boolean,
+                container: ViewGroup,
+                handler: ControllerChangeHandler
+            ) {
 
                 syncActivityViewWithController(to, from, isPush)
                 appbar.y = 0f
             }
 
-            override fun onChangeCompleted(to: Controller?, from: Controller?, isPush: Boolean,
-                                           container: ViewGroup, handler: ControllerChangeHandler) {
+            override fun onChangeCompleted(
+                to: Controller?,
+                from: Controller?,
+                isPush: Boolean,
+                container: ViewGroup,
+                handler: ControllerChangeHandler
+            ) {
                 appbar.y = 0f
             }
-
         })
 
         syncActivityViewWithController(router.backstack.lastOrNull()?.controller())
@@ -341,20 +341,10 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             // Show changelog if needed
             if (Migrations.upgrade(preferences)) {
                 if (BuildConfig.DEBUG) {
-                    MaterialDialog(this)
-                        .title(text = "Welcome to the J2K MD2 Beta")
-                        .message(text = "This beta is for testing the upcoming " +
-                            "release. Requests for new additions this beta will ignored (however" +
-                            " suggestions on how to better implement a feature in this beta are " +
-                            "welcome).\n\nFor any bugs you come across, there is a bug report " +
-                            "button in settings.\n\nAs a reminder this is a *BETA* build and bugs" +
-                            " may happen and features may be missing/not implemented yet." +
-                            "\n\nEnjoy and thanks for testing!")
-                        .positiveButton(android.R.string.ok)
-                        .cancelOnTouchOutside(false)
-                        .show()
-                }
-                else ChangelogDialogController().showDialog(router)
+                    MaterialDialog(this).title(text = "Welcome to the J2K MD2 Beta").message(
+                            text = "This beta is for testing the upcoming " + "release. Requests for new additions this beta will ignored (however" + " suggestions on how to better implement a feature in this beta are " + "welcome).\n\nFor any bugs you come across, there is a bug report " + "button in settings.\n\nAs a reminder this is a *BETA* build and bugs" + " may happen and features may be missing/not implemented yet." + "\n\nEnjoy and thanks for testing!"
+                        ).positiveButton(android.R.string.ok).cancelOnTouchOutside(false).show()
+                } else ChangelogDialogController().showDialog(router)
             }
         }
         preferences.extensionUpdatesCount().asObservable().subscribe {
@@ -364,15 +354,18 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
     }
 
     fun updateRecentsIcon() {
-        bottom_nav.menu.findItem(R.id.nav_recents).icon =
-            AppCompatResources.getDrawable(this,
-                if (preferences.showRecentUpdates().getOrDefault()) R.drawable.recent_updates_selector_24dp
-                else R.drawable.recent_read_selector_24dp)
+        bottom_nav.menu.findItem(R.id.nav_recents).icon = AppCompatResources.getDrawable(
+            this,
+            if (preferences.showRecentUpdates()
+                    .getOrDefault()
+            ) R.drawable.recent_updates_selector_24dp
+            else R.drawable.recent_read_selector_24dp
+        )
     }
 
     override fun startSupportActionMode(callback: androidx.appcompat.view.ActionMode.Callback): androidx.appcompat.view.ActionMode? {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M )
-            window?.statusBarColor = getResourceColor(R.attr.colorPrimary)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) window?.statusBarColor =
+            getResourceColor(R.attr.colorPrimary)
         return super.startSupportActionMode(callback)
     }
 
@@ -384,9 +377,12 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             val duration = resources.getInteger(android.R.integer.config_mediumAnimTime) * scale
             delay(duration.toLong())
             delay(100)
-            if (Color.alpha(window?.statusBarColor ?: Color.BLACK) >= 255)
-                window?.statusBarColor = ColorUtils.setAlphaComponent(getResourceColor(android.R.attr
-                .colorBackground), 175)
+            if (Color.alpha(window?.statusBarColor ?: Color.BLACK) >= 255) window?.statusBarColor =
+                ColorUtils.setAlphaComponent(
+                    getResourceColor(
+                        android.R.attr.colorBackground
+                    ), 175
+                )
         }
         super.onSupportActionModeFinished(mode)
     }
@@ -398,8 +394,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             badge.number = updates
             badge.backgroundColor = getResourceColor(R.attr.badgeColor)
             badge.badgeTextColor = Color.WHITE
-        }
-        else {
+        } else {
             bottom_nav.removeBadge(R.id.nav_catalogues)
         }
     }
@@ -412,15 +407,15 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
     }
 
     private fun getExtensionUpdates() {
-        if (Date().time >= preferences.lastExtCheck().getOrDefault() +
-            TimeUnit.HOURS.toMillis(1)) {
+        if (Date().time >= preferences.lastExtCheck().getOrDefault() + TimeUnit.HOURS.toMillis(1)) {
             GlobalScope.launch(Dispatchers.IO) {
                 val preferences: PreferencesHelper by injectLazy()
                 try {
                     val pendingUpdates = ExtensionGithubApi().checkForUpdates(this@MainActivity)
                     preferences.extensionUpdatesCount().set(pendingUpdates.size)
                     preferences.lastExtCheck().set(Date().time)
-                } catch (e: java.lang.Exception) { }
+                } catch (e: java.lang.Exception) {
+                }
             }
         }
     }
@@ -445,14 +440,14 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             }
             SHORTCUT_CATALOGUES -> bottom_nav.selectedItemId = R.id.nav_catalogues
             SHORTCUT_EXTENSIONS -> {
-                    if (router.backstack.isEmpty()) {
-                        bottom_nav.selectedItemId = R.id.nav_catalogues
-                        bottom_nav.post {
-                            val controller =
-                                router.backstack.firstOrNull()?.controller() as? CatalogueController
-                            controller?.showExtensions()
-                        }
+                if (router.backstack.isEmpty()) {
+                    bottom_nav.selectedItemId = R.id.nav_catalogues
+                    bottom_nav.post {
+                        val controller =
+                            router.backstack.firstOrNull()?.controller() as? CatalogueController
+                        controller?.showExtensions()
                     }
+                }
             }
             SHORTCUT_MANGA -> {
                 val extras = intent.extras ?: return false
@@ -465,20 +460,21 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                 if (router.backstack.none { it.controller() is DownloadController }) {
                     if (router.backstack.isEmpty()) {
                         bottom_nav.selectedItemId = R.id.nav_library
-                        router.pushController(RouterTransaction.with(DownloadController())
-                            .pushChangeHandler(SimpleSwapChangeHandler())
-                            .popChangeHandler(FadeChangeHandler()))
-                    }
-                    else {
+                        router.pushController(
+                            RouterTransaction.with(DownloadController())
+                                .pushChangeHandler(SimpleSwapChangeHandler())
+                                .popChangeHandler(FadeChangeHandler())
+                        )
+                    } else {
                         router.pushController(DownloadController().withFadeTransaction())
                     }
                 }
             }
             Intent.ACTION_SEARCH, "com.google.android.gms.actions.SEARCH_ACTION" -> {
-                //If the intent match the "standard" Android search intent
+                // If the intent match the "standard" Android search intent
                 // or the Google-specific search intent (triggered by saying or typing "search *query* on *Tachiyomi*" in Google Search/Google Assistant)
 
-                //Get the search query provided in extras, and if not null, perform a global search with it.
+                // Get the search query provided in extras, and if not null, perform a global search with it.
                 val query = intent.getStringExtra(SearchManager.QUERY)
                 if (query != null && query.isNotEmpty()) {
                     if (router.backstackSize > 1) {
@@ -494,7 +490,12 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                     if (router.backstackSize > 1) {
                         router.popToRoot()
                     }
-                    router.pushController(CatalogueSearchController(query, filter).withFadeTransaction())
+                    router.pushController(
+                        CatalogueSearchController(
+                            query,
+                            filter
+                        ).withFadeTransaction()
+                    )
                 }
             }
             else -> return false
@@ -516,13 +517,14 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         /*if (drawer.isDrawerOpen(GravityCompat.START) || drawer.isDrawerOpen(GravityCompat.END)) {
             drawer.closeDrawers()
         } else  {*/
-            val baseController = router.backstack.last().controller() as? BaseController
-            if (if (router.backstackSize == 1) !(baseController?.handleRootBack() ?: false)
-                else !router.handleBack()) {
-                SecureActivityDelegate.locked = true
-                super.onBackPressed()
-            }
-        //}
+        val baseController = router.backstack.last().controller() as? BaseController
+        if (if (router.backstackSize == 1) !(baseController?.handleRootBack() ?: false)
+            else !router.handleBack()
+        ) {
+            SecureActivityDelegate.locked = true
+            super.onBackPressed()
+        }
+        // }
     }
 
     private fun setRoot(controller: Controller, id: Int) {
@@ -533,9 +535,11 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         when (item.itemId) {
             // Initialize option to open catalogue settings.
             R.id.action_settings -> {
-                router.pushController((RouterTransaction.with(SettingsMainController()))
-                    .popChangeHandler(FadeChangeHandler())
-                    .pushChangeHandler(FadeChangeHandler()))
+                router.pushController(
+                    (RouterTransaction.with(SettingsMainController())).popChangeHandler(
+                            FadeChangeHandler()
+                        ).pushChangeHandler(FadeChangeHandler())
+                )
             }
             else -> return super.onOptionsItemSelected(item)
         }
@@ -545,26 +549,26 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
     override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
         gestureDetector.onTouchEvent(ev)
         val controller = router.backstack.lastOrNull()?.controller()
-        if (controller is OnTouchEventInterface)
-            controller.onTouchEvent(ev)
+        if (controller is OnTouchEventInterface) controller.onTouchEvent(ev)
         if (ev?.action == MotionEvent.ACTION_DOWN) {
             if (snackBar != null && snackBar!!.isShown) {
                 val sRect = Rect()
                 snackBar!!.view.getGlobalVisibleRect(sRect)
 
-                val extRect:Rect? = if (extraViewForUndo != null) Rect() else null
+                val extRect: Rect? = if (extraViewForUndo != null) Rect() else null
                 extraViewForUndo?.getGlobalVisibleRect(extRect)
-                //This way the snackbar will only be dismissed if
-                //the user clicks outside it.
-                if (canDismissSnackBar && !sRect.contains(ev.x.toInt(), ev.y.toInt())
-                    && (extRect == null ||
-                        !extRect.contains(ev.x.toInt(), ev.y.toInt()))) {
+                // This way the snackbar will only be dismissed if
+                // the user clicks outside it.
+                if (canDismissSnackBar && !sRect.contains(
+                        ev.x.toInt(),
+                        ev.y.toInt()
+                    ) && (extRect == null || !extRect.contains(ev.x.toInt(), ev.y.toInt()))
+                ) {
                     snackBar?.dismiss()
                     snackBar = null
                     extraViewForUndo = null
                 }
-            }
-            else if (snackBar != null) {
+            } else if (snackBar != null) {
                 snackBar = null
                 extraViewForUndo = null
             }
@@ -572,8 +576,11 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         return super.dispatchTouchEvent(ev)
     }
 
-    protected open fun syncActivityViewWithController(to: Controller?, from: Controller? = null,
-        isPush: Boolean = false) {
+    protected open fun syncActivityViewWithController(
+        to: Controller?,
+        from: Controller? = null,
+        isPush: Boolean = false
+    ) {
         if (from is DialogController || to is DialogController) {
             return
         }
@@ -602,43 +609,30 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             } else newDrawer
         }*/
 
-        if (to is NoToolbarElevationController) {
-            appbar.disableElevation()
-            /*controller_container.updateLayoutParams<CoordinatorLayout.LayoutParams> {
-                behavior = null
-            }*/
-        } else {
-            appbar.enableElevation()
-            /*controller_container.updateLayoutParams<CoordinatorLayout.LayoutParams> {
-                behavior = AppBarLayout.ScrollingViewBehavior()
-            }*/
-        }
-
         if (to !is SpinnerTitleInterface) toolbar.removeSpinner()
 
         if (to !is DialogController) {
-            bottom_nav.visibility = if (router.backstackSize == 0 ||
-                (router.backstackSize <= 1 && !isPush))
-                View.VISIBLE else  bottom_nav.visibility
+            bottom_nav.visibility =
+                if (router.backstackSize == 0 || (router.backstackSize <= 1 && !isPush)) View.VISIBLE else bottom_nav.visibility
             animationSet?.cancel()
             animationSet = AnimatorSet()
             val alphaAnimation = ValueAnimator.ofFloat(
-                bottom_nav.alpha,
-                if (router.backstackSize > 1) 0f else 1f
+                bottom_nav.alpha, if (router.backstackSize > 1) 0f else 1f
             )
             alphaAnimation.addUpdateListener { valueAnimator ->
                 bottom_nav.alpha = valueAnimator.animatedValue as Float
             }
             alphaAnimation.addListener(object : Animator.AnimatorListener {
                 override fun onAnimationEnd(animation: Animator?) {
-                    bottom_nav.visibility = if (router.backstackSize > 1) View.GONE else View.VISIBLE
+                    bottom_nav.visibility =
+                        if (router.backstackSize > 1) View.GONE else View.VISIBLE
                 }
 
-                override fun onAnimationCancel(animation: Animator?) { }
+                override fun onAnimationCancel(animation: Animator?) {}
 
-                override fun onAnimationRepeat(animation: Animator?) { }
+                override fun onAnimationRepeat(animation: Animator?) {}
 
-                override fun onAnimationStart(animation: Animator?) { }
+                override fun onAnimationStart(animation: Animator?) {}
             })
             alphaAnimation.duration = 200
             alphaAnimation.startDelay = 50
@@ -661,14 +655,16 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         }*/
     }
 
-
     private inner class GestureListener : GestureDetector.SimpleOnGestureListener() {
         override fun onDown(e: MotionEvent): Boolean {
             return true
         }
 
         override fun onFling(
-            e1: MotionEvent, e2: MotionEvent, velocityX: Float, velocityY: Float
+            e1: MotionEvent,
+            e2: MotionEvent,
+            velocityX: Float,
+            velocityY: Float
         ): Boolean {
             if (currentGestureDelegate == null) return false
             var result = false
@@ -676,14 +672,14 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                 val diffY = e2.y - e1.y
                 val diffX = e2.x - e1.x
                 if (abs(diffX) > abs(diffY)) {
-                    if (abs(diffX) > Companion.SWIPE_THRESHOLD &&
-                        abs(velocityX) > Companion.SWIPE_VELOCITY_THRESHOLD
-                        && abs(diffY) <= Companion.SWIPE_THRESHOLD * 0.75f
+                    if (abs(diffX) > Companion.SWIPE_THRESHOLD && abs(velocityX) > Companion.SWIPE_VELOCITY_THRESHOLD && abs(
+                            diffY
+                        ) <= Companion.SWIPE_THRESHOLD * 0.75f
                     ) {
                         if (diffX > 0) {
-                            currentGestureDelegate?.onSwipeRight(velocityX,  e1.y)
+                            currentGestureDelegate?.onSwipeRight(velocityX, e1.y)
                         } else {
-                            currentGestureDelegate?.onSwipeLeft(velocityX,  e1.y)
+                            currentGestureDelegate?.onSwipeLeft(velocityX, e1.y)
                         }
                         result = true
                     }
@@ -692,10 +688,10 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                     ) > Companion.SWIPE_VELOCITY_THRESHOLD
                 ) {
                     if (diffY > 0) {
-                        currentGestureDelegate?.onSwipeBottom(e1.x,  e1.y)
-                        //onSwipeBottom()
+                        currentGestureDelegate?.onSwipeBottom(e1.x, e1.y)
+                        // onSwipeBottom()
                     } else {
-                        currentGestureDelegate?.onSwipeTop(e1.x,  e1.y)
+                        currentGestureDelegate?.onSwipeTop(e1.x, e1.y)
                     }
                     result = true
                 }
@@ -704,13 +700,13 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             }
             return result
         }
-
     }
 
     companion object {
 
         private const val SWIPE_THRESHOLD = 100
         private const val SWIPE_VELOCITY_THRESHOLD = 100
+
         // Shortcut actions
         const val SHORTCUT_LIBRARY = "eu.kanade.tachiyomi.SHOW_LIBRARY"
         const val SHORTCUT_RECENTLY_UPDATED = "eu.kanade.tachiyomi.SHOW_RECENTLY_UPDATED"
@@ -723,7 +719,6 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         const val INTENT_SEARCH = "eu.kanade.tachiyomi.SEARCH"
         const val INTENT_SEARCH_QUERY = "query"
         const val INTENT_SEARCH_FILTER = "filter"
-
     }
 }
 

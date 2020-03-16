@@ -10,15 +10,14 @@ import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.visible
 import kotlinx.android.synthetic.main.main_activity.view.*
 
-class CenteredToolbar@JvmOverloads constructor(context: Context, attrs: AttributeSet? = null): Toolbar
+class CenteredToolbar@JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : Toolbar
     (context, attrs) {
 
     override fun setTitle(resId: Int) {
         if (navigationIcon is DrawerArrowDrawable) {
             super.setTitle(resId)
             toolbar_title.text = null
-        }
-        else {
+        } else {
             toolbar_title.text = context.getString(resId)
             post {
                 if (navigationIcon !is DrawerArrowDrawable) {
@@ -34,8 +33,7 @@ class CenteredToolbar@JvmOverloads constructor(context: Context, attrs: Attribut
         if (navigationIcon is DrawerArrowDrawable) {
             super.setTitle(title)
             toolbar_title.text = ""
-        }
-        else {
+        } else {
             toolbar_title.text = title
             post {
                 if (navigationIcon !is DrawerArrowDrawable) {

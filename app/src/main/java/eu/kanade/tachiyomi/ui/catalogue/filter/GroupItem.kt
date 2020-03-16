@@ -40,7 +40,6 @@ class GroupItem(val filter: Filter.Group<*>) : AbstractExpandableHeaderItem<Grou
             R.drawable.ic_chevron_right_white_24dp)
 
         holder.itemView.setOnClickListener(holder)
-
     }
 
     override fun equals(other: Any?): Boolean {
@@ -53,7 +52,6 @@ class GroupItem(val filter: Filter.Group<*>) : AbstractExpandableHeaderItem<Grou
         return filter.hashCode()
     }
 
-
     open class Holder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>) : ExpandableViewHolder(view, adapter, true) {
 
         val title: TextView = itemView.findViewById(R.id.title)
@@ -62,6 +60,5 @@ class GroupItem(val filter: Filter.Group<*>) : AbstractExpandableHeaderItem<Grou
         override fun shouldNotifyParentOnClick(): Boolean {
             return true
         }
-
     }
 }

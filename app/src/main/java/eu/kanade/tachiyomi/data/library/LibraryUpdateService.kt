@@ -38,6 +38,10 @@ import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.lang.chop
 import eu.kanade.tachiyomi.util.system.notification
 import eu.kanade.tachiyomi.util.system.notificationManager
+import java.util.ArrayList
+import java.util.Date
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -50,10 +54,6 @@ import rx.schedulers.Schedulers
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import java.util.ArrayList
-import java.util.Date
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * This class will take care of updating the chapters of the manga from the library. It can be
@@ -127,8 +127,8 @@ class LibraryUpdateService(
      */
     enum class Target {
         CHAPTERS, // Manga chapters
-        DETAILS,  // Manga metadata
-        TRACKING  // Tracking metadata
+        DETAILS, // Manga metadata
+        TRACKING // Tracking metadata
     }
 
     companion object {

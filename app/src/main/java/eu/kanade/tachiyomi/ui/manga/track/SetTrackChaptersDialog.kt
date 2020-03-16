@@ -17,7 +17,7 @@ class SetTrackChaptersDialog<T> : DialogController
         where T : SetTrackChaptersDialog.Listener {
 
     private val item: TrackItem
-    private  lateinit var listener: Listener
+    private lateinit var listener: Listener
 
     constructor(target: T, item: TrackItem) : super(Bundle().apply {
         putSerializable(KEY_ITEM_TRACK, item.track)
@@ -55,7 +55,6 @@ class SetTrackChaptersDialog<T> : DialogController
         // Don't allow to go from 0 to 9999
         np.wrapSelectorWheel = false
 
-
         return dialog
     }
 
@@ -66,5 +65,4 @@ class SetTrackChaptersDialog<T> : DialogController
     private companion object {
         const val KEY_ITEM_TRACK = "SetTrackChaptersDialog.item.track"
     }
-
 }

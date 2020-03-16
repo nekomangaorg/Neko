@@ -47,13 +47,13 @@ import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
+import java.util.concurrent.TimeUnit
 import kotlinx.android.synthetic.main.catalogue_controller.*
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
-import java.util.concurrent.TimeUnit
 
 /**
  * Controller to manage the catalogues available in the app.
@@ -66,12 +66,14 @@ open class BrowseCatalogueController(bundle: Bundle) :
         FlexibleAdapter.EndlessScrollListener,
         ChangeMangaCategoriesDialog.Listener {
 
-    constructor(source: CatalogueSource,
+    constructor(
+        source: CatalogueSource,
         searchQuery: String? = null,
-        smartSearchConfig: CatalogueController.SmartSearchConfig? = null) : this(Bundle().apply {
+        smartSearchConfig: CatalogueController.SmartSearchConfig? = null
+    ) : this(Bundle().apply {
         putLong(SOURCE_ID_KEY, source.id)
 
-        if(searchQuery != null)
+        if (searchQuery != null)
             putString(SEARCH_QUERY_KEY, searchQuery)
 
         if (smartSearchConfig != null)
@@ -582,5 +584,4 @@ open class BrowseCatalogueController(bundle: Bundle) :
         const val SEARCH_QUERY_KEY = "searchQuery"
         const val SMART_SEARCH_CONFIG_KEY = "smartSearchConfig"
     }
-
 }

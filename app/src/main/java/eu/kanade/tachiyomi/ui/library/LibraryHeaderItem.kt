@@ -48,7 +48,7 @@ class LibraryHeaderItem(private val categoryF: (Int) -> Category, val catId: Int
         holder.bind(categoryF(catId))
     }
 
-    val category:Category
+    val category: Category
         get() = categoryF(catId)
 
     override fun equals(other: Any?): Boolean {
@@ -81,7 +81,7 @@ class LibraryHeaderItem(private val categoryF: (Int) -> Category, val catId: Int
 
         init {
             updateButton.setOnClickListener { addCategoryToUpdate() }
-            sortText.setOnClickListener {  it.post { showCatSortOptions() } }
+            sortText.setOnClickListener { it.post { showCatSortOptions() } }
             checkboxImage.setOnClickListener { selectAll() }
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
                 sortText.compoundDrawablesRelative[2]?.mutate()?.setTint(
@@ -207,11 +207,10 @@ class LibraryHeaderItem(private val categoryF: (Int) -> Category, val catId: Int
                 val t = (category.mangaSort?.minus('a') ?: 0) + 1
                 if (t % 2 != 0) t + 1
                 else t - 1
-            }
-            else {
+            } else {
                 val order = when (menuId) {
                     R.id.action_drag_and_drop -> {
-                        adapter.libraryListener.sortCategory(category.id!!,  'D' - 'a' + 1)
+                        adapter.libraryListener.sortCategory(category.id!!, 'D' - 'a' + 1)
                         return
                     }
                     R.id.action_total_chaps -> 4

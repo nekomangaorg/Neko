@@ -125,5 +125,4 @@ abstract class BaseController(bundle: Bundle? = null) : RestoreViewOnCreateContr
             true
         }
     }
-
 }

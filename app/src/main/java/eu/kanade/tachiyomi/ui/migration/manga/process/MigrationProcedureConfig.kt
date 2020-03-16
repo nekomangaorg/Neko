@@ -5,6 +5,6 @@ import kotlinx.android.parcel.Parcelize
 
 @Parcelize
 data class MigrationProcedureConfig(
-        var mangaIds: List<Long>,
-        val extraSearchParams: String?
-): Parcelable
+    var mangaIds: List<Long>,
+    val extraSearchParams: String?
+) : Parcelable

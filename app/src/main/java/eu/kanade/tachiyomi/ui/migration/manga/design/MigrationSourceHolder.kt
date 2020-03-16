@@ -10,7 +10,7 @@ import eu.kanade.tachiyomi.util.view.getRound
 import kotlinx.android.synthetic.main.migration_source_item.*
 import uy.kohesive.injekt.injectLazy
 
-class MigrationSourceHolder(view: View, val adapter: MigrationSourceAdapter):
+class MigrationSourceHolder(view: View, val adapter: MigrationSourceAdapter) :
         BaseFlexibleViewHolder(view, adapter) {
     init {
         setDragHandleView(reorder)
@@ -24,10 +24,10 @@ class MigrationSourceHolder(view: View, val adapter: MigrationSourceAdapter):
         title.text = sourceName
         // Update circle letter image.
         itemView.post {
-            edit_button.setImageDrawable(edit_button.getRound(source.name.take(1).toUpperCase(),false))
+            edit_button.setImageDrawable(edit_button.getRound(source.name.take(1).toUpperCase(), false))
         }
 
-        if(sourceEnabled) {
+        if (sourceEnabled) {
             title.alpha = 1.0f
             edit_button.alpha = 1.0f
             title.paintFlags = title.paintFlags and STRIKE_THRU_TEXT_FLAG.inv()

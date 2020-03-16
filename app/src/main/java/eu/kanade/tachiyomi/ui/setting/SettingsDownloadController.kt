@@ -14,17 +14,17 @@ import com.afollestad.materialdialogs.list.listItemsSingleChoice
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
+import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.download.DownloadController
 import eu.kanade.tachiyomi.util.system.getFilePicker
+import java.io.File
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
-import java.io.File
-import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 
 class SettingsDownloadController : SettingsController() {
 
@@ -158,8 +158,7 @@ class SettingsDownloadController : SettingsController() {
             val selectedIndex = externalDirs.map(File::toString).indexOfFirst { it in currentDir }
 
             return MaterialDialog(activity)
-                .listItemsSingleChoice(items = externalDirs.map { it.path }, initialSelection = selectedIndex)
-                {  _, position, text ->
+                .listItemsSingleChoice(items = externalDirs.map { it.path }, initialSelection = selectedIndex) { _, position, text ->
                     val target = targetController as? SettingsDownloadController
                     if (position == externalDirs.lastIndex) {
                         target?.customDirectorySelected(currentDir)

@@ -3,9 +3,9 @@ package eu.kanade.tachiyomi.data.database.models
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
+import java.util.Locale
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import java.util.Locale
 
 interface Manga : SManga {
 
@@ -82,7 +82,7 @@ interface Manga : SManga {
                 tag.startsWith("chinese") || tag == "manhua" ||
                     tag.startsWith("english") || tag == "comic"
             } == true || isComicSource(sourceName) ||
-            sourceName.contains("manhua", true) )
+            sourceName.contains("manhua", true))
             ReaderActivity.LEFT_TO_RIGHT
         else 0
     }
@@ -168,5 +168,4 @@ interface Manga : SManga {
             this.source = source
         }
     }
-
 }

@@ -18,10 +18,12 @@ class MangaItem(val manga: Manga) : AbstractFlexibleItem<MangaHolder>() {
         return MangaHolder(view, adapter)
     }
 
-    override fun bindViewHolder(adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
-                                holder: MangaHolder,
-                                position: Int,
-                                payloads: MutableList<Any?>?) {
+    override fun bindViewHolder(
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
+        holder: MangaHolder,
+        position: Int,
+        payloads: MutableList<Any?>?
+    ) {
 
         holder.bind(this)
     }

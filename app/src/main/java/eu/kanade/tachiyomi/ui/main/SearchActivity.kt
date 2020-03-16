@@ -6,14 +6,13 @@ import android.os.Bundle
 import com.bluelinelabs.conductor.Controller
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
-import eu.kanade.tachiyomi.ui.base.controller.NoToolbarElevationController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.catalogue.global_search.CatalogueSearchController
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.view.gone
 import kotlinx.android.synthetic.main.main_activity.*
 
-class SearchActivity: MainActivity() {
+class SearchActivity : MainActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,8 +38,12 @@ class SearchActivity: MainActivity() {
         }
     }
 
-    override fun syncActivityViewWithController(to: Controller?, from: Controller?, isPush:
-    Boolean) {
+    override fun syncActivityViewWithController(
+        to: Controller?,
+        from: Controller?,
+        isPush:
+            Boolean
+    ) {
         if (from is DialogController || to is DialogController) {
             return
         }
@@ -48,12 +51,6 @@ class SearchActivity: MainActivity() {
         drawerArrow?.progress = 1f
 
         if (to !is SpinnerTitleInterface) toolbar.removeSpinner()
-
-        if (to is NoToolbarElevationController) {
-            appbar.disableElevation()
-        } else {
-            appbar.enableElevation()
-        }
         bottom_nav.gone()
     }
 
@@ -64,10 +61,10 @@ class SearchActivity: MainActivity() {
         )
         when (intent.action) {
             Intent.ACTION_SEARCH, "com.google.android.gms.actions.SEARCH_ACTION" -> {
-                //If the intent match the "standard" Android search intent
+                // If the intent match the "standard" Android search intent
                 // or the Google-specific search intent (triggered by saying or typing "search *query* on *Tachiyomi*" in Google Search/Google Assistant)
 
-                //Get the search query provided in extras, and if not null, perform a global search with it.
+                // Get the search query provided in extras, and if not null, perform a global search with it.
                 val query = intent.getStringExtra(SearchManager.QUERY)
                 if (query != null && query.isNotEmpty()) {
                     router.replaceTopController(CatalogueSearchController(query).withFadeTransaction())

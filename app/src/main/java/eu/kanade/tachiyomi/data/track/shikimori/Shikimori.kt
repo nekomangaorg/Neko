@@ -6,7 +6,6 @@ import com.google.gson.Gson
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackService
-import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 

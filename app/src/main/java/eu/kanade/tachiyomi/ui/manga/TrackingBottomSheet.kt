@@ -62,7 +62,6 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) : Bott
                 }
             }
         })
-
     }
 
     override fun onStart() {
@@ -164,7 +163,7 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) : Bott
 
     fun refreshTrack(item: TrackService?) {
         val index = adapter?.indexOf(item) ?: -1
-        if (index > -1 ){
+        if (index > -1) {
             (track_recycler.findViewHolderForAdapterPosition(index) as? TrackHolder)
                 ?.setProgress(true)
         }

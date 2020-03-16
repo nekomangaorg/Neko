@@ -4,12 +4,12 @@ import androidx.biometric.BiometricManager
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.updater.UpdaterJob
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.system.LocaleHelper
 import eu.kanade.tachiyomi.widget.preference.IntListMatPreference
-import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 
 class SettingsGeneralController : SettingsController() {
 
@@ -26,8 +26,8 @@ class SettingsGeneralController : SettingsController() {
             "pt-BR", "ro", "ru", "sc", "sr", "sv", "th", "tl", "tr", "uk", "vi", "zh-rCN")
             entries = entryValues.map { value ->
                 val locale = LocaleHelper.getLocaleFromString(value.toString())
-                locale?.getDisplayName(locale)?.capitalize() ?:
-                        context.getString(R.string.system_default)
+                locale?.getDisplayName(locale)?.capitalize()
+                        ?: context.getString(R.string.system_default)
             }
             defaultValue = ""
             summary = "%s"
@@ -59,7 +59,7 @@ class SettingsGeneralController : SettingsController() {
         }
 
         listPreference(activity) {
-            key= Keys.dateFormat
+            key = Keys.dateFormat
             titleRes = R.string.pref_date_format
             entryValues = listOf("", "MM/dd/yy", "dd/MM/yy", "yyyy-MM-dd")
             entries = entryValues.map { value ->

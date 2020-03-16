@@ -1,9 +1,9 @@
 package eu.kanade.tachiyomi.widget.preference
 
 import android.content.Context
+import android.util.AttributeSet
 import androidx.preference.Preference
 import androidx.preference.PreferenceViewHolder
-import android.util.AttributeSet
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
@@ -30,15 +30,13 @@ class ExtensionPreference @JvmOverloads constructor(context: Context, attrs: Att
             extUpdateText.text = context.resources.getQuantityString(R.plurals
                 .updates_available, updates, updates)
             extUpdateText.visible()
-        }
-        else {
+        } else {
             extUpdateText.text = null
             extUpdateText.gone()
         }
     }
 
-    override public fun notifyChanged() {
+    public override fun notifyChanged() {
         super.notifyChanged()
     }
-
 }

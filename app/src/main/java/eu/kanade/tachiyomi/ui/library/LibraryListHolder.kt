@@ -22,8 +22,8 @@ import kotlinx.android.synthetic.main.unread_download_badge.*
  */
 
 class LibraryListHolder(
-        private val view: View,
-        adapter: LibraryCategoryAdapter
+    private val view: View,
+    adapter: LibraryCategoryAdapter
 ) : LibraryHolder(view, adapter) {
 
     /**
@@ -74,5 +74,4 @@ class LibraryListHolder(
         super.onItemReleased(position)
         view.card.isDragged = false
     }
-
 }

@@ -11,13 +11,13 @@ import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsPresenter
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.system.getResourceColor
-import uy.kohesive.injekt.injectLazy
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
+import uy.kohesive.injekt.injectLazy
 
 class ChaptersAdapter(
-        val controller: MangaDetailsController,
-        context: Context
+    val controller: MangaDetailsController,
+    context: Context
 ) : FlexibleAdapter<IFlexible<*>>(null, controller, true) {
 
     val preferences: PreferencesHelper by injectLazy()

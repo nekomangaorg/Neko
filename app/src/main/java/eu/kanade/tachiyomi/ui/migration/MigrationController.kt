@@ -48,7 +48,7 @@ class MigrationController : NucleusController<MigrationPresenter>(),
         return inflater.inflate(R.layout.migration_controller, container, false)
     }
 
-    fun searchController(manga:Manga): SearchController {
+    fun searchController(manga: Manga): SearchController {
         val controller = SearchController(manga)
         controller.targetController = this
 

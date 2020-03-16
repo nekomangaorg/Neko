@@ -22,7 +22,6 @@ class MyAnimeListInterceptor(private val myanimelist: MyAnimeList) : Interceptor
         }
         val request = chain.request()
         return chain.proceed(updateRequest(request))
-
     }
 
     private fun updateRequest(request: Request): Request {

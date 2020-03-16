@@ -9,7 +9,7 @@ import eu.kanade.tachiyomi.data.database.inTransactionReturn
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.tables.MangaTable
 
-class MangaInfoPutResolver(val reset:Boolean = false): PutResolver<Manga>() {
+class MangaInfoPutResolver(val reset: Boolean = false) : PutResolver<Manga>() {
 
     override fun performPut(db: StorIOSQLite, manga: Manga) = db.inTransactionReturn {
         val updateQuery = mapToUpdateQuery(manga)
@@ -40,6 +40,4 @@ class MangaInfoPutResolver(val reset:Boolean = false): PutResolver<Manga>() {
         put(MangaTable.COL_ARTIST, manga.originalArtist())
         put(MangaTable.COL_DESCRIPTION, manga.originalDesc())
     }
-
-
 }

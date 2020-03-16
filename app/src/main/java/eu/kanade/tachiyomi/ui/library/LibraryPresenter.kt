@@ -27,6 +27,9 @@ import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Comp
 import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_IGNORE
 import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_INCLUDE
 import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_REALLY_EXCLUDE
+import java.util.ArrayList
+import java.util.Collections
+import java.util.Comparator
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -37,9 +40,6 @@ import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import java.util.ArrayList
-import java.util.Collections
-import java.util.Comparator
 
 /**
  * Class containing library information.
@@ -55,12 +55,12 @@ private typealias LibraryMap = Map<Int, List<LibraryItem>>
  * Presenter of [LibraryController].
  */
 class LibraryPresenter(
-        private val view: LibraryController,
-        private val db: DatabaseHelper = Injekt.get(),
-        private val preferences: PreferencesHelper = Injekt.get(),
-        private val coverCache: CoverCache = Injekt.get(),
-        private val sourceManager: SourceManager = Injekt.get(),
-        private val downloadManager: DownloadManager = Injekt.get()
+    private val view: LibraryController,
+    private val db: DatabaseHelper = Injekt.get(),
+    private val preferences: PreferencesHelper = Injekt.get(),
+    private val coverCache: CoverCache = Injekt.get(),
+    private val sourceManager: SourceManager = Injekt.get(),
+    private val downloadManager: DownloadManager = Injekt.get()
 ) {
 
     private val context = preferences.context
@@ -77,11 +77,11 @@ class LibraryPresenter(
     /**
      * List of all manga to update the
      */
-    private var rawMangaMap:LibraryMap? = null
+    private var rawMangaMap: LibraryMap? = null
 
-    private var currentMangaMap:LibraryMap? = null
+    private var currentMangaMap: LibraryMap? = null
 
-    private var totalChapters:Map<Long, Int>? = null
+    private var totalChapters: Map<Long, Int>? = null
 
     fun isDownloading() = downloadManager.hasQueue()
 
@@ -99,8 +99,8 @@ class LibraryPresenter(
     fun getLibrary() {
         launchUI {
             totalChapters = null
-            val freshStart = !preferences.libraryAsSingleList().getOrDefault()
-                && (currentMangaMap?.values?.firstOrNull()?.firstOrNull()?.header != null)
+            val freshStart = !preferences.libraryAsSingleList().getOrDefault() &&
+                (currentMangaMap?.values?.firstOrNull()?.firstOrNull()?.header != null)
             val mangaMap = withContext(Dispatchers.IO) {
                 val library = getLibraryFromDB()
                 library.apply { setDownloadCount(library.mangaMap) }
@@ -161,7 +161,7 @@ class LibraryPresenter(
 
         val filterTrackers = FilterBottomSheet.FILTER_TRACKER
 
-        val filterFn: (LibraryItem) -> Boolean = f@ { item ->
+        val filterFn: (LibraryItem) -> Boolean = f@{ item ->
             // Filter when there isn't unread chapters.
             if (filterUnread == STATE_INCLUDE &&
                 (item.manga.unread == 0 || db.getChapters(item.manga).executeAsBlocking()
@@ -277,7 +277,7 @@ class LibraryPresenter(
         }
         val comparator = Comparator(sortFn)
 
-        return  map.mapValues { entry -> entry.value.sortedWith(comparator) }
+        return map.mapValues { entry -> entry.value.sortedWith(comparator) }
     }
 
     /**
@@ -332,8 +332,7 @@ class LibraryPresenter(
             if (compare == 0) {
                 if (ascending) sortAlphabetical(i1, i2)
                 else sortAlphabetical(i2, i1)
-            }
-            else compare
+            } else compare
         }
 
         val comparator = if (ascending)
@@ -347,7 +346,7 @@ class LibraryPresenter(
     private fun setTotalChapters() {
         if (totalChapters != null) return
         val mangaMap = rawMangaMap ?: return
-        totalChapters = mangaMap.flatMap{
+        totalChapters = mangaMap.flatMap {
             it.value
         }.associate {
             it.manga.id!! to db.getChapters(it.manga).executeAsBlocking().size
@@ -364,8 +363,11 @@ class LibraryPresenter(
         return category
     }
 
-    private fun sortCategory(i1: LibraryItem, i2: LibraryItem,
-        lastReadManga: Map<Long, Int>, initCat: Category? = null
+    private fun sortCategory(
+        i1: LibraryItem,
+        i2: LibraryItem,
+        lastReadManga: Map<Long, Int>,
+        initCat: Category? = null
     ): Int {
         return if (initCat != null || i1.manga.category == i2.manga.category) {
             val category = initCat ?: allCategories.find { it.id == i1.manga.category } ?: return 0
@@ -426,7 +428,6 @@ class LibraryPresenter(
         }
     }
 
-
     private fun sortAlphabetical(i1: LibraryItem, i2: LibraryItem): Int {
         return if (preferences.removeArticles().getOrDefault())
             i1.manga.currentTitle().removeArticles().compareTo(i2.manga.currentTitle().removeArticles(), true)
@@ -458,16 +459,15 @@ class LibraryPresenter(
         val libraryMap =
             if (!preferences.libraryAsSingleList().getOrDefault()) {
                 libraryManga.map { manga ->
-                    LibraryItem(manga, libraryLayout, preferences.uniformGrid(),null).apply { unreadType =
+                    LibraryItem(manga, libraryLayout, preferences.uniformGrid(), null).apply { unreadType =
                         unreadBadgeType }
                 }.groupBy {
                     if (showCategories) it.manga.category else -1
                 }
-            }
-        else {
+            } else {
                 libraryManga.groupBy { manga ->
                     if (showCategories) manga.category else -1
-                    //LibraryItem(manga, libraryLayout).apply { unreadType = unreadBadgeType }
+                    // LibraryItem(manga, libraryLayout).apply { unreadType = unreadBadgeType }
                 }.map { entry ->
                     val categoryItem =
                         if (!showCategories) catItemAll else
@@ -480,7 +480,7 @@ class LibraryPresenter(
                 }.map {
                     val cat = if (showCategories) it.firstOrNull()?.manga?.category ?: 0 else -1
                     cat to it
-                    //LibraryItem(manga, libraryLayout).apply { unreadType = unreadBadgeType }
+                    // LibraryItem(manga, libraryLayout).apply { unreadType = unreadBadgeType }
                 }.toMap()
             }
         if (libraryMap.containsKey(0))
@@ -518,12 +518,15 @@ class LibraryPresenter(
         }
     }
 
-    suspend fun updateView(categories: List<Category>, mangaMap: LibraryMap, freshStart:Boolean
-    = false) {
+    suspend fun updateView(
+        categories: List<Category>,
+        mangaMap: LibraryMap,
+        freshStart: Boolean =
+            false
+    ) {
         if (view !is LibraryListController) {
             view.onNextLibraryUpdate(categories, mangaMap, freshStart)
-        }
-        else {
+        } else {
             val mangaList = withContext(Dispatchers.IO) {
                 val list = mutableListOf<LibraryItem>()
                 for (element in mangaMap.toSortedMap(compareBy { entry ->
@@ -553,8 +556,7 @@ class LibraryPresenter(
             if (mangaMap.values.firstOrNull()?.firstOrNull()?.header != null)
                 return
             view.onNextLibraryUpdate(categories, mangaMap, true)
-        }
-        else {
+        } else {
             val list = mutableListOf<LibraryItem>()
             for (element in mangaMap.toSortedMap(compareBy { entry ->
                 categories.find { it.id == entry }?.order ?: -1
@@ -563,7 +565,6 @@ class LibraryPresenter(
             }
             view.onNextLibraryUpdate(list, true)
         }
-
     }
 
     /**
@@ -585,7 +586,7 @@ class LibraryPresenter(
      * Requests the library to have unread badges changed.
      */
     fun requestUnreadBadgesUpdate() {
-        //getLibrary()
+        // getLibrary()
         launchUI {
             val mangaMap = rawMangaMap ?: return@launchUI
             withContext(Dispatchers.IO) { setUnreadBadge(mangaMap) }
@@ -715,7 +716,7 @@ class LibraryPresenter(
     fun migrateManga(prevManga: Manga, manga: Manga, replace: Boolean) {
         val source = sourceManager.get(manga.source) ?: return
 
-        //state = state.copy(isReplacingManga = true)
+        // state = state.copy(isReplacingManga = true)
 
         Observable.defer { source.fetchChapterList(manga) }
             .onErrorReturn { emptyList() }
@@ -723,7 +724,7 @@ class LibraryPresenter(
             .onErrorReturn { emptyList() }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            //.doOnUnsubscribe { state = state.copy(isReplacingManga = false) }
+            // .doOnUnsubscribe { state = state.copy(isReplacingManga = false) }
             .subscribe()
     }
 
@@ -736,8 +737,13 @@ class LibraryPresenter(
         }
     }
 
-    private fun migrateMangaInternal(source: Source, sourceChapters: List<SChapter>,
-        prevManga: Manga, manga: Manga, replace: Boolean) {
+    private fun migrateMangaInternal(
+        source: Source,
+        sourceChapters: List<SChapter>,
+        prevManga: Manga,
+        manga: Manga,
+        replace: Boolean
+    ) {
 
         val flags = preferences.migrateFlags().getOrDefault()
         val migrateChapters = MigrationFlags.hasChapters(flags)
@@ -797,7 +803,6 @@ class LibraryPresenter(
     fun getFirstUnread(manga: Manga): Chapter? {
         val chapters = db.getChapters(manga).executeAsBlocking()
         return chapters.sortedByDescending { it.source_order }.find { !it.read }
-
     }
 
     fun sortCategory(catId: Int, order: Int) {
@@ -808,8 +813,7 @@ class LibraryPresenter(
             preferences.librarySortingMode().set(sort)
             preferences.librarySortingAscending().set(category.isAscending())
             requestSortUpdate()
-        }
-        else {
+        } else {
             if (category.id == 0) preferences.defaultMangaOrder().set(category.mangaSort.toString())
             else Injekt.get<DatabaseHelper>().insertCategory(category).executeAsBlocking()
             requestCatSortUpdate(category.id!!)
@@ -845,10 +849,9 @@ class LibraryPresenter(
 
             item.manga.category = categoryId
 
-
             val mc = ArrayList<MangaCategory>()
             val categories =
-                db.getCategoriesForManga(manga).executeAsBlocking().filter { it.id  != oldCatId } + listOf(category)
+                db.getCategoriesForManga(manga).executeAsBlocking().filter { it.id != oldCatId } + listOf(category)
 
             for (cat in categories) {
                 mc.add(MangaCategory.create(manga, cat))
@@ -874,6 +877,6 @@ class LibraryPresenter(
     }
 
     private companion object {
-        var currentLibrary:Library? = null
+        var currentLibrary: Library? = null
     }
 }

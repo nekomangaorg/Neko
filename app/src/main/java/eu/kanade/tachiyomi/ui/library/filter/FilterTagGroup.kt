@@ -14,7 +14,7 @@ import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.visible
 import kotlinx.android.synthetic.main.filter_buttons.view.*
 
-class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: AttributeSet? = null): LinearLayout
+class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : LinearLayout
     (context, attrs) {
 
     private var listener: FilterTagGroupListener? = null
@@ -22,7 +22,7 @@ class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: Attribute
     var itemCount = 0
         private set
 
-    private var root:ViewGroup? = null
+    private var root: ViewGroup? = null
 
     private val buttons by lazy { arrayOf(firstButton, secondButton, thirdButton) }
     private val separators by lazy { arrayOf(separator1, separator2) }
@@ -31,7 +31,7 @@ class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: Attribute
         return buttons.any { it.isActivated }
     }
 
-    fun nameOf(index: Int):String? = buttons.getOrNull(index)?.text as? String
+    fun nameOf(index: Int): String? = buttons.getOrNull(index)?.text as? String
 
     fun setup(root: ViewGroup, firstText: Int, secondText: Int? = null, thirdText: Int? = null) {
         val text1 = context.getString(firstText)
@@ -40,8 +40,13 @@ class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: Attribute
         setup(root, text1, text2, text3)
     }
 
-    fun setup(root: ViewGroup, firstText: String, secondText: String? = null, thirdText: String? =
-        null) {
+    fun setup(
+        root: ViewGroup,
+        firstText: String,
+        secondText: String? = null,
+        thirdText: String? =
+                null
+    ) {
         listener = root as? FilterTagGroupListener
         (layoutParams as? MarginLayoutParams)?.rightMargin = 5.dpToPx
         (layoutParams as? MarginLayoutParams)?.leftMargin = 5.dpToPx
@@ -52,13 +57,11 @@ class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: Attribute
             if (thirdText != null) {
                 thirdButton.text = thirdText
                 itemCount = 3
-            }
-            else {
+            } else {
                 thirdButton.gone()
                 separator2.gone()
             }
-        }
-        else {
+        } else {
             itemCount = 1
             secondButton.gone()
             separator1.gone()
@@ -66,9 +69,9 @@ class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: Attribute
             separator2.gone()
         }
         this.root = root
-        firstButton.setOnClickListener {toggleButton(0) }
-        secondButton.setOnClickListener {toggleButton(1) }
-        thirdButton.setOnClickListener {toggleButton(2) }
+        firstButton.setOnClickListener { toggleButton(0) }
+        secondButton.setOnClickListener { toggleButton(1) }
+        thirdButton.setOnClickListener { toggleButton(2) }
     }
 
     fun setState(preference: Preference<Int>) {
@@ -87,7 +90,7 @@ class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: Attribute
         buttons.forEach {
             it.isActivated = false
         }
-        for (i in 0 until itemCount)  {
+        for (i in 0 until itemCount) {
             buttons[i].visible()
             buttons[i].setTextColor(context.getResourceColor(android.R.attr.textColorPrimary))
         }
@@ -122,12 +125,11 @@ class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: Attribute
             listener?.onFilterClicked(this, -1, callBack)
             if (itemCount >= 3)
                 separator2.visible()
-            buttons.forEach{ it.visible() }
-        }
-        else {
+            buttons.forEach { it.visible() }
+        } else {
             mainButton.isActivated = true
             listener?.onFilterClicked(this, index, callBack)
-            buttons.forEach{ it.gone() }
+            buttons.forEach { it.gone() }
             separator1.gone()
             if (itemCount >= 3) {
                 separator2.gone()
@@ -139,5 +141,5 @@ class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: Attribute
 }
 
 interface FilterTagGroupListener {
-    fun onFilterClicked(view: FilterTagGroup, index: Int, updatePreference:Boolean)
+    fun onFilterClicked(view: FilterTagGroup, index: Int, updatePreference: Boolean)
 }

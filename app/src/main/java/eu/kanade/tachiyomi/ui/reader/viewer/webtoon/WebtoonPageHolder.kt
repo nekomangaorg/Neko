@@ -4,8 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.net.Uri
-import androidx.appcompat.widget.AppCompatButton
-import androidx.appcompat.widget.AppCompatImageView
 import android.view.Gravity
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
@@ -14,6 +12,8 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.appcompat.widget.AppCompatButton
+import androidx.appcompat.widget.AppCompatImageView
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.engine.GlideException
@@ -33,12 +33,12 @@ import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.visible
+import java.io.InputStream
+import java.util.concurrent.TimeUnit
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
-import java.io.InputStream
-import java.util.concurrent.TimeUnit
 
 /**
  * Holder of the webtoon reader for a single page of a chapter.
@@ -48,8 +48,8 @@ import java.util.concurrent.TimeUnit
  * @constructor creates a new webtoon holder.
  */
 class WebtoonPageHolder(
-        private val frame: FrameLayout,
-        viewer: WebtoonViewer
+    private val frame: FrameLayout,
+    viewer: WebtoonViewer
 ) : WebtoonBaseHolder(frame, viewer) {
 
     /**
@@ -328,7 +328,7 @@ class WebtoonPageHolder(
             val size = 48.dpToPx
             layoutParams = FrameLayout.LayoutParams(size, size).apply {
                 gravity = Gravity.CENTER_HORIZONTAL
-                setMargins(0, parentHeight/4, 0, 0)
+                setMargins(0, parentHeight / 4, 0, 0)
             }
         }
         progressContainer.addView(progress)
@@ -389,7 +389,7 @@ class WebtoonPageHolder(
         AppCompatButton(context).apply {
             layoutParams = FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
                 gravity = Gravity.CENTER_HORIZONTAL
-                setMargins(0, parentHeight/4, 0, 0)
+                setMargins(0, parentHeight / 4, 0, 0)
             }
             setText(R.string.action_retry)
             setOnClickListener {
@@ -411,7 +411,7 @@ class WebtoonPageHolder(
 
         val decodeLayout = LinearLayout(context).apply {
             layoutParams = LinearLayout.LayoutParams(MATCH_PARENT, parentHeight).apply {
-                setMargins(0, parentHeight/6, 0, 0)
+                setMargins(0, parentHeight / 6, 0, 0)
             }
             gravity = Gravity.CENTER_HORIZONTAL
             orientation = LinearLayout.VERTICAL
@@ -482,21 +482,21 @@ class WebtoonPageHolder(
             .transition(DrawableTransitionOptions.with(NoTransition.getFactory()))
             .listener(object : RequestListener<Drawable> {
                 override fun onLoadFailed(
-                        e: GlideException?,
-                        model: Any?,
-                        target: Target<Drawable>?,
-                        isFirstResource: Boolean
+                    e: GlideException?,
+                    model: Any?,
+                    target: Target<Drawable>?,
+                    isFirstResource: Boolean
                 ): Boolean {
                     onImageDecodeError()
                     return false
                 }
 
                 override fun onResourceReady(
-                        resource: Drawable?,
-                        model: Any?,
-                        target: Target<Drawable>?,
-                        dataSource: DataSource?,
-                        isFirstResource: Boolean
+                    resource: Drawable?,
+                    model: Any?,
+                    target: Target<Drawable>?,
+                    dataSource: DataSource?,
+                    isFirstResource: Boolean
                 ): Boolean {
                     if (resource is GifDrawable) {
                         resource.setLoopCount(GifDrawable.LOOP_INTRINSIC)
@@ -507,5 +507,4 @@ class WebtoonPageHolder(
             })
             .into(this)
     }
-
 }

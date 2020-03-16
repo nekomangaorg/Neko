@@ -87,7 +87,7 @@ class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
         view.applyWindowInsetsForRootController(activity!!.bottom_nav)
-        
+
         view.context.notificationManager.cancel(Notifications.ID_NEW_CHAPTERS)
         // Init RecyclerView and adapter
         val layoutManager = LinearLayoutManager(view.context)
@@ -275,7 +275,6 @@ class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
     override fun onCoverClick(position: Int) {
         val chapterClicked = adapter?.getItem(position) as? RecentChapterItem ?: return
         openManga(chapterClicked)
-
     }
 
     fun openManga(chapter: RecentChapterItem) {
@@ -345,7 +344,6 @@ class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
         adapter?.clearSelection()
         actionMode = null
     }
-
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.recent_updates, menu)

@@ -39,5 +39,4 @@ object LibraryUpdateRanker {
             compareValues(mangaFirst.currentTitle(), mangaSecond.currentTitle())
         }
     }
-
 }

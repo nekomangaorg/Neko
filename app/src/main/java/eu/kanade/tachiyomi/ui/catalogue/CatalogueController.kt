@@ -33,13 +33,13 @@ import eu.kanade.tachiyomi.util.view.applyWindowInsetsForRootController
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import eu.kanade.tachiyomi.widget.preference.SourceLoginDialog
+import kotlin.math.max
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.catalogue_main_controller.*
 import kotlinx.android.synthetic.main.extensions_bottom_sheet.*
 import kotlinx.android.synthetic.main.main_activity.*
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import kotlin.math.max
 
 /**
  * This controller shows and manages the different catalogues enabled by the user.
@@ -131,7 +131,7 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
         recycler.addItemDecoration(SourceDividerItemDecoration(view.context))
         val attrsArray = intArrayOf(android.R.attr.actionBarSize)
         val array = view.context.obtainStyledAttributes(attrsArray)
-        val appBarHeight =  array.getDimensionPixelSize(0, 0)
+        val appBarHeight = array.getDimensionPixelSize(0, 0)
         array.recycle()
         scrollViewWith(recycler) {
             headerHeight = it.systemWindowInsetTop + appBarHeight
@@ -160,7 +160,7 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
                     state == BottomSheetBehavior.STATE_COLLAPSED) {
                     sheet_layout.alpha =
                         if (state == BottomSheetBehavior.STATE_COLLAPSED) 1f else 0f
-                    showingExtenions = state ==  BottomSheetBehavior.STATE_EXPANDED
+                    showingExtenions = state == BottomSheetBehavior.STATE_EXPANDED
                     setTitle()
                     activity?.invalidateOptionsMenu()
                 }
@@ -175,7 +175,6 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
         if (showingExtenions) {
             ext_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
         }
-
     }
 
     fun showExtensions() {
@@ -185,8 +184,7 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
     fun toggleExtensions() {
         if (ext_bottom_sheet.sheetBehavior?.state != BottomSheetBehavior.STATE_COLLAPSED) {
             ext_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
-        }
-        else {
+        } else {
             ext_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
         }
     }
@@ -288,8 +286,7 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
                 ext_bottom_sheet.drawExtensions()
                 true
             }
-        }
-        else {
+        } else {
             // Inflate menu
             inflater.inflate(R.menu.catalogue_main, menu)
 
@@ -308,7 +305,7 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
         }
     }
 
-    private fun performGlobalSearch(query: String){
+    private fun performGlobalSearch(query: String) {
         router.pushController(CatalogueSearchController(query).withFadeTransaction())
     }
 

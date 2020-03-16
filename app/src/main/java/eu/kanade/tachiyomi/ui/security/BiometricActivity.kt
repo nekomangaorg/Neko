@@ -38,5 +38,4 @@ class BiometricActivity : BaseActivity() {
 
         biometricPrompt.authenticate(promptInfo)
     }
-
 }

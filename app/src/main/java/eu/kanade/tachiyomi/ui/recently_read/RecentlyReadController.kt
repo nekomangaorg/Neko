@@ -62,12 +62,11 @@ class RecentlyReadController(bundle: Bundle? = null) : BaseController(bundle),
      * Endless loading item.
      */
     private var progressItem: ProgressItem? = null
-    private var observeLater:Boolean = false
+    private var observeLater: Boolean = false
     private var query = ""
 
     private var presenter = RecentlyReadPresenter(this)
     private var recentItems: MutableList<RecentlyReadItem>? = null
-
 
     override fun getTitle(): String? {
         return resources?.getString(R.string.label_recent_manga)

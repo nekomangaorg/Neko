@@ -67,5 +67,4 @@ object ChapterTable {
 
     val pagesLeftQuery: String
         get() = "ALTER TABLE $TABLE ADD COLUMN $COL_PAGES_LEFT INTEGER DEFAULT 0"
-
 }

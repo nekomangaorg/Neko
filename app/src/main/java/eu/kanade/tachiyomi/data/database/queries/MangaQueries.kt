@@ -145,5 +145,5 @@ interface MangaQueries : DbProvider {
             .prepare()
 
     fun getTotalChapterManga() = db.get().listOfObjects(Manga::class.java)
-            .withQuery(RawQuery.builder().query(getTotalChapterMangaQuery()).observesTables(MangaTable.TABLE).build()).prepare();
+            .withQuery(RawQuery.builder().query(getTotalChapterMangaQuery()).observesTables(MangaTable.TABLE).build()).prepare()
 }

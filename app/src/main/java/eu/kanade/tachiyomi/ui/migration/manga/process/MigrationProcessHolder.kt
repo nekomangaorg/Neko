@@ -21,13 +21,13 @@ import eu.kanade.tachiyomi.util.view.invisible
 import eu.kanade.tachiyomi.util.view.setVectorCompat
 import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.widget.StateImageViewTarget
+import java.text.DecimalFormat
 import kotlinx.android.synthetic.main.catalogue_grid_item.view.*
 import kotlinx.android.synthetic.main.migration_process_item.*
 import kotlinx.android.synthetic.main.unread_download_badge.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.injectLazy
-import java.text.DecimalFormat
 
 class MigrationProcessHolder(
     private val view: View,
@@ -36,8 +36,7 @@ class MigrationProcessHolder(
 
     private val db: DatabaseHelper by injectLazy()
     private val sourceManager: SourceManager by injectLazy()
-    private var item:MigrationProcessItem? = null
-
+    private var item: MigrationProcessItem? = null
 
     init {
         // We need to post a Runnable to show the popup to make sure that the PopupMenu is
@@ -139,8 +138,7 @@ class MigrationProcessHolder(
             if (isTo) {
                 transition(DrawableTransitionOptions.withCrossFade())
                     .into(StateImageViewTarget(cover_thumbnail, progress))
-            }
-            else
+            } else
                 into(cover_thumbnail)
         }
 

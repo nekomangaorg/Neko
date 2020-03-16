@@ -40,11 +40,6 @@ import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
-import kotlinx.android.synthetic.main.filter_bottom_sheet.*
-import kotlinx.android.synthetic.main.library_grid_recycler.*
-import kotlinx.android.synthetic.main.library_list_controller.*
-import kotlinx.android.synthetic.main.main_activity.*
-import kotlinx.coroutines.delay
 import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.max
@@ -52,15 +47,16 @@ import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.roundToInt
 import kotlin.math.sign
+import kotlinx.android.synthetic.main.filter_bottom_sheet.*
+import kotlinx.android.synthetic.main.library_grid_recycler.*
+import kotlinx.android.synthetic.main.library_list_controller.*
+import kotlinx.android.synthetic.main.main_activity.*
+import kotlinx.coroutines.delay
 
 class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
-    FlexibleAdapter.OnItemClickListener,
-    FlexibleAdapter.OnItemLongClickListener,
-    FlexibleAdapter.OnItemMoveListener,
-    LibraryCategoryAdapter.LibraryListener,
-    SpinnerTitleInterface,
-    OnTouchEventInterface,
-    SwipeGestureInterface {
+    FlexibleAdapter.OnItemClickListener, FlexibleAdapter.OnItemLongClickListener,
+    FlexibleAdapter.OnItemMoveListener, LibraryCategoryAdapter.LibraryListener,
+    SpinnerTitleInterface, OnTouchEventInterface, SwipeGestureInterface {
 
     private lateinit var adapter: LibraryCategoryAdapter
 
@@ -68,32 +64,33 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
 
     private var updateScroll = true
 
-    private var lastItemPosition:Int? = null
-    private var lastItem:IFlexible<*>? = null
+    private var lastItemPosition: Int? = null
+    private var lastItem: IFlexible<*>? = null
 
     private var switchingCategories = false
 
-    private var startPosX:Float? = null
-    private var startPosY:Float? = null
+    private var startPosX: Float? = null
+    private var startPosY: Float? = null
     private var moved = false
     private var lockedRecycler = false
     private var lockedY = false
-    private var nextCategory:Int? = null
-    private var ogCategory:Int? = null
-    private var prevCategory:Int? = null
+    private var nextCategory: Int? = null
+    private var ogCategory: Int? = null
+    private var prevCategory: Int? = null
     private val swipeDistance = 300f
     private var flinging = false
     private var isDragging = false
 
-    override fun contentView():View = recycler_layout
+    override fun contentView(): View = recycler_layout
 
     override fun getTitle(): String? {
         return if (view != null && presenter.categories.size > 1) presenter.categories.find {
-            it.order == activeCategory }?.name ?: super.getTitle()
+            it.order == activeCategory
+        }?.name ?: super.getTitle()
         else super.getTitle()
     }
 
-    private var scrollListener = object : RecyclerView.OnScrollListener () {
+    private var scrollListener = object : RecyclerView.OnScrollListener() {
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
             super.onScrolled(recyclerView, dx, dy)
             val order = getCategoryOrder()
@@ -109,7 +106,8 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
         super.onViewCreated(view)
         // pad the recycler if the filter bottom sheet is visible
         if (!phoneLandscape) {
-            val height = view.context.resources.getDimensionPixelSize(R.dimen.rounder_radius) + 4.dpToPx
+            val height =
+                view.context.resources.getDimensionPixelSize(R.dimen.rounder_radius) + 4.dpToPx
             recycler.updatePaddingRelative(bottom = height)
         }
     }
@@ -132,7 +130,6 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
         bottom_sheet.getGlobalVisibleRect(sheetRect)
         view?.getGlobalVisibleRect(recyclerRect)
         activity?.appbar?.getGlobalVisibleRect(appBarRect)
-
 
         if (startPosX == null) {
             startPosX = event.rawX
@@ -166,10 +163,14 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
             }
             return
         }
-        if (startPosX != null && startPosY != null &&
-            (sheetRect.contains(startPosX!!.toInt(), startPosY!!.toInt()) ||
-                !recyclerRect.contains(startPosX!!.toInt(), startPosY!!.toInt())
-                || appBarRect.contains(startPosX!!.toInt(), startPosY!!.toInt()))) {
+        if (startPosX != null && startPosY != null && (sheetRect.contains(
+                startPosX!!.toInt(),
+                startPosY!!.toInt()
+            ) || !recyclerRect.contains(
+                startPosX!!.toInt(),
+                startPosY!!.toInt()
+            ) || appBarRect.contains(startPosX!!.toInt(), startPosY!!.toInt()))
+        ) {
             return
         }
         if (event.actionMasked != MotionEvent.ACTION_UP && startPosX != null) {
@@ -178,25 +179,21 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
 
             if (lockedY) return
 
-            if (distance > 60 && abs(event.rawY - startPosY!!) <= 30 &&
-                !lockedRecycler) {
+            if (distance > 60 && abs(event.rawY - startPosY!!) <= 30 && !lockedRecycler) {
                 lockedRecycler = true
                 switchingCategories = true
                 recycler.suppressLayout(true)
-            }
-            else if (!lockedRecycler && abs(event.rawY - startPosY!!) > 30) {
+            } else if (!lockedRecycler && abs(event.rawY - startPosY!!) > 30) {
                 lockedY = true
                 resetRecyclerY()
                 return
             }
-            if (abs(event.rawY - startPosY!!) <= 30 || recycler.isLayoutSuppressed
-                || lockedRecycler) {
+            if (abs(event.rawY - startPosY!!) <= 30 || recycler.isLayoutSuppressed || lockedRecycler) {
 
                 if ((prevCategory == null && sign > 0) || (nextCategory == null && sign < 0)) {
                     recycler_layout.x = sign * distance.pow(0.6f)
                     recycler_layout.alpha = 1f
-                }
-                else if (distance <= swipeDistance * 1.1f) {
+                } else if (distance <= swipeDistance * 1.1f) {
                     recycler_layout.x = (max(0f, distance - 50f) * sign) / 3
                     recycler_layout.alpha =
                         (1f - (distance - (swipeDistance * 0.1f)) / swipeDistance)
@@ -258,14 +255,14 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
             val set = AnimatorSet()
             val translationXAnimator = ValueAnimator.ofFloat(recycler_layout.x, 0f)
             translationXAnimator.duration = time
-            translationXAnimator.addUpdateListener {
-                    animation -> recycler_layout.x = animation.animatedValue as Float
+            translationXAnimator.addUpdateListener { animation ->
+                recycler_layout.x = animation.animatedValue as Float
             }
 
             val translationAlphaAnimator = ValueAnimator.ofFloat(recycler_layout.alpha, 1f)
             translationAlphaAnimator.duration = time
-            translationAlphaAnimator.addUpdateListener {
-                    animation -> recycler_layout.alpha = animation.animatedValue as Float
+            translationAlphaAnimator.addUpdateListener { animation ->
+                recycler_layout.alpha = animation.animatedValue as Float
             }
             set.playTogether(translationXAnimator, translationAlphaAnimator)
             set.start()
@@ -274,8 +271,7 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
                 delay(time)
                 if (!lockedRecycler) switchingCategories = false
             }
-        }
-        else {
+        } else {
             recycler_layout.x = 0f
             recycler_layout.alpha = 1f
             switchingCategories = false
@@ -286,7 +282,6 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
     override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
         return inflater.inflate(R.layout.library_list_controller, container, false)
     }
-
 
     override fun layoutView(view: View) {
         adapter = LibraryCategoryAdapter(this)
@@ -317,8 +312,7 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
         if (libraryLayout == 0) {
             recycler.spanCount = 1
             recycler.updatePaddingRelative(start = 0, end = 0)
-        }
-        else {
+        } else {
             recycler.columnWidth = (90 + (preferences.gridSize().getOrDefault() * 30)).dpToPx
             recycler.updatePaddingRelative(start = 5.dpToPx, end = 5.dpToPx)
         }
@@ -356,34 +350,29 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
         }
         adapter.setItems(mangaMap)
 
-        val categoryNames =  presenter.categories.map { it.name }.toTypedArray()
+        val categoryNames = presenter.categories.map { it.name }.toTypedArray()
 
-        val isCurrentController = router?.backstack?.lastOrNull()?.controller() ==
-            this
+        val isCurrentController = router?.backstack?.lastOrNull()?.controller() == this
 
         setTitle()
         updateScroll = false
         if (!freshStart) {
             justStarted = false
-            if (contentView().alpha == 0f)
-                contentView().animate().alpha(1f).setDuration(500).start()
-
-
+            if (contentView().alpha == 0f) contentView().animate().alpha(1f).setDuration(500)
+                .start()
         } else if (justStarted) {
             if (freshStart) scrollToHeader(activeCategory)
-        }
-        else {
+        } else {
             updateScroll = true
         }
         adapter.isLongPressDragEnabled = canDrag()
 
-       val popupMenu = if (presenter.categories.size > 1 && isCurrentController) {
+        val popupMenu = if (presenter.categories.size > 1 && isCurrentController) {
             activity?.toolbar?.showSpinner()
+        } else {
+            activity?.toolbar?.removeSpinner()
+            null
         }
-        else  {
-           activity?.toolbar?.removeSpinner()
-           null
-       }
 
         presenter.categories.forEach { category ->
             popupMenu?.menu?.add(0, category.order, max(0, category.order), category.name)
@@ -401,18 +390,15 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
         if (headerPosition > -1) {
             val appbar = activity?.appbar
             recycler.suppressLayout(true)
-            val appbarOffset =
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    if (appbar?.y ?: 0f > -20) 0 else
-                        (appbar?.y?.plus(view?.rootWindowInsets?.systemWindowInsetTop ?: 0)
-                            ?: 0f).roundToInt() + 30.dpToPx
-                }
-                else {
-                    0
-                }
+            val appbarOffset = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (appbar?.y ?: 0f > -20) 0 else (appbar?.y?.plus(
+                    view?.rootWindowInsets?.systemWindowInsetTop ?: 0
+                ) ?: 0f).roundToInt() + 30.dpToPx
+            } else {
+                0
+            }
             (recycler.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
-                headerPosition, (if (headerPosition == 0) 0 else (-28).dpToPx)
-                    + appbarOffset
+                headerPosition, (if (headerPosition == 0) 0 else (-28).dpToPx) + appbarOffset
             )
 
             /*val headerItem = adapter.getItem(headerPosition) as? LibraryHeaderItem
@@ -492,8 +478,7 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
         headerPositions.forEach {
             if (changedMode) {
                 adapter.notifyItemChanged(it)
-            }
-            else {
+            } else {
                 (recycler.findViewHolderForAdapterPosition(it) as? LibraryHeaderItem.Holder)?.setSelection()
             }
         }
@@ -517,8 +502,8 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
     }
 
     override fun canDrag(): Boolean {
-        val filterOff = !bottom_sheet.hasActiveFilters() &&
-            !preferences.hideCategories().getOrDefault()
+        val filterOff =
+            !bottom_sheet.hasActiveFilters() && !preferences.hideCategories().getOrDefault()
         return filterOff && adapter.mode != SelectableAdapter.Mode.MULTI
     }
 
@@ -552,10 +537,12 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
         createActionModeIfNeeded()
         when {
             lastClickPosition == -1 -> setSelection(position)
-            lastClickPosition > position -> for (i in position until lastClickPosition)
-                setSelection(i)
-            lastClickPosition < position -> for (i in lastClickPosition + 1..position)
-                setSelection(i)
+            lastClickPosition > position -> for (i in position until lastClickPosition) setSelection(
+                i
+            )
+            lastClickPosition < position -> for (i in lastClickPosition + 1..position) setSelection(
+                i
+            )
             else -> setSelection(position)
         }
         lastClickPosition = position
@@ -566,14 +553,15 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
         if (actionState == 2) {
             isDragging = true
             activity?.appbar?.y = 0f
-            if (lastItemPosition != null && position != lastItemPosition
-                && lastItem == adapter.getItem(position)) {
+            if (lastItemPosition != null && position != lastItemPosition && lastItem == adapter.getItem(
+                    position
+                )
+            ) {
                 // because for whatever reason you can repeatedly tap on a currently dragging manga
                 adapter.removeSelection(position)
                 (recycler.findViewHolderForAdapterPosition(position) as? LibraryHolder)?.toggleActivation()
                 adapter.moveItem(position, lastItemPosition!!)
-            }
-            else {
+            } else {
                 lastItem = adapter.getItem(position)
                 lastItemPosition = position
                 onItemLongClick(position)
@@ -592,28 +580,27 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
         setSelection(item.manga, selected)
         invalidateActionMode()
     }
+
     override fun onItemMove(fromPosition: Int, toPosition: Int) {
         // Because padding a recycler causes it to scroll up we have to scroll it back down... wild
-        if ((adapter.getItem(fromPosition) is LibraryItem &&
-            adapter.getItem(fromPosition) is LibraryItem) ||
-            adapter.getItem(fromPosition) == null)
-            recycler.scrollBy(0, recycler.paddingTop)
+        if ((adapter.getItem(fromPosition) is LibraryItem && adapter.getItem(fromPosition) is LibraryItem) || adapter.getItem(
+                fromPosition
+            ) == null
+        ) recycler.scrollBy(0, recycler.paddingTop)
         activity?.appbar?.y = 0f
-        if (lastItemPosition == toPosition)
-            lastItemPosition = null
-        else if (lastItemPosition == null)
-            lastItemPosition = fromPosition
+        if (lastItemPosition == toPosition) lastItemPosition = null
+        else if (lastItemPosition == null) lastItemPosition = fromPosition
     }
 
     override fun shouldMoveItem(fromPosition: Int, toPosition: Int): Boolean {
-        if (adapter.isSelected(fromPosition))
-            toggleSelection(fromPosition)
+        if (adapter.isSelected(fromPosition)) toggleSelection(fromPosition)
         val item = adapter.getItem(fromPosition) as? LibraryItem ?: return false
         val newHeader = adapter.getSectionHeader(toPosition) as? LibraryHeaderItem
         if (toPosition <= 1) return false
-        return (adapter.getItem(toPosition) !is LibraryHeaderItem)&&
-            (newHeader?.category?.id == item.manga.category ||
-            !presenter.mangaIsInCategory(item.manga, newHeader?.category?.id))
+        return (adapter.getItem(toPosition) !is LibraryHeaderItem) && (newHeader?.category?.id == item.manga.category || !presenter.mangaIsInCategory(
+            item.manga,
+            newHeader?.category?.id
+        ))
     }
 
     override fun onItemReleased(position: Int) {
@@ -624,8 +611,7 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
         }
         destroyActionModeIfNeeded()
         // if nothing moved
-        if (lastItemPosition == null)
-            return
+        if (lastItemPosition == null) return
         val item = adapter.getItem(position) as? LibraryItem ?: return
         val newHeader = adapter.getSectionHeader(position) as? LibraryHeaderItem
         val libraryItems = adapter.getSectionItems(adapter.getSectionHeader(position))
@@ -652,9 +638,7 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
                                 item, newHeader.category.id, mangaIds, true
                             )
                             if (it.isCheckPromptChecked()) preferences.keepCatSort().set(2)
-                        }
-                        .checkBoxPrompt(R.string.remember_choice) {}
-                        .negativeButton(
+                        }.checkBoxPrompt(R.string.remember_choice) {}.negativeButton(
                             text = resources?.getString(
                                 R.string.keep_current_sort,
                                 resources!!.getString(newHeader.category.sortRes()).toLowerCase(
@@ -667,8 +651,7 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
                             )
                             if (it.isCheckPromptChecked()) preferences.keepCatSort().set(1)
                         }.cancelOnTouchOutside(false).show()
-                }
-                else {
+                } else {
                     presenter.moveMangaToCategory(
                         item, newHeader.category.id, mangaIds, keepCatSort == 2
                     )
@@ -679,21 +662,21 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
     }
 
     override fun updateCategory(catId: Int): Boolean {
-        val category = (adapter.getItem(catId) as? LibraryHeaderItem)?.category ?:
-        return false
+        val category = (adapter.getItem(catId) as? LibraryHeaderItem)?.category ?: return false
         val inQueue = LibraryUpdateService.categoryInQueue(category.id)
         snack?.dismiss()
-        snack = view?.snack(resources!!.getString(
-            when {
-                inQueue -> R.string.category_already_in_queue
-                LibraryUpdateService.isRunning() ->
-                    R.string.adding_category_to_queue
-                else -> R.string.updating_category_x
-            }, category.name)) {
+        snack = view?.snack(
+            resources!!.getString(
+                when {
+                    inQueue -> R.string.category_already_in_queue
+                    LibraryUpdateService.isRunning() -> R.string.adding_category_to_queue
+                    else -> R.string.updating_category_x
+                }, category.name
+            )
+        ) {
             anchorView = bottom_sheet
         }
-        if (!inQueue)
-            LibraryUpdateService.start(view!!.context, category)
+        if (!inQueue) LibraryUpdateService.start(view!!.context, category)
         return true
     }
 
@@ -705,8 +688,7 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
         val header = adapter.getSectionHeader(position) ?: return
         val items = adapter.getSectionItemPositions(header)
         val allSelected = allSelected(position)
-        for (i in items)
-            setSelection(i, !allSelected)
+        for (i in items) setSelection(i, !allSelected)
     }
 
     override fun allSelected(position: Int): Boolean {
@@ -715,23 +697,22 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
         return items.all { adapter.isSelected(it) }
     }
 
-    override fun onSwipeBottom(x: Float, y: Float) { }
+    override fun onSwipeBottom(x: Float, y: Float) {}
     override fun onSwipeTop(x: Float, y: Float) {
         val sheetRect = Rect()
         activity!!.bottom_nav.getGlobalVisibleRect(sheetRect)
         if (sheetRect.contains(x.toInt(), y.toInt())) {
-            if (bottom_sheet.sheetBehavior?.state != BottomSheetBehavior.STATE_EXPANDED)
-                toggleFilters()
+            if (bottom_sheet.sheetBehavior?.state != BottomSheetBehavior.STATE_EXPANDED) toggleFilters()
         }
     }
+
     override fun onSwipeLeft(x: Float, y: Float) = goToNextCategory(x)
     override fun onSwipeRight(x: Float, y: Float) = goToNextCategory(x)
 
     private fun goToNextCategory(x: Float) {
-        if (lockedRecycler && abs(x) > 1000f)  {
+        if (lockedRecycler && abs(x) > 1000f) {
             val sign = sign(x).roundToInt()
-            if ((sign < 0 && nextCategory == null) || (sign > 0) && prevCategory == null)
-                return
+            if ((sign < 0 && nextCategory == null) || (sign > 0) && prevCategory == null) return
             val distance = recycler_layout.alpha
             val speed = max(3000f / abs(x), 0.75f)
             if (sign(recycler_layout.x) == sign(x)) {

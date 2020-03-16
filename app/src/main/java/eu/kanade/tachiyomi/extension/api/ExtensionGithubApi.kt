@@ -28,7 +28,7 @@ internal class ExtensionGithubApi {
         val call = GET("$REPO_URL/index.json")
 
         return withContext(Dispatchers.IO) {
-             parseResponse(network.client.newCall(call).await())
+            parseResponse(network.client.newCall(call).await())
         }
     }
 
@@ -41,9 +41,9 @@ internal class ExtensionGithubApi {
                 val extensions = parseResponse(response)
                 val extensionsWithUpdate = mutableListOf<Extension.Installed>()
 
-                val installedExtensions = ExtensionLoader.loadExtensions(context)
-                    .filterIsInstance<LoadResult.Success>()
-                    .map { it.extension }
+                val installedExtensions =
+                    ExtensionLoader.loadExtensions(context).filterIsInstance<LoadResult.Success>()
+                        .map { it.extension }
                 val mutInstalledExtensions = installedExtensions.toMutableList()
                 for (installedExt in mutInstalledExtensions) {
                     val pkgName = installedExt.pkgName
@@ -84,6 +84,7 @@ internal class ExtensionGithubApi {
     }
 
     companion object {
-        private const val REPO_URL = "https://raw.githubusercontent.com/inorichi/tachiyomi-extensions/repo"
+        private const val REPO_URL =
+            "https://raw.githubusercontent.com/inorichi/tachiyomi-extensions/repo"
     }
 }

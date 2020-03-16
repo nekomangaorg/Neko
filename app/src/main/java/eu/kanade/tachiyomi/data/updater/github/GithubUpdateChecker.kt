@@ -19,5 +19,4 @@ import eu.kanade.tachiyomi.data.updater.UpdateResult
             GithubUpdateResult.NoNewUpdate()
         }
     }
-
 }

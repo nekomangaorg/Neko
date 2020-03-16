@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.data.database.tables
 
-
 object SearchMetadataTable {
     const val TABLE = "search_metadata"
 

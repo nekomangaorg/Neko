@@ -15,9 +15,9 @@ import uy.kohesive.injekt.api.get
  * Presenter of [CategoryController]. Used to manage the categories of the library.
  */
 class CategoryPresenter(
-        private val controller: CategoryController,
-        private val db: DatabaseHelper = Injekt.get(),
-        preferences: PreferencesHelper = Injekt.get()
+    private val controller: CategoryController,
+    private val db: DatabaseHelper = Injekt.get(),
+    preferences: PreferencesHelper = Injekt.get()
 ) {
 
     private val context = preferences.context
@@ -138,5 +138,4 @@ class CategoryPresenter(
     companion object {
         const val CREATE_CATEGORY_ORDER = -2
     }
-
 }

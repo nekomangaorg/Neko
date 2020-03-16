@@ -12,7 +12,7 @@ import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import kotlinx.android.synthetic.main.unread_download_badge.view.*
 
-class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null):
+class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     MaterialCardView(context, attrs) {
 
     fun setUnreadDownload(unread: Int, downloads: Int, showTotalChapters: Boolean) {
@@ -33,7 +33,7 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
 
         // Update the download count or local status and its visibility.
         with(download_text) {
-            visibility = if (downloads == -2 || downloads > 0)  View.VISIBLE else View.GONE
+            visibility = if (downloads == -2 || downloads > 0) View.VISIBLE else View.GONE
             text = if (downloads == -2)
                 resources.getString(R.string.local_source_badge)
             else downloads.toString()
@@ -52,8 +52,7 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
         if (unread_angle.visibility == View.VISIBLE) {
             download_text.updatePaddingRelative(end = 8.dpToPx)
             unread_text.updatePaddingRelative(start = 2.dpToPx)
-        }
-        else {
+        } else {
             download_text.updatePaddingRelative(end = 5.dpToPx)
             unread_text.updatePaddingRelative(start = 5.dpToPx)
         }
@@ -70,5 +69,4 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
         unread_text.visibility = if (inLibrary) View.VISIBLE else View.GONE
         unread_text.text = resources.getText(R.string.in_library)
     }
-
 }

@@ -13,9 +13,9 @@ import com.bumptech.glide.module.AppGlideModule
 import com.bumptech.glide.request.RequestOptions
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.network.NetworkHelper
+import java.io.InputStream
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import java.io.InputStream
 
 /**
  * Class used to update Glide module settings
@@ -26,8 +26,8 @@ class TachiGlideModule : AppGlideModule() {
     override fun applyOptions(context: Context, builder: GlideBuilder) {
         builder.setDiskCache(InternalCacheDiskCacheFactory(context, 50 * 1024 * 1024))
         builder.setDefaultRequestOptions(RequestOptions().format(DecodeFormat.PREFER_RGB_565))
-        //val memoryCacheSizeBytes = 1024 * 1024 * 100 // 100mb
-        //builder.setMemoryCache(LruResourceCache(memoryCacheSizeBytes.toLong()))
+        // val memoryCacheSizeBytes = 1024 * 1024 * 100 // 100mb
+        // builder.setMemoryCache(LruResourceCache(memoryCacheSizeBytes.toLong()))
 
             /* builder.setDefaultTransitionOptions(
             Drawable::class.java,

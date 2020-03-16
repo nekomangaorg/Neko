@@ -20,6 +20,9 @@ import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.inflate
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.visibleIf
+import kotlin.math.max
+import kotlin.math.min
+import kotlin.math.roundToInt
 import kotlinx.android.synthetic.main.filter_bottom_sheet.view.*
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
@@ -29,12 +32,9 @@ import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
-import kotlin.math.max
-import kotlin.math.min
-import kotlin.math.roundToInt
 
-class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null)
-    : LinearLayout(context, attrs),
+class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
+    LinearLayout(context, attrs),
     FilterTagGroupListener {
 
     /**
@@ -54,11 +54,11 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
     private var mangaType: FilterTagGroup? = null
 
-    var sheetBehavior:BottomSheetBehavior<View>? = null
+    var sheetBehavior: BottomSheetBehavior<View>? = null
 
-    private lateinit var clearButton:ImageView
+    private lateinit var clearButton: ImageView
 
-    private val filterItems:MutableList<FilterTagGroup> by lazy {
+    private val filterItems: MutableList<FilterTagGroup> by lazy {
         val list = mutableListOf<FilterTagGroup>()
         list.add(unread)
         list.add(downloaded)
@@ -68,11 +68,11 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         list
     }
 
-    var onGroupClicked: (Int) -> Unit = { _ ->  }
-    var pager:View? = null
+    var onGroupClicked: (Int) -> Unit = { _ -> }
+    var pager: View? = null
     var phoneLandscape = false
 
-    fun onCreate(pagerView:View) {
+    fun onCreate(pagerView: View) {
         clearButton = clear_button
         filter_layout.removeView(clearButton)
         sheetBehavior = BottomSheetBehavior.from(this)
@@ -80,8 +80,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         sheetBehavior?.isHideable = true
         sheetBehavior?.skipCollapsed = phoneLandscape
         pager = pagerView
-        val shadow2:View = (pagerView.parent as ViewGroup).findViewById(R.id.shadow2)
-        val shadow:View = (pagerView.parent as ViewGroup).findViewById(R.id.shadow)
+        val shadow2: View = (pagerView.parent as ViewGroup).findViewById(R.id.shadow2)
+        val shadow: View = (pagerView.parent as ViewGroup).findViewById(R.id.shadow)
         if (phoneLandscape) {
             sheetBehavior?.state = BottomSheetBehavior.STATE_HIDDEN
         }
@@ -156,8 +156,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
     fun updateRootPadding(progress: Float? = null) {
         val minHeight = sheetBehavior?.peekHeight ?: 0
         val maxHeight = height
-        val trueProgress = progress ?:
-            if (sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) 1f else 0f
+        val trueProgress = progress
+            ?: if (sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) 1f else 0f
         val percent = (trueProgress * 100).roundToInt()
         val value = (percent * (maxHeight - minHeight) / 100) + minHeight
         val height = context.resources.getDimensionPixelSize(R.dimen.rounder_radius)
@@ -196,7 +196,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
     private fun checkForManhwa() {
         GlobalScope.launch(Dispatchers.IO, CoroutineStart.DEFAULT) {
-            val db:DatabaseHelper by injectLazy()
+            val db: DatabaseHelper by injectLazy()
             val showCategoriesCheckBox = withContext(Dispatchers.IO) {
                 db.getCategories().executeAsBlocking()
                     .isNotEmpty()
@@ -224,7 +224,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                         filterItems.add(tracked)
                 }
             }
-            withContext(Dispatchers.Main)  {
+            withContext(Dispatchers.Main) {
                 hide_categories.visibleIf(showCategoriesCheckBox)
                 downloaded.setState(preferences.filterDownloaded())
                 completed.setState(preferences.filterCompleted())
@@ -255,11 +255,10 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                     }
                 }
             }
-
         }
     }
 
-    override fun onFilterClicked(view: FilterTagGroup, index: Int, updatePreference:Boolean) {
+    override fun onFilterClicked(view: FilterTagGroup, index: Int, updatePreference: Boolean) {
         if (updatePreference) {
             if (view == trackers) {
                 FILTER_TRACKER = view.nameOf(index) ?: ""
@@ -279,8 +278,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             trackers != null && trackers?.parent == null) {
             filter_layout.addView(trackers)
             filterItems.add(trackers!!)
-        }
-        else if (preferences.filterTracked().getOrDefault() != 1 &&
+        } else if (preferences.filterTracked().getOrDefault() != 1 &&
             trackers?.parent != null) {
             filter_layout.removeView(trackers)
             trackers?.reset()

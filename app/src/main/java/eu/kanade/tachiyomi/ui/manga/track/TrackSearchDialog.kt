@@ -18,13 +18,13 @@ import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsPresenter
 import eu.kanade.tachiyomi.ui.manga.TrackingBottomSheet
 import eu.kanade.tachiyomi.util.lang.plusAssign
+import java.util.concurrent.TimeUnit
 import kotlinx.android.synthetic.main.track_search_dialog.view.*
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.subscriptions.CompositeSubscription
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import java.util.concurrent.TimeUnit
 
 class TrackSearchDialog : DialogController {
 
@@ -41,15 +41,11 @@ class TrackSearchDialog : DialogController {
     private var searchTextSubscription: Subscription? = null
 
     private lateinit var bottomSheet: TrackingBottomSheet
-    //private val trackController
-       // get() = targetController as TrackController
 
+    private var wasPreviouslyTracked: Boolean = false
+    private lateinit var presenter: MangaDetailsPresenter
 
-
-    private var wasPreviouslyTracked:Boolean = false
-    private lateinit var presenter:MangaDetailsPresenter
-
-    constructor(target: TrackingBottomSheet, service: TrackService, wasTracked:Boolean) : super(Bundle()
+    constructor(target: TrackingBottomSheet, service: TrackService, wasTracked: Boolean) : super(Bundle()
         .apply {
             putInt(KEY_SERVICE, service.id)
         }) {
@@ -70,7 +66,7 @@ class TrackSearchDialog : DialogController {
             negativeButton(android.R.string.cancel)
             positiveButton(
                 if (wasPreviouslyTracked) R.string.action_clear
-                else R.string.action_track){ onPositiveButtonClick() }
+                else R.string.action_track) { onPositiveButtonClick() }
             setActionButtonEnabled(WhichButton.POSITIVE, wasPreviouslyTracked)
         }
 
@@ -157,7 +153,6 @@ class TrackSearchDialog : DialogController {
     }
 
     private fun onPositiveButtonClick() {
-       // trackController.swipe_refresh.isRefreshing = true
         bottomSheet.refreshTrack(service)
         presenter.registerTracking(selectedItem,
             service)
@@ -166,5 +161,4 @@ class TrackSearchDialog : DialogController {
     private companion object {
         const val KEY_SERVICE = "service_id"
     }
-
 }

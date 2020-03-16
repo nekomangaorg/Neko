@@ -23,14 +23,14 @@ import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.util.view.visibleIf
-import kotlinx.android.synthetic.main.manga_header_item.*
 import java.util.Locale
+import kotlinx.android.synthetic.main.manga_header_item.*
 
 class MangaHeaderHolder(
     private val view: View,
     private val adapter: ChaptersAdapter,
     startExpanded: Boolean
-) : BaseFlexibleViewHolder(view, adapter)  {
+) : BaseFlexibleViewHolder(view, adapter) {
 
     init {
         start_reading_button.setOnClickListener { adapter.coverListener.readNextChapter() }
@@ -103,11 +103,10 @@ class MangaHeaderHolder(
             .no_description)
 
         manga_summary.post {
-            if ((manga_summary.lineCount < 3 && manga.currentGenres().isNullOrBlank())
-                || less_button.visibility == View.VISIBLE) {
+            if ((manga_summary.lineCount < 3 && manga.currentGenres().isNullOrBlank()) ||
+                less_button.visibility == View.VISIBLE) {
                 more_button_group.gone()
-            }
-            else
+            } else
                 more_button_group.visible()
         }
         manga_summary_label.text = itemView.context.getString(R.string.about_this,
@@ -137,8 +136,8 @@ class MangaHeaderHolder(
             )
             checked(!item.isLocked && manga.favorite)
         }
-        true_backdrop.setBackgroundColor(adapter.coverListener.coverColor() ?:
-        itemView.context.getResourceColor(android.R.attr.colorBackground))
+        true_backdrop.setBackgroundColor(adapter.coverListener.coverColor()
+        ?: itemView.context.getResourceColor(android.R.attr.colorBackground))
 
         val tracked = presenter.isTracked() && !item.isLocked
 
@@ -169,8 +168,7 @@ class MangaHeaderHolder(
                         else R.string.start_reading
                     )
                 }
-            }
-            else {
+            } else {
                 text = resources.getString(R.string.start_reading)
             }
         }
@@ -182,7 +180,7 @@ class MangaHeaderHolder(
             height = adapter.coverListener.topCoverHeight()
         }
 
-        manga_status.text = (itemView.context.getString( when (manga.status) {
+        manga_status.text = (itemView.context.getString(when (manga.status) {
             SManga.ONGOING -> R.string.ongoing
             SManga.COMPLETED -> R.string.completed
             SManga.LICENSED -> R.string.licensed

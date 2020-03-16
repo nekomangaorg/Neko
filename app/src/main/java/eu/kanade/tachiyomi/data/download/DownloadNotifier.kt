@@ -6,7 +6,6 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.model.Download
-import eu.kanade.tachiyomi.data.download.model.DownloadQueue
 import eu.kanade.tachiyomi.data.notification.NotificationHandler
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
@@ -93,8 +92,7 @@ internal class DownloadNotifier(private val context: Context) {
                 setContentText(
                     context.getString(R.string.chapter_downloading)
                 )
-            }
-            else {
+            } else {
                 setContentTitle(
                     context.getString(
                         R.string.chapter_downloading
@@ -102,12 +100,11 @@ internal class DownloadNotifier(private val context: Context) {
                 )
                 setContentText(null)
             }
-            setProgress(0,0, true)
+            setProgress(0, 0, true)
             setStyle(null)
         }
         // Displays the progress bar on notification
         notification.show()
-
     }
 
     /**
@@ -164,7 +161,7 @@ internal class DownloadNotifier(private val context: Context) {
                 context.getString(R.string.action_resume),
                 NotificationReceiver.resumeDownloadsPendingBroadcast(context)
             )
-            //Clear action
+            // Clear action
             addAction(
                 R.drawable.ic_clear_grey_24dp_img,
                 context.getString(R.string.action_cancel_all),

@@ -21,9 +21,9 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 class MigrationPresenter(
-        private val sourceManager: SourceManager = Injekt.get(),
-        private val db: DatabaseHelper = Injekt.get(),
-        private val preferences: PreferencesHelper = Injekt.get()
+    private val sourceManager: SourceManager = Injekt.get(),
+    private val db: DatabaseHelper = Injekt.get(),
+    private val preferences: PreferencesHelper = Injekt.get()
 ) : BasePresenter<MigrationController>() {
 
     var state = ViewState()
@@ -37,27 +37,19 @@ class MigrationPresenter(
     override fun onCreate(savedState: Bundle?) {
         super.onCreate(savedState)
 
-        db.getFavoriteMangas()
-                .asRxObservable()
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnNext { state = state.copy(sourcesWithManga = findSourcesWithManga(it)) }
-                .combineLatest(stateRelay.map { it.selectedSource }
-                        .distinctUntilChanged()
-                ) { library, source -> library to source }
-                .filter { (_, source) -> source != null }
-                .observeOn(Schedulers.io())
-                .map { (library, source) -> libraryToMigrationItem(library, source!!.id) }
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnNext { state = state.copy(mangaForSource = it) }
-                .subscribe()
+        db.getFavoriteMangas().asRxObservable().observeOn(AndroidSchedulers.mainThread())
+            .doOnNext { state = state.copy(sourcesWithManga = findSourcesWithManga(it)) }
+            .combineLatest(stateRelay.map { it.selectedSource }
+                .distinctUntilChanged()) { library, source -> library to source }
+            .filter { (_, source) -> source != null }.observeOn(Schedulers.io())
+            .map { (library, source) -> libraryToMigrationItem(library, source!!.id) }
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnNext { state = state.copy(mangaForSource = it) }.subscribe()
 
         stateRelay
-                // Render the view when any field other than isReplacingManga changes
-                .distinctUntilChanged { t1, t2 -> t1.isReplacingManga != t2.isReplacingManga }
-                .subscribeLatestCache(MigrationController::render)
-
-       /* stateRelay.distinctUntilChanged { state -> state.isReplacingManga }
-                .subscribeLatestCache(MigrationController::renderIsReplacingManga)*/
+            // Render the view when any field other than isReplacingManga changes
+            .distinctUntilChanged { t1, t2 -> t1.isReplacingManga != t2.isReplacingManga }
+            .subscribeLatestCache(MigrationController::render)
     }
 
     fun setSelectedSource(source: Source) {
@@ -71,8 +63,8 @@ class MigrationPresenter(
     private fun findSourcesWithManga(library: List<Manga>): List<SourceItem> {
         val header = SelectionHeader()
         return library.map { it.source }.toSet()
-                .mapNotNull { if (it != LocalSource.ID) sourceManager.getOrStub(it) else null }
-                .map { SourceItem(it, header) }
+            .mapNotNull { if (it != LocalSource.ID) sourceManager.getOrStub(it) else null }
+            .map { SourceItem(it, header) }
     }
 
     private fun libraryToMigrationItem(library: List<Manga>, sourceId: Long): List<MangaItem> {
@@ -84,18 +76,20 @@ class MigrationPresenter(
 
         state = state.copy(isReplacingManga = true)
 
-        Observable.defer { source.fetchChapterList(manga) }
-                .onErrorReturn { emptyList() }
-                .doOnNext { migrateMangaInternal(source, it, prevManga, manga, replace) }
-                .onErrorReturn { emptyList() }
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnUnsubscribe { state = state.copy(isReplacingManga = false) }
-                .subscribe()
+        Observable.defer { source.fetchChapterList(manga) }.onErrorReturn { emptyList() }
+            .doOnNext { migrateMangaInternal(source, it, prevManga, manga, replace) }
+            .onErrorReturn { emptyList() }.subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnUnsubscribe { state = state.copy(isReplacingManga = false) }.subscribe()
     }
 
-    private fun migrateMangaInternal(source: Source, sourceChapters: List<SChapter>,
-                                     prevManga: Manga, manga: Manga, replace: Boolean) {
+    private fun migrateMangaInternal(
+        source: Source,
+        sourceChapters: List<SChapter>,
+        prevManga: Manga,
+        manga: Manga,
+        replace: Boolean
+    ) {
 
         val flags = preferences.migrateFlags().getOrDefault()
         val migrateChapters = MigrationFlags.hasChapters(flags)
@@ -112,8 +106,8 @@ class MigrationPresenter(
                 }
 
                 val prevMangaChapters = db.getChapters(prevManga).executeAsBlocking()
-                val maxChapterRead = prevMangaChapters.filter { it.read }
-                        .maxBy { it.chapter_number }?.chapter_number
+                val maxChapterRead =
+                    prevMangaChapters.filter { it.read }.maxBy { it.chapter_number }?.chapter_number
                 if (maxChapterRead != null) {
                     val dbChapters = db.getChapters(manga).executeAsBlocking()
                     for (chapter in dbChapters) {

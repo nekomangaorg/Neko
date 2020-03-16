@@ -2,10 +2,10 @@ package eu.kanade.tachiyomi.data.track
 
 import android.content.Context
 import eu.kanade.tachiyomi.data.track.anilist.Anilist
+import eu.kanade.tachiyomi.data.track.bangumi.Bangumi
 import eu.kanade.tachiyomi.data.track.kitsu.Kitsu
 import eu.kanade.tachiyomi.data.track.myanimelist.MyAnimeList
 import eu.kanade.tachiyomi.data.track.shikimori.Shikimori
-import eu.kanade.tachiyomi.data.track.bangumi.Bangumi
 
 class TrackManager(context: Context) {
 
@@ -32,5 +32,4 @@ class TrackManager(context: Context) {
     fun getService(id: Int) = services.find { it.id == id }
 
     fun hasLoggedServices() = services.any { it.isLogged }
-
 }

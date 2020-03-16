@@ -115,7 +115,6 @@ class SettingsAdvancedController : SettingsController() {
                 activity.toast(cleanupString, Toast.LENGTH_LONG)
             }
         }
-
     }
 
     private fun clearChapterCache() {

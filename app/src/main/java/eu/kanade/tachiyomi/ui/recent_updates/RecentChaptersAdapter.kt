@@ -11,7 +11,7 @@ class RecentChaptersAdapter(val controller: RecentChaptersController) :
 
     init {
         setDisplayHeadersAtStartUp(true)
-        //setStickyHeaders(true)
+        // setStickyHeaders(true)
     }
 
     fun setItems(recents: List<RecentChapterItem>) {
@@ -23,8 +23,7 @@ class RecentChaptersAdapter(val controller: RecentChaptersController) :
         val s = getFilter(String::class.java)
         if (s.isNullOrBlank()) {
             updateDataSet(recents)
-        }
-        else {
+        } else {
             updateDataSet(recents.filter { it.filter(s) })
         }
     }

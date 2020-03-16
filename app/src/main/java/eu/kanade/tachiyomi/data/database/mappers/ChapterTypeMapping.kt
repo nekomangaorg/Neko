@@ -88,4 +88,3 @@ class ChapterDeleteResolver : DefaultDeleteResolver<Chapter>() {
             .whereArgs(obj.id)
             .build()
 }
-

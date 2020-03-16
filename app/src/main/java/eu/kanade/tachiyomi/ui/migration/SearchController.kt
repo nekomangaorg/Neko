@@ -23,8 +23,8 @@ import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationListController
 import uy.kohesive.injekt.injectLazy
 
 class SearchController(
-        private var manga: Manga? = null
-) : CatalogueSearchController(manga?.originalTitle()), BottomNavBarInterface{
+    private var manga: Manga? = null
+) : CatalogueSearchController(manga?.originalTitle()), BottomNavBarInterface {
 
     private var newManga: Manga? = null
     private var progress = 1
@@ -37,12 +37,10 @@ class SearchController(
         setHasOptionsMenu(true)
     }
 
-
     override fun getTitle(): String? {
         if (totalProgress > 1) {
             return "($progress/$totalProgress) ${super.getTitle()}"
-        }
-        else
+        } else
             return super.getTitle()
     }
 
@@ -101,7 +99,7 @@ class SearchController(
 
     private fun replaceWithNewSearchController(manga: Manga?) {
         if (manga != null) {
-            //router.popCurrentController()
+            // router.popCurrentController()
             val searchController = SearchController(manga)
             searchController.targetController = targetController
             searchController.progress = progress + 1
@@ -143,7 +141,7 @@ class SearchController(
                     .message(R.string.migration_dialog_what_to_include)
                     .listItemsMultiChoice(items = MigrationFlags.titles.map
                     { resources?.getString(it) as CharSequence },
-                        initialSelection = preselected.toIntArray()) {  _, positions, _ ->
+                        initialSelection = preselected.toIntArray()) { _, positions, _ ->
                         val newValue = MigrationFlags.getFlagsFromPositions(positions.toTypedArray())
                         preferences.migrateFlags().set(newValue)
                     }
@@ -154,7 +152,6 @@ class SearchController(
                         (targetController as? SearchController)?.copyManga()
                     }
         }
-
     }
 
     /**

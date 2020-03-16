@@ -141,5 +141,4 @@ class SettingsReaderController : SettingsController() {
             }.apply { dependency = Keys.readWithVolumeKeys }
         }
     }
-
 }

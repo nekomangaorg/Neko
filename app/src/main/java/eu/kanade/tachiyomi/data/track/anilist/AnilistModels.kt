@@ -5,28 +5,30 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
-import uy.kohesive.injekt.injectLazy
 import java.text.SimpleDateFormat
 import java.util.Locale
+import uy.kohesive.injekt.injectLazy
 
 data class OAuth(
     val access_token: String,
     val token_type: String,
     val expires: Long,
-    val expires_in: Long) {
+    val expires_in: Long
+) {
 
     fun isExpired() = System.currentTimeMillis() > expires
 }
 
 data class ALManga(
-        val media_id: Int,
-        val title_romaji: String,
-        val image_url_lge: String,
-        val description: String?,
-        val type: String,
-        val publishing_status: String,
-        val start_date_fuzzy: Long,
-        val total_chapters: Int) {
+    val media_id: Int,
+    val title_romaji: String,
+    val image_url_lge: String,
+    val description: String?,
+    val type: String,
+    val publishing_status: String,
+    val start_date_fuzzy: Long,
+    val total_chapters: Int
+) {
 
     fun toTrack() = TrackSearch.create(TrackManager.ANILIST).apply {
         media_id = this@ALManga.media_id

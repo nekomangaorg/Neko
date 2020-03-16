@@ -364,7 +364,7 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
      *
      * @param manga the manga to open.
      */
-    private fun openManga(manga: Manga, startY:Float?) {
+    private fun openManga(manga: Manga, startY: Float?) {
         controller.openManga(manga, startY)
     }
 
@@ -379,7 +379,6 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
         controller.setSelection((item as LibraryItem).manga, !adapter.isSelected(position))
         controller.invalidateActionMode()
     }
-
 
     /**
      * Tells the presenter to set the selection for the given position.

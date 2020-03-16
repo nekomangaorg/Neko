@@ -26,10 +26,9 @@ class ChooseShapeDialog(bundle: Bundle? = null) : DialogController(bundle) {
         return MaterialDialog(activity!!)
             .title(R.string.icon_shape)
             .negativeButton(android.R.string.cancel)
-            .listItemsSingleChoice (
+            .listItemsSingleChoice(
                 items = modes.map { activity?.getString(it) as CharSequence },
-                waitForPositiveButton = false)
-            { _, i, _ ->
+                waitForPositiveButton = false) { _, i, _ ->
                 (targetController as? MangaDetailsController)?.createShortcutForShape(i)
                 dismissDialog()
             }

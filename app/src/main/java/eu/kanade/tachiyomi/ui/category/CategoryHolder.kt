@@ -57,15 +57,13 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleVie
             edit_button.setImageDrawable(null)
             edit_text.setText("")
             edit_text.hint = title.text
-        }
-        else {
+        } else {
             title.setTextColor(ContextCompat.getColor(itemView.context, R.color.textColorPrimary))
             regularDrawable = ContextCompat.getDrawable(itemView.context, R.drawable
                 .ic_reorder_grey_24dp)
             image.visible()
             edit_text.setText(title.text)
         }
-
     }
 
     fun isEditing(editing: Boolean) {
@@ -89,15 +87,13 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleVie
                     adapter.categoryItemListener.onItemDelete(adapterPosition)
                 }
             }
-        }
-        else {
+        } else {
             if (!createCategory) {
                 setDragHandleView(reorder)
                 edit_button.setImageDrawable(ContextCompat.getDrawable(itemView.context, R.drawable.ic_edit_white_24dp))
-            }
-            else {
+            } else {
                 edit_button.setImageDrawable(null)
-                reorder.setOnTouchListener { _, _ ->  true}
+                reorder.setOnTouchListener { _, _ -> true }
             }
             edit_text.clearFocus()
             edit_button.drawable?.mutate()?.setTint(ContextCompat.getColor(itemView.context, R
@@ -107,7 +103,7 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleVie
     }
 
     private fun submitChanges() {
-        if (edit_text.visibility == View.VISIBLE ) {
+        if (edit_text.visibility == View.VISIBLE) {
             if (adapter.categoryItemListener
                     .onCategoryRename(adapterPosition, edit_text.text.toString())) {
                 isEditing(false)
@@ -115,8 +111,7 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleVie
                 if (!createCategory)
                     title.text = edit_text.text.toString()
             }
-        }
-        else {
+        } else {
             itemView.performClick()
         }
     }
@@ -137,5 +132,4 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleVie
         super.onItemReleased(position)
         adapter.categoryItemListener.onItemReleased(position)
     }
-
 }

@@ -52,7 +52,7 @@ open class App : Application(), LifecycleObserver {
 
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
     fun onAppBackgrounded() {
-        //App in background
+        // App in background
         val preferences: PreferencesHelper by injectLazy()
         if (preferences.lockAfter().getOrDefault() >= 0) {
             SecureActivityDelegate.locked = true
@@ -92,5 +92,4 @@ open class App : Application(), LifecycleObserver {
     protected open fun setupNotificationChannels() {
         Notifications.createChannels(this)
     }
-
 }

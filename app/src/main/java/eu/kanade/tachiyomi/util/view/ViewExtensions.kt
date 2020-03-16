@@ -35,11 +35,11 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import kotlin.math.abs
+import kotlin.math.min
 import kotlinx.android.synthetic.main.main_activity.*
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import kotlin.math.abs
-import kotlin.math.min
 
 /**
  * Returns coordinates of view.
@@ -56,19 +56,22 @@ fun View.getCoordinates() = Point((left + right) / 2, (top + bottom) / 2)
  * @param length the duration of the snack.
  * @param f a function to execute in the snack, allowing for example to define a custom action.
  */
-fun View.snack(message: String, length: Int = Snackbar.LENGTH_SHORT, f: (Snackbar.() ->
-Unit)? = null): Snackbar {
+fun View.snack(
+    message: String,
+    length: Int = Snackbar.LENGTH_SHORT,
+    f: (Snackbar.() -> Unit)? = null
+): Snackbar {
     val snack = Snackbar.make(this, message, length)
-   /* when {
-        Build.VERSION.SDK_INT >= 23 ->  {
-            val leftM = if (this is CoordinatorLayout) 0 else rootWindowInsets.systemWindowInsetLeft
-            val rightM = if (this is CoordinatorLayout) 0
-            else rootWindowInsets.systemWindowInsetRight
-                snack.config(context, rootWindowInsets
-                .systemWindowInsetBottom, rightM, leftM)
-        }
-        else -> snack.config(context)
-    }*/
+    /* when {
+         Build.VERSION.SDK_INT >= 23 ->  {
+             val leftM = if (this is CoordinatorLayout) 0 else rootWindowInsets.systemWindowInsetLeft
+             val rightM = if (this is CoordinatorLayout) 0
+             else rootWindowInsets.systemWindowInsetRight
+                 snack.config(context, rootWindowInsets
+                 .systemWindowInsetBottom, rightM, leftM)
+         }
+         else -> snack.config(context)
+     }*/
     if (f != null) {
         snack.f()
     }
@@ -82,28 +85,24 @@ Unit)? = null): Snackbar {
         button?.setTextColor(context.getResourceColor(R.attr.snackbar_text))
         snack.config(context)
     }
-   // if (Build.VERSION.SDK_INT < 23) {
-/*        val view = if (this !is CoordinatorLayout) this else snack.view
-        view.doOnApplyWindowInsets { _, insets, _ ->
-            snack.view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                bottomMargin = 12 + insets.systemWindowInsetBottom
-            }
-        }*/
-    /*}
-    else {
-        snack.view.doOnApplyWindowInsets { _,_,_ -> }
-    }*/
     snack.show()
     return snack
 }
 
-fun View.snack(resource: Int, length: Int = Snackbar.LENGTH_SHORT, f: (Snackbar.() ->
-Unit)? = null): Snackbar {
+fun View.snack(
+    resource: Int,
+    length: Int = Snackbar.LENGTH_SHORT,
+    f: (Snackbar.() -> Unit)? = null
+): Snackbar {
     return snack(context.getString(resource), length, f)
 }
 
-fun Snackbar.config(context: Context, bottomMargin: Int = 0, rightMargin: Int = 0, leftMargin:
-Int = 0) {
+fun Snackbar.config(
+    context: Context,
+    bottomMargin: Int = 0,
+    rightMargin: Int = 0,
+    leftMargin: Int = 0
+) {
     val params = this.view.layoutParams as ViewGroup.MarginLayoutParams
     params.setMargins(12 + leftMargin, 12, 12 + rightMargin, 12 + bottomMargin)
     this.view.layoutParams = params
@@ -143,16 +142,15 @@ inline fun View.visibleIf(show: Boolean) {
  * @param text text of [TextDrawable]
  * @param random random color
  */
-fun View.getRound(text: String, random : Boolean = true): TextDrawable {
+fun View.getRound(text: String, random: Boolean = true): TextDrawable {
     val size = min(this.width, this.height)
-    return TextDrawable.builder()
-            .beginConfig()
-            .width(size)
-            .height(size)
-            .textColor(Color.WHITE)
-            .useFont(Typeface.DEFAULT)
-            .endConfig()
-            .buildRound(text, if (random) ColorGenerator.MATERIAL.randomColor else ColorGenerator.MATERIAL.getColor(text))
+    return TextDrawable.builder().beginConfig().width(size).height(size).textColor(Color.WHITE)
+        .useFont(Typeface.DEFAULT).endConfig().buildRound(
+            text,
+            if (random) ColorGenerator.MATERIAL.randomColor else ColorGenerator.MATERIAL.getColor(
+                text
+            )
+        )
 }
 
 inline val View.marginTop: Int
@@ -170,7 +168,7 @@ inline val View.marginLeft: Int
 object RecyclerWindowInsetsListener : View.OnApplyWindowInsetsListener {
     override fun onApplyWindowInsets(v: View, insets: WindowInsets): WindowInsets {
         v.updatePaddingRelative(bottom = insets.systemWindowInsetBottom)
-        //v.updatePaddingRelative(bottom = v.paddingBottom + insets.systemWindowInsetBottom)
+        // v.updatePaddingRelative(bottom = v.paddingBottom + insets.systemWindowInsetBottom)
         return insets
     }
 }
@@ -190,7 +188,7 @@ object ControllerViewWindowInsetsListener : View.OnApplyWindowInsetsListener {
 object HeightTopWindowInsetsListener : View.OnApplyWindowInsetsListener {
     override fun onApplyWindowInsets(v: View, insets: WindowInsets): WindowInsets {
         val topInset = insets.systemWindowInsetTop
-        v.setPadding(0,topInset,0,0)
+        v.setPadding(0, topInset, 0, 0)
         if (v.layoutParams.height != topInset) {
             v.layoutParams.height = topInset
             v.requestLayout()
@@ -215,40 +213,36 @@ fun View.applyWindowInsetsForController() {
 }
 
 fun View.checkHeightThen(f: () -> Unit) {
-    viewTreeObserver.addOnGlobalLayoutListener(
-        object : ViewTreeObserver.OnGlobalLayoutListener {
-            override fun onGlobalLayout() {
-                if (height > 0) {
-                    viewTreeObserver.removeOnGlobalLayoutListener(this)
-                    f()
-                }
+    viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+        override fun onGlobalLayout() {
+            if (height > 0) {
+                viewTreeObserver.removeOnGlobalLayoutListener(this)
+                f()
             }
         }
-    )
+    })
 }
 
 fun View.applyWindowInsetsForRootController(bottomNav: View) {
-    viewTreeObserver.addOnGlobalLayoutListener(
-        object : ViewTreeObserver.OnGlobalLayoutListener {
-            override fun onGlobalLayout() {
-                if (bottomNav.height > 0) {
-                    viewTreeObserver.removeOnGlobalLayoutListener(this)
-                    setOnApplyWindowInsetsListener { view, insets ->
-                        view.updateLayoutParams<FrameLayout.LayoutParams> {
-                            val attrsArray = intArrayOf(android.R.attr.actionBarSize)
-                            val array = view.context.obtainStyledAttributes(attrsArray)
-                            //topMargin = insets.systemWindowInsetTop + array
-                                //.getDimensionPixelSize(0, 0)
-                            bottomMargin = bottomNav.height
-                            array.recycle()
-                        }
-                        insets
+    viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+        override fun onGlobalLayout() {
+            if (bottomNav.height > 0) {
+                viewTreeObserver.removeOnGlobalLayoutListener(this)
+                setOnApplyWindowInsetsListener { view, insets ->
+                    view.updateLayoutParams<FrameLayout.LayoutParams> {
+                        val attrsArray = intArrayOf(android.R.attr.actionBarSize)
+                        val array = view.context.obtainStyledAttributes(attrsArray)
+                        // topMargin = insets.systemWindowInsetTop + array
+                        // .getDimensionPixelSize(0, 0)
+                        bottomMargin = bottomNav.height
+                        array.recycle()
                     }
-                    requestApplyInsetsWhenAttached()
+                    insets
                 }
+                requestApplyInsetsWhenAttached()
             }
         }
-    )
+    })
 }
 
 fun View.requestApplyInsetsWhenAttached() {
@@ -280,8 +274,14 @@ inline fun View.updatePadding(
     setPadding(left, top, right, bottom)
 }
 
-private fun createStateForView(view: View) = ViewPaddingState(view.paddingLeft,
-    view.paddingTop, view.paddingRight, view.paddingBottom, view.paddingStart, view.paddingEnd)
+private fun createStateForView(view: View) = ViewPaddingState(
+    view.paddingLeft,
+    view.paddingTop,
+    view.paddingRight,
+    view.paddingBottom,
+    view.paddingStart,
+    view.paddingEnd
+)
 
 data class ViewPaddingState(
     val left: Int,
@@ -292,13 +292,16 @@ data class ViewPaddingState(
     val end: Int
 )
 
-
-fun Controller.setOnQueryTextChangeListener(searchView: SearchView, onlyOnSubmit:Boolean = false,
-    f: (text: String?) -> Boolean) {
+fun Controller.setOnQueryTextChangeListener(
+    searchView: SearchView,
+    onlyOnSubmit: Boolean = false,
+    f: (text: String?) -> Boolean
+) {
     searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
         override fun onQueryTextChange(newText: String?): Boolean {
-            if (!onlyOnSubmit && router.backstack.lastOrNull()?.controller() ==
-                this@setOnQueryTextChangeListener) {
+            if (!onlyOnSubmit && router.backstack.lastOrNull()
+                    ?.controller() == this@setOnQueryTextChangeListener
+            ) {
                 return f(newText)
             }
             return false
@@ -317,7 +320,8 @@ fun Controller.scrollViewWith(
     recycler: RecyclerView,
     padBottom: Boolean = false,
     swipeRefreshLayout: SwipeRefreshLayout? = null,
-    afterInsets: ((WindowInsets) -> Unit)? = null) {
+    afterInsets: ((WindowInsets) -> Unit)? = null
+) {
     var statusBarHeight = -1
     activity?.appbar?.y = 0f
     val attrsArray = intArrayOf(android.R.attr.actionBarSize)
@@ -339,15 +343,12 @@ fun Controller.scrollViewWith(
     recycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
             super.onScrolled(recyclerView, dx, dy)
-            if (router?.backstack?.lastOrNull()?.controller() == this@scrollViewWith &&
-                statusBarHeight > -1 &&
-                activity != null &&
-                activity!!.appbar.height > 0) {
+            if (router?.backstack?.lastOrNull()
+                    ?.controller() == this@scrollViewWith && statusBarHeight > -1 && activity != null && activity!!.appbar.height > 0
+            ) {
                 activity!!.appbar.y -= dy
                 activity!!.appbar.y = clamp(
-                    activity!!.appbar.y,
-                    -activity!!.appbar.height.toFloat(),
-                    0f
+                    activity!!.appbar.y, -activity!!.appbar.height.toFloat(), 0f
                 )
             }
         }
@@ -355,22 +356,20 @@ fun Controller.scrollViewWith(
         override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
             super.onScrollStateChanged(recyclerView, newState)
             if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                if (router?.backstack?.lastOrNull()?.controller() == this@scrollViewWith &&
-                    statusBarHeight > -1 && activity != null &&
-                    activity!!.appbar.height > 0) {
+                if (router?.backstack?.lastOrNull()
+                        ?.controller() == this@scrollViewWith && statusBarHeight > -1 && activity != null && activity!!.appbar.height > 0
+                ) {
                     val halfWay = abs((-activity!!.appbar.height.toFloat()) / 2)
                     val shortAnimationDuration = resources?.getInteger(
                         android.R.integer.config_shortAnimTime
                     ) ?: 0
-                    val closerToTop =  abs(activity!!.appbar.y) - halfWay > 0
-                    val atTop = (recycler.layoutManager as LinearLayoutManager)
-                        .findFirstVisibleItemPosition() < 2
-                    activity!!.appbar.animate()
-                        .y(if (closerToTop && !atTop)
-                            (-activity!!.appbar.height.toFloat())
-                        else 0f)
-                        .setDuration(shortAnimationDuration.toLong())
-                        .start()
+                    val closerToTop = abs(activity!!.appbar.y) - halfWay > 0
+                    val atTop =
+                        (recycler.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition() < 2
+                    activity!!.appbar.animate().y(
+                            if (closerToTop && !atTop) (-activity!!.appbar.height.toFloat())
+                            else 0f
+                        ).setDuration(shortAnimationDuration.toLong()).start()
                 }
             }
         }
@@ -386,42 +385,42 @@ inline fun View.updatePaddingRelative(
     setPaddingRelative(start, top, end, bottom)
 }
 
-fun BottomSheetDialog.setEdgeToEdge(activity: Activity, layout: View, contentView: View,
-    setTopMargin: Boolean) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-        window?.setBackgroundDrawable(null)
-    val currentNightMode = activity.resources.configuration.uiMode and Configuration
-        .UI_MODE_NIGHT_MASK
-    if (currentNightMode == Configuration.UI_MODE_NIGHT_NO)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            if (activity.window.decorView.rootWindowInsets.systemWindowInsetRight == 0 &&
-                activity.window.decorView.rootWindowInsets.systemWindowInsetLeft == 0)
-                window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
-        }
-        else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && layout is ConstraintLayout) {
-            val nView = View(context)
-            val height = activity.window.decorView.rootWindowInsets.systemWindowInsetBottom
-            val params = ConstraintLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, height
+fun BottomSheetDialog.setEdgeToEdge(
+    activity: Activity,
+    layout: View,
+    contentView: View,
+    setTopMargin: Boolean
+) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) window?.setBackgroundDrawable(null)
+    val currentNightMode =
+        activity.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+    if (currentNightMode == Configuration.UI_MODE_NIGHT_NO) if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        if (activity.window.decorView.rootWindowInsets.systemWindowInsetRight == 0 && activity.window.decorView.rootWindowInsets.systemWindowInsetLeft == 0) window?.decorView?.systemUiVisibility =
+            View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+    } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && layout is ConstraintLayout) {
+        val nView = View(context)
+        val height = activity.window.decorView.rootWindowInsets.systemWindowInsetBottom
+        val params = ConstraintLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, height
+        )
+        params.bottomToBottom = layout.id
+        params.startToStart = layout.id
+        params.endToEnd = layout.id
+        nView.layoutParams = params
+        nView.background = GradientDrawable(
+            GradientDrawable.Orientation.BOTTOM_TOP, intArrayOf(
+                ColorUtils.setAlphaComponent(Color.BLACK, 179), Color.TRANSPARENT
             )
-            params.bottomToBottom = layout.id
-            params.startToStart = layout.id
-            params.endToEnd = layout.id
-            nView.layoutParams = params
-            nView.background = GradientDrawable(
-                GradientDrawable.Orientation.BOTTOM_TOP, intArrayOf(
-                    ColorUtils.setAlphaComponent(Color.BLACK, 179), Color.TRANSPARENT
-                )
-            )
-            layout.addView(nView)
-        }
+        )
+        layout.addView(nView)
+    }
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-        //window?.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+        // window?.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
         window?.findViewById<View>(com.google.android.material.R.id.container)?.fitsSystemWindows =
             false
         contentView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-            if (setTopMargin)
-                topMargin = activity.window.decorView.rootWindowInsets.systemWindowInsetTop
+            if (setTopMargin) topMargin =
+                activity.window.decorView.rootWindowInsets.systemWindowInsetTop
             leftMargin = activity.window.decorView.rootWindowInsets.systemWindowInsetLeft
             rightMargin = activity.window.decorView.rootWindowInsets.systemWindowInsetRight
         }
@@ -432,8 +431,8 @@ fun setBottomEdge(view: View, activity: Activity) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
         val marginB = view.marginBottom
         view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-            bottomMargin = marginB +
-                activity.window.decorView.rootWindowInsets.systemWindowInsetBottom
+            bottomMargin =
+                marginB + activity.window.decorView.rootWindowInsets.systemWindowInsetBottom
         }
     }
 }
