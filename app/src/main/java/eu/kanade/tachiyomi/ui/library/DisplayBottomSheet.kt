@@ -39,9 +39,7 @@ class DisplayBottomSheet(private val controller: LibraryController) : BottomShee
 
         sheetBehavior = BottomSheetBehavior.from(view.parent as ViewGroup)
         setEdgeToEdge(activity, bottom_sheet, view, false)
-        val height = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            activity.window.decorView.rootWindowInsets.systemWindowInsetBottom
-        } else 0
+        val height = activity.window.decorView.rootWindowInsets.systemWindowInsetBottom
         sheetBehavior.peekHeight = 220.dpToPx + height
 
         sheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {

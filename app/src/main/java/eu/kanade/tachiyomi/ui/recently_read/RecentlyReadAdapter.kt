@@ -5,10 +5,10 @@ import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.source.SourceManager
+import uy.kohesive.injekt.injectLazy
 import java.text.DateFormat
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
-import uy.kohesive.injekt.injectLazy
 
 /**
  * Adapter of RecentlyReadHolder.
@@ -48,6 +48,6 @@ FlexibleAdapter<IFlexible<*>>(null, controller, true) {
     }
 
     interface OnCoverClickListener {
-        fun onCoverClick(position: Int, lastTouchY: Float)
+        fun onCoverClick(position: Int)
     }
 }

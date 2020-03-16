@@ -57,9 +57,7 @@ class ReaderSettingsSheet(private val activity: ReaderActivity) :
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && preferences.readerTheme()
                 .getOrDefault() == 0 && activity.window.decorView.rootWindowInsets.systemWindowInsetRight == 0 && activity.window.decorView.rootWindowInsets.systemWindowInsetLeft == 0
         ) window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
-        val height = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            activity.window.decorView.rootWindowInsets.systemWindowInsetBottom
-        } else 0
+        val height = activity.window.decorView.rootWindowInsets.systemWindowInsetBottom
         sheetBehavior.peekHeight = 200.dpToPx + height
 
         sheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {

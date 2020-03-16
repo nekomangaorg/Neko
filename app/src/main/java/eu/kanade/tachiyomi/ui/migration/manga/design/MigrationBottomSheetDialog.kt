@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.ui.migration.manga.design
 
 import android.app.Activity
 import android.content.res.Configuration
-import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
 import android.widget.CompoundButton
@@ -78,9 +77,7 @@ class MigrationBottomSheetDialog(
 
         initPreferences()
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             window?.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
-        }
 
         fab.setOnClickListener {
             preferences.skipPreMigration().set(skip_step.isChecked)

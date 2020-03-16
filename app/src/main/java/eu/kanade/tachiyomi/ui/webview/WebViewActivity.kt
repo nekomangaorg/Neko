@@ -121,8 +121,7 @@ class WebViewActivity : BaseActivity() {
             if (Build.VERSION.SDK_INT >= 26 && currentNightMode == Configuration.UI_MODE_NIGHT_NO) {
                 content.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
             }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && currentNightMode == Configuration
-                    .UI_MODE_NIGHT_NO && preferences.theme() >= 8)
+            if (currentNightMode == Configuration.UI_MODE_NIGHT_NO && preferences.theme() >= 8)
                 content.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
             insets
         }
@@ -215,7 +214,7 @@ class WebViewActivity : BaseActivity() {
             web_linear_layout.systemUiVisibility = web_linear_layout.systemUiVisibility.or(View
                 .SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR)
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && lightMode && preferences.theme() >= 8)
+        if (lightMode && preferences.theme() >= 8)
             web_linear_layout.systemUiVisibility = web_linear_layout.systemUiVisibility
                 .or(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
         invalidateOptionsMenu()

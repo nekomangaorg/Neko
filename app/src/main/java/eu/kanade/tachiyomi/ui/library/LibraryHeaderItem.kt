@@ -83,10 +83,6 @@ class LibraryHeaderItem(private val categoryF: (Int) -> Category, val catId: Int
             updateButton.setOnClickListener { addCategoryToUpdate() }
             sortText.setOnClickListener { it.post { showCatSortOptions() } }
             checkboxImage.setOnClickListener { selectAll() }
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-                sortText.compoundDrawablesRelative[2]?.mutate()?.setTint(
-                    ContextCompat.getColor(contentView.context, R.color.gray_button))
-            }
             updateButton.drawable.mutate()
         }
 

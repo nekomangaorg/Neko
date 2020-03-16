@@ -31,7 +31,7 @@ android {
     buildToolsVersion("29.0.2")
 
     defaultConfig {
-        minSdkVersion(21)
+        minSdkVersion(23)
         targetSdkVersion(29)
         applicationId = "eu.kanade.tachiyomi"
         versionCode = 60

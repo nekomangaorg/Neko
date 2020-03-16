@@ -35,11 +35,11 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
-import kotlin.math.abs
-import kotlin.math.min
 import kotlinx.android.synthetic.main.main_activity.*
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import kotlin.math.abs
+import kotlin.math.min
 
 /**
  * Returns coordinates of view.
@@ -391,13 +391,13 @@ fun BottomSheetDialog.setEdgeToEdge(
     contentView: View,
     setTopMargin: Boolean
 ) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) window?.setBackgroundDrawable(null)
+    window?.setBackgroundDrawable(null)
     val currentNightMode =
         activity.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
     if (currentNightMode == Configuration.UI_MODE_NIGHT_NO) if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         if (activity.window.decorView.rootWindowInsets.systemWindowInsetRight == 0 && activity.window.decorView.rootWindowInsets.systemWindowInsetLeft == 0) window?.decorView?.systemUiVisibility =
             View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
-    } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && layout is ConstraintLayout) {
+    } else if (layout is ConstraintLayout) {
         val nView = View(context)
         val height = activity.window.decorView.rootWindowInsets.systemWindowInsetBottom
         val params = ConstraintLayout.LayoutParams(
@@ -414,25 +414,19 @@ fun BottomSheetDialog.setEdgeToEdge(
         )
         layout.addView(nView)
     }
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-        // window?.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
-        window?.findViewById<View>(com.google.android.material.R.id.container)?.fitsSystemWindows =
-            false
-        contentView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-            if (setTopMargin) topMargin =
-                activity.window.decorView.rootWindowInsets.systemWindowInsetTop
-            leftMargin = activity.window.decorView.rootWindowInsets.systemWindowInsetLeft
-            rightMargin = activity.window.decorView.rootWindowInsets.systemWindowInsetRight
-        }
+    window?.findViewById<View>(com.google.android.material.R.id.container)?.fitsSystemWindows =
+        false
+    contentView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+        if (setTopMargin) topMargin =
+            activity.window.decorView.rootWindowInsets.systemWindowInsetTop
+        leftMargin = activity.window.decorView.rootWindowInsets.systemWindowInsetLeft
+        rightMargin = activity.window.decorView.rootWindowInsets.systemWindowInsetRight
     }
 }
 
 fun setBottomEdge(view: View, activity: Activity) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-        val marginB = view.marginBottom
-        view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-            bottomMargin =
-                marginB + activity.window.decorView.rootWindowInsets.systemWindowInsetBottom
-        }
+    val marginB = view.marginBottom
+    view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+        bottomMargin = marginB + activity.window.decorView.rootWindowInsets.systemWindowInsetBottom
     }
 }

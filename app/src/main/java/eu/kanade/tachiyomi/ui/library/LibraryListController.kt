@@ -390,13 +390,9 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
         if (headerPosition > -1) {
             val appbar = activity?.appbar
             recycler.suppressLayout(true)
-            val appbarOffset = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                if (appbar?.y ?: 0f > -20) 0 else (appbar?.y?.plus(
+            val appbarOffset = if (appbar?.y ?: 0f > -20) 0 else (appbar?.y?.plus(
                     view?.rootWindowInsets?.systemWindowInsetTop ?: 0
                 ) ?: 0f).roundToInt() + 30.dpToPx
-            } else {
-                0
-            }
             (recycler.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
                 headerPosition, (if (headerPosition == 0) 0 else (-28).dpToPx) + appbarOffset
             )
