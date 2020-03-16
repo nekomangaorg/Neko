@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.ui.library
 
 import android.graphics.drawable.Drawable
-import android.os.Build
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView

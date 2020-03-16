@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.recently_read
 
-import android.view.MotionEvent
 import android.view.View
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import eu.kanade.tachiyomi.R
@@ -8,9 +7,8 @@ import eu.kanade.tachiyomi.data.database.models.MangaChapterHistory
 import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.lang.toTimestampString
-import kotlinx.android.synthetic.main.recently_read_item.*
 import java.util.Date
-import kotlin.math.max
+import kotlinx.android.synthetic.main.recently_read_item.*
 
 /**
  * Holder that contains recent manga item

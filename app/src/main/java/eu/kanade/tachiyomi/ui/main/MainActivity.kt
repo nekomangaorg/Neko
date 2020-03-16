@@ -63,9 +63,6 @@ import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePadding
 import eu.kanade.tachiyomi.util.view.visible
-import java.util.Date
-import java.util.concurrent.TimeUnit
-import kotlin.math.abs
 import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -73,6 +70,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
+import java.util.Date
+import java.util.concurrent.TimeUnit
+import kotlin.math.abs
 
 open class MainActivity : BaseActivity(), DownloadServiceListener {
 
@@ -223,8 +223,8 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             // if device doesn't support light nav bar
             window.navigationBarColor = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
                 // basically if in landscape on a phone
-                if (v.rootWindowInsets.systemWindowInsetLeft > 0 || v.rootWindowInsets.systemWindowInsetRight > 0))
                 // For lollipop, draw opaque nav bar
+                if (v.rootWindowInsets.systemWindowInsetLeft > 0 || v.rootWindowInsets.systemWindowInsetRight > 0)
                     Color.BLACK
                 else Color.argb(179, 0, 0, 0)
             }
@@ -232,7 +232,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                 getColor(android.R.color.transparent)
             }*/
             // if the android q+ device has gesture nav, transparent nav bar
-            // this is here incase some crazy with a notch uses landscape
+            // this is here in case some crazy with a notch uses landscape
             else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && (v.rootWindowInsets.systemWindowInsetBottom != v.rootWindowInsets.tappableElementInsets.bottom)) {
                 getColor(android.R.color.transparent)
             }
