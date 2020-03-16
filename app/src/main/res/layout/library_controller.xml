@@ -17,11 +17,6 @@
             android:layout_height="match_parent" />
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
-    <androidx.coordinatorlayout.widget.CoordinatorLayout
-        android:id="@+id/snackbar_layout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
-
     <eu.kanade.tachiyomi.widget.EmptyView
         android:id="@+id/empty_view"
         android:layout_width="wrap_content"
@@ -41,19 +36,6 @@
 
     <!-- Adding bottom sheet after main content -->
     <include layout="@layout/filter_bottom_sheet"/>
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab"
-        style="@style/Theme.Widget.FABFixed"
-        android:layout_gravity="center"
-        android:clickable="false"
-        android:focusable="false"
-        android:scaleX="0"
-        android:scaleY="0"
-        android:visibility="gone"
-        app:layout_anchor="@id/bottom_sheet"
-        app:layout_anchorGravity="end|top"
-        app:srcCompat="@drawable/ic_file_download_white_24dp" />
 
     <View
         android:id="@+id/shadow2"

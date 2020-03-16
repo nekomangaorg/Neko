@@ -24,8 +24,8 @@ import eu.kanade.tachiyomi.util.view.inflate
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
+import kotlinx.android.synthetic.main.filter_bottom_sheet.*
 import kotlinx.android.synthetic.main.library_category.view.*
-import kotlinx.android.synthetic.main.library_controller.*
 import kotlinx.coroutines.delay
 import rx.subscriptions.CompositeSubscription
 import uy.kohesive.injekt.injectLazy
@@ -116,13 +116,15 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
         swipe_refresh.setOnRefreshListener {
             val inQueue = LibraryUpdateService.categoryInQueue(category.id)
             controller.snack?.dismiss()
-            controller.snack = controller.snackbar_layout.snack(
+            controller.snack = controller.view?.snack(
                 resources.getString(
                     when {
                         inQueue -> R.string.category_already_in_queue
                         LibraryUpdateService.isRunning() -> R.string.adding_category_to_queue
                         else -> R.string.updating_category_x
-                    }, category.name))
+                    }, category.name)) {
+                anchorView = controller.bottom_sheet
+            }
             if (!inQueue)
                 LibraryUpdateService.start(context, category)
         }

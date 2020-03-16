@@ -651,9 +651,10 @@ open class LibraryController(
         presenter.removeMangaFromLibrary(mangas)
         destroyActionModeIfNeeded()
         snack?.dismiss()
-        snack = snackbar_layout?.snack(
+        snack = view?.snack(
             activity?.getString(R.string.manga_removed_library) ?: "", Snackbar.LENGTH_INDEFINITE
         ) {
+            anchorView = bottom_sheet
             var undoing = false
             setAction(R.string.action_undo) {
                 presenter.addMangas(mangas)
