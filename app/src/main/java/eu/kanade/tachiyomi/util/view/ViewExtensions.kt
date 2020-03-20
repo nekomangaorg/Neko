@@ -16,6 +16,7 @@ import android.view.ViewTreeObserver
 import android.view.WindowInsets
 import android.widget.Button
 import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.Px
 import androidx.appcompat.widget.SearchView
@@ -142,15 +143,15 @@ inline fun View.visibleIf(show: Boolean) {
  * @param text text of [TextDrawable]
  * @param random random color
  */
-fun View.getRound(text: String, random: Boolean = true): TextDrawable {
+fun ImageView.roundTextIcon(text: String) {
     val size = min(this.width, this.height)
-    return TextDrawable.builder().beginConfig().width(size).height(size).textColor(Color.WHITE)
-        .useFont(Typeface.DEFAULT).endConfig().buildRound(
-            text,
-            if (random) ColorGenerator.MATERIAL.randomColor else ColorGenerator.MATERIAL.getColor(
-                text
+    val letter = text.take(1).toUpperCase()
+    setImageDrawable(
+        TextDrawable.builder().beginConfig().width(size).height(size).textColor(Color.WHITE)
+            .useFont(Typeface.DEFAULT).endConfig().buildRound(
+                letter, ColorGenerator.MATERIAL.getColor(letter)
             )
-        )
+    )
 }
 
 inline val View.marginTop: Int

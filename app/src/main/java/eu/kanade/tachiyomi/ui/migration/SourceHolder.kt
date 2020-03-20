@@ -2,9 +2,10 @@ package eu.kanade.tachiyomi.ui.migration
 
 import android.view.View
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.source.icon
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.ui.base.holder.SlicedHolder
-import eu.kanade.tachiyomi.util.view.getRound
+import eu.kanade.tachiyomi.util.view.roundTextIcon
 import io.github.mthli.slice.Slice
 import kotlinx.android.synthetic.main.catalogue_main_controller_card_item.*
 
@@ -39,7 +40,9 @@ class SourceHolder(view: View, override val adapter: SourceAdapter) :
 
         // Set circle letter image.
         itemView.post {
-            edit_button.setImageDrawable(edit_button.getRound(source.name.take(1).toUpperCase(), false))
+            val icon = source.icon()
+            if (icon != null) edit_button.setImageDrawable(source.icon())
+            else edit_button.roundTextIcon(source.name)
         }
     }
 }

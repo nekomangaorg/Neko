@@ -4,9 +4,10 @@ import android.graphics.Paint.STRIKE_THRU_TEXT_FLAG
 import android.view.View
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
+import eu.kanade.tachiyomi.source.icon
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
-import eu.kanade.tachiyomi.util.view.getRound
+import eu.kanade.tachiyomi.util.view.roundTextIcon
 import kotlinx.android.synthetic.main.migration_source_item.*
 import uy.kohesive.injekt.injectLazy
 
@@ -24,7 +25,9 @@ class MigrationSourceHolder(view: View, val adapter: MigrationSourceAdapter) :
         title.text = sourceName
         // Update circle letter image.
         itemView.post {
-            edit_button.setImageDrawable(edit_button.getRound(source.name.take(1).toUpperCase(), false))
+            val icon = source.icon()
+            if (icon != null) edit_button.setImageDrawable(source.icon())
+            else edit_button.roundTextIcon(source.name)
         }
 
         if (sourceEnabled) {

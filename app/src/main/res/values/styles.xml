@@ -222,6 +222,7 @@
 
     <style name="Theme.Widget.Button.Borderless" parent="Widget.MaterialComponents.Button.TextButton">
         <item name="android:textColor">?attr/colorAccent</item>
+        <item name="rippleColor">@color/fullRippleColor</item>
     </style>
 
     <style name="Theme.Widget.Button.Borderless.Negative">
