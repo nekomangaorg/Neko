@@ -39,6 +39,11 @@ import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
+import kotlinx.android.synthetic.main.filter_bottom_sheet.*
+import kotlinx.android.synthetic.main.library_grid_recycler.*
+import kotlinx.android.synthetic.main.library_list_controller.*
+import kotlinx.android.synthetic.main.main_activity.*
+import kotlinx.coroutines.delay
 import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.max
@@ -46,11 +51,6 @@ import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.roundToInt
 import kotlin.math.sign
-import kotlinx.android.synthetic.main.filter_bottom_sheet.*
-import kotlinx.android.synthetic.main.library_grid_recycler.*
-import kotlinx.android.synthetic.main.library_list_controller.*
-import kotlinx.android.synthetic.main.main_activity.*
-import kotlinx.coroutines.delay
 
 class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
     FlexibleAdapter.OnItemClickListener, FlexibleAdapter.OnItemLongClickListener,
@@ -193,7 +193,7 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
                     recycler_layout.x = sign * distance.pow(0.6f)
                     recycler_layout.alpha = 1f
                 } else if (distance <= swipeDistance * 1.1f) {
-                    recycler_layout.x = (max(0f, distance - 50f) * sign) / 3
+                    recycler_layout.x = sign * (distance / 100f).pow(3.5f)
                     recycler_layout.alpha =
                         (1f - (distance - (swipeDistance * 0.1f)) / swipeDistance)
                     if (moved) {
@@ -205,13 +205,9 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
                         scrollToHeader((if (sign <= 0) nextCategory else prevCategory) ?: -1)
                         moved = true
                     }
-                    recycler_layout.x = ((distance - swipeDistance * 2) * sign) / 3
+                    recycler_layout.x = -sign * (max(0f, (swipeDistance * 2 - distance)) / 100f)
+                        .pow(3.5f)
                     recycler_layout.alpha = ((distance - swipeDistance * 1.1f) / swipeDistance)
-                    if (sign > 0) {
-                        recycler_layout.x = min(0f, recycler_layout.x)
-                    } else {
-                        recycler_layout.x = max(0f, recycler_layout.x)
-                    }
                     recycler_layout.alpha = min(1f, recycler_layout.alpha)
                 }
             }
@@ -701,10 +697,10 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
         }
     }
 
-    override fun onSwipeLeft(x: Float, y: Float) = goToNextCategory(x)
-    override fun onSwipeRight(x: Float, y: Float) = goToNextCategory(x)
+    override fun onSwipeLeft(x: Float, xPos: Float) = goToNextCategory(x, xPos)
+    override fun onSwipeRight(x: Float, xPos: Float) = goToNextCategory(x, xPos)
 
-    private fun goToNextCategory(x: Float) {
+    private fun goToNextCategory(x: Float, xPos: Float) {
         if (lockedRecycler && abs(x) > 1000f) {
             val sign = sign(x).roundToInt()
             if ((sign < 0 && nextCategory == null) || (sign > 0) && prevCategory == null) return
@@ -714,10 +710,11 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
                 flinging = true
                 val duration = (distance * 100 * speed).toLong()
                 val set = AnimatorSet()
-                val translationXAnimator = ValueAnimator.ofFloat(recycler_layout.x, sign * 100f)
+                val translationXAnimator = ValueAnimator.ofFloat(abs(xPos - startPosX!!),
+                    swipeDistance)
                 translationXAnimator.duration = duration
                 translationXAnimator.addUpdateListener { animation ->
-                    recycler_layout.x = animation.animatedValue as Float
+                    recycler_layout.x = sign * (animation.animatedValue as Float / 100f).pow(3.5f)
                 }
 
                 val translationAlphaAnimator = ValueAnimator.ofFloat(recycler_layout.alpha, 0f)
@@ -729,12 +726,16 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
                 set.start()
                 set.addListener(object : Animator.AnimatorListener {
                     override fun onAnimationEnd(animation: Animator?) {
-                        recycler_layout.x = -sign * 100f
+                        recycler_layout.x = -sign * (swipeDistance / 100f).pow(3.5f)
                         recycler_layout.alpha = 0f
-                        scrollToHeader((if (sign <= 0) nextCategory else prevCategory) ?: -1)
-                        resetScrollingValues()
-                        resetRecyclerY(true, (100 * speed).toLong())
-                        flinging = false
+                        recycler_layout.post {
+                            scrollToHeader((if (sign <= 0) nextCategory else prevCategory) ?: -1)
+                            recycler_layout.post {
+                                resetScrollingValues()
+                                resetRecyclerY(true, (100 * speed).toLong())
+                                flinging = false
+                            }
+                        }
                     }
 
                     override fun onAnimationCancel(animation: Animator?) {}

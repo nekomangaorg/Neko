@@ -676,9 +676,9 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                         ) <= Companion.SWIPE_THRESHOLD * 0.75f
                     ) {
                         if (diffX > 0) {
-                            currentGestureDelegate?.onSwipeRight(velocityX, e1.y)
+                            currentGestureDelegate?.onSwipeRight(velocityX, e2.x)
                         } else {
-                            currentGestureDelegate?.onSwipeLeft(velocityX, e1.y)
+                            currentGestureDelegate?.onSwipeLeft(velocityX, e2.x)
                         }
                         result = true
                     }
@@ -733,8 +733,8 @@ interface OnTouchEventInterface {
 }
 
 interface SwipeGestureInterface {
-    fun onSwipeRight(x: Float, y: Float)
-    fun onSwipeLeft(x: Float, y: Float)
+    fun onSwipeRight(x: Float, xPos: Float)
+    fun onSwipeLeft(x: Float, xPos: Float)
     fun onSwipeTop(x: Float, y: Float)
     fun onSwipeBottom(x: Float, y: Float)
 }
