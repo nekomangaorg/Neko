@@ -335,7 +335,7 @@ class LibraryPresenter(
             } else compare
         }
 
-        val comparator = if (ascending)
+        val comparator = if (ascending || useDnD)
             Comparator(sortFn)
         else
             Collections.reverseOrder(sortFn)

@@ -116,6 +116,12 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             if (isChecked)
                 onGroupClicked(ACTION_HIDE_FILTER_TIP)
         }
+
+        val activeFilters = hasActiveFiltersFromPref()
+        sheetBehavior?.isHideable = !activeFilters
+        if (activeFilters && sheetBehavior?.state == BottomSheetBehavior.STATE_HIDDEN &&
+            sheetBehavior?.skipCollapsed == false)
+            sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
         createTags()
         clearButton.setOnClickListener { clearFilters() }
     }
@@ -168,6 +174,14 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
     }
 
     fun hasActiveFilters() = filterItems.any { it.isActivated }
+
+    private fun hasActiveFiltersFromPref(): Boolean {
+        return preferences.filterDownloaded().getOrDefault() > 0 || preferences.filterUnread()
+            .getOrDefault() > 0 || preferences.filterCompleted()
+            .getOrDefault() > 0 || preferences.filterTracked()
+            .getOrDefault() > 0 || preferences.filterMangaType()
+            .getOrDefault() > 0 || FILTER_TRACKER.isNotEmpty()
+    }
 
     private fun createTags() {
         hide_categories.isChecked = preferences.hideCategories().getOrDefault()
@@ -286,11 +300,20 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             filterItems.remove(trackers!!)
         }
         val hasFilters = hasActiveFilters()
+        sheetBehavior?.isHideable = !hasFilters
         if (hasFilters && clearButton.parent == null)
             filter_layout.addView(clearButton, 0)
         else if (!hasFilters && clearButton.parent != null)
             filter_layout.removeView(clearButton)
     }
+
+    fun hideIfPossible() {
+        if (!hasActiveFilters() && sheetBehavior?.isHideable == true)
+            sheetBehavior?.state = BottomSheetBehavior.STATE_HIDDEN
+    }
+
+    fun canHide(): Boolean = sheetBehavior?.isHideable == true && sheetBehavior?.state !=
+        BottomSheetBehavior.STATE_HIDDEN
 
     private fun clearFilters() {
         preferences.filterDownloaded().set(0)

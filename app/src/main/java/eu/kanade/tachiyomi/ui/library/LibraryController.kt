@@ -239,6 +239,7 @@ open class LibraryController(
             DownloadService.callListeners()
             LibraryUpdateService.setListener(this)
         }
+        if (type == ControllerChangeType.POP_ENTER) bottom_sheet.hideIfPossible()
     }
 
     override fun onActivityResumed(activity: Activity) {

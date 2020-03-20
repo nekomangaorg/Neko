@@ -21,7 +21,7 @@
             style="@style/TextAppearance.Regular.Caption.Light"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@color/pale_red"
+            android:background="@color/pale_green"
             android:gravity="center"
             android:maxLines="1"
             android:paddingStart="5dp"

@@ -71,8 +71,6 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
 
     var headerHeight = 0
 
-    var customTitle = ""
-
     var showingExtenions = false
 
     /**

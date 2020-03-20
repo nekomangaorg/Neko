@@ -39,11 +39,6 @@ import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
-import kotlinx.android.synthetic.main.filter_bottom_sheet.*
-import kotlinx.android.synthetic.main.library_grid_recycler.*
-import kotlinx.android.synthetic.main.library_list_controller.*
-import kotlinx.android.synthetic.main.main_activity.*
-import kotlinx.coroutines.delay
 import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.max
@@ -51,6 +46,11 @@ import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.roundToInt
 import kotlin.math.sign
+import kotlinx.android.synthetic.main.filter_bottom_sheet.*
+import kotlinx.android.synthetic.main.library_grid_recycler.*
+import kotlinx.android.synthetic.main.library_list_controller.*
+import kotlinx.android.synthetic.main.main_activity.*
+import kotlinx.coroutines.delay
 
 class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
     FlexibleAdapter.OnItemClickListener, FlexibleAdapter.OnItemLongClickListener,
@@ -67,6 +67,7 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
     private var lastItem: IFlexible<*>? = null
 
     private var switchingCategories = false
+    var scrollDistance = 0f
 
     private var startPosX: Float? = null
     private var startPosY: Float? = null
@@ -79,6 +80,7 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
     private val swipeDistance = 300f
     private var flinging = false
     private var isDragging = false
+    private val scrollDistanceTilHidden = 1000.dpToPx
 
     override fun contentView(): View = recycler_layout
 
@@ -93,6 +95,13 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
             super.onScrolled(recyclerView, dx, dy)
             val order = getCategoryOrder()
+            if (bottom_sheet.canHide()) {
+                scrollDistance += abs(dy)
+                if (scrollDistance > scrollDistanceTilHidden) {
+                    bottom_sheet.hideIfPossible()
+                    scrollDistance = 0f
+                }
+            } else scrollDistance = 0f
             if (order != null && order != activeCategory) {
                 preferences.lastUsedCategory().set(order)
                 activeCategory = order

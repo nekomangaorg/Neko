@@ -83,6 +83,5 @@
 
     <color name="md_teal_500">#009688</color>
 
-    <color name="total_green">@color/material_green_800</color>
-    <color name="pale_red">@color/material_red_300</color>
+    <color name="pale_green">#99CC99</color>
 </resources>
