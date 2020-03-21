@@ -492,7 +492,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
      */
     @SuppressLint("SetTextI18n")
     fun onPageSelected(page: ReaderPage) {
-        presenter.onPageSelected(page)
+        val newChapter = presenter.onPageSelected(page)
         val pages = page.chapter.pages ?: return
 
         // Set bottom page number
@@ -505,6 +505,10 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
         } else {
             right_page_text.text = "${page.number}"
             left_page_text.text = "${pages.size}"
+        }
+
+        if (newChapter && config?.showNewChapter == false) {
+            systemUi?.show()
         }
 
         // Set seekbar progress
@@ -679,6 +683,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
          */
         private var customFilterColorSubscription: Subscription? = null
 
+        var showNewChapter = false
+
         /**
          * Initializes the reader subscriptions.
          */
@@ -715,6 +721,9 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
 
             subscriptions += preferences.colorFilterMode().asObservable()
                 .subscribe { setColorFilter(preferences.colorFilter().getOrDefault()) }
+
+            subscriptions += preferences.alwaysShowChapterTransition().asObservable()
+                .subscribe { showNewChapter = it }
         }
 
         /**

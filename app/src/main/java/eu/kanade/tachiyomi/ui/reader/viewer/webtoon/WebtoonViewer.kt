@@ -174,7 +174,7 @@ class WebtoonViewer(val activity: ReaderActivity) : BaseViewer {
      */
     override fun setChapters(chapters: ViewerChapters) {
         Timber.d("setChapters")
-        var forceTransition = config.alwaysShowChapterTransition || currentPage is ChapterTransition
+        val forceTransition = config.alwaysShowChapterTransition || currentPage is ChapterTransition
         adapter.setChapters(chapters, forceTransition)
 
         if (recycler.visibility == View.GONE) {

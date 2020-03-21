@@ -24,9 +24,6 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.system.ImageUtil
-import java.io.File
-import java.util.Date
-import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -39,6 +36,9 @@ import rx.schedulers.Schedulers
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.io.File
+import java.util.Date
+import java.util.concurrent.TimeUnit
 
 /**
  * Presenter used by the activity to perform background operations.
@@ -318,8 +318,8 @@ class ReaderPresenter(
      * read, update tracking services, enqueue downloaded chapter deletion, and updating the active chapter if this
      * [page]'s chapter is different from the currently active.
      */
-    fun onPageSelected(page: ReaderPage) {
-        val currentChapters = viewerChaptersRelay.value ?: return
+    fun onPageSelected(page: ReaderPage): Boolean {
+        val currentChapters = viewerChaptersRelay.value ?: return false
 
         val selectedChapter = page.chapter
 
@@ -337,7 +337,9 @@ class ReaderPresenter(
             Timber.d("Setting ${selectedChapter.chapter.url} as active")
             onChapterChanged(currentChapters.currChapter, selectedChapter)
             loadNewChapter(selectedChapter)
+            return true
         }
+        return false
     }
 
     /**
