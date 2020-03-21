@@ -67,6 +67,8 @@
         <item name="tabBarIconColor">@color/colorPrimary</item>
         <item name="tabBarIconInactive">@color/colorPrimaryInactive</item>
         <item name="android:statusBarColor">@color/md_black_1000_54</item>
+        <item name="actionBarTintColor">@color/textColorPrimary</item>
+        <item name="actionBarTheme">@style/ThemeOverlay.AppCompat.DayNight.ActionBar</item>
     </style>
     <style name="Theme.Tachiyomi.DarkBlue" parent="Theme.Tachiyomi"/>
     <style name="Theme.Tachiyomi.Amoled" parent="Theme.Tachiyomi"/>
