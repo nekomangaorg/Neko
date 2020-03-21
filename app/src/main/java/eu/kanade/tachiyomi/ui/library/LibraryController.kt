@@ -121,8 +121,6 @@ open class LibraryController(
 
     val stopRefreshRelay: PublishRelay<Boolean> = PublishRelay.create()
 
-    protected var phoneLandscape = false
-
     /**
      * Number of manga per row in grid mode.
      */
@@ -193,12 +191,6 @@ open class LibraryController(
                 )
             }
         }
-
-        val config = resources?.configuration
-        phoneLandscape =
-            (config?.orientation == Configuration.ORIENTATION_LANDSCAPE && (config.screenLayout.and(
-                Configuration.SCREENLAYOUT_SIZE_MASK
-            )) < Configuration.SCREENLAYOUT_SIZE_LARGE)
 
         presenter.onRestore()
         val library = presenter.getAllManga()

@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.ui.library.filter
 
 import android.content.Context
-import android.content.res.Configuration
 import android.os.Parcelable
 import android.util.AttributeSet
 import android.view.View
@@ -16,7 +15,6 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.util.system.launchUI
-import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.inflate
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.visibleIf
@@ -70,27 +68,20 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
     var onGroupClicked: (Int) -> Unit = { _ -> }
     var pager: View? = null
-    var phoneLandscape = false
 
     fun onCreate(pagerView: View) {
         clearButton = clear_button
         filter_layout.removeView(clearButton)
         sheetBehavior = BottomSheetBehavior.from(this)
-        phoneLandscape = (isLandscape() && !isTablet())
         sheetBehavior?.isHideable = true
-        sheetBehavior?.skipCollapsed = phoneLandscape
         pager = pagerView
         val shadow2: View = (pagerView.parent as ViewGroup).findViewById(R.id.shadow2)
         val shadow: View = (pagerView.parent as ViewGroup).findViewById(R.id.shadow)
-        if (phoneLandscape) {
-            sheetBehavior?.state = BottomSheetBehavior.STATE_HIDDEN
-        }
         sheetBehavior?.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onSlide(bottomSheet: View, progress: Float) {
                 top_bar.alpha = 1 - max(0f, progress)
                 shadow2.alpha = (1 - max(0f, progress)) * 0.25f
-                if (phoneLandscape) shadow.alpha = progress
-                else shadow.alpha = 1 + min(0f, progress)
+                shadow.alpha = 1 + min(0f, progress)
                 updateRootPadding(progress)
             }
 
@@ -100,15 +91,6 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         })
         if (preferences.hideFiltersAtStart().getOrDefault()) {
             sheetBehavior?.state = BottomSheetBehavior.STATE_HIDDEN
-        }
-        updateRootPadding(when (sheetBehavior?.state) {
-            BottomSheetBehavior.STATE_HIDDEN -> -1f
-            BottomSheetBehavior.STATE_EXPANDED -> 1f
-            else -> 0f
-        })
-        shadow.alpha = if (sheetBehavior?.state == BottomSheetBehavior.STATE_HIDDEN) 0f else 1f
-        if (phoneLandscape && shadow2.visibility != View.GONE) {
-            shadow2.gone()
         }
         hide_filters.isChecked = preferences.hideFiltersAtStart().getOrDefault()
         hide_filters.setOnCheckedChangeListener { _, isChecked ->
@@ -122,6 +104,14 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         if (activeFilters && sheetBehavior?.state == BottomSheetBehavior.STATE_HIDDEN &&
             sheetBehavior?.skipCollapsed == false)
             sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
+
+        updateRootPadding(when (sheetBehavior?.state) {
+            BottomSheetBehavior.STATE_HIDDEN -> -1f
+            BottomSheetBehavior.STATE_EXPANDED -> 1f
+            else -> 0f
+        })
+        shadow.alpha = if (sheetBehavior?.state == BottomSheetBehavior.STATE_HIDDEN) 0f else 1f
+
         createTags()
         clearButton.setOnClickListener { clearFilters() }
     }
@@ -134,8 +124,6 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         }
         if (state == BottomSheetBehavior.STATE_EXPANDED) {
             top_bar.alpha = 0f
-            if (phoneLandscape)
-                shadow?.alpha = 1f
         }
         if (state == BottomSheetBehavior.STATE_HIDDEN) {
             reSortViews()
@@ -148,15 +136,6 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         super.onRestoreInstanceState(state)
         val sheetBehavior = BottomSheetBehavior.from(this)
         stateChanged(sheetBehavior.state)
-    }
-
-    private fun isLandscape(): Boolean {
-        return context.resources.configuration?.orientation == Configuration.ORIENTATION_LANDSCAPE
-    }
-
-    private fun isTablet(): Boolean {
-        return (context.resources.configuration.screenLayout and Configuration
-            .SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_LARGE
     }
 
     fun updateRootPadding(progress: Float? = null) {
@@ -333,6 +312,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             filterItems.remove(trackers!!)
         reSortViews()
         onGroupClicked(ACTION_FILTER)
+        sheetBehavior?.isHideable = true
     }
 
     private fun reSortViews() {

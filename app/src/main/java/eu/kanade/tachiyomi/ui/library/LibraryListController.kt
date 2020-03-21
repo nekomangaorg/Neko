@@ -113,11 +113,8 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
         // pad the recycler if the filter bottom sheet is visible
-        if (!phoneLandscape) {
-            val height =
-                view.context.resources.getDimensionPixelSize(R.dimen.rounder_radius) + 4.dpToPx
-            recycler.updatePaddingRelative(bottom = height)
-        }
+        val height = view.context.resources.getDimensionPixelSize(R.dimen.rounder_radius) + 4.dpToPx
+        recycler.updatePaddingRelative(bottom = height)
     }
 
     override fun onTouchEvent(event: MotionEvent?) {
