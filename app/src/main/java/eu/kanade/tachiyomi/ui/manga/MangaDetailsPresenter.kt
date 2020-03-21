@@ -90,13 +90,16 @@ class MangaDetailsPresenter(
     fun onDestroy() {
         downloadManager.removeListener(this)
         LibraryUpdateService.removeListener(this)
+    }
+
+    fun cancelScope() {
         scope.cancel()
     }
 
-    fun fetchChapters() {
+    fun fetchChapters(andTracking: Boolean = true) {
         scope.launch {
             getChapters()
-            refreshTracking()
+            if (andTracking) refreshTracking()
             withContext(Dispatchers.Main) { controller.updateChapters(chapters) }
         }
     }
@@ -648,7 +651,7 @@ class MangaDetailsPresenter(
 
     fun refreshTrackers() {
         scope.launch {
-            val list = trackList.filter { it.track != null }.map { item ->
+            trackList.filter { it.track != null }.map { item ->
                 withContext(Dispatchers.IO) {
                     val trackItem = try {
                         item.service.refresh(item.track!!)

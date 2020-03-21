@@ -2,7 +2,10 @@ package eu.kanade.tachiyomi.ui.manga.track
 
 import android.annotation.SuppressLint
 import android.view.View
+import androidx.constraintlayout.widget.ConstraintLayout
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.base.holder.BaseViewHolder
+import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.visibleIf
 import kotlinx.android.synthetic.main.track_item.*
 
@@ -11,9 +14,10 @@ class TrackHolder(view: View, adapter: TrackAdapter) : BaseViewHolder(view) {
     init {
         val listener = adapter.rowClickListener
         logo_container.setOnClickListener { listener.onLogoClick(adapterPosition) }
-        track_set.setOnClickListener { listener.onSetClick(adapterPosition) }
-        status_container.setOnClickListener { listener.onStatusClick(adapterPosition) }
-        chapters_container.setOnClickListener { listener.onChaptersClick(adapterPosition) }
+        add_tracking.setOnClickListener { listener.onSetClick(adapterPosition) }
+        track_title.setOnClickListener { listener.onSetClick(adapterPosition) }
+        track_status.setOnClickListener { listener.onStatusClick(adapterPosition) }
+        track_chapters.setOnClickListener { listener.onChaptersClick(adapterPosition) }
         score_container.setOnClickListener { listener.onScoreClick(adapterPosition) }
     }
 
@@ -22,11 +26,28 @@ class TrackHolder(view: View, adapter: TrackAdapter) : BaseViewHolder(view) {
         val track = item.track
         track_logo.setImageResource(item.service.getLogo())
         logo_container.setBackgroundColor(item.service.getLogoColor())
+        logo_container.updateLayoutParams<ConstraintLayout.LayoutParams> {
+            bottomToBottom = if (track != null) divider.id else track_details.id
+        }
+        track_logo.contentDescription = item.service.name
         track_group.visibleIf(track != null)
+        add_tracking.visibleIf(track == null)
         if (track != null) {
-            track_chapters.text = "${track.last_chapter_read}/" +
-                    if (track.total_chapters > 0) track.total_chapters else "-"
-            track_status.text = item.service.getStatus(track.status)
+            track_title.text = track.title
+            with(track_chapters) {
+                text = when {
+                    track.total_chapters > 0 -> context.getString(
+                        R.string.chapter_x_of_y, track.last_chapter_read, track.total_chapters
+                    )
+                    track.last_chapter_read > 0 -> context.getString(
+                        R.string.chapter_x, track.last_chapter_read
+                    )
+                    else -> context.getString(R.string.action_filter_not_started)
+                }
+            }
+            val status = item.service.getStatus(track.status)
+            if (status.isEmpty()) track_status.setText(R.string.unknown_status)
+            else track_status.text = item.service.getStatus(track.status)
             track_score.text = if (track.score == 0f) "-" else item.service.displayScore(track)
         }
     }

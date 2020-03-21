@@ -156,6 +156,7 @@ class MangaDetailsController : BaseController,
     private var trackingBottomSheet: TrackingBottomSheet? = null
     private var startingDLChapterPos: Int? = null
     private var editMangaDialog: EditMangaDialog? = null
+    var refreshTracker: Int? = null
 
     /**
      * Adapter containing a list of chapters.
@@ -256,6 +257,7 @@ class MangaDetailsController : BaseController,
         })
         setPaletteColor()
 
+        swipe_refresh.isRefreshing = presenter.isLoading
         if (manga?.initialized != true)
             swipe_refresh.post { swipe_refresh.isRefreshing = true }
 
@@ -305,7 +307,12 @@ class MangaDetailsController : BaseController,
         super.onActivityResumed(activity)
         presenter.isLockedFromSearch = SecureActivityDelegate.shouldBeLocked()
         presenter.headerItem.isLocked = presenter.isLockedFromSearch
-        presenter.fetchChapters()
+        presenter.fetchChapters(refreshTracker == null)
+        if (refreshTracker != null) {
+            trackingBottomSheet?.refreshItem(refreshTracker ?: 0)
+            presenter.refreshTrackers()
+            refreshTracker = null
+        }
         val isCurrentController = router?.backstack?.lastOrNull()?.controller() ==
             this
         if (isCurrentController) {
@@ -334,7 +341,10 @@ class MangaDetailsController : BaseController,
         } else if (type == ControllerChangeType.PUSH_EXIT || type == ControllerChangeType.POP_EXIT) {
             if (router.backstack.lastOrNull()?.controller() is DialogController)
                 return
-            if (type == ControllerChangeType.POP_EXIT) setHasOptionsMenu(false)
+            if (type == ControllerChangeType.POP_EXIT) {
+                setHasOptionsMenu(false)
+                presenter.cancelScope()
+            }
             colorAnimator?.cancel()
 
             val colorPrimary = activity?.getResourceColor(

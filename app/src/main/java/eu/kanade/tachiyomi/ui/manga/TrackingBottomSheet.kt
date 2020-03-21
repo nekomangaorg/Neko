@@ -119,6 +119,7 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) : Bott
             activity.toast(R.string.url_not_set)
         } else {
             activity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(track.tracking_url)))
+            controller.refreshTracker = position
         }
     }
 
@@ -156,6 +157,10 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) : Bott
 
     private fun refreshItem(item: TrackItem) {
         refreshTrack(item.service)
+    }
+
+    fun refreshItem(index: Int) {
+        (track_recycler.findViewHolderForAdapterPosition(index) as? TrackHolder)?.setProgress(true)
     }
 
     fun refreshTrack(item: TrackService?) {

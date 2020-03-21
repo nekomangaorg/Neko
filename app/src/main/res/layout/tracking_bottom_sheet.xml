@@ -3,12 +3,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/display_bottom_sheet"
     android:layout_width="match_parent"
+    android:background="@drawable/bg_bottom_sheet_dialog_fragment"
     android:layout_height="match_parent">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/track_recycler"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/bg_bottom_sheet_dialog_fragment"
+        android:paddingTop="5dp"
         tools:listitem="@layout/track_item" />
 </FrameLayout>

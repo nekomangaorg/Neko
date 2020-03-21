@@ -64,9 +64,7 @@ class TrackSearchDialog : DialogController {
         val dialog = MaterialDialog(activity!!).apply {
             customView(viewRes = R.layout.track_search_dialog, scrollable = false)
             negativeButton(android.R.string.cancel)
-            positiveButton(
-                if (wasPreviouslyTracked) R.string.action_clear
-                else R.string.action_track) { onPositiveButtonClick() }
+            positiveButton(R.string.action_clear) { onPositiveButtonClick() }
             setActionButtonEnabled(WhichButton.POSITIVE, wasPreviouslyTracked)
         }
 
@@ -90,9 +88,7 @@ class TrackSearchDialog : DialogController {
         selectedItem = null
 
         subscriptions += view.track_search_list.itemClicks().subscribe { position ->
-            selectedItem = adapter.getItem(position)
-            (dialog as? MaterialDialog)?.positiveButton(R.string.action_track)
-            (dialog as? MaterialDialog)?.setActionButtonEnabled(WhichButton.POSITIVE, true)
+            trackItem(position)
         }
 
         // Do an initial search based on the manga's title
@@ -101,6 +97,13 @@ class TrackSearchDialog : DialogController {
             view.track_search.append(title)
             search(title)
         }
+    }
+
+    private fun trackItem(position: Int) {
+        selectedItem = adapter?.getItem(position)
+        bottomSheet.refreshTrack(service)
+        presenter.registerTracking(selectedItem, service)
+        dismissDialog()
     }
 
     override fun onDestroyView(view: View) {
@@ -139,9 +142,7 @@ class TrackSearchDialog : DialogController {
         view.track_search_list.visibility = View.VISIBLE
         adapter?.setItems(results)
         if (results.size == 1 && !wasPreviouslyTracked) {
-            selectedItem = adapter?.getItem(0)
-            (dialog as? MaterialDialog)?.positiveButton(R.string.action_track)
-            (dialog as? MaterialDialog)?.setActionButtonEnabled(WhichButton.POSITIVE, true)
+            trackItem(0)
         }
     }
 
@@ -154,7 +155,7 @@ class TrackSearchDialog : DialogController {
 
     private fun onPositiveButtonClick() {
         bottomSheet.refreshTrack(service)
-        presenter.registerTracking(selectedItem,
+        presenter.registerTracking(null,
             service)
     }
 
