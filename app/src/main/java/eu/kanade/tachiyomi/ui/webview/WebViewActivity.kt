@@ -7,6 +7,7 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -70,12 +71,8 @@ class WebViewActivity : BaseActivity() {
 
         val container: ViewGroup = findViewById(R.id.web_view_layout)
         val content: LinearLayout = findViewById(R.id.web_linear_layout)
-        container.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
-            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
-            View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-        content.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
-            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
-            View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+        container.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+        content.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
 
         container.setOnApplyWindowInsetsListener { v, insets ->
             val contextView = window?.decorView?.findViewById<View>(R.id.action_mode_bar)
@@ -98,11 +95,14 @@ class WebViewActivity : BaseActivity() {
             refreshPage()
         }
 
+        window.statusBarColor = ColorUtils.setAlphaComponent(getResourceColor(R.attr
+            .colorOnPrimary), 255)
+
         content.setOnApplyWindowInsetsListener { v, insets ->
             // if pure white theme on a device that does not support dark status bar
-            if (getResourceColor(android.R.attr.statusBarColor) != Color.TRANSPARENT)
+            /*if (getResourceColor(android.R.attr.statusBarColor) != Color.TRANSPARENT)
                 window.statusBarColor = Color.BLACK
-            else window.statusBarColor = getResourceColor(R.attr.colorPrimary)
+            else window.statusBarColor = getResourceColor(R.attr.colorPrimary)*/
             window.navigationBarColor = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
                 val colorPrimary = getResourceColor(android.R.attr.colorPrimary)
                 if (colorPrimary == Color.WHITE) Color.BLACK
@@ -121,8 +121,6 @@ class WebViewActivity : BaseActivity() {
             if (Build.VERSION.SDK_INT >= 26 && currentNightMode == Configuration.UI_MODE_NIGHT_NO) {
                 content.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
             }
-            if (currentNightMode == Configuration.UI_MODE_NIGHT_NO && preferences.theme() >= 8)
-                content.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
             insets
         }
 
@@ -192,8 +190,9 @@ class WebViewActivity : BaseActivity() {
         super.onConfigurationChanged(newConfig)
         val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
         val lightMode = currentNightMode == Configuration.UI_MODE_NIGHT_NO
-        window.statusBarColor = getResourceColor(R.attr.colorPrimary)
-        toolbar.setBackgroundColor(getResourceColor(R.attr.colorPrimary))
+        window.statusBarColor = ColorUtils.setAlphaComponent(getResourceColor(R.attr
+            .colorOnPrimary), 255)
+        toolbar.setBackgroundColor(getResourceColor(R.attr.colorOnPrimary))
         toolbar.popupTheme = if (lightMode) R.style.ThemeOverlay_MaterialComponents else R
             .style.ThemeOverlay_MaterialComponents_Dark
         val tintColor = getResourceColor(R.attr.actionBarTintColor)
@@ -214,9 +213,15 @@ class WebViewActivity : BaseActivity() {
             web_linear_layout.systemUiVisibility = web_linear_layout.systemUiVisibility.or(View
                 .SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR)
         }
-        if (lightMode && preferences.theme() >= 8)
+        val typedValue = TypedValue()
+        theme.resolveAttribute(android.R.attr.windowLightStatusBar, typedValue, true)
+
+        if (typedValue.data == -1)
             web_linear_layout.systemUiVisibility = web_linear_layout.systemUiVisibility
                 .or(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
+        else
+            web_linear_layout.systemUiVisibility = web_linear_layout.systemUiVisibility
+                .rem(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
         invalidateOptionsMenu()
     }
 

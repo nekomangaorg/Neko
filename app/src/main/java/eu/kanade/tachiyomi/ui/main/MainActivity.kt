@@ -199,17 +199,13 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         supportActionBar?.setDisplayShowCustomEnabled(true)
 
         content.setOnApplyWindowInsetsListener { v, insets ->
-            // if device doesn't support light nav bar
-            window.navigationBarColor = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            window.navigationBarColor = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O_MR1) {
                 // basically if in landscape on a phone
                 // For lollipop, draw opaque nav bar
                 if (v.rootWindowInsets.systemWindowInsetLeft > 0 || v.rootWindowInsets.systemWindowInsetRight > 0)
                     Color.BLACK
                 else Color.argb(179, 0, 0, 0)
             }
-            /*else {
-                getColor(android.R.color.transparent)
-            }*/
             // if the android q+ device has gesture nav, transparent nav bar
             // this is here in case some crazy with a notch uses landscape
             else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && (v.rootWindowInsets.systemWindowInsetBottom != v.rootWindowInsets.tappableElementInsets.bottom)) {
@@ -240,16 +236,6 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             )
             bottom_nav.updatePadding(bottom = insets.systemWindowInsetBottom)
 
-            /*controller_container.updateLayoutParams<ConstraintLayout.LayoutParams> {
-                val attrsArray = intArrayOf(android.R.attr.actionBarSize)
-                val array = v.context.obtainStyledAttributes(attrsArray)
-                topMargin = insets.systemWindowInsetTop + array.getDimensionPixelSize(0, 0)
-                array.recycle()
-            }*/
-
-            /*nav_bar_scrim.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                height = 0//insets.systemWindowInsetBottom
-            }*/
             insets.replaceSystemWindowInsets(
                 0, insets.systemWindowInsetTop, 0, insets.systemWindowInsetBottom
             )
@@ -257,12 +243,6 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             insets
         }
         val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        if (Build.VERSION.SDK_INT >= 26 && currentNightMode == Configuration.UI_MODE_NIGHT_NO && preferences.theme() >= 8) {
-            content.systemUiVisibility = content.systemUiVisibility.or(
-                View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
-            )
-        }
-        // val drawerContainer: FrameLayout = findViewById(R.id.drawer_container)
 
         router = Conductor.attachRouter(this, container, savedInstanceState)
         if (!router.hasRootController()) {

@@ -23,8 +23,8 @@ import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.util.view.visibleIf
-import kotlinx.android.synthetic.main.manga_header_item.*
 import java.util.Locale
+import kotlinx.android.synthetic.main.manga_header_item.*
 
 class MangaHeaderHolder(
     private val view: View,

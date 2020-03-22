@@ -157,11 +157,18 @@ class LibraryPresenter(
 
         val filterTracked = preferences.filterTracked().getOrDefault()
 
-        val filterMangaType by lazy { preferences.filterMangaType().getOrDefault() }
+        val filterMangaType = preferences.filterMangaType().getOrDefault()
 
         val filterTrackers = FilterBottomSheet.FILTER_TRACKER
 
         val filterFn: (LibraryItem) -> Boolean = f@{ item ->
+            if (item.manga.isBlank()) {
+                return@f filterDownloaded == 0 &&
+                    filterUnread == 0 &&
+                    filterCompleted == 0 &&
+                    filterTracked == 0 &&
+                    filterMangaType == 0
+            }
             // Filter when there isn't unread chapters.
             if (filterUnread == STATE_INCLUDE &&
                 (item.manga.unread == 0 || db.getChapters(item.manga).executeAsBlocking()

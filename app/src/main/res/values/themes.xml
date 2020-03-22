@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <!--============-->
     <!-- Base Theme -->
@@ -7,7 +7,7 @@
     <style name="Theme"/>
 
     <style name="Theme.Base" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <item name="android:forceDarkAllowed">false</item>
+        <item name="android:forceDarkAllowed" tools:targetApi="29">false</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorOnPrimary">@color/background</item>
@@ -59,6 +59,7 @@
         <item name="md_button_casing">literal</item>
         <item name="md_corner_radius">16dp</item>
         <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="27">true</item>
     </style>
 
     <style name="Theme.Tachiyomi" parent="Theme.Base"/>
@@ -72,13 +73,14 @@
         <item name="actionBarTintColor">@color/md_white_1000</item>
         <item name="actionBarTheme">@style/Theme.ActionBar.Dark.DayNight</item>
         <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
     </style>
     <style name="Theme.Tachiyomi.Amoled" parent="Theme.Tachiyomi"/>
     <!--==============-->
     <!-- Reader Theme -->
     <!--==============-->
     <style name="Theme.Base.Reader" parent="Theme.Base">
-        <item name="android:forceDarkAllowed">false</item>
+        <item name="android:forceDarkAllowed" tools:targetApi="29">false</item>
         <item name="colorPrimary">@color/darkPrimaryTranslucent</item>
         <item name="colorPrimaryDark">@color/darkPrimaryTranslucent</item>
         <item name="android:colorBackground">@android:color/white</item>
@@ -87,10 +89,11 @@
         <item name="android:statusBarColor">?colorPrimaryDark</item>
         <item name="android:navigationBarColor">?colorPrimaryDark</item>
         <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
     </style>
 
     <style name="Theme.Base.Reader.Dark" parent="Theme.MaterialComponents.NoActionBar">
-        <item name="android:forceDarkAllowed">false</item>
+        <item name="android:forceDarkAllowed" tools:targetApi="29">false</item>
         <item name="colorPrimary">@color/darkPrimaryTranslucent</item>
         <item name="colorPrimaryDark">@color/darkPrimaryTranslucent</item>
         <item name="android:colorBackground">@android:color/black</item>
@@ -129,7 +132,7 @@
     </style>
 
     <style name="Theme.Base.Reader.Light" parent="Theme.MaterialComponents.Light.NoActionBar">
-        <item name="android:forceDarkAllowed">false</item>
+        <item name="android:forceDarkAllowed" tools:targetApi="29">false</item>
         <item name="colorPrimary">@color/darkPrimaryTranslucent</item>
         <item name="colorPrimaryDark">@color/darkPrimaryTranslucent</item>
         <item name="android:colorBackground">@android:color/white</item>
@@ -171,6 +174,7 @@
         <item name="android:windowBackground">@drawable/splash_background</item>
         <item name="android:statusBarColor">@color/splashBackground</item>
         <item name="android:navigationBarColor">@color/splashBackground</item>
-        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
     </style>
 </resources>
