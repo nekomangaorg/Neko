@@ -7,7 +7,6 @@ import eu.davidea.flexibleadapter.items.AbstractFlexibleItem
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.ui.manga.chapter.ChaptersAdapter
 
 class MangaHeaderItem(val manga: Manga, private val startExpanded: Boolean) :
     AbstractFlexibleItem<MangaHeaderHolder>() {
@@ -27,7 +26,7 @@ class MangaHeaderItem(val manga: Manga, private val startExpanded: Boolean) :
     }
 
     override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): MangaHeaderHolder {
-        return MangaHeaderHolder(view, adapter as ChaptersAdapter, startExpanded)
+        return MangaHeaderHolder(view, adapter as MangaDetailsAdapter, startExpanded)
     }
 
     override fun bindViewHolder(

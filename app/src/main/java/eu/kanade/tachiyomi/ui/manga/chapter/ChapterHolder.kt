@@ -10,15 +10,16 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
+import eu.kanade.tachiyomi.ui.manga.MangaDetailsAdapter
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.visibleIf
-import kotlinx.android.synthetic.main.chapters_mat_item.*
-import kotlinx.android.synthetic.main.download_button.*
 import java.util.Date
+import kotlinx.android.synthetic.main.chapters_item.*
+import kotlinx.android.synthetic.main.download_button.*
 
-class ChapterMatHolder(
+class ChapterHolder(
     private val view: View,
-    private val adapter: ChaptersAdapter
+    private val adapter: MangaDetailsAdapter
 ) : BaseFlexibleViewHolder(view, adapter) {
 
     private var localSource = false
@@ -151,7 +152,7 @@ class ChapterMatHolder(
             val anim = front_view.animate().translationX(0f).setDuration(250)
             anim.setListener(object : Animator.AnimatorListener {
                 override fun onAnimationEnd(animation: Animator?) {
-                    adapter.itemTouchHelper.startSwipe(this@ChapterMatHolder)
+                    adapter.itemTouchHelper.startSwipe(this@ChapterHolder)
                     adapter.notifyItemChanged(adapterPosition)
                 }
 

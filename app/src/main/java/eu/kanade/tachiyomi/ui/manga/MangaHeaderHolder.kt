@@ -18,18 +18,17 @@ import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
-import eu.kanade.tachiyomi.ui.manga.chapter.ChaptersAdapter
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.util.view.visibleIf
-import java.util.Locale
 import kotlinx.android.synthetic.main.manga_header_item.*
+import java.util.Locale
 
 class MangaHeaderHolder(
     private val view: View,
-    private val adapter: ChaptersAdapter,
+    private val adapter: MangaDetailsAdapter,
     startExpanded: Boolean
 ) : BaseFlexibleViewHolder(view, adapter) {
 

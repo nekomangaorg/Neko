@@ -24,7 +24,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/chapters_title"
-            tools:listitem="@layout/chapters_mat_item"/>
+            tools:listitem="@layout/chapters_item"/>
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
     <eu.davidea.fastscroller.FastScroller
         android:id="@+id/fast_scroller"

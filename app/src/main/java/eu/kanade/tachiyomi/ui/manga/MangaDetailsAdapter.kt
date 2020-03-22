@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.manga.chapter
+package eu.kanade.tachiyomi.ui.manga
 
 import android.content.Context
 import android.view.View
@@ -8,15 +8,14 @@ import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
-import eu.kanade.tachiyomi.ui.manga.MangaDetailsPresenter
+import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import uy.kohesive.injekt.injectLazy
 
-class ChaptersAdapter(
+class MangaDetailsAdapter(
     val controller: MangaDetailsController,
     context: Context
 ) : FlexibleAdapter<IFlexible<*>>(null, controller, true) {

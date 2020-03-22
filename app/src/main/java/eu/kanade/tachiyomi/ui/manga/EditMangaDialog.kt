@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.manga.info
+package eu.kanade.tachiyomi.ui.manga
 
 import android.app.Dialog
 import android.net.Uri
@@ -15,7 +15,6 @@ import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
-import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import kotlinx.android.synthetic.main.edit_manga_dialog.view.*
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get

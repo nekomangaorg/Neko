@@ -10,9 +10,10 @@ import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.model.Page
+import eu.kanade.tachiyomi.ui.manga.MangaDetailsAdapter
 
 class ChapterItem(val chapter: Chapter, val manga: Manga) :
-    AbstractFlexibleItem<ChapterMatHolder>(),
+    AbstractFlexibleItem<ChapterHolder>(),
     Chapter by chapter {
 
     private var _status: Int = 0
@@ -34,7 +35,7 @@ class ChapterItem(val chapter: Chapter, val manga: Manga) :
         get() = status == Download.DOWNLOADED
 
     override fun getLayoutRes(): Int {
-        return R.layout.chapters_mat_item
+        return R.layout.chapters_item
     }
 
     override fun isSelectable(): Boolean {
@@ -45,13 +46,13 @@ class ChapterItem(val chapter: Chapter, val manga: Manga) :
         return !isLocked
     }
 
-    override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): ChapterMatHolder {
-        return ChapterMatHolder(view, adapter as ChaptersAdapter)
+    override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): ChapterHolder {
+        return ChapterHolder(view, adapter as MangaDetailsAdapter)
     }
 
     override fun bindViewHolder(
         adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
-        holder: ChapterMatHolder,
+        holder: ChapterHolder,
         position: Int,
         payloads: MutableList<Any?>?
     ) {

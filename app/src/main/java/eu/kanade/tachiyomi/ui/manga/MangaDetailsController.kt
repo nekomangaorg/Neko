@@ -80,11 +80,11 @@ import eu.kanade.tachiyomi.ui.library.ChangeMangaCategoriesDialog
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.SearchActivity
+import eu.kanade.tachiyomi.ui.manga.chapter.ChapterHolder
 import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
-import eu.kanade.tachiyomi.ui.manga.chapter.ChapterMatHolder
-import eu.kanade.tachiyomi.ui.manga.chapter.ChaptersAdapter
-import eu.kanade.tachiyomi.ui.manga.info.EditMangaDialog
+import eu.kanade.tachiyomi.ui.manga.chapter.ChaptersSortBottomSheet
 import eu.kanade.tachiyomi.ui.manga.track.TrackItem
+import eu.kanade.tachiyomi.ui.manga.track.TrackingBottomSheet
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
@@ -115,7 +115,7 @@ class MangaDetailsController : BaseController,
     FlexibleAdapter.OnItemClickListener,
     FlexibleAdapter.OnItemLongClickListener,
     ActionMode.Callback,
-    ChaptersAdapter.MangaHeaderInterface,
+    MangaDetailsAdapter.MangaHeaderInterface,
     FlexibleAdapter.OnItemMoveListener,
     ChangeMangaCategoriesDialog.Listener {
 
@@ -170,7 +170,7 @@ class MangaDetailsController : BaseController,
     /**
      * Adapter containing a list of chapters.
      */
-    private var adapter: ChaptersAdapter? = null
+    private var adapter: MangaDetailsAdapter? = null
 
     /**
      * Action mode for selections.
@@ -195,7 +195,8 @@ class MangaDetailsController : BaseController,
         coverColor = null
 
         // Init RecyclerView and adapter
-        adapter = ChaptersAdapter(this, view.context)
+        adapter =
+            MangaDetailsAdapter(this, view.context)
 
         recycler.adapter = adapter
         adapter?.isSwipeEnabled = true
@@ -340,8 +341,8 @@ class MangaDetailsController : BaseController,
             download.progress)
     }
 
-    private fun getHolder(chapter: Chapter): ChapterMatHolder? {
-        return recycler?.findViewHolderForItemId(chapter.id!!) as? ChapterMatHolder
+    private fun getHolder(chapter: Chapter): ChapterHolder? {
+        return recycler?.findViewHolderForItemId(chapter.id!!) as? ChapterHolder
     }
 
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
@@ -434,7 +435,7 @@ class MangaDetailsController : BaseController,
                 adapter?.addSelection(position)
                 (recycler.findViewHolderForAdapterPosition(position) as? BaseFlexibleViewHolder)
                     ?.toggleActivation()
-                (recycler.findViewHolderForAdapterPosition(position) as? ChapterMatHolder)
+                (recycler.findViewHolderForAdapterPosition(position) as? ChapterHolder)
                     ?.notifyStatus(Download.CHECKED, false, 0)
                 startingDLChapterPos = position
                 actionMode?.invalidate()
@@ -589,7 +590,11 @@ class MangaDetailsController : BaseController,
         when (item.itemId) {
             R.id.action_edit -> {
                 if (manga?.source == LocalSource.ID) {
-                    editMangaDialog = EditMangaDialog(this, presenter.manga)
+                    editMangaDialog =
+                        EditMangaDialog(
+                            this,
+                            presenter.manga
+                        )
                     editMangaDialog?.showDialog(router)
                 } else {
                     if (manga?.hasCustomCover() == true) {
@@ -1015,7 +1020,8 @@ class MangaDetailsController : BaseController,
     }
 
     override fun showTrackingSheet() {
-        trackingBottomSheet = TrackingBottomSheet(this)
+        trackingBottomSheet =
+            TrackingBottomSheet(this)
         trackingBottomSheet?.show()
     }
 
@@ -1083,7 +1089,7 @@ class MangaDetailsController : BaseController,
         setStatusBarAndToolbar()
         if (startingDLChapterPos != null) {
             val item = adapter?.getItem(startingDLChapterPos!!) as? ChapterItem
-            (recycler.findViewHolderForAdapterPosition(startingDLChapterPos!!) as? ChapterMatHolder)?.notifyStatus(
+            (recycler.findViewHolderForAdapterPosition(startingDLChapterPos!!) as? ChapterHolder)?.notifyStatus(
                 item?.status ?: Download.NOT_DOWNLOADED, false, 0
             )
         }

@@ -16,7 +16,6 @@ import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsPresenter
-import eu.kanade.tachiyomi.ui.manga.TrackingBottomSheet
 import eu.kanade.tachiyomi.util.lang.plusAssign
 import java.util.concurrent.TimeUnit
 import kotlinx.android.synthetic.main.track_search_dialog.view.*

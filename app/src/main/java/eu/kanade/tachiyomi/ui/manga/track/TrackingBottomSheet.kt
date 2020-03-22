@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.manga
+package eu.kanade.tachiyomi.ui.manga.track
 
 import android.content.Intent
 import android.net.Uri
@@ -11,13 +11,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
-import eu.kanade.tachiyomi.ui.manga.track.SetTrackChaptersDialog
-import eu.kanade.tachiyomi.ui.manga.track.SetTrackScoreDialog
-import eu.kanade.tachiyomi.ui.manga.track.SetTrackStatusDialog
-import eu.kanade.tachiyomi.ui.manga.track.TrackAdapter
-import eu.kanade.tachiyomi.ui.manga.track.TrackHolder
-import eu.kanade.tachiyomi.ui.manga.track.TrackItem
-import eu.kanade.tachiyomi.ui.manga.track.TrackSearchDialog
+import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
@@ -126,7 +120,9 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) : Bott
     override fun onSetClick(position: Int) {
         val item = adapter?.getItem(position) ?: return
         TrackSearchDialog(this, item.service, item.track != null).showDialog(
-            controller.router, TAG_SEARCH_CONTROLLER)
+            controller.router,
+            TAG_SEARCH_CONTROLLER
+        )
     }
 
     override fun onStatusClick(position: Int) {
