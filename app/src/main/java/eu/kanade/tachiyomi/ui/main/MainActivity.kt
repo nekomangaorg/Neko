@@ -78,7 +78,8 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
 
     protected lateinit var router: Router
 
-    protected var drawerArrow: DrawerArrowDrawable? = null
+    var drawerArrow: DrawerArrowDrawable? = null
+        private set
     private var searchDrawable: Drawable? = null
     private var currentGestureDelegate: SwipeGestureInterface? = null
     private lateinit var gestureDetector: GestureDetectorCompat
@@ -90,8 +91,6 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
     private var canDismissSnackBar = false
 
     private var animationSet: AnimatorSet? = null
-
-    private var bottomNavHeight = 0
 
     fun setUndoSnackBar(snackBar: Snackbar?, extraViewToCheck: View? = null) {
         this.snackBar = snackBar
@@ -214,11 +213,6 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
 
         supportActionBar?.setDisplayShowCustomEnabled(true)
 
-        window.statusBarColor = ColorUtils.setAlphaComponent(
-            getResourceColor(
-                android.R.attr.colorBackground
-            ), 175
-        )
         content.setOnApplyWindowInsetsListener { v, insets ->
             // if device doesn't support light nav bar
             window.navigationBarColor = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
@@ -283,11 +277,6 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                 View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
             )
         }
-        if (currentNightMode == Configuration.UI_MODE_NIGHT_NO) content.systemUiVisibility =
-            content.systemUiVisibility.or(
-                View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-            )
-
         // val drawerContainer: FrameLayout = findViewById(R.id.drawer_container)
 
         router = Conductor.attachRouter(this, container, savedInstanceState)
@@ -377,11 +366,9 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             delay(duration.toLong())
             delay(100)
             if (Color.alpha(window?.statusBarColor ?: Color.BLACK) >= 255) window?.statusBarColor =
-                ColorUtils.setAlphaComponent(
-                    getResourceColor(
-                        android.R.attr.colorBackground
-                    ), 175
-                )
+                getResourceColor(
+                        android.R.attr.statusBarColor
+                    )
         }
         super.onSupportActionModeFinished(mode)
     }

@@ -10,7 +10,7 @@
         <item name="android:forceDarkAllowed">false</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorOnPrimary">@color/md_white_1000</item>
+        <item name="colorOnPrimary">@color/background</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:textColorPrimary">@color/textColorPrimary</item>
@@ -24,8 +24,8 @@
         <item name="android:divider">@color/divider</item>
         <item name="android:listDivider">@drawable/line_divider_light</item>
         <item name="actionModeStyle">@style/CustomActionModeStyle</item>
-        <item name="tabBarIconColor">@color/tabBarIconHighlight</item>
-        <item name="tabBarIconInactive">@color/tabInactive</item>
+        <item name="tabBarIconColor">?colorAccent</item>
+        <item name="tabBarIconInactive">@color/colorPrimaryInactive</item>
 
 
         <!-- Themes -->
@@ -47,7 +47,7 @@
         <item name="actionBarTintColor">@color/textColorPrimary</item>
         <item name="badgeColor">@color/badgeColor</item>
 
-        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:statusBarColor">@color/mainStatus</item>
         <item name="android:navigationBarColor">#B3000000</item>
         <item name="android:colorEdgeEffect">@color/colorAccent</item>
 
@@ -56,21 +56,23 @@
         <item name="md_color_content">@color/textColorSecondary</item>
         <item name="md_color_button_text">@color/colorAccent</item>
         <item name="md_background_color">@color/dialog</item>
+        <item name="md_button_casing">literal</item>
         <item name="md_corner_radius">16dp</item>
+        <item name="android:windowLightStatusBar">true</item>
     </style>
 
     <style name="Theme.Tachiyomi" parent="Theme.Base"/>
-    <style name="Theme.Tachiyomi.MatWhite" parent="Theme.Tachiyomi">
-        <item name="colorPrimary">@color/purePrimary</item>
-        <item name="colorPrimaryDark">@color/purePrimary</item>
-        <item name="colorOnPrimary">@color/colorPrimary</item>
-        <item name="tabBarIconColor">@color/colorPrimary</item>
-        <item name="tabBarIconInactive">@color/colorPrimaryInactive</item>
-        <item name="android:statusBarColor">@color/md_black_1000_54</item>
-        <item name="actionBarTintColor">@color/textColorPrimary</item>
-        <item name="actionBarTheme">@style/ThemeOverlay.AppCompat.DayNight.ActionBar</item>
+    <style name="Theme.Tachiyomi.AllBlue" parent="Theme.Tachiyomi">
+        <item name="colorPrimary">@color/bluePrimary</item>
+        <item name="colorPrimaryDark">@color/bluePrimary</item>
+        <item name="colorOnPrimary">@color/bluePrimary</item>
+        <item name="tabBarIconColor">@color/md_white_1000</item>
+        <item name="tabBarIconInactive">@color/md_white_1000_50</item>
+        <item name="android:statusBarColor">@color/blueStatus</item>
+        <item name="actionBarTintColor">@color/md_white_1000</item>
+        <item name="actionBarTheme">@style/Theme.ActionBar.Dark.DayNight</item>
+        <item name="android:windowLightStatusBar">false</item>
     </style>
-    <style name="Theme.Tachiyomi.DarkBlue" parent="Theme.Tachiyomi"/>
     <style name="Theme.Tachiyomi.Amoled" parent="Theme.Tachiyomi"/>
     <!--==============-->
     <!-- Reader Theme -->
@@ -143,7 +145,7 @@
 
         <!-- Themes -->
         <item name="windowActionModeOverlay">true</item>
-        <item name="actionBarTheme">@style/Theme.ActionBar.DayNight</item>
+        <item name="actionBarTheme">@style/Theme.ActionBar.Dark.DayNight</item>
         <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
         <item name="alertDialogTheme">@style/Theme.AlertDialog.DayNight</item>
 
@@ -168,7 +170,6 @@
         <item name="android:windowBackground">@drawable/splash_background</item>
         <item name="android:statusBarColor">@color/splashBackground</item>
         <item name="android:navigationBarColor">@color/splashBackground</item>
+        <item name="android:windowLightStatusBar">true</item>
     </style>
-
-
 </resources>

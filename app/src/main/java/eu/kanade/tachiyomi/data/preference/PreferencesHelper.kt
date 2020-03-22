@@ -55,7 +55,7 @@ class PreferencesHelper(val context: Context) {
 
     fun clear() = prefs.edit().clear().apply()
 
-    fun theme() = prefs.getInt(Keys.theme, 9)
+    fun theme() = prefs.getInt(Keys.theme, 5)
 
     fun rotation() = rxPrefs.getInteger(Keys.rotation, 1)
 

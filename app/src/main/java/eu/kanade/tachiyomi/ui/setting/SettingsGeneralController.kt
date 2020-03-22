@@ -46,11 +46,10 @@ class SettingsGeneralController : SettingsController() {
             key = Keys.theme
             titleRes = R.string.pref_theme
             entriesRes = arrayOf(R.string.white_theme, R.string.light_theme, R.string.dark_theme,
-                R.string.amoled_theme, R.string.darkblue_theme,
-                R.string.sysyem_white_theme, R.string.system_theme, R.string.system_amoled_theme,
+                R.string.amoled_theme, R.string.darkblue_theme, R.string.system_theme, R.string.system_amoled_theme,
                 R.string.system_darkblue_theme)
-            entryValues = listOf(8, 1, 2, 3, 4, 9, 5, 6, 7)
-            defaultValue = 9
+            entryValues = listOf(1, 8, 2, 3, 4, 5, 6, 7)
+            defaultValue = 5
 
             onChange {
                 activity?.recreate()

@@ -79,7 +79,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         val shadow: View = (pagerView.parent as ViewGroup).findViewById(R.id.shadow)
         sheetBehavior?.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onSlide(bottomSheet: View, progress: Float) {
-                top_bar.alpha = 1 - max(0f, progress)
+                pill.alpha = (1 - max(0f, progress)) * 0.25f
                 shadow2.alpha = (1 - max(0f, progress)) * 0.25f
                 shadow.alpha = 1 + min(0f, progress)
                 updateRootPadding(progress)
@@ -105,12 +105,16 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             sheetBehavior?.skipCollapsed == false)
             sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
 
-        updateRootPadding(when (sheetBehavior?.state) {
-            BottomSheetBehavior.STATE_HIDDEN -> -1f
-            BottomSheetBehavior.STATE_EXPANDED -> 1f
-            else -> 0f
-        })
-        shadow.alpha = if (sheetBehavior?.state == BottomSheetBehavior.STATE_HIDDEN) 0f else 1f
+        post {
+            updateRootPadding(
+                when (sheetBehavior?.state) {
+                    BottomSheetBehavior.STATE_HIDDEN -> -1f
+                    BottomSheetBehavior.STATE_EXPANDED -> 1f
+                    else -> 0f
+                }
+            )
+            shadow.alpha = if (sheetBehavior?.state == BottomSheetBehavior.STATE_HIDDEN) 0f else 1f
+        }
 
         createTags()
         clearButton.setOnClickListener { clearFilters() }
@@ -123,7 +127,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             pager?.updatePaddingRelative(bottom = sheetBehavior?.peekHeight ?: 0)
         }
         if (state == BottomSheetBehavior.STATE_EXPANDED) {
-            top_bar.alpha = 0f
+            pill.alpha = 0f
         }
         if (state == BottomSheetBehavior.STATE_HIDDEN) {
             reSortViews()

@@ -46,6 +46,7 @@ import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
 import eu.kanade.tachiyomi.util.lang.plusAssign
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.GLUtil
+import eu.kanade.tachiyomi.util.system.ThemeUtil
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
@@ -151,20 +152,14 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
     /**
      * Called when the activity is created. Initializes the presenter and configuration.
      */
-    override fun onCreate(savedState: Bundle?) {
-        AppCompatDelegate.setDefaultNightMode(
-            when (preferences.theme()) {
-                1, 8 -> AppCompatDelegate.MODE_NIGHT_NO
-                2, 3, 4 -> AppCompatDelegate.MODE_NIGHT_YES
-                else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-            }
-        )
+    override fun onCreate(savedInstanceState: Bundle?) {
+        AppCompatDelegate.setDefaultNightMode(ThemeUtil.nightMode(preferences.theme()))
         setTheme(when (preferences.readerTheme().getOrDefault()) {
             0 -> R.style.Theme_Base_Reader_Light
             1 -> R.style.Theme_Base_Reader_Dark
             else -> R.style.Theme_Base_Reader
         })
-        super.onCreate(savedState)
+        super.onCreate(savedInstanceState)
         setContentView(R.layout.reader_activity)
 
         setNotchCutoutMode()
@@ -182,8 +177,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
             else presenter.init(manga, chapterUrl)
         }
 
-        if (savedState != null) {
-            menuVisible = savedState.getBoolean(::menuVisible.name)
+        if (savedInstanceState != null) {
+            menuVisible = savedInstanceState.getBoolean(::menuVisible.name)
         }
 
         config = ReaderConfig()

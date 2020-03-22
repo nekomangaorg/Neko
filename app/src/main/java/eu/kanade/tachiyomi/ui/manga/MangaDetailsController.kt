@@ -88,6 +88,7 @@ import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.storage.getUriCompat
+import eu.kanade.tachiyomi.util.system.ThemeUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
@@ -97,8 +98,6 @@ import eu.kanade.tachiyomi.util.view.getText
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
-import java.io.File
-import java.io.IOException
 import jp.wasabeef.glide.transformations.CropSquareTransformation
 import jp.wasabeef.glide.transformations.MaskTransformation
 import kotlinx.android.synthetic.main.main_activity.*
@@ -107,6 +106,8 @@ import kotlinx.android.synthetic.main.manga_header_item.*
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.io.File
+import java.io.IOException
 
 class MangaDetailsController : BaseController,
     FlexibleAdapter.OnItemClickListener,
@@ -337,23 +338,52 @@ class MangaDetailsController : BaseController,
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
         super.onChangeStarted(handler, type)
         if (type == ControllerChangeType.PUSH_ENTER || type == ControllerChangeType.POP_ENTER) {
+            setActionBar(true)
             setStatusBarAndToolbar()
         } else if (type == ControllerChangeType.PUSH_EXIT || type == ControllerChangeType.POP_EXIT) {
             if (router.backstack.lastOrNull()?.controller() is DialogController)
                 return
             if (type == ControllerChangeType.POP_EXIT) {
                 setHasOptionsMenu(false)
+                setActionBar(false)
                 presenter.cancelScope()
             }
             colorAnimator?.cancel()
 
-            val colorPrimary = activity?.getResourceColor(
-                android.R.attr.colorBackground
+            val colorOnPrimary = activity?.getResourceColor(
+                R.attr.colorOnPrimary
             ) ?: Color.BLACK
-            (activity as MainActivity).appbar.setBackgroundColor(colorPrimary)
-            (activity as MainActivity).toolbar.setBackgroundColor(colorPrimary)
+            (activity as MainActivity).appbar.setBackgroundColor(colorOnPrimary)
+            (activity as MainActivity).toolbar.setBackgroundColor(colorOnPrimary)
 
-            activity?.window?.statusBarColor = ColorUtils.setAlphaComponent(colorPrimary, 175)
+            activity?.window?.statusBarColor = activity?.getResourceColor(android.R.attr
+                .statusBarColor) ?: colorOnPrimary
+        }
+    }
+
+    private fun setActionBar(forThis: Boolean) {
+        val currentNightMode =
+            activity!!.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+        // if the theme is using inverted toolbar color
+        if (currentNightMode == Configuration.UI_MODE_NIGHT_NO && ThemeUtil.isBlueTheme(
+                presenter.preferences.theme()
+            )
+        ) {
+            val iconPrimary = view?.context?.getResourceColor(
+                if (forThis) android.R.attr.textColorPrimary
+                else R.attr.actionBarTintColor
+            ) ?: Color.BLACK
+            (activity as MainActivity).toolbar.setTitleTextColor(iconPrimary)
+            (activity as MainActivity).drawerArrow?.color = iconPrimary
+            (activity as MainActivity).toolbar.overflowIcon?.setTint(iconPrimary)
+            if (forThis) activity!!.main_content.systemUiVisibility =
+                activity!!.main_content.systemUiVisibility.or(
+                    View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                )
+            else activity!!.main_content.systemUiVisibility =
+                activity!!.main_content.systemUiVisibility.rem(
+                    View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                )
         }
     }
 
@@ -501,6 +531,10 @@ class MangaDetailsController : BaseController,
             presenter.getNextUnreadChapter() != null && !presenter.isLockedFromSearch
         menu.findItem(R.id.action_mark_all_as_unread).isVisible =
             !presenter.allUnread() && !presenter.isLockedFromSearch
+        val iconPrimary = view?.context?.getResourceColor(android.R.attr.textColorPrimary)
+            ?: Color.BLACK
+        menu.findItem(R.id.action_download).icon?.mutate()?.setTint(iconPrimary)
+        editItem.icon?.mutate()?.setTint(iconPrimary)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

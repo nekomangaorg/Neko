@@ -5,13 +5,13 @@ import android.util.AttributeSet
 import android.view.Gravity
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.appcompat.widget.PopupMenu
-import androidx.appcompat.widget.Toolbar
+import com.google.android.material.appbar.MaterialToolbar
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.visible
 import kotlinx.android.synthetic.main.main_activity.view.*
 
-class CenteredToolbar@JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : Toolbar
-    (context, attrs) {
+class CenteredToolbar@JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
+    MaterialToolbar(context, attrs) {
 
     override fun setTitle(resId: Int) {
         if (navigationIcon is DrawerArrowDrawable) {
