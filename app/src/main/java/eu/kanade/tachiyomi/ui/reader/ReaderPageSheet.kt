@@ -32,7 +32,7 @@ class ReaderPageSheet(
 
     init {
         setContentView(view)
-        setEdgeToEdge(activity, view, view, false)
+        setEdgeToEdge(activity, view, view)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
             Injekt.get<PreferencesHelper>().readerTheme().getOrDefault() == 0 &&
             activity.window.decorView.rootWindowInsets.systemWindowInsetRight == 0 &&

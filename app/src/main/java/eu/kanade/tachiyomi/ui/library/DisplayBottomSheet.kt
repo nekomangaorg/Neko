@@ -20,7 +20,7 @@ import kotlinx.android.synthetic.main.display_bottom_sheet.*
 import uy.kohesive.injekt.injectLazy
 
 class DisplayBottomSheet(private val controller: LibraryController) : BottomSheetDialog
-    (controller.activity!!, R.style.BottomSheetDialogTheme) {
+    (controller.activity!!, R.style.BottomSheetDialogThemeCovered) {
 
     val activity = controller.activity!!
 
@@ -37,9 +37,10 @@ class DisplayBottomSheet(private val controller: LibraryController) : BottomShee
         setContentView(view)
 
         sheetBehavior = BottomSheetBehavior.from(view.parent as ViewGroup)
-        setEdgeToEdge(activity, bottom_sheet, view, false)
+        setEdgeToEdge(activity, bottom_sheet, view)
         val height = activity.window.decorView.rootWindowInsets.systemWindowInsetBottom
         sheetBehavior.peekHeight = 220.dpToPx + height
+        window?.navigationBarColor = activity.window.navigationBarColor
 
         sheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onSlide(bottomSheet: View, progress: Float) { }

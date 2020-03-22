@@ -398,7 +398,7 @@ fun BottomSheetDialog.setEdgeToEdge(
     activity: Activity,
     layout: View,
     contentView: View,
-    setTopMargin: Boolean
+    setTopMargin: Int = -1
 ) {
     window?.setBackgroundDrawable(null)
     val currentNightMode =
@@ -425,12 +425,22 @@ fun BottomSheetDialog.setEdgeToEdge(
     }
     window?.findViewById<View>(com.google.android.material.R.id.container)?.fitsSystemWindows =
         false
-    contentView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-        if (setTopMargin) topMargin =
-            activity.window.decorView.rootWindowInsets.systemWindowInsetTop
-        leftMargin = activity.window.decorView.rootWindowInsets.systemWindowInsetLeft
-        rightMargin = activity.window.decorView.rootWindowInsets.systemWindowInsetRight
+    contentView.systemUiVisibility =
+        View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+    /*contentView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+        if (setTopMargin > -1) topMargin =
+            activity.window.decorView.rootWindowInsets.systemWindowInsetTop + setTopMargin
+    }*/
+
+    if (setTopMargin > 0) (contentView.parent as View).updateLayoutParams<ViewGroup.MarginLayoutParams> {
+        height =
+            activity.window.decorView.height - activity.window.decorView.rootWindowInsets.systemWindowInsetTop - setTopMargin
+        // activity.window.decorView.rootWindowInsets.systemWindowInsetTop // + setTopMargin
     }
+    else if (setTopMargin == 0) contentView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+        topMargin = activity.window.decorView.rootWindowInsets.systemWindowInsetTop
+    }
+    contentView.requestLayout()
 }
 
 fun setBottomEdge(view: View, activity: Activity) {

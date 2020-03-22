@@ -60,12 +60,15 @@ open class BrowseCataloguePresenter(
     var query = ""
         private set
 
+    var filtersChanged = false
+
     /**
      * Modifiable list of filters.
      */
     var sourceFilters = FilterList()
         set(value) {
             field = value
+            filtersChanged = true
             filterItems = value.toItems()
         }
 

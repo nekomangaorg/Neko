@@ -52,7 +52,8 @@ class ReaderSettingsSheet(private val activity: ReaderActivity) :
             activity,
             constraint_layout,
             scroll,
-            context.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+            if (context.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE)
+                0 else -1
         )
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && preferences.readerTheme()
                 .getOrDefault() == 0 && activity.window.decorView.rootWindowInsets.systemWindowInsetRight == 0 && activity.window.decorView.rootWindowInsets.systemWindowInsetLeft == 0

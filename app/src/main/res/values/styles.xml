@@ -213,6 +213,13 @@
         <item name="android:colorBackground">@android:color/transparent</item>
     </style>
 
+    <style name="BottomSheetDialogThemeCovered"
+        parent="@style/Theme.MaterialComponents.BottomSheetDialog">
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:colorBackground">@android:color/transparent</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
+
     <!--==============-->
     <!--Widgets.Button-->
     <!--==============-->

@@ -9,7 +9,6 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.SearchView
-import androidx.core.view.GravityCompat
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -24,10 +23,10 @@ import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.CatalogueSource
+import eu.kanade.tachiyomi.source.model.Filter
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
-import eu.kanade.tachiyomi.ui.base.controller.SecondaryDrawerController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.catalogue.CatalogueController
 import eu.kanade.tachiyomi.ui.library.ChangeMangaCategoriesDialog
@@ -35,32 +34,28 @@ import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.system.connectivityManager
-import eu.kanade.tachiyomi.util.view.HeightTopWindowInsetsListener
-import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
+import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.inflate
-import eu.kanade.tachiyomi.util.view.marginBottom
-import eu.kanade.tachiyomi.util.view.marginTop
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
-import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.visible
+import eu.kanade.tachiyomi.util.view.visibleIf
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
-import java.util.concurrent.TimeUnit
 import kotlinx.android.synthetic.main.catalogue_controller.*
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
+import java.util.concurrent.TimeUnit
 
 /**
  * Controller to manage the catalogues available in the app.
  */
 open class BrowseCatalogueController(bundle: Bundle) :
         NucleusController<BrowseCataloguePresenter>(bundle),
-        SecondaryDrawerController,
         FlexibleAdapter.OnItemClickListener,
         FlexibleAdapter.OnItemLongClickListener,
         FlexibleAdapter.EndlessScrollListener,
@@ -148,8 +143,9 @@ open class BrowseCatalogueController(bundle: Bundle) :
         setupRecycler(view)
 
         navView?.setFilters(presenter.filterItems)
-        scrollViewWith(recycler!!, true)
 
+        fab.visibleIf(presenter.sourceFilters.isNotEmpty())
+        fab.setOnClickListener { showFilters() }
         progress?.visible()
     }
 
@@ -162,53 +158,6 @@ open class BrowseCatalogueController(bundle: Bundle) :
         snack = null
         recycler = null
         super.onDestroyView(view)
-    }
-
-    override fun createSecondaryDrawer(drawer: androidx.drawerlayout.widget.DrawerLayout): ViewGroup? {
-        // Inflate and prepare drawer
-        val navView = drawer.inflate(R.layout.catalogue_drawer) as CatalogueNavigationView
-        this.navView = navView
-        navView.setFilters(presenter.filterItems)
-
-        drawer.setDrawerLockMode(androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_UNLOCKED, GravityCompat.END)
-
-        navView.onSearchClicked = {
-            val allDefault = presenter.sourceFilters == presenter.source.getFilterList()
-            showProgressBar()
-            adapter?.clear()
-            drawer.closeDrawer(GravityCompat.END)
-            presenter.setSourceFilter(if (allDefault) FilterList() else presenter.sourceFilters)
-        }
-
-        navView.onResetClicked = {
-            presenter.appliedFilters = FilterList()
-            val newFilters = presenter.source.getFilterList()
-            presenter.sourceFilters = newFilters
-            navView.setFilters(presenter.filterItems)
-        }
-        drawer.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
-            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
-            View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-
-        val statusScrim = navView.findViewById(R.id.status_bar_scrim) as View
-        statusScrim.setOnApplyWindowInsetsListener(HeightTopWindowInsetsListener)
-        val titleView = navView.findViewById(R.id.title_background) as View
-        val titleMarginTop = titleView.marginTop
-        navView.setOnApplyWindowInsetsListener { v, insets ->
-            navView.recycler.updatePaddingRelative(
-                bottom = navView.recycler.marginBottom + insets.systemWindowInsetBottom,
-                top = navView.recycler.marginTop + insets.systemWindowInsetTop
-            )
-            titleView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                topMargin = titleMarginTop + insets.systemWindowInsetTop
-            }
-            insets
-        }
-        return navView
-    }
-
-    override fun cleanupSecondaryDrawer(drawer: androidx.drawerlayout.widget.DrawerLayout) {
-        navView = null
     }
 
     private fun setupRecycler(view: View) {
@@ -252,8 +201,22 @@ open class BrowseCatalogueController(bundle: Bundle) :
         recycler.setHasFixedSize(true)
         recycler.adapter = adapter
 
+        scrollViewWith(recycler, true) { insets ->
+            fab.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                bottomMargin = insets.systemWindowInsetBottom + 16.dpToPx
+            }
+        }
+
+        recycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                if (dy <= 0)
+                    fab.extend()
+                else
+                    fab.shrink()
+            }
+        })
+
         catalogue_view.addView(recycler, 1)
-        recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
         if (oldPosition != RecyclerView.NO_POSITION) {
             recycler.layoutManager?.scrollToPosition(oldPosition)
         }
@@ -297,9 +260,6 @@ open class BrowseCatalogueController(bundle: Bundle) :
             }
         )
 
-        // Setup filters button
-        menu.findItem(R.id.action_set_filter).isVisible = presenter.sourceFilters.isNotEmpty()
-
         // Show next display mode
         menu.findItem(R.id.action_display_mode).apply {
             val icon = if (presenter.isListMode)
@@ -321,11 +281,61 @@ open class BrowseCatalogueController(bundle: Bundle) :
         when (item.itemId) {
             R.id.action_search -> expandActionViewFromInteraction = true
             R.id.action_display_mode -> swapDisplayMode()
-//            R.id.action_set_filter -> navView?.let { activity?.drawer?.openDrawer(GravityCompat.END) }
             R.id.action_open_in_web_view -> openInWebView()
             else -> return super.onOptionsItemSelected(item)
         }
         return true
+    }
+
+    private fun showFilters() {
+        val sheet = CatalogueSearchSheet(activity!!)
+        sheet.setFilters(presenter.filterItems)
+        presenter.filtersChanged = false
+        val oldFilters = mutableListOf<Any?>()
+        for (i in presenter.sourceFilters) {
+            if (i is Filter.Group<*>) {
+                val subFilters = mutableListOf<Any?>()
+                for (j in i.state) {
+                    subFilters.add((j as Filter<*>).state)
+                }
+                oldFilters.add(subFilters)
+            } else {
+                oldFilters.add(i.state)
+            }
+        }
+        sheet.onSearchClicked = {
+            var matches = true
+            for (i in presenter.sourceFilters.indices) {
+                val filter = oldFilters[i]
+                if (filter is List<*>) {
+                    for (j in filter.indices) {
+                        if (filter[j] !=
+                            ((presenter.sourceFilters[i] as Filter.Group<*>).state[j] as
+                                Filter<*>).state) {
+                            matches = false
+                            break
+                        }
+                    }
+                } else if (oldFilters[i] != presenter.sourceFilters[i].state) {
+                    matches = false
+                    break
+                }
+            }
+            if (!matches) {
+                val allDefault = presenter.sourceFilters == presenter.source.getFilterList()
+                showProgressBar()
+                adapter?.clear()
+                presenter.setSourceFilter(if (allDefault) FilterList() else presenter.sourceFilters)
+            }
+        }
+
+        sheet.onResetClicked = {
+            presenter.appliedFilters = FilterList()
+            val newFilters = presenter.source.getFilterList()
+            presenter.sourceFilters = newFilters
+            sheet.setFilters(presenter.filterItems)
+        }
+        sheet.show()
     }
 
     private fun openInWebView() {

@@ -62,7 +62,7 @@ class MigrationBottomSheetDialog(
             params3.endToEnd = -1
             extra_search_param.layoutParams = params3
         }
-        setEdgeToEdge(activity, constraint_layout, view, false)
+        setEdgeToEdge(activity, constraint_layout, view)
         setBottomEdge(
             if (activity.resources.configuration?.orientation == Configuration.ORIENTATION_LANDSCAPE) extra_search_param_text
             else skip_step, activity
