@@ -38,7 +38,7 @@ open class ExtensionBottomPresenter(
     private var currentDownloads = hashMapOf<String, InstallStep>()
 
     fun onCreate() {
-        extensionManager.findAvailableExtensions()
+        // extensionManager.findAvailableExtensions()
         bindToExtensionsObservable()
     }
 

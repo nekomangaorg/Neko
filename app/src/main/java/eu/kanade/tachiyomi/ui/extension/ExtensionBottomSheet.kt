@@ -31,7 +31,9 @@ ExtensionAdapter.OnButtonClickListener,
     ExtensionTrustDialog.Listener {
 
     var sheetBehavior: BottomSheetBehavior<*>? = null
-    lateinit var autoCheckItem: AutoCheckItem
+    private lateinit var autoCheckItem: AutoCheckItem
+
+    var shouldCallApi = true
 
     /**
      * Adapter containing the list of manga from the catalogue.
@@ -71,11 +73,19 @@ ExtensionAdapter.OnButtonClickListener,
         sheet_layout.setOnClickListener {
             if (sheetBehavior?.state != BottomSheetBehavior.STATE_EXPANDED) {
                 sheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
+                fetchOnlineExtensionsIfNeeded()
             } else {
                 sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
             }
         }
         presenter.getExtensionUpdateCount()
+    }
+
+    fun fetchOnlineExtensionsIfNeeded() {
+        if (shouldCallApi) {
+            presenter.findAvailableExtensions()
+            shouldCallApi = false
+        }
     }
 
     fun updateExtTitle() {

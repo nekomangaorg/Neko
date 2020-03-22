@@ -160,6 +160,9 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
                         if (state == BottomSheetBehavior.STATE_COLLAPSED) 1f else 0f
                     showingExtenions = state == BottomSheetBehavior.STATE_EXPANDED
                     setTitle()
+                    if (state == BottomSheetBehavior.STATE_EXPANDED)
+                        ext_bottom_sheet.fetchOnlineExtensionsIfNeeded()
+                    else ext_bottom_sheet.shouldCallApi = true
                     activity?.invalidateOptionsMenu()
                 }
 
@@ -177,6 +180,7 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
 
     fun showExtensions() {
         ext_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
+        ext_bottom_sheet.fetchOnlineExtensionsIfNeeded()
     }
 
     fun toggleExtensions() {
@@ -184,6 +188,7 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
             ext_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
         } else {
             ext_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
+            ext_bottom_sheet.fetchOnlineExtensionsIfNeeded()
         }
     }
 
