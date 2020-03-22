@@ -22,10 +22,12 @@ import com.afollestad.materialdialogs.checkbox.isCheckPromptChecked
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.snackbar.Snackbar
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.SelectableAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
@@ -291,7 +293,9 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
             override fun getSpanSize(position: Int): Int {
                 if (libraryLayout == 0) return 1
                 val item = this@LibraryListController.adapter.getItem(position)
-                return if (item is LibraryHeaderItem) recycler.manager.spanCount else 1
+                return if (item is LibraryHeaderItem) recycler.manager.spanCount
+                else if (item is LibraryItem && item.manga.isBlank()) recycler.manager.spanCount
+                else 1
             }
         })
         recycler.setHasFixedSize(true)
@@ -493,7 +497,7 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
 
     private fun toggleSelection(position: Int) {
         val item = adapter.getItem(position) as? LibraryItem ?: return
-
+        if (item.manga.isBlank()) return
         setSelection(item.manga, !adapter.isSelected(position))
         invalidateActionMode()
     }
@@ -625,14 +629,14 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
                 return
             }
             if (newHeader?.category?.mangaSort == null) {
-                presenter.moveMangaToCategory(item, newHeader?.category?.id, mangaIds, true)
+                moveMangaToCategory(item.manga, newHeader?.category, mangaIds, true)
             } else {
                 val keepCatSort = preferences.keepCatSort().getOrDefault()
                 if (keepCatSort == 0) {
                     MaterialDialog(activity!!).message(R.string.switch_to_dnd)
                         .positiveButton(R.string.action_switch) {
-                            presenter.moveMangaToCategory(
-                                item, newHeader.category.id, mangaIds, true
+                            moveMangaToCategory(
+                                item.manga, newHeader.category, mangaIds, true
                             )
                             if (it.isCheckPromptChecked()) preferences.keepCatSort().set(2)
                         }.checkBoxPrompt(R.string.remember_choice) {}.negativeButton(
@@ -643,19 +647,40 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
                                 )
                             )
                         ) {
-                            presenter.moveMangaToCategory(
-                                item, newHeader.category.id, mangaIds, false
+                            moveMangaToCategory(
+                                item.manga, newHeader.category, mangaIds, false
                             )
                             if (it.isCheckPromptChecked()) preferences.keepCatSort().set(1)
                         }.cancelOnTouchOutside(false).show()
                 } else {
-                    presenter.moveMangaToCategory(
-                        item, newHeader.category.id, mangaIds, keepCatSort == 2
+                    moveMangaToCategory(
+                        item.manga, newHeader.category, mangaIds, keepCatSort == 2
                     )
                 }
             }
         }
         lastItemPosition = null
+    }
+
+    private fun moveMangaToCategory(
+        manga: LibraryManga,
+        category: Category?,
+        mangaIds: List<Long>,
+        useDND: Boolean
+    ) {
+        if (category?.id == null) return
+        val oldCatId = manga.category
+        presenter.moveMangaToCategory(manga, category.id, mangaIds, useDND)
+        snack?.dismiss()
+        snack = view?.snack(
+            resources!!.getString(R.string.moved_to_category, category.name)
+        ) {
+            anchorView = bottom_sheet
+            setAction(R.string.action_undo) {
+                manga.category = category.id!!
+                presenter.moveMangaToCategory(manga, oldCatId, mangaIds, useDND)
+            }
+        }
     }
 
     override fun updateCategory(catId: Int): Boolean {
@@ -669,7 +694,7 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
                     LibraryUpdateService.isRunning() -> R.string.adding_category_to_queue
                     else -> R.string.updating_category_x
                 }, category.name
-            )
+            ), Snackbar.LENGTH_LONG
         ) {
             anchorView = bottom_sheet
         }

@@ -37,7 +37,7 @@ class LibraryItem(
     var chapterCount = -1
 
     override fun getLayoutRes(): Int {
-        return if (libraryLayout.getOrDefault() == 0)
+        return if (libraryLayout.getOrDefault() == 0 || manga.isBlank())
             R.layout.catalogue_list_item
         else
             R.layout.catalogue_grid_item
@@ -48,7 +48,7 @@ class LibraryItem(
         return if (parent is AutofitRecyclerView) {
             val libraryLayout = libraryLayout.getOrDefault()
             val isFixedSize = fixedSize.getOrDefault()
-            if (libraryLayout == 0) {
+            if (libraryLayout == 0 || manga.isBlank()) {
                 LibraryListHolder(view, adapter as LibraryCategoryAdapter)
             } else {
                 view.apply {
@@ -111,7 +111,15 @@ class LibraryItem(
      * Returns true if this item is draggable.
      */
     override fun isDraggable(): Boolean {
-        return true
+        return !manga.isBlank()
+    }
+
+    override fun isEnabled(): Boolean {
+        return !manga.isBlank()
+    }
+
+    override fun isSelectable(): Boolean {
+        return !manga.isBlank()
     }
 
     /**
@@ -121,6 +129,8 @@ class LibraryItem(
      * @return true if the manga should be included, false otherwise.
      */
     override fun filter(constraint: String): Boolean {
+        if (manga.isBlank())
+            return constraint.isEmpty()
         val sourceManager by injectLazy<SourceManager>()
         val sourceName = if (manga.source == 0L) "Local" else
             sourceManager.getOrStub(manga.source).name

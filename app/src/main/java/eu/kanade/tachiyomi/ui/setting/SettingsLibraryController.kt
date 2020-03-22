@@ -51,6 +51,8 @@ class SettingsLibraryController : SettingsController() {
             titleRes = R.string.pref_category_library_categories
             preference {
                 titleRes = R.string.action_edit_categories
+                val catCount = db.getCategories().executeAsBlocking().size
+                summary = context.resources.getQuantityString(R.plurals.category, catCount, catCount)
                 onClick { router.pushController(CategoryController().withFadeTransaction()) }
             }
             intListPreference(activity) {

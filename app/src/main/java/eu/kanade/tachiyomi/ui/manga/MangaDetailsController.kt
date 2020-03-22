@@ -98,6 +98,8 @@ import eu.kanade.tachiyomi.util.view.getText
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
+import java.io.File
+import java.io.IOException
 import jp.wasabeef.glide.transformations.CropSquareTransformation
 import jp.wasabeef.glide.transformations.MaskTransformation
 import kotlinx.android.synthetic.main.main_activity.*
@@ -106,8 +108,6 @@ import kotlinx.android.synthetic.main.manga_header_item.*
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import java.io.File
-import java.io.IOException
 
 class MangaDetailsController : BaseController,
     FlexibleAdapter.OnItemClickListener,

@@ -445,6 +445,7 @@ class LibraryPresenter(
         val showCategories = !preferences.hideCategories().getOrDefault()
         val unreadBadgeType = preferences.unreadBadgeType().getOrDefault()
         var libraryManga = db.getLibraryMangas().executeAsBlocking()
+        val singleList = preferences.libraryAsSingleList().getOrDefault()
         if (!showCategories)
             libraryManga = libraryManga.distinctBy { it.id }
         /*val libraryMap = libraryManga.map { manga ->
@@ -457,7 +458,7 @@ class LibraryPresenter(
             preferences.librarySortingAscending().getOrDefault())
         val catItemAll = LibraryHeaderItem({ categoryAll }, -1)
         val libraryMap =
-            if (!preferences.libraryAsSingleList().getOrDefault()) {
+            if (!singleList) {
                 libraryManga.map { manga ->
                     LibraryItem(manga, libraryLayout, preferences.uniformGrid(), null).apply { unreadType =
                         unreadBadgeType }
@@ -482,9 +483,26 @@ class LibraryPresenter(
                     cat to it
                     // LibraryItem(manga, libraryLayout).apply { unreadType = unreadBadgeType }
                 }.toMap()
-            }
+            }.toMutableMap()
         if (libraryMap.containsKey(0))
             categories.add(0, createDefaultCategory())
+
+        if (showCategories) {
+            categories.forEach { category ->
+                if (!libraryMap.containsKey(category.id)) {
+                    val headerItem =
+                        LibraryHeaderItem({ getCategory(category.id!!) }, category.id!!)
+                    libraryMap[category.id!!] = listOf(
+                        LibraryItem(
+                            LibraryManga.createBlank(category.id!!),
+                            libraryLayout,
+                            preferences.uniformGrid(),
+                            headerItem
+                        )
+                    )
+                }
+            }
+        }
 
         if (categories.size == 1 && showCategories)
             categories.first().name = context.getString(R.string.label_library)
@@ -831,13 +849,17 @@ class LibraryPresenter(
         }
     }
 
-    fun moveMangaToCategory(item: LibraryItem, catId: Int?, mangaIds: List<Long>, useDND: Boolean) {
+    fun moveMangaToCategory(
+        manga: LibraryManga,
+        catId: Int?,
+        mangaIds: List<Long>,
+        useDND: Boolean
+    ) {
         GlobalScope.launch(Dispatchers.IO) {
             val categoryId = catId ?: return@launch
             val category = categories.find { catId == it.id } ?: return@launch
-            val manga = item.manga
 
-            val mangaMap = currentMangaMap?.toMutableMap() ?: return@launch
+            /*val mangaMap = currentMangaMap?.toMutableMap() ?: return@launch
             val oldCatId = item.manga.category
             val oldCatMap = mangaMap[manga.category]?.toMutableList() ?: return@launch
             val newCatMap = mangaMap[catId]?.toMutableList() ?: return@launch
@@ -845,13 +867,14 @@ class LibraryPresenter(
             newCatMap.add(item)
             mangaMap[oldCatId] = oldCatMap
             mangaMap[catId] = newCatMap
-            currentMangaMap = mangaMap
+            currentMangaMap = mangaMap*/
 
-            item.manga.category = categoryId
+            val oldCatId = manga.category
+            manga.category = categoryId
 
             val mc = ArrayList<MangaCategory>()
-            val categories =
-                db.getCategoriesForManga(manga).executeAsBlocking().filter { it.id != oldCatId } + listOf(category)
+            val categories = db.getCategoriesForManga(manga).executeAsBlocking()
+                .filter { it.id != oldCatId } + listOf(category)
 
             for (cat in categories) {
                 mc.add(MangaCategory.create(manga, cat))
@@ -864,7 +887,8 @@ class LibraryPresenter(
                 val ids = mangaIds.toMutableList()
                 if (!ids.contains(manga.id!!)) ids.add(manga.id!!)
                 category.mangaOrder = ids
-                if (category.id == 0) preferences.defaultMangaOrder().set(mangaIds.joinToString("/"))
+                if (category.id == 0) preferences.defaultMangaOrder()
+                    .set(mangaIds.joinToString("/"))
                 else db.insertCategory(category).executeAsBlocking()
             }
             getLibrary()

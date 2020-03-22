@@ -7,6 +7,8 @@ import com.bumptech.glide.signature.ObjectKey
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.glide.GlideApp
+import eu.kanade.tachiyomi.util.view.gone
+import eu.kanade.tachiyomi.util.view.visible
 import kotlinx.android.synthetic.main.catalogue_list_item.*
 import kotlinx.android.synthetic.main.catalogue_list_item.view.*
 import kotlinx.android.synthetic.main.unread_download_badge.*
@@ -33,6 +35,17 @@ class LibraryListHolder(
      * @param item the manga item to bind.
      */
     override fun onSetValues(item: LibraryItem) {
+
+        if (item.manga.isBlank()) {
+            title.text = itemView.context.getString(R.string.category_is_empty)
+            title.textAlignment = View.TEXT_ALIGNMENT_CENTER
+            card.gone()
+            badge_view.gone()
+            return
+        }
+        card.visible()
+        title.textAlignment = View.TEXT_ALIGNMENT_TEXT_START
+
         // Update the title of the manga.
         title.text = item.manga.title
         setUnreadBadge(badge_view, item)

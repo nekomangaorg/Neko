@@ -197,6 +197,10 @@
     <string name="landscape">Landscape</string>
     <string name="default_columns">Default</string>
     <string name="create_new_category">Create new category</string>
+    <plurals name="category">
+        <item quantity="one">%d category</item>
+        <item quantity="other">%d categories</item>
+    </plurals>
 
     <string name="pref_category_library_update">Updates</string>
     <string name="pref_library_update_interval">Library update frequency</string>
@@ -442,6 +446,8 @@
     <string name="updating_category_x">Updating %1$s</string>
     <string name="adding_category_to_queue">Adding %1$s to update queue</string>
     <string name="category_already_in_queue">%1$s is already in queue</string>
+    <string name="moved_to_category">Moved to %1$s</string>
+    <string name="category_is_empty">Category is empty</string>
     <string name="local_source_badge">Local</string>
     <string name="confirm_manga_deletion">Remove from library?</string>
     <string name="switch_to_dnd">Switch to Drag &amp; Drop mode?</string>

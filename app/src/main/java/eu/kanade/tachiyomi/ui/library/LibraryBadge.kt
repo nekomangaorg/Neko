@@ -40,7 +40,7 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
         }
 
         // Show the bade card if unread or downloads exists
-        badge_view.visibility = if (download_text.visibility == View.VISIBLE || unread_text
+        visibility = if (download_text.visibility == View.VISIBLE || unread_text
                 .visibility != View.GONE) View.VISIBLE else View.GONE
 
         // Show the angles divider if both unread and downloads exists
@@ -63,7 +63,7 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
     }
 
     fun setInLibrary(inLibrary: Boolean) {
-        badge_view.visibility = if (inLibrary) View.VISIBLE else View.GONE
+        visibility = if (inLibrary) View.VISIBLE else View.GONE
         unread_angle.visibility = View.GONE
         unread_text.updatePaddingRelative(start = 5.dpToPx)
         unread_text.visibility = if (inLibrary) View.VISIBLE else View.GONE
