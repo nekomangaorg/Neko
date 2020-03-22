@@ -14,6 +14,7 @@ import android.view.ViewGroup
 import androidx.appcompat.view.ActionMode
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.afollestad.materialdialogs.MaterialDialog
@@ -551,7 +552,7 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
 
     override fun onActionStateChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
         val position = viewHolder?.adapterPosition ?: return
-        if (actionState == 2) {
+        if (actionState == ItemTouchHelper.ACTION_STATE_DRAG) {
             isDragging = true
             activity?.appbar?.y = 0f
             if (lastItemPosition != null && position != lastItemPosition && lastItem == adapter.getItem(

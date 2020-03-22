@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.afollestad.materialdialogs.MaterialDialog
 import com.google.android.material.snackbar.BaseTransientBottomBar
@@ -77,7 +76,6 @@ class CategoryController(bundle: Bundle? = null) : BaseController(bundle),
         adapter?.isHandleDragEnabled = true
         adapter?.isPermanentDelete = false
 
-        activity?.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
         presenter.getCategories()
     }
 
@@ -90,7 +88,6 @@ class CategoryController(bundle: Bundle? = null) : BaseController(bundle),
         // Manually call callback to delete categories if required
         snack?.dismiss()
         view.clearFocus()
-        activity?.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
         confirmDelete()
         snack = null
         adapter = null
@@ -100,7 +97,6 @@ class CategoryController(bundle: Bundle? = null) : BaseController(bundle),
     override fun handleBack(): Boolean {
         view?.clearFocus()
         confirmDelete()
-        activity?.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
         return super.handleBack()
     }
 

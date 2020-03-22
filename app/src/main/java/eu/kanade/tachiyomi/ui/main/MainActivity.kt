@@ -572,8 +572,10 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         }
         val onRoot = router.backstackSize == 1
         if (onRoot) {
+            window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
             toolbar.navigationIcon = searchDrawable
         } else {
+            window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
             toolbar.navigationIcon = drawerArrow
         }
         drawerArrow?.progress = 1f

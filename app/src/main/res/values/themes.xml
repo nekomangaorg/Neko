@@ -86,6 +86,7 @@
         <item name="actionBarTintColor">@color/md_white_1000</item>
         <item name="android:statusBarColor">?colorPrimaryDark</item>
         <item name="android:navigationBarColor">?colorPrimaryDark</item>
+        <item name="android:windowLightStatusBar">false</item>
     </style>
 
     <style name="Theme.Base.Reader.Dark" parent="Theme.MaterialComponents.NoActionBar">

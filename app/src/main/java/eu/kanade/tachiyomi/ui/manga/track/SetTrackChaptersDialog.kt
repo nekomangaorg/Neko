@@ -52,8 +52,13 @@ class SetTrackChaptersDialog<T> : DialogController
         val np: NumberPicker = view.findViewById(R.id.chapters_picker)
         // Set initial value
         np.value = item.track?.last_chapter_read ?: 0
-        // Don't allow to go from 0 to 9999
-        np.wrapSelectorWheel = false
+        if (item.track?.total_chapters ?: 0 > 0) {
+            np.wrapSelectorWheel = true
+            np.maxValue = item.track?.total_chapters ?: 0
+        } else {
+            // Don't allow to go from 0 to 9999
+            np.wrapSelectorWheel = false
+        }
 
         return dialog
     }
