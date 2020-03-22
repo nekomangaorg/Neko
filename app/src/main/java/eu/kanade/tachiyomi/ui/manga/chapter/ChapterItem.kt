@@ -41,6 +41,10 @@ class ChapterItem(val chapter: Chapter, val manga: Manga) :
         return true
     }
 
+    override fun isSwipeable(): Boolean {
+        return !isLocked
+    }
+
     override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): ChapterMatHolder {
         return ChapterMatHolder(view, adapter as ChaptersAdapter)
     }

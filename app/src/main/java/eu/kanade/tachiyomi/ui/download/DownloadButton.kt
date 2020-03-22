@@ -29,6 +29,10 @@ class DownloadButton @JvmOverloads constructor(context: Context, attrs: Attribut
         R.drawable.filled_circle)?.mutate()
     private val borderCircle = ContextCompat.getDrawable(context,
         R.drawable.border_circle)?.mutate()
+    private val downloadDrawable = ContextCompat.getDrawable(context,
+        R.drawable.ic_arrow_down_white_24dp)?.mutate()
+    private val checkDrawable = ContextCompat.getDrawable(context,
+        R.drawable.ic_check_white_24dp)?.mutate()
     private var isAnimating = false
     private var iconAnimation: ObjectAnimator? = null
 
@@ -38,7 +42,17 @@ class DownloadButton @JvmOverloads constructor(context: Context, attrs: Attribut
             download_icon.alpha = 1f
             isAnimating = false
         }
+        download_icon.setImageDrawable(if (state == Download.CHECKED)
+            checkDrawable else downloadDrawable)
         when (state) {
+            Download.CHECKED -> {
+                download_progress.gone()
+                download_border.visible()
+                download_progress_indeterminate.gone()
+                download_border.setImageDrawable(filledCircle)
+                download_border.drawable.setTint(activeColor)
+                download_icon.drawable.setTint(Color.WHITE)
+            }
             Download.NOT_DOWNLOADED -> {
                 download_border.visible()
                 download_progress.gone()

@@ -59,10 +59,8 @@ import eu.kanade.tachiyomi.ui.setting.SettingsController
 import eu.kanade.tachiyomi.ui.setting.SettingsMainController
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
-import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePadding
-import eu.kanade.tachiyomi.util.view.visible
 import java.util.Date
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
@@ -197,19 +195,6 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         container.systemUiVisibility =
             View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
         updateRecentsIcon()
-        content.viewTreeObserver.addOnGlobalLayoutListener {
-            val heightDiff: Int = content.rootView.height - content.height
-            if (heightDiff > 200 && window.attributes.softInputMode == WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE) {
-                // keyboard is open, hide layout
-                bottom_nav.gone()
-            } else if (bottom_nav.visibility == View.GONE && window.attributes.softInputMode == WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE) {
-                // keyboard is hidden, show layout
-                // use coroutine to delay so the bottom bar doesn't flash on top of the keyboard
-                launchUI {
-                    bottom_nav.visible()
-                }
-            }
-        }
 
         supportActionBar?.setDisplayShowCustomEnabled(true)
 

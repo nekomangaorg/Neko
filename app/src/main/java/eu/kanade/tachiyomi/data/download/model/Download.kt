@@ -40,7 +40,7 @@ class Download(val source: HttpSource, val manga: Manga, val chapter: Chapter) {
     }
 
     companion object {
-
+        const val CHECKED = -1
         const val NOT_DOWNLOADED = 0
         const val QUEUE = 1
         const val DOWNLOADING = 2

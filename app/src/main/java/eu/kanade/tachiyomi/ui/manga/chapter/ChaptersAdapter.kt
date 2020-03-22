@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.manga.chapter
 import android.content.Context
 import android.view.View
 import androidx.fragment.app.FragmentActivity
+import androidx.recyclerview.widget.ItemTouchHelper
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
@@ -37,7 +38,7 @@ class ChaptersAdapter(
 
     fun setChapters(items: List<ChapterItem>?) {
         this.items = items ?: emptyList()
-        super.updateDataSet(items)
+        performFilter()
     }
 
     fun indexOf(item: ChapterItem): Int {
@@ -47,6 +48,24 @@ class ChaptersAdapter(
     fun unlock() {
         val activity = controller.activity as? FragmentActivity ?: return
         SecureActivityDelegate.promptLockIfNeeded(activity)
+    }
+
+    fun performFilter() {
+        val s = getFilter(String::class.java)
+        if (s.isNullOrBlank()) {
+            updateDataSet(items)
+        } else {
+            updateDataSet(items.filter { it.name.contains(s, true) ||
+                it.scanlator?.contains(s, true) == true })
+        }
+    }
+
+    override fun onItemSwiped(position: Int, direction: Int) {
+        super.onItemSwiped(position, direction)
+        when (direction) {
+            ItemTouchHelper.RIGHT -> controller.bookmarkChapter(position)
+            ItemTouchHelper.LEFT -> controller.toggleReadChapter(position)
+        }
     }
 
     interface MangaHeaderInterface {

@@ -520,7 +520,7 @@
 
     <string name="score">Оценка</string>
 
-    <string name="search_hint">Название, теги, источник</string>
+    <string name="library_search_hint">Название, теги, источник</string>
     <string name="search_parameter">Параметр поиска (например: language:english)</string>
 
     <string name="second_to_last">Предпоследняя</string>

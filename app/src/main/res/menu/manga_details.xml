@@ -3,10 +3,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/action_edit"
-        android:icon="@drawable/ic_edit_white_24dp"
-        android:title="@string/action_edit"
-        app:showAsAction="ifRoom" />
+        android:id="@+id/action_search"
+        android:icon="@drawable/ic_search_white_24dp"
+        android:title="@string/action_search"
+        app:actionViewClass="androidx.appcompat.widget.SearchView"
+        app:showAsAction="collapseActionView|ifRoom" />
 
     <item
         android:id="@+id/action_download"
@@ -42,6 +43,12 @@
         android:id="@+id/action_mark_all_as_unread"
         android:icon="@drawable/ic_done_all_white_24dp"
         android:title="@string/action_mark_all_as_unread"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_edit"
+        android:icon="@drawable/ic_edit_white_24dp"
+        android:title="@string/action_edit"
         app:showAsAction="never" />
 
     <item

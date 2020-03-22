@@ -19,7 +19,6 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -31,12 +30,14 @@ import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.PopupMenu
+import androidx.appcompat.widget.SearchView
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.drawable.IconCompat
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.ChangeBounds
@@ -95,6 +96,7 @@ import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.getText
+import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
@@ -114,6 +116,7 @@ class MangaDetailsController : BaseController,
     FlexibleAdapter.OnItemLongClickListener,
     ActionMode.Callback,
     ChaptersAdapter.MangaHeaderInterface,
+    FlexibleAdapter.OnItemMoveListener,
     ChangeMangaCategoriesDialog.Listener {
 
     constructor(
@@ -160,6 +163,11 @@ class MangaDetailsController : BaseController,
     var refreshTracker: Int? = null
 
     /**
+     * Library search query.
+     */
+    private var query = ""
+
+    /**
      * Adapter containing a list of chapters.
      */
     private var adapter: ChaptersAdapter? = null
@@ -190,6 +198,7 @@ class MangaDetailsController : BaseController,
         adapter = ChaptersAdapter(this, view.context)
 
         recycler.adapter = adapter
+        adapter?.isSwipeEnabled = true
         recycler.layoutManager = LinearLayoutManager(view.context)
         recycler.addItemDecoration(
             DividerItemDecoration(
@@ -369,6 +378,13 @@ class MangaDetailsController : BaseController,
                 presenter.preferences.theme()
             )
         ) {
+            if (forThis)
+            (activity as MainActivity).appbar.context.setTheme(R.style
+                .ThemeOverlay_AppCompat_DayNight_ActionBar)
+            else
+                (activity as MainActivity).appbar.context.setTheme(R.style
+                    .Theme_ActionBar_Dark_DayNight)
+
             val iconPrimary = view?.context?.getResourceColor(
                 if (forThis) android.R.attr.textColorPrimary
                 else R.attr.actionBarTintColor
@@ -418,6 +434,8 @@ class MangaDetailsController : BaseController,
                 adapter?.addSelection(position)
                 (recycler.findViewHolderForAdapterPosition(position) as? BaseFlexibleViewHolder)
                     ?.toggleActivation()
+                (recycler.findViewHolderForAdapterPosition(position) as? ChapterMatHolder)
+                    ?.notifyStatus(Download.CHECKED, false, 0)
                 startingDLChapterPos = position
                 actionMode?.invalidate()
             } else {
@@ -446,24 +464,24 @@ class MangaDetailsController : BaseController,
         val adapter = adapter ?: return
         val item = (adapter.getItem(position) as? ChapterItem) ?: return
         val itemView = getHolder(item)?.itemView ?: return
-        val popup = PopupMenu(itemView.context, itemView, Gravity.END)
+        val popup = PopupMenu(itemView.context, itemView)
 
         // Inflate our menu resource into the PopupMenu's Menu
         popup.menuInflater.inflate(R.menu.chapters_mat_single, popup.menu)
 
         // Hide bookmark if bookmark
-        popup.menu.findItem(R.id.action_bookmark).isVisible = !item.bookmark
-        popup.menu.findItem(R.id.action_remove_bookmark).isVisible = item.bookmark
+        popup.menu.findItem(R.id.action_bookmark).isVisible = false // !item.bookmark
+        popup.menu.findItem(R.id.action_remove_bookmark).isVisible = false // item.bookmark
 
         // Hide mark as unread when the chapter is unread
-        if (!item.read && item.last_page_read == 0) {
+//        if (!item.read && item.last_page_read == 0) {
             popup.menu.findItem(R.id.action_mark_as_unread).isVisible = false
-        }
+//        }
 
         // Hide mark as read when the chapter is read
-        if (item.read) {
+//        if (item.read) {
             popup.menu.findItem(R.id.action_mark_as_read).isVisible = false
-        }
+//        }
 
         // Set a listener so we are notified if a menu item is clicked
         popup.setOnMenuItemClickListener { menuItem ->
@@ -491,19 +509,30 @@ class MangaDetailsController : BaseController,
         }
     }
 
+    fun bookmarkChapter(position: Int) {
+        val item = adapter?.getItem(position) as? ChapterItem ?: return
+        bookmarkChapters(listOf(item), !item.bookmark)
+    }
+
+    fun toggleReadChapter(position: Int) {
+        val item = adapter?.getItem(position) as? ChapterItem ?: return
+        if (!item.read) markAsRead(listOf(item), false)
+        else markAsUnread(listOf(item), false)
+    }
+
     private fun bookmarkChapters(chapters: List<ChapterItem>, bookmarked: Boolean) {
         presenter.bookmarkChapters(chapters, bookmarked)
     }
 
-    private fun markAsRead(chapters: List<ChapterItem>) {
-        presenter.markChaptersRead(chapters, true)
+    private fun markAsRead(chapters: List<ChapterItem>, refresh: Boolean = true) {
+        presenter.markChaptersRead(chapters, read = true)
         if (presenter.preferences.removeAfterMarkedAsRead()) {
             presenter.deleteChapters(chapters)
         }
     }
 
-    private fun markAsUnread(chapters: List<ChapterItem>) {
-        presenter.markChaptersRead(chapters, false)
+    private fun markAsUnread(chapters: List<ChapterItem>, refresh: Boolean = true) {
+        presenter.markChaptersRead(chapters, read = false)
     }
 
     private fun openChapter(chapter: Chapter) {
@@ -535,6 +564,25 @@ class MangaDetailsController : BaseController,
             ?: Color.BLACK
         menu.findItem(R.id.action_download).icon?.mutate()?.setTint(iconPrimary)
         editItem.icon?.mutate()?.setTint(iconPrimary)
+
+        val searchItem = menu.findItem(R.id.action_search)
+        val searchView = searchItem.actionView as SearchView
+        searchView.queryHint = resources?.getString(R.string.chapter_search_hint)
+        searchItem.icon?.mutate()?.setTint(iconPrimary)
+        searchItem.collapseActionView()
+        if (query.isNotEmpty()) {
+            searchItem.expandActionView()
+            searchView.setQuery(query, true)
+            searchView.clearFocus()
+        }
+
+        setOnQueryTextChangeListener(searchView) {
+            query = it ?: ""
+            adapter?.setFilter(query)
+            adapter?.performFilter()
+            true
+        }
+        searchItem.fixExpand(onExpand = { invalidateMenuOnExpand() })
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -1033,6 +1081,12 @@ class MangaDetailsController : BaseController,
     override fun onDestroyActionMode(mode: ActionMode?) {
         actionMode = null
         setStatusBarAndToolbar()
+        if (startingDLChapterPos != null) {
+            val item = adapter?.getItem(startingDLChapterPos!!) as? ChapterItem
+            (recycler.findViewHolderForAdapterPosition(startingDLChapterPos!!) as? ChapterMatHolder)?.notifyStatus(
+                item?.status ?: Download.NOT_DOWNLOADED, false, 0
+            )
+        }
         startingDLChapterPos = null
         adapter?.mode = SelectableAdapter.Mode.IDLE
         adapter?.clearSelection()
@@ -1094,6 +1148,17 @@ class MangaDetailsController : BaseController,
                 Timber.e(error)
             }
         }
+    }
+
+    override fun onActionStateChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
+        swipe_refresh.isEnabled = actionState != ItemTouchHelper.ACTION_STATE_SWIPE
+    }
+
+    override fun onItemMove(fromPosition: Int, toPosition: Int) {
+    }
+
+    override fun shouldMoveItem(fromPosition: Int, toPosition: Int): Boolean {
+        return true
     }
 
     override fun zoomImageFromThumb(thumbView: View) {

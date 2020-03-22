@@ -183,7 +183,7 @@
         <item quantity="many">Po %1$s minutach</item>
         <item quantity="other">Po %1$s minutach</item>
     </plurals>
-    <string name="search_hint">Szukaj tytułu, tagów, źródła…</string>
+    <string name="library_search_hint">Szukaj tytułu, tagów, źródła…</string>
     <string name="pref_refresh_covers_too">Automatycznie odśwież okładki</string>
     <string name="pref_refresh_covers_too_summary">Odśwież okładki w bibliotece podczas odświeżania biblioteki (nadpisuje lokalne okładki)</string>
 

@@ -14,6 +14,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.view.WindowInsets
+import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ImageView
@@ -310,6 +311,10 @@ fun Controller.setOnQueryTextChangeListener(
 
         override fun onQueryTextSubmit(query: String?): Boolean {
             if (router.backstack.lastOrNull()?.controller() == this@setOnQueryTextChangeListener) {
+                val imm =
+                    activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+                        ?: return f(query)
+                imm.hideSoftInputFromWindow(searchView.windowToken, 0)
                 return f(query)
             }
             return true
@@ -320,6 +325,7 @@ fun Controller.setOnQueryTextChangeListener(
 fun Controller.scrollViewWith(
     recycler: RecyclerView,
     padBottom: Boolean = false,
+    customPadding: Boolean = false,
     swipeRefreshLayout: SwipeRefreshLayout? = null,
     afterInsets: ((WindowInsets) -> Unit)? = null
 ) {
@@ -331,7 +337,7 @@ fun Controller.scrollViewWith(
     array.recycle()
     recycler.doOnApplyWindowInsets { view, insets, _ ->
         val headerHeight = insets.systemWindowInsetTop + appBarHeight
-        view.updatePaddingRelative(
+        if (!customPadding) view.updatePaddingRelative(
             top = headerHeight,
             bottom = if (padBottom) insets.systemWindowInsetBottom else view.paddingBottom
         )
@@ -365,8 +371,10 @@ fun Controller.scrollViewWith(
                         android.R.integer.config_shortAnimTime
                     ) ?: 0
                     val closerToTop = abs(activity!!.appbar.y) - halfWay > 0
-                    val atTop =
-                        (recycler.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition() < 2
+                    val atTop = (!customPadding &&
+                        (recycler.layoutManager as LinearLayoutManager)
+                            .findFirstVisibleItemPosition() < 2) ||
+                        !recycler.canScrollVertically(-1)
                     activity!!.appbar.animate().y(
                             if (closerToTop && !atTop) (-activity!!.appbar.height.toFloat())
                             else 0f

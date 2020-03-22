@@ -36,6 +36,8 @@ class TrackHolder(view: View, adapter: TrackAdapter) : BaseViewHolder(view) {
             track_title.text = track.title
             with(track_chapters) {
                 text = when {
+                    track.total_chapters > 0 && track.last_chapter_read == track.total_chapters ->
+                        context.getString(R.string.all_chapters_read)
                     track.total_chapters > 0 -> context.getString(
                         R.string.chapter_x_of_y, track.last_chapter_read, track.total_chapters
                     )

@@ -22,6 +22,10 @@ class MangaHeaderItem(val manga: Manga, private val startExpanded: Boolean) :
         return false
     }
 
+    override fun isSwipeable(): Boolean {
+        return false
+    }
+
     override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): MangaHeaderHolder {
         return MangaHeaderHolder(view, adapter as ChaptersAdapter, startExpanded)
     }
