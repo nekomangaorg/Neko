@@ -82,8 +82,6 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
     private var currentGestureDelegate: SwipeGestureInterface? = null
     private lateinit var gestureDetector: GestureDetectorCompat
 
-    private var secondaryDrawer: ViewGroup? = null
-
     private var snackBar: Snackbar? = null
     private var extraViewForUndo: View? = null
     private var canDismissSnackBar = false
@@ -546,21 +544,6 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         drawerArrow?.progress = 1f
 
         currentGestureDelegate = to as? SwipeGestureInterface
-
-        /*if (from is SecondaryDrawerController) {
-            if (secondaryDrawer != null) {
-                from.cleanupSecondaryDrawer(drawer)
-                drawer.removeView(secondaryDrawer)
-                secondaryDrawer = null
-            }
-        }
-        if (to is SecondaryDrawerController) {
-            val newDrawer = to.createSecondaryDrawer(drawer)?.also { drawer.addView(it) }
-            secondaryDrawer = if (newDrawer == null && secondaryDrawer != null) {
-                drawer.removeView(secondaryDrawer)
-                null
-            } else newDrawer
-        }*/
 
         if (to !is SpinnerTitleInterface) toolbar.removeSpinner()
 
