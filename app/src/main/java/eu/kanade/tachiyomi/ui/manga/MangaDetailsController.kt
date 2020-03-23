@@ -243,7 +243,7 @@ class MangaDetailsController : BaseController,
                         return
                     }
                     val color =
-                        coverColor ?: activity!!.getResourceColor(android.R.attr.colorPrimary)
+                        coverColor ?: activity!!.getResourceColor(R.attr.colorPrimaryVariant)
                     val colorFrom =
                         if (colorAnimator?.isRunning == true) activity?.window?.statusBarColor
                             ?: color
@@ -360,14 +360,14 @@ class MangaDetailsController : BaseController,
             }
             colorAnimator?.cancel()
 
-            val colorOnPrimary = activity?.getResourceColor(
-                R.attr.colorOnPrimary
+            val colorSecondary = activity?.getResourceColor(
+                R.attr.colorSecondary
             ) ?: Color.BLACK
-            (activity as MainActivity).appbar.setBackgroundColor(colorOnPrimary)
-            (activity as MainActivity).toolbar.setBackgroundColor(colorOnPrimary)
+            (activity as MainActivity).appbar.setBackgroundColor(colorSecondary)
+            (activity as MainActivity).toolbar.setBackgroundColor(colorSecondary)
 
             activity?.window?.statusBarColor = activity?.getResourceColor(android.R.attr
-                .statusBarColor) ?: colorOnPrimary
+                .statusBarColor) ?: colorSecondary
         }
     }
 
@@ -517,22 +517,22 @@ class MangaDetailsController : BaseController,
 
     fun toggleReadChapter(position: Int) {
         val item = adapter?.getItem(position) as? ChapterItem ?: return
-        if (!item.read) markAsRead(listOf(item), false)
-        else markAsUnread(listOf(item), false)
+        if (!item.read) markAsRead(listOf(item))
+        else markAsUnread(listOf(item))
     }
 
     private fun bookmarkChapters(chapters: List<ChapterItem>, bookmarked: Boolean) {
         presenter.bookmarkChapters(chapters, bookmarked)
     }
 
-    private fun markAsRead(chapters: List<ChapterItem>, refresh: Boolean = true) {
+    private fun markAsRead(chapters: List<ChapterItem>) {
         presenter.markChaptersRead(chapters, read = true)
         if (presenter.preferences.removeAfterMarkedAsRead()) {
             presenter.deleteChapters(chapters)
         }
     }
 
-    private fun markAsUnread(chapters: List<ChapterItem>, refresh: Boolean = true) {
+    private fun markAsUnread(chapters: List<ChapterItem>) {
         presenter.markChaptersRead(chapters, read = false)
     }
 
@@ -1248,25 +1248,25 @@ class MangaDetailsController : BaseController,
             expandedImageView.setOnClickListener {
                 currentAnimator?.cancel()
 
-                val rect = Rect()
-                thumbView.getGlobalVisibleRect(rect)
+                val rect2 = Rect()
+                thumbView.getGlobalVisibleRect(rect2)
                 expandedImageView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                     height = thumbView.height
                     width = thumbView.width
-                    topMargin = rect.top
-                    leftMargin = rect.left
-                    rightMargin = rect.right
-                    bottomMargin = rect.bottom
+                    topMargin = rect2.top
+                    leftMargin = rect2.left
+                    rightMargin = rect2.right
+                    bottomMargin = rect2.bottom
                 }
 
                 // Zoom out back to tc thumbnail
-                val transitionSet = TransitionSet()
-                val bound = ChangeBounds()
-                transitionSet.addTransition(bound)
-                val changeImageTransform = ChangeImageTransform()
-                transitionSet.addTransition(changeImageTransform)
-                transitionSet.duration = shortAnimationDuration.toLong()
-                TransitionManager.beginDelayedTransition(frame_layout, transitionSet)
+                val transitionSet2 = TransitionSet()
+                val bound2 = ChangeBounds()
+                transitionSet2.addTransition(bound2)
+                val changeImageTransform2 = ChangeImageTransform()
+                transitionSet2.addTransition(changeImageTransform2)
+                transitionSet2.duration = shortAnimationDuration.toLong()
+                TransitionManager.beginDelayedTransition(frame_layout, transitionSet2)
 
                 // Animation to remove backdrop and hide the full cover
                 currentAnimator = AnimatorSet().apply {

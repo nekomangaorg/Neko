@@ -19,7 +19,7 @@ import eu.kanade.tachiyomi.util.view.setEdgeToEdge
 import kotlinx.android.synthetic.main.catalogue_drawer_content.*
 import uy.kohesive.injekt.injectLazy
 
-class CatalogueSearchSheet(private val activity: Activity) :
+class CatalogueSearchSheet(activity: Activity) :
     BottomSheetDialog(activity, R.style.BottomSheetDialogThemeCovered) {
 
     /**

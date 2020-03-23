@@ -96,7 +96,7 @@ class WebViewActivity : BaseActivity() {
         }
 
         window.statusBarColor = ColorUtils.setAlphaComponent(getResourceColor(R.attr
-            .colorOnPrimary), 255)
+            .colorSecondary), 255)
 
         content.setOnApplyWindowInsetsListener { v, insets ->
             // if pure white theme on a device that does not support dark status bar
@@ -104,7 +104,7 @@ class WebViewActivity : BaseActivity() {
                 window.statusBarColor = Color.BLACK
             else window.statusBarColor = getResourceColor(R.attr.colorPrimary)*/
             window.navigationBarColor = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-                val colorPrimary = getResourceColor(android.R.attr.colorPrimary)
+                val colorPrimary = getResourceColor(R.attr.colorPrimaryVariant)
                 if (colorPrimary == Color.WHITE) Color.BLACK
                 else getResourceColor(android.R.attr.colorPrimary)
             }
@@ -191,8 +191,8 @@ class WebViewActivity : BaseActivity() {
         val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
         val lightMode = currentNightMode == Configuration.UI_MODE_NIGHT_NO
         window.statusBarColor = ColorUtils.setAlphaComponent(getResourceColor(R.attr
-            .colorOnPrimary), 255)
-        toolbar.setBackgroundColor(getResourceColor(R.attr.colorOnPrimary))
+            .colorSecondary), 255)
+        toolbar.setBackgroundColor(getResourceColor(R.attr.colorSecondary))
         toolbar.popupTheme = if (lightMode) R.style.ThemeOverlay_MaterialComponents else R
             .style.ThemeOverlay_MaterialComponents_Dark
         val tintColor = getResourceColor(R.attr.actionBarTintColor)
@@ -202,7 +202,7 @@ class WebViewActivity : BaseActivity() {
         toolbar.overflowIcon?.setTint(tintColor)
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
-            window.navigationBarColor = getResourceColor(android.R.attr.colorPrimary)
+            window.navigationBarColor = getResourceColor(R.attr.colorPrimaryVariant)
         else if (window.navigationBarColor != getColor(android.R.color.transparent))
             window.navigationBarColor = getResourceColor(android.R.attr.colorBackground)
 

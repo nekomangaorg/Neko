@@ -54,7 +54,7 @@
     <string name="action_filter_tracked">Tracked</string>
     <string name="action_filter_not_tracked">Not tracked</string>
     <string name="action_hide_categories">Hide categories</string>
-    <string name="action_start_filters_hidden">Hide filters on startup</string>
+    <string name="action_start_filters_hidden">Start hidden</string>
     <string name="hiding_categories">Hiding categories</string>
     <string name="manga_only">Manga only</string>
     <string name="manhwa_only">Manhwa only</string>

@@ -211,12 +211,12 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             }
             // if in landscape with 2/3 button mode, fully opaque nav bar
             else if (v.rootWindowInsets.systemWindowInsetLeft > 0 || v.rootWindowInsets.systemWindowInsetRight > 0) {
-                getResourceColor(android.R.attr.colorPrimary)
+                getResourceColor(R.attr.colorPrimaryVariant)
             }
             // if in portrait with 2/3 button mode, translucent nav bar
             else {
                 ColorUtils.setAlphaComponent(
-                    getResourceColor(android.R.attr.colorPrimary), 179
+                    getResourceColor(R.attr.colorPrimaryVariant), 179
                 )
             }
             val contextView = window?.decorView?.findViewById<View>(R.id.action_mode_bar)
@@ -316,7 +316,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
     }
 
     override fun startSupportActionMode(callback: androidx.appcompat.view.ActionMode.Callback): androidx.appcompat.view.ActionMode? {
-        window?.statusBarColor = getResourceColor(R.attr.colorPrimary)
+        window?.statusBarColor = getResourceColor(R.attr.colorPrimaryVariant)
         return super.startSupportActionMode(callback)
     }
 

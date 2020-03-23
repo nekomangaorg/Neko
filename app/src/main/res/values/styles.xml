@@ -220,6 +220,12 @@
         <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
 
+    <style name="Theme.Widget.TextInputLayout.OutlinedBox.Dense" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense">
+        <item name="boxStrokeColor">@color/text_input_stroke</item>
+        <item name="hintTextColor">?colorAccent</item>
+        <item name="android:textColorHint">?android:attr/textColorHint</item>
+    </style>
+
     <!--==============-->
     <!--Widgets.Button-->
     <!--==============-->

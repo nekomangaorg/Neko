@@ -176,7 +176,7 @@ fun Context.openInBrowser(url: String) {
     try {
         val parsedUrl = Uri.parse(url)
         val intent = CustomTabsIntent.Builder()
-                .setToolbarColor(getResourceColor(R.attr.colorPrimary))
+                .setToolbarColor(getResourceColor(R.attr.colorPrimaryVariant))
                 .build()
         intent.launchUrl(this, parsedUrl)
     } catch (e: Exception) {

@@ -25,7 +25,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:theme="?attr/actionBarTheme"
-        android:background="?attr/colorOnPrimary"
+        android:background="?attr/colorSecondary"
         android:stateListAnimator="@null"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -35,7 +35,7 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorOnPrimary">
+            android:background="?attr/colorSecondary">
 
             <LinearLayout
                 android:id="@+id/title_layout"
@@ -44,8 +44,7 @@
                 android:layout_gravity="center"
                 android:clickable="true"
                 android:focusable="true"
-                android:orientation="horizontal"
-                tools:background="?colorPrimary">
+                android:orientation="horizontal">
 
                 <com.google.android.material.textview.MaterialTextView
                     android:id="@+id/toolbar_title"
@@ -92,7 +91,7 @@
         android:id="@+id/bottom_nav"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?attr/colorPrimary"
+        android:background="?colorPrimaryVariant"
         app:itemIconTint="@drawable/bottom_nav_item_selector"
         app:itemRippleColor="@color/rippleColor"
         app:itemTextColor="@drawable/bottom_nav_item_selector"
@@ -101,7 +100,6 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:menu="@menu/bottom_navigation"
-        app:tabBackground="@color/rippleColor"
         app:tabRippleColor="@color/rippleColor"
         app:tabTextColor="?attr/tabBarIconColor" />
 </androidx.constraintlayout.widget.ConstraintLayout>
