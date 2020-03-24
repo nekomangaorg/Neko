@@ -576,6 +576,10 @@ class MangaDetailsController : BaseController,
 
         setOnQueryTextChangeListener(searchView) {
             query = it ?: ""
+            if (query.isNotEmpty()) {
+                (recycler.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder)?.collaspe()
+            } else (recycler.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder)?.expand()
+
             adapter?.setFilter(query)
             adapter?.performFilter()
             true

@@ -274,6 +274,13 @@
         android:layout_height="wrap_content"
         app:constraint_referenced_ids="more_button,more_bg_gradient,more_bg_solid" />
 
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/sub_item_group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:constraint_referenced_ids="start_reading_button,
+        manga_summary,manga_summary_label,button_layout" />
+
     <me.gujun.android.taggroup.TagGroup
         android:id="@+id/manga_genres_tags"
         style="@style/TagGroup"
@@ -339,7 +346,7 @@
         android:textSize="17sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/filters_text"
-        app:layout_constraintStart_toStartOf="@id/manga_summary_label"
+        app:layout_constraintStart_toStartOf="@id/cover_card"
         app:layout_constraintTop_toBottomOf="@id/start_reading_button" />
 
     <ImageView

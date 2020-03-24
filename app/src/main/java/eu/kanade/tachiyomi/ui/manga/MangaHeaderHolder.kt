@@ -20,11 +20,12 @@ import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.gone
+import eu.kanade.tachiyomi.util.view.invisible
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.util.view.visibleIf
-import java.util.Locale
 import kotlinx.android.synthetic.main.manga_header_item.*
+import java.util.Locale
 
 class MangaHeaderHolder(
     private val view: View,
@@ -103,11 +104,13 @@ class MangaHeaderHolder(
             .no_description)
 
         manga_summary.post {
-            if ((manga_summary.lineCount < 3 && manga.genre.isNullOrBlank()) ||
-                less_button.visibility == View.VISIBLE) {
-                more_button_group.gone()
-            } else
-                more_button_group.visible()
+            if (sub_item_group.visibility != View.GONE) {
+                if ((manga_summary.lineCount < 3 && manga.genre.isNullOrBlank()) || less_button.visibility == View.VISIBLE) {
+                    more_button_group.gone()
+                } else more_button_group.visible()
+            }
+            if (adapter.hasFilter()) collaspe()
+            else expand()
         }
         manga_summary_label.text = itemView.context.getString(R.string.about_this,
             itemView.context.getString(
@@ -249,6 +252,26 @@ class MangaHeaderHolder(
             icon = ContextCompat.getDrawable(itemView.context, if (tracked) R.drawable
                 .ic_check_white_24dp else R.drawable.ic_sync_black_24dp)
             checked(tracked)
+        }
+    }
+
+    fun collaspe() {
+        sub_item_group.gone()
+        if (more_button.visibility == View.VISIBLE || more_button.visibility == View.INVISIBLE)
+            more_button_group.invisible()
+        else {
+            less_button.gone()
+            manga_genres_tags.gone()
+        }
+    }
+
+    fun expand() {
+        sub_item_group.visible()
+        if (more_button.visibility == View.VISIBLE || more_button.visibility == View.INVISIBLE)
+            more_button_group.visible()
+        else {
+            less_button.visible()
+            manga_genres_tags.visible()
         }
     }
 
