@@ -7,8 +7,7 @@ import android.widget.RelativeLayout
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.setVectorCompat
-import kotlinx.android.synthetic.main.common_view_empty.view.image_view
-import kotlinx.android.synthetic.main.common_view_empty.view.text_label
+import kotlinx.android.synthetic.main.common_view_empty.view.*
 
 class EmptyView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
         RelativeLayout(context, attrs) {

@@ -11,8 +11,7 @@ import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.LoginSource
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.setVectorCompat
-import kotlinx.android.synthetic.main.pref_item_source.view.login
-import kotlinx.android.synthetic.main.pref_item_source.view.login_frame
+import kotlinx.android.synthetic.main.pref_item_source.view.*
 
 class LoginCheckBoxPreference @JvmOverloads constructor(
     context: Context,

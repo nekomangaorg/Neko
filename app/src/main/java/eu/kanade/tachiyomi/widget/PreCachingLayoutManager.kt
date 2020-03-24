@@ -1,8 +1,6 @@
 package eu.kanade.tachiyomi.widget
 
 import android.content.Context
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 
 class PreCachingLayoutManager(context: Context) : androidx.recyclerview.widget.LinearLayoutManager(context) {
 

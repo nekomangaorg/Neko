@@ -8,7 +8,6 @@ import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.setVectorCompat
 import kotlinx.android.synthetic.main.download_item.*
-import kotlinx.android.synthetic.main.download_item.migration_menu
 
 /**
  * Class used to hold the data of a download.

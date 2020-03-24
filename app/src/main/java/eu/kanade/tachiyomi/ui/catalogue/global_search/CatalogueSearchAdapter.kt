@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.ui.catalogue.global_search
 import android.os.Bundle
 import android.os.Parcelable
 import android.util.SparseArray
-import androidx.recyclerview.widget.RecyclerView
 import eu.davidea.flexibleadapter.FlexibleAdapter
 
 /**
