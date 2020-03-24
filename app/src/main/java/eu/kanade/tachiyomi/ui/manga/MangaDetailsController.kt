@@ -526,14 +526,11 @@ class MangaDetailsController : BaseController,
     }
 
     private fun markAsRead(chapters: List<ChapterItem>) {
-        presenter.markChaptersRead(chapters, read = true)
-        if (presenter.preferences.removeAfterMarkedAsRead()) {
-            presenter.deleteChapters(chapters)
-        }
+        presenter.markChaptersRead(chapters, true)
     }
 
     private fun markAsUnread(chapters: List<ChapterItem>) {
-        presenter.markChaptersRead(chapters, read = false)
+        presenter.markChaptersRead(chapters, false)
     }
 
     private fun openChapter(chapter: Chapter) {

@@ -169,7 +169,7 @@ class MangaHeaderHolder(
                     )
                 }
             } else {
-                text = resources.getString(R.string.start_reading)
+                text = resources.getString(R.string.all_chapters_read)
             }
         }
 

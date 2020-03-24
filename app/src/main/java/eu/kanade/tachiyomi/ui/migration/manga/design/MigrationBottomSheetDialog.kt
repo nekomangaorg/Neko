@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.ui.migration.manga.design
 import android.app.Activity
 import android.content.res.Configuration
 import android.os.Bundle
-import android.view.WindowManager
 import android.widget.CompoundButton
 import android.widget.LinearLayout
 import android.widget.RadioButton
@@ -62,7 +61,7 @@ class MigrationBottomSheetDialog(
             params3.endToEnd = -1
             extra_search_param.layoutParams = params3
         }
-        setEdgeToEdge(activity, constraint_layout, view)
+        setEdgeToEdge(activity, view)
         setBottomEdge(
             if (activity.resources.configuration?.orientation == Configuration.ORIENTATION_LANDSCAPE) extra_search_param_text
             else skip_step, activity
@@ -77,7 +76,7 @@ class MigrationBottomSheetDialog(
 
         initPreferences()
 
-            window?.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+        // window?.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
 
         fab.setOnClickListener {
             preferences.skipPreMigration().set(skip_step.isChecked)

@@ -292,14 +292,15 @@ class MangaDetailsPresenter(
      * Deletes the given list of chapter.
      * @param chapters the list of chapters to delete.
      */
-    fun deleteChapters(chapters: List<ChapterItem>) {
+    fun deleteChapters(chapters: List<ChapterItem>, update: Boolean = true) {
         deleteChaptersInternal(chapters)
 
         chapters.forEach { chapter ->
             this.chapters.find { it.id == chapter.id }?.download?.status = Download.NOT_DOWNLOADED
         }
 
-        controller.updateChapters(this.chapters)
+        if (update)
+            controller.updateChapters(this.chapters)
     }
 
     /**
@@ -404,6 +405,7 @@ class MangaDetailsPresenter(
                 it.bookmark = bookmarked
             }
             db.updateChaptersProgress(selectedChapters).executeAsBlocking()
+            getChapters()
             withContext(Dispatchers.Main) { controller.updateChapters(chapters) }
         }
     }
@@ -423,6 +425,10 @@ class MangaDetailsPresenter(
                 }
             }
             db.updateChaptersProgress(selectedChapters).executeAsBlocking()
+            if (read && preferences.removeAfterMarkedAsRead()) {
+                deleteChapters(selectedChapters, false)
+            }
+            getChapters()
             withContext(Dispatchers.Main) { controller.updateChapters(chapters) }
         }
     }

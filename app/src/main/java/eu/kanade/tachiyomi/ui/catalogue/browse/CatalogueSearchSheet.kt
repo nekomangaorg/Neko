@@ -20,7 +20,7 @@ import kotlinx.android.synthetic.main.catalogue_drawer_content.*
 import uy.kohesive.injekt.injectLazy
 
 class CatalogueSearchSheet(activity: Activity) :
-    BottomSheetDialog(activity, R.style.BottomSheetDialogThemeCovered) {
+    BottomSheetDialog(activity, R.style.BottomSheetDialogTheme) {
 
     /**
      * Preferences helper.
@@ -61,11 +61,8 @@ class CatalogueSearchSheet(activity: Activity) :
         sheetBehavior.skipCollapsed = true
         sheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
         setEdgeToEdge(
-            activity, recycler, view, 50.dpToPx
+            activity, view, 50.dpToPx
         )
-        //        window?.findViewById<View>(com.google.android.material.R.id.container)?.fitsSystemWindows =
-        //            false
-        window?.navigationBarColor = activity.window.navigationBarColor
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && preferences.readerTheme()
                 .getOrDefault() == 0 && activity.window.decorView.rootWindowInsets.systemWindowInsetRight == 0 && activity.window.decorView.rootWindowInsets.systemWindowInsetLeft == 0
         ) window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR

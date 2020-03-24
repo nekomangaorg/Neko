@@ -5,7 +5,6 @@ import android.animation.AnimatorSet
 import android.animation.ValueAnimator
 import android.app.SearchManager
 import android.content.Intent
-import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
@@ -17,6 +16,7 @@ import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowInsets
 import android.view.WindowManager
 import android.webkit.WebView
 import androidx.appcompat.content.res.AppCompatResources
@@ -59,6 +59,7 @@ import eu.kanade.tachiyomi.ui.setting.SettingsController
 import eu.kanade.tachiyomi.ui.setting.SettingsMainController
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePadding
 import java.util.Date
@@ -196,29 +197,9 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
 
         supportActionBar?.setDisplayShowCustomEnabled(true)
 
-        content.setOnApplyWindowInsetsListener { v, insets ->
-            window.navigationBarColor = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O_MR1) {
-                // basically if in landscape on a phone
-                // For lollipop, draw opaque nav bar
-                if (v.rootWindowInsets.systemWindowInsetLeft > 0 || v.rootWindowInsets.systemWindowInsetRight > 0)
-                    Color.BLACK
-                else Color.argb(179, 0, 0, 0)
-            }
-            // if the android q+ device has gesture nav, transparent nav bar
-            // this is here in case some crazy with a notch uses landscape
-            else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && (v.rootWindowInsets.systemWindowInsetBottom != v.rootWindowInsets.tappableElementInsets.bottom)) {
-                getColor(android.R.color.transparent)
-            }
-            // if in landscape with 2/3 button mode, fully opaque nav bar
-            else if (v.rootWindowInsets.systemWindowInsetLeft > 0 || v.rootWindowInsets.systemWindowInsetRight > 0) {
-                getResourceColor(R.attr.colorPrimaryVariant)
-            }
-            // if in portrait with 2/3 button mode, translucent nav bar
-            else {
-                ColorUtils.setAlphaComponent(
-                    getResourceColor(R.attr.colorPrimaryVariant), 179
-                )
-            }
+        setNavBarColor(content.rootWindowInsets)
+        content.doOnApplyWindowInsets { v, insets, _ ->
+            setNavBarColor(insets)
             val contextView = window?.decorView?.findViewById<View>(R.id.action_mode_bar)
             contextView?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 leftMargin = insets.systemWindowInsetLeft
@@ -234,13 +215,10 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             )
             bottom_nav.updatePadding(bottom = insets.systemWindowInsetBottom)
 
-            insets.replaceSystemWindowInsets(
+            /*insets.replaceSystemWindowInsets(
                 0, insets.systemWindowInsetTop, 0, insets.systemWindowInsetBottom
-            )
-
-            insets
+            )*/
         }
-        val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
 
         router = Conductor.attachRouter(this, container, savedInstanceState)
         if (!router.hasRootController()) {
@@ -303,6 +281,33 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             setExtensionsBadge()
         }
         setExtensionsBadge()
+    }
+
+    private fun setNavBarColor(insets: WindowInsets?) {
+        if (insets == null) return
+        window.navigationBarColor = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O_MR1) {
+            // basically if in landscape on a phone
+            // For lollipop, draw opaque nav bar
+            if (insets.systemWindowInsetLeft > 0 || insets.systemWindowInsetRight > 0)
+                Color.BLACK
+            else Color.argb(179, 0, 0, 0)
+        }
+        // if the android q+ device has gesture nav, transparent nav bar
+        // this is here in case some crazy with a notch uses landscape
+        else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && (insets
+                .systemWindowInsetBottom != insets.tappableElementInsets.bottom)) {
+            getColor(android.R.color.transparent)
+        }
+        // if in landscape with 2/3 button mode, fully opaque nav bar
+        else if (insets.systemWindowInsetLeft > 0 || insets.systemWindowInsetRight > 0) {
+            getResourceColor(R.attr.colorPrimaryVariant)
+        }
+        // if in portrait with 2/3 button mode, translucent nav bar
+        else {
+            ColorUtils.setAlphaComponent(
+                getResourceColor(R.attr.colorPrimaryVariant), 179
+            )
+        }
     }
 
     fun updateRecentsIcon() {

@@ -16,7 +16,7 @@ import eu.kanade.tachiyomi.util.view.visibleIf
 import kotlinx.android.synthetic.main.chapter_sort_bottom_sheet.*
 
 class ChaptersSortBottomSheet(controller: MangaDetailsController) : BottomSheetDialog
-    (controller.activity!!, R.style.BottomSheetDialogThemeCovered) {
+    (controller.activity!!, R.style.BottomSheetDialogTheme) {
 
     val activity = controller.activity!!
 
@@ -30,10 +30,9 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) : BottomSheetD
         setContentView(view)
 
         sheetBehavior = BottomSheetBehavior.from(view.parent as ViewGroup)
-        setEdgeToEdge(activity, bottom_sheet, view)
+        setEdgeToEdge(activity, view)
         val height = activity.window.decorView.rootWindowInsets.systemWindowInsetBottom
         sheetBehavior.peekHeight = 380.dpToPx + height
-        window?.navigationBarColor = activity.window.navigationBarColor
 
         sheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onSlide(bottomSheet: View, progress: Float) { }

@@ -49,10 +49,7 @@ class ReaderSettingsSheet(private val activity: ReaderActivity) :
 
         sheetBehavior = BottomSheetBehavior.from(scroll.parent as ViewGroup)
         setEdgeToEdge(
-            activity,
-            constraint_layout,
-            scroll,
-            if (context.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE)
+            activity, scroll, if (context.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE)
                 0 else -1
         )
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && preferences.readerTheme()

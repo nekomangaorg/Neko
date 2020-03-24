@@ -52,7 +52,7 @@ class MangaDetailsAdapter(
     fun performFilter() {
         val s = getFilter(String::class.java)
         if (s.isNullOrBlank()) {
-            updateDataSet(items)
+            updateDataSet(items, true)
         } else {
             updateDataSet(items.filter { it.name.contains(s, true) ||
                 it.scanlator?.contains(s, true) == true })

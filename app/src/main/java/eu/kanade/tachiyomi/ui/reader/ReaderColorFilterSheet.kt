@@ -54,7 +54,7 @@ class ReaderColorFilterSheet(activity: ReaderActivity) : BottomSheetDialog
         val view = activity.layoutInflater.inflate(R.layout.reader_color_filter_sheet, null)
         setContentView(view)
 
-        setEdgeToEdge(activity, constraint_layout, view, 0)
+        setEdgeToEdge(activity, view, 0)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
             preferences.readerTheme().getOrDefault() == 0 &&
             activity.window.decorView.rootWindowInsets.systemWindowInsetRight == 0 &&

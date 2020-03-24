@@ -8,7 +8,6 @@ import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.Point
 import android.graphics.Typeface
-import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.view.View
 import android.view.ViewGroup
@@ -21,8 +20,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.Px
 import androidx.appcompat.widget.SearchView
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.graphics.ColorUtils
 import androidx.core.math.MathUtils.clamp
 import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -37,11 +34,11 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
-import kotlin.math.abs
-import kotlin.math.min
 import kotlinx.android.synthetic.main.main_activity.*
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import kotlin.math.abs
+import kotlin.math.min
 
 /**
  * Returns coordinates of view.
@@ -396,42 +393,31 @@ inline fun View.updatePaddingRelative(
 
 fun BottomSheetDialog.setEdgeToEdge(
     activity: Activity,
-    layout: View,
     contentView: View,
     setTopMargin: Int = -1
 ) {
     window?.setBackgroundDrawable(null)
     val currentNightMode =
         activity.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-    if (currentNightMode == Configuration.UI_MODE_NIGHT_NO) if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        if (activity.window.decorView.rootWindowInsets.systemWindowInsetRight == 0 && activity.window.decorView.rootWindowInsets.systemWindowInsetLeft == 0) window?.decorView?.systemUiVisibility =
-            View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
-    } else if (layout is ConstraintLayout) {
-        val nView = View(context)
-        val height = activity.window.decorView.rootWindowInsets.systemWindowInsetBottom
-        val params = ConstraintLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT, height
-        )
-        params.bottomToBottom = layout.id
-        params.startToStart = layout.id
-        params.endToEnd = layout.id
-        nView.layoutParams = params
-        nView.background = GradientDrawable(
-            GradientDrawable.Orientation.BOTTOM_TOP, intArrayOf(
-                ColorUtils.setAlphaComponent(Color.BLACK, 179), Color.TRANSPARENT
-            )
-        )
-        layout.addView(nView)
-    }
+    window?.navigationBarColor = activity.window.navigationBarColor
+    val isLight = (activity.window?.decorView?.systemUiVisibility ?: 0) and View
+        .SYSTEM_UI_FLAG_LIGHT_STATUS_BAR == View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && isLight)
+        window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
     window?.findViewById<View>(com.google.android.material.R.id.container)?.fitsSystemWindows =
         false
     contentView.systemUiVisibility =
-        View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-    /*contentView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-        if (setTopMargin > -1) topMargin =
-            activity.window.decorView.rootWindowInsets.systemWindowInsetTop + setTopMargin
-    }*/
+        View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN //
+            // or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
 
+    if (activity.window.decorView.rootWindowInsets.systemWindowInsetLeft +
+        activity.window.decorView.rootWindowInsets.systemWindowInsetRight == 0)
+        contentView.systemUiVisibility = contentView.systemUiVisibility
+            .or(View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION)
+    /*contentView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+        leftMargin = activity.window.decorView.rootWindowInsets.systemWindowInsetLeft
+        rightMargin = activity.window.decorView.rootWindowInsets.systemWindowInsetRight
+    }*/
     if (setTopMargin > 0) (contentView.parent as View).updateLayoutParams<ViewGroup.MarginLayoutParams> {
         height =
             activity.window.decorView.height - activity.window.decorView.rootWindowInsets.systemWindowInsetTop - setTopMargin

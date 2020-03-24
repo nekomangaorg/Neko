@@ -8,7 +8,6 @@
     style="@style/Theme.MaterialComponents.BottomSheetDialog"
     android:layout_height="match_parent"
     android:background="@android:color/transparent"
-    android:fitsSystemWindows="true"
     android:orientation="vertical">
 
 

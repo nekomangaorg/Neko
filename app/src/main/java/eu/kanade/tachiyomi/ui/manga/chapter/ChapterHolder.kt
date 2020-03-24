@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.manga.chapter
 
-import android.animation.Animator
 import android.text.format.DateUtils
 import android.view.View
 import androidx.appcompat.widget.PopupMenu
@@ -147,23 +146,7 @@ class ChapterHolder(
 
     private fun resetFrontView() {
         if (front_view.translationX == 0f) return
-        itemView.post {
-            adapter.recyclerView.itemAnimator?.changeDuration = 0
-            val anim = front_view.animate().translationX(0f).setDuration(250)
-            anim.setListener(object : Animator.AnimatorListener {
-                override fun onAnimationEnd(animation: Animator?) {
-                    adapter.itemTouchHelper.startSwipe(this@ChapterHolder)
-                    adapter.notifyItemChanged(adapterPosition)
-                }
-
-                override fun onAnimationCancel(animation: Animator?) {}
-
-                override fun onAnimationRepeat(animation: Animator?) {}
-
-                override fun onAnimationStart(animation: Animator?) {}
-            })
-            anim.start()
-        }
+        itemView.post { adapter.notifyItemChanged(adapterPosition) }
     }
 
     fun notifyStatus(status: Int, locked: Boolean, progress: Int) = with(download_button) {

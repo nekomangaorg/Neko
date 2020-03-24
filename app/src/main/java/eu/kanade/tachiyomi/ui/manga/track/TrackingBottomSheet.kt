@@ -40,7 +40,7 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) : Bott
         setContentView(view)
 
         sheetBehavior = BottomSheetBehavior.from(view.parent as ViewGroup)
-        setEdgeToEdge(activity, display_bottom_sheet, view)
+        setEdgeToEdge(activity, view)
         val height = activity.window.decorView.rootWindowInsets.systemWindowInsetBottom
         sheetBehavior.peekHeight = 380.dpToPx + height
 
