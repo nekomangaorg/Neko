@@ -214,7 +214,7 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
 
     override fun onActivityResumed(activity: Activity) {
         super.onActivityResumed(activity)
-        ext_bottom_sheet.presenter.refreshExtensions()
+        ext_bottom_sheet?.presenter?.refreshExtensions()
     }
 
     /**
