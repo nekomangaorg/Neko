@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.catalogue
 
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+import android.app.Activity
 import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.Menu
@@ -33,13 +34,13 @@ import eu.kanade.tachiyomi.util.view.applyWindowInsetsForRootController
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import eu.kanade.tachiyomi.widget.preference.SourceLoginDialog
-import kotlin.math.max
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.catalogue_main_controller.*
 import kotlinx.android.synthetic.main.extensions_bottom_sheet.*
 import kotlinx.android.synthetic.main.main_activity.*
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import kotlin.math.max
 
 /**
  * This controller shows and manages the different catalogues enabled by the user.
@@ -180,7 +181,6 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
 
     fun showExtensions() {
         ext_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
-        ext_bottom_sheet.fetchOnlineExtensionsIfNeeded()
     }
 
     fun toggleExtensions() {
@@ -188,7 +188,6 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
             ext_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
         } else {
             ext_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
-            ext_bottom_sheet.fetchOnlineExtensionsIfNeeded()
         }
     }
 
@@ -209,8 +208,13 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
         super.onChangeStarted(handler, type)
         if (!type.isPush && handler is SettingsSourcesFadeChangeHandler) {
             ext_bottom_sheet.updateExtTitle()
-            presenter.updateSources()
+            ext_bottom_sheet.presenter.refreshExtensions()
         }
+    }
+
+    override fun onActivityResumed(activity: Activity) {
+        super.onActivityResumed(activity)
+        ext_bottom_sheet.presenter.refreshExtensions()
     }
 
     /**

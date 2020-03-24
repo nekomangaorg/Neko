@@ -5,17 +5,16 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.extension.ExtensionManager
+import eu.kanade.tachiyomi.extension.ExtensionsChangedListener
 import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.extension.model.InstallStep
 import eu.kanade.tachiyomi.util.system.LocaleHelper
-import java.util.concurrent.TimeUnit
-import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import rx.Observable
-import rx.Subscription
-import rx.android.schedulers.AndroidSchedulers
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -25,36 +24,51 @@ typealias ExtensionTuple =
 /**
  * Presenter of [ExtensionBottomSheet].
  */
-open class ExtensionBottomPresenter(
+class ExtensionBottomPresenter(
     private val bottomSheet: ExtensionBottomSheet,
     private val extensionManager: ExtensionManager = Injekt.get(),
     private val preferences: PreferencesHelper = Injekt.get()
-) : CoroutineScope {
-
-    override var coroutineContext: CoroutineContext = Job() + Dispatchers.Default
+) : ExtensionsChangedListener {
+    private var scope = CoroutineScope(Job() + Dispatchers.Default)
 
     private var extensions = emptyList<ExtensionItem>()
 
     private var currentDownloads = hashMapOf<String, InstallStep>()
 
     fun onCreate() {
-        // extensionManager.findAvailableExtensions()
-        bindToExtensionsObservable()
+        scope.launch {
+            extensionManager.findAvailableExtensionsAsync()
+            extensions = toItems(
+                Triple(
+                    extensionManager.installedExtensions,
+                    extensionManager.untrustedExtensions,
+                    extensionManager.availableExtensions
+                )
+            )
+            withContext(Dispatchers.Main) { bottomSheet.setExtensions(extensions) }
+            extensionManager.setListener(this@ExtensionBottomPresenter)
+        }
     }
 
-    private fun bindToExtensionsObservable(): Subscription {
-        val installedObservable = extensionManager.getInstalledExtensionsObservable()
-        val untrustedObservable = extensionManager.getUntrustedExtensionsObservable()
-        val availableObservable = extensionManager.getAvailableExtensionsObservable()
-            .startWith(emptyList<Extension.Available>())
+    fun onDestroy() {
+        extensionManager.removeListener(this)
+    }
 
-        return Observable.combineLatest(installedObservable, untrustedObservable, availableObservable) { installed, untrusted, available -> Triple(installed, untrusted, available) }
-            .debounce(100, TimeUnit.MILLISECONDS)
-            .map(::toItems)
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe {
-                bottomSheet.setExtensions(extensions)
-            }
+    fun refreshExtensions() {
+        scope.launch {
+            extensions = toItems(
+                Triple(
+                    extensionManager.installedExtensions,
+                    extensionManager.untrustedExtensions,
+                    extensionManager.availableExtensions
+                )
+            )
+            withContext(Dispatchers.Main) { bottomSheet.setExtensions(extensions) }
+        }
+    }
+
+    override fun extensionsUpdated() {
+        refreshExtensions()
     }
 
     @Synchronized

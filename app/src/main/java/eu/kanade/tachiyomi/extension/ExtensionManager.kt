@@ -15,7 +15,9 @@ import eu.kanade.tachiyomi.extension.util.ExtensionLoader
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.util.system.launchNow
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.withContext
 import rx.Observable
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -57,12 +59,28 @@ class ExtensionManager(
         private set(value) {
             field = value
             installedExtensionsRelay.call(value)
+            listener?.extensionsUpdated()
         }
+
+    private var listener: ExtensionsChangedListener? = null
+
+    fun setListener(listener: ExtensionsChangedListener) {
+        this.listener = listener
+    }
+
+    fun removeListener(listener: ExtensionsChangedListener) {
+        if (this.listener == listener)
+            this.listener = null
+    }
 
     fun getAppIconForSource(source: Source): Drawable? {
         val pkgName =
             installedExtensions.find { ext -> ext.sources.any { it.id == source.id } }?.pkgName
-        return if (pkgName != null) context.packageManager.getApplicationIcon(pkgName)
+        return if (pkgName != null) try {
+            context.packageManager.getApplicationIcon(pkgName)
+        } catch (e: Exception) {
+            null
+        }
         else null
     }
 
@@ -79,6 +97,7 @@ class ExtensionManager(
             field = value
             availableExtensionsRelay.call(value)
             updatedInstalledExtensionsStatuses(value)
+            listener?.extensionsUpdated()
         }
 
     /**
@@ -93,6 +112,7 @@ class ExtensionManager(
         private set(value) {
             field = value
             untrustedExtensionsRelay.call(value)
+            listener?.extensionsUpdated()
         }
 
     /**
@@ -154,6 +174,19 @@ class ExtensionManager(
      */
     fun findAvailableExtensions() {
         launchNow {
+            availableExtensions = try {
+                api.findExtensions()
+            } catch (e: Exception) {
+                emptyList()
+            }
+        }
+    }
+
+    /**
+     * Finds the available extensions in the [api] and updates [availableExtensions].
+     */
+    suspend fun findAvailableExtensionsAsync() {
+        withContext(Dispatchers.IO) {
             availableExtensions = try {
                 api.findExtensions()
             } catch (e: Exception) {
@@ -351,4 +384,8 @@ class ExtensionManager(
         }
         return this
     }
+}
+
+interface ExtensionsChangedListener {
+    fun extensionsUpdated()
 }

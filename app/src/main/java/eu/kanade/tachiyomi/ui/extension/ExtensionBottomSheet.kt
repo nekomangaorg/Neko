@@ -33,7 +33,7 @@ ExtensionAdapter.OnButtonClickListener,
     var sheetBehavior: BottomSheetBehavior<*>? = null
     private lateinit var autoCheckItem: AutoCheckItem
 
-    var shouldCallApi = true
+    var shouldCallApi = false
 
     /**
      * Adapter containing the list of manga from the catalogue.
@@ -54,6 +54,7 @@ ExtensionAdapter.OnButtonClickListener,
         // Create recycler and set adapter.
         ext_recycler.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
         ext_recycler.adapter = adapter
+        ext_recycler.setHasFixedSize(true)
         ext_recycler.addItemDecoration(ExtensionDividerItemDecoration(context))
         ext_recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
         this.controller = controller
@@ -146,7 +147,6 @@ ExtensionAdapter.OnButtonClickListener,
     }
 
     fun setExtensions(extensions: List<ExtensionItem>) {
-        // ext_swipe_refresh?.isRefreshing = false
         this.extensions = extensions
         controller.presenter.updateSources()
         drawExtensions()
