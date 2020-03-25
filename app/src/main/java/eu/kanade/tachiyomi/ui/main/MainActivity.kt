@@ -31,7 +31,6 @@ import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.Router
 import com.bluelinelabs.conductor.RouterTransaction
 import com.bluelinelabs.conductor.changehandler.FadeChangeHandler
-import com.bluelinelabs.conductor.changehandler.SimpleSwapChangeHandler
 import com.google.android.material.snackbar.Snackbar
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.Migrations
@@ -62,9 +61,6 @@ import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePadding
-import java.util.Date
-import java.util.concurrent.TimeUnit
-import kotlin.math.abs
 import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -72,6 +68,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
+import java.util.Date
+import java.util.concurrent.TimeUnit
+import kotlin.math.abs
 
 open class MainActivity : BaseActivity(), DownloadServiceListener {
 
@@ -394,34 +393,23 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             }
             SHORTCUT_CATALOGUES -> bottom_nav.selectedItemId = R.id.nav_catalogues
             SHORTCUT_EXTENSIONS -> {
-                if (router.backstack.isEmpty()) {
-                    bottom_nav.selectedItemId = R.id.nav_catalogues
-                    bottom_nav.post {
-                        val controller =
-                            router.backstack.firstOrNull()?.controller() as? CatalogueController
-                        controller?.showExtensions()
-                    }
+                bottom_nav.selectedItemId = R.id.nav_catalogues
+                router.popToRoot()
+                bottom_nav.post {
+                    val controller =
+                        router.backstack.firstOrNull()?.controller() as? CatalogueController
+                    controller?.showExtensions()
                 }
             }
             SHORTCUT_MANGA -> {
                 val extras = intent.extras ?: return false
-                if (router.backstack.isEmpty()) {
-                    bottom_nav.selectedItemId = R.id.nav_library
-                }
+                if (router.backstack.isEmpty()) bottom_nav.selectedItemId = R.id.nav_library
                 router.pushController(MangaDetailsController(extras).withFadeTransaction())
             }
             SHORTCUT_DOWNLOADS -> {
                 if (router.backstack.none { it.controller() is DownloadController }) {
-                    if (router.backstack.isEmpty()) {
-                        bottom_nav.selectedItemId = R.id.nav_library
-                        router.pushController(
-                            RouterTransaction.with(DownloadController())
-                                .pushChangeHandler(SimpleSwapChangeHandler())
-                                .popChangeHandler(FadeChangeHandler())
-                        )
-                    } else {
-                        router.pushController(DownloadController().withFadeTransaction())
-                    }
+                    if (router.backstack.isEmpty()) bottom_nav.selectedItemId = R.id.nav_library
+                    router.pushController(DownloadController().withFadeTransaction())
                 }
             }
             Intent.ACTION_SEARCH, "com.google.android.gms.actions.SEARCH_ACTION" -> {
