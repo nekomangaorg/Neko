@@ -1,7 +1,5 @@
 package eu.kanade.tachiyomi.ui.library
 
-import android.app.Activity
-import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Bundle
@@ -43,11 +41,9 @@ import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.util.inflate
 import eu.kanade.tachiyomi.util.toast
 import eu.kanade.tachiyomi.util.visible
-import java.io.IOException
 import kotlinx.android.synthetic.main.library_controller.*
 import kotlinx.android.synthetic.main.main_activity.*
 import rx.Subscription
-import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -428,6 +424,11 @@ class LibraryController(
                     selectAllRelay.call(it)
                 }
             }
+            R.id.action_sync_to_dex -> {
+                presenter.syncMangaToDex(selectedMangas.toList())
+                destroyActionModeIfNeeded()
+                applicationContext?.toast("Adding to mangadex follows")
+            }
             else -> return false
         }
         return true
@@ -498,30 +499,6 @@ class LibraryController(
         destroyActionModeIfNeeded()
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode == REQUEST_IMAGE_OPEN) {
-            if (data == null || resultCode != Activity.RESULT_OK) return
-            val activity = activity ?: return
-            val manga = selectedCoverManga ?: return
-
-            try {
-                // Get the file's input stream from the incoming Intent
-                activity.contentResolver.openInputStream(data.data!!).use {
-                    // Update cover to selected file, show error if something went wrong
-                    if (presenter.editCoverWithStream(it!!, manga)) {
-                        // TODO refresh cover
-                    } else {
-                        activity.toast(R.string.notification_cover_update_failed)
-                    }
-                }
-            } catch (error: IOException) {
-                activity.toast(R.string.notification_cover_update_failed)
-                Timber.e(error)
-            }
-            selectedCoverManga = null
-        }
-    }
-
     fun lockFilterBar(lock: Boolean) {
         val drawer = (navView?.parent as? DrawerLayout) ?: return
         if (lock) {
@@ -531,12 +508,5 @@ class LibraryController(
             drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
             drawer.visible()
         }
-    }
-
-    private companion object {
-        /**
-         * Key to change the cover of a manga in [onActivityResult].
-         */
-        const val REQUEST_IMAGE_OPEN = 101
     }
 }

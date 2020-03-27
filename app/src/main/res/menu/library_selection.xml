@@ -27,5 +27,10 @@
         app:ico_color="@color/md_white_1000"
         app:showAsAction="ifRoom" />
 
+    <item
+        android:id="@+id/action_sync_to_dex"
+        android:title="@string/action_add_to_follows"
+        app:showAsAction="never" />
+
 
 </menu>

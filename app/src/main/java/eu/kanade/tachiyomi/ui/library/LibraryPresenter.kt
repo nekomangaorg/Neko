@@ -14,12 +14,19 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.HttpSource
+import eu.kanade.tachiyomi.source.online.utils.FollowStatus
+import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
 import eu.kanade.tachiyomi.util.combineLatest
 import eu.kanade.tachiyomi.util.isNullOrUnsubscribed
+import eu.kanade.tachiyomi.util.launchNow
 import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_EXCLUDE
 import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_IGNORE
 import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_INCLUDE
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.io.InputStream
 import java.util.ArrayList
@@ -308,7 +315,7 @@ class LibraryPresenter(
         if (mangas.isEmpty()) return emptyList()
         return mangas.toSet()
             .map { db.getCategoriesForManga(it).executeAsBlocking() }
-            .reduce { set1: Iterable<Category>, set2 -> set1.intersect(set2) }
+            .reduce { set1: Iterable<Category>, set2 -> set1.intersect(set2).toMutableList() }
     }
 
     /**
@@ -360,19 +367,13 @@ class LibraryPresenter(
         db.setMangaCategories(mc, mangas)
     }
 
-    /**
-     * Update cover with local file.
-     *
-     * @param inputStream the new cover.
-     * @param manga the manga edited.
-     * @return true if the cover is updated, false otherwise
-     */
-    @Throws(IOException::class)
-    fun editCoverWithStream(inputStream: InputStream, manga: Manga): Boolean {
-        if (manga.thumbnail_url != null && manga.favorite) {
-            coverCache.copyToCache(manga.thumbnail_url!!, inputStream)
-            return true
+    fun syncMangaToDex(mangaList : List<Manga>){
+        GlobalScope.launch {
+            withContext(Dispatchers.IO){
+                mangaList.forEach{
+                    sourceManager.getMangadex().updateFollowStatus(MdUtil.getMangaId(it.url), FollowStatus.READING);
+                }
+            }
         }
-        return false
     }
 }
