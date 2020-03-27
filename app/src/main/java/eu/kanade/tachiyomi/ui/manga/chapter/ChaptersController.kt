@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.ui.manga.chapter
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Color
@@ -31,9 +30,11 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.model.Download
+import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
+import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.getCoordinates
 import eu.kanade.tachiyomi.util.snack
 import eu.kanade.tachiyomi.util.toast
@@ -43,8 +44,8 @@ import timber.log.Timber
 class ChaptersController : NucleusController<ChaptersPresenter>(),
     ActionMode.Callback,
     FlexibleAdapter.OnItemClickListener,
-    FlexibleAdapter.OnItemLongClickListener,
     ChaptersAdapter.OnMenuItemClickListener,
+    FlexibleAdapter.OnItemLongClickListener,
     DownloadCustomChaptersDialog.Listener,
     DeleteChaptersDialog.Listener {
 
@@ -393,7 +394,6 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
         return true
     }
 
-    @SuppressLint("StringFormatInvalid")
     override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
         val count = adapter?.selectedItemCount ?: 0
         if (count == 0) {
@@ -412,6 +412,7 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
             R.id.action_mark_as_unread -> markAsUnread(getSelectedChapters())
             R.id.action_download -> downloadChapters(getSelectedChapters())
             R.id.action_delete -> showDeleteChaptersConfirmationDialog()
+            R.id.action_view_comments -> viewComments()
             else -> return false
         }
         return true
@@ -558,5 +559,15 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
         if (chaptersToDownload.isNotEmpty()) {
             downloadChapters(chaptersToDownload)
         }
+    }
+
+    fun viewComments() {
+        val activity = activity ?: return
+        val chapter = getSelectedChapters()[0]
+        val url = MdUtil.baseUrl + "/chapter/" + MdUtil.getChapterId(chapter.url) + "/comments"
+        val intent =
+            WebViewActivity.newIntent(activity, presenter.source.id, url, chapter.name)
+        destroyActionModeIfNeeded()
+        startActivity(intent)
     }
 }

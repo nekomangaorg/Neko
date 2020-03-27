@@ -46,6 +46,7 @@
     <string name="action_add_to_follows">Add to Mangadex Follows</string>
     <string name="action_mark_as_read">Mark as read</string>
     <string name="action_mark_as_unread">Mark as unread</string>
+    <string name="action_view_comments">View comments</string>
     <string name="action_mark_previous_as_read">Mark previous as read</string>
     <string name="action_download">Download</string>
     <string name="action_bookmark">Bookmark</string>

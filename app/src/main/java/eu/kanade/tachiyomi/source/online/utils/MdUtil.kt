@@ -35,6 +35,8 @@ class MdUtil {
             }
         }
 
+        fun getChapterId(url: String) = url.trimEnd('/').substringAfterLast("/")
+
         // creates the manga url from the browse for the api
         fun modifyMangaUrl(url: String): String =
             url.replace("/title/", "/manga/").substringBeforeLast("/") + "/"
@@ -58,7 +60,7 @@ class MdUtil {
         }
 
         fun cleanDescription(string: String): String {
-            val description = cleanString(string)
+            val description = cleanString(string.substringBefore("[b][u]French[/u][/b]"))
             return description
                 .substringBefore("Russian / Русский")
                 .substringBefore("German / Deutsch")

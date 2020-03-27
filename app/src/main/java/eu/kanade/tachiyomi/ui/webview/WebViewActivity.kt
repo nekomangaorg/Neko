@@ -24,6 +24,7 @@ import eu.kanade.tachiyomi.util.openInBrowser
 import eu.kanade.tachiyomi.util.toast
 import eu.kanade.tachiyomi.util.visible
 import kotlinx.android.synthetic.main.webview_activity.*
+import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 
 class WebViewActivity : BaseActivity() {
@@ -41,10 +42,8 @@ class WebViewActivity : BaseActivity() {
         window.statusBarColor = getResourceColor(R.attr.colorPrimaryDark)
 
         title = intent.extras?.getString(TITLE_KEY)
-        toolbar.setNavigationIcon(
-            IconicsDrawable(applicationContext!!)
-                .icon(MaterialDesignDx.Icon.gmf_close).colorInt(Color.WHITE).sizeDp(20)
-        )
+        toolbar.navigationIcon = IconicsDrawable(applicationContext!!)
+            .icon(MaterialDesignDx.Icon.gmf_close).colorInt(Color.WHITE).sizeDp(20)
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         toolbar.setNavigationOnClickListener {
@@ -175,6 +174,7 @@ class WebViewActivity : BaseActivity() {
 
         fun newIntent(context: Context, sourceId: Long, url: String, title: String?): Intent {
             val intent = Intent(context, WebViewActivity::class.java)
+            Timber.d("ESCO $url")
             intent.putExtra(SOURCE_KEY, sourceId)
             intent.putExtra(URL_KEY, url)
             intent.putExtra(TITLE_KEY, title)

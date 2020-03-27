@@ -38,5 +38,9 @@
           app:ico_color="@color/md_white_1000"
           app:showAsAction="ifRoom"/>
 
+    <item android:id="@+id/action_view_comments"
+        android:title="@string/action_view_comments"
+        app:showAsAction="never"/>)))=){){
+
 
 </menu>
