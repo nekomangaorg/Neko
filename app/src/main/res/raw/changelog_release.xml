@@ -2,12 +2,19 @@
 <changelog bulletedList="true">
     <changelogversion
         changeDate=""
+        versionName="v1.7.2">
+    <changelogtext>Long press and select manga in library can now be synced to MDlist as follows</changelogtext>
+        <changelogtext>Long press a chapter gives option to view comments for chapter</changelogtext>
+        <changelogtext>Removed other languages from manga description</changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
         versionName="v1.7.1">
         <changelogtext>Long Strip tagged comics now use Webtoon reader automatically</changelogtext>
         <changelogtext>Non long strip tagged comics that a user chooses to read in webtoon reader
             now adds margins between pages by default
         </changelogtext>
-        <changelogtext>Removed other langaguges from manga description</changelogtext>
+        <changelogtext>Removed other languages from manga description</changelogtext>
     </changelogversion>
     <changelogversion
         changeDate=""
