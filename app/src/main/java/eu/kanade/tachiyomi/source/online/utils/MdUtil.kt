@@ -64,6 +64,7 @@ class MdUtil {
                 .substringBefore("German / Deutsch")
                 .substringBefore("Italian / Italiano")
                 .substringBefore("Portuguese (BR) / Portugu")
+                .substringBefore("Português / Portuguese")
                 .substringBefore("Portuguese / Portugu")
                 .substringBefore("Turkish/ T&uuml")
                 .substringBefore("German/Deutsch:")

@@ -19,19 +19,16 @@ import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
 import eu.kanade.tachiyomi.util.combineLatest
 import eu.kanade.tachiyomi.util.isNullOrUnsubscribed
-import eu.kanade.tachiyomi.util.launchNow
 import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_EXCLUDE
 import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_IGNORE
 import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_INCLUDE
+import java.util.ArrayList
+import java.util.Collections
+import java.util.Comparator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.IOException
-import java.io.InputStream
-import java.util.ArrayList
-import java.util.Collections
-import java.util.Comparator
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
@@ -367,11 +364,11 @@ class LibraryPresenter(
         db.setMangaCategories(mc, mangas)
     }
 
-    fun syncMangaToDex(mangaList : List<Manga>){
+    fun syncMangaToDex(mangaList: List<Manga>) {
         GlobalScope.launch {
-            withContext(Dispatchers.IO){
-                mangaList.forEach{
-                    sourceManager.getMangadex().updateFollowStatus(MdUtil.getMangaId(it.url), FollowStatus.READING);
+            withContext(Dispatchers.IO) {
+                mangaList.forEach {
+                    sourceManager.getMangadex().updateFollowStatus(MdUtil.getMangaId(it.url), FollowStatus.READING)
                 }
             }
         }
