@@ -18,9 +18,6 @@ import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.inflate
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.visibleIf
-import kotlin.math.max
-import kotlin.math.min
-import kotlin.math.roundToInt
 import kotlinx.android.synthetic.main.filter_bottom_sheet.view.*
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
@@ -30,6 +27,9 @@ import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
+import kotlin.math.max
+import kotlin.math.min
+import kotlin.math.roundToInt
 
 class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     LinearLayout(context, attrs),

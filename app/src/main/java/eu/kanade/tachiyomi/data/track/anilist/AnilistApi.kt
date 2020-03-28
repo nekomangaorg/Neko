@@ -12,8 +12,6 @@ import com.google.gson.JsonParser
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.network.jsonType
-import java.util.Calendar
-import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType
@@ -21,6 +19,8 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
+import java.util.Calendar
+import java.util.concurrent.TimeUnit
 
 class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
 

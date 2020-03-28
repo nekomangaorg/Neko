@@ -5,7 +5,6 @@ import android.content.Intent
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.anilist.AnilistApi
@@ -15,6 +14,7 @@ import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.widget.preference.LoginPreference
 import eu.kanade.tachiyomi.widget.preference.TrackLoginDialog
 import uy.kohesive.injekt.injectLazy
+import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 
 class SettingsTrackingController : SettingsController(),
         TrackLoginDialog.Listener {

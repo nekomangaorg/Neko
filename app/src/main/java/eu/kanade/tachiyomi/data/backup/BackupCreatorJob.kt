@@ -6,9 +6,9 @@ import com.evernote.android.job.JobManager
 import com.evernote.android.job.JobRequest
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
-import java.util.concurrent.TimeUnit
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.util.concurrent.TimeUnit
 
 class BackupCreatorJob : Job() {
 

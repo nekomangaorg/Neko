@@ -3,8 +3,8 @@ package eu.kanade.tachiyomi.data.database.models
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadProvider
 import eu.kanade.tachiyomi.source.model.SManga
-import kotlin.collections.set
 import uy.kohesive.injekt.injectLazy
+import kotlin.collections.set
 
 open class MangaImpl : Manga {
 

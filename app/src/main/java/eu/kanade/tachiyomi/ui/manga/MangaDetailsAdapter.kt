@@ -9,9 +9,9 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.manga.chapter.BaseChapterAdapter
 import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import uy.kohesive.injekt.injectLazy
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
-import uy.kohesive.injekt.injectLazy
 
 class MangaDetailsAdapter(
     val controller: MangaDetailsController,

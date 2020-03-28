@@ -10,9 +10,9 @@ import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsAdapter
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.visibleIf
-import java.util.Date
 import kotlinx.android.synthetic.main.chapters_item.*
 import kotlinx.android.synthetic.main.download_button.*
+import java.util.Date
 
 class ChapterHolder(
     view: View,

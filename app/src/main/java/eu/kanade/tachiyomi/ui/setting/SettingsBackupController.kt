@@ -21,7 +21,6 @@ import eu.kanade.tachiyomi.data.backup.BackupCreateService
 import eu.kanade.tachiyomi.data.backup.BackupCreatorJob
 import eu.kanade.tachiyomi.data.backup.BackupRestoreService
 import eu.kanade.tachiyomi.data.backup.models.Backup
-import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.base.controller.popControllerWithTag
@@ -30,6 +29,7 @@ import eu.kanade.tachiyomi.util.system.getFilePicker
 import eu.kanade.tachiyomi.util.system.registerLocalReceiver
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.system.unregisterLocalReceiver
+import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 
 class SettingsBackupController : SettingsController() {
 

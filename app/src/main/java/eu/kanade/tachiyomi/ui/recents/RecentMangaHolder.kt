@@ -7,9 +7,9 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.ui.manga.chapter.BaseChapterHolder
 import eu.kanade.tachiyomi.util.view.visibleIf
-import java.util.Date
 import kotlinx.android.synthetic.main.download_button.*
 import kotlinx.android.synthetic.main.recent_manga_item.*
+import java.util.Date
 
 class RecentMangaHolder(
     view: View,

@@ -61,9 +61,6 @@ import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePadding
-import java.util.Date
-import java.util.concurrent.TimeUnit
-import kotlin.math.abs
 import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -71,6 +68,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
+import java.util.Date
+import java.util.concurrent.TimeUnit
+import kotlin.math.abs
 
 open class MainActivity : BaseActivity(), DownloadServiceListener {
 

@@ -7,8 +7,8 @@ import eu.kanade.tachiyomi.data.database.models.MangaChapterHistory
 import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.lang.toTimestampString
-import java.util.Date
 import kotlinx.android.synthetic.main.recently_read_item.*
+import java.util.Date
 
 /**
  * Holder that contains recent manga item

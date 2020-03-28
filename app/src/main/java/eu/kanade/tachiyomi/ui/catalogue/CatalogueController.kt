@@ -34,13 +34,13 @@ import eu.kanade.tachiyomi.util.view.applyWindowInsetsForRootController
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import eu.kanade.tachiyomi.widget.preference.SourceLoginDialog
-import kotlin.math.max
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.catalogue_main_controller.*
 import kotlinx.android.synthetic.main.extensions_bottom_sheet.*
 import kotlinx.android.synthetic.main.main_activity.*
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import kotlin.math.max
 
 /**
  * This controller shows and manages the different catalogues enabled by the user.

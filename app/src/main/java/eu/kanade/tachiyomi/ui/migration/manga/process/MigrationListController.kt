@@ -36,8 +36,6 @@ import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
 import eu.kanade.tachiyomi.util.view.applyWindowInsetsForController
-import java.util.concurrent.atomic.AtomicInteger
-import kotlin.coroutines.CoroutineContext
 import kotlinx.android.synthetic.main.chapters_controller.*
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -52,6 +50,8 @@ import kotlinx.coroutines.withContext
 import rx.schedulers.Schedulers
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
+import java.util.concurrent.atomic.AtomicInteger
+import kotlin.coroutines.CoroutineContext
 
 class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
     MigrationProcessAdapter.MigrationProcessInterface, BottomNavBarInterface, CoroutineScope {

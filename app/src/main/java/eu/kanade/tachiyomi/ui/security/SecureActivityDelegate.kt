@@ -7,8 +7,8 @@ import androidx.biometric.BiometricManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.main.SearchActivity
-import java.util.Date
 import uy.kohesive.injekt.injectLazy
+import java.util.Date
 
 object SecureActivityDelegate {
 

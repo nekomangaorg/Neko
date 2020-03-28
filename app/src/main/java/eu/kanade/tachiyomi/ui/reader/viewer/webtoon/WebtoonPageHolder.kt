@@ -33,12 +33,12 @@ import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.visible
-import java.io.InputStream
-import java.util.concurrent.TimeUnit
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
+import java.io.InputStream
+import java.util.concurrent.TimeUnit
 
 /**
  * Holder of the webtoon reader for a single page of a chapter.

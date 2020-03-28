@@ -1,12 +1,5 @@
 package eu.kanade.tachiyomi.network
 
-import java.io.BufferedReader
-import java.io.IOException
-import java.io.InputStreamReader
-import java.util.concurrent.atomic.AtomicBoolean
-import java.util.zip.GZIPInputStream
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 import kotlinx.coroutines.suspendCancellableCoroutine
 import okhttp3.Call
 import okhttp3.Callback
@@ -17,6 +10,13 @@ import okhttp3.Response
 import rx.Observable
 import rx.Producer
 import rx.Subscription
+import java.io.BufferedReader
+import java.io.IOException
+import java.io.InputStreamReader
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.zip.GZIPInputStream
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 fun Call.asObservable(): Observable<Response> {
     return Observable.unsafeCreate { subscriber ->

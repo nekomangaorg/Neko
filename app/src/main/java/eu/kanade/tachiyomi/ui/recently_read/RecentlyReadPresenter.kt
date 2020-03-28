@@ -6,12 +6,12 @@ import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchUI
-import java.util.Calendar
-import java.util.Comparator
-import java.util.Date
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.injectLazy
+import java.util.Calendar
+import java.util.Comparator
+import java.util.Date
 
 /**
  * Presenter of RecentlyReadFragment.

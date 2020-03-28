@@ -21,7 +21,6 @@ import eu.kanade.tachiyomi.util.storage.saveTo
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.launchNow
 import eu.kanade.tachiyomi.util.system.launchUI
-import java.io.File
 import kotlinx.coroutines.async
 import okhttp3.Response
 import rx.Observable
@@ -29,6 +28,7 @@ import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 import rx.subscriptions.CompositeSubscription
 import timber.log.Timber
+import java.io.File
 
 /**
  * This class is the one in charge of downloading chapters.

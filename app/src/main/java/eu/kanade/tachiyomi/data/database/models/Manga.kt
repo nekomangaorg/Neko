@@ -3,9 +3,9 @@ package eu.kanade.tachiyomi.data.database.models
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
-import java.util.Locale
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.util.Locale
 
 interface Manga : SManga {
 

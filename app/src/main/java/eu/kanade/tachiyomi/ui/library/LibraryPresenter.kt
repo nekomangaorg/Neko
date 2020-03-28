@@ -27,9 +27,6 @@ import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Comp
 import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_IGNORE
 import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_INCLUDE
 import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_REALLY_EXCLUDE
-import java.util.ArrayList
-import java.util.Collections
-import java.util.Comparator
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -40,6 +37,9 @@ import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.util.ArrayList
+import java.util.Collections
+import java.util.Comparator
 
 /**
  * Class containing library information.

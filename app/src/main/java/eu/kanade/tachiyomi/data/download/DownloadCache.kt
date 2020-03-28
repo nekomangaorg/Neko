@@ -10,10 +10,10 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.util.storage.DiskUtil
-import java.util.concurrent.TimeUnit
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
+import java.util.concurrent.TimeUnit
 
 /**
  * Cache where we dump the downloads directory from the filesystem. This class is needed because

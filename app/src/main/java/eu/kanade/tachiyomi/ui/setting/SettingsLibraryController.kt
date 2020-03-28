@@ -11,7 +11,6 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
-import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
@@ -20,6 +19,7 @@ import eu.kanade.tachiyomi.ui.category.CategoryController
 import kotlinx.android.synthetic.main.pref_library_columns.view.*
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 
 class SettingsLibraryController : SettingsController() {
 

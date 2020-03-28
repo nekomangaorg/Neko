@@ -10,9 +10,6 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.util.lang.plusAssign
 import eu.kanade.tachiyomi.util.system.ImageUtil
-import java.util.concurrent.PriorityBlockingQueue
-import java.util.concurrent.atomic.AtomicInteger
-import kotlin.math.min
 import rx.Completable
 import rx.Observable
 import rx.schedulers.Schedulers
@@ -23,6 +20,9 @@ import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
+import java.util.concurrent.PriorityBlockingQueue
+import java.util.concurrent.atomic.AtomicInteger
+import kotlin.math.min
 
 /**
  * Loader used to load chapters from an online source.
