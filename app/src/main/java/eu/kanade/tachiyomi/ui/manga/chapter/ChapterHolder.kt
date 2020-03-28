@@ -2,13 +2,11 @@ package eu.kanade.tachiyomi.ui.manga.chapter
 
 import android.text.format.DateUtils
 import android.view.View
-import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.LocalSource
-import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsAdapter
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.visibleIf
@@ -17,50 +15,15 @@ import kotlinx.android.synthetic.main.chapters_item.*
 import kotlinx.android.synthetic.main.download_button.*
 
 class ChapterHolder(
-    private val view: View,
+    view: View,
     private val adapter: MangaDetailsAdapter
-) : BaseFlexibleViewHolder(view, adapter) {
+) : BaseChapterHolder(view, adapter) {
 
     private var localSource = false
     init {
-        download_button.setOnClickListener { downloadOrRemoveMenu() }
         download_button.setOnLongClickListener {
             adapter.delegate.startDownloadRange(adapterPosition)
             true
-        }
-    }
-
-    private fun downloadOrRemoveMenu() {
-        val chapter = adapter.getItem(adapterPosition) as? ChapterItem ?: return
-        if (chapter.status == Download.NOT_DOWNLOADED || chapter.status == Download.ERROR) {
-            adapter.delegate.downloadChapter(adapterPosition)
-        } else {
-            download_button.post {
-                // Create a PopupMenu, giving it the clicked view for an anchor
-                val popup = PopupMenu(download_button.context, download_button)
-
-                // Inflate our menu resource into the PopupMenu's Menu
-                popup.menuInflater.inflate(R.menu.chapter_download, popup.menu)
-
-                popup.menu.findItem(R.id.action_start).isVisible = chapter.status == Download.QUEUE
-
-                // Hide download and show delete if the chapter is downloaded
-                if (chapter.status != Download.DOWNLOADED) popup.menu.findItem(R.id.action_delete).title = download_button.context.getString(
-                    R.string.action_cancel
-                )
-
-                // Set a listener so we are notified if a menu item is clicked
-                popup.setOnMenuItemClickListener { item ->
-                    when (item.itemId) {
-                        R.id.action_delete -> adapter.delegate.downloadChapter(adapterPosition)
-                        R.id.action_start -> adapter.delegate.startDownloadNow(adapterPosition)
-                    }
-                    true
-                }
-
-                // Finally show the PopupMenu
-                popup.show()
-            }
         }
     }
 

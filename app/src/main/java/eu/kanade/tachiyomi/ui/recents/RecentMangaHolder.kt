@@ -2,11 +2,10 @@ package eu.kanade.tachiyomi.ui.recents
 
 import android.text.format.DateUtils
 import android.view.View
-import androidx.appcompat.widget.PopupMenu
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.LocalSource
-import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
+import eu.kanade.tachiyomi.ui.manga.chapter.BaseChapterHolder
 import eu.kanade.tachiyomi.util.view.visibleIf
 import java.util.Date
 import kotlinx.android.synthetic.main.download_button.*
@@ -15,45 +14,10 @@ import kotlinx.android.synthetic.main.recent_manga_item.*
 class RecentMangaHolder(
     view: View,
     val adapter: RecentMangaAdapter
-) : BaseFlexibleViewHolder(view, adapter) {
+) : BaseChapterHolder(view, adapter) {
 
     init {
         cover_thumbnail.setOnClickListener { adapter.delegate.onCoverClick(adapterPosition) }
-        download_button.setOnClickListener { downloadOrRemoveMenu() }
-    }
-
-    private fun downloadOrRemoveMenu() {
-        val chapter = adapter.getItem(adapterPosition) as? RecentMangaItem ?: return
-        if (chapter.status == Download.NOT_DOWNLOADED || chapter.status == Download.ERROR) {
-            adapter.delegate.downloadChapter(adapterPosition)
-        } else {
-            download_button.post {
-                // Create a PopupMenu, giving it the clicked view for an anchor
-                val popup = PopupMenu(download_button.context, download_button)
-
-                // Inflate our menu resource into the PopupMenu's Menu
-                popup.menuInflater.inflate(R.menu.chapter_download, popup.menu)
-
-                popup.menu.findItem(R.id.action_start).isVisible = chapter.status == Download.QUEUE
-
-                // Hide download and show delete if the chapter is downloaded
-                if (chapter.status != Download.DOWNLOADED) popup.menu.findItem(R.id.action_delete).title = download_button.context.getString(
-                    R.string.action_cancel
-                )
-
-                // Set a listener so we are notified if a menu item is clicked
-                popup.setOnMenuItemClickListener { item ->
-                    when (item.itemId) {
-                        R.id.action_delete -> adapter.delegate.downloadChapter(adapterPosition)
-                        R.id.action_start -> adapter.delegate.startDownloadNow(adapterPosition)
-                    }
-                    true
-                }
-
-                // Finally show the PopupMenu
-                popup.show()
-            }
-        }
     }
 
     fun bind(item: RecentMangaItem) {
@@ -102,9 +66,8 @@ class RecentMangaHolder(
         )
     }
 
-    fun notifyStatus(status: Int, progress: Int) = with(download_button) {
-        setDownloadStatus(status, progress)
-    }
+    fun notifyStatus(status: Int, progress: Int) =
+        download_button.setDownloadStatus(status, progress)
 
     override fun getFrontView(): View {
         return front_view

@@ -2,20 +2,19 @@ package eu.kanade.tachiyomi.ui.recents
 
 import android.widget.ImageView
 import androidx.recyclerview.widget.ItemTouchHelper
-import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.ui.manga.MangaDetailsAdapter
+import eu.kanade.tachiyomi.ui.manga.chapter.BaseChapterAdapter
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 
 class RecentMangaAdapter(val delegate: RecentsInterface) :
-    FlexibleAdapter<IFlexible<RecentMangaHolder>>(null, delegate, true) {
+    BaseChapterAdapter<IFlexible<RecentMangaHolder>>(delegate) {
 
     val decimalFormat = DecimalFormat("#.###", DecimalFormatSymbols()
         .apply { decimalSeparator = '.' })
 
-    interface RecentsInterface : RecentMangaInterface, MangaDetailsAdapter.DownloadInterface
+    interface RecentsInterface : RecentMangaInterface, DownloadInterface
 
     interface RecentMangaInterface {
         fun onCoverClick(position: Int)

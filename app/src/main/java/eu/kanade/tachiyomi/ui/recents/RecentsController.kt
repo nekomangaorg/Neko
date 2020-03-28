@@ -134,7 +134,7 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
         }
     }
 
-    fun refreshItem(chapterId: Long) {
+    private fun refreshItem(chapterId: Long) {
         for (i in 0 until adapter.itemCount) {
             val holder = recycler.findViewHolderForAdapterPosition(i) as? RecentsHolder ?: continue
             holder.refreshChapter(chapterId)
