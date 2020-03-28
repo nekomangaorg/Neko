@@ -35,6 +35,7 @@ import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.drawable.IconCompat
+import androidx.core.math.MathUtils
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -100,8 +101,6 @@ import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
-import java.io.File
-import java.io.IOException
 import jp.wasabeef.glide.transformations.CropSquareTransformation
 import jp.wasabeef.glide.transformations.MaskTransformation
 import kotlinx.android.synthetic.main.main_activity.*
@@ -110,6 +109,10 @@ import kotlinx.android.synthetic.main.manga_header_item.*
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.io.File
+import java.io.IOException
+import kotlin.math.abs
+import kotlin.math.max
 
 class MangaDetailsController : BaseController,
     FlexibleAdapter.OnItemClickListener,
@@ -214,14 +217,16 @@ class MangaDetailsController : BaseController,
         val appbarHeight = array.getDimensionPixelSize(0, 0)
         array.recycle()
         val offset = 10.dpToPx
+        var statusBarHeight = -1
 
         recycler.doOnApplyWindowInsets { v, insets, _ ->
             headerHeight = appbarHeight + insets.systemWindowInsetTop
+            statusBarHeight = insets.systemWindowInsetTop
             swipe_refresh.setProgressViewOffset(false, (-40).dpToPx, headerHeight + offset)
             (recycler.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder)
                 ?.setTopHeight(headerHeight)
             fast_scroller?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                topMargin = headerHeight
+                topMargin = statusBarHeight
                 bottomMargin = insets.systemWindowInsetBottom
             }
             v.updatePaddingRelative(bottom = insets.systemWindowInsetBottom)
@@ -233,36 +238,42 @@ class MangaDetailsController : BaseController,
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 val atTop = !recycler.canScrollVertically(-1)
-                if ((!atTop && !toolbarIsColored) || (atTop && toolbarIsColored)) {
-                    toolbarIsColored = !atTop
-                    val isCurrentController =
-                        router?.backstack?.lastOrNull()?.controller() == this@MangaDetailsController
-                    if (isCurrentController) setTitle()
-                    if (actionMode != null) {
-                        (activity as MainActivity).toolbar.setBackgroundColor(Color.TRANSPARENT)
-                        return
-                    }
-                    val color =
-                        coverColor ?: activity!!.getResourceColor(R.attr.colorPrimaryVariant)
-                    val colorFrom =
-                        if (colorAnimator?.isRunning == true) activity?.window?.statusBarColor
-                            ?: color
-                        else ColorUtils.setAlphaComponent(
-                            color, if (toolbarIsColored) 0 else 175
-                        )
-                    val colorTo = ColorUtils.setAlphaComponent(
-                        color, if (toolbarIsColored) 175 else 0
+                val tY = getHeader()?.backdrop?.translationY ?: 0f
+                getHeader()?.backdrop?.translationY = max(0f, tY + dy * 0.25f)
+                if (router?.backstack?.lastOrNull()
+                        ?.controller() == this@MangaDetailsController && statusBarHeight > -1 && activity != null && activity!!.appbar.height > 0
+                ) {
+                    activity!!.appbar.y -= dy
+                    activity!!.appbar.y = MathUtils.clamp(
+                        activity!!.appbar.y, -activity!!.appbar.height.toFloat(), 0f
                     )
-                    colorAnimator?.cancel()
-                    colorAnimator = ValueAnimator.ofObject(
-                        android.animation.ArgbEvaluator(), colorFrom, colorTo
-                    )
-                    colorAnimator?.duration = 250 // milliseconds
-                    colorAnimator?.addUpdateListener { animator ->
-                        (activity as MainActivity).toolbar.setBackgroundColor(animator.animatedValue as Int)
-                        activity?.window?.statusBarColor = (animator.animatedValue as Int)
+                }
+                val appBarY = activity?.appbar?.y ?: 0f
+                if ((!atTop && !toolbarIsColored && (appBarY < (-headerHeight + 1) || (dy < 0 && appBarY == 0f))) || (atTop && toolbarIsColored)) {
+                    colorToolbar(!atTop)
+                }
+            }
+
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    if (router?.backstack?.lastOrNull()
+                            ?.controller() == this@MangaDetailsController && statusBarHeight > -1 && activity != null &&
+                        activity!!.appbar.height > 0
+                    ) {
+                        val halfWay = abs((-activity!!.appbar.height.toFloat()) / 2)
+                        val shortAnimationDuration = resources?.getInteger(
+                            android.R.integer.config_shortAnimTime
+                        ) ?: 0
+                        val closerToTop = abs(activity!!.appbar.y) - halfWay > 0
+                        val atTop = !recycler.canScrollVertically(-1)
+                        activity!!.appbar.animate().y(
+                            if (closerToTop && !atTop) (-activity!!.appbar.height.toFloat())
+                            else 0f
+                        ).setDuration(shortAnimationDuration.toLong()).start()
+                        if (!closerToTop && !atTop && !toolbarIsColored)
+                            colorToolbar(true)
                     }
-                    colorAnimator?.start()
                 }
             }
         })
@@ -273,6 +284,38 @@ class MangaDetailsController : BaseController,
             swipe_refresh.post { swipe_refresh.isRefreshing = true }
 
         swipe_refresh.setOnRefreshListener { presenter.refreshAll() }
+    }
+
+    fun colorToolbar(isColor: Boolean) {
+        toolbarIsColored = isColor
+        val isCurrentController =
+            router?.backstack?.lastOrNull()?.controller() == this@MangaDetailsController
+        if (isCurrentController) setTitle()
+        if (actionMode != null) {
+            (activity as MainActivity).toolbar.setBackgroundColor(Color.TRANSPARENT)
+            return
+        }
+        val color =
+            coverColor ?: activity!!.getResourceColor(R.attr.colorPrimaryVariant)
+        val colorFrom =
+            if (colorAnimator?.isRunning == true) activity?.window?.statusBarColor
+                ?: color
+            else ColorUtils.setAlphaComponent(
+                color, if (toolbarIsColored) 0 else 175
+            )
+        val colorTo = ColorUtils.setAlphaComponent(
+            color, if (toolbarIsColored) 175 else 0
+        )
+        colorAnimator?.cancel()
+        colorAnimator = ValueAnimator.ofObject(
+            android.animation.ArgbEvaluator(), colorFrom, colorTo
+        )
+        colorAnimator?.duration = 250 // milliseconds
+        colorAnimator?.addUpdateListener { animator ->
+            (activity as MainActivity).toolbar.setBackgroundColor(animator.animatedValue as Int)
+            activity?.window?.statusBarColor = (animator.animatedValue as Int)
+        }
+        colorAnimator?.start()
     }
 
     fun setPaletteColor() {
@@ -344,6 +387,8 @@ class MangaDetailsController : BaseController,
     private fun getHolder(chapter: Chapter): ChapterHolder? {
         return recycler?.findViewHolderForItemId(chapter.id!!) as? ChapterHolder
     }
+
+    private fun getHeader(): MangaHeaderHolder? = recycler.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder
 
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
         super.onChangeStarted(handler, type)
