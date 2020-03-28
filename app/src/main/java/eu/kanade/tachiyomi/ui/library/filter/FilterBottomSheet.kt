@@ -271,12 +271,10 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             }
             onGroupClicked(ACTION_FILTER)
         }
-        if (preferences.filterTracked().getOrDefault() == 1 &&
-            trackers != null && trackers?.parent == null) {
+        if (tracked.isActivated && trackers != null && trackers?.parent == null) {
             filter_layout.addView(trackers)
             filterItems.add(trackers!!)
-        } else if (preferences.filterTracked().getOrDefault() != 1 &&
-            trackers?.parent != null) {
+        } else if (!tracked.isActivated && trackers?.parent != null) {
             filter_layout.removeView(trackers)
             trackers?.reset()
             FILTER_TRACKER = ""
