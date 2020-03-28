@@ -89,19 +89,28 @@ class MangaHeaderHolder(
         val presenter = adapter.delegate.mangaPresenter()
         manga_full_title.text = manga.title
 
-        if (manga.genre.isNullOrBlank().not())
-            manga_genres_tags.setTags(manga.genre?.split(", ")?.map(String::trim))
-        else
-            manga_genres_tags.setTags(emptyList())
+        if (manga.genre.isNullOrBlank().not()) manga_genres_tags.setTags(
+            manga.genre?.split(", ")?.map(String::trim)
+        )
+        else manga_genres_tags.setTags(emptyList())
 
-        if (manga.author == manga.artist ||
-            manga.artist.isNullOrBlank())
-            manga_author.text = manga.author?.trim()
+        if (manga.author == manga.artist || manga.artist.isNullOrBlank()) manga_author.text =
+            manga.author?.trim()
         else {
             manga_author.text = "${manga.author?.trim()}, ${manga.artist}"
         }
-        manga_summary.text = manga.description?.trim() ?: itemView.context.getString(R.string
-            .no_description)
+        manga_summary.text = manga.description?.trim() ?: itemView.context.getString(
+            R.string.no_description
+        )
+
+        if (item.isLocked) sub_item_group.referencedIds =
+            intArrayOf(R.id.manga_summary, R.id.manga_summary_label, R.id.button_layout)
+        else sub_item_group.referencedIds = intArrayOf(
+            R.id.start_reading_button,
+            R.id.manga_summary,
+            R.id.manga_summary_label,
+            R.id.button_layout
+        )
 
         manga_summary.post {
             if (sub_item_group.visibility != View.GONE) {
@@ -112,8 +121,8 @@ class MangaHeaderHolder(
             if (adapter.hasFilter()) collapse()
             else expand()
         }
-        manga_summary_label.text = itemView.context.getString(R.string.about_this,
-            itemView.context.getString(
+        manga_summary_label.text = itemView.context.getString(
+            R.string.about_this, itemView.context.getString(
                 when {
                     manga.mangaType() == Manga.TYPE_MANHWA -> R.string.manhwa
                     manga.mangaType() == Manga.TYPE_MANHUA -> R.string.manhua
@@ -121,7 +130,8 @@ class MangaHeaderHolder(
                     manga.mangaType() == Manga.TYPE_WEBTOON -> R.string.webtoon
                     else -> R.string.manga
                 }
-            ).toLowerCase(Locale.getDefault()))
+            ).toLowerCase(Locale.getDefault())
+        )
         with(favorite_button) {
             icon = ContextCompat.getDrawable(
                 itemView.context, when {
@@ -139,18 +149,24 @@ class MangaHeaderHolder(
             )
             checked(!item.isLocked && manga.favorite)
         }
-        true_backdrop.setBackgroundColor(adapter.delegate.coverColor()
-        ?: itemView.context.getResourceColor(android.R.attr.colorBackground))
+        true_backdrop.setBackgroundColor(
+            adapter.delegate.coverColor()
+                ?: itemView.context.getResourceColor(android.R.attr.colorBackground)
+        )
 
         val tracked = presenter.isTracked() && !item.isLocked
 
         with(track_button) {
             visibleIf(presenter.hasTrackers())
-            text = itemView.context.getString(if (tracked) R.string.action_filter_tracked
-            else R.string.tracking)
+            text = itemView.context.getString(
+                if (tracked) R.string.action_filter_tracked
+                else R.string.tracking
+            )
 
-            icon = ContextCompat.getDrawable(itemView.context, if (tracked) R.drawable
-                .ic_check_white_24dp else R.drawable.ic_sync_black_24dp)
+            icon = ContextCompat.getDrawable(
+                itemView.context,
+                if (tracked) R.drawable.ic_check_white_24dp else R.drawable.ic_sync_black_24dp
+            )
             checked(tracked)
         }
 
@@ -158,21 +174,20 @@ class MangaHeaderHolder(
             val nextChapter = presenter.getNextUnreadChapter()
             visibleIf(presenter.chapters.isNotEmpty() && !item.isLocked)
             isEnabled = (nextChapter != null)
-            if (nextChapter != null) {
+            text = if (nextChapter != null) {
                 val number = adapter.decimalFormat.format(nextChapter.chapter_number.toDouble())
-                text = if (nextChapter.chapter_number > 0) resources.getString(
+                if (nextChapter.chapter_number > 0) resources.getString(
                     if (nextChapter.last_page_read > 0) R.string.continue_reading_chapter
                     else R.string.start_reading_chapter, number
                 )
                 else {
-                    val name = nextChapter.name
                     resources.getString(
                         if (nextChapter.last_page_read > 0) R.string.continue_reading
                         else R.string.start_reading
                     )
                 }
             } else {
-                text = resources.getString(R.string.all_chapters_read)
+                resources.getString(R.string.all_chapters_read)
             }
         }
 
@@ -183,12 +198,14 @@ class MangaHeaderHolder(
             height = adapter.delegate.topCoverHeight()
         }
 
-        manga_status.text = (itemView.context.getString(when (manga.status) {
-            SManga.ONGOING -> R.string.ongoing
-            SManga.COMPLETED -> R.string.completed
-            SManga.LICENSED -> R.string.licensed
-            else -> R.string.unknown_status
-        }))
+        manga_status.text = (itemView.context.getString(
+            when (manga.status) {
+                SManga.ONGOING -> R.string.ongoing
+                SManga.COMPLETED -> R.string.completed
+                SManga.LICENSED -> R.string.licensed
+                else -> R.string.unknown_status
+            }
+        ))
         manga_source.text = presenter.source.toString()
 
         filters_text.text = presenter.currentFilters()
@@ -199,16 +216,12 @@ class MangaHeaderHolder(
         }
 
         if (!manga.initialized) return
-        GlideApp.with(view.context).load(manga)
-            .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+        GlideApp.with(view.context).load(manga).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
             .signature(ObjectKey(MangaImpl.getLastCoverFetch(manga.id!!).toString()))
             .into(manga_cover)
-        GlideApp.with(view.context).load(manga)
-            .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-            .signature(ObjectKey(MangaImpl.getLastCoverFetch(manga.id!!).toString()))
-            .centerCrop()
-            .transition(DrawableTransitionOptions.withCrossFade())
-            .into(backdrop)
+        GlideApp.with(view.context).load(manga).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+            .signature(ObjectKey(MangaImpl.getLastCoverFetch(manga.id!!).toString())).centerCrop()
+            .transition(DrawableTransitionOptions.withCrossFade()).into(backdrop)
     }
 
     private fun MaterialButton.checked(checked: Boolean) {
@@ -243,7 +256,7 @@ class MangaHeaderHolder(
     }
 
     fun updateTracking() {
-        val presenter = adapter.delegate.mangaPresenter() ?: return
+        val presenter = adapter.delegate.mangaPresenter()
         val tracked = presenter.isTracked()
         with(track_button) {
             text = itemView.context.getString(if (tracked) R.string.action_filter_tracked
@@ -267,8 +280,7 @@ class MangaHeaderHolder(
 
     fun expand() {
         sub_item_group.visible()
-        if (more_button.visibility == View.VISIBLE || more_button.visibility == View.INVISIBLE)
-            more_button_group.visible()
+        if (more_button.visibility == View.VISIBLE || more_button.visibility == View.INVISIBLE) more_button_group.visible()
         else {
             less_button.visible()
             manga_genres_tags.visible()

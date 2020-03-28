@@ -252,10 +252,15 @@ class MangaDetailsController : BaseController,
                 if ((!atTop && !toolbarIsColored && (appBarY < (-headerHeight + 1) || (dy < 0 && appBarY == 0f))) || (atTop && toolbarIsColored)) {
                     colorToolbar(!atTop)
                 }
+                if (atTop) {
+                    getHeader()?.backdrop?.translationY = 0f
+                    activity!!.appbar.y = 0f
+                }
             }
 
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
+                val atTop = !recycler.canScrollVertically(-1)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                     if (router?.backstack?.lastOrNull()
                             ?.controller() == this@MangaDetailsController && statusBarHeight > -1 && activity != null &&
@@ -266,7 +271,6 @@ class MangaDetailsController : BaseController,
                             android.R.integer.config_shortAnimTime
                         ) ?: 0
                         val closerToTop = abs(activity!!.appbar.y) - halfWay > 0
-                        val atTop = !recycler.canScrollVertically(-1)
                         activity!!.appbar.animate().y(
                             if (closerToTop && !atTop) (-activity!!.appbar.height.toFloat())
                             else 0f
@@ -274,6 +278,11 @@ class MangaDetailsController : BaseController,
                         if (!closerToTop && !atTop && !toolbarIsColored)
                             colorToolbar(true)
                     }
+                }
+                if (atTop && toolbarIsColored) colorToolbar(false)
+                if (atTop) {
+                    getHeader()?.backdrop?.translationY = 0f
+                    activity!!.appbar.y = 0f
                 }
             }
         })
@@ -599,6 +608,7 @@ class MangaDetailsController : BaseController,
         editItem.title = view?.context?.getString(if (manga?.source == LocalSource.ID)
             R.string.action_edit else R.string.action_edit_cover)
         menu.findItem(R.id.action_download).isVisible = !presenter.isLockedFromSearch
+        menu.findItem(R.id.action_add_to_home_screen).isVisible = !presenter.isLockedFromSearch
         menu.findItem(R.id.action_mark_all_as_read).isVisible =
             presenter.getNextUnreadChapter() != null && !presenter.isLockedFromSearch
         menu.findItem(R.id.action_mark_all_as_unread).isVisible =
@@ -935,11 +945,16 @@ class MangaDetailsController : BaseController,
         ChaptersSortBottomSheet(this).show()
     }
 
-    override fun favoriteManga(longPress: Boolean) {
+    private fun isLocked(): Boolean {
         if (presenter.isLockedFromSearch) {
             SecureActivityDelegate.promptLockIfNeeded(activity)
-            return
+            return true
         }
+        return false
+    }
+
+    override fun favoriteManga(longPress: Boolean) {
+        if (isLocked()) return
         val manga = presenter.manga
         if (longPress) {
             if (!manga.favorite) {
@@ -1071,6 +1086,7 @@ class MangaDetailsController : BaseController,
     }
 
     override fun showTrackingSheet() {
+        if (isLocked()) return
         trackingBottomSheet =
             TrackingBottomSheet(this)
         trackingBottomSheet?.show()
