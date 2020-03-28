@@ -8,7 +8,7 @@
             android:title="@string/label_library" />
         <item
             android:id="@+id/nav_recents"
-            android:icon="@drawable/recent_updates_selector_24dp"
+            android:icon="@drawable/recent_read_selector_24dp"
             android:title="@string/short_recents" />
         <item
             android:id="@+id/nav_catalogues"

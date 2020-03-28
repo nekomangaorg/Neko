@@ -19,7 +19,6 @@ import android.view.ViewGroup
 import android.view.WindowInsets
 import android.view.WindowManager
 import android.webkit.WebView
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
@@ -53,6 +52,7 @@ import eu.kanade.tachiyomi.ui.library.LibraryListController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.recent_updates.RecentChaptersController
 import eu.kanade.tachiyomi.ui.recently_read.RecentlyReadController
+import eu.kanade.tachiyomi.ui.recents.RecentsController
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.ui.setting.SettingsController
 import eu.kanade.tachiyomi.ui.setting.SettingsMainController
@@ -61,6 +61,9 @@ import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePadding
+import java.util.Date
+import java.util.concurrent.TimeUnit
+import kotlin.math.abs
 import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -68,9 +71,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
-import java.util.Date
-import java.util.concurrent.TimeUnit
-import kotlin.math.abs
 
 open class MainActivity : BaseActivity(), DownloadServiceListener {
 
@@ -151,24 +151,24 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                         else LibraryController(), id
                     )
                     R.id.nav_recents -> {
-                        if (preferences.showRecentUpdates().getOrDefault()) setRoot(
-                            RecentChaptersController(),
-                            id
-                        )
-                        else setRoot(RecentlyReadController(), id)
+                        setRoot(RecentsController(), id)
+//                        if (preferences.showRecentUpdates().getOrDefault()) setRoot(
+//                            RecentChaptersController(), id
+//                        )
+//                        else setRoot(RecentlyReadController(), id)
                     }
                     R.id.nav_catalogues -> setRoot(CatalogueController(), id)
                 }
             } else if (currentRoot.tag()?.toIntOrNull() == id) {
                 if (router.backstackSize == 1) {
                     when (id) {
-                        R.id.nav_recents -> {
+                        /*R.id.nav_recents -> {
                             val showRecents = preferences.showRecentUpdates().getOrDefault()
                             if (!showRecents) setRoot(RecentChaptersController(), id)
                             else setRoot(RecentlyReadController(), id)
                             preferences.showRecentUpdates().set(!showRecents)
                             updateRecentsIcon()
-                        }
+                        }*/
                         R.id.nav_library -> {
                             val controller =
                                 router.getControllerWithTag(id.toString()) as? LibraryController
@@ -192,7 +192,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
         container.systemUiVisibility =
             View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-        updateRecentsIcon()
+        // updateRecentsIcon()
 
         supportActionBar?.setDisplayShowCustomEnabled(true)
 
@@ -309,7 +309,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         }
     }
 
-    fun updateRecentsIcon() {
+    /*fun updateRecentsIcon() {
         bottom_nav.menu.findItem(R.id.nav_recents).icon = AppCompatResources.getDrawable(
             this,
             if (preferences.showRecentUpdates()
@@ -317,7 +317,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             ) R.drawable.recent_updates_selector_24dp
             else R.drawable.recent_read_selector_24dp
         )
-    }
+    }*/
 
     override fun startSupportActionMode(callback: androidx.appcompat.view.ActionMode.Callback): androidx.appcompat.view.ActionMode? {
         window?.statusBarColor = getResourceColor(R.attr.colorPrimaryVariant)
@@ -387,9 +387,14 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         when (intent.action) {
             SHORTCUT_LIBRARY -> bottom_nav.selectedItemId = R.id.nav_library
             SHORTCUT_RECENTLY_UPDATED, SHORTCUT_RECENTLY_READ -> {
-                preferences.showRecentUpdates().set(intent.action == SHORTCUT_RECENTLY_UPDATED)
+                // preferences.showRecentUpdates().set(intent.action == SHORTCUT_RECENTLY_UPDATED)
                 bottom_nav.selectedItemId = R.id.nav_recents
-                updateRecentsIcon()
+                val controller: Controller = when (intent.action) {
+                    SHORTCUT_RECENTLY_UPDATED -> RecentChaptersController()
+                    else -> RecentlyReadController()
+                }
+                router.pushController(controller.withFadeTransaction())
+                // updateRecentsIcon()
             }
             SHORTCUT_CATALOGUES -> bottom_nav.selectedItemId = R.id.nav_catalogues
             SHORTCUT_EXTENSIONS -> {

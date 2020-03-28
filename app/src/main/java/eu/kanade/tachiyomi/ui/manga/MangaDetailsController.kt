@@ -115,7 +115,7 @@ class MangaDetailsController : BaseController,
     FlexibleAdapter.OnItemClickListener,
     FlexibleAdapter.OnItemLongClickListener,
     ActionMode.Callback,
-    MangaDetailsAdapter.MangaHeaderInterface,
+    MangaDetailsAdapter.MangaDetailsInterface,
     FlexibleAdapter.OnItemMoveListener,
     ChangeMangaCategoriesDialog.Listener {
 
@@ -577,7 +577,7 @@ class MangaDetailsController : BaseController,
         setOnQueryTextChangeListener(searchView) {
             query = it ?: ""
             if (query.isNotEmpty()) {
-                (recycler.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder)?.collaspe()
+                (recycler.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder)?.collapse()
             } else (recycler.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder)?.expand()
 
             adapter?.setFilter(query)
@@ -715,6 +715,11 @@ class MangaDetailsController : BaseController,
         if (chaptersToDownload.isNotEmpty()) {
             downloadChapters(chaptersToDownload)
         }
+    }
+
+    override fun startDownloadNow(position: Int) {
+        val chapter = (adapter?.getItem(position) as? ChapterItem) ?: return
+        presenter.startDownloadingNow(chapter)
     }
 
     private fun downloadChapters(chapters: List<ChapterItem>) {

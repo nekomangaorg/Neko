@@ -19,7 +19,9 @@
     <string name="label_library">Library</string>
     <string name="label_recent_manga">Recently read</string>
     <string name="label_catalogues">Catalogues</string>
-    <string name="label_recent_updates">Recently updated</string>
+    <string name="label_recent_updates">Recent updates</string>
+    <string name="new_chapters">New chapters</string>
+    <string name="new_additions">New additions</string>
     <string name="label_selected">Selected: %1$d</string>
     <string name="label_migration">Source migration</string>
     <string name="label_extensions">Extensions</string>
@@ -84,6 +86,7 @@
     <string name="action_remove_bookmark">Remove bookmark</string>
     <string name="action_delete">Delete</string>
     <string name="action_remove_download">Remove download</string>
+    <string name="start_downloading_now">Start downloading now</string>
     <string name="action_update_library">Update library</string>
     <string name="action_edit">Edit</string>
     <string name="action_edit_cover">Edit cover</string>
@@ -459,7 +462,6 @@
         <item quantity="one">New chapter</item>
         <item quantity="other">%d unread</item>
     </plurals>
-    <string name="new_chapter">New</string>
     <plurals name="download_count">
         <item quantity="one">1 downloaded</item>
         <item quantity="other">%d downloaded</item>
@@ -754,4 +756,14 @@
     <string name="sort_by_chapter_number">Sort by chapter number</string>
     <string name="newest_first">Newest to oldest</string>
     <string name="oldest_first">Oldest to newest</string>
+    <string name="view_all">View All</string>
+    <string name="previously_read_chapter">Previously read Chapter %1$s</string>
+    <string name="last_read_chapter_x">Last read Chapter %1$s</string>
+    <string name="last_read_x">Last read %1$s</string>
+    <string name="uploaded_x">Uploaded %1$s</string>
+    <string name="view_history">View history</string>
+    <string name="view_all_updates">View all updates</string>
+    <string name="marked_as_read">Marked as read</string>
+    <string name="no_search_result">No search results</string>
+    <string name="search_recents">Search recents…</string>
 </resources>

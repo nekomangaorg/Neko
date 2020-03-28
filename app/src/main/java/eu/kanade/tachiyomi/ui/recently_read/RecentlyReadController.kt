@@ -15,25 +15,17 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.backup.BackupRestoreService
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.catalogue.browse.ProgressItem
-import eu.kanade.tachiyomi.ui.main.MainActivity
-import eu.kanade.tachiyomi.ui.main.RootSearchInterface
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
-import eu.kanade.tachiyomi.ui.recent_updates.RecentChaptersController
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
-import eu.kanade.tachiyomi.util.view.applyWindowInsetsForRootController
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
-import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.android.synthetic.main.recently_read_controller.*
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
 
 /**
  * Fragment that shows recently read manga.
@@ -46,7 +38,6 @@ class RecentlyReadController(bundle: Bundle? = null) : BaseController(bundle),
         RecentlyReadAdapter.OnRemoveClickListener,
         RecentlyReadAdapter.OnResumeClickListener,
         RecentlyReadAdapter.OnCoverClickListener,
-        RootSearchInterface,
         RemoveHistoryDialog.Listener {
 
     init {
@@ -69,7 +60,7 @@ class RecentlyReadController(bundle: Bundle? = null) : BaseController(bundle),
     private var recentItems: MutableList<RecentlyReadItem>? = null
 
     override fun getTitle(): String? {
-        return resources?.getString(R.string.label_recent_manga)
+        return resources?.getString(R.string.history)
     }
 
     override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
@@ -83,7 +74,7 @@ class RecentlyReadController(bundle: Bundle? = null) : BaseController(bundle),
      */
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
-        view.applyWindowInsetsForRootController(activity!!.bottom_nav)
+        // view.applyWindowInsetsForController()
         // Initialize adapter
         adapter = RecentlyReadAdapter(this)
         recycler.adapter = adapter
@@ -232,7 +223,7 @@ class RecentlyReadController(bundle: Bundle? = null) : BaseController(bundle),
         })
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+    /*override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_recents -> {
                 router.setRoot(
@@ -242,5 +233,5 @@ class RecentlyReadController(bundle: Bundle? = null) : BaseController(bundle),
             }
         }
         return super.onOptionsItemSelected(item)
-    }
+    }*/
 }

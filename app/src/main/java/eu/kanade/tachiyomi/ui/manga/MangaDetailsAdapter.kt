@@ -24,7 +24,7 @@ class MangaDetailsAdapter(
 
     var items: List<ChapterItem> = emptyList()
 
-    val coverListener: MangaHeaderInterface = controller
+    val delegate: MangaDetailsInterface = controller
 
     val readColor = context.getResourceColor(android.R.attr.textColorHint)
 
@@ -67,13 +67,15 @@ class MangaDetailsAdapter(
         }
     }
 
+    interface MangaDetailsInterface : MangaHeaderInterface, DownloadInterface
+
     interface MangaHeaderInterface {
         fun coverColor(): Int?
         fun mangaPresenter(): MangaDetailsPresenter
         fun prepareToShareManga()
         fun openInWebView()
+        fun startDownloadRange(position: Int)
         fun readNextChapter()
-        fun downloadChapter(position: Int)
         fun topCoverHeight(): Int
         fun tagClicked(text: String)
         fun showChapterFilter()
@@ -81,6 +83,10 @@ class MangaDetailsAdapter(
         fun copyToClipboard(content: String, label: Int)
         fun zoomImageFromThumb(thumbView: View)
         fun showTrackingSheet()
-        fun startDownloadRange(position: Int)
+    }
+
+    interface DownloadInterface {
+        fun downloadChapter(position: Int)
+        fun startDownloadNow(position: Int)
     }
 }

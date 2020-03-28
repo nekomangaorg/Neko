@@ -34,9 +34,9 @@ class MangaHeaderHolder(
 ) : BaseFlexibleViewHolder(view, adapter) {
 
     init {
-        start_reading_button.setOnClickListener { adapter.coverListener.readNextChapter() }
+        start_reading_button.setOnClickListener { adapter.delegate.readNextChapter() }
         top_view.updateLayoutParams<ConstraintLayout.LayoutParams> {
-            height = adapter.coverListener.topCoverHeight()
+            height = adapter.delegate.topCoverHeight()
         }
         more_button.setOnClickListener { expandDesc() }
         manga_summary.setOnClickListener { expandDesc() }
@@ -47,30 +47,30 @@ class MangaHeaderHolder(
             more_button_group.visible()
         }
         manga_genres_tags.setOnTagClickListener {
-            adapter.coverListener.tagClicked(it)
+            adapter.delegate.tagClicked(it)
         }
-        filter_button.setOnClickListener { adapter.coverListener.showChapterFilter() }
-        filters_text.setOnClickListener { adapter.coverListener.showChapterFilter() }
-        chapters_title.setOnClickListener { adapter.coverListener.showChapterFilter() }
-        webview_button.setOnClickListener { adapter.coverListener.openInWebView() }
-        share_button.setOnClickListener { adapter.coverListener.prepareToShareManga() }
+        filter_button.setOnClickListener { adapter.delegate.showChapterFilter() }
+        filters_text.setOnClickListener { adapter.delegate.showChapterFilter() }
+        chapters_title.setOnClickListener { adapter.delegate.showChapterFilter() }
+        webview_button.setOnClickListener { adapter.delegate.openInWebView() }
+        share_button.setOnClickListener { adapter.delegate.prepareToShareManga() }
         favorite_button.setOnClickListener {
-            adapter.coverListener.favoriteManga(false)
+            adapter.delegate.favoriteManga(false)
         }
         favorite_button.setOnLongClickListener {
-            adapter.coverListener.favoriteManga(true)
+            adapter.delegate.favoriteManga(true)
             true
         }
         manga_full_title.setOnLongClickListener {
-            adapter.coverListener.copyToClipboard(manga_full_title.text.toString(), R.string.manga_info_full_title_label)
+            adapter.delegate.copyToClipboard(manga_full_title.text.toString(), R.string.manga_info_full_title_label)
             true
         }
         manga_author.setOnLongClickListener {
-            adapter.coverListener.copyToClipboard(manga_author.text.toString(), R.string.manga_info_author_label)
+            adapter.delegate.copyToClipboard(manga_author.text.toString(), R.string.manga_info_author_label)
             true
         }
-        manga_cover.setOnClickListener { adapter.coverListener.zoomImageFromThumb(cover_card) }
-        track_button.setOnClickListener { adapter.coverListener.showTrackingSheet() }
+        manga_cover.setOnClickListener { adapter.delegate.zoomImageFromThumb(cover_card) }
+        track_button.setOnClickListener { adapter.delegate.showTrackingSheet() }
         if (startExpanded)
             expandDesc()
     }
@@ -86,7 +86,7 @@ class MangaHeaderHolder(
 
     @SuppressLint("SetTextI18n")
     fun bind(item: MangaHeaderItem, manga: Manga) {
-        val presenter = adapter.coverListener.mangaPresenter()
+        val presenter = adapter.delegate.mangaPresenter()
         manga_full_title.text = manga.title
 
         if (manga.genre.isNullOrBlank().not())
@@ -109,7 +109,7 @@ class MangaHeaderHolder(
                     more_button_group.gone()
                 } else more_button_group.visible()
             }
-            if (adapter.hasFilter()) collaspe()
+            if (adapter.hasFilter()) collapse()
             else expand()
         }
         manga_summary_label.text = itemView.context.getString(R.string.about_this,
@@ -139,7 +139,7 @@ class MangaHeaderHolder(
             )
             checked(!item.isLocked && manga.favorite)
         }
-        true_backdrop.setBackgroundColor(adapter.coverListener.coverColor()
+        true_backdrop.setBackgroundColor(adapter.delegate.coverColor()
         ?: itemView.context.getResourceColor(android.R.attr.colorBackground))
 
         val tracked = presenter.isTracked() && !item.isLocked
@@ -180,7 +180,7 @@ class MangaHeaderHolder(
         chapters_title.text = itemView.resources.getQuantityString(R.plurals.chapters, count, count)
 
         top_view.updateLayoutParams<ConstraintLayout.LayoutParams> {
-            height = adapter.coverListener.topCoverHeight()
+            height = adapter.delegate.topCoverHeight()
         }
 
         manga_status.text = (itemView.context.getString(when (manga.status) {
@@ -243,7 +243,7 @@ class MangaHeaderHolder(
     }
 
     fun updateTracking() {
-        val presenter = adapter.coverListener.mangaPresenter() ?: return
+        val presenter = adapter.delegate.mangaPresenter() ?: return
         val tracked = presenter.isTracked()
         with(track_button) {
             text = itemView.context.getString(if (tracked) R.string.action_filter_tracked
@@ -255,7 +255,7 @@ class MangaHeaderHolder(
         }
     }
 
-    fun collaspe() {
+    fun collapse() {
         sub_item_group.gone()
         if (more_button.visibility == View.VISIBLE || more_button.visibility == View.INVISIBLE)
             more_button_group.invisible()

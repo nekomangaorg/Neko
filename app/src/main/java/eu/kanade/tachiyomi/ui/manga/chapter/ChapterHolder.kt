@@ -25,7 +25,7 @@ class ChapterHolder(
     init {
         download_button.setOnClickListener { downloadOrRemoveMenu() }
         download_button.setOnLongClickListener {
-            adapter.coverListener.startDownloadRange(adapterPosition)
+            adapter.delegate.startDownloadRange(adapterPosition)
             true
         }
     }
@@ -33,7 +33,7 @@ class ChapterHolder(
     private fun downloadOrRemoveMenu() {
         val chapter = adapter.getItem(adapterPosition) as? ChapterItem ?: return
         if (chapter.status == Download.NOT_DOWNLOADED || chapter.status == Download.ERROR) {
-            adapter.coverListener.downloadChapter(adapterPosition)
+            adapter.delegate.downloadChapter(adapterPosition)
         } else {
             download_button.post {
                 // Create a PopupMenu, giving it the clicked view for an anchor
@@ -42,14 +42,19 @@ class ChapterHolder(
                 // Inflate our menu resource into the PopupMenu's Menu
                 popup.menuInflater.inflate(R.menu.chapter_download, popup.menu)
 
+                popup.menu.findItem(R.id.action_start).isVisible = chapter.status == Download.QUEUE
+
                 // Hide download and show delete if the chapter is downloaded
                 if (chapter.status != Download.DOWNLOADED) popup.menu.findItem(R.id.action_delete).title = download_button.context.getString(
                     R.string.action_cancel
                 )
 
                 // Set a listener so we are notified if a menu item is clicked
-                popup.setOnMenuItemClickListener { _ ->
-                    adapter.coverListener.downloadChapter(adapterPosition)
+                popup.setOnMenuItemClickListener { item ->
+                    when (item.itemId) {
+                        R.id.action_delete -> adapter.delegate.downloadChapter(adapterPosition)
+                        R.id.action_start -> adapter.delegate.startDownloadNow(adapterPosition)
+                    }
                     true
                 }
 

@@ -99,6 +99,20 @@ class DownloadManager(val context: Context) {
         DownloadService.callListeners(false)
     }
 
+    fun startDownloadNow(chapter: Chapter) {
+        val download = downloader.queue.find { it.chapter.id == chapter.id } ?: return
+        val queue = downloader.queue.toMutableList()
+        queue.remove(download)
+        queue.add(0, download)
+        reorderQueue(queue)
+        if (isPaused()) {
+            if (DownloadService.isRunning(context))
+                downloader.start()
+            else
+                DownloadService.start(context)
+        }
+    }
+
     /**
      * Reorders the download queue.
      *

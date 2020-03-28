@@ -263,6 +263,8 @@ class Downloader(
                 // Start downloader if needed
                 if (autoStart && wasEmpty) {
                     DownloadService.start(this@Downloader.context)
+                } else if (!isRunning) {
+                    notifier.onDownloadPaused()
                 }
             }
         }

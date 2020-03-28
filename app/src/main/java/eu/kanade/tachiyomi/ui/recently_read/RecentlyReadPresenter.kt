@@ -4,6 +4,7 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchUI
 import java.util.Calendar
 import java.util.Comparator
@@ -36,13 +37,13 @@ class RecentlyReadPresenter(private val view: RecentlyReadController) {
      * Get all recent manga up to a point
      * @return list of history
      */
-    private fun getRecentMangaLimit(search: String = ""): List<RecentlyReadItem> {
+    private suspend fun getRecentMangaLimit(search: String = ""): List<RecentlyReadItem> {
         // Set date for recent manga
         val cal = Calendar.getInstance()
         cal.time = Date()
         cal.add(Calendar.YEAR, -50)
 
-        return db.getRecentMangaLimit(cal.time, lastCount, search).executeAsBlocking()
+        return db.getRecentMangaLimit(cal.time, lastCount, search).executeOnIO()
             .map(::RecentlyReadItem)
     }
 
@@ -57,7 +58,7 @@ class RecentlyReadPresenter(private val view: RecentlyReadController) {
     }
 
     suspend fun refresh(search: String? = null): List<RecentlyReadItem> {
-        val manga = withContext(Dispatchers.IO) { getRecentMangaLimit(search ?: "") }
+        val manga = getRecentMangaLimit(search ?: "")
         checkIfNew(manga.size, search)
         lastSearch = search ?: lastSearch
         lastCount = manga.size

@@ -323,6 +323,7 @@ fun Controller.scrollViewWith(
     recycler: RecyclerView,
     padBottom: Boolean = false,
     customPadding: Boolean = false,
+    skipFirstSnap: Boolean = false,
     swipeRefreshLayout: SwipeRefreshLayout? = null,
     afterInsets: ((WindowInsets) -> Unit)? = null
 ) {
@@ -370,7 +371,7 @@ fun Controller.scrollViewWith(
                     val closerToTop = abs(activity!!.appbar.y) - halfWay > 0
                     val atTop = (!customPadding &&
                         (recycler.layoutManager as LinearLayoutManager)
-                            .findFirstVisibleItemPosition() < 2) ||
+                            .findFirstVisibleItemPosition() < 2 && !skipFirstSnap) ||
                         !recycler.canScrollVertically(-1)
                     activity!!.appbar.animate().y(
                             if (closerToTop && !atTop) (-activity!!.appbar.height.toFloat())

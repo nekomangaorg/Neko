@@ -136,6 +136,9 @@ class MangaDetailsPresenter(
         for (chapter in chapters) {
             if (downloadManager.isChapterDownloaded(chapter, manga)) {
                 chapter.status = Download.DOWNLOADED
+            } else if (downloadManager.hasQueue()) {
+                chapter.status = downloadManager.queue.find { it.chapter.id == chapter.id }
+                    ?.status ?: 0
             }
         }
     }
@@ -274,6 +277,10 @@ class MangaDetailsPresenter(
 
     fun getLatestChapter(): Float? {
         return chapters.maxBy { it.chapter_number }?.chapter_number
+    }
+
+    fun startDownloadingNow(chapter: Chapter) {
+        downloadManager.startDownloadNow(chapter)
     }
 
     /**
