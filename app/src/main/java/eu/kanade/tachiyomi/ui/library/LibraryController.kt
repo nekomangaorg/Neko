@@ -150,8 +150,6 @@ open class LibraryController(
 
     var libraryLayout: Int = preferences.libraryLayout().getOrDefault()
 
-    private var usePager: Boolean = !preferences.libraryAsSingleList().getOrDefault()
-
     open fun contentView(): View = pager_layout
 
     init {
@@ -522,7 +520,7 @@ open class LibraryController(
     override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
         mode.menuInflater.inflate(R.menu.library_selection, menu)
         val selectItem = menu.findItem(R.id.action_select_all)
-        selectItem.isVisible = !preferences.libraryAsSingleList().getOrDefault()
+        selectItem.isVisible = false
         return true
     }
 

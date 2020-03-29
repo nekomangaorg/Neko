@@ -13,11 +13,9 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService.Target
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
-import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.library.LibraryListController
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
@@ -156,10 +154,7 @@ class SettingsAdvancedController : SettingsController() {
     private fun clearDatabase() {
         // Avoid weird behavior by going back to the library.
         val newBackstack = listOf(RouterTransaction.with(
-            if (preferences.libraryAsSingleList().getOrDefault())
-                LibraryListController()
-            else
-                LibraryController())) +
+                LibraryListController())) +
                 router.backstack.drop(1)
 
         router.setBackstack(newBackstack, FadeChangeHandler())

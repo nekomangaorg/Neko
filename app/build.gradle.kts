@@ -34,8 +34,8 @@ android {
         minSdkVersion(23)
         targetSdkVersion(29)
         applicationId = "eu.kanade.tachiyomi"
-        versionCode = 61
-        versionName = "0.9.81"
+        versionCode = 62
+        versionName = "0.9.82"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
 
@@ -51,7 +51,7 @@ android {
     }
     buildTypes {
         getByName("debug") {
-            applicationIdSuffix = ".debug"
+            applicationIdSuffix = ".debugJ2K"
         }
         getByName("release") {
             applicationIdSuffix = ".j2k"

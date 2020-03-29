@@ -64,7 +64,7 @@ object Migrations {
             }
             if (oldVersion < 54)
                 DownloadProvider(context).renameChaapters()
-            if (oldVersion < 61)
+            if (oldVersion < 62)
                 LibraryPresenter.resetCustomManga()
             return true
         }

@@ -29,13 +29,13 @@ class SettingsLibraryController : SettingsController() {
         titleRes = R.string.pref_category_library
         preferenceCategory {
             titleRes = R.string.pref_category_library_display
-
+            /*
             switchPreference {
                 key = Keys.libraryAsSingleList
                 titleRes = R.string.pref_library_single_list
                 summaryRes = R.string.pref_library_single_list_summary
                 defaultValue = false
-            }
+            }*/
 
             switchPreference {
                 key = Keys.removeArticles

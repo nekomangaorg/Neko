@@ -145,12 +145,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             val currentRoot = router.backstack.firstOrNull()
             if (currentRoot?.tag()?.toIntOrNull() != id) {
                 when (id) {
-                    R.id.nav_library -> setRoot(
-                        if (preferences.libraryAsSingleList()
-                                .getOrDefault()
-                        ) LibraryListController()
-                        else LibraryController(), id
-                    )
+                    R.id.nav_library -> setRoot(LibraryListController(), id)
                     R.id.nav_recents -> {
                         setRoot(RecentsController(), id)
 //                        if (preferences.showRecentUpdates().getOrDefault()) setRoot(
@@ -273,8 +268,8 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             if (Migrations.upgrade(preferences)) {
                 if (BuildConfig.DEBUG) {
                     MaterialDialog(this).title(text = "Welcome to the J2K MD2 Beta").message(
-                            text = "This beta is for testing the upcoming " + "release. Requests for new additions this beta will ignored (however" + " suggestions on how to better implement a feature in this beta are " + "welcome).\n\nFor any bugs you come across, there is a bug report " + "button in settings.\n\nAs a reminder this is a *BETA* build and bugs" + " may happen and features may be missing/not implemented yet." + "\n\nEnjoy and thanks for testing!"
-                        ).positiveButton(android.R.string.ok).cancelOnTouchOutside(false).show()
+                        text = "This beta is for testing the upcoming release. Requests for new additions for this beta will ignored (however suggestions on how to better implement a feature in this beta are welcome).\n\nFor any bugs you come across, there is a bug report button in settings.\n\nAs a reminder this is a *BETA* build; bugs may happen, features may be missing/not implemented yet, and screens can change.\n\nEnjoy and thanks for testing!"
+                    ).positiveButton(android.R.string.ok).cancelOnTouchOutside(false).show()
                 } else ChangelogDialogController().showDialog(router)
             }
         }

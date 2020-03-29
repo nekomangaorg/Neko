@@ -8,8 +8,6 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.util.lang.chop
 import eu.kanade.tachiyomi.util.lang.removeArticles
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -25,8 +23,7 @@ class LibraryCategoryAdapter(val libraryListener: LibraryListener) :
         FlexibleAdapter<IFlexible<*>>(null, libraryListener, true) {
 
     init {
-        setDisplayHeadersAtStartUp(Injekt.get<PreferencesHelper>().libraryAsSingleList()
-            .getOrDefault())
+        setDisplayHeadersAtStartUp(true)
     }
     /**
      * The list of manga in this category.

@@ -126,7 +126,7 @@ class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
             resetRecyclerY()
             return
         }
-        if (flinging) return
+        if (flinging || presenter.categories.size <= 1) return
         if (isDragging) {
             resetScrollingValues()
             resetRecyclerY(false)

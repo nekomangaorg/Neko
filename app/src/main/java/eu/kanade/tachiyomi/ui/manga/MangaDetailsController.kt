@@ -1170,8 +1170,10 @@ class MangaDetailsController : BaseController,
      * Called to set the last used catalogue at the top of the view.
      */
     private fun addMangaHeader() {
-        adapter?.removeAllScrollableHeaders()
-        adapter?.addScrollableHeader(presenter.headerItem)
+        if (adapter?.scrollableHeaders?.isEmpty() == true) {
+            adapter?.removeAllScrollableHeaders()
+            adapter?.addScrollableHeader(presenter.headerItem)
+        }
     }
 
     private fun setStatusBarAndToolbar() {

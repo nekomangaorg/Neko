@@ -99,8 +99,6 @@ class LibraryPresenter(
     fun getLibrary() {
         launchUI {
             totalChapters = null
-            val freshStart = !preferences.libraryAsSingleList().getOrDefault() &&
-                (currentMangaMap?.values?.firstOrNull()?.firstOrNull()?.header != null)
             val mangaMap = withContext(Dispatchers.IO) {
                 val library = getLibraryFromDB()
                 library.apply { setDownloadCount(library.mangaMap) }
@@ -111,7 +109,7 @@ class LibraryPresenter(
                 mangaMap
             }
             currentMangaMap = mangaMap
-            updateView(categories, mangaMap, freshStart)
+            updateView(categories, mangaMap)
             withContext(Dispatchers.IO) {
                 setTotalChapters()
             }
@@ -315,8 +313,7 @@ class LibraryPresenter(
         }
 
         val ascending = preferences.librarySortingAscending().getOrDefault()
-        val useDnD = preferences.libraryAsSingleList().getOrDefault() && !preferences
-            .hideCategories().getOrDefault()
+        val useDnD = !preferences.hideCategories().getOrDefault()
 
         val sortFn: (LibraryItem, LibraryItem) -> Int = { i1, i2 ->
             i1.chapterCount = -1
@@ -394,7 +391,8 @@ class LibraryPresenter(
             val category = initCat ?: allCategories.find { it.id == i1.manga.category } ?: return 0
             if (category.mangaOrder.isNullOrEmpty() && category.mangaSort == null) {
                 category.changeSortTo(preferences.librarySortingMode().getOrDefault())
-                db.insertCategory(category).asRxObservable().subscribe()
+                if (category.id == 0) preferences.defaultMangaOrder().set(category.mangaSort.toString())
+                else db.insertCategory(category).asRxObservable().subscribe()
             }
             val compare = when {
                 category.mangaSort != null -> {
@@ -466,7 +464,7 @@ class LibraryPresenter(
         val showCategories = !preferences.hideCategories().getOrDefault()
         val unreadBadgeType = preferences.unreadBadgeType().getOrDefault()
         var libraryManga = db.getLibraryMangas().executeAsBlocking()
-        val singleList = preferences.libraryAsSingleList().getOrDefault()
+        val singleList = true
         if (!showCategories)
             libraryManga = libraryManga.distinctBy { it.id }
         /*val libraryMap = libraryManga.map { manga ->
@@ -505,12 +503,10 @@ class LibraryPresenter(
                     // LibraryItem(manga, libraryLayout).apply { unreadType = unreadBadgeType }
                 }.toMap()
             }.toMutableMap()
-        if (libraryMap.containsKey(0))
-            categories.add(0, createDefaultCategory())
 
         if (showCategories) {
             categories.forEach { category ->
-                if (!libraryMap.containsKey(category.id)) {
+                if (category.id ?: 0 <= 0 && !libraryMap.containsKey(category.id)) {
                     val headerItem =
                         LibraryHeaderItem({ getCategory(category.id!!) }, category.id!!)
                     libraryMap[category.id!!] = listOf(
@@ -524,6 +520,9 @@ class LibraryPresenter(
                 }
             }
         }
+
+        if (libraryMap.containsKey(0))
+            categories.add(0, createDefaultCategory())
 
         if (categories.size == 1 && showCategories)
             categories.first().name = context.getString(R.string.label_library)
