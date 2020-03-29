@@ -11,6 +11,11 @@
         android:title="@string/action_delete"
         android:visible="false"/>
 
+    <item
+        android:id="@+id/action_view_comments"
+        android:title="@string/action_view_comments"
+        android:visible="true"/>
+
     <item android:id="@+id/action_bookmark"
           android:title="@string/action_bookmark"
           android:visible="true" />

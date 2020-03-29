@@ -436,6 +436,7 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
 
         when (item.itemId) {
             R.id.action_download -> downloadChapters(chapters)
+            R.id.action_view_comments -> viewComments(chapter)
             R.id.action_bookmark -> bookmarkChapters(chapters, true)
             R.id.action_remove_bookmark -> bookmarkChapters(chapters, false)
             R.id.action_delete -> deleteChapters(chapters)
@@ -562,11 +563,15 @@ class ChaptersController : NucleusController<ChaptersPresenter>(),
     }
 
     fun viewComments() {
-        val activity = activity ?: return
         val chapter = getSelectedChapters()[0]
+        viewComments(chapter)
+    }
+
+    fun viewComments(chapter: ChapterItem) {
+        val activity = activity ?: return
         val url = MdUtil.baseUrl + "/chapter/" + MdUtil.getChapterId(chapter.url) + "/comments"
         val intent =
-            WebViewActivity.newIntent(activity, presenter.source.id, url, chapter.name)
+                WebViewActivity.newIntent(activity, presenter.source.id, url, chapter.name)
         destroyActionModeIfNeeded()
         startActivity(intent)
     }
