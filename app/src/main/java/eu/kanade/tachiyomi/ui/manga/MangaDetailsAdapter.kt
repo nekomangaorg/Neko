@@ -22,6 +22,7 @@ class MangaDetailsAdapter(
 
     var items: List<ChapterItem> = emptyList()
 
+    private var isAnimating = false
     val delegate: MangaDetailsInterface = controller
 
     val readColor = context.getResourceColor(android.R.attr.textColorHint)
@@ -42,18 +43,24 @@ class MangaDetailsAdapter(
         return items.indexOf(item)
     }
 
+    fun indexOf(chapterId: Long): Int {
+        return currentItems.indexOfFirst { it is ChapterItem && it.id == chapterId }
+    }
+
     fun performFilter() {
         val s = getFilter(String::class.java)
         if (s.isNullOrBlank()) {
-            updateDataSet(items, itemCount != 0)
+            updateDataSet(items, isAnimating)
         } else {
             updateDataSet(items.filter { it.name.contains(s, true) ||
-                it.scanlator?.contains(s, true) == true }, itemCount != 0)
+                it.scanlator?.contains(s, true) == true }, isAnimating)
         }
+        isAnimating = false
     }
 
     override fun onItemSwiped(position: Int, direction: Int) {
         super.onItemSwiped(position, direction)
+        isAnimating = true
         when (direction) {
             ItemTouchHelper.RIGHT -> controller.bookmarkChapter(position)
             ItemTouchHelper.LEFT -> controller.toggleReadChapter(position)

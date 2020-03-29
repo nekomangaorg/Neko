@@ -77,19 +77,20 @@ class ChapterHolder(
             statuses.add(chapter.scanlator!!)
         }
 
-        read.setImageDrawable(
-            ContextCompat.getDrawable(
-                read.context, if (item.read) R.drawable.eye_off
-                else R.drawable.eye
+        if (front_view.translationX == 0f) {
+            read.setImageDrawable(
+                ContextCompat.getDrawable(
+                    read.context, if (item.read) R.drawable.eye_off
+                    else R.drawable.eye
+                )
             )
-        )
-        bookmark.setImageDrawable(
-            ContextCompat.getDrawable(
-                read.context, if (item.bookmark) R.drawable.star_off
-                else R.drawable.star
+            bookmark.setImageDrawable(
+                ContextCompat.getDrawable(
+                    read.context, if (item.bookmark) R.drawable.star_off
+                    else R.drawable.star
+                )
             )
-        )
-
+        }
         chapter_scanlator.setTextColor(if (chapter.read) adapter.readColor else adapter.unreadColor)
         chapter_scanlator.text = statuses.joinToString(" • ")
         notifyStatus(

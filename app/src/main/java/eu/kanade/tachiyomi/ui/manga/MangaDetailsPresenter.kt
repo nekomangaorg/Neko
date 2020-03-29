@@ -29,6 +29,7 @@ import eu.kanade.tachiyomi.ui.manga.track.TrackItem
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.storage.DiskUtil
+import eu.kanade.tachiyomi.util.system.executeOnIO
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -105,9 +106,7 @@ class MangaDetailsPresenter(
     }
 
     private suspend fun getChapters() {
-        val chapters = withContext(Dispatchers.IO) {
-            db.getChapters(manga).executeAsBlocking().map { it.toModel() }
-        }
+        val chapters = db.getChapters(manga).executeOnIO().map { it.toModel() }
 
         // Find downloaded chapters
         setDownloadedChapters(chapters)
@@ -472,9 +471,7 @@ class MangaDetailsPresenter(
 
     private fun asyncUpdateMangaAndChapters(justChapters: Boolean = false) {
         scope.launch {
-            if (!justChapters) withContext(Dispatchers.IO) {
-                db.updateFlags(manga).executeAsBlocking()
-            }
+            if (!justChapters) db.updateFlags(manga).executeOnIO()
             updateChapters()
             withContext(Dispatchers.Main) { controller.updateChapters(chapters) }
         }
