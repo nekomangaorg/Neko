@@ -13,6 +13,22 @@ class MdUtil {
         const val followsAllApi = "/api/?type=manga_follows"
         const val followsMangaApi = "/api/?type=manga_follows&manga_id="
 
+        val descriptionLanguages = arrayListOf(  "[b][u]French[/u][/b]",
+            "[b][u]Russian / Русский[/u][/b]",
+            "German/Deutsch:",
+            "[b][u]German / Deutsch[/u][/b]",
+            "[b][u]Espa&ntilde;ol / Spanish:[/u][/b]",
+            "[b][u]Italian / Italiano[/u][/b]",
+            "[b][u]Portuguese (BR) / Portugu&ecirc;s (BR)[/u][/b]",
+            "[b][u]Português / Portuguese[/u][/b]",
+            "[b][u]Portuguese / Portugu[/u][/b]",
+            "French - Français:",
+            "[b][u]French[/u][/b]",
+            "[b][u]French / Fran&ccedil;ais[/u][/b]",
+            "[b][u]Turkish / T&uuml;rk&ccedil;e[/u][/b]",
+            "[b][u]Arabic / العربية[/u][/b]")
+
+
         // guess the thumbnail url is .jpg  this has a ~80% success rate
         fun formThumbUrl(mangaUrl: String, lowQuality: Boolean): String {
             var ext = ".jpg"
@@ -60,16 +76,11 @@ class MdUtil {
         }
 
         fun cleanDescription(string: String): String {
-            val description = cleanString(string.substringBefore("[b][u]French[/u][/b]"))
-            return description
-                .substringBefore("Russian / Русский")
-                .substringBefore("German / Deutsch")
-                .substringBefore("Italian / Italiano")
-                .substringBefore("Portuguese (BR) / Portugu")
-                .substringBefore("Português / Portuguese")
-                .substringBefore("Portuguese / Portugu")
-                .substringBefore("Turkish/ T&uuml")
-                .substringBefore("German/Deutsch:")
+            var newDescription = string
+            descriptionLanguages.forEach{
+                it-> newDescription = newDescription.substringBefore(it)
+            }
+            return cleanString(newDescription)
         }
 
         fun getImageUrl(attr: String): String {
