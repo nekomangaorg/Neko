@@ -70,7 +70,7 @@
     <string name="action_sort_alpha">Alphabetically</string>
     <string name="action_sort_enabled">Enabled</string>
     <string name="action_sort_total">Total chapters</string>
-    <string name="action_date_added">Date Added</string>
+    <string name="action_date_added">Date added</string>
     <string name="action_sort_last_read">Last read</string>
     <string name="action_sort_drag_and_drop">Drag &amp; Drop</string>
     <string name="action_search">Search</string>
