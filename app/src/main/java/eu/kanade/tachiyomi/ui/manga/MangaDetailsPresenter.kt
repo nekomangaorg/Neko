@@ -488,6 +488,12 @@ class MangaDetailsPresenter(
 
     fun toggleFavorite(): Boolean {
         manga.favorite = !manga.favorite
+
+        when (manga.favorite) {
+            true -> manga.date_added = Date().time
+            false -> manga.date_added = 0
+        }
+
         db.insertManga(manga).executeAsBlocking()
         controller.updateHeader()
         return manga.favorite

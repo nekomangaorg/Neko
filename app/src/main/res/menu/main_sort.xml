@@ -31,4 +31,9 @@
             android:title="@string/action_sort_drag_and_drop"
             android:icon="@drawable/ic_blank_24dp"/>
 
+        <item
+            android:id="@+id/action_date_added"
+            android:title="@string/action_date_added"
+            android:icon="@drawable/ic_blank_24dp"/>
+
 </menu>
