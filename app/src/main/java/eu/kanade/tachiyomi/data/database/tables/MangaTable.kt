@@ -40,6 +40,8 @@ object MangaTable {
 
     const val COL_HIDE_TITLE = "hideTitle"
 
+    const val COL_DATE_ADDED = "date_added"
+
     val createTableQuery: String
         get() = """CREATE TABLE $TABLE(
             $COL_ID INTEGER NOT NULL PRIMARY KEY,
@@ -57,7 +59,9 @@ object MangaTable {
             $COL_INITIALIZED BOOLEAN NOT NULL,
             $COL_VIEWER INTEGER NOT NULL,
             $COL_HIDE_TITLE INTEGER NOT NULL,
-            $COL_CHAPTER_FLAGS INTEGER NOT NULL
+            $COL_CHAPTER_FLAGS INTEGER NOT NULL,
+            $COL_DATE_ADDED LONG
+
             )"""
 
     val createUrlIndexQuery: String
@@ -69,4 +73,7 @@ object MangaTable {
 
     val addHideTitle: String
         get() = "ALTER TABLE $TABLE ADD COLUMN $COL_HIDE_TITLE INTEGER DEFAULT 0"
+
+    val addDateAddedCol: String
+        get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_DATE_ADDED} LONG DEFAULT 0"
 }

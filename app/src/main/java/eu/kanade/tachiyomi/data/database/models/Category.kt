@@ -36,6 +36,7 @@ interface Category : Serializable {
         LAST_READ_ASC, LAST_READ_DSC -> LibrarySort.LAST_READ
         TOTAL_ASC, TOTAL_DSC -> LibrarySort.TOTAL
         DRAG_AND_DROP -> LibrarySort.DRAG_AND_DROP
+        DATE_ADDED_ASC, DATE_ADDED_DSC -> LibrarySort.DATE_ADDED
         else -> null
     }
 
@@ -45,6 +46,7 @@ interface Category : Serializable {
         UNREAD_ASC, UNREAD_DSC -> R.string.action_filter_unread
         LAST_READ_ASC, LAST_READ_DSC -> R.string.action_sort_last_read
         TOTAL_ASC, TOTAL_DSC -> R.string.action_sort_total
+        DATE_ADDED_ASC, DATE_ADDED_DSC -> R.string.action_date_added
         else -> R.string.action_sort_drag_and_drop
     }
 
@@ -54,6 +56,7 @@ interface Category : Serializable {
         UNREAD_ASC, UNREAD_DSC -> 2
         LAST_READ_ASC, LAST_READ_DSC -> 3
         TOTAL_ASC, TOTAL_DSC -> 4
+        DATE_ADDED_ASC, DATE_ADDED_DSC -> 5
         else -> null
     }
 
@@ -64,6 +67,7 @@ interface Category : Serializable {
             LibrarySort.UNREAD -> UNREAD_ASC
             LibrarySort.LAST_READ -> LAST_READ_ASC
             LibrarySort.TOTAL -> ALPHA_ASC
+            LibrarySort.DATE_ADDED -> DATE_ADDED_ASC
             else -> ALPHA_ASC
         }
     }
@@ -80,6 +84,8 @@ interface Category : Serializable {
         private const val LAST_READ_DSC = 'h'
         private const val TOTAL_ASC = 'i'
         private const val TOTAL_DSC = 'j'
+        private const val DATE_ADDED_ASC = 'k'
+        private const val DATE_ADDED_DSC = 'l'
 
         fun create(name: String): Category = CategoryImpl().apply {
             this.name = name
@@ -100,6 +106,7 @@ interface Category : Serializable {
                     LibrarySort.UNREAD -> UNREAD_ASC
                     LibrarySort.LAST_READ -> LAST_READ_ASC
                     LibrarySort.TOTAL -> TOTAL_ASC
+                    LibrarySort.DATE_ADDED -> DATE_ADDED_ASC
                     LibrarySort.DRAG_AND_DROP -> DRAG_AND_DROP
                     else -> DRAG_AND_DROP
                 }

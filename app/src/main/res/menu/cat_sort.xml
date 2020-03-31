@@ -26,4 +26,9 @@
             android:id="@+id/action_total_chaps"
             android:title="@string/action_sort_total"
             android:icon="@drawable/ic_blank_24dp"/>
+
+        <item
+            android:id="@+id/action_date_added"
+            android:title="@string/action_date_added"
+            android:icon="@drawable/ic_blank_24dp"/>
 </menu>

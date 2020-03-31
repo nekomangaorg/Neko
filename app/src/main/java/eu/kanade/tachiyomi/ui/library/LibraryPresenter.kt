@@ -345,6 +345,9 @@ class LibraryPresenter(
                     i2.chapterCount = totalChapters!![i2.manga.id!!] ?: 0
                     manga1TotalChapter.compareTo(mange2TotalChapter)
                 }
+                sortingMode == LibrarySort.DATE_ADDED -> {
+                    i1.manga.date_added.compareTo(i2.manga.date_added)
+                }
                 else -> 0
             }
             if (compare == 0) {
@@ -418,6 +421,7 @@ class LibraryPresenter(
                             i2.chapterCount = totalChapters!![i2.manga.id!!] ?: 0
                             manga1TotalChapter.compareTo(mange2TotalChapter)
                         }
+                        LibrarySort.DATE_ADDED -> i1.manga.date_added.compareTo(i2.manga.date_added)
                         else -> sortAlphabetical(i1, i2)
                     }
                     if (!category.isAscending()) sort *= -1

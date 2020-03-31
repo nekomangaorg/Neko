@@ -103,6 +103,7 @@ class LibraryHeaderItem(private val categoryF: (Int) -> Category, val catId: Int
                     LibrarySort.UNREAD -> R.string.action_filter_unread
                     LibrarySort.LAST_READ -> R.string.action_sort_last_read
                     LibrarySort.ALPHA -> R.string.title
+                    LibrarySort.DATE_ADDED -> R.string.action_date_added
                     else -> R.string.action_sort_drag_and_drop
                 }
             ))
@@ -165,6 +166,7 @@ class LibraryHeaderItem(private val categoryF: (Int) -> Category, val catId: Int
                     LibrarySort.LAST_READ -> R.id.action_last_read
                     LibrarySort.UNREAD -> R.id.action_unread
                     LibrarySort.LATEST_CHAPTER -> R.id.action_update
+                    LibrarySort.DATE_ADDED -> R.id.action_date_added
                     else -> R.id.action_alpha
                 }
             )
@@ -208,6 +210,7 @@ class LibraryHeaderItem(private val categoryF: (Int) -> Category, val catId: Int
                         adapter.libraryListener.sortCategory(category.id!!, 'D' - 'a' + 1)
                         return
                     }
+                    R.id.action_date_added -> 5
                     R.id.action_total_chaps -> 4
                     R.id.action_last_read -> 3
                     R.id.action_unread -> 2

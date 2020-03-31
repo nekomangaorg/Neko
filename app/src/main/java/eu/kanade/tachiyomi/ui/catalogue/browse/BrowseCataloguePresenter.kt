@@ -37,6 +37,7 @@ import rx.subjects.PublishSubject
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.util.Date
 
 /**
  * Presenter of [BrowseCatalogueController].
@@ -272,6 +273,12 @@ open class BrowseCataloguePresenter(
      */
     fun changeMangaFavorite(manga: Manga) {
         manga.favorite = !manga.favorite
+
+        when (manga.favorite) {
+            true -> manga.date_added = Date().time
+            false -> manga.date_added = 0
+        }
+
         db.insertManga(manga).executeAsBlocking()
     }
 

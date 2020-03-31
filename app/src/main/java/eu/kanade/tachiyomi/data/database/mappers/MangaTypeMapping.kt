@@ -11,6 +11,7 @@ import com.pushtorefresh.storio.sqlite.queries.InsertQuery
 import com.pushtorefresh.storio.sqlite.queries.UpdateQuery
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
+import eu.kanade.tachiyomi.data.database.tables.MangaTable
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_ARTIST
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_AUTHOR
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_CHAPTER_FLAGS
@@ -64,6 +65,7 @@ class MangaPutResolver : DefaultPutResolver<Manga>() {
         put(COL_VIEWER, obj.viewer)
         put(COL_HIDE_TITLE, obj.hide_title)
         put(COL_CHAPTER_FLAGS, obj.chapter_flags)
+        put(MangaTable.COL_DATE_ADDED, obj.date_added)
     }
 }
 
@@ -85,6 +87,7 @@ interface BaseMangaGetResolver {
         viewer = cursor.getInt(cursor.getColumnIndex(COL_VIEWER))
         chapter_flags = cursor.getInt(cursor.getColumnIndex(COL_CHAPTER_FLAGS))
         hide_title = cursor.getInt(cursor.getColumnIndex(COL_HIDE_TITLE)) == 1
+        date_added = cursor.getLong(cursor.getColumnIndex(MangaTable.COL_DATE_ADDED))
     }
 }
 
