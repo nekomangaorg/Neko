@@ -13,7 +13,7 @@ class MdUtil {
         const val followsAllApi = "/api/?type=manga_follows"
         const val followsMangaApi = "/api/?type=manga_follows&manga_id="
 
-        val descriptionLanguages = arrayListOf(  "[b][u]French[/u][/b]",
+        val descriptionLanguages = arrayListOf("[b][u]French[/u][/b]",
             "[b][u]Russian / Русский[/u][/b]",
             "German/Deutsch:",
             "[b][u]German / Deutsch[/u][/b]",
@@ -27,7 +27,6 @@ class MdUtil {
             "[b][u]French / Fran&ccedil;ais[/u][/b]",
             "[b][u]Turkish / T&uuml;rk&ccedil;e[/u][/b]",
             "[b][u]Arabic / العربية[/u][/b]")
-
 
         // guess the thumbnail url is .jpg  this has a ~80% success rate
         fun formThumbUrl(mangaUrl: String, lowQuality: Boolean): String {
@@ -77,8 +76,8 @@ class MdUtil {
 
         fun cleanDescription(string: String): String {
             var newDescription = string
-            descriptionLanguages.forEach{
-                it-> newDescription = newDescription.substringBefore(it)
+            descriptionLanguages.forEach {
+                it -> newDescription = newDescription.substringBefore(it)
             }
             return cleanString(newDescription)
         }
