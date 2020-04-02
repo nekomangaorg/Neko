@@ -26,7 +26,7 @@ class MangadexLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle
 
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
         val dialog = MaterialDialog(activity!!).apply {
-            customView(R.layout.pref_account_login, scrollable = false)
+            customView(R.layout.pref_site_login, scrollable = false)
             positiveButton(android.R.string.cancel)
             if (canLogout) {
                 negativeButton(R.string.logout) { logout() }
