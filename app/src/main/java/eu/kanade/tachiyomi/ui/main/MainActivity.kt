@@ -144,17 +144,11 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             preferences.lastTab().set(item.itemId)
             val currentRoot = router.backstack.firstOrNull()
             if (currentRoot?.tag()?.toIntOrNull() != id) {
-                when (id) {
-                    R.id.nav_library -> setRoot(LibraryListController(), id)
-                    R.id.nav_recents -> {
-                        setRoot(RecentsController(), id)
-//                        if (preferences.showRecentUpdates().getOrDefault()) setRoot(
-//                            RecentChaptersController(), id
-//                        )
-//                        else setRoot(RecentlyReadController(), id)
-                    }
-                    R.id.nav_catalogues -> setRoot(CatalogueController(), id)
-                }
+                setRoot(when (id) {
+                    R.id.nav_library -> LibraryListController()
+                    R.id.nav_recents -> RecentsController()
+                    else -> CatalogueController()
+                }, id)
             } else if (currentRoot.tag()?.toIntOrNull() == id) {
                 if (router.backstackSize == 1) {
                     when (id) {
@@ -163,7 +157,6 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                             if (!showRecents) setRoot(RecentChaptersController(), id)
                             else setRoot(RecentlyReadController(), id)
                             preferences.showRecentUpdates().set(!showRecents)
-                            updateRecentsIcon()
                         }*/
                         R.id.nav_library -> {
                             val controller =
@@ -188,7 +181,6 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
         container.systemUiVisibility =
             View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-        // updateRecentsIcon()
 
         supportActionBar?.setDisplayShowCustomEnabled(true)
 
@@ -209,10 +201,6 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                 top = insets.systemWindowInsetTop
             )
             bottom_nav.updatePadding(bottom = insets.systemWindowInsetBottom)
-
-            /*insets.replaceSystemWindowInsets(
-                0, insets.systemWindowInsetTop, 0, insets.systemWindowInsetBottom
-            )*/
         }
 
         router = Conductor.attachRouter(this, container, savedInstanceState)
@@ -306,16 +294,6 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         }
     }
 
-    /*fun updateRecentsIcon() {
-        bottom_nav.menu.findItem(R.id.nav_recents).icon = AppCompatResources.getDrawable(
-            this,
-            if (preferences.showRecentUpdates()
-                    .getOrDefault()
-            ) R.drawable.recent_updates_selector_24dp
-            else R.drawable.recent_read_selector_24dp
-        )
-    }*/
-
     override fun startSupportActionMode(callback: androidx.appcompat.view.ActionMode.Callback): androidx.appcompat.view.ActionMode? {
         window?.statusBarColor = getResourceColor(R.attr.colorPrimaryVariant)
         return super.startSupportActionMode(callback)
@@ -354,6 +332,11 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         // setting in case someone comes from the search activity to main
         getExtensionUpdates()
         DownloadService.callListeners()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        snackBar?.dismiss()
     }
 
     private fun getExtensionUpdates() {
