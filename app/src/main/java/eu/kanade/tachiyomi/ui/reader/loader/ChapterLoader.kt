@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.ui.reader.loader
 
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
-import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
@@ -76,14 +75,6 @@ class ChapterLoader(
         return when {
             isDownloaded -> DownloadPageLoader(chapter, manga, source, downloadManager)
             source is HttpSource -> HttpPageLoader(chapter, source)
-            source is LocalSource -> source.getFormat(chapter.chapter).let { format ->
-                when (format) {
-                    is LocalSource.Format.Directory -> DirectoryPageLoader(format.file)
-                    is LocalSource.Format.Zip -> ZipPageLoader(format.file)
-                    is LocalSource.Format.Rar -> RarPageLoader(format.file)
-                    is LocalSource.Format.Epub -> EpubPageLoader(format.file)
-                }
-            }
             else -> error("Loader not implemented")
         }
     }

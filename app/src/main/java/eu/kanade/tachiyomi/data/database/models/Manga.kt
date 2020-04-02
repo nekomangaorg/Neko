@@ -38,7 +38,7 @@ interface Manga : SManga {
     }
 
     fun mangaType(): Int {
-        val sourceName = Injekt.get<SourceManager>().getOrStub(source).name
+        val sourceName = Injekt.get<SourceManager>().getMangadex().name
         val currentTags = genre?.split(",")?.map { it.trim().toLowerCase(Locale.US) }
         return if (currentTags?.any
             { tag ->
@@ -70,7 +70,7 @@ interface Manga : SManga {
     }
 
     fun defaultReaderType(): Int {
-        val sourceName = Injekt.get<SourceManager>().getOrStub(source).name
+        val sourceName = Injekt.get<SourceManager>().getMangadex().name
         val currentTags = genre?.split(",")?.map { it.trim().toLowerCase(Locale.US) }
         return if (currentTags?.any
             { tag ->
@@ -171,3 +171,5 @@ interface Manga : SManga {
         }
     }
 }
+
+fun Manga.isWebtoon() = this.genre?.contains("long strip", true) ?: false

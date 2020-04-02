@@ -51,4 +51,30 @@
         <item>@string/action_display_comfy_grid</item>
     </string-array>
 
+    <string-array name="follows_options">
+        <item>@string/follows_unfollowed</item>
+        <item>@string/follows_reading</item>
+        <item>@string/follows_completed</item>
+        <item>@string/follows_on_hold</item>
+        <item>@string/follows_plan_to_read</item>
+        <item>@string/follows_dropped</item>
+        <item>@string/follows_re_reading</item>
+    </string-array>
+
+    <string-array name="webtoon_margin_ratio">
+        <item>@string/webtoon_margin_ratio_0</item>
+        <item>@string/webtoon_margin_ratio_10</item>
+        <item>@string/webtoon_margin_ratio_15</item>
+        <item>@string/webtoon_margin_ratio_20</item>
+        <item>@string/webtoon_margin_ratio_25</item>
+    </string-array>
+
+    <string-array name="webtoon_margin_ratio_values">
+        <item>0</item>
+        <item>10</item>
+        <item>15</item>
+        <item>20</item>
+        <item>25</item>
+    </string-array>
+
 </resources>

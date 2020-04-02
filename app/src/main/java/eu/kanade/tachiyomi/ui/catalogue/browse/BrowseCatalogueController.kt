@@ -22,13 +22,12 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.source.CatalogueSource
+import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.Filter
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
-import eu.kanade.tachiyomi.ui.catalogue.CatalogueController
 import eu.kanade.tachiyomi.ui.library.ChangeMangaCategoriesDialog
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
@@ -62,20 +61,16 @@ open class BrowseCatalogueController(bundle: Bundle) :
         ChangeMangaCategoriesDialog.Listener {
 
     constructor(
-        source: CatalogueSource,
-        searchQuery: String? = null,
-        smartSearchConfig: CatalogueController.SmartSearchConfig? = null
+        source: Source,
+        searchQuery: String? = null
     ) : this(Bundle().apply {
         putLong(SOURCE_ID_KEY, source.id)
 
         if (searchQuery != null)
             putString(SEARCH_QUERY_KEY, searchQuery)
-
-        if (smartSearchConfig != null)
-            putParcelable(SMART_SEARCH_CONFIG_KEY, smartSearchConfig)
     })
 
-    constructor(source: CatalogueSource) : this(Bundle().apply {
+    constructor(source: Source) : this(Bundle().apply {
         putLong(SOURCE_ID_KEY, source.id)
     })
 
@@ -592,6 +587,5 @@ open class BrowseCatalogueController(bundle: Bundle) :
         const val SOURCE_ID_KEY = "sourceId"
 
         const val SEARCH_QUERY_KEY = "searchQuery"
-        const val SMART_SEARCH_CONFIG_KEY = "smartSearchConfig"
     }
 }

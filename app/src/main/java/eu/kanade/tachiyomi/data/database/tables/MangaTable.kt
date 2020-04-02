@@ -42,6 +42,20 @@ object MangaTable {
 
     const val COL_DATE_ADDED = "date_added"
 
+    const val COL_LANG_FLAG = "lang_flag"
+
+    const val COL_FOLLOW_STATUS = "follow_status"
+
+    const val COL_ANILIST_ID = "anilist_id"
+
+    const val COL_KITSU_ID = "kitsu_id"
+
+    const val COL_MY_ANIME_LIST_ID = "my_anime_list_id"
+
+    const val COL_MANGA_UPDATES_ID = "manga_updates_id"
+
+    const val COL_ANIME_PLANET_ID = "anime_planet_id"
+
     val createTableQuery: String
         get() = """CREATE TABLE $TABLE(
             $COL_ID INTEGER NOT NULL PRIMARY KEY,
@@ -60,8 +74,14 @@ object MangaTable {
             $COL_VIEWER INTEGER NOT NULL,
             $COL_HIDE_TITLE INTEGER NOT NULL,
             $COL_CHAPTER_FLAGS INTEGER NOT NULL,
-            $COL_DATE_ADDED LONG
-
+            $COL_DATE_ADDED LONG,
+            $COL_LANG_FLAG TEXT,
+            $COL_ANILIST_ID TEXT,
+            $COL_KITSU_ID TEXT,
+            $COL_MY_ANIME_LIST_ID TEXT,
+            $COL_ANIME_PLANET_ID TEXT,
+            $COL_MANGA_UPDATES_ID TEXT,
+            $COL_FOLLOW_STATUS INTEGER
             )"""
 
     val createUrlIndexQuery: String
@@ -76,4 +96,25 @@ object MangaTable {
 
     val addDateAddedCol: String
         get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_DATE_ADDED} LONG DEFAULT 0"
+
+    val addLangFlagCol: String
+        get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_LANG_FLAG} TEXT DEFAULT NULL"
+
+    val addFollowStatusCol: String
+        get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_FOLLOW_STATUS} INT DEFAULT NULL"
+
+    val addAnilistIdCol: String
+        get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_ANILIST_ID} TEXT DEFAULT NULL"
+
+    val addKitsuIdCol: String
+        get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_KITSU_ID} TEXT DEFAULT NULL"
+
+    val addMyAnimeListIdCol: String
+        get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_MY_ANIME_LIST_ID} TEXT DEFAULT NULL"
+
+    val addMangaUpdatesIdCol: String
+        get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_MANGA_UPDATES_ID} TEXT DEFAULT NULL"
+
+    val addAnimePlanetIdCol: String
+        get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_ANIME_PLANET_ID} TEXT DEFAULT NULL"
 }

@@ -65,6 +65,8 @@
     <color name="md_white_1000_38">#61FFFFFF</color>
     <color name="md_white_1000_12">#1FFFFFFF</color>
 
+    <!-- other colors -->
+
     <!-- Material Design Colors -->
     <color name="md_black_1000">#000000</color>
 
@@ -85,4 +87,8 @@
     <color name="md_teal_500">#009688</color>
 
     <color name="pale_green">#99CC99</color>
+
+    <!-- other colors -->
+    <color name="mangadex_orange">#F79421</color>
+
 </resources>

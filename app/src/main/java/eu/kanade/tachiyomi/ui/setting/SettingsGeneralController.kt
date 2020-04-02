@@ -7,7 +7,6 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.updater.UpdaterJob
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
-import eu.kanade.tachiyomi.util.system.LocaleHelper
 import eu.kanade.tachiyomi.widget.preference.IntListMatPreference
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 
@@ -17,30 +16,6 @@ class SettingsGeneralController : SettingsController() {
 
     override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
         titleRes = R.string.pref_category_general
-
-        listPreference(activity) {
-            key = Keys.lang
-            titleRes = R.string.pref_language
-            entryValues = listOf("", "ar", "bg", "bn", "ca", "cs", "de", "el", "en-US", "en-GB",
-            "es", "fr", "hi", "hu", "in", "it", "ja", "ko", "lv", "ms", "nb-rNO", "nl", "pl", "pt",
-            "pt-BR", "ro", "ru", "sc", "sr", "sv", "th", "tl", "tr", "uk", "vi", "zh-rCN")
-            entries = entryValues.map { value ->
-                val locale = LocaleHelper.getLocaleFromString(value.toString())
-                locale?.getDisplayName(locale)?.capitalize()
-                        ?: context.getString(R.string.system_default)
-            }
-            defaultValue = ""
-            summary = "%s"
-
-            onChange { newValue ->
-                val activity = activity ?: return@onChange false
-                val app = activity.application
-                LocaleHelper.changeLocale(newValue.toString())
-                LocaleHelper.updateConfiguration(app, app.resources.configuration)
-                activity.recreate()
-                true
-            }
-        }
 
         intListPreference(activity) {
             key = Keys.theme

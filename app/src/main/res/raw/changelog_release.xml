@@ -1,308 +1,241 @@
 <?xml version="1.0" encoding="utf-8"?>
 <changelog bulletedList="true">
-    <changelogversion versionName="v0.9.81" changeDate="">
-        <changelogtext>Fixed Extensions list sometimes not loading</changelogtext>
-        <changelogtext>Fixed Catalogue list resetting to the top</changelogtext>
-        <changelogtext>Fixed those without a category seeing "Updating Default"</changelogtext>
+    <changelogversion
+        changeDate=""
+        versionName="v1.7.2">
+        <changelogtext>Long press and select manga in library can now be synced to MDlist as follows</changelogtext>
+        <changelogtext>Long press a chapter gives option to view comments for chapter</changelogtext>
+        <changelogtext>Removed other languages from manga description</changelogtext>
     </changelogversion>
-
-    <changelogversion versionName="v0.9.8" changeDate="">
-		<changelogtext>Hide categories and show your library in a single list in filters</changelogtext>
-		<changelogtext>Option to set date format</changelogtext>
-		<changelogtext>You can now pull to refresh on multiple categories, they will be added to the queue</changelogtext>
-		<changelogtext>Fast scroller added to library</changelogtext>
-		<changelogtext>Search history in recently read</changelogtext>
-		<changelogtext>Unread sorting now always shows unread on top</changelogtext>
-		<changelogtext>Download notification placeholder improved</changelogtext>
-		<changelogtext>Confirmation popup when removing manga from library</changelogtext>
-		<changelogtext>Reworked downloads caching logic</changelogtext>
-		<changelogtext>Bug fixes for icons and themes</changelogtext>
-    </changelogversion>
-
-    <changelogversion versionName="v0.9.761" changeDate="">
-        <changelogtext>More bug fixes :(</changelogtext>
-    </changelogversion>
-
-	<changelogversion versionName="v0.9.76" changeDate="">
-		<changelogtext>Bug fixes and performance improvements :)</changelogtext>
-		<changelogtext>If titles of your manga disappeared in the last update, please go to sources and search for it, this will add the title back</changelogtext>
-	</changelogversion>
-	
-	<changelogversion versionName="v0.9.75" changeDate="">
-		<changelogtext>Edit all manga info from title to tags for both online and local manga</changelogtext>
-		<changelogtext>Tracked filter no longer shows tracking for services you've logged out of</changelogtext>
-		<changelogtext>Added logout button to tracking settings</changelogtext>
-		<changelogtext>Track button pre-selected when adding new manga to track and there's a single entry</changelogtext>
-		<changelogtext>Tracking status options now reflect the site's wording and order</changelogtext>
-		<changelogtext>Refreshing metadata now updates the manga title (if there is a new manga title)</changelogtext>
-		<changelogtext>Search "local" to see local manga, also can now search artist</changelogtext>
-		<changelogtext>Tapping the app icon on homescreen no longer closes the reader or webview</changelogtext>
-		<changelogtext>Fixed crash when changing categories for global download</changelogtext>
-		<changelogtext>Fully Translated Russian Language</changelogtext>
-		<changelogtext>Default category name in settings now honors locale</changelogtext>
-		<changelogtext>Added Last Read to Drag &amp; Drop sorting</changelogtext>
-		<changelogtext>Fixes to stopping downloads</changelogtext>
-	</changelogversion>
-
-    <changelogversion versionName="v0.9.7" changeDate="">
-		<changelogtext>Extensions notifications now perfected</changelogtext>
-		<changelogtext>Extensions are checked every hour in app</changelogtext>
-		<changelogtext>Added badge showing how many updates for extension are pending in the side drawer</changelogtext>
-		<changelogtext>Extensions no longer available show obsolete</changelogtext>
-		<changelogtext>More material dialog boxes, Android 10 uses normal casing on buttons</changelogtext>
-		<changelogtext>Tap on manga thumbnails in info to expand them</changelogtext>
-		<changelogtext>Have different sorting per category in drag &amp; drop</changelogtext>
-		<changelogtext>Filter Library by tracked manga</changelogtext>
-		<changelogtext>Web view now has pull to refresh and progress bar</changelogtext>
-		<changelogtext>Extensions no longer available show up as obsolete</changelogtext>
-		<changelogtext>Sort drag &amp; drop by unread</changelogtext>
-		<changelogtext>Move selected manga to the top or bottom of the list in Drag &amp; Drop</changelogtext>
-		<changelogtext>Web view now hides the top bar when scroll</changelogtext>
-		<changelogtext>Search view in toolbar hides filter/no more duplicates</changelogtext>
-		<changelogtext>Fixed last updated sorting not going by latest chapter upload</changelogtext>
-		<changelogtext>More translations, Default category now honors your language</changelogtext>
-		<changelogtext>Fixes to a few dialog boxes, Drag &amp; Drop, selecting in library</changelogtext>
-		<changelogtext>Fixed double vibration when long pressing in drag &amp; drop mode</changelogtext>
-		<changelogtext>Updating wording in a few places</changelogtext>
-		<changelogtext>Settings -> About -> Build Time now shows you this changelog</changelogtext>
-	</changelogversion>
-	
-    <changelogversion versionName="v0.9.69" changeDate="">
-        <changelogtext>Restoring backups is now a notification</changelogtext>
-		<changelogtext>Fixed Recent Read bugs, recently read goes back 50 years</changelogtext>
-		<changelogtext>Group notifications now only make one sound</changelogtext>
-		<changelogtext>New Last Updated (last updated being newest chapter) logic now is set on restore as well</changelogtext>
-		<changelogtext>Using new material dialog boxes</changelogtext>
-		<changelogtext>For unfavorited manga, chapters now start at the top of the list</changelogtext>
-		<changelogtext>Option for smart read bg to be based on the page or based on the app theme</changelogtext>
-		<changelogtext>Splash screen now matches app colors</changelogtext>
-		<changelogtext>Added option in Advanced to cleanup old downloads</changelogtext>
-		<changelogtext>Downloads will now take images from the reader cache, instead of downloading again</changelogtext>
-		<changelogtext>Downloads have been renamed to a more simple format</changelogtext>
-    </changelogversion>
-
-    <changelogversion versionName="v0.9.62" changeDate="">
-        <changelogtext>Fixed Status Bar in Black reader theme</changelogtext>
-    </changelogversion>
-	
-    <changelogversion versionName="v0.9.61" changeDate="">
-        <changelogtext>Added splash screen</changelogtext>
-        <changelogtext>Truly fixed the dark theme bug</changelogtext>
-        <changelogtext>Fixed downloads not deleting after reading if the chapter has scanlator
+    <changelogversion
+        changeDate=""
+        versionName="v1.7.1">
+        <changelogtext>Long Strip tagged comics now use Webtoon reader automatically</changelogtext>
+        <changelogtext>Non long strip tagged comics that a user chooses to read in webtoon reader
+            now adds margins between pages by default
         </changelogtext>
-        <changelogtext>🦀Manga Rock is Dead🦀, but that shouldn't crash the app when
-            pressing browse</changelogtext>
+        <changelogtext>Removed other languages from manga description</changelogtext>
     </changelogversion>
-
-	<changelogversion versionName="v0.9.6" changeDate="">
-		<changelogtext>Pending downloads can be move to the top or bottom of the queue with a
-            menu button on the right side, they can also be canceled</changelogtext>
-		<changelogtext>Fixes for the extension updates notification (should be solid
-            now)</changelogtext>
-		<changelogtext>Auto migration now has a prompt before you quit early + fixes</changelogtext>
-		<changelogtext>Fixed dark theme sometimes mixing with the light, bugging out the
-            UI</changelogtext>
-		<changelogtext>Added option to reorder pending downloads by newest or oldest
-            chapter</changelogtext>
-		<changelogtext>Mass Migration now shows progress and total manga in the
-            title</changelogtext>
-		<changelogtext>Fixed the issue where deleted downloads using the old folder format said
-            they weren't (they were)</changelogtext>
-		<changelogtext>Canceled downloads now delete the temp folder</changelogtext>
-		<changelogtext>Auto Migration source now show their language if multiple languages are
-            enabled</changelogtext>
-	</changelogversion>
-
-	<changelogversion versionName="v0.9.56" changeDate="">
-		<changelogtext>Rewording a few things</changelogtext>
-		<changelogtext>Extensions Updater checker now checks every 12 hours, you might need to
-            renable this setting to get the new timing</changelogtext>
-		<changelogtext>Fixed reordering drag and drop by last updating being reversed</changelogtext>
-		<changelogtext>Auto Migrations now shows how many manual migrations were made after
-            skipping the rest</changelogtext>
-	</changelogversion>
-
-	<changelogversion versionName="v0.9.55" changeDate="">
-		<changelogtext>Drag &amp; Drop support in Library</changelogtext>
-		<changelogtext>Optimizations for the auto-migration, should now find alternative titles
-            for mangas</changelogtext>
-		<changelogtext>Fast scrolling in library</changelogtext>
-		<changelogtext>(From dev) faster loading when scrubbing the reader's seekbar</changelogtext>
-		<changelogtext>Barely smaller app size</changelogtext>
-		<changelogtext>Fix extension notifcation sometimes not showing</changelogtext>
-	</changelogversion>
-
-	<changelogversion versionName="v0.9.5" changeDate="">
-		<changelogtext>Mass/Automatic Source Migration</changelogtext>
-		<changelogtext>Fix single tag searching + multi tag searching by commas (ie. "Romance,
-            -Harem, Comedy")</changelogtext>
-		<changelogtext>Chapters FAB no longer hides</changelogtext>
-		<changelogtext>Added setting to ignore articles when sorting alphabetically</changelogtext>
-		<changelogtext>Downloaded chapters names now use scantalors names</changelogtext>
-		<changelogtext>Fixed reordering downloads restarting the progress</changelogtext>
-		<changelogtext>(From dev) Auto attempt a login refresh once if MAL returns http
-            400</changelogtext>
-		<changelogtext>(From dev) Increase default text size of the transition chapter
-            page</changelogtext>
-		<changelogtext>(From dev) Add .nomedia file in each chapter download folder</changelogtext>
-        <changelogtext>Hard coded Mangadex extension removed, please update your
-            extensions to access their preferences</changelogtext>
-	</changelogversion>
-
-    <changelogversion versionName="v0.9.41" changeDate="">
-        <changelogtext>Fixed status bar not being transparent for dark themes on Android Pie and
-            under</changelogtext>
-        <changelogtext>Manga/Chapter titles are no longer truncated on notifications</changelogtext>
+    <changelogversion
+        changeDate=""
+        versionName="v1.7.0">
+        <changelogtext>Changed external tab name to other</changelogtext>
+        <changelogtext>Changed related tab name to similar</changelogtext>
+        <changelogtext>improved similar tabs background work</changelogtext>
+        <changelogtext>improved cache and cover updating when library updates</changelogtext>
+        <changelogtext>remove image server option that doesnt exist anymore</changelogtext>
+        <changelogtext>fix color issues on tracking cards</changelogtext>
+        <changelogtext>low quality covers now work on follows and similar pages</changelogtext>
     </changelogversion>
-
-    <changelogversion versionName="v0.9.4" changeDate="">
-        <changelogtext>Automatically check for updates for installed extensions (Enable it by
-            going to Extensions -> Overflow menu -> Auto-check for updates)</changelogtext>
-		<changelogtext>Reorder downloads in queue</changelogtext>
-        <changelogtext>New Icon!</changelogtext>
+    <changelogversion
+        changeDate=""
+        versionName="v1.6.5">
+        <changelogtext>Make related manga a scheduled job when enabled
+        </changelogtext>
+        <changelogtext>Fix bug where covers were force reloaded in library
+        </changelogtext>
+        <changelogtext>Condensed tracking page
+        </changelogtext>
     </changelogversion>
-
-    <changelogversion versionName="v0.9.35" changeDate="">
-        <changelogtext>Fixed crash when disabling all sources in a language before disabling any
-            sources</changelogtext>
-        <changelogtext>Added back MangaDex Extension Preferences</changelogtext>
+    <changelogversion
+        changeDate=""
+        versionName="v1.6.4.1">
+        <changelogtext>Changed link for related manga
+        </changelogtext>
     </changelogversion>
-
-	<changelogversion versionName="v0.9.3" changeDate="">
-        <changelogtext>Lock Tachiyomi using your fingerprint/Biometrics</changelogtext>
-        <changelogtext>Added search/sorting/mass enable/disable to catalogue sources</changelogtext>
-        <changelogtext>Extensions are now filtered to your locale, with an option to show other
-            languages</changelogtext>
-        <changelogtext>Fixed AMOLED theme not having dark snackbar</changelogtext>
+    <changelogversion
+        changeDate=""
+        versionName="v1.6.4">
+        <changelogtext>Added recommendations tab in manga info (alpha) Requires download a json and
+            loading it manually for now. Enable in settings
+        </changelogtext>
+        <changelogtext>add setting to manage notifications</changelogtext>
+        <changelogtext>refresh webtoon adapter on image property changes</changelogtext>
+        <changelogtext>minor code cleanup</changelogtext>
     </changelogversion>
-	
-    <changelogversion versionName="v0.9.2" changeDate="">
-        <changelogtext>Fixes notification text when there are multiple chapters</changelogtext>
-        <changelogtext>Simplified errors now show after restoring a backup on the popup
-            dialog</changelogtext>
-        <changelogtext>Fixed last updated sorting being in a jumbled order after restoring (Note:
-            if the list is still jumbled after restore, refersh your library)</changelogtext>
-        <changelogtext>Fixed notifcations not expanding on older devices</changelogtext>
+    <changelogversion
+        changeDate=""
+        versionName="v1.6.3">
+        <changelogtext>Added setting to use low quality covers in browse/search</changelogtext>
+        <changelogtext>Added setting to to use non logged in network for chapter downloads to
+            prevent marking website chapter as read
+        </changelogtext>
+        <changelogtext>Fix bug with mdlist where unfollowing a manga was not resetting the chapter
+            count
+        </changelogtext>
+        <changelogtext>Fix bug with mdlist where switching status then refreshing was showing the
+            old status
+        </changelogtext>
+        <changelogtext>Fix bug with mdlist where reading a chapter was updating the tracking tab for
+            unfollowed manga
+        </changelogtext>
+        <changelogtext>Fix bug where external link title was replacing the EDIT button for untracked
+            manga
+        </changelogtext>
     </changelogversion>
-
-    <changelogversion versionName="v0.9.1" changeDate="">
-        <changelogtext>Range Select for Library and Chapters: long Press on an item
-            then long press on another to select everything in between</changelogtext>
-        <changelogtext>Tap on top or bottom of a webtoon to scroll up and down
-            (tapping the sides still works too)</changelogtext>
-        <changelogtext>Tri-State Filters on library</changelogtext>
-        <changelogtext>Fixes to white background sometimes in auto dark mode</changelogtext>
+    <changelogversion
+        changeDate=""
+        versionName="v1.6.2.1">
+        <changelogtext>Fix saved file name swapping chapter and volume so saved files are always in
+            correct chapter order
+        </changelogtext>
     </changelogversion>
-
-    <changelogversion versionName="v0.9.0" changeDate="">
-        <changelogtext>Android 10 Dark Theme support: You can have Tachiyomi follow the system
-            theme as well as customize which dark theme to use for dark mode</changelogtext>
-        <changelogtext>Android 10 edge to edge support (and a translucent nav bar for older
-            versions): no more small ugly bar for the gesture navigation</changelogtext>
-        <changelogtext>Automatic background based on manga page: For those that like having a
-            white background to match the content, this will automatically set the background to
-            match for moments such as a flashback section of a manga</changelogtext>
-        <changelogtext>Richer New chapters notifications: Now as a group of notifications,
-            expanding out to show more information about the new chapters (like chapter name and
-            manga cover). Tapping on it will bring you right into the chapter or expand it to
-            mark it as read or view all chapters</changelogtext>
-        <changelogtext>New material snackbar: Removing manga now auto deletes chapters and has an
-            undo button in case you change your mind</changelogtext>
-        <changelogtext>Multi Source Migration from library</changelogtext>
-        <changelogtext>Notification separation of updating library and new chapters</changelogtext>
-        <changelogtext>Share sheets upgrade for Android 10</changelogtext>
-        <changelogtext>Reader seekbar overrides switch app gesture in Android 10, so no more
-            accidents for that</changelogtext>
-        <changelogtext>Option to hide manga titles in grid view</changelogtext>
-        <changelogtext>Filter out your library by searching for tags (ex. "Comedy" or "Slice of
-            Life") or exclude manga by a tag (ex. "-Shounen" or "-Romance"). Tapping on these
-            tags also performs a local search</changelogtext>
-        <changelogtext>Android X Support</changelogtext>
+    <changelogversion
+        changeDate=""
+        versionName="v1.6.2">
+        <changelogtext>Add ability to filter library by specific tracker</changelogtext>
+        <changelogtext>Changed internal json parsing logic for manga api</changelogtext>
+        <changelogtext>Changed the file name structure when saving an image</changelogtext>
+        <changelogtext>Fix amoled tracking card color</changelogtext>
+        <changelogtext>Fix backup file name still being Taciyomi</changelogtext>
+        <changelogtext>Fix bug where logout was not working</changelogtext>
+        <changelogtext>Fix bug where some manga wouldnt load</changelogtext>
+        <changelogtext>Fix toast message</changelogtext>
+        <changelogtext>Filter out tmp folders from download badges</changelogtext>
+        <changelogtext>Moved the follows screen into the browse screen</changelogtext>
+        <changelogtext>Moved edit categories into library settings</changelogtext>
+        <changelogtext>Removed ability to set cover since it gets overridden on manga refresh
+        </changelogtext>
     </changelogversion>
-
-    <changelogversion versionName="v0.8.4" changeDate="">
-        <changelogtext>All the internal sources have been removed. They now need to be
-            installed as an extension.</changelogtext>
-        <changelogtext>Cloudflare is now resolved with a WebView in background which should put
-            an end to the recent updates to adapt to their changes.</changelogtext>
-        <changelogtext>Added an option to open manga details in a WebView. This
-            should also help when receiving a captcha confirmation page (usually 403 errors).
-            It can also be used to login with the website, as the app now shares cookies
-            .</changelogtext>
-        <changelogtext>Added a deep link handler that extensions can use to perform
-            a search within the app.</changelogtext>
-        <changelogtext>Added an option to decode images in ARGB8888 format for
-            devices running Oreo or later.</changelogtext>
-        <changelogtext>Added Shikimori tracker.</changelogtext>
-        <changelogtext>Updated translations.</changelogtext>
+    <changelogversion
+        changeDate=""
+        versionName="v1.6.1">
+        <changelogtext>Add automatic Mangadex List in tracking, note you must be following a manga
+            for chapters to update
+        </changelogtext>
+        <changelogtext>Added external links from mangadex for animeplanet and mangaupdates
+        </changelogtext>
+        <changelogtext>Renamed tracking tab to external</changelogtext>
+        <changelogtext>Removed Shikimori tracker</changelogtext>
+        <changelogtext>Removed display/sorting mode dialog and made them submenus</changelogtext>
+        <changelogtext>Removed ability to change covers</changelogtext>
+        <changelogtext>Library filter ignored Md List</changelogtext>
     </changelogversion>
-
-    <changelogversion versionName="v0.8.2" changeDate="">
-        <changelogtext>Updated Cloudflare.</changelogtext>
-        <changelogtext>Fixed crashes with some translations.</changelogtext>
+    <changelogversion
+        changeDate=""
+        versionName="v1.6">
+        <changelogtext>Add ability to update follow status from manga info page</changelogtext>
+        <changelogtext>Add filter by tracked option in Library</changelogtext>
+        <changelogtext>Add logout for trackers</changelogtext>
+        <changelogtext>Add new logout dialog for mangadex</changelogtext>
+        <changelogtext>Add Change Log back into app</changelogtext>
+        <changelogtext>Add Firebase back for analytics</changelogtext>
+        <changelogtext>Clicking build time will open change log</changelogtext>
+        <changelogtext>Clicking cover in manga info page enlarges cover</changelogtext>
+        <changelogtext>Download Dialog is now a submenu</changelogtext>
+        <changelogtext>Fix amoled dialog color</changelogtext>
+        <changelogtext>Fix blocked groups from mangadex not always being honored</changelogtext>
+        <changelogtext>Fix crash for multichoice preference with all option</changelogtext>
+        <changelogtext>Fix fast scroll bug when opening right side menu</changelogtext>
+        <changelogtext>Fix follow status not showing correctly on manga info</changelogtext>
+        <changelogtext>Fix my animelist title being too long</changelogtext>
+        <changelogtext>Remove cloudflare interceptor</changelogtext>
+        <changelogtext>Start storing tracker ids from mangadex api</changelogtext>
+        <changelogtext>Tweak initial tracker appearance and add remove button</changelogtext>
     </changelogversion>
-
-    <changelogversion versionName="v0.8.1" changeDate="">
-        <changelogtext>Fixed latest Cloudflare changes.</changelogtext>
-        <changelogtext>Bundled SQLite for better performance and new features.</changelogtext>
-        <changelogtext>Restored dark blue theme.</changelogtext>
-        <changelogtext>Added a MAL API workaround.</changelogtext>
-        <changelogtext>Fixed search issues on Kitsu and AniList.</changelogtext>
-        <changelogtext>Fixed an issue where the image was centered when using the vertical reader.</changelogtext>
-        <changelogtext>Updated translations.</changelogtext>
+    <changelogversion
+        changeDate=""
+        versionName="v1.5.4.1">
+        <changelogtext>Switched to Tachiyomi user agent</changelogtext>
     </changelogversion>
-
-    <changelogversion versionName="v0.8.0" changeDate="">
-        <changelogtext>Added a new reader with many fixes.</changelogtext>
-        <changelogtext>Added GIF support.</changelogtext>
-        <changelogtext>Fixed loading errors with local compressed files.</changelogtext>
-        <changelogtext>Fixed an issue where images couldn't be shared.</changelogtext>
-        <changelogtext>Removed image decoders setting because it's not needed anymore.</changelogtext>
-        <changelogtext>Updated translations.</changelogtext>
-        <changelogtext>Show all entries in library even if their extensions are not installed</changelogtext>
-        <changelogtext>Fixed search issues on Kitsu and AniList.</changelogtext>
-        <changelogtext>Other minor bugfixes.</changelogtext>
+    <changelogversion
+        changeDate=""
+        versionName="v1.5.4">
+        <changelogtext>Switched back to .org urls</changelogtext>
+        <changelogtext>fix some dialog bugs where ok button was missing</changelogtext>
+        <changelogtext>fix dialog bug where you couldnt select no category to add to default
+            category
+        </changelogtext>
+        <changelogtext>adjust splashscreen for neko</changelogtext>
+        <changelogtext>use cache to complete downloads</changelogtext>
+        <changelogtext>recently read goes back 50 years</changelogtext>
+        <changelogtext>webview is now an activity</changelogtext>
+        <changelogtext>changed library title font</changelogtext>
+        <changelogtext>tweaked reader seekbar height</changelogtext>
+        <changelogtext>fix browse search focus being removed when deleting the text</changelogtext>
     </changelogversion>
-
-    <changelogversion versionName="v0.7.4" changeDate="">
-        <changelogtext>Updated Anilist's API to v2.</changelogtext>
-        <changelogtext>Added Github link to about.</changelogtext>
-        <changelogtext>Fixed indonesian language not working.</changelogtext>
-        <changelogtext>Fixed an issue on KitKat that crashed the app when scheduling updates.</changelogtext>
-        <changelogtext>Fixed a few more issues introduced on the previous release.</changelogtext>
+    <changelogversion
+        changeDate=""
+        versionName="v1.5.3">
+        <changelogtext>new notification when restoring a backup</changelogtext>
+        <changelogtext>switched to long press select between like j2k</changelogtext>
+        <changelogtext>new splash screen</changelogtext>
+        <changelogtext>changed some images to webp</changelogtext>
+        <changelogtext>lower rate limit to 3 per a second to help reduce load on mangadex
+        </changelogtext>
+        <changelogtext></changelogtext>
+        <changelogtext></changelogtext>
     </changelogversion>
-
-    <changelogversion versionName="v0.7.3" changeDate="">
-        <changelogtext>Fixed the tracking search layout when there are many results.</changelogtext>
-        <changelogtext>Separate english language into american and british so that dates are formatted according to that locale.</changelogtext>
-        <changelogtext>Added Firebase analytics, for Android API distribution.</changelogtext>
-        <changelogtext>Crop borders for webtoons now has a separate setting.</changelogtext>
-        <changelogtext>The downloader now runs in a foreground service to prevent it from being killed.</changelogtext>
-        <changelogtext>Fixed a few weird crashes.</changelogtext>
+    <changelogversion
+        changeDate=""
+        versionName="v1.5.2">
+        <changelogtext>fix notification of library update not cancelling</changelogtext>
+        <changelogtext>fix webtoon margin option showing in wrong reader</changelogtext>
     </changelogversion>
-
-    <changelogversion versionName="v0.7.2" changeDate="">
-        <changelogtext>Fixed missing downloaded label in chapters screen.</changelogtext>
-        <changelogtext>Fixed updater in KitKat and lower due to TLS.</changelogtext>
+    <changelogversion
+        changeDate=""
+        versionName="v1.5.1">
+        <changelogtext>fix reader settings sheet</changelogtext>
+        <changelogtext>fix import follows not cleaning the title</changelogtext>
     </changelogversion>
-
-    <changelogversion versionName="v0.7.1" changeDate="">
-        <changelogtext>Updated Cloudflare bypass.</changelogtext>
-        <changelogtext>Enabled TLS 1.1 and TLS 1.2 on Android KitKat and lower.</changelogtext>
-        <changelogtext>Minor UI changes.</changelogtext>
+    <changelogversion
+        changeDate=""
+        versionName="v1.5.0">
+        <changelogtext>Updated domain to .cc since most of the old chapters now work!
+        </changelogtext>
+        <changelogtext>added ability to sync read and reread follows from mangadex into your
+            library
+        </changelogtext>
+        <changelogtext>minor clean up of code</changelogtext>
     </changelogversion>
-
-    <changelogversion versionName="v0.7.0" changeDate="">
-        <changelogtext>Added extensions support. You can now install and update extensions within the app.
-            If you installed any extension previously through F-Droid, you'll have to uninstall them first.</changelogtext>
-        <changelogtext>Added a custom download option to download N chapters.</changelogtext>
-        <changelogtext>Updated manga info layout, with clickable components to copy to clipboard or perform a global search.</changelogtext>
-        <changelogtext>Added an option to change the animation speed of a double tap in the reader.</changelogtext>
-        <changelogtext>Improved tracking results UI with covers.</changelogtext>
-        <changelogtext>Dropped support for simultaneous downloads.</changelogtext>
-        <changelogtext>Batoto is now a legacy source, you can only use it to migrate.</changelogtext>
-        <changelogtext>Updated dark theme and reader theme.</changelogtext>
-        <changelogtext>Bugfixes and minor UI/UX improvements.</changelogtext>
+    <changelogversion
+        changeDate=""
+        versionName="v1.4.8">
+        <changelogtext>Enhanced Notifications for library updates</changelogtext>
+        <changelogtext>android 10 style share images/ share manga page</changelogtext>
+        <changelogtext>split general settings into general and library</changelogtext>
+        <changelogtext>fix bug where marked as read was not updating the DOWNLOADED text
+        </changelogtext>
+        <changelogtext>improved loading speeds when skipping pages in a chapter</changelogtext>
+        <changelogtext>file format changes</changelogtext>
+        <changelogtext>fix bug in custom downloads dialog for amoled</changelogtext>
+        <changelogtext>updated webtoon transition text to match other reader</changelogtext>
+        <changelogtext>added side margins option for webtoon</changelogtext>
+        <changelogtext>added option to put a margin between webtoon pages</changelogtext>
     </changelogversion>
-
+    <changelogversion
+        changeDate=""
+        versionName="v1.4.7">
+        <changelogtext>fix download dialogs</changelogtext>
+        <changelogtext>add multi tag search in library</changelogtext>
+        <changelogtext>removed sorting ignoring article (a the etc)</changelogtext>
+        <changelogtext>add fast scroll with bubble to library</changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
+        versionName="v1.4.6">
+        <changelogtext>send logs when crashing. Only information sent is the following
+            ReportField.ANDROID_VERSION,
+            ReportField.APP_VERSION_CODE,
+            ReportField.APP_VERSION_NAME,
+            ReportField.PACKAGE_NAME,
+            ReportField.REPORT_ID,
+            ReportField.STACK_TRACE,
+            ReportField.USER_APP_START_DATE,
+            ReportField.USER_CRASH_DATE
+        </changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
+        versionName="v1.4.5">
+        <changelogtext>fix crash bug on certain version of android</changelogtext>
+        <changelogtext>fix neko logo not showing in side drawer</changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
+        versionName="v1.4.4">
+        <changelogtext>fixed bug with download folder dialog</changelogtext>
+        <changelogtext>fixed bug with backup dialog</changelogtext>
+        <changelogtext>fixed bug with downloaded files not being found</changelogtext>
+    </changelogversion>
 </changelog>

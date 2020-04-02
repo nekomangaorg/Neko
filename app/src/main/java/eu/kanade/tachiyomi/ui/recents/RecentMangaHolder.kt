@@ -4,7 +4,6 @@ import android.text.format.DateUtils
 import android.view.View
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.model.Download
-import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.ui.manga.chapter.BaseChapterHolder
 import eu.kanade.tachiyomi.util.view.visibleIf
 import kotlinx.android.synthetic.main.download_button.*
@@ -21,7 +20,7 @@ class RecentMangaHolder(
     }
 
     fun bind(item: RecentMangaItem) {
-        download_button.visibleIf(item.mch.manga.source != LocalSource.ID)
+        download_button.visibility = View.VISIBLE
         title.text = item.mch.manga.title
         val holder = (adapter.delegate as RecentsHolder)
         val isSearch =

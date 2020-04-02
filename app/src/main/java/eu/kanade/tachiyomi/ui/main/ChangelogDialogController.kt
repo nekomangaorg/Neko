@@ -26,7 +26,7 @@ class ChangelogDialogController : DialogController() {
         override fun initAttrs(attrs: AttributeSet?, defStyle: Int) {
             mRowLayoutId = R.layout.changelog_row_layout
             mRowHeaderLayoutId = R.layout.changelog_header_layout
-            mChangeLogFileResourceId = if (BuildConfig.DEBUG) R.raw.changelog_debug else R.raw.changelog_release
+            mChangeLogFileResourceId = R.raw.changelog_release
         }
     }
 }

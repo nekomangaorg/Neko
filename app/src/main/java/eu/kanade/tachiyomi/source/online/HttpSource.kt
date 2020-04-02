@@ -4,26 +4,25 @@ import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.asObservableSuccess
 import eu.kanade.tachiyomi.network.newCallWithProgress
-import eu.kanade.tachiyomi.source.CatalogueSource
+import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.FilterList
-import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.online.handlers.MangaPlusHandler
+import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import okhttp3.Headers
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import rx.Observable
 import uy.kohesive.injekt.injectLazy
-import java.net.URI
-import java.net.URISyntaxException
 import java.security.MessageDigest
 
 /**
  * A simple implementation for sources from a website.
  */
-abstract class HttpSource : CatalogueSource {
+abstract class HttpSource : Source {
 
     /**
      * Network service.
@@ -40,7 +39,9 @@ abstract class HttpSource : CatalogueSource {
     /**
      * Base url of the website without the trailing slash, like: http://mysite.com
      */
-    abstract val baseUrl: String
+    val baseUrl = MdUtil.baseUrl
+
+    override val name = "MangaDex"
 
     /**
      * Version id used to generate the source id. If the site completely changes and urls are
@@ -56,7 +57,8 @@ abstract class HttpSource : CatalogueSource {
     override val id by lazy {
         val key = "${name.toLowerCase()}/$lang/$versionId"
         val bytes = MessageDigest.getInstance("MD5").digest(key.toByteArray())
-        (0..7).map { bytes[it].toLong() and 0xff shl 8 * (7 - it) }.reduce(Long::or) and Long.MAX_VALUE
+        (0..7).map { bytes[it].toLong() and 0xff shl 8 * (7 - it) }
+            .reduce(Long::or) and Long.MAX_VALUE
     }
 
     /**
@@ -67,14 +69,14 @@ abstract class HttpSource : CatalogueSource {
     /**
      * Default network client for doing requests.
      */
-    open val client: OkHttpClient
-        get() = network.client
+    val client: OkHttpClient = network.client.newBuilder().build()
 
     /**
-     * Headers builder for requests. Implementations can override this method for custom headers.
+     * Headers builder for request.
      */
-    protected open fun headersBuilder() = Headers.Builder().apply {
-        add("User-Agent", "Mozilla/5.0 (Windows NT 6.3; WOW64)")
+    protected fun headersBuilder() = Headers.Builder().apply {
+        add("User-Agent", "Tachiyomi " + System.getProperty("http.agent"))
+        add("X-Requested-With", "XMLHttpRequest")
     }
 
     /**
@@ -82,188 +84,10 @@ abstract class HttpSource : CatalogueSource {
      */
     override fun toString() = "$name (${lang.toUpperCase()})"
 
-    /**
-     * Returns an observable containing a page with a list of manga. Normally it's not needed to
-     * override this method.
-     *
-     * @param page the page number to retrieve.
-     */
-    override fun fetchPopularManga(page: Int): Observable<MangasPage> {
-        return client.newCall(popularMangaRequest(page))
-                .asObservableSuccess()
-                .map { response ->
-                    popularMangaParse(response)
-                }
-    }
-
-    /**
-     * Returns the request for the popular manga given the page.
-     *
-     * @param page the page number to retrieve.
-     */
-    protected abstract fun popularMangaRequest(page: Int): Request
-
-    /**
-     * Parses the response from the site and returns a [MangasPage] object.
-     *
-     * @param response the response from the site.
-     */
-    protected abstract fun popularMangaParse(response: Response): MangasPage
-
-    /**
-     * Returns an observable containing a page with a list of manga. Normally it's not needed to
-     * override this method.
-     *
-     * @param page the page number to retrieve.
-     * @param query the search query.
-     * @param filters the list of filters to apply.
-     */
-    override fun fetchSearchManga(page: Int, query: String, filters: FilterList): Observable<MangasPage> {
-        return client.newCall(searchMangaRequest(page, query, filters))
-                .asObservableSuccess()
-                .map { response ->
-                    searchMangaParse(response)
-                }
-    }
-
-    /**
-     * Returns the request for the search manga given the page.
-     *
-     * @param page the page number to retrieve.
-     * @param query the search query.
-     * @param filters the list of filters to apply.
-     */
-    protected abstract fun searchMangaRequest(page: Int, query: String, filters: FilterList): Request
-
-    /**
-     * Parses the response from the site and returns a [MangasPage] object.
-     *
-     * @param response the response from the site.
-     */
-    protected abstract fun searchMangaParse(response: Response): MangasPage
-
-    /**
-     * Returns an observable containing a page with a list of latest manga updates.
-     *
-     * @param page the page number to retrieve.
-     */
-    override fun fetchLatestUpdates(page: Int): Observable<MangasPage> {
-        return client.newCall(latestUpdatesRequest(page))
-                .asObservableSuccess()
-                .map { response ->
-                    latestUpdatesParse(response)
-                }
-    }
-
-    /**
-     * Returns the request for latest manga given the page.
-     *
-     * @param page the page number to retrieve.
-     */
-    protected abstract fun latestUpdatesRequest(page: Int): Request
-
-    /**
-     * Parses the response from the site and returns a [MangasPage] object.
-     *
-     * @param response the response from the site.
-     */
-    protected abstract fun latestUpdatesParse(response: Response): MangasPage
-
-    /**
-     * Returns an observable with the updated details for a manga. Normally it's not needed to
-     * override this method.
-     *
-     * @param manga the manga to be updated.
-     */
-    override fun fetchMangaDetails(manga: SManga): Observable<SManga> {
-        return client.newCall(mangaDetailsRequest(manga))
-                .asObservableSuccess()
-                .map { response ->
-                    mangaDetailsParse(response).apply { initialized = true }
-                }
-    }
-
-    /**
-     * Returns the request for the details of a manga. Override only if it's needed to change the
-     * url, send different headers or request method like POST.
-     *
-     * @param manga the manga to be updated.
-     */
+    // used to get the manga url instead of the api manga url
     open fun mangaDetailsRequest(manga: SManga): Request {
         return GET(baseUrl + manga.url, headers)
     }
-
-    /**
-     * Parses the response from the site and returns the details of a manga.
-     *
-     * @param response the response from the site.
-     */
-    protected abstract fun mangaDetailsParse(response: Response): SManga
-
-    /**
-     * Returns an observable with the updated chapter list for a manga. Normally it's not needed to
-     * override this method.  If a manga is licensed an empty chapter list observable is returned
-     *
-     * @param manga the manga to look for chapters.
-     */
-    override fun fetchChapterList(manga: SManga): Observable<List<SChapter>> {
-        if (manga.status != SManga.LICENSED) {
-            return client.newCall(chapterListRequest(manga))
-                    .asObservableSuccess()
-                    .map { response ->
-                        chapterListParse(response)
-                    }
-        } else {
-            return Observable.error(Exception("Licensed - No chapters to show"))
-        }
-    }
-
-    /**
-     * Returns the request for updating the chapter list. Override only if it's needed to override
-     * the url, send different headers or request method like POST.
-     *
-     * @param manga the manga to look for chapters.
-     */
-    protected open fun chapterListRequest(manga: SManga): Request {
-        return GET(baseUrl + manga.url, headers)
-    }
-
-    /**
-     * Parses the response from the site and returns a list of chapters.
-     *
-     * @param response the response from the site.
-     */
-    protected abstract fun chapterListParse(response: Response): List<SChapter>
-
-    /**
-     * Returns an observable with the page list for a chapter.
-     *
-     * @param chapter the chapter whose page list has to be fetched.
-     */
-    override fun fetchPageList(chapter: SChapter): Observable<List<Page>> {
-        return client.newCall(pageListRequest(chapter))
-                .asObservableSuccess()
-                .map { response ->
-                    pageListParse(response)
-                }
-    }
-
-    /**
-     * Returns the request for getting the page list. Override only if it's needed to override the
-     * url, send different headers or request method like POST.
-     *
-     * @param chapter the chapter whose page list has to be fetched.
-     */
-    protected open fun pageListRequest(chapter: SChapter): Request {
-        return GET(baseUrl + chapter.url, headers)
-    }
-
-    /**
-     * Parses the response from the site and returns a list of pages.
-     *
-     * @param response the response from the site.
-     */
-    protected abstract fun pageListParse(response: Response): List<Page>
 
     /**
      * Returns an observable with the page containing the source url of the image. If there's any
@@ -272,27 +96,15 @@ abstract class HttpSource : CatalogueSource {
      * @param page the page whose source image has to be fetched.
      */
     open fun fetchImageUrl(page: Page): Observable<String> {
-        return client.newCall(imageUrlRequest(page))
+        if (page.imageUrl!!.contains("mangaplus", true)) {
+            return MangaPlusHandler(client).client.newCall(GET(page.imageUrl!!, headers))
                 .asObservableSuccess()
-                .map { imageUrlParse(it) }
+                .map { "" }
+        }
+        return client.newCall(GET(page.imageUrl!!, headers))
+            .asObservableSuccess()
+            .map { "" }
     }
-
-    /**
-     * Returns the request for getting the url to the source image. Override only if it's needed to
-     * override the url, send different headers or request method like POST.
-     *
-     * @param page the chapter whose page list has to be fetched
-     */
-    protected open fun imageUrlRequest(page: Page): Request {
-        return GET(page.url, headers)
-    }
-
-    /**
-     * Parses the response from the site and returns the absolute url to the source image.
-     *
-     * @param response the response from the site.
-     */
-    protected abstract fun imageUrlParse(response: Response): String
 
     /**
      * Returns an observable with the response of the source image.
@@ -300,57 +112,12 @@ abstract class HttpSource : CatalogueSource {
      * @param page the page whose source image has to be downloaded.
      */
     fun fetchImage(page: Page): Observable<Response> {
-        return client.newCallWithProgress(imageRequest(page), page)
+        if (page.imageUrl!!.contains("mangaplus", true)) {
+            return MangaPlusHandler(client).client.newCall(GET(page.imageUrl!!, headers))
                 .asObservableSuccess()
-    }
-
-    /**
-     * Returns the request for getting the source image. Override only if it's needed to override
-     * the url, send different headers or request method like POST.
-     *
-     * @param page the chapter whose page list has to be fetched
-     */
-    protected open fun imageRequest(page: Page): Request {
-        return GET(page.imageUrl!!, headers)
-    }
-
-    /**
-     * Assigns the url of the chapter without the scheme and domain. It saves some redundancy from
-     * database and the urls could still work after a domain change.
-     *
-     * @param url the full url to the chapter.
-     */
-    fun SChapter.setUrlWithoutDomain(url: String) {
-        this.url = getUrlWithoutDomain(url)
-    }
-
-    /**
-     * Assigns the url of the manga without the scheme and domain. It saves some redundancy from
-     * database and the urls could still work after a domain change.
-     *
-     * @param url the full url to the manga.
-     */
-    fun SManga.setUrlWithoutDomain(url: String) {
-        this.url = getUrlWithoutDomain(url)
-    }
-
-    /**
-     * Returns the url of the given string without the scheme and domain.
-     *
-     * @param orig the full url.
-     */
-    private fun getUrlWithoutDomain(orig: String): String {
-        try {
-            val uri = URI(orig)
-            var out = uri.path
-            if (uri.query != null)
-                out += "?" + uri.query
-            if (uri.fragment != null)
-                out += "#" + uri.fragment
-            return out
-        } catch (e: URISyntaxException) {
-            return orig
         }
+        return client.newCallWithProgress(GET(page.imageUrl!!, headers), page)
+            .asObservableSuccess()
     }
 
     /**

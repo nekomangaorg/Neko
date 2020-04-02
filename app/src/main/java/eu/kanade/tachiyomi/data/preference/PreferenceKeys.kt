@@ -105,8 +105,6 @@ object PreferenceKeys {
 
     const val automaticUpdates = "automatic_updates"
 
-    const val automaticExtUpdates = "automatic_ext_updates"
-
     const val downloadNew = "download_new"
 
     const val downloadNewCategories = "download_new_categories"
@@ -146,6 +144,22 @@ object PreferenceKeys {
     const val keepCatSort = "keep_cat_sort"
 
     const val alwaysShowChapterTransition = "always_show_chapter_transition"
+
+    const val skipHidden = "skip_hidden"
+
+    const val marginRatioWebtoon = "margin_ratio_webtoon_new"
+
+    const val similarShowTab = "pref_related_show_tab_key"
+
+    const val similarUpdateRestriction = "related_update_restriction"
+
+    const val showR18 = "show_r18"
+
+    const val imageServer = "image_server"
+
+    const val lowQualityCovers = "low_quality_covers"
+
+    const val useNonLoggedNetwork = "non_logged_in_network"
 
     @Deprecated("Use the preferences of the source")
     fun sourceUsername(sourceId: Long) = "pref_source_username_$sourceId"

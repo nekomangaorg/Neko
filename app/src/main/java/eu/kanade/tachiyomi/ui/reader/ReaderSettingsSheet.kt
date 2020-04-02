@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.CompoundButton
 import android.widget.Spinner
+import androidx.annotation.ArrayRes
 import androidx.core.widget.NestedScrollView
 import com.f2prateek.rx.preferences.Preference
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -133,6 +134,10 @@ class ReaderSettingsSheet(private val activity: ReaderActivity) :
         webtoon_prefs_group.visible()
         pager_prefs_group.gone()
         crop_borders_webtoon.bindToPreference(preferences.cropBordersWebtoon())
+        margin_ratio_webtoon.bindToIntPreference(
+            preferences.marginRatioWebtoon(),
+            R.array.webtoon_margin_ratio_values
+        )
     }
 
     /**
@@ -156,5 +161,21 @@ class ReaderSettingsSheet(private val activity: ReaderActivity) :
             if (shouldDismiss) dismiss()
         }
         setSelection(pref.getOrDefault() - offset, false)
+    }
+
+    /**
+     * Binds a spinner to a int preference. The position of the spinner item must
+     * correlate with the [Int value] resource item (in arrays.xml), which is a <string-array>
+     * of float values that will be parsed here and applied to the preference.
+     */
+    private fun Spinner.bindToIntPreference(
+        pref: Preference<Int>,
+        @ArrayRes intValuesResource: Int
+    ) {
+        val intValues = resources.getStringArray(intValuesResource).map { it.toInt() }
+        onItemSelectedListener = IgnoreFirstSpinnerListener { position ->
+            pref.set(intValues[position])
+        }
+        setSelection(intValues.indexOf(pref.getOrDefault()), false)
     }
 }

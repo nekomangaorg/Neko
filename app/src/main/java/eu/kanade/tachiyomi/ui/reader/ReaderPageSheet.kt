@@ -4,12 +4,10 @@ import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
-import com.afollestad.materialdialogs.MaterialDialog
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
-import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.util.view.setBottomEdge
 import eu.kanade.tachiyomi.util.view.setEdgeToEdge
@@ -41,7 +39,6 @@ class ReaderPageSheet(
 
         setBottomEdge(save_layout, activity)
 
-        set_as_cover_layout.setOnClickListener { setAsCover() }
         share_layout.setOnClickListener { share() }
         save_layout.setOnClickListener { save() }
     }
@@ -52,22 +49,6 @@ class ReaderPageSheet(
         if (width > 0) {
             window?.setLayout(width, ViewGroup.LayoutParams.MATCH_PARENT)
         }
-    }
-
-    /**
-     * Sets the image of this page as the cover of the manga.
-     */
-    private fun setAsCover() {
-        if (page.status != Page.READY) return
-
-        MaterialDialog(activity)
-            .title(R.string.confirm_set_image_as_cover)
-            .positiveButton(android.R.string.yes) {
-                activity.setAsCover(page)
-                dismiss()
-            }
-            .negativeButton(android.R.string.no)
-            .show()
     }
 
     /**

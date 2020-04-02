@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.data.database.models
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadProvider
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import uy.kohesive.injekt.injectLazy
 import kotlin.collections.set
 
@@ -41,6 +42,20 @@ open class MangaImpl : Manga {
     override var hide_title: Boolean = false
 
     override var date_added: Long = 0
+
+    override var follow_status: FollowStatus? = null
+
+    override var lang_flag: String? = null
+
+    override var anilist_id: String? = null
+
+    override var kitsu_id: String? = null
+
+    override var my_anime_list_id: String? = null
+
+    override var manga_updates_id: String? = null
+
+    override var anime_planet_id: String? = null
 
     override fun copyFrom(other: SManga) {
         if (other is MangaImpl && (other as MangaImpl)::title.isInitialized &&

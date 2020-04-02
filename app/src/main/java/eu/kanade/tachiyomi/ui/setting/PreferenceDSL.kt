@@ -13,7 +13,6 @@ import androidx.preference.PreferenceManager
 import androidx.preference.PreferenceScreen
 import androidx.preference.SwitchPreferenceCompat
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
-import eu.kanade.tachiyomi.widget.preference.ExtensionPreference
 import eu.kanade.tachiyomi.widget.preference.IntListMatPreference
 import eu.kanade.tachiyomi.widget.preference.ListMatPreference
 import eu.kanade.tachiyomi.widget.preference.MultiListMatPreference
@@ -28,10 +27,6 @@ inline fun PreferenceManager.newScreen(block: (@DSL PreferenceScreen).() -> Unit
 
 inline fun PreferenceGroup.preference(block: (@DSL Preference).() -> Unit): Preference {
     return initThenAdd(Preference(context), block)
-}
-
-inline fun PreferenceGroup.extensionPreference(block: (@DSL Preference).() -> Unit): ExtensionPreference {
-    return initThenAdd(ExtensionPreference(context), block)
 }
 
 inline fun PreferenceGroup.switchPreference(block: (@DSL SwitchPreferenceCompat).() -> Unit): SwitchPreferenceCompat {

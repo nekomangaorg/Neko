@@ -158,7 +158,7 @@ class BackupManager(val context: Context, version: Int = CURRENT_VERSION) {
 
                 // Delete older backups
                 val numberOfBackups = numberOfBackups()
-                val backupRegex = Regex("""tachiyomi_\d+-\d+-\d+_\d+-\d+.json""")
+                val backupRegex = Regex("""neko_\d+-\d+-\d+_\d+-\d+.json""")
                 dir.listFiles { _, filename -> backupRegex.matches(filename) }
                         .orEmpty()
                         .sortedByDescending { it.name }
@@ -286,7 +286,7 @@ class BackupManager(val context: Context, version: Int = CURRENT_VERSION) {
      */
     suspend fun restoreMangaFetch(source: Source, manga: Manga): Manga {
         return withContext(Dispatchers.IO) {
-            val networkManga = source.fetchMangaDetails(manga).toBlocking().single()
+            val networkManga = source.fetchMangaDetails(manga)
             manga.copyFrom(networkManga)
             manga.favorite = true
             manga.initialized = true
@@ -304,7 +304,7 @@ class BackupManager(val context: Context, version: Int = CURRENT_VERSION) {
      */
     suspend fun restoreChapterFetch(source: Source, manga: Manga, chapters: List<Chapter>) {
         withContext(Dispatchers.IO) {
-            val fetchChapters = source.fetchChapterList(manga).toBlocking().single()
+            val fetchChapters = source.fetchChapterList(manga)
             val syncChaptersWithSource =
                 syncChaptersWithSource(databaseHelper, fetchChapters, manga, source)
             if (syncChaptersWithSource.first.isNotEmpty()) {

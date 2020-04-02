@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.ui.library
 
 import android.view.View
-import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 
 /**
@@ -34,7 +33,6 @@ abstract class LibraryHolder(
             },
             when {
                 item.downloadCount == -1 -> -1
-                item.manga.source == LocalSource.ID -> -2
                 else -> item.downloadCount
             },
             item.chapterCount > -1)

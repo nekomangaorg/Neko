@@ -20,12 +20,18 @@ class CatalogueNavigationView @JvmOverloads constructor(context: Context, attrs:
 
     var onResetClicked = {}
 
+    var onRandomClicked = {}
+
+    var onFollowsClicked = {}
+
     init {
         recycler.adapter = adapter
         recycler.setHasFixedSize(true)
         val view = inflate(R.layout.catalogue_drawer_content)
         ((view as ViewGroup).getChildAt(1) as ViewGroup).addView(recycler)
         addView(view)
+        //follows_btn.setOnClickListener { onFollowsClicked() }
+        //random_manga_btn.setOnClickListener { onRandomClicked() }
         // title.text = context.getString(R.string.source_search_options)
         /*search_btn.setOnClickListener { onSearchClicked() }
         reset_btn.setOnClickListener { onResetClicked() }

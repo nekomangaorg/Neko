@@ -15,7 +15,6 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.glide.GlideApp
-import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.system.getResourceColor
@@ -209,11 +208,6 @@ class MangaHeaderHolder(
         manga_source.text = presenter.source.toString()
 
         filters_text.text = presenter.currentFilters()
-
-        if (manga.source == LocalSource.ID) {
-            webview_button.gone()
-            share_button.gone()
-        }
 
         if (!manga.initialized) return
         GlideApp.with(view.context).load(manga).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)

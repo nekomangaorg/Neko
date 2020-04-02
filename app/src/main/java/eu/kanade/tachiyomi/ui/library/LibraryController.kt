@@ -45,10 +45,6 @@ import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.RootSearchInterface
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
-import eu.kanade.tachiyomi.ui.migration.MigrationInterface
-import eu.kanade.tachiyomi.ui.migration.manga.design.PreMigrationController
-import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationListController
-import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationProcedureConfig
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.toast
@@ -66,7 +62,7 @@ open class LibraryController(
     bundle: Bundle? = null,
     protected val preferences: PreferencesHelper = Injekt.get()
 ) : BaseController(bundle), TabbedController, ActionMode.Callback,
-    ChangeMangaCategoriesDialog.Listener, MigrationInterface, DownloadServiceListener,
+    ChangeMangaCategoriesDialog.Listener, DownloadServiceListener,
     RootSearchInterface, LibraryServiceListener {
 
     /**
@@ -555,19 +551,12 @@ open class LibraryController(
                     selectAllRelay.call(it)
                 }
             }
-            R.id.action_migrate -> {
-                val skipPre = preferences.skipPreMigration().getOrDefault()
-                router.pushController(
-                    if (skipPre) {
-                        MigrationListController.create(
-                            MigrationProcedureConfig(selectedMangas.mapNotNull { it.id }, null)
-                        )
-                    } else {
-                        PreMigrationController.create(selectedMangas.mapNotNull { it.id })
-                    }.withFadeTransaction().tag(if (skipPre) MigrationListController.TAG else null)
-                )
+         /*   R.id.action_sync_to_dex -> {
+                presenter.syncMangaToDex(selectedMangas.toList())
                 destroyActionModeIfNeeded()
-            }
+                applicationContext?.toast("Adding to mangadex follows")
+            }*/
+
             /*R.id.action_to_top, R.id.action_to_bottom -> {
                 adapter?.categories?.getOrNull(library_pager.currentItem)?.id?.let {
                     reorganizeRelay.call(it to if (item.itemId == R.id.action_to_top) -1 else -2)
@@ -577,15 +566,6 @@ open class LibraryController(
             else -> return false
         }
         return true
-    }
-
-    override fun migrateManga(prevManga: Manga, manga: Manga, replace: Boolean): Manga? {
-        if (manga.id != prevManga.id) {
-            presenter.migrateManga(prevManga, manga, replace = replace)
-        }
-        val nextManga = migratingMangas.firstOrNull() ?: return null
-        migratingMangas.remove(nextManga)
-        return nextManga
     }
 
     override fun onDestroyActionMode(mode: ActionMode?) {

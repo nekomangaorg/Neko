@@ -6,7 +6,6 @@ import androidx.core.content.ContextCompat
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.model.Download
-import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsAdapter
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.visibleIf
@@ -19,7 +18,6 @@ class ChapterHolder(
     private val adapter: MangaDetailsAdapter
 ) : BaseChapterHolder(view, adapter) {
 
-    private var localSource = false
     init {
         download_button.setOnLongClickListener {
             adapter.delegate.startDownloadRange(adapterPosition)
@@ -38,8 +36,7 @@ class ChapterHolder(
             else -> chapter.name
         }
 
-        localSource = manga.source == LocalSource.ID
-        download_button.visibleIf(!localSource)
+        download_button.visibility = View.VISIBLE
 
         if (isLocked) download_button.gone()
 
@@ -123,7 +120,7 @@ class ChapterHolder(
             gone()
             return
         }
-        download_button.visibleIf(!localSource)
+        download_button.visibility = View.VISIBLE
         setDownloadStatus(status, progress)
     }
 }

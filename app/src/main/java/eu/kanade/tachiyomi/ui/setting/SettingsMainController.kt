@@ -8,7 +8,6 @@ import com.bluelinelabs.conductor.Controller
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
-import eu.kanade.tachiyomi.ui.migration.MigrationController
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.openInBrowser
 
@@ -47,12 +46,7 @@ class SettingsMainController : SettingsController() {
             titleRes = R.string.pref_category_downloads
             onClick { navigateTo(SettingsDownloadController()) }
         }
-        preference {
-            iconRes = R.drawable.ic_swap_calls_white_24dp
-            iconTint = tintColor
-            titleRes = R.string.label_migration
-            onClick { navigateTo(MigrationController()) }
-        }
+
         preference {
             iconRes = R.drawable.ic_sync_black_24dp
             iconTint = tintColor
@@ -98,6 +92,6 @@ class SettingsMainController : SettingsController() {
 
     private companion object {
         private const val URL_HELP = "https://tachiyomi.org/help/"
-        private const val URL_BUG_REPORT = "https://github.com/Jays2Kings/tachiyomiJ2K/issues"
+        private const val URL_BUG_REPORT = "https://github.com/CarlosEsco/Neko/issues"
     }
 }

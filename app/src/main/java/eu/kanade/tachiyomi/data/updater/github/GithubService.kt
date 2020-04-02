@@ -24,6 +24,6 @@ interface GithubService {
         }
     }
 
-    @GET("/repos/Jays2Kings/tachiyomiJ2K/releases/latest")
+    @GET("/repos/CarlosEsco/Neko/releases/latest")
     suspend fun getLatestVersion(): GithubRelease
 }

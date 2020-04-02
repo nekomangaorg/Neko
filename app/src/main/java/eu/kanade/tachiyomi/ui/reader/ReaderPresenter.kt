@@ -4,19 +4,21 @@ import android.app.Application
 import android.os.Bundle
 import android.os.Environment
 import com.jakewharton.rxrelay.BehaviorRelay
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.database.models.MangaImpl
+import eu.kanade.tachiyomi.data.database.models.Track
+import eu.kanade.tachiyomi.data.database.models.isWebtoon
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
-import eu.kanade.tachiyomi.source.LocalSource
+import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Page
+import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
+import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
 import eu.kanade.tachiyomi.ui.reader.loader.ChapterLoader
 import eu.kanade.tachiyomi.ui.reader.loader.DownloadPageLoader
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
@@ -88,22 +90,49 @@ class ReaderPresenter(
      */
     private val chapterList by lazy {
         val manga = manga!!
-        val dbChapters = db.getChapters(manga).executeAsBlocking()
+        val dbChapters = db.getChapters(manga).executeAsBlocking().map { ChapterItem(it, manga) }
 
         val selectedChapter = dbChapters.find { it.id == chapterId }
             ?: error("Requested chapter of id $chapterId not found in chapter list")
 
-        val chaptersForReader =
-            if (preferences.skipRead()) {
-                val list = dbChapters.filter { !it.read }.toMutableList()
-                val find = list.find { it.id == chapterId }
-                if (find == null) {
-                    list.add(selectedChapter)
+        val chaptersForReader = dbChapters
+            .filter {
+                if (preferences.skipRead()) {
+                    !it.read
+                } else {
+                    true
                 }
-                list
-            } else {
-                dbChapters
             }
+            .filter {
+                if (preferences.skipHidden()) {
+                    var shouldInclude = true
+
+                    when (manga.readFilter) {
+                        Manga.SHOW_READ -> if (!it.read) {
+                            shouldInclude = false
+                        }
+                        Manga.SHOW_UNREAD -> if (it.read) {
+                            shouldInclude = false
+                        }
+                    }
+
+                    if (manga.downloadedFilter == Manga.SHOW_DOWNLOADED &&
+                        !downloadManager.isChapterDownloaded(it.chapter, manga)
+                    ) {
+                        shouldInclude = false
+                    }
+
+                    if (manga.bookmarkedFilter == Manga.SHOW_BOOKMARKED && !it.bookmark) {
+                        shouldInclude = false
+                    }
+
+                    shouldInclude
+                } else {
+                    true
+                }
+            }
+            .map { it.chapter }
+            .toMutableList()
 
         when (manga.sorting) {
             Manga.SORTING_SOURCE -> ChapterLoadBySource().get(chaptersForReader)
@@ -201,7 +230,7 @@ class ReaderPresenter(
         this.manga = manga
         if (chapterId == -1L) chapterId = initialChapterId
 
-        val source = sourceManager.getOrStub(manga.source)
+        val source = sourceManager.getMangadex()
         loader = ChapterLoader(downloadManager, manga, source)
 
         Observable.just(manga).subscribeLatestCache(ReaderActivity::setManga)
@@ -404,9 +433,8 @@ class ReaderPresenter(
      */
     fun getMangaViewer(): Int {
         val manga = manga ?: return preferences.defaultViewer()
-        if (manga.viewer == -1) {
-            manga.viewer = manga.defaultReaderType()
-            db.updateMangaViewer(manga).asRxObservable().subscribe()
+        if (manga.isWebtoon()) {
+            return ReaderActivity.WEBTOON_WITHOUT_MARGIN
         }
         return if (manga.viewer == 0) preferences.defaultViewer() else manga.viewer
     }
@@ -445,10 +473,14 @@ class ReaderPresenter(
 
         val chapter = page.chapter.chapter
 
-        // Build destination file.
-        val filename = DiskUtil.buildValidFilename(
-            "${manga.title} - ${chapter.name}".take(225)
-        ) + " - ${page.number}.${type.extension}"
+        // create chapter name so its always sorted correctly  max character is 75
+        val pageName = parseChapterName(chapter.name, page.number.toString(), chapter.scanlator)
+        // take only 150 characters so this file maxes at 225
+        val trimmedTitle = manga.title.take(150)
+
+        // Build destination file
+        val filename =
+            DiskUtil.buildValidFilename("$trimmedTitle - $pageName") + ".${type.extension}"
 
         val destFile = File(directory, filename)
         stream().use { input ->
@@ -457,6 +489,40 @@ class ReaderPresenter(
             }
         }
         return destFile
+    }
+
+    private fun parseChapterName(
+        chapterName: String,
+        pageNumber: String,
+        scanlator: String?
+    ): String {
+        val builder = StringBuilder()
+        var title = ""
+        var vol = ""
+        val list = chapterName.split(Regex(" "), 3)
+
+        list.forEach {
+            if (it.startsWith("vol.", true)) {
+                vol = " Vol." + it.substringAfter(".").padStart(4, '0')
+            } else if (it.startsWith("ch.", true)) {
+                builder.append(" Ch.")
+                builder.append(it.substringAfter(".").padStart(4, '0'))
+            } else {
+                title = " $it"
+            }
+        }
+
+        if (vol.isNotBlank()) {
+            builder.append(vol)
+        }
+        builder.append(" Pg.")
+        builder.append(pageNumber.padStart(4, '0'))
+
+        if (title.isNotEmpty()) {
+            builder.append(title.take(200))
+        }
+
+        return builder.toString().trim()
     }
 
     /**
@@ -475,7 +541,7 @@ class ReaderPresenter(
         val destDir = File(
             Environment.getExternalStorageDirectory().absolutePath +
                 File.separator + Environment.DIRECTORY_PICTURES +
-                File.separator + "Tachiyomi"
+                File.separator + "Neko"
         )
 
         // Copy file in background.
@@ -518,47 +584,6 @@ class ReaderPresenter(
     }
 
     /**
-     * Sets the image of this [page] as cover and notifies the UI of the result.
-     */
-    fun setAsCover(page: ReaderPage) {
-        if (page.status != Page.READY) return
-        val manga = manga ?: return
-        val stream = page.stream ?: return
-
-        Observable
-            .fromCallable {
-                if (manga.source == LocalSource.ID) {
-                    val context = Injekt.get<Application>()
-                    LocalSource.updateCover(context, manga, stream())
-                    R.string.cover_updated
-                    SetAsCoverResult.Success
-                } else {
-                    val thumbUrl = manga.thumbnail_url ?: throw Exception("Image url not found")
-                    if (manga.favorite) {
-                        coverCache.copyToCache(thumbUrl, stream())
-                        MangaImpl.setLastCoverFetch(manga.id!!, Date().time)
-                        SetAsCoverResult.Success
-                    } else {
-                        SetAsCoverResult.AddToLibraryFirst
-                    }
-                }
-            }
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeFirst(
-                { view, result -> view.onSetAsCoverResult(result) },
-                { view, _ -> view.onSetAsCoverResult(SetAsCoverResult.Error) }
-            )
-    }
-
-    /**
-     * Results of the set as cover feature.
-     */
-    enum class SetAsCoverResult {
-        Success, AddToLibraryFirst, Error
-    }
-
-    /**
      * Results of the save image feature.
      */
     sealed class SaveImageResult {
@@ -584,10 +609,11 @@ class ReaderPresenter(
                 val trackList = db.getTracks(manga).executeAsBlocking()
                 trackList.map { track ->
                     val service = trackManager.getService(track.sync_id)
-                    if (service != null && service.isLogged && chapterRead > track.last_chapter_read) {
+
+                    if (shouldUpdateTracker(service, chapterRead, track)) {
                         try {
                             track.last_chapter_read = chapterRead
-                            service.update(track)
+                            service!!.update(track)
                             db.insertTrack(track).executeAsBlocking()
                         } catch (e: Exception) {
                             Timber.e(e)
@@ -597,6 +623,19 @@ class ReaderPresenter(
             }
         }
     }
+        private fun shouldUpdateTracker(
+            service: TrackService?,
+            chapterRead: Int,
+            track: Track
+        ): Boolean {
+            if (service == null || !service.isLogged || chapterRead <= track.last_chapter_read) {
+                return false
+            }
+            if (service.isMdList() && track.status == FollowStatus.UNFOLLOWED.int) {
+                return false
+            }
+            return true
+        }
 
     /**
      * Enqueues this [chapter] to be deleted when [deletePendingChapters] is called. The download

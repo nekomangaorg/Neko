@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.ui.main
 import android.animation.Animator
 import android.animation.AnimatorSet
 import android.animation.ValueAnimator
-import android.app.SearchManager
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.Rect
@@ -37,15 +36,14 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.download.DownloadServiceListener
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
-import eu.kanade.tachiyomi.extension.api.ExtensionGithubApi
+import eu.kanade.tachiyomi.source.Source
+import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
-import eu.kanade.tachiyomi.ui.catalogue.CatalogueController
-import eu.kanade.tachiyomi.ui.catalogue.global_search.CatalogueSearchController
+import eu.kanade.tachiyomi.ui.catalogue.browse.BrowseCatalogueController
 import eu.kanade.tachiyomi.ui.download.DownloadController
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.library.LibraryListController
@@ -61,20 +59,19 @@ import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePadding
+import eu.kanade.tachiyomi.widget.preference.MangadexLoginDialog
 import kotlinx.android.synthetic.main.main_activity.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import timber.log.Timber
-import uy.kohesive.injekt.injectLazy
-import java.util.Date
-import java.util.concurrent.TimeUnit
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import kotlin.math.abs
 
-open class MainActivity : BaseActivity(), DownloadServiceListener {
+open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLoginDialog.Listener {
 
     protected lateinit var router: Router
+
+    val source: Source by lazy { Injekt.get<SourceManager>().getMangadex() }
 
     var drawerArrow: DrawerArrowDrawable? = null
         private set
@@ -153,7 +150,16 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
 //                        )
 //                        else setRoot(RecentlyReadController(), id)
                     }
-                    R.id.nav_catalogues -> setRoot(CatalogueController(), id)
+                    R.id.nav_catalogues -> {
+                        val browseCatalogueController = BrowseCatalogueController(source)
+                        if (!source.isLogged()) {
+                            val dialog = MangadexLoginDialog(source)
+                            dialog.targetController = browseCatalogueController
+                            dialog.showDialog(router)
+                        }else{
+                            setRoot(browseCatalogueController, id)
+                        }
+                    }
                 }
             } else if (currentRoot.tag()?.toIntOrNull() == id) {
                 if (router.backstackSize == 1) {
@@ -172,8 +178,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                         }
                         R.id.nav_catalogues -> {
                             val controller =
-                                router.getControllerWithTag(id.toString()) as? CatalogueController
-                            controller?.toggleExtensions()
+                                router.getControllerWithTag(id.toString()) as? BrowseCatalogueController
                         }
                     }
                 }
@@ -267,16 +272,12 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             // Show changelog if needed
             if (Migrations.upgrade(preferences)) {
                 if (BuildConfig.DEBUG) {
-                    MaterialDialog(this).title(text = "Welcome to the J2K MD2 Beta").message(
+                    MaterialDialog(this).title(text = "Welcome to the Neko MD2 Beta").message(
                         text = "This beta is for testing the upcoming release. Requests for new additions for this beta will ignored (however suggestions on how to better implement a feature in this beta are welcome).\n\nFor any bugs you come across, there is a bug report button in settings.\n\nAs a reminder this is a *BETA* build; bugs may happen, features may be missing/not implemented yet, and screens can change.\n\nEnjoy and thanks for testing!"
                     ).positiveButton(android.R.string.ok).cancelOnTouchOutside(false).show()
                 } else ChangelogDialogController().showDialog(router)
             }
         }
-        preferences.extensionUpdatesCount().asObservable().subscribe {
-            setExtensionsBadge()
-        }
-        setExtensionsBadge()
     }
 
     private fun setNavBarColor(insets: WindowInsets?) {
@@ -337,36 +338,23 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         super.onSupportActionModeFinished(mode)
     }
 
-    private fun setExtensionsBadge() {
-        val updates = preferences.extensionUpdatesCount().getOrDefault()
-        if (updates > 0) {
-            val badge = bottom_nav.getOrCreateBadge(R.id.nav_catalogues)
-            badge.number = updates
-            badge.backgroundColor = getResourceColor(R.attr.badgeColor)
-            badge.badgeTextColor = Color.WHITE
-        } else {
-            bottom_nav.removeBadge(R.id.nav_catalogues)
-        }
-    }
 
     override fun onResume() {
         super.onResume()
         // setting in case someone comes from the search activity to main
-        getExtensionUpdates()
         DownloadService.callListeners()
     }
 
-    private fun getExtensionUpdates() {
-        if (Date().time >= preferences.lastExtCheck().getOrDefault() + TimeUnit.HOURS.toMillis(1)) {
-            GlobalScope.launch(Dispatchers.IO) {
-                val preferences: PreferencesHelper by injectLazy()
-                try {
-                    val pendingUpdates = ExtensionGithubApi().checkForUpdates(this@MainActivity)
-                    preferences.extensionUpdatesCount().set(pendingUpdates.size)
-                    preferences.lastExtCheck().set(Date().time)
-                } catch (e: java.lang.Exception) {
-                }
-            }
+    /**
+     * Called when login dialog is closed, refreshes the adapter.
+     *
+     * @param source clicked item containing source information.
+     */
+    override fun siteLoginDialogClosed(source: Source) {
+        if (source.isLogged()) {
+            router.popCurrentController()
+            R.id.nav_catalogues
+            setRoot(BrowseCatalogueController(source), R.id.nav_catalogues)
         }
     }
 
@@ -392,15 +380,6 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                 router.pushController(controller.withFadeTransaction())
             }
             SHORTCUT_CATALOGUES -> bottom_nav.selectedItemId = R.id.nav_catalogues
-            SHORTCUT_EXTENSIONS -> {
-                bottom_nav.selectedItemId = R.id.nav_catalogues
-                router.popToRoot()
-                bottom_nav.post {
-                    val controller =
-                        router.backstack.firstOrNull()?.controller() as? CatalogueController
-                    controller?.showExtensions()
-                }
-            }
             SHORTCUT_MANGA -> {
                 val extras = intent.extras ?: return false
                 if (router.backstack.isEmpty()) bottom_nav.selectedItemId = R.id.nav_library
@@ -412,19 +391,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                     router.pushController(DownloadController().withFadeTransaction())
                 }
             }
-            Intent.ACTION_SEARCH, "com.google.android.gms.actions.SEARCH_ACTION" -> {
-                // If the intent match the "standard" Android search intent
-                // or the Google-specific search intent (triggered by saying or typing "search *query* on *Tachiyomi*" in Google Search/Google Assistant)
 
-                // Get the search query provided in extras, and if not null, perform a global search with it.
-                val query = intent.getStringExtra(SearchManager.QUERY)
-                if (query != null && query.isNotEmpty()) {
-                    if (router.backstackSize > 1) {
-                        router.popToRoot()
-                    }
-                    router.pushController(CatalogueSearchController(query).withFadeTransaction())
-                }
-            }
             INTENT_SEARCH -> {
                 val query = intent.getStringExtra(INTENT_SEARCH_QUERY)
                 val filter = intent.getStringExtra(INTENT_SEARCH_FILTER)
@@ -433,7 +400,8 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                         router.popToRoot()
                     }
                     router.pushController(
-                        CatalogueSearchController(
+                        BrowseCatalogueController(
+                            source,
                             query,
                             filter
                         ).withFadeTransaction()
@@ -643,7 +611,6 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         const val SHORTCUT_CATALOGUES = "eu.kanade.tachiyomi.SHOW_CATALOGUES"
         const val SHORTCUT_DOWNLOADS = "eu.kanade.tachiyomi.SHOW_DOWNLOADS"
         const val SHORTCUT_MANGA = "eu.kanade.tachiyomi.SHOW_MANGA"
-        const val SHORTCUT_EXTENSIONS = "eu.kanade.tachiyomi.EXTENSIONS"
 
         const val INTENT_SEARCH = "eu.kanade.tachiyomi.SEARCH"
         const val INTENT_SEARCH_QUERY = "query"

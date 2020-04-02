@@ -1,81 +1,81 @@
 package eu.kanade.tachiyomi.source
 
-import android.content.Context
-import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.source.model.Page
-import eu.kanade.tachiyomi.source.model.SChapter
-import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.online.HttpSource
-import rx.Observable
+import eu.kanade.tachiyomi.source.online.Mangadex
 
-open class SourceManager(private val context: Context) {
+/**
+ *Currently hardcoded to always return the same English [Mangadex] instance
+ */
+open class SourceManager {
 
-    private val sourcesMap = mutableMapOf<Long, Source>()
-
-    private val stubSourcesMap = mutableMapOf<Long, StubSource>()
+    // private val sourcesMap = mutableMapOf<Long, Source>()
+    private val source: Source
 
     init {
-        createInternalSources().forEach { registerSource(it) }
+        source = Mangadex("en", "gb", 1)
     }
 
     open fun get(sourceKey: Long): Source? {
-        return sourcesMap[sourceKey]
+        return source
     }
 
-    fun getOrStub(sourceKey: Long): Source {
-        return sourcesMap[sourceKey] ?: stubSourcesMap.getOrPut(sourceKey) {
-            StubSource(sourceKey)
-        }
+    fun getSource(sourceKey: Long): Source {
+        return source
     }
 
-    fun getOnlineSources() = sourcesMap.values.filterIsInstance<HttpSource>()
-
-    fun getCatalogueSources() = sourcesMap.values.filterIsInstance<CatalogueSource>()
-
-    internal fun registerSource(source: Source, overwrite: Boolean = false) {
-        if (overwrite || !sourcesMap.containsKey(source.id)) {
-            sourcesMap[source.id] = source
-        }
+    fun isMangadex(sourceKey: Long): Boolean {
+        return possibleIds.contains(sourceKey)
     }
 
-    internal fun unregisterSource(source: Source) {
-        sourcesMap.remove(source.id)
+    fun getNullableSource(sourceKey: Long): Source? {
+        return source
     }
 
-    private fun createInternalSources(): List<Source> = listOf(
-            LocalSource(context)
-    )
+    fun getSources(): List<Source> {
+        return listOf(source)
+    }
 
-    private inner class StubSource(override val id: Long) : Source {
+    fun getMangadex() = source
 
-        override val name: String
-            get() = id.toString()
-
-        override fun fetchMangaDetails(manga: SManga): Observable<SManga> {
-            return Observable.error(getSourceNotInstalledException())
-        }
-
-        override fun fetchChapterList(manga: SManga): Observable<List<SChapter>> {
-            return Observable.error(getSourceNotInstalledException())
-        }
-
-        override fun fetchPageList(chapter: SChapter): Observable<List<Page>> {
-            return Observable.error(getSourceNotInstalledException())
-        }
-
-        override fun toString(): String {
-            return name
-        }
-
-        private fun getSourceNotInstalledException(): Exception {
-            return SourceNotFoundException(context.getString(R.string.source_not_installed, id
-                .toString()), id)
-        }
-
-        override fun hashCode(): Int {
-            return id.hashCode()
-        }
+    companion object {
+        val possibleIds = listOf(
+            Mangadex("en", "gb", 1).id,
+            Mangadex("ja", "jp", 2).id,
+            Mangadex("pl", "pl", 3).id,
+            Mangadex("sh", "rs", 4).id,
+            Mangadex("nl", "nl", 5).id,
+            Mangadex("it", "it", 6).id,
+            Mangadex("ru", "ru", 7).id,
+            Mangadex("de", "de", 8).id,
+            Mangadex("hu", "hu", 9).id,
+            Mangadex("fr", "fr", 10).id,
+            Mangadex("fi", "fi", 11).id,
+            Mangadex("vi", "vn", 12).id,
+            Mangadex("el", "gr", 13).id,
+            Mangadex("bg", "bg", 14).id,
+            Mangadex("es", "es", 15).id,
+            Mangadex("pt-BR", "br", 16).id,
+            Mangadex("pt", "pt", 17).id,
+            Mangadex("sv", "se", 18).id,
+            Mangadex("ar", "sa", 19).id,
+            Mangadex("da", "dk", 20).id,
+            Mangadex("zh-Hans", "cn", 21).id,
+            Mangadex("bn", "bd", 22).id,
+            Mangadex("ro", "ro", 23).id,
+            Mangadex("cs", "cz", 24).id,
+            Mangadex("mn", "mn", 25).id,
+            Mangadex("tr", "tr", 26).id,
+            Mangadex("id", "id", 27).id,
+            Mangadex("ko", "kr", 28).id,
+            Mangadex("es-419", "mx", 29).id,
+            Mangadex("fa", "ir", 30).id,
+            Mangadex("ms", "my", 31).id,
+            Mangadex("th", "th", 32).id,
+            Mangadex("ca", "ct", 33).id,
+            Mangadex("fil", "ph", 34).id,
+            Mangadex("zh-Hant", "hk", 35).id,
+            Mangadex("uk", "ua", 36),
+            Mangadex("my", "mm", 37).id,
+            Mangadex("lt", "lt", 38).id
+        )
     }
 }
-
-class SourceNotFoundException(message: String, val id: Long) : Exception(message)

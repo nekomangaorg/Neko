@@ -137,7 +137,7 @@ class RecentsPresenter(
      * @param chapter the chapter to delete.
      */
     fun deleteChapter(chapter: Chapter, manga: Manga, update: Boolean = true) {
-        val source = Injekt.get<SourceManager>().getOrStub(manga.source)
+        val source = Injekt.get<SourceManager>().getMangadex()
         downloadManager.deleteChapters(listOf(chapter), manga, source)
 
         if (update) {

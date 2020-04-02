@@ -132,12 +132,10 @@ class LibraryItem(
         if (manga.isBlank())
             return constraint.isEmpty()
         val sourceManager by injectLazy<SourceManager>()
-        val sourceName = if (manga.source == 0L) "Local" else
-            sourceManager.getOrStub(manga.source).name
+        val sourceName = sourceManager.getMangadex().name
         return manga.title.contains(constraint, true) ||
             (manga.author?.contains(constraint, true) ?: false) ||
             (manga.artist?.contains(constraint, true) ?: false) ||
-            sourceName.contains(constraint, true) ||
             if (constraint.contains(",")) {
                 val genres = manga.genre?.split(", ")
                 constraint.split(",").all { containsGenre(it.trim(), genres) }

@@ -126,8 +126,8 @@ class LibraryUpdateService(
      * Defines what should be updated within a service execution.
      */
     enum class Target {
-        CHAPTERS, // Manga chapters
-        DETAILS, // Manga metadata
+        CHAPTERS, // Manga meta data and  chapters
+        SYNC_FOLLOWS, // Manga in reading, rereading
         TRACKING // Tracking metadata
     }
 
@@ -400,7 +400,7 @@ class LibraryUpdateService(
             showProgressNotification(manga, progess, mangaToUpdate.size)
             val source = sourceManager.get(manga.source) as? HttpSource ?: return false
             val fetchedChapters = withContext(Dispatchers.IO) {
-                source.fetchChapterList(manga).toBlocking().single()
+                source.fetchChapterList(manga)
             } ?: emptyList()
             if (fetchedChapters.isNotEmpty()) {
                 val newChapters = syncChaptersWithSource(db, fetchedChapters, manga, source)
@@ -442,7 +442,7 @@ class LibraryUpdateService(
      */
     fun updateManga(manga: Manga): Observable<Pair<List<Chapter>, List<Chapter>>> {
         val source = sourceManager.get(manga.source) as? HttpSource ?: return Observable.empty()
-        return source.fetchChapterList(manga)
+        return source.fetchChapterListObservable(manga)
             .map { syncChaptersWithSource(db, it, manga, source) }
     }
 
@@ -540,7 +540,7 @@ class LibraryUpdateService(
             val chapters = it.value
             val chapterNames = chapters.map { chapter -> chapter.name }
             notifications.add(Pair(notification(Notifications.CHANNEL_NEW_CHAPTERS) {
-                setSmallIcon(R.drawable.ic_tachi)
+                setSmallIcon(R.drawable.ic_neko_notification)
                 try {
                     val icon = GlideApp.with(this@LibraryUpdateService)
                         .asBitmap().load(manga).dontTransform().centerCrop().circleCrop()
@@ -590,7 +590,7 @@ class LibraryUpdateService(
             notify(
                 Notifications.ID_NEW_CHAPTERS,
                 notification(Notifications.CHANNEL_NEW_CHAPTERS) {
-                    setSmallIcon(R.drawable.ic_tachi)
+                    setSmallIcon(R.drawable.ic_neko_notification)
                     setLargeIcon(notificationBitmap)
                     setContentTitle(getString(R.string.notification_new_chapters))
                     color = ContextCompat.getColor(applicationContext, R.color.colorAccent)

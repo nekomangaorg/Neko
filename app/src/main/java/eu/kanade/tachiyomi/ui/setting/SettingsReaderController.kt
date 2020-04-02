@@ -66,6 +66,11 @@ class SettingsReaderController : SettingsController() {
             defaultValue = false
         }
         switchPreference {
+            key = Keys.skipHidden
+            titleRes = R.string.pref_skip_hidden_chapters
+            defaultValue = false
+        }
+        switchPreference {
             key = Keys.fullscreen
             titleRes = R.string.pref_fullscreen
             defaultValue = true
@@ -114,6 +119,18 @@ class SettingsReaderController : SettingsController() {
                 key = Keys.cropBordersWebtoon
                 titleRes = R.string.pref_crop_borders
                 defaultValue = false
+            }
+
+            intListPreference(activity) {
+                key = Keys.marginRatioWebtoon
+                titleRes = R.string.pref_reader_margin
+                entriesRes = arrayOf(
+                    R.string.webtoon_margin_ratio_0,
+                    R.string.webtoon_margin_ratio_10, R.string.webtoon_margin_ratio_15,
+                    R.string.webtoon_margin_ratio_20, R.string.webtoon_margin_ratio_25
+                )
+                entryValues = listOf(0, 1, 15, 20, 25)
+                defaultValue = "0"
             }
         }
         preferenceCategory {

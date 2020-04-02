@@ -8,7 +8,6 @@ import androidx.preference.CheckBoxPreference
 import androidx.preference.PreferenceViewHolder
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.online.HttpSource
-import eu.kanade.tachiyomi.source.online.LoginSource
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.setVectorCompat
 import kotlinx.android.synthetic.main.pref_item_source.view.*
@@ -28,20 +27,16 @@ class LoginCheckBoxPreference @JvmOverloads constructor(
     override fun onBindViewHolder(holder: PreferenceViewHolder) {
         super.onBindViewHolder(holder)
         val loginFrame = holder.itemView.login_frame
-        if (source is LoginSource) {
-            val tint = if (source.isLogged())
-                Color.argb(255, 76, 175, 80)
-            else
-                context.getResourceColor(android.R.attr.textColorSecondary)
+        val tint = if (source.isLogged())
+            Color.argb(255, 76, 175, 80)
+        else
+            context.getResourceColor(android.R.attr.textColorSecondary)
 
-            holder.itemView.login.setVectorCompat(R.drawable.ic_account_circle_black_24dp, tint)
+        holder.itemView.login.setVectorCompat(R.drawable.ic_account_circle_black_24dp, tint)
 
-            loginFrame.visibility = View.VISIBLE
-            loginFrame.setOnClickListener {
-                onLoginClick()
-            }
-        } else {
-            loginFrame.visibility = View.GONE
+        loginFrame.visibility = View.VISIBLE
+        loginFrame.setOnClickListener {
+            onLoginClick()
         }
     }
 

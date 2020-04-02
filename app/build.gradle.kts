@@ -8,8 +8,9 @@ plugins {
     kotlin("android")
     kotlin("android.extensions")
     kotlin("kapt")
-    id("org.jmailen.kotlinter") version "2.3.1"
+    //id("org.jmailen.kotlinter") version "2.3.1"
     id("com.github.zellius.shortcut-helper")
+    id("org.jetbrains.kotlin.plugin.serialization")
     id("com.google.gms.google-services") apply false
 }
 
@@ -33,17 +34,16 @@ android {
     defaultConfig {
         minSdkVersion(23)
         targetSdkVersion(29)
-        applicationId = "eu.kanade.tachiyomi"
-        versionCode = 62
-        versionName = "0.9.82"
+        applicationId = "tachiyomi.mangadex"
+        versionCode = 51
+        versionName = "2.0.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
-
+        setProperty("archivesBaseName", "Neko")
         buildConfigField("String", "COMMIT_COUNT", "\"${getCommitCount()}\"")
         buildConfigField("String", "COMMIT_SHA", "\"${getGitSha()}\"")
         buildConfigField("String", "BUILD_TIME", "\"${getBuildTime()}\"")
         buildConfigField("Boolean", "INCLUDE_UPDATER", "false")
-
 
         ndk {
             abiFilters("armeabi-v7a", "arm64-v8a", "x86")
@@ -51,10 +51,7 @@ android {
     }
     buildTypes {
         getByName("debug") {
-            applicationIdSuffix = ".debugJ2K"
-        }
-        getByName("release") {
-            applicationIdSuffix = ".j2k"
+            applicationIdSuffix = ".debug"
         }
     }
 
@@ -93,8 +90,6 @@ shortcutHelper {
 dependencies {
 // Modified dependencies
     implementation("com.github.inorichi:subsampling-scale-image-view:ac0dae7")
-    implementation("com.github.inorichi:junrar-android:634c1f5")
-
 
 // Android support library
     implementation("androidx.appcompat:appcompat:1.1.0")
@@ -132,16 +127,19 @@ dependencies {
     implementation("com.squareup.okio:okio:2.4.3")
 
 // REST
-    val retrofitVersion = "2.7.1"
+    val retrofitVersion = "2.7.2"
     implementation("com.squareup.retrofit2:retrofit:$retrofitVersion")
     implementation("com.squareup.retrofit2:converter-gson:$retrofitVersion")
+    implementation("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:0.5.0")
+
 
 // JSON
     implementation("com.google.code.gson:gson:2.8.6")
     implementation("com.github.salomonbrys.kotson:kotson:2.5.0")
 
-// JavaScript engine
-    implementation("com.squareup.duktape:duktape-android:1.3.0")
+// Serialization
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.20.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:0.20.0")
 
 // Disk
     implementation("com.jakewharton:disklrucache:2.0.2")
@@ -149,6 +147,12 @@ dependencies {
 
 // HTML parser
     implementation("org.jsoup:jsoup:1.12.2")
+
+//Icons
+    implementation("com.mikepenz:iconics-core:4.0.2@aar")
+    implementation("com.mikepenz:iconics-views:4.0.2@aar")
+    implementation("com.mikepenz:community-material-typeface:3.7.95.4-kotlin@aar")
+    implementation("com.mikepenz:material-design-icons-dx-typeface:5.0.1.0-kotlin@aar")
 
 // Job scheduling
     implementation("com.evernote:android-job:1.4.2")
@@ -189,13 +193,13 @@ dependencies {
     implementation("eu.davidea:flexible-adapter:5.1.0")
     implementation("eu.davidea:flexible-adapter-ui:1.0.0")
     implementation("com.nononsenseapps:filepicker:2.5.2")
+//switch this to material dialog file picker
     implementation("com.github.amulyakhare:TextDrawable:558677e")
     implementation("com.afollestad.material-dialogs:core:3.3.0")
     implementation("com.afollestad.material-dialogs:input:3.3.0")
     implementation("me.zhanghai.android.systemuihelper:library:1.0.0")
     implementation("com.nightlynexus.viewstatepageradapter:viewstatepageradapter:1.1.0")
     implementation("com.github.mthli:Slice:v1.2")
-
     implementation("com.github.kizitonwose:AndroidTagGroup:1.6.0")
     implementation("com.github.chrisbanes:PhotoView:2.3.0")
     implementation("com.github.carlosesco:DirectionalViewPager:a844dbca0a")
@@ -232,19 +236,20 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion")
 
     //Crash reports
-    val acraVersion = "4.9.2"
-    implementation("ch.acra:acra:$acraVersion")
+    val acraVersion = "5.5.0"
+    implementation("ch.acra:acra-http:$acraVersion")
+    implementation("ch.acra:acra-mail:$acraVersion")
 
     // Text distance
     implementation("info.debatty:java-string-similarity:1.2.1")
 }
 
-tasks.preBuild {
+/*tasks.preBuild {
     dependsOn(tasks.lintKotlin)
 }
 tasks.lintKotlin {
     dependsOn(tasks.formatKotlin)
-}
+}*/
 
 if (gradle.startParameter.taskRequests.toString().contains("Standard")) {
     apply(mapOf("plugin" to "com.google.gms.google-services"))

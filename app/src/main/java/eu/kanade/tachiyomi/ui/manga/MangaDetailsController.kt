@@ -69,14 +69,12 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
-import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
-import eu.kanade.tachiyomi.ui.catalogue.CatalogueController
 import eu.kanade.tachiyomi.ui.library.ChangeMangaCategoriesDialog
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.main.MainActivity
@@ -125,17 +123,15 @@ class MangaDetailsController : BaseController,
     constructor(
         manga: Manga?,
         fromCatalogue: Boolean = false,
-        smartSearchConfig: CatalogueController.SmartSearchConfig? = null,
         update: Boolean = false
     ) : super(Bundle().apply {
         putLong(MANGA_EXTRA, manga?.id ?: 0)
         putBoolean(FROM_CATALOGUE_EXTRA, fromCatalogue)
-        putParcelable(SMART_SEARCH_CONFIG_EXTRA, smartSearchConfig)
         putBoolean(UPDATE_EXTRA, update)
     }) {
         this.manga = manga
         if (manga != null) {
-            source = Injekt.get<SourceManager>().getOrStub(manga.source)
+            source = Injekt.get<SourceManager>().getMangadex()
         }
         presenter = MangaDetailsPresenter(this, manga!!, source!!)
     }
@@ -162,7 +158,6 @@ class MangaDetailsController : BaseController,
     var coverDrawable: Drawable? = null
     private var trackingBottomSheet: TrackingBottomSheet? = null
     private var startingDLChapterPos: Int? = null
-    private var editMangaDialog: EditMangaDialog? = null
     var refreshTracker: Int? = null
 
     /**
@@ -603,10 +598,6 @@ class MangaDetailsController : BaseController,
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.manga_details, menu)
-        val editItem = menu.findItem(R.id.action_edit)
-        editItem.isVisible = presenter.manga.favorite && !presenter.isLockedFromSearch
-        editItem.title = view?.context?.getString(if (manga?.source == LocalSource.ID)
-            R.string.action_edit else R.string.action_edit_cover)
         menu.findItem(R.id.action_download).isVisible = !presenter.isLockedFromSearch
         menu.findItem(R.id.action_add_to_home_screen).isVisible = !presenter.isLockedFromSearch
         menu.findItem(R.id.action_mark_all_as_read).isVisible =
@@ -616,7 +607,6 @@ class MangaDetailsController : BaseController,
         val iconPrimary = view?.context?.getResourceColor(android.R.attr.textColorPrimary)
             ?: Color.BLACK
         menu.findItem(R.id.action_download).icon?.mutate()?.setTint(iconPrimary)
-        editItem.icon?.mutate()?.setTint(iconPrimary)
 
         val searchItem = menu.findItem(R.id.action_search)
         val searchView = searchItem.actionView as SearchView
@@ -644,38 +634,7 @@ class MangaDetailsController : BaseController,
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.action_edit -> {
-                if (manga?.source == LocalSource.ID) {
-                    editMangaDialog =
-                        EditMangaDialog(
-                            this,
-                            presenter.manga
-                        )
-                    editMangaDialog?.showDialog(router)
-                } else {
-                    if (manga?.hasCustomCover() == true) {
-                        MaterialDialog(activity!!).listItems(items = listOf(
-                                view!!.context.getString(
-                                    R.string.action_edit_cover
-                                ), view!!.context.getString(
-                                    R.string.action_reset_cover
-                                )
-                            ),
-                                waitForPositiveButton = false,
-                                selection = { _, index, _ ->
-                                    when (index) {
-                                        0 -> changeCover()
-                                        else -> presenter.clearCover()
-                                    }
-                                })
-                            .show()
-                    } else {
-                        changeCover()
-                    }
-                }
-            }
             R.id.action_open_in_web_view -> openInWebView()
-            R.id.action_share -> prepareToShareManga()
             R.id.action_add_to_home_screen -> addToHomeScreen()
             R.id.action_mark_all_as_read -> {
                 MaterialDialog(view!!.context)
@@ -687,7 +646,7 @@ class MangaDetailsController : BaseController,
                     .show()
             }
             R.id.action_mark_all_as_unread -> markAsUnread(presenter.chapters)
-            R.id.download_next, R.id.download_next_5, R.id.download_next_10,
+            R.id.download_next, R.id.download_next_5,
             R.id.download_custom, R.id.download_unread, R.id.download_all
             -> downloadChapters(item.itemId)
             else -> return super.onOptionsItemSelected(item)
@@ -758,7 +717,6 @@ class MangaDetailsController : BaseController,
         val chaptersToDownload = when (choice) {
             R.id.download_next -> presenter.getUnreadChaptersSorted().take(1)
             R.id.download_next_5 -> presenter.getUnreadChaptersSorted().take(5)
-            R.id.download_next_10 -> presenter.getUnreadChaptersSorted().take(10)
             R.id.download_custom -> {
                 createActionModeIfNeeded()
                 return
@@ -826,7 +784,7 @@ class MangaDetailsController : BaseController,
                     0 -> circleCrop()
                     1 -> transform(RoundedCorners(5))
                     2 -> transform(CropSquareTransformation())
-                    3 -> centerCrop().transform(MaskTransformation(R.drawable.mask_star))
+                    else -> centerCrop().transform(MaskTransformation(R.drawable.mask_star))
                 }
             }
             .into(object : CustomTarget<Bitmap>(128, 128) {
@@ -1204,24 +1162,6 @@ class MangaDetailsController : BaseController,
             )
         } else {
             activity?.toast(R.string.notification_first_add_to_library)
-        }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode == 101) {
-            if (data == null || resultCode != Activity.RESULT_OK) return
-            val activity = activity ?: return
-            try {
-                val uri = data.data ?: return
-                if (editMangaDialog != null) editMangaDialog?.updateCover(uri)
-                else {
-                    presenter.editCoverWithStream(uri)
-                    setPaletteColor()
-                }
-            } catch (error: IOException) {
-                activity.toast(R.string.notification_cover_update_failed)
-                Timber.e(error)
-            }
         }
     }
 

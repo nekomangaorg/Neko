@@ -21,7 +21,6 @@ import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
-import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
@@ -234,7 +233,7 @@ class MangaDetailsPresenter(
             chapters = chapters.filter { it.read }
         }
         if (onlyDownloaded()) {
-            chapters = chapters.filter { it.isDownloaded || it.manga.source == LocalSource.ID }
+            chapters = chapters.filter { it.isDownloaded }
         }
         if (onlyBookmarked()) {
             chapters = chapters.filter { it.bookmark }
@@ -328,7 +327,7 @@ class MangaDetailsPresenter(
             var chapterError: java.lang.Exception? = null
             val chapters = async(Dispatchers.IO) {
                 try {
-                    source.fetchChapterList(manga).toBlocking().single()
+                    source.fetchChapterList(manga)
                 } catch (e: Exception) {
                     chapterError = e
                     emptyList<SChapter>()
@@ -337,7 +336,7 @@ class MangaDetailsPresenter(
             val thumbnailUrl = manga.thumbnail_url
             val nManga = async(Dispatchers.IO) {
                 try {
-                    source.fetchMangaDetails(manga).toBlocking().single()
+                    source.fetchMangaDetails(manga)
                 } catch (e: java.lang.Exception) {
                     mangaError = e
                     null
@@ -378,7 +377,7 @@ class MangaDetailsPresenter(
 
         scope.launch(Dispatchers.IO) {
             val chapters = try {
-                source.fetchChapterList(manga).toBlocking().single()
+                source.fetchChapterList(manga)
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) { controller.showError(trimException(e)) }
                 return@launch
@@ -590,28 +589,6 @@ class MangaDetailsPresenter(
         return destFile
     }
 
-    fun updateManga(
-        title: String?,
-        author: String?,
-        artist: String?,
-        uri: Uri?,
-        description: String?,
-        tags: Array<String>?
-    ) {
-        if (manga.source == LocalSource.ID) {
-            manga.title = if (title.isNullOrBlank()) manga.url else title.trim()
-            manga.author = author?.trim()
-            manga.artist = artist?.trim()
-            manga.description = description?.trim()
-            val tagsString = tags?.joinToString(", ") { it.capitalize() }
-            manga.genre = if (tags.isNullOrEmpty()) null else tagsString?.trim()
-            LocalSource(downloadManager.context).updateMangaInfo(manga)
-            db.updateMangaInfo(manga).executeAsBlocking()
-        }
-        if (uri != null) editCoverWithStream(uri)
-        controller.updateHeader()
-    }
-
     fun clearCover() {
         if (manga.hasCustomCover()) {
             coverCache.deleteFromCache(manga.thumbnail_url!!)
@@ -621,26 +598,6 @@ class MangaDetailsPresenter(
             controller.updateHeader()
             controller.setPaletteColor()
         }
-    }
-
-    fun editCoverWithStream(uri: Uri): Boolean {
-        val inputStream =
-            downloadManager.context.contentResolver.openInputStream(uri) ?: return false
-        if (manga.source == LocalSource.ID) {
-            LocalSource.updateCover(downloadManager.context, manga, inputStream)
-            return true
-        }
-
-        if (manga.favorite) {
-            if (!manga.hasCustomCover()) {
-                manga.thumbnail_url = "Custom-${manga.thumbnail_url ?: manga.id!!}"
-                db.insertManga(manga).executeAsBlocking()
-            }
-            coverCache.copyToCache(manga.thumbnail_url!!, inputStream)
-            MangaImpl.setLastCoverFetch(manga.id!!, Date().time)
-            return true
-        }
-        return false
     }
 
     fun isTracked(): Boolean =

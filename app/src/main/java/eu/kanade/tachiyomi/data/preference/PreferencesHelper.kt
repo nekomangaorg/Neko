@@ -10,6 +10,7 @@ import com.f2prateek.rx.preferences.RxSharedPreferences
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.source.Source
+import eu.kanade.tachiyomi.source.online.Mangadex
 import java.io.File
 import java.text.DateFormat
 import java.text.SimpleDateFormat
@@ -201,8 +202,6 @@ class PreferencesHelper(val context: Context) {
 
     fun automaticUpdates() = prefs.getBoolean(Keys.automaticUpdates, true)
 
-    fun automaticExtUpdates() = rxPrefs.getBoolean(Keys.automaticExtUpdates, false)
-
     fun hiddenCatalogues() = rxPrefs.getStringSet("hidden_catalogues", mutableSetOf())
 
     fun downloadNew() = rxPrefs.getBoolean(Keys.downloadNew, false)
@@ -239,8 +238,6 @@ class PreferencesHelper(val context: Context) {
 
     fun refreshCoversToo() = rxPrefs.getBoolean(Keys.refreshCoversToo, true)
 
-    fun extensionUpdatesCount() = rxPrefs.getInteger("ext_updates_count", 0)
-
     fun showRecentUpdates() = rxPrefs.getBoolean("show_recents", false)
 
     fun lastExtCheck() = rxPrefs.getLong("last_ext_check", 0)
@@ -252,4 +249,21 @@ class PreferencesHelper(val context: Context) {
     fun hideFiltersAtStart() = rxPrefs.getBoolean("hide_filters_at_start", false)
 
     fun alwaysShowChapterTransition() = rxPrefs.getBoolean(Keys.alwaysShowChapterTransition, true)
+
+    fun marginRatioWebtoon() = rxPrefs.getInteger(Keys.marginRatioWebtoon, 0)
+
+    fun skipHidden() = prefs.getBoolean(Keys.skipHidden, false)
+
+    fun similarShowTab() = prefs.getBoolean(Keys.similarShowTab, false)
+
+    fun similarUpdateRestriction() = prefs.getStringSet(Keys.similarUpdateRestriction, emptySet())
+
+    fun lowQualityCovers() = prefs.getBoolean(Keys.lowQualityCovers, false)
+
+    fun useNonLoggedNetwork() = prefs.getBoolean(Keys.useNonLoggedNetwork, false)
+
+    fun r18() = prefs.getString(Keys.showR18, "0")
+
+    fun imageServer() = prefs.getString(Keys.imageServer, Mangadex.SERVER_PREF_ENTRY_VALUES.first())
+
 }

@@ -14,11 +14,13 @@ import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.ui.reader.viewer.BaseViewer
 import rx.subscriptions.CompositeSubscription
 import timber.log.Timber
+import java.lang.Math.max
+import java.lang.Math.min
 
 /**
  * Implementation of a [BaseViewer] to display pages with a [RecyclerView].
  */
-class WebtoonViewer(val activity: ReaderActivity) : BaseViewer {
+class WebtoonViewer(val activity: ReaderActivity, val showMargins: Boolean = false) : BaseViewer {
 
     /**
      * Recycler view used by this viewer.
@@ -112,6 +114,11 @@ class WebtoonViewer(val activity: ReaderActivity) : BaseViewer {
             }
             false
         }
+
+        config.imagePropertyChangedListener = {
+            refreshAdapter()
+        }
+        config.marginBetweenPagesWebtoon = showMargins
 
         frame.layoutParams = ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT)
         frame.addView(recycler)
@@ -254,5 +261,14 @@ class WebtoonViewer(val activity: ReaderActivity) : BaseViewer {
      */
     override fun handleGenericMotionEvent(event: MotionEvent): Boolean {
         return false
+    }
+
+    /**
+     * Notifies adapter of changes around the current page to trigger a relayout in the recycler.
+     * Used when a image configuration is changed.
+     */
+    private fun refreshAdapter() {
+        val position = layoutManager.findLastEndVisibleItemPosition()
+        adapter.notifyItemRangeChanged(max(0, position - 1), min(2, adapter.itemCount - position))
     }
 }

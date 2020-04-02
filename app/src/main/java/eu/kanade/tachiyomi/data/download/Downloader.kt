@@ -14,7 +14,6 @@ import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.online.HttpSource
-import eu.kanade.tachiyomi.source.online.fetchAllImageUrlsFromPageList
 import eu.kanade.tachiyomi.util.lang.RetryWithDelay
 import eu.kanade.tachiyomi.util.lang.plusAssign
 import eu.kanade.tachiyomi.util.storage.DiskUtil
@@ -305,7 +304,7 @@ class Downloader(
                     download.status = Download.DOWNLOADING
                 }
                 // Get all the URLs to the source images, fetch pages if necessary
-                .flatMap { download.source.fetchAllImageUrlsFromPageList(it) }
+                .flatMap { Observable.from(it) }
                 // Start downloading images, consider we can have downloaded images already
                 .concatMap { page -> getOrDownloadImage(page, download, tmpDir) }
                 // Do when page is downloaded.

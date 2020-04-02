@@ -2,11 +2,11 @@
 <resources>
 
     <attr name="typeface" format="enum">
-        <enum name="ptsansNarrow" value="0"/>
-        <enum name="ptsansNarrowBold" value="1"/>
+        <enum name="pathwayGothic" value="0" />
+        />
     </attr>
 
-    <declare-styleable name="PTSansTextView">
+    <declare-styleable name="CustomFontTextView">
         <attr name="typeface"/>
     </declare-styleable>
 

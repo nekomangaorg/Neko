@@ -1,12 +1,8 @@
 package eu.kanade.tachiyomi
 
-import eu.kanade.tachiyomi.data.download.DownloadProvider
-import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.updater.UpdaterJob
-import eu.kanade.tachiyomi.ui.library.LibraryPresenter
-import java.io.File
 
 object Migrations {
 
@@ -22,50 +18,11 @@ object Migrations {
         if (oldVersion < BuildConfig.VERSION_CODE) {
             preferences.lastVersionCode().set(BuildConfig.VERSION_CODE)
 
-            if (oldVersion == 0) {
-                if (BuildConfig.INCLUDE_UPDATER && preferences.automaticUpdates()) {
+            if (oldVersion < 38) {
+                if (preferences.automaticUpdates()) {
                     UpdaterJob.setupTask()
                 }
-                return BuildConfig.DEBUG
             }
-
-            if (oldVersion < 14) {
-                // Restore jobs after upgrading to evernote's job scheduler.
-                if (BuildConfig.INCLUDE_UPDATER && preferences.automaticUpdates()) {
-                    UpdaterJob.setupTask()
-                }
-                LibraryUpdateJob.setupTask()
-            }
-            if (oldVersion < 15) {
-                // Delete internal chapter cache dir.
-                File(context.cacheDir, "chapter_disk_cache").deleteRecursively()
-            }
-            if (oldVersion < 19) {
-                // Move covers to external files dir.
-                val oldDir = File(context.externalCacheDir, "cover_disk_cache")
-                if (oldDir.exists()) {
-                    val destDir = context.getExternalFilesDir("covers")
-                    if (destDir != null) {
-                        oldDir.listFiles()?.forEach {
-                            it.renameTo(File(destDir, it.name))
-                        }
-                    }
-                }
-            }
-            if (oldVersion < 26) {
-                // Delete external chapter cache dir.
-                val extCache = context.externalCacheDir
-                if (extCache != null) {
-                    val chapterCache = File(extCache, "chapter_disk_cache")
-                    if (chapterCache.exists()) {
-                        chapterCache.deleteRecursively()
-                    }
-                }
-            }
-            if (oldVersion < 54)
-                DownloadProvider(context).renameChaapters()
-            if (oldVersion < 62)
-                LibraryPresenter.resetCustomManga()
             return true
         }
         return false

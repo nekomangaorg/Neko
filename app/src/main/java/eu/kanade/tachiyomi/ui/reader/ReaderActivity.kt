@@ -32,9 +32,6 @@ import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.base.activity.BaseRxActivity
-import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.AddToLibraryFirst
-import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.Error
-import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.Success
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
@@ -137,6 +134,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
         const val RIGHT_TO_LEFT = 2
         const val VERTICAL = 3
         const val WEBTOON = 4
+        const val WEBTOON_WITHOUT_MARGIN = 5
 
         fun newIntent(context: Context, manga: Manga, chapter: Chapter):
             Intent {
@@ -379,7 +377,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
         val newViewer = when (mangaViewer) {
             RIGHT_TO_LEFT -> R2LPagerViewer(this)
             VERTICAL -> VerticalPagerViewer(this)
-            WEBTOON -> WebtoonViewer(this)
+            WEBTOON -> WebtoonViewer(this, true)
+            WEBTOON_WITHOUT_MARGIN -> WebtoonViewer(this)
             else -> L2RPagerViewer(this)
         }
 
@@ -588,26 +587,6 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
                 Timber.e(result.error)
             }
         }
-    }
-
-    /**
-     * Called from the page sheet. It delegates setting the image of the given [page] as the
-     * cover to the presenter.
-     */
-    fun setAsCover(page: ReaderPage) {
-        presenter.setAsCover(page)
-    }
-
-    /**
-     * Called from the presenter when a page is set as cover or fails. It shows a different message
-     * depending on the [result].
-     */
-    fun onSetAsCoverResult(result: ReaderPresenter.SetAsCoverResult) {
-        toast(when (result) {
-            Success -> R.string.cover_updated
-            AddToLibraryFirst -> R.string.notification_first_add_to_library
-            Error -> R.string.notification_cover_update_failed
-        })
     }
 
     override fun onVisibilityChange(visible: Boolean) {

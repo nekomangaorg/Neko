@@ -10,11 +10,12 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.source.CatalogueSource
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Filter
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.online.Mangadex
+import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
 import eu.kanade.tachiyomi.ui.catalogue.filter.CheckboxItem
 import eu.kanade.tachiyomi.ui.catalogue.filter.CheckboxSectionItem
@@ -29,6 +30,7 @@ import eu.kanade.tachiyomi.ui.catalogue.filter.TextItem
 import eu.kanade.tachiyomi.ui.catalogue.filter.TextSectionItem
 import eu.kanade.tachiyomi.ui.catalogue.filter.TriStateItem
 import eu.kanade.tachiyomi.ui.catalogue.filter.TriStateSectionItem
+import eu.kanade.tachiyomi.ui.catalogue.follows.FollowsPager
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
@@ -53,7 +55,7 @@ open class BrowseCataloguePresenter(
     /**
      * Selected source.
      */
-    val source = sourceManager.get(sourceId) as CatalogueSource
+    val source = sourceManager.get(sourceId)!!
 
     /**
      * Query from the view.
@@ -137,14 +139,18 @@ open class BrowseCataloguePresenter(
      * @param query the query.
      * @param filters the current state of the filters (for search mode).
      */
-    fun restartPager(query: String = this.query, filters: FilterList = this.appliedFilters) {
+    fun restartPager(query: String = this.query, filters: FilterList = this.appliedFilters, followsPager: Boolean = false) {
         this.query = query
         this.appliedFilters = filters
 
         subscribeToMangaInitializer()
 
         // Create a new pager.
+        if (followsPager) {
+            pager = FollowsPager(source)
+        } else {
         pager = createPager(query, filters)
+        }
 
         val sourceId = source.id
 
@@ -233,9 +239,6 @@ open class BrowseCataloguePresenter(
             val result = db.insertManga(newManga).executeAsBlocking()
             newManga.id = result.insertedId()
             localManga = newManga
-        } else if (localManga.title.isBlank()) {
-            localManga.title = sManga.title
-            db.insertManga(localManga).executeAsBlocking()
         }
         return localManga
     }
@@ -256,7 +259,7 @@ open class BrowseCataloguePresenter(
      * @return an observable of the manga to initialize
      */
     private fun getMangaDetailsObservable(manga: Manga): Observable<Manga> {
-        return source.fetchMangaDetails(manga)
+        return source.fetchMangaDetailsObservable(manga)
                 .flatMap { networkManga ->
                     manga.copyFrom(networkManga)
                     manga.initialized = true
@@ -400,6 +403,23 @@ open class BrowseCataloguePresenter(
             moveMangaToCategories(manga, selectedCategories.filter { it.id != 0 })
         } else {
             changeMangaFavorite(manga)
+        }
+    }
+
+    /**
+     * Search for manga based off of a random manga id by utilizing the [query] and the [restartPager].
+     */
+    fun searchRandomManga() {
+        (source as? Mangadex)?.apply {
+            fetchRandomMangaId()
+                .observeOn(Schedulers.io())
+                .subscribeOn(Schedulers.io())
+                .subscribe { randMangaId ->
+                    // Query string, e.g. "id:350"
+                    restartPager("${SearchHandler.PREFIX_ID_SEARCH}$randMangaId")
+                    // Clear search query so user can browse all manga again when they hit the Search button
+                    query = ""
+                }
         }
     }
 }

@@ -33,7 +33,6 @@ import eu.kanade.tachiyomi.data.database.models.TrackImpl
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.track.TrackManager
-import eu.kanade.tachiyomi.source.SourceNotFoundException
 import eu.kanade.tachiyomi.util.lang.chop
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.isServiceRunning
@@ -69,7 +68,14 @@ class BackupRestoreService : Service() {
      */
     private var restoreProgress = 0
 
+    /**
+     * Amount of manga in Json file (needed for restore)
+     */
+    private var restoreAmount = 0
+
     private var totalAmount = 0
+
+    private var skippedAmount = 0
 
     /**
      * List containing errors
@@ -188,8 +194,19 @@ class BackupRestoreService : Service() {
 
         val mangasJson = json.get(MANGAS).asJsonArray
 
+        val mangdexManga = mangasJson.filter {
+
+            val manga = backupManager.parser.fromJson<MangaImpl>(it.asJsonObject.get(MANGA))
+            val isMangaDex = backupManager.sourceManager.isMangadex(manga.source)
+            if (!isMangaDex) {
+                restoreAmount -= 1
+            }
+            isMangaDex
+        }
         // +1 for categories
         totalAmount = mangasJson.size() + 1
+        skippedAmount = mangasJson.size() - mangdexManga.count()
+        restoreAmount = mangdexManga.count()
         trackingErrors.clear()
         sourcesMissing.clear()
         lincensedManga = 0
@@ -198,7 +215,7 @@ class BackupRestoreService : Service() {
         // Restore categories
         restoreCategories(json, backupManager)
 
-        mangasJson.forEach {
+        mangdexManga.forEach {
             restoreManga(it.asJsonObject, backupManager)
         }
 
@@ -220,6 +237,7 @@ class BackupRestoreService : Service() {
         val element = json.get(CATEGORIES)
         if (element != null) {
             backupManager.restoreCategories(element.asJsonArray)
+            restoreAmount += 1
             restoreProgress += 1
             showProgressNotification(restoreProgress, totalAmount, "Categories added")
         } else {
@@ -236,7 +254,7 @@ class BackupRestoreService : Service() {
         val categories = backupManager.parser.fromJson<List<String>>(obj.get(CATEGORIES) ?: JsonArray())
         val history = backupManager.parser.fromJson<List<DHistory>>(obj.get(HISTORY) ?: JsonArray())
         val tracks = backupManager.parser.fromJson<List<TrackImpl>>(obj.get(TRACK) ?: JsonArray())
-        val source = backupManager.sourceManager.getOrStub(manga.source)
+        val source = backupManager.sourceManager.getMangadex()
 
         try {
             if (job?.isCancelled == false) {
@@ -270,17 +288,6 @@ class BackupRestoreService : Service() {
             trackingFetch(manga, tracks)
         } catch (e: Exception) {
             Timber.e(e)
-
-            if (e is RuntimeException) {
-                val cause = e.cause
-                if (cause is SourceNotFoundException) {
-                    sourcesMissing.add(cause.id)
-                } else if (e.message?.contains("licensed", true) == true) {
-                    lincensedManga++
-                }
-                errors.add("${manga.title} - ${cause?.message ?: e.message}")
-                return
-            }
             errors.add("${manga.title} - ${e.message}")
         }
     }
@@ -314,7 +321,7 @@ class BackupRestoreService : Service() {
     private fun writeErrorLog(): File {
         try {
             if (errors.isNotEmpty()) {
-                val destFile = File(externalCacheDir, "tachiyomi_restore.log")
+                val destFile = File(externalCacheDir, "neko_restore.log")
                 val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.getDefault())
 
                 destFile.bufferedWriter().use { out ->
@@ -336,7 +343,7 @@ class BackupRestoreService : Service() {
     private val progressNotification by lazy {
         NotificationCompat.Builder(this, Notifications.CHANNEL_RESTORE)
                 .setContentTitle(getString(R.string.app_name))
-                .setSmallIcon(R.drawable.ic_tachi)
+                .setSmallIcon(R.drawable.ic_neko_notification)
                 .setOngoing(true)
                 .setOnlyAlertOnce(true)
                 .setAutoCancel(false)
@@ -395,7 +402,7 @@ class BackupRestoreService : Service() {
                 .setContentTitle(getString(R.string.restore_completed))
                 .setContentText(restoreString)
                 .setStyle(NotificationCompat.BigTextStyle().bigText(restoreString))
-                .setSmallIcon(R.drawable.ic_tachi)
+                .setSmallIcon(R.drawable.ic_neko_notification)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setColor(ContextCompat.getColor(this, R.color.colorAccent))
         if (errors.size > 0 && !path.isNullOrEmpty() && !file.isNullOrEmpty()) {
@@ -422,7 +429,7 @@ class BackupRestoreService : Service() {
      *
      */
     private fun getErrorLogIntent(path: String, file: String): PendingIntent {
-        val destFile = File(path, file!!)
+        val destFile = File(path, file)
         val uri = destFile.getUriCompat(applicationContext)
         return NotificationReceiver.openFileExplorerPendingActivity(this@BackupRestoreService, uri)
     }

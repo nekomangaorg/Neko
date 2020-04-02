@@ -19,12 +19,6 @@
         app:showAsAction="ifRoom"/>
 
     <item
-        android:id="@+id/action_migrate"
-        android:icon="@drawable/ic_swap_calls_white_24dp"
-        android:title="@string/label_migration"
-        app:showAsAction="ifRoom" />
-
-    <item
         android:id="@+id/action_move_manga"
         android:icon="@drawable/ic_swap_vert_white_24dp"
         android:title="@string/action_move"

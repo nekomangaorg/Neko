@@ -194,10 +194,7 @@ class DownloadProvider(private val context: Context) {
      * @param chapter the chapter to query.
      */
     fun getChapterDirName(chapter: Chapter): String {
-        return DiskUtil.buildValidFilename(
-            if (chapter.scanlator != null) "${chapter.scanlator}_${chapter.name}"
-            else chapter.name
-        )
+        return DiskUtil.buildValidFilename(chapter.name + " - " + chapter.url.substringAfterLast("/"))
     }
 
     /**
@@ -206,10 +203,6 @@ class DownloadProvider(private val context: Context) {
      * @param chapter the chapter to query.
      */
     fun getValidChapterDirNames(chapter: Chapter): List<String> {
-        return listOf(
-            getChapterDirName(chapter),
-            // Legacy chapter directory name used in v0.8.4 and before
-            DiskUtil.buildValidFilename(chapter.name)
-        )
+        return listOf(getChapterDirName(chapter))
     }
 }

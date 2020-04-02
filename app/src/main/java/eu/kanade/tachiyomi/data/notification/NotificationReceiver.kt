@@ -19,6 +19,7 @@ import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.similar.SimilarUpdateService
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
@@ -67,6 +68,7 @@ class NotificationReceiver : BroadcastReceiver() {
                     intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1))
             // Cancel library update and dismiss notification
             ACTION_CANCEL_LIBRARY_UPDATE -> cancelLibraryUpdate(context)
+            ACTION_CANCEL_SIMILAR_UPDATE -> cancelSimilarUpdate(context)
             ACTION_CANCEL_RESTORE -> cancelRestoreUpdate(context)
             // Open reader activity
             ACTION_OPEN_CHAPTER -> {
@@ -166,6 +168,17 @@ class NotificationReceiver : BroadcastReceiver() {
     }
 
     /**
+     * Method called when user wants to stop a similar manga update
+     *
+     * @param context context of application
+     * @param notificationId id of notification
+     */
+    private fun cancelSimilarUpdate(context: Context) {
+        SimilarUpdateService.stop(context)
+        Handler().post { dismissNotification(context, Notifications.ID_SIMILAR_PROGRESS) }
+    }
+
+    /**
      * Method called when user wants to mark as read
      *
      * @param context context of application
@@ -208,6 +221,9 @@ class NotificationReceiver : BroadcastReceiver() {
 
         // Called to cancel library update.
         private const val ACTION_CANCEL_LIBRARY_UPDATE = "$ID.$NAME.CANCEL_LIBRARY_UPDATE"
+
+        // Called to cancel library update.
+        private const val ACTION_CANCEL_SIMILAR_UPDATE = "$ID.$NAME.CANCEL_SIMILAR_UPDATE"
 
         // Called to mark as read
         private const val ACTION_MARK_AS_READ = "$ID.$NAME.MARK_AS_READ"
@@ -418,21 +434,6 @@ class NotificationReceiver : BroadcastReceiver() {
             )
         }
 
-        /**
-         * Returns [PendingIntent] that opens the extensions controller,
-         *
-         * @param context context of application
-         * @param manga manga of chapter
-         */
-        internal fun openExtensionsPendingActivity(context: Context): PendingIntent {
-            val newIntent =
-                Intent(context, MainActivity::class.java).setAction(MainActivity.SHORTCUT_EXTENSIONS)
-                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-            return PendingIntent.getActivity(
-                context, 0, newIntent, PendingIntent.FLAG_UPDATE_CURRENT
-            )
-        }
-
         /**Returns the PendingIntent that will open the error log in an external text viewer
          *
          */
@@ -478,6 +479,19 @@ class NotificationReceiver : BroadcastReceiver() {
         internal fun cancelLibraryUpdatePendingBroadcast(context: Context): PendingIntent {
             val intent = Intent(context, NotificationReceiver::class.java).apply {
                 action = ACTION_CANCEL_LIBRARY_UPDATE
+            }
+            return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        }
+
+        /**
+         * Returns [PendingIntent] that starts a service which stops the similar update
+         *
+         * @param context context of application
+         * @return [PendingIntent]
+         */
+        internal fun cancelSimilarUpdatePendingBroadcast(context: Context): PendingIntent {
+            val intent = Intent(context, NotificationReceiver::class.java).apply {
+                action = ACTION_CANCEL_SIMILAR_UPDATE
             }
             return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
         }
