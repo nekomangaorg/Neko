@@ -13,11 +13,11 @@ open class BaseChapterHolder(
 ) : BaseFlexibleViewHolder(view, adapter) {
 
     init {
-        download_button.setOnClickListener { downloadOrRemoveMenu() }
+        download_button?.setOnClickListener { downloadOrRemoveMenu() }
     }
 
     private fun downloadOrRemoveMenu() {
-        val chapter = adapter.getItem(adapterPosition) as? BaseChapterItem ?: return
+        val chapter = adapter.getItem(adapterPosition) as? BaseChapterItem<*, *> ?: return
         if (chapter.status == Download.NOT_DOWNLOADED || chapter.status == Download.ERROR) {
             adapter.baseDelegate.downloadChapter(adapterPosition)
         } else {

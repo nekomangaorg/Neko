@@ -129,4 +129,8 @@ class RecentsHolder(
         val item = (subAdapter.getItem(position) as RecentMangaItem)
         adapter.delegate.markAsRead(item.mch.manga, item.chapter)
     }
+
+    override fun onHeaderClick(position: Int) {
+    }
+    override fun isSearching() = false
 }

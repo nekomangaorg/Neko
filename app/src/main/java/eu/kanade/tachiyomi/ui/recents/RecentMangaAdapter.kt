@@ -9,7 +9,11 @@ import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 
 class RecentMangaAdapter(val delegate: RecentsInterface) :
-    BaseChapterAdapter<IFlexible<RecentMangaHolder>>(delegate) {
+    BaseChapterAdapter<IFlexible<*>>(delegate) {
+
+    init {
+        setDisplayHeadersAtStartUp(true)
+    }
 
     val decimalFormat = DecimalFormat("#.###", DecimalFormatSymbols()
         .apply { decimalSeparator = '.' })
@@ -17,9 +21,11 @@ class RecentMangaAdapter(val delegate: RecentsInterface) :
     interface RecentsInterface : RecentMangaInterface, DownloadInterface
 
     interface RecentMangaInterface {
+        fun onHeaderClick(position: Int)
         fun onCoverClick(position: Int)
         fun markAsRead(position: Int)
         fun setCover(manga: Manga, view: ImageView)
+        fun isSearching(): Boolean
     }
 
     override fun onItemSwiped(position: Int, direction: Int) {

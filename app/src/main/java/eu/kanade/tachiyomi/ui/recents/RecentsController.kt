@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.appcompat.widget.SearchView
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.ControllerChangeHandler
@@ -48,8 +49,9 @@ import kotlinx.android.synthetic.main.recently_read_controller.*
  * UI related actions should be called from here.
  */
 class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
-    FlexibleAdapter.OnUpdateListener,
+    RecentMangaAdapter.RecentsInterface,
     RecentsAdapter.RecentsInterface,
+    FlexibleAdapter.OnItemClickListener,
     RootSearchInterface {
 
     init {
@@ -59,10 +61,11 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
     /**
      * Adapter containing the recent manga.
      */
-    private val adapter = RecentsAdapter(this)
+    // private val adapter = RecentsAdapter(this)
+    private var adapter = RecentMangaAdapter(this)
 
     private var presenter = RecentsPresenter(this)
-    private var recentItems: List<RecentsItem>? = null
+    private var recentItems: List<RecentMangaItem>? = null
     private var snack: Snackbar? = null
     private var lastChapterId: Long? = null
 
@@ -83,10 +86,20 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
         super.onViewCreated(view)
         view.applyWindowInsetsForRootController(activity!!.bottom_nav)
         // Initialize adapter
+        adapter = RecentMangaAdapter(this)
         recycler.adapter = adapter
         recycler.layoutManager = LinearLayoutManager(view.context)
         recycler.setHasFixedSize(true)
-
+        recycler.recycledViewPool.setMaxRecycledViews(0, 0)
+        adapter.isSwipeEnabled = true
+        /*recycler.addItemDecoration(
+            DividerItemDecoration(
+                recycler.context, DividerItemDecoration.VERTICAL
+            )
+        )*/
+        adapter.itemTouchHelperCallback.setSwipeFlags(
+            ItemTouchHelper.LEFT
+        )
         scrollViewWith(recycler, skipFirstSnap = true)
 
         if (recentItems != null) adapter.updateDataSet(recentItems!!.toList())
@@ -108,37 +121,42 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
 
     fun refresh() = presenter.getRecents()
 
-    fun showLists(recents: List<RecentsItem>) {
+    fun showLists(recents: List<RecentMangaItem>) {
         recentItems = recents
         adapter.updateDataSet(recents)
         if (lastChapterId != null) {
             refreshItem(lastChapterId ?: 0L)
             lastChapterId = null
         }
-    }
-
-    override fun onUpdateEmptyView(size: Int) {
-        if (size > 0) {
-            empty_view?.hide()
-        } else {
-            empty_view?.show(R.drawable.ic_history_white_128dp, R.string
-                .information_no_recent_manga)
-        }
+        // recycler.removeItemDecorationAt(0)
     }
 
     fun updateChapterDownload(download: Download) {
         if (view == null) return
-        for (i in 0 until adapter.itemCount) {
+        val id = download.chapter.id ?: return
+        val holder = recycler.findViewHolderForItemId(id) as? RecentMangaHolder ?: return
+        holder.notifyStatus(download.status, download.progress)
+        /* (i in 0 until adapter.itemCount) {
             val holder = recycler.findViewHolderForAdapterPosition(i) as? RecentsHolder ?: continue
             if (holder.updateChapterDownload(download)) break
-        }
+        }*/
     }
 
     private fun refreshItem(chapterId: Long) {
+        val recentItemPos = adapter.currentItems.indexOfFirst {
+            it is RecentMangaItem &&
+            it.mch.chapter.id == chapterId }
+        if (recentItemPos > -1) adapter.notifyItemChanged(recentItemPos)
+        /*holder.notifyStatus(download.status, download.progress)
         for (i in 0 until adapter.itemCount) {
             val holder = recycler.findViewHolderForAdapterPosition(i) as? RecentsHolder ?: continue
             holder.refreshChapter(chapterId)
-        }
+        }*/
+    }
+
+    override fun downloadChapter(position: Int) {
+        val item = adapter.getItem(position) as? RecentMangaItem ?: return
+        downloadChapter(item)
     }
 
     override fun downloadChapter(item: RecentMangaItem) {
@@ -153,16 +171,47 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
         }
     }
 
+    override fun startDownloadNow(position: Int) {
+        val chapter = (adapter.getItem(position) as? RecentMangaItem)?.chapter ?: return
+        presenter.startDownloadChapterNow(chapter)
+    }
+
     override fun downloadChapterNow(chapter: Chapter) {
         presenter.startDownloadChapterNow(chapter)
     }
 
+    override fun onCoverClick(position: Int) {
+        val manga = (adapter.getItem(position) as? RecentMangaItem)?.mch?.manga ?: return
+        router.pushController(MangaDetailsController(manga).withFadeTransaction())
+    }
+
     override fun showManga(manga: Manga) = router.pushController(MangaDetailsController(manga).withFadeTransaction())
+
+    override fun onItemClick(view: View?, position: Int): Boolean {
+        val item = adapter.getItem(position) ?: return false
+        if (item is RecentMangaItem) {
+            if (item.mch.manga.id == null) {
+                val headerItem = adapter.getHeaderOf(item) as? RecentMangaHeaderItem
+                val controller: Controller = when (headerItem?.recentsType) {
+                    RecentsItem.NEW_CHAPTERS -> RecentChaptersController()
+                    RecentsItem.CONTINUE_READING -> RecentlyReadController()
+                    else -> return false
+                }
+                router.pushController(controller.withFadeTransaction())
+            } else resumeManga(item.mch.manga, item.chapter)
+        } else if (item is RecentMangaHeaderItem) return false // onHeaderClick(position)
+        return true
+    }
 
     override fun resumeManga(manga: Manga, chapter: Chapter) {
         val activity = activity ?: return
         val intent = ReaderActivity.newIntent(activity, manga, chapter)
         startActivity(intent)
+    }
+
+    override fun markAsRead(position: Int) {
+        val item = adapter.getItem(position) as? RecentMangaItem ?: return
+        markAsRead(item.mch.manga, item.chapter)
     }
 
     override fun markAsRead(manga: Manga, chapter: Chapter) {
@@ -190,6 +239,8 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
             }
         (activity as? MainActivity)?.setUndoSnackBar(snack)
     }
+
+    override fun isSearching() = presenter.query.isNotEmpty()
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.recents, menu)
@@ -229,14 +280,25 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
             .signature(ObjectKey(MangaImpl.getLastCoverFetch(manga.id!!).toString())).into(view)
     }
 
-    override fun viewAll(position: Int) {
-        val recentsType = (adapter.getItem(position) as? RecentsItem)?.recentType ?: return
+    override fun onHeaderClick(position: Int) {
+        val recentsType = (adapter.getItem(position) as? RecentMangaHeaderItem)?.recentsType
+        ?: return
         val controller: Controller = when (recentsType) {
             RecentsItem.NEW_CHAPTERS -> RecentChaptersController()
             RecentsItem.CONTINUE_READING -> RecentlyReadController()
             else -> return
         }
         router.pushController(controller.withFadeTransaction())
+    }
+
+    override fun viewAll(position: Int) {
+        /*val recentsType = (adapter.getItem(position) as? RecentsItem)?.recentType ?: return
+        val controller: Controller = when (recentsType) {
+            RecentsItem.NEW_CHAPTERS -> RecentChaptersController()
+            RecentsItem.CONTINUE_READING -> RecentlyReadController()
+            else -> return
+        }
+        router.pushController(controller.withFadeTransaction())*/
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

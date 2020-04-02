@@ -17,45 +17,54 @@ class RecentMangaHolder(
 ) : BaseChapterHolder(view, adapter) {
 
     init {
-        cover_thumbnail.setOnClickListener { adapter.delegate.onCoverClick(adapterPosition) }
+        cover_thumbnail?.setOnClickListener { adapter.delegate.onCoverClick(adapterPosition) }
+    }
+
+    fun bind(recentsType: Int) {
+        when (recentsType) {
+            RecentsItem.CONTINUE_READING -> {
+                title.setText(R.string.view_history)
+            }
+            RecentsItem.NEW_CHAPTERS -> {
+                title.setText(R.string.view_all_updates)
+            }
+        }
     }
 
     fun bind(item: RecentMangaItem) {
         download_button.visibleIf(item.mch.manga.source != LocalSource.ID)
         title.text = item.mch.manga.title
-        val holder = (adapter.delegate as RecentsHolder)
-        val isSearch =
-            (holder.adapter.getItem(holder.adapterPosition) as RecentsItem).recentType == RecentsItem.SEARCH
+        val isSearch = adapter.delegate.isSearching()
         subtitle.text = item.chapter.name
-        body.text = if (isSearch) when {
+        val notValidNum = item.mch.chapter.chapter_number <= 0
+        body.text = when {
+            item.mch.chapter.id == null -> body.context.getString(
+                R.string.added_x, DateUtils.getRelativeTimeSpanString(
+                    item.mch.manga.date_added, Date().time, DateUtils.MINUTE_IN_MILLIS
+                ).toString()
+            )
             item.chapter.id != item.mch.chapter.id -> body.context.getString(
-                R.string.last_read_chapter_x, adapter.decimalFormat.format(
-                    item.mch.chapter.chapter_number
-                ) + " (${DateUtils.getRelativeTimeSpanString(
+                if (notValidNum) R.string.last_read_x else R.string.last_read_chapter_x,
+                if (notValidNum) item.mch.chapter.name else adapter.decimalFormat.format(item.mch.chapter.chapter_number) +
+                    " (${DateUtils.getRelativeTimeSpanString(
                     item.mch.history.last_read, Date().time, DateUtils.MINUTE_IN_MILLIS
                 )})"
             )
             item.mch.history.id == null -> body.context.getString(
-                R.string.uploaded_x, DateUtils.getRelativeTimeSpanString(
+                R.string.updated_x, DateUtils.getRelativeTimeSpanString(
                     item.chapter.date_upload, Date().time, DateUtils.HOUR_IN_MILLIS
                 ).toString()
             )
-            else -> body.context.getString(
-                R.string.last_read_x, DateUtils.getRelativeTimeSpanString(
+            !isSearch && item.chapter.pages_left > 0 -> itemView.resources.getQuantityString(
+                R.plurals.pages_left, item.chapter.pages_left, item.chapter.pages_left
+            ) +
+                " (${DateUtils.getRelativeTimeSpanString(
+                    item.mch.history.last_read, Date().time, DateUtils.MINUTE_IN_MILLIS
+                )})"
+            isSearch -> body.context.getString(
+                R.string.read_x, DateUtils.getRelativeTimeSpanString(
                     item.mch.history.last_read, Date().time, DateUtils.MINUTE_IN_MILLIS
                 ).toString()
-            )
-        } else when {
-            item.chapter.id != item.mch.chapter.id -> body.context.getString(
-                R.string.last_read_chapter_x, adapter.decimalFormat.format(
-                    item.mch.chapter.chapter_number
-                )
-            )
-            item.mch.history.id == null -> DateUtils.getRelativeTimeSpanString(
-                item.chapter.date_upload, Date().time, DateUtils.HOUR_IN_MILLIS
-            ).toString()
-            item.chapter.pages_left > 0 -> itemView.resources.getQuantityString(
-                R.plurals.pages_left, item.chapter.pages_left, item.chapter.pages_left
             )
             else -> ""
         }

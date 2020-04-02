@@ -927,11 +927,16 @@ class LibraryPresenter(
     companion object {
         private var currentLibrary: Library? = null
 
-        fun resetCustomManga() {
+        fun updateDB() {
             val db: DatabaseHelper = Injekt.get()
             db.inTransaction {
                 val libraryManga = db.getLibraryMangas().executeAsBlocking()
                 libraryManga.forEach { manga ->
+                    if (manga.date_added == 0L) {
+                        val chapters = db.getChapters(manga).executeAsBlocking()
+                        manga.date_added = chapters.minBy { it.date_fetch }?.date_fetch ?: 0L
+                        db.insertManga(manga).executeAsBlocking()
+                    }
                     db.resetMangaInfo(manga).executeAsBlocking()
                 }
             }
