@@ -143,13 +143,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
             if (currentRoot?.tag()?.toIntOrNull() != id) {
                 when (id) {
                     R.id.nav_library -> setRoot(LibraryListController(), id)
-                    R.id.nav_recents -> {
-                        setRoot(RecentsController(), id)
-//                        if (preferences.showRecentUpdates().getOrDefault()) setRoot(
-//                            RecentChaptersController(), id
-//                        )
-//                        else setRoot(RecentlyReadController(), id)
-                    }
+                    R.id.nav_recents -> setRoot(RecentsController(), id)
                     R.id.nav_catalogues -> {
                         val browseCatalogueController = BrowseCatalogueController(source)
                         if (!source.isLogged()) {
@@ -169,7 +163,6 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
                             if (!showRecents) setRoot(RecentChaptersController(), id)
                             else setRoot(RecentlyReadController(), id)
                             preferences.showRecentUpdates().set(!showRecents)
-                            updateRecentsIcon()
                         }*/
                         R.id.nav_library -> {
                             val controller =
@@ -193,7 +186,6 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
             View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
         container.systemUiVisibility =
             View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-        // updateRecentsIcon()
 
         supportActionBar?.setDisplayShowCustomEnabled(true)
 
@@ -214,10 +206,6 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
                 top = insets.systemWindowInsetTop
             )
             bottom_nav.updatePadding(bottom = insets.systemWindowInsetBottom)
-
-            /*insets.replaceSystemWindowInsets(
-                0, insets.systemWindowInsetTop, 0, insets.systemWindowInsetBottom
-            )*/
         }
 
         router = Conductor.attachRouter(this, container, savedInstanceState)
@@ -307,16 +295,6 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
         }
     }
 
-    /*fun updateRecentsIcon() {
-        bottom_nav.menu.findItem(R.id.nav_recents).icon = AppCompatResources.getDrawable(
-            this,
-            if (preferences.showRecentUpdates()
-                    .getOrDefault()
-            ) R.drawable.recent_updates_selector_24dp
-            else R.drawable.recent_read_selector_24dp
-        )
-    }*/
-
     override fun startSupportActionMode(callback: androidx.appcompat.view.ActionMode.Callback): androidx.appcompat.view.ActionMode? {
         window?.statusBarColor = getResourceColor(R.attr.colorPrimaryVariant)
         return super.startSupportActionMode(callback)
@@ -345,6 +323,10 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
         DownloadService.callListeners()
     }
 
+    override fun onPause() {
+        super.onPause()
+        snackBar?.dismiss()
+    }
     /**
      * Called when login dialog is closed, refreshes the adapter.
      *

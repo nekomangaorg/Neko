@@ -58,11 +58,17 @@ class RecentMangaHeaderItem(val recentsType: Int) :
 
         fun bind(recentsType: Int) {
             title.setText(when (recentsType) {
-                RecentsItem.CONTINUE_READING -> R.string.continue_reading
-                RecentsItem.NEW_CHAPTERS -> R.string.new_chapters
-                RecentsItem.NEWLY_ADDED -> R.string.new_additions
+                CONTINUE_READING -> R.string.continue_reading
+                NEW_CHAPTERS -> R.string.new_chapters
+                NEWLY_ADDED -> R.string.new_additions
                 else -> R.string.continue_reading
             })
         }
+    }
+
+    companion object {
+        const val CONTINUE_READING = 0
+        const val NEW_CHAPTERS = 1
+        const val NEWLY_ADDED = 2
     }
 }

@@ -8,25 +8,18 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
-import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.signature.ObjectKey
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.database.models.Chapter
-import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.download.model.Download
-import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
@@ -50,7 +43,6 @@ import kotlinx.android.synthetic.main.recently_read_controller.*
  */
 class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
     RecentMangaAdapter.RecentsInterface,
-    RecentsAdapter.RecentsInterface,
     FlexibleAdapter.OnItemClickListener,
     RootSearchInterface {
 
@@ -61,7 +53,6 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
     /**
      * Adapter containing the recent manga.
      */
-    // private val adapter = RecentsAdapter(this)
     private var adapter = RecentMangaAdapter(this)
 
     private var presenter = RecentsPresenter(this)
@@ -92,11 +83,6 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
         recycler.setHasFixedSize(true)
         recycler.recycledViewPool.setMaxRecycledViews(0, 0)
         adapter.isSwipeEnabled = true
-        /*recycler.addItemDecoration(
-            DividerItemDecoration(
-                recycler.context, DividerItemDecoration.VERTICAL
-            )
-        )*/
         adapter.itemTouchHelperCallback.setSwipeFlags(
             ItemTouchHelper.LEFT
         )
@@ -128,7 +114,6 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
             refreshItem(lastChapterId ?: 0L)
             lastChapterId = null
         }
-        // recycler.removeItemDecorationAt(0)
     }
 
     fun updateChapterDownload(download: Download) {
@@ -136,10 +121,6 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
         val id = download.chapter.id ?: return
         val holder = recycler.findViewHolderForItemId(id) as? RecentMangaHolder ?: return
         holder.notifyStatus(download.status, download.progress)
-        /* (i in 0 until adapter.itemCount) {
-            val holder = recycler.findViewHolderForAdapterPosition(i) as? RecentsHolder ?: continue
-            if (holder.updateChapterDownload(download)) break
-        }*/
     }
 
     private fun refreshItem(chapterId: Long) {
@@ -147,20 +128,11 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
             it is RecentMangaItem &&
             it.mch.chapter.id == chapterId }
         if (recentItemPos > -1) adapter.notifyItemChanged(recentItemPos)
-        /*holder.notifyStatus(download.status, download.progress)
-        for (i in 0 until adapter.itemCount) {
-            val holder = recycler.findViewHolderForAdapterPosition(i) as? RecentsHolder ?: continue
-            holder.refreshChapter(chapterId)
-        }*/
     }
 
     override fun downloadChapter(position: Int) {
-        val item = adapter.getItem(position) as? RecentMangaItem ?: return
-        downloadChapter(item)
-    }
-
-    override fun downloadChapter(item: RecentMangaItem) {
         val view = view ?: return
+        val item = adapter.getItem(position) as? RecentMangaItem ?: return
         val chapter = item.chapter
         val manga = item.mch.manga
         if (item.status != Download.NOT_DOWNLOADED && item.status != Download.ERROR) {
@@ -176,16 +148,10 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
         presenter.startDownloadChapterNow(chapter)
     }
 
-    override fun downloadChapterNow(chapter: Chapter) {
-        presenter.startDownloadChapterNow(chapter)
-    }
-
     override fun onCoverClick(position: Int) {
         val manga = (adapter.getItem(position) as? RecentMangaItem)?.mch?.manga ?: return
         router.pushController(MangaDetailsController(manga).withFadeTransaction())
     }
-
-    override fun showManga(manga: Manga) = router.pushController(MangaDetailsController(manga).withFadeTransaction())
 
     override fun onItemClick(view: View?, position: Int): Boolean {
         val item = adapter.getItem(position) ?: return false
@@ -193,50 +159,45 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
             if (item.mch.manga.id == null) {
                 val headerItem = adapter.getHeaderOf(item) as? RecentMangaHeaderItem
                 val controller: Controller = when (headerItem?.recentsType) {
-                    RecentsItem.NEW_CHAPTERS -> RecentChaptersController()
-                    RecentsItem.CONTINUE_READING -> RecentlyReadController()
+                    RecentMangaHeaderItem.NEW_CHAPTERS -> RecentChaptersController()
+                    RecentMangaHeaderItem.CONTINUE_READING -> RecentlyReadController()
                     else -> return false
                 }
                 router.pushController(controller.withFadeTransaction())
-            } else resumeManga(item.mch.manga, item.chapter)
-        } else if (item is RecentMangaHeaderItem) return false // onHeaderClick(position)
+            } else {
+                val activity = activity ?: return false
+                val intent = ReaderActivity.newIntent(activity, item.mch.manga, item.chapter)
+                startActivity(intent)
+            }
+        } else if (item is RecentMangaHeaderItem) return false
         return true
-    }
-
-    override fun resumeManga(manga: Manga, chapter: Chapter) {
-        val activity = activity ?: return
-        val intent = ReaderActivity.newIntent(activity, manga, chapter)
-        startActivity(intent)
     }
 
     override fun markAsRead(position: Int) {
         val item = adapter.getItem(position) as? RecentMangaItem ?: return
-        markAsRead(item.mch.manga, item.chapter)
-    }
-
-    override fun markAsRead(manga: Manga, chapter: Chapter) {
+        val chapter = item.chapter
+        val manga = item.mch.manga
         val lastRead = chapter.last_page_read
         val pagesLeft = chapter.pages_left
         lastChapterId = chapter.id
         presenter.markChapterRead(chapter, true)
-        snack =
-            view?.snack(R.string.marked_as_read, Snackbar.LENGTH_INDEFINITE) {
-                anchorView = activity?.bottom_nav
-                var undoing = false
-                setAction(R.string.action_undo) {
-                    presenter.markChapterRead(chapter, false, lastRead, pagesLeft)
-                    undoing = true
-                }
-                addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
-                    override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
-                        super.onDismissed(transientBottomBar, event)
-                        if (!undoing && presenter.preferences.removeAfterMarkedAsRead()) {
-                            lastChapterId = chapter.id
-                            presenter.deleteChapter(chapter, manga)
-                        }
-                    }
-                })
+        snack = view?.snack(R.string.marked_as_read, Snackbar.LENGTH_INDEFINITE) {
+            anchorView = activity?.bottom_nav
+            var undoing = false
+            setAction(R.string.action_undo) {
+                presenter.markChapterRead(chapter, false, lastRead, pagesLeft)
+                undoing = true
             }
+            addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
+                override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+                    super.onDismissed(transientBottomBar, event)
+                    if (!undoing && presenter.preferences.removeAfterMarkedAsRead()) {
+                        lastChapterId = chapter.id
+                        presenter.deleteChapter(chapter, manga)
+                    }
+                }
+            })
+        }
         (activity as? MainActivity)?.setUndoSnackBar(snack)
     }
 
@@ -272,33 +233,6 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
             snack?.dismiss()
             setHasOptionsMenu(false)
         }
-    }
-
-    override fun setCover(manga: Manga, view: ImageView) {
-        val activity = activity ?: return
-        GlideApp.with(activity).load(manga).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-            .signature(ObjectKey(MangaImpl.getLastCoverFetch(manga.id!!).toString())).into(view)
-    }
-
-    override fun onHeaderClick(position: Int) {
-        val recentsType = (adapter.getItem(position) as? RecentMangaHeaderItem)?.recentsType
-        ?: return
-        val controller: Controller = when (recentsType) {
-            RecentsItem.NEW_CHAPTERS -> RecentChaptersController()
-            RecentsItem.CONTINUE_READING -> RecentlyReadController()
-            else -> return
-        }
-        router.pushController(controller.withFadeTransaction())
-    }
-
-    override fun viewAll(position: Int) {
-        /*val recentsType = (adapter.getItem(position) as? RecentsItem)?.recentType ?: return
-        val controller: Controller = when (recentsType) {
-            RecentsItem.NEW_CHAPTERS -> RecentChaptersController()
-            RecentsItem.CONTINUE_READING -> RecentlyReadController()
-            else -> return
-        }
-        router.pushController(controller.withFadeTransaction())*/
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

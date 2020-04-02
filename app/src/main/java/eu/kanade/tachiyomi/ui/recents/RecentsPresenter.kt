@@ -32,12 +32,12 @@ class RecentsPresenter(
 
     private var scope = CoroutineScope(Job() + Dispatchers.Default)
 
-    var recentItems = listOf<RecentMangaItem>()
-    // var groupedRecentItems = listOf<RecentsItem>()
+    private var recentItems = listOf<RecentMangaItem>()
     var query = ""
-    var newAdditionsHeader = RecentMangaHeaderItem(RecentsItem.NEWLY_ADDED)
-    var newChaptersHeader = RecentMangaHeaderItem(RecentsItem.NEW_CHAPTERS)
-    var continueReadingHeader = RecentMangaHeaderItem(RecentsItem.CONTINUE_READING)
+    private val newAdditionsHeader = RecentMangaHeaderItem(RecentMangaHeaderItem.NEWLY_ADDED)
+    private val newChaptersHeader = RecentMangaHeaderItem(RecentMangaHeaderItem.NEW_CHAPTERS)
+    private val continueReadingHeader = RecentMangaHeaderItem(RecentMangaHeaderItem
+        .CONTINUE_READING)
 
     fun onCreate() {
         downloadManager.addListener(this)
