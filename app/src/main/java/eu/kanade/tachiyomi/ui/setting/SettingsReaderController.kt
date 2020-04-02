@@ -66,7 +66,7 @@ class SettingsReaderController : SettingsController() {
             defaultValue = false
         }
         switchPreference {
-            key = Keys.skipHidden
+            key = Keys.skipFiltered
             titleRes = R.string.pref_skip_hidden_chapters
             defaultValue = false
         }

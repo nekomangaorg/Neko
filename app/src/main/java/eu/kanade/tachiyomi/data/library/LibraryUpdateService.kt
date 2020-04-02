@@ -13,7 +13,10 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.GROUP_ALERT_SUMMARY
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.signature.ObjectKey
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Chapter
@@ -33,6 +36,7 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.HttpSource
+import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.lang.chop
@@ -68,18 +72,14 @@ class LibraryUpdateService(
     val sourceManager: SourceManager = Injekt.get(),
     val preferences: PreferencesHelper = Injekt.get(),
     val downloadManager: DownloadManager = Injekt.get(),
-    val trackManager: TrackManager = Injekt.get()
+    private val trackManager: TrackManager = Injekt.get(),
+    private val coverCache: CoverCache = Injekt.get()
 ) : Service() {
 
     /**
      * Wake lock that will be held until the service is destroyed.
      */
     private lateinit var wakeLock: PowerManager.WakeLock
-
-    /**
-     * Subscription where the update is done.
-     */
-    private var subscription: Subscription? = null
 
     /**
      * Pending intent of action that cancels the library update
@@ -120,89 +120,6 @@ class LibraryUpdateService(
                 getString(android.R.string.cancel),
                 cancelIntent
             )
-    }
-
-    /**
-     * Defines what should be updated within a service execution.
-     */
-    enum class Target {
-        CHAPTERS, // Manga meta data and  chapters
-        SYNC_FOLLOWS, // Manga in reading, rereading
-        TRACKING // Tracking metadata
-    }
-
-    companion object {
-
-        /**
-         * Key for category to update.
-         */
-        const val KEY_CATEGORY = "category"
-
-        fun categoryInQueue(id: Int?) = instance?.categoryIds?.contains(id) ?: false
-        private var instance: LibraryUpdateService? = null
-
-        /**
-         * Key that defines what should be updated.
-         */
-        const val KEY_TARGET = "target"
-
-        /**
-         * Returns the status of the service.
-         *
-         * @return true if the service is running, false otherwise.
-         */
-        fun isRunning(): Boolean {
-            return instance != null
-        }
-
-        /**
-         * Starts the service. It will be started only if there isn't another instance already
-         * running.
-         *
-         * @param context the application context.
-         * @param category a specific category to update, or null for global update.
-         * @param target defines what should be updated.
-         */
-        fun start(context: Context, category: Category? = null, target: Target = Target.CHAPTERS) {
-            if (!isRunning()) {
-                val intent = Intent(context, LibraryUpdateService::class.java).apply {
-                    putExtra(KEY_TARGET, target)
-                    category?.id?.let { id ->
-                        putExtra(KEY_CATEGORY, id)
-                    }
-                }
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-                    context.startService(intent)
-                } else {
-                    context.startForegroundService(intent)
-                }
-            } else {
-                if (target == Target.CHAPTERS) category?.id?.let {
-                    instance?.addCategory(it)
-                }
-            }
-        }
-
-        /**
-         * Stops the service.
-         *
-         * @param context the application context.
-         */
-        fun stop(context: Context) {
-            instance?.job?.cancel()
-            context.stopService(Intent(context, LibraryUpdateService::class.java))
-        }
-
-        private var listener: LibraryServiceListener? = null
-
-        fun setListener(listener: LibraryServiceListener) {
-            this.listener = listener
-        }
-
-        fun removeListener(listener: LibraryServiceListener) {
-            if (this.listener == listener)
-                this.listener = null
-        }
     }
 
     private fun addManga(mangaToAdd: List<LibraryManga>) {
@@ -276,7 +193,6 @@ class LibraryUpdateService(
         job?.cancel()
         if (instance == this)
             instance = null
-        subscription?.unsubscribe()
         if (wakeLock.isHeld) {
             wakeLock.release()
         }
@@ -305,26 +221,15 @@ class LibraryUpdateService(
             ?: return START_NOT_STICKY
 
         // Unsubscribe from any previous subscription if needed.
-        subscription?.unsubscribe()
         instance = this
 
         val selectedScheme = preferences.libraryUpdatePrioritization().getOrDefault()
         val mangaList =
             getMangaToUpdate(intent, target).sortedWith(rankingScheme[selectedScheme])
         // Update favorite manga. Destroy service when completed or in case of an error.
-        if (target == Target.DETAILS) {
-            // Update either chapter list or manga details.
-            subscription = Observable.defer {
-                updateDetails(mangaList)
-            }.subscribeOn(Schedulers.io()).subscribe({}, {
-                Timber.e(it)
-                stopSelf(startId)
-            }, {
-                stopSelf(startId)
-            })
-        } else {
-            launchTarget(target, mangaList, startId)
-        }
+
+        launchTarget(target, mangaList, startId)
+
         return START_REDELIVER_INTENT
     }
 
@@ -333,16 +238,14 @@ class LibraryUpdateService(
             Timber.e(exception)
             stopSelf(startId)
         }
-        if (target == Target.CHAPTERS) {
-            job = GlobalScope.launch(handler) {
-                updateChaptersJob(mangaToAdd)
-            }
-        } else {
-            job = GlobalScope.launch(handler) {
-                updateTrackings(mangaToAdd)
+        job = GlobalScope.launch(handler) {
+            when(target){
+            Target.SYNC_FOLLOWS -> syncFollows()
+            Target.CHAPTERS -> updateChaptersJob(mangaToAdd)
+            Target.TRACKING ->  updateTrackings(mangaToAdd)
+
             }
         }
-
         job?.invokeOnCompletion { stopSelf(startId) }
     }
 
@@ -368,21 +271,10 @@ class LibraryUpdateService(
         }
         if (newUpdates.isNotEmpty()) {
             showResultNotification(newUpdates)
-
-            if (preferences.refreshCoversToo().getOrDefault() && job?.isCancelled == false) {
-                updateDetails(newUpdates.map { it.key }).observeOn(Schedulers.io())
-                    .doOnCompleted {
-                        cancelProgressNotification()
-                        if (downloadNew && hasDownloads) {
-                            DownloadService.start(this)
-                        }
-                    }
-                    .subscribeOn(Schedulers.io()).subscribe {}
-            } else if (downloadNew && hasDownloads) {
+            if (downloadNew && hasDownloads) {
                 DownloadService.start(this)
             }
         }
-
         cancelProgressNotification()
     }
 
@@ -398,10 +290,29 @@ class LibraryUpdateService(
                 throw java.lang.Exception("Job was cancelled")
             }
             showProgressNotification(manga, progess, mangaToUpdate.size)
-            val source = sourceManager.get(manga.source) as? HttpSource ?: return false
-            val fetchedChapters = withContext(Dispatchers.IO) {
-                source.fetchChapterList(manga)
-            } ?: emptyList()
+            val source = sourceManager.getMangadex()
+            val details = source.fetchMangaAndChapterDetails(manga)
+
+            // delete cover cache image if the thumbnail from network is not empty
+            // note: we preload the covers here so we can view everything offline if they change
+            if (!details.first.thumbnail_url.isNullOrEmpty()) {
+                // clear the old url from the cache
+                coverCache.deleteFromCache(manga.thumbnail_url)
+                // download the glide image cache (used in library and manga info)
+                // the coverCache should be auto populated if we preload into glide
+                manga.thumbnail_url = details.first.thumbnail_url
+                MangaImpl.setLastCoverFetch(manga.id!!, Date().time)
+                GlideApp.with(this@LibraryUpdateService)
+                    .load(manga)
+                    .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+                    .signature(ObjectKey(MangaImpl.getLastCoverFetch(manga.id!!).toString()))
+                    .preload()
+            }
+
+            manga.copyFrom(details.first)
+            db.insertManga(manga).executeAsBlocking()
+
+            val fetchedChapters = details.second
             if (fetchedChapters.isNotEmpty()) {
                 val newChapters = syncChaptersWithSource(db, fetchedChapters, manga, source)
                 if (newChapters.first.isNotEmpty()) {
@@ -423,7 +334,7 @@ class LibraryUpdateService(
         }
     }
 
-    fun downloadChapters(manga: Manga, chapters: List<Chapter>) {
+    private fun downloadChapters(manga: Manga, chapters: List<Chapter>) {
         // we need to get the chapters from the db so we have chapter ids
         val mangaChapters = db.getChapters(manga).executeAsBlocking()
         val dbChapters = chapters.map {
@@ -434,52 +345,6 @@ class LibraryUpdateService(
         downloadManager.downloadChapters(manga, dbChapters, false)
     }
 
-    /**
-     * Updates the chapters for the given manga and adds them to the database.
-     *
-     * @param manga the manga to update.
-     * @return a pair of the inserted and removed chapters.
-     */
-    fun updateManga(manga: Manga): Observable<Pair<List<Chapter>, List<Chapter>>> {
-        val source = sourceManager.get(manga.source) as? HttpSource ?: return Observable.empty()
-        return source.fetchChapterListObservable(manga)
-            .map { syncChaptersWithSource(db, it, manga, source) }
-    }
-
-    /**
-     * Method that updates the details of the given list of manga. It's called in a background
-     * thread, so it's safe to do heavy operations or network calls here.
-     *
-     * @param mangaToUpdate the list to update
-     * @return an observable delivering the progress of each update.
-     */
-    fun updateDetails(mangaToUpdate: List<LibraryManga>): Observable<LibraryManga> {
-        // Initialize the variables holding the progress of the updates.
-        val count = AtomicInteger(0)
-
-        // Emit each manga and update it sequentially.
-        return Observable.from(mangaToUpdate)
-            // Notify manga that will update.
-            .doOnNext { showProgressNotification(it, count.andIncrement, mangaToUpdate.size) }
-            // Update the details of the manga.
-            .concatMap { manga ->
-                val source = sourceManager.get(manga.source) as? HttpSource
-                    ?: return@concatMap Observable.empty<LibraryManga>()
-                source.fetchMangaDetails(manga)
-                    .map { networkManga ->
-                        val thumbnailUrl = manga.thumbnail_url
-                        manga.copyFrom(networkManga)
-                        db.insertManga(manga).executeAsBlocking()
-                        if (thumbnailUrl != networkManga.thumbnail_url)
-                            MangaImpl.setLastCoverFetch(manga.id!!, Date().time)
-                        manga
-                    }
-                    .onErrorReturn { manga }
-            }
-            .doOnCompleted {
-                cancelProgressNotification()
-            }
-    }
 
     /**
      * Method that updates the metadata of the connected tracking services. It's called in a
@@ -513,13 +378,43 @@ class LibraryUpdateService(
     }
 
     /**
+     * Method that updates the syncs reading and rereading manga into neko library
+     */
+    private suspend fun syncFollows() {
+        val count = AtomicInteger(0)
+        val listManga = sourceManager.getMangadex().fetchAllFollows()
+        // filter all follows from Mangadex and only add reading or rereading manga to library
+        listManga.filter { it ->
+            it.follow_status == FollowStatus.RE_READING || it.follow_status == FollowStatus.READING
+        }
+            .forEach { networkManga ->
+                showProgressNotification(networkManga, count.andIncrement, listManga.size)
+
+                var dbManga = db.getManga(networkManga.url, sourceManager.getMangadex().id)
+                    .executeAsBlocking()
+                if (dbManga == null) {
+                    dbManga = Manga.create(
+                        networkManga.url,
+                        networkManga.title,
+                        sourceManager.getMangadex().id
+                    )
+                }
+
+                dbManga.copyFrom(networkManga)
+                dbManga.favorite = true
+                db.insertManga(dbManga).executeAsBlocking()
+            }
+        cancelProgressNotification()
+    }
+
+    /**
      * Shows the notification containing the currently updating manga and the progress.
      *
      * @param manga the manga that's being updated.
      * @param current the current progress.
      * @param total the total progress.
      */
-    private fun showProgressNotification(manga: Manga, current: Int, total: Int) {
+    private fun showProgressNotification(manga: SManga, current: Int, total: Int) {
         notificationManager.notify(
             Notifications.ID_LIBRARY_PROGRESS, progressNotification
                 .setContentTitle(manga.title)
@@ -640,6 +535,89 @@ class LibraryUpdateService(
         intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
         intent.action = MainActivity.SHORTCUT_RECENTLY_UPDATED
         return PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+    }
+
+    /**
+     * Defines what should be updated within a service execution.
+     */
+    enum class Target {
+        CHAPTERS, // Manga meta data and  chapters
+        SYNC_FOLLOWS, // Manga in reading, rereading
+        TRACKING // Tracking metadata
+    }
+
+    companion object {
+
+        /**
+         * Key for category to update.
+         */
+        const val KEY_CATEGORY = "category"
+
+        fun categoryInQueue(id: Int?) = instance?.categoryIds?.contains(id) ?: false
+        private var instance: LibraryUpdateService? = null
+
+        /**
+         * Key that defines what should be updated.
+         */
+        const val KEY_TARGET = "target"
+
+        /**
+         * Returns the status of the service.
+         *
+         * @return true if the service is running, false otherwise.
+         */
+        fun isRunning(): Boolean {
+            return instance != null
+        }
+
+        /**
+         * Starts the service. It will be started only if there isn't another instance already
+         * running.
+         *
+         * @param context the application context.
+         * @param category a specific category to update, or null for global update.
+         * @param target defines what should be updated.
+         */
+        fun start(context: Context, category: Category? = null, target: Target = Target.CHAPTERS) {
+            if (!isRunning()) {
+                val intent = Intent(context, LibraryUpdateService::class.java).apply {
+                    putExtra(KEY_TARGET, target)
+                    category?.id?.let { id ->
+                        putExtra(KEY_CATEGORY, id)
+                    }
+                }
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                    context.startService(intent)
+                } else {
+                    context.startForegroundService(intent)
+                }
+            } else {
+                if (target == Target.CHAPTERS) category?.id?.let {
+                    instance?.addCategory(it)
+                }
+            }
+        }
+
+        /**
+         * Stops the service.
+         *
+         * @param context the application context.
+         */
+        fun stop(context: Context) {
+            instance?.job?.cancel()
+            context.stopService(Intent(context, LibraryUpdateService::class.java))
+        }
+
+        private var listener: LibraryServiceListener? = null
+
+        fun setListener(listener: LibraryServiceListener) {
+            this.listener = listener
+        }
+
+        fun removeListener(listener: LibraryServiceListener) {
+            if (this.listener == listener)
+                this.listener = null
+        }
     }
 }
 

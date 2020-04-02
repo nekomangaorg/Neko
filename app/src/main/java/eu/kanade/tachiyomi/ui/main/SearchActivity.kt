@@ -77,7 +77,7 @@ class SearchActivity : MainActivity() {
                     if (router.backstackSize > 1) {
                         router.popToRoot()
                     }
-                    router.replaceTopController(BrowseCatalogueController(source, query, filter).withFadeTransaction())
+                    router.replaceTopController(BrowseCatalogueController(source, query).withFadeTransaction())
                 }
             }
             else -> return false
