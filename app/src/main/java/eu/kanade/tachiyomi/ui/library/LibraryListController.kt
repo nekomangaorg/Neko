@@ -55,7 +55,8 @@ import kotlin.math.pow
 import kotlin.math.roundToInt
 import kotlin.math.sign
 
-class LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
+class
+LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
     FlexibleAdapter.OnItemClickListener, FlexibleAdapter.OnItemLongClickListener,
     FlexibleAdapter.OnItemMoveListener, LibraryCategoryAdapter.LibraryListener,
     SpinnerTitleInterface, OnTouchEventInterface, SwipeGestureInterface {

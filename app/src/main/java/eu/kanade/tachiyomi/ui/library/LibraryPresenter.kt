@@ -842,16 +842,6 @@ class LibraryPresenter(
     companion object {
         private var currentLibrary: Library? = null
 
-        fun resetCustomManga() {
-            val db: DatabaseHelper = Injekt.get()
-            db.inTransaction {
-                val libraryManga = db.getLibraryMangas().executeAsBlocking()
-                libraryManga.forEach { manga ->
-                    db.resetMangaInfo(manga).executeAsBlocking()
-                }
-            }
-        }
-    }
     fun syncMangaToDex(mangaList: List<Manga>) {
         GlobalScope.launch {
             withContext(Dispatchers.IO) {

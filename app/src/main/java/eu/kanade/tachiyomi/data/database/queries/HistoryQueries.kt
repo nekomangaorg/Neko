@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.data.database.models.MangaChapterHistory
 import eu.kanade.tachiyomi.data.database.resolvers.HistoryLastReadPutResolver
 import eu.kanade.tachiyomi.data.database.resolvers.MangaChapterHistoryGetResolver
 import eu.kanade.tachiyomi.data.database.tables.HistoryTable
+import eu.kanade.tachiyomi.data.database.tables.MangaTable
 import java.util.Date
 
 interface HistoryQueries : DbProvider {
@@ -32,6 +33,21 @@ interface HistoryQueries : DbProvider {
                     .build())
             .withGetResolver(MangaChapterHistoryGetResolver.INSTANCE)
             .prepare()
+
+    /**
+     * Returns history of recent manga containing last read chapter in 25s
+     * @param date recent date range
+     * @offset offset the db by
+     */
+    fun getRecentlyAdded(date: Date, search: String = "") = db.get()
+        .listOfObjects(MangaChapterHistory::class.java)
+        .withQuery(RawQuery.builder()
+            .query(getRecentAdditionsQuery(search))
+            .args(date.time)
+            .observesTables(MangaTable.TABLE)
+            .build())
+        .withGetResolver(MangaChapterHistoryGetResolver.INSTANCE)
+        .prepare()
 
     /**
      * Returns history of recent manga containing last read chapter in 25s

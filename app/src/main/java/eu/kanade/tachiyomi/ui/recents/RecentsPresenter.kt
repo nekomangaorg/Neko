@@ -32,9 +32,12 @@ class RecentsPresenter(
 
     private var scope = CoroutineScope(Job() + Dispatchers.Default)
 
-    private var recentItems = listOf<RecentMangaItem>()
-    var groupedRecentItems = listOf<RecentsItem>()
+    var recentItems = listOf<RecentMangaItem>()
+    // var groupedRecentItems = listOf<RecentsItem>()
     var query = ""
+    var newAdditionsHeader = RecentMangaHeaderItem(RecentsItem.NEWLY_ADDED)
+    var newChaptersHeader = RecentMangaHeaderItem(RecentsItem.NEW_CHAPTERS)
+    var continueReadingHeader = RecentMangaHeaderItem(RecentsItem.CONTINUE_READING)
 
     fun onCreate() {
         downloadManager.addListener(this)
@@ -43,51 +46,75 @@ class RecentsPresenter(
     }
 
     fun getRecents() {
+        val oldQuery = query
         scope.launch {
             val cal = Calendar.getInstance()
             cal.time = Date()
             if (query.isNotEmpty()) cal.add(Calendar.YEAR, -50)
             else cal.add(Calendar.MONTH, -1)
+
+            val calWeek = Calendar.getInstance()
+            calWeek.time = Date()
+            if (query.isNotEmpty()) calWeek.add(Calendar.YEAR, -50)
+            else calWeek.add(Calendar.DAY_OF_YEAR, -1)
+
             val cReading =
-                if (query.isEmpty())
-                    db.getRecentsWithUnread(cal.time, query).executeOnIO()
-                else
-                    db.getRecentMangaLimit(cal.time, 8, query).executeOnIO()
+                if (query.isEmpty()) db.getRecentsWithUnread(cal.time, query).executeOnIO()
+                else db.getRecentMangaLimit(cal.time, 8, query).executeOnIO()
             val rUpdates = db.getUpdatedManga(cal.time, query).executeOnIO()
             rUpdates.forEach {
-                it.history.last_read = it.chapter.date_upload
+                it.history.last_read = it.chapter.date_fetch
             }
-            val mangaList = (cReading + rUpdates).sortedByDescending {
+            val nAdditions = db.getRecentlyAdded(calWeek.time, query).executeOnIO()
+            nAdditions.forEach {
+                it.history.last_read = it.manga.date_added
+            }
+            if (query != oldQuery) return@launch
+            val mangaList = (cReading + rUpdates + nAdditions).sortedByDescending {
                 it.history.last_read
             }.distinctBy {
-                if (query.isEmpty()) it.manga.id else it.chapter.id }
-            recentItems = mangaList.mapNotNull {
-                val chapter = if (it.chapter.read) getNextChapter(it.manga)
+                if (query.isEmpty()) it.manga.id else it.chapter.id
+            }
+            val pairs = mangaList.mapNotNull {
+                val chapter = if (it.chapter.read || it.chapter.id == null) getNextChapter(it.manga)
                 else it.chapter
-                if (chapter == null) if (query.isNotEmpty()) RecentMangaItem(it, it.chapter)
+                if (chapter == null) if (query.isNotEmpty() && it.chapter.id != null) Pair(
+                    it, it.chapter
+                )
                 else null
-                else RecentMangaItem(it, chapter)
+                else Pair(it, chapter)
+            }
+            if (query.isEmpty()) {
+                val nChaptersItems =
+                    pairs.filter { it.first.history.id == null && it.first.chapter.id != null }
+                        .sortedByDescending { it.second.date_upload }
+                        .take(4).map {
+                            RecentMangaItem(
+                                it.first,
+                                it.second,
+                                newChaptersHeader
+                            )
+                        } +
+                        RecentMangaItem(header = newChaptersHeader)
+                val cReadingItems =
+                    pairs.filter { it.first.history.id != null }.take(9 - nChaptersItems.size).map {
+                            RecentMangaItem(
+                                it.first,
+                                it.second,
+                                continueReadingHeader
+                            )
+                        } + RecentMangaItem(header = continueReadingHeader)
+                val nAdditionsItems = pairs.filter { it.first.chapter.id == null }.take(4)
+                    .map { RecentMangaItem(it.first, it.second, newAdditionsHeader) }
+                recentItems =
+                    listOf(nChaptersItems, cReadingItems, nAdditionsItems).sortedByDescending {
+                            it.firstOrNull()?.mch?.history?.last_read ?: 0L
+                        }.flatten()
+            } else {
+                recentItems = pairs.map { RecentMangaItem(it.first, it.second, null) }
             }
             setDownloadedChapters(recentItems)
-            if (query.isEmpty()) {
-                val nChaptersItems = RecentsItem(
-                    RecentsItem.NEW_CHAPTERS,
-                    recentItems.filter { it.mch.history.id == null }.take(4)
-                )
-                val cReadingItems = RecentsItem(
-                    RecentsItem.CONTINUE_READING,
-                    recentItems.filter { it.mch.history.id != null }.take(
-                        8 - nChaptersItems.mangaList.size
-                    )
-                )
-                // TODO: Add Date Added
-                groupedRecentItems = listOf(cReadingItems, nChaptersItems).sortedByDescending {
-                    it.mangaList.firstOrNull()?.mch?.history?.last_read ?: 0
-                }
-            } else {
-                groupedRecentItems = listOf(RecentsItem(RecentsItem.SEARCH, recentItems))
-            }
-            withContext(Dispatchers.Main) { controller.showLists(groupedRecentItems) }
+            withContext(Dispatchers.Main) { controller.showLists(recentItems) }
         }
     }
 
@@ -147,7 +174,7 @@ class RecentsPresenter(
                 download = null
             }
 
-            controller.showLists(groupedRecentItems)
+            controller.showLists(recentItems)
         }
     }
 

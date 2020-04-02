@@ -21,7 +21,7 @@
     <string name="label_catalogues">Catalogues</string>
     <string name="label_recent_updates">Recent updates</string>
     <string name="new_chapters">New chapters</string>
-    <string name="new_additions">New additions</string>
+    <string name="new_additions">Newly added</string>
     <string name="label_selected">Selected: %1$d</string>
     <string name="label_help">Help</string>
     <string name="unlock">Unlock</string>
@@ -795,7 +795,9 @@
     <string name="previously_read_chapter">Previously read Chapter %1$s</string>
     <string name="last_read_chapter_x">Last read Chapter %1$s</string>
     <string name="last_read_x">Last read %1$s</string>
-    <string name="uploaded_x">Uploaded %1$s</string>
+    <string name="read_x">Read %1$s</string>
+    <string name="updated_x">Updated %1$s</string>
+    <string name="added_x">Added %1$s</string>
     <string name="view_history">View history</string>
     <string name="view_all_updates">View all updates</string>
     <string name="marked_as_read">Marked as read</string>
