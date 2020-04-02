@@ -252,7 +252,7 @@ class PreferencesHelper(val context: Context) {
 
     fun marginRatioWebtoon() = rxPrefs.getInteger(Keys.marginRatioWebtoon, 0)
 
-    fun skipHidden() = prefs.getBoolean(Keys.skipHidden, false)
+    fun skipFiltered() = prefs.getBoolean(Keys.skipFiltered, false)
 
     fun similarShowTab() = prefs.getBoolean(Keys.similarShowTab, false)
 

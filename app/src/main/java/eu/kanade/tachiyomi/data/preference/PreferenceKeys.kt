@@ -145,7 +145,7 @@ object PreferenceKeys {
 
     const val alwaysShowChapterTransition = "always_show_chapter_transition"
 
-    const val skipHidden = "skip_hidden"
+    const val skipFiltered = "skip_hidden"
 
     const val marginRatioWebtoon = "margin_ratio_webtoon_new"
 

@@ -60,6 +60,9 @@ class LibraryPresenter(
     private val context = preferences.context
 
     private val loggedServices by lazy { Injekt.get<TrackManager>().services.filter { it.isLogged } }
+
+    private val source by lazy { Injekt.get<SourceManager>().getMangadex() }
+
     /**
      * Categories of the library.
      */
@@ -68,6 +71,7 @@ class LibraryPresenter(
 
     var allCategories: List<Category> = emptyList()
         private set
+
     /**
      * List of all manga to update the
      */
@@ -164,10 +168,12 @@ class LibraryPresenter(
             // Filter for unread chapters
             if (filterUnread == STATE_INCLUDE &&
                 (item.manga.unread == 0 || db.getChapters(item.manga).executeAsBlocking()
-                    .size != item.manga.unread)) return@f false
+                    .size != item.manga.unread)
+            ) return@f false
             if (filterUnread == STATE_EXCLUDE &&
                 (item.manga.unread == 0 ||
-                    db.getChapters(item.manga).executeAsBlocking().size == item.manga.unread))
+                    db.getChapters(item.manga).executeAsBlocking().size == item.manga.unread)
+            )
                 return@f false
             if (filterUnread == STATE_REALLY_EXCLUDE && item.manga.unread > 0) return@f false
 
@@ -175,7 +181,8 @@ class LibraryPresenter(
                 if (if (filterMangaType == Manga.TYPE_MANHWA)
                         (filterMangaType != item.manga.mangaType() &&
                             filterMangaType != Manga.TYPE_WEBTOON)
-                    else filterMangaType != item.manga.mangaType()) return@f false
+                    else filterMangaType != item.manga.mangaType()
+                ) return@f false
             }
 
             // Filter for completed status of manga
@@ -321,8 +328,10 @@ class LibraryPresenter(
                     val manga2LastRead = lastReadManga[i2.manga.id!!] ?: lastReadManga.size
                     manga1LastRead.compareTo(manga2LastRead)
                 }
-                sortingMode == LibrarySort.LATEST_CHAPTER -> i2.manga.last_update.compareTo(i1
-                    .manga.last_update)
+                sortingMode == LibrarySort.LATEST_CHAPTER -> i2.manga.last_update.compareTo(
+                    i1
+                        .manga.last_update
+                )
                 sortingMode == LibrarySort.UNREAD ->
                     when {
                         i1.manga.unread == i2.manga.unread -> 0
@@ -387,7 +396,8 @@ class LibraryPresenter(
             val category = initCat ?: allCategories.find { it.id == i1.manga.category } ?: return 0
             if (category.mangaOrder.isNullOrEmpty() && category.mangaSort == null) {
                 category.changeSortTo(preferences.librarySortingMode().getOrDefault())
-                if (category.id == 0) preferences.defaultMangaOrder().set(category.mangaSort.toString())
+                if (category.id == 0) preferences.defaultMangaOrder()
+                    .set(category.mangaSort.toString())
                 else db.insertCategory(category).asRxObservable().subscribe()
             }
             val compare = when {
@@ -469,15 +479,19 @@ class LibraryPresenter(
         }.groupBy {
             if (showCategories) it.manga.category else 0
         }*/
-        val categoryAll = Category.createAll(context,
+        val categoryAll = Category.createAll(
+            context,
             preferences.librarySortingMode().getOrDefault(),
-            preferences.librarySortingAscending().getOrDefault())
+            preferences.librarySortingAscending().getOrDefault()
+        )
         val catItemAll = LibraryHeaderItem({ categoryAll }, -1)
         val libraryMap =
             if (!singleList) {
                 libraryManga.map { manga ->
-                    LibraryItem(manga, libraryLayout, preferences.uniformGrid(), null).apply { unreadType =
-                        unreadBadgeType }
+                    LibraryItem(manga, libraryLayout, preferences.uniformGrid(), null).apply {
+                        unreadType =
+                            unreadBadgeType
+                    }
                 }.groupBy {
                     if (showCategories) it.manga.category else -1
                 }
@@ -662,8 +676,8 @@ class LibraryPresenter(
     fun getCommonCategories(mangas: List<Manga>): Collection<Category> {
         if (mangas.isEmpty()) return emptyList()
         return mangas.toSet()
-                .map { db.getCategoriesForManga(it).executeAsBlocking() }
-                .reduce { set1: Iterable<Category>, set2 -> set1.intersect(set2).toMutableList() }
+            .map { db.getCategoriesForManga(it).executeAsBlocking() }
+            .reduce { set1: Iterable<Category>, set2 -> set1.intersect(set2).toMutableList() }
     }
 
     /**
@@ -839,16 +853,17 @@ class LibraryPresenter(
         return catId in categories
     }
 
-    companion object {
-        private var currentLibrary: Library? = null
-
     fun syncMangaToDex(mangaList: List<Manga>) {
         GlobalScope.launch {
             withContext(Dispatchers.IO) {
                 mangaList.forEach {
-                    sourceManager.getMangadex().updateFollowStatus(MdUtil.getMangaId(it.url), FollowStatus.READING)
+                    source.updateFollowStatus(MdUtil.getMangaId(it.url), FollowStatus.READING)
                 }
             }
         }
+    }
+
+    companion object {
+        private var currentLibrary: Library? = null
     }
 }

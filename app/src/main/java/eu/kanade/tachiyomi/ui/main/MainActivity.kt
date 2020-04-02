@@ -384,8 +384,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
                     router.pushController(
                         BrowseCatalogueController(
                             source,
-                            query,
-                            filter
+                            query
                         ).withFadeTransaction()
                     )
                 }
