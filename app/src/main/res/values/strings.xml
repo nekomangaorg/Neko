@@ -30,6 +30,7 @@
         <item quantity="one">Update available</item>
         <item quantity="other">%d updates available</item>
     </plurals>
+    <string name="downloading_x">Downloading: %1$s</string>
     <plurals name="downloads_pending">
         <item quantity="one">1 in queue</item>
         <item quantity="other">%d in queue</item>
@@ -742,6 +743,7 @@
 
     <!-- Information Text -->
     <string name="information_no_downloads">No downloads</string>
+    <string name="nothing_downloading">Nothing currently downloading</string>
     <string name="information_no_recent">No recent chapters</string>
     <string name="information_no_recent_manga">No recently read manga</string>
     <string name="information_empty_library">Your library is empty, add series to your library from the catalogues.</string>

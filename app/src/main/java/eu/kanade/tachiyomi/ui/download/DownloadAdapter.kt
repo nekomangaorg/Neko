@@ -8,7 +8,7 @@ import eu.davidea.flexibleadapter.FlexibleAdapter
  *
  * @param context the context of the fragment containing this adapter.
  */
-class DownloadAdapter(controller: DownloadController) : FlexibleAdapter<DownloadItem>(null, controller,
+class DownloadAdapter(controller: DownloadItemListener) : FlexibleAdapter<DownloadItem>(null, controller,
     true) {
 
     /**
@@ -21,6 +21,12 @@ class DownloadAdapter(controller: DownloadController) : FlexibleAdapter<Download
          * Called when an item of the list is released.
          */
         fun onItemReleased(position: Int)
+        fun onItemRemoved(position: Int)
         fun onMenuItemClick(position: Int, menuItem: MenuItem)
+    }
+
+    override fun onItemSwiped(position: Int, direction: Int) {
+        super.onItemSwiped(position, direction)
+        downloadItemListener.onItemRemoved(position)
     }
 }

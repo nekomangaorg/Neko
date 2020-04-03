@@ -299,15 +299,9 @@ class DownloadController : NucleusController<DownloadPresenter>(),
                 val downloads = items.mapNotNull { it.download }
                 presenter.reorder(downloads)
             }
-            R.id.cancel_download -> {
-                val download = adapter?.getItem(position)?.download ?: return
-                presenter.cancelDownload(download)
-
-                adapter?.removeItem(position)
-                val adapter = adapter ?: return
-                val downloads = (0 until adapter.itemCount).mapNotNull { adapter.getItem(it)?.download }
-                presenter.reorder(downloads)
-            }
         }
+    }
+
+    override fun onItemRemoved(position: Int) {
     }
 }

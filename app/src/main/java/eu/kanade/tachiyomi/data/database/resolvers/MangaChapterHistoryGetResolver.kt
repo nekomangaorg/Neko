@@ -8,6 +8,8 @@ import eu.kanade.tachiyomi.data.database.mappers.MangaGetResolver
 import eu.kanade.tachiyomi.data.database.models.ChapterImpl
 import eu.kanade.tachiyomi.data.database.models.HistoryImpl
 import eu.kanade.tachiyomi.data.database.models.MangaChapterHistory
+import eu.kanade.tachiyomi.data.database.tables.ChapterTable
+import eu.kanade.tachiyomi.data.database.tables.HistoryTable
 
 class MangaChapterHistoryGetResolver : DefaultGetResolver<MangaChapterHistory>() {
     companion object {
@@ -37,19 +39,24 @@ class MangaChapterHistoryGetResolver : DefaultGetResolver<MangaChapterHistory>()
         val manga = mangaGetResolver.mapFromCursor(cursor)
 
         // Get chapter object
-        val chapter = try { chapterResolver.mapFromCursor(cursor) } catch (e: Exception) {
-            ChapterImpl() }
+        val chapter =
+            if (!cursor.isNull(cursor.getColumnIndex(ChapterTable.COL_MANGA_ID))) chapterResolver
+                .mapFromCursor(
+                cursor
+            ) else ChapterImpl()
 
         // Get history object
-        val history = try { historyGetResolver.mapFromCursor(cursor) } catch (e: Exception) { HistoryImpl() }
+        val history =
+            if (!cursor.isNull(cursor.getColumnIndex(HistoryTable.COL_ID))) historyGetResolver.mapFromCursor(
+                cursor
+            ) else HistoryImpl()
 
         // Make certain column conflicts are dealt with
         if (chapter.id != null) {
             manga.id = chapter.manga_id
             manga.url = cursor.getString(cursor.getColumnIndex("mangaUrl"))
         }
-        if (history.id != null)
-            chapter.id = history.chapter_id
+        if (history.id != null) chapter.id = history.chapter_id
 
         // Return result
         return MangaChapterHistory(manga, chapter, history)

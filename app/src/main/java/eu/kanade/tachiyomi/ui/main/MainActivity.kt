@@ -33,6 +33,7 @@ import com.google.android.material.snackbar.Snackbar
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.Migrations
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.download.DownloadServiceListener
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
@@ -76,6 +77,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
     var drawerArrow: DrawerArrowDrawable? = null
         private set
     private var searchDrawable: Drawable? = null
+    private var dismissDrawable: Drawable? = null
     private var currentGestureDelegate: SwipeGestureInterface? = null
     private lateinit var gestureDetector: GestureDetectorCompat
 
@@ -126,6 +128,9 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
         searchDrawable = ContextCompat.getDrawable(
             this, R.drawable.ic_search_white_24dp
         )
+        dismissDrawable = ContextCompat.getDrawable(
+            this, R.drawable.ic_close_white_24dp
+        )
 
         var continueSwitchingTabs = false
         bottom_nav.setOnNavigationItemSelectedListener { item ->
@@ -144,12 +149,12 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
                 when (id) {
                     R.id.nav_library -> setRoot(LibraryListController(), id)
                     R.id.nav_recents -> setRoot(RecentsController(), id)
-                    R.id.nav_catalogues -> {
+                    else -> {
                         val browseCatalogueController = BrowseCatalogueController(source)
                         if (!source.isLogged()) {
                             val dialog = MangadexLoginDialog(source, this)
                             dialog.showDialog(router)
-                        }else{
+                        } else {
                             setRoot(browseCatalogueController, id)
                         }
                     }
@@ -157,12 +162,11 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
             } else if (currentRoot.tag()?.toIntOrNull() == id) {
                 if (router.backstackSize == 1) {
                     when (id) {
-                        /*R.id.nav_recents -> {
-                            val showRecents = preferences.showRecentUpdates().getOrDefault()
-                            if (!showRecents) setRoot(RecentChaptersController(), id)
-                            else setRoot(RecentlyReadController(), id)
-                            preferences.showRecentUpdates().set(!showRecents)
-                        }*/
+                        R.id.nav_recents -> {
+                            val controller =
+                                router.getControllerWithTag(id.toString()) as? RecentsController
+                            controller?.toggleDownloads()
+                        }
                         R.id.nav_library -> {
                             val controller =
                                 router.getControllerWithTag(id.toString()) as? LibraryController
@@ -219,7 +223,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
         toolbar.setNavigationOnClickListener {
             val rootSearchController = router.backstack.lastOrNull()?.controller()
             if (rootSearchController is RootSearchInterface) {
-                toolbar.menu.findItem(R.id.action_search)?.expandActionView()
+                rootSearchController.expandSearch()
             } else onBackPressed()
         }
 
@@ -267,6 +271,10 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
         }
     }
 
+    fun setDismissIcon(enabled: Boolean) {
+        toolbar.navigationIcon = if (enabled) dismissDrawable else searchDrawable
+    }
+
     private fun setNavBarColor(insets: WindowInsets?) {
         if (insets == null) return
         window.navigationBarColor = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O_MR1) {
@@ -309,8 +317,8 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
             delay(100)
             if (Color.alpha(window?.statusBarColor ?: Color.BLACK) >= 255) window?.statusBarColor =
                 getResourceColor(
-                        android.R.attr.statusBarColor
-                    )
+                    android.R.attr.statusBarColor
+                )
         }
         super.onSupportActionModeFinished(mode)
     }
@@ -517,17 +525,15 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
     }
 
     override fun downloadStatusChanged(downloading: Boolean) {
-        /*val downloadManager = Injekt.get<DownloadManager>()
+        val downloadManager = Injekt.get<DownloadManager>()
         val hasQueue = downloading || downloadManager.hasQueue()
         launchUI {
             if (hasQueue) {
-                val badge = navigationView?.getOrCreateBadge(R.id.nav_library) ?: return@launchUI
-                badge.clearNumber()
-                badge.backgroundColor = getResourceColor(R.attr.badgeColor)
+                bottom_nav?.getOrCreateBadge(R.id.nav_recents)
             } else {
-                navigationView?.removeBadge(R.id.nav_library)
+                bottom_nav?.removeBadge(R.id.nav_recents)
             }
-        }*/
+        }
     }
 
     private inner class GestureListener : GestureDetector.SimpleOnGestureListener() {
@@ -600,7 +606,12 @@ interface BottomNavBarInterface {
     fun canChangeTabs(block: () -> Unit): Boolean
 }
 
-interface RootSearchInterface
+interface RootSearchInterface {
+    fun expandSearch() {
+        if (this is Controller) activity?.toolbar?.menu?.findItem(R.id.action_search)?.expandActionView()
+    }
+}
+
 interface SpinnerTitleInterface
 
 interface OnTouchEventInterface {

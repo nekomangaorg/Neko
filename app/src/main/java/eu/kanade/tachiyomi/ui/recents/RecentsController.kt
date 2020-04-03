@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import eu.davidea.flexibleadapter.FlexibleAdapter
@@ -29,12 +30,18 @@ import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.recent_updates.RecentChaptersController
 import eu.kanade.tachiyomi.ui.recently_read.RecentlyReadController
+import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.applyWindowInsetsForRootController
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import eu.kanade.tachiyomi.util.view.snack
+import eu.kanade.tachiyomi.util.view.updateLayoutParams
+import eu.kanade.tachiyomi.util.view.updatePaddingRelative
+import kotlinx.android.synthetic.main.download_bottom_sheet.*
 import kotlinx.android.synthetic.main.main_activity.*
-import kotlinx.android.synthetic.main.recently_read_controller.*
+import kotlinx.android.synthetic.main.recents_controller.*
+import kotlin.math.abs
+import kotlin.math.max
 
 /**
  * Fragment that shows recently read manga.
@@ -59,13 +66,17 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
     private var recentItems: List<RecentMangaItem>? = null
     private var snack: Snackbar? = null
     private var lastChapterId: Long? = null
+    private var showingDownloads = false
+    var headerHeight = 0
 
     override fun getTitle(): String? {
-        return resources?.getString(R.string.short_recents)
+        return if (showingDownloads)
+            resources?.getString(R.string.label_download_queue)
+        else resources?.getString(R.string.short_recents)
     }
 
     override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
-        return inflater.inflate(R.layout.recently_read_controller, container, false)
+        return inflater.inflate(R.layout.recents_controller, container, false)
     }
 
     /**
@@ -86,16 +97,90 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
         adapter.itemTouchHelperCallback.setSwipeFlags(
             ItemTouchHelper.LEFT
         )
-        scrollViewWith(recycler, skipFirstSnap = true)
+        val attrsArray = intArrayOf(android.R.attr.actionBarSize)
+        val array = view.context.obtainStyledAttributes(attrsArray)
+        val appBarHeight = array.getDimensionPixelSize(0, 0)
+        array.recycle()
+        scrollViewWith(recycler, skipFirstSnap = true) {
+            headerHeight = it.systemWindowInsetTop + appBarHeight
+        }
 
         if (recentItems != null) adapter.updateDataSet(recentItems!!.toList())
         presenter.onCreate()
+
+        dl_bottom_sheet.onCreate(this)
+
+        shadow2.alpha =
+            if (dl_bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_COLLAPSED) 0.25f else 0f
+        shadow.alpha =
+            if (dl_bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_COLLAPSED) 0.5f else 0f
+
+        dl_bottom_sheet.sheetBehavior?.addBottomSheetCallback(object :
+            BottomSheetBehavior.BottomSheetCallback() {
+            override fun onSlide(bottomSheet: View, progress: Float) {
+                shadow2.alpha = (1 - abs(progress)) * 0.25f
+                shadow.alpha = (1 - abs(progress)) * 0.5f
+                sheet_layout.alpha = 1 - progress
+                activity?.appbar?.y = max(activity!!.appbar.y, -headerHeight * (1 - progress))
+                val oldShow = showingDownloads
+                showingDownloads = progress > 0.92f
+                if (oldShow != showingDownloads) {
+                    setTitle()
+                    activity?.invalidateOptionsMenu()
+                }
+            }
+
+            override fun onStateChanged(p0: View, state: Int) {
+                if (this@RecentsController.view == null) return
+                if (state == BottomSheetBehavior.STATE_EXPANDED) activity?.appbar?.y = 0f
+                if (state == BottomSheetBehavior.STATE_EXPANDED || state == BottomSheetBehavior.STATE_COLLAPSED) {
+                    sheet_layout.alpha =
+                        if (state == BottomSheetBehavior.STATE_COLLAPSED) 1f else 0f
+                    showingDownloads = state == BottomSheetBehavior.STATE_EXPANDED
+                    setTitle()
+                    activity?.invalidateOptionsMenu()
+                }
+
+                if (state == BottomSheetBehavior.STATE_HIDDEN || state == BottomSheetBehavior.STATE_COLLAPSED) {
+                    shadow2.alpha = if (state == BottomSheetBehavior.STATE_COLLAPSED) 0.25f else 0f
+                    shadow.alpha = if (state == BottomSheetBehavior.STATE_COLLAPSED) 0.5f else 0f
+                }
+
+                retainViewMode =
+                    if (state == BottomSheetBehavior.STATE_EXPANDED) RetainViewMode.RETAIN_DETACH else RetainViewMode.RELEASE_DETACH
+                sheet_layout?.isClickable = state == BottomSheetBehavior.STATE_COLLAPSED
+                sheet_layout?.isFocusable = state == BottomSheetBehavior.STATE_COLLAPSED
+                setPadding(dl_bottom_sheet.sheetBehavior?.isHideable == true)
+            }
+        })
+
+        if (showingDownloads) {
+            dl_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
+        }
+        setPadding(dl_bottom_sheet.sheetBehavior?.isHideable == true)
+    }
+
+    override fun handleRootBack(): Boolean {
+        if (dl_bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) {
+            dl_bottom_sheet.dismiss()
+            return true
+        }
+        return false
+    }
+
+    fun setPadding(sheetIsHidden: Boolean) {
+        recycler.updatePaddingRelative(bottom = if (sheetIsHidden) 0 else 20.dpToPx)
+        recycler.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            bottomMargin = if (sheetIsHidden) 0 else 30.dpToPx
+        }
     }
 
     override fun onActivityResumed(activity: Activity) {
         super.onActivityResumed(activity)
-        if (view != null)
+        if (view != null) {
             refresh()
+            dl_bottom_sheet?.update()
+        }
     }
 
     override fun onDestroy() {
@@ -118,6 +203,9 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
 
     fun updateChapterDownload(download: Download) {
         if (view == null) return
+        dl_bottom_sheet.update()
+        dl_bottom_sheet.onUpdateProgress(download)
+        dl_bottom_sheet.onUpdateDownloadedPages(download)
         val id = download.chapter.id ?: return
         val holder = recycler.findViewHolderForItemId(id) as? RecentMangaHolder ?: return
         holder.notifyStatus(download.status, download.progress)
@@ -204,30 +292,38 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
     override fun isSearching() = presenter.query.isNotEmpty()
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.recents, menu)
-        val searchItem = menu.findItem(R.id.action_search)
-        val searchView = searchItem.actionView as SearchView
-        searchView.queryHint = view?.context?.getString(R.string.search_recents)
-        if (presenter.query.isNotEmpty()) {
-            searchItem.expandActionView()
-            searchView.setQuery(presenter.query, true)
-            searchView.clearFocus()
-        }
-        setOnQueryTextChangeListener(searchView) {
-            if (presenter.query != it) {
-                presenter.query = it ?: return@setOnQueryTextChangeListener false
-                refresh()
+        (activity as? MainActivity)?.setDismissIcon(showingDownloads)
+        if (showingDownloads) {
+            inflater.inflate(R.menu.download_queue, menu)
+        } else {
+            inflater.inflate(R.menu.recents, menu)
+            val searchItem = menu.findItem(R.id.action_search)
+            val searchView = searchItem.actionView as SearchView
+            searchView.queryHint = view?.context?.getString(R.string.search_recents)
+            if (presenter.query.isNotEmpty()) {
+                searchItem.expandActionView()
+                searchView.setQuery(presenter.query, true)
+                searchView.clearFocus()
             }
-            true
+            setOnQueryTextChangeListener(searchView) {
+                if (presenter.query != it) {
+                    presenter.query = it ?: return@setOnQueryTextChangeListener false
+                    refresh()
+                }
+                true
+            }
         }
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu) {
+        super.onPrepareOptionsMenu(menu)
+        if (showingDownloads) dl_bottom_sheet.prepareMenu(menu)
     }
 
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
         super.onChangeStarted(handler, type)
         if (type.isEnter) {
-            if (type == ControllerChangeType.POP_EXIT) {
-                presenter.onCreate()
-            }
+            if (type == ControllerChangeType.POP_EXIT) presenter.onCreate()
             setHasOptionsMenu(true)
         } else {
             snack?.dismiss()
@@ -235,7 +331,23 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
         }
     }
 
+    fun toggleDownloads() {
+        if (dl_bottom_sheet.sheetBehavior?.isHideable == false) {
+            if (showingDownloads) dl_bottom_sheet.dismiss()
+            else dl_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
+        }
+    }
+
+    override fun expandSearch() {
+        if (showingDownloads) {
+            dl_bottom_sheet.dismiss()
+        } else
+            activity?.toolbar?.menu?.findItem(R.id.action_search)?.expandActionView()
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (showingDownloads)
+            return dl_bottom_sheet.onOptionsItemSelected(item)
         when (item.itemId) {
             R.id.action_refresh -> {
                 if (!LibraryUpdateService.isRunning()) {
