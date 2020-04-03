@@ -446,7 +446,7 @@ LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
                     view?.rootWindowInsets?.systemWindowInsetTop ?: 0
                 ) ?: 0f).roundToInt() + 30.dpToPx
             (recycler.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
-                headerPosition, (if (headerPosition == 0) 0 else (-28).dpToPx) + appbarOffset
+                headerPosition, (if (headerPosition == 0) 0 else (-40).dpToPx) + appbarOffset
             )
 
             /*val headerItem = adapter.getItem(headerPosition) as? LibraryHeaderItem

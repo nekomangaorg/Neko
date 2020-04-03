@@ -333,8 +333,8 @@ class MangaDetailsController : BaseController,
                     transition: Transition<in Drawable>?
                 ) {
                     coverDrawable = resource
-                    Palette.from(
-                        (resource as BitmapDrawable).bitmap).generate {
+                    val bitmapCover = resource as? BitmapDrawable ?: return
+                    Palette.from(bitmapCover.bitmap).generate {
                         if (recycler == null) return@generate
                         val currentNightMode =
                             recycler.resources!!.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
