@@ -147,8 +147,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
                     R.id.nav_catalogues -> {
                         val browseCatalogueController = BrowseCatalogueController(source)
                         if (!source.isLogged()) {
-                            val dialog = MangadexLoginDialog(source)
-                            dialog.targetController = browseCatalogueController
+                            val dialog = MangadexLoginDialog(source, this)
                             dialog.showDialog(router)
                         }else{
                             setRoot(browseCatalogueController, id)
@@ -334,8 +333,6 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
      */
     override fun siteLoginDialogClosed(source: Source) {
         if (source.isLogged()) {
-            router.popCurrentController()
-            R.id.nav_catalogues
             setRoot(BrowseCatalogueController(source), R.id.nav_catalogues)
         }
     }

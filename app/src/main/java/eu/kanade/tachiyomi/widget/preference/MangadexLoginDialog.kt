@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.widget.preference
 
+import android.app.Activity
 import android.app.Dialog
 import android.os.Bundle
 import android.view.View
@@ -22,7 +23,7 @@ class MangadexLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle
 
     val source: Source by lazy { Injekt.get<SourceManager>().getMangadex() }
 
-    constructor(source: Source) : this(Bundle().apply { putLong("key", source.id) })
+    constructor(source: Source, activity: Activity? = null) : this(Bundle().apply { putLong("key", source.id) })
 
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
         val dialog = MaterialDialog(activity!!).apply {
@@ -87,7 +88,11 @@ class MangadexLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle
 
     override fun onDialogClosed() {
         super.onDialogClosed()
+        if(activity != null){
+            (activity as? Listener)?.siteLoginDialogClosed(source)
+        }else{
         (targetController as? Listener)?.siteLoginDialogClosed(source)
+        }
     }
 
     interface Listener {
