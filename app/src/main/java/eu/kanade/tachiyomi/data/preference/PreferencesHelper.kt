@@ -239,6 +239,8 @@ class PreferencesHelper(val context: Context) {
 
     fun refreshCoversToo() = rxPrefs.getBoolean(Keys.refreshCoversToo, true)
 
+    fun updateOnRefresh() = rxPrefs.getInteger(Keys.updateOnRefresh, -1)
+
     fun extensionUpdatesCount() = rxPrefs.getInteger("ext_updates_count", 0)
 
     fun showRecentUpdates() = rxPrefs.getBoolean("show_recents", false)

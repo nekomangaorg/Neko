@@ -607,7 +607,8 @@ class MangaDetailsController : BaseController,
         editItem.isVisible = presenter.manga.favorite && !presenter.isLockedFromSearch
         editItem.title = view?.context?.getString(if (manga?.source == LocalSource.ID)
             R.string.action_edit else R.string.action_edit_cover)
-        menu.findItem(R.id.action_download).isVisible = !presenter.isLockedFromSearch
+        menu.findItem(R.id.action_download).isVisible = !presenter.isLockedFromSearch &&
+            manga?.source != LocalSource.ID
         menu.findItem(R.id.action_add_to_home_screen).isVisible = !presenter.isLockedFromSearch
         menu.findItem(R.id.action_mark_all_as_read).isVisible =
             presenter.getNextUnreadChapter() != null && !presenter.isLockedFromSearch

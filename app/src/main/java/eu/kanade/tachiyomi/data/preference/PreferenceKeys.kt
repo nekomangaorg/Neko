@@ -143,6 +143,8 @@ object PreferenceKeys {
 
     const val refreshCoversToo = "refresh_covers_too"
 
+    const val updateOnRefresh = "update_on_refresh"
+
     const val keepCatSort = "keep_cat_sort"
 
     const val alwaysShowChapterTransition = "always_show_chapter_transition"

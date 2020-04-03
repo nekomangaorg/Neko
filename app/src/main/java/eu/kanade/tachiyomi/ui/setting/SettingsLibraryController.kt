@@ -93,6 +93,16 @@ class SettingsLibraryController : SettingsController() {
         preferenceCategory {
             titleRes = R.string.pref_category_library_update
             intListPreference(activity) {
+                key = Keys.updateOnRefresh
+                titleRes = R.string.categories_on_manual
+
+                entriesRes = arrayOf(
+                    R.string.first_category, R.string.categories_in_global_update
+                )
+                entryRange = 0..1
+                defaultValue = -1
+            }
+            intListPreference(activity) {
                 key = Keys.libraryUpdateInterval
                 titleRes = R.string.pref_library_update_interval
                 entriesRes = arrayOf(
