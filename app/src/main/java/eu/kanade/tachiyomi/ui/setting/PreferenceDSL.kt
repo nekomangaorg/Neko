@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.setting
 
 import android.app.Activity
+import android.graphics.drawable.Drawable
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.preference.CheckBoxPreference
 import androidx.preference.DialogPreference
@@ -13,6 +14,7 @@ import androidx.preference.PreferenceManager
 import androidx.preference.PreferenceScreen
 import androidx.preference.SwitchPreferenceCompat
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
+import com.mikepenz.iconics.IconicsDrawable
 import eu.kanade.tachiyomi.widget.preference.IntListMatPreference
 import eu.kanade.tachiyomi.widget.preference.ListMatPreference
 import eu.kanade.tachiyomi.widget.preference.MultiListMatPreference
@@ -134,3 +136,9 @@ var Preference.summaryRes: Int
 var Preference.iconTint: Int
     get() = 0 // set only
     set(value) { DrawableCompat.setTint(icon, value) }
+
+var Preference.iconDrawable: Drawable
+    get() = IconicsDrawable(context) // set only
+    set(value) {
+        icon = value
+    }

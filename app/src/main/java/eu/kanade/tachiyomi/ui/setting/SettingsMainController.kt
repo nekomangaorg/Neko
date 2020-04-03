@@ -5,6 +5,10 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import androidx.preference.PreferenceScreen
 import com.bluelinelabs.conductor.Controller
+import com.mikepenz.iconics.IconicsDrawable
+import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
+import com.mikepenz.iconics.utils.colorInt
+import com.mikepenz.iconics.utils.sizeDp
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
@@ -16,6 +20,8 @@ class SettingsMainController : SettingsController() {
     init {
         setHasOptionsMenu(true)
     }
+
+    private val size = 18
 
     override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
         titleRes = R.string.label_settings
@@ -35,6 +41,16 @@ class SettingsMainController : SettingsController() {
             onClick { navigateTo(SettingsLibraryController()) }
         }
         preference {
+            iconDrawable =
+                IconicsDrawable(context)
+                    .icon(CommunityMaterial.Icon.cmd_google_chrome)
+                    .colorInt(tintColor)
+                    .sizeDp(size)
+
+            titleRes = R.string.pref_category_site_specific
+            onClick { navigateTo(SettingsSiteController()) }
+        }
+        preference {
             iconRes = R.drawable.ic_read_24dp
             iconTint = tintColor
             titleRes = R.string.pref_category_reader
@@ -52,6 +68,16 @@ class SettingsMainController : SettingsController() {
             iconTint = tintColor
             titleRes = R.string.pref_category_tracking
             onClick { navigateTo(SettingsTrackingController()) }
+        }
+        preference {
+            iconDrawable =
+                IconicsDrawable(context)
+                    .icon(CommunityMaterial.Icon.cmd_chart_histogram)
+                    .colorInt(tintColor)
+                    .sizeDp(size)
+
+            titleRes = R.string.pref_category_similar
+            onClick { navigateTo(SettingsSimilarController()) }
         }
         preference {
             iconRes = R.drawable.ic_backup_black_24dp

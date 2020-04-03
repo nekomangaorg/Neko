@@ -8,7 +8,7 @@ import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.Mangadex
-import eu.kanade.tachiyomi.widget.preference.LoginCheckBoxPreference
+import eu.kanade.tachiyomi.widget.preference.SiteLoginPreference
 import eu.kanade.tachiyomi.widget.preference.MangadexLoginDialog
 import eu.kanade.tachiyomi.widget.preference.MangadexLogoutDialog
 import uy.kohesive.injekt.Injekt
@@ -21,7 +21,7 @@ class SettingsSiteController : SettingsController(), MangadexLoginDialog.Listene
     override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
         titleRes = R.string.pref_site_specific_settings
 
-        val sourcePreference = LoginCheckBoxPreference(context, mdex).apply {
+        val sourcePreference = SiteLoginPreference(context, mdex).apply {
             title = mdex.name + " Login"
             key = getSourceKey(source.id)
             setOnLoginClickListener {
@@ -75,12 +75,12 @@ class SettingsSiteController : SettingsController(), MangadexLoginDialog.Listene
     }
 
     override fun siteLoginDialogClosed(source: Source) {
-        val pref = findPreference(getSourceKey(source.id)) as? LoginCheckBoxPreference
+        val pref = findPreference(getSourceKey(source.id)) as? SiteLoginPreference
         pref?.notifyChanged()
     }
 
     override fun siteLogoutDialogClosed(source: Source) {
-        val pref = findPreference(getSourceKey(source.id)) as? LoginCheckBoxPreference
+        val pref = findPreference(getSourceKey(source.id)) as? SiteLoginPreference
         pref?.notifyChanged()
     }
 

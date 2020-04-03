@@ -1,22 +1,24 @@
 package eu.kanade.tachiyomi.widget.preference
 
 import android.content.Context
-import android.graphics.Color
 import android.util.AttributeSet
 import android.view.View
-import androidx.preference.CheckBoxPreference
+import androidx.core.content.ContextCompat
+import androidx.preference.Preference
 import androidx.preference.PreferenceViewHolder
+import com.mikepenz.iconics.IconicsDrawable
+import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
+import com.mikepenz.iconics.utils.colorInt
+import com.mikepenz.iconics.utils.sizeDp
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.online.HttpSource
-import eu.kanade.tachiyomi.util.system.getResourceColor
-import eu.kanade.tachiyomi.util.view.setVectorCompat
 import kotlinx.android.synthetic.main.pref_item_source.view.*
 
-class LoginCheckBoxPreference @JvmOverloads constructor(
+class SiteLoginPreference @JvmOverloads constructor(
     context: Context,
     val source: HttpSource,
     attrs: AttributeSet? = null
-) : CheckBoxPreference(context, attrs) {
+) : Preference(context, attrs) {
 
     init {
         layoutResource = R.layout.pref_item_source
@@ -26,13 +28,20 @@ class LoginCheckBoxPreference @JvmOverloads constructor(
 
     override fun onBindViewHolder(holder: PreferenceViewHolder) {
         super.onBindViewHolder(holder)
+        holder.itemView.setOnClickListener {
+            onLoginClick()
+        }
         val loginFrame = holder.itemView.login_frame
-        val tint = if (source.isLogged())
-            Color.argb(255, 76, 175, 80)
+        val color = if (source.isLogged())
+            ContextCompat.getColor(context, R.color.material_green_500)
         else
-            context.getResourceColor(android.R.attr.textColorSecondary)
+            ContextCompat.getColor(context, R.color.material_blue_grey_300)
 
-        holder.itemView.login.setVectorCompat(R.drawable.ic_account_circle_black_24dp, tint)
+        holder.itemView.login
+                .setImageDrawable(IconicsDrawable(context)
+                        .icon(CommunityMaterial.Icon.cmd_account_circle)
+                        .sizeDp(24)
+                        .colorInt(color))
 
         loginFrame.visibility = View.VISIBLE
         loginFrame.setOnClickListener {
