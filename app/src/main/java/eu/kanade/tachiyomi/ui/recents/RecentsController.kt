@@ -292,7 +292,7 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
     override fun isSearching() = presenter.query.isNotEmpty()
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        (activity as? MainActivity)?.setDismissIcon(showingDownloads)
+        if (onRoot) (activity as? MainActivity)?.setDismissIcon(showingDownloads)
         if (showingDownloads) {
             inflater.inflate(R.menu.download_queue, menu)
         } else {

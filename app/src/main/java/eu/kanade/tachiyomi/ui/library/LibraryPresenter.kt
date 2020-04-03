@@ -566,20 +566,16 @@ class LibraryPresenter(
         freshStart: Boolean =
             false
     ) {
-        if (view !is LibraryListController) {
-            view.onNextLibraryUpdate(categories, mangaMap, freshStart)
-        } else {
-            val mangaList = withContext(Dispatchers.IO) {
-                val list = mutableListOf<LibraryItem>()
-                for (element in mangaMap.toSortedMap(compareBy { entry ->
-                    categories.find { it.id == entry }?.order ?: -1
-                })) {
-                    list.addAll(element.value)
-                }
-                list
+        val mangaList = withContext(Dispatchers.IO) {
+            val list = mutableListOf<LibraryItem>()
+            for (element in mangaMap.toSortedMap(compareBy { entry ->
+                categories.find { it.id == entry }?.order ?: -1
+            })) {
+                list.addAll(element.value)
             }
-            view.onNextLibraryUpdate(mangaList, freshStart)
+            list
         }
+        view.onNextLibraryUpdate(mangaList, freshStart)
     }
 
     fun getList(): List<LibraryItem> {
@@ -594,19 +590,13 @@ class LibraryPresenter(
 
     fun updateViewBlocking() {
         val mangaMap = currentMangaMap ?: return
-        if (view !is LibraryListController) {
-            if (mangaMap.values.firstOrNull()?.firstOrNull()?.header != null)
-                return
-            view.onNextLibraryUpdate(categories, mangaMap, true)
-        } else {
-            val list = mutableListOf<LibraryItem>()
-            for (element in mangaMap.toSortedMap(compareBy { entry ->
-                categories.find { it.id == entry }?.order ?: -1
-            })) {
-                list.addAll(element.value)
-            }
-            view.onNextLibraryUpdate(list, true)
+        val list = mutableListOf<LibraryItem>()
+        for (element in mangaMap.toSortedMap(compareBy { entry ->
+            categories.find { it.id == entry }?.order ?: -1
+        })) {
+            list.addAll(element.value)
         }
+        view.onNextLibraryUpdate(list, true)
     }
 
     /**

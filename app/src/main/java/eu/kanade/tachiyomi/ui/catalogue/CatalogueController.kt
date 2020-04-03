@@ -283,7 +283,7 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
      * @param inflater used to load the menu xml.
      */
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        (activity as? MainActivity)?.setDismissIcon(showingExtenions)
+        if (onRoot) (activity as? MainActivity)?.setDismissIcon(showingExtenions)
         if (showingExtenions) {
             // Inflate menu
             inflater.inflate(R.menu.extension_main, menu)

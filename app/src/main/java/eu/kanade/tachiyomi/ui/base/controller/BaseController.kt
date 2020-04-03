@@ -64,6 +64,9 @@ abstract class BaseController(bundle: Bundle? = null) : RestoreViewOnCreateContr
         super.onChangeStarted(handler, type)
     }
 
+    val onRoot: Boolean
+        get() = router.backstack.lastOrNull()?.controller() == this
+
     open fun handleRootBack(): Boolean = false
 
     open fun getTitle(): String? {
