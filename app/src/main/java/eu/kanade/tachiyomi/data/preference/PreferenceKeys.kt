@@ -149,7 +149,7 @@ object PreferenceKeys {
 
     const val marginRatioWebtoon = "margin_ratio_webtoon_new"
 
-    const val similarShowTab = "pref_related_show_tab_key"
+    const val similarEnabled = "pref_related_show_tab_key"
 
     const val similarUpdateRestriction = "related_update_restriction"
 

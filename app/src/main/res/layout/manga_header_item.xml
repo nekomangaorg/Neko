@@ -174,7 +174,6 @@
             android:text="@string/manga_tracking_tab"
             app:icon="@drawable/ic_sync_black_24dp" />
 
-
         <ImageView
             android:id="@+id/webview_button"
             style="@style/Theme.Widget.CustomImageButton"
@@ -202,6 +201,23 @@
             android:src="@drawable/ic_share_white_24dp" />
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/similar_layout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/button_layout">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/similar_button"
+            style="@style/Theme.Widget.Button.RounededOutline"
+            android:text="@string/manga_similar_tab"
+            app:icon="@drawable/ic_sync_black_24dp" />
+    </LinearLayout>
+
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/manga_summary_label"
         style="@style/TextAppearance.MaterialComponents.Headline6"
@@ -214,7 +230,7 @@
         android:textIsSelectable="false"
         android:textSize="17sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/button_layout"
+        app:layout_constraintTop_toBottomOf="@id/similar_layout"
         tools:text="About this manga" />
 
     <TextView

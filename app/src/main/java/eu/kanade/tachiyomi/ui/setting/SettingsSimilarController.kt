@@ -19,7 +19,7 @@ class SettingsSimilarController : SettingsController() {
         }
 
         switchPreference {
-            key = Keys.similarShowTab
+            key = Keys.similarEnabled
             titleRes = R.string.pref_similar_show_tab
             defaultValue = false
             onClick {

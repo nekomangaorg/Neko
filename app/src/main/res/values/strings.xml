@@ -616,6 +616,8 @@
     <string name="stop_migration">Stop migrating?</string>
     <string name="invalid_download_dir">Invalid download location</string>
 
+    <string name="manga_similar_tab">Similar</string>
+
     <!-- Tracking Screen -->
     <string name="manga_tracking_tab">Tracking</string>
     <string name="reading">Reading</string>

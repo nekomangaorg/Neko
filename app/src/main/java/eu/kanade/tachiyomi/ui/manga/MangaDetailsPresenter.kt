@@ -605,6 +605,8 @@ class MangaDetailsPresenter(
 
     fun hasTrackers(): Boolean = loggedServices.isNotEmpty()
 
+    fun similarEnabled(): Boolean = preferences.similarEnabled()
+
     // Tracking
     private fun fetchTrackings() {
         scope.launch {

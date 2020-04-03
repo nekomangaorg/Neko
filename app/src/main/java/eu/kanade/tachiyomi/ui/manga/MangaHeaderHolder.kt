@@ -169,6 +169,10 @@ class MangaHeaderHolder(
             checked(tracked)
         }
 
+        with(similar_layout){
+            visibleIf(presenter.similarEnabled())
+        }
+
         with(start_reading_button) {
             val nextChapter = presenter.getNextUnreadChapter()
             visibleIf(presenter.chapters.isNotEmpty() && !item.isLocked)
