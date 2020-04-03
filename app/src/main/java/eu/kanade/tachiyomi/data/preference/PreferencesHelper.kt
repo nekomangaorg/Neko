@@ -254,7 +254,7 @@ class PreferencesHelper(val context: Context) {
 
     fun skipFiltered() = prefs.getBoolean(Keys.skipFiltered, false)
 
-    fun similarShowTab() = prefs.getBoolean(Keys.similarShowTab, false)
+    fun similarEnabled() = prefs.getBoolean(Keys.similarEnabled, false)
 
     fun similarUpdateRestriction() = prefs.getStringSet(Keys.similarUpdateRestriction, emptySet())
 
