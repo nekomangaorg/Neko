@@ -10,7 +10,6 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.download.model.Download
-import eu.kanade.tachiyomi.ui.extension.ExtensionDividerItemDecoration
 import eu.kanade.tachiyomi.ui.recents.RecentsController
 import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
@@ -50,7 +49,6 @@ class DownloadBottomSheet @JvmOverloads constructor(
         adapter?.isHandleDragEnabled = true
         adapter?.isSwipeEnabled = true
         dl_recycler.setHasFixedSize(true)
-        dl_recycler.addItemDecoration(ExtensionDividerItemDecoration(context))
         dl_recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
         this.controller = controller
         updateDLTitle()

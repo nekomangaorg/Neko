@@ -34,6 +34,7 @@ import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.system.connectivityManager
 import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.view.applyWindowInsetsForRootController
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.inflate
 import eu.kanade.tachiyomi.util.view.scrollViewWith
@@ -43,6 +44,7 @@ import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.util.view.visibleIf
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import kotlinx.android.synthetic.main.catalogue_controller.*
+import kotlinx.android.synthetic.main.main_activity.*
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
@@ -132,6 +134,7 @@ open class BrowseCatalogueController(bundle: Bundle) :
 
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
+        view.applyWindowInsetsForRootController(activity!!.bottom_nav)
 
         // Initialize adapter, scroll listener and recycler views
         adapter = FlexibleAdapter(null, this)

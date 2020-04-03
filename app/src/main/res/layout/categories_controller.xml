@@ -4,8 +4,8 @@
     android:id="@+id/cat_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
     android:clipToPadding="false"
+    android:fitsSystemWindows="true"
     android:orientation="vertical">
 
     <androidx.recyclerview.widget.RecyclerView
