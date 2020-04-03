@@ -40,6 +40,7 @@ import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.lang.chop
+import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.notification
 import eu.kanade.tachiyomi.util.system.notificationManager
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -263,7 +264,9 @@ class LibraryUpdateService(
         mangaToUpdate.addAll(mangaToAdd)
         while (count < mangaToUpdate.size) {
             val shouldDownload = (downloadNew && (categoriesToDownload.isEmpty() ||
-                mangaToUpdate[count].category in categoriesToDownload))
+                mangaToUpdate[count].category in categoriesToDownload ||
+                db.getCategoriesForManga(mangaToUpdate[count]).executeOnIO()
+                    .any { (it.id ?: -1) in categoriesToDownload }))
             if (updateMangaChapters(mangaToUpdate[count], count, shouldDownload)) {
                 hasDownloads = true
             }

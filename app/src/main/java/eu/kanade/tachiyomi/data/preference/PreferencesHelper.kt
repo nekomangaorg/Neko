@@ -238,6 +238,8 @@ class PreferencesHelper(val context: Context) {
 
     fun refreshCoversToo() = rxPrefs.getBoolean(Keys.refreshCoversToo, true)
 
+    fun updateOnRefresh() = rxPrefs.getInteger(Keys.updateOnRefresh, -1)
+
     fun showRecentUpdates() = rxPrefs.getBoolean("show_recents", false)
 
     fun lastExtCheck() = rxPrefs.getLong("last_ext_check", 0)

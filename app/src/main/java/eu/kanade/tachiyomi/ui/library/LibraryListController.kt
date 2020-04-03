@@ -12,7 +12,6 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.view.ActionMode
-import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -20,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.checkbox.checkBoxPrompt
 import com.afollestad.materialdialogs.checkbox.isCheckPromptChecked
+import com.afollestad.materialdialogs.list.listItemsSingleChoice
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -81,7 +81,7 @@ LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
     private var nextCategory: Int? = null
     private var ogCategory: Int? = null
     private var prevCategory: Int? = null
-    private val swipeDistance = 300f
+    private val swipeDistance = 500f
     private var flinging = false
     private var isDragging = false
     private val scrollDistanceTilHidden = 1000.dpToPx
@@ -189,6 +189,7 @@ LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
             if (lockedY) return
 
             if (distance > 60 && abs(event.rawY - startPosY!!) <= 30 && !lockedRecycler) {
+                swipe_refresh.isEnabled = false
                 lockedRecycler = true
                 switchingCategories = true
                 recycler.suppressLayout(true)
@@ -203,7 +204,7 @@ LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
                     recycler_layout.x = sign * distance.pow(0.6f)
                     recycler_layout.alpha = 1f
                 } else if (distance <= swipeDistance * 1.1f) {
-                    recycler_layout.x = sign * (distance / 100f).pow(3.5f)
+                    recycler_layout.x = sign * (distance / (swipeDistance / 3f)).pow(3.5f)
                     recycler_layout.alpha =
                         (1f - (distance - (swipeDistance * 0.1f)) / swipeDistance)
                     if (moved) {
@@ -215,8 +216,8 @@ LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
                         scrollToHeader((if (sign <= 0) nextCategory else prevCategory) ?: -1)
                         moved = true
                     }
-                    recycler_layout.x = -sign * (max(0f, (swipeDistance * 2 - distance)) / 100f)
-                        .pow(3.5f)
+                    recycler_layout.x = -sign * (max(0f, (swipeDistance * 2 - distance)) /
+                        (swipeDistance / 3f)).pow(3.5f)
                     recycler_layout.alpha = ((distance - swipeDistance * 1.1f) / swipeDistance)
                     recycler_layout.alpha = min(1f, recycler_layout.alpha)
                 }
@@ -245,6 +246,7 @@ LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
     }
 
     private fun resetScrollingValues() {
+        swipe_refresh.isEnabled = true
         startPosX = null
         startPosY = null
         nextCategory = null
@@ -254,6 +256,7 @@ LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
     }
 
     private fun resetRecyclerY(animated: Boolean = false, time: Long = 100) {
+        swipe_refresh.isEnabled = true
         moved = false
         lockedRecycler = false
         if (animated) {
@@ -308,10 +311,52 @@ LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
         val tv = TypedValue()
         activity!!.theme.resolveAttribute(R.attr.actionBarTintColor, tv, true)
 
-        scrollViewWith(recycler) { insets ->
-            fast_scroller.updateLayoutParams<CoordinatorLayout.LayoutParams> {
+        scrollViewWith(recycler, swipeRefreshLayout = swipe_refresh) { insets ->
+            fast_scroller.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 topMargin = insets.systemWindowInsetTop
             }
+        }
+
+        swipe_refresh.setOnRefreshListener {
+            swipe_refresh.isRefreshing = false
+            if (!LibraryUpdateService.isRunning()) {
+                when {
+                    presenter.allCategories.size <= 1 -> updateLibrary()
+                    preferences.updateOnRefresh().getOrDefault() == -1 -> {
+                        MaterialDialog(activity!!).title(R.string.what_should_update)
+                            .negativeButton(android.R.string.cancel)
+                            .listItemsSingleChoice(items = listOf(
+                                view.context.getString(
+                                    R.string.top_category, presenter.allCategories.first().name
+                                ), view.context.getString(
+                                    R.string.categories_in_global_update
+                                )
+                            ), selection = { _, index, _ ->
+                                preferences.updateOnRefresh().set(index)
+                                when (index) {
+                                    0 -> updateLibrary(presenter.allCategories.first())
+                                    else -> updateLibrary()
+                                }
+                            })
+                            .positiveButton(R.string.action_update)
+                            .show()
+                    }
+                    else -> {
+                        when (preferences.updateOnRefresh().getOrDefault()) {
+                            0 -> updateLibrary(presenter.allCategories.first())
+                            else -> updateLibrary()
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun updateLibrary(category: Category? = null) {
+        val view = view ?: return
+        LibraryUpdateService.start(view.context, category)
+        snack = view.snack(R.string.updating_library) {
+            anchorView = bottom_sheet
         }
     }
 
@@ -738,7 +783,7 @@ LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
             val sign = sign(x).roundToInt()
             if ((sign < 0 && nextCategory == null) || (sign > 0) && prevCategory == null) return
             val distance = recycler_layout.alpha
-            val speed = max(3000f / abs(x), 0.75f)
+            val speed = max(5000f / abs(x), 0.75f)
             if (sign(recycler_layout.x) == sign(x)) {
                 flinging = true
                 val duration = (distance * 100 * speed).toLong()
@@ -747,7 +792,8 @@ LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
                     swipeDistance)
                 translationXAnimator.duration = duration
                 translationXAnimator.addUpdateListener { animation ->
-                    recycler_layout.x = sign * (animation.animatedValue as Float / 100f).pow(3.5f)
+                    recycler_layout.x = sign *
+                        (animation.animatedValue as Float / (swipeDistance / 3f)).pow(3.5f)
                 }
 
                 val translationAlphaAnimator = ValueAnimator.ofFloat(recycler_layout.alpha, 0f)
@@ -759,7 +805,7 @@ LibraryListController(bundle: Bundle? = null) : LibraryController(bundle),
                 set.start()
                 set.addListener(object : Animator.AnimatorListener {
                     override fun onAnimationEnd(animation: Animator?) {
-                        recycler_layout.x = -sign * (swipeDistance / 100f).pow(3.5f)
+                        recycler_layout.x = -sign * (swipeDistance / (swipeDistance / 3f)).pow(3.5f)
                         recycler_layout.alpha = 0f
                         recycler_layout.post {
                             scrollToHeader((if (sign <= 0) nextCategory else prevCategory) ?: -1)

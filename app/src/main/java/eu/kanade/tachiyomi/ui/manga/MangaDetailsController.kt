@@ -635,6 +635,7 @@ class MangaDetailsController : BaseController,
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_open_in_web_view -> openInWebView()
+            R.id.action_share -> prepareToShareManga()
             R.id.action_add_to_home_screen -> addToHomeScreen()
             R.id.action_mark_all_as_read -> {
                 MaterialDialog(view!!.context)
@@ -646,7 +647,7 @@ class MangaDetailsController : BaseController,
                     .show()
             }
             R.id.action_mark_all_as_unread -> markAsUnread(presenter.chapters)
-            R.id.download_next, R.id.download_next_5,
+            R.id.download_next, R.id.download_next_5, R.id.download_next_10,
             R.id.download_custom, R.id.download_unread, R.id.download_all
             -> downloadChapters(item.itemId)
             else -> return super.onOptionsItemSelected(item)
@@ -717,6 +718,7 @@ class MangaDetailsController : BaseController,
         val chaptersToDownload = when (choice) {
             R.id.download_next -> presenter.getUnreadChaptersSorted().take(1)
             R.id.download_next_5 -> presenter.getUnreadChaptersSorted().take(5)
+            R.id.download_next_10 -> presenter.getUnreadChaptersSorted().take(10)
             R.id.download_custom -> {
                 createActionModeIfNeeded()
                 return
@@ -784,7 +786,7 @@ class MangaDetailsController : BaseController,
                     0 -> circleCrop()
                     1 -> transform(RoundedCorners(5))
                     2 -> transform(CropSquareTransformation())
-                    else -> centerCrop().transform(MaskTransformation(R.drawable.mask_star))
+                    3 -> centerCrop().transform(MaskTransformation(R.drawable.mask_star))
                 }
             }
             .into(object : CustomTarget<Bitmap>(128, 128) {
