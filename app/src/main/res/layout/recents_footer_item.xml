@@ -15,6 +15,7 @@
         android:layout_marginTop="6dp"
         android:layout_marginBottom="12dp"
         android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+        android:fontFamily="sans-serif-medium"
         app:layout_constraintStart_toEndOf="@id/arrow"
         app:layout_constraintTop_toTopOf="parent"
         android:textColor="?colorAccent"

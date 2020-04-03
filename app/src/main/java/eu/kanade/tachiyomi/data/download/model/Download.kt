@@ -5,6 +5,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.online.HttpSource
 import rx.subjects.PublishSubject
+import kotlin.math.roundToInt
 
 class Download(val source: HttpSource, val manga: Manga, val chapter: Chapter) {
 
@@ -25,10 +26,16 @@ class Download(val source: HttpSource, val manga: Manga, val chapter: Chapter) {
 
     @Transient private var statusCallback: ((Download) -> Unit)? = null
 
+    val pageProgress: Int
+        get() {
+            val pages = pages ?: return 0
+            return pages.map(Page::progress).sum()
+        }
+
     val progress: Int
         get() {
             val pages = pages ?: return 0
-            return pages.map(Page::progress).average().toInt()
+            return pages.map(Page::progress).average().roundToInt()
         }
 
     fun setStatusSubject(subject: PublishSubject<Download>?) {

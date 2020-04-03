@@ -36,7 +36,7 @@ ExtensionAdapter.OnButtonClickListener,
     var shouldCallApi = false
 
     /**
-     * Adapter containing the list of manga from the catalogue.
+     * Adapter containing the list of extensions
      */
     private var adapter: FlexibleAdapter<IFlexible<*>>? = null
 

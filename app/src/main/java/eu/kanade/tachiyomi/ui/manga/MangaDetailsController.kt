@@ -347,10 +347,10 @@ class MangaDetailsController : BaseController,
                             android.R.attr.colorBackground
                         )
                         val backDropColor =
-                            (if (currentNightMode == Configuration.UI_MODE_NIGHT_NO) it?.getLightMutedColor(
+                            (if (currentNightMode == Configuration.UI_MODE_NIGHT_NO) it?.getLightVibrantColor(
                                 colorBack
                             )
-                            else it?.getDarkMutedColor(colorBack)) ?: colorBack
+                            else it?.getDarkVibrantColor(colorBack)) ?: colorBack
                         coverColor = backDropColor
                         (recycler.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder)
                             ?.setBackDrop(backDropColor)

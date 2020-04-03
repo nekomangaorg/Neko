@@ -4,7 +4,6 @@
     <item
         android:id="@+id/action_search"
         android:icon="@drawable/ic_search_white_24dp"
-        android:visible="false"
         android:title="@string/action_search"
         app:actionViewClass="androidx.appcompat.widget.SearchView"
         app:showAsAction="collapseActionView|ifRoom" />
@@ -22,11 +21,4 @@
         android:visible="false"
         android:checkable="true"
         app:showAsAction="never"/>
-
-    <item
-        android:id="@+id/action_dismiss"
-        android:title="@string/action_dismiss"
-        android:icon="@drawable/ic_close_white_24dp"
-        app:showAsAction="always"/>
-
 </menu>

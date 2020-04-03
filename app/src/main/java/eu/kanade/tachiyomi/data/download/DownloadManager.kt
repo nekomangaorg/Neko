@@ -239,6 +239,9 @@ class DownloadManager(val context: Context) {
             downloader.start()
         } else if (downloader.queue.isEmpty() && DownloadService.isRunning(context)) {
             DownloadService.stop(context)
+        } else if (downloader.queue.isEmpty()) {
+            DownloadService.callListeners(false)
+            downloader.stop()
         }
         queue.remove(chapters)
         val chapterDirs = provider.findChapterDirs(chapters, manga, source) + provider.findTempChapterDirs(chapters, manga, source)

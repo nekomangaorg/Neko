@@ -4,6 +4,7 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.MangaChapterHistory
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.download.model.DownloadQueue
@@ -22,6 +23,8 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.Calendar
 import java.util.Date
+import java.util.concurrent.TimeUnit
+import kotlin.math.abs
 
 class RecentsPresenter(
     val controller: RecentsController,
@@ -87,7 +90,13 @@ class RecentsPresenter(
             if (query.isEmpty()) {
                 val nChaptersItems =
                     pairs.filter { it.first.history.id == null && it.first.chapter.id != null }
-                        .sortedByDescending { it.second.date_upload }
+                        .sortedWith(Comparator<Pair<MangaChapterHistory, Chapter>> { f1, f2 ->
+                            if (abs(f1.second.date_fetch - f2.second.date_fetch) <=
+                                TimeUnit.HOURS.toMillis(2))
+                                f2.second.date_upload.compareTo(f1.second.date_upload)
+                            else
+                                f2.second.date_fetch.compareTo(f1.second.date_fetch)
+                        })
                         .take(4).map {
                             RecentMangaItem(
                                 it.first,

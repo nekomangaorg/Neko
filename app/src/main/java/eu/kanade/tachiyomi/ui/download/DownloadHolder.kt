@@ -64,7 +64,7 @@ class DownloadHolder(private val view: View, val adapter: DownloadAdapter) :
         if (download_progress.max == 1) {
             download_progress.max = pages.size * 100
         }
-        download_progress.progress = download.totalProgress
+        download_progress.progress = download.pageProgress
     }
 
     /**
@@ -103,5 +103,17 @@ class DownloadHolder(private val view: View, val adapter: DownloadAdapter) :
 
         // Finally show the PopupMenu
         popup.show()
+    }
+
+    override fun getFrontView(): View {
+        return front_view
+    }
+
+    override fun getRearRightView(): View {
+        return right_view
+    }
+
+    override fun getRearLeftView(): View {
+        return left_view
     }
 }

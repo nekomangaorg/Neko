@@ -28,6 +28,7 @@ import eu.kanade.tachiyomi.ui.catalogue.browse.BrowseCatalogueController
 import eu.kanade.tachiyomi.ui.catalogue.global_search.CatalogueSearchController
 import eu.kanade.tachiyomi.ui.catalogue.latest.LatestUpdatesController
 import eu.kanade.tachiyomi.ui.extension.SettingsExtensionsController
+import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.RootSearchInterface
 import eu.kanade.tachiyomi.ui.setting.SettingsSourcesController
 import eu.kanade.tachiyomi.util.view.applyWindowInsetsForRootController
@@ -269,6 +270,12 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
         router.pushController(controller.withFadeTransaction())
     }
 
+    override fun expandSearch() {
+        if (showingExtenions)
+            ext_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
+        else activity?.toolbar?.menu?.findItem(R.id.action_search)?.expandActionView()
+    }
+
     /**
      * Adds items to the options menu.
      *
@@ -276,6 +283,7 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
      * @param inflater used to load the menu xml.
      */
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        (activity as? MainActivity)?.setDismissIcon(showingExtenions)
         if (showingExtenions) {
             // Inflate menu
             inflater.inflate(R.menu.extension_main, menu)
@@ -335,9 +343,6 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
                         SettingsSourcesFadeChangeHandler()
                     ).pushChangeHandler(FadeChangeHandler())
                     )
-            }
-            R.id.action_dismiss -> {
-                ext_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
             }
             else -> return super.onOptionsItemSelected(item)
         }
