@@ -87,7 +87,7 @@ class LibraryHeaderItem(private val categoryF: (Int) -> Category, val catId: Int
 
         fun bind(category: Category) {
             sectionText.updateLayoutParams<ConstraintLayout.LayoutParams> {
-                topMargin = (if (category.isFirst == true) 2 else 32).dpToPx
+                topMargin = (if (category.isFirst == true) 2 else 44).dpToPx
             }
 
             if (category.isFirst == true && category.isLast == true) sectionText.text = ""
