@@ -353,6 +353,10 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
         }
     }
 
+    fun showDownloads() {
+        dl_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
+    }
+
     fun toggleDownloads() {
         if (dl_bottom_sheet.sheetBehavior?.isHideable == false) {
             if (showingDownloads) dl_bottom_sheet.dismiss()

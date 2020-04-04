@@ -47,7 +47,6 @@ import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.catalogue.CatalogueController
 import eu.kanade.tachiyomi.ui.catalogue.global_search.CatalogueSearchController
-import eu.kanade.tachiyomi.ui.download.DownloadController
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.recent_updates.RecentChaptersController
@@ -399,9 +398,12 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                 router.pushController(MangaDetailsController(extras).withFadeTransaction())
             }
             SHORTCUT_DOWNLOADS -> {
-                if (router.backstack.none { it.controller() is DownloadController }) {
-                    if (router.backstack.isEmpty()) bottom_nav.selectedItemId = R.id.nav_library
-                    router.pushController(DownloadController().withFadeTransaction())
+                bottom_nav.selectedItemId = R.id.nav_catalogues
+                router.popToRoot()
+                bottom_nav.post {
+                    val controller =
+                        router.backstack.firstOrNull()?.controller() as? RecentsController
+                    controller?.showDownloads()
                 }
             }
             Intent.ACTION_SEARCH, "com.google.android.gms.actions.SEARCH_ACTION" -> {
