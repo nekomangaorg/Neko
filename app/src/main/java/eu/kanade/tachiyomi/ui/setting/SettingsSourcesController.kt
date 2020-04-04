@@ -39,7 +39,7 @@ class SettingsSourcesController : SettingsController(),
     private var sorting = SourcesSort.Alpha
 
     override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
-        titleRes = R.string.pref_category_sources
+        titleRes = R.string.action_filter
         sorting = SourcesSort.from(preferences.sourceSorting().getOrDefault()) ?: SourcesSort.Alpha
         activity?.invalidateOptionsMenu()
         // Get the list of active language codes.

@@ -98,6 +98,9 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             if (isChecked)
                 onGroupClicked(ACTION_HIDE_FILTER_TIP)
         }
+        view_options.setOnClickListener {
+            onGroupClicked(ACTION_DISPLAY)
+        }
 
         val activeFilters = hasActiveFiltersFromPref()
         sheetBehavior?.isHideable = !activeFilters
@@ -334,6 +337,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         const val ACTION_REFRESH = 0
         const val ACTION_FILTER = 1
         const val ACTION_HIDE_FILTER_TIP = 2
+        const val ACTION_DISPLAY = 3
         var FILTER_TRACKER = ""
             private set
     }

@@ -346,7 +346,7 @@ class LibraryPresenter(
                     manga1TotalChapter.compareTo(mange2TotalChapter)
                 }
                 sortingMode == LibrarySort.DATE_ADDED -> {
-                    i1.manga.date_added.compareTo(i2.manga.date_added)
+                    i2.manga.date_added.compareTo(i1.manga.date_added)
                 }
                 else -> 0
             }
@@ -421,13 +421,13 @@ class LibraryPresenter(
                             i2.chapterCount = totalChapters!![i2.manga.id!!] ?: 0
                             manga1TotalChapter.compareTo(mange2TotalChapter)
                         }
-                        LibrarySort.DATE_ADDED -> i1.manga.date_added.compareTo(i2.manga.date_added)
+                        LibrarySort.DATE_ADDED -> i2.manga.date_added.compareTo(i1.manga.date_added)
                         else -> sortAlphabetical(i1, i2)
                     }
                     if (!category.isAscending()) sort *= -1
                     sort
                 }
-                category?.mangaOrder?.isEmpty() == false -> {
+                category.mangaOrder.isNotEmpty() -> {
                     val order = category.mangaOrder
                     val index1 = order.indexOf(i1.manga.id!!)
                     val index2 = order.indexOf(i2.manga.id!!)
@@ -441,7 +441,7 @@ class LibraryPresenter(
                 else -> 0
             }
             if (compare == 0) {
-                if (category?.isAscending() != false) sortAlphabetical(i1, i2)
+                if (category.isAscending()) sortAlphabetical(i1, i2)
                 else sortAlphabetical(i2, i1)
             } else compare
         } else {
@@ -560,7 +560,7 @@ class LibraryPresenter(
         }
     }
 
-    suspend fun updateView(
+    private suspend fun updateView(
         categories: List<Category>,
         mangaMap: LibraryMap,
         freshStart: Boolean =

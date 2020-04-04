@@ -5,6 +5,7 @@ import android.animation.AnimatorSet
 import android.animation.ValueAnimator
 import android.app.Activity
 import android.content.Context
+import android.content.res.ColorStateList
 import android.graphics.Rect
 import android.os.Bundle
 import android.util.TypedValue
@@ -15,11 +16,13 @@ import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewPropertyAnimator
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.SearchView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -33,6 +36,8 @@ import com.bluelinelabs.conductor.ControllerChangeType
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
+import com.reddit.indicatorfastscroll.FastScrollItemIndicator
+import com.reddit.indicatorfastscroll.FastScrollerView
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.SelectableAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
@@ -51,7 +56,6 @@ import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.OnTouchEventInterface
 import eu.kanade.tachiyomi.ui.main.RootSearchInterface
-import eu.kanade.tachiyomi.ui.main.SpinnerTitleInterface
 import eu.kanade.tachiyomi.ui.main.SwipeGestureInterface
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.migration.manga.design.PreMigrationController
@@ -59,6 +63,7 @@ import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationListController
 import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationProcedureConfig
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.applyWindowInsetsForRootController
@@ -90,7 +95,7 @@ class LibraryController(
     ChangeMangaCategoriesDialog.Listener,
     FlexibleAdapter.OnItemClickListener, FlexibleAdapter.OnItemLongClickListener,
     FlexibleAdapter.OnItemMoveListener, LibraryCategoryAdapter.LibraryListener,
-    SpinnerTitleInterface, OnTouchEventInterface, SwipeGestureInterface,
+    OnTouchEventInterface, SwipeGestureInterface,
     RootSearchInterface, LibraryServiceListener {
 
     init {
@@ -111,6 +116,8 @@ class LibraryController(
     private var actionMode: ActionMode? = null
 
     private var libraryLayout: Int = preferences.libraryLayout().getOrDefault()
+
+    private var singleCategory: Boolean = false
 
     /**
      * Library search query.
@@ -155,11 +162,15 @@ class LibraryController(
     private var isDragging = false
     private val scrollDistanceTilHidden = 1000.dpToPx
 
+    private var textAnim: ViewPropertyAnimator? = null
+    private var scrollAnim: ViewPropertyAnimator? = null
+    private var autoHideScroller: Boolean = preferences.autoHideSeeker().getOrDefault()
+
     override fun getTitle(): String? {
         return if (view != null && presenter.categories.size > 1) presenter.categories.find {
             it.order == activeCategory
-        }?.name ?: super.getTitle()
-        else super.getTitle()
+        }?.name ?: view?.context?.getString(R.string.label_library)
+        else view?.context?.getString(R.string.label_library)
     }
 
     private var scrollListener = object : RecyclerView.OnScrollListener() {
@@ -179,14 +190,145 @@ class LibraryController(
                 setTitle()
             }
         }
+
+        override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+            super.onScrollStateChanged(recyclerView, newState)
+            if (!autoHideScroller) return
+            when (newState) {
+                RecyclerView.SCROLL_STATE_DRAGGING -> {
+                    scrollAnim?.cancel()
+                    if (fast_scroller.translationX != 0f) {
+                        fast_scroller.animate().setStartDelay(0).setDuration(100).translationX(0f)
+                            .start()
+                    }
+                }
+                RecyclerView.SCROLL_STATE_IDLE -> {
+                    scrollAnim = fast_scroller.animate().setStartDelay(1000).setDuration(250)
+                        .translationX(22f.dpToPx)
+                    scrollAnim?.start()
+                }
+            }
+        }
+    }
+
+    private fun hideScroller() {
+        if (!autoHideScroller) return
+        scrollAnim = fast_scroller.animate()
+            .setStartDelay(1000)
+            .setDuration(250)
+            .translationX(22f.dpToPx)
+        scrollAnim?.start()
+    }
+
+    private fun setFastScrollBackground() {
+        val context = activity ?: return
+        fast_scroller.background = if (autoHideScroller) ContextCompat.getDrawable(
+            context, R.drawable.fast_scroll_background
+        ) else null
+        fast_scroller.textColor = ColorStateList.valueOf(
+            context.getResourceColor(
+                if (autoHideScroller) android.R.attr.textColorPrimaryInverse else android.R.attr.textColorPrimary
+            )
+        )
     }
 
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
         view.applyWindowInsetsForRootController(activity!!.bottom_nav)
         if (!::presenter.isInitialized) presenter = LibraryPresenter(this)
+        fast_scroller.translationX = 22f.dpToPx
+        setFastScrollBackground()
 
-        layoutView(view)
+        adapter = LibraryCategoryAdapter(this)
+        setRecyclerLayout()
+        recycler.manager.spanSizeLookup = (object : GridLayoutManager.SpanSizeLookup() {
+            override fun getSpanSize(position: Int): Int {
+                if (libraryLayout == 0) return 1
+                val item = this@LibraryController.adapter.getItem(position)
+                return if (item is LibraryHeaderItem) recycler.manager.spanCount
+                else if (item is LibraryItem && item.manga.isBlank()) recycler.manager.spanCount
+                else 1
+            }
+        })
+        recycler.setHasFixedSize(true)
+        recycler.adapter = adapter
+        fast_scroller.setupWithRecyclerView(
+            recycler, { position ->
+                val letter = adapter.getSectionText(position)
+                if (!singleCategory && !adapter.isHeader(adapter.getItem(position))) null
+                else if (letter != null) FastScrollItemIndicator.Text(letter)
+                else FastScrollItemIndicator.Icon(R.drawable.star)
+            })
+        fast_scroller.useDefaultScroller = false
+        fast_scroller.itemIndicatorSelectedCallbacks += object : FastScrollerView.ItemIndicatorSelectedCallback {
+            override fun onItemIndicatorSelected(
+                indicator: FastScrollItemIndicator,
+                indicatorCenterY: Int,
+                itemPosition: Int
+            ) {
+                fast_scroller.translationX = 0f
+                hideScroller()
+
+                textAnim?.cancel()
+                textAnim = text_view_m.animate().alpha(0f).setDuration(250L).setStartDelay(1000)
+                textAnim?.start()
+
+                text_view_m.translationY = indicatorCenterY.toFloat() - text_view_m.height / 2
+                text_view_m.alpha = 1f
+                text_view_m.text = adapter.onCreateBubbleText(itemPosition)
+                val appbar = activity?.appbar
+                appbar?.y = 0f
+                (recycler.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
+                    itemPosition,
+                    if (singleCategory) 0 else (if (itemPosition == 0) 0 else (-40).dpToPx)
+                )
+            }
+        }
+        recycler.addOnScrollListener(scrollListener)
+
+        val tv = TypedValue()
+        activity!!.theme.resolveAttribute(R.attr.actionBarTintColor, tv, true)
+
+        scrollViewWith(recycler, swipeRefreshLayout = swipe_refresh) { insets ->
+            fast_scroller.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                topMargin = insets.systemWindowInsetTop
+            }
+        }
+
+        swipe_refresh.setDistanceToTriggerSync(150.dpToPx)
+        swipe_refresh.setOnRefreshListener {
+            swipe_refresh.isRefreshing = false
+            if (!LibraryUpdateService.isRunning()) {
+                when {
+                    presenter.allCategories.size <= 1 -> updateLibrary()
+                    preferences.updateOnRefresh().getOrDefault() == -1 -> {
+                        MaterialDialog(activity!!).title(R.string.what_should_update)
+                            .negativeButton(android.R.string.cancel)
+                            .listItemsSingleChoice(items = listOf(
+                                view.context.getString(
+                                    R.string.top_category, presenter.allCategories.first().name
+                                ), view.context.getString(
+                                    R.string.categories_in_global_update
+                                )
+                            ), selection = { _, index, _ ->
+                                preferences.updateOnRefresh().set(index)
+                                when (index) {
+                                    0 -> updateLibrary(presenter.allCategories.first())
+                                    else -> updateLibrary()
+                                }
+                            })
+                            .positiveButton(R.string.action_update)
+                            .show()
+                    }
+                    else -> {
+                        when (preferences.updateOnRefresh().getOrDefault()) {
+                            0 -> updateLibrary(presenter.allCategories.first())
+                            else -> updateLibrary()
+                        }
+                    }
+                }
+            }
+        }
 
         if (selectedMangas.isNotEmpty()) {
             createActionModeIfNeeded()
@@ -201,6 +343,7 @@ class LibraryController(
                 FilterBottomSheet.ACTION_HIDE_FILTER_TIP -> activity?.toast(
                     R.string.hide_filters_tip, Toast.LENGTH_LONG
                 )
+                FilterBottomSheet.ACTION_DISPLAY -> DisplayBottomSheet(this).show()
             }
         }
 
@@ -342,7 +485,7 @@ class LibraryController(
     }
 
     private fun resetScrollingValues() {
-        swipe_refresh.isEnabled = true
+        swipe_refresh.isEnabled = !isDragging
         startPosX = null
         startPosY = null
         nextCategory = null
@@ -351,8 +494,17 @@ class LibraryController(
         lockedY = false
     }
 
+    fun updateAutoHideScrollbar(autoHide: Boolean) {
+        autoHideScroller = autoHide
+        setFastScrollBackground()
+        scrollAnim?.cancel()
+        if (autoHide) hideScroller()
+        else fast_scroller.translationX = 0f
+        setRecyclerLayout()
+    }
+
     private fun resetRecyclerY(animated: Boolean = false, time: Long = 100) {
-        swipe_refresh.isEnabled = true
+        swipe_refresh.isEnabled = !isDragging
         moved = false
         lockedRecycler = false
         if (animated) {
@@ -387,67 +539,6 @@ class LibraryController(
         return inflater.inflate(R.layout.library_list_controller, container, false)
     }
 
-    private fun layoutView(view: View) {
-        adapter = LibraryCategoryAdapter(this)
-        setRecyclerLayout()
-        recycler.manager.spanSizeLookup = (object : GridLayoutManager.SpanSizeLookup() {
-            override fun getSpanSize(position: Int): Int {
-                if (libraryLayout == 0) return 1
-                val item = this@LibraryController.adapter.getItem(position)
-                return if (item is LibraryHeaderItem) recycler.manager.spanCount
-                else if (item is LibraryItem && item.manga.isBlank()) recycler.manager.spanCount
-                else 1
-            }
-        })
-        recycler.setHasFixedSize(true)
-        recycler.adapter = adapter
-        adapter.fastScroller = fast_scroller
-        recycler.addOnScrollListener(scrollListener)
-
-        val tv = TypedValue()
-        activity!!.theme.resolveAttribute(R.attr.actionBarTintColor, tv, true)
-
-        scrollViewWith(recycler, swipeRefreshLayout = swipe_refresh) { insets ->
-            fast_scroller.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                topMargin = insets.systemWindowInsetTop
-            }
-        }
-
-        swipe_refresh.setOnRefreshListener {
-            swipe_refresh.isRefreshing = false
-            if (!LibraryUpdateService.isRunning()) {
-                when {
-                    presenter.allCategories.size <= 1 -> updateLibrary()
-                    preferences.updateOnRefresh().getOrDefault() == -1 -> {
-                        MaterialDialog(activity!!).title(R.string.what_should_update)
-                            .negativeButton(android.R.string.cancel)
-                            .listItemsSingleChoice(items = listOf(
-                                view.context.getString(
-                                    R.string.top_category, presenter.allCategories.first().name
-                                ), view.context.getString(
-                                    R.string.categories_in_global_update
-                                )
-                            ), selection = { _, index, _ ->
-                                preferences.updateOnRefresh().set(index)
-                                when (index) {
-                                    0 -> updateLibrary(presenter.allCategories.first())
-                                    else -> updateLibrary()
-                                }
-                            })
-                            .positiveButton(R.string.action_update)
-                            .show()
-                    }
-                    else -> {
-                        when (preferences.updateOnRefresh().getOrDefault()) {
-                            0 -> updateLibrary(presenter.allCategories.first())
-                            else -> updateLibrary()
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     private fun updateLibrary(category: Category? = null) {
         val view = view ?: return
         LibraryUpdateService.start(view.context, category)
@@ -459,21 +550,24 @@ class LibraryController(
     private fun setRecyclerLayout() {
         if (libraryLayout == 0) {
             recycler.spanCount = 1
-            recycler.updatePaddingRelative(start = 0, end = 0)
+            recycler.updatePaddingRelative(start = 0, end = if (!autoHideScroller) 10.dpToPx else 0)
         } else {
             recycler.columnWidth = (90 + (preferences.gridSize().getOrDefault() * 30)).dpToPx
-            recycler.updatePaddingRelative(start = 5.dpToPx, end = 5.dpToPx)
+            recycler.updatePaddingRelative(
+                start = (if (!autoHideScroller) 2 else 5).dpToPx,
+                end = (if (!autoHideScroller) 12 else 5).dpToPx
+            )
         }
     }
 
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
         super.onChangeStarted(handler, type)
         if (type.isEnter) {
-            if (presenter.categories.size > 1) {
+            /*if (presenter.categories.size > 1) {
                 activity?.toolbar?.showSpinner()
             } else {
                 activity?.toolbar?.removeSpinner()
-            }
+            }*/
             presenter.getLibrary()
             DownloadService.callListeners()
             LibraryUpdateService.setListener(this)
@@ -521,8 +615,10 @@ class LibraryController(
             )
         }
         adapter.setItems(mangaMap)
+        singleCategory = presenter.categories.size <= 1
 
-        val isCurrentController = router?.backstack?.lastOrNull()?.controller() == this
+        fast_scroller.translationX = 0f
+        hideScroller()
 
         setTitle()
         updateScroll = false
@@ -537,21 +633,21 @@ class LibraryController(
         }
         adapter.isLongPressDragEnabled = canDrag()
 
-        val popupMenu = if (presenter.categories.size > 1 && isCurrentController) {
+        /*val popupMenu = if (presenter.categories.size > 1 && isCurrentController) {
             activity?.toolbar?.showSpinner()
         } else {
             activity?.toolbar?.removeSpinner()
             null
-        }
+        }*/
 
-        presenter.categories.forEach { category ->
+        /*presenter.categories.forEach { category ->
             popupMenu?.menu?.add(0, category.order, max(0, category.order), category.name)
         }
 
         popupMenu?.setOnMenuItemClickListener { item ->
             scrollToHeader(item.itemId)
             true
-        }
+        }*/
     }
 
     private fun scrollToHeader(pos: Int) {
@@ -736,6 +832,7 @@ class LibraryController(
 
     override fun onActionStateChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
         val position = viewHolder?.adapterPosition ?: return
+        swipe_refresh.isEnabled = actionState != ItemTouchHelper.ACTION_STATE_DRAG
         if (actionState == ItemTouchHelper.ACTION_STATE_DRAG) {
             isDragging = true
             activity?.appbar?.y = 0f
@@ -995,9 +1092,6 @@ class LibraryController(
             searchView.clearFocus()
         }
 
-        // Mutate the filter icon because it needs to be tinted and the resource is shared.
-        menu.findItem(R.id.action_library_filter).icon.mutate()
-
         setOnQueryTextChangeListener(searchView) { search(it) }
         searchItem.fixExpand(onExpand = { invalidateMenuOnExpand() })
     }
@@ -1043,8 +1137,6 @@ class LibraryController(
 
     override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
         mode.menuInflater.inflate(R.menu.library_selection, menu)
-        val selectItem = menu.findItem(R.id.action_select_all)
-        selectItem.isVisible = false
         return true
     }
 

@@ -60,7 +60,7 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleVie
         } else {
             title.setTextColor(ContextCompat.getColor(itemView.context, R.color.textColorPrimary))
             regularDrawable = ContextCompat.getDrawable(itemView.context, R.drawable
-                .ic_reorder_grey_24dp)
+                .ic_drag_handle_black_24dp)
             image.visible()
             edit_text.setText(title.text)
         }

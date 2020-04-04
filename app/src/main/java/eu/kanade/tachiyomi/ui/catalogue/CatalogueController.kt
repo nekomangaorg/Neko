@@ -91,7 +91,7 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
     override fun getTitle(): String? {
         return if (showingExtenions)
             applicationContext?.getString(R.string.label_extensions)
-        else applicationContext?.getString(R.string.label_catalogues)
+        else applicationContext?.getString(R.string.pref_category_sources)
     }
 
     /**

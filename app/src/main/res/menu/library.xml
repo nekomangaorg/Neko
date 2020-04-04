@@ -13,24 +13,18 @@
         app:showAsAction="collapseActionView|ifRoom" />
 
     <item
-        android:id="@+id/action_library_filter"
-        android:icon="@drawable/ic_filter_list_white_24dp"
-        android:visible="false"
-        android:title="@string/action_filter"
-        app:showAsAction="ifRoom"/>
-
-    <item
         android:id="@+id/action_library_display"
         android:icon="@drawable/ic_tune_white_24dp"
+        android:visible="false"
         android:title="@string/action_view_options"
-        app:showAsAction="never"
+        app:showAsAction="ifRoom"
         />
 
     <item
         android:id="@+id/action_settings"
         android:icon="@drawable/ic_settings_white_24dp"
         android:title="@string/label_settings"
-        app:showAsAction="never"
+        app:showAsAction="ifRoom"
         />
 
 </menu>

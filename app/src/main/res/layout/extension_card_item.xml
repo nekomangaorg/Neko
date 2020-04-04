@@ -64,7 +64,7 @@
             app:layout_constraintStart_toEndOf="@id/lang"
             tools:text="Version" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/ext_button"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="wrap_content"

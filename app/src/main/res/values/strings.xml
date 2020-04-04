@@ -46,7 +46,7 @@
     <!-- Actions -->
     <string name="action_filter">Filter</string>
     <string name="action_change_sources">Change sources</string>
-    <string name="action_view_options">View options</string>
+    <string name="action_view_options">Display options</string>
     <string name="action_filter_downloaded">Downloaded</string>
     <string name="action_filter_not_downloaded">Not downloaded</string>
     <string name="action_filter_bookmarked">Bookmarked</string>
@@ -57,7 +57,7 @@
     <string name="action_filter_tracked">Tracked</string>
     <string name="action_filter_not_tracked">Not tracked</string>
     <string name="action_hide_categories">Hide categories</string>
-    <string name="action_start_filters_hidden">Start hidden</string>
+    <string name="action_start_filters_hidden">Start with filters hidden</string>
     <string name="hiding_categories">Hiding categories</string>
     <string name="manga_only">Manga only</string>
     <string name="manhwa_only">Manhwa only</string>
@@ -121,6 +121,7 @@
     <string name="action_display_grid">Compact Grid</string>
     <string name="action_display_list">List</string>
     <string name="action_display_download_badge">Download badges</string>
+    <string name="auto_hide_category_seeker">Auto-hide category seeker</string>
     <string name="action_display_unread_badge">Unread badges</string>
     <string name="action_set_filter">Set filter</string>
     <string name="action_cancel">Cancel</string>
@@ -483,9 +484,9 @@
     <string name="large">Large</string>
     <string name="grid_options">Grid options</string>
     <string name="badges">Badges</string>
-    <string name="hide_unread">Hide unread badges</string>
-    <string name="show_unread">Show unread badges</string>
-    <string name="show_unread_count">Show unread count</string>
+    <string name="hide_badges">Hide badges</string>
+    <string name="show_badges">Show badges</string>
+    <string name="show_count">Show count</string>
     <string name="hide_filters_tip">To show filters again, tap the Library icon</string>
 
     <!-- Catalogue fragment -->

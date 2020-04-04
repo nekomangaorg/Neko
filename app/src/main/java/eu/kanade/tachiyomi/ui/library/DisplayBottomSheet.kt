@@ -64,7 +64,7 @@ class DisplayBottomSheet(private val controller: LibraryController) : BottomShee
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initGeneralPreferences()
-        setBottomEdge(unread_badge_group, activity)
+        setBottomEdge(hide_filters, activity)
         close_button.setOnClickListener {
             dismiss()
             true
@@ -86,6 +86,9 @@ class DisplayBottomSheet(private val controller: LibraryController) : BottomShee
         uniform_grid.bindToPreference(preferences.uniformGrid()) {
             controller.reattachAdapter()
         }
+        autohide_seeker.bindToPreference(preferences.autoHideSeeker()) {
+            controller.updateAutoHideScrollbar(autohide_seeker.isChecked)
+        }
         grid_size_toggle_group.bindToPreference(preferences.gridSize()) {
             controller.reattachAdapter()
         }
@@ -95,28 +98,29 @@ class DisplayBottomSheet(private val controller: LibraryController) : BottomShee
         unread_badge_group.bindToPreference(preferences.unreadBadgeType()) {
             controller.presenter.requestUnreadBadgesUpdate()
         }
+        hide_filters.bindToPreference(preferences.hideFiltersAtStart())
     }
 
     /**
      * Binds a checkbox or switch view with a boolean preference.
      */
-    private fun CompoundButton.bindToPreference(pref: Preference<Boolean>, block: () -> Unit) {
+    private fun CompoundButton.bindToPreference(pref: Preference<Boolean>, block: (() -> Unit)? = null) {
         isChecked = pref.getOrDefault()
         setOnCheckedChangeListener { _, isChecked ->
             pref.set(isChecked)
-            block()
+            block?.invoke()
         }
     }
 
     /**
      * Binds a radio group with a int preference.
      */
-    private fun RadioGroup.bindToPreference(pref: Preference<Int>, block: () -> Unit) {
+    private fun RadioGroup.bindToPreference(pref: Preference<Int>, block: (() -> Unit)? = null) {
         (getChildAt(pref.getOrDefault()) as RadioButton).isChecked = true
         setOnCheckedChangeListener { _, checkedId ->
             val index = indexOfChild(findViewById(checkedId))
             pref.set(index)
-            block()
+            block?.invoke()
         }
     }
 }

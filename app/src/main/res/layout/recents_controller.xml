@@ -1,25 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/recents_layout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:layout_height="match_parent">
 
-    <FrameLayout
-        android:id="@+id/frame_layout"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="?android:attr/colorBackground">
+        android:layout_height="match_parent">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycler"
+        <FrameLayout
+            android:id="@+id/frame_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:clipToPadding="false"
-            tools:listitem="@layout/catalogue_main_controller_card" />
+            android:background="?android:attr/colorBackground">
 
-    </FrameLayout>
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                tools:listitem="@layout/catalogue_main_controller_card" />
+
+        </FrameLayout>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <View
         android:id="@+id/shadow"
@@ -28,10 +34,10 @@
         android:alpha="0.5"
         android:background="@drawable/shape_gradient_top_shadow"
         android:paddingBottom="10dp"
-        app:layout_anchorGravity="top"
-        app:layout_anchor="@id/dl_bottom_sheet" />
+        app:layout_anchor="@id/dl_bottom_sheet"
+        app:layout_anchorGravity="top" />
     <!-- Adding bottom sheet after main content -->
-    <include layout="@layout/download_bottom_sheet"/>
+    <include layout="@layout/download_bottom_sheet" />
 
     <View
         android:id="@+id/shadow2"

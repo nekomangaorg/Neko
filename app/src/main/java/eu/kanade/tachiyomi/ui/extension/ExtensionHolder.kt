@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.extension
 
 import android.content.res.ColorStateList
+import android.graphics.Color
 import android.view.View
 import androidx.core.content.ContextCompat
 import eu.kanade.tachiyomi.R
@@ -11,6 +12,7 @@ import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.ui.base.holder.SlicedHolder
 import eu.kanade.tachiyomi.util.system.LocaleHelper
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.view.resetStrokeColor
 import io.github.mthli.slice.Slice
 import kotlinx.android.synthetic.main.extension_card_item.*
 
@@ -64,8 +66,8 @@ class ExtensionHolder(view: View, override val adapter: ExtensionAdapter) :
         setTextColor(ContextCompat.getColorStateList(context, R.drawable.button_text_state))
         backgroundTintList = ContextCompat.getColorStateList(context, android.R.color.transparent)
 
+        resetStrokeColor()
         val extension = item.extension
-
         val installStep = item.installStep
         if (installStep != null) {
             setText(when (installStep) {
@@ -85,6 +87,7 @@ class ExtensionHolder(view: View, override val adapter: ExtensionAdapter) :
                     isActivated = true
                     backgroundTintList = ColorStateList.valueOf(
                         context.getResourceColor(R.attr.colorAccent))
+                    strokeColor = ColorStateList.valueOf(Color.TRANSPARENT)
                     setText(R.string.ext_update)
                 }
                 extension.isObsolete -> {

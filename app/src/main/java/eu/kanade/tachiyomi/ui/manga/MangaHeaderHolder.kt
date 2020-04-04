@@ -21,6 +21,7 @@ import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.invisible
+import eu.kanade.tachiyomi.util.view.resetStrokeColor
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.util.view.visibleIf
@@ -233,13 +234,7 @@ class MangaHeaderHolder(
             )
             strokeColor = ColorStateList.valueOf(Color.TRANSPARENT)
         } else {
-            strokeColor = ColorStateList.valueOf(
-                ColorUtils.setAlphaComponent(
-                    itemView.context.getResourceColor(
-                        R.attr.colorOnSurface
-                    ), 31
-                )
-            )
+            resetStrokeColor()
             backgroundTintList =
                 ContextCompat.getColorStateList(context, android.R.color.transparent)
         }

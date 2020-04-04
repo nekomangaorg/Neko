@@ -11,6 +11,7 @@ import android.view.ViewGroup
 import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
@@ -51,6 +52,7 @@ import kotlin.math.max
 class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
     RecentMangaAdapter.RecentsInterface,
     FlexibleAdapter.OnItemClickListener,
+    FlexibleAdapter.OnItemMoveListener,
     RootSearchInterface {
 
     init {
@@ -101,7 +103,7 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
         val array = view.context.obtainStyledAttributes(attrsArray)
         val appBarHeight = array.getDimensionPixelSize(0, 0)
         array.recycle()
-        scrollViewWith(recycler, skipFirstSnap = true) {
+        scrollViewWith(recycler, skipFirstSnap = true, swipeRefreshLayout = swipe_refresh) {
             headerHeight = it.systemWindowInsetTop + appBarHeight
         }
 
@@ -154,10 +156,30 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
             }
         })
 
+        swipe_refresh.setOnRefreshListener {
+            if (!LibraryUpdateService.isRunning()) {
+                LibraryUpdateService.start(view.context)
+                snack = view.snack(R.string.updating_library) {
+                    anchorView = (activity as? MainActivity)?.bottom_nav
+                }
+            }
+        }
+
         if (showingDownloads) {
             dl_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
         }
         setPadding(dl_bottom_sheet.sheetBehavior?.isHideable == true)
+    }
+
+    override fun onItemMove(fromPosition: Int, toPosition: Int) {
+    }
+
+    override fun shouldMoveItem(fromPosition: Int, toPosition: Int): Boolean {
+        return true
+    }
+
+    override fun onActionStateChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
+        swipe_refresh.isEnabled = actionState != ItemTouchHelper.ACTION_STATE_SWIPE
     }
 
     override fun handleRootBack(): Boolean {
