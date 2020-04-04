@@ -47,7 +47,7 @@ class LibraryItem(
         val parent = adapter.recyclerView
         return if (parent is AutofitRecyclerView) {
             val libraryLayout = libraryLayout.getOrDefault()
-            val isFixedSize = true // fixedSize.getOrDefault()
+            val isFixedSize = fixedSize.getOrDefault()
             if (libraryLayout == 0 || manga.isBlank()) {
                 LibraryListHolder(view, adapter as LibraryCategoryAdapter)
             } else {

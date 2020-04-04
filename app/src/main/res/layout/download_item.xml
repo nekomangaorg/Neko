@@ -18,6 +18,7 @@
             android:layout_height="24dp"
             android:tint="@color/md_white_1000"
             android:layout_gravity="end|center"
+            android:contentDescription="@string/action_cancel"
             android:layout_marginEnd="21dp"
             android:src="@drawable/ic_close_white_24dp" />
     </FrameLayout>
@@ -33,6 +34,7 @@
             android:id="@+id/close_left"
             android:layout_width="24dp"
             android:layout_height="24dp"
+            android:contentDescription="@string/action_cancel"
             android:layout_gravity="start|center"
             android:layout_marginStart="21dp"
             android:tint="@color/md_white_1000"
@@ -57,7 +59,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_drag_handle_black_24dp" />
+            app:srcCompat="@drawable/ic_reorder_grey_24dp" />
 
         <TextView
             android:id="@+id/manga_full_title"
@@ -83,6 +85,7 @@
             android:maxLines="1"
             android:textAppearance="@style/TextAppearance.Regular.Caption"
             app:layout_constraintEnd_toStartOf="@+id/migration_menu"
+            android:layout_marginEnd="16dp"
             app:layout_constraintStart_toStartOf="@+id/manga_full_title"
             app:layout_constraintTop_toBottomOf="@+id/manga_full_title"
             tools:text="Chapter Title" />
@@ -96,6 +99,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/migration_menu"
             app:layout_constraintStart_toEndOf="@+id/reorder"
+            android:layout_marginEnd="16dp"
             app:layout_constraintTop_toBottomOf="@+id/chapter_title" />
 
         <TextView
@@ -106,6 +110,7 @@
             android:maxLines="1"
             android:textAppearance="@style/TextAppearance.Regular.Caption.Hint"
             app:layout_constraintBottom_toBottomOf="@+id/manga_full_title"
+            android:layout_marginEnd="16dp"
             app:layout_constraintEnd_toStartOf="@+id/migration_menu"
             app:layout_constraintTop_toTopOf="@+id/manga_full_title"
             tools:text="(0/10)" />
