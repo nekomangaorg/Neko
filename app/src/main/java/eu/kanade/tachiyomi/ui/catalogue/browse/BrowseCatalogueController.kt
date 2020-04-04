@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.catalogue.browse
 
 import android.content.res.Configuration
 import android.os.Bundle
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -92,11 +93,6 @@ open class BrowseCatalogueController(bundle: Bundle) :
     private var snack: Snackbar? = null
 
     /**
-     * Navigation view containing filter items.
-     */
-    private var navView: CatalogueNavigationView? = null
-
-    /**
      * Recycler view with the list of results.
      */
     private var recycler: RecyclerView? = null
@@ -139,8 +135,6 @@ open class BrowseCatalogueController(bundle: Bundle) :
         // Initialize adapter, scroll listener and recycler views
         adapter = FlexibleAdapter(null, this)
         setupRecycler(view)
-
-        navView?.setFilters(presenter.filterItems)
 
         fab.visibleIf(presenter.sourceFilters.isNotEmpty())
         fab.setOnClickListener { showFilters() }
@@ -334,6 +328,19 @@ open class BrowseCatalogueController(bundle: Bundle) :
             presenter.sourceFilters = newFilters
             sheet.setFilters(presenter.filterItems)
         }
+
+        sheet.onRandomClicked = {
+            sheet.dismiss()
+            showProgressBar()
+            adapter?.clear()
+            presenter.searchRandomManga()
+        }
+        sheet.onFollowsClicked = {
+            sheet.dismiss()
+            adapter?.clear()
+            presenter.restartPager("", followsPager = true)
+        }
+
         sheet.show()
     }
 

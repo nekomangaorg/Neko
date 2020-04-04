@@ -13,6 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="?attr/actionBarSize"
+        android:layout_marginBottom="?attr/actionBarSize"
         android:clipToPadding="false"
         android:fitsSystemWindows="true" />
 
@@ -67,5 +68,42 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+      </androidx.constraintlayout.widget.ConstraintLayout>
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/other_button_layout"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:layout_gravity="bottom"
+        android:paddingBottom="10dp"
+        android:background="@drawable/bg_bottom_sheet_primary"
+        android:backgroundTint="?attr/colorSecondary"
+        android:clickable="true"
+        android:elevation="0dp"
+        android:focusable="true"
+        android:orientation="horizontal">
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/random_manga_btn"
+            style="@style/Theme.Widget.Button.RoundedOutline"
+            android:layout_width="wrap_content"
+            android:textColor="?attr/tabBarIconColor"
+            android:layout_height="match_parent"
+            android:text="@string/action_random_manga"
+            android:layout_marginStart="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/follows_btn"
+            style="@style/Theme.Widget.Button.RoundedOutline"
+            android:layout_width="wrap_content"
+            android:textColor="?attr/tabBarIconColor"
+            android:layout_height="match_parent"
+            android:text="@string/action_follows"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@id/random_manga_btn"
+            app:layout_constraintTop_toTopOf="parent"
+            />
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 </FrameLayout>

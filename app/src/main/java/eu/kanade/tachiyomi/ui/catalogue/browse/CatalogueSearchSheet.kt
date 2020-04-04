@@ -17,6 +17,7 @@ import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.setEdgeToEdge
 import kotlinx.android.synthetic.main.catalogue_drawer_content.*
+import kotlinx.android.synthetic.main.catalogue_drawer_content.view.*
 import uy.kohesive.injekt.injectLazy
 
 class CatalogueSearchSheet(activity: Activity) :
@@ -42,12 +43,18 @@ class CatalogueSearchSheet(activity: Activity) :
 
     var onResetClicked = {}
 
+    var onRandomClicked = {}
+
+    var onFollowsClicked = {}
+
     init {
         val view = activity.layoutInflater.inflate(R.layout.catalogue_drawer_content, null)
         setContentView(view)
         toolbar_title.text = context.getString(R.string.source_search_options)
         dismiss_button.setOnClickListener { dismiss() }
         reset_btn.setOnClickListener { onResetClicked() }
+        follows_btn.setOnClickListener { onFollowsClicked() }
+        random_manga_btn.setOnClickListener { onRandomClicked() }
         /*view.search_layout.setOnApplyWindowInsetsListener { v, insets ->
             view.updatePaddingRelative(bottom = insets.systemWindowInsetBottom)
             insets
