@@ -19,7 +19,7 @@ class Shikimori(private val context: Context, id: Int) : TrackService(id) {
 
     private val api by lazy { ShikimoriApi(client, interceptor) }
 
-    override fun getLogo() = R.drawable.tracker_shikimori
+    override fun getLogo() = R.drawable.ic_tracker_shikimori
 
     override fun getLogoColor() = Color.rgb(40, 40, 40)
 

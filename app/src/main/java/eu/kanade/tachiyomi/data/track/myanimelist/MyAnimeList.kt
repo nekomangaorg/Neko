@@ -17,7 +17,7 @@ class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
 
     override val name = "MyAnimeList"
 
-    override fun getLogo() = R.drawable.tracker_mal
+    override fun getLogo() = R.drawable.ic_tracker_mal
 
     override fun getLogoColor() = Color.rgb(46, 81, 162)
 

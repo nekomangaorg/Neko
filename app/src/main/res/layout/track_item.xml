@@ -34,7 +34,7 @@
                 android:contentDescription="@string/tracking"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                tools:src="@drawable/tracker_mal" />
+                tools:src="@drawable/ic_tracker_mal" />
 
             <ProgressBar
                 android:id="@+id/progress"
