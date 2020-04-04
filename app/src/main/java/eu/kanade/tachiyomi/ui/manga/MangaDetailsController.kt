@@ -72,6 +72,7 @@ import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
+import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
@@ -541,6 +542,7 @@ class MangaDetailsController : BaseController,
                 R.id.action_remove_bookmark -> bookmarkChapters(chapters, false)
                 R.id.action_mark_as_read -> markAsRead(chapters)
                 R.id.action_mark_previous_as_read -> markPreviousAsRead(item)
+            R.id.action_view_comments -> viewComments(chapters[0])
                 R.id.action_mark_as_unread -> markAsUnread(chapters)
             }
             true
@@ -1151,18 +1153,13 @@ class MangaDetailsController : BaseController,
         return false
     }
 
-    fun changeCover() {
-        if (manga?.favorite == true) {
-            val intent = Intent(Intent.ACTION_GET_CONTENT)
-            intent.type = "image/*"
-            startActivityForResult(
-                Intent.createChooser(intent,
-                    resources?.getString(R.string.file_select_cover)),
-                101
-            )
-        } else {
-            activity?.toast(R.string.notification_first_add_to_library)
-        }
+    private fun viewComments(chapter: ChapterItem) {
+        val activity = activity ?: return
+        val url = MdUtil.baseUrl + "/chapter/" + MdUtil.getChapterId(chapter.url) + "/comments"
+        val intent =
+            WebViewActivity.newIntent(activity, presenter.source.id, url, chapter.name)
+        destroyActionModeIfNeeded()
+        startActivity(intent)
     }
 
     override fun onActionStateChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
