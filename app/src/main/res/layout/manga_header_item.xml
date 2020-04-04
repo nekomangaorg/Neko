@@ -356,53 +356,69 @@
         android:layout_marginTop="12dp"
         android:layout_marginEnd="16dp"
         android:text="@string/start_reading"
-        app:layout_constraintBottom_toTopOf="@id/chapters_title"
+        app:layout_constraintBottom_toTopOf="@id/chapter_layout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/less_button"
         tools:text="Continue Reading Chapter 17.1" />
 
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/chapters_title"
-        style="@style/TextAppearance.MaterialComponents.Headline6"
-        android:layout_width="wrap_content"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/chapter_layout"
+        android:layout_width="match_parent"
+        android:layout_marginTop="12dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="18dp"
-        android:layout_marginBottom="12dp"
-        android:maxLines="1"
-        android:text="@string/chapters"
-        android:textSize="17sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/filters_text"
-        app:layout_constraintStart_toStartOf="@id/cover_card"
-        app:layout_constraintTop_toBottomOf="@id/start_reading_button" />
-
-    <ImageView
-        android:id="@+id/filter_button"
-        style="@style/Theme.Widget.CustomImageButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:padding="5dp"
-        android:src="@drawable/ic_filter_list_white_24dp"
-        android:tooltipText="@string/action_filter"
-        app:layout_constraintBottom_toBottomOf="@id/chapters_title"
+        android:tooltipText="@string/action_sort_and_filter"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/chapters_title" />
+        android:background="?selectable_list_drawable"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/start_reading_button">
 
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/filters_text"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="6dp"
-        android:maxLines="2"
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/chapters_title"
+            style="@style/TextAppearance.MaterialComponents.Headline6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp"
+            android:maxLines="1"
+            android:text="@string/chapters"
+            android:textSize="17sp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/filters_text"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <ImageView
+            android:id="@+id/filter_button"
+            android:tint="?colorAccent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="9dp"
+            android:background="@null"
         android:padding="5dp"
+            android:padding="5dp"
+            android:src="@drawable/ic_filter_list_white_24dp"
+        android:tooltipText="@string/action_filter"
+            app:layout_constraintBottom_toBottomOf="@id/chapters_title"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/chapters_title" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/filters_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="6dp"
+            android:maxLines="2"
+            android:padding="5dp"
         android:textAlignment="textEnd"
         android:textColor="?android:textColorHint"
-        app:layout_constraintBottom_toBottomOf="@id/filter_button"
-        app:layout_constraintEnd_toStartOf="@id/filter_button"
-        app:layout_constraintStart_toEndOf="@+id/chapters_title"
-        app:layout_constraintTop_toTopOf="@id/filter_button"
-        tools:text="Read, Unread, Bookmarked, Downloaded, All" />
+            app:layout_constraintBottom_toBottomOf="@id/filter_button"
+            app:layout_constraintEnd_toStartOf="@id/filter_button"
+            app:layout_constraintStart_toEndOf="@+id/chapters_title"
+            app:layout_constraintTop_toTopOf="@id/filter_button"
+            app:layout_constraintBaseline_toBaselineOf="@id/chapters_title"
+            tools:text="Read, Unread, Bookmarked, Downloaded, All" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -27,7 +27,10 @@ interface Manga : SManga {
 
     fun setChapterOrder(order: Int) {
         setFlags(order, SORT_MASK)
+        setFlags(SORT_LOCAL, SORT_SELF_MASK)
     }
+
+    fun setSortToGlobal() = setFlags(SORT_GLOBAL, SORT_SELF_MASK)
 
     private fun setFlags(flag: Int, mask: Int) {
         chapter_flags = chapter_flags and mask.inv() or (flag and mask)
@@ -35,6 +38,15 @@ interface Manga : SManga {
 
     fun sortDescending(): Boolean {
         return chapter_flags and SORT_MASK == SORT_DESC
+    }
+
+    fun sortDescending(defaultDesc: Boolean): Boolean {
+        return if (chapter_flags and SORT_SELF_MASK == SORT_GLOBAL) defaultDesc
+        else sortDescending()
+    }
+
+    fun showChapterTitle(defaultShow: Boolean): Boolean {
+        return chapter_flags and DISPLAY_MASK == DISPLAY_NUMBER
     }
 
     fun mangaType(): Int {
@@ -130,6 +142,14 @@ interface Manga : SManga {
         const val SORT_DESC = 0x00000000
         const val SORT_ASC = 0x00000001
         const val SORT_MASK = 0x00000001
+
+        const val SORT_GLOBAL = 0x00000000
+        const val SORT_LOCAL = 0x00001000
+        const val SORT_SELF_MASK = 0x00001000
+
+        /*const val HIDE_GLOBAL = 0x00000000
+        const val HIDE_LOCAL = 0x00010000
+        const val HIDE_SELF_MASK = 0x00010000*/
 
         // Generic filter that does not filter anything
         const val SHOW_ALL = 0x00000000

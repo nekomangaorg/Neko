@@ -10,8 +10,10 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.view.invisible
 import eu.kanade.tachiyomi.util.view.setBottomEdge
 import eu.kanade.tachiyomi.util.view.setEdgeToEdge
+import eu.kanade.tachiyomi.util.view.visInvisIf
 import eu.kanade.tachiyomi.util.view.visibleIf
 import kotlinx.android.synthetic.main.chapter_sort_bottom_sheet.*
 
@@ -84,16 +86,25 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) : BottomSheetD
         show_all.isChecked = !(show_read.isChecked || show_unread.isChecked ||
             show_download.isChecked || show_bookmark.isChecked)
 
-        sort_group.check(if (presenter.manga.sortDescending()) R.id.sort_newest else
+        var defPref = presenter.globalSort()
+        sort_group.check(if (presenter.manga.sortDescending(defPref)) R.id.sort_newest else
             R.id.sort_oldest)
 
         hide_titles.isChecked = presenter.manga.displayMode != Manga.DISPLAY_NAME
         sort_method_group.check(if (presenter.manga.sorting == Manga.SORTING_SOURCE) R.id.sort_by_source else
             R.id.sort_by_number)
 
+        set_as_default_sort.visInvisIf(defPref != presenter.manga.sortDescending())
         sort_group.setOnCheckedChangeListener { _, checkedId ->
-            presenter.setSortOrder(checkedId == R.id.sort_oldest)
-            dismiss()
+            presenter.setSortOrder(checkedId == R.id.sort_newest)
+            set_as_default_sort.visInvisIf(defPref != presenter.manga.sortDescending())
+        }
+
+        set_as_default_sort.setOnClickListener {
+            val desc = sort_group.checkedRadioButtonId == R.id.sort_newest
+            presenter.setGlobalChapterSort(desc)
+            defPref = desc
+            set_as_default_sort.invisible()
         }
 
         sort_method_group.setOnCheckedChangeListener { _, checkedId ->

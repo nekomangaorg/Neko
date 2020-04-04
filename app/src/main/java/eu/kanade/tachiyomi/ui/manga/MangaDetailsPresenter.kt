@@ -19,6 +19,7 @@ import eu.kanade.tachiyomi.data.download.model.DownloadQueue
 import eu.kanade.tachiyomi.data.library.LibraryServiceListener
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.source.Source
@@ -188,37 +189,27 @@ class MangaDetailsPresenter(
     /**
      * Whether the display only downloaded filter is enabled.
      */
-    fun onlyDownloaded(): Boolean {
-        return manga.downloadedFilter == Manga.SHOW_DOWNLOADED
-    }
+    fun onlyDownloaded() = manga.downloadedFilter == Manga.SHOW_DOWNLOADED
 
     /**
      * Whether the display only downloaded filter is enabled.
      */
-    fun onlyBookmarked(): Boolean {
-        return manga.bookmarkedFilter == Manga.SHOW_BOOKMARKED
-    }
+    fun onlyBookmarked() = manga.bookmarkedFilter == Manga.SHOW_BOOKMARKED
 
     /**
      * Whether the display only unread filter is enabled.
      */
-    fun onlyUnread(): Boolean {
-        return manga.readFilter == Manga.SHOW_UNREAD
-    }
+    fun onlyUnread() = manga.readFilter == Manga.SHOW_UNREAD
 
     /**
      * Whether the display only read filter is enabled.
      */
-    fun onlyRead(): Boolean {
-        return manga.readFilter == Manga.SHOW_READ
-    }
+    fun onlyRead() = manga.readFilter == Manga.SHOW_READ
 
     /**
      * Whether the sorting method is descending or ascending.
      */
-    fun sortDescending(): Boolean {
-        return manga.sortDescending()
-    }
+    fun sortDescending() = manga.sortDescending(globalSort())
 
     /**
      * Applies the view filters to the list of chapters obtained from the database.
@@ -441,8 +432,16 @@ class MangaDetailsPresenter(
     /**
      * Sets the sorting order and requests an UI update.
      */
-    fun setSortOrder(desend: Boolean) {
-        manga.setChapterOrder(if (desend) Manga.SORT_ASC else Manga.SORT_DESC)
+    fun setSortOrder(descend: Boolean) {
+        manga.setChapterOrder(if (descend) Manga.SORT_DESC else Manga.SORT_ASC)
+        asyncUpdateMangaAndChapters()
+    }
+
+    fun globalSort() = preferences.chaptersDescAsDefault().getOrDefault()
+
+    fun setGlobalChapterSort(descend: Boolean) {
+        preferences.chaptersDescAsDefault().set(descend)
+        manga.setSortToGlobal()
         asyncUpdateMangaAndChapters()
     }
 
