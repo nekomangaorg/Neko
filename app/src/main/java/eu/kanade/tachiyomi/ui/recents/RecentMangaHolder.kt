@@ -36,9 +36,9 @@ class RecentMangaHolder(
 
     fun bind(item: RecentMangaItem) {
         download_button.visibility = View.VISIBLE
-        title.text = item.mch.manga.title
+        subtitle.text = item.mch.manga.title
         val isSearch = adapter.delegate.isSearching()
-        subtitle.text = item.chapter.name
+        title.text = item.chapter.name
         val notValidNum = item.mch.chapter.chapter_number <= 0
         body.text = when {
             item.mch.chapter.id == null -> body.context.getString(

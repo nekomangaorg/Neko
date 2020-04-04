@@ -8,7 +8,7 @@ plugins {
     kotlin("android")
     kotlin("android.extensions")
     kotlin("kapt")
-    //id("org.jmailen.kotlinter") version "2.3.1"
+    id("org.jmailen.kotlinter") version "2.3.1"
     id("com.github.zellius.shortcut-helper")
     id("org.jetbrains.kotlin.plugin.serialization")
     id("com.google.gms.google-services") apply false
@@ -200,6 +200,8 @@ dependencies {
     implementation("me.zhanghai.android.systemuihelper:library:1.0.0")
     implementation("com.nightlynexus.viewstatepageradapter:viewstatepageradapter:1.1.0")
     implementation("com.github.mthli:Slice:v1.2")
+    implementation("com.reddit:indicator-fast-scroll:1.2.1")
+
     implementation("com.github.kizitonwose:AndroidTagGroup:1.6.0")
     implementation("com.github.chrisbanes:PhotoView:2.3.0")
     implementation("com.github.carlosesco:DirectionalViewPager:a844dbca0a")
@@ -244,12 +246,12 @@ dependencies {
     implementation("info.debatty:java-string-similarity:1.2.1")
 }
 
-/*tasks.preBuild {
+tasks.preBuild {
     dependsOn(tasks.lintKotlin)
 }
 tasks.lintKotlin {
     dependsOn(tasks.formatKotlin)
-}*/
+}
 
 if (gradle.startParameter.taskRequests.toString().contains("Standard")) {
     apply(mapOf("plugin" to "com.google.gms.google-services"))

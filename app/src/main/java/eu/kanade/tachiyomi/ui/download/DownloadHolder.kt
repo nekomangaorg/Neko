@@ -7,6 +7,7 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.setVectorCompat
+import eu.kanade.tachiyomi.util.view.visibleIf
 import kotlinx.android.synthetic.main.download_item.*
 
 /**
@@ -51,6 +52,7 @@ class DownloadHolder(private val view: View, val adapter: DownloadAdapter) :
             notifyDownloadedPages()
         }
 
+        migration_menu.visibleIf(adapterPosition != 0 || adapterPosition != adapter.itemCount - 1)
         migration_menu.setVectorCompat(
             R.drawable.ic_more_vert_black_24dp, view.context
             .getResourceColor(R.attr.icon_color))
