@@ -20,4 +20,11 @@
         android:title="@string/action_open_in_web_view"
         app:showAsAction="never" />
 
+    <item
+        android:id="@+id/action_settings"
+        android:icon="@drawable/ic_settings_white_24dp"
+        android:title="@string/label_settings"
+        app:showAsAction="never"
+        />
+
 </menu>

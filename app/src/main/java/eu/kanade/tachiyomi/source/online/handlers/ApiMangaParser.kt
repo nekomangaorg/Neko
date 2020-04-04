@@ -28,8 +28,8 @@ class ApiMangaParser(val lang: String) {
             manga.title = MdUtil.cleanString(networkManga.title)
             manga.thumbnail_url = MdUtil.cdnUrl + MdUtil.removeTimeParamUrl(networkManga.cover_url)
             manga.description = MdUtil.cleanDescription(networkManga.description)
-            manga.author = networkManga.author
-            manga.artist = networkManga.artist
+            manga.author = MdUtil.cleanString(networkManga.author)
+            manga.artist = MdUtil.cleanString(networkManga.artist)
             manga.lang_flag = networkManga.lang_flag
 
             networkManga.links?.let {

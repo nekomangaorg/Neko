@@ -222,6 +222,7 @@ open class BrowseCatalogueController(bundle: Bundle) :
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        (activity as? MainActivity)?.hideNavigationIcon()
         inflater.inflate(R.menu.catalogue_list, menu)
 
         // Initialize search menu

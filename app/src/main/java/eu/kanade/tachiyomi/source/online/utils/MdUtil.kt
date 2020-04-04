@@ -15,9 +15,11 @@ class MdUtil {
 
         val descriptionLanguages = arrayListOf("[b][u]French[/u][/b]",
             "[b][u]Russian / Русский[/u][/b]",
+            "[hr][u][b]Russian / Русский:[/b][/u]",
             "German/Deutsch:",
             "[b][u]German / Deutsch[/u][/b]",
             "[b][u]Espa&ntilde;ol / Spanish:[/u][/b]",
+            "[hr][u][b]Spanish / Espa&ntilde;ol:[/b][/u]",
             "[b][u]Italian / Italiano[/u][/b]",
             "[b][u]Portuguese (BR) / Portugu&ecirc;s (BR)[/u][/b]",
             "[b][u]Português / Portuguese[/u][/b]",

@@ -150,12 +150,11 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
                     R.id.nav_library -> setRoot(LibraryListController(), id)
                     R.id.nav_recents -> setRoot(RecentsController(), id)
                     else -> {
-                        val browseCatalogueController = BrowseCatalogueController(source)
                         if (!source.isLogged()) {
                             val dialog = MangadexLoginDialog(source, this)
                             dialog.showDialog(router)
                         } else {
-                            setRoot(browseCatalogueController, id)
+                            setBrowseRoot()
                         }
                     }
                 }
@@ -275,6 +274,15 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
         toolbar.navigationIcon = if (enabled) dismissDrawable else searchDrawable
     }
 
+    fun setNavigationArrow() {
+        window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+        toolbar.navigationIcon = drawerArrow
+    }
+
+    fun hideNavigationIcon(){
+        toolbar.navigationIcon = null
+    }
+
     private fun setNavBarColor(insets: WindowInsets?) {
         if (insets == null) return
         window.navigationBarColor = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O_MR1) {
@@ -341,7 +349,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
      */
     override fun siteLoginDialogClosed(source: Source) {
         if (source.isLogged()) {
-            setRoot(BrowseCatalogueController(source), R.id.nav_catalogues)
+            setBrowseRoot()
         }
     }
 
@@ -349,6 +357,12 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
         if (!handleIntentAction(intent)) {
             super.onNewIntent(intent)
         }
+    }
+
+    fun setBrowseRoot(){
+        toolbar.navigationIcon = null
+        setRoot(BrowseCatalogueController(source), R.id.nav_catalogues)
+
     }
 
     protected open fun handleIntentAction(intent: Intent): Boolean {
@@ -485,8 +499,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
             window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
             toolbar.navigationIcon = searchDrawable
         } else {
-            window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
-            toolbar.navigationIcon = drawerArrow
+            setNavigationArrow()
         }
         drawerArrow?.progress = 1f
 
