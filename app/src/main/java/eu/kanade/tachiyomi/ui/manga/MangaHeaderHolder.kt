@@ -50,9 +50,7 @@ class MangaHeaderHolder(
         manga_genres_tags.setOnTagClickListener {
             adapter.delegate.tagClicked(it)
         }
-        filter_button.setOnClickListener { adapter.delegate.showChapterFilter() }
-        filters_text.setOnClickListener { adapter.delegate.showChapterFilter() }
-        chapters_title.setOnClickListener { adapter.delegate.showChapterFilter() }
+        chapter_layout.setOnClickListener { adapter.delegate.showChapterFilter() }
         webview_button.setOnClickListener { adapter.delegate.openInWebView() }
         share_button.setOnClickListener { adapter.delegate.prepareToShareManga() }
         favorite_button.setOnClickListener {

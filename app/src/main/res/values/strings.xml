@@ -45,6 +45,7 @@
 
     <!-- Actions -->
     <string name="action_filter">Filter</string>
+    <string name="action_sort_and_filter">Sort &amp; Filter</string>
     <string name="action_change_sources">Change sources</string>
     <string name="action_view_options">Display options</string>
     <string name="action_filter_downloaded">Downloaded</string>
@@ -633,6 +634,7 @@
     <!-- Reader activity -->
     <string name="custom_filter">Custom filter</string>
     <string name="set_as_cover">Set as cover</string>
+    <string name="set_as_default">Set as default for all</string>
     <string name="cover_updated">Cover updated</string>
     <string name="chapter_progress">Page: %1$d</string>
     <plurals name="pages_left">

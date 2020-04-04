@@ -138,6 +138,10 @@ inline fun View.visibleIf(show: Boolean) {
     visibility = if (show) View.VISIBLE else View.GONE
 }
 
+inline fun View.visInvisIf(show: Boolean) {
+    visibility = if (show) View.VISIBLE else View.INVISIBLE
+}
+
 /**
  * Returns a TextDrawable determined by input
  *
@@ -354,10 +358,18 @@ fun Controller.scrollViewWith(
             if (router?.backstack?.lastOrNull()
                     ?.controller() == this@scrollViewWith && statusBarHeight > -1 && activity != null && activity!!.appbar.height > 0
             ) {
-                activity!!.appbar.y -= dy
-                activity!!.appbar.y = clamp(
-                    activity!!.appbar.y, -activity!!.appbar.height.toFloat(), 0f
-                )
+                if (!recycler.canScrollVertically(-1)) {
+                    val shortAnimationDuration = resources?.getInteger(
+                        android.R.integer.config_shortAnimTime
+                    ) ?: 0
+                    activity!!.appbar.animate().y(0f).setDuration(shortAnimationDuration.toLong())
+                        .start()
+                } else {
+                    activity!!.appbar.y -= dy
+                    activity!!.appbar.y = clamp(
+                        activity!!.appbar.y, -activity!!.appbar.height.toFloat(), 0f
+                    )
+                }
             }
         }
 

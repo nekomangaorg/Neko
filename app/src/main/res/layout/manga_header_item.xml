@@ -10,11 +10,11 @@
         android:id="@+id/true_backdrop"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="@id/bottom_line"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHeight_min="200dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="@id/bottom_line"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0"
         tools:background="@color/material_red_400" />
 
@@ -42,8 +42,8 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:background="?android:attr/colorBackground"
-        app:layout_constraintTop_toBottomOf="@id/backdrop_gradient"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/backdrop_gradient" />
 
     <View
         android:id="@+id/top_view"
@@ -59,11 +59,11 @@
         android:id="@+id/cover_card"
         android:layout_width="100dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
         android:layout_marginStart="16dp"
+        android:layout_marginTop="12dp"
         android:layout_marginBottom="16dp"
-        app:layout_constraintTop_toBottomOf="@id/top_view"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/top_view"
         app:layout_constraintVertical_bias="1.0">
 
         <ImageView
@@ -72,9 +72,9 @@
             android:layout_height="wrap_content"
             android:adjustViewBounds="true"
             android:clickable="true"
+            android:contentDescription="@string/description_cover"
             android:focusable="true"
             android:foreground="?android:attr/selectableItemBackground"
-            android:contentDescription="@string/description_cover"
             android:maxHeight="300dp"
             tools:background="@color/material_grey_700"
             tools:src="@mipmap/ic_launcher" />
@@ -183,10 +183,10 @@
             android:layout_gravity="center"
             android:layout_marginStart="6dp"
             android:layout_marginEnd="6dp"
-            android:tooltipText="@string/action_open_in_web_view"
-            android:padding="5dp"
             android:contentDescription="@string/action_open_in_web_view"
-            android:src="@drawable/ic_open_in_webview_white_24dp" />
+            android:padding="5dp"
+            android:src="@drawable/ic_open_in_webview_white_24dp"
+            android:tooltipText="@string/action_open_in_web_view" />
 
         <ImageView
             android:id="@+id/share_button"
@@ -196,10 +196,10 @@
             android:layout_gravity="center"
             android:layout_marginStart="0dp"
             android:layout_marginEnd="6dp"
-            android:tooltipText="@string/action_share"
-            android:padding="5dp"
             android:contentDescription="@string/action_share"
-            android:src="@drawable/ic_share_white_24dp" />
+            android:padding="5dp"
+            android:src="@drawable/ic_share_white_24dp"
+            android:tooltipText="@string/action_share" />
     </LinearLayout>
 
     <com.google.android.material.textview.MaterialTextView
@@ -224,16 +224,16 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="4dp"
+        android:layout_marginEnd="16dp"
         android:clickable="true"
         android:focusable="true"
-        android:layout_marginEnd="16dp"
         android:maxLines="3"
         android:textIsSelectable="false"
         app:layout_constraintBottom_toTopOf="@id/manga_genres_tags"
         app:layout_constraintEnd_toEndOf="parent"
-        tools:maxLines="10"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/manga_summary_label"
+        tools:maxLines="10"
         tools:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum." />
 
     <View
@@ -261,18 +261,18 @@
         android:layout_width="1dp"
         android:layout_height="15sp"
         app:layout_constraintEnd_toEndOf="@id/manga_summary"
-        app:layout_constraintTop_toBottomOf="@id/manga_summary"/>
+        app:layout_constraintTop_toBottomOf="@id/manga_summary" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/more_button"
         style="@style/Theme.Widget.Button.TextButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/more"
         android:layout_marginEnd="8dp"
+        android:text="@string/more"
         android:textAlignment="textEnd"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="@id/more_guide"
+        app:layout_constraintEnd_toEndOf="parent"
         app:rippleColor="@null" />
 
     <androidx.constraintlayout.widget.Group
@@ -297,8 +297,6 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="16dp"
         android:visibility="gone"
-        tools:visibility="visible"
-        tools:layout_height="100dp"
         app:atg_backgroundColor="@android:color/transparent"
         app:atg_borderColor="@color/md_blue_A400"
         app:atg_borderStrokeWidth="1dp"
@@ -307,81 +305,97 @@
         app:layout_constraintBottom_toTopOf="@id/less_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/manga_summary" />
+        app:layout_constraintTop_toBottomOf="@id/manga_summary"
+        tools:layout_height="100dp"
+        tools:visibility="visible" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/less_button"
         style="@style/Theme.Widget.Button.TextButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="@string/less"
-        android:visibility="gone"
-        tools:visibility="visible"
-        android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:text="@string/less"
         android:textAlignment="textEnd"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@id/start_reading_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/manga_genres_tags"
-        app:rippleColor="@null" />
+        app:rippleColor="@null"
+        tools:visibility="visible" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/start_reading_button"
         style="@style/Theme.Widget.Button.Primary"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
         android:layout_marginStart="16dp"
+        android:layout_marginTop="12dp"
         android:layout_marginEnd="16dp"
         android:text="@string/start_reading"
-        app:layout_constraintBottom_toTopOf="@id/chapters_title"
+        app:layout_constraintBottom_toTopOf="@id/chapter_layout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/less_button"
         tools:text="Continue Reading Chapter 17.1" />
 
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/chapters_title"
-        style="@style/TextAppearance.MaterialComponents.Headline6"
-        android:layout_width="wrap_content"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/chapter_layout"
+        android:layout_width="match_parent"
+        android:layout_marginTop="12dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="18dp"
-        android:layout_marginBottom="12dp"
-        android:maxLines="1"
-        android:text="@string/chapters"
-        android:textSize="17sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/filters_text"
-        app:layout_constraintStart_toStartOf="@id/cover_card"
-        app:layout_constraintTop_toBottomOf="@id/start_reading_button" />
-
-    <ImageView
-        android:id="@+id/filter_button"
-        style="@style/Theme.Widget.CustomImageButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:padding="5dp"
-        android:tooltipText="@string/action_filter"
-        android:src="@drawable/ic_filter_list_white_24dp"
-        app:layout_constraintBottom_toBottomOf="@id/chapters_title"
+        android:tooltipText="@string/action_sort_and_filter"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/chapters_title" />
+        android:background="?selectable_list_drawable"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/start_reading_button">
 
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/filters_text"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="6dp"
-        android:maxLines="2"
-        android:padding="5dp"
-        android:textColor="?android:textColorHint"
-        android:textAlignment="textEnd"
-        app:layout_constraintBottom_toBottomOf="@id/filter_button"
-        app:layout_constraintEnd_toStartOf="@id/filter_button"
-        app:layout_constraintStart_toEndOf="@+id/chapters_title"
-        app:layout_constraintTop_toTopOf="@id/filter_button"
-        tools:text="Read, Unread, Bookmarked, Downloaded, All" />
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/chapters_title"
+            style="@style/TextAppearance.MaterialComponents.Headline6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp"
+            android:maxLines="1"
+            android:text="@string/chapters"
+            android:textSize="17sp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/filters_text"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <ImageView
+            android:id="@+id/filter_button"
+            android:tint="?colorAccent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="9dp"
+            android:background="@null"
+            android:padding="5dp"
+            android:src="@drawable/ic_filter_list_white_24dp"
+            app:layout_constraintBottom_toBottomOf="@id/chapters_title"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/chapters_title" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/filters_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="6dp"
+            android:maxLines="2"
+            android:padding="5dp"
+            android:textAlignment="textEnd"
+            android:textColor="?android:textColorHint"
+            app:layout_constraintBottom_toBottomOf="@id/filter_button"
+            app:layout_constraintEnd_toStartOf="@id/filter_button"
+            app:layout_constraintStart_toEndOf="@+id/chapters_title"
+            app:layout_constraintTop_toTopOf="@id/filter_button"
+            app:layout_constraintBaseline_toBaselineOf="@id/chapters_title"
+            tools:text="Read, Unread, Bookmarked, Downloaded, All" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

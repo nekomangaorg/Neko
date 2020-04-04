@@ -181,7 +181,7 @@ class PreferencesHelper(val context: Context) {
 
     fun uniformGrid() = rxPrefs.getBoolean(Keys.uniformGrid, true)
 
-    fun libraryAsSingleList() = rxPrefs.getBoolean(Keys.libraryAsSingleList, false)
+    fun chaptersDescAsDefault() = rxPrefs.getBoolean("chapters_desc_as_default", true)
 
     fun downloadBadge() = rxPrefs.getBoolean(Keys.downloadBadge, false)
 

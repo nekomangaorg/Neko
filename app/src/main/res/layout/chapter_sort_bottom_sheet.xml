@@ -20,13 +20,26 @@
             android:paddingTop="12dp"
             app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
-            <com.google.android.material.textview.MaterialTextView
-                style="@style/TextAppearance.MaterialComponents.Headline6"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingStart="16dp"
-                android:paddingEnd="12dp"
-                android:text="@string/action_sort" />
+                android:orientation="horizontal"
+                android:layout_height="wrap_content">
+
+                <com.google.android.material.textview.MaterialTextView
+                    style="@style/TextAppearance.MaterialComponents.Headline6"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="12dp"
+                    android:text="@string/action_sort" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/set_as_default_sort"
+                    style="@style/Theme.Widget.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/set_as_default" />
+            </LinearLayout>
 
             <RadioGroup
                 android:id="@+id/sort_group"
@@ -39,16 +52,16 @@
                 <com.google.android.material.radiobutton.MaterialRadioButton
                     android:id="@+id/sort_newest"
                     android:layout_width="wrap_content"
-                    android:layout_weight="1"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:text="@string/newest_first" />
 
                 <com.google.android.material.radiobutton.MaterialRadioButton
                     android:id="@+id/sort_oldest"
-                    android:layout_marginStart="12dp"
-                    android:layout_weight="1"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
                     android:text="@string/oldest_first" />
             </RadioGroup>
 
