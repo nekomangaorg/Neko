@@ -75,6 +75,7 @@ import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
+import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.ui.library.ChangeMangaCategoriesDialog
 import eu.kanade.tachiyomi.ui.library.LibraryController
@@ -83,6 +84,7 @@ import eu.kanade.tachiyomi.ui.main.SearchActivity
 import eu.kanade.tachiyomi.ui.manga.chapter.ChapterHolder
 import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
 import eu.kanade.tachiyomi.ui.manga.chapter.ChaptersSortBottomSheet
+import eu.kanade.tachiyomi.ui.manga.similar.SimilarController
 import eu.kanade.tachiyomi.ui.manga.track.TrackItem
 import eu.kanade.tachiyomi.ui.manga.track.TrackingBottomSheet
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
@@ -700,6 +702,10 @@ class MangaDetailsController : BaseController,
         }
     }
 
+    override fun openSimilar() {
+        router.pushController(SimilarController(manga!!, source!!).withFadeTransaction())
+    }
+
     override fun openInWebView() {
         val source = presenter.source as? HttpSource ?: return
 
@@ -1058,11 +1064,6 @@ class MangaDetailsController : BaseController,
 
     fun onTrackSearchResults(results: List<TrackSearch>) {
         trackingBottomSheet?.onSearchResults(results)
-    }
-
-    fun refreshTracker() {
-        (recycler.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder)
-            ?.updateTracking()
     }
 
     fun trackRefreshDone() {

@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.ui.catalogue.browse
 
 import android.content.res.Configuration
 import android.os.Bundle
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -56,12 +55,12 @@ import java.util.concurrent.TimeUnit
 /**
  * Controller to manage the catalogues available in the app.
  */
-open class BrowseCatalogueController(bundle: Bundle) :
-        NucleusController<BrowseCataloguePresenter>(bundle),
-        FlexibleAdapter.OnItemClickListener,
-        FlexibleAdapter.OnItemLongClickListener,
-        FlexibleAdapter.EndlessScrollListener,
-        ChangeMangaCategoriesDialog.Listener {
+open class BrowseCatalogueController(bundle: Bundle, val applyInset: Boolean = true) :
+    NucleusController<BrowseCataloguePresenter>(bundle),
+    FlexibleAdapter.OnItemClickListener,
+    FlexibleAdapter.OnItemLongClickListener,
+    FlexibleAdapter.EndlessScrollListener,
+    ChangeMangaCategoriesDialog.Listener {
 
     constructor(
         source: Source,
@@ -130,7 +129,9 @@ open class BrowseCatalogueController(bundle: Bundle) :
 
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
-        view.applyWindowInsetsForRootController(activity!!.bottom_nav)
+        if (applyInset) {
+            view.applyWindowInsetsForRootController(activity!!.bottom_nav)
+        }
 
         // Initialize adapter, scroll listener and recycler views
         adapter = FlexibleAdapter(null, this)
@@ -158,7 +159,8 @@ open class BrowseCatalogueController(bundle: Bundle) :
         var oldPosition = RecyclerView.NO_POSITION
         val oldRecycler = catalogue_view?.getChildAt(1)
         if (oldRecycler is RecyclerView) {
-            oldPosition = (oldRecycler.layoutManager as androidx.recyclerview.widget.LinearLayoutManager).findFirstVisibleItemPosition()
+            oldPosition =
+                (oldRecycler.layoutManager as androidx.recyclerview.widget.LinearLayoutManager).findFirstVisibleItemPosition()
             oldRecycler.adapter = null
 
             catalogue_view?.removeView(oldRecycler)
@@ -168,25 +170,29 @@ open class BrowseCatalogueController(bundle: Bundle) :
             RecyclerView(view.context).apply {
                 id = R.id.recycler
                 layoutManager = LinearLayoutManager(context)
-                layoutParams = RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+                layoutParams = RecyclerView.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
                 addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
             }
         } else {
             (catalogue_view.inflate(R.layout.catalogue_recycler_autofit) as AutofitRecyclerView).apply {
                 numColumnsSubscription = getColumnsPreferenceForCurrentOrientation().asObservable()
-                        .doOnNext { spanCount = it }
-                        .skip(1)
-                        // Set again the adapter to recalculate the covers height
-                        .subscribe { adapter = this@BrowseCatalogueController.adapter }
+                    .doOnNext { spanCount = it }
+                    .skip(1)
+                    // Set again the adapter to recalculate the covers height
+                    .subscribe { adapter = this@BrowseCatalogueController.adapter }
 
-                (layoutManager as androidx.recyclerview.widget.GridLayoutManager).spanSizeLookup = object : androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup() {
-                    override fun getSpanSize(position: Int): Int {
-                        return when (adapter?.getItemViewType(position)) {
-                            R.layout.catalogue_grid_item, null -> 1
-                            else -> spanCount
+                (layoutManager as androidx.recyclerview.widget.GridLayoutManager).spanSizeLookup =
+                    object : androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup() {
+                        override fun getSpanSize(position: Int): Int {
+                            return when (adapter?.getItemViewType(position)) {
+                                R.layout.catalogue_grid_item, null -> 1
+                                else -> spanCount
+                            }
                         }
                     }
-                }
             }
         }
         recycler.clipToPadding = false
@@ -232,7 +238,9 @@ open class BrowseCatalogueController(bundle: Bundle) :
 
         val searchEventsObservable = searchView.queryTextChangeEvents()
             .skip(1)
-            .filter { router.backstack.lastOrNull()?.controller() == this@BrowseCatalogueController }
+            .filter {
+                router.backstack.lastOrNull()?.controller() == this@BrowseCatalogueController
+            }
             .share()
         val writingObservable = searchEventsObservable
             .filter { !it.isSubmitted }
@@ -304,7 +312,8 @@ open class BrowseCatalogueController(bundle: Bundle) :
                     for (j in filter.indices) {
                         if (filter[j] !=
                             ((presenter.sourceFilters[i] as Filter.Group<*>).state[j] as
-                                Filter<*>).state) {
+                                Filter<*>).state
+                        ) {
                             matches = false
                             break
                         }
@@ -347,8 +356,10 @@ open class BrowseCatalogueController(bundle: Bundle) :
     private fun openInWebView() {
         val source = presenter.source as? HttpSource ?: return
         val activity = activity ?: return
-        val intent = WebViewActivity.newIntent(activity, source.id, source.baseUrl, presenter
-            .source.name)
+        val intent = WebViewActivity.newIntent(
+            activity, source.id, source.baseUrl, presenter
+                .source.name
+        )
         startActivity(intent)
     }
 
@@ -396,7 +407,9 @@ open class BrowseCatalogueController(bundle: Bundle) :
         hideProgressBar()
 
         snack?.dismiss()
-        val message = if (error is NoResultsException) catalogue_view.context.getString(R.string.no_results_found) else (error.message ?: "")
+        val message =
+            if (error is NoResultsException) catalogue_view.context.getString(R.string.no_results_found) else (error.message
+                ?: "")
         snack = catalouge_layout?.snack(message, Snackbar.LENGTH_INDEFINITE) {
             setAction(R.string.action_retry) {
                 // If not the first page, show bottom progress bar.
@@ -405,7 +418,7 @@ open class BrowseCatalogueController(bundle: Bundle) :
                     adapter.addScrollableFooterWithDelay(item, 0, true)
                 } else {
                     showProgressBar()
-                presenter.requestNext()
+                    presenter.requestNext()
                 }
             }
         }
@@ -539,7 +552,10 @@ open class BrowseCatalogueController(bundle: Bundle) :
         if (manga.favorite) {
             presenter.changeMangaFavorite(manga)
             adapter?.notifyItemChanged(position)
-            snack = catalouge_layout?.snack(R.string.manga_removed_library, Snackbar.LENGTH_INDEFINITE) {
+            snack = catalouge_layout?.snack(
+                R.string.manga_removed_library,
+                Snackbar.LENGTH_INDEFINITE
+            ) {
                 setAction(R.string.action_undo) {
                     if (!manga.favorite) addManga(manga, position)
                 }
@@ -578,7 +594,7 @@ open class BrowseCatalogueController(bundle: Bundle) :
                 }.toTypedArray()
 
                 ChangeMangaCategoriesDialog(this, listOf(manga), categories, preselected)
-                        .showDialog(router)
+                    .showDialog(router)
             }
         }
     }

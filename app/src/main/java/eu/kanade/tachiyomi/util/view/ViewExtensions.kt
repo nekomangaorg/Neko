@@ -222,7 +222,8 @@ fun View.checkHeightThen(f: () -> Unit) {
     })
 }
 
-fun View.applyWindowInsetsForRootController(bottomNav: View) {
+fun View.applyWindowInsetsForRootController(bottomNav: View?) {
+    bottomNav ?: return
     viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
         override fun onGlobalLayout() {
             if (bottomNav.height > 0) {

@@ -56,6 +56,7 @@ class MangaHeaderHolder(
         filters_text.setOnClickListener { adapter.delegate.showChapterFilter() }
         chapters_title.setOnClickListener { adapter.delegate.showChapterFilter() }
         webview_button.setOnClickListener { adapter.delegate.openInWebView() }
+        similar_button.setOnClickListener { adapter.delegate.openSimilar() }
         share_button.setOnClickListener { adapter.delegate.prepareToShareManga() }
         favorite_button.setOnClickListener {
             adapter.delegate.favoriteManga(false)
@@ -136,20 +137,12 @@ class MangaHeaderHolder(
             ).toLowerCase(Locale.getDefault())
         )
         with(favorite_button) {
-            icon =  DrawableHelper.standardIcon(context, when{
+            setImageDrawable(
+             DrawableHelper.standardIcon24(context, when{
                      item.isLocked -> MaterialDesignDx.Icon.gmf_lock
                      item.manga.favorite -> CommunityMaterial.Icon.cmd_bookmark as IIcon
                      else -> CommunityMaterial.Icon.cmd_bookmark_plus_outline as IIcon
-                 })
-
-            text = itemView.resources.getString(
-                when {
-                    item.isLocked -> R.string.unlock
-                    manga.favorite -> R.string.in_library
-                    else -> R.string.add_to_library
-                }
-            )
-            checked(!item.isLocked && manga.favorite)
+                 }))
         }
         true_backdrop.setBackgroundColor(
             adapter.delegate.coverColor()
@@ -159,18 +152,19 @@ class MangaHeaderHolder(
         val tracked = presenter.isTracked() && !item.isLocked
 
         with(track_button) {
-            visibleIf(presenter.hasTrackers())
-            text = itemView.context.getString(
-                if (tracked) R.string.action_filter_tracked
-                else R.string.tracking
-            )
-            icon = DrawableHelper.standardIcon(itemView.context, CommunityMaterial.Icon.cmd_check)
-
-            checked(tracked)
+            setImageDrawable( DrawableHelper.standardIcon32(itemView.context, MaterialDesignDx.Icon.gmf_art_track))
         }
 
-        with(similar_layout){
+        with(similar_button){
             visibleIf(presenter.similarEnabled())
+            setImageDrawable( DrawableHelper.standardIcon24(itemView.context, MaterialDesignDx.Icon.gmf_account_tree))
+        }
+
+        with(webview_button){
+            setImageDrawable(DrawableHelper.standardIcon24(itemView.context, CommunityMaterial.Icon2.cmd_web))
+        }
+        with(share_button){
+            setImageDrawable(DrawableHelper.standardIcon24(itemView.context, MaterialDesignDx.Icon.gmf_share))
         }
 
         with(start_reading_button) {
@@ -254,16 +248,6 @@ class MangaHeaderHolder(
 
     fun setBackDrop(color: Int) {
         true_backdrop.setBackgroundColor(color)
-    }
-
-    fun updateTracking() {
-        val presenter = adapter.delegate.mangaPresenter()
-        val tracked = presenter.isTracked()
-        with(track_button) {
-            text = itemView.context.getString(if (tracked) R.string.action_filter_tracked
-            else R.string.tracking)
-            checked(tracked)
-        }
     }
 
     fun collapse() {

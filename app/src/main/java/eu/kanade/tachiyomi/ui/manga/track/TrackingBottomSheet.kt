@@ -76,7 +76,6 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) : Bott
     fun onNextTrackings(trackings: List<TrackItem>) {
         onRefreshDone()
         adapter?.items = trackings
-        controller.refreshTracker()
     }
 
     fun onSearchResults(results: List<TrackSearch>) {
@@ -119,6 +118,9 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) : Bott
 
     override fun onSetClick(position: Int) {
         val item = adapter?.getItem(position) ?: return
+        item.service.isMdList()?: return
+
+
         TrackSearchDialog(this, item.service, item.track != null).showDialog(
             controller.router,
             TAG_SEARCH_CONTROLLER

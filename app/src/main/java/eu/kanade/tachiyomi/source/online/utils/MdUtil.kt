@@ -26,6 +26,7 @@ class MdUtil {
             "[b][u]Portuguese (BR) / Portugu&ecirc;s (BR)[/u][/b]",
             "[b][u]Português / Portuguese[/u][/b]",
             "[b][u]Portuguese / Portugu[/u][/b]",
+            "[b][u]Portuguese / Portugu&ecirc;s:[/u][/b]",
             "[b] Portuguese (BR) / Portugu & ecirc; s (BR): [/ b]",
             "French - Français:",
             "[b][u]French[/u][/b]",
