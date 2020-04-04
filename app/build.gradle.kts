@@ -32,7 +32,7 @@ android {
     buildToolsVersion("29.0.2")
 
     defaultConfig {
-        minSdkVersion(23)
+        minSdkVersion(24)
         targetSdkVersion(29)
         applicationId = "tachiyomi.mangadex"
         versionCode = 51
@@ -149,9 +149,9 @@ dependencies {
     implementation("org.jsoup:jsoup:1.12.2")
 
 //Icons
-    implementation("com.mikepenz:iconics-core:4.0.2@aar")
-    implementation("com.mikepenz:iconics-views:4.0.2@aar")
-    implementation("com.mikepenz:community-material-typeface:3.7.95.4-kotlin@aar")
+    implementation("com.mikepenz:iconics-core:5.0.1@aar")
+    implementation("com.mikepenz:iconics-views:5.0.1@aar")
+    implementation("com.mikepenz:community-material-typeface:5.0.45.1-kotlin@aar")
     implementation("com.mikepenz:material-design-icons-dx-typeface:5.0.1.0-kotlin@aar")
 
 // Job scheduling

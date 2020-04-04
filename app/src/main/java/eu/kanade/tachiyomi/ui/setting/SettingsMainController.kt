@@ -42,10 +42,10 @@ class SettingsMainController : SettingsController() {
         }
         preference {
             iconDrawable =
-                IconicsDrawable(context)
-                    .icon(CommunityMaterial.Icon.cmd_google_chrome)
-                    .colorInt(tintColor)
-                    .sizeDp(size)
+                IconicsDrawable(context, CommunityMaterial.Icon.cmd_google_chrome).apply {
+                    colorInt = tintColor
+                    sizeDp = size
+                }
 
             titleRes = R.string.pref_category_site_specific
             onClick { navigateTo(SettingsSiteController()) }
@@ -71,10 +71,10 @@ class SettingsMainController : SettingsController() {
         }
         preference {
             iconDrawable =
-                IconicsDrawable(context)
-                    .icon(CommunityMaterial.Icon.cmd_chart_histogram)
-                    .colorInt(tintColor)
-                    .sizeDp(size)
+                IconicsDrawable(context, CommunityMaterial.Icon.cmd_chart_histogram).apply {
+                    colorInt = tintColor
+                    sizeDp = size
+                }
 
             titleRes = R.string.pref_category_similar
             onClick { navigateTo(SettingsSimilarController()) }

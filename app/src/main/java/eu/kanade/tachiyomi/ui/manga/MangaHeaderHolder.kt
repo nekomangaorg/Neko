@@ -11,6 +11,9 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.signature.ObjectKey
 import com.google.android.material.button.MaterialButton
+import com.mikepenz.iconics.typeface.IIcon
+import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
+import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
@@ -18,6 +21,7 @@ import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.view.DrawableHelper
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.invisible
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
@@ -132,13 +136,12 @@ class MangaHeaderHolder(
             ).toLowerCase(Locale.getDefault())
         )
         with(favorite_button) {
-            icon = ContextCompat.getDrawable(
-                itemView.context, when {
-                    item.isLocked -> R.drawable.ic_lock_white_24dp
-                    manga.favorite -> R.drawable.ic_bookmark_white_24dp
-                    else -> R.drawable.ic_add_to_library_24dp
-                }
-            )
+            icon =  DrawableHelper.standardIcon(context, when{
+                     item.isLocked -> MaterialDesignDx.Icon.gmf_lock
+                     item.manga.favorite -> CommunityMaterial.Icon.cmd_bookmark as IIcon
+                     else -> CommunityMaterial.Icon.cmd_bookmark_plus_outline as IIcon
+                 })
+
             text = itemView.resources.getString(
                 when {
                     item.isLocked -> R.string.unlock
@@ -161,11 +164,8 @@ class MangaHeaderHolder(
                 if (tracked) R.string.action_filter_tracked
                 else R.string.tracking
             )
+            icon = DrawableHelper.standardIcon(itemView.context, CommunityMaterial.Icon.cmd_check)
 
-            icon = ContextCompat.getDrawable(
-                itemView.context,
-                if (tracked) R.drawable.ic_check_white_24dp else R.drawable.ic_sync_black_24dp
-            )
             checked(tracked)
         }
 
@@ -206,7 +206,10 @@ class MangaHeaderHolder(
                 SManga.ONGOING -> R.string.ongoing
                 SManga.COMPLETED -> R.string.completed
                 SManga.LICENSED -> R.string.licensed
-                else -> R.string.unknown_status
+                SManga.PUBLICATION_COMPLETE -> R.string.publication_complete
+                SManga.HIATUS -> R.string.hiatus
+                SManga.CANCELLED -> R.string.cancelled
+                else -> R.string.unknown
             }
         ))
         manga_source.text = presenter.source.toString()
@@ -259,9 +262,6 @@ class MangaHeaderHolder(
         with(track_button) {
             text = itemView.context.getString(if (tracked) R.string.action_filter_tracked
             else R.string.tracking)
-
-            icon = ContextCompat.getDrawable(itemView.context, if (tracked) R.drawable
-                .ic_check_white_24dp else R.drawable.ic_sync_black_24dp)
             checked(tracked)
         }
     }

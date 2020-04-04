@@ -161,11 +161,12 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/bottom_line">
 
+
         <com.google.android.material.button.MaterialButton
             android:id="@+id/favorite_button"
             style="@style/Theme.Widget.Button.RoundedOutline"
             android:text="@string/add_to_library"
-            app:icon="@drawable/ic_add_to_library_24dp" />
+            app:icon="@drawable/ic_neko" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/track_button"

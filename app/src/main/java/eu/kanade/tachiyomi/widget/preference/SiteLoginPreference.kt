@@ -38,10 +38,10 @@ class SiteLoginPreference @JvmOverloads constructor(
             ContextCompat.getColor(context, R.color.material_blue_grey_300)
 
         holder.itemView.login
-                .setImageDrawable(IconicsDrawable(context)
-                        .icon(CommunityMaterial.Icon.cmd_account_circle)
-                        .sizeDp(24)
-                        .colorInt(color))
+                .setImageDrawable(IconicsDrawable(context,CommunityMaterial.Icon.cmd_account_circle).apply {
+                    sizeDp = 24
+                    colorInt = color
+                })
 
         loginFrame.visibility = View.VISIBLE
         loginFrame.setOnClickListener {
