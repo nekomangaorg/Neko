@@ -137,7 +137,7 @@
     <string name="action_restore">Restore</string>
     <string name="action_webview_back">Back</string>
     <string name="action_webview_forward">Forward</string>
-    <string name="action_auto_check_extensions">Auto-check for updates</string>
+    <string name="action_auto_check_extensions">Notify for extension updates</string>
     <string name="action_search_manually">Search manually</string>
     <string name="action_migrate_now">Migrate now</string>
     <string name="action_copy_now">Copy now</string>

@@ -1,33 +1,35 @@
 package eu.kanade.tachiyomi.ui.recent_updates
 
+import android.app.Activity
+import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.view.ActionMode
 import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.jakewharton.rxbinding.support.v4.widget.refreshes
-import com.jakewharton.rxbinding.support.v7.widget.scrollStateChanges
+import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.snackbar.BaseTransientBottomBar
+import com.google.android.material.snackbar.Snackbar
 import eu.davidea.flexibleadapter.FlexibleAdapter
-import eu.davidea.flexibleadapter.SelectableAdapter
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.notification.Notifications
-import eu.kanade.tachiyomi.ui.base.controller.NucleusController
+import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
+import eu.kanade.tachiyomi.ui.manga.chapter.BaseChapterAdapter
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.system.notificationManager
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.snack
+import kotlinx.android.synthetic.main.download_bottom_sheet.*
 import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.android.synthetic.main.recent_chapters_controller.*
+import kotlinx.android.synthetic.main.recent_chapters_controller.empty_view
 import timber.log.Timber
 
 /**
@@ -35,21 +37,10 @@ import timber.log.Timber
  * Uses [R.layout.recent_chapters_controller].
  * UI related actions should be called from here.
  */
-class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
-        ActionMode.Callback,
-        FlexibleAdapter.OnItemClickListener,
-        FlexibleAdapter.OnItemLongClickListener,
-        FlexibleAdapter.OnUpdateListener,
-        ConfirmDeleteChaptersDialog.Listener,
-        RecentChaptersAdapter.OnCoverClickListener {
-
-    init {
-        setHasOptionsMenu(true)
-    }
-    /**
-     * Action mode for multiple selection.
-     */
-    private var actionMode: ActionMode? = null
+class RecentChaptersController(bundle: Bundle? = null) : BaseController(bundle),
+    FlexibleAdapter.OnItemClickListener, FlexibleAdapter.OnUpdateListener,
+    FlexibleAdapter.OnItemMoveListener,
+    RecentChaptersAdapter.OnCoverClickListener, BaseChapterAdapter.DownloadInterface {
 
     /**
      * Adapter containing the recent chapters.
@@ -57,14 +48,12 @@ class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
     var adapter: RecentChaptersAdapter? = null
         private set
 
-    private var query = ""
+    private var presenter = RecentChaptersPresenter(this)
+    private var snack: Snackbar? = null
+    private var lastChapterId: Long? = null
 
     override fun getTitle(): String? {
         return resources?.getString(R.string.label_recent_updates)
-    }
-
-    override fun createPresenter(): RecentChaptersPresenter {
-        return RecentChaptersPresenter()
     }
 
     override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
@@ -88,14 +77,14 @@ class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
         adapter = RecentChaptersAdapter(this@RecentChaptersController)
         recycler.adapter = adapter
 
-        recycler.scrollStateChanges().subscribeUntilDestroy {
-            // Disable swipe refresh when view is not at the top
-            val firstPos = layoutManager.findFirstCompletelyVisibleItemPosition()
-            swipe_refresh.isEnabled = firstPos <= 0
-        }
+        adapter?.isSwipeEnabled = true
+        adapter?.itemTouchHelperCallback?.setSwipeFlags(
+            ItemTouchHelper.LEFT
+        )
+        if (presenter.chapters.isNotEmpty()) adapter?.updateDataSet(presenter.chapters.toList())
 
         swipe_refresh.setDistanceToTriggerSync((2 * 64 * view.resources.displayMetrics.density).toInt())
-        swipe_refresh.refreshes().subscribeUntilDestroy {
+        swipe_refresh.setOnRefreshListener {
             if (!LibraryUpdateService.isRunning()) {
                 LibraryUpdateService.start(view.context)
                 view.snack(R.string.updating_library) {
@@ -107,23 +96,31 @@ class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
             swipe_refresh.isRefreshing = false
         }
 
-        scrollViewWith(recycler, swipeRefreshLayout = swipe_refresh)
+        scrollViewWith(recycler, swipeRefreshLayout = swipe_refresh, padBottom = true)
+
+        presenter.onCreate()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        presenter.onDestroy()
     }
 
     override fun onDestroyView(view: View) {
         adapter = null
-        actionMode = null
+        snack = null
         super.onDestroyView(view)
     }
 
-    /**
-     * Returns selected chapters
-     * @return list of selected chapters
-     */
-    fun getSelectedChapters(): List<RecentChapterItem> {
-        val adapter = adapter ?: return emptyList()
-        return adapter.selectedPositions.mapNotNull { adapter.getItem(it) as? RecentChapterItem }
+    override fun onActivityResumed(activity: Activity) {
+        super.onActivityResumed(activity)
+        if (view != null) {
+            refresh()
+            dl_bottom_sheet?.update()
+        }
     }
+
+    fun refresh() = presenter.getUpdates()
 
     /**
      * Called when item in list is clicked
@@ -134,34 +131,8 @@ class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
 
         // Get item from position
         val item = adapter.getItem(position) as? RecentChapterItem ?: return false
-        if (actionMode != null && adapter.mode == SelectableAdapter.Mode.MULTI) {
-            toggleSelection(position)
-            return true
-        } else {
-            openChapter(item)
-            return false
-        }
-    }
-
-    /**
-     * Called when item in list is long clicked
-     * @param position position of clicked item
-     */
-    override fun onItemLongClick(position: Int) {
-        if (actionMode == null)
-            actionMode = (activity as AppCompatActivity).startSupportActionMode(this)
-
-        toggleSelection(position)
-    }
-
-    /**
-     * Called to toggle selection
-     * @param position position of selected item
-     */
-    private fun toggleSelection(position: Int) {
-        val adapter = adapter ?: return
-        adapter.toggleSelection(position)
-        actionMode?.invalidate()
+        openChapter(item)
+        return false
     }
 
     /**
@@ -175,21 +146,18 @@ class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
     }
 
     /**
-     * Download selected items
-     * @param chapters list of selected [RecentChapter]s
-     */
-    fun downloadChapters(chapters: List<RecentChapterItem>) {
-        destroyActionModeIfNeeded()
-        presenter.downloadChapters(chapters)
-    }
-
-    /**
      * Populate adapter with chapters
      * @param chapters list of [Any]
      */
     fun onNextRecentChapters(chapters: List<RecentChapterItem>) {
-        destroyActionModeIfNeeded()
         adapter?.setItems(chapters)
+    }
+
+    fun updateChapterDownload(download: Download) {
+        if (view == null) return
+        val id = download.chapter.id ?: return
+        val holder = recycler.findViewHolderForItemId(id) as? RecentChapterHolder ?: return
+        holder.notifyStatus(download.status, download.progress)
     }
 
     override fun onUpdateEmptyView(size: Int) {
@@ -200,12 +168,19 @@ class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
         }
     }
 
+    override fun onItemMove(fromPosition: Int, toPosition: Int) { }
+    override fun shouldMoveItem(fromPosition: Int, toPosition: Int) = true
+
+    override fun onActionStateChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
+        swipe_refresh.isEnabled = actionState != ItemTouchHelper.ACTION_STATE_SWIPE
+    }
+
     /**
      * Update download status of chapter
      * @param download [Download] object containing download progress.
      */
     fun onChapterStatusChange(download: Download) {
-        getHolder(download)?.notifyStatus(download.status)
+        getHolder(download)?.notifyStatus(download.status, download.progress)
     }
 
     /**
@@ -218,49 +193,54 @@ class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
 
     /**
      * Mark chapter as read
-     * @param chapters list of chapters
+     * @param position position of chapter item
      */
-    fun markAsRead(chapters: List<RecentChapterItem>) {
-        presenter.markChapterRead(chapters, true)
-        if (presenter.preferences.removeAfterMarkedAsRead()) {
-            deleteChapters(chapters)
+    fun toggleMarkAsRead(position: Int) {
+        val item = adapter?.getItem(position) as? RecentChapterItem ?: return
+        val chapter = item.chapter
+        val lastRead = chapter.last_page_read
+        val pagesLeft = chapter.pages_left
+        val read = item.chapter.read
+        lastChapterId = chapter.id
+        presenter.markChapterRead(item, !read)
+        if (!read) {
+            snack = view?.snack(R.string.marked_as_read, Snackbar.LENGTH_INDEFINITE) {
+                var undoing = false
+                setAction(R.string.action_undo) {
+                    presenter.markChapterRead(item, !item.chapter.read, lastRead, pagesLeft)
+                    undoing = true
+                }
+                addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
+                    override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+                        super.onDismissed(transientBottomBar, event)
+                        if (!undoing && presenter.preferences.removeAfterMarkedAsRead()) {
+                            lastChapterId = chapter.id
+                            presenter.deleteChapter(chapter, item.manga)
+                        }
+                    }
+                })
+            }
+            (activity as? MainActivity)?.setUndoSnackBar(snack)
+        }
+        // presenter.markChapterRead(item, !item.chapter.read)
+    }
+
+    override fun downloadChapter(position: Int) {
+        val view = view ?: return
+        val item = adapter?.getItem(position) as? RecentChapterItem ?: return
+        val chapter = item.chapter
+        val manga = item.manga
+        if (item.status != Download.NOT_DOWNLOADED && item.status != Download.ERROR) {
+            presenter.deleteChapter(chapter, manga)
+        } else {
+            if (item.status == Download.ERROR) DownloadService.start(view.context)
+            else presenter.downloadChapters(listOf(item))
         }
     }
 
-    override fun deleteChapters(chaptersToDelete: List<RecentChapterItem>) {
-        destroyActionModeIfNeeded()
-        presenter.deleteChapters(chaptersToDelete)
-    }
-
-    /**
-     * Destory [ActionMode] if it's shown
-     */
-    private fun destroyActionModeIfNeeded() {
-        actionMode?.finish()
-    }
-
-    /**
-     * Mark chapter as unread
-     * @param chapters list of selected [RecentChapter]
-     */
-    fun markAsUnread(chapters: List<RecentChapterItem>) {
-        presenter.markChapterRead(chapters, false)
-    }
-
-    /**
-     * Start downloading chapter
-     * @param chapter selected chapter with manga
-     */
-    fun downloadChapter(chapter: RecentChapterItem) {
-        presenter.downloadChapters(listOf(chapter))
-    }
-
-    /**
-     * Start deleting chapter
-     * @param chapter selected chapter with manga
-     */
-    fun deleteChapter(chapter: RecentChapterItem) {
-        presenter.deleteChapters(listOf(chapter))
+    override fun startDownloadNow(position: Int) {
+        val chapter = (adapter?.getItem(position) as? RecentChapterItem)?.chapter ?: return
+        presenter.startDownloadChapterNow(chapter)
     }
 
     override fun onCoverClick(position: Int) {
@@ -285,70 +265,5 @@ class RecentChaptersController : NucleusController<RecentChaptersPresenter>(),
      */
     fun onChaptersDeletedError(error: Throwable) {
         Timber.e(error)
-    }
-
-    /**
-     * Called when ActionMode created.
-     * @param mode the ActionMode object
-     * @param menu menu object of ActionMode
-     */
-    override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
-        mode.menuInflater.inflate(R.menu.chapter_recent_selection, menu)
-        adapter?.mode = SelectableAdapter.Mode.MULTI
-        return true
-    }
-
-    override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
-        val count = adapter?.selectedItemCount ?: 0
-        if (count == 0) {
-            // Destroy action mode if there are no items selected.
-            destroyActionModeIfNeeded()
-        } else {
-            mode.title = resources?.getString(R.string.label_selected, count)
-        }
-        return false
-    }
-
-    /**
-     * Called when ActionMode item clicked
-     * @param mode the ActionMode object
-     * @param item item from ActionMode.
-     */
-    override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.action_mark_as_read -> markAsRead(getSelectedChapters())
-            R.id.action_mark_as_unread -> markAsUnread(getSelectedChapters())
-            R.id.action_download -> downloadChapters(getSelectedChapters())
-            R.id.action_delete -> ConfirmDeleteChaptersDialog(this, getSelectedChapters())
-                    .showDialog(router)
-            else -> return false
-        }
-        return true
-    }
-
-    /**
-     * Called when ActionMode destroyed
-     * @param mode the ActionMode object
-     */
-    override fun onDestroyActionMode(mode: ActionMode?) {
-        adapter?.mode = SelectableAdapter.Mode.IDLE
-        adapter?.clearSelection()
-        actionMode = null
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.recent_updates, menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.action_sort -> {
-                /*router.setRoot(
-                    RecentlyReadController().withFadeTransaction().tag(R.id.nav_recents.toString()))
-                Injekt.get<PreferencesHelper>().showRecentUpdates().set(false)
-                (activity as? MainActivity)?.updateRecentsIcon()*/
-            }
-        }
-        return super.onOptionsItemSelected(item)
     }
 }
