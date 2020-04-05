@@ -82,7 +82,7 @@ class RecentlyReadController(bundle: Bundle? = null) : BaseController(bundle),
         recycler.setHasFixedSize(true)
         recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
         resetProgressItem()
-        scrollViewWith(recycler)
+        scrollViewWith(recycler, padBottom = true)
 
         if (recentItems != null)
             adapter?.updateDataSet(recentItems!!.toList())
