@@ -551,11 +551,11 @@ open class LibraryController(
                     selectAllRelay.call(it)
                 }
             }
-         /*   R.id.action_sync_to_dex -> {
-                presenter.syncMangaToDex(selectedMangas.toList())
-                destroyActionModeIfNeeded()
-                applicationContext?.toast("Adding to mangadex follows")
-            }*/
+            /*   R.id.action_sync_to_dex -> {
+                   presenter.syncMangaToDex(selectedMangas.toList())
+                   destroyActionModeIfNeeded()
+                   applicationContext?.toast("Adding to mangadex follows")
+               }*/
 
             /*R.id.action_to_top, R.id.action_to_bottom -> {
                 adapter?.categories?.getOrNull(library_pager.currentItem)?.id?.let {

@@ -8,7 +8,6 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsAdapter
 import eu.kanade.tachiyomi.util.view.gone
-import eu.kanade.tachiyomi.util.view.visibleIf
 import kotlinx.android.synthetic.main.chapters_item.*
 import kotlinx.android.synthetic.main.download_button.*
 import java.util.Date

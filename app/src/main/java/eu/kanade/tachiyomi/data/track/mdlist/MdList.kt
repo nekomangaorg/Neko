@@ -30,13 +30,14 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
         return FollowStatus.values().map { it.int }
     }
 
-    override fun getStatus(status: Int): String = context.resources.getStringArray(R.array.follows_options).asList()[status]
+    override fun getStatus(status: Int): String =
+        context.resources.getStringArray(R.array.follows_options).asList()[status]
 
     override fun getScoreList() = IntRange(0, 10).map(Int::toString)
 
     override fun displayScore(track: Track) = track.score.toInt().toString()
 
-   override suspend fun update(track: Track): Track {
+    override suspend fun update(track: Track): Track {
         if (track.total_chapters != 0 && track.last_chapter_read == track.total_chapters) {
             track.status = FollowStatus.COMPLETED.int
         }

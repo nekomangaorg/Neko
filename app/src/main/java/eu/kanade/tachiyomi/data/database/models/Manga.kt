@@ -1,7 +1,12 @@
 package eu.kanade.tachiyomi.data.database.models
 
+import eu.kanade.tachiyomi.data.external.AnimePlanet
+import eu.kanade.tachiyomi.data.external.Dex
+import eu.kanade.tachiyomi.data.external.ExternalLink
+import eu.kanade.tachiyomi.data.external.MangaUpdates
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -55,28 +60,33 @@ interface Manga : SManga {
         return if (currentTags?.any
             { tag ->
                 tag.startsWith("japanese") || tag == "manga"
-            } == true)
+            } == true
+        )
             TYPE_MANGA
         else if (currentTags?.any
             { tag ->
                 tag.startsWith("english") || tag == "comic"
-            } == true || isComicSource(sourceName))
+            } == true || isComicSource(sourceName)
+        )
             TYPE_COMIC
         else if (currentTags?.any
             { tag ->
                 tag.startsWith("chinese") || tag == "manhua"
             } == true ||
-            sourceName.contains("manhua", true))
+            sourceName.contains("manhua", true)
+        )
             TYPE_MANHUA
         else if (currentTags?.any
             { tag ->
                 tag == "long strip" || tag == "manhwa"
-            } == true || isWebtoonSource(sourceName))
+            } == true || isWebtoonSource(sourceName)
+        )
             TYPE_MANHWA
         else if (currentTags?.any
             { tag ->
                 tag.startsWith("webtoon")
-            } == true)
+            } == true
+        )
             TYPE_WEBTOON
         else TYPE_MANGA
     }
@@ -89,14 +99,16 @@ interface Manga : SManga {
                 tag == "long strip" || tag == "manhwa" ||
                     tag.contains("webtoon")
             } == true || isWebtoonSource(sourceName) ||
-            sourceName.contains("tapastic", true))
+            sourceName.contains("tapastic", true)
+        )
             ReaderActivity.WEBTOON
         else if (currentTags?.any
             { tag ->
                 tag.startsWith("chinese") || tag == "manhua" ||
                     tag.startsWith("english") || tag == "comic"
             } == true || isComicSource(sourceName) ||
-            sourceName.contains("manhua", true))
+            sourceName.contains("manhua", true)
+        )
             ReaderActivity.LEFT_TO_RIGHT
         else 0
     }
@@ -114,6 +126,20 @@ interface Manga : SManga {
             sourceName.contains("cyanide", true) ||
             sourceName.contains("xkcd", true) ||
             sourceName.contains("tapastic", true)
+    }
+
+    fun getExternalLinks(): List<ExternalLink> {
+        val list = mutableListOf<ExternalLink>()
+        list.add(Dex(MdUtil.getMangaId(url)))
+
+        anime_planet_id?.let {
+            list.add(AnimePlanet(it))
+        }
+
+        manga_updates_id?.let {
+            list.add(MangaUpdates(it))
+        }
+        return list.toList()
     }
 
     // Used to display the chapter's title one way or another

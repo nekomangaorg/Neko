@@ -365,11 +365,11 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/chapter_layout"
         android:layout_width="match_parent"
-        android:layout_marginTop="12dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:background="?selectable_list_drawable"
         android:tooltipText="@string/action_sort_and_filter"
         app:layout_constraintEnd_toEndOf="parent"
-        android:background="?selectable_list_drawable"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/start_reading_button">
 
@@ -384,22 +384,21 @@
             android:maxLines="1"
             android:text="@string/chapters"
             android:textSize="17sp"
-            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/filters_text"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
             android:id="@+id/filter_button"
-            android:tint="?colorAccent"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="9dp"
             android:background="@null"
-        android:padding="5dp"
             android:padding="5dp"
             android:src="@drawable/ic_filter_list_white_24dp"
-        android:tooltipText="@string/action_filter"
+            android:tint="?colorAccent"
+            android:tooltipText="@string/action_filter"
             app:layout_constraintBottom_toBottomOf="@id/chapters_title"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/chapters_title" />
@@ -412,13 +411,13 @@
             android:layout_marginEnd="6dp"
             android:maxLines="2"
             android:padding="5dp"
-        android:textAlignment="textEnd"
-        android:textColor="?android:textColorHint"
+            android:textAlignment="textEnd"
+            android:textColor="?android:textColorHint"
+            app:layout_constraintBaseline_toBaselineOf="@id/chapters_title"
             app:layout_constraintBottom_toBottomOf="@id/filter_button"
             app:layout_constraintEnd_toStartOf="@id/filter_button"
             app:layout_constraintStart_toEndOf="@+id/chapters_title"
             app:layout_constraintTop_toTopOf="@id/filter_button"
-            app:layout_constraintBaseline_toBaselineOf="@id/chapters_title"
             tools:text="Read, Unread, Bookmarked, Downloaded, All" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

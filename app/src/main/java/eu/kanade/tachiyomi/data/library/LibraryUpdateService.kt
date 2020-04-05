@@ -35,7 +35,6 @@ import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
@@ -44,14 +43,9 @@ import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.notification
 import eu.kanade.tachiyomi.util.system.notificationManager
 import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import rx.Observable
-import rx.Subscription
-import rx.schedulers.Schedulers
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -240,11 +234,10 @@ class LibraryUpdateService(
             stopSelf(startId)
         }
         job = GlobalScope.launch(handler) {
-            when(target){
+            when (target) {
             Target.SYNC_FOLLOWS -> syncFollows()
             Target.CHAPTERS -> updateChaptersJob(mangaToAdd)
-            Target.TRACKING ->  updateTrackings(mangaToAdd)
-
+            Target.TRACKING -> updateTrackings(mangaToAdd)
             }
         }
         job?.invokeOnCompletion { stopSelf(startId) }
@@ -347,7 +340,6 @@ class LibraryUpdateService(
         // may don't like it and they could ban the user.
         downloadManager.downloadChapters(manga, dbChapters, false)
     }
-
 
     /**
      * Method that updates the metadata of the connected tracking services. It's called in a

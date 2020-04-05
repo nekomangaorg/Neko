@@ -267,5 +267,4 @@ class PreferencesHelper(val context: Context) {
     fun r18() = prefs.getString(Keys.showR18, "0")
 
     fun imageServer() = prefs.getString(Keys.imageServer, Mangadex.SERVER_PREF_ENTRY_VALUES.first())
-
 }

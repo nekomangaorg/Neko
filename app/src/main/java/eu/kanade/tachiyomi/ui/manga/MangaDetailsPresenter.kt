@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.ui.manga
 
 import android.app.Application
 import android.graphics.Bitmap
-import android.net.Uri
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -25,6 +24,7 @@ import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
+import eu.kanade.tachiyomi.ui.manga.external.ExternalItem
 import eu.kanade.tachiyomi.ui.manga.track.TrackItem
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
@@ -65,6 +65,8 @@ class MangaDetailsPresenter(
 
     var trackList: List<TrackItem> = emptyList()
 
+    var externalLinksList: List<ExternalItem> = emptyList()
+
     var chapters: List<ChapterItem> = emptyList()
         private set
 
@@ -75,6 +77,7 @@ class MangaDetailsPresenter(
         headerItem.isLocked = isLockedFromSearch
         downloadManager.addListener(this)
         LibraryUpdateService.setListener(this)
+        fetchExternalLinks()
         tracks = db.getTracks(manga).executeAsBlocking()
         if (!manga.initialized) {
             isLoading = true
@@ -611,6 +614,14 @@ class MangaDetailsPresenter(
         scope.launch {
             trackList = loggedServices.map { service ->
                 TrackItem(tracks.find { it.sync_id == service.id }, service)
+            }
+        }
+    }
+
+    private fun fetchExternalLinks() {
+        scope.launch {
+            externalLinksList = manga.getExternalLinks().map { external ->
+                ExternalItem(external)
             }
         }
     }

@@ -73,7 +73,6 @@ class MangaDetailsAdapter(
         fun coverColor(): Int?
         fun mangaPresenter(): MangaDetailsPresenter
         fun prepareToShareManga()
-        fun openInWebView()
         fun openSimilar()
         fun startDownloadRange(position: Int)
         fun readNextChapter()
@@ -84,5 +83,6 @@ class MangaDetailsAdapter(
         fun copyToClipboard(content: String, label: Int)
         fun zoomImageFromThumb(thumbView: View)
         fun showTrackingSheet()
+        fun showExternalSheet()
     }
 }

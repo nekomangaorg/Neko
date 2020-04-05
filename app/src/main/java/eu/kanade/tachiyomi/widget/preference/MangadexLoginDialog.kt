@@ -88,9 +88,9 @@ class MangadexLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle
 
     override fun onDialogClosed() {
         super.onDialogClosed()
-        if(activity != null){
+        if (activity != null) {
             (activity as? Listener)?.siteLoginDialogClosed(source)
-        }else{
+        } else {
         (targetController as? Listener)?.siteLoginDialogClosed(source)
         }
     }

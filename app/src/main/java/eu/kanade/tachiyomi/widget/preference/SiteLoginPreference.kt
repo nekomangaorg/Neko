@@ -38,7 +38,7 @@ class SiteLoginPreference @JvmOverloads constructor(
             ContextCompat.getColor(context, R.color.material_blue_grey_300)
 
         holder.itemView.login
-                .setImageDrawable(IconicsDrawable(context,CommunityMaterial.Icon.cmd_account_circle).apply {
+                .setImageDrawable(IconicsDrawable(context, CommunityMaterial.Icon.cmd_account_circle).apply {
                     sizeDp = 24
                     colorInt = color
                 })

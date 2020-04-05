@@ -53,7 +53,8 @@ class MangaHeaderHolder(
             adapter.delegate.tagClicked(it)
         }
         chapter_layout.setOnClickListener { adapter.delegate.showChapterFilter() }
-        webview_button.setOnClickListener { adapter.delegate.openInWebView() }
+        if (startExpanded)
+            expandDesc()
         similar_button.setOnClickListener { adapter.delegate.openSimilar() }
         share_button.setOnClickListener { adapter.delegate.prepareToShareManga() }
         favorite_button.setOnClickListener {
@@ -64,15 +65,23 @@ class MangaHeaderHolder(
             true
         }
         manga_full_title.setOnLongClickListener {
-            adapter.delegate.copyToClipboard(manga_full_title.text.toString(), R.string.manga_info_full_title_label)
+            adapter.delegate.copyToClipboard(
+                manga_full_title.text.toString(),
+                R.string.manga_info_full_title_label
+            )
             true
         }
         manga_author.setOnLongClickListener {
-            adapter.delegate.copyToClipboard(manga_author.text.toString(), R.string.manga_info_author_label)
+            adapter.delegate.copyToClipboard(
+                manga_author.text.toString(),
+                R.string.manga_info_author_label
+            )
             true
         }
         manga_cover.setOnClickListener { adapter.delegate.zoomImageFromThumb(cover_card) }
         track_button.setOnClickListener { adapter.delegate.showTrackingSheet() }
+        webview_button.setOnClickListener { adapter.delegate.showExternalSheet() }
+
         if (startExpanded)
             expandDesc()
     }
@@ -136,11 +145,14 @@ class MangaHeaderHolder(
         )
         with(favorite_button) {
             setImageDrawable(
-             DrawableHelper.standardIcon24(context, when{
-                     item.isLocked -> MaterialDesignDx.Icon.gmf_lock
-                     item.manga.favorite -> CommunityMaterial.Icon.cmd_bookmark as IIcon
-                     else -> CommunityMaterial.Icon.cmd_bookmark_plus_outline as IIcon
-                 }))
+                DrawableHelper.standardIcon24(
+                    context, when {
+                        item.isLocked -> MaterialDesignDx.Icon.gmf_lock
+                        item.manga.favorite -> CommunityMaterial.Icon.cmd_bookmark as IIcon
+                        else -> CommunityMaterial.Icon.cmd_bookmark_plus_outline as IIcon
+                    }
+                )
+            )
         }
         true_backdrop.setBackgroundColor(
             adapter.delegate.coverColor()
@@ -150,19 +162,39 @@ class MangaHeaderHolder(
         val tracked = presenter.isTracked() && !item.isLocked
 
         with(track_button) {
-            setImageDrawable( DrawableHelper.standardIcon32(itemView.context, MaterialDesignDx.Icon.gmf_art_track))
+            setImageDrawable(
+                DrawableHelper.standardIcon32(
+                    itemView.context,
+                    MaterialDesignDx.Icon.gmf_art_track
+                )
+            )
         }
 
-        with(similar_button){
+        with(similar_button) {
             visibleIf(presenter.similarEnabled())
-            setImageDrawable( DrawableHelper.standardIcon24(itemView.context, MaterialDesignDx.Icon.gmf_account_tree))
+            setImageDrawable(
+                DrawableHelper.standardIcon24(
+                    itemView.context,
+                    MaterialDesignDx.Icon.gmf_account_tree
+                )
+            )
         }
 
-        with(webview_button){
-            setImageDrawable(DrawableHelper.standardIcon24(itemView.context, CommunityMaterial.Icon2.cmd_web))
+        with(webview_button) {
+            setImageDrawable(
+                DrawableHelper.standardIcon24(
+                    itemView.context,
+                    CommunityMaterial.Icon2.cmd_web
+                )
+            )
         }
-        with(share_button){
-            setImageDrawable(DrawableHelper.standardIcon24(itemView.context, MaterialDesignDx.Icon.gmf_share))
+        with(share_button) {
+            setImageDrawable(
+                DrawableHelper.standardIcon24(
+                    itemView.context,
+                    MaterialDesignDx.Icon.gmf_share
+                )
+            )
         }
 
         with(start_reading_button) {

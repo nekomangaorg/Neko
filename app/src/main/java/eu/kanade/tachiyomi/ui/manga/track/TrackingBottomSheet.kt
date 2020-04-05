@@ -118,8 +118,7 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) : Bott
 
     override fun onSetClick(position: Int) {
         val item = adapter?.getItem(position) ?: return
-        item.service.isMdList()?: return
-
+        item.service.isMdList() ?: return
 
         TrackSearchDialog(this, item.service, item.track != null).showDialog(
             controller.router,

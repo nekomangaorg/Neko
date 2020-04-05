@@ -279,7 +279,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
         toolbar.navigationIcon = drawerArrow
     }
 
-    fun hideNavigationIcon(){
+    fun hideNavigationIcon() {
         toolbar.navigationIcon = null
     }
 
@@ -331,7 +331,6 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
         super.onSupportActionModeFinished(mode)
     }
 
-
     override fun onResume() {
         super.onResume()
         // setting in case someone comes from the search activity to main
@@ -359,10 +358,9 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
         }
     }
 
-    fun setBrowseRoot(){
+    fun setBrowseRoot() {
         toolbar.navigationIcon = null
         setRoot(BrowseCatalogueController(source), R.id.nav_catalogues)
-
     }
 
     protected open fun handleIntentAction(intent: Intent): Boolean {

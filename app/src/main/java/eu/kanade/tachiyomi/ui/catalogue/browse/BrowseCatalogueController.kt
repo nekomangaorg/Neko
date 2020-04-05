@@ -55,7 +55,7 @@ import java.util.concurrent.TimeUnit
 /**
  * Controller to manage the catalogues available in the app.
  */
-open class BrowseCatalogueController(bundle: Bundle, val applyInset: Boolean = true) :
+open class BrowseCatalogueController(bundle: Bundle) :
     NucleusController<BrowseCataloguePresenter>(bundle),
     FlexibleAdapter.OnItemClickListener,
     FlexibleAdapter.OnItemLongClickListener,
@@ -64,16 +64,19 @@ open class BrowseCatalogueController(bundle: Bundle, val applyInset: Boolean = t
 
     constructor(
         source: Source,
-        searchQuery: String? = null
+        searchQuery: String? = null,
+        applyInset: Boolean = true
     ) : this(Bundle().apply {
         putLong(SOURCE_ID_KEY, source.id)
+        putBoolean(APPLY_INSET, applyInset)
 
         if (searchQuery != null)
             putString(SEARCH_QUERY_KEY, searchQuery)
     })
 
-    constructor(source: Source) : this(Bundle().apply {
+    constructor(source: Source, applyInset: Boolean = true) : this(Bundle().apply {
         putLong(SOURCE_ID_KEY, source.id)
+        putBoolean(APPLY_INSET, applyInset)
     })
 
     /**
@@ -129,7 +132,7 @@ open class BrowseCatalogueController(bundle: Bundle, val applyInset: Boolean = t
 
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
-        if (applyInset) {
+        if (bundle?.getBoolean(APPLY_INSET) == true) {
             view.applyWindowInsetsForRootController(activity!!.bottom_nav)
         }
 
@@ -612,7 +615,7 @@ open class BrowseCatalogueController(bundle: Bundle, val applyInset: Boolean = t
 
     protected companion object {
         const val SOURCE_ID_KEY = "sourceId"
-
         const val SEARCH_QUERY_KEY = "searchQuery"
+        const val APPLY_INSET = "applyInset"
     }
 }

@@ -24,7 +24,6 @@ import eu.kanade.tachiyomi.ui.reader.loader.DownloadPageLoader
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
-import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import kotlinx.coroutines.Dispatchers
@@ -436,7 +435,7 @@ class ReaderPresenter(
      */
     fun setMangaViewer(viewer: Int) {
         val manga = manga ?: return
-        manga.viewer = when{
+        manga.viewer = when {
             viewer == ReaderActivity.WEBTOON && manga.isWebtoon() -> ReaderActivity.WEBTOON_WITHOUT_MARGIN
             else -> viewer
         }
