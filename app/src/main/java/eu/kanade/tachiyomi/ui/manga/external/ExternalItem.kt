@@ -22,8 +22,8 @@ open class ExternalItem(val externalLink: ExternalLink) : AbstractItem<ExternalI
     }
 
     class ViewHolder(view: View) : FastAdapter.ViewHolder<ExternalItem>(view) {
-        var logo = view.findViewById<ImageView>(R.id.external_logo)
-        var container = view.findViewById<View>(R.id.external_logo_container)
+        var logo = view.findViewById<ImageView>(R.id.external_logo)!!
+        var container = view.findViewById<View>(R.id.external_logo_container)!!
         override fun bindView(item: ExternalItem, payloads: List<Any>) {
             container.setBackgroundColor(item.externalLink.getLogoColor())
             logo.setImageResource(item.externalLink.getLogo())

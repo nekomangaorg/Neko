@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.ui.manga.external
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
-import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.mikepenz.fastadapter.FastAdapter
@@ -57,9 +56,6 @@ class ExternalBottomSheet(private val controller: MangaDetailsController) : Bott
         super.onCreate(savedInstanceState)
         val itemAdapter = ItemAdapter<ExternalItem>()
         val fastAdapter = FastAdapter.with(itemAdapter)
-
-        val gridLayoutManager = GridLayoutManager(activity, 3)
-        external_recycler.layoutManager = gridLayoutManager
         external_recycler.adapter = fastAdapter
         external_recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
         itemAdapter.add(presenter.externalLinksList)

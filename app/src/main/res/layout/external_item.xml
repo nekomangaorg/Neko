@@ -17,10 +17,8 @@
 
         <FrameLayout
             android:id="@+id/external_logo_container"
-            android:layout_width="96dp"
-            android:layout_height="96dp"
-            android:clickable="true"
-            android:focusable="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:foreground="?selectableItemBackgroundBorderless"
             android:gravity="center"
             android:orientation="vertical"
@@ -33,11 +31,12 @@
 
             <ImageView
                 android:id="@+id/external_logo"
-                android:layout_width="72dp"
-                android:layout_height="72dp"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
                 android:layout_gravity="center"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
+                tools:ignore="ContentDescription"
                 tools:src="@drawable/tracker_mal" />
 
         </FrameLayout>
