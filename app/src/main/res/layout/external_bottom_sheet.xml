@@ -15,6 +15,5 @@
         android:layout_gravity="center"
         app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
         app:spanCount="3"
-        android:paddingTop="5dp"
         tools:listitem="@layout/external_item" />
 </FrameLayout>
