@@ -11,7 +11,8 @@ plugins {
     id("org.jmailen.kotlinter") version "2.3.1"
     id("com.github.zellius.shortcut-helper")
     id("org.jetbrains.kotlin.plugin.serialization")
-    id("com.google.gms.google-services") apply false
+    id("com.google.firebase.crashlytics")
+    id("com.google.gms.google-services") //apply false
 }
 
 fun getBuildTime() = DateTimeFormatter.ISO_DATE_TIME.format(LocalDateTime.now(ZoneOffset.UTC))
@@ -108,6 +109,8 @@ dependencies {
     implementation("androidx.multidex:multidex:2.0.1")
 
     implementation("com.google.firebase:firebase-core:17.2.3")
+    implementation("com.google.firebase:firebase-analytics:17.3.0")
+    implementation("com.google.firebase:firebase-crashlytics:17.0.0-beta03")
 
     val lifecycleVersion = "2.1.0"
     implementation("androidx.lifecycle:lifecycle-extensions:$lifecycleVersion")
@@ -131,7 +134,6 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:$retrofitVersion")
     implementation("com.squareup.retrofit2:converter-gson:$retrofitVersion")
     implementation("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:0.5.0")
-
 
 // JSON
     implementation("com.google.code.gson:gson:2.8.6")
@@ -238,11 +240,6 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion")
 
-    //Crash reports
-    val acraVersion = "5.5.0"
-    implementation("ch.acra:acra-http:$acraVersion")
-    implementation("ch.acra:acra-mail:$acraVersion")
-
     // Text distance
     implementation("info.debatty:java-string-similarity:1.2.1")
 }
@@ -254,6 +251,7 @@ tasks.lintKotlin {
     dependsOn(tasks.formatKotlin)
 }
 
+/*
 if (gradle.startParameter.taskRequests.toString().contains("Standard")) {
     apply(mapOf("plugin" to "com.google.gms.google-services"))
-}
+}*/

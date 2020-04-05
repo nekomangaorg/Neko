@@ -20,37 +20,11 @@ import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.similar.SimilarUpdateJob
 import eu.kanade.tachiyomi.data.updater.UpdaterJob
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
-import org.acra.ACRA
-import org.acra.ReportField
-import org.acra.annotation.AcraCore
-import org.acra.annotation.AcraHttpSender
-import org.acra.data.StringFormat
-import org.acra.sender.HttpSender
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.InjektScope
 import uy.kohesive.injekt.injectLazy
 import uy.kohesive.injekt.registry.default.DefaultRegistrar
-
-@AcraCore(
-    buildConfigClass = BuildConfig::class,
-    reportFormat = StringFormat.JSON,
-    excludeMatchingSharedPreferencesKeys = arrayOf(".*username.*", ".*password.*", ".*token.*"),
-    reportContent = arrayOf(
-        ReportField.ANDROID_VERSION,
-        ReportField.APP_VERSION_CODE,
-        ReportField.APP_VERSION_NAME,
-        ReportField.PACKAGE_NAME,
-        ReportField.REPORT_ID,
-        ReportField.STACK_TRACE,
-        ReportField.USER_APP_START_DATE,
-        ReportField.USER_CRASH_DATE
-    )
-)
-@AcraHttpSender(
-    uri = "https://collector.tracepot.com/0ebf5ef8",
-    httpMethod = HttpSender.Method.PUT
-)
 
 open class App : Application(), LifecycleObserver {
 
@@ -61,7 +35,6 @@ open class App : Application(), LifecycleObserver {
         Injekt = InjektScope(DefaultRegistrar())
         Injekt.importModule(AppModule(this))
 
-        setupAcra()
         setupJobManager()
         setupNotificationChannels()
 
@@ -87,10 +60,6 @@ open class App : Application(), LifecycleObserver {
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-    }
-
-    protected open fun setupAcra() {
-        ACRA.init(this)
     }
 
     protected open fun setupJobManager() {
