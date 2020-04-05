@@ -264,9 +264,6 @@
         <item quantity="other">After %1$s minutes</item>
     </plurals>
     <string name="library_search_hint">Search title, tags, source</string>
-    <string name="pref_refresh_covers_too">Automatically refresh covers</string>
-    <string name="pref_refresh_covers_too_summary">Refresh covers in library as well
-        when updating library (overwrites local covers)</string>
 
     <string name="pref_category_library_migration">Migration</string>
     <string name="pref_keep_category_sorting">Change category sorting when moving</string>

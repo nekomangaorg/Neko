@@ -165,13 +165,6 @@ class SettingsLibraryController : SettingsController() {
                 summaryRes = R.string.pref_library_update_prioritization_summary
             }
 
-            switchPreference {
-                key = Keys.refreshCoversToo
-                titleRes = R.string.pref_refresh_covers_too
-                summaryRes = R.string.pref_refresh_covers_too_summary
-                defaultValue = true
-            }
-
             multiSelectListPreferenceMat(activity) {
                 key = Keys.libraryUpdateCategories
                 titleRes = R.string.pref_library_update_categories
