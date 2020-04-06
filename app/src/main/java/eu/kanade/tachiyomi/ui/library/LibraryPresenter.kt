@@ -328,10 +328,8 @@ class LibraryPresenter(
                     val manga2LastRead = lastReadManga[i2.manga.id!!] ?: lastReadManga.size
                     manga1LastRead.compareTo(manga2LastRead)
                 }
-                sortingMode == LibrarySort.LATEST_CHAPTER -> i2.manga.last_update.compareTo(
-                    i1
-                        .manga.last_update
-                )
+                sortingMode == LibrarySort.LATEST_CHAPTER -> i2.manga.last_update.compareTo(i1
+                    .manga.last_update)
                 sortingMode == LibrarySort.UNREAD ->
                     when {
                         i1.manga.unread == i2.manga.unread -> 0
@@ -348,7 +346,7 @@ class LibraryPresenter(
                     manga1TotalChapter.compareTo(mange2TotalChapter)
                 }
                 sortingMode == LibrarySort.DATE_ADDED -> {
-                    i1.manga.date_added.compareTo(i2.manga.date_added)
+                    i2.manga.date_added.compareTo(i1.manga.date_added)
                 }
                 else -> 0
             }
@@ -424,13 +422,13 @@ class LibraryPresenter(
                             i2.chapterCount = totalChapters!![i2.manga.id!!] ?: 0
                             manga1TotalChapter.compareTo(mange2TotalChapter)
                         }
-                        LibrarySort.DATE_ADDED -> i1.manga.date_added.compareTo(i2.manga.date_added)
+                        LibrarySort.DATE_ADDED -> i2.manga.date_added.compareTo(i1.manga.date_added)
                         else -> sortAlphabetical(i1, i2)
                     }
                     if (!category.isAscending()) sort *= -1
                     sort
                 }
-                category?.mangaOrder?.isEmpty() == false -> {
+                category.mangaOrder.isNotEmpty() -> {
                     val order = category.mangaOrder
                     val index1 = order.indexOf(i1.manga.id!!)
                     val index2 = order.indexOf(i2.manga.id!!)
@@ -444,7 +442,7 @@ class LibraryPresenter(
                 else -> 0
             }
             if (compare == 0) {
-                if (category?.isAscending() != false) sortAlphabetical(i1, i2)
+                if (category.isAscending()) sortAlphabetical(i1, i2)
                 else sortAlphabetical(i2, i1)
             } else compare
         } else {
@@ -471,60 +469,43 @@ class LibraryPresenter(
         val showCategories = !preferences.hideCategories().getOrDefault()
         val unreadBadgeType = preferences.unreadBadgeType().getOrDefault()
         var libraryManga = db.getLibraryMangas().executeAsBlocking()
-        val singleList = true
+        val seekPref = preferences.alwaysShowSeeker()
         if (!showCategories)
             libraryManga = libraryManga.distinctBy { it.id }
-        /*val libraryMap = libraryManga.map { manga ->
-            LibraryItem(manga, libraryLayout).apply { unreadType = unreadBadgeType }
-        }.groupBy {
-            if (showCategories) it.manga.category else 0
-        }*/
-        val categoryAll = Category.createAll(
-            context,
+        val categoryAll = Category.createAll(context,
             preferences.librarySortingMode().getOrDefault(),
-            preferences.librarySortingAscending().getOrDefault()
-        )
-        val catItemAll = LibraryHeaderItem({ categoryAll }, -1)
+            preferences.librarySortingAscending().getOrDefault())
+        val catItemAll = LibraryHeaderItem({ categoryAll }, -1, seekPref)
         val libraryMap =
-            if (!singleList) {
-                libraryManga.map { manga ->
-                    LibraryItem(manga, libraryLayout, preferences.uniformGrid(), null).apply {
-                        unreadType =
-                            unreadBadgeType
-                    }
-                }.groupBy {
-                    if (showCategories) it.manga.category else -1
+            libraryManga.groupBy { manga ->
+                if (showCategories) manga.category else -1
+                // LibraryItem(manga, libraryLayout).apply { unreadType = unreadBadgeType }
+            }.map { entry ->
+                val categoryItem =
+                    if (!showCategories) catItemAll else
+                        (LibraryHeaderItem({ getCategory(it) }, entry.key, seekPref))
+                entry.value.map {
+                    LibraryItem(
+                        it, libraryLayout, preferences.uniformGrid(), seekPref, categoryItem
+                    ).apply { unreadType = unreadBadgeType }
                 }
-            } else {
-                libraryManga.groupBy { manga ->
-                    if (showCategories) manga.category else -1
-                    // LibraryItem(manga, libraryLayout).apply { unreadType = unreadBadgeType }
-                }.map { entry ->
-                    val categoryItem =
-                        if (!showCategories) catItemAll else
-                            (LibraryHeaderItem({ getCategory(it) }, entry.key))
-                    entry.value.map {
-                        LibraryItem(
-                            it, libraryLayout, preferences.uniformGrid(), categoryItem
-                        ).apply { unreadType = unreadBadgeType }
-                    }
-                }.map {
-                    val cat = if (showCategories) it.firstOrNull()?.manga?.category ?: 0 else -1
-                    cat to it
-                    // LibraryItem(manga, libraryLayout).apply { unreadType = unreadBadgeType }
-                }.toMap()
-            }.toMutableMap()
+            }.map {
+                val cat = if (showCategories) it.firstOrNull()?.manga?.category ?: 0 else -1
+                cat to it
+                // LibraryItem(manga, libraryLayout).apply { unreadType = unreadBadgeType }
+            }.toMap().toMutableMap()
 
         if (showCategories) {
             categories.forEach { category ->
                 if (category.id ?: 0 <= 0 && !libraryMap.containsKey(category.id)) {
                     val headerItem =
-                        LibraryHeaderItem({ getCategory(category.id!!) }, category.id!!)
+                        LibraryHeaderItem({ getCategory(category.id!!) }, category.id!!, seekPref)
                     libraryMap[category.id!!] = listOf(
                         LibraryItem(
                             LibraryManga.createBlank(category.id!!),
                             libraryLayout,
                             preferences.uniformGrid(),
+                            preferences.alwaysShowSeeker(),
                             headerItem
                         )
                     )
@@ -567,26 +548,22 @@ class LibraryPresenter(
         }
     }
 
-    suspend fun updateView(
+    private suspend fun updateView(
         categories: List<Category>,
         mangaMap: LibraryMap,
         freshStart: Boolean =
             false
     ) {
-        if (view !is LibraryListController) {
-            view.onNextLibraryUpdate(categories, mangaMap, freshStart)
-        } else {
-            val mangaList = withContext(Dispatchers.IO) {
-                val list = mutableListOf<LibraryItem>()
-                for (element in mangaMap.toSortedMap(compareBy { entry ->
-                    categories.find { it.id == entry }?.order ?: -1
-                })) {
-                    list.addAll(element.value)
-                }
-                list
+        val mangaList = withContext(Dispatchers.IO) {
+            val list = mutableListOf<LibraryItem>()
+            for (element in mangaMap.toSortedMap(compareBy { entry ->
+                categories.find { it.id == entry }?.order ?: -1
+            })) {
+                list.addAll(element.value)
             }
-            view.onNextLibraryUpdate(mangaList, freshStart)
+            list
         }
+        view.onNextLibraryUpdate(mangaList, freshStart)
     }
 
     fun getList(): List<LibraryItem> {
@@ -601,19 +578,13 @@ class LibraryPresenter(
 
     fun updateViewBlocking() {
         val mangaMap = currentMangaMap ?: return
-        if (view !is LibraryListController) {
-            if (mangaMap.values.firstOrNull()?.firstOrNull()?.header != null)
-                return
-            view.onNextLibraryUpdate(categories, mangaMap, true)
-        } else {
-            val list = mutableListOf<LibraryItem>()
-            for (element in mangaMap.toSortedMap(compareBy { entry ->
-                categories.find { it.id == entry }?.order ?: -1
-            })) {
-                list.addAll(element.value)
-            }
-            view.onNextLibraryUpdate(list, true)
+        val list = mutableListOf<LibraryItem>()
+        for (element in mangaMap.toSortedMap(compareBy { entry ->
+            categories.find { it.id == entry }?.order ?: -1
+        })) {
+            list.addAll(element.value)
         }
+        view.onNextLibraryUpdate(list, true)
     }
 
     /**

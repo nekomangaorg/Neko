@@ -160,8 +160,8 @@ class MangaDetailsController : BaseController,
     val fromCatalogue = args.getBoolean(FROM_CATALOGUE_EXTRA, false)
     var coverDrawable: Drawable? = null
     private var trackingBottomSheet: TrackingBottomSheet? = null
-    private var externalBottomSheet: ExternalBottomSheet? = null
     private var startingDLChapterPos: Int? = null
+    private var externalBottomSheet: ExternalBottomSheet? = null
     var refreshTracker: Int? = null
 
     /**
@@ -532,27 +532,9 @@ class MangaDetailsController : BaseController,
         // Inflate our menu resource into the PopupMenu's Menu
         popup.menuInflater.inflate(R.menu.chapters_mat_single, popup.menu)
 
-        // Hide bookmark if bookmark
-        popup.menu.findItem(R.id.action_bookmark).isVisible = false // !item.bookmark
-        popup.menu.findItem(R.id.action_remove_bookmark).isVisible = false // item.bookmark
-
-        // Hide mark as unread when the chapter is unread
-//        if (!item.read && item.last_page_read == 0) {
-        popup.menu.findItem(R.id.action_mark_as_unread).isVisible = false
-//        }
-
-        // Hide mark as read when the chapter is read
-//        if (item.read) {
-        popup.menu.findItem(R.id.action_mark_as_read).isVisible = false
-//        }
-
-        // Set a listener so we are notified if a menu item is clicked
         popup.setOnMenuItemClickListener { menuItem ->
             val chapters = listOf(item)
             when (menuItem.itemId) {
-                R.id.action_bookmark -> bookmarkChapters(chapters, true)
-                R.id.action_remove_bookmark -> bookmarkChapters(chapters, false)
-                R.id.action_mark_as_read -> markAsRead(chapters)
                 R.id.action_mark_previous_as_read -> markPreviousAsRead(item)
                 R.id.action_view_comments -> viewComments(chapters[0])
                 R.id.action_mark_as_unread -> markAsUnread(chapters)
@@ -613,11 +595,11 @@ class MangaDetailsController : BaseController,
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.manga_details, menu)
         menu.findItem(R.id.action_download).isVisible = !presenter.isLockedFromSearch
-        menu.findItem(R.id.action_add_to_home_screen).isVisible = !presenter.isLockedFromSearch
         menu.findItem(R.id.action_mark_all_as_read).isVisible =
             presenter.getNextUnreadChapter() != null && !presenter.isLockedFromSearch
         menu.findItem(R.id.action_mark_all_as_unread).isVisible =
             !presenter.allUnread() && !presenter.isLockedFromSearch
+        menu.findItem(R.id.action_mark_all_as_unread).isVisible = presenter.isTracked()
         val iconPrimary = view?.context?.getResourceColor(android.R.attr.textColorPrimary)
             ?: Color.BLACK
         menu.findItem(R.id.action_download).icon?.mutate()?.setTint(iconPrimary)
@@ -648,20 +630,17 @@ class MangaDetailsController : BaseController,
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.action_add_to_home_screen -> addToHomeScreen()
+            R.id.action_refresh_tracking -> presenter.refreshTrackers()
             R.id.action_mark_all_as_read -> {
-                MaterialDialog(view!!.context)
-                    .message(R.string.mark_all_as_read_message)
+                MaterialDialog(view!!.context).message(R.string.mark_all_as_read_message)
                     .positiveButton(R.string.action_mark_as_read) {
                         markAsRead(presenter.chapters)
-                    }
-                    .negativeButton(android.R.string.cancel)
-                    .show()
+                    }.negativeButton(android.R.string.cancel).show()
             }
             R.id.action_mark_all_as_unread -> markAsUnread(presenter.chapters)
-            R.id.download_next, R.id.download_next_5,
-            R.id.download_custom, R.id.download_unread, R.id.download_all
-            -> downloadChapters(item.itemId)
+            R.id.download_next, R.id.download_next_5, R.id.download_custom, R.id.download_unread, R.id.download_all -> downloadChapters(
+                item.itemId
+            )
             else -> return super.onOptionsItemSelected(item)
         }
         return true
@@ -677,7 +656,6 @@ class MangaDetailsController : BaseController,
                 override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
                     presenter.shareManga(resource)
                 }
-
                 override fun onLoadCleared(placeholder: Drawable?) {}
 
                 override fun onLoadFailed(errorDrawable: Drawable?) {
@@ -1085,6 +1063,11 @@ class MangaDetailsController : BaseController,
 
     fun onTrackSearchResults(results: List<TrackSearch>) {
         trackingBottomSheet?.onSearchResults(results)
+    }
+
+    fun refreshTracker() {
+        (recycler.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder)
+            ?.updateTracking()
     }
 
     fun trackRefreshDone() {

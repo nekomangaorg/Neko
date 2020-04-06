@@ -11,6 +11,7 @@ import android.view.ViewGroup
 import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
@@ -24,6 +25,7 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
+import eu.kanade.tachiyomi.ui.main.BottomSheetController
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.RootSearchInterface
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
@@ -51,7 +53,9 @@ import kotlin.math.max
 class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
     RecentMangaAdapter.RecentsInterface,
     FlexibleAdapter.OnItemClickListener,
-    RootSearchInterface {
+    FlexibleAdapter.OnItemMoveListener,
+    RootSearchInterface,
+    BottomSheetController {
 
     init {
         setHasOptionsMenu(true)
@@ -101,7 +105,7 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
         val array = view.context.obtainStyledAttributes(attrsArray)
         val appBarHeight = array.getDimensionPixelSize(0, 0)
         array.recycle()
-        scrollViewWith(recycler, skipFirstSnap = true) {
+        scrollViewWith(recycler, skipFirstSnap = true, swipeRefreshLayout = swipe_refresh) {
             headerHeight = it.systemWindowInsetTop + appBarHeight
         }
 
@@ -154,13 +158,33 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
             }
         })
 
+        swipe_refresh.setOnRefreshListener {
+            if (!LibraryUpdateService.isRunning()) {
+                LibraryUpdateService.start(view.context)
+                snack = view.snack(R.string.updating_library) {
+                    anchorView = (activity as? MainActivity)?.bottom_nav
+                }
+            }
+        }
+
         if (showingDownloads) {
             dl_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
         }
         setPadding(dl_bottom_sheet.sheetBehavior?.isHideable == true)
     }
 
-    override fun handleRootBack(): Boolean {
+    override fun onItemMove(fromPosition: Int, toPosition: Int) {
+    }
+
+    override fun shouldMoveItem(fromPosition: Int, toPosition: Int): Boolean {
+        return true
+    }
+
+    override fun onActionStateChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
+        swipe_refresh.isEnabled = actionState != ItemTouchHelper.ACTION_STATE_SWIPE
+    }
+
+    override fun handleSheetBack(): Boolean {
         if (dl_bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) {
             dl_bottom_sheet.dismiss()
             return true
@@ -292,7 +316,7 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
     override fun isSearching() = presenter.query.isNotEmpty()
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        (activity as? MainActivity)?.setDismissIcon(showingDownloads)
+        if (onRoot) (activity as? MainActivity)?.setDismissIcon(showingDownloads)
         if (showingDownloads) {
             inflater.inflate(R.menu.download_queue, menu)
         } else {
@@ -331,7 +355,11 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
         }
     }
 
-    fun toggleDownloads() {
+    override fun showSheet() {
+        dl_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
+    }
+
+    override fun toggleSheet() {
         if (dl_bottom_sheet.sheetBehavior?.isHideable == false) {
             if (showingDownloads) dl_bottom_sheet.dismiss()
             else dl_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED

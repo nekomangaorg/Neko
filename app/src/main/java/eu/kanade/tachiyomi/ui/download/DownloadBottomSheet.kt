@@ -70,8 +70,7 @@ class DownloadBottomSheet @JvmOverloads constructor(
             }
         }
         update()
-        setBottomSheet()
-
+        setInformationView()
         if (sheetBehavior?.state != BottomSheetBehavior.STATE_EXPANDED && sheetBehavior?.isHideable == true) sheetBehavior?.state =
             BottomSheetBehavior.STATE_HIDDEN
     }

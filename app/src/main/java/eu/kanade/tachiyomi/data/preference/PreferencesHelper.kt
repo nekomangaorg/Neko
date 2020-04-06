@@ -178,6 +178,8 @@ class PreferencesHelper(val context: Context) {
 
     fun gridSize() = rxPrefs.getInteger(Keys.gridSize, 1)
 
+    fun alwaysShowSeeker() = rxPrefs.getBoolean("always_show_seeker", false)
+
     fun uniformGrid() = rxPrefs.getBoolean(Keys.uniformGrid, true)
 
     fun chaptersDescAsDefault() = rxPrefs.getBoolean("chapters_desc_as_default", true)

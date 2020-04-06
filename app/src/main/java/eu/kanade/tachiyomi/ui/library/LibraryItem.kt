@@ -28,6 +28,7 @@ class LibraryItem(
     val manga: LibraryManga,
     private val libraryLayout: Preference<Int>,
     private val fixedSize: Preference<Boolean>,
+    private val showFastScroll: Preference<Boolean>,
     header: LibraryHeaderItem?
 ) :
     AbstractSectionableItem<LibraryHolder, LibraryHeaderItem?>(header), IFilterable<String> {
@@ -49,7 +50,7 @@ class LibraryItem(
             val libraryLayout = libraryLayout.getOrDefault()
             val isFixedSize = fixedSize.getOrDefault()
             if (libraryLayout == 0 || manga.isBlank()) {
-                LibraryListHolder(view, adapter as LibraryCategoryAdapter)
+                LibraryListHolder(view, adapter as LibraryCategoryAdapter, showFastScroll.getOrDefault())
             } else {
                 view.apply {
                     val coverHeight = (parent.itemWidth / 3f * 4f).toInt()
@@ -94,7 +95,7 @@ class LibraryItem(
                 )
             }
         } else {
-            LibraryListHolder(view, adapter as LibraryCategoryAdapter)
+            LibraryListHolder(view, adapter as LibraryCategoryAdapter, showFastScroll.getOrDefault())
         }
     }
 
