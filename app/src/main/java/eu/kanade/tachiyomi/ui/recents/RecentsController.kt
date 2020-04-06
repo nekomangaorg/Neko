@@ -41,9 +41,7 @@ import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import kotlinx.android.synthetic.main.download_bottom_sheet.*
 import kotlinx.android.synthetic.main.main_activity.*
-import kotlinx.android.synthetic.main.recent_chapters_controller.*
 import kotlinx.android.synthetic.main.recents_controller.*
-import kotlinx.android.synthetic.main.recents_controller.recycler
 import kotlin.math.abs
 import kotlin.math.max
 

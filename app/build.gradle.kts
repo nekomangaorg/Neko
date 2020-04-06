@@ -108,7 +108,7 @@ dependencies {
 
     implementation("androidx.multidex:multidex:2.0.1")
 
-    implementation("com.google.firebase:firebase-core:17.2.3")
+    implementation("com.google.firebase:firebase-core:17.3.0")
     implementation("com.google.firebase:firebase-analytics:17.3.0")
     implementation("com.google.firebase:firebase-crashlytics:17.0.0-beta03")
 

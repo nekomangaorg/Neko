@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Bundle
 import androidx.preference.PreferenceScreen
 import com.afollestad.materialdialogs.MaterialDialog
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -50,7 +51,16 @@ class SettingsAboutController : SettingsController() {
 
     override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
         titleRes = R.string.pref_category_about
-
+        throw RuntimeException("test Error")
+        switchPreference {
+            key = "acra.enable"
+            titleRes = R.string.pref_enable_acra
+            summaryRes = R.string.pref_acra_summary
+            defaultValue = true
+            onClick {
+                FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(isEnabled)
+            }
+        }
         preference {
             title = "Discord"
             val url = "https://discord.gg/tachiyomi"

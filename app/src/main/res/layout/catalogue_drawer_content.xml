@@ -68,7 +68,8 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
-      </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/other_button_layout"
         android:layout_width="match_parent"
@@ -81,6 +82,7 @@
         android:elevation="0dp"
         android:focusable="true"
         android:orientation="horizontal">
+
         <com.google.android.material.button.MaterialButton
             android:id="@+id/random_manga_btn"
             style="@style/Theme.Widget.Button.RoundedOutline"
@@ -100,10 +102,11 @@
             android:textColor="?attr/tabBarIconColor"
             android:layout_height="match_parent"
             android:text="@string/action_follows"
+            android:layout_marginStart="8dp"
+
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@id/random_manga_btn"
-            app:layout_constraintTop_toTopOf="parent"
-            />
+            app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </FrameLayout>

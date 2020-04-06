@@ -52,7 +52,8 @@ class SettingsLibraryController : SettingsController() {
             preference {
                 titleRes = R.string.action_edit_categories
                 val catCount = db.getCategories().executeAsBlocking().size
-                summary = context.resources.getQuantityString(R.plurals.category, catCount, catCount)
+                summary =
+                    context.resources.getQuantityString(R.plurals.category, catCount, catCount)
                 onClick { router.pushController(CategoryController().withFadeTransaction()) }
             }
             intListPreference(activity) {
@@ -61,7 +62,8 @@ class SettingsLibraryController : SettingsController() {
 
                 val categories = listOf(Category.createDefault(context)) + dbCategories
                 entries =
-                    listOf(context.getString(R.string.default_category_summary)) + categories.map { it.name }.toTypedArray()
+                    listOf(context.getString(R.string.default_category_summary)) + categories.map { it.name }
+                        .toTypedArray()
                 entryValues = listOf(-1) + categories.mapNotNull { it.id }.toList()
                 defaultValue = "-1"
 
@@ -180,19 +182,6 @@ class SettingsLibraryController : SettingsController() {
                     customSummary =
                         if (selectedCategories.isEmpty()) context.getString(R.string.all)
                         else selectedCategories.joinToString { it.name }
-                }
-            }
-        }
-        if (preferences.skipPreMigration().getOrDefault() || preferences.migrationSources().getOrDefault().isNotEmpty()) {
-            preferenceCategory {
-                titleRes = R.string.pref_category_library_migration
-                // Only show this if someone has mass migrated manga once
-
-                switchPreference {
-                    key = Keys.skipPreMigration
-                    titleRes = R.string.pref_skip_pre_migration
-                    summaryRes = R.string.pref_skip_pre_migration_summary
-                    defaultValue = false
                 }
             }
         }
