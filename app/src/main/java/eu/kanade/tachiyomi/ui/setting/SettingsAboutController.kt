@@ -51,12 +51,6 @@ class SettingsAboutController : SettingsController() {
     override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
         titleRes = R.string.pref_category_about
 
-        switchPreference {
-            key = "acra.enable"
-            titleRes = R.string.pref_enable_acra
-            summaryRes = R.string.pref_acra_summary
-            defaultValue = true
-        }
         preference {
             title = "Discord"
             val url = "https://discord.gg/tachiyomi"
@@ -138,17 +132,17 @@ class SettingsAboutController : SettingsController() {
 
         override fun onCreateDialog(savedViewState: Bundle?): Dialog {
             return MaterialDialog(activity!!)
-                    .title(R.string.update_check_title)
-                    .message(text = args.getString(BODY_KEY) ?: "")
-                    .positiveButton(R.string.update_check_confirm) {
-                        val appContext = applicationContext
-                        if (appContext != null) {
-                            // Start download
-                            val url = args.getString(URL_KEY) ?: ""
-                            UpdaterService.downloadUpdate(appContext, url)
-                        }
+                .title(R.string.update_check_title)
+                .message(text = args.getString(BODY_KEY) ?: "")
+                .positiveButton(R.string.update_check_confirm) {
+                    val appContext = applicationContext
+                    if (appContext != null) {
+                        // Start download
+                        val url = args.getString(URL_KEY) ?: ""
+                        UpdaterService.downloadUpdate(appContext, url)
                     }
-                    .negativeButton(R.string.update_check_ignore)
+                }
+                .negativeButton(R.string.update_check_ignore)
         }
 
         private companion object {

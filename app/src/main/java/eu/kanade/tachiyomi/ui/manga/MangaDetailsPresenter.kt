@@ -60,7 +60,8 @@ class MangaDetailsPresenter(
     var hasRequested = false
     var isLoading = false
 
-    private val loggedServices by lazy { Injekt.get<TrackManager>().services.filter { it.isLogged } }
+    private val trackManager: TrackManager by lazy { Injekt.get<TrackManager>() }
+    private val loggedServices by lazy { trackManager.services.filter { it.isLogged } }
     var tracks = emptyList<Track>()
 
     var trackList: List<TrackItem> = emptyList()
@@ -89,6 +90,7 @@ class MangaDetailsPresenter(
             controller.updateChapters(this.chapters)
         }
         fetchTrackings()
+        // refreshTrackers()
     }
 
     fun onDestroy() {
@@ -612,6 +614,10 @@ class MangaDetailsPresenter(
     // Tracking
     private fun fetchTrackings() {
         scope.launch {
+            registerTracking(
+                tracks.find { it.sync_id == trackManager.mdList.id },
+                trackManager.mdList
+            )
             trackList = loggedServices.map { service ->
                 TrackItem(tracks.find { it.sync_id == service.id }, service)
             }
@@ -669,6 +675,8 @@ class MangaDetailsPresenter(
     }
 
     fun registerTracking(item: Track?, service: TrackService) {
+        initialRegisterMdList(service)
+
         if (item != null) {
             item.manga_id = manga.id!!
 
@@ -690,6 +698,25 @@ class MangaDetailsPresenter(
                     db.deleteTrackForManga(manga, service).executeAsBlocking()
                 }
                 refreshTracking()
+            }
+        }
+    }
+
+    /**
+     * If this is mdlist check ti see if it needs to be registered initially
+     */
+    private fun initialRegisterMdList(service: TrackService) {
+        if (service.isMdList()) {
+            val mdTrackCount = tracks.filter { it.sync_id == TrackManager.MDLIST }.count()
+            if (mdTrackCount == 0) {
+                scope.launch {
+                    withContext(Dispatchers.IO) {
+                        val track = source.fetchTrackingInfo(manga)
+                        track.manga_id = manga.id!!
+                        db.insertTrack(track).executeAsBlocking()
+                        refreshTracking()
+                    }
+                }
             }
         }
     }
