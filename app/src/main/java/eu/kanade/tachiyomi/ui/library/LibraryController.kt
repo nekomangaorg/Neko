@@ -23,8 +23,6 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.afollestad.materialdialogs.MaterialDialog
-import com.afollestad.materialdialogs.checkbox.checkBoxPrompt
-import com.afollestad.materialdialogs.checkbox.isCheckPromptChecked
 import com.afollestad.materialdialogs.list.listItemsSingleChoice
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
@@ -73,7 +71,6 @@ import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.coroutines.delay
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
@@ -158,7 +155,7 @@ class LibraryController(
                     scrollDistance = 0f
                 }
             } else scrollDistance = 0f
-            if (order != null && order != activeCategory) {
+            if (order != null && order != activeCategory && lastItem == null) {
                 preferences.lastUsedCategory().set(order)
                 activeCategory = order
                 setTitle()
@@ -663,10 +660,16 @@ class LibraryController(
 
     override fun onItemMove(fromPosition: Int, toPosition: Int) {
         // Because padding a recycler causes it to scroll up we have to scroll it back down... wild
-        if ((adapter.getItem(fromPosition) is LibraryItem && adapter.getItem(fromPosition) is LibraryItem) || adapter.getItem(
+        if ((adapter.getItem(fromPosition) is LibraryItem && adapter.getItem(fromPosition) is
+                LibraryItem) || adapter.getItem(
                 fromPosition
             ) == null
-        ) recycler.scrollBy(0, recycler.paddingTop)
+        ) {
+            recycler.scrollBy(0, recycler.paddingTop)
+            view?.post {
+                setTitle()
+            }
+        }
         activity?.appbar?.y = 0f
         if (lastItemPosition == toPosition) lastItemPosition = null
         else if (lastItemPosition == null) lastItemPosition = fromPosition
@@ -676,7 +679,7 @@ class LibraryController(
         if (adapter.isSelected(fromPosition)) toggleSelection(fromPosition)
         val item = adapter.getItem(fromPosition) as? LibraryItem ?: return false
         val newHeader = adapter.getSectionHeader(toPosition) as? LibraryHeaderItem
-        if (toPosition <= 1) return false
+        if (toPosition < 1) return false
         return (adapter.getItem(toPosition) !is LibraryHeaderItem) && (newHeader?.category?.id == item.manga.category || !presenter.mangaIsInCategory(
             item.manga, newHeader?.category?.id
         ))
@@ -687,6 +690,7 @@ class LibraryController(
             lastItemPosition = null
             return
         }
+        lastItem = null
         destroyActionModeIfNeeded()
         // if nothing moved
         if (lastItemPosition == null) return
@@ -705,36 +709,9 @@ class LibraryController(
                 }
                 return
             }
-            if (newHeader?.category?.mangaSort == null) {
-                moveMangaToCategory(item.manga, newHeader?.category, mangaIds, true)
-            } else {
-                val keepCatSort = preferences.keepCatSort().getOrDefault()
-                if (keepCatSort == 0) {
-                    MaterialDialog(activity!!).message(R.string.switch_to_dnd)
-                        .positiveButton(R.string.action_switch) {
-                            moveMangaToCategory(
-                                item.manga, newHeader.category, mangaIds, true
-                            )
-                            if (it.isCheckPromptChecked()) preferences.keepCatSort().set(2)
-                        }.checkBoxPrompt(R.string.remember_choice) {}.negativeButton(
-                            text = resources?.getString(
-                                R.string.keep_current_sort,
-                                resources!!.getString(newHeader.category.sortRes()).toLowerCase(
-                                    Locale.getDefault()
-                                )
-                            )
-                        ) {
-                            moveMangaToCategory(
-                                item.manga, newHeader.category, mangaIds, false
-                            )
-                            if (it.isCheckPromptChecked()) preferences.keepCatSort().set(1)
-                        }.cancelOnTouchOutside(false).show()
-                } else {
-                    moveMangaToCategory(
-                        item.manga, newHeader.category, mangaIds, keepCatSort == 2
-                    )
-                }
-            }
+            if (newHeader?.category != null) moveMangaToCategory(
+                item.manga, newHeader.category, mangaIds
+            )
         }
         lastItemPosition = null
     }
@@ -742,12 +719,11 @@ class LibraryController(
     private fun moveMangaToCategory(
         manga: LibraryManga,
         category: Category?,
-        mangaIds: List<Long>,
-        useDND: Boolean
+        mangaIds: List<Long>
     ) {
         if (category?.id == null) return
         val oldCatId = manga.category
-        presenter.moveMangaToCategory(manga, category.id, mangaIds, useDND)
+        presenter.moveMangaToCategory(manga, category.id, mangaIds)
         snack?.dismiss()
         snack = view?.snack(
             resources!!.getString(R.string.moved_to_category, category.name)
@@ -755,7 +731,7 @@ class LibraryController(
             anchorView = bottom_sheet
             setAction(R.string.action_undo) {
                 manga.category = category.id!!
-                presenter.moveMangaToCategory(manga, oldCatId, mangaIds, useDND)
+                presenter.moveMangaToCategory(manga, oldCatId, mangaIds)
             }
         }
     }

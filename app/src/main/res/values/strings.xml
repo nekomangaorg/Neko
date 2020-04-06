@@ -260,14 +260,6 @@
         when updating library (overwrites local covers)</string>
 
     <string name="pref_category_library_migration">Migration</string>
-    <string name="pref_keep_category_sorting">Change category sorting when moving</string>
-    <string name="pref_keep_category_sorting_summary">Should dragging and
-        dropping an entry into a new category change the category\'s sorting to drag &amp;
-        drop?</string>
-    <string name="always_ask">Always ask</string>
-    <string name="option_keep_category_sort">Keep category\'s current sorting</string>
-    <string name="option_switch_to_dnd">Switch to Drag &amp; Drop</string>
-
 
     <!-- Extension section -->
     <string name="all_lang">All</string>
@@ -460,13 +452,11 @@
     <string name="category_is_empty">Category is empty</string>
     <string name="local_source_badge">Local</string>
     <string name="confirm_manga_deletion">Remove from library?</string>
-    <string name="switch_to_dnd">Switch to Drag &amp; Drop mode?</string>
     <string name="what_should_update">What should update?</string>
     <string name="top_category">Top category (%1$s)</string>
     <string name="first_category">First category</string>
     <string name="categories_on_manual">Categories to update when manually refreshing</string>
     <string name="categories_in_global_update">All categories in global update</string>
-    <string name="keep_current_sort">Keep sorting by %1$s</string>
     <string name="confirm_category_deletion">Delete category?</string>
     <string name="confirm_category_deletion_message">Manga in this category will moved into the
         default category.</string>

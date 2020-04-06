@@ -29,14 +29,6 @@ class SettingsLibraryController : SettingsController() {
         titleRes = R.string.pref_category_library
         preferenceCategory {
             titleRes = R.string.pref_category_library_display
-            /*
-            switchPreference {
-                key = Keys.libraryAsSingleList
-                titleRes = R.string.pref_library_single_list
-                summaryRes = R.string.pref_library_single_list_summary
-                defaultValue = false
-            }*/
-
             switchPreference {
                 key = Keys.removeArticles
                 titleRes = R.string.pref_remove_articles
@@ -74,19 +66,6 @@ class SettingsLibraryController : SettingsController() {
                     }?.name ?: context.getString(R.string.default_category_summary)
                     true
                 }
-            }
-            intListPreference(activity) {
-                titleRes = R.string.pref_keep_category_sorting
-                key = Keys.keepCatSort
-
-                customSummary = context.getString(R.string.pref_keep_category_sorting_summary)
-                entries = listOf(
-                    context.getString(R.string.always_ask),
-                    context.getString(R.string.option_keep_category_sort),
-                    context.getString(R.string.option_switch_to_dnd)
-                )
-                entryRange = 0..2
-                defaultValue = 0
             }
         }
 
