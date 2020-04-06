@@ -27,10 +27,13 @@ import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.invisible
 import eu.kanade.tachiyomi.util.view.marginBottom
+import eu.kanade.tachiyomi.util.view.setStyle
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePadding
 import eu.kanade.tachiyomi.util.view.visible
+import kotlinx.android.synthetic.main.library_list_controller.*
 import kotlinx.android.synthetic.main.webview_activity.*
+import kotlinx.android.synthetic.main.webview_activity.swipe_refresh
 import uy.kohesive.injekt.injectLazy
 
 class WebViewActivity : BaseActivity() {
@@ -91,6 +94,7 @@ class WebViewActivity : BaseActivity() {
                 0, insets.systemWindowInsetBottom
             )
         }
+        swipe_refresh.setStyle()
         swipe_refresh.setOnRefreshListener {
             refreshPage()
         }

@@ -99,6 +99,7 @@ import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.getText
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
+import eu.kanade.tachiyomi.util.view.setStyle
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
@@ -217,6 +218,7 @@ class MangaDetailsController : BaseController,
         array.recycle()
         val offset = 10.dpToPx
         var statusBarHeight = -1
+        swipe_refresh.setStyle()
         swipe_refresh.setDistanceToTriggerSync(70.dpToPx)
 
         recycler.doOnApplyWindowInsets { v, insets, _ ->
