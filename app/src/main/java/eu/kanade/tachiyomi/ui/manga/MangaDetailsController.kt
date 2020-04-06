@@ -547,13 +547,48 @@ class MangaDetailsController : BaseController,
 
     fun bookmarkChapter(position: Int) {
         val item = adapter?.getItem(position) as? ChapterItem ?: return
-        bookmarkChapters(listOf(item), !item.bookmark)
+        val chapter = item.chapter
+        val bookmarked = item.bookmark
+        bookmarkChapters(listOf(item), !bookmarked)
+        snack?.dismiss()
+        snack = view?.snack(
+            if (bookmarked) R.string.removed_bookmark
+            else R.string.bookmarked, Snackbar.LENGTH_INDEFINITE
+        ) {
+            setAction(R.string.action_undo) {
+                bookmarkChapters(listOf(item), bookmarked)
+            }
+        }
+        (activity as? MainActivity)?.setUndoSnackBar(snack)
     }
 
     fun toggleReadChapter(position: Int) {
         val item = adapter?.getItem(position) as? ChapterItem ?: return
-        if (!item.read) markAsRead(listOf(item))
-        else markAsUnread(listOf(item))
+        val chapter = item.chapter
+        val lastRead = chapter.last_page_read
+        val pagesLeft = chapter.pages_left
+        val read = item.chapter.read
+        presenter.markChaptersRead(listOf(item), !read, false)
+        snack?.dismiss()
+        snack = view?.snack(
+            if (read) R.string.marked_as_unread
+            else R.string.marked_as_read, Snackbar.LENGTH_INDEFINITE
+        ) {
+            var undoing = false
+            setAction(R.string.action_undo) {
+                presenter.markChaptersRead(listOf(item), read, true, lastRead, pagesLeft)
+                undoing = true
+            }
+            addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
+                override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+                    super.onDismissed(transientBottomBar, event)
+                    if (!undoing && !read && presenter.preferences.removeAfterMarkedAsRead()) {
+                        presenter.deleteChapters(listOf(item))
+                    }
+                }
+            })
+        }
+        (activity as? MainActivity)?.setUndoSnackBar(snack)
     }
 
     private fun bookmarkChapters(chapters: List<ChapterItem>, bookmarked: Boolean) {

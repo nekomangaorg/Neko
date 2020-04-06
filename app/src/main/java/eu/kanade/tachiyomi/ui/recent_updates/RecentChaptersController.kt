@@ -203,7 +203,7 @@ class RecentChaptersController(bundle: Bundle? = null) : BaseController(bundle),
             snack = view?.snack(R.string.marked_as_read, Snackbar.LENGTH_INDEFINITE) {
                 var undoing = false
                 setAction(R.string.action_undo) {
-                    presenter.markChapterRead(item, !item.chapter.read, lastRead, pagesLeft)
+                    presenter.markChapterRead(item, read, lastRead, pagesLeft)
                     undoing = true
                 }
                 addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
