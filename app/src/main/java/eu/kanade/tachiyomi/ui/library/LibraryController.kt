@@ -61,13 +61,17 @@ import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.applyWindowInsetsForRootController
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
+import eu.kanade.tachiyomi.util.view.setStyle
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import kotlinx.android.synthetic.main.filter_bottom_sheet.*
 import kotlinx.android.synthetic.main.library_grid_recycler.*
+import kotlinx.android.synthetic.main.library_grid_recycler.recycler
 import kotlinx.android.synthetic.main.library_list_controller.*
+import kotlinx.android.synthetic.main.library_list_controller.swipe_refresh
 import kotlinx.android.synthetic.main.main_activity.*
+import kotlinx.android.synthetic.main.recents_controller.*
 import kotlinx.coroutines.delay
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -262,7 +266,7 @@ class LibraryController(
 
         val tv = TypedValue()
         activity!!.theme.resolveAttribute(R.attr.actionBarTintColor, tv, true)
-
+        swipe_refresh.setStyle()
         scrollViewWith(recycler, swipeRefreshLayout = swipe_refresh) { insets ->
             fast_scroller.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 topMargin = insets.systemWindowInsetTop
@@ -392,6 +396,7 @@ class LibraryController(
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
         super.onChangeStarted(handler, type)
         if (type.isEnter) {
+            view?.applyWindowInsetsForRootController(activity!!.bottom_nav)
             presenter.getLibrary()
             DownloadService.callListeners()
             LibraryUpdateService.setListener(this)

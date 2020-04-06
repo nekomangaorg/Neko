@@ -209,6 +209,7 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
         super.onChangeStarted(handler, type)
         if (!type.isPush && handler is SettingsSourcesFadeChangeHandler) {
+            view?.applyWindowInsetsForRootController(activity!!.bottom_nav)
             ext_bottom_sheet.updateExtTitle()
             ext_bottom_sheet.presenter.refreshExtensions()
         }

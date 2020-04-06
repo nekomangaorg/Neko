@@ -25,6 +25,7 @@ import eu.kanade.tachiyomi.ui.manga.chapter.BaseChapterAdapter
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.system.notificationManager
 import eu.kanade.tachiyomi.util.view.scrollViewWith
+import eu.kanade.tachiyomi.util.view.setStyle
 import eu.kanade.tachiyomi.util.view.snack
 import kotlinx.android.synthetic.main.download_bottom_sheet.*
 import kotlinx.android.synthetic.main.recent_chapters_controller.*
@@ -81,7 +82,7 @@ class RecentChaptersController(bundle: Bundle? = null) : BaseController(bundle),
             ItemTouchHelper.LEFT
         )
         if (presenter.chapters.isNotEmpty()) adapter?.updateDataSet(presenter.chapters.toList())
-
+        swipe_refresh.setStyle()
         swipe_refresh.setDistanceToTriggerSync((2 * 64 * view.resources.displayMetrics.density).toInt())
         swipe_refresh.setOnRefreshListener {
             if (!LibraryUpdateService.isRunning()) {

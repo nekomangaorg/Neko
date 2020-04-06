@@ -348,7 +348,7 @@ fun Controller.scrollViewWith(
             bottom = if (padBottom) insets.systemWindowInsetBottom else view.paddingBottom
         )
         swipeRefreshLayout?.setProgressViewOffset(
-            false, headerHeight + (-60).dpToPx, headerHeight
+            true, headerHeight + (-60).dpToPx, headerHeight + 10.dpToPx
         )
         statusBarHeight = insets.systemWindowInsetTop
         afterInsets?.invoke(insets)
@@ -451,6 +451,11 @@ fun setBottomEdge(view: View, activity: Activity) {
     view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
         bottomMargin = marginB + activity.window.decorView.rootWindowInsets.systemWindowInsetBottom
     }
+}
+
+fun SwipeRefreshLayout.setStyle() {
+    setColorSchemeColors(context.getResourceColor(R.attr.actionBarTintColor))
+    setProgressBackgroundColorSchemeColor(context.getResourceColor(R.attr.colorPrimaryVariant))
 }
 
 fun MaterialButton.resetStrokeColor() {

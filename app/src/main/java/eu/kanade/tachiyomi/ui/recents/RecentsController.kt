@@ -36,6 +36,7 @@ import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.applyWindowInsetsForRootController
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
+import eu.kanade.tachiyomi.util.view.setStyle
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
@@ -59,6 +60,7 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
 
     init {
         setHasOptionsMenu(true)
+        retainViewMode = RetainViewMode.RETAIN_DETACH
     }
 
     /**
@@ -105,6 +107,7 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
         val array = view.context.obtainStyledAttributes(attrsArray)
         val appBarHeight = array.getDimensionPixelSize(0, 0)
         array.recycle()
+        swipe_refresh.setStyle()
         scrollViewWith(recycler, skipFirstSnap = true, swipeRefreshLayout = swipe_refresh) {
             headerHeight = it.systemWindowInsetTop + appBarHeight
         }
@@ -150,20 +153,15 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
                     shadow.alpha = if (state == BottomSheetBehavior.STATE_COLLAPSED) 0.5f else 0f
                 }
 
-                retainViewMode =
-                    if (state == BottomSheetBehavior.STATE_EXPANDED) RetainViewMode.RETAIN_DETACH else RetainViewMode.RELEASE_DETACH
                 sheet_layout?.isClickable = state == BottomSheetBehavior.STATE_COLLAPSED
                 sheet_layout?.isFocusable = state == BottomSheetBehavior.STATE_COLLAPSED
                 setPadding(dl_bottom_sheet.sheetBehavior?.isHideable == true)
             }
         })
-
+        swipe_refresh.isRefreshing = LibraryUpdateService.isRunning()
         swipe_refresh.setOnRefreshListener {
             if (!LibraryUpdateService.isRunning()) {
                 LibraryUpdateService.start(view.context)
-                snack = view.snack(R.string.updating_library) {
-                    anchorView = (activity as? MainActivity)?.bottom_nav
-                }
             }
         }
 
@@ -173,15 +171,16 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
         setPadding(dl_bottom_sheet.sheetBehavior?.isHideable == true)
     }
 
-    override fun onItemMove(fromPosition: Int, toPosition: Int) {
+    fun reEnableSwipe() {
+        swipe_refresh.isRefreshing = false
     }
+    override fun onItemMove(fromPosition: Int, toPosition: Int) { }
 
-    override fun shouldMoveItem(fromPosition: Int, toPosition: Int): Boolean {
-        return true
-    }
+    override fun shouldMoveItem(fromPosition: Int, toPosition: Int) = true
 
     override fun onActionStateChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
-        swipe_refresh.isEnabled = actionState != ItemTouchHelper.ACTION_STATE_SWIPE
+        swipe_refresh.isEnabled = actionState != ItemTouchHelper.ACTION_STATE_SWIPE ||
+            swipe_refresh.isRefreshing
     }
 
     override fun handleSheetBack(): Boolean {
@@ -217,6 +216,7 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
     fun refresh() = presenter.getRecents()
 
     fun showLists(recents: List<RecentMangaItem>) {
+        swipe_refresh.isRefreshing = LibraryUpdateService.isRunning()
         recentItems = recents
         adapter.updateDataSet(recents)
         if (lastChapterId != null) {
@@ -347,9 +347,11 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
         super.onChangeStarted(handler, type)
         if (type.isEnter) {
-            if (type == ControllerChangeType.POP_EXIT) presenter.onCreate()
+            view?.applyWindowInsetsForRootController(activity!!.bottom_nav)
+            if (type == ControllerChangeType.POP_ENTER) presenter.onCreate()
             setHasOptionsMenu(true)
         } else {
+            if (type == ControllerChangeType.POP_EXIT) presenter.onDestroy()
             snack?.dismiss()
             setHasOptionsMenu(false)
         }
