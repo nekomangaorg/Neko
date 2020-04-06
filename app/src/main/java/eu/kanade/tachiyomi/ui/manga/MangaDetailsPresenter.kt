@@ -294,26 +294,16 @@ class MangaDetailsPresenter(
      * @param chapters the list of chapters to delete.
      */
     fun deleteChapters(chapters: List<ChapterItem>, update: Boolean = true) {
-        deleteChaptersInternal(chapters)
+        downloadManager.deleteChapters(chapters, manga, source)
 
         chapters.forEach { chapter ->
-            this.chapters.find { it.id == chapter.id }?.download?.status = Download.NOT_DOWNLOADED
+            this.chapters.find { it.id == chapter.id }?.apply {
+                status = Download.NOT_DOWNLOADED
+                download = null
+            }
         }
 
-        if (update)
-            controller.updateChapters(this.chapters)
-    }
-
-    /**
-     * Deletes a list of chapters from disk. This method is called in a background thread.
-     * @param chapters the chapters to delete.
-     */
-    private fun deleteChaptersInternal(chapters: List<ChapterItem>) {
-        downloadManager.deleteChapters(chapters, manga, source)
-        chapters.forEach {
-            it.status = Download.NOT_DOWNLOADED
-            it.download = null
-        }
+        if (update) controller.updateChapters(this.chapters)
     }
 
     fun refreshAll() {
@@ -416,17 +406,23 @@ class MangaDetailsPresenter(
      * @param selectedChapters the list of selected chapters.
      * @param read whether to mark chapters as read or unread.
      */
-    fun markChaptersRead(selectedChapters: List<ChapterItem>, read: Boolean) {
+    fun markChaptersRead(
+        selectedChapters: List<ChapterItem>,
+        read: Boolean,
+        deleteNow: Boolean = true,
+        lastRead: Int? = null,
+        pagesLeft: Int? = null
+    ) {
         scope.launch(Dispatchers.IO) {
             selectedChapters.forEach {
                 it.read = read
                 if (!read) {
-                    it.last_page_read = 0
-                    it.pages_left = 0
+                    it.last_page_read = lastRead ?: 0
+                    it.pages_left = pagesLeft ?: 0
                 }
             }
             db.updateChaptersProgress(selectedChapters).executeAsBlocking()
-            if (read && preferences.removeAfterMarkedAsRead()) {
+            if (read && deleteNow && preferences.removeAfterMarkedAsRead()) {
                 deleteChapters(selectedChapters, false)
             }
             getChapters()

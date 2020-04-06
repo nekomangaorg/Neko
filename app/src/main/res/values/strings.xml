@@ -810,6 +810,9 @@
     <string name="view_history">View history</string>
     <string name="view_all_updates">View all updates</string>
     <string name="marked_as_read">Marked as read</string>
+    <string name="marked_as_unread">Marked as unread</string>
+    <string name="bookmarked">Bookmarked</string>
+    <string name="removed_bookmark">Removed bookmark</string>
     <string name="no_search_result">No search results</string>
     <string name="search_recents">Search recents…</string>
 </resources>
