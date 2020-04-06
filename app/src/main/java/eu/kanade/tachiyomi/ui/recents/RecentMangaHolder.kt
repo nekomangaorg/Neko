@@ -47,17 +47,17 @@ class RecentMangaHolder(
                     item.mch.manga.date_added, Date().time, DateUtils.MINUTE_IN_MILLIS
                 ).toString()
             )
+            item.mch.history.id == null -> body.context.getString(
+                R.string.updated_x, DateUtils.getRelativeTimeSpanString(
+                    item.chapter.date_upload, Date().time, DateUtils.HOUR_IN_MILLIS
+                ).toString()
+            )
             item.chapter.id != item.mch.chapter.id -> body.context.getString(
                 if (notValidNum) R.string.last_read_x else R.string.last_read_chapter_x,
                 if (notValidNum) item.mch.chapter.name else adapter.decimalFormat.format(item.mch.chapter.chapter_number) +
                     " (${DateUtils.getRelativeTimeSpanString(
                     item.mch.history.last_read, Date().time, DateUtils.MINUTE_IN_MILLIS
                 )})"
-            )
-            item.mch.history.id == null -> body.context.getString(
-                R.string.updated_x, DateUtils.getRelativeTimeSpanString(
-                    item.chapter.date_upload, Date().time, DateUtils.HOUR_IN_MILLIS
-                ).toString()
             )
             !isSearch && item.chapter.pages_left > 0 -> itemView.resources.getQuantityString(
                 R.plurals.pages_left, item.chapter.pages_left, item.chapter.pages_left

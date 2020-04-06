@@ -80,7 +80,8 @@ class RecentsPresenter(
             }
             val pairs = mangaList.mapNotNull {
                 val chapter = if (it.chapter.read || it.chapter.id == null) getNextChapter(it.manga)
-                else it.chapter
+                    else if (it.history.id == null) getFirstUpdatedChapter(it.manga, it.chapter)
+                    else it.chapter
                 if (chapter == null) if (query.isNotEmpty() && it.chapter.id != null) Pair(
                     it, it.chapter
                 )
@@ -92,7 +93,7 @@ class RecentsPresenter(
                     pairs.filter { it.first.history.id == null && it.first.chapter.id != null }
                         .sortedWith(Comparator<Pair<MangaChapterHistory, Chapter>> { f1, f2 ->
                             if (abs(f1.second.date_fetch - f2.second.date_fetch) <=
-                                TimeUnit.HOURS.toMillis(2))
+                                TimeUnit.HOURS.toMillis(12))
                                 f2.second.date_upload.compareTo(f1.second.date_upload)
                             else
                                 f2.second.date_fetch.compareTo(f1.second.date_fetch)
@@ -130,6 +131,13 @@ class RecentsPresenter(
     private fun getNextChapter(manga: Manga): Chapter? {
         val chapters = db.getChapters(manga).executeAsBlocking()
         return chapters.sortedByDescending { it.source_order }.find { !it.read }
+    }
+
+    private fun getFirstUpdatedChapter(manga: Manga, chapter: Chapter): Chapter? {
+        val chapters = db.getChapters(manga).executeAsBlocking()
+        return chapters.sortedByDescending { it.source_order }.find {
+            !it.read && abs(it.date_fetch - chapter.date_fetch) <= TimeUnit.HOURS.toMillis(12)
+        }
     }
 
     fun onDestroy() {
