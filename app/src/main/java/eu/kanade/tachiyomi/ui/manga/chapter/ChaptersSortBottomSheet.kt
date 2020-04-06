@@ -34,7 +34,7 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) : BottomSheetD
         sheetBehavior = BottomSheetBehavior.from(view.parent as ViewGroup)
         setEdgeToEdge(activity, view)
         val height = activity.window.decorView.rootWindowInsets.systemWindowInsetBottom
-        sheetBehavior.peekHeight = 380.dpToPx + height
+        sheetBehavior.peekHeight = 415.dpToPx + height
 
         sheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onSlide(bottomSheet: View, progress: Float) { }
@@ -94,10 +94,12 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) : BottomSheetD
         sort_method_group.check(if (presenter.manga.sorting == Manga.SORTING_SOURCE) R.id.sort_by_source else
             R.id.sort_by_number)
 
-        set_as_default_sort.visInvisIf(defPref != presenter.manga.sortDescending())
+        set_as_default_sort.visInvisIf(defPref != presenter.manga.sortDescending() &&
+        presenter.manga.usesLocalSort())
         sort_group.setOnCheckedChangeListener { _, checkedId ->
             presenter.setSortOrder(checkedId == R.id.sort_newest)
-            set_as_default_sort.visInvisIf(defPref != presenter.manga.sortDescending())
+            set_as_default_sort.visInvisIf(defPref != presenter.manga.sortDescending() &&
+                presenter.manga.usesLocalSort())
         }
 
         set_as_default_sort.setOnClickListener {

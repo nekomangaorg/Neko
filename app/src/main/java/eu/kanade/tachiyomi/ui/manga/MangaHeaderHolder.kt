@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.manga
 import android.annotation.SuppressLint
 import android.content.res.ColorStateList
 import android.graphics.Color
+import android.view.MotionEvent
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
@@ -25,6 +26,7 @@ import eu.kanade.tachiyomi.util.view.resetStrokeColor
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.util.view.visibleIf
+import kotlinx.android.synthetic.main.manga_details_controller.*
 import kotlinx.android.synthetic.main.manga_header_item.*
 import java.util.Locale
 
@@ -41,8 +43,21 @@ class MangaHeaderHolder(
         }
         more_button.setOnClickListener { expandDesc() }
         manga_summary.setOnClickListener { expandDesc() }
+        manga_summary.setOnLongClickListener {
+            if (manga_summary.isTextSelectable && !adapter.recyclerView.canScrollVertically(-1)) {
+                (adapter.delegate as MangaDetailsController).swipe_refresh.isEnabled = false
+            }
+            false
+        }
+        manga_summary.setOnTouchListener { _, event ->
+            if (event.actionMasked == MotionEvent.ACTION_UP)
+                (adapter.delegate as MangaDetailsController).swipe_refresh.isEnabled = true
+            false
+        }
         less_button.setOnClickListener {
+            manga_summary.setTextIsSelectable(false)
             manga_summary.maxLines = 3
+            manga_summary.setOnClickListener { expandDesc() }
             manga_genres_tags.gone()
             less_button.gone()
             more_button_group.visible()
@@ -77,6 +92,7 @@ class MangaHeaderHolder(
     private fun expandDesc() {
         if (more_button.visibility == View.VISIBLE) {
             manga_summary.maxLines = Integer.MAX_VALUE
+            manga_summary.setTextIsSelectable(true)
             manga_genres_tags.visible()
             less_button.visible()
             more_button_group.gone()

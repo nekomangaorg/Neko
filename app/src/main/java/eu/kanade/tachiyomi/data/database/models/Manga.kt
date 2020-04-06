@@ -36,9 +36,9 @@ interface Manga : SManga {
         chapter_flags = chapter_flags and mask.inv() or (flag and mask)
     }
 
-    fun sortDescending(): Boolean {
-        return chapter_flags and SORT_MASK == SORT_DESC
-    }
+    fun sortDescending(): Boolean = chapter_flags and SORT_MASK == SORT_DESC
+
+    fun usesLocalSort(): Boolean = chapter_flags and SORT_SELF_MASK == SORT_LOCAL
 
     fun sortDescending(defaultDesc: Boolean): Boolean {
         return if (chapter_flags and SORT_SELF_MASK == SORT_GLOBAL) defaultDesc

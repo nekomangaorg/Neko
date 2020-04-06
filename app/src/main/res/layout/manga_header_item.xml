@@ -228,7 +228,6 @@
         android:clickable="true"
         android:focusable="true"
         android:maxLines="3"
-        android:textIsSelectable="false"
         app:layout_constraintBottom_toTopOf="@id/manga_genres_tags"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

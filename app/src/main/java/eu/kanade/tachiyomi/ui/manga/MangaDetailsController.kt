@@ -218,6 +218,7 @@ class MangaDetailsController : BaseController,
         array.recycle()
         val offset = 10.dpToPx
         var statusBarHeight = -1
+        swipe_refresh.setDistanceToTriggerSync(70.dpToPx)
 
         recycler.doOnApplyWindowInsets { v, insets, _ ->
             headerHeight = appbarHeight + insets.systemWindowInsetTop
