@@ -780,28 +780,20 @@ class LibraryPresenter(
     fun moveMangaToCategory(
         manga: LibraryManga,
         catId: Int?,
-        mangaIds: List<Long>,
-        useDND: Boolean
+        mangaIds: List<Long>
     ) {
         GlobalScope.launch(Dispatchers.IO) {
             val categoryId = catId ?: return@launch
             val category = categories.find { catId == it.id } ?: return@launch
 
-            /*val mangaMap = currentMangaMap?.toMutableMap() ?: return@launch
-            val oldCatId = item.manga.category
-            val oldCatMap = mangaMap[manga.category]?.toMutableList() ?: return@launch
-            val newCatMap = mangaMap[catId]?.toMutableList() ?: return@launch
-            oldCatMap.remove(item)
-            newCatMap.add(item)
-            mangaMap[oldCatId] = oldCatMap
-            mangaMap[catId] = newCatMap
-            currentMangaMap = mangaMap*/
-
             val oldCatId = manga.category
             manga.category = categoryId
 
             val mc = ArrayList<MangaCategory>()
-            val categories = db.getCategoriesForManga(manga).executeAsBlocking()
+            val categories =
+                if (catId == 0) emptyList()
+                else
+                db.getCategoriesForManga(manga).executeAsBlocking()
                 .filter { it.id != oldCatId } + listOf(category)
 
             for (cat in categories) {
@@ -810,8 +802,7 @@ class LibraryPresenter(
 
             db.setMangaCategories(mc, listOf(manga))
 
-            if (useDND) {
-                category.mangaSort = null
+            if (category.mangaSort == null) {
                 val ids = mangaIds.toMutableList()
                 if (!ids.contains(manga.id!!)) ids.add(manga.id!!)
                 category.mangaOrder = ids

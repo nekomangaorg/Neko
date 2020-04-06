@@ -143,8 +143,6 @@ object PreferenceKeys {
 
     const val updateOnRefresh = "update_on_refresh"
 
-    const val keepCatSort = "keep_cat_sort"
-
     const val alwaysShowChapterTransition = "always_show_chapter_transition"
 
     const val skipFiltered = "skip_hidden"

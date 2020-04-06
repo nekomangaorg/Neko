@@ -97,7 +97,7 @@ class LibraryCategoryAdapter(val libraryListener: LibraryListener) :
         val db: DatabaseHelper by injectLazy()
         return when (val item: IFlexible<*>? = getItem(position)) {
             is LibraryHeaderItem ->
-                if (preferences.hideCategories().getOrDefault()) null
+                if (preferences.hideCategories().getOrDefault() || item.category.id == 0) null
                 else getFirstLetter(item.category.name) +
                     "\u200B".repeat(max(0, item.category.order))
             is LibraryItem -> {

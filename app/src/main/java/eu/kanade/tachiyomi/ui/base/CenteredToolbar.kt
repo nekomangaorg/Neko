@@ -15,12 +15,6 @@ class CenteredToolbar@JvmOverloads constructor(context: Context, attrs: Attribut
             toolbar_title.text = null
         } else {
             toolbar_title.text = context.getString(resId)
-            post {
-                if (navigationIcon !is DrawerArrowDrawable) {
-                    toolbar_title.text = context.getString(resId)
-                    requestLayout()
-                }
-            }
             super.setTitle(null)
         }
     }
@@ -31,12 +25,6 @@ class CenteredToolbar@JvmOverloads constructor(context: Context, attrs: Attribut
             toolbar_title.text = ""
         } else {
             toolbar_title.text = title
-            post {
-                if (navigationIcon !is DrawerArrowDrawable) {
-                    toolbar_title.text = title
-                    requestLayout()
-                }
-            }
             super.setTitle(null)
         }
     }
