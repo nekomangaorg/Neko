@@ -4,6 +4,7 @@ package eu.kanade.tachiyomi.util.view
 
 import android.app.Activity
 import android.content.Context
+import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.Point
@@ -20,6 +21,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.Px
 import androidx.appcompat.widget.SearchView
+import androidx.core.graphics.ColorUtils
 import androidx.core.math.MathUtils.clamp
 import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -29,6 +31,7 @@ import com.amulyakhare.textdrawable.TextDrawable
 import com.amulyakhare.textdrawable.util.ColorGenerator
 import com.bluelinelabs.conductor.Controller
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.snackbar.Snackbar
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -388,9 +391,9 @@ fun Controller.scrollViewWith(
                             .findFirstVisibleItemPosition() < 2 && !skipFirstSnap) ||
                         !recycler.canScrollVertically(-1)
                     activity!!.appbar.animate().y(
-                            if (closerToTop && !atTop) (-activity!!.appbar.height.toFloat())
-                            else 0f
-                        ).setDuration(shortAnimationDuration.toLong()).start()
+                        if (closerToTop && !atTop) (-activity!!.appbar.height.toFloat())
+                        else 0f
+                    ).setDuration(shortAnimationDuration.toLong()).start()
                 }
             }
         }
@@ -423,10 +426,11 @@ fun BottomSheetDialog.setEdgeToEdge(
         false
     contentView.systemUiVisibility =
         View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN //
-            // or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+    // or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
 
     if (activity.window.decorView.rootWindowInsets.systemWindowInsetLeft +
-        activity.window.decorView.rootWindowInsets.systemWindowInsetRight == 0)
+        activity.window.decorView.rootWindowInsets.systemWindowInsetRight == 0
+    )
         contentView.systemUiVisibility = contentView.systemUiVisibility
             .or(View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION)
     /*contentView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
@@ -449,4 +453,14 @@ fun setBottomEdge(view: View, activity: Activity) {
     view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
         bottomMargin = marginB + activity.window.decorView.rootWindowInsets.systemWindowInsetBottom
     }
+}
+
+fun MaterialButton.resetStrokeColor() {
+    strokeColor = ColorStateList.valueOf(
+        ColorUtils.setAlphaComponent(
+            context.getResourceColor(
+                R.attr.colorOnSurface
+            ), 31
+        )
+    )
 }

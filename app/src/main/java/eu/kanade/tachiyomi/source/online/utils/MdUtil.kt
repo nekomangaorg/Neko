@@ -98,7 +98,7 @@ class MdUtil {
             descriptionLanguages.forEach { it ->
                 newDescription = newDescription.substringBefore(it)
             }
-            
+
             englishDescriptionTags.forEach { it ->
                 newDescription = newDescription.replace(it, "")
             }

@@ -45,9 +45,7 @@ import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.catalogue.browse.BrowseCatalogueController
-import eu.kanade.tachiyomi.ui.download.DownloadController
 import eu.kanade.tachiyomi.ui.library.LibraryController
-import eu.kanade.tachiyomi.ui.library.LibraryListController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.recent_updates.RecentChaptersController
 import eu.kanade.tachiyomi.ui.recently_read.RecentlyReadController
@@ -146,7 +144,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
             val currentRoot = router.backstack.firstOrNull()
             if (currentRoot?.tag()?.toIntOrNull() != id) {
                 when (id) {
-                    R.id.nav_library -> setRoot(LibraryListController(), id)
+                    R.id.nav_library -> setRoot(LibraryController(), id)
                     R.id.nav_recents -> setRoot(RecentsController(), id)
                     else -> {
                         if (!source.isLogged()) {
@@ -200,7 +198,8 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
         if (!router.hasRootController()) {
             // Set start screen
             if (!handleIntentAction(intent)) {
-                val lastItemId = bottom_nav.menu.findItem(preferences.lastTab().getOrDefault())?.itemId
+                val lastItemId =
+                    bottom_nav.menu.findItem(preferences.lastTab().getOrDefault())?.itemId
                 bottom_nav.selectedItemId = lastItemId ?: R.id.nav_library
             }
         }
@@ -281,7 +280,8 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
         // if the android q+ device has gesture nav, transparent nav bar
         // this is here in case some crazy with a notch uses landscape
         else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && (insets
-                .systemWindowInsetBottom != insets.tappableElementInsets.bottom)) {
+                .systemWindowInsetBottom != insets.tappableElementInsets.bottom)
+        ) {
             getColor(android.R.color.transparent)
         }
         // if in landscape with 2/3 button mode, fully opaque nav bar
@@ -327,6 +327,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
         super.onPause()
         snackBar?.dismiss()
     }
+
     /**
      * Called when login dialog is closed, refreshes the adapter.
      *
@@ -426,8 +427,8 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
             R.id.action_settings -> {
                 router.pushController(
                     (RouterTransaction.with(SettingsMainController())).popChangeHandler(
-                            FadeChangeHandler()
-                        ).pushChangeHandler(FadeChangeHandler())
+                        FadeChangeHandler()
+                    ).pushChangeHandler(FadeChangeHandler())
                 )
             }
             else -> return super.onOptionsItemSelected(item)

@@ -52,9 +52,6 @@ import eu.kanade.tachiyomi.ui.main.BottomSheetController
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.RootSearchInterface
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
-import eu.kanade.tachiyomi.ui.migration.manga.design.PreMigrationController
-import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationListController
-import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationProcedureConfig
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
@@ -77,7 +74,7 @@ import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
-class LibraryController(
+open class LibraryController(
     bundle: Bundle? = null,
     private val preferences: PreferencesHelper = Injekt.get()
 ) : BaseController(bundle),
@@ -912,19 +909,6 @@ class LibraryController(
                     .positiveButton(R.string.action_remove) {
                         deleteMangasFromLibrary()
                     }.negativeButton(android.R.string.no).show()
-            }
-            R.id.action_migrate -> {
-                val skipPre = preferences.skipPreMigration().getOrDefault()
-                router.pushController(
-                    if (skipPre) {
-                        MigrationListController.create(
-                            MigrationProcedureConfig(selectedMangas.mapNotNull { it.id }, null)
-                        )
-                    } else {
-                        PreMigrationController.create(selectedMangas.mapNotNull { it.id })
-                    }.withFadeTransaction().tag(if (skipPre) MigrationListController.TAG else null)
-                )
-                destroyActionModeIfNeeded()
             }
             else -> return false
         }

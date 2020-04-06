@@ -691,6 +691,7 @@ class MangaDetailsController : BaseController,
                 override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
                     presenter.shareManga(resource)
                 }
+
                 override fun onLoadCleared(placeholder: Drawable?) {}
 
                 override fun onLoadFailed(errorDrawable: Drawable?) {
@@ -1098,11 +1099,6 @@ class MangaDetailsController : BaseController,
 
     fun onTrackSearchResults(results: List<TrackSearch>) {
         trackingBottomSheet?.onSearchResults(results)
-    }
-
-    fun refreshTracker() {
-        (recycler.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder)
-            ?.updateTracking()
     }
 
     fun trackRefreshDone() {

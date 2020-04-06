@@ -41,7 +41,9 @@ import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import kotlinx.android.synthetic.main.download_bottom_sheet.*
 import kotlinx.android.synthetic.main.main_activity.*
+import kotlinx.android.synthetic.main.recent_chapters_controller.*
 import kotlinx.android.synthetic.main.recents_controller.*
+import kotlinx.android.synthetic.main.recents_controller.recycler
 import kotlin.math.abs
 import kotlin.math.max
 
@@ -238,7 +240,8 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
     private fun refreshItem(chapterId: Long) {
         val recentItemPos = adapter.currentItems.indexOfFirst {
             it is RecentMangaItem &&
-            it.mch.chapter.id == chapterId }
+                it.mch.chapter.id == chapterId
+        }
         if (recentItemPos > -1) adapter.notifyItemChanged(recentItemPos)
     }
 

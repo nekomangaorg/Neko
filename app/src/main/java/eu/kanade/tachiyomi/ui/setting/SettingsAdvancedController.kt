@@ -19,7 +19,7 @@ import eu.kanade.tachiyomi.data.library.LibraryUpdateService.Target
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
-import eu.kanade.tachiyomi.ui.library.LibraryListController
+import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
@@ -150,13 +150,13 @@ class SettingsAdvancedController : SettingsController() {
                 val activity = activity ?: return@launchUI
                 GlideApp.get(activity).clearMemory()
                 activity?.toast(
-                        resources?.getQuantityString(
-                                R.plurals.cache_deleted,
-                                deletedFiles, deletedFiles
-                        ), Toast.LENGTH_LONG
+                    resources?.getQuantityString(
+                        R.plurals.cache_deleted,
+                        deletedFiles, deletedFiles
+                    ), Toast.LENGTH_LONG
                 )
                 findPreference(CLEAR_CACHE_IMAGES_KEY)?.summary =
-                        resources?.getString(R.string.used_cache, getChaperCacheSize())
+                    resources?.getString(R.string.used_cache, getChaperCacheSize())
             }
         }
     }
@@ -168,40 +168,47 @@ class SettingsAdvancedController : SettingsController() {
         var deletedFiles = 0
 
         Observable.defer { Observable.from(files) }
-                .doOnNext { file ->
-                    if (chapterCache.removeFileFromCache(file.name)) {
-                        deletedFiles++
-                    }
+            .doOnNext { file ->
+                if (chapterCache.removeFileFromCache(file.name)) {
+                    deletedFiles++
                 }
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({
-                }, {
-                    activity?.toast(R.string.cache_delete_error)
-                }, {
-                    activity?.toast(resources?.getQuantityString(R.plurals.cache_deleted,
-                        deletedFiles, deletedFiles))
-                    findPreference(CLEAR_CACHE_KEY)?.summary =
-                            resources?.getString(R.string.used_cache, chapterCache.readableSize)
-                })
+            }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({
+            }, {
+                activity?.toast(R.string.cache_delete_error)
+            }, {
+                activity?.toast(
+                    resources?.getQuantityString(
+                        R.plurals.cache_deleted,
+                        deletedFiles, deletedFiles
+                    )
+                )
+                findPreference(CLEAR_CACHE_KEY)?.summary =
+                    resources?.getString(R.string.used_cache, chapterCache.readableSize)
+            })
     }
 
     class ClearDatabaseDialogController : DialogController() {
         override fun onCreateDialog(savedViewState: Bundle?): Dialog {
             return MaterialDialog(activity!!)
-                    .message(R.string.clear_database_confirmation)
-                    .positiveButton(android.R.string.yes) {
-                        (targetController as? SettingsAdvancedController)?.clearDatabase()
-                    }
-                    .negativeButton(android.R.string.no)
+                .message(R.string.clear_database_confirmation)
+                .positiveButton(android.R.string.yes) {
+                    (targetController as? SettingsAdvancedController)?.clearDatabase()
+                }
+                .negativeButton(android.R.string.no)
         }
     }
 
     private fun clearDatabase() {
         // Avoid weird behavior by going back to the library.
-        val newBackstack = listOf(RouterTransaction.with(
-                LibraryListController())) +
-                router.backstack.drop(1)
+        val newBackstack = listOf(
+            RouterTransaction.with(
+                LibraryController()
+            )
+        ) +
+            router.backstack.drop(1)
 
         router.setBackstack(newBackstack, FadeChangeHandler())
 
