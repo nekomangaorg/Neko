@@ -138,7 +138,7 @@
     <string name="action_restore">Restore</string>
     <string name="action_webview_back">Back</string>
     <string name="action_webview_forward">Forward</string>
-    <string name="action_auto_check_extensions">Notify for extension updates</string>
+    <string name="action_auto_check_extensions">Notify when extension updates are available</string>
     <string name="action_search_manually">Search manually</string>
     <string name="action_migrate_now">Migrate now</string>
     <string name="action_copy_now">Copy now</string>
@@ -710,7 +710,7 @@
 
     <!-- Information Text -->
     <string name="information_no_downloads">No downloads</string>
-    <string name="nothing_downloading">Nothing currently downloading</string>
+    <string name="nothing_downloading">Nothing is currently downloading</string>
     <string name="information_no_recent">No recent chapters</string>
     <string name="information_no_recent_manga">No recently read manga</string>
     <string name="information_empty_library">Your library is empty, add series to your library from the catalogues.</string>
