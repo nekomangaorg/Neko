@@ -949,31 +949,26 @@ class MangaDetailsController : BaseController,
     override fun favoriteManga(longPress: Boolean) {
         if (isLocked()) return
         val manga = presenter.manga
-        if (longPress) {
+        val categories = presenter.getCategories()
+        if (longPress && categories.isNotEmpty()) {
             if (!manga.favorite) {
                 presenter.toggleFavorite()
                 showAddedSnack()
             }
-            val categories = presenter.getCategories()
-            if (categories.isEmpty()) {
-                // no categories exist, display a message about adding categories
-                snack = view?.snack(R.string.action_add_category)
-            } else {
-                val ids = presenter.getMangaCategoryIds(manga)
-                val preselected = ids.mapNotNull { id ->
-                    categories.indexOfFirst { it.id == id }.takeIf { it != -1 }
-                }.toTypedArray()
+            val ids = presenter.getMangaCategoryIds(manga)
+            val preselected = ids.mapNotNull { id ->
+                categories.indexOfFirst { it.id == id }.takeIf { it != -1 }
+            }.toTypedArray()
 
-                ChangeMangaCategoriesDialog(this, listOf(manga), categories, preselected)
-                    .showDialog(router)
-            }
+            ChangeMangaCategoriesDialog(this, listOf(manga), categories, preselected).showDialog(
+                    router
+                )
         } else {
             if (!manga.favorite) {
                 toggleMangaFavorite()
             } else {
                 val headerHolder =
-                    recycler.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder
-                        ?: return
+                    recycler.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder ?: return
                 val popup = PopupMenu(view!!.context, headerHolder.favorite_button)
                 popup.menu.add(R.string.remove_from_library)
 
