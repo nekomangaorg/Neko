@@ -524,29 +524,10 @@ class MangaDetailsController : BaseController,
         // Inflate our menu resource into the PopupMenu's Menu
         popup.menuInflater.inflate(R.menu.chapters_mat_single, popup.menu)
 
-        // Hide bookmark if bookmark
-        popup.menu.findItem(R.id.action_bookmark).isVisible = false // !item.bookmark
-        popup.menu.findItem(R.id.action_remove_bookmark).isVisible = false // item.bookmark
-
-        // Hide mark as unread when the chapter is unread
-//        if (!item.read && item.last_page_read == 0) {
-            popup.menu.findItem(R.id.action_mark_as_unread).isVisible = false
-//        }
-
-        // Hide mark as read when the chapter is read
-//        if (item.read) {
-            popup.menu.findItem(R.id.action_mark_as_read).isVisible = false
-//        }
-
-        // Set a listener so we are notified if a menu item is clicked
         popup.setOnMenuItemClickListener { menuItem ->
             val chapters = listOf(item)
             when (menuItem.itemId) {
-                R.id.action_bookmark -> bookmarkChapters(chapters, true)
-                R.id.action_remove_bookmark -> bookmarkChapters(chapters, false)
-                R.id.action_mark_as_read -> markAsRead(chapters)
                 R.id.action_mark_previous_as_read -> markPreviousAsRead(item)
-                R.id.action_mark_as_unread -> markAsUnread(chapters)
             }
             true
         }
@@ -614,6 +595,7 @@ class MangaDetailsController : BaseController,
             presenter.getNextUnreadChapter() != null && !presenter.isLockedFromSearch
         menu.findItem(R.id.action_mark_all_as_unread).isVisible =
             !presenter.allUnread() && !presenter.isLockedFromSearch
+        menu.findItem(R.id.action_mark_all_as_unread).isVisible = presenter.isTracked()
         val iconPrimary = view?.context?.getResourceColor(android.R.attr.textColorPrimary)
             ?: Color.BLACK
         menu.findItem(R.id.action_download).icon?.mutate()?.setTint(iconPrimary)
@@ -647,29 +629,24 @@ class MangaDetailsController : BaseController,
         when (item.itemId) {
             R.id.action_edit -> {
                 if (manga?.source == LocalSource.ID) {
-                    editMangaDialog =
-                        EditMangaDialog(
-                            this,
-                            presenter.manga
-                        )
+                    editMangaDialog = EditMangaDialog(
+                        this, presenter.manga
+                    )
                     editMangaDialog?.showDialog(router)
                 } else {
                     if (manga?.hasCustomCover() == true) {
                         MaterialDialog(activity!!).listItems(items = listOf(
-                                view!!.context.getString(
-                                    R.string.action_edit_cover
-                                ), view!!.context.getString(
-                                    R.string.action_reset_cover
-                                )
-                            ),
-                                waitForPositiveButton = false,
-                                selection = { _, index, _ ->
-                                    when (index) {
-                                        0 -> changeCover()
-                                        else -> presenter.clearCover()
-                                    }
-                                })
-                            .show()
+                            view!!.context.getString(
+                                R.string.action_edit_cover
+                            ), view!!.context.getString(
+                                R.string.action_reset_cover
+                            )
+                        ), waitForPositiveButton = false, selection = { _, index, _ ->
+                            when (index) {
+                                0 -> changeCover()
+                                else -> presenter.clearCover()
+                            }
+                        }).show()
                     } else {
                         changeCover()
                     }
@@ -678,19 +655,17 @@ class MangaDetailsController : BaseController,
             R.id.action_open_in_web_view -> openInWebView()
             R.id.action_share -> prepareToShareManga()
             R.id.action_add_to_home_screen -> addToHomeScreen()
+            R.id.action_refresh_tracking -> presenter.refreshTrackers()
             R.id.action_mark_all_as_read -> {
-                MaterialDialog(view!!.context)
-                    .message(R.string.mark_all_as_read_message)
+                MaterialDialog(view!!.context).message(R.string.mark_all_as_read_message)
                     .positiveButton(R.string.action_mark_as_read) {
                         markAsRead(presenter.chapters)
-                    }
-                    .negativeButton(android.R.string.cancel)
-                    .show()
+                    }.negativeButton(android.R.string.cancel).show()
             }
             R.id.action_mark_all_as_unread -> markAsUnread(presenter.chapters)
-            R.id.download_next, R.id.download_next_5, R.id.download_next_10,
-            R.id.download_custom, R.id.download_unread, R.id.download_all
-            -> downloadChapters(item.itemId)
+            R.id.download_next, R.id.download_next_5, R.id.download_custom, R.id.download_unread, R.id.download_all -> downloadChapters(
+                item.itemId
+            )
             else -> return super.onOptionsItemSelected(item)
         }
         return true
@@ -759,7 +734,6 @@ class MangaDetailsController : BaseController,
         val chaptersToDownload = when (choice) {
             R.id.download_next -> presenter.getUnreadChaptersSorted().take(1)
             R.id.download_next_5 -> presenter.getUnreadChaptersSorted().take(5)
-            R.id.download_next_10 -> presenter.getUnreadChaptersSorted().take(10)
             R.id.download_custom -> {
                 createActionModeIfNeeded()
                 return

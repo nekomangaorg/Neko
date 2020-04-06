@@ -25,6 +25,7 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
+import eu.kanade.tachiyomi.ui.main.BottomSheetController
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.RootSearchInterface
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
@@ -53,7 +54,8 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
     RecentMangaAdapter.RecentsInterface,
     FlexibleAdapter.OnItemClickListener,
     FlexibleAdapter.OnItemMoveListener,
-    RootSearchInterface {
+    RootSearchInterface,
+    BottomSheetController {
 
     init {
         setHasOptionsMenu(true)
@@ -182,7 +184,7 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
         swipe_refresh.isEnabled = actionState != ItemTouchHelper.ACTION_STATE_SWIPE
     }
 
-    override fun handleRootBack(): Boolean {
+    override fun handleSheetBack(): Boolean {
         if (dl_bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) {
             dl_bottom_sheet.dismiss()
             return true
@@ -353,11 +355,11 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
         }
     }
 
-    fun showDownloads() {
+    override fun showSheet() {
         dl_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
     }
 
-    fun toggleDownloads() {
+    override fun toggleSheet() {
         if (dl_bottom_sheet.sheetBehavior?.isHideable == false) {
             if (showingDownloads) dl_bottom_sheet.dismiss()
             else dl_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED

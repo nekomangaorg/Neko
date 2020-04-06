@@ -28,6 +28,7 @@ import eu.kanade.tachiyomi.ui.catalogue.browse.BrowseCatalogueController
 import eu.kanade.tachiyomi.ui.catalogue.global_search.CatalogueSearchController
 import eu.kanade.tachiyomi.ui.catalogue.latest.LatestUpdatesController
 import eu.kanade.tachiyomi.ui.extension.SettingsExtensionsController
+import eu.kanade.tachiyomi.ui.main.BottomSheetController
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.RootSearchInterface
 import eu.kanade.tachiyomi.ui.setting.SettingsSourcesController
@@ -55,7 +56,7 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
         FlexibleAdapter.OnItemClickListener,
         CatalogueAdapter.OnBrowseClickListener,
         RootSearchInterface,
-
+        BottomSheetController,
         CatalogueAdapter.OnLatestClickListener {
 
     /**
@@ -180,11 +181,11 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
         }
     }
 
-    fun showExtensions() {
+    override fun showSheet() {
         ext_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
     }
 
-    fun toggleExtensions() {
+    override fun toggleSheet() {
         if (ext_bottom_sheet.sheetBehavior?.state != BottomSheetBehavior.STATE_COLLAPSED) {
             ext_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
         } else {
@@ -192,7 +193,7 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
         }
     }
 
-    override fun handleRootBack(): Boolean {
+    override fun handleSheetBack(): Boolean {
         if (ext_bottom_sheet.sheetBehavior?.state != BottomSheetBehavior.STATE_COLLAPSED) {
             ext_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
             return true

@@ -468,56 +468,43 @@ class LibraryPresenter(
         val showCategories = !preferences.hideCategories().getOrDefault()
         val unreadBadgeType = preferences.unreadBadgeType().getOrDefault()
         var libraryManga = db.getLibraryMangas().executeAsBlocking()
-        val singleList = true
+        val seekPref = preferences.alwaysShowSeeker()
         if (!showCategories)
             libraryManga = libraryManga.distinctBy { it.id }
-        /*val libraryMap = libraryManga.map { manga ->
-            LibraryItem(manga, libraryLayout).apply { unreadType = unreadBadgeType }
-        }.groupBy {
-            if (showCategories) it.manga.category else 0
-        }*/
         val categoryAll = Category.createAll(context,
             preferences.librarySortingMode().getOrDefault(),
             preferences.librarySortingAscending().getOrDefault())
-        val catItemAll = LibraryHeaderItem({ categoryAll }, -1)
+        val catItemAll = LibraryHeaderItem({ categoryAll }, -1, seekPref)
         val libraryMap =
-            if (!singleList) {
-                libraryManga.map { manga ->
-                    LibraryItem(manga, libraryLayout, preferences.uniformGrid(), null).apply { unreadType =
-                        unreadBadgeType }
-                }.groupBy {
-                    if (showCategories) it.manga.category else -1
+            libraryManga.groupBy { manga ->
+                if (showCategories) manga.category else -1
+                // LibraryItem(manga, libraryLayout).apply { unreadType = unreadBadgeType }
+            }.map { entry ->
+                val categoryItem =
+                    if (!showCategories) catItemAll else
+                        (LibraryHeaderItem({ getCategory(it) }, entry.key, seekPref))
+                entry.value.map {
+                    LibraryItem(
+                        it, libraryLayout, preferences.uniformGrid(), seekPref, categoryItem
+                    ).apply { unreadType = unreadBadgeType }
                 }
-            } else {
-                libraryManga.groupBy { manga ->
-                    if (showCategories) manga.category else -1
-                    // LibraryItem(manga, libraryLayout).apply { unreadType = unreadBadgeType }
-                }.map { entry ->
-                    val categoryItem =
-                        if (!showCategories) catItemAll else
-                            (LibraryHeaderItem({ getCategory(it) }, entry.key))
-                    entry.value.map {
-                        LibraryItem(
-                            it, libraryLayout, preferences.uniformGrid(), categoryItem
-                        ).apply { unreadType = unreadBadgeType }
-                    }
-                }.map {
-                    val cat = if (showCategories) it.firstOrNull()?.manga?.category ?: 0 else -1
-                    cat to it
-                    // LibraryItem(manga, libraryLayout).apply { unreadType = unreadBadgeType }
-                }.toMap()
-            }.toMutableMap()
+            }.map {
+                val cat = if (showCategories) it.firstOrNull()?.manga?.category ?: 0 else -1
+                cat to it
+                // LibraryItem(manga, libraryLayout).apply { unreadType = unreadBadgeType }
+            }.toMap().toMutableMap()
 
         if (showCategories) {
             categories.forEach { category ->
                 if (category.id ?: 0 <= 0 && !libraryMap.containsKey(category.id)) {
                     val headerItem =
-                        LibraryHeaderItem({ getCategory(category.id!!) }, category.id!!)
+                        LibraryHeaderItem({ getCategory(category.id!!) }, category.id!!, seekPref)
                     libraryMap[category.id!!] = listOf(
                         LibraryItem(
                             LibraryManga.createBlank(category.id!!),
                             libraryLayout,
                             preferences.uniformGrid(),
+                            preferences.alwaysShowSeeker(),
                             headerItem
                         )
                     )

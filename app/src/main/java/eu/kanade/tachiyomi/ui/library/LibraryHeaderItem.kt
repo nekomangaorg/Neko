@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.library
 
 import android.graphics.drawable.Drawable
 import android.view.View
+import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.view.menu.MenuBuilder
@@ -9,6 +10,7 @@ import androidx.appcompat.widget.PopupMenu
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
+import com.f2prateek.rx.preferences.Preference
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.SelectableAdapter
 import eu.davidea.flexibleadapter.items.AbstractHeaderItem
@@ -17,6 +19,7 @@ import eu.davidea.viewholders.FlexibleViewHolder
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
+import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.gone
@@ -24,7 +27,11 @@ import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.visible
 import kotlinx.android.synthetic.main.library_category_header_item.view.*
 
-class LibraryHeaderItem(private val categoryF: (Int) -> Category, val catId: Int) :
+class LibraryHeaderItem(
+    private val categoryF: (Int) -> Category,
+    private val catId: Int,
+    private val showFastScroll: Preference<Boolean>
+) :
     AbstractHeaderItem<LibraryHeaderItem.Holder>() {
 
     override fun getLayoutRes(): Int {
@@ -35,7 +42,7 @@ class LibraryHeaderItem(private val categoryF: (Int) -> Category, val catId: Int
         view: View,
         adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>
     ): Holder {
-        return Holder(view, adapter as LibraryCategoryAdapter)
+        return Holder(view, adapter as LibraryCategoryAdapter, showFastScroll.getOrDefault())
     }
 
     override fun bindViewHolder(
@@ -70,7 +77,7 @@ class LibraryHeaderItem(private val categoryF: (Int) -> Category, val catId: Int
         return -(category.id!!)
     }
 
-    class Holder(val view: View, private val adapter: LibraryCategoryAdapter) :
+    class Holder(val view: View, private val adapter: LibraryCategoryAdapter, padEnd: Boolean) :
         FlexibleViewHolder(view, adapter, true) {
 
         private val sectionText: TextView = view.findViewById(R.id.category_title)
@@ -79,6 +86,9 @@ class LibraryHeaderItem(private val categoryF: (Int) -> Category, val catId: Int
         private val checkboxImage: ImageView = view.findViewById(R.id.checkbox)
 
         init {
+            sortText.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                marginEnd = (if (padEnd && adapter.recyclerView.paddingEnd == 0) 12 else 2).dpToPx
+            }
             updateButton.setOnClickListener { addCategoryToUpdate() }
             sortText.setOnClickListener { it.post { showCatSortOptions() } }
             checkboxImage.setOnClickListener { selectAll() }
@@ -140,7 +150,6 @@ class LibraryHeaderItem(private val categoryF: (Int) -> Category, val catId: Int
             }
         }
         private fun showCatSortOptions() {
-            if (adapter.libraryListener.recyclerIsScrolling()) return
             val category =
                 (adapter.getItem(adapterPosition) as? LibraryHeaderItem)?.category ?: return
             // Create a PopupMenu, giving it the clicked view for an anchor

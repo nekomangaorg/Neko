@@ -7,7 +7,6 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
-import eu.kanade.tachiyomi.util.lang.chop
 import eu.kanade.tachiyomi.util.lang.removeArticles
 import uy.kohesive.injekt.injectLazy
 import java.text.SimpleDateFormat
@@ -158,7 +157,9 @@ class LibraryCategoryAdapter(val libraryListener: LibraryListener) :
         val preferences: PreferencesHelper by injectLazy()
         val db: DatabaseHelper by injectLazy()
         return when (val iFlexible: IFlexible<*>? = getItem(position)) {
-            is LibraryHeaderItem -> iFlexible.category.name
+            is LibraryHeaderItem ->
+                if (!preferences.hideCategories().getOrDefault()) iFlexible.category.name
+                else recyclerView.context.getString(R.string.top)
             is LibraryItem -> {
                 when (preferences.librarySortingMode().getOrDefault()) {
                     LibrarySort.DRAG_AND_DROP -> {
@@ -170,8 +171,7 @@ class LibraryCategoryAdapter(val libraryListener: LibraryListener) :
                         } else {
                             val category = db.getCategoriesForManga(iFlexible.manga)
                                 .executeAsBlocking().firstOrNull()?.name
-                            category?.chop(10)
-                            ?: recyclerView.context.getString(R.string.default_category)
+                            category ?: recyclerView.context.getString(R.string.default_columns)
                         }
                     }
                     LibrarySort.LAST_READ -> {
@@ -265,6 +265,5 @@ class LibraryCategoryAdapter(val libraryListener: LibraryListener) :
         fun sortCategory(catId: Int, sortBy: Int)
         fun selectAll(position: Int)
         fun allSelected(position: Int): Boolean
-        fun recyclerIsScrolling(): Boolean
     }
 }

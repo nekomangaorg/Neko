@@ -2,12 +2,8 @@ package eu.kanade.tachiyomi.ui.base
 
 import android.content.Context
 import android.util.AttributeSet
-import android.view.Gravity
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
-import androidx.appcompat.widget.PopupMenu
 import com.google.android.material.appbar.MaterialToolbar
-import eu.kanade.tachiyomi.util.view.gone
-import eu.kanade.tachiyomi.util.view.visible
 import kotlinx.android.synthetic.main.main_activity.view.*
 
 class CenteredToolbar@JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
@@ -43,21 +39,5 @@ class CenteredToolbar@JvmOverloads constructor(context: Context, attrs: Attribut
             }
             super.setTitle(null)
         }
-    }
-
-    fun showSpinner(): PopupMenu {
-        val popupMenu = PopupMenu(context, title_layout, Gravity.CENTER)
-        dropdown.visible()
-        title_layout.setOnTouchListener(popupMenu.dragToOpenListener)
-        title_layout.setOnClickListener {
-            popupMenu.show()
-        }
-        return popupMenu
-    }
-
-    fun removeSpinner() {
-        dropdown.gone()
-        title_layout.setOnTouchListener(null)
-        title_layout.setOnClickListener(null)
     }
 }

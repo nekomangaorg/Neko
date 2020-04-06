@@ -177,7 +177,7 @@ class PreferencesHelper(val context: Context) {
 
     fun gridSize() = rxPrefs.getInteger(Keys.gridSize, 1)
 
-    fun autoHideSeeker() = rxPrefs.getBoolean("auto_hide_seeker", true)
+    fun alwaysShowSeeker() = rxPrefs.getBoolean("always_show_seeker", false)
 
     fun uniformGrid() = rxPrefs.getBoolean(Keys.uniformGrid, true)
 

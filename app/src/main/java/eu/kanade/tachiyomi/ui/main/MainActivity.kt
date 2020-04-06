@@ -81,7 +81,6 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         private set
     private var searchDrawable: Drawable? = null
     private var dismissDrawable: Drawable? = null
-    private var currentGestureDelegate: SwipeGestureInterface? = null
     private lateinit var gestureDetector: GestureDetectorCompat
 
     private var snackBar: Snackbar? = null
@@ -156,23 +155,9 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                 }, id)
             } else if (currentRoot.tag()?.toIntOrNull() == id) {
                 if (router.backstackSize == 1) {
-                    when (id) {
-                        R.id.nav_recents -> {
-                            val controller =
-                                router.getControllerWithTag(id.toString()) as? RecentsController
-                            controller?.toggleDownloads()
-                        }
-                        R.id.nav_library -> {
-                            val controller =
-                                router.getControllerWithTag(id.toString()) as? LibraryController
-                            controller?.toggleFilters()
-                        }
-                        R.id.nav_catalogues -> {
-                            val controller =
-                                router.getControllerWithTag(id.toString()) as? CatalogueController
-                            controller?.toggleExtensions()
-                        }
-                    }
+                    val controller =
+                        router.getControllerWithTag(id.toString()) as? BottomSheetController
+                    controller?.toggleSheet()
                 }
             }
             true
@@ -389,7 +374,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                 bottom_nav.post {
                     val controller =
                         router.backstack.firstOrNull()?.controller() as? CatalogueController
-                    controller?.showExtensions()
+                    controller?.showSheet()
                 }
             }
             SHORTCUT_MANGA -> {
@@ -398,12 +383,12 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                 router.pushController(MangaDetailsController(extras).withFadeTransaction())
             }
             SHORTCUT_DOWNLOADS -> {
-                bottom_nav.selectedItemId = R.id.nav_catalogues
+                bottom_nav.selectedItemId = R.id.nav_recents
                 router.popToRoot()
                 bottom_nav.post {
                     val controller =
                         router.backstack.firstOrNull()?.controller() as? RecentsController
-                    controller?.showDownloads()
+                    controller?.showSheet()
                 }
             }
             Intent.ACTION_SEARCH, "com.google.android.gms.actions.SEARCH_ACTION" -> {
@@ -446,21 +431,13 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
     }
 
     override fun onBackPressed() {
-        /*if (trulyGoBack) {
-            super.onBackPressed()
-            return
-        }*/
-        /*if (drawer.isDrawerOpen(GravityCompat.START) || drawer.isDrawerOpen(GravityCompat.END)) {
-            drawer.closeDrawers()
-        } else  {*/
-        val baseController = router.backstack.last().controller() as? BaseController
-        if (if (router.backstackSize == 1) !(baseController?.handleRootBack() ?: false)
+        val sheetController = router.backstack.last().controller() as? BottomSheetController
+        if (if (router.backstackSize == 1) !(sheetController?.handleSheetBack() ?: false)
             else !router.handleBack()
         ) {
             SecureActivityDelegate.locked = true
             super.onBackPressed()
         }
-        // }
     }
 
     private fun setRoot(controller: Controller, id: Int) {
@@ -484,8 +461,6 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
 
     override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
         gestureDetector.onTouchEvent(ev)
-        val controller = router.backstack.lastOrNull()?.controller()
-        if (controller is OnTouchEventInterface) controller.onTouchEvent(ev)
         if (ev?.action == MotionEvent.ACTION_DOWN) {
             if (snackBar != null && snackBar!!.isShown) {
                 val sRect = Rect()
@@ -529,10 +504,6 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             toolbar.navigationIcon = drawerArrow
         }
         drawerArrow?.progress = 1f
-
-        currentGestureDelegate = to as? SwipeGestureInterface
-
-        if (to !is SpinnerTitleInterface) toolbar.removeSpinner()
 
         if (to !is DialogController) {
             bottom_nav.visibility =
@@ -587,37 +558,21 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             velocityX: Float,
             velocityY: Float
         ): Boolean {
-            if (currentGestureDelegate == null) return false
             var result = false
-            try {
-                val diffY = e2.y - e1.y
-                val diffX = e2.x - e1.x
-                if (abs(diffX) > abs(diffY)) {
-                    if (abs(diffX) > Companion.SWIPE_THRESHOLD && abs(velocityX) > Companion.SWIPE_VELOCITY_THRESHOLD && abs(
-                            diffY
-                        ) <= Companion.SWIPE_THRESHOLD * 0.75f
-                    ) {
-                        if (diffX > 0) {
-                            currentGestureDelegate?.onSwipeRight(velocityX, e2.x)
-                        } else {
-                            currentGestureDelegate?.onSwipeLeft(velocityX, e2.x)
-                        }
-                        result = true
-                    }
-                } else if (abs(diffY) > Companion.SWIPE_THRESHOLD && abs(
-                        velocityY
-                    ) > Companion.SWIPE_VELOCITY_THRESHOLD
+            val diffY = e2.y - e1.y
+            val diffX = e2.x - e1.x
+            if (abs(diffX) <= abs(diffY)) {
+                val sheetRect = Rect()
+                bottom_nav.getGlobalVisibleRect(sheetRect)
+                if (sheetRect.contains(
+                        e1.x.toInt(), e1.y.toInt()
+                    ) && abs(diffY) > Companion.SWIPE_THRESHOLD && abs(velocityY) > Companion.SWIPE_VELOCITY_THRESHOLD && diffY <= 0
                 ) {
-                    if (diffY > 0) {
-                        currentGestureDelegate?.onSwipeBottom(e1.x, e1.y)
-                        // onSwipeBottom()
-                    } else {
-                        currentGestureDelegate?.onSwipeTop(e1.x, e1.y)
-                    }
-                    result = true
+                    val bottomSheetController =
+                        router.backstack.lastOrNull()?.controller() as? BottomSheetController
+                    bottomSheetController?.showSheet()
                 }
-            } catch (exception: Exception) {
-                exception.printStackTrace()
+                result = true
             }
             return result
         }
@@ -649,19 +604,13 @@ interface BottomNavBarInterface {
 
 interface RootSearchInterface {
     fun expandSearch() {
-        if (this is Controller) activity?.toolbar?.menu?.findItem(R.id.action_search)?.expandActionView()
+        if (this is Controller) activity?.toolbar?.menu?.findItem(R.id.action_search)
+            ?.expandActionView()
     }
 }
 
-interface SpinnerTitleInterface
-
-interface OnTouchEventInterface {
-    fun onTouchEvent(event: MotionEvent?)
-}
-
-interface SwipeGestureInterface {
-    fun onSwipeRight(x: Float, xPos: Float)
-    fun onSwipeLeft(x: Float, xPos: Float)
-    fun onSwipeTop(x: Float, y: Float)
-    fun onSwipeBottom(x: Float, y: Float)
+interface BottomSheetController {
+    fun showSheet()
+    fun toggleSheet()
+    fun handleSheetBack(): Boolean
 }

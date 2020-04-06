@@ -27,7 +27,6 @@ import eu.kanade.tachiyomi.util.system.notificationManager
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.snack
 import kotlinx.android.synthetic.main.download_bottom_sheet.*
-import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.android.synthetic.main.recent_chapters_controller.*
 import kotlinx.android.synthetic.main.recent_chapters_controller.empty_view
 import timber.log.Timber
@@ -87,10 +86,7 @@ class RecentChaptersController(bundle: Bundle? = null) : BaseController(bundle),
         swipe_refresh.setOnRefreshListener {
             if (!LibraryUpdateService.isRunning()) {
                 LibraryUpdateService.start(view.context)
-                view.snack(R.string.updating_library) {
-                    anchorView = (this@RecentChaptersController.activity as? MainActivity)
-                        ?.bottom_nav
-                }
+                snack = view.snack(R.string.updating_library)
             }
             // It can be a very long operation, so we disable swipe refresh and show a snackbar.
             swipe_refresh.isRefreshing = false

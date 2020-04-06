@@ -37,12 +37,17 @@
         android:id="@+id/action_mark_all_as_read"
         android:icon="@drawable/ic_done_all_white_24dp"
         android:title="@string/action_mark_all_as_read"
-        app:showAsAction="never" />
+        app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/action_mark_all_as_unread"
-        android:icon="@drawable/ic_done_all_white_24dp"
         android:title="@string/action_mark_all_as_unread"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_refresh_tracking"
+        android:icon="@drawable/ic_refresh_white_24dp"
+        android:title="@string/action_refresh_tracking"
         app:showAsAction="never" />
 
     <item

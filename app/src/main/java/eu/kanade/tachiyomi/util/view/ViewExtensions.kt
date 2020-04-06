@@ -340,6 +340,7 @@ fun Controller.scrollViewWith(
     val array = recycler.context.obtainStyledAttributes(attrsArray)
     val appBarHeight = array.getDimensionPixelSize(0, 0)
     array.recycle()
+    swipeRefreshLayout?.setDistanceToTriggerSync(150.dpToPx)
     recycler.doOnApplyWindowInsets { view, insets, _ ->
         val headerHeight = insets.systemWindowInsetTop + appBarHeight
         if (!customPadding) view.updatePaddingRelative(
