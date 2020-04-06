@@ -13,7 +13,13 @@ class MdUtil {
         const val followsAllApi = "/api/?type=manga_follows"
         const val followsMangaApi = "/api/?type=manga_follows&manga_id="
 
-        val descriptionLanguages = arrayListOf(
+        val englishDescriptionTags = listOf(
+            "[b][u]English:[/u][/b]",
+            "[b][u]English[/u][/b]",
+            "[English]:"
+        )
+
+        val descriptionLanguages = listOf(
             "[b][u]French[/u][/b]",
             "[b][u]Russian / Русский[/u][/b]",
             "[b] [u] Russian / Русский [/ u] [/ b]",
@@ -22,6 +28,8 @@ class MdUtil {
             "[b][u]German / Deutsch[/u][/b]",
             "[b][u]Espa&ntilde;ol / Spanish:[/u][/b]",
             "[hr][u][b]Spanish / Espa&ntilde;ol:[/b][/u]",
+            "[b] [u] Spanish / Espa & ntilde; ol: [/ u] [/ b]",
+            "[Espa&ntilde;ol]:",
             "[b] Spanish: [/ b]",
             "[b][u]Italian / Italiano[/u][/b]",
             "[b][u]Portuguese (BR) / Portugu&ecirc;s (BR)[/u][/b]",
@@ -33,7 +41,10 @@ class MdUtil {
             "[b][u]French[/u][/b]",
             "[b][u]French / Fran&ccedil;ais[/u][/b]",
             "[b][u]Turkish / T&uuml;rk&ccedil;e[/u][/b]",
-            "[b][u]Arabic / العربية[/u][/b]"
+            "[b][u]Arabic / العربية[/u][/b]",
+            "[hr][b]Links:[/b]",
+            "[b]External Links :[/b]"
+
         )
 
         // guess the thumbnail url is .jpg  this has a ~80% success rate
@@ -86,6 +97,10 @@ class MdUtil {
             var newDescription = string
             descriptionLanguages.forEach { it ->
                 newDescription = newDescription.substringBefore(it)
+            }
+            
+            englishDescriptionTags.forEach { it ->
+                newDescription = newDescription.replace(it, "")
             }
             return cleanString(newDescription)
         }
