@@ -27,6 +27,8 @@ abstract class TrackService(val id: Int) {
 
     open fun getStatusList(): List<Int> = throw Exception("Not used")
 
+    open fun isCompletedStatus(index: Int): Boolean
+
     open fun getStatus(status: Int): String = throw Exception("Not used")
 
     open fun getScoreList(): List<String> = throw Exception("Not used")

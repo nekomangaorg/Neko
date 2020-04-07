@@ -36,6 +36,8 @@ class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
         return listOf(READING, COMPLETED, ON_HOLD, DROPPED, PLAN_TO_READ)
     }
 
+    override fun isCompletedStatus(index: Int) = getStatusList()[index] == COMPLETED
+
     override fun getScoreList(): List<String> {
         return IntRange(0, 10).map(Int::toString)
     }
@@ -121,7 +123,8 @@ class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
         networkService.cookieManager.remove(BASE_URL.toHttpUrlOrNull()!!)
     }
 
-    private val isAuthorized = super.isLogged && getCSRF().isNotEmpty() && checkCookies()
+    private val isAuthorized: Boolean
+        get() = super.isLogged && getCSRF().isNotEmpty() && checkCookies()
 
     fun getCSRF(): String = preferences.trackToken(this).getOrDefault()
 

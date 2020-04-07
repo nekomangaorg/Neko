@@ -38,6 +38,8 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
 
     override fun getStatusList() = listOf(READING, PLANNING, COMPLETED, REPEATING, PAUSED, DROPPED)
 
+    override fun isCompletedStatus(index: Int) = getStatusList()[index] == COMPLETED
+
     override fun getStatus(status: Int): String = with(context) {
         when (status) {
             READING -> getString(R.string.reading)
