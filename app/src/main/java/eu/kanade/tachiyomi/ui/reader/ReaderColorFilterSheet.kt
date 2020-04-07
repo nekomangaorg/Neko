@@ -55,6 +55,7 @@ class ReaderColorFilterSheet(activity: ReaderActivity) : BottomSheetDialog
         setContentView(view)
 
         setEdgeToEdge(activity, view, 0)
+        window?.navigationBarColor = Color.TRANSPARENT
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
             preferences.readerTheme().getOrDefault() == 0 &&
             activity.window.decorView.rootWindowInsets.systemWindowInsetRight == 0 &&
