@@ -3,22 +3,24 @@
     <!-- Application Colors -->
     <color name="colorPrimary">@color/md_white_1000</color>
     <color name="colorPrimaryInactive">#C2424242</color>
-    <color name="drawerColor">#54759E</color>
+    <color name="drawerColor">@color/neko_primary</color>
     <color name="colorPrimaryDark">@color/md_white_1000</color>
     <color name="drawerHighlight">@color/md_black_1000_12</color>
-    <color name="drawerPrimary">@color/bluePrimary</color>
-    <color name="bluePrimary">#54759E</color>
+    <color name="drawerPrimary">@color/neko_primary</color>
+    <color name="bluePrimary">@color/neko_primary</color>
     <color name="mainStatus">#AFFAFAFA</color>
-    <color name="blueStatus">#AF54759E</color>
+    <color name="blueStatus">@color/neko_status</color>
     <color name="blackStatus">#AF000000</color>
     <color name="cardBackground">#FFFFFF</color>
-    <color name="splashBackground">@color/bluePrimary</color>
+    <color name="splashBackground">@color/neko_primary_variant</color>
     <color name="snackbarBackground">#323232</color>
     <color name="trueSnackbarBackground">#323232</color>
     <color name="dialogBackground">@color/md_white_1000</color>
     <color name="fullRippleColor">#C2C2C2</color>
     <color name="rippleColor">@color/md_black_1000_12</color>
-    <color name="colorAccent">@color/md_blue_A400</color>
+    <color name="colorAccent">@color/neko_accent</color>
+    <color name="colorAccentDark">@color/neko_dark_accent</color>
+
     <color name="actionModeShadow">@color/md_black_1000_38</color>
     <!-- Dark Application Colors -->
     <color name="colorAmoledPrimary">@color/md_black_1000</color>
@@ -36,7 +38,7 @@
     <color name="textColorHintInverse">@color/md_white_1000_50</color>
     <color name="divider">@color/md_black_1000_12</color>
     <color name="oldNavBarBackground">#B3FFFFFF</color>
-    <color name="badgeColor">@color/material_red_accent_700</color>
+    <color name="badgeColor">@color/neko_badge_1</color>
 
     <color name="preference_fallback_accent_color">@color/colorAccent</color>
     <color name="darkPrimaryColor">#212121</color>
@@ -90,6 +92,29 @@
     <color name="pale_green">#99CC99</color>
 
     <!-- other colors -->
+
     <color name="mangadex_orange">#F79421</color>
+
+    <color name="neko_primary">#165070</color>
+    <color name="neko_primary_variant">#165070</color>
+    <color name="neko_status">#165070</color>
+    <color name="neko_accent">#367b92</color>
+    <color name="neko_dark_accent">#AF367b92</color>
+    <color name="neko_badge_1">#3ea6aa</color>
+    <color name="neko_badge_2">#2d617e</color>
+
+    <color name="neko_outrun_primary">#2E2157</color>
+    <color name="neko_outrun_primary_variant">#241734</color>
+    <color name="neko_outrun_status">#241734</color>
+    <color name="neko_outrun_accent">#FD3777</color>
+    <color name="neko_outrun_dark_accent">#AFFD3777</color>
+    <color name="neko_outrun_badge_1">#F706CF</color>
+
+    <color name="neko_miami_primary">#41B6E6</color>
+    <color name="neko_miami_primary_variant">#000000</color>
+    <color name="neko_miami_status">#241734</color>
+    <color name="neko_miami_accent">#DB3EB1</color>
+    <color name="neko_miami_dark_accent">#AFDB3EB1</color>
+    <color name="neko_miami_badge_1">#F706CF</color>
 
 </resources>

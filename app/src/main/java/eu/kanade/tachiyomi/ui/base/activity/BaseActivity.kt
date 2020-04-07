@@ -18,11 +18,14 @@ abstract class BaseActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         AppCompatDelegate.setDefaultNightMode(ThemeUtil.nightMode(preferences.theme()))
         val theme = preferences.theme()
-        setTheme(when {
-            ThemeUtil.isAMOLEDTheme(theme) -> R.style.Theme_Tachiyomi_Amoled
-            ThemeUtil.isBlueTheme(theme) -> R.style.Theme_Tachiyomi_AllBlue
-            else -> R.style.Theme_Tachiyomi
-        })
+        setTheme(
+            when {
+                ThemeUtil.isAMOLEDTheme(theme) -> R.style.Theme_Tachiyomi_Amoled
+                ThemeUtil.isBlueTheme(theme) -> R.style.Theme_Tachiyomi_AllBlue
+                ThemeUtil.isNekoTheme(theme) -> R.style.Theme_Neko
+                else -> R.style.Theme_Tachiyomi
+            }
+        )
         super.onCreate(savedInstanceState)
         SecureActivityDelegate.setSecure(this)
     }

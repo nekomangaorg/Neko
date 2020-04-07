@@ -19,12 +19,15 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
         // Update the unread count and its visibility.
         with(unread_text) {
             text = if (unread == -1) "0" else unread.toString()
-            setTextColor(if (unread == -1 && !showTotalChapters)
-                context.getResourceColor(android.R.attr.colorAccent)
-            else Color.WHITE)
+            setTextColor(
+                if (unread == -1 && !showTotalChapters)
+                    context.getResourceColor(android.R.attr.colorAccent)
+                else Color.WHITE
+            )
             setBackgroundColor(
-                if (showTotalChapters) ContextCompat.getColor(context, R.color.material_deep_purple_500)
-                else context.getResourceColor(android.R.attr.colorAccent))
+                if (showTotalChapters) ContextCompat.getColor(context, R.color.neko_badge_2)
+                else context.getResourceColor(android.R.attr.colorAccent)
+            )
             visibility = when {
                 unread > 0 || unread == -1 || showTotalChapters -> View.VISIBLE
                 else -> View.GONE
@@ -41,14 +44,17 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
 
         // Show the bade card if unread or downloads exists
         visibility = if (download_text.visibility == View.VISIBLE || unread_text
-                .visibility != View.GONE) View.VISIBLE else View.GONE
+                .visibility != View.GONE
+        ) View.VISIBLE else View.GONE
 
         // Show the angles divider if both unread and downloads exists
         unread_angle.visibility = if (download_text.visibility == View.VISIBLE && unread_text
-                .visibility != View.GONE) View.VISIBLE else View.GONE
+                .visibility != View.GONE
+        ) View.VISIBLE else View.GONE
         unread_angle.setColorFilter(
             if (showTotalChapters) ContextCompat.getColor(context, R.color.material_deep_purple_500)
-            else context.getResourceColor(android.R.attr.colorAccent))
+            else context.getResourceColor(android.R.attr.colorAccent)
+        )
         if (unread_angle.visibility == View.VISIBLE) {
             download_text.updatePaddingRelative(end = 8.dpToPx)
             unread_text.updatePaddingRelative(start = 2.dpToPx)

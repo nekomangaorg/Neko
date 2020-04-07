@@ -193,6 +193,7 @@
     <string name="pref_theme">App theme</string>
     <string name="light_theme">Light Blue</string>
     <string name="dark_theme">Dark</string>
+    <string name="neko_theme">Neko Theme</string>
     <string name="amoled_theme">AMOLED Black</string>
     <string name="darkblue_theme">Dark Blue</string>
     <string name="system_theme">System default</string>

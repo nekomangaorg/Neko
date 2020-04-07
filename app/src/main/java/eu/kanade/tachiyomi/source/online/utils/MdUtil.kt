@@ -24,6 +24,7 @@ class MdUtil {
             "[b][u]Russian / Русский[/u][/b]",
             "[b] [u] Russian / Русский [/ u] [/ b]",
             "[hr][u][b]Russian / Русский:[/b][/u]",
+            "[u][b]Russian / Русский:[/b][/u]",
             "German/Deutsch:",
             "[b][u]German / Deutsch[/u][/b]",
             "[b][u]Espa&ntilde;ol / Spanish:[/u][/b]",
@@ -32,7 +33,9 @@ class MdUtil {
             "[Espa&ntilde;ol]:",
             "[b] Spanish: [/ b]",
             "[b][u]Italian / Italiano[/u][/b]",
+            "[b]Polish / polski[/b]",
             "[b][u]Portuguese (BR) / Portugu&ecirc;s (BR)[/u][/b]",
+            "[b]Portuguese (BR) / Portugu&ecirc;s (BR)[/b]",
             "[b][u]Português / Portuguese[/u][/b]",
             "[b][u]Portuguese / Portugu[/u][/b]",
             "[b][u]Portuguese / Portugu&ecirc;s:[/u][/b]",
@@ -43,6 +46,7 @@ class MdUtil {
             "[b][u]Turkish / T&uuml;rk&ccedil;e[/u][/b]",
             "[b][u]Arabic / العربية[/u][/b]",
             "[hr][b]Links:[/b]",
+            "Links:",
             "[b]External Links :[/b]"
 
         )

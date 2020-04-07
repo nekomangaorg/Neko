@@ -4,15 +4,15 @@
     <!--============-->
     <!-- Base Theme -->
     <!--============-->
-    <style name="Theme"/>
+    <style name="Theme" />
 
     <style name="Theme.Base" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="android:forceDarkAllowed" tools:targetApi="29">false</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
-        <item name="colorPrimary">@color/bluePrimary</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryVariant">@color/colorPrimary</item>
         <item name="colorSecondary">@color/background</item>
-        <item name="colorPrimaryDark">@color/bluePrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimary</item>
         <item name="colorControlActivated">@color/colorAccent</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:textColorPrimary">@color/textColorPrimary</item>
@@ -56,7 +56,7 @@
         <!-- Material Dialog colors -->
         <item name="md_color_title">@color/textColorPrimary</item>
         <item name="md_color_content">@color/textColorSecondary</item>
-        <item name="md_color_button_text">@color/colorAccent</item>
+        <item name="md_color_button_text">@color/neko_dark_accent</item>
         <item name="md_background_color">@color/dialog</item>
         <item name="md_button_casing">literal</item>
         <item name="md_corner_radius">16dp</item>
@@ -64,7 +64,8 @@
         <item name="android:windowLightNavigationBar" tools:targetApi="27">true</item>
     </style>
 
-    <style name="Theme.Tachiyomi" parent="Theme.Base"/>
+    <style name="Theme.Tachiyomi" parent="Theme.Base" />
+
     <style name="Theme.Tachiyomi.AllBlue" parent="Theme.Tachiyomi">
         <item name="colorPrimaryVariant">@color/bluePrimary</item>
         <item name="colorSecondary">@color/bluePrimary</item>
@@ -76,7 +77,9 @@
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
     </style>
-    <style name="Theme.Tachiyomi.Amoled" parent="Theme.Tachiyomi"/>
+
+    <style name="Theme.Tachiyomi.Amoled" parent="Theme.Tachiyomi" />
+
     <!--==============-->
     <!-- Reader Theme -->
     <!--==============-->
@@ -98,7 +101,7 @@
         <item name="colorPrimary">@color/darkPrimaryTranslucent</item>
         <item name="colorPrimaryDark">@color/darkPrimaryTranslucent</item>
         <item name="android:colorBackground">@android:color/black</item>
-        <item name="colorAccent">#3399FF</item>
+        <item name="colorAccent">@color/colorAccent</item>
         <item name="android:textColorPrimary">@color/md_white_1000</item>
         <item name="android:textColorSecondary">@color/md_white_1000_70</item>
         <item name="android:textColorHint">@color/md_white_1000_50</item>
@@ -166,6 +169,31 @@
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:statusBarColor">?colorPrimaryDark</item>
         <item name="android:navigationBarColor">?colorPrimaryDark</item>
+    </style>
+
+    <style name="Theme.Neko" parent="Theme.Tachiyomi">
+        <item name="colorPrimary">@color/neko_primary</item>
+        <item name="colorSecondary">@color/neko_primary</item>
+        <item name="colorPrimaryVariant">@color/neko_primary</item>
+        <item name="colorOnPrimary">@color/colorAmoledPrimary</item>
+        <item name="colorPrimaryDark">@color/colorAmoledPrimary</item>
+        <item name="android:colorBackground">@color/neko_primary_variant</item>
+        <item name="android:statusBarColor">@color/neko_primary</item>
+        <item name="snackbar_background">@color/neko_primary_variant</item>
+        <item name="snackbar_text">@color/md_white_1000</item>
+
+        <!-- Custom Attributes-->
+        <item name="selectable_list_drawable">@drawable/list_item_selector</item>
+        <item name="selectable_library_drawable">@drawable/library_item_selector_amoled</item>
+        <item name="background_card">@color/neko_primary</item>
+
+
+        <!-- Material Dialog colors -->
+        <item name="md_color_title">@color/textColorPrimary</item>
+        <item name="md_color_content">@color/textColorSecondary</item>
+        <item name="md_color_button_text">@color/colorAccent</item>
+        <item name="md_background_color">@color/colorAmoledPrimary</item>
+        <item name="md_corner_radius">16dp</item>
     </style>
 
     <!--===============-->

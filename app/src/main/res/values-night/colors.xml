@@ -6,14 +6,14 @@
     <color name="colorPrimaryInactive">@color/md_white_1000_76</color>
 
     <color name="drawerHighlight">@color/md_white_1000_12</color>
-    <color name="drawerPrimary">#3399FF</color>
+    <color name="drawerPrimary">@color/neko_accent</color>
     <color name="oldNavBarBackground">#B3000000</color>
     <color name="snackbarBackground">#FFFFFF</color>
     <color name="cardBackground">#212121</color>
     <color name="rippleColor">@color/md_white_1000_20</color>
     <color name="fullRippleColor">#707070</color>
     <color name="dialogBackground">#171717</color>
-    <color name="colorAccent">#3399FF</color>
+    <color name="colorAccent">@color/neko_accent</color>
     <color name="splashBackground">#212121</color>
     <color name="mainStatus">#AF1C1C1D</color>
     <color name="actionModeShadow">@color/md_white_1000_38</color>
@@ -29,8 +29,9 @@
     <color name="background">#1C1C1D</color>
     <color name="dialog">#212121</color>
 
-    <color name="selectorColor">@color/md_blue_A200_50</color>
+    <color name="selectorColor">@color/neko_dark_accent</color>
     <color name="iconColor">@color/md_white_1000_54</color>
     <color name="button_bg">@color/md_grey_800</color>
     <color name="gray_button">#BFBFBF</color>
+
 </resources>

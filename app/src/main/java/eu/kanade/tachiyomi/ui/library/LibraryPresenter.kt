@@ -328,8 +328,10 @@ class LibraryPresenter(
                     val manga2LastRead = lastReadManga[i2.manga.id!!] ?: lastReadManga.size
                     manga1LastRead.compareTo(manga2LastRead)
                 }
-                sortingMode == LibrarySort.LATEST_CHAPTER -> i2.manga.last_update.compareTo(i1
-                    .manga.last_update)
+                sortingMode == LibrarySort.LATEST_CHAPTER -> i2.manga.last_update.compareTo(
+                    i1
+                        .manga.last_update
+                )
                 sortingMode == LibrarySort.UNREAD ->
                     when {
                         i1.manga.unread == i2.manga.unread -> 0
@@ -472,9 +474,11 @@ class LibraryPresenter(
         val seekPref = preferences.alwaysShowSeeker()
         if (!showCategories)
             libraryManga = libraryManga.distinctBy { it.id }
-        val categoryAll = Category.createAll(context,
+        val categoryAll = Category.createAll(
+            context,
             preferences.librarySortingMode().getOrDefault(),
-            preferences.librarySortingAscending().getOrDefault())
+            preferences.librarySortingAscending().getOrDefault()
+        )
         val catItemAll = LibraryHeaderItem({ categoryAll }, -1, seekPref)
         val libraryMap =
             libraryManga.groupBy { manga ->
