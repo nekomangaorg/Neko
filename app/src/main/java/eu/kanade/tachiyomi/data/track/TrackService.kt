@@ -27,6 +27,8 @@ abstract class TrackService(val id: Int) {
 
     abstract fun getStatusList(): List<Int>
 
+    abstract fun isCompletedStatus(index: Int): Boolean
+
     abstract fun getStatus(status: Int): String
 
     abstract fun getScoreList(): List<String>

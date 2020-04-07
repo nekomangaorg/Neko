@@ -44,6 +44,8 @@ class Kitsu(private val context: Context, id: Int) : TrackService(id) {
         return listOf(READING, PLAN_TO_READ, COMPLETED, ON_HOLD, DROPPED)
     }
 
+    override fun isCompletedStatus(index: Int) = getStatusList()[index] == COMPLETED
+
     override fun getStatus(status: Int): String = with(context) {
         when (status) {
             READING -> getString(R.string.currently_reading)
