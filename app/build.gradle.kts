@@ -148,7 +148,7 @@ dependencies {
     implementation("com.github.inorichi:unifile:e9ee588")
 
 // HTML parser
-    implementation("org.jsoup:jsoup:1.12.2")
+    implementation("org.jsoup:jsoup:1.13.1")
 
 //Icons
     implementation("com.mikepenz:iconics-core:5.0.1@aar")

@@ -32,6 +32,7 @@
             android:elevation="10dp"
             android:layout_gravity="end"
             android:background="@drawable/fast_scroll_background"
+            android:backgroundTint="@color/md_grey_800"
             android:paddingTop="8dp"
             android:paddingBottom="8dp"
             android:paddingStart="3dp"

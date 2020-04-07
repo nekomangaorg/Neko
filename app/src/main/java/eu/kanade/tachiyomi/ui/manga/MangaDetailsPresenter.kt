@@ -59,6 +59,9 @@ class MangaDetailsPresenter(
     var isLockedFromSearch = false
     var hasRequested = false
     var isLoading = false
+    var scrollType = 0
+    private val volumeRegex = Regex("""(vol|volume)\.? *([0-9]+)?""", RegexOption.IGNORE_CASE)
+    private val seasonRegex = Regex("""(Season |S)([0-9]+)?""")
 
     private val trackManager: TrackManager by lazy { Injekt.get<TrackManager>() }
     private val loggedServices by lazy { trackManager.services.filter { it.isLogged } }
@@ -246,9 +249,71 @@ class MangaDetailsPresenter(
             else -> { c1, c2 -> c1.source_order.compareTo(c2.source_order) }
         }
         chapters = chapters.sortedWith(Comparator(sortFunction))
+        getScrollType(chapters)
         return chapters
     }
 
+    private fun getScrollType(chapters: List<ChapterItem>) {
+        scrollType = when {
+            hasMultipleVolumes(chapters) -> MULTIPLE_VOLUMES
+            hasMultipleSeasons(chapters) -> MULTIPLE_SEASONS
+            hasHundredsOfChapters(chapters) -> HUNDREDS_OF_CHAPTERS
+            hasTensOfChapters(chapters) -> TENS_OF_CHAPTERS
+            else -> 0
+        }
+    }
+
+    fun getGroupNumber(chapter: ChapterItem): Int? {
+        val groups = volumeRegex.find(chapter.name)?.groups
+        if (groups != null) return groups[2]?.value?.toIntOrNull()
+        val seasonGroups = seasonRegex.find(chapter.name)?.groups
+        if (seasonGroups != null) return seasonGroups[2]?.value?.toIntOrNull()
+        return null
+    }
+
+    private fun getVolumeNumber(chapter: ChapterItem): Int? {
+        val groups = volumeRegex.find(chapter.name)?.groups
+        if (groups != null) return groups[2]?.value?.toIntOrNull()
+        return null
+    }
+
+    private fun getSeasonNumber(chapter: ChapterItem): Int? {
+        val groups = seasonRegex.find(chapter.name)?.groups
+        if (groups != null) return groups[2]?.value?.toIntOrNull()
+        return null
+    }
+
+    private fun hasMultipleVolumes(chapters: List<ChapterItem>): Boolean {
+        val volumeSet = mutableSetOf<Int>()
+        chapters.forEach {
+            val volNum = getVolumeNumber(it)
+            if (volNum != null) {
+                volumeSet.add(volNum)
+                if (volumeSet.size >= 3) return true
+            }
+        }
+        return false
+    }
+
+    private fun hasMultipleSeasons(chapters: List<ChapterItem>): Boolean {
+        val volumeSet = mutableSetOf<Int>()
+        chapters.forEach {
+            val volNum = getSeasonNumber(it)
+            if (volNum != null) {
+                volumeSet.add(volNum)
+                if (volumeSet.size >= 3) return true
+            }
+        }
+        return false
+    }
+
+    private fun hasHundredsOfChapters(chapters: List<ChapterItem>): Boolean {
+        return chapters.size > 300
+    }
+
+    private fun hasTensOfChapters(chapters: List<ChapterItem>): Boolean {
+        return chapters.size in 21..300
+    }
     /**
      * Returns the next unread chapter or null if everything is read.
      */
@@ -346,6 +411,14 @@ class MangaDetailsPresenter(
             }
             isLoading = false
             if (chapterError == null) withContext(Dispatchers.Main) { controller.updateChapters(this@MangaDetailsPresenter.chapters) }
+            else {
+                withContext(Dispatchers.Main) {
+                    controller.showError(
+                        trimException(mangaError!!)
+                    )
+                }
+                return@launch
+            }
             if (mangaError != null) withContext(Dispatchers.Main) {
                 controller.showError(
                     trimException(mangaError!!)
@@ -756,5 +829,12 @@ class MangaDetailsPresenter(
         val track = item.track!!
         track.last_chapter_read = chapterNumber
         updateRemote(track, item.service)
+    }
+
+    companion object {
+        const val MULTIPLE_VOLUMES = 1
+        const val TENS_OF_CHAPTERS = 2
+        const val HUNDREDS_OF_CHAPTERS = 3
+        const val MULTIPLE_SEASONS = 4
     }
 }

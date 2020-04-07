@@ -392,7 +392,7 @@
             android:id="@+id/filter_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="9dp"
+            android:layout_marginEnd="20dp"
             android:background="@null"
             android:padding="5dp"
             android:src="@drawable/ic_filter_list_white_24dp"

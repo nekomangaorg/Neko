@@ -25,6 +25,7 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewPropertyAnimator
 import android.view.animation.DecelerateInterpolator
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
@@ -55,6 +56,8 @@ import com.bumptech.glide.request.transition.Transition
 import com.bumptech.glide.signature.ObjectKey
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
+import com.reddit.indicatorfastscroll.FastScrollItemIndicator
+import com.reddit.indicatorfastscroll.FastScrollerView
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.SelectableAdapter
 import eu.kanade.tachiyomi.R
@@ -164,6 +167,8 @@ class MangaDetailsController : BaseController,
     private var startingDLChapterPos: Int? = null
     private var externalBottomSheet: ExternalBottomSheet? = null
     var refreshTracker: Int? = null
+    private var textAnim: ViewPropertyAnimator? = null
+    private var scrollAnim: ViewPropertyAnimator? = null
 
     /**
      * Library search query.
@@ -183,6 +188,7 @@ class MangaDetailsController : BaseController,
     // Hold a reference to the current animator, so that it can be canceled mid-way.
     private var currentAnimator: Animator? = null
 
+    var showScroll = false
     var headerHeight = 0
 
     init {
@@ -211,7 +217,6 @@ class MangaDetailsController : BaseController,
             )
         )
         recycler.setHasFixedSize(true)
-        adapter?.fastScroller = fast_scroller
         val attrsArray = intArrayOf(android.R.attr.actionBarSize)
         val array = view.context.obtainStyledAttributes(attrsArray)
         val appbarHeight = array.getDimensionPixelSize(0, 0)
@@ -227,15 +232,15 @@ class MangaDetailsController : BaseController,
             swipe_refresh.setProgressViewOffset(false, (-40).dpToPx, headerHeight + offset)
             (recycler.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder)
                 ?.setTopHeight(headerHeight)
-            fast_scroller?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                topMargin = statusBarHeight
+            fast_scroll_layout.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                topMargin = headerHeight
                 bottomMargin = insets.systemWindowInsetBottom
             }
             v.updatePaddingRelative(bottom = insets.systemWindowInsetBottom)
         }
 
         presenter.onCreate()
-
+        fast_scroller.translationX = if (showScroll) 0f else 22f.dpToPx
         recycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
@@ -257,6 +262,19 @@ class MangaDetailsController : BaseController,
                 if (atTop) {
                     getHeader()?.backdrop?.translationY = 0f
                     activity!!.appbar.y = 0f
+                }
+                val fPosition =
+                    (recycler.layoutManager as LinearLayoutManager).findFirstCompletelyVisibleItemPosition()
+                if (fPosition > 0 && !showScroll) {
+                    showScroll = true
+                    scrollAnim?.cancel()
+                    scrollAnim = fast_scroller.animate().setDuration(100).translationX(0f)
+                        scrollAnim?.start()
+                } else if (fPosition <= 0 && showScroll) {
+                    showScroll = false
+                    scrollAnim?.cancel()
+                    scrollAnim = fast_scroller.animate().setDuration(100).translationX(22f.dpToPx)
+                    scrollAnim?.start()
                 }
             }
 
@@ -290,6 +308,38 @@ class MangaDetailsController : BaseController,
         })
         setPaletteColor()
 
+        fast_scroller.setupWithRecyclerView(recycler, { position ->
+            val letter = adapter?.getSectionText(position)
+            when {
+                presenter.scrollType == 0 -> null
+                letter != null -> FastScrollItemIndicator.Text(letter)
+                else -> FastScrollItemIndicator.Icon(R.drawable.star)
+            }
+        })
+        fast_scroller.useDefaultScroller = false
+        fast_scroller.itemIndicatorSelectedCallbacks += object :
+            FastScrollerView.ItemIndicatorSelectedCallback {
+            override fun onItemIndicatorSelected(
+                indicator: FastScrollItemIndicator,
+                indicatorCenterY: Int,
+                itemPosition: Int
+            ) {
+                textAnim?.cancel()
+                textAnim = text_view_m.animate().alpha(0f).setDuration(250L).setStartDelay(1000)
+                textAnim?.start()
+
+                text_view_m.translationY = indicatorCenterY.toFloat() - text_view_m.height / 2
+                text_view_m.alpha = 1f
+                text_view_m.text = adapter?.getFullText(itemPosition)
+                val appbar = activity?.appbar
+                appbar?.y = 0f
+                (recycler.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
+                    itemPosition, headerHeight
+                )
+                colorToolbar(itemPosition > 0, false)
+            }
+        }
+
         swipe_refresh.isRefreshing = presenter.isLoading
         if (manga?.initialized != true)
             swipe_refresh.post { swipe_refresh.isRefreshing = true }
@@ -297,7 +347,8 @@ class MangaDetailsController : BaseController,
         swipe_refresh.setOnRefreshListener { presenter.refreshAll() }
     }
 
-    fun colorToolbar(isColor: Boolean) {
+    fun colorToolbar(isColor: Boolean, animate: Boolean = true) {
+        if (isColor == toolbarIsColored) return
         toolbarIsColored = isColor
         val isCurrentController =
             router?.backstack?.lastOrNull()?.controller() == this@MangaDetailsController
@@ -318,6 +369,7 @@ class MangaDetailsController : BaseController,
             color, if (toolbarIsColored) 175 else 0
         )
         colorAnimator?.cancel()
+        if (animate) {
         colorAnimator = ValueAnimator.ofObject(
             android.animation.ArgbEvaluator(), colorFrom, colorTo
         )
@@ -327,6 +379,10 @@ class MangaDetailsController : BaseController,
             activity?.window?.statusBarColor = (animator.animatedValue as Int)
         }
         colorAnimator?.start()
+        } else {
+            (activity as MainActivity).toolbar.setBackgroundColor(colorTo)
+            activity?.window?.statusBarColor = colorTo
+        }
     }
 
     fun setPaletteColor() {
