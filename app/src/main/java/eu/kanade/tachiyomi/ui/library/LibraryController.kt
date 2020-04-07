@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.library
 import android.app.Activity
 import android.content.Context
 import android.content.res.ColorStateList
+import android.graphics.Color
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.LayoutInflater
@@ -67,11 +68,8 @@ import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import kotlinx.android.synthetic.main.filter_bottom_sheet.*
 import kotlinx.android.synthetic.main.library_grid_recycler.*
-import kotlinx.android.synthetic.main.library_grid_recycler.recycler
 import kotlinx.android.synthetic.main.library_list_controller.*
-import kotlinx.android.synthetic.main.library_list_controller.swipe_refresh
 import kotlinx.android.synthetic.main.main_activity.*
-import kotlinx.android.synthetic.main.recents_controller.*
 import kotlinx.coroutines.delay
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -199,9 +197,8 @@ class LibraryController(
             context, R.drawable.fast_scroll_background
         ) else null
         fast_scroller.textColor = ColorStateList.valueOf(
-            context.getResourceColor(
-                if (!alwaysShowScroller) android.R.attr.textColorPrimaryInverse else android.R.attr.textColorPrimary
-            )
+            if (!alwaysShowScroller) Color.WHITE
+            else context.getResourceColor(android.R.attr.textColorPrimary)
         )
         fast_scroller.iconColor = fast_scroller.textColor
     }

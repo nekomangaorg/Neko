@@ -48,9 +48,15 @@ interface Source {
     fun fetchPageList(chapter: SChapter): Observable<List<Page>>
 }
 
-suspend fun Source.fetchMangaDetails(manga: SManga): SManga? {
+suspend fun Source.fetchMangaDetailsAsync(manga: SManga): SManga? {
     return withContext(Dispatchers.IO) {
         fetchMangaDetails(manga).toBlocking().single()
+    }
+}
+
+suspend fun Source.fetchChapterListAsync(manga: SManga): List<SChapter>? {
+    return withContext(Dispatchers.IO) {
+        fetchChapterList(manga).toBlocking().single()
     }
 }
 

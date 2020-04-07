@@ -49,6 +49,7 @@ import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.source.fetchMangaDetailsAsync
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.system.sendLocalBroadcast
 import kotlinx.coroutines.Dispatchers
@@ -286,7 +287,7 @@ class BackupManager(val context: Context, version: Int = CURRENT_VERSION) {
      */
     suspend fun restoreMangaFetch(source: Source, manga: Manga): Manga {
         return withContext(Dispatchers.IO) {
-            val networkManga = source.fetchMangaDetails(manga).toBlocking().single()
+            val networkManga = source.fetchMangaDetailsAsync(manga)!!
             manga.copyFrom(networkManga)
             manga.favorite = true
             manga.initialized = true

@@ -148,7 +148,7 @@ dependencies {
     implementation("com.github.inorichi:unifile:e9ee588")
 
 // HTML parser
-    implementation("org.jsoup:jsoup:1.12.2")
+    implementation("org.jsoup:jsoup:1.13.1")
 
 // Job scheduling
     implementation("com.evernote:android-job:1.4.2")
