@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.reader
 
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.view.View
@@ -31,6 +32,7 @@ class ReaderPageSheet(
     init {
         setContentView(view)
         setEdgeToEdge(activity, view)
+        window?.navigationBarColor = Color.TRANSPARENT
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
             Injekt.get<PreferencesHelper>().readerTheme().getOrDefault() == 0 &&
             activity.window.decorView.rootWindowInsets.systemWindowInsetRight == 0 &&

@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.reader
 
 import android.content.res.Configuration
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.view.View
@@ -53,6 +54,7 @@ class ReaderSettingsSheet(private val activity: ReaderActivity) :
             activity, scroll, if (context.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE)
                 0 else -1
         )
+        window?.navigationBarColor = Color.TRANSPARENT
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && preferences.readerTheme()
                 .getOrDefault() == 0 && activity.window.decorView.rootWindowInsets.systemWindowInsetRight == 0 && activity.window.decorView.rootWindowInsets.systemWindowInsetLeft == 0
         ) window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
