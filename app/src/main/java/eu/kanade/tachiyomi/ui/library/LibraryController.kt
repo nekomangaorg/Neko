@@ -842,7 +842,6 @@ open class LibraryController(
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_search -> expandActionViewFromInteraction = true
-            R.id.action_library_display -> DisplayBottomSheet(this).show()
             else -> return super.onOptionsItemSelected(item)
         }
         return true
@@ -909,6 +908,11 @@ open class LibraryController(
                     .positiveButton(R.string.action_remove) {
                         deleteMangasFromLibrary()
                     }.negativeButton(android.R.string.no).show()
+            }
+            R.id.action_sync_to_dex -> {
+                presenter.syncMangaToDex(selectedMangas.toList())
+                destroyActionModeIfNeeded()
+                applicationContext?.toast("Adding to mangadex follows")
             }
             else -> return false
         }
