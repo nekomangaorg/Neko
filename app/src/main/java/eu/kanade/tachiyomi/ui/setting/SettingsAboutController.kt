@@ -51,7 +51,6 @@ class SettingsAboutController : SettingsController() {
 
     override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
         titleRes = R.string.pref_category_about
-        throw RuntimeException("test Error")
         switchPreference {
             key = "acra.enable"
             titleRes = R.string.pref_enable_acra

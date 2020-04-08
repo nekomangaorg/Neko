@@ -81,7 +81,6 @@ class MangaDetailsPresenter(
         headerItem.isLocked = isLockedFromSearch
         downloadManager.addListener(this)
         LibraryUpdateService.setListener(this)
-        fetchExternalLinks()
         tracks = db.getTracks(manga).executeAsBlocking()
         if (!manga.initialized) {
             isLoading = true
@@ -92,8 +91,9 @@ class MangaDetailsPresenter(
             updateChapters()
             controller.updateChapters(this.chapters)
         }
+        fetchExternalLinks()
         fetchTrackings()
-        // refreshTrackers()
+        refreshTrackers()
     }
 
     fun onDestroy() {
@@ -314,6 +314,7 @@ class MangaDetailsPresenter(
     private fun hasTensOfChapters(chapters: List<ChapterItem>): Boolean {
         return chapters.size in 21..300
     }
+
     /**
      * Returns the next unread chapter or null if everything is read.
      */
