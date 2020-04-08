@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.catalogue.browse
 
-import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
@@ -12,7 +11,6 @@ import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.f2prateek.rx.preferences.Preference
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.jakewharton.rxbinding.support.v7.widget.queryTextChangeEvents
@@ -22,6 +20,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.source.CatalogueSource
 import eu.kanade.tachiyomi.source.model.Filter
 import eu.kanade.tachiyomi.source.model.FilterList
@@ -110,11 +109,6 @@ open class BrowseCatalogueController(bundle: Bundle) :
     private var searchViewSubscription: Subscription? = null
 
     /**
-     * Subscription for the number of manga per row.
-     */
-    private var numColumnsSubscription: Subscription? = null
-
-    /**
      * Endless loading item.
      */
     private var progressItem: ProgressItem? = null
@@ -150,8 +144,6 @@ open class BrowseCatalogueController(bundle: Bundle) :
     }
 
     override fun onDestroyView(view: View) {
-        numColumnsSubscription?.unsubscribe()
-        numColumnsSubscription = null
         searchViewSubscription?.unsubscribe()
         searchViewSubscription = null
         adapter = null
@@ -161,8 +153,6 @@ open class BrowseCatalogueController(bundle: Bundle) :
     }
 
     private fun setupRecycler(view: View) {
-        numColumnsSubscription?.unsubscribe()
-
         var oldPosition = RecyclerView.NO_POSITION
         val oldRecycler = catalogue_view?.getChildAt(1)
         if (oldRecycler is RecyclerView) {
@@ -181,11 +171,11 @@ open class BrowseCatalogueController(bundle: Bundle) :
             }
         } else {
             (catalogue_view.inflate(R.layout.catalogue_recycler_autofit) as AutofitRecyclerView).apply {
-                numColumnsSubscription = getColumnsPreferenceForCurrentOrientation().asObservable()
-                        .doOnNext { spanCount = it }
-                        .skip(1)
-                        // Set again the adapter to recalculate the covers height
-                        .subscribe { adapter = this@BrowseCatalogueController.adapter }
+                columnWidth = when (preferences.gridSize().getOrDefault()) {
+                    0 -> 1f
+                    2 -> 1.66f
+                    else -> 1.25f
+                }
 
                 (layoutManager as androidx.recyclerview.widget.GridLayoutManager).spanSizeLookup = object : androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup() {
                     override fun getSpanSize(position: Int): Int {
@@ -456,18 +446,6 @@ open class BrowseCatalogueController(bundle: Bundle) :
             }
             presenter.initializeMangas(mangas)
         }
-    }
-
-    /**
-     * Returns a preference for the number of manga per row based on the current orientation.
-     *
-     * @return the preference.
-     */
-    fun getColumnsPreferenceForCurrentOrientation(): Preference<Int> {
-        return if (resources?.configuration?.orientation == Configuration.ORIENTATION_PORTRAIT)
-            preferences.portraitColumns()
-        else
-            preferences.landscapeColumns()
     }
 
     /**

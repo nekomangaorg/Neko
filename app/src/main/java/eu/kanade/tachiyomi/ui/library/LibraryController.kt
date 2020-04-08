@@ -378,11 +378,14 @@ class LibraryController(
         if (libraryLayout == 0) {
             recycler.spanCount = 1
             recycler.updatePaddingRelative(
-                start = 0,
-                end = 0
+                start = 0, end = 0
             )
         } else {
-            recycler.columnWidth = (90 + (preferences.gridSize().getOrDefault() * 30)).dpToPx
+            recycler.columnWidth = when (preferences.gridSize().getOrDefault()) {
+                0 -> 1f
+                2 -> 1.66f
+                else -> 1.25f
+            }
             recycler.updatePaddingRelative(
                 start = (if (alwaysShowScroller) 2 else 5).dpToPx,
                 end = (if (alwaysShowScroller) 12 else 5).dpToPx
