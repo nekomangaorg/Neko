@@ -747,15 +747,6 @@ class LibraryPresenter(
             .subscribe()
     }
 
-    fun hideShowTitle(mangas: List<Manga>, hide: Boolean) {
-        mangas.forEach { it.hide_title = hide }
-        db.inTransaction {
-            mangas.forEach {
-                db.updateMangaHideTitle(it).executeAsBlocking()
-            }
-        }
-    }
-
     private fun migrateMangaInternal(
         source: Source,
         sourceChapters: List<SChapter>,
