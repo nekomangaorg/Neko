@@ -11,10 +11,10 @@ import com.pushtorefresh.storio.sqlite.queries.InsertQuery
 import com.pushtorefresh.storio.sqlite.queries.UpdateQuery
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
-import eu.kanade.tachiyomi.data.database.tables.MangaTable
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_ARTIST
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_AUTHOR
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_CHAPTER_FLAGS
+import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_DATE_ADDED
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_DESCRIPTION
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_FAVORITE
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_GENRE
@@ -63,7 +63,7 @@ class MangaPutResolver : DefaultPutResolver<Manga>() {
         put(COL_INITIALIZED, obj.initialized)
         put(COL_VIEWER, obj.viewer)
         put(COL_CHAPTER_FLAGS, obj.chapter_flags)
-        put(MangaTable.COL_DATE_ADDED, obj.date_added)
+        put(COL_DATE_ADDED, obj.date_added)
     }
 }
 
@@ -84,7 +84,7 @@ interface BaseMangaGetResolver {
         initialized = cursor.getInt(cursor.getColumnIndex(COL_INITIALIZED)) == 1
         viewer = cursor.getInt(cursor.getColumnIndex(COL_VIEWER))
         chapter_flags = cursor.getInt(cursor.getColumnIndex(COL_CHAPTER_FLAGS))
-        date_added = cursor.getLong(cursor.getColumnIndex(MangaTable.COL_DATE_ADDED))
+        date_added = cursor.getLong(cursor.getColumnIndex(COL_DATE_ADDED))
     }
 }
 

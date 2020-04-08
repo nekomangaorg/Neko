@@ -43,10 +43,11 @@ interface Manga : SManga {
         else sortDescending()
     }
 
-    fun showChapterTitle(defaultShow: Boolean): Boolean {
-        return chapter_flags and DISPLAY_MASK == DISPLAY_NUMBER
-    }
+    fun showChapterTitle(defaultShow: Boolean): Boolean = chapter_flags and DISPLAY_MASK == DISPLAY_NUMBER
 
+    /**
+     * The type of comic the manga is (ie. manga, manhwa, manhua)
+     */
     fun mangaType(): Int {
         val sourceName = Injekt.get<SourceManager>().getOrStub(source).name
         val currentTags = genre?.split(",")?.map { it.trim().toLowerCase(Locale.US) }
@@ -79,6 +80,10 @@ interface Manga : SManga {
         else TYPE_MANGA
     }
 
+    /**
+     * The type the reader should use. Different from manga type as certain manga has different
+     * read types
+     */
     fun defaultReaderType(): Int {
         val sourceName = Injekt.get<SourceManager>().getOrStub(source).name
         val currentTags = genre?.split(",")?.map { it.trim().toLowerCase(Locale.US) }
@@ -144,10 +149,6 @@ interface Manga : SManga {
         const val SORT_GLOBAL = 0x00000000
         const val SORT_LOCAL = 0x00001000
         const val SORT_SELF_MASK = 0x00001000
-
-        /*const val HIDE_GLOBAL = 0x00000000
-        const val HIDE_LOCAL = 0x00010000
-        const val HIDE_SELF_MASK = 0x00010000*/
 
         // Generic filter that does not filter anything
         const val SHOW_ALL = 0x00000000
