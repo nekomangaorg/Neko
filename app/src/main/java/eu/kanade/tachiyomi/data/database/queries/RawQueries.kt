@@ -93,6 +93,7 @@ fun getRecentsQueryDistinct(search: String) = """
     ON ${Chapter.TABLE}.${Chapter.COL_MANGA_ID} = newest_chapter.${Chapter.COL_MANGA_ID}
     WHERE ${Manga.COL_FAVORITE} = 1
     AND newest_chapter.${History.COL_CHAPTER_ID} = ${Chapter.TABLE}.${Chapter.COL_ID}
+    AND ${Chapter.COL_DATE_FETCH} > ${Manga.COL_DATE_ADDED}
     AND lower(${Manga.COL_TITLE}) LIKE '%$search%'
     ORDER BY ${Chapter.COL_DATE_UPLOAD} DESC
     LIMIT 8

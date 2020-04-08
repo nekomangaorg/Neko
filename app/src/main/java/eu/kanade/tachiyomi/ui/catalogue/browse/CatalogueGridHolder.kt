@@ -10,6 +10,7 @@ import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.ui.library.LibraryCategoryAdapter
+import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.widget.StateImageViewTarget
 import kotlinx.android.synthetic.main.catalogue_grid_item.*
 import kotlinx.android.synthetic.main.unread_download_badge.*
@@ -25,9 +26,18 @@ import kotlinx.android.synthetic.main.unread_download_badge.*
  */
 class CatalogueGridHolder(
     private val view: View,
-    private val adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>
-) :
-    CatalogueHolder(view, adapter) {
+    private val adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
+    compact: Boolean
+) : CatalogueHolder(view, adapter) {
+
+    init {
+        if (compact) {
+            text_layout.gone()
+        } else {
+            compact_title.gone()
+            gradient.gone()
+        }
+    }
 
     /**
      * Method called from [LibraryCategoryAdapter.onBindViewHolder]. It updates the data for this
@@ -37,7 +47,8 @@ class CatalogueGridHolder(
      */
     override fun onSetValues(manga: Manga) {
         // Update the title of the manga.
-        compact_title.text = manga.title
+        title.text = manga.title
+        compact_title.text = title.text
         badge_view.setInLibrary(manga.favorite)
 
         // Update the cover.
