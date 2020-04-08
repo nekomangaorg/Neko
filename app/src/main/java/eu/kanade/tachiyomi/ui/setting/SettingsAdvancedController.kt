@@ -17,7 +17,6 @@ import eu.kanade.tachiyomi.data.library.LibraryUpdateService.Target
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
-import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast

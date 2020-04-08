@@ -33,7 +33,12 @@ class TrackHolder(view: View, adapter: TrackAdapter) : BaseViewHolder(view) {
         track_group.visibleIf(track != null)
         add_tracking.visibleIf(track == null)
         if (track != null) {
-            track_title.text = track.title
+
+            with(track_title) {
+                text = track.title
+                isClickable = item.service.isMdList().not()
+            }
+
             with(track_chapters) {
                 text = when {
                     track.total_chapters > 0 && track.last_chapter_read == track.total_chapters ->

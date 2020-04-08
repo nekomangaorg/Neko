@@ -27,7 +27,7 @@ abstract class TrackService(val id: Int) {
 
     open fun getStatusList(): List<Int> = throw Exception("Not used")
 
-    open fun isCompletedStatus(index: Int): Boolean
+    open fun isCompletedStatus(index: Int): Boolean = throw Exception("Not used")
 
     open fun getStatus(status: Int): String = throw Exception("Not used")
 
@@ -47,7 +47,8 @@ abstract class TrackService(val id: Int) {
 
     open suspend fun refresh(track: Track): Track = throw Exception("Not used")
 
-    open suspend fun login(username: String, password: String): Boolean = throw Exception("Not used")
+    open suspend fun login(username: String, password: String): Boolean =
+        throw Exception("Not used")
 
     open fun isMdList() = false
 
@@ -58,7 +59,7 @@ abstract class TrackService(val id: Int) {
 
     open val isLogged: Boolean
         get() = getUsername().isNotEmpty() &&
-                getPassword().isNotEmpty()
+            getPassword().isNotEmpty()
 
     fun getUsername() = preferences.trackUsername(this)!!
 

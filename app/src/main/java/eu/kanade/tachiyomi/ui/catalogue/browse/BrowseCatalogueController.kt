@@ -20,6 +20,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.Filter
 import eu.kanade.tachiyomi.source.model.FilterList
@@ -162,7 +163,10 @@ open class BrowseCatalogueController(bundle: Bundle) :
             RecyclerView(view.context).apply {
                 id = R.id.recycler
                 layoutManager = LinearLayoutManager(context)
-                layoutParams = RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+                layoutParams = RecyclerView.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
                 addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
             }
         } else {
@@ -173,14 +177,15 @@ open class BrowseCatalogueController(bundle: Bundle) :
                     else -> 1.25f
                 }
 
-                (layoutManager as androidx.recyclerview.widget.GridLayoutManager).spanSizeLookup = object : androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup() {
-                    override fun getSpanSize(position: Int): Int {
-                        return when (adapter?.getItemViewType(position)) {
-                            R.layout.catalogue_grid_item, null -> 1
-                            else -> spanCount
+                (layoutManager as androidx.recyclerview.widget.GridLayoutManager).spanSizeLookup =
+                    object : androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup() {
+                        override fun getSpanSize(position: Int): Int {
+                            return when (adapter?.getItemViewType(position)) {
+                                R.layout.catalogue_grid_item, null -> 1
+                                else -> spanCount
+                            }
                         }
                     }
-                }
             }
         }
         recycler.clipToPadding = false

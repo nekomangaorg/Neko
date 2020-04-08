@@ -9,7 +9,6 @@ plugins {
     kotlin("android.extensions")
     kotlin("kapt")
     id("org.jmailen.kotlinter") version "2.3.1"
-    id("com.github.zellius.shortcut-helper")
     id("org.jetbrains.kotlin.plugin.serialization")
     id("com.google.firebase.crashlytics")
     id("com.google.gms.google-services") //apply false
@@ -82,10 +81,6 @@ android {
 }
 androidExtensions {
     isExperimental = true
-}
-
-shortcutHelper {
-    setFilePath("./shortcuts.xml")
 }
 
 dependencies {

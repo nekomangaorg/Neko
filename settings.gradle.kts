@@ -14,8 +14,6 @@ pluginManagement {
                 useModule("com.google.gms:google-services:4.3.3")
             } else if (requested.id.id.equals("com.google.gms.google-services")) {
                 useModule("com.google.gms:google-services:4.3.3")
-            } else if (requested.id.id.equals("com.github.zellius.shortcut-helper")) {
-                useModule("com.github.zellius:android-shortcut-gradle-plugin:0.1.2")
             } else if (requested.id.id.equals("com.google.firebase.crashlytics")) {
                 useModule("com.google.firebase:firebase-crashlytics-gradle:2.0.0-beta03")
             }
