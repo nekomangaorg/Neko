@@ -44,7 +44,7 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
 
     override suspend fun update(track: Track): Track {
         return withContext(Dispatchers.IO) {
-            val manga = db.getManga(track.tracking_url.substringAfter(".org/"), mdex.id)
+            val manga = db.getManga(track.tracking_url.substringAfter(".org"), mdex.id)
                 .executeAsBlocking()!!
             val followStatus = FollowStatus.fromInt(track.status)!!
 
