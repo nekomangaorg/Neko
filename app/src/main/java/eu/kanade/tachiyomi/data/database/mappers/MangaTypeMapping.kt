@@ -11,8 +11,6 @@ import com.pushtorefresh.storio.sqlite.queries.InsertQuery
 import com.pushtorefresh.storio.sqlite.queries.UpdateQuery
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
-import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_ANILIST_ID
-import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_ANIME_PLANET_ID
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_ARTIST
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_AUTHOR
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_CHAPTER_FLAGS
@@ -72,6 +70,7 @@ class MangaPutResolver : DefaultPutResolver<Manga>() {
         put(COL_VIEWER, obj.viewer)
         put(COL_CHAPTER_FLAGS, obj.chapter_flags)
         put(COL_DATE_ADDED, obj.date_added)
+        put(COL_DATE_ADDED, obj.date_added)
         put(COL_LANG_FLAG, obj.lang_flag)
         put(COL_FOLLOW_STATUS, obj.follow_status?.int)
         put(COL_ANILIST_ID, obj.anilist_id)
@@ -99,8 +98,6 @@ interface BaseMangaGetResolver {
         initialized = cursor.getInt(cursor.getColumnIndex(COL_INITIALIZED)) == 1
         viewer = cursor.getInt(cursor.getColumnIndex(COL_VIEWER))
         chapter_flags = cursor.getInt(cursor.getColumnIndex(COL_CHAPTER_FLAGS))
-        date_added = cursor.getLong(cursor.getColumnIndex(MangaTable.COL_DATE_ADDED))
-        hide_title = cursor.getInt(cursor.getColumnIndex(COL_HIDE_TITLE)) == 1
         date_added = cursor.getLong(cursor.getColumnIndex(COL_DATE_ADDED))
         lang_flag = cursor.getString(cursor.getColumnIndex(COL_LANG_FLAG))
         anilist_id = cursor.getString(cursor.getColumnIndex(COL_ANILIST_ID))

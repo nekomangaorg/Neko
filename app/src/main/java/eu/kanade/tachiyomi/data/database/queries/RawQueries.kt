@@ -64,7 +64,7 @@ fun getRecentsQuery() = """
 """
 
 /**
- * Query to get the recent chapters of manga from the library up to a date.
+ * Query to get the recently added manga
  */
 fun getRecentAdditionsQuery(search: String) = """
     SELECT ${Manga.TABLE}.${Manga.COL_URL} as mangaUrl, * FROM ${Manga.TABLE}
@@ -76,7 +76,7 @@ fun getRecentAdditionsQuery(search: String) = """
 """
 
 /**
- * Query to get the recent chapters of manga from the library up to a date.
+ * Query to get the manga with recently uploaded chapters
  */
 fun getRecentsQueryDistinct(search: String) = """
     SELECT ${Manga.TABLE}.${Manga.COL_URL} as mangaUrl, ${Manga.TABLE}.*, ${Chapter.TABLE}.*
@@ -153,7 +153,8 @@ fun getRecentMangasLimitQuery(limit: Int = 25, search: String = "") = """
 """
 
 /**
- * Query to get the recently read chapters of manga from the library up to a date.
+ * Query to get the recently read manga that has more chapters to read
+ * The first from checks that there's an unread chapter
  * The max_last_read table contains the most recent chapters grouped by manga
  * The select statement returns all information of chapters that have the same id as the chapter in max_last_read
  * and are read after the given time period
