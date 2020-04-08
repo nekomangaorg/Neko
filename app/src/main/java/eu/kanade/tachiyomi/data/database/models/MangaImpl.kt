@@ -39,8 +39,6 @@ open class MangaImpl : Manga {
 
     override var chapter_flags: Int = 0
 
-    override var hide_title: Boolean = false
-
     override var date_added: Long = 0
 
     override var follow_status: FollowStatus? = null

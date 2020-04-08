@@ -61,7 +61,6 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
             db.execSQL(SimilarTable.createMangaIdIndexQuery)
         }
         if (oldVersion < 13) {
-            db.execSQL(MangaTable.addHideTitle)
             db.execSQL(CategoryTable.addMangaOrder)
             db.execSQL(ChapterTable.pagesLeftQuery)
         }

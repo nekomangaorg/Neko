@@ -737,15 +737,6 @@ class LibraryPresenter(
         db.setMangaCategories(mc, mangas)
     }
 
-    fun hideShowTitle(mangas: List<Manga>, hide: Boolean) {
-        mangas.forEach { it.hide_title = hide }
-        db.inTransaction {
-            mangas.forEach {
-                db.updateMangaHideTitle(it).executeAsBlocking()
-            }
-        }
-    }
-
     fun getFirstUnread(manga: Manga): Chapter? {
         val chapters = db.getChapters(manga).executeAsBlocking()
         return chapters.sortedByDescending { it.source_order }.find { !it.read }
