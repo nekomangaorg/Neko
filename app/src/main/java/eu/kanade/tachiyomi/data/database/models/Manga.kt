@@ -54,7 +54,7 @@ interface Manga : SManga {
             TYPE_MANHUA -> R.string.manhua
             TYPE_COMIC -> R.string.comic
             else -> R.string.manga
-        })
+        }).toLowerCase(Locale.getDefault())
     }
 
     /**

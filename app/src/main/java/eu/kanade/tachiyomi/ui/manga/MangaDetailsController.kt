@@ -242,7 +242,7 @@ class MangaDetailsController : BaseController,
         }
 
         presenter.onCreate()
-        fast_scroller.translationX = if (showScroll) 0f else 22f.dpToPx
+        fast_scroller.translationX = if (showScroll) 0f else 25f.dpToPx
         recycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
@@ -275,7 +275,7 @@ class MangaDetailsController : BaseController,
                 } else if (fPosition <= 0 && showScroll) {
                     showScroll = false
                     scrollAnim?.cancel()
-                    scrollAnim = fast_scroller.animate().setDuration(100).translationX(22f.dpToPx)
+                    scrollAnim = fast_scroller.animate().setDuration(100).translationX(25f.dpToPx)
                     scrollAnim?.start()
                 }
             }
@@ -690,7 +690,8 @@ class MangaDetailsController : BaseController,
             presenter.getNextUnreadChapter() != null && !presenter.isLockedFromSearch
         menu.findItem(R.id.action_mark_all_as_unread).isVisible =
             !presenter.allUnread() && !presenter.isLockedFromSearch
-        menu.findItem(R.id.action_remove_downloads).isVisible = !presenter.isLockedFromSearch
+        menu.findItem(R.id.action_remove_downloads).isVisible =
+            presenter.hasDownloads() && !presenter.isLockedFromSearch
         menu.findItem(R.id.remove_non_bookmarked).isVisible =
             presenter.hasBookmark() && !presenter.isLockedFromSearch
         menu.findItem(R.id.action_mark_all_as_unread).isVisible = presenter.isTracked()

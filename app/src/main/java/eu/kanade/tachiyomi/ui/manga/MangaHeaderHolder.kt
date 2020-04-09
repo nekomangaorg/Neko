@@ -28,7 +28,6 @@ import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.util.view.visibleIf
 import kotlinx.android.synthetic.main.manga_details_controller.*
 import kotlinx.android.synthetic.main.manga_header_item.*
-import java.util.Locale
 
 class MangaHeaderHolder(
     private val view: View,
@@ -137,15 +136,7 @@ class MangaHeaderHolder(
             else expand()
         }
         manga_summary_label.text = itemView.context.getString(
-            R.string.about_this_, itemView.context.getString(
-                when {
-                    manga.mangaType() == Manga.TYPE_MANHWA -> R.string.manhwa
-                    manga.mangaType() == Manga.TYPE_MANHUA -> R.string.manhua
-                    manga.mangaType() == Manga.TYPE_COMIC -> R.string.comic
-                    manga.mangaType() == Manga.TYPE_WEBTOON -> R.string.webtoon
-                    else -> R.string.manga
-                }
-            ).toLowerCase(Locale.getDefault())
+            R.string.about_this_, manga.mangaType(itemView.context)
         )
         with(favorite_button) {
             icon = ContextCompat.getDrawable(
