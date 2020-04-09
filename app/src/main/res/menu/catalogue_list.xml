@@ -12,7 +12,7 @@
 
     <item
         android:id="@+id/action_display_mode"
-        android:title="@string/display_mode"
+        android:title="@string/display_as"
         app:showAsAction="ifRoom" />
 
     <item

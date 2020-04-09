@@ -8,7 +8,6 @@ import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.category.CategoryController
-import kotlinx.android.synthetic.main.pref_library_columns.view.*
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
@@ -23,8 +22,8 @@ class SettingsLibraryController : SettingsController() {
             titleRes = R.string.display
             switchPreference {
                 key = Keys.removeArticles
-                titleRes = R.string.pref_remove_articles
-                summaryRes = R.string.pref_remove_articles_summary
+                titleRes = R.string.sort_by_ignoring_articles
+                summaryRes = R.string.when_sorting_ignore_articles
                 defaultValue = false
             }
         }
@@ -36,8 +35,7 @@ class SettingsLibraryController : SettingsController() {
             preference {
                 titleRes = R.string.edit_categories
                 val catCount = db.getCategories().executeAsBlocking().size
-                summary =
-                    context.resources.getQuantityString(R.plurals.category, catCount, catCount)
+                summary = context.resources.getQuantityString(R.plurals.category, catCount, catCount)
                 onClick { router.pushController(CategoryController().withFadeTransaction()) }
             }
             intListPreference(activity) {
@@ -76,7 +74,7 @@ class SettingsLibraryController : SettingsController() {
             }
             intListPreference(activity) {
                 key = Keys.libraryUpdateInterval
-                titleRes = R.string.pref_library_update_interval
+                titleRes = R.string.library_update_frequency
                 entriesRes = arrayOf(
                     R.string.manual,
                     R.string.hourly,
@@ -119,7 +117,7 @@ class SettingsLibraryController : SettingsController() {
             }
             switchPreference {
                 key = Keys.updateOnlyNonCompleted
-                titleRes = R.string.pref_update_only_non_completed
+                titleRes = R.string.only_update_ongoing
                 defaultValue = false
             }
 
@@ -134,12 +132,12 @@ class SettingsLibraryController : SettingsController() {
                 )
                 entryRange = 0..1
                 defaultValue = 0
-                summaryRes = R.string.pref_library_update_prioritization_summary
+                summaryRes = R.string.select_order_to_update
             }
 
             multiSelectListPreferenceMat(activity) {
                 key = Keys.libraryUpdateCategories
-                titleRes = R.string.pref_library_update_categories
+                titleRes = R.string.categories_to_include_in_global_update
                 entries = dbCategories.map { it.name }
                 entryValues = dbCategories.map { it.id.toString() }
                 allSelectionRes = R.string.all

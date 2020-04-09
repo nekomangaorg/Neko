@@ -102,7 +102,7 @@ class SettingsGeneralController : SettingsController() {
                             0 -> context.getString(R.string.always)
                             -1 -> context.getString(R.string.never)
                             else -> resources?.getQuantityString(
-                                R.plurals.lock_after_mins, it.toInt(), it
+                                R.plurals.after_minutes, it.toInt(), it
                             )
                         }
                     }

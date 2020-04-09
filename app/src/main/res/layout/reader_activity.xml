@@ -64,7 +64,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="?selectableItemBackgroundBorderless"
-                android:contentDescription="@string/previous_chapter"
+                android:contentDescription="@string/previous"
                 android:padding="@dimen/material_layout_keylines_screen_edge_margin"
                 app:srcCompat="@drawable/ic_skip_previous_white_24dp" />
 
@@ -101,7 +101,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="?selectableItemBackgroundBorderless"
-                android:contentDescription="@string/next_chapter"
+                android:contentDescription="@string/next"
                 android:padding="@dimen/material_layout_keylines_screen_edge_margin"
                 app:srcCompat="@drawable/ic_skip_next_white_24dp" />
 

@@ -92,17 +92,17 @@ class MangaDetailsAdapter(
             MangaDetailsPresenter.MULTIPLE_VOLUMES, MangaDetailsPresenter.MULTIPLE_SEASONS -> {
                 val volume = presenter.getGroupNumber(chapter)
                 if (volume != null) recyclerView.context.getString(
-                    if (scrollType == MangaDetailsPresenter.MULTIPLE_SEASONS) R.string.season_x
-                    else R.string.volume_x, volume)
+                    if (scrollType == MangaDetailsPresenter.MULTIPLE_SEASONS) R.string.season_
+                    else R.string.volume_, volume)
                 else recyclerView.context.getString(R.string.unknown)
             }
             MangaDetailsPresenter.HUNDREDS_OF_CHAPTERS -> recyclerView.context.getString(
-                R.string.chapters_x, get100sRange(
+                R.string.chapters_, get100sRange(
                     chapter.chapter_number
                 )
             )
             MangaDetailsPresenter.TENS_OF_CHAPTERS -> recyclerView.context.getString(
-                R.string.chapters_x, get10sRange(
+                R.string.chapters_, get10sRange(
                     chapter.chapter_number
                 )
             )

@@ -60,7 +60,7 @@ class RecentMangaHeaderItem(val recentsType: Int) :
             title.setText(when (recentsType) {
                 CONTINUE_READING -> R.string.continue_reading
                 NEW_CHAPTERS -> R.string.new_chapters
-                NEWLY_ADDED -> R.string.new_additions
+                NEWLY_ADDED -> R.string.newly_added
                 else -> R.string.continue_reading
             })
         }

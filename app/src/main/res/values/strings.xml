@@ -4,160 +4,68 @@
 
     <!--Models-->
     <string name="name">Name</string>
-    <string name="categories">Categories</string>
+
+    <!-- Manga Type -->
     <string name="manga">Manga</string>
     <string name="manhwa">Manhwa</string>
     <string name="manhua">Manhua</string>
     <string name="comic">Comic</string>
-    <string name="chapters">Chapters</string>
-    <string name="tracking">Tracking</string>
-    <string name="history">History</string>
+    <string name="webtoon">Webtoon</string>
 
-    <!-- Activities and fragments labels (toolbar title) -->
-    <string name="settings">Settings</string>
-    <string name="download_queue">Download queue</string>
-    <string name="library">Library</string>
-    <string name="recently_read">Recently read</string>
-    <string name="catalogues">Catalogues</string>
-    <string name="recent_updates">Recent updates</string>
-    <string name="new_chapters">New chapters</string>
-    <string name="new_additions">Newly added</string>
-    <string name="selected_">Selected: %1$d</string>
-    <string name="source_migration">Source migration</string>
-    <string name="extensions">Extensions</string>
-    <string name="extension_info">Extension info</string>
-    <string name="help">Help</string>
-    <string name="unlock">Unlock</string>
-    <string name="unlock_library">Unlock to access Library</string>
-    <plurals name="updates_available">
-        <item quantity="one">Update available</item>
-        <item quantity="other">%d updates available</item>
-    </plurals>
-    <plurals name="extensions_updates_available">
-        <item quantity="one">Extension update available</item>
-        <item quantity="other">%d extension updates available</item>
-    </plurals>
-    <string name="downloading_">Downloading: %1$s</string>
-    <plurals name="downloads_pending">
-        <item quantity="one">1 in queue</item>
-        <item quantity="other">%d in queue</item>
-    </plurals>
-
-    <!-- Actions -->
-    <string name="filter">Filter</string>
-    <string name="sort_and_filter">Sort &amp; Filter</string>
-    <string name="display_options">Display options</string>
-    <string name="downloaded">Downloaded</string>
-    <string name="not_downloaded">Not downloaded</string>
-    <string name="bookmarked">Bookmarked</string>
-    <string name="unread">Unread</string>
+    <!-- Manga -->
     <string name="not_started">Not started</string>
     <string name="in_progress">In progress</string>
     <string name="read">Read</string>
-    <string name="tracked">Tracked</string>
-    <string name="not_tracked">Not tracked</string>
-    <string name="hide_categories">Hide categories</string>
-    <string name="start_with_filters_hidden">Start with filters hidden</string>
-    <string name="hiding_categories">Hiding categories</string>
-    <string name="update">Update</string>
-    <string name="delete">Delete</string>
+    <string name="title">Title</string>
+    <string name="author">Author</string>
+    <string name="artist">Artist</string>
+    <string name="description">Description</string>
 
-    <string name="unlock_trackers">Unlock to access trackers</string>
+    <!-- Status -->
+    <string name="ongoing">Ongoing</string>
+    <string name="unknown">Unknown</string>
+    <string name="unknown_status">Unknown Status</string>
+    <string name="licensed">Licensed</string>
+    <string name="completed">Completed</string>
 
-    <string name="sort_by_">Sort by: %1$s</string>
-    <string name="alphabetically">Alphabetically</string>
-    <string name="enabled">Enabled</string>
-    <string name="total_chapters">Total chapters</string>
-    <string name="date_added">Date added</string>
-    <string name="last_read">Last read</string>
-    <string name="drag_and_drop">Drag &amp; Drop</string>
-    <string name="search">Search</string>
-    <string name="dont_migrate">Don\'t migrate</string>
-    <string name="select_all">Select all</string>
-    <string name="mark_as_read">Mark as read</string>
-    <string name="mark_all_as_read">Mark all as read</string>
-    <string name="mark_all_as_unread">Mark all as unread</string>
-    <string name="refresh_tracking">Refresh tracking</string>
-    <string name="mark_as_unread">Mark as unread</string>
-    <string name="mark_previous_as_read">Mark previous as read</string>
-    <string name="download">Download</string>
+    <!-- Security -->
+    <string name="unlock_library">Unlock to access Library</string>
+    <string name="unlock">Unlock</string>
+    <string name="lock_with_biometrics">Lock with biometrics</string>
+    <string name="lock_when_idle">Lock when idle</string>
+
+    <!-- Chapters -->
+    <string name="chapters">Chapters</string>
+    <string name="new_chapters">New chapters</string>
+    <string name="unread">Unread</string>
     <string name="bookmark">Bookmark</string>
-    <string name="remove_download">Remove download</string>
-    <string name="start_downloading_now">Start downloading now</string>
-    <string name="update_library">Update library</string>
-    <string name="edit">Edit</string>
-    <string name="edit_cover">Edit cover</string>
-    <string name="reset_cover">Reset cover</string>
-    <string name="add">Add</string>
-    <string name="add_category">Add category</string>
-    <string name="edit_categories">Edit categories</string>
-    <string name="rename_category">Rename category</string>
-    <string name="move_to_categories">Move to categories</string>
-    <string name="view_chapters">View chapters</string>
-    <string name="start">Start</string>
-    <string name="stop">Stop</string>
-    <string name="pause">Pause</string>
-    <string name="cancel_all">Cancel all</string>
-    <string name="clear">Clear</string>
-    <string name="close">Close</string>
-    <string name="previous_chapter">Previous chapter</string>
-    <string name="next_chapter">Next chapter</string>
-    <string name="retry">Retry</string>
-    <string name="remove">Remove</string>
-    <string name="resume">Resume</string>
-    <string name="move">Move</string>
-    <string name="open_in_browser">Open in browser</string>
-    <string name="open_in_web_view">Open in web view</string>
-    <string name="add_to_home_screen">Add to home screen</string>
-    <string name="display_mode">Display mode</string>
-    <string name="display">Display</string>
-    <string name="comfortable_grid">Comfortable Grid</string>
-    <string name="compact_grid">Compact Grid</string>
-    <string name="list">List</string>
-    <string name="download_badge">Download badges</string>
-    <string name="always_show_library_fast_scroll">Always show library fast scroll</string>
-    <string name="unread_badges">Unread badges</string>
-    <string name="cancel">Cancel</string>
-    <string name="sort">Sort</string>
-    <string name="install">Install</string>
-    <string name="share">Share</string>
-    <string name="save">Save</string>
-    <string name="reset">Reset</string>
-    <string name="undo">Undo</string>
-    <string name="use_default">Use Default</string>
-    <string name="create">Create</string>
-    <string name="restore">Restore</string>
-    <string name="back">Back</string>
-    <string name="forward">Forward</string>
-    <string name="notify_extension_updates">Notify when extension updates are available</string>
-    <string name="search_manually">Search manually</string>
-    <string name="migrate_now">Migrate now</string>
-    <string name="copy_now">Copy now</string>
-    <string name="reorder">Reorder</string>
-    <string name="last_updated">Last Updated</string>
-    <string name="latest_chapter">Latest chapter</string>
-    <string name="newest">Newest</string>
-    <string name="oldest">Oldest</string>
-    <string name="move_to_top">Move to top</string>
-    <string name="move_to_bottom">Move to bottom</string>
-    <string name="bug_report">Report a Bug</string>
-    <string name="updating_library">Updating library</string>
-    <string name="default_value">Default</string>
-    <string name="top">Top</string>
-    <string name="bottom">Bottom</string>
-    <string name="all">All</string>
-    <string name="downloading">Downloading</string>
+    <string name="previously_read_chapter">Previously read Chapter %1$s</string>
+    <string name="last_read_chapter_">Last read Chapter %1$s</string>
+    <string name="chapter_">Chapter %1$s</string>
+    <string name="chapter_x_of_y">Chapter %1$d of %2$d</string>
+    <string name="all_chapters_read">All chapters read</string>
+    <string name="bookmarked">Bookmarked</string>
+    <string name="marked_as_read">Marked as read</string>
+    <string name="marked_as_unread">Marked as unread</string>
+    <string name="removed_bookmark">Removed bookmark</string>
+    <plurals name="chapters">
+        <item quantity="one">%1$d chapter</item>
+        <item quantity="other">%1$d chapters</item>
+    </plurals>
+    <plurals name="pages_left">
+        <item quantity="one">%1$d page left</item>
+        <item quantity="other">%1$d pages left</item>
+    </plurals>
 
-    <!-- Library -->
-    <string name="updating_">Updating %1$s</string>
+    <!-- Category -->
+    <string name="category">Category</string>
+    <string name="categories">Categories</string>
     <string name="adding_category_to_queue">Adding %1$s to update queue</string>
     <string name="_already_in_queue">%1$s is already in queue</string>
-    <string name="moved_to_">Moved to %1$s</string>
+    <string name="create_new_category">Create new category</string>
     <string name="category_is_empty">Category is empty</string>
-    <string name="local">Local</string>
-    <string name="remove_from_library_question">Remove from library?</string>
-    <string name="what_should_update">What should update?</string>
     <string name="top_category">Top category (%1$s)</string>
+    <string name="default_category">Default category</string>
     <string name="first_category">First category</string>
     <string name="categories_on_manual">Categories to update when manually refreshing</string>
     <string name="categories_in_global_update">All categories in global update</string>
@@ -165,7 +73,59 @@
     <string name="confirm_category_deletion_message">Manga in this category will moved into the
         default category.</string>
     <string name="already_in_category">Manga already in category</string>
-    <string name="category">Category</string>
+    <string name="add_category">Add category</string>
+    <string name="edit_categories">Edit categories</string>
+    <string name="rename_category">Rename category</string>
+    <string name="move_to_categories">Move to categories</string>
+    <string name="hide_categories">Hide categories</string>
+    <plurals name="category">
+        <item quantity="one">%d category</item>
+        <item quantity="other">%d categories</item>
+    </plurals>
+    <string name="category_with_name_exists">A category with this name already exists!</string>
+    <string name="category_deleted">Category deleted</string>
+
+    <!-- Updates -->
+    <string name="update">Update</string>
+    <string name="what_should_update">What should update?</string>
+    <string name="updating_">Updating %1$s</string>
+    <string name="update_available">Update available</string>
+    <string name="new_version_available">New version available!</string>
+    <string name="no_new_updates_available">No new updates available</string>
+    <string name="searching_for_updates">Searching for updates…</string>
+
+    <!-- Main Screens -->
+
+    <!-- Library -->
+    <string name="library">Library</string>
+    <string name="updating_library">Updating library</string>
+    <string name="selected_">Selected: %1$d</string>
+    <string name="update_library">Update library</string>
+    <string name="local">Local</string>
+    <string name="remove_from_library_question">Remove from library?</string>
+    <string name="library_search_hint">Search title, tags, source</string>
+    <string name="library_is_empty_add_from_browse">Your library is empty, add series to your
+        library from the browse tab.</string>
+    <string name="no_matches_for_filters">No matches found for your current filters</string>
+
+    <!-- Library Sort -->
+    <string name="sort_by_">Sort by: %1$s</string>
+    <string name="total_chapters">Total chapters</string>
+    <string name="date_added">Date added</string>
+    <string name="last_read">Last read</string>
+    <string name="last_updated">Last Updated</string>
+    <string name="latest_chapter">Latest chapter</string>
+    <string name="drag_and_drop">Drag &amp; Drop</string>
+
+    <!-- Library Display -->
+    <string name="display_options">Display options</string>
+    <string name="list">List</string>
+    <string name="comfortable_grid">Comfortable Grid</string>
+    <string name="compact_grid">Compact Grid</string>
+    <string name="start_with_filters_hidden">Start with filters hidden</string>
+    <string name="download_badge">Download badges</string>
+    <string name="always_show_library_fast_scroll">Always show library fast scroll</string>
+    <string name="unread_badges">Unread badges</string>
     <string name="uniform_covers">Uniform covers</string>
     <string name="small">Small</string>
     <string name="medium">Medium</string>
@@ -176,102 +136,78 @@
     <string name="show_badges">Show badges</string>
     <string name="show_count">Show count</string>
     <string name="hide_filters_tip">To show filters again, tap the Library icon</string>
+    <string name="display_as">Display as</string>
 
-    <!-- Category -->
-    <string name="create_new_category">Create new category</string>
+    <!-- Library update service notifications -->
+    <string name="new_chapters_found">New chapters found</string>
+    <plurals name="for_n_titles">
+        <item quantity="one">For %d title</item>
+        <item quantity="other">For %d titles</item>
+    </plurals>
+    <plurals name="notification_and_n_more">
+        <item quantity="one">and %1$d more chapter</item>
+        <item quantity="other">and %1$d more chapters</item>
+    </plurals>
 
     <!-- Library settings -->
-    <plurals name="category">
-        <item quantity="one">%d category</item>
-        <item quantity="other">%d categories</item>
-    </plurals>
-    <string name="pref_library_update_interval">Library update frequency</string>
-    <string name="manual">Manual</string>
-    <string name="hourly">Hourly</string>
-    <string name="every_2_hours">Every 2 hours</string>
-    <string name="every_3_hours">Every 3 hours</string>
-    <string name="every_6_hours">Every 6 hours</string>
-    <string name="every_12_hours">Every 12 hours</string>
-    <string name="daily">Daily</string>
-    <string name="every_2_days">Every 2 days</string>
-    <string name="weekly">Weekly</string>
-    <string name="monthly">Monthly</string>
+    <string name="library_update_frequency">Library update frequency</string>
     <string name="library_update_order">Library update order</string>
-    <string name="pref_library_update_prioritization_summary">Select the order in which Tachiyomi checks for update</string>
+    <string name="select_order_to_update">Select the order in which Tachiyomi checks for update</string>
     <string name="library_update_restriction">Library update restrictions</string>
     <string name="library_update_restriction_summary">Update only when the conditions are met</string>
-    <string name="wifi">Wi-Fi</string>
-    <string name="charging">Charging</string>
-    <string name="pref_update_only_non_completed">Only update ongoing manga</string>
-    <string name="pref_auto_update_manga_sync">Sync chapters after reading</string>
-    <string name="pref_remove_articles">Sort by ignoring articles</string>
-    <string name="pref_remove_articles_summary">When sorting alphabetically, sort ignoring
+    <string name="only_update_ongoing">Only update ongoing manga</string>
+    <string name="sort_by_ignoring_articles">Sort by ignoring articles</string>
+    <string name="when_sorting_ignore_articles">When sorting alphabetically, sort ignoring
         articles (a, an, the) at the start of manga titles</string>
-    <string name="pref_skip_pre_migration">Skip pre-migration</string>
-    <string name="pref_skip_pre_migration_summary">Use last saved pre-migration preferences
+    <string name="use_last_saved_migration_preferences">Use last saved pre-migration preferences
     and sources to mass migrate</string>
-    <string name="default_category">Default category</string>
-    <string name="always_ask">Always ask</string>
-    <string name="pref_library_update_categories">Categories to include in global update</string>
-
-    <string name="lock_with_biometrics">Lock with biometrics</string>
-    <string name="lock_when_idle">Lock when idle</string>
-    <string name="always">Always</string>
-    <string name="never">Never</string>
-    <plurals name="lock_after_mins">
-        <item quantity="one">After %1$s minute</item>
-        <item quantity="other">After %1$s minutes</item>
-    </plurals>
-    <string name="library_search_hint">Search title, tags, source</string>
+    <string name="categories_to_include_in_global_update">Categories to include in global update</string>
     <string name="auto_refresh_covers">Automatically refresh covers</string>
     <string name="auto_refresh_covers_summary">Refresh covers in library as well
         when updating library (overwrites local covers)</string>
 
-    <!-- Manga details -->
-    <string name="volume_x">Volume %1$d</string>
-    <string name="season_x">Season %1$d</string>
-    <string name="chapters_x">Chapters %1$s</string>
-    <string name="description">Description</string>
-
-    <!-- Operations -->
-    <string name="loading">Loading…</string>
-
-    <!-- Shortcuts-->
-    <string name="app_not_available">App not available</string>
-    <string name="updates">Updates</string>
+    <!-- Recents -->
     <string name="recents">Recents</string>
+    <string name="updates">Updates</string>
+    <string name="newly_added">Newly added</string>
+    <string name="history">History</string>
+    <string name="recently_read">Recently read</string>
+    <string name="recent_updates">Recent updates</string>
+    <string name="this_will_remove_the_read_date_question">This will remove the read date of this chapter. Are you sure?</string>
+    <string name="reset_all_chapters_for_this_">Reset all chapters for this %1$s</string>
+    <string name="source_dash_chapter_">%1$s - Ch.%2$s</string>
+    <string name="last_read_">Last read %1$s</string>
+    <string name="read_">Read %1$s</string>
+    <string name="updated_">Updated %1$s</string>
+    <string name="added_">Added %1$s</string>
+    <string name="view_history">View history</string>
+    <string name="view_all_updates">View all updates</string>
+    <string name="no_search_result">No search results</string>
+    <string name="search_recents">Search recents…</string>
+    <string name="no_recent_chapters">No recent chapters</string>
+    <string name="no_recently_read_manga">No recently read manga</string>
 
     <!-- Browse -->
+    <string name="search_filters">Search filters</string>
+    <string name="no_more_results">No more results</string>
+    <string name="no_results_found">No results found</string>
+    <string name="local_manga">Local manga</string>
+    <string name="other">Other</string>
+    <string name="global_search">Global search…</string>
+    <string name="latest">Latest</string>
+    <string name="browse">Browse</string>
+    <string name="in_library">In Library</string>
+    <string name="search_extensions">Search extensions…</string>
     <string name="all_sources">All sources</string>
     <string name="sources">Sources</string>
 
-    <!-- Preferences -->
-      <!-- Subsections -->
-    <string name="general">General</string>
-    <string name="reader">Reader</string>
-    <string name="downloads">Downloads</string>
-    <string name="advanced">Advanced</string>
-    <string name="about">About</string>
+    <!-- Other Screens -->
 
-      <!-- General section -->
-    <string name="app_theme">App theme</string>
-    <string name="light_blue">Light Blue</string>
-    <string name="dark">Dark</string>
-    <string name="amoled_black">AMOLED Black</string>
-    <string name="dark_blue">Dark Blue</string>
-    <string name="white_theme">Pure White</string>
-    <string name="system_default_amoled">System default (White + Black)</string>
-    <string name="system_default_all_blue">System default (All Blue)</string>
-    <string name="language">Language</string>
-    <string name="system_default">System default</string>
-    <string name="date_format">Date format</string>
-    <string name="check_for_updates">Check for updates</string>
-    <string name="auto_check_for_app_versions">Automatically check for new app versions</string>
-    <string name="secure_screen">Secure screen</string>
-    <string name="hide_tachi_from_recents">Hide Tachiyomi from the recents screen</string>
-    <string name="security">Security</string>
-
-    <!-- Extension section -->
+    <!-- Extensions -->
+    <string name="extensions">Extensions</string>
+    <string name="extension_updates">Extension Updates</string>
+    <string name="notify_extension_updates">Notify when extension updates are available</string>
+    <string name="extension_info">Extension info</string>
     <string name="details">Details</string>
     <string name="obsolete">Obsolete</string>
     <string name="pending">Pending</string>
@@ -286,8 +222,37 @@
     <string name="version_">Version: %1$s</string>
     <string name="language_">Language: %1$s</string>
     <string name="empty_preferences_for_extension">No preferences to edit for this extension</string>
+    <plurals name="extension_updates_available">
+        <item quantity="one">Extension update available</item>
+        <item quantity="other">%d extension updates available</item>
+    </plurals>
+    <plurals name="notification_and_n_more_ext">
+        <item quantity="one">and %1$d more extension</item>
+        <item quantity="other">and %1$d more extensions</item>
+    </plurals>
 
-      <!-- Reader section -->
+    <!-- Reader -->
+    <string name="custom_filter">Custom filter</string>
+    <string name="set_as_cover">Set as cover</string>
+    <string name="set_as_default_for_all">Set as default for all</string>
+    <string name="cover_updated">Cover updated</string>
+    <string name="page_">Page: %1$d</string>
+    <string name="next_chapter_not_found">Next chapter not found</string>
+    <string name="decode_image_error">The image could not be decoded</string>
+    <string name="use_image_as_cover">Use this image as cover art?</string>
+    <string name="viewer_for_this_series">Viewer for this series</string>
+    <string name="finished">Finished:</string>
+    <string name="current">Current:</string>
+    <string name="next">Next:</string>
+    <string name="previous">Previous:</string>
+    <string name="theres_no_next_chapter">There\'s no next chapter</string>
+    <string name="theres_no_previous_chapter">There\'s no previous chapter</string>
+    <string name="loading_pages">Loading pages…</string>
+    <string name="failed_to_load_pages_">Failed to load pages: %1$s</string>
+    <string name="reading_">Reading %1$s</string>
+    <string name="webtoon_style">webtoon style</string>
+
+    <!-- Reader settings -->
     <string name="fullscreen">Fullscreen</string>
     <string name="page_transitions">Page transitions</string>
     <string name="double_tap_anim_speed">Double tap animation speed</string>
@@ -318,7 +283,6 @@
     <string name="left_to_right_viewer">Left to right</string>
     <string name="right_to_left_viewer">Right to left</string>
     <string name="vertical_viewer">Vertical</string>
-    <string name="webtoon">Webtoon</string>
     <string name="pager_viewer">Pager</string>
     <string name="scale_type">Scale type</string>
     <string name="fit_screen">Fit screen</string>
@@ -328,16 +292,6 @@
     <string name="original_size">Original size</string>
     <string name="smart_fit">Smart fit</string>
     <string name="zoom_start_position">Zoom start position</string>
-    <string name="automatic">Automatic</string>
-    <string name="left">Left</string>
-    <string name="right">Right</string>
-    <string name="center">Center</string>
-    <string name="no_animation">No animation</string>
-    <string name="normal">Normal</string>
-    <string name="fast">Fast</string>
-    <string name="rotation">Rotation</string>
-    <string name="free">Free</string>
-    <string name="lock">Lock</string>
     <string name="force_portrait">Force portrait</string>
     <string name="force_landscape">Force landscape</string>
     <string name="red_initial">R</string>
@@ -348,25 +302,144 @@
     <string name="smart_based_on_page_and_theme">Smart (based on page and theme)</string>
     <string name="always_show_chapter_transition">Always show chapter transition</string>
 
-      <!-- Downloads section -->
-    <string name="download_location">Download location</string>
-    <string name="only_download_over_wifi">Only download over Wi-Fi</string>
-    <string name="remove_when_marked_as_read">Remove when marked as read</string>
-    <string name="remove_after_read">Remove after read</string>
-    <string name="custom_location">Custom location</string>
-    <string name="disabled">Disabled</string>
-    <string name="last_read_chapter">Last read chapter</string>
-    <string name="second_to_last">Second to last chapter</string>
-    <string name="third_to_last">Third to last chapter</string>
-    <string name="fourth_to_last">Fourth to last chapter</string>
-    <string name="fifth_to_last">Fifth to last chapter</string>
-    <string name="download_new_chapters">Download new chapters</string>
-    <string name="categories_to_include_in_download">Categories to include in download</string>
+    <!-- Manga details -->
+    <string name="about_this_">About this %1$s</string>
+    <string name="start_reading">Start reading</string>
+    <string name="start_reading_chapter_">Start reading Chapter %1$s</string>
+    <string name="continue_reading_chapter_">Continue reading Chapter %1$s</string>
+    <string name="continue_reading">Continue reading</string>
+    <string name="chapters_">Chapters %1$s</string>
+    <string name="volume_">Volume %1$d</string>
+    <string name="season_">Season %1$d</string>
+    <string name="added_to_library">Added to library</string>
+    <string name="add_to_library">Add to Library</string>
+    <string name="removed_from_library">Removed from library</string>
+    <string name="icon_shape">Icon shape</string>
+    <string name="circular">Circular</string>
+    <string name="rounded">Rounded</string>
+    <string name="square">Square</string>
+    <string name="star">Star</string>
+    <string name="add_to_home_screen">Add to home screen</string>
+    <string name="shortcut_created">Shortcut was added to home screen.</string>
+    <string name="could_not_create_shortcut">Could not create shortcut</string>
+    <string name="_copied_to_clipboard">%1$s copied to clipboard</string>
+    <string name="source_not_installed_">Source not installed: %1$s</string>
+    <string name="no_description">No description</string>
+    <string name="mark_all_chapters_as_read">Mark all chapters as read?</string>
+    <string name="remove_from_library">Remove from library</string>
+    <string name="select_starting_chapter">Select starting chapter</string>
+    <string name="select_ending_chapter">Select ending chapter</string>
+    <string name="search_chapters">Search chapters</string>
+    <string name="next_unread_chapter">Next unread chapter</string>
+    <string name="next_5_unread">Next 5 unread</string>
+    <string name="custom_range">Custom range</string>
+    <string name="all_chapters">All chapters</string>
+    <string name="all_unread_chapters">All unread chapters</string>
+    <string name="add_x_to_library">Add %1$s to library?</string>
+    <string name="show_all">Show All</string>
+    <string name="show_bookmarked_chapters">Show bookmarked chapters</string>
+    <string name="show_downloaded_chapters">Show downloaded chapters</string>
+    <string name="show_unread_chapters">Show unread chapters</string>
+    <string name="show_read_chapters">Show read chapters</string>
+    <string name="hide_chapter_titles">Hide chapter titles</string>
+    <string name="sort_by_source_s_order">Sort by source\'s order</string>
+    <string name="sort_by_chapter_number">Sort by chapter number</string>
+    <string name="newest_first">Newest to oldest</string>
+    <string name="oldest_first">Oldest to newest</string>
+    <string name="clear_tags">Clear Tags</string>
+    <string name="edit_cover">Edit cover</string>
+    <string name="reset_cover">Reset cover</string>
+    <string name="failed_to_update_cover">Failed to update cover</string>
+    <string name="must_be_in_library_to_edit">Manga must be in your library to edit</string>
 
-      <!-- Sync section -->
+    <!-- Tracking -->
+    <string name="tracking">Tracking</string>
+    <string name="tracked">Tracked</string>
+    <string name="not_tracked">Not tracked</string>
     <string name="services">Services</string>
+    <string name="sync_chapters_after_reading">Sync chapters after reading</string>
+    <string name="reading">Reading</string>
+    <string name="currently_reading">Currently Reading</string>
+    <string name="dropped">Dropped</string>
+    <string name="on_hold">On hold</string>
+    <string name="plan_to_read">Plan to read</string>
+    <string name="want_to_read">Want to Read</string>
+    <string name="paused">Paused</string>
+    <string name="rereading">Rereading</string>
+    <string name="score">Score</string>
+    <string name="status">Status</string>
+    <string name="started">Started</string>
+    <string name="type">Type</string>
+    <string name="url_not_set_click_again">Manga URL not set, please click title and select manga again</string>
+    <string name="refresh_tracking">Refresh tracking</string>
+    <string name="add_tracking">Add tracking</string>
 
-    <!-- Backup section -->
+    <!-- Migration -->
+    <string name="source_migration">Source migration</string>
+    <string name="migration">Migration</string>
+    <string name="skip_pre_migration">Skip pre-migration</string>
+    <string name="select_a_source_to_migrate_from">Select a source to migrate from</string>
+    <string name="data_to_include_in_migration">Data to include in migration</string>
+    <string name="search_parameter_eg">Search parameter (e.g. language:english)</string>
+    <string name="include_extra_search_parameter">Include extra search parameter when searching</string>
+    <string name="use_most_chapters">Use source with the most chapters (slower)</string>
+    <string name="use_first_source">Use first source with alternative</string>
+    <string name="skip_this_step_next_time">Skip this step next time</string>
+    <string name="to_show_again_setting_library">To show this screen again, go to Settings -> Library.</string>
+    <string name="latest_">Latest: %1$s</string>
+    <string name="migrating_to">migrating to</string>
+    <string name="dont_migrate">Don\'t migrate</string>
+    <string name="search_manually">Search manually</string>
+    <string name="migrate_now">Migrate now</string>
+    <string name="copy_now">Copy now</string>
+    <string name="select">Select</string>
+    <string name="migrate">Migrate</string>
+    <string name="copy_value">Copy</string>
+    <string name="no_chapters_found_for_migration">No chapters found, this manga cannot be used for
+        migration</string>
+    <string name="no_alternatives_found">No Alternatives Found</string>
+    <string name="stop_migrating">Stop migrating?</string>
+    <plurals name="migrate_manga">
+        <item quantity="one">Migrate %1$d%2$s manga?</item>
+        <item quantity="other">Migrate %1$d%2$s manga?</item>
+    </plurals>
+    <plurals name="copy_manga">
+        <item quantity="one">Copy %1$d%2$s manga?</item>
+        <item quantity="other">Copy %1$d%2$s manga?</item>
+    </plurals>
+    <string name="skipping_">(skipping %1$d)</string>
+    <plurals name="manga_migrated">
+        <item quantity="one">%d manga migrated</item>
+        <item quantity="other">%d manga migrated</item>
+    </plurals>
+
+    <!-- Settings -->
+    <string name="settings">Settings</string>
+    <string name="general">General</string>
+    <string name="reader">Reader</string>
+    <string name="advanced">Advanced</string>
+    <string name="about">About</string>
+    <string name="help">Help</string>
+
+    <!-- General settings -->
+    <string name="app_theme">App theme</string>
+    <string name="light_blue">Light Blue</string>
+    <string name="dark">Dark</string>
+    <string name="amoled_black">AMOLED Black</string>
+    <string name="dark_blue">Dark Blue</string>
+    <string name="white_theme">Pure White</string>
+    <string name="system_default_amoled">System default (White + Black)</string>
+    <string name="system_default_all_blue">System default (All Blue)</string>
+    <string name="language">Language</string>
+    <string name="system_default">System default</string>
+    <string name="date_format">Date format</string>
+    <string name="check_for_updates">Check for updates</string>
+    <string name="auto_check_for_app_versions">Automatically check for new app versions</string>
+    <string name="secure_screen">Secure screen</string>
+    <string name="hide_tachi_from_recents">Hide Tachiyomi from the recents screen</string>
+    <string name="security">Security</string>
+
+    <!-- Backup -->
     <string name="backup">Backup</string>
     <string name="create_backup">Create backup</string>
     <string name="can_be_used_to_restore">Can be used to restore current library</string>
@@ -396,7 +469,7 @@
     </plurals>
     <string name="not_logged_into_">Not logged into %1$s</string>
 
-      <!-- Advanced section -->
+    <!-- Advanced section -->
     <string name="clear_chapter_cache">Clear chapter cache</string>
     <string name="used_">Used: %1$s</string>
     <plurals name="cache_cleared">
@@ -417,7 +490,6 @@
     <string name="clean_up_downloaded_chapters">Clean up downloaded chapters</string>
     <string name="delete_unused_chapters">Delete non-existent, partially downloaded,
             and read chapter folders</string>
-
     <string name="starting_cleanup">Starting cleanup</string>
     <string name="no_folders_to_cleanup">No folders to cleanup</string>
     <plurals name="cleanup_done">
@@ -425,13 +497,11 @@
         <item quantity="other">Cleanup done. Removed %d folders</item>
     </plurals>
 
-      <!-- About section -->
+    <!-- About section -->
     <string name="version">Version</string>
     <string name="build_time">Build time</string>
-    <!-- ACRA -->
     <string name="send_crash_report">Send crash reports</string>
     <string name="helps_fix_bugs">Helps fix any bugs. No sensitive data will be sent</string>
-
 
     <!-- Login dialog -->
     <string name="log_in_to_">Log in to %1$s</string>
@@ -445,270 +515,150 @@
     <string name="successfully_logged_in">Successfully logged in</string>
     <string name="successfully_logged_out">You are now logged out</string>
     <string name="could_not_log_in">Could not log in</string>
-    <string name="unknown_error">Unknown error</string>
 
-    <!-- Catalogue fragment -->
-    <string name="search_filters">Search filters</string>
-    <string name="no_more_results">No more results</string>
-    <string name="no_results_found">No results found</string>
-    <string name="local_manga">Local manga</string>
-    <string name="other">Other</string>
-    <string name="global_search">Global search…</string>
-    <string name="latest">Latest</string>
-    <string name="browse">Browse</string>
-    <string name="in_library">In Library</string>
-    <string name="search_extensions">Search extensions…</string>
-
-    <!-- Manga activity -->
-    <string name="manga_not_in_db">This manga has been removed from the database.</string>
-
-    <!-- Manga info fragment -->
-    <string name="ongoing">Ongoing</string>
-    <string name="unknown">Unknown</string>
-    <string name="unknown_status">Unknown Status</string>
-    <string name="last_updated_">Last updated %1$s</string>
-    <string name="last_update_unknown">Last update unknown</string>
-    <string name="licensed">Licensed</string>
-    <string name="added_to_library">Added to library</string>
-    <string name="add_to_library">Add to Library</string>
-    <string name="removed_from_library">Removed from library</string>
-    <string name="author">Author</string>
-    <string name="artist">Artist</string>
-    <string name="last_chapter">Last chapter</string>
-    <string name="updated">Updated</string>
-    <string name="source">Source</string>
-    <string name="circular">Circular</string>
-    <string name="rounded">Rounded</string>
-    <string name="square">Square</string>
-    <string name="star">Star</string>
-    <string name="shortcut_created">Shortcut was added to home screen.</string>
-    <string name="icon_shape">Icon shape</string>
-    <string name="could_not_create_shortcut">Could not create shortcut</string>
-    <string name="_copied_to_clipboard">%1$s copied to clipboard</string>
-    <string name="source_not_installed_">Source not installed: %1$s</string>
-    <string name="about_this_">About this %1$s</string>
-    <plurals name="chapters">
-        <item quantity="one">%1$d chapter</item>
-        <item quantity="other">%1$d chapters</item>
-    </plurals>
-    <string name="no_description">No description</string>
-    <string name="mark_all_chapters_as_read">Mark all chapters as read?</string>
-    <string name="remove_from_library">Remove from library</string>
-    <string name="select_starting_chapter">Select starting chapter</string>
-    <string name="select_ending_chapter">Select ending chapter</string>
-    <string name="search_chapters">Search chapters</string>
-
-    <!-- Manga chapters fragment -->
-    <string name="start_reading">Start reading</string>
-    <string name="start_reading_chapter_">Start reading Chapter %1$s</string>
-    <string name="continue_reading_chapter_">Continue reading Chapter %1$s</string>
-    <string name="continue_reading">Continue reading</string>
-    <string name="chapter_">Chapter %1$s</string>
+    <!-- Downloads -->
+    <string name="downloads">Downloads</string>
+    <string name="download_queue">Download queue</string>
+    <string name="downloading_">Downloading: %1$s</string>
+    <string name="cancel_all">Cancel all</string>
+    <string name="downloaded">Downloaded</string>
+    <string name="not_downloaded">Not downloaded</string>
+    <string name="downloading">Downloading</string>
+    <string name="download">Download</string>
+    <string name="start_downloading_now">Start downloading now</string>
+    <string name="remove_download">Remove download</string>
     <string name="downloading_progress">Downloading (%1$d/%2$d)</string>
-    <string name="error">Error</string>
-    <string name="chapter_number">Chapter number</string>
-    <string name="sorting_mode">Sorting mode</string>
-    <string name="drag_handle">Drag handle</string>
-    <string name="custom_download">Download custom amount</string>
-    <string name="next_unread_chapter">Next unread chapter</string>
-    <string name="next_5_unread">Next 5 unread</string>
-    <string name="custom_range">Custom range</string>
-    <string name="all_chapters">All chapters</string>
-    <string name="all_unread_chapters">All unread chapters</string>
-    <plurals name="migrate_manga">
-        <item quantity="one">Migrate %1$d%2$s manga?</item>
-        <item quantity="other">Migrate %1$d%2$s manga?</item>
-    </plurals>
-    <plurals name="copy_manga">
-        <item quantity="one">Copy %1$d%2$s manga?</item>
-        <item quantity="other">Copy %1$d%2$s manga?</item>
-    </plurals>
-    <string name="skipping_">(skipping %1$d)</string>
-    <plurals name="manga_migrated">
-        <item quantity="one">%d manga migrated</item>
-        <item quantity="other">%d manga migrated</item>
-    </plurals>
-    <string name="no_chapters_found_for_migration">No chapters found, this manga cannot be used for
-        migration</string>
-    <string name="no_alternatives_found">No Alternatives Found</string>
-    <string name="stop_migrating">Stop migrating?</string>
     <string name="invalid_download_location">Invalid download location</string>
-
-    <!-- Tracking Screen -->
-    <string name="reading">Reading</string>
-    <string name="currently_reading">Currently Reading</string>
-    <string name="completed">Completed</string>
-    <string name="dropped">Dropped</string>
-    <string name="on_hold">On hold</string>
-    <string name="plan_to_read">Plan to read</string>
-    <string name="want_to_read">Want to Read</string>
-    <string name="paused">Paused</string>
-    <string name="rereading">Rereading</string>
-    <string name="score">Score</string>
-    <string name="title">Title</string>
-    <string name="status">Status</string>
-    <string name="started">Started</string>
-    <string name="type">Type</string>
-    <string name="url_not_set_click_again">Manga URL not set, please click title and select manga again</string>
-    <string name="add_tracking">Add Tracking</string>
-    <string name="chapter_x_of_y">Chapter %1$d of %2$d</string>
-    <string name="all_chapters_read">All chapters read</string>
-
-    <!-- Category activity -->
-    <string name="category_with_name_exists">A category with this name already exists!</string>
-    <string name="category_deleted">Category deleted</string>
-
-    <!-- Dialog option with checkbox view -->
-    <string name="this_will_reomve_the_read_date_question">This will remove the read date of this chapter. Are you sure?</string>
-    <string name="reset_all_chapters_for_this_">Reset all chapters for this %1$s</string>
-
-    <!-- SnackBar -->
-    <string name="add_x_to_library">Add %1$s to library?</string>
-
-    <!-- Image notifier -->
-    <string name="picture_saved">Picture saved</string>
-    <string name="options">Options</string>
-
-    <!-- Reader activity -->
-    <string name="custom_filter">Custom filter</string>
-    <string name="set_as_cover">Set as cover</string>
-    <string name="set_as_default_for_all">Set as default for all</string>
-    <string name="cover_updated">Cover updated</string>
-    <string name="page_">Page: %1$d</string>
-    <plurals name="pages_left">
-        <item quantity="one">%1$d page left</item>
-        <item quantity="other">%1$d pages left</item>
-    </plurals>
-    <string name="next_chapter_not_found">Next chapter not found</string>
-    <string name="decode_image_error">The image could not be decoded</string>
-    <string name="use_image_as_cover">Use this image as cover art?</string>
-    <string name="viewer_for_this_series">Viewer for this series</string>
-    <string name="finished">Finished:</string>
-    <string name="current">Current:</string>
-    <string name="next">Next:</string>
-    <string name="previous">Previous:</string>
-    <string name="theres_no_next_chapter">There\'s no next chapter</string>
-    <string name="theres_no_previous_chapter">There\'s no previous chapter</string>
-    <string name="loading_pages">Loading pages…</string>
-    <string name="failed_to_load_pages_">Failed to load pages: %1$s</string>
-    <string name="reading_">Reading %1$s</string>
-    <string name="webtoon_style">webtoon style</string>
-
-    <!-- Recent manga fragment -->
-    <string name="source_dash_chapter_">%1$s - Ch.%2$s</string>
-
-    <!-- Source migration screen -->
-    <string name="select_data_to_include">Select data to include</string>
-    <string name="select_a_source_to_migrate_from">Select a source to migrate from</string>
-    <string name="select">Select</string>
-    <string name="migrate">Migrate</string>
-    <string name="copy_value">Copy</string>
-    <string name="migration">Migration</string>
-    <string name="latest_">Latest: %1$s</string>
-
-    <!-- Downloads activity and service -->
-    <string name="could_not_download_chapter_can_try_again">Could not download chapters. You can try again in the downloads section</string>
-
-    <!-- Library update service notifications -->
-    <string name="new_chapters_found">New chapters found</string>
-    <plurals name="for_n_titles">
-        <item quantity="one">For %d title</item>
-        <item quantity="other">For %d titles</item>
-    </plurals>
-    <plurals name="notification_and_n_more">
-        <item quantity="one">and %1$d more chapter</item>
-        <item quantity="other">and %1$d more chapters</item>
-    </plurals>
-    <plurals name="notification_and_n_more_ext">
-        <item quantity="one">and %1$d more extension</item>
-        <item quantity="other">and %1$d more extensions</item>
-    </plurals>
-    <string name="failed_to_update_cover">Failed to update cover</string>
-    <string name="must_be_in_library_to_edit">Manga must be in your library to edit</string>
-
-    <string name="view_all_errors">View all errors</string>
-
-    <!-- File Picker Titles -->
-    <string name="select_cover_image">Select cover image</string>
-    <string name="select_backup_file">Select backup file</string>
-
-    <!--UpdateCheck-->
-    <string name="new_version_available">New version available!</string>
-    <string name="ignore">Ignore</string>
-    <string name="no_new_updates_available">No new updates available</string>
-    <string name="searching_for_updates">Searching for updates…</string>
-
-    <!--UpdateCheck Notifications-->
-    <string name="download_complete">Download complete</string>
-    <string name="download_error">Download error</string>
-    <string name="update_available">Update available</string>
-    <plurals name="extension_update_available">
-        <item quantity="one">Extension update available</item>
-        <item quantity="other">%d extension updates available</item>
-    </plurals>
-
-    <!--Content Description-->
-    <string name="backdrop_of_image">Backdrop image of manga</string>
-    <string name="cover_of_image">Cover of manga</string>
-
-    <!-- Information Text -->
+    <string name="download_paused">Download paused</string>
     <string name="no_downloads">No downloads</string>
     <string name="nothing_is_downloading">Nothing is currently downloading</string>
-    <string name="no_recent_chapters">No recent chapters</string>
-    <string name="no_recently_read_manga">No recently read manga</string>
-    <string name="library_is_empty_add_from_browse">Your library is empty, add series to your
-        library from the browse tab.</string>
-    <string name="no_matches_for_filters">No matches found for your current
-        filters</string>
-    <string name="failed_to_bypass_cloudflare">Failed to bypass Cloudflare</string>
-    <string name="please_update_webview">Please update the WebView app for better compatibility</string>
+    <string name="download_complete">Download complete</string>
+    <string name="download_error">Download error</string>
+    <string name="could_not_download_chapter_can_try_again">Could not download chapters. You can try again in the downloads section</string>
 
     <!-- Download Notification -->
     <string name="could_not_download_unexpected_error">Could not download chapter due to unexpected error</string>
     <string name="no_wifi_connection">No Wi-Fi connection available</string>
     <string name="no_network_connection">No network connection available</string>
-    <string name="download_paused">Download paused</string>
 
-    <!-- Notification channels -->
-    <string name="common">Common</string>
-    <string name="extension_updates">Extension Updates</string>
+    <!-- Downloads settings -->
+    <string name="download_location">Download location</string>
+    <string name="only_download_over_wifi">Only download over Wi-Fi</string>
+    <string name="remove_when_marked_as_read">Remove when marked as read</string>
+    <string name="remove_after_read">Remove after read</string>
+    <string name="custom_location">Custom location</string>
+    <string name="last_read_chapter">Last read chapter</string>
+    <string name="second_to_last">Second to last chapter</string>
+    <string name="third_to_last">Third to last chapter</string>
+    <string name="fourth_to_last">Fourth to last chapter</string>
+    <string name="fifth_to_last">Fifth to last chapter</string>
+    <string name="download_new_chapters">Download new chapters</string>
+    <string name="categories_to_include_in_download">Categories to include in download</string>
 
-    <string name="data_to_include_in_migration">Data to include in migration</string>
-    <string name="search_parameter_ex">Search parameter (e.g. language:english)</string>
-    <string name="include_extra_search_parameter">Include extra search parameter when searching</string>
-    <string name="migrating_to">migrating to</string>
-    <string name="use_most_chapters">Use source with the most chapters (slower)</string>
-    <string name="use_first_source">Use first source with alternative</string>
-    <string name="skip_this_step_next_time">Skip this step next time</string>
-    <string name="to_show_again_setting_library">To show this screen again, go to Settings -> Library.</string>
-    <string name="clear_tags">Clear Tags</string>
-    <string name="display_as">Display as</string>
+    <!-- Time -->
+    <string name="manual">Manual</string>
+    <string name="hourly">Hourly</string>
+    <string name="every_2_hours">Every 2 hours</string>
+    <string name="every_3_hours">Every 3 hours</string>
+    <string name="every_6_hours">Every 6 hours</string>
+    <string name="every_12_hours">Every 12 hours</string>
+    <string name="daily">Daily</string>
+    <string name="every_2_days">Every 2 days</string>
+    <string name="weekly">Weekly</string>
+    <string name="monthly">Monthly</string>
+    <plurals name="after_minutes">
+        <item quantity="one">After %1$s minute</item>
+        <item quantity="other">After %1$s minutes</item>
+    </plurals>
+
+    <!-- File Picker Titles -->
+    <string name="select_cover_image">Select cover image</string>
+    <string name="select_backup_file">Select backup file</string>
+
+    <!-- Webview -->
+    <string name="failed_to_bypass_cloudflare">Failed to bypass Cloudflare</string>
+    <string name="please_update_webview">Please update the WebView app for better compatibility</string>
+
+    <!-- Miscellaneous -->
+    <string name="add">Add</string>
+    <string name="all">All</string>
+    <string name="alphabetically">Alphabetically</string>
+    <string name="always">Always</string>
+    <string name="always_ask">Always ask</string>
+    <string name="app_not_available">App not available</string>
     <string name="auto">Auto</string>
-    <string name="more">More</string>
+    <string name="automatic">Automatic</string>
+    <string name="back">Back</string>
+    <string name="backdrop_of_image">Backdrop image of manga</string>
+    <string name="bottom">Bottom</string>
+    <string name="bug_report">Report a Bug</string>
+    <string name="cancel">Cancel</string>
+    <string name="center">Center</string>
+    <string name="charging">Charging</string>
+    <string name="clear">Clear</string>
+    <string name="close">Close</string>
+    <string name="common">Common</string>
+    <string name="cover_of_image">Cover of manga</string>
+    <string name="create">Create</string>
+    <string name="default_value">Default</string>
+    <string name="delete">Delete</string>
+    <string name="disabled">Disabled</string>
+    <string name="display">Display</string>
+    <string name="drag_handle">Drag handle</string>
+    <string name="edit">Edit</string>
+    <string name="enabled">Enabled</string>
+    <string name="error">Error</string>
+    <string name="fast">Fast</string>
+    <string name="filter">Filter</string>
+    <string name="forward">Forward</string>
+    <string name="free">Free</string>
+    <string name="ignore">Ignore</string>
+    <string name="install">Install</string>
+    <string name="left">Left</string>
     <string name="less">Less</string>
-    <string name="more_options">More options</string>
-    <string name="show_bookmarked_chapters">Show bookmarked chapters</string>
-    <string name="show_downloaded_chapters">Show downloaded chapters</string>
-    <string name="show_unread_chapters">Show unread chapters</string>
-    <string name="show_read_chapters">Show read chapters</string>
-    <string name="show_all">Show All</string>
-    <string name="hide_chapter_titles">Hide chapter titles</string>
-    <string name="sort_by_source_s_order">Sort by source\'s order</string>
-    <string name="sort_by_chapter_number">Sort by chapter number</string>
-    <string name="newest_first">Newest to oldest</string>
-    <string name="oldest_first">Oldest to newest</string>
-    <string name="view_all">View All</string>
-    <string name="previously_read_chapter">Previously read Chapter %1$s</string>
-    <string name="last_read_chapter_">Last read Chapter %1$s</string>
-    <string name="last_read_">Last read %1$s</string>
-    <string name="read_">Read %1$s</string>
-    <string name="updated_">Updated %1$s</string>
-    <string name="added_">Added %1$s</string>
-    <string name="view_history">View history</string>
-    <string name="view_all_updates">View all updates</string>
-    <string name="marked_as_read">Marked as read</string>
-    <string name="marked_as_unread">Marked as unread</string>
-    <string name="removed_bookmark">Removed bookmark</string>
-    <string name="no_search_result">No search results</string>
-    <string name="search_recents">Search recents…</string>
+    <string name="loading">Loading…</string>
+    <string name="lock">Lock</string>
+    <string name="mark_all_as_read">Mark all as read</string>
+    <string name="mark_all_as_unread">Mark all as unread</string>
+    <string name="mark_as_read">Mark as read</string>
+    <string name="mark_as_unread">Mark as unread</string>
+    <string name="mark_previous_as_read">Mark previous as read</string>
+    <string name="more">More</string>
+    <string name="move">Move</string>
+    <string name="move_to_bottom">Move to bottom</string>
+    <string name="move_to_top">Move to top</string>
+    <string name="moved_to_">Moved to %1$s</string>
+    <string name="never">Never</string>
+    <string name="newest">Newest</string>
+    <string name="no_animation">No animation</string>
+    <string name="normal">Normal</string>
+    <string name="oldest">Oldest</string>
+    <string name="open_in_browser">Open in browser</string>
+    <string name="open_in_web_view">Open in web view</string>
+    <string name="options">Options</string>
+    <string name="pause">Pause</string>
+    <string name="picture_saved">Picture saved</string>
+    <string name="remove">Remove</string>
+    <string name="reorder">Reorder</string>
+    <string name="reset">Reset</string>
+    <string name="restore">Restore</string>
+    <string name="resume">Resume</string>
+    <string name="retry">Retry</string>
+    <string name="right">Right</string>
+    <string name="rotation">Rotation</string>
+    <string name="save">Save</string>
+    <string name="search">Search</string>
+    <string name="select_all">Select all</string>
+    <string name="share">Share</string>
+    <string name="sort">Sort</string>
+    <string name="sort_and_filter">Sort &amp; Filter</string>
+    <string name="start">Start</string>
+    <string name="stop">Stop</string>
+    <string name="top">Top</string>
+    <string name="undo">Undo</string>
+    <string name="unknown_error">Unknown error</string>
+    <string name="use_default">Use default</string>
+    <string name="view_all_errors">View all errors</string>
+    <string name="view_chapters">View chapters</string>
+    <string name="wifi">Wi-Fi</string>
 </resources>
