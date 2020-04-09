@@ -34,7 +34,7 @@ class ChangeMangaCategoriesDialog<T>(bundle: Bundle? = null) :
 
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
         return MaterialDialog(activity!!)
-            .title(R.string.action_move_category)
+            .title(R.string.move_to_categories)
             .listItemsMultiChoice(
                 items = categories.map { it.name },
                 initialSelection = preselected.toIntArray(),

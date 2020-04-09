@@ -163,7 +163,7 @@ class DownloadService : Service() {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({ state -> onNetworkStateChanged(state)
                 }, {
-                    toast(R.string.download_queue_error)
+                    toast(R.string.could_not_download_chapter_can_try_again)
                     stopSelf()
                 })
     }
@@ -177,14 +177,14 @@ class DownloadService : Service() {
         when (connectivity.state) {
             CONNECTED -> {
                 if (preferences.downloadOnlyOverWifi() && connectivityManager.isActiveNetworkMetered) {
-                    downloadManager.stopDownloads(getString(R.string.download_notifier_text_only_wifi))
+                    downloadManager.stopDownloads(getString(R.string.no_wifi_connection))
                 } else {
                     val started = downloadManager.startDownloads()
                     if (!started) stopSelf()
                 }
             }
             DISCONNECTED -> {
-                downloadManager.stopDownloads(getString(R.string.download_notifier_no_network))
+                downloadManager.stopDownloads(getString(R.string.no_network_connection))
             }
             else -> { /* Do nothing */ }
         }
@@ -218,7 +218,7 @@ class DownloadService : Service() {
 
     private fun getPlaceholderNotification(): Notification {
         return NotificationCompat.Builder(this, Notifications.CHANNEL_DOWNLOADER)
-            .setContentTitle(getString(R.string.download_notifier_downloader_title))
+            .setContentTitle(getString(R.string.downloading))
             .build()
     }
 }

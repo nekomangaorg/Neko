@@ -50,6 +50,16 @@ interface Manga : SManga {
 
     fun showChapterTitle(defaultShow: Boolean): Boolean = chapter_flags and DISPLAY_MASK == DISPLAY_NUMBER
 
+    fun mangaType(context: Context): String {
+        return context.getString(when (mangaType()) {
+            TYPE_WEBTOON -> R.string.webtoon
+            TYPE_MANHWA -> R.string.manhwa
+            TYPE_MANHUA -> R.string.manhua
+            TYPE_COMIC -> R.string.comic
+            else -> R.string.manga
+        })
+    }
+
     /**
      * The type of comic the manga is (ie. manga, manhwa, manhua)
      */

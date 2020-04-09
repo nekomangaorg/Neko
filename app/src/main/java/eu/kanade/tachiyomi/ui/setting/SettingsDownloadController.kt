@@ -29,11 +29,11 @@ class SettingsDownloadController : SettingsController() {
     private val db: DatabaseHelper by injectLazy()
 
     override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
-        titleRes = R.string.pref_category_downloads
+        titleRes = R.string.downloads
 
         preference {
             key = Keys.downloadsDirectory
-            titleRes = R.string.pref_download_directory
+            titleRes = R.string.download_location
             onClick {
                 val ctrl = DownloadDirectoriesDialog()
                 ctrl.targetController = this@SettingsDownloadController
@@ -48,20 +48,20 @@ class SettingsDownloadController : SettingsController() {
         }
         switchPreference {
             key = Keys.downloadOnlyOverWifi
-            titleRes = R.string.pref_download_only_over_wifi
+            titleRes = R.string.only_download_over_wifi
             defaultValue = true
         }
         preferenceCategory {
-            titleRes = R.string.pref_remove_after_read
+            titleRes = R.string.remove_after_read
 
             switchPreference {
                 key = Keys.removeAfterMarkedAsRead
-                titleRes = R.string.pref_remove_after_marked_as_read
+                titleRes = R.string.remove_when_marked_as_read
                 defaultValue = false
             }
             intListPreference(activity) {
                 key = Keys.removeAfterReadSlots
-                titleRes = R.string.pref_remove_after_read
+                titleRes = R.string.remove_after_read
                 entriesRes = arrayOf(R.string.disabled, R.string.last_read_chapter,
                         R.string.second_to_last, R.string.third_to_last, R.string.fourth_to_last,
                         R.string.fifth_to_last)
@@ -73,16 +73,16 @@ class SettingsDownloadController : SettingsController() {
         val dbCategories = db.getCategories().executeAsBlocking()
 
         preferenceCategory {
-            titleRes = R.string.pref_download_new
+            titleRes = R.string.download_new_chapters
 
             switchPreference {
                 key = Keys.downloadNew
-                titleRes = R.string.pref_download_new
+                titleRes = R.string.download_new_chapters
                 defaultValue = false
             }
             multiSelectListPreferenceMat(activity) {
                 key = Keys.downloadNewCategories
-                titleRes = R.string.pref_download_new_categories
+                titleRes = R.string.categories_to_include_in_download
                 entries = dbCategories.map { it.name }
                 entryValues = dbCategories.map { it.id.toString() }
                 allSelectionRes = R.string.all
@@ -145,7 +145,7 @@ class SettingsDownloadController : SettingsController() {
         override fun onCreateDialog(savedViewState: Bundle?): Dialog {
             val activity = activity!!
             val currentDir = preferences.downloadsDirectory().getOrDefault()
-            val externalDirs = getExternalDirs() + File(activity.getString(R.string.custom_dir))
+            val externalDirs = getExternalDirs() + File(activity.getString(R.string.custom_location))
             val selectedIndex = externalDirs.map(File::toString).indexOfFirst { it in currentDir }
 
             return MaterialDialog(activity)

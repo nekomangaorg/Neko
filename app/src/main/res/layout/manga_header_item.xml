@@ -72,7 +72,7 @@
             android:layout_height="wrap_content"
             android:adjustViewBounds="true"
             android:clickable="true"
-            android:contentDescription="@string/description_cover"
+            android:contentDescription="@string/cover_of_image"
             android:focusable="true"
             android:foreground="?android:attr/selectableItemBackground"
             android:maxHeight="300dp"
@@ -90,7 +90,7 @@
         android:layout_marginEnd="16dp"
         android:ellipsize="end"
         android:maxLines="4"
-        android:text="@string/manga_info_full_title_label"
+        android:text="@string/title"
         android:textIsSelectable="false"
         android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -105,7 +105,7 @@
         android:layout_marginEnd="16dp"
         android:ellipsize="end"
         android:maxLines="2"
-        android:text="@string/manga_info_author_label"
+        android:text="@string/author"
         android:textAppearance="@style/TextAppearance.Regular.Body1.SemiBold"
         android:textColor="?android:attr/textColorSecondary"
         android:textIsSelectable="false"
@@ -203,9 +203,9 @@
             android:layout_gravity="center"
             android:layout_marginStart="6dp"
             android:layout_marginEnd="6dp"
-            android:contentDescription="@string/action_open_in_web_view"
+            android:contentDescription="@string/open_in_web_view"
             android:padding="5dp"
-            android:tooltipText="@string/action_open_in_web_view"
+            android:tooltipText="@string/open_in_web_view"
             tools:src="@drawable/ic_open_in_webview_white_24dp" />
 
         <ImageView
@@ -216,9 +216,9 @@
             android:layout_gravity="center"
             android:layout_marginStart="6dp"
             android:layout_marginEnd="6dp"
-            android:contentDescription="@string/action_share"
+            android:contentDescription="@string/share"
             android:padding="5dp"
-            android:tooltipText="@string/action_share"
+            android:tooltipText="@string/share"
             tools:src="@drawable/ic_open_in_webview_white_24dp" />
 
     </LinearLayout>
@@ -367,7 +367,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
         android:background="?selectable_list_drawable"
-        android:tooltipText="@string/action_sort_and_filter"
+        android:tooltipText="@string/sort_and_filter"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/start_reading_button">
@@ -397,7 +397,6 @@
             android:padding="5dp"
             android:src="@drawable/ic_filter_list_white_24dp"
             android:tint="?colorAccent"
-            android:tooltipText="@string/action_filter"
             app:layout_constraintBottom_toBottomOf="@id/chapters_title"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/chapters_title" />

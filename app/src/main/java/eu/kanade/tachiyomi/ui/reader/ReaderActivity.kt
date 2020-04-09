@@ -385,7 +385,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
         if (noDefault && presenter.manga?.viewer!! > 0) {
             snackbar = reader_layout.snack(
                 getString(
-                    R.string.reading_mode, getString(
+                    R.string.reading_, getString(
                         when (mangaViewer) {
                             RIGHT_TO_LEFT -> R.string.right_to_left_viewer
                             VERTICAL -> R.string.vertical_viewer
@@ -395,7 +395,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
                     ).toLowerCase(Locale.getDefault())
                 ), 8000
             ) {
-                setAction(R.string.action_use_default) {
+                setAction(R.string.use_default) {
                     presenter.setMangaViewer(0)
                 }
             }
@@ -563,7 +563,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
             clipData = ClipData.newRawUri(null, stream)
             type = "image/*"
         }
-        startActivity(Intent.createChooser(intent, getString(R.string.action_share)))
+        startActivity(Intent.createChooser(intent, getString(R.string.share)))
     }
 
     /**

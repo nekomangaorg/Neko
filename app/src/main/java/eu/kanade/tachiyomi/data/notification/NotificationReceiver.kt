@@ -135,7 +135,7 @@ class NotificationReceiver : BroadcastReceiver() {
             }
             context.startActivity(intent)
         } else {
-            context.toast(context.getString(R.string.no_next_chapter))
+            context.toast(context.getString(R.string.next_chapter_not_found))
         }
     }
 

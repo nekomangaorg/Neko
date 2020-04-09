@@ -24,20 +24,20 @@ class SettingsMainController : SettingsController() {
     private val size = 18
 
     override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
-        titleRes = R.string.label_settings
+        titleRes = R.string.settings
 
         val tintColor = context.getResourceColor(R.attr.colorAccent)
 
         preference {
             iconRes = R.drawable.ic_tune_white_24dp
             iconTint = tintColor
-            titleRes = R.string.pref_category_general
+            titleRes = R.string.general
             onClick { navigateTo(SettingsGeneralController()) }
         }
         preference {
             iconRes = R.drawable.ic_book_black_24dp
             iconTint = tintColor
-            titleRes = R.string.pref_category_library
+            titleRes = R.string.library
             onClick { navigateTo(SettingsLibraryController()) }
         }
         preference {
@@ -53,20 +53,20 @@ class SettingsMainController : SettingsController() {
         preference {
             iconRes = R.drawable.ic_read_24dp
             iconTint = tintColor
-            titleRes = R.string.pref_category_reader
+            titleRes = R.string.reader
             onClick { navigateTo(SettingsReaderController()) }
         }
         preference {
             iconRes = R.drawable.ic_file_download_black_24dp
             iconTint = tintColor
-            titleRes = R.string.pref_category_downloads
+            titleRes = R.string.downloads
             onClick { navigateTo(SettingsDownloadController()) }
         }
 
         preference {
             iconRes = R.drawable.ic_sync_black_24dp
             iconTint = tintColor
-            titleRes = R.string.pref_category_tracking
+            titleRes = R.string.tracking
             onClick { navigateTo(SettingsTrackingController()) }
         }
         preference {
@@ -88,13 +88,13 @@ class SettingsMainController : SettingsController() {
         preference {
             iconRes = R.drawable.ic_code_black_24dp
             iconTint = tintColor
-            titleRes = R.string.pref_category_advanced
+            titleRes = R.string.advanced
             onClick { navigateTo(SettingsAdvancedController()) }
         }
         preference {
             iconRes = R.drawable.ic_info_black_24dp
             iconTint = tintColor
-            titleRes = R.string.pref_category_about
+            titleRes = R.string.about
             onClick { navigateTo(SettingsAboutController()) }
         }
     }

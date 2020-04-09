@@ -52,7 +52,7 @@ class DownloadProvider(private val context: Context) {
             return downloadsDir.createDirectory(getSourceDirName(source))
                 .createDirectory(getMangaDirName(manga))
         } catch (e: NullPointerException) {
-            throw Exception(context.getString(R.string.invalid_download_dir))
+            throw Exception(context.getString(R.string.invalid_download_location))
         }
     }
 

@@ -405,7 +405,7 @@ class WebtoonPageHolder(
                 gravity = Gravity.CENTER_HORIZONTAL
                 setMargins(0, parentHeight / 4, 0, 0)
             }
-            setText(R.string.action_retry)
+            setText(R.string.retry)
             setOnClickListener {
                 page?.let { it.chapter.pageLoader?.retryPage(it) }
             }
@@ -446,7 +446,7 @@ class WebtoonPageHolder(
             layoutParams = FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
                 setMargins(0, margins, 0, margins)
             }
-            setText(R.string.action_retry)
+            setText(R.string.retry)
             setOnClickListener {
                 page?.let { it.chapter.pageLoader?.retryPage(it) }
             }
@@ -460,7 +460,7 @@ class WebtoonPageHolder(
                 layoutParams = FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
                     setMargins(0, margins, 0, margins)
                 }
-                setText(R.string.action_open_in_browser)
+                setText(R.string.open_in_browser)
                 setOnClickListener {
                     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(imageUrl))
                     context.startActivity(intent)

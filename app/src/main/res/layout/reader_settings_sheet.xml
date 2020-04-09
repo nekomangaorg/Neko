@@ -20,7 +20,7 @@
         android:id="@+id/general_prefs"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="@string/pref_category_general"
+        android:text="@string/general"
         android:textColor="?attr/colorAccent"
         android:textStyle="bold"
         app:layout_constraintEnd_toStartOf="@id/close_button"
@@ -68,7 +68,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="@string/pref_rotation_type"
+        android:text="@string/rotation"
         app:layout_constraintBaseline_toBaselineOf="@id/rotation_mode"
         app:layout_constraintEnd_toStartOf="@id/bottom_line"
         app:layout_constraintStart_toStartOf="parent" />
@@ -86,7 +86,7 @@
     <TextView
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="@string/pref_reader_theme"
+        android:text="@string/background_color"
         app:layout_constraintBaseline_toBaselineOf="@id/background_color"
         app:layout_constraintEnd_toStartOf="@id/background_color"
         app:layout_constraintStart_toStartOf="parent" />
@@ -106,7 +106,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="@string/pref_show_page_number"
+        android:text="@string/show_page_number"
         android:textColor="?android:attr/textColorSecondary"
         app:layout_constraintTop_toBottomOf="@id/background_color" />
 
@@ -115,7 +115,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="0dp"
-        android:text="@string/pref_true_color"
+        android:text="@string/true_32bit_color"
         android:textColor="?android:attr/textColorSecondary"
         android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@id/show_page_number"
@@ -126,7 +126,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="0dp"
-        android:text="@string/pref_fullscreen"
+        android:text="@string/fullscreen"
         android:textColor="?android:attr/textColorSecondary"
         app:layout_constraintTop_toBottomOf="@id/true_color" />
 
@@ -135,7 +135,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="0dp"
-        android:text="@string/pref_keep_screen_on"
+        android:text="@string/keep_screen_on"
         android:textColor="?android:attr/textColorSecondary"
         app:layout_constraintTop_toBottomOf="@id/fullscreen" />
 
@@ -143,7 +143,7 @@
         android:id="@+id/always_show_chapter_transition"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/pref_always_show_chapter_transition"
+        android:text="@string/always_show_chapter_transition"
         android:textColor="?android:attr/textColorSecondary"
         app:layout_constraintTop_toBottomOf="@id/keepscreen" />
 
@@ -170,7 +170,7 @@
         android:id="@+id/zoom_start_text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="@string/pref_image_scale_type"
+        android:text="@string/scale_type"
         app:layout_constraintBaseline_toBaselineOf="@id/scale_type"
         app:layout_constraintEnd_toStartOf="@id/bottom_line"
         app:layout_constraintStart_toStartOf="parent" />
@@ -189,7 +189,7 @@
         android:id="@+id/scale_type_text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="@string/pref_zoom_start"
+        android:text="@string/zoom_start_position"
         app:layout_constraintBaseline_toBaselineOf="@id/zoom_start"
         app:layout_constraintEnd_toStartOf="@id/bottom_line"
         app:layout_constraintStart_toStartOf="parent" />
@@ -209,7 +209,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="@string/pref_crop_borders"
+        android:text="@string/crop_borders"
         android:textColor="?android:attr/textColorSecondary"
         app:layout_constraintTop_toBottomOf="@id/zoom_start" />
 
@@ -218,7 +218,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="0dp"
-        android:text="@string/pref_page_transitions"
+        android:text="@string/page_transitions"
         android:textColor="?android:attr/textColorSecondary"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/crop_borders" />
@@ -263,7 +263,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="@string/pref_crop_borders"
+        android:text="@string/crop_borders"
         android:textColor="?android:attr/textColorSecondary"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/margin_ratio_webtoon" />

@@ -18,10 +18,10 @@ class ChooseShapeDialog(bundle: Bundle? = null) : DialogController(bundle) {
 
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
         val modes = intArrayOf(
-            R.string.circular_icon,
-            R.string.rounded_icon,
-            R.string.square_icon,
-            R.string.star_icon)
+            R.string.circular,
+            R.string.rounded,
+            R.string.square,
+            R.string.star)
 
         return MaterialDialog(activity!!)
             .title(R.string.icon_shape)

@@ -10,6 +10,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
+import java.util.Locale
 
 class RemoveHistoryDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
         where T : Controller, T : RemoveHistoryDialog.Listener {
@@ -27,14 +28,17 @@ class RemoveHistoryDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
         val activity = activity!!
 
-        return MaterialDialog(activity)
-                .title(R.string.action_remove)
-                .message(R.string.dialog_with_checkbox_remove_description)
-                .checkBoxPrompt(res = R.string.dialog_with_checkbox_reset) {}
-                .negativeButton(android.R.string.cancel)
-                .positiveButton(R.string.action_remove) {
-                    onPositive(it.isCheckPromptChecked())
-                }
+        return MaterialDialog(activity).title(R.string.remove)
+            .message(R.string.this_will_reomve_the_read_date_question).checkBoxPrompt(
+                text = activity.getString(
+                    R.string.reset_all_chapters_for_this_,
+                    (manga?.mangaType(activity) ?: activity.getString(R.string.manga)).toLowerCase(
+                            Locale.ROOT
+                        )
+                )
+            ) {}.negativeButton(android.R.string.cancel).positiveButton(R.string.remove) {
+                onPositive(it.isCheckPromptChecked())
+            }
     }
 
     private fun onPositive(checked: Boolean) {

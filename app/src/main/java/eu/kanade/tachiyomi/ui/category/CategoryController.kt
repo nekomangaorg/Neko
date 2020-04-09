@@ -47,7 +47,7 @@ class CategoryController(bundle: Bundle? = null) : BaseController(bundle),
      * Returns the toolbar title to show when this controller is attached.
      */
     override fun getTitle(): String? {
-        return resources?.getString(R.string.action_edit_categories)
+        return resources?.getString(R.string.edit_categories)
     }
 
     /**
@@ -107,11 +107,6 @@ class CategoryController(bundle: Bundle? = null) : BaseController(bundle),
      */
     fun setCategories(categories: List<CategoryItem>) {
         adapter?.updateDataSet(categories)
-        if (categories.isNotEmpty()) {
-            empty_view.hide()
-        } else {
-            empty_view.show(R.drawable.ic_shape_black_128dp, R.string.information_empty_category)
-        }
     }
 
     /**
@@ -136,7 +131,7 @@ class CategoryController(bundle: Bundle? = null) : BaseController(bundle),
         MaterialDialog(activity!!)
             .title(R.string.confirm_category_deletion)
             .message(R.string.confirm_category_deletion_message)
-            .positiveButton(R.string.action_delete) {
+            .positiveButton(R.string.delete) {
                 deleteCategory(position)
             }
             .negativeButton(android.R.string.no)
@@ -146,9 +141,9 @@ class CategoryController(bundle: Bundle? = null) : BaseController(bundle),
     private fun deleteCategory(position: Int) {
         adapter?.removeItem(position)
         snack =
-            view?.snack(R.string.snack_category_deleted, Snackbar.LENGTH_INDEFINITE) {
+            view?.snack(R.string.category_deleted, Snackbar.LENGTH_INDEFINITE) {
                 var undoing = false
-                setAction(R.string.action_undo) {
+                setAction(R.string.undo) {
                     adapter?.restoreDeletedItems()
                     undoing = true
                 }
@@ -212,6 +207,6 @@ class CategoryController(bundle: Bundle? = null) : BaseController(bundle),
      * Called from the presenter when a category with the given name already exists.
      */
     fun onCategoryExistsError() {
-        activity?.toast(R.string.error_category_exists)
+        activity?.toast(R.string.category_with_name_exists)
     }
 }

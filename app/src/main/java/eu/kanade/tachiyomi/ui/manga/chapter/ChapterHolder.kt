@@ -30,7 +30,7 @@ class ChapterHolder(
         chapter_title.text = when (manga.displayMode) {
             Manga.DISPLAY_NUMBER -> {
                 val number = adapter.decimalFormat.format(chapter.chapter_number.toDouble())
-                itemView.context.getString(R.string.display_mode_chapter, number)
+                itemView.context.getString(R.string.chapter_, number)
             }
             else -> chapter.name
         }
@@ -64,7 +64,7 @@ class ChapterHolder(
         } else if (!chapter.read && chapter.last_page_read > 0 && !isLocked) {
             statuses.add(
                 itemView.context.getString(
-                    R.string.chapter_progress, chapter.last_page_read + 1
+                    R.string.page_, chapter.last_page_read + 1
                 )
             )
         }

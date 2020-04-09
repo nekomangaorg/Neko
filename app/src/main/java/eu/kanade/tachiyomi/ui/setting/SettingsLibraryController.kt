@@ -1,19 +1,11 @@
 package eu.kanade.tachiyomi.ui.setting
 
-import android.app.Dialog
-import android.os.Bundle
 import android.os.Handler
-import android.view.View
 import androidx.preference.PreferenceScreen
-import com.afollestad.materialdialogs.MaterialDialog
-import com.afollestad.materialdialogs.customview.customView
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.getOrDefault
-import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.category.CategoryController
 import kotlinx.android.synthetic.main.pref_library_columns.view.*
@@ -26,9 +18,9 @@ class SettingsLibraryController : SettingsController() {
     private val db: DatabaseHelper = Injekt.get()
 
     override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
-        titleRes = R.string.pref_category_library
+        titleRes = R.string.library
         preferenceCategory {
-            titleRes = R.string.pref_category_library_display
+            titleRes = R.string.display
             switchPreference {
                 key = Keys.removeArticles
                 titleRes = R.string.pref_remove_articles
@@ -40,9 +32,9 @@ class SettingsLibraryController : SettingsController() {
         val dbCategories = db.getCategories().executeAsBlocking()
 
         preferenceCategory {
-            titleRes = R.string.pref_category_library_categories
+            titleRes = R.string.categories
             preference {
-                titleRes = R.string.action_edit_categories
+                titleRes = R.string.edit_categories
                 val catCount = db.getCategories().executeAsBlocking().size
                 summary =
                     context.resources.getQuantityString(R.plurals.category, catCount, catCount)
@@ -54,25 +46,24 @@ class SettingsLibraryController : SettingsController() {
 
                 val categories = listOf(Category.createDefault(context)) + dbCategories
                 entries =
-                    listOf(context.getString(R.string.default_category_summary)) + categories.map { it.name }
-                        .toTypedArray()
+                    listOf(context.getString(R.string.always_ask)) + categories.map { it.name }.toTypedArray()
                 entryValues = listOf(-1) + categories.mapNotNull { it.id }.toList()
                 defaultValue = "-1"
 
                 val selectedCategory = categories.find { it.id == preferences.defaultCategory() }
                 summary =
-                    selectedCategory?.name ?: context.getString(R.string.default_category_summary)
+                    selectedCategory?.name ?: context.getString(R.string.always_ask)
                 onChange { newValue ->
                     summary = categories.find {
                         it.id == newValue as Int
-                    }?.name ?: context.getString(R.string.default_category_summary)
+                    }?.name ?: context.getString(R.string.always_ask)
                     true
                 }
             }
         }
 
         preferenceCategory {
-            titleRes = R.string.pref_category_library_update
+            titleRes = R.string.updates
             intListPreference(activity) {
                 key = Keys.updateOnRefresh
                 titleRes = R.string.categories_on_manual
@@ -87,14 +78,14 @@ class SettingsLibraryController : SettingsController() {
                 key = Keys.libraryUpdateInterval
                 titleRes = R.string.pref_library_update_interval
                 entriesRes = arrayOf(
-                    R.string.update_never,
-                    R.string.update_1hour,
-                    R.string.update_2hour,
-                    R.string.update_3hour,
-                    R.string.update_6hour,
-                    R.string.update_12hour,
-                    R.string.update_24hour,
-                    R.string.update_48hour
+                    R.string.manual,
+                    R.string.hourly,
+                    R.string.every_2_hours,
+                    R.string.every_3_hours,
+                    R.string.every_6_hours,
+                    R.string.every_12_hours,
+                    R.string.daily,
+                    R.string.every_2_days
                 )
                 entryValues = listOf(0, 1, 2, 3, 6, 12, 24, 48)
                 defaultValue = 0
@@ -112,10 +103,10 @@ class SettingsLibraryController : SettingsController() {
             }
             multiSelectListPreferenceMat(activity) {
                 key = Keys.libraryUpdateRestriction
-                titleRes = R.string.pref_library_update_restriction
+                titleRes = R.string.library_update_restriction
                 entriesRes = arrayOf(R.string.wifi, R.string.charging)
                 entryValues = listOf("wifi", "ac")
-                customSummaryRes = R.string.pref_library_update_restriction_summary
+                customSummaryRes = R.string.library_update_restriction_summary
 
                 preferences.libraryUpdateInterval().asObservable()
                     .subscribeUntilDestroy { isVisible = it > 0 }
@@ -134,12 +125,12 @@ class SettingsLibraryController : SettingsController() {
 
             intListPreference(activity) {
                 key = Keys.libraryUpdatePrioritization
-                titleRes = R.string.pref_library_update_prioritization
+                titleRes = R.string.library_update_order
 
                 // The following array lines up with the list rankingScheme in:
                 // ../../data/library/LibraryUpdateRanker.kt
                 entriesRes = arrayOf(
-                    R.string.action_sort_alpha, R.string.action_sort_last_updated
+                    R.string.alphabetically, R.string.last_updated
                 )
                 entryRange = 0..1
                 defaultValue = 0
@@ -161,49 +152,6 @@ class SettingsLibraryController : SettingsController() {
                     customSummary =
                         if (selectedCategories.isEmpty()) context.getString(R.string.all)
                         else selectedCategories.joinToString { it.name }
-                }
-            }
-        }
-    }
-
-    class LibraryColumnsDialog : DialogController() {
-
-        private val preferences: PreferencesHelper = Injekt.get()
-
-        private var portrait = preferences.portraitColumns().getOrDefault()
-        private var landscape = preferences.landscapeColumns().getOrDefault()
-
-        override fun onCreateDialog(savedViewState: Bundle?): Dialog {
-            val dialog = MaterialDialog(activity!!)
-                .title(R.string.pref_library_columns)
-                .customView(viewRes = R.layout.pref_library_columns, scrollable = false)
-                .positiveButton(android.R.string.ok) {
-                    preferences.portraitColumns().set(portrait)
-                    preferences.landscapeColumns().set(landscape)
-                }
-                .negativeButton(android.R.string.cancel)
-
-            onViewCreated(dialog.view)
-            return dialog
-        }
-
-        fun onViewCreated(view: View) {
-            with(view.portrait_columns) {
-                displayedValues = arrayOf(context.getString(R.string.default_columns)) +
-                    IntRange(1, 10).map(Int::toString)
-                value = portrait
-
-                setOnValueChangedListener { _, _, newValue ->
-                    portrait = newValue
-                }
-            }
-            with(view.landscape_columns) {
-                displayedValues = arrayOf(context.getString(R.string.default_columns)) +
-                    IntRange(1, 10).map(Int::toString)
-                value = landscape
-
-                setOnValueChangedListener { _, _, newValue ->
-                    landscape = newValue
                 }
             }
         }

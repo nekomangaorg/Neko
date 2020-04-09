@@ -47,9 +47,9 @@ class TrackHolder(view: View, adapter: TrackAdapter) : BaseViewHolder(view) {
                         R.string.chapter_x_of_y, track.last_chapter_read, track.total_chapters
                     )
                     track.last_chapter_read > 0 -> context.getString(
-                        R.string.chapter_x, track.last_chapter_read
+                        R.string.chapter_, track.last_chapter_read
                     )
-                    else -> context.getString(R.string.action_filter_not_started)
+                    else -> context.getString(R.string.not_started)
                 }
             }
             val status = item.service.getStatus(track.status)

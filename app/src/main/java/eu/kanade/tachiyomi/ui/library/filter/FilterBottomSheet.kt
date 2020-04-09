@@ -178,23 +178,17 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         }
 
         downloaded = inflate(R.layout.filter_buttons) as FilterTagGroup
-        downloaded.setup(
-            this,
-            R.string.action_filter_downloaded,
-            R.string.action_filter_not_downloaded
-        )
+        downloaded.setup(this, R.string.downloaded, R.string.not_downloaded)
 
         completed = inflate(R.layout.filter_buttons) as FilterTagGroup
         completed.setup(this, R.string.completed, R.string.ongoing)
 
         unread = inflate(R.layout.filter_buttons) as FilterTagGroup
-        unread.setup(
-            this, R.string.action_filter_not_started, R.string.action_filter_in_progress,
-            R.string.action_filter_read
-        )
+        unread.setup(this, R.string.not_started, R.string.in_progress,
+            R.string.read)
 
         tracked = inflate(R.layout.filter_buttons) as FilterTagGroup
-        tracked.setup(this, R.string.action_filter_tracked, R.string.action_filter_not_tracked)
+        tracked.setup(this, R.string.tracked, R.string.not_tracked)
 
         reSortViews()
 

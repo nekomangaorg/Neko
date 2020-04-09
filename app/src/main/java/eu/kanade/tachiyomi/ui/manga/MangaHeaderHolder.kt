@@ -81,17 +81,11 @@ class MangaHeaderHolder(
             true
         }
         manga_full_title.setOnLongClickListener {
-            adapter.delegate.copyToClipboard(
-                manga_full_title.text.toString(),
-                R.string.manga_info_full_title_label
-            )
+            adapter.delegate.copyToClipboard(manga_full_title.text.toString(), R.string.title)
             true
         }
         manga_author.setOnLongClickListener {
-            adapter.delegate.copyToClipboard(
-                manga_author.text.toString(),
-                R.string.manga_info_author_label
-            )
+            adapter.delegate.copyToClipboard(manga_author.text.toString(), R.string.author)
             true
         }
         manga_cover.setOnClickListener { adapter.delegate.zoomImageFromThumb(cover_card) }
@@ -150,7 +144,7 @@ class MangaHeaderHolder(
             else expand()
         }
         manga_summary_label.text = itemView.context.getString(
-            R.string.about_this, itemView.context.getString(
+            R.string.about_this_, itemView.context.getString(
                 when {
                     manga.mangaType() == Manga.TYPE_MANHWA -> R.string.manhwa
                     manga.mangaType() == Manga.TYPE_MANHUA -> R.string.manhua
@@ -221,8 +215,8 @@ class MangaHeaderHolder(
             text = if (nextChapter != null) {
                 val number = adapter.decimalFormat.format(nextChapter.chapter_number.toDouble())
                 if (nextChapter.chapter_number > 0) resources.getString(
-                    if (nextChapter.last_page_read > 0) R.string.continue_reading_chapter
-                    else R.string.start_reading_chapter, number
+                    if (nextChapter.last_page_read > 0) R.string.continue_reading_chapter_
+                    else R.string.start_reading_chapter_, number
                 )
                 else {
                     resources.getString(

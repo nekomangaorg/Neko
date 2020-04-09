@@ -41,17 +41,17 @@ class RecentMangaHolder(
         val notValidNum = item.mch.chapter.chapter_number <= 0
         body.text = when {
             item.mch.chapter.id == null -> body.context.getString(
-                R.string.added_x, DateUtils.getRelativeTimeSpanString(
+                R.string.added_, DateUtils.getRelativeTimeSpanString(
                     item.mch.manga.date_added, Date().time, DateUtils.MINUTE_IN_MILLIS
                 ).toString()
             )
             item.mch.history.id == null -> body.context.getString(
-                R.string.updated_x, DateUtils.getRelativeTimeSpanString(
+                R.string.updated_, DateUtils.getRelativeTimeSpanString(
                     item.chapter.date_upload, Date().time, DateUtils.HOUR_IN_MILLIS
                 ).toString()
             )
             item.chapter.id != item.mch.chapter.id -> body.context.getString(
-                if (notValidNum) R.string.last_read_x else R.string.last_read_chapter_x,
+                if (notValidNum) R.string.last_read_ else R.string.last_read_chapter_,
                 if (notValidNum) item.mch.chapter.name else adapter.decimalFormat.format(item.mch.chapter.chapter_number) +
                     " (${DateUtils.getRelativeTimeSpanString(
                     item.mch.history.last_read, Date().time, DateUtils.MINUTE_IN_MILLIS
@@ -64,7 +64,7 @@ class RecentMangaHolder(
                     item.mch.history.last_read, Date().time, DateUtils.MINUTE_IN_MILLIS
                 )})"
             isSearch -> body.context.getString(
-                R.string.read_x, DateUtils.getRelativeTimeSpanString(
+                R.string.read_, DateUtils.getRelativeTimeSpanString(
                     item.mch.history.last_read, Date().time, DateUtils.MINUTE_IN_MILLIS
                 ).toString()
             )

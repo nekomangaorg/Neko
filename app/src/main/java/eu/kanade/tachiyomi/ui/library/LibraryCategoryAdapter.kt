@@ -171,7 +171,7 @@ class LibraryCategoryAdapter(val libraryListener: LibraryListener) :
                         } else {
                             val category = db.getCategoriesForManga(iFlexible.manga)
                                 .executeAsBlocking().firstOrNull()?.name
-                            category ?: recyclerView.context.getString(R.string.default_columns)
+                            category ?: recyclerView.context.getString(R.string.default_value)
                         }
                     }
                     LibrarySort.LAST_READ -> {
@@ -184,7 +184,7 @@ class LibraryCategoryAdapter(val libraryListener: LibraryListener) :
                     LibrarySort.UNREAD -> {
                         val unread = iFlexible.manga.unread
                         if (unread > 0) getRange(unread)
-                        else recyclerView.context.getString(R.string.action_filter_read)
+                        else recyclerView.context.getString(R.string.read)
                     }
                     LibrarySort.TOTAL -> {
                         val total = iFlexible.chapterCount

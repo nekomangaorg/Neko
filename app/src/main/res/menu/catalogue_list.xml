@@ -6,24 +6,25 @@
     <item
         android:id="@+id/action_search"
         android:icon="@drawable/ic_search_white_24dp"
-        android:title="@string/action_search"
+        android:title="@string/search"
         app:actionViewClass="androidx.appcompat.widget.SearchView"
         app:showAsAction="collapseActionView|ifRoom" />
 
     <item
         android:id="@+id/action_display_mode"
-        android:title="@string/action_display_mode"
+        android:title="@string/display_mode"
         app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/action_open_in_web_view"
-        android:title="@string/action_open_in_web_view"
+        android:icon="@drawable/ic_open_in_webview_white_24dp"
+        android:title="@string/open_in_web_view"
         app:showAsAction="never" />
 
     <item
         android:id="@+id/action_settings"
         android:icon="@drawable/ic_settings_white_24dp"
-        android:title="@string/label_settings"
+        android:title="@string/settings"
         app:showAsAction="never"
         />
 

@@ -64,28 +64,28 @@ object Notifications {
 
         val channels = listOf(NotificationChannel(
             CHANNEL_COMMON,
-            context.getString(R.string.channel_common),
+            context.getString(R.string.common),
             NotificationManager.IMPORTANCE_LOW
         ), NotificationChannel(
             CHANNEL_LIBRARY,
-            context.getString(R.string.channel_library_updates),
+            context.getString(R.string.updating_library),
             NotificationManager.IMPORTANCE_LOW
         ).apply {
             setShowBadge(false)
         }, NotificationChannel(
             CHANNEL_DOWNLOADER,
-            context.getString(R.string.channel_downloader),
+            context.getString(R.string.downloads),
             NotificationManager.IMPORTANCE_LOW
         ).apply {
             setShowBadge(false)
             },
             NotificationChannel(
             CHANNEL_NEW_CHAPTERS,
-            context.getString(R.string.channel_new_chapters),
+            context.getString(R.string.new_chapters),
             NotificationManager.IMPORTANCE_DEFAULT
         ), NotificationChannel(
             CHANNEL_RESTORE,
-            context.getString(R.string.channel_backup_restore),
+            context.getString(R.string.restoring_backup),
             NotificationManager.IMPORTANCE_LOW
         ).apply {
             setShowBadge(false)

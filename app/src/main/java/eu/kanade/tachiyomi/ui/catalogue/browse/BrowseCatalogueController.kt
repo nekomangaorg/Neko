@@ -404,7 +404,7 @@ open class BrowseCatalogueController(bundle: Bundle) :
             if (error is NoResultsException) catalogue_view.context.getString(R.string.no_results_found) else (error.message
                 ?: "")
         snack = catalouge_layout?.snack(message, Snackbar.LENGTH_INDEFINITE) {
-            setAction(R.string.action_retry) {
+            setAction(R.string.retry) {
                 // If not the first page, show bottom progress bar.
                 if (adapter.mainItemCount > 0) {
                     val item = progressItem ?: return@setAction
@@ -533,11 +533,8 @@ open class BrowseCatalogueController(bundle: Bundle) :
         if (manga.favorite) {
             presenter.changeMangaFavorite(manga)
             adapter?.notifyItemChanged(position)
-            snack = catalouge_layout?.snack(
-                R.string.manga_removed_library,
-                Snackbar.LENGTH_INDEFINITE
-            ) {
-                setAction(R.string.action_undo) {
+            snack = catalouge_layout?.snack(R.string.removed_from_library, Snackbar.LENGTH_INDEFINITE) {
+                setAction(R.string.undo) {
                     if (!manga.favorite) addManga(manga, position)
                 }
                 addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
@@ -550,7 +547,7 @@ open class BrowseCatalogueController(bundle: Bundle) :
             (activity as? MainActivity)?.setUndoSnackBar(snack)
         } else {
             addManga(manga, position)
-            snack = catalouge_layout?.snack(R.string.manga_added_library)
+            snack = catalouge_layout?.snack(R.string.added_to_library)
         }
     }
 

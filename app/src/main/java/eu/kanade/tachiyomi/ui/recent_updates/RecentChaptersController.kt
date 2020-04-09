@@ -53,7 +53,7 @@ class RecentChaptersController(bundle: Bundle? = null) : BaseController(bundle),
     private var lastChapterId: Long? = null
 
     override fun getTitle(): String? {
-        return resources?.getString(R.string.label_recent_updates)
+        return resources?.getString(R.string.recent_updates)
     }
 
     override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
@@ -161,7 +161,7 @@ class RecentChaptersController(bundle: Bundle? = null) : BaseController(bundle),
         if (size > 0) {
             empty_view?.hide()
         } else {
-            empty_view?.show(R.drawable.ic_update_black_128dp, R.string.information_no_recent)
+            empty_view?.show(R.drawable.ic_update_black_128dp, R.string.no_recent_chapters)
         }
     }
 
@@ -203,7 +203,7 @@ class RecentChaptersController(bundle: Bundle? = null) : BaseController(bundle),
         if (!read) {
             snack = view?.snack(R.string.marked_as_read, Snackbar.LENGTH_INDEFINITE) {
                 var undoing = false
-                setAction(R.string.action_undo) {
+                setAction(R.string.undo) {
                     presenter.markChapterRead(item, read, lastRead, pagesLeft)
                     undoing = true
                 }

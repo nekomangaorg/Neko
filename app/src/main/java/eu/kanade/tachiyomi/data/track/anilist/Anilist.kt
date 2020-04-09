@@ -47,7 +47,7 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
             PAUSED -> getString(R.string.paused)
             DROPPED -> getString(R.string.dropped)
             PLANNING -> getString(R.string.plan_to_read)
-            REPEATING -> getString(R.string.repeating)
+            REPEATING -> getString(R.string.rereading)
             else -> ""
         }
     }

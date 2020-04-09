@@ -552,10 +552,10 @@ class MangaDetailsPresenter(
 
     fun currentFilters(): String {
         val filtersId = mutableListOf<Int?>()
-        filtersId.add(if (onlyRead()) R.string.action_filter_read else null)
-        filtersId.add(if (onlyUnread()) R.string.action_filter_unread else null)
-        filtersId.add(if (onlyDownloaded()) R.string.action_filter_downloaded else null)
-        filtersId.add(if (onlyBookmarked()) R.string.action_filter_bookmarked else null)
+        filtersId.add(if (onlyRead()) R.string.read else null)
+        filtersId.add(if (onlyUnread()) R.string.unread else null)
+        filtersId.add(if (onlyDownloaded()) R.string.downloaded else null)
+        filtersId.add(if (onlyBookmarked()) R.string.bookmarked else null)
         return filtersId.filterNotNull().joinToString(", ") { preferences.context.getString(it) }
     }
 

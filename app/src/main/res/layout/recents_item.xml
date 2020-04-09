@@ -15,7 +15,7 @@
         android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="@string/label_recent_updates" />
+        tools:text="@string/recent_updates" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/view_all"
