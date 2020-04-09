@@ -92,7 +92,7 @@ ExtensionAdapter.OnButtonClickListener,
     fun updateExtTitle() {
         val extCount = presenter.getExtensionUpdateCount()
         title_text.text = if (extCount == 0) context.getString(R.string.extensions)
-        else resources.getQuantityString(R.plurals.extensions_updates_available, extCount,
+        else resources.getQuantityString(R.plurals.extension_updates_available, extCount,
             extCount)
 
         title_text.setTextColor(context.getResourceColor(

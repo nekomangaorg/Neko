@@ -23,8 +23,8 @@ class SettingsLibraryController : SettingsController() {
             titleRes = R.string.display
             switchPreference {
                 key = Keys.removeArticles
-                titleRes = R.string.pref_remove_articles
-                summaryRes = R.string.pref_remove_articles_summary
+                titleRes = R.string.sort_by_ignoring_articles
+                summaryRes = R.string.when_sorting_ignore_articles
                 defaultValue = false
             }
         }
@@ -75,7 +75,7 @@ class SettingsLibraryController : SettingsController() {
             }
             intListPreference(activity) {
                 key = Keys.libraryUpdateInterval
-                titleRes = R.string.pref_library_update_interval
+                titleRes = R.string.library_update_frequency
                 entriesRes = arrayOf(
                     R.string.manual,
                     R.string.hourly,
@@ -118,7 +118,7 @@ class SettingsLibraryController : SettingsController() {
             }
             switchPreference {
                 key = Keys.updateOnlyNonCompleted
-                titleRes = R.string.pref_update_only_non_completed
+                titleRes = R.string.only_update_ongoing
                 defaultValue = false
             }
 
@@ -133,7 +133,7 @@ class SettingsLibraryController : SettingsController() {
                 )
                 entryRange = 0..1
                 defaultValue = 0
-                summaryRes = R.string.pref_library_update_prioritization_summary
+                summaryRes = R.string.select_order_to_update
             }
 
             switchPreference {
@@ -145,7 +145,7 @@ class SettingsLibraryController : SettingsController() {
 
             multiSelectListPreferenceMat(activity) {
                 key = Keys.libraryUpdateCategories
-                titleRes = R.string.pref_library_update_categories
+                titleRes = R.string.categories_to_include_in_global_update
                 entries = dbCategories.map { it.name }
                 entryValues = dbCategories.map { it.id.toString() }
                 allSelectionRes = R.string.all
@@ -168,8 +168,8 @@ class SettingsLibraryController : SettingsController() {
 
                 switchPreference {
                     key = Keys.skipPreMigration
-                    titleRes = R.string.pref_skip_pre_migration
-                    summaryRes = R.string.pref_skip_pre_migration_summary
+                    titleRes = R.string.skip_pre_migration
+                    summaryRes = R.string.use_last_saved_migration_preferences
                     defaultValue = false
                 }
             }

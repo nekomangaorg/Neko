@@ -84,7 +84,7 @@
     <string name="portrait">Vertical</string>
     <string name="landscape">Horitzontal</string>
     <string name="default_value">Per defecte</string>
-    <string name="pref_library_update_interval">Freqüència d\'actualització de la biblioteca</string>
+    <string name="library_update_frequency">Freqüència d\'actualització de la biblioteca</string>
     <string name="manual">Manual</string>
     <string name="hourly">Cada hora</string>
     <string name="every_2_hours">Cada 2 hores</string>
@@ -94,14 +94,14 @@
     <string name="daily">Cada dia</string>
     <string name="every_2_days">Cada 2 dies</string>
     <string name="weekly">Cada setmana</string>
-    <string name="pref_library_update_categories">Categories a incloure a l\'actualització global</string>
+    <string name="categories_to_include_in_global_update">Categories a incloure a l\'actualització global</string>
     <string name="all">Tot</string>
     <string name="library_update_restriction">Restriccions d\'actualització de la biblioteca</string>
     <string name="library_update_restriction_summary">Actualitza només quan es compleixin les condicions</string>
     <string name="wifi">Wi-Fi</string>
     <string name="charging">Carregant</string>
-    <string name="pref_update_only_non_completed">Actualitza només el manga en curs</string>
-    <string name="pref_auto_update_manga_sync">Sincronitza els capítols després de llegir-los</string>
+    <string name="only_update_ongoing">Actualitza només el manga en curs</string>
+    <string name="sync_chapters_after_reading">Sincronitza els capítols després de llegir-los</string>
     <string name="app_theme">Tema de l\'aplicació</string>
     <string name="light_blue">Tema principal</string>
     <string name="dark">Tema fosc</string>
@@ -310,7 +310,7 @@
     <string name="url_not_set_click_again">La URL del manga no està definida. Feu clic al títol i torneu a triar un manga</string>
     <string name="category_with_name_exists">Ja hi ha una categoria amb aquest nom!</string>
     <string name="snack_categories_deleted">S\'han suprimit les categories</string>
-    <string name="this_will_reomve_the_read_date_question">S\'eliminarà la data de lectura d\'aquest capítol. N\'esteu segur\?</string>
+    <string name="this_will_remove_the_read_date_question">S\'eliminarà la data de lectura d\'aquest capítol. N\'esteu segur\?</string>
     <string name="dialog_with_checkbox_reset">Reinicia tots els capítols d\'aquest manga</string>
     <string name="snack_add_to_library">Voleu afegir el manga a la biblioteca\?</string>
     <string name="picture_saved">S\'ha desat la imatge</string>
@@ -379,7 +379,7 @@
     <string name="burn_darken">Crema / Enfosqueix</string>
     <string name="help">Ajuda</string>
     <string name="library_update_order">Ordre d\'actualització de la biblioteca</string>
-    <string name="pref_library_update_prioritization_summary">Seleccioneu l\'ordre amb què el Tachiyomi comprova si hi ha actualitzacions</string>
+    <string name="select_order_to_update">Seleccioneu l\'ordre amb què el Tachiyomi comprova si hi ha actualitzacions</string>
     <string name="no_results_found">No s\'ha trobat cap resultat</string>
     <string name="select_a_source_to_migrate_from">Seleccioneu un origen del qual vulgueu migrar</string>
 </resources>

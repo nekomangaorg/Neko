@@ -34,7 +34,7 @@
     <string name="portrait">Álló</string>
     <string name="landscape">Fekvő</string>
     <string name="default_value">Alapértelmezett</string>
-    <string name="pref_library_update_interval">Könyvtár frissítések gyakorisága</string>
+    <string name="library_update_frequency">Könyvtár frissítések gyakorisága</string>
     <string name="manual">Kézi</string>
     <string name="hourly">Óránként</string>
     <string name="every_2_hours">2 óránként</string>
@@ -44,13 +44,13 @@
     <string name="daily">Naponta</string>
     <string name="every_2_days">2 naponta</string>
     <string name="weekly">Hetente</string>
-    <string name="pref_library_update_categories">Globális frissítésben tartalmazott kategóriák</string>
+    <string name="categories_to_include_in_global_update">Globális frissítésben tartalmazott kategóriák</string>
     <string name="all">Összes</string>
     <string name="library_update_restriction">Könyvtár frissítési korlátozások</string>
     <string name="library_update_restriction_summary">Frissítés csak akkor, ha a feltételek teljesülnek</string>
     <string name="wifi">Wi-Fi</string>
     <string name="charging">Töltés</string>
-    <string name="pref_update_only_non_completed">Csak a folyamatban lévő mangákat frissítse</string>
+    <string name="only_update_ongoing">Csak a folyamatban lévő mangákat frissítse</string>
     <string name="app_theme">Alkalmazás téma</string>
     <string name="light_blue">Fő téma</string>
     <string name="dark">Sötét téma</string>
@@ -130,7 +130,7 @@
     <string name="restore">Visszaállítás</string>
     <string name="app_not_available">Az alkalmazás nem érhető el</string>
     <string name="updates">Frissítések</string>
-    <string name="pref_auto_update_manga_sync">Olvasás után a fejezetek szinkronizálása</string>
+    <string name="sync_chapters_after_reading">Olvasás után a fejezetek szinkronizálása</string>
     <string name="page_transitions">Áttűnés lapozáskor</string>
     <string name="crop_borders">Szegélyek vágása</string>
     <string name="use_custom_brightness">Egyéni fényerő használata</string>

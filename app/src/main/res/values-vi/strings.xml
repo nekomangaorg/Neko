@@ -74,7 +74,7 @@
     <string name="portrait">Dọc</string>
     <string name="landscape">Ngang</string>
     <string name="default_value">Mặc định</string>
-    <string name="pref_library_update_interval">Lịch cập nhật thư viện</string>
+    <string name="library_update_frequency">Lịch cập nhật thư viện</string>
     <string name="manual">Thủ công</string>
     <string name="hourly">Mỗi tiếng</string>
     <string name="every_2_hours">Mỗi 2 tiếng</string>
@@ -83,14 +83,14 @@
     <string name="every_12_hours">Mỗi 12 tiếng</string>
     <string name="daily">Mỗi ngày</string>
     <string name="every_2_days">Mỗi 2 ngày</string>
-    <string name="pref_library_update_categories">Các danh mục được cập nhật toàn bộ</string>
+    <string name="categories_to_include_in_global_update">Các danh mục được cập nhật toàn bộ</string>
     <string name="all">Tất cả</string>
     <string name="library_update_restriction">Hạn chế cập nhật thư viện</string>
     <string name="library_update_restriction_summary">Chỉ cập nhật khi có đủ các điều kiện</string>
     <string name="wifi">Wi-Fi</string>
     <string name="charging">Đang sạc</string>
-    <string name="pref_update_only_non_completed">Chỉ cập nhật truyện đang tiến hành</string>
-    <string name="pref_auto_update_manga_sync">Đồng bộ các chương sau khi đọc</string>
+    <string name="only_update_ongoing">Chỉ cập nhật truyện đang tiến hành</string>
+    <string name="sync_chapters_after_reading">Đồng bộ các chương sau khi đọc</string>
     <string name="app_theme">Chủ đề ứng dụng</string>
     <string name="light_blue">Chủ đề chính</string>
     <string name="dark">Chủ đề tối</string>
@@ -238,7 +238,7 @@
     <string name="category_with_name_exists">Tên danh mục này đã tồn tại!</string>
     <string name="snack_categories_deleted">Danh mục đã bị xóa</string>
     <!-- Dialog option with checkbox view -->
-    <string name="this_will_reomve_the_read_date_question">Sẽ xóa ngày đọc các chương. Bạn chắc chứ?</string>
+    <string name="this_will_remove_the_read_date_question">Sẽ xóa ngày đọc các chương. Bạn chắc chứ?</string>
     <string name="dialog_with_checkbox_reset">Làm mới mọi chương của truyện này</string>
     <!-- SnackBar -->
     <string name="snack_add_to_library">Thêm truyện vào thư viện?</string>
@@ -410,7 +410,7 @@
     <string name="multiply">Nhân</string>
     <string name="help">Trợ giúp</string>
     <string name="library_update_order">Thứ tự ưu tiên cập nhật</string>
-    <string name="pref_library_update_prioritization_summary">Chọn thứ tự để Tachiyomi kiểm tra cập nhật</string>
+    <string name="select_order_to_update">Chọn thứ tự để Tachiyomi kiểm tra cập nhật</string>
     <string name="no_results_found">Không tìm thấy kết quả nào</string>
     <string name="select_a_source_to_migrate_from">Chọn 1 nguồn để di chuyển từ</string>
 </resources>

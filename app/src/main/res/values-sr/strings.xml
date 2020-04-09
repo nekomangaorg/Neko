@@ -84,7 +84,7 @@
     <string name="portrait">Vertikalno</string>
     <string name="landscape">Horizontalno</string>
     <string name="default_value">Podrazumevano</string>
-    <string name="pref_library_update_interval">Učestalost ažuriranja biblioteke</string>
+    <string name="library_update_frequency">Učestalost ažuriranja biblioteke</string>
     <string name="manual">Ručno</string>
     <string name="hourly">Jednočasovno</string>
     <string name="every_2_hours">Dvočasovno</string>
@@ -94,14 +94,14 @@
     <string name="daily">Dnevno</string>
     <string name="every_2_days">Svaka 2 dana</string>
     <string name="weekly">Nedeljno</string>
-    <string name="pref_library_update_categories">Kategorije koje su ubrajane u globalnom ažuriranju</string>
+    <string name="categories_to_include_in_global_update">Kategorije koje su ubrajane u globalnom ažuriranju</string>
     <string name="all">Sve</string>
     <string name="library_update_restriction">Restrikcije ažuriranja biblioteke</string>
     <string name="library_update_restriction_summary">Ažuriraj samo kada su uslovi zadovoljeni</string>
     <string name="wifi">Wi-Fi</string>
     <string name="charging">Punjenje</string>
-    <string name="pref_update_only_non_completed">Samo ažuriraj mangu koja je u toku</string>
-    <string name="pref_auto_update_manga_sync">Sinhronizuj poglavlja nakon čitanja</string>
+    <string name="only_update_ongoing">Samo ažuriraj mangu koja je u toku</string>
+    <string name="sync_chapters_after_reading">Sinhronizuj poglavlja nakon čitanja</string>
     <string name="app_theme">Tema aplikacije</string>
     <string name="light_blue">Glavna tema</string>
     <string name="dark">Tamna tema</string>

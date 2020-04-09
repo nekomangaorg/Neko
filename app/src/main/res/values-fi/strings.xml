@@ -138,7 +138,7 @@
     <string name="portrait">Pystysuunnassa</string>
     <string name="landscape">Vaakatasossa</string>
     <string name="default_value">Oletus</string>
-    <string name="pref_library_update_interval">Kirjaston automaattipäivitys</string>
+    <string name="library_update_frequency">Kirjaston automaattipäivitys</string>
     <string name="manual">Manuaalinen</string>
     <string name="hourly">Tunnin välein</string>
     <string name="every_2_hours">Kahden tunnin välein</string>
@@ -148,14 +148,14 @@
     <string name="daily">Päivittäin</string>
     <string name="every_2_days">Kahden päivän välein</string>
     <string name="weekly">Viikoittain</string>
-    <string name="pref_library_update_categories">Globaalin päivityksen sisältämät kategoriat</string>
+    <string name="categories_to_include_in_global_update">Globaalin päivityksen sisältämät kategoriat</string>
     <string name="all">Kaikki</string>
     <string name="library_update_restriction">Kirjaston päivityksen rajoitukset</string>
     <string name="library_update_restriction_summary">Päivitä vain kun vaatimukset täyttyvät</string>
     <string name="wifi">Wi-Fi</string>
     <string name="charging">Latauksessa</string>
-    <string name="pref_update_only_non_completed">Päivitä vain jatkuvat sarjat</string>
-    <string name="pref_auto_update_manga_sync">Synkronoi luvut lukemisen jälkeen</string>
+    <string name="only_update_ongoing">Päivitä vain jatkuvat sarjat</string>
+    <string name="sync_chapters_after_reading">Synkronoi luvut lukemisen jälkeen</string>
     <string name="app_theme">Sovelluksen teema</string>
     <string name="light_blue">Oletusteema</string>
     <string name="dark">Tumma teema</string>
@@ -363,7 +363,7 @@
     <string name="on_hold">Pidossa</string>
     <string name="plan_to_read">Aikomus lukea</string>
     <string name="rereading">Uudelleenluettava</string>
-    <string name="this_will_reomve_the_read_date_question">Tämä poistaa luvun lukupäivän. Haluatko jatkaa\?</string>
+    <string name="this_will_remove_the_read_date_question">Tämä poistaa luvun lukupäivän. Haluatko jatkaa\?</string>
     <string name="dialog_with_checkbox_reset">Resetoi kaikki luvut tästä sarjasta</string>
     <string name="snack_add_to_library">Lisää sarja kirjastoon\?</string>
     <string name="picture_saved">Kuva tallennetu</string>
@@ -376,7 +376,7 @@
     <string name="burn_darken">Polttava / Tummentava</string>
     <string name="help">Apu</string>
     <string name="library_update_order">Kirjaston päivitys järjestys</string>
-    <string name="pref_library_update_prioritization_summary">Valitse järjestys jossa päivitykset tarkistetaan</string>
+    <string name="select_order_to_update">Valitse järjestys jossa päivitykset tarkistetaan</string>
     <string name="system_theme">Järjestelmän oletus</string>
     <string name="system_default_all_blue">Järjestelmän oletus (Tumman sininen)</string>
     <string name="system_default_amoled">Järjestelmän oletus (AMOLED)</string>

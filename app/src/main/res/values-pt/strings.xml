@@ -58,7 +58,7 @@
     <string name="portrait">Retrato</string>
     <string name="landscape">Paisagem</string>
     <string name="default_value">Por defeito</string>
-    <string name="pref_library_update_interval">Frequência de atualização da biblioteca</string>
+    <string name="library_update_frequency">Frequência de atualização da biblioteca</string>
     <string name="manual">Manual</string>
     <string name="hourly">Hora à hora</string>
     <string name="every_2_hours">A cada 2 horas</string>
@@ -67,14 +67,14 @@
     <string name="every_12_hours">A cada 12 horas</string>
     <string name="daily">Diariamente</string>
     <string name="every_2_days">A cada 2 dias</string>
-    <string name="pref_library_update_categories">Categorias a incluir na atualização global</string>
+    <string name="categories_to_include_in_global_update">Categorias a incluir na atualização global</string>
     <string name="all">Tudo</string>
     <string name="library_update_restriction">Restrições sobre a atualização da biblioteca</string>
     <string name="library_update_restriction_summary">Atualizar apenas quando se cumprem as condições</string>
     <string name="wifi">Wi-Fi</string>
     <string name="charging">A carregar</string>
-    <string name="pref_update_only_non_completed">Atualizar apenas mangás a decorrer</string>
-    <string name="pref_auto_update_manga_sync">Sincronizar capítulos após leitura</string>
+    <string name="only_update_ongoing">Atualizar apenas mangás a decorrer</string>
+    <string name="sync_chapters_after_reading">Sincronizar capítulos após leitura</string>
     <string name="app_theme">Tema da aplicação</string>
     <string name="light_blue">Tema principal</string>
     <string name="dark">Tema escuro</string>
@@ -197,7 +197,7 @@
     <string name="title">Título</string>
     <string name="chapters">Capítulos</string>
     <!-- Dialog remove recently view -->
-    <string name="this_will_reomve_the_read_date_question">Esta ação irá remover a data de leitura deste capítulo. Continuar?</string>
+    <string name="this_will_remove_the_read_date_question">Esta ação irá remover a data de leitura deste capítulo. Continuar?</string>
     <string name="dialog_with_checkbox_reset">Repor todos os capítulos desta manga</string>
     <!-- Reader activity -->
     <string name="page_">Página: %1$d</string>
@@ -404,7 +404,7 @@
     <string name="dodge_lighten">Dodge / Clarear</string>
     <string name="help">Ajuda</string>
     <string name="library_update_order">Ordem de atualização da biblioteca</string>
-    <string name="pref_library_update_prioritization_summary">Selecione a ordem em que Tachiyomi verifica a atualização</string>
+    <string name="select_order_to_update">Selecione a ordem em que Tachiyomi verifica a atualização</string>
     <string name="system_theme">Predefinição do sistema</string>
     <string name="system_default_all_blue">Predefinição do sistema (Preto/Azul)</string>
     <string name="system_default_amoled">Predefinição do sistema (AMOLED)</string>

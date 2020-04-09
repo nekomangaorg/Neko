@@ -26,7 +26,7 @@ class SettingsTrackingController : SettingsController(),
 
         switchPreference {
             key = Keys.autoUpdateTrack
-            titleRes = R.string.pref_auto_update_manga_sync
+            titleRes = R.string.sync_chapters_after_reading
             defaultValue = true
         }
         preferenceCategory {

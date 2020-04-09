@@ -119,11 +119,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
-        android:text="@string/updated"
+        android:text="@string/unknown_status"
         android:textIsSelectable="false"
         app:layout_constraintStart_toStartOf="@id/manga_full_title"
-        app:layout_constraintTop_toBottomOf="@+id/manga_author"
-        tools:text="Completed" />
+        app:layout_constraintTop_toBottomOf="@+id/manga_author" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/manga_source"

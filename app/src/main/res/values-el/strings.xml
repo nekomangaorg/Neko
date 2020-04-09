@@ -84,7 +84,7 @@
     <string name="portrait">Κατακόρυφος</string>
     <string name="landscape">Οριζόντιος</string>
     <string name="default_value">Προεπιλογή</string>
-    <string name="pref_library_update_interval">Συχνότητα ενημέρωσης βιβλιοθήκης</string>
+    <string name="library_update_frequency">Συχνότητα ενημέρωσης βιβλιοθήκης</string>
     <string name="manual">Εγχειρίδιο</string>
     <string name="hourly">Ωριαία</string>
     <string name="every_2_hours">Κάθε 2 ώρες</string>
@@ -94,14 +94,14 @@
     <string name="daily">Καθημερινά</string>
     <string name="every_2_days">Κάθε 2 ημέρες</string>
     <string name="weekly">Εβδομαδιαία</string>
-    <string name="pref_library_update_categories">Κατηγορίες που περιλαμβάνονται στην ολική ενημέρωση</string>
+    <string name="categories_to_include_in_global_update">Κατηγορίες που περιλαμβάνονται στην ολική ενημέρωση</string>
     <string name="all">Όλα</string>
     <string name="library_update_restriction">Περιορισμοί ενημέρωσης βιβλιοθήκης</string>
     <string name="library_update_restriction_summary">Ενημέρωση μόνο όταν πληρούνται οι προϋποθέσεις</string>
     <string name="wifi">Wi-Fi</string>
     <string name="charging">Φόρτωση</string>
-    <string name="pref_update_only_non_completed">Ενημέρωση μόνο manga σε εξέλιξη</string>
-    <string name="pref_auto_update_manga_sync">Συγχρονισμός κεφάλαιων μετά τη ανάγνωση</string>
+    <string name="only_update_ongoing">Ενημέρωση μόνο manga σε εξέλιξη</string>
+    <string name="sync_chapters_after_reading">Συγχρονισμός κεφάλαιων μετά τη ανάγνωση</string>
     <string name="app_theme">Θέμα εφαρμογής</string>
     <string name="light_blue">Κύριο θέμα</string>
     <string name="dark">Σκοτεινό θέμα</string>
@@ -307,7 +307,7 @@
     <string name="url_not_set_click_again">Το Manga url δεν έχει οριστεί, κάντε κλικ στον τίτλο και επιλέξτε ξανά το manga</string>
     <string name="category_with_name_exists">Μια κατηγορία με αυτό το όνομα υπάρχει ήδη!</string>
     <string name="snack_categories_deleted">Οι κατηγορίες διαγράφηκαν</string>
-    <string name="this_will_reomve_the_read_date_question">Αυτό θα αφαιρέσει την ημερομηνία ανάγνωσης αυτού του κεφαλαίου. Είσαι σίγουρος;</string>
+    <string name="this_will_remove_the_read_date_question">Αυτό θα αφαιρέσει την ημερομηνία ανάγνωσης αυτού του κεφαλαίου. Είσαι σίγουρος;</string>
     <string name="dialog_with_checkbox_reset">Επαναφέρετε όλα τα κεφάλαια για αυτό το μάγκα</string>
     <string name="snack_add_to_library">Προσθέστε το manga στη βιβλιοθήκη;</string>
     <string name="picture_saved">Η εικόνα αποθηκεύτηκε</string>
@@ -372,7 +372,7 @@
     <string name="screen">Οθόνη</string>
     <string name="help">Βοήθεια</string>
     <string name="library_update_order">Συχνότητα ανανέωσης της Βιβλιοθήκης</string>
-    <string name="pref_library_update_prioritization_summary">Διαλέξτε την σύχνοτητα που το Tachiyomi ελένχει για διαθέσιμη ενημέρωση</string>
+    <string name="select_order_to_update">Διαλέξτε την σύχνοτητα που το Tachiyomi ελένχει για διαθέσιμη ενημέρωση</string>
     <string name="system_theme">Προεπιλογή συστήματος</string>
     <string name="system_default_all_blue">Προεπιλογή συστήματος (Σκούρο μπλε)</string>
     <string name="system_default_amoled">Προεπιλογή συστήματος (AMOLED)</string>

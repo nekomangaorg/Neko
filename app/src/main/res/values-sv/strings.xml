@@ -84,7 +84,7 @@
     <string name="portrait">Stående</string>
     <string name="landscape">Liggande</string>
     <string name="default_value">Standard</string>
-    <string name="pref_library_update_interval">Bibliotekets uppdateringsfrekvens</string>
+    <string name="library_update_frequency">Bibliotekets uppdateringsfrekvens</string>
     <string name="manual">Manuell</string>
     <string name="hourly">Varje timme</string>
     <string name="every_2_hours">Varannan timme</string>
@@ -94,14 +94,14 @@
     <string name="daily">Dagligen</string>
     <string name="every_2_days">Varannan dag</string>
     <string name="weekly">Varje vecka</string>
-    <string name="pref_library_update_categories">Kategorier som ska inkluderas i global uppdatering</string>
+    <string name="categories_to_include_in_global_update">Kategorier som ska inkluderas i global uppdatering</string>
     <string name="all">Alla</string>
     <string name="library_update_restriction">Biblioteks uppdateringsrestriktioner</string>
     <string name="library_update_restriction_summary">Uppdatera endast när vilkoren är uppfyllda</string>
     <string name="wifi">WiFi</string>
     <string name="charging">Laddning</string>
-    <string name="pref_update_only_non_completed">Uppdatera endast pågående manga</string>
-    <string name="pref_auto_update_manga_sync">Synkronisera kapitel efter läsning</string>
+    <string name="only_update_ongoing">Uppdatera endast pågående manga</string>
+    <string name="sync_chapters_after_reading">Synkronisera kapitel efter läsning</string>
     <string name="app_theme">Programtema</string>
     <string name="light_blue">Huvudtema</string>
     <string name="dark">Mörkt tema</string>
@@ -307,7 +307,7 @@
     <string name="url_not_set_click_again">Manga url är inte inställd, vänligen klicka på titeln och välj manga igen</string>
     <string name="category_with_name_exists">En kategori med detta namn finns redan!</string>
     <string name="snack_categories_deleted">Kategorier raderade</string>
-    <string name="this_will_reomve_the_read_date_question">Detta kommer att ta bort läs datumet för detta kapitel. Är du säker\?</string>
+    <string name="this_will_remove_the_read_date_question">Detta kommer att ta bort läs datumet för detta kapitel. Är du säker\?</string>
     <string name="dialog_with_checkbox_reset">Återställ alla kapitel för denna manga</string>
     <string name="snack_add_to_library">Lägg till manga i bibliotek\?</string>
     <string name="picture_saved">Bild sparad</string>
@@ -376,7 +376,7 @@
     <string name="burn_darken">Mörkna</string>
     <string name="help">Hjälp</string>
     <string name="library_update_order">Bibliotekets uppdateringsordning</string>
-    <string name="pref_library_update_prioritization_summary">Välj i vilken ordning Tachiyomi söker efter uppdateringar</string>
+    <string name="select_order_to_update">Välj i vilken ordning Tachiyomi söker efter uppdateringar</string>
     <string name="system_theme">System standard</string>
     <string name="system_default_all_blue">System standard (Mörkblå)</string>
     <string name="system_default_amoled">System standard (AMOLED)</string>

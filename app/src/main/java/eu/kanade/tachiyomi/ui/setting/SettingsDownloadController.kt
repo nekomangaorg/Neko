@@ -62,7 +62,7 @@ class SettingsDownloadController : SettingsController() {
             intListPreference(activity) {
                 key = Keys.removeAfterReadSlots
                 titleRes = R.string.remove_after_read
-                entriesRes = arrayOf(R.string.disabled, R.string.last_read_chapter,
+                entriesRes = arrayOf(R.string.never, R.string.last_read_chapter,
                         R.string.second_to_last, R.string.third_to_last, R.string.fourth_to_last,
                         R.string.fifth_to_last)
                 entryRange = -1..4

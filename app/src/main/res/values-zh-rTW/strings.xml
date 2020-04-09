@@ -82,7 +82,7 @@
     <string name="portrait">縱向螢幕</string>
     <string name="landscape">橫向螢幕</string>
     <string name="default_value">預設</string>
-    <string name="pref_library_update_interval">書櫃更新頻率</string>
+    <string name="library_update_frequency">書櫃更新頻率</string>
     <string name="manual">手動</string>
     <string name="hourly">每小時</string>
     <string name="every_2_hours">每 2 小時</string>
@@ -92,13 +92,13 @@
     <string name="daily">每日</string>
     <string name="every_2_days">每 2 日</string>
     <string name="weekly">每週</string>
-    <string name="pref_library_update_categories">自動更新的分類</string>
+    <string name="categories_to_include_in_global_update">自動更新的分類</string>
     <string name="all">全部</string>
     <string name="library_update_order">書櫃更新順序</string>
     <string name="library_update_restriction">書櫃更新限制</string>
     <string name="wifi">僅限 Wi-Fi</string>
     <string name="charging">僅限充電時</string>
-    <string name="pref_update_only_non_completed">僅更新連載中的漫畫</string>
+    <string name="only_update_ongoing">僅更新連載中的漫畫</string>
     <string name="app_theme">佈景主題</string>
     <string name="light_blue">預設</string>
     <string name="dark">深色</string>
@@ -198,7 +198,7 @@
     <string name="no_network_connection">尚未連接至網路</string>
     <string name="download_paused">下載已暫停</string>
     <string name="pref_library_columns">書櫃欄位數目</string>
-    <string name="pref_library_update_prioritization_summary">選擇 Tachiyomi 檢查書櫃更新的順序</string>
+    <string name="select_order_to_update">選擇 Tachiyomi 檢查書櫃更新的順序</string>
     <string name="details">詳情</string>
     <string name="empty_preferences_for_extension">該套件未提供可用的偏好設定</string>
     <string name="page_transitions">翻頁轉場動畫</string>
@@ -339,7 +339,7 @@
     <string name="name">名稱</string>
     <string name="tracking">追隨中</string>
     <string name="pref_category_tracking">跟隨中</string>
-    <string name="pref_auto_update_manga_sync">閱讀完後同步章節</string>
+    <string name="sync_chapters_after_reading">閱讀完後同步章節</string>
     <string name="trust">信任</string>
     <string name="untrusted">不信任</string>
     <string name="untrusted_extension">不信任的擴充元件</string>
@@ -364,7 +364,7 @@
     <string name="started">已開始</string>
     <string name="type">類型</string>
     <string name="url_not_set_click_again">漫畫網址未設置，請點擊標題再選擇一次漫畫</string>
-    <string name="this_will_reomve_the_read_date_question">這將會清除此章節的閱讀日期，確定嗎？</string>
+    <string name="this_will_remove_the_read_date_question">這將會清除此章節的閱讀日期，確定嗎？</string>
     <string name="current">當前章節:</string>
     <string name="previous">上一章：</string>
     <string name="source_dash_chapter_">%1$s - 第%2$s章</string>

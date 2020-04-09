@@ -81,7 +81,7 @@
     <string name="portrait">ঘুরান</string>
     <string name="landscape">আড়াআড়ি ভাবে</string>
     <string name="default_value">ডিফল্ট</string>
-    <string name="pref_library_update_interval">"মাংগাশালা আপডেট  কাল"</string>
+    <string name="library_update_frequency">"মাংগাশালা আপডেট  কাল"</string>
     <string name="manual">সারগ্রন্থ</string>
     <string name="hourly">ঘন্টায়</string>
     <string name="every_2_hours">প্রতি ২ ঘন্টায়</string>
@@ -91,14 +91,14 @@
     <string name="daily">প্রতিদিন</string>
     <string name="every_2_days">প্রতি ২ দিন</string>
     <string name="weekly">সাপ্তাহিক</string>
-    <string name="pref_library_update_categories">সার্বজনীন আপডেটের জন্য ধরণগুলো</string>
+    <string name="categories_to_include_in_global_update">সার্বজনীন আপডেটের জন্য ধরণগুলো</string>
     <string name="all">সব</string>
     <string name="library_update_restriction">মাংগাশালা আপডেটের নিষেধাজ্ঞা</string>
     <string name="library_update_restriction_summary">তথ্য মিলেগেলে কেবল আপডেট করুন</string>
     <string name="wifi">ওয়াই-ফাই</string>
     <string name="charging">চার্জ হচ্ছে</string>
-    <string name="pref_update_only_non_completed">কেবল চলমান মাংগা আপডেট করুন</string>
-    <string name="pref_auto_update_manga_sync">পড়ার পর অধ্যায়গুলো সুসংগত করুন</string>
+    <string name="only_update_ongoing">কেবল চলমান মাংগা আপডেট করুন</string>
+    <string name="sync_chapters_after_reading">পড়ার পর অধ্যায়গুলো সুসংগত করুন</string>
     <string name="app_theme">এপ্লিকেশন থিম</string>
     <string name="light_blue">প্রধান থিম</string>
     <string name="dark">কালো থিম</string>
@@ -266,7 +266,7 @@
     <string name="title">শিরোনাম</string>
     <string name="category_with_name_exists">এই নামে ধরণ বিদ্যমান!</string>
     <string name="snack_categories_deleted">ধরণগুলো মুছে ফেলা হয়েছে</string>
-    <string name="this_will_reomve_the_read_date_question">এটা এই অধ্যায়ের পড়ার সময়কাল সরিয়ে ফেলবে। আপনি নিশ্চিত?</string>
+    <string name="this_will_remove_the_read_date_question">এটা এই অধ্যায়ের পড়ার সময়কাল সরিয়ে ফেলবে। আপনি নিশ্চিত?</string>
     <string name="dialog_with_checkbox_reset">এই মাংগার জন্য সব অধ্যায় রিসেট করুন</string>
     <string name="snack_add_to_library">মাংগাশালায় মাংগাটি যোগ করবেন?</string>
     <string name="picture_saved">ছবি সংরক্ষিত হয়েছে</string>
@@ -378,5 +378,5 @@
     <string name="multiply">গুণ</string>
     <string name="help">সাহায্য</string>
     <string name="library_update_order">মাঙ্গা লাইব্রেরী আপডেটের প্রক্রিয়া</string>
-    <string name="pref_library_update_prioritization_summary">যে ক্রমে তাচিয়োমি হালনাগাদ করবে তা নির্বাচন করুন</string>
+    <string name="select_order_to_update">যে ক্রমে তাচিয়োমি হালনাগাদ করবে তা নির্বাচন করুন</string>
 </resources>

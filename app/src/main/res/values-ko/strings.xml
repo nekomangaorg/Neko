@@ -83,7 +83,7 @@
     <string name="portrait">세로</string>
     <string name="landscape">가로</string>
     <string name="default_value">기본값</string>
-    <string name="pref_library_update_interval">서재 업데이트 주기</string>
+    <string name="library_update_frequency">서재 업데이트 주기</string>
     <string name="manual">수동</string>
     <string name="hourly">1시간</string>
     <string name="every_2_hours">2시간</string>
@@ -93,7 +93,7 @@
     <string name="daily">1일</string>
     <string name="every_2_days">2일</string>
     <string name="weekly">1주</string>
-    <string name="pref_library_update_categories">전역 업데이트에 포함할 카테고리</string>
+    <string name="categories_to_include_in_global_update">전역 업데이트에 포함할 카테고리</string>
     <string name="all">전부</string>
     <string name="library_update_restriction">서재 업데이트 제한</string>
     <string name="library_update_restriction_summary">조건들이 충족 될 때에만 업데이트</string>
@@ -245,7 +245,7 @@
     <string name="title">제목</string>
     <string name="track_status">상태</string>
     <string name="snack_categories_deleted">카테고리 삭제됨</string>
-    <string name="this_will_reomve_the_read_date_question">이 챕터의 읽은 날짜를 삭제합니다. 확실합니까\?</string>
+    <string name="this_will_remove_the_read_date_question">이 챕터의 읽은 날짜를 삭제합니다. 확실합니까\?</string>
     <string name="dialog_with_checkbox_reset">이 만화의 챕터들을 전부 리셋</string>
     <string name="snack_add_to_library">서재에 만화를 추가합니까\?</string>
     <string name="picture_saved">사진 저장됨</string>
@@ -292,8 +292,8 @@
     <string name="channel_downloader">다운로더</string>
     <string name="download_badge">다운로드 배지</string>
     <string name="wifi">Wi-Fi</string>
-    <string name="pref_update_only_non_completed">연재 중인 만화만 업데이트</string>
-    <string name="pref_auto_update_manga_sync">읽은 뒤 챕터 동기화</string>
+    <string name="only_update_ongoing">연재 중인 만화만 업데이트</string>
+    <string name="sync_chapters_after_reading">읽은 뒤 챕터 동기화</string>
     <string name="always_ask">항상 물어보기</string>
     <string name="details">세부정보</string>
     <string name="can_be_used_to_restore">현재 서재를 나중에 복구하는 데 사용 가능</string>

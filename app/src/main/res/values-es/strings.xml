@@ -57,7 +57,7 @@
     <string name="portrait">Retrato</string>
     <string name="landscape">Apaisado</string>
     <string name="default_value">Predefinido</string>
-    <string name="pref_library_update_interval">Frecuencia de actualización de la librería</string>
+    <string name="library_update_frequency">Frecuencia de actualización de la librería</string>
     <string name="manual">Manual</string>
     <string name="hourly">Cada hora</string>
     <string name="every_2_hours">Cada 2 horas</string>
@@ -70,8 +70,8 @@
     <string name="library_update_restriction_summary">Actualizar solo cuando se cumplan las condiciones</string>
     <string name="wifi">Wi-Fi</string>
     <string name="charging">Cargando</string>
-    <string name="pref_update_only_non_completed">Solo actualizar el manga en curso</string>
-    <string name="pref_auto_update_manga_sync">Sincronizar capítulos después de leerlos</string>
+    <string name="only_update_ongoing">Solo actualizar el manga en curso</string>
+    <string name="sync_chapters_after_reading">Sincronizar capítulos después de leerlos</string>
     <string name="app_theme">Tema de la aplicación</string>
     <string name="light_blue">Tema principal</string>
     <string name="dark">Tema oscuro</string>
@@ -189,7 +189,7 @@
     <string name="title">Título</string>
     <string name="chapters">Capítulos</string>
     <!-- Dialog remove recently view -->
-    <string name="this_will_reomve_the_read_date_question">Esto eliminará la fecha de lectura de este capítulo. ¿Estás seguro?</string>
+    <string name="this_will_remove_the_read_date_question">Esto eliminará la fecha de lectura de este capítulo. ¿Estás seguro?</string>
     <string name="dialog_with_checkbox_reset">Reiniciar todas los capítulos de este manga</string>
     <!-- Reader activity -->
     <string name="page_">Pág: %1$d</string>
@@ -262,7 +262,7 @@
     <string name="app_not_available">Aplicación no disponible</string>
     <string name="updates">Actualizaciones</string>
     <string name="weekly">Semanalmente</string>
-    <string name="pref_library_update_categories">Categorías a incluir en actualización global</string>
+    <string name="categories_to_include_in_global_update">Categorías a incluir en actualización global</string>
     <string name="all">Todos</string>
     <string name="amoled_black">Tema AMOLED</string>
     <string name="pref_start_screen">Pantalla inicial</string>
@@ -405,7 +405,7 @@ También asegúrese de haber iniciado sesión en las fuentes que lo requieren an
     <string name="burn_darken">Quemar / Oscurecer</string>
     <string name="help">Ayuda</string>
     <string name="library_update_order">Orden de actualización de la biblioteca</string>
-    <string name="pref_library_update_prioritization_summary">Selecciona el orden en el que Tachiyomi buscará actualizaciones</string>
+    <string name="select_order_to_update">Selecciona el orden en el que Tachiyomi buscará actualizaciones</string>
     <string name="system_theme">Predefinido del sistema</string>
     <string name="system_default_all_blue">Predefinido del sistema (Azul oscuro)</string>
     <string name="system_default_amoled">Predefinido del sistema (AMOLED)</string>

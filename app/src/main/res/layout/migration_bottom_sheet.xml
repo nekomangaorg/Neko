@@ -118,7 +118,7 @@
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:ems="10"
-            android:hint="@string/search_parameter_ex"
+            android:hint="@string/search_parameter_eg"
             android:importantForAutofill="no"
             android:inputType="textPersonName"
             app:layout_constraintEnd_toEndOf="parent"

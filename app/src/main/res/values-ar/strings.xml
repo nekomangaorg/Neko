@@ -81,7 +81,7 @@
     <string name="portrait">أفقى</string>
     <string name="landscape">رأسي</string>
     <string name="default_value">الافتراضي</string>
-    <string name="pref_library_update_interval">فترة تحديث المكتبة</string>
+    <string name="library_update_frequency">فترة تحديث المكتبة</string>
     <string name="manual">يدويا</string>
     <string name="hourly">كل ساعة</string>
     <string name="every_2_hours">كل ساعتين</string>
@@ -91,14 +91,14 @@
     <string name="daily">يوميا</string>
     <string name="every_2_days">كل يومان</string>
     <string name="weekly">أسبوعيا</string>
-    <string name="pref_library_update_categories">الفئات المتضمنة فى التحديث الشامل</string>
+    <string name="categories_to_include_in_global_update">الفئات المتضمنة فى التحديث الشامل</string>
     <string name="all">الكل</string>
     <string name="library_update_restriction">قيود تحديثات المكتبة</string>
     <string name="library_update_restriction_summary">تحديث فقط عندما يتم استيفاء الشروط</string>
     <string name="wifi">الواي فاى</string>
     <string name="charging">أثناء الشحن</string>
-    <string name="pref_update_only_non_completed">تحديث المانجا المستمرة فقط</string>
-    <string name="pref_auto_update_manga_sync">مزامنة الفصول بعد القراءة</string>
+    <string name="only_update_ongoing">تحديث المانجا المستمرة فقط</string>
+    <string name="sync_chapters_after_reading">مزامنة الفصول بعد القراءة</string>
     <string name="app_theme">سمة التطبيق</string>
     <string name="light_blue">السمة الرئيسية</string>
     <string name="dark">السمة الليلية</string>
@@ -267,7 +267,7 @@
     <string name="title">العنوان</string>
     <string name="category_with_name_exists">توجد بالفعل فئة بهذا الاسم!</string>
     <string name="snack_categories_deleted">تم حذف الفئات</string>
-    <string name="this_will_reomve_the_read_date_question">سيؤدي هذا إلى إزالة تاريخ قراءة هذا الفصل. هل أنت متأكد؟</string>
+    <string name="this_will_remove_the_read_date_question">سيؤدي هذا إلى إزالة تاريخ قراءة هذا الفصل. هل أنت متأكد؟</string>
     <string name="dialog_with_checkbox_reset">إعادة تعيين جميع الفصول لهذه المانجا</string>
     <string name="snack_add_to_library">إضافة المانجا إلى المكتبة؟</string>
     <string name="picture_saved">تم حفظ الصورة</string>
@@ -376,7 +376,7 @@
     <string name="screen">الشاشة</string>
     <string name="help">المساعدة</string>
     <string name="library_update_order">طلبات تحديث المكتبة</string>
-    <string name="pref_library_update_prioritization_summary">إختر طريقة (Tachiyomi) لطلب التحديثات</string>
+    <string name="select_order_to_update">إختر طريقة (Tachiyomi) لطلب التحديثات</string>
     <string name="reader_pull_up_for_more_options">"سحب  لمزيد من الخيارات"</string>
     <string name="color_filter_blend_mode">فلتر الألوان ”وضع الألوان الممزوجة“</string>
     <string name="dodge_lighten">مراوغة / تفتيح</string>

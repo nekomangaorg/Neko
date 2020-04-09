@@ -84,7 +84,7 @@
     <string name="portrait">Dikey</string>
     <string name="landscape">Yatay</string>
     <string name="default_value">Öntanımlı</string>
-    <string name="pref_library_update_interval">Kitaplık güncelleme sıklığı</string>
+    <string name="library_update_frequency">Kitaplık güncelleme sıklığı</string>
     <string name="manual">Elle</string>
     <string name="hourly">Her saat</string>
     <string name="every_2_hours">2 saatte bir</string>
@@ -94,14 +94,14 @@
     <string name="daily">Her gün</string>
     <string name="every_2_days">2 günde bir</string>
     <string name="weekly">Her hafta</string>
-    <string name="pref_library_update_categories">Genel güncellemeye eklenecek kategoriler</string>
+    <string name="categories_to_include_in_global_update">Genel güncellemeye eklenecek kategoriler</string>
     <string name="all">Tümü</string>
     <string name="library_update_restriction">Kitaplık güncelleme kısıtlamaları</string>
     <string name="library_update_restriction_summary">Yalnızca koşullar sağlandığında güncelle</string>
     <string name="wifi">Wi-Fi</string>
     <string name="charging">Şarj oluyor</string>
-    <string name="pref_update_only_non_completed">Yalnızca devam eden mangaları güncelleme</string>
-    <string name="pref_auto_update_manga_sync">Okudukdan sonra bölümleri eşitle</string>
+    <string name="only_update_ongoing">Yalnızca devam eden mangaları güncelleme</string>
+    <string name="sync_chapters_after_reading">Okudukdan sonra bölümleri eşitle</string>
     <string name="app_theme">Uygulama teması</string>
     <string name="light_blue">Ana tema</string>
     <string name="dark">Koyu tema</string>
@@ -306,7 +306,7 @@
     <string name="url_not_set_click_again">Manga url\'si ayarlı değil, lütfen başlığa dokunun ve mangayı yeniden seçin</string>
     <string name="category_with_name_exists">Bu adla bir kategori zaten var!</string>
     <string name="snack_categories_deleted">Kategoriler silindi</string>
-    <string name="this_will_reomve_the_read_date_question">Bu, bu bölümün okunma tarihini kaldıracak. Emin misiniz?</string>
+    <string name="this_will_remove_the_read_date_question">Bu, bu bölümün okunma tarihini kaldıracak. Emin misiniz?</string>
     <string name="dialog_with_checkbox_reset">Bu manga için tüm bölümleri sıfırla</string>
     <string name="snack_add_to_library">Manga kitaplığa eklensin mi?</string>
     <string name="picture_saved">Resim kaydedildi</string>
@@ -376,7 +376,7 @@
     <string name="burn_darken">Yakma / Karartma</string>
     <string name="help">Yardım</string>
     <string name="library_update_order">Kitaplık güncelleme sırası</string>
-    <string name="pref_library_update_prioritization_summary">Tachiyomi\'nin güncelleme denetleme sırasını seçin</string>
+    <string name="select_order_to_update">Tachiyomi\'nin güncelleme denetleme sırasını seçin</string>
     <string name="system_theme">Sistem öntanımlı</string>
     <string name="system_default_all_blue">Sistem öntanımlı (Koyu mavi)</string>
     <string name="system_default_amoled">Sistem öntanımlı (AMOLED)</string>

@@ -71,7 +71,7 @@
     <string name="advanced">Geavanceerd</string>
     <string name="pref_library_columns">Manga per rij in de bibliotheek</string>
     <string name="default_value">Standaard</string>
-    <string name="pref_library_update_interval">Bibliotheek update frequentie</string>
+    <string name="library_update_frequency">Bibliotheek update frequentie</string>
     <string name="manual">Manueel</string>
     <string name="hourly">Ieder uur</string>
     <string name="every_2_hours">Iedere 2 uur</string>
@@ -266,9 +266,9 @@
     <string name="could_not_download_unexpected_error">Er is een onverwachte fout opgetreden bij het downloaden van het hoofdstuk</string>
     <string name="clear">Legen</string>
     <string name="library_update_restriction">Bibliotheek updatebeperkingen</string>
-    <string name="pref_library_update_categories">Categorieën om op te nemen in globale update</string>
-    <string name="pref_update_only_non_completed">Update alleen actieve manga</string>
-    <string name="pref_auto_update_manga_sync">Synchroniseer hoofdstukken na lezen</string>
+    <string name="categories_to_include_in_global_update">Categorieën om op te nemen in globale update</string>
+    <string name="only_update_ongoing">Update alleen actieve manga</string>
+    <string name="sync_chapters_after_reading">Synchroniseer hoofdstukken na lezen</string>
     <string name="keep_screen_on">Automatisch dimmen uitschakelen</string>
     <string name="categories_to_include_in_download">Categorieën om op te nemen in de download</string>
     <string name="clear_database_confirmation">Ben je zeker? Gelezen hoofdstukken en voortgang voor manga niet in de bibliotheek zullen verloren gaan</string>
@@ -284,7 +284,7 @@
     <string name="reading">Aan het lezen</string>
     <string name="dropped">Laten vallen</string>
     <string name="on_hold">In de wacht</string>
-    <string name="this_will_reomve_the_read_date_question">Dit verwijdert de datum waarop het hoofdstuk is gelezen. Ben je zeker?</string>
+    <string name="this_will_remove_the_read_date_question">Dit verwijdert de datum waarop het hoofdstuk is gelezen. Ben je zeker?</string>
     <string name="decode_image_error">Afbeelding kon niet worden gedecodeerd.</string>
     <string name="could_not_download_chapter_can_try_again">Er is een fout opgetreden bij het downloaden van hoofdstukken. Je kan het opnieuw proberen in de downloadwachtrij</string>
     <string name="failed_to_update_cover">Updaten van omslag mislukt</string>
@@ -376,5 +376,5 @@ Zorg ook dat je ingelogd bent voor bronnen die dit vereisen alvorens je het teru
     <string name="screen"></string>
     <string name="help">Help</string>
     <string name="library_update_order">Updatevolgorde bibliotheken</string>
-    <string name="pref_library_update_prioritization_summary">Selecteer de volgorde waarop Tachiyomi zoekt naar updates</string>
+    <string name="select_order_to_update">Selecteer de volgorde waarop Tachiyomi zoekt naar updates</string>
 </resources>

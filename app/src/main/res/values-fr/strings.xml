@@ -73,7 +73,7 @@
     <string name="portrait">Portrait</string>
     <string name="landscape">Paysage</string>
     <string name="default_value">Par défaut</string>
-    <string name="pref_library_update_interval">Fréquence de mise à jour de la bibliothèque</string>
+    <string name="library_update_frequency">Fréquence de mise à jour de la bibliothèque</string>
     <string name="manual">Manuel</string>
     <string name="hourly">Toutes les heures</string>
     <string name="every_2_hours">Toutes les 2 heures</string>
@@ -82,14 +82,14 @@
     <string name="every_12_hours">Toutes les 12 heures</string>
     <string name="daily">Tous les jours</string>
     <string name="every_2_days">Tous les 2 jours</string>
-    <string name="pref_library_update_categories">Catégories à inclure dans une mise à jour globale</string>
+    <string name="categories_to_include_in_global_update">Catégories à inclure dans une mise à jour globale</string>
     <string name="all">Tout</string>
     <string name="library_update_restriction">Restrictions de mise à jour de la bibliothèque</string>
     <string name="library_update_restriction_summary">Mettre à jour uniquement lorsque les conditions sont remplies</string>
     <string name="wifi">Wi-Fi</string>
     <string name="charging">En charge</string>
-    <string name="pref_update_only_non_completed">Ne mettre à jour que les mangas en cours</string>
-    <string name="pref_auto_update_manga_sync">Synchroniser les chapitres après les avoir lus</string>
+    <string name="only_update_ongoing">Ne mettre à jour que les mangas en cours</string>
+    <string name="sync_chapters_after_reading">Synchroniser les chapitres après les avoir lus</string>
     <string name="app_theme">Thème de l\'application</string>
     <string name="light_blue">Thème principal</string>
     <string name="dark">Thème sombre</string>
@@ -221,7 +221,7 @@
     <!-- Category activity -->
     <string name="category_with_name_exists">Une catégorie avec ce nom existe déjà !</string>
     <!-- Dialog option with checkbox view -->
-    <string name="this_will_reomve_the_read_date_question">Cela enlèvera la date de lecture de ce chapitre. Êtes-vous sûr ?</string>
+    <string name="this_will_remove_the_read_date_question">Cela enlèvera la date de lecture de ce chapitre. Êtes-vous sûr ?</string>
     <string name="dialog_with_checkbox_reset">Réinitialiser tous les chapitres de ce manga</string>
     <!-- SnackBar -->
     <string name="snack_add_to_library">Ajouter ce manga à la bibliothèque ?</string>

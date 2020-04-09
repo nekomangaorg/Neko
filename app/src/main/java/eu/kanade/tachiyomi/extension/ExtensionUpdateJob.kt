@@ -32,17 +32,11 @@ class ExtensionUpdateJob : Job() {
                         context.notification(Notifications.CHANNEL_UPDATES_TO_EXTS) {
                             setContentTitle(
                                 context.resources.getQuantityString(
-                                    R.plurals.extension_update_available, names
+                                    R.plurals.extension_updates_available, names
                                         .size, names.size
                                 )
                             )
-                            val extNames = if (names.size > 5) {
-                                "${names.take(4).joinToString(", ")}, " +
-                                    context.resources.getQuantityString(
-                                    R.plurals.notification_and_n_more_ext,
-                                        (names.size - 4), (names.size - 4)
-                                )
-                            } else names.joinToString(", ")
+                            val extNames = names.joinToString(", ")
                             setContentText(extNames)
                             setStyle(NotificationCompat.BigTextStyle().bigText(extNames))
                             setSmallIcon(R.drawable.ic_extension_update)
