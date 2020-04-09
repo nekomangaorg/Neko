@@ -690,6 +690,9 @@ class MangaDetailsController : BaseController,
             presenter.getNextUnreadChapter() != null && !presenter.isLockedFromSearch
         menu.findItem(R.id.action_mark_all_as_unread).isVisible =
             !presenter.allUnread() && !presenter.isLockedFromSearch
+        menu.findItem(R.id.action_remove_downloads).isVisible = !presenter.isLockedFromSearch
+        menu.findItem(R.id.remove_non_bookmarked).isVisible =
+            presenter.hasBookmark() && !presenter.isLockedFromSearch
         menu.findItem(R.id.action_mark_all_as_unread).isVisible = presenter.isTracked()
         val iconPrimary = view?.context?.getResourceColor(android.R.attr.textColorPrimary)
             ?: Color.BLACK
@@ -748,7 +751,6 @@ class MangaDetailsController : BaseController,
                 }
             }
             R.id.action_open_in_web_view -> openInWebView()
-            R.id.action_share -> prepareToShareManga()
             R.id.action_add_to_home_screen -> addToHomeScreen()
             R.id.action_refresh_tracking -> presenter.refreshTrackers()
             R.id.action_mark_all_as_read -> {
@@ -757,6 +759,7 @@ class MangaDetailsController : BaseController,
                         markAsRead(presenter.chapters)
                     }.negativeButton(android.R.string.cancel).show()
             }
+            R.id.remove_all, R.id.remove_read, R.id.remove_non_bookmarked -> massDeleteChapters(item.itemId)
             R.id.action_mark_all_as_unread -> markAsUnread(presenter.chapters)
             R.id.download_next, R.id.download_next_5, R.id.download_custom, R.id.download_unread, R.id.download_all -> downloadChapters(
                 item.itemId
@@ -823,6 +826,29 @@ class MangaDetailsController : BaseController,
         val intent = WebViewActivity.newIntent(activity.applicationContext, source.id, url, presenter.manga
             .title)
         startActivity(intent)
+    }
+
+    private fun massDeleteChapters(choice: Int) {
+        val chaptersToDelete = when (choice) {
+            R.id.remove_all -> presenter.chapters
+            R.id.remove_non_bookmarked -> presenter.chapters.filter { !it.bookmark }
+            R.id.remove_read -> presenter.chapters.filter { it.read }
+            else -> emptyList()
+        }.filter { it.isDownloaded }
+        if (chaptersToDelete.isNotEmpty()) {
+            massDeleteChapters(chaptersToDelete)
+        }
+    }
+
+    private fun massDeleteChapters(chapters: List<ChapterItem>) {
+        val context = view?.context ?: return
+        MaterialDialog(context).message(
+            text = context.resources.getQuantityString(
+                R.plurals.remove_n_chapters, chapters.size, chapters.size
+            )
+        ).positiveButton(R.string.remove) {
+                presenter.deleteChapters(chapters)
+            }.negativeButton(android.R.string.cancel).show()
     }
 
     private fun downloadChapters(choice: Int) {
