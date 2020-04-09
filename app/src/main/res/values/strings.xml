@@ -48,6 +48,10 @@
     <string name="marked_as_read">Marked as read</string>
     <string name="marked_as_unread">Marked as unread</string>
     <string name="removed_bookmark">Removed bookmark</string>
+    <plurals name="remove_n_chapters">
+        <item quantity="one">Remove %1$d downloaded chapter?</item>
+        <item quantity="other">Remove %1$d downloaded chapters?</item>
+    </plurals>
     <plurals name="chapters">
         <item quantity="one">%1$d chapter</item>
         <item quantity="other">%1$d chapters</item>
@@ -335,6 +339,8 @@
     <string name="custom_range">Custom range</string>
     <string name="all_chapters">All chapters</string>
     <string name="all_unread_chapters">All unread chapters</string>
+    <string name="all_read_chapters">All read chapters</string>
+    <string name="all_but_bookmarked_chapters">All but bookmarked chapters</string>
     <string name="add_x_to_library">Add %1$s to library?</string>
     <string name="show_all">Show All</string>
     <string name="show_bookmarked_chapters">Show bookmarked chapters</string>
@@ -527,6 +533,7 @@
     <string name="download">Download</string>
     <string name="start_downloading_now">Start downloading now</string>
     <string name="remove_download">Remove download</string>
+    <string name="remove_downloads">Remove downloads</string>
     <string name="downloading_progress">Downloading (%1$d/%2$d)</string>
     <string name="invalid_download_location">Invalid download location</string>
     <string name="download_paused">Download paused</string>

@@ -48,8 +48,25 @@
         android:id="@+id/action_refresh_tracking"
         android:icon="@drawable/ic_refresh_white_24dp"
         android:title="@string/refresh_tracking"
-        app:showAsAction="never" />
 
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_remove_downloads"
+        android:icon="@drawable/ic_file_download_white_24dp"
+        android:title="@string/remove_downloads"
+        app:showAsAction="ifRoom">
+        <menu>
+            <item
+                android:id="@+id/remove_all"
+                android:title="@string/all_chapters" />
+            <item
+                android:id="@+id/remove_non_bookmarked"
+                android:title="@string/all_but_bookmarked_chapters" />
+            <item
+                android:id="@+id/remove_read"
+                android:title="@string/all_read_chapters" />
+        </menu>
+    </item>
     <item
         android:id="@+id/action_add_to_home_screen"
         android:title="@string/add_to_home_screen"

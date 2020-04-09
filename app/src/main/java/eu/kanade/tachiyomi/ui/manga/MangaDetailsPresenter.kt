@@ -323,6 +323,7 @@ class MangaDetailsPresenter(
     }
 
     fun allUnread(): Boolean = chapters.none { it.read }
+    fun hasBookmark(): Boolean = chapters.any { it.bookmark }
 
     fun getUnreadChaptersSorted() =
         chapters.filter { !it.read && it.status == Download.NOT_DOWNLOADED }.distinctBy { it.name }

@@ -350,6 +350,7 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
         if (type.isEnter) {
             view?.applyWindowInsetsForRootController(activity!!.bottom_nav)
             if (type == ControllerChangeType.POP_ENTER) presenter.onCreate()
+            dl_bottom_sheet.dismiss()
             setHasOptionsMenu(true)
         } else {
             if (type == ControllerChangeType.POP_EXIT) presenter.onDestroy()
@@ -363,10 +364,9 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
     }
 
     override fun toggleSheet() {
-        if (dl_bottom_sheet.sheetBehavior?.isHideable == false) {
-            if (showingDownloads) dl_bottom_sheet.dismiss()
-            else dl_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
-        }
+        if (showingDownloads) dl_bottom_sheet.dismiss()
+        else if (dl_bottom_sheet.sheetBehavior?.isHideable == false) dl_bottom_sheet.sheetBehavior?.state =
+            BottomSheetBehavior.STATE_EXPANDED
     }
 
     override fun expandSearch() {
