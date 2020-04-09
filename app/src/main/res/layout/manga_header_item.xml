@@ -72,7 +72,7 @@
             android:layout_height="wrap_content"
             android:adjustViewBounds="true"
             android:clickable="true"
-            android:contentDescription="@string/description_cover"
+            android:contentDescription="@string/cover_of_image"
             android:focusable="true"
             android:foreground="?android:attr/selectableItemBackground"
             android:maxHeight="300dp"
@@ -90,7 +90,7 @@
         android:layout_marginEnd="16dp"
         android:ellipsize="end"
         android:maxLines="4"
-        android:text="@string/manga_info_full_title_label"
+        android:text="@string/title"
         android:textIsSelectable="false"
         android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -105,7 +105,7 @@
         android:layout_marginEnd="16dp"
         android:ellipsize="end"
         android:maxLines="2"
-        android:text="@string/manga_info_author_label"
+        android:text="@string/author"
         android:textAppearance="@style/TextAppearance.Regular.Body1.SemiBold"
         android:textColor="?android:attr/textColorSecondary"
         android:textIsSelectable="false"
@@ -119,7 +119,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
-        android:text="@string/manga_info_latest_data_label"
+        android:text="@string/updated"
         android:textIsSelectable="false"
         app:layout_constraintStart_toStartOf="@id/manga_full_title"
         app:layout_constraintTop_toBottomOf="@+id/manga_author"
@@ -171,7 +171,7 @@
             android:id="@+id/track_button"
             style="@style/Theme.Widget.Button.RounededOutline"
             android:layout_marginStart="6dp"
-            android:text="@string/manga_tracking_tab"
+            android:text="@string/tracking"
             app:icon="@drawable/ic_sync_black_24dp" />
 
 
@@ -183,10 +183,10 @@
             android:layout_gravity="center"
             android:layout_marginStart="6dp"
             android:layout_marginEnd="6dp"
-            android:contentDescription="@string/action_open_in_web_view"
+            android:contentDescription="@string/open_in_web_view"
             android:padding="5dp"
             android:src="@drawable/ic_open_in_webview_white_24dp"
-            android:tooltipText="@string/action_open_in_web_view" />
+            android:tooltipText="@string/open_in_web_view" />
 
         <ImageView
             android:id="@+id/share_button"
@@ -196,10 +196,10 @@
             android:layout_gravity="center"
             android:layout_marginStart="0dp"
             android:layout_marginEnd="6dp"
-            android:contentDescription="@string/action_share"
+            android:contentDescription="@string/share"
             android:padding="5dp"
             android:src="@drawable/ic_share_white_24dp"
-            android:tooltipText="@string/action_share" />
+            android:tooltipText="@string/share" />
     </LinearLayout>
 
     <com.google.android.material.textview.MaterialTextView
@@ -345,7 +345,7 @@
         android:layout_width="match_parent"
         android:layout_marginTop="12dp"
         android:layout_height="wrap_content"
-        android:tooltipText="@string/action_sort_and_filter"
+        android:tooltipText="@string/sort_and_filter"
         app:layout_constraintEnd_toEndOf="parent"
         android:background="?selectable_list_drawable"
         app:layout_constraintStart_toStartOf="parent"

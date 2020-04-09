@@ -14,7 +14,7 @@
         tools:visibility="visible"
         tools:tint="?attr/colorAccent"
         android:layout_width="wrap_content"
-        android:contentDescription="@string/action_select_all"
+        android:contentDescription="@string/select_all"
         android:clickable="true"
         android:focusable="true"
         android:layout_height="wrap_content"

@@ -33,6 +33,6 @@
         style="@style/Widget.MaterialComponents.Button.TextButton"
         android:textColor="?android:attr/colorAccent"
         android:layout_height="wrap_content"
-        android:text="@string/action_unlock_trackers"/>
+        android:text="@string/unlock_trackers"/>
 
 </FrameLayout>

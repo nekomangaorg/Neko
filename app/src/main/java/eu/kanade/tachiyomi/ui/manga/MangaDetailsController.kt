@@ -115,6 +115,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File
 import java.io.IOException
+import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.max
 
@@ -581,7 +582,7 @@ class MangaDetailsController : BaseController,
         val popup = PopupMenu(itemView.context, itemView)
 
         // Inflate our menu resource into the PopupMenu's Menu
-        popup.menuInflater.inflate(R.menu.chapters_mat_single, popup.menu)
+        popup.menuInflater.inflate(R.menu.chapter_single, popup.menu)
 
         popup.setOnMenuItemClickListener { menuItem ->
             val chapters = listOf(item)
@@ -614,7 +615,7 @@ class MangaDetailsController : BaseController,
             if (bookmarked) R.string.removed_bookmark
             else R.string.bookmarked, Snackbar.LENGTH_INDEFINITE
         ) {
-            setAction(R.string.action_undo) {
+            setAction(R.string.undo) {
                 bookmarkChapters(listOf(item), bookmarked)
             }
         }
@@ -634,7 +635,7 @@ class MangaDetailsController : BaseController,
             else R.string.marked_as_read, Snackbar.LENGTH_INDEFINITE
         ) {
             var undoing = false
-            setAction(R.string.action_undo) {
+            setAction(R.string.undo) {
                 presenter.markChaptersRead(listOf(item), read, true, lastRead, pagesLeft)
                 undoing = true
             }
@@ -681,7 +682,7 @@ class MangaDetailsController : BaseController,
         val editItem = menu.findItem(R.id.action_edit)
         editItem.isVisible = presenter.manga.favorite && !presenter.isLockedFromSearch
         editItem.title = view?.context?.getString(if (manga?.source == LocalSource.ID)
-            R.string.action_edit else R.string.action_edit_cover)
+            R.string.edit else R.string.edit_cover)
         menu.findItem(R.id.action_download).isVisible = !presenter.isLockedFromSearch &&
             manga?.source != LocalSource.ID
         menu.findItem(R.id.action_add_to_home_screen).isVisible = !presenter.isLockedFromSearch
@@ -697,7 +698,7 @@ class MangaDetailsController : BaseController,
 
         val searchItem = menu.findItem(R.id.action_search)
         val searchView = searchItem.actionView as SearchView
-        searchView.queryHint = resources?.getString(R.string.chapter_search_hint)
+        searchView.queryHint = resources?.getString(R.string.search_chapters)
         searchItem.icon?.mutate()?.setTint(iconPrimary)
         searchItem.collapseActionView()
         if (query.isNotEmpty()) {
@@ -731,9 +732,9 @@ class MangaDetailsController : BaseController,
                     if (manga?.hasCustomCover() == true) {
                         MaterialDialog(activity!!).listItems(items = listOf(
                             view!!.context.getString(
-                                R.string.action_edit_cover
+                                R.string.edit_cover
                             ), view!!.context.getString(
-                                R.string.action_reset_cover
+                                R.string.reset_cover
                             )
                         ), waitForPositiveButton = false, selection = { _, index, _ ->
                             when (index) {
@@ -751,8 +752,8 @@ class MangaDetailsController : BaseController,
             R.id.action_add_to_home_screen -> addToHomeScreen()
             R.id.action_refresh_tracking -> presenter.refreshTrackers()
             R.id.action_mark_all_as_read -> {
-                MaterialDialog(view!!.context).message(R.string.mark_all_as_read_message)
-                    .positiveButton(R.string.action_mark_as_read) {
+                MaterialDialog(view!!.context).message(R.string.mark_all_chapters_as_read)
+                    .positiveButton(R.string.mark_as_read) {
                         markAsRead(presenter.chapters)
                     }.negativeButton(android.R.string.cancel).show()
             }
@@ -803,7 +804,7 @@ class MangaDetailsController : BaseController,
                     clipData = ClipData.newRawUri(null, stream)
                 }
             }
-            startActivity(Intent.createChooser(intent, context.getString(R.string.action_share)))
+            startActivity(Intent.createChooser(intent, context.getString(R.string.share)))
         } catch (e: Exception) {
             context.toast(e.message)
         }
@@ -847,12 +848,14 @@ class MangaDetailsController : BaseController,
     }
 
     private fun downloadChapters(chapters: List<ChapterItem>) {
-        val view = view
+        val view = view ?: return
         presenter.downloadChapters(chapters)
-        if (view != null && !presenter.manga.favorite && (snack == null ||
-                snack?.getText() != view.context.getString(R.string.snack_add_to_library))) {
-            snack = view.snack(view.context.getString(R.string.snack_add_to_library), Snackbar.LENGTH_INDEFINITE) {
-                setAction(R.string.action_add) {
+        val text = view.context.getString(R.string.add_x_to_library, presenter.manga.mangaType
+            (view.context).toLowerCase(Locale.ROOT))
+        if (!presenter.manga.favorite && (snack == null ||
+                snack?.getText() != text)) {
+            snack = view.snack(text, Snackbar.LENGTH_INDEFINITE) {
+                setAction(R.string.add) {
                     presenter.setFavorite(true)
                 }
                 addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
@@ -906,7 +909,7 @@ class MangaDetailsController : BaseController,
                 override fun onLoadCleared(placeholder: Drawable?) { }
 
                 override fun onLoadFailed(errorDrawable: Drawable?) {
-                    activity?.toast(R.string.icon_creation_fail)
+                    activity?.toast(R.string.could_not_create_shortcut)
                 }
             })
     }
@@ -973,8 +976,8 @@ class MangaDetailsController : BaseController,
         if (item != null) {
                 openChapter(item.chapter)
         } else if (snack == null || snack?.getText() != view?.context?.getString(
-                R.string.no_next_chapter)) {
-            snack = view?.snack(R.string.no_next_chapter, Snackbar.LENGTH_LONG) {
+                R.string.next_chapter_not_found)) {
+            snack = view?.snack(R.string.next_chapter_not_found, Snackbar.LENGTH_LONG) {
                 addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
                     override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
                         super.onDismissed(transientBottomBar, event)
@@ -1091,17 +1094,17 @@ class MangaDetailsController : BaseController,
     private fun showAddedSnack() {
         val view = view ?: return
         snack?.dismiss()
-        snack = view.snack(view.context.getString(R.string.manga_added_library))
+        snack = view.snack(view.context.getString(R.string.added_to_library))
     }
 
     private fun showRemovedSnack() {
         val view = view ?: return
         snack?.dismiss()
         snack = view.snack(
-            view.context.getString(R.string.manga_removed_library),
+            view.context.getString(R.string.removed_from_library),
             Snackbar.LENGTH_INDEFINITE
         ) {
-            setAction(R.string.action_undo) {
+            setAction(R.string.undo) {
                 presenter.setFavorite(true)
             }
             addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
@@ -1139,7 +1142,7 @@ class MangaDetailsController : BaseController,
         val clipboard = activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         clipboard.setPrimaryClip(ClipData.newPlainText(contentType, content))
 
-        snack = view.snack(view.context.getString(R.string.copied_to_clipboard, contentType))
+        snack = view.snack(view.context.getString(R.string._copied_to_clipboard, contentType))
     }
 
     override fun handleBack(): Boolean {
@@ -1254,7 +1257,7 @@ class MangaDetailsController : BaseController,
 
     override fun onPrepareActionMode(mode: ActionMode?, menu: Menu?): Boolean {
         mode?.title = view?.context?.getString(if (startingDLChapterPos == null)
-            R.string.select_start_chapter else R.string.select_end_chapter)
+            R.string.select_starting_chapter else R.string.select_ending_chapter)
         return false
     }
 
@@ -1264,11 +1267,11 @@ class MangaDetailsController : BaseController,
             intent.type = "image/*"
             startActivityForResult(
                 Intent.createChooser(intent,
-                    resources?.getString(R.string.file_select_cover)),
+                    resources?.getString(R.string.select_cover_image)),
                 101
             )
         } else {
-            activity?.toast(R.string.notification_first_add_to_library)
+            activity?.toast(R.string.must_be_in_library_to_edit)
         }
     }
 
@@ -1284,7 +1287,7 @@ class MangaDetailsController : BaseController,
                     setPaletteColor()
                 }
             } catch (error: IOException) {
-                activity.toast(R.string.notification_cover_update_failed)
+                activity.toast(R.string.failed_to_update_cover)
                 Timber.e(error)
             }
         }

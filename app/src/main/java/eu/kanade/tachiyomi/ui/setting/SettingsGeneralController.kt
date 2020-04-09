@@ -16,11 +16,11 @@ class SettingsGeneralController : SettingsController() {
     private val isUpdaterEnabled = BuildConfig.INCLUDE_UPDATER
 
     override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
-        titleRes = R.string.pref_category_general
+        titleRes = R.string.general
 
         listPreference(activity) {
             key = Keys.lang
-            titleRes = R.string.pref_language
+            titleRes = R.string.language
             entryValues = listOf("", "ar", "bg", "bn", "ca", "cs", "de", "el", "en-US", "en-GB",
             "es", "fr", "hi", "hu", "in", "it", "ja", "ko", "lv", "ms", "nb-rNO", "nl", "pl", "pt",
             "pt-BR", "ro", "ru", "sc", "sr", "sv", "th", "tl", "tr", "uk", "vi", "zh-rCN")
@@ -44,10 +44,11 @@ class SettingsGeneralController : SettingsController() {
 
         intListPreference(activity) {
             key = Keys.theme
-            titleRes = R.string.pref_theme
-            entriesRes = arrayOf(R.string.white_theme, R.string.light_theme, R.string.dark_theme,
-                R.string.amoled_theme, R.string.darkblue_theme, R.string.system_theme, R.string.system_amoled_theme,
-                R.string.system_darkblue_theme)
+            titleRes = R.string.app_theme
+            entriesRes = arrayOf(R.string.white_theme, R.string.light_blue, R.string.dark,
+                R.string.amoled_black, R.string.dark_blue, R.string.system_default, R.string
+                    .system_default_amoled,
+                R.string.system_default_all_blue)
             entryValues = listOf(1, 8, 2, 3, 4, 5, 6, 7)
             defaultValue = 5
 
@@ -59,7 +60,7 @@ class SettingsGeneralController : SettingsController() {
 
         listPreference(activity) {
             key = Keys.dateFormat
-            titleRes = R.string.pref_date_format
+            titleRes = R.string.date_format
             entryValues = listOf("", "MM/dd/yy", "dd/MM/yy", "yyyy-MM-dd")
             entries = entryValues.map { value ->
                 if (value == "") {
@@ -74,8 +75,8 @@ class SettingsGeneralController : SettingsController() {
 
         switchPreference {
             key = Keys.automaticUpdates
-            titleRes = R.string.pref_enable_automatic_updates
-            summaryRes = R.string.pref_enable_automatic_updates_summary
+            titleRes = R.string.check_for_updates
+            summaryRes = R.string.auto_check_for_app_versions
             defaultValue = true
 
             if (isUpdaterEnabled) {
@@ -94,7 +95,7 @@ class SettingsGeneralController : SettingsController() {
         }
 
         preferenceCategory {
-            titleRes = R.string.pref_category_security
+            titleRes = R.string.security
 
             val biometricManager = BiometricManager.from(context)
             if (biometricManager.canAuthenticate() == BiometricManager.BIOMETRIC_SUCCESS) {
@@ -116,8 +117,8 @@ class SettingsGeneralController : SettingsController() {
                     val values = listOf(0, 2, 5, 10, 20, 30, 60, 90, 120, -1)
                     entries = values.mapNotNull {
                         when (it) {
-                            0 -> context.getString(R.string.lock_always)
-                            -1 -> context.getString(R.string.lock_never)
+                            0 -> context.getString(R.string.always)
+                            -1 -> context.getString(R.string.never)
                             else -> resources?.getQuantityString(
                                 R.plurals.lock_after_mins, it.toInt(), it
                             )
@@ -130,8 +131,8 @@ class SettingsGeneralController : SettingsController() {
 
             switchPreference {
                 key = Keys.secureScreen
-                titleRes = R.string.pref_secure_screen
-                summaryRes = R.string.pref_secure_screen_summary
+                titleRes = R.string.secure_screen
+                summaryRes = R.string.hide_tachi_from_recents
                 defaultValue = false
 
                 onChange {

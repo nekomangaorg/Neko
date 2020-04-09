@@ -39,19 +39,19 @@
                 <com.google.android.material.radiobutton.MaterialRadioButton
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/action_display_list" />
+                    android:text="@string/list" />
 
                 <com.google.android.material.radiobutton.MaterialRadioButton
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="12dp"
-                    android:text="@string/action_display_grid" />
+                    android:text="@string/compact_grid" />
 
                 <com.google.android.material.radiobutton.MaterialRadioButton
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="12dp"
-                    android:text="@string/action_display_comfy_grid" />
+                    android:text="@string/comfortable_grid" />
             </RadioGroup>
 
             <com.google.android.material.textview.MaterialTextView
@@ -95,7 +95,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
                 android:layout_marginEnd="12dp"
-                android:text="@string/uniform_grid" />
+                android:text="@string/uniform_covers" />
 
             <com.google.android.material.textview.MaterialTextView
                 style="@style/TextAppearance.MaterialComponents.Headline6"
@@ -104,7 +104,7 @@
                 android:layout_marginTop="12dp"
                 android:paddingStart="16dp"
                 android:paddingEnd="12dp"
-                android:text="@string/action_display_unread_badge" />
+                android:text="@string/unread_badges" />
 
             <RadioGroup
                 android:id="@+id/unread_badge_group"
@@ -150,7 +150,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
                 android:layout_marginEnd="12dp"
-                android:text="@string/action_display_download_badge" />
+                android:text="@string/download_badge" />
 
             <com.google.android.material.checkbox.MaterialCheckBox
                 android:id="@+id/autohide_seeker"
@@ -166,7 +166,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
                 android:layout_marginEnd="12dp"
-                android:text="@string/action_start_filters_hidden" />
+                android:text="@string/start_with_filters_hidden" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
@@ -179,7 +179,7 @@
         android:layout_marginEnd="12dp"
         android:background="@drawable/round_ripple"
         android:clickable="true"
-        android:contentDescription="@string/action_close"
+        android:contentDescription="@string/close"
         android:focusable="true"
         android:src="@drawable/ic_close_white_24dp"
         android:tint="@color/gray_button" />

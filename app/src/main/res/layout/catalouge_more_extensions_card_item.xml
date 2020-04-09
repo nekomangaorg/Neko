@@ -33,7 +33,7 @@
             style="@style/Theme.Widget.Button.Borderless.Small"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/update_check_look_for_updates"
+            android:text="@string/searching_for_updates"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent"/>

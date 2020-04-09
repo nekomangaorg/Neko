@@ -19,5 +19,5 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
-        tools:text="@string/label_recent_updates" />
+        tools:text="@string/recent_updates" />
 </androidx.constraintlayout.widget.ConstraintLayout>

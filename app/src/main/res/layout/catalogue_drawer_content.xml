@@ -34,7 +34,7 @@
             android:layout_width="wrap_content"
             android:textColor="?attr/tabBarIconColor"
             android:layout_height="match_parent"
-            android:text="@string/action_reset"
+            android:text="@string/reset"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

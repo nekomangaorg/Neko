@@ -53,7 +53,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="32dp"
-            android:text="@string/action_share"/>
+            android:text="@string/share"/>
 
     </LinearLayout>
 
@@ -78,7 +78,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="32dp"
-            android:text="@string/action_save"/>
+            android:text="@string/save"/>
 
     </LinearLayout>
 

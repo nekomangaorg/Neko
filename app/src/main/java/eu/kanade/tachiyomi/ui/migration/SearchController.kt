@@ -138,7 +138,7 @@ class SearchController(
             val preselected = MigrationFlags.getEnabledFlagsPositions(prefValue)
 
             return MaterialDialog(activity!!)
-                    .message(R.string.migration_dialog_what_to_include)
+                    .message(R.string.select_data_to_include)
                     .listItemsMultiChoice(items = MigrationFlags.titles.map
                     { resources?.getString(it) as CharSequence },
                         initialSelection = preselected.toIntArray()) { _, positions, _ ->
@@ -148,7 +148,7 @@ class SearchController(
                     .positiveButton(R.string.migrate) {
                         (targetController as? SearchController)?.migrateManga()
                     }
-                    .negativeButton(R.string.copy) {
+                    .negativeButton(R.string.copy_value) {
                         (targetController as? SearchController)?.copyManga()
                     }
         }

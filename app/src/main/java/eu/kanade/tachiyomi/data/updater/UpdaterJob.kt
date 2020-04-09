@@ -29,13 +29,13 @@ class UpdaterJob : Job() {
 
                 NotificationCompat.Builder(context, Notifications.CHANNEL_COMMON).update {
                     setContentTitle(context.getString(R.string.app_name))
-                    setContentText(context.getString(R.string.update_check_notification_update_available))
+                    setContentText(context.getString(R.string.update_available))
                     setSmallIcon(android.R.drawable.stat_sys_download_done)
                     color = ContextCompat.getColor(context, R.color.colorAccent)
                     // Download action
                     addAction(
                         android.R.drawable.stat_sys_download_done,
-                        context.getString(R.string.action_download),
+                        context.getString(R.string.download),
                         PendingIntent.getService(
                             context,
                             0,

@@ -32,7 +32,7 @@ open class BaseChapterHolder(
 
                 // Hide download and show delete if the chapter is downloaded
                 if (chapter.status != Download.DOWNLOADED) popup.menu.findItem(R.id.action_delete).title = download_button.context.getString(
-                    R.string.action_cancel
+                    R.string.cancel
                 )
 
                 // Set a listener so we are notified if a menu item is clicked

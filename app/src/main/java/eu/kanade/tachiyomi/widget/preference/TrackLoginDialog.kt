@@ -24,7 +24,7 @@ class TrackLoginDialog(usernameLabel: String? = null, bundle: Bundle? = null) :
         this(usernameLabel, Bundle().apply { putInt("key", service.id) })
 
     override fun setCredentialsOnView(view: View) = with(view) {
-        dialog_title.text = context.getString(R.string.login_title, service.name)
+        dialog_title.text = context.getString(R.string.log_in_to_, service.name)
         username.setText(service.getUsername())
         password.setText(service.getPassword())
     }
@@ -44,19 +44,19 @@ class TrackLoginDialog(usernameLabel: String? = null, bundle: Bundle? = null) :
                     val result = service.login(user, pass)
                     if (result) {
                         dialog?.dismiss()
-                        context.toast(R.string.login_success)
+                        context.toast(R.string.successfully_logged_in)
                     } else {
-                        errorResult(this@apply)
+                        errorResult()
                     }
                 } catch (error: Exception) {
-                    errorResult(this@apply)
+                    errorResult()
                     error.message?.let { context.toast(it) }
                 }
             }
         }
     }
 
-    fun errorResult(view: View?) {
+    private fun errorResult() {
         v?.apply {
             login.progress = -1
             login.setText(R.string.unknown_error)
@@ -66,7 +66,7 @@ class TrackLoginDialog(usernameLabel: String? = null, bundle: Bundle? = null) :
     override fun logout() {
         if (service.isLogged) {
             service.logout()
-            activity?.toast(R.string.logout_success)
+            activity?.toast(R.string.successfully_logged_out)
         }
     }
 

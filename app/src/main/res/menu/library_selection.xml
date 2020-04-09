@@ -4,35 +4,19 @@
       xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item android:id="@+id/action_move_to_category"
-          android:title="@string/action_move_category"
+          android:title="@string/move_to_categories"
           android:icon="@drawable/ic_label_white_24dp"
           app:showAsAction="ifRoom"/>
 
     <item android:id="@+id/action_delete"
-        android:title="@string/action_remove"
+        android:title="@string/remove"
         android:icon="@drawable/ic_delete_white_24dp"
         app:showAsAction="ifRoom"/>
 
     <item
         android:id="@+id/action_migrate"
         android:icon="@drawable/ic_swap_calls_white_24dp"
-        android:title="@string/label_migration"
+        android:title="@string/source_migration"
         app:showAsAction="ifRoom" />
-
-    <item
-        android:id="@+id/action_move_manga"
-        android:icon="@drawable/ic_swap_vert_white_24dp"
-        android:title="@string/action_move"
-        app:showAsAction="ifRoom"
-        >
-        <menu >
-            <item
-                android:id="@+id/action_to_top"
-                android:title="@string/action_move_to_top" />
-            <item
-                android:id="@+id/action_to_bottom"
-                android:title="@string/action_move_to_bottom" />
-        </menu>
-    </item>
 
 </menu>

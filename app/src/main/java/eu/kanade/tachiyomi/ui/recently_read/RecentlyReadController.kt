@@ -129,7 +129,7 @@ class RecentlyReadController(bundle: Bundle? = null) : BaseController(bundle),
             empty_view?.hide()
         } else {
             empty_view.show(R.drawable.ic_history_white_128dp, R.string
-                .information_no_recent_manga)
+                .no_recently_read_manga)
         }
     }
 
@@ -163,7 +163,7 @@ class RecentlyReadController(bundle: Bundle? = null) : BaseController(bundle),
             val intent = ReaderActivity.newIntent(activity, manga, nextChapter)
             startActivity(intent)
         } else {
-            activity.toast(R.string.no_next_chapter)
+            activity.toast(R.string.next_chapter_not_found)
         }
     }
 

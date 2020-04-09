@@ -22,7 +22,7 @@ class SettingsTrackingController : SettingsController(),
     private val trackManager: TrackManager by injectLazy()
 
     override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
-        titleRes = R.string.pref_category_tracking
+        titleRes = R.string.tracking
 
         switchPreference {
             key = Keys.autoUpdateTrack

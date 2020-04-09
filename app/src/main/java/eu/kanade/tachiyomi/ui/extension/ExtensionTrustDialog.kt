@@ -21,10 +21,10 @@ class ExtensionTrustDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
         return MaterialDialog(activity!!)
                 .title(R.string.untrusted_extension)
                 .message(R.string.untrusted_extension_message)
-                .positiveButton(R.string.ext_trust) {
+                .positiveButton(R.string.trust) {
                     listener.trustSignature(args.getString(SIGNATURE_KEY)!!)
                 }
-                .negativeButton(R.string.ext_uninstall) {
+                .negativeButton(R.string.uninstall) {
                     listener.uninstallExtension(args.getString(PKGNAME_KEY)!!)
                 }
     }

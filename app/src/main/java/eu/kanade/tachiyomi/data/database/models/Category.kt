@@ -42,12 +42,12 @@ interface Category : Serializable {
 
     fun sortRes(): Int = when (mangaSort) {
         ALPHA_ASC, ALPHA_DSC -> R.string.title
-        UPDATED_ASC, UPDATED_DSC -> R.string.action_sort_latest_chapter
-        UNREAD_ASC, UNREAD_DSC -> R.string.action_filter_unread
-        LAST_READ_ASC, LAST_READ_DSC -> R.string.action_sort_last_read
-        TOTAL_ASC, TOTAL_DSC -> R.string.action_sort_total
-        DATE_ADDED_ASC, DATE_ADDED_DSC -> R.string.action_date_added
-        else -> R.string.action_sort_drag_and_drop
+        UPDATED_ASC, UPDATED_DSC -> R.string.latest_chapter
+        UNREAD_ASC, UNREAD_DSC -> R.string.unread
+        LAST_READ_ASC, LAST_READ_DSC -> R.string.last_read
+        TOTAL_ASC, TOTAL_DSC -> R.string.total_chapters
+        DATE_ADDED_ASC, DATE_ADDED_DSC -> R.string.date_added
+        else -> R.string.drag_and_drop
     }
 
     fun catSortingMode(): Int? = when (mangaSort) {
@@ -92,7 +92,7 @@ interface Category : Serializable {
         }
 
         fun createDefault(context: Context): Category =
-            create(context.getString(R.string.default_columns)).apply {
+            create(context.getString(R.string.default_value)).apply {
                 id = 0
                 isFirst = true
             }

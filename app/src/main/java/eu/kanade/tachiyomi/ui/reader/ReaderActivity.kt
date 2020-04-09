@@ -386,7 +386,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
         if (noDefault && presenter.manga?.viewer!! > 0) {
             snackbar = reader_layout.snack(
                 getString(
-                    R.string.reading_mode, getString(
+                    R.string.reading_, getString(
                         when (mangaViewer) {
                             RIGHT_TO_LEFT -> R.string.right_to_left_viewer
                             VERTICAL -> R.string.vertical_viewer
@@ -396,7 +396,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
                     ).toLowerCase(Locale.getDefault())
                 ), 8000
             ) {
-                setAction(R.string.action_use_default) {
+                setAction(R.string.use_default) {
                     presenter.setMangaViewer(0)
                 }
             }
@@ -564,7 +564,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
             clipData = ClipData.newRawUri(null, stream)
             type = "image/*"
         }
-        startActivity(Intent.createChooser(intent, getString(R.string.action_share)))
+        startActivity(Intent.createChooser(intent, getString(R.string.share)))
     }
 
     /**
@@ -605,8 +605,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
     fun onSetAsCoverResult(result: ReaderPresenter.SetAsCoverResult) {
         toast(when (result) {
             Success -> R.string.cover_updated
-            AddToLibraryFirst -> R.string.notification_first_add_to_library
-            Error -> R.string.notification_cover_update_failed
+            AddToLibraryFirst -> R.string.must_be_in_library_to_edit
+            Error -> R.string.failed_to_update_cover
         })
     }
 

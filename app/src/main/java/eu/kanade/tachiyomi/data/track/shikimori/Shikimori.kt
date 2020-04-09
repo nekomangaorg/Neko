@@ -36,7 +36,7 @@ class Shikimori(private val context: Context, id: Int) : TrackService(id) {
             ON_HOLD -> getString(R.string.on_hold)
             DROPPED -> getString(R.string.dropped)
             PLANNING -> getString(R.string.plan_to_read)
-            REPEATING -> getString(R.string.repeating)
+            REPEATING -> getString(R.string.rereading)
             else -> ""
         }
     }

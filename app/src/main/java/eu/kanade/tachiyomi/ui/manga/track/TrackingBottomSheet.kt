@@ -110,7 +110,7 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) : Bott
         val track = adapter?.getItem(position)?.track ?: return
 
         if (track.tracking_url.isBlank()) {
-            activity.toast(R.string.url_not_set)
+            activity.toast(R.string.url_not_set_click_again)
         } else {
             activity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(track.tracking_url)))
             controller.refreshTracker = position

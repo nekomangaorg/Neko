@@ -164,10 +164,10 @@ class MigrationProcessHolder(
         val latestChapter = mangaChapters.maxBy { it.chapter_number }?.chapter_number ?: -1f
 
         if (latestChapter > 0f) {
-            subtitle.text = context.getString(R.string.latest_x,
+            subtitle.text = context.getString(R.string.latest_,
                 DecimalFormat("#.#").format(latestChapter))
         } else {
-            subtitle.text = context.getString(R.string.latest_x,
+            subtitle.text = context.getString(R.string.latest_,
                 context.getString(R.string.unknown))
         }
     }

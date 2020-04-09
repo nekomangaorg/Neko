@@ -302,7 +302,7 @@ class BackupRestoreService : Service() {
                 }
             } else {
                 errors.add("${manga.title} - ${service?.name} not logged in")
-                val notLoggedIn = getString(R.string.not_logged_into, service?.name)
+                val notLoggedIn = getString(R.string.not_logged_into_, service?.name)
                 trackingErrors.add(notLoggedIn)
             }
         }
@@ -361,7 +361,7 @@ class BackupRestoreService : Service() {
     private fun showProgressNotification(current: Int, total: Int, title: String) {
         notificationManager.notify(Notifications.ID_RESTORE_PROGRESS, progressNotification
                 .setContentTitle(title.chop(30))
-                .setContentText(getString(R.string.backup_restoring_progress, restoreProgress,
+                .setContentText(getString(R.string.restoring_progress, restoreProgress,
                     totalAmount))
                 .setProgress(total, current, false)
                 .build())
@@ -387,7 +387,7 @@ class BackupRestoreService : Service() {
             content.add(trackingErrorsString)
         }
         if (cancelled > 0)
-            content.add(getString(R.string.restore_completed_content_2, cancelled))
+            content.add(getString(R.string.restore_content_skipped, cancelled))
 
         val restoreString = content.joinToString("\n")
 
@@ -400,7 +400,7 @@ class BackupRestoreService : Service() {
                 .setColor(ContextCompat.getColor(this, R.color.colorAccent))
         if (errors.size > 0 && !path.isNullOrEmpty() && !file.isNullOrEmpty()) {
             resultNotification.addAction(R.drawable.ic_clear_grey_24dp_img, getString(R.string
-                .notification_action_error_log), getErrorLogIntent(path, file))
+                .view_all_errors), getErrorLogIntent(path, file))
         }
         notificationManager.notify(Notifications.ID_RESTORE_COMPLETE, resultNotification.build())
     }

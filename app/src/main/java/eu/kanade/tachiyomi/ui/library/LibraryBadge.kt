@@ -35,7 +35,7 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
         with(download_text) {
             visibility = if (downloads == -2 || downloads > 0) View.VISIBLE else View.GONE
             text = if (downloads == -2)
-                resources.getString(R.string.local_source_badge)
+                resources.getString(R.string.local)
             else downloads.toString()
         }
 

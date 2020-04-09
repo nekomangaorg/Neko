@@ -63,7 +63,7 @@ class ReaderPageSheet(
         if (page.status != Page.READY) return
 
         MaterialDialog(activity)
-            .title(R.string.confirm_set_image_as_cover)
+            .title(R.string.use_image_as_cover)
             .positiveButton(android.R.string.yes) {
                 activity.setAsCover(page)
                 dismiss()

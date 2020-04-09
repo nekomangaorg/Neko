@@ -79,7 +79,7 @@ internal class DownloadNotifier(private val context: Context) {
                 isDownloading = true
                 // Pause action
                 addAction(R.drawable.ic_av_pause_grey_24dp_img,
-                    context.getString(R.string.action_pause),
+                    context.getString(R.string.pause),
                     NotificationReceiver.pauseDownloadsPendingBroadcast(context))
             }
 
@@ -90,12 +90,12 @@ internal class DownloadNotifier(private val context: Context) {
                     .toRegex(RegexOption.IGNORE_CASE), "")
                 setContentTitle("$title - $chapter".chop(30))
                 setContentText(
-                    context.getString(R.string.chapter_downloading)
+                    context.getString(R.string.downloading)
                 )
             } else {
                 setContentTitle(
                     context.getString(
-                        R.string.chapter_downloading
+                        R.string.downloading
                     )
                 )
                 setContentText(null)
@@ -125,7 +125,7 @@ internal class DownloadNotifier(private val context: Context) {
                 isDownloading = true
                 // Pause action
                 addAction(R.drawable.ic_av_pause_grey_24dp_img,
-                        context.getString(R.string.action_pause),
+                        context.getString(R.string.pause),
                         NotificationReceiver.pauseDownloadsPendingBroadcast(context))
             }
 
@@ -133,7 +133,7 @@ internal class DownloadNotifier(private val context: Context) {
             val quotedTitle = Pattern.quote(title)
             val chapter = download.chapter.name.replaceFirst("$quotedTitle[\\s]*[-]*[\\s]*".toRegex(RegexOption.IGNORE_CASE), "")
             setContentTitle("$title - $chapter".chop(30))
-            setContentText(context.getString(R.string.chapter_downloading_progress)
+            setContentText(context.getString(R.string.downloading_progress)
                     .format(download.downloadedImages, download.pages!!.size))
             setStyle(null)
             setProgress(download.pages!!.size, download.downloadedImages, false)
@@ -147,8 +147,8 @@ internal class DownloadNotifier(private val context: Context) {
      */
     fun onDownloadPaused() {
         with(notification) {
-            setContentTitle(context.getString(R.string.chapter_paused))
-            setContentText(context.getString(R.string.download_notifier_download_paused))
+            setContentTitle(context.getString(R.string.paused))
+            setContentText(context.getString(R.string.download_paused))
             setSmallIcon(R.drawable.ic_av_pause_grey_24dp_img)
             setAutoCancel(false)
             setProgress(0, 0, false)
@@ -158,13 +158,13 @@ internal class DownloadNotifier(private val context: Context) {
             // Resume action
             addAction(
                 R.drawable.ic_av_play_arrow_grey_img,
-                context.getString(R.string.action_resume),
+                context.getString(R.string.resume),
                 NotificationReceiver.resumeDownloadsPendingBroadcast(context)
             )
             // Clear action
             addAction(
                 R.drawable.ic_clear_grey_24dp_img,
-                context.getString(R.string.action_cancel_all),
+                context.getString(R.string.cancel_all),
                 NotificationReceiver.clearDownloadsPendingBroadcast(context)
             )
         }
@@ -183,7 +183,7 @@ internal class DownloadNotifier(private val context: Context) {
      */
     fun onWarning(reason: String) {
         with(notification) {
-            setContentTitle(context.getString(R.string.download_notifier_downloader_title))
+            setContentTitle(context.getString(R.string.downloads))
             setContentText(reason)
             setSmallIcon(android.R.drawable.stat_sys_warning)
             setAutoCancel(true)
@@ -207,9 +207,9 @@ internal class DownloadNotifier(private val context: Context) {
     fun onError(error: String? = null, chapter: String? = null) {
         // Create notification
         with(notification) {
-            setContentTitle(chapter ?: context.getString(R.string.download_notifier_downloader_title))
-            setContentText(error ?: context.getString(R.string.download_notifier_unkown_error))
-            setStyle(NotificationCompat.BigTextStyle().bigText(error ?: context.getString(R.string.download_notifier_unkown_error)))
+            setContentTitle(chapter ?: context.getString(R.string.download_error))
+            setContentText(error ?: context.getString(R.string.could_not_download_unexpected_error))
+            setStyle(NotificationCompat.BigTextStyle().bigText(error ?: context.getString(R.string.could_not_download_unexpected_error)))
             setSmallIcon(android.R.drawable.stat_sys_warning)
             setCategory(NotificationCompat.CATEGORY_ERROR)
             clearActions()

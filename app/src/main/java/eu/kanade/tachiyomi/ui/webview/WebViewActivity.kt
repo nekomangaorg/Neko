@@ -31,7 +31,6 @@ import eu.kanade.tachiyomi.util.view.setStyle
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePadding
 import eu.kanade.tachiyomi.util.view.visible
-import kotlinx.android.synthetic.main.library_list_controller.*
 import kotlinx.android.synthetic.main.webview_activity.*
 import kotlinx.android.synthetic.main.webview_activity.swipe_refresh
 import uy.kohesive.injekt.injectLazy
@@ -277,7 +276,7 @@ class WebViewActivity : BaseActivity() {
                 type = "text/plain"
                 putExtra(Intent.EXTRA_TEXT, webview.url)
             }
-            startActivity(Intent.createChooser(intent, getString(R.string.action_share)))
+            startActivity(Intent.createChooser(intent, getString(R.string.share)))
         } catch (e: Exception) {
             toast(e.message)
         }

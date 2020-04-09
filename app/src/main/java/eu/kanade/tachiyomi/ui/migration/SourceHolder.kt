@@ -21,7 +21,7 @@ class SourceHolder(view: View, override val adapter: SourceAdapter) :
         get() = card
 
     init {
-        source_latest.text = view.context.getString(R.string.action_auto)
+        source_latest.text = view.context.getString(R.string.auto)
         source_browse.setText(R.string.select)
         source_browse.setOnClickListener {
             adapter.selectClickListener?.onSelectClick(adapterPosition)

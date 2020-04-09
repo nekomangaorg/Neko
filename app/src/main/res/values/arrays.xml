@@ -2,7 +2,7 @@
 <resources>
 
     <string-array name="viewers_selector">
-        <item>@string/default_viewer</item>
+        <item>@string/default_value</item>
         <item>@string/left_to_right_viewer</item>
         <item>@string/right_to_left_viewer</item>
         <item>@string/vertical_viewer</item>
@@ -10,45 +10,45 @@
     </string-array>
 
     <string-array name="reader_themes">
-        <item>@string/white_background</item>
-        <item>@string/black_background</item>
-        <item>@string/smart_background</item>
-        <item>@string/smart_theme_background</item>
+        <item>@string/white</item>
+        <item>@string/black</item>
+        <item>@string/smart_by_page</item>
+        <item>@string/smart_by_theme</item>
     </string-array>
 
     <string-array name="image_scale_type">
-        <item>@string/scale_type_fit_screen</item>
-        <item>@string/scale_type_stretch</item>
-        <item>@string/scale_type_fit_width</item>
-        <item>@string/scale_type_fit_height</item>
-        <item>@string/scale_type_original_size</item>
-        <item>@string/scale_type_smart_fit</item>
+        <item>@string/fit_screen</item>
+        <item>@string/stretch</item>
+        <item>@string/fit_width</item>
+        <item>@string/fit_height</item>
+        <item>@string/original_size</item>
+        <item>@string/smart_fit</item>
     </string-array>
 
     <string-array name="zoom_start">
-        <item>@string/zoom_start_automatic</item>
-        <item>@string/zoom_start_left</item>
-        <item>@string/zoom_start_right</item>
-        <item>@string/zoom_start_center</item>
+        <item>@string/automatic</item>
+        <item>@string/left</item>
+        <item>@string/right</item>
+        <item>@string/center</item>
     </string-array>
 
     <string-array name="rotation_type">
-        <item>@string/rotation_free</item>
-        <item>@string/rotation_lock</item>
-        <item>@string/rotation_force_portrait</item>
-        <item>@string/rotation_force_landscape</item>
+        <item>@string/free</item>
+        <item>@string/lock</item>
+        <item>@string/force_portrait</item>
+        <item>@string/force_landscape</item>
     </string-array>
 
     <string-array name="color_filter_modes">
-        <item>@string/filter_mode_default</item>
-        <item>@string/filter_mode_multiply</item>
-        <item>@string/filter_mode_screen</item>
+        <item>@string/default_value</item>
+        <item>@string/multiply</item>
+        <item>@string/screen</item>
     </string-array>
 
     <string-array name="library_display">
-        <item>@string/action_display_list</item>
-        <item>@string/action_display_grid</item>
-        <item>@string/action_display_comfy_grid</item>
+        <item>@string/list</item>
+        <item>@string/compact_grid</item>
+        <item>@string/comfortable_grid</item>
     </string-array>
 
 </resources>

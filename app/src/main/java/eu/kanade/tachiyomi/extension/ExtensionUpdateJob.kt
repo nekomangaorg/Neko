@@ -32,7 +32,7 @@ class ExtensionUpdateJob : Job() {
                         context.notification(Notifications.CHANNEL_UPDATES_TO_EXTS) {
                             setContentTitle(
                                 context.resources.getQuantityString(
-                                    R.plurals.update_check_notification_ext_updates, names
+                                    R.plurals.extension_update_available, names
                                         .size, names.size
                                 )
                             )

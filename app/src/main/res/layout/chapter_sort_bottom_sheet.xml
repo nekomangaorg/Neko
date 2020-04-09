@@ -31,14 +31,14 @@
                     android:layout_height="wrap_content"
                     android:paddingStart="16dp"
                     android:paddingEnd="12dp"
-                    android:text="@string/action_sort" />
+                    android:text="@string/sort" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/set_as_default_sort"
                     style="@style/Theme.Widget.Button.TextButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/set_as_default" />
+                    android:text="@string/set_as_default_for_all" />
             </LinearLayout>
 
             <RadioGroup
@@ -72,7 +72,7 @@
                 android:layout_marginTop="12dp"
                 android:paddingStart="16dp"
                 android:paddingEnd="12dp"
-                android:text="@string/action_filter" />
+                android:text="@string/filter" />
 
             <com.google.android.material.checkbox.MaterialCheckBox
                 android:id="@+id/show_all"
@@ -164,7 +164,7 @@
         android:layout_marginEnd="12dp"
         android:background="@drawable/round_ripple"
         android:clickable="true"
-        android:contentDescription="@string/action_close"
+        android:contentDescription="@string/close"
         android:focusable="true"
         android:src="@drawable/ic_close_white_24dp"
         android:tint="@color/gray_button" />

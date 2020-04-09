@@ -48,7 +48,7 @@ class EditMangaDialog : DialogController {
         val dialog = MaterialDialog(activity!!).apply {
             customView(viewRes = R.layout.edit_manga_dialog, scrollable = true)
             negativeButton(android.R.string.cancel)
-            positiveButton(R.string.action_save) { onPositiveButtonClick() }
+            positiveButton(R.string.save) { onPositiveButtonClick() }
         }
         dialogView = dialog.view
         onViewCreated(dialog.view)

@@ -407,7 +407,7 @@ class PagerPageHolder(
             layoutParams = FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
                 gravity = Gravity.CENTER
             }
-            setText(R.string.action_retry)
+            setText(R.string.retry)
             setOnClickListener {
                 page.chapter.pageLoader?.retryPage(page)
             }
@@ -444,7 +444,7 @@ class PagerPageHolder(
             layoutParams = FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
                 setMargins(margins, margins, margins, margins)
             }
-            setText(R.string.action_retry)
+            setText(R.string.retry)
             setOnClickListener {
                 page.chapter.pageLoader?.retryPage(page)
             }
@@ -458,7 +458,7 @@ class PagerPageHolder(
                 layoutParams = FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
                     setMargins(margins, margins, margins, margins)
                 }
-                setText(R.string.action_open_in_browser)
+                setText(R.string.open_in_browser)
                 setOnClickListener {
                     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(imageUrl))
                     context.startActivity(intent)

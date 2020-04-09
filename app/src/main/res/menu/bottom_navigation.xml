@@ -5,14 +5,14 @@
             android:checked="true"
             android:id="@+id/nav_library"
             android:icon="@drawable/library_selector_24dp"
-            android:title="@string/label_library" />
+            android:title="@string/library" />
         <item
             android:id="@+id/nav_recents"
             android:icon="@drawable/recent_read_selector_24dp"
-            android:title="@string/short_recents" />
+            android:title="@string/recents" />
         <item
             android:id="@+id/nav_catalogues"
             android:icon="@drawable/browse_selector_24dp"
-            android:title="@string/short_catalogues" />
+            android:title="@string/browse" />
     </group>
 </menu>

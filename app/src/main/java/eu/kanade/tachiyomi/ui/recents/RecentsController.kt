@@ -77,8 +77,8 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
 
     override fun getTitle(): String? {
         return if (showingDownloads)
-            resources?.getString(R.string.label_download_queue)
-        else resources?.getString(R.string.short_recents)
+            resources?.getString(R.string.download_queue)
+        else resources?.getString(R.string.recents)
     }
 
     override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
@@ -296,7 +296,7 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
         snack = view?.snack(R.string.marked_as_read, Snackbar.LENGTH_INDEFINITE) {
             anchorView = activity?.bottom_nav
             var undoing = false
-            setAction(R.string.action_undo) {
+            setAction(R.string.undo) {
                 presenter.markChapterRead(chapter, false, lastRead, pagesLeft)
                 undoing = true
             }

@@ -87,6 +87,6 @@
         android:elevation="10dp"
         android:translationZ="20dp"
         android:layout_marginBottom="16dp"
-        android:contentDescription="@string/description_cover"
+        android:contentDescription="@string/cover_of_image"
         android:visibility="invisible" />
 </FrameLayout>

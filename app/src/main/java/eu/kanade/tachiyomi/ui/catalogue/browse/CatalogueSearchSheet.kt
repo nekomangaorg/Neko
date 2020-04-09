@@ -45,7 +45,7 @@ class CatalogueSearchSheet(activity: Activity) :
     init {
         val view = activity.layoutInflater.inflate(R.layout.catalogue_drawer_content, null)
         setContentView(view)
-        toolbar_title.text = context.getString(R.string.source_search_options)
+        toolbar_title.text = context.getString(R.string.search_filters)
         dismiss_button.setOnClickListener { dismiss() }
         reset_btn.setOnClickListener { onResetClicked() }
         /*view.search_layout.setOnApplyWindowInsetsListener { v, insets ->

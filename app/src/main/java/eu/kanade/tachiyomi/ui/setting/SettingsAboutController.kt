@@ -49,12 +49,12 @@ class SettingsAboutController : SettingsController() {
     private val isUpdaterEnabled = BuildConfig.INCLUDE_UPDATER
 
     override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
-        titleRes = R.string.pref_category_about
+        titleRes = R.string.about
 
         switchPreference {
             key = "acra.enable"
-            titleRes = R.string.pref_enable_acra
-            summaryRes = R.string.pref_acra_summary
+            titleRes = R.string.send_crash_report
+            summaryRes = R.string.helps_fix_bugs
             defaultValue = true
         }
         preference {
@@ -102,7 +102,7 @@ class SettingsAboutController : SettingsController() {
     private fun checkVersion() {
         if (activity == null) return
 
-        activity?.toast(R.string.update_check_look_for_updates)
+        activity?.toast(R.string.searching_for_updates)
         scope.launch {
             val result = try {
                 updateChecker.checkForUpdate()
@@ -122,7 +122,7 @@ class SettingsAboutController : SettingsController() {
                 }
                 is UpdateResult.NoNewUpdate -> {
                     withContext(Dispatchers.Main) {
-                        activity?.toast(R.string.update_check_no_new_updates)
+                        activity?.toast(R.string.no_new_updates_available)
                     }
                 }
             }
@@ -138,9 +138,9 @@ class SettingsAboutController : SettingsController() {
 
         override fun onCreateDialog(savedViewState: Bundle?): Dialog {
             return MaterialDialog(activity!!)
-                    .title(R.string.update_check_title)
+                    .title(R.string.new_version_available)
                     .message(text = args.getString(BODY_KEY) ?: "")
-                    .positiveButton(R.string.update_check_confirm) {
+                    .positiveButton(R.string.download) {
                         val appContext = applicationContext
                         if (appContext != null) {
                             // Start download
@@ -148,7 +148,7 @@ class SettingsAboutController : SettingsController() {
                             UpdaterService.downloadUpdate(appContext, url)
                         }
                     }
-                    .negativeButton(R.string.update_check_ignore)
+                    .negativeButton(R.string.ignore)
         }
 
         private companion object {

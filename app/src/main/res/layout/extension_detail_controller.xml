@@ -85,7 +85,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:textColor="@android:color/white"
-        android:text="@string/ext_uninstall"
+        android:text="@string/uninstall"
         style="@style/Theme.Widget.Button.Colored"
         app:layout_constraintStart_toStartOf="@id/guideline"
         app:layout_constraintEnd_toEndOf="parent"

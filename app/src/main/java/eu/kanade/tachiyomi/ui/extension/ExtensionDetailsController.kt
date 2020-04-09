@@ -63,7 +63,7 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
     }
 
     override fun getTitle(): String? {
-        return resources?.getString(R.string.label_extension_info)
+        return resources?.getString(R.string.extension_info)
     }
 
     @SuppressLint("PrivateResource")
@@ -75,8 +75,8 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
         val context = view.context
 
         extension_title.text = extension.name
-        extension_version.text = context.getString(R.string.ext_version_info, extension.versionName)
-        extension_lang.text = context.getString(R.string.ext_language_info, LocaleHelper.getDisplayName(extension.lang, context))
+        extension_version.text = context.getString(R.string.version_, extension.versionName)
+        extension_lang.text = context.getString(R.string.language_, LocaleHelper.getDisplayName(extension.lang, context))
         extension_pkg.text = extension.pkgName
         extension.getApplicationIcon(context)?.let { extension_icon.setImageDrawable(it) }
         extension_uninstall_button.clicks().subscribeUntilDestroy {
@@ -112,7 +112,7 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
 
         if (screen.preferenceCount == 0) {
             extension_prefs_empty_view.show(R.drawable.ic_no_settings,
-                    R.string.ext_empty_preferences)
+                    R.string.empty_preferences_for_extension)
         }
     }
 

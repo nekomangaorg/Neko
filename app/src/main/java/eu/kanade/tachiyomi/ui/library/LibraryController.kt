@@ -142,8 +142,8 @@ class LibraryController(
     override fun getTitle(): String? {
         return if (view != null && presenter.categories.size > 1) presenter.categories.find {
             it.order == activeCategory
-        }?.name ?: view?.context?.getString(R.string.label_library)
-        else view?.context?.getString(R.string.label_library)
+        }?.name ?: view?.context?.getString(R.string.library)
+        else view?.context?.getString(R.string.library)
     }
 
     private var scrollListener = object : RecyclerView.OnScrollListener() {
@@ -290,7 +290,7 @@ class LibraryController(
                                     0 -> updateLibrary(presenter.allCategories.first())
                                     else -> updateLibrary()
                                 }
-                            }).positiveButton(R.string.action_update).show()
+                            }).positiveButton(R.string.update).show()
                     }
                     else -> {
                         when (preferences.updateOnRefresh().getOrDefault()) {
@@ -437,8 +437,8 @@ class LibraryController(
         } else {
             empty_view?.show(
                 R.drawable.ic_book_black_128dp,
-                if (bottom_sheet.hasActiveFilters()) R.string.information_empty_library_filtered
-                else R.string.information_empty_library
+                if (bottom_sheet.hasActiveFilters()) R.string.no_matches_for_filters
+                else R.string.library_is_empty_add_from_browse
             )
         }
         adapter.setItems(mangaMap)
@@ -731,10 +731,10 @@ class LibraryController(
         presenter.moveMangaToCategory(manga, category.id, mangaIds)
         snack?.dismiss()
         snack = view?.snack(
-            resources!!.getString(R.string.moved_to_category, category.name)
+            resources!!.getString(R.string.moved_to_, category.name)
         ) {
             anchorView = bottom_sheet
-            setAction(R.string.action_undo) {
+            setAction(R.string.undo) {
                 manga.category = category.id!!
                 presenter.moveMangaToCategory(manga, oldCatId, mangaIds)
             }
@@ -748,9 +748,9 @@ class LibraryController(
         snack = view?.snack(
             resources!!.getString(
                 when {
-                    inQueue -> R.string.category_already_in_queue
+                    inQueue -> R.string._already_in_queue
                     LibraryUpdateService.isRunning() -> R.string.adding_category_to_queue
-                    else -> R.string.updating_category_x
+                    else -> R.string.updating_
                 }, category.name
             ), Snackbar.LENGTH_LONG
         ) {
@@ -869,18 +869,9 @@ class LibraryController(
 
     override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
         val count = selectedMangas.size
-        if (count == 0) {
-            // Destroy action mode if there are no items selected.
-            destroyActionModeIfNeeded()
-        } else {
-            mode.title = resources?.getString(R.string.label_selected, count)
-            if (preferences.librarySortingMode().getOrDefault() == LibrarySort.DRAG_AND_DROP) {
-                val catId = (selectedMangas.first() as? LibraryManga)?.category
-                val sameCat = /*(adapter?.categories?.getOrNull(library_pager.currentItem)?.id
-                    == catId) &&*/ selectedMangas.all { (it as? LibraryManga)?.category == catId }
-                menu.findItem(R.id.action_move_manga).isVisible = sameCat
-            } else menu.findItem(R.id.action_move_manga).isVisible = false
-        }
+        // Destroy action mode if there are no items selected.
+        if (count == 0) destroyActionModeIfNeeded()
+        else mode.title = resources?.getString(R.string.selected_, count)
         return false
     }
     //endregion
@@ -889,8 +880,8 @@ class LibraryController(
         when (item.itemId) {
             R.id.action_move_to_category -> showChangeMangaCategoriesDialog()
             R.id.action_delete -> {
-                MaterialDialog(activity!!).message(R.string.confirm_manga_deletion)
-                    .positiveButton(R.string.action_remove) {
+                MaterialDialog(activity!!).message(R.string.remove_from_library_question)
+                    .positiveButton(R.string.remove) {
                         deleteMangasFromLibrary()
                     }.negativeButton(android.R.string.no).show()
             }
@@ -918,11 +909,11 @@ class LibraryController(
         destroyActionModeIfNeeded()
         snack?.dismiss()
         snack = view?.snack(
-            activity?.getString(R.string.manga_removed_library) ?: "", Snackbar.LENGTH_INDEFINITE
+            activity?.getString(R.string.removed_from_library) ?: "", Snackbar.LENGTH_INDEFINITE
         ) {
             anchorView = bottom_sheet
             var undoing = false
-            setAction(R.string.action_undo) {
+            setAction(R.string.undo) {
                 presenter.addMangas(mangas)
                 undoing = true
             }

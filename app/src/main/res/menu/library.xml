@@ -7,7 +7,7 @@
     <item
         android:id="@+id/action_search"
         android:icon="@drawable/ic_search_white_24dp"
-        android:title="@string/action_search"
+        android:title="@string/search"
         android:visible="false"
         app:actionViewClass="androidx.appcompat.widget.SearchView"
         app:showAsAction="collapseActionView|ifRoom" />
@@ -16,14 +16,14 @@
         android:id="@+id/action_library_display"
         android:icon="@drawable/ic_tune_white_24dp"
         android:visible="false"
-        android:title="@string/action_view_options"
+        android:title="@string/display_options"
         app:showAsAction="ifRoom"
         />
 
     <item
         android:id="@+id/action_settings"
         android:icon="@drawable/ic_settings_white_24dp"
-        android:title="@string/label_settings"
+        android:title="@string/settings"
         app:showAsAction="ifRoom"
         />
 

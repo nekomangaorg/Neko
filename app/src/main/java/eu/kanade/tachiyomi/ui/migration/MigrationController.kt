@@ -86,14 +86,14 @@ class MigrationController : NucleusController<MigrationPresenter>(),
 
     fun render(state: ViewState) {
         if (state.selectedSource == null) {
-            title = resources?.getString(R.string.label_migration)
+            title = resources?.getString(R.string.source_migration)
             if (adapter !is SourceAdapter) {
                 adapter = SourceAdapter(this)
                 migration_recycler.adapter = adapter
             }
             adapter?.updateDataSet(state.sourcesWithManga)
         } else {
-            val switching = title == resources?.getString(R.string.label_migration)
+            val switching = title == resources?.getString(R.string.source_migration)
             title = state.selectedSource.toString()
             if (adapter !is MangaAdapter) {
                 adapter = MangaAdapter(this)

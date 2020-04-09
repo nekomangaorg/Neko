@@ -516,7 +516,7 @@ class LibraryPresenter(
             categories.add(0, createDefaultCategory())
 
         if (categories.size == 1 && showCategories)
-            categories.first().name = context.getString(R.string.label_library)
+            categories.first().name = context.getString(R.string.library)
 
         this.allCategories = categories
         this.categories = if (!showCategories) arrayListOf(categoryAll)

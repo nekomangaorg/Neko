@@ -2,20 +2,20 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/action_filter"
-        android:title="@string/action_filter"
+        android:title="@string/filter"
         android:icon="@drawable/ic_filter_list_white_24dp"
         app:showAsAction="always"/>
 
     <item
         android:id="@+id/action_search"
         android:icon="@drawable/ic_search_white_24dp"
-        android:title="@string/action_search"
+        android:title="@string/search"
         app:actionViewClass="androidx.appcompat.widget.SearchView"
         app:showAsAction="collapseActionView|ifRoom" />
 
     <item
         android:id="@+id/action_auto_check"
-        android:title="@string/action_auto_check_extensions"
+        android:title="@string/notify_extension_updates"
         android:icon="@drawable/ic_sync_black_24dp"
         android:visible="false"
         android:checkable="true"

@@ -374,7 +374,7 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
                 adapter?.notifyDataSetChanged()
             } else {
                 migratingManga.manga.migrationStatus = MigrationStatus.MANGA_NOT_FOUND
-                activity?.toast(R.string.error_fetching_migration, Toast.LENGTH_LONG)
+                activity?.toast(R.string.no_chapters_found_for_migration, Toast.LENGTH_LONG)
                 adapter?.notifyDataSetChanged()
             }
         }
@@ -397,8 +397,8 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
     override fun handleBack(): Boolean {
         activity?.let {
             MaterialDialog(it).show {
-                title(R.string.stop_migration)
-                positiveButton(R.string.action_stop) {
+                title(R.string.stop_migrating)
+                positiveButton(R.string.stop) {
                     router.popCurrentController()
                     migrationsJob?.cancel()
                 }
@@ -465,8 +465,8 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
         if (migrationsJob?.isCancelled == false || adapter?.allMangasDone() == true) {
             activity?.let {
                 MaterialDialog(it).show {
-                    title(R.string.stop_migration)
-                    positiveButton(R.string.action_stop) {
+                    title(R.string.stop_migrating)
+                    positiveButton(R.string.stop) {
                         block()
                         migrationsJob?.cancel()
                     }

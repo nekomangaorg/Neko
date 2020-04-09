@@ -4,13 +4,13 @@
 
     <item
         android:id="@+id/action_bug_report"
-        android:title="@string/action_bug_report"
+        android:title="@string/bug_report"
         android:icon="@drawable/ic_bug_report_white_24dp"
         app:showAsAction="always"/>
 
     <item
         android:id="@+id/action_help"
-        android:title="@string/label_help"
+        android:title="@string/help"
         android:icon="@drawable/ic_help_black_24dp"
         app:showAsAction="always"/>
 </menu>

@@ -91,8 +91,8 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
      */
     override fun getTitle(): String? {
         return if (showingExtenions)
-            applicationContext?.getString(R.string.label_extensions)
-        else applicationContext?.getString(R.string.pref_category_sources)
+            applicationContext?.getString(R.string.extensions)
+        else applicationContext?.getString(R.string.sources)
     }
 
     /**
@@ -312,7 +312,7 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
             val searchView = searchItem.actionView as SearchView
 
             // Change hint to show global search.
-            searchView.queryHint = applicationContext?.getString(R.string.action_global_search_hint)
+            searchView.queryHint = applicationContext?.getString(R.string.global_search)
 
             // Create query listener which opens the global search view.
             setOnQueryTextChangeListener(searchView, true) {

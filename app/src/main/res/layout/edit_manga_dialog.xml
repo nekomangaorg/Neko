@@ -17,7 +17,7 @@
             android:layout_width="wrap_content"
             android:adjustViewBounds="true"
             android:layout_height="150dp"
-            android:contentDescription="@string/description_cover"
+            android:contentDescription="@string/cover_of_image"
             android:background="@drawable/image_border_background"
             android:src="@mipmap/ic_launcher"/>
     </FrameLayout>
@@ -35,7 +35,7 @@
         android:id="@+id/manga_author"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/manga_info_author_label"
+        android:hint="@string/author"
         android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
         android:inputType="text"
@@ -45,7 +45,7 @@
         android:id="@+id/manga_artist"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/manga_info_artist_label"
+        android:hint="@string/artist"
         android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
         android:inputType="text"

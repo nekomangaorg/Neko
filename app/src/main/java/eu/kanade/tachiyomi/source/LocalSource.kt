@@ -63,11 +63,11 @@ class LocalSource(private val context: Context) : CatalogueSource {
     }
 
     override val id = ID
-    override val name = context.getString(R.string.local_source)
+    override val name = context.getString(R.string.local_manga)
     override val lang = ""
     override val supportsLatest = true
 
-    override fun toString() = context.getString(R.string.local_source)
+    override fun toString() = context.getString(R.string.local_manga)
 
     override fun fetchPopularManga(page: Int) = fetchSearchManga(page, "", POPULAR_FILTERS)
 

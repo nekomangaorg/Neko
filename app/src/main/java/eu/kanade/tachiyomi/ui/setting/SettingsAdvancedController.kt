@@ -37,17 +37,17 @@ class SettingsAdvancedController : SettingsController() {
     private val db: DatabaseHelper by injectLazy()
 
     override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
-        titleRes = R.string.pref_category_advanced
+        titleRes = R.string.advanced
 
         preference {
             key = CLEAR_CACHE_KEY
-            titleRes = R.string.pref_clear_chapter_cache
-            summary = context.getString(R.string.used_cache, chapterCache.readableSize)
+            titleRes = R.string.clear_chapter_cache
+            summary = context.getString(R.string.used_, chapterCache.readableSize)
 
             onClick { clearChapterCache() }
         }
         preference {
-            titleRes = R.string.pref_clear_cookies
+            titleRes = R.string.clear_cookies
 
             onClick {
                 network.cookieManager.removeAll()
@@ -55,8 +55,8 @@ class SettingsAdvancedController : SettingsController() {
             }
         }
         preference {
-            titleRes = R.string.pref_clear_database
-            summaryRes = R.string.pref_clear_database_summary
+            titleRes = R.string.clear_database
+            summaryRes = R.string.clear_database_summary
 
             onClick {
                 val ctrl = ClearDatabaseDialogController()
@@ -65,21 +65,21 @@ class SettingsAdvancedController : SettingsController() {
             }
         }
         preference {
-            titleRes = R.string.pref_refresh_library_metadata
-            summaryRes = R.string.pref_refresh_library_metadata_summary
+            titleRes = R.string.refresh_library_metadata
+            summaryRes = R.string.updates_covers_genres_desc
 
             onClick { LibraryUpdateService.start(context, target = Target.DETAILS) }
         }
         preference {
-            titleRes = R.string.pref_refresh_library_tracking
-            summaryRes = R.string.pref_refresh_library_tracking_summary
+            titleRes = R.string.refresh_tracking_metadata
+            summaryRes = R.string.updates_tracking_details
 
             onClick { LibraryUpdateService.start(context, target = Target.TRACKING) }
         }
         preference {
-            titleRes = R.string.pref_clean_downloads
+            titleRes = R.string.clean_up_downloaded_chapters
 
-            summaryRes = R.string.pref_clean_downloads_summary
+            summaryRes = R.string.delete_unused_chapters
 
             onClick { cleanupDownloads() }
         }
@@ -101,7 +101,7 @@ class SettingsAdvancedController : SettingsController() {
             launchUI {
                 val activity = activity ?: return@launchUI
                 val cleanupString =
-                    if (foldersCleared == 0) activity.getString(R.string.no_cleanup_done)
+                    if (foldersCleared == 0) activity.getString(R.string.no_folders_to_cleanup)
                     else resources!!.getQuantityString(
                         R.plurals.cleanup_done,
                         foldersCleared,
@@ -130,10 +130,10 @@ class SettingsAdvancedController : SettingsController() {
                 }, {
                     activity?.toast(R.string.cache_delete_error)
                 }, {
-                    activity?.toast(resources?.getQuantityString(R.plurals.cache_deleted,
+                    activity?.toast(resources?.getQuantityString(R.plurals.cache_cleared,
                         deletedFiles, deletedFiles))
                     findPreference(CLEAR_CACHE_KEY)?.summary =
-                            resources?.getString(R.string.used_cache, chapterCache.readableSize)
+                            resources?.getString(R.string.used_, chapterCache.readableSize)
                 })
     }
 

@@ -105,16 +105,16 @@ class LibraryHeaderItem(
             sortText.text = itemView.context.getString(R.string.sort_by_,
                 itemView.context.getString(
                 when (category.sortingMode()) {
-                    LibrarySort.LATEST_CHAPTER -> R.string.action_sort_latest_chapter
+                    LibrarySort.LATEST_CHAPTER -> R.string.latest_chapter
                     LibrarySort.DRAG_AND_DROP ->
                         if (category.id == -1) R.string.category
-                        else R.string.action_sort_drag_and_drop
-                    LibrarySort.TOTAL -> R.string.action_sort_total
-                    LibrarySort.UNREAD -> R.string.action_filter_unread
-                    LibrarySort.LAST_READ -> R.string.action_sort_last_read
+                        else R.string.drag_and_drop
+                    LibrarySort.TOTAL -> R.string.total_chapters
+                    LibrarySort.UNREAD -> R.string.unread
+                    LibrarySort.LAST_READ -> R.string.last_read
                     LibrarySort.ALPHA -> R.string.title
-                    LibrarySort.DATE_ADDED -> R.string.action_date_added
-                    else -> R.string.action_sort_drag_and_drop
+                    LibrarySort.DATE_ADDED -> R.string.date_added
+                    else -> R.string.drag_and_drop
                 }
             ))
 

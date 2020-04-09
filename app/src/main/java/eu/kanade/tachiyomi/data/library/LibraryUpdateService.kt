@@ -571,14 +571,14 @@ class LibraryUpdateService(
                     )
                 )
                 addAction(
-                    R.drawable.ic_glasses_black_24dp, getString(R.string.action_mark_as_read),
+                    R.drawable.ic_glasses_black_24dp, getString(R.string.mark_as_read),
                     NotificationReceiver.markAsReadPendingBroadcast(
                         this@LibraryUpdateService,
                         manga, chapters, Notifications.ID_NEW_CHAPTERS
                     )
                 )
                 addAction(
-                    R.drawable.ic_book_white_24dp, getString(R.string.action_view_chapters),
+                    R.drawable.ic_book_white_24dp, getString(R.string.view_chapters),
                     NotificationReceiver.openChapterPendingActivity(
                         this@LibraryUpdateService,
                         manga, Notifications.ID_NEW_CHAPTERS
@@ -595,13 +595,13 @@ class LibraryUpdateService(
                 notification(Notifications.CHANNEL_NEW_CHAPTERS) {
                     setSmallIcon(R.drawable.ic_tachi)
                     setLargeIcon(notificationBitmap)
-                    setContentTitle(getString(R.string.notification_new_chapters))
+                    setContentTitle(getString(R.string.new_chapters_found))
                     color = ContextCompat.getColor(applicationContext, R.color.colorAccent)
                     if (updates.size > 1) {
                         setContentText(
                             resources.getQuantityString(
                                 R.plurals
-                                    .notification_new_chapters_text,
+                                    .for_n_titles,
                                 updates.size, updates.size
                             )
                         )

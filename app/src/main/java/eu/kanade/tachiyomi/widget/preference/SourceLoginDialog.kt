@@ -20,7 +20,7 @@ class SourceLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle =
     constructor(source: Source) : this(Bundle().apply { putLong("key", source.id) })
 
     override fun setCredentialsOnView(view: View) = with(view) {
-        dialog_title.text = context.getString(R.string.login_title, source.toString())
+        dialog_title.text = context.getString(R.string.log_in_to_, source.toString())
         username.setText(preferences.sourceUsername(source))
         password.setText(preferences.sourcePassword(source))
     }
@@ -44,7 +44,7 @@ class SourceLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle =
                                     password.text.toString())
 
                             dialog?.dismiss()
-                            context.toast(R.string.login_success)
+                            context.toast(R.string.successfully_logged_in)
                         } else {
                             preferences.setSourceCredentials(source, "", "")
                             login.progress = -1

@@ -158,10 +158,10 @@ class CloudflareInterceptor(private val context: Context) : Interceptor {
         if (!cloudflareBypassed) {
             // Prompt user to update WebView if it seems too outdated
             if (isWebviewOutdated) {
-                context.toast(R.string.information_webview_outdated, Toast.LENGTH_LONG)
+                context.toast(R.string.please_update_webview, Toast.LENGTH_LONG)
             }
 
-            throw Exception(context.getString(R.string.information_cloudflare_bypass_failure))
+            throw Exception(context.getString(R.string.failed_to_bypass_cloudflare))
         }
     }
 

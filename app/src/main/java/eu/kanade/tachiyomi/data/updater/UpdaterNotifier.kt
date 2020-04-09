@@ -41,7 +41,7 @@ internal class UpdaterNotifier(private val context: Context) {
     fun onDownloadStarted(title: String) {
         with(notification) {
             setContentTitle(title)
-            setContentText(context.getString(R.string.update_check_notification_download_in_progress))
+            setContentText(context.getString(R.string.downloading))
             setSmallIcon(android.R.drawable.stat_sys_download)
             setOngoing(true)
         }
@@ -68,18 +68,18 @@ internal class UpdaterNotifier(private val context: Context) {
      */
     fun onDownloadFinished(uri: Uri) {
         with(notification) {
-            setContentText(context.getString(R.string.update_check_notification_download_complete))
+            setContentText(context.getString(R.string.download_complete))
             setSmallIcon(android.R.drawable.stat_sys_download_done)
             setOnlyAlertOnce(false)
             setProgress(0, 0, false)
             // Install action
             setContentIntent(NotificationHandler.installApkPendingActivity(context, uri))
             addAction(R.drawable.ic_system_update_grey_24dp_img,
-                    context.getString(R.string.action_install),
+                    context.getString(R.string.install),
                     NotificationHandler.installApkPendingActivity(context, uri))
             // Cancel action
             addAction(R.drawable.ic_clear_grey_24dp_img,
-                    context.getString(R.string.action_cancel),
+                    context.getString(R.string.cancel),
                     NotificationReceiver.dismissNotificationPendingBroadcast(context, Notifications.ID_UPDATER))
         }
         notification.show()
@@ -92,18 +92,18 @@ internal class UpdaterNotifier(private val context: Context) {
      */
     fun onDownloadError(url: String) {
         with(notification) {
-            setContentText(context.getString(R.string.update_check_notification_download_error))
+            setContentText(context.getString(R.string.download_error))
             setSmallIcon(android.R.drawable.stat_sys_warning)
             setOnlyAlertOnce(false)
             setProgress(0, 0, false)
             color = ContextCompat.getColor(context, R.color.colorAccent)
             // Retry action
             addAction(R.drawable.ic_refresh_grey_24dp_img,
-                    context.getString(R.string.action_retry),
+                    context.getString(R.string.retry),
                     UpdaterService.downloadApkPendingService(context, url))
             // Cancel action
             addAction(R.drawable.ic_clear_grey_24dp_img,
-                    context.getString(R.string.action_cancel),
+                    context.getString(R.string.cancel),
                     NotificationReceiver.dismissNotificationPendingBroadcast(context, Notifications.ID_UPDATER))
         }
         notification.show(Notifications.ID_UPDATER)

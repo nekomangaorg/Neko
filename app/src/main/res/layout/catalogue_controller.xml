@@ -28,7 +28,7 @@
         android:id="@+id/fab"
         android:layout_width="wrap_content"
         app:backgroundTint="?colorAccent"
-        android:text="@string/action_filter"
+        android:text="@string/filter"
         android:layout_gravity="bottom|end"
         app:icon="@drawable/ic_filter_list_white_24dp"
         app:iconTint="@color/md_white_1000"

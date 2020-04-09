@@ -43,7 +43,7 @@ class ExtensionHolder(view: View, override val adapter: ExtensionAdapter) :
         lang.text = if (extension !is Extension.Untrusted) {
             LocaleHelper.getDisplayName(extension.lang, itemView.context)
         } else {
-            itemView.context.getString(R.string.ext_untrusted).toUpperCase()
+            itemView.context.getString(R.string.untrusted).toUpperCase()
         }
 
         GlideApp.with(itemView.context).clear(edit_button)
@@ -71,11 +71,11 @@ class ExtensionHolder(view: View, override val adapter: ExtensionAdapter) :
         val installStep = item.installStep
         if (installStep != null) {
             setText(when (installStep) {
-                InstallStep.Pending -> R.string.ext_pending
-                InstallStep.Downloading -> R.string.ext_downloading
-                InstallStep.Installing -> R.string.ext_installing
-                InstallStep.Installed -> R.string.ext_installed
-                InstallStep.Error -> R.string.action_retry
+                InstallStep.Pending -> R.string.pending
+                InstallStep.Downloading -> R.string.downloading
+                InstallStep.Installing -> R.string.installing
+                InstallStep.Installed -> R.string.installed
+                InstallStep.Error -> R.string.retry
             })
             if (installStep != InstallStep.Error) {
                 isEnabled = false
@@ -88,22 +88,22 @@ class ExtensionHolder(view: View, override val adapter: ExtensionAdapter) :
                     backgroundTintList = ColorStateList.valueOf(
                         context.getResourceColor(R.attr.colorAccent))
                     strokeColor = ColorStateList.valueOf(Color.TRANSPARENT)
-                    setText(R.string.ext_update)
+                    setText(R.string.update)
                 }
                 extension.isObsolete -> {
                     // Red outline
                     setTextColor(ContextCompat.getColorStateList(context, R.drawable.button_bg_error))
 
-                    setText(R.string.ext_obsolete)
+                    setText(R.string.obsolete)
                 }
                 else -> {
-                    setText(R.string.ext_details)
+                    setText(R.string.details)
                 }
             }
         } else if (extension is Extension.Untrusted) {
-            setText(R.string.ext_trust)
+            setText(R.string.trust)
         } else {
-            setText(R.string.ext_install)
+            setText(R.string.install)
         }
     }
 }

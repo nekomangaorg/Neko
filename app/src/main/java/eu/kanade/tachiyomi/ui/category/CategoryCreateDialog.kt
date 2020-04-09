@@ -26,7 +26,7 @@ class CategoryCreateDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
      */
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
         return MaterialDialog(activity!!)
-                .title(R.string.action_add_category)
+                .title(R.string.add_category)
                 .positiveButton(android.R.string.ok)
                 .negativeButton(android.R.string.cancel)
                 .input(hintRes = R.string.name) { _, input ->
