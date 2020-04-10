@@ -350,7 +350,7 @@ class MangaDetailsPresenter(
      * @param chapters the list of chapters to download.
      */
     fun downloadChapters(chapters: List<ChapterItem>) {
-        downloadManager.downloadChapters(manga, chapters)
+        downloadManager.downloadChapters(manga, chapters.filter { !it.isDownloaded })
     }
 
     fun restartDownloads() {
