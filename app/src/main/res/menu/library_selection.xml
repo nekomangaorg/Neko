@@ -19,10 +19,15 @@
         app:showAsAction="ifRoom"/>
 
     <item
+        android:id="@+id/action_sync_to_dex"
+        android:title="@string/action_add_to_follows"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/action_move_manga"
         android:icon="@drawable/ic_swap_vert_white_24dp"
         android:title="@string/action_move"
-        app:showAsAction="ifRoom"
+        app:showAsAction="never"
         >
         <menu >
             <item
