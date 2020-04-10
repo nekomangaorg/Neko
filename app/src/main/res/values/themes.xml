@@ -112,6 +112,7 @@
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:statusBarColor">?colorPrimaryDark</item>
         <item name="android:navigationBarColor">@color/darkPrimaryColor</item>
+        <item name="actionBarTintColor">@color/md_white_1000</item>
 
         <!-- Themes -->
         <item name="windowActionModeOverlay">true</item>
