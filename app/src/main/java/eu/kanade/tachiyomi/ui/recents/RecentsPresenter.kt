@@ -59,16 +59,21 @@ class RecentsPresenter(
             val calWeek = Calendar.getInstance()
             calWeek.time = Date()
             if (query.isNotEmpty()) calWeek.add(Calendar.YEAR, -50)
-            else calWeek.add(Calendar.DAY_OF_YEAR, -1)
+            else calWeek.add(Calendar.WEEK_OF_MONTH, -1)
+
+            val calDay = Calendar.getInstance()
+            calDay.time = Date()
+            if (query.isNotEmpty()) calDay.add(Calendar.YEAR, -50)
+            else calDay.add(Calendar.DAY_OF_YEAR, -1)
 
             val cReading =
                 if (query.isEmpty()) db.getRecentsWithUnread(cal.time, query).executeOnIO()
                 else db.getRecentMangaLimit(cal.time, 8, query).executeOnIO()
-            val rUpdates = db.getUpdatedManga(cal.time, query).executeOnIO()
+            val rUpdates = db.getUpdatedManga(calWeek.time, query).executeOnIO()
             rUpdates.forEach {
                 it.history.last_read = it.chapter.date_fetch
             }
-            val nAdditions = db.getRecentlyAdded(calWeek.time, query).executeOnIO()
+            val nAdditions = db.getRecentlyAdded(calDay.time, query).executeOnIO()
             nAdditions.forEach {
                 it.history.last_read = it.manga.date_added
             }
