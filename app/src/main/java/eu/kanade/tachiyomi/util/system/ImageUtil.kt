@@ -55,8 +55,9 @@ object ImageUtil {
         return null
     }
 
-    fun autoSetBackground(image: Bitmap, useWhiteAlways: Boolean): Drawable {
+    fun autoSetBackground(image: Bitmap?, useWhiteAlways: Boolean): Drawable {
         val backgroundColor = if (useWhiteAlways) Color.WHITE else android.R.attr.colorBackground
+        if (image == null) return ColorDrawable(backgroundColor)
         if (image.width < 50 || image.height < 50)
             return ColorDrawable(backgroundColor)
         val top = 5
