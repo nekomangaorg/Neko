@@ -1,6 +1,8 @@
 package eu.kanade.tachiyomi.ui.library
 
 import android.graphics.drawable.Drawable
+import android.text.SpannableString
+import android.text.style.ForegroundColorSpan
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
@@ -192,13 +194,21 @@ class LibraryHeaderItem(
                 m.setOptionalIconsVisible(true)
             }
 
+            val isAscending = category.isAscending()
+
             currentItem?.icon = tintVector(
                 when {
                     sortingMode == LibrarySort.DRAG_AND_DROP -> R.drawable.ic_check_white_24dp
-                    category.isAscending() -> R.drawable.ic_arrow_up_white_24dp
-                    else -> R.drawable.ic_arrow_down_white_24dp
+                    if (sortingMode == LibrarySort.DATE_ADDED ||
+                        sortingMode == LibrarySort.LATEST_CHAPTER ||
+                        sortingMode == LibrarySort.LAST_READ) !isAscending else isAscending ->
+                        R.drawable.ic_arrow_down_white_24dp
+                    else -> R.drawable.ic_arrow_up_white_24dp
                 }
             )
+            val s = SpannableString(currentItem?.title ?: "")
+            s.setSpan(ForegroundColorSpan(itemView.context.getResourceColor(android.R.attr.colorAccent)), 0, s.length, 0)
+            currentItem?.title = s
 
             // Finally show the PopupMenu
             popup.show()
