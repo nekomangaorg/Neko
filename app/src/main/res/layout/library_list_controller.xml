@@ -27,7 +27,7 @@
         <com.reddit.indicatorfastscroll.FastScrollerView
             android:id="@+id/fast_scroller"
             android:textColor="?android:attr/textColorPrimaryInverse"
-            android:layout_width="22dp"
+            android:layout_width="25dp"
             android:layout_height="wrap_content"
             android:elevation="10dp"
             android:layout_gravity="end"

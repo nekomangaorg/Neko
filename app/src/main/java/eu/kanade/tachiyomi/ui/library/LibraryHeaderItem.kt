@@ -4,6 +4,7 @@ import android.graphics.drawable.Drawable
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.view.menu.MenuBuilder
 import androidx.appcompat.widget.PopupMenu
@@ -23,6 +24,7 @@ import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.gone
+import eu.kanade.tachiyomi.util.view.invisible
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.visible
 import kotlinx.android.synthetic.main.library_category_header_item.view.*
@@ -84,6 +86,7 @@ class LibraryHeaderItem(
         private val sortText: TextView = view.findViewById(R.id.category_sort)
         private val updateButton: ImageView = view.findViewById(R.id.update_button)
         private val checkboxImage: ImageView = view.findViewById(R.id.checkbox)
+        private val catProgress: ProgressBar = view.findViewById(R.id.cat_progress)
 
         init {
             sortText.updateLayoutParams<ViewGroup.MarginLayoutParams> {
@@ -122,6 +125,7 @@ class LibraryHeaderItem(
                 adapter.mode == SelectableAdapter.Mode.MULTI -> {
                     checkboxImage.visible()
                     updateButton.gone()
+                    catProgress.gone()
                     setSelection()
                 }
                 category.id == -1 -> {
@@ -130,14 +134,12 @@ class LibraryHeaderItem(
                 }
                 LibraryUpdateService.categoryInQueue(category.id) -> {
                     checkboxImage.gone()
-                    updateButton.drawable.setTint(ContextCompat.getColor(itemView.context,
-                        R.color.material_on_surface_disabled))
-                    updateButton.visible()
+                    catProgress.visible()
+                    updateButton.invisible()
                 }
                 else -> {
+                    catProgress.gone()
                     checkboxImage.gone()
-                    updateButton.drawable.setTint(itemView.context.getResourceColor(
-                        R.attr.colorAccent))
                     updateButton.visible()
                 }
             }
@@ -145,8 +147,8 @@ class LibraryHeaderItem(
 
         private fun addCategoryToUpdate() {
             if (adapter.libraryListener.updateCategory(adapterPosition)) {
-                updateButton.drawable.setTint(ContextCompat.getColor(itemView.context,
-                    R.color.material_on_surface_disabled))
+                catProgress.visible()
+                updateButton.invisible()
             }
         }
         private fun showCatSortOptions() {

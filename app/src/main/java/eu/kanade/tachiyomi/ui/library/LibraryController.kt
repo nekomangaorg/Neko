@@ -174,17 +174,17 @@ open class LibraryController(
                 }
                 RecyclerView.SCROLL_STATE_IDLE -> {
                     scrollAnim = fast_scroller.animate().setStartDelay(1000).setDuration(250)
-                        .translationX(22f.dpToPx)
+                        .translationX(25f.dpToPx)
                     scrollAnim?.start()
                 }
             }
         }
     }
 
-    private fun hideScroller() {
+    private fun hideScroller(duration: Long = 1000) {
         if (alwaysShowScroller) return
         scrollAnim =
-            fast_scroller.animate().setStartDelay(1000).setDuration(250).translationX(22f.dpToPx)
+            fast_scroller.animate().setStartDelay(duration).setDuration(250).translationX(25f.dpToPx)
         scrollAnim?.start()
     }
 
@@ -204,10 +204,12 @@ open class LibraryController(
         super.onViewCreated(view)
         view.applyWindowInsetsForRootController(activity!!.bottom_nav)
         if (!::presenter.isInitialized) presenter = LibraryPresenter(this)
-        fast_scroller.translationX = 22f.dpToPx
+        fast_scroller.translationX = 25f.dpToPx
         setFastScrollBackground()
 
         adapter = LibraryCategoryAdapter(this)
+        adapter.expandItemsAtStartUp()
+        adapter.isRecursiveCollapse = true
         setRecyclerLayout()
         recycler.manager.spanSizeLookup = (object : GridLayoutManager.SpanSizeLookup() {
             override fun getSpanSize(position: Int): Int {
@@ -235,13 +237,11 @@ open class LibraryController(
                 itemPosition: Int
             ) {
                 fast_scroller.translationX = 0f
-                hideScroller()
+                hideScroller(2000)
 
                 textAnim?.cancel()
-                textAnim = text_view_m.animate().alpha(0f).setDuration(250L).setStartDelay(1000)
-                this@LibraryController.view?.post {
-                    textAnim?.start()
-                }
+                textAnim = text_view_m.animate().alpha(0f).setDuration(250L).setStartDelay(2000)
+                textAnim?.start()
 
                 text_view_m.translationY = indicatorCenterY.toFloat() - text_view_m.height / 2
                 text_view_m.alpha = 1f
@@ -321,9 +321,9 @@ open class LibraryController(
         recycler.updatePaddingRelative(bottom = height)
 
         presenter.onRestore()
-        val library = presenter.getAllManga()
-        if (library != null) presenter.updateViewBlocking()
-        else {
+        if (presenter.libraryItems.isNotEmpty())
+        onNextLibraryUpdate(presenter.libraryItems, true)
+            else {
             recycler_layout.alpha = 0f
             presenter.getLibraryBlocking()
         }
@@ -426,7 +426,7 @@ open class LibraryController(
         super.onDestroyView(view)
     }
 
-    fun onNextLibraryUpdate(mangaMap: List<LibraryItem>, freshStart: Boolean) {
+    fun onNextLibraryUpdate(mangaMap: List<LibraryItem>, freshStart: Boolean = false) {
         if (view == null) return
         destroyActionModeIfNeeded()
         if (mangaMap.isNotEmpty()) {
@@ -439,6 +439,7 @@ open class LibraryController(
             )
         }
         adapter.setItems(mangaMap)
+        adapter.collapse(0)
         singleCategory = presenter.categories.size <= 1
 
         setTitle()
@@ -449,7 +450,9 @@ open class LibraryController(
         } else if (justStarted && freshStart) {
             scrollToHeader(activeCategory)
             fast_scroller.translationX = 0f
-            hideScroller()
+            view?.post {
+                hideScroller(2000)
+            }
         }
         adapter.isLongPressDragEnabled = canDrag()
     }
@@ -902,7 +905,7 @@ open class LibraryController(
             anchorView = bottom_sheet
             var undoing = false
             setAction(R.string.undo) {
-                presenter.addMangas(mangas)
+                presenter.reAddMangas(mangas)
                 undoing = true
             }
             addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
