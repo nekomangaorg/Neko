@@ -95,10 +95,11 @@ class LibraryCategoryAdapter(val libraryListener: LibraryListener) :
     fun getSectionText(position: Int): String? {
         val preferences: PreferencesHelper by injectLazy()
         val db: DatabaseHelper by injectLazy()
+        if (position == itemCount - 1) return "-"
         return when (val item: IFlexible<*>? = getItem(position)) {
             is LibraryHeaderItem ->
                 if (preferences.hideCategories().getOrDefault() || item.category.id == 0) null
-                else getFirstLetter(item.category.name) +
+                else item.category.name.first().toString() +
                     "\u200B".repeat(max(0, item.category.order))
             is LibraryItem -> {
                 when (preferences.librarySortingMode().getOrDefault()) {
@@ -156,12 +157,14 @@ class LibraryCategoryAdapter(val libraryListener: LibraryListener) :
     override fun onCreateBubbleText(position: Int): String {
         val preferences: PreferencesHelper by injectLazy()
         val db: DatabaseHelper by injectLazy()
+        if (position == itemCount - 1) return recyclerView.context.getString(R.string.bottom)
         return when (val iFlexible: IFlexible<*>? = getItem(position)) {
             is LibraryHeaderItem ->
                 if (!preferences.hideCategories().getOrDefault()) iFlexible.category.name
                 else recyclerView.context.getString(R.string.top)
             is LibraryItem -> {
-                when (preferences.librarySortingMode().getOrDefault()) {
+                if (iFlexible.manga.isBlank()) ""
+                else when (preferences.librarySortingMode().getOrDefault()) {
                     LibrarySort.DRAG_AND_DROP -> {
                         if (!preferences.hideCategories().getOrDefault()) {
                             val title = iFlexible.manga.title

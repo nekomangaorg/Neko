@@ -224,7 +224,9 @@ open class LibraryController(
         recycler.adapter = adapter
         fast_scroller.setupWithRecyclerView(recycler, { position ->
             val letter = adapter.getSectionText(position)
-            if (!singleCategory && !adapter.isHeader(adapter.getItem(position))) null
+            if (!singleCategory &&
+                !adapter.isHeader(adapter.getItem(position)) &&
+                position != adapter.itemCount - 1) null
             else if (letter != null) FastScrollItemIndicator.Text(letter)
             else FastScrollItemIndicator.Icon(R.drawable.star)
         })
@@ -439,7 +441,6 @@ open class LibraryController(
             )
         }
         adapter.setItems(mangaMap)
-        adapter.collapse(0)
         singleCategory = presenter.categories.size <= 1
 
         setTitle()

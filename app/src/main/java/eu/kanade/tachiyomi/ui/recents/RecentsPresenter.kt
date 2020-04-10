@@ -59,7 +59,7 @@ class RecentsPresenter(
             val calWeek = Calendar.getInstance()
             calWeek.time = Date()
             if (query.isNotEmpty()) calWeek.add(Calendar.YEAR, -50)
-            else calWeek.add(Calendar.WEEK_OF_MONTH, -1)
+            else calWeek.add(Calendar.WEEK_OF_YEAR, -1)
 
             val calDay = Calendar.getInstance()
             calDay.time = Date()
