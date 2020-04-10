@@ -92,6 +92,7 @@ class MangaDetailsPresenter(
             controller.updateChapters(this.chapters)
         }
         fetchTrackings()
+        refreshTrackers()
     }
 
     fun onDestroy() {
