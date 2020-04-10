@@ -62,13 +62,25 @@
         android:padding="5dp"
         android:clickable="true"
         android:focusable="true"
-        tools:tint="?attr/colorAccent"
+        android:tint="?attr/colorAccent"
         android:src="@drawable/ic_refresh_white_24dp"
         app:layout_constraintBottom_toBottomOf="@id/category_title"
         app:layout_constraintTop_toTopOf="@id/category_title"
         app:layout_constraintEnd_toStartOf="@id/space"
         app:layout_constraintStart_toEndOf="@id/category_title"
         app:rippleColor="@color/fullRippleColor" />
+
+    <ProgressBar
+        android:id="@+id/cat_progress"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="5dp"
+        android:visibility="gone"
+        tools:visibility="visible"
+        app:layout_constraintTop_toTopOf="@id/update_button"
+        app:layout_constraintBottom_toBottomOf="@id/update_button"
+        app:layout_constraintStart_toStartOf="@id/update_button"
+        app:layout_constraintEnd_toEndOf="@id/update_button"/>
 
     <TextView
         android:id="@+id/category_sort"
@@ -82,6 +94,7 @@
         android:ellipsize="start"
         android:focusable="true"
         android:gravity="center|end"
+        android:background="@drawable/square_ripple"
         android:maxLines="2"
         android:padding="6dp"
         android:textAlignment="textEnd"
