@@ -655,6 +655,8 @@
     <string name="options">Options</string>
     <string name="pause">Pause</string>
     <string name="picture_saved">Picture saved</string>
+    <string name="pin">Pin</string>
+    <string name="pinned">Pinned</string>
     <string name="refresh">Refresh</string>
     <string name="refreshing">Refreshing</string>
     <string name="remove">Remove</string>
@@ -677,6 +679,7 @@
     <string name="undo">Undo</string>
     <string name="unknown_error">Unknown error</string>
     <string name="un_select_all">Un-select all</string>
+    <string name="unpin">Unpin</string>
     <string name="use_default">Use default</string>
     <string name="view_all_errors">View all errors</string>
     <string name="view_chapters">View chapters</string>

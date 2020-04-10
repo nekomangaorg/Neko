@@ -10,7 +10,6 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.SearchView
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.list.listItems
 import com.bluelinelabs.conductor.ControllerChangeHandler
@@ -25,7 +24,6 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.source.CatalogueSource
 import eu.kanade.tachiyomi.source.Source
-import eu.kanade.tachiyomi.source.online.LoginSource
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.base.controller.requestPermissionsSafe
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
@@ -40,7 +38,6 @@ import eu.kanade.tachiyomi.ui.setting.SettingsSourcesController
 import eu.kanade.tachiyomi.util.view.applyWindowInsetsForRootController
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
-import eu.kanade.tachiyomi.widget.preference.SourceLoginDialog
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.catalogue_main_controller.*
 import kotlinx.android.synthetic.main.extensions_bottom_sheet.*
@@ -52,12 +49,10 @@ import kotlin.math.max
 /**
  * This controller shows and manages the different catalogues enabled by the user.
  * This controller should only handle UI actions, IO actions should be done by [CataloguePresenter]
- * [SourceLoginDialog.Listener] refreshes the adapter on successful login of catalogues.
  * [CatalogueAdapter.OnBrowseClickListener] call function data on browse item click.
  * [CatalogueAdapter.OnLatestClickListener] call function data on latest item click
  */
 class CatalogueController : NucleusController<CataloguePresenter>(),
-        SourceLoginDialog.Listener,
         FlexibleAdapter.OnItemClickListener,
         FlexibleAdapter.OnItemLongClickListener,
         CatalogueAdapter.OnBrowseClickListener,
@@ -86,26 +81,15 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
      * Called when controller is initialized.
      */
     init {
-        // Enable the option menu
         setHasOptionsMenu(true)
     }
 
-    /**
-     * Set the title of controller.
-     *
-     * @return title.
-     */
     override fun getTitle(): String? {
         return if (showingExtenions)
             applicationContext?.getString(R.string.extensions)
         else applicationContext?.getString(R.string.sources)
     }
 
-    /**
-     * Create the [CataloguePresenter] used in controller.
-     *
-     * @return instance of [CataloguePresenter]
-     */
     override fun createPresenter(): CataloguePresenter {
         return CataloguePresenter()
     }
@@ -121,11 +105,6 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
         return inflater.inflate(R.layout.catalogue_main_controller, container, false)
     }
 
-    /**
-     * Called when the view is created
-     *
-     * @param view view of controller
-     */
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
         view.applyWindowInsetsForRootController(activity!!.bottom_nav)
@@ -229,44 +208,28 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
         ext_bottom_sheet?.presenter?.refreshExtensions()
     }
 
-    /**
-     * Called when login dialog is closed, refreshes the adapter.
-     *
-     * @param source clicked item containing source information.
-     */
-    override fun loginDialogClosed(source: LoginSource) {
-        if (source.isLogged()) {
-            adapter?.clear()
-            presenter.loadSources()
-        }
-    }
-
     override fun onItemClick(view: View, position: Int): Boolean {
         val item = adapter?.getItem(position) as? SourceItem ?: return false
         val source = item.source
-        if (source is LoginSource && !source.isLogged()) {
-            val dialog = SourceLoginDialog(source)
-            dialog.targetController = this
-            dialog.showDialog(router)
-        } else {
-            // Open the catalogue view.
-            openCatalogue(source, BrowseCatalogueController(source))
-        }
+        // Open the catalogue view.
+        openCatalogue(source, BrowseCatalogueController(source))
         return false
     }
 
     override fun onItemLongClick(position: Int) {
         val activity = activity ?: return
         val item = adapter?.getItem(position) as? SourceItem ?: return
+        val isPinned = item.header?.code?.equals(CataloguePresenter.PINNED_KEY) ?: false
 
         MaterialDialog(activity)
                 .title(text = item.source.name)
-                .listItems(items = listOf(activity.getString(R.string.hide)),
-                    waitForPositiveButton = false, selection = { _, index, _ ->
+                .listItems(items = listOf(
+                    activity.getString(R.string.hide),
+                    activity.getString(if (isPinned) R.string.unpin else R.string.pin)
+                ), waitForPositiveButton = false, selection = { _, index, _ ->
                     when (index) {
-                        0 -> {
-                            hideCatalogue(item.source)
-                        }
+                        0 -> hideCatalogue(item.source)
+                        1 -> pinCatalogue(item.source, isPinned)
                     }
                 }).show()
     }
@@ -274,6 +237,17 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
     private fun hideCatalogue(source: Source) {
         val current = preferences.hiddenCatalogues().getOrDefault()
         preferences.hiddenCatalogues().set(current + source.id.toString())
+
+        presenter.updateSources()
+    }
+
+    private fun pinCatalogue(source: Source, isPinned: Boolean) {
+        val current = preferences.pinnedCatalogues().getOrDefault()
+        if (isPinned) {
+            preferences.pinnedCatalogues().set(current - source.id.toString())
+        } else {
+            preferences.pinnedCatalogues().set(current + source.id.toString())
+        }
 
         presenter.updateSources()
     }
