@@ -470,7 +470,6 @@ class MangaDetailsController : BaseController,
             if (router.backstack.lastOrNull()?.controller() is DialogController)
                 return
             if (type == ControllerChangeType.POP_EXIT) {
-                setHasOptionsMenu(false)
                 setActionBar(false)
                 presenter.cancelScope()
             }
