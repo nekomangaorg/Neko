@@ -121,7 +121,7 @@
             android:layout_marginBottom="14dp"
             android:ellipsize="end"
             android:maxLines="2"
-            android:singleLine="true"
+            android:lineSpacingExtra="2dp"
             android:textColor="?android:attr/textColorSecondary"
             android:textSize="14sp"
             app:layout_constrainedWidth="true"

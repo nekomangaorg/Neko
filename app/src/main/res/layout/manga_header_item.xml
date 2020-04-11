@@ -162,13 +162,13 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/favorite_button"
-            style="@style/Theme.Widget.Button.RounededOutline"
+            style="@style/Theme.Widget.Button.RoundedOutline"
             android:text="@string/add_to_library"
             app:icon="@drawable/ic_add_to_library_24dp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/track_button"
-            style="@style/Theme.Widget.Button.RounededOutline"
+            style="@style/Theme.Widget.Button.RoundedOutline"
             android:layout_marginStart="6dp"
             android:text="@string/tracking"
             app:icon="@drawable/ic_sync_black_24dp" />

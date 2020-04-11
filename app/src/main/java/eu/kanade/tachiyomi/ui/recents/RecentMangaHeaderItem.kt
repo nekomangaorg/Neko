@@ -8,6 +8,7 @@ import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.ui.library.LibraryHeaderItem
+import eu.kanade.tachiyomi.util.view.visibleIf
 import kotlinx.android.synthetic.main.recents_header_item.*
 
 class RecentMangaHeaderItem(val recentsType: Int) :
@@ -56,6 +57,11 @@ class RecentMangaHeaderItem(val recentsType: Int) :
     class Holder(val view: View, adapter: RecentMangaAdapter) : BaseFlexibleViewHolder(view, adapter,
         true) {
 
+        init {
+            action_history.setOnClickListener { adapter.delegate.showHistory() }
+            action_update.setOnClickListener { adapter.delegate.showUpdates() }
+        }
+
         fun bind(recentsType: Int) {
             title.setText(when (recentsType) {
                 CONTINUE_READING -> R.string.continue_reading
@@ -63,6 +69,9 @@ class RecentMangaHeaderItem(val recentsType: Int) :
                 NEWLY_ADDED -> R.string.newly_added
                 else -> R.string.continue_reading
             })
+            action_history.visibleIf(recentsType == -1)
+            action_update.visibleIf(recentsType == -1)
+            title.visibleIf(recentsType != -1)
         }
     }
 

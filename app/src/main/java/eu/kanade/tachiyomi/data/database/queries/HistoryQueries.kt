@@ -39,10 +39,10 @@ interface HistoryQueries : DbProvider {
      * @param date recent date range
      * @offset offset the db by
      */
-    fun getRecentlyAdded(date: Date, search: String = "") = db.get()
+    fun getRecentlyAdded(date: Date, search: String = "", endless: Boolean) = db.get()
         .listOfObjects(MangaChapterHistory::class.java)
         .withQuery(RawQuery.builder()
-            .query(getRecentAdditionsQuery(search))
+            .query(getRecentAdditionsQuery(search, endless))
             .args(date.time)
             .observesTables(MangaTable.TABLE)
             .build())
@@ -69,10 +69,10 @@ interface HistoryQueries : DbProvider {
      * @param date recent date range
      * @offset offset the db by
      */
-    fun getRecentsWithUnread(date: Date, search: String = "") = db.get()
+    fun getRecentsWithUnread(date: Date, search: String = "", endless: Boolean) = db.get()
         .listOfObjects(MangaChapterHistory::class.java)
         .withQuery(RawQuery.builder()
-            .query(getRecentReadWithUnreadChapters(search))
+            .query(getRecentReadWithUnreadChapters(search, endless))
             .args(date.time)
             .observesTables(HistoryTable.TABLE)
             .build())
