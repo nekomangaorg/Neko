@@ -235,9 +235,9 @@ class LibraryUpdateService(
         }
         job = GlobalScope.launch(handler) {
             when (target) {
-            Target.SYNC_FOLLOWS -> syncFollows()
-            Target.CHAPTERS -> updateChaptersJob(mangaToAdd)
-            Target.TRACKING -> updateTrackings(mangaToAdd)
+                Target.SYNC_FOLLOWS -> syncFollows()
+                Target.CHAPTERS -> updateChaptersJob(mangaToAdd)
+                Target.TRACKING -> updateTrackings(mangaToAdd)
             }
         }
         job?.invokeOnCompletion { stopSelf(startId) }
