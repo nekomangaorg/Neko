@@ -36,10 +36,10 @@ interface ChapterQueries : DbProvider {
             .withGetResolver(MangaChapterGetResolver.INSTANCE)
             .prepare()
 
-    fun getUpdatedManga(date: Date, search: String = "") = db.get()
+    fun getUpdatedManga(date: Date, search: String = "", endless: Boolean) = db.get()
         .listOfObjects(MangaChapterHistory::class.java)
         .withQuery(RawQuery.builder()
-            .query(getRecentsQueryDistinct(search))
+            .query(getRecentsQueryDistinct(search, endless))
             .args(date.time)
             .observesTables(ChapterTable.TABLE)
             .build())

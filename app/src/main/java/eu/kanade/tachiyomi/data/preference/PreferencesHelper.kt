@@ -242,7 +242,7 @@ class PreferencesHelper(val context: Context) {
 
     fun updateOnRefresh() = rxPrefs.getInteger(Keys.updateOnRefresh, -1)
 
-    fun showRecentUpdates() = rxPrefs.getBoolean("show_recents", false)
+    fun groupRecents() = rxPrefs.getBoolean("group_recents", true)
 
     fun lastExtCheck() = rxPrefs.getLong("last_ext_check", 0)
 

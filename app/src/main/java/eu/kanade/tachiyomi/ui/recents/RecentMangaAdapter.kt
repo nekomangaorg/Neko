@@ -22,6 +22,8 @@ class RecentMangaAdapter(val delegate: RecentsInterface) :
         fun onCoverClick(position: Int)
         fun markAsRead(position: Int)
         fun isSearching(): Boolean
+        fun showHistory()
+        fun showUpdates()
     }
 
     override fun onItemSwiped(position: Int, direction: Int) {

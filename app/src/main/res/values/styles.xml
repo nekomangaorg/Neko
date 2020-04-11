@@ -252,7 +252,7 @@
         <item name="iconTint">?colorAccent</item>
         <item name="rippleColor">@color/fullRippleColor</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
-        <item name="cornerRadius">15dp</item>
+        <item name="cornerRadius">20dp</item>
     </style>
 
     <style name="Theme.Widget.Button.Primary" parent="Widget.MaterialComponents.Button">

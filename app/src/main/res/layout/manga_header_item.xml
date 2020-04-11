@@ -160,7 +160,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/bottom_line">
 
-
         <ImageView
             android:id="@+id/favorite_button"
             style="@style/Theme.Widget.CustomImageButton"

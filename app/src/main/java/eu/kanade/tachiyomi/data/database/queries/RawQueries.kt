@@ -66,19 +66,19 @@ fun getRecentsQuery() = """
 /**
  * Query to get the recently added manga
  */
-fun getRecentAdditionsQuery(search: String) = """
+fun getRecentAdditionsQuery(search: String, endless: Boolean) = """
     SELECT ${Manga.TABLE}.${Manga.COL_URL} as mangaUrl, * FROM ${Manga.TABLE}
     WHERE ${Manga.COL_FAVORITE} = 1
     AND ${Manga.COL_DATE_ADDED} > ?
     AND lower(${Manga.COL_TITLE}) LIKE '%$search%'
     ORDER BY ${Manga.COL_DATE_ADDED} DESC
-    LIMIT 8
+    ${if (endless) "" else "LIMIT 8"}
 """
 
 /**
  * Query to get the manga with recently uploaded chapters
  */
-fun getRecentsQueryDistinct(search: String) = """
+fun getRecentsQueryDistinct(search: String, endless: Boolean) = """
     SELECT ${Manga.TABLE}.${Manga.COL_URL} as mangaUrl, ${Manga.TABLE}.*, ${Chapter.TABLE}.*
     FROM ${Manga.TABLE}
     JOIN ${Chapter.TABLE}
@@ -96,7 +96,7 @@ fun getRecentsQueryDistinct(search: String) = """
     AND ${Chapter.COL_DATE_FETCH} > ${Manga.COL_DATE_ADDED}
     AND lower(${Manga.COL_TITLE}) LIKE '%$search%'
     ORDER BY ${Chapter.COL_DATE_UPLOAD} DESC
-    LIMIT 8
+    ${if (endless) "" else "LIMIT 8"}
 """
 
 /**
@@ -159,7 +159,7 @@ fun getRecentMangasLimitQuery(limit: Int = 25, search: String = "") = """
  * The select statement returns all information of chapters that have the same id as the chapter in max_last_read
  * and are read after the given time period
  */
-fun getRecentReadWithUnreadChapters(search: String = "") = """
+fun getRecentReadWithUnreadChapters(search: String = "", endless: Boolean) = """
     SELECT ${Manga.TABLE}.${Manga.COL_URL} as mangaUrl, ${Manga.TABLE}.*, ${Chapter.TABLE}.*, ${History.TABLE}.*
     FROM (
         SELECT ${Manga.TABLE}.*
@@ -189,7 +189,7 @@ fun getRecentReadWithUnreadChapters(search: String = "") = """
     AND max_last_read.${History.COL_CHAPTER_ID} = ${History.TABLE}.${History.COL_CHAPTER_ID}
     AND lower(${Manga.TABLE}.${Manga.COL_TITLE}) LIKE '%$search%'
     ORDER BY max_last_read.${History.COL_LAST_READ} DESC
-    LIMIT 8
+    ${if (endless) "" else "LIMIT 8"}
 """
 
 fun getHistoryByMangaId() = """

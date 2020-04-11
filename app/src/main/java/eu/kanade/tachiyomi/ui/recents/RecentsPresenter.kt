@@ -11,6 +11,7 @@ import eu.kanade.tachiyomi.data.download.model.DownloadQueue
 import eu.kanade.tachiyomi.data.library.LibraryServiceListener
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import kotlinx.coroutines.CoroutineScope
@@ -39,8 +40,10 @@ class RecentsPresenter(
     var query = ""
     private val newAdditionsHeader = RecentMangaHeaderItem(RecentMangaHeaderItem.NEWLY_ADDED)
     private val newChaptersHeader = RecentMangaHeaderItem(RecentMangaHeaderItem.NEW_CHAPTERS)
+    private val endlessHeader = RecentMangaHeaderItem(-1)
     private val continueReadingHeader = RecentMangaHeaderItem(RecentMangaHeaderItem
         .CONTINUE_READING)
+    var groupRecents = preferences.groupRecents().getOrDefault()
 
     fun onCreate() {
         downloadManager.addListener(this)
@@ -51,29 +54,42 @@ class RecentsPresenter(
     fun getRecents() {
         val oldQuery = query
         scope.launch {
-            val cal = Calendar.getInstance()
-            cal.time = Date()
-            if (query.isNotEmpty()) cal.add(Calendar.YEAR, -50)
-            else cal.add(Calendar.MONTH, -1)
+            val isEndless = groupRecents && query.isEmpty()
+            val cal = Calendar.getInstance().apply {
+                time = Date()
+                when {
+                    query.isNotEmpty() -> add(Calendar.YEAR, -50)
+                    isEndless -> add(Calendar.MONTH, -1)
+                    else -> add(Calendar.MONTH, -1)
+                }
+            }
 
-            val calWeek = Calendar.getInstance()
-            calWeek.time = Date()
-            if (query.isNotEmpty()) calWeek.add(Calendar.YEAR, -50)
-            else calWeek.add(Calendar.WEEK_OF_YEAR, -1)
+            val calWeek = Calendar.getInstance().apply {
+                time = Date()
+                when {
+                    query.isNotEmpty() -> add(Calendar.YEAR, -50)
+                    isEndless -> add(Calendar.MONTH, -1)
+                    else -> add(Calendar.WEEK_OF_YEAR, -1)
+                }
+            }
 
-            val calDay = Calendar.getInstance()
-            calDay.time = Date()
-            if (query.isNotEmpty()) calDay.add(Calendar.YEAR, -50)
-            else calDay.add(Calendar.DAY_OF_YEAR, -1)
+            val calDay = Calendar.getInstance().apply {
+                time = Date()
+                when {
+                    query.isNotEmpty() -> add(Calendar.YEAR, -50)
+                    isEndless -> add(Calendar.MONTH, -1)
+                    else -> add(Calendar.DAY_OF_YEAR, -1)
+                }
+            }
 
             val cReading =
-                if (query.isEmpty()) db.getRecentsWithUnread(cal.time, query).executeOnIO()
+                if (query.isEmpty()) db.getRecentsWithUnread(cal.time, query, isEndless).executeOnIO()
                 else db.getRecentMangaLimit(cal.time, 8, query).executeOnIO()
-            val rUpdates = db.getUpdatedManga(calWeek.time, query).executeOnIO()
+            val rUpdates = db.getUpdatedManga(calWeek.time, query, isEndless).executeOnIO()
             rUpdates.forEach {
                 it.history.last_read = it.chapter.date_fetch
             }
-            val nAdditions = db.getRecentlyAdded(calDay.time, query).executeOnIO()
+            val nAdditions = db.getRecentlyAdded(calDay.time, query, isEndless).executeOnIO()
             nAdditions.forEach {
                 it.history.last_read = it.manga.date_added
             }
@@ -93,7 +109,7 @@ class RecentsPresenter(
                 else null
                 else Pair(it, chapter)
             }
-            if (query.isEmpty()) {
+            if (query.isEmpty() && !groupRecents) {
                 val nChaptersItems =
                     pairs.filter { it.first.history.id == null && it.first.chapter.id != null }
                         .sortedWith(Comparator<Pair<MangaChapterHistory, Chapter>> { f1, f2 ->
@@ -126,7 +142,8 @@ class RecentsPresenter(
                             it.firstOrNull()?.mch?.history?.last_read ?: 0L
                         }.flatten()
             } else {
-                recentItems = pairs.map { RecentMangaItem(it.first, it.second, null) }
+                val header = if (isEndless) endlessHeader else null
+                recentItems = pairs.map { RecentMangaItem(it.first, it.second, header) }
             }
             setDownloadedChapters(recentItems)
             withContext(Dispatchers.Main) { controller.showLists(recentItems) }
@@ -152,6 +169,12 @@ class RecentsPresenter(
 
     fun cancelScope() {
         scope.cancel()
+    }
+
+    fun toggleGroupRecents() {
+        preferences.groupRecents().set(!groupRecents)
+        groupRecents = !groupRecents
+        getRecents()
     }
 
     /**

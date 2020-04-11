@@ -266,6 +266,9 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
         router.pushController(MangaDetailsController(manga).withFadeTransaction())
     }
 
+    override fun showHistory() = router.pushController(RecentlyReadController().withFadeTransaction())
+    override fun showUpdates() = router.pushController(RecentChaptersController().withFadeTransaction())
+
     override fun onItemClick(view: View?, position: Int): Boolean {
         val item = adapter.getItem(position) ?: return false
         if (item is RecentMangaItem) {
@@ -322,6 +325,12 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
             inflater.inflate(R.menu.download_queue, menu)
         } else {
             inflater.inflate(R.menu.recents, menu)
+
+            val viewItem = menu.findItem(R.id.action_view)
+            val endless = presenter.groupRecents
+            viewItem.setTitle(if (endless) R.string.group_recents else R.string.ungroup_recents)
+            viewItem.setIcon(if (endless) R.drawable.ic_view_stream_24dp else R.drawable.ic_view_headline_24dp)
+
             val searchItem = menu.findItem(R.id.action_search)
             val searchView = searchItem.actionView as SearchView
             searchView.queryHint = view?.context?.getString(R.string.search_recents)
@@ -351,11 +360,9 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
             view?.applyWindowInsetsForRootController(activity!!.bottom_nav)
             if (type == ControllerChangeType.POP_ENTER) presenter.onCreate()
             dl_bottom_sheet.dismiss()
-            setHasOptionsMenu(true)
         } else {
             if (type == ControllerChangeType.POP_EXIT) presenter.onDestroy()
             snack?.dismiss()
-            setHasOptionsMenu(false)
         }
     }
 
@@ -380,14 +387,9 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
         if (showingDownloads)
             return dl_bottom_sheet.onOptionsItemSelected(item)
         when (item.itemId) {
-            R.id.action_refresh -> {
-                if (!LibraryUpdateService.isRunning()) {
-                    val view = view ?: return true
-                    LibraryUpdateService.start(view.context)
-                    snack = view.snack(R.string.updating_library) {
-                        anchorView = (activity as? MainActivity)?.bottom_nav
-                    }
-                }
+            R.id.action_view -> {
+                presenter.toggleGroupRecents()
+                activity?.invalidateOptionsMenu()
             }
         }
         return super.onOptionsItemSelected(item)

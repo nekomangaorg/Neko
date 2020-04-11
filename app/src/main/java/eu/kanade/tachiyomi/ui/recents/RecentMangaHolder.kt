@@ -50,25 +50,27 @@ class RecentMangaHolder(
                     item.chapter.date_upload, Date().time, DateUtils.HOUR_IN_MILLIS
                 ).toString()
             )
-            item.chapter.id != item.mch.chapter.id -> body.context.getString(
+            item.chapter.id != item.mch.chapter.id ->
+                body.context.getString(
+                    R.string.read_, DateUtils.getRelativeTimeSpanString(
+                        item.mch.history.last_read, Date().time, DateUtils.MINUTE_IN_MILLIS
+                    ).toString()
+                ) + "\n" + body.context.getString(
                 if (notValidNum) R.string.last_read_ else R.string.last_read_chapter_,
-                if (notValidNum) item.mch.chapter.name else adapter.decimalFormat.format(item.mch.chapter.chapter_number) +
-                    " (${DateUtils.getRelativeTimeSpanString(
-                    item.mch.history.last_read, Date().time, DateUtils.MINUTE_IN_MILLIS
-                )})"
+                if (notValidNum) item.mch.chapter.name else adapter.decimalFormat.format(item.mch.chapter.chapter_number)
             )
-            !isSearch && item.chapter.pages_left > 0 -> itemView.resources.getQuantityString(
-                R.plurals.pages_left, item.chapter.pages_left, item.chapter.pages_left
-            ) +
-                " (${DateUtils.getRelativeTimeSpanString(
+            item.chapter.pages_left > 0 && !item.chapter.read -> body.context.getString(
+                R.string.read_, DateUtils.getRelativeTimeSpanString(
                     item.mch.history.last_read, Date().time, DateUtils.MINUTE_IN_MILLIS
-                )})"
-            isSearch -> body.context.getString(
+                ).toString()
+            ) + "\n" + itemView.resources.getQuantityString(
+                R.plurals.pages_left, item.chapter.pages_left, item.chapter.pages_left
+            )
+            else -> body.context.getString(
                 R.string.read_, DateUtils.getRelativeTimeSpanString(
                     item.mch.history.last_read, Date().time, DateUtils.MINUTE_IN_MILLIS
                 ).toString()
             )
-            else -> ""
         }
         GlideApp.with(itemView.context).load(item.mch.manga).diskCacheStrategy(DiskCacheStrategy
             .AUTOMATIC)

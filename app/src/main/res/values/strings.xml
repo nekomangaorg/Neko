@@ -193,6 +193,8 @@
     <string name="search_recents">Search recents…</string>
     <string name="no_recent_chapters">No recent chapters</string>
     <string name="no_recently_read_manga">No recently read manga</string>
+    <string name="group_recents">Group recents</string>
+    <string name="ungroup_recents">Ungroup recents</string>
 
     <!-- Browse -->
     <string name="search_filters">Search filters</string>
