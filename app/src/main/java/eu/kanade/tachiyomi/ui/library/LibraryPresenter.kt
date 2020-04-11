@@ -246,8 +246,10 @@ class LibraryPresenter(
                     val manga2LastRead = lastReadManga[i2.manga.id!!] ?: lastReadManga.size
                     manga1LastRead.compareTo(manga2LastRead)
                 }
-                sortingMode == LibrarySort.LATEST_CHAPTER -> i2.manga.last_update.compareTo(i1
-                    .manga.last_update)
+                sortingMode == LibrarySort.LATEST_CHAPTER -> i2.manga.last_update.compareTo(
+                    i1
+                        .manga.last_update
+                )
                 sortingMode == LibrarySort.UNREAD ->
                     when {
                         i1.manga.unread == i2.manga.unread -> 0
@@ -389,9 +391,11 @@ class LibraryPresenter(
         val seekPref = preferences.alwaysShowSeeker()
         if (!showCategories)
             libraryManga = libraryManga.distinctBy { it.id }
-        val categoryAll = Category.createAll(context,
+        val categoryAll = Category.createAll(
+            context,
             preferences.librarySortingMode().getOrDefault(),
-            preferences.librarySortingAscending().getOrDefault())
+            preferences.librarySortingAscending().getOrDefault()
+        )
         val catItemAll = LibraryHeaderItem({ categoryAll }, -1, seekPref)
         val categorySet = mutableSetOf<Int>()
         val headerItems = (categories.mapNotNull { category ->
@@ -411,13 +415,15 @@ class LibraryPresenter(
             categories.forEach { category ->
                 if (category.id ?: 0 <= 0 && !categorySet.contains(category.id)) {
                     val headerItem = headerItems[category.id ?: 0]
-                    items.add(LibraryItem(
-                        LibraryManga.createBlank(category.id!!),
-                        libraryLayout,
-                        preferences.uniformGrid(),
-                        preferences.alwaysShowSeeker(),
-                        headerItem
-                    ))
+                    items.add(
+                        LibraryItem(
+                            LibraryManga.createBlank(category.id!!),
+                            libraryLayout,
+                            preferences.uniformGrid(),
+                            preferences.alwaysShowSeeker(),
+                            headerItem
+                        )
+                    )
                 }
             }
         }
@@ -507,8 +513,8 @@ class LibraryPresenter(
     fun getCommonCategories(mangas: List<Manga>): Collection<Category> {
         if (mangas.isEmpty()) return emptyList()
         return mangas.toSet()
-                .map { db.getCategoriesForManga(it).executeAsBlocking() }
-                .reduce { set1: Iterable<Category>, set2 -> set1.intersect(set2).toMutableList() }
+            .map { db.getCategoriesForManga(it).executeAsBlocking() }
+            .reduce { set1: Iterable<Category>, set2 -> set1.intersect(set2).toMutableList() }
     }
 
     /**
@@ -633,8 +639,8 @@ class LibraryPresenter(
             val categories =
                 if (catId == 0) emptyList()
                 else
-                db.getCategoriesForManga(manga).executeOnIO()
-                .filter { it.id != oldCatId } + listOf(category)
+                    db.getCategoriesForManga(manga).executeOnIO()
+                        .filter { it.id != oldCatId } + listOf(category)
 
             for (cat in categories) {
                 mc.add(MangaCategory.create(manga, cat))
@@ -660,7 +666,7 @@ class LibraryPresenter(
     }
 
     fun syncMangaToDex(mangaList: List<Manga>) {
-        GlobalScope.launch {
+        scope.launch {
             withContext(Dispatchers.IO) {
                 mangaList.forEach {
                     source.updateFollowStatus(MdUtil.getMangaId(it.url), FollowStatus.READING)
