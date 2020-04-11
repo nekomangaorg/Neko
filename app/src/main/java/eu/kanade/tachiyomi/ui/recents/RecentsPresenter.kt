@@ -36,7 +36,8 @@ class RecentsPresenter(
 
     private var scope = CoroutineScope(Job() + Dispatchers.Default)
 
-    private var recentItems = listOf<RecentMangaItem>()
+    var recentItems = listOf<RecentMangaItem>()
+        private set
     var query = ""
     private val newAdditionsHeader = RecentMangaHeaderItem(RecentMangaHeaderItem.NEWLY_ADDED)
     private val newChaptersHeader = RecentMangaHeaderItem(RecentMangaHeaderItem.NEW_CHAPTERS)
@@ -48,6 +49,11 @@ class RecentsPresenter(
     fun onCreate() {
         downloadManager.addListener(this)
         LibraryUpdateService.setListener(this)
+        if (lastRecents != null) {
+            if (recentItems.isEmpty())
+                recentItems = lastRecents ?: emptyList()
+            lastRecents = null
+        }
         getRecents()
     }
 
@@ -170,6 +176,7 @@ class RecentsPresenter(
     fun onDestroy() {
         downloadManager.removeListener(this)
         LibraryUpdateService.removeListener(this)
+        lastRecents = recentItems
     }
 
     fun cancelScope() {
@@ -263,5 +270,9 @@ class RecentsPresenter(
             db.updateChaptersProgress(listOf(chapter)).executeAsBlocking()
             getRecents()
         }
+    }
+
+    private companion object {
+        var lastRecents: List<RecentMangaItem>? = null
     }
 }
