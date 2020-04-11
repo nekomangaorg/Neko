@@ -12,6 +12,7 @@ import com.dd.processbutton.iml.ActionProcessButton
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
+import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.widget.SimpleTextWatcher
 import kotlinx.android.synthetic.main.pref_account_login.view.*
 import kotlinx.coroutines.CoroutineScope
@@ -42,9 +43,6 @@ abstract class LoginDialogPreference(
         val dialog = MaterialDialog(activity!!).apply {
             customView(R.layout.pref_account_login, scrollable = false)
             positiveButton(android.R.string.cancel)
-            if (canLogout) {
-                negativeButton(R.string.logout) { logout() }
-            }
         }
 
         onViewCreated(dialog.view)
@@ -71,6 +69,11 @@ abstract class LoginDialogPreference(
             login.setOnClickListener { checkLogin() }
 
             setCredentialsOnView(this)
+
+            if (canLogout && !username.text.isNullOrEmpty()) {
+                logout.visible()
+                logout.setOnClickListener { logout() }
+            }
 
             show_password.isEnabled = password.text.isNullOrEmpty()
 
