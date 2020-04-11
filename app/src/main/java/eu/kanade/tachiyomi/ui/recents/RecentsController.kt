@@ -69,7 +69,6 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
     private var adapter = RecentMangaAdapter(this)
 
     private var presenter = RecentsPresenter(this)
-    private var recentItems: List<RecentMangaItem>? = null
     private var snack: Snackbar? = null
     private var lastChapterId: Long? = null
     private var showingDownloads = false
@@ -112,8 +111,8 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
             headerHeight = it.systemWindowInsetTop + appBarHeight
         }
 
-        if (recentItems != null) adapter.updateDataSet(recentItems!!.toList())
         presenter.onCreate()
+        if (presenter.recentItems.isNotEmpty()) adapter.updateDataSet(presenter.recentItems)
 
         dl_bottom_sheet.onCreate(this)
 
@@ -217,7 +216,6 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
 
     fun showLists(recents: List<RecentMangaItem>) {
         swipe_refresh.isRefreshing = LibraryUpdateService.isRunning()
-        recentItems = recents
         adapter.updateDataSet(recents)
         if (lastChapterId != null) {
             refreshItem(lastChapterId ?: 0L)
