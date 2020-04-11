@@ -144,6 +144,11 @@ class RecentsPresenter(
             } else {
                 val header = if (isEndless) endlessHeader else null
                 recentItems = pairs.map { RecentMangaItem(it.first, it.second, header) }
+                if (isEndless && recentItems.isEmpty()) {
+                    recentItems = listOf(
+                        RecentMangaItem(header = newChaptersHeader),
+                        RecentMangaItem(header = continueReadingHeader))
+                }
             }
             setDownloadedChapters(recentItems)
             withContext(Dispatchers.Main) { controller.showLists(recentItems) }
