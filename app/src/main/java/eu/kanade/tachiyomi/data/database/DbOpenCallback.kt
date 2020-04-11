@@ -69,6 +69,9 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
             db.execSQL(MangaTable.createLibraryIndexQuery)
             db.execSQL(ChapterTable.createUnreadChaptersIndexQuery)
         }
+        if (oldVersion < 9) {
+            db.execSQL(MangaTable.addHideTitle)
+        }
         if (oldVersion < 10) {
             db.execSQL(CategoryTable.addMangaOrder)
         }
