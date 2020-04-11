@@ -4,8 +4,6 @@ import android.app.Dialog
 import android.os.Bundle
 import android.view.View
 import com.afollestad.materialdialogs.MaterialDialog
-import com.afollestad.materialdialogs.WhichButton
-import com.afollestad.materialdialogs.actions.setActionButtonEnabled
 import com.afollestad.materialdialogs.customview.customView
 import com.jakewharton.rxbinding.widget.itemClicks
 import com.jakewharton.rxbinding.widget.textChanges
@@ -44,10 +42,11 @@ class TrackSearchDialog : DialogController {
     private var wasPreviouslyTracked: Boolean = false
     private lateinit var presenter: MangaDetailsPresenter
 
-    constructor(target: TrackingBottomSheet, service: TrackService, wasTracked: Boolean) : super(Bundle()
-        .apply {
-            putInt(KEY_SERVICE, service.id)
-        }) {
+    constructor(target: TrackingBottomSheet, service: TrackService, wasTracked: Boolean) : super(
+        Bundle()
+            .apply {
+                putInt(KEY_SERVICE, service.id)
+            }) {
         wasPreviouslyTracked = wasTracked
         bottomSheet = target
         presenter = target.presenter
@@ -63,8 +62,9 @@ class TrackSearchDialog : DialogController {
         val dialog = MaterialDialog(activity!!).apply {
             customView(viewRes = R.layout.track_search_dialog, scrollable = false)
             negativeButton(android.R.string.cancel)
-            positiveButton(R.string.clear) { onPositiveButtonClick() }
-            setActionButtonEnabled(WhichButton.POSITIVE, wasPreviouslyTracked)
+            if (wasPreviouslyTracked) {
+                positiveButton(R.string.clear) { onPositiveButtonClick() }
+            }
         }
 
         if (subscriptions.isUnsubscribed) {
@@ -115,11 +115,11 @@ class TrackSearchDialog : DialogController {
     override fun onAttach(view: View) {
         super.onAttach(view)
         searchTextSubscription = dialogView!!.track_search.textChanges()
-                .skip(1)
-                .debounce(1, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
-                .map { it.toString() }
-                .filter(String::isNotBlank)
-                .subscribe { search(it) }
+            .skip(1)
+            .debounce(1, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
+            .map { it.toString() }
+            .filter(String::isNotBlank)
+            .subscribe { search(it) }
     }
 
     override fun onDetach(view: View) {
@@ -154,8 +154,10 @@ class TrackSearchDialog : DialogController {
 
     private fun onPositiveButtonClick() {
         bottomSheet.refreshTrack(service)
-        presenter.registerTracking(null,
-            service)
+        presenter.registerTracking(
+            null,
+            service
+        )
     }
 
     private companion object {

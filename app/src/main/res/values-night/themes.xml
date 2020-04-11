@@ -34,12 +34,5 @@
         <item name="selectable_library_drawable">@drawable/library_item_selector_amoled</item>
         <item name="background_card">@color/colorAmoledPrimary</item>
 
-
-        <!-- Material Dialog colors -->
-        <item name="md_color_title">@color/textColorPrimary</item>
-        <item name="md_color_content">@color/textColorSecondary</item>
-        <item name="md_color_button_text">@color/colorAccent</item>
-        <item name="md_background_color">@color/colorAmoledPrimary</item>
-        <item name="md_corner_radius">16dp</item>
     </style>
 </resources>
