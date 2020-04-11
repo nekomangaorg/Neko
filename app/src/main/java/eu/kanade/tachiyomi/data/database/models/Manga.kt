@@ -1,5 +1,7 @@
 package eu.kanade.tachiyomi.data.database.models
 
+import android.content.Context
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.external.AnimePlanet
 import eu.kanade.tachiyomi.data.external.Dex
 import eu.kanade.tachiyomi.data.external.ExternalLink
@@ -48,56 +50,31 @@ interface Manga : SManga {
         else sortDescending()
     }
 
-    fun showChapterTitle(defaultShow: Boolean): Boolean = chapter_flags and DISPLAY_MASK == DISPLAY_NUMBER
+    fun showChapterTitle(defaultShow: Boolean): Boolean =
+        chapter_flags and DISPLAY_MASK == DISPLAY_NUMBER
 
     fun mangaType(context: Context): String {
-        return context.getString(when (mangaType()) {
-            TYPE_WEBTOON -> R.string.webtoon
-            TYPE_MANHWA -> R.string.manhwa
-            TYPE_MANHUA -> R.string.manhua
-            TYPE_COMIC -> R.string.comic
-            else -> R.string.manga
-        }).toLowerCase(Locale.getDefault())
+        return context.getString(
+            when (mangaType()) {
+                TYPE_WEBTOON -> R.string.webtoon
+                TYPE_MANHWA -> R.string.manhwa
+                TYPE_MANHUA -> R.string.manhua
+                TYPE_COMIC -> R.string.comic
+                else -> R.string.manga
+            }
+        ).toLowerCase(Locale.getDefault())
     }
 
     /**
      * The type of comic the manga is (ie. manga, manhwa, manhua)
      */
     fun mangaType(): Int {
-        val sourceName = Injekt.get<SourceManager>().getMangadex().name
-        val currentTags = genre?.split(",")?.map { it.trim().toLowerCase(Locale.US) }
-        return if (currentTags?.any
-            { tag ->
-                tag.startsWith("japanese") || tag == "manga"
-            } == true
-        )
-            TYPE_MANGA
-        else if (currentTags?.any
-            { tag ->
-                tag.startsWith("english") || tag == "comic"
-            } == true || isComicSource(sourceName)
-        )
-            TYPE_COMIC
-        else if (currentTags?.any
-            { tag ->
-                tag.startsWith("chinese") || tag == "manhua"
-            } == true ||
-            sourceName.contains("manhua", true)
-        )
-            TYPE_MANHUA
-        else if (currentTags?.any
-            { tag ->
-                tag == "long strip" || tag == "manhwa"
-            } == true || isWebtoonSource(sourceName)
-        )
-            TYPE_MANHWA
-        else if (currentTags?.any
-            { tag ->
-                tag.startsWith("webtoon")
-            } == true
-        )
-            TYPE_WEBTOON
-        else TYPE_MANGA
+        // lump everything as manga if not manhua or manhwa
+        return when (lang_flag) {
+            "kr" -> TYPE_MANHUA
+            "cn" -> TYPE_MANHWA
+            else -> TYPE_MANGA
+        }
     }
 
     /**

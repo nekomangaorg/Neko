@@ -26,22 +26,22 @@ class MangadexLogoutDialog(bundle: Bundle? = null) : DialogController(bundle) {
 
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
         return MaterialDialog(activity!!)
-                .title(R.string.logout_title, source.name)
-                .positiveButton(R.string.logout) {
-                    launchNow {
+            .title(R.string.logout_from_, source.name)
+            .positiveButton(R.string.logout) {
+                launchNow {
 
-                        val loggedOut = withContext(Dispatchers.IO) { source.logout() }
+                    val loggedOut = withContext(Dispatchers.IO) { source.logout() }
 
-                        if (loggedOut) {
-                            preferences.setSourceCredentials(source, "", "")
-                            activity?.toast(R.string.logout_success)
-                            (targetController as? Listener)?.siteLogoutDialogClosed(source)
-                        } else {
-                            activity?.toast(R.string.unknown_error)
-                        }
+                    if (loggedOut) {
+                        preferences.setSourceCredentials(source, "", "")
+                        activity?.toast(R.string.successfully_logged_out)
+                        (targetController as? Listener)?.siteLogoutDialogClosed(source)
+                    } else {
+                        activity?.toast(R.string.unknown_error)
                     }
                 }
-                .negativeButton(android.R.string.cancel)
+            }
+            .negativeButton(android.R.string.cancel)
     }
 
     interface Listener {

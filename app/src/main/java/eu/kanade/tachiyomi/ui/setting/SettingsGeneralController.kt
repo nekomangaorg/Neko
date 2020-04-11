@@ -19,17 +19,17 @@ class SettingsGeneralController : SettingsController() {
 
         intListPreference(activity) {
             key = Keys.theme
-            titleRes = R.string.pref_theme
+            titleRes = R.string.app_theme
             entriesRes = arrayOf(
-                R.string.neko_theme,
+                R.string.solid_blue,
                 R.string.white_theme,
-                R.string.light_theme,
-                R.string.dark_theme,
-                R.string.amoled_theme,
-                R.string.darkblue_theme,
-                R.string.system_theme,
-                R.string.system_amoled_theme,
-                R.string.system_darkblue_theme
+                R.string.light_blue,
+                R.string.dark,
+                R.string.amoled_black,
+                R.string.dark_blue,
+                R.string.system_default,
+                R.string.system_default_amoled,
+                R.string.system_default_blue_accents
             )
             entryValues = listOf(9, 1, 8, 2, 3, 4, 5, 6, 7)
             defaultValue = 5

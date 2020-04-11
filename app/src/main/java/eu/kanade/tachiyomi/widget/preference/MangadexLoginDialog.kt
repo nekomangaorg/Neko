@@ -23,7 +23,12 @@ class MangadexLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle
 
     val source: Source by lazy { Injekt.get<SourceManager>().getMangadex() }
 
-    constructor(source: Source, activity: Activity? = null) : this(Bundle().apply { putLong("key", source.id) })
+    constructor(source: Source, activity: Activity? = null) : this(Bundle().apply {
+        putLong(
+            "key",
+            source.id
+        )
+    })
 
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
         val dialog = MaterialDialog(activity!!).apply {
@@ -40,7 +45,7 @@ class MangadexLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle
     }
 
     override fun setCredentialsOnView(view: View) = with(view) {
-        dialog_title.text = context.getString(R.string.login_title, source.name)
+        dialog_title.text = context.getString(R.string.log_in_to_, source.name)
         username.setText(preferences.sourceUsername(source))
         password.setText(preferences.sourcePassword(source))
     }
@@ -67,7 +72,7 @@ class MangadexLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle
                             username.text.toString(),
                             password.text.toString()
                         )
-                        context.toast(R.string.login_success)
+                        context.toast(R.string.successfully_logged_in)
                     } else {
                         errorResult(this@apply)
                     }
@@ -91,7 +96,7 @@ class MangadexLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle
         if (activity != null) {
             (activity as? Listener)?.siteLoginDialogClosed(source)
         } else {
-        (targetController as? Listener)?.siteLoginDialogClosed(source)
+            (targetController as? Listener)?.siteLoginDialogClosed(source)
         }
     }
 

@@ -115,6 +115,7 @@ import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File
+import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.max
 
@@ -269,7 +270,7 @@ class MangaDetailsController : BaseController,
                     showScroll = true
                     scrollAnim?.cancel()
                     scrollAnim = fast_scroller.animate().setDuration(100).translationX(0f)
-                        scrollAnim?.start()
+                    scrollAnim?.start()
                 } else if (fPosition <= 0 && showScroll) {
                     showScroll = false
                     scrollAnim?.cancel()
@@ -370,15 +371,15 @@ class MangaDetailsController : BaseController,
         )
         colorAnimator?.cancel()
         if (animate) {
-        colorAnimator = ValueAnimator.ofObject(
-            android.animation.ArgbEvaluator(), colorFrom, colorTo
-        )
-        colorAnimator?.duration = 250 // milliseconds
-        colorAnimator?.addUpdateListener { animator ->
-            (activity as MainActivity).toolbar.setBackgroundColor(animator.animatedValue as Int)
-            activity?.window?.statusBarColor = (animator.animatedValue as Int)
-        }
-        colorAnimator?.start()
+            colorAnimator = ValueAnimator.ofObject(
+                android.animation.ArgbEvaluator(), colorFrom, colorTo
+            )
+            colorAnimator?.duration = 250 // milliseconds
+            colorAnimator?.addUpdateListener { animator ->
+                (activity as MainActivity).toolbar.setBackgroundColor(animator.animatedValue as Int)
+                activity?.window?.statusBarColor = (animator.animatedValue as Int)
+            }
+            colorAnimator?.start()
         } else {
             (activity as MainActivity).toolbar.setBackgroundColor(colorTo)
             activity?.window?.statusBarColor = colorTo
@@ -596,7 +597,7 @@ class MangaDetailsController : BaseController,
             when (menuItem.itemId) {
                 R.id.action_mark_previous_as_read -> markPreviousAsRead(item)
                 R.id.action_view_comments -> viewComments(chapters[0])
-                R.id.action_mark_as_unread -> markAsUnread(chapters)
+                R.id.action_mark_all_as_unread -> markAsUnread(chapters)
             }
             true
         }
@@ -730,7 +731,7 @@ class MangaDetailsController : BaseController,
         when (item.itemId) {
             R.id.action_refresh_tracking -> presenter.refreshTrackers()
             R.id.action_mark_all_as_read -> {
-                MaterialDialog(view!!.context).message(R.string.mark_all_as_read_message)
+                MaterialDialog(view!!.context).message(R.string.mark_all_as_read)
                     .positiveButton(R.string.marked_as_read) {
                         markAsRead(presenter.chapters)
                     }.negativeButton(android.R.string.cancel).show()
@@ -822,8 +823,8 @@ class MangaDetailsController : BaseController,
                 R.plurals.remove_n_chapters, chapters.size, chapters.size
             )
         ).positiveButton(R.string.remove) {
-                presenter.deleteChapters(chapters)
-            }.negativeButton(android.R.string.cancel).show()
+            presenter.deleteChapters(chapters)
+        }.negativeButton(android.R.string.cancel).show()
     }
 
     private fun downloadChapters(choice: Int) {
@@ -851,10 +852,13 @@ class MangaDetailsController : BaseController,
     private fun downloadChapters(chapters: List<ChapterItem>) {
         val view = view ?: return
         presenter.downloadChapters(chapters)
-        val text = view.context.getString(R.string.add_x_to_library, presenter.manga.mangaType
-            (view.context).toLowerCase(Locale.ROOT))
+        val text = view.context.getString(
+            R.string.add_x_to_library, presenter.manga.mangaType
+                (view.context).toLowerCase(Locale.ROOT)
+        )
         if (!presenter.manga.favorite && (snack == null ||
-                snack?.getText() != text)) {
+                snack?.getText() != text)
+        ) {
             snack = view.snack(text, Snackbar.LENGTH_INDEFINITE) {
                 setAction(R.string.add) {
                     presenter.setFavorite(true)
@@ -980,7 +984,9 @@ class MangaDetailsController : BaseController,
         if (item != null) {
             openChapter(item.chapter)
         } else if (snack == null || snack?.getText() != view?.context?.getString(
-                R.string.next_chapter_not_found)) {
+                R.string.next_chapter_not_found
+            )
+        ) {
             snack = view?.snack(R.string.next_chapter_not_found, Snackbar.LENGTH_LONG) {
                 addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
                     override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
@@ -1044,8 +1050,8 @@ class MangaDetailsController : BaseController,
             }.toTypedArray()
 
             ChangeMangaCategoriesDialog(this, listOf(manga), categories, preselected).showDialog(
-                    router
-                )
+                router
+            )
         } else {
             if (!manga.favorite) {
                 toggleMangaFavorite()
@@ -1266,8 +1272,10 @@ class MangaDetailsController : BaseController,
     }
 
     override fun onPrepareActionMode(mode: ActionMode?, menu: Menu?): Boolean {
-        mode?.title = view?.context?.getString(if (startingDLChapterPos == null)
-            R.string.select_starting_chapter else R.string.select_ending_chapter)
+        mode?.title = view?.context?.getString(
+            if (startingDLChapterPos == null)
+                R.string.select_starting_chapter else R.string.select_ending_chapter
+        )
         return false
     }
 

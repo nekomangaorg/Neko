@@ -19,7 +19,7 @@
         android:layout_height="1dp"
         android:layout_marginBottom="24dp"
         android:layout_marginTop="6dp"
-        android:background="@color/divider"/>
+        android:background="@color/divider" />
 
     <TextView
         android:id="@+id/username_label"
@@ -90,9 +90,8 @@
         android:layout_marginTop="20dp"
         android:text="@string/login"
         android:textColor="@android:color/white"
-        app:pb_textComplete="@string/login_success"
-        app:pb_textError="@string/invalid_login"
-        app:pb_textProgress="@string/loading"/>
+        app:pb_textComplete="@string/successfully_logged_in"
+        app:pb_textError="@string/could_not_log_in" />
 
 
 </LinearLayout>

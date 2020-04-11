@@ -13,49 +13,63 @@ class SettingsReaderController : SettingsController() {
         intListPreference(activity) {
             key = Keys.defaultViewer
             titleRes = R.string.default_viewer
-            entriesRes = arrayOf(R.string.left_to_right_viewer, R.string.right_to_left_viewer,
-                    R.string.vertical_viewer, R.string.webtoon)
+            entriesRes = arrayOf(
+                R.string.left_to_right_viewer, R.string.right_to_left_viewer,
+                R.string.vertical_viewer, R.string.webtoon
+            )
             entryRange = 1..4
             defaultValue = 1
         }
         intListPreference(activity) {
             key = Keys.imageScaleType
             titleRes = R.string.scale_type
-            entriesRes = arrayOf(R.string.fit_screen, R.string.stretch,
-                    R.string.fit_width, R.string.fit_height,
-                    R.string.original_size, R.string.smart_fit)
+            entriesRes = arrayOf(
+                R.string.fit_screen, R.string.stretch,
+                R.string.fit_width, R.string.fit_height,
+                R.string.original_size, R.string.smart_fit
+            )
             entryRange = 1..6
             defaultValue = 1
         }
         intListPreference(activity) {
             key = Keys.zoomStart
             titleRes = R.string.zoom_start_position
-            entriesRes = arrayOf(R.string.automatic, R.string.left,
-                    R.string.right, R.string.center)
+            entriesRes = arrayOf(
+                R.string.automatic, R.string.left,
+                R.string.right, R.string.center
+            )
             entryRange = 1..4
             defaultValue = 1
         }
         intListPreference(activity) {
             key = Keys.rotation
             titleRes = R.string.rotation
-            entriesRes = arrayOf(R.string.free, R.string.lock,
-                    R.string.force_portrait, R.string.force_landscape)
+            entriesRes = arrayOf(
+                R.string.free, R.string.lock,
+                R.string.force_portrait, R.string.force_landscape
+            )
             entryRange = 1..4
             defaultValue = 1
         }
         intListPreference(activity) {
             key = Keys.readerTheme
             titleRes = R.string.background_color
-            entriesRes = arrayOf(R.string.white, R.string.black, R.string
-                .smart_based_on_page, R.string.smart_based_on_page_and_theme)
+            entriesRes = arrayOf(
+                R.string.white, R.string.black, R.string
+                    .smart_based_on_page, R.string.smart_based_on_page_and_theme
+            )
             entryRange = 0..3
             defaultValue = 2
         }
         intListPreference(activity) {
             key = Keys.doubleTapAnimationSpeed
             titleRes = R.string.double_tap_anim_speed
-            entries = listOf(context.getString(R.string.no_animation), context.getString(R
-                .string.fast), context.getString(R.string.normal))
+            entries = listOf(
+                context.getString(R.string.no_animation), context.getString(
+                    R
+                        .string.fast
+                ), context.getString(R.string.normal)
+            )
             entryValues = listOf(1, 250, 500) // using a value of 0 breaks the image viewer, so
             // min is 1
             defaultValue = 500
@@ -67,7 +81,7 @@ class SettingsReaderController : SettingsController() {
         }
         switchPreference {
             key = Keys.skipFiltered
-            titleRes = R.string.pref_skip_hidden_chapters
+            titleRes = R.string.skip_hidden_chapters
             defaultValue = false
         }
         switchPreference {
@@ -123,11 +137,11 @@ class SettingsReaderController : SettingsController() {
 
             intListPreference(activity) {
                 key = Keys.marginRatioWebtoon
-                titleRes = R.string.pref_reader_margin
+                titleRes = R.string.webtoon_side_margin
                 entriesRes = arrayOf(
-                    R.string.webtoon_margin_ratio_0,
-                    R.string.webtoon_margin_ratio_10, R.string.webtoon_margin_ratio_15,
-                    R.string.webtoon_margin_ratio_20, R.string.webtoon_margin_ratio_25
+                    R.string.webtoon_side_margin_0,
+                    R.string.webtoon_side_margin_10, R.string.webtoon_side_margin_15,
+                    R.string.webtoon_side_margin_20, R.string.webtoon_side_margin_25
                 )
                 entryValues = listOf(0, 1, 15, 20, 25)
                 defaultValue = "0"

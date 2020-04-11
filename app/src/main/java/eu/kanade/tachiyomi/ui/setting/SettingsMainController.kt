@@ -47,7 +47,7 @@ class SettingsMainController : SettingsController() {
                     sizeDp = size
                 }
 
-            titleRes = R.string.pref_category_site_specific
+            titleRes = R.string.site_specific_settings
             onClick { navigateTo(SettingsSiteController()) }
         }
         preference {
@@ -76,7 +76,7 @@ class SettingsMainController : SettingsController() {
                     sizeDp = size
                 }
 
-            titleRes = R.string.pref_category_similar
+            titleRes = R.string.similar
             onClick { navigateTo(SettingsSimilarController()) }
         }
         preference {
@@ -98,6 +98,7 @@ class SettingsMainController : SettingsController() {
             onClick { navigateTo(SettingsAboutController()) }
         }
     }
+
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.settings_main, menu)
         menu.findItem(R.id.action_bug_report).isVisible = BuildConfig.DEBUG

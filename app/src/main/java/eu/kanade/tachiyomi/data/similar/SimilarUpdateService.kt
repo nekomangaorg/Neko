@@ -15,7 +15,6 @@ import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.util.system.customize
 import eu.kanade.tachiyomi.util.system.isServiceRunning
 import eu.kanade.tachiyomi.util.system.notificationManager
-import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -28,6 +27,7 @@ import org.json.JSONObject
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.util.concurrent.TimeUnit
 
 class SimilarUpdateService(
     val db: DatabaseHelper = Injekt.get()
@@ -56,12 +56,16 @@ class SimilarUpdateService(
         NotificationCompat.Builder(this, Notifications.CHANNEL_SIMILAR)
             .customize(
                 this,
-                getString(R.string.pref_similar_loading_progress_start),
+                getString(R.string.similar_loading_progress_start),
                 R.drawable.ic_neko_notification,
                 true
             )
             .setAutoCancel(true)
-            .addAction(R.drawable.ic_clear_grey_24dp_img, getString(android.R.string.cancel), cancelIntent)
+            .addAction(
+                R.drawable.ic_clear_grey_24dp_img,
+                getString(android.R.string.cancel),
+                cancelIntent
+            )
     }
 
     /**
@@ -194,7 +198,7 @@ class SimilarUpdateService(
             Notifications.ID_SIMILAR_PROGRESS, progressNotification
                 .setContentTitle(
                     getString(
-                        R.string.pref_similar_loading_percent,
+                        R.string.similar_loading_percent,
                         current,
                         total
                     )
@@ -212,10 +216,10 @@ class SimilarUpdateService(
     private fun showResultNotification(error: Boolean = false) {
 
         val title = if (error) {
-            getString(R.string.pref_similar_loading_complete_error)
+            getString(R.string.similar_loading_complete_error)
         } else {
             getString(
-                R.string.pref_similar_loading_complete
+                R.string.similar_loading_complete
             )
         }
 

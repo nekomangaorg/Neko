@@ -240,13 +240,13 @@
         android:id="@+id/margin_ratio_text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="@string/pref_reader_margin"
+        android:text="@string/webtoon_side_margin"
         android:textColor="?android:attr/textColorSecondary"
         app:layout_constraintBaseline_toBaselineOf="@id/margin_ratio_webtoon"
         app:layout_constraintEnd_toStartOf="@id/background_color"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/webtoon_prefs"
-        tools:text="@string/pref_reader_margin" />
+        tools:text="@string/webtoon_side_margin" />
 
     <androidx.appcompat.widget.AppCompatSpinner
         android:id="@+id/margin_ratio_webtoon"

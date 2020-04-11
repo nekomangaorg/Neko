@@ -56,7 +56,7 @@ class DownloadController : NucleusController<DownloadPresenter>(),
     }
 
     override fun getTitle(): String? {
-        return resources?.getString(R.string.label_download_queue)
+        return resources?.getString(R.string.download_queue)
     }
 
     override fun onViewCreated(view: View) {
@@ -78,16 +78,16 @@ class DownloadController : NucleusController<DownloadPresenter>(),
 
         // Suscribe to changes
         DownloadService.runningRelay
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeUntilDestroy { onQueueStatusChange(it) }
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeUntilDestroy { onQueueStatusChange(it) }
 
         presenter.getDownloadStatusObservable()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeUntilDestroy { onStatusChange(it) }
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeUntilDestroy { onStatusChange(it) }
 
         presenter.getDownloadProgressObservable()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeUntilDestroy { onUpdateDownloadedPages(it) }
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeUntilDestroy { onUpdateDownloadedPages(it) }
     }
 
     override fun onDestroyView(view: View) {
@@ -172,22 +172,22 @@ class DownloadController : NucleusController<DownloadPresenter>(),
      */
     private fun observeProgress(download: Download) {
         val subscription = Observable.interval(50, TimeUnit.MILLISECONDS)
-                // Get the sum of percentages for all the pages.
-                .flatMap {
-                    Observable.from(download.pages)
-                            .map(Page::progress)
-                            .reduce { x, y -> x + y }
+            // Get the sum of percentages for all the pages.
+            .flatMap {
+                Observable.from(download.pages)
+                    .map(Page::progress)
+                    .reduce { x, y -> x + y }
+            }
+            // Keep only the latest emission to avoid backpressure.
+            .onBackpressureLatest()
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe { progress ->
+                // Update the view only if the progress has changed.
+                if (download.totalProgress != progress) {
+                    download.totalProgress = progress
+                    onUpdateProgress(download)
                 }
-                // Keep only the latest emission to avoid backpressure.
-                .onBackpressureLatest()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe { progress ->
-                    // Update the view only if the progress has changed.
-                    if (download.totalProgress != progress) {
-                        download.totalProgress = progress
-                        onUpdateProgress(download)
-                    }
-                }
+            }
 
         // Avoid leaking subscriptions
         progressSubscriptions.remove(download)?.unsubscribe()
@@ -261,8 +261,10 @@ class DownloadController : NucleusController<DownloadPresenter>(),
      */
     private fun setInformationView() {
         if (presenter.downloadQueue.isEmpty()) {
-            empty_view?.show(R.drawable.ic_file_download_black_128dp,
-                    R.string.information_no_downloads)
+            empty_view?.show(
+                R.drawable.ic_file_download_black_128dp,
+                R.string.no_downloads
+            )
         } else {
             empty_view?.hide()
         }

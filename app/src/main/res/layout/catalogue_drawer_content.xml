@@ -89,7 +89,7 @@
             android:layout_width="wrap_content"
             android:textColor="?attr/tabBarIconColor"
             android:layout_height="match_parent"
-            android:text="@string/action_random_manga"
+            android:text="@string/random_manga"
             android:layout_marginStart="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -101,7 +101,7 @@
             android:layout_width="wrap_content"
             android:textColor="?attr/tabBarIconColor"
             android:layout_height="match_parent"
-            android:text="@string/action_follows"
+            android:text="@string/follows"
             android:layout_marginStart="8dp"
 
             app:layout_constraintBottom_toBottomOf="parent"

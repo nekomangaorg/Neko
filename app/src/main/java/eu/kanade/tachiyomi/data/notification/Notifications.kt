@@ -78,21 +78,21 @@ object Notifications {
             NotificationManager.IMPORTANCE_LOW
         ).apply {
             setShowBadge(false)
-            },
+        },
             NotificationChannel(
-            CHANNEL_NEW_CHAPTERS,
-            context.getString(R.string.new_chapters),
-            NotificationManager.IMPORTANCE_DEFAULT
-        ), NotificationChannel(
-            CHANNEL_RESTORE,
-            context.getString(R.string.restoring_backup),
-            NotificationManager.IMPORTANCE_LOW
-        ).apply {
-            setShowBadge(false)
+                CHANNEL_NEW_CHAPTERS,
+                context.getString(R.string.new_chapters),
+                NotificationManager.IMPORTANCE_DEFAULT
+            ), NotificationChannel(
+                CHANNEL_RESTORE,
+                context.getString(R.string.restoring_backup),
+                NotificationManager.IMPORTANCE_LOW
+            ).apply {
+                setShowBadge(false)
             },
             NotificationChannel(
                 CHANNEL_SIMILAR,
-                context.getString(R.string.channel_manga_similar),
+                context.getString(R.string.similar),
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
                 setShowBadge(false)

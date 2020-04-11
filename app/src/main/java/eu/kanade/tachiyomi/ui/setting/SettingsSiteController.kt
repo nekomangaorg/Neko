@@ -8,18 +8,19 @@ import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.Mangadex
-import eu.kanade.tachiyomi.widget.preference.SiteLoginPreference
 import eu.kanade.tachiyomi.widget.preference.MangadexLoginDialog
 import eu.kanade.tachiyomi.widget.preference.MangadexLogoutDialog
+import eu.kanade.tachiyomi.widget.preference.SiteLoginPreference
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class SettingsSiteController : SettingsController(), MangadexLoginDialog.Listener, MangadexLogoutDialog.Listener {
+class SettingsSiteController : SettingsController(), MangadexLoginDialog.Listener,
+    MangadexLogoutDialog.Listener {
 
     private val mdex by lazy { Injekt.get<SourceManager>().getMangadex() as HttpSource }
 
     override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
-        titleRes = R.string.pref_site_specific_settings
+        titleRes = R.string.site_specific_settings
 
         val sourcePreference = SiteLoginPreference(context, mdex).apply {
             title = mdex.name + " Login"
@@ -41,15 +42,19 @@ class SettingsSiteController : SettingsController(), MangadexLoginDialog.Listene
 
         listPreference(activity) {
             key = PreferenceKeys.showR18
-            titleRes = R.string.pref_show_r18_title
-            entriesRes = arrayOf(R.string.pref_show_r18_no, R.string.pref_show_r18_all, R.string.pref_show_r18_show)
+            titleRes = R.string.show_r18_title
+            entriesRes = arrayOf(
+                R.string.show_r18_no,
+                R.string.show_r18_all,
+                R.string.show_r18_show
+            )
             entryValues = listOf("0", "1", "2")
             summary = "%s"
         }
 
         listPreference(activity) {
             key = PreferenceKeys.imageServer
-            titleRes = R.string.pref_image_server
+            titleRes = R.string.image_server
             entries = Mangadex.SERVER_PREF_ENTRIES
             entryValues = Mangadex.SERVER_PREF_ENTRY_VALUES
             summary = "%s"
@@ -57,20 +62,25 @@ class SettingsSiteController : SettingsController(), MangadexLoginDialog.Listene
 
         switchPreference {
             key = PreferenceKeys.lowQualityCovers
-            titleRes = R.string.pref_low_quality_covers
+            titleRes = R.string.low_quality_covers
             defaultValue = false
         }
         switchPreference {
             key = PreferenceKeys.useNonLoggedNetwork
-            titleRes = R.string.pref_use_non_logged_in_network
+            titleRes = R.string.use_non_logged_in_network
             defaultValue = false
         }
 
         preference {
-            titleRes = R.string.pref_sync_library_follows
-            summaryRes = R.string.pref_refresh_library_follows_summary
+            titleRes = R.string.sync_follows_to_library
+            summaryRes = R.string.sync_follows_to_library_summary
 
-            onClick { LibraryUpdateService.start(context, target = LibraryUpdateService.Target.SYNC_FOLLOWS) }
+            onClick {
+                LibraryUpdateService.start(
+                    context,
+                    target = LibraryUpdateService.Target.SYNC_FOLLOWS
+                )
+            }
         }
     }
 

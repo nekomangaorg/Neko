@@ -27,6 +27,9 @@
     <string name="unknown_status">Unknown Status</string>
     <string name="licensed">Licensed</string>
     <string name="completed">Completed</string>
+    <string name="hiatus">Hiatus</string>
+    <string name="cancelled">Cancelled</string>
+    <string name="publication_complete">Publication Complete</string>
 
     <!-- Security -->
     <string name="unlock_library">Unlock to access Library</string>
@@ -204,6 +207,7 @@
     <string name="search_extensions">Search extensions…</string>
     <string name="all_sources">All sources</string>
     <string name="sources">Sources</string>
+    <string name="random_manga">Random Manga</string>
 
     <!-- Other Screens -->
 
@@ -305,6 +309,13 @@
     <string name="smart_based_on_page">Smart (based on page)</string>
     <string name="smart_based_on_page_and_theme">Smart (based on page and theme)</string>
     <string name="always_show_chapter_transition">Always show chapter transition</string>
+    <string name="skip_hidden_chapters">Skip chapters hidden by filters</string>
+    <string name="webtoon_side_margin">Side Margin ratio</string>
+    <string name="webtoon_side_margin_0">No margin</string>
+    <string name="webtoon_side_margin_10">10%</string>
+    <string name="webtoon_side_margin_15">15%</string>
+    <string name="webtoon_side_margin_20">20%</string>
+    <string name="webtoon_side_margin_25">25%</string>
 
     <!-- Manga details -->
     <string name="about_this_">About this %1$s</string>
@@ -330,6 +341,7 @@
     <string name="source_not_installed_">Source not installed: %1$s</string>
     <string name="no_description">No description</string>
     <string name="mark_all_chapters_as_read">Mark all chapters as read?</string>
+    <string name="view_comments">View comments</string>
     <string name="remove_from_library">Remove from library</string>
     <string name="select_starting_chapter">Select starting chapter</string>
     <string name="select_ending_chapter">Select ending chapter</string>
@@ -380,44 +392,38 @@
     <string name="refresh_tracking">Refresh tracking</string>
     <string name="add_tracking">Add tracking</string>
 
-    <!-- Migration -->
-    <string name="source_migration">Source migration</string>
-    <string name="migration">Migration</string>
-    <string name="skip_pre_migration">Skip pre-migration</string>
-    <string name="select_a_source_to_migrate_from">Select a source to migrate from</string>
-    <string name="data_to_include_in_migration">Data to include in migration</string>
-    <string name="search_parameter_eg">Search parameter (e.g. language:english)</string>
-    <string name="include_extra_search_parameter">Include extra search parameter when searching</string>
-    <string name="use_most_chapters">Use source with the most chapters (slower)</string>
-    <string name="use_first_source">Use first source with alternative</string>
-    <string name="skip_this_step_next_time">Skip this step next time</string>
-    <string name="to_show_again_setting_library">To show this screen again, go to Settings -> Library.</string>
-    <string name="latest_">Latest: %1$s</string>
-    <string name="migrating_to">migrating to</string>
-    <string name="dont_migrate">Don\'t migrate</string>
-    <string name="search_manually">Search manually</string>
-    <string name="migrate_now">Migrate now</string>
-    <string name="copy_now">Copy now</string>
-    <string name="select">Select</string>
-    <string name="migrate">Migrate</string>
-    <string name="copy_value">Copy</string>
-    <string name="no_chapters_found_for_migration">No chapters found, this manga cannot be used for
-        migration</string>
-    <string name="no_alternatives_found">No Alternatives Found</string>
-    <string name="stop_migrating">Stop migrating?</string>
-    <plurals name="migrate_manga">
-        <item quantity="one">Migrate %1$d%2$s manga?</item>
-        <item quantity="other">Migrate %1$d%2$s manga?</item>
-    </plurals>
-    <plurals name="copy_manga">
-        <item quantity="one">Copy %1$d%2$s manga?</item>
-        <item quantity="other">Copy %1$d%2$s manga?</item>
-    </plurals>
-    <string name="skipping_">(skipping %1$d)</string>
-    <plurals name="manga_migrated">
-        <item quantity="one">%d manga migrated</item>
-        <item quantity="other">%d manga migrated</item>
-    </plurals>
+    <!-- Similar -->
+    <string name="similar">Similar Manga</string>
+    <string name="similar_settings">Similar Manga Settings</string>
+    <string name="similar_screen">Show Similar Manga</string>
+    <string name="similar_update_restriction">Similar Manga update restrictions</string>
+    <string name="similar_update_restriction_summary">Update only when the conditions are met</string>
+    <string name="similar_loading_percent">Updating similar manga (%1$d / %2$d updated)</string>
+    <string name="similar_loading_complete">Updating similar manga complete</string>
+    <string name="similar_loading_complete_error">Error trying to load/process similar manga</string>
+    <string name="similar_loading_progress_start">Downloading similar manga data file…</string>
+    <string name="similar_screen_summary_message">
+        This is an beta feature where one can get manga recommendations.
+        This is a recommendation system outside of MangaDex, and works by matching by genres,
+        demographics, content type, themes, and then using term frequency–inverse document frequency (Tfidf) to get the
+        similarity of two manga\'s descriptions. When enabled this file will download immediately
+        and then auto download a refreshed file every 24 hours. The file is about 20mb in size.
+    </string>
+    <string name="similar_credit_message">
+        For more information and to view the source code:\n%s
+    </string>
+
+    <!-- Follows -->
+    <string name="follows">My Follows</string>
+    <string name="add_to_follows">Add to Mangadex Follows</string>
+    <string name="follows_status">Follows Status</string>
+    <string name="follows_unfollowed">Unfollowed</string>
+    <string name="follows_reading">Reading</string>
+    <string name="follows_completed">Completed</string>
+    <string name="follows_on_hold">On Hold</string>
+    <string name="follows_plan_to_read">Plan To Read</string>
+    <string name="follows_dropped">Dropped</string>
+    <string name="follows_re_reading">Re Reading</string>
 
     <!-- Settings -->
     <string name="settings">Settings</string>
@@ -433,9 +439,10 @@
     <string name="dark">Dark</string>
     <string name="amoled_black">AMOLED Black</string>
     <string name="dark_blue">Dark Blue</string>
+    <string name="solid_blue">Solid Blue</string>
     <string name="white_theme">Pure White</string>
     <string name="system_default_amoled">System default (White + Black)</string>
-    <string name="system_default_all_blue">System default (All Blue)</string>
+    <string name="system_default_blue_accents">System default (Blue Accents)</string>
     <string name="language">Language</string>
     <string name="system_default">System default</string>
     <string name="date_format">Date format</string>
@@ -444,6 +451,19 @@
     <string name="secure_screen">Secure screen</string>
     <string name="hide_tachi_from_recents">Hide Tachiyomi from the recents screen</string>
     <string name="security">Security</string>
+
+    <!-- Site Settings -->
+    <string name="site_specific_settings">MangaDex Settings</string>
+    <string name="image_server">Choose image server</string>
+    <string name="show_r18_title">Default R18+ Setting</string>
+    <string name="show_r18_show">show only R18+</string>
+    <string name="show_r18_no">Show No R18+</string>
+    <string name="show_r18_all">Show All</string>
+    <string name="sync_follows_to_library">Sync Mangadex Manga into Neko</string>
+    <string name="sync_follows_to_library_summary">Pulls reading/rereading manga from Mangadex into your Neko Library</string>
+    <string name="low_quality_covers">Use low quality thumbnails</string>
+    <string name="use_non_logged_in_network">Do not mark website chapters read</string>
+
 
     <!-- Backup -->
     <string name="backup">Backup</string>
@@ -477,6 +497,7 @@
 
     <!-- Advanced section -->
     <string name="clear_chapter_cache">Clear chapter cache</string>
+    <string name="clear_image_cache">Clear image cover cache</string>
     <string name="used_">Used: %1$s</string>
     <plurals name="cache_cleared">
         <item quantity="one">Cache cleared. %d file has been deleted</item>
@@ -514,6 +535,7 @@
     <string name="username">Username</string>
     <string name="email">Email address</string>
     <string name="password">Password</string>
+    <string name="two_factor">2FA Code</string>
     <string name="show_password">Show password</string>
     <string name="login">Login</string>
     <string name="logout">Logout</string>

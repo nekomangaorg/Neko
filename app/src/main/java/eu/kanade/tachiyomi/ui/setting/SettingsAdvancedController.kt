@@ -54,8 +54,8 @@ class SettingsAdvancedController : SettingsController() {
         }
         preference {
             key = CLEAR_CACHE_IMAGES_KEY
-            titleRes = R.string.pref_clear_image_cache
-            summary = context.getString(R.string.used_cache, getChaperCacheSize())
+            titleRes = R.string.clear_image_cache
+            summary = context.getString(R.string.used_, getChaperCacheSize())
 
             onClick { clearImageCache() }
         }
@@ -148,12 +148,12 @@ class SettingsAdvancedController : SettingsController() {
                 GlideApp.get(activity).clearMemory()
                 activity?.toast(
                     resources?.getQuantityString(
-                        R.plurals.cache_deleted,
+                        R.plurals.cache_cleared,
                         deletedFiles, deletedFiles
                     ), Toast.LENGTH_LONG
                 )
                 findPreference(CLEAR_CACHE_IMAGES_KEY)?.summary =
-                    resources?.getString(R.string.used_cache, getChaperCacheSize())
+                    resources?.getString(R.string.used_, getChaperCacheSize())
             }
         }
     }
@@ -176,10 +176,14 @@ class SettingsAdvancedController : SettingsController() {
             }, {
                 activity?.toast(R.string.cache_delete_error)
             }, {
-                    activity?.toast(resources?.getQuantityString(R.plurals.cache_cleared,
-                        deletedFiles, deletedFiles))
+                activity?.toast(
+                    resources?.getQuantityString(
+                        R.plurals.cache_cleared,
+                        deletedFiles, deletedFiles
+                    )
+                )
                 findPreference(CLEAR_CACHE_KEY)?.summary =
-                            resources?.getString(R.string.used_, chapterCache.readableSize)
+                    resources?.getString(R.string.used_, chapterCache.readableSize)
             })
     }
 
