@@ -57,6 +57,7 @@ import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.applyWindowInsetsForRootController
+import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import eu.kanade.tachiyomi.util.view.setStyle
@@ -323,11 +324,11 @@ open class LibraryController(
         recycler.updatePaddingRelative(bottom = height)
 
         presenter.onRestore()
-        if (presenter.libraryItems.isNotEmpty())
-        onNextLibraryUpdate(presenter.libraryItems, true)
-            else {
+        if (presenter.libraryItems.isNotEmpty()) {
+            onNextLibraryUpdate(presenter.libraryItems, true)
+        } else {
             recycler_layout.alpha = 0f
-            presenter.getLibraryBlocking()
+            presenter.getLibrary()
         }
     }
 
@@ -449,6 +450,7 @@ open class LibraryController(
             if (recycler_layout.alpha == 0f) recycler_layout.animate().alpha(1f).setDuration(500)
                 .start()
         } else if (justStarted && freshStart) {
+            progress.gone()
             scrollToHeader(activeCategory)
             fast_scroller.translationX = 0f
             view?.post {

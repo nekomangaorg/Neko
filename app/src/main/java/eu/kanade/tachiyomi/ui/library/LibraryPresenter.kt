@@ -19,14 +19,15 @@ import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet
 import eu.kanade.tachiyomi.util.lang.removeArticles
+import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_EXCLUDE
 import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_IGNORE
 import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_INCLUDE
 import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_REALLY_EXCLUDE
-import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.Injekt
@@ -47,6 +48,8 @@ class LibraryPresenter(
     private val downloadManager: DownloadManager = Injekt.get()
 ) {
 
+    private var scope = CoroutineScope(Job() + Dispatchers.Default)
+
     private val context = preferences.context
 
     private val loggedServices by lazy { Injekt.get<TrackManager>().services.filter { it.isLogged } }
@@ -65,11 +68,8 @@ class LibraryPresenter(
     /**
      * List of all manga to update the
      */
-    // private var rawMangaMap: LibraryMap? = null
     var libraryItems: List<LibraryItem> = emptyList()
     private var allLibraryItems: List<LibraryItem> = emptyList()
-
-    // private var currentMangaMap: LibraryMap? = null
 
     private var totalChapters: Map<Long, Int>? = null
 
@@ -97,27 +97,12 @@ class LibraryPresenter(
                 mangaMap = applySort(mangaMap)
                 mangaMap
             }
+            val freshStart = libraryItems.isEmpty()
             libraryItems = mangaMap
-            view.onNextLibraryUpdate(libraryItems)
+            view.onNextLibraryUpdate(libraryItems, freshStart)
             withContext(Dispatchers.IO) {
                 setTotalChapters()
             }
-        }
-    }
-
-    fun getLibraryBlocking() {
-        val mangaMap = {
-            val library = getLibraryFromDB()
-            library.apply { setDownloadCount(library) }
-            allLibraryItems = library
-            var mangaMap = library
-            mangaMap = applyFilters(mangaMap)
-            mangaMap = applySort(mangaMap)
-            mangaMap
-        }()
-        libraryItems = mangaMap
-        launchUI {
-            view.onNextLibraryUpdate(libraryItems)
         }
     }
 
@@ -532,21 +517,21 @@ class LibraryPresenter(
      * @param mangas the list of manga to delete.
      */
     fun removeMangaFromLibrary(mangas: List<Manga>) {
-        GlobalScope.launch(Dispatchers.IO, CoroutineStart.DEFAULT) {
+        scope.launch {
             // Create a set of the list
             val mangaToDelete = mangas.distinctBy { it.id }
             mangaToDelete.forEach { it.favorite = false }
 
-            db.insertMangas(mangaToDelete).executeAsBlocking()
+            db.insertMangas(mangaToDelete).executeOnIO()
             getLibrary()
         }
     }
 
     fun confirmDeletion(mangas: List<Manga>) {
-        GlobalScope.launch(Dispatchers.IO, CoroutineStart.DEFAULT) {
+        scope.launch {
             val mangaToDelete = mangas.distinctBy { it.id }
             mangaToDelete.forEach { manga ->
-                db.resetMangaInfo(manga).executeAsBlocking()
+                db.resetMangaInfo(manga).executeOnIO()
                 coverCache.deleteFromCache(manga.thumbnail_url)
                 val source = sourceManager.get(manga.source) as? HttpSource
                 if (source != null)
@@ -556,11 +541,11 @@ class LibraryPresenter(
     }
 
     fun updateManga(manga: LibraryManga) {
-        GlobalScope.launch(Dispatchers.IO, CoroutineStart.DEFAULT) {
-            val rawMap = allLibraryItems ?: return@launch
-            val currentMap = libraryItems ?: return@launch
+        scope.launch {
+            val rawMap = allLibraryItems
+            val currentMap = libraryItems
             val id = manga.id ?: return@launch
-            val dbManga = db.getLibraryManga(id).executeAsBlocking() ?: return@launch
+            val dbManga = db.getLibraryManga(id).executeOnIO() ?: return@launch
             arrayOf(rawMap, currentMap).forEach { map ->
                 map.forEach { item ->
                     if (item.manga.id == dbManga.id) {
@@ -574,10 +559,10 @@ class LibraryPresenter(
     }
 
     fun reAddMangas(mangas: List<Manga>) {
-        GlobalScope.launch(Dispatchers.IO, CoroutineStart.DEFAULT) {
+        scope.launch {
             val mangaToAdd = mangas.distinctBy { it.id }
             mangaToAdd.forEach { it.favorite = true }
-            db.insertMangas(mangaToAdd).executeAsBlocking()
+            db.insertMangas(mangaToAdd).executeOnIO()
             getLibrary()
             mangaToAdd.forEach { db.insertManga(it).executeAsBlocking() }
         }
@@ -622,12 +607,12 @@ class LibraryPresenter(
     }
 
     fun rearrangeCategory(catId: Int?, mangaIds: List<Long>) {
-        GlobalScope.launch(Dispatchers.IO) {
+        scope.launch {
             val category = categories.find { catId == it.id } ?: return@launch
             category.mangaSort = null
             category.mangaOrder = mangaIds
             if (category.id == 0) preferences.defaultMangaOrder().set(mangaIds.joinToString("/"))
-            else db.insertCategory(category).executeAsBlocking()
+            else db.insertCategory(category).executeOnIO()
             requestSortUpdate()
         }
     }
@@ -637,7 +622,7 @@ class LibraryPresenter(
         catId: Int?,
         mangaIds: List<Long>
     ) {
-        GlobalScope.launch(Dispatchers.IO) {
+        scope.launch {
             val categoryId = catId ?: return@launch
             val category = categories.find { catId == it.id } ?: return@launch
 
@@ -648,7 +633,7 @@ class LibraryPresenter(
             val categories =
                 if (catId == 0) emptyList()
                 else
-                db.getCategoriesForManga(manga).executeAsBlocking()
+                db.getCategoriesForManga(manga).executeOnIO()
                 .filter { it.id != oldCatId } + listOf(category)
 
             for (cat in categories) {
