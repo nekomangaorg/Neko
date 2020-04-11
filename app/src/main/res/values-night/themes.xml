@@ -32,7 +32,6 @@
         <!-- Custom Attributes-->
         <item name="selectable_list_drawable">@drawable/list_item_selector</item>
         <item name="selectable_library_drawable">@drawable/library_item_selector_amoled</item>
-        <item name="background_card">@color/colorAmoledPrimary</item>
 
     </style>
 </resources>

@@ -42,7 +42,7 @@
         <item name="selectable_list_drawable">@drawable/list_item_selector</item>
         <item name="selectable_library_drawable">@drawable/library_item_selector_light</item>
         <item name="text_color_primary">@color/textColorPrimary</item>
-        <item name="background_card">@color/cardBackground</item>
+        <item name="background_card">?attr/colorPrimary</item>
         <item name="icon_color">@color/iconColor</item>
         <item name="snackbar_background">@color/snackbarBackground</item>
         <item name="snackbar_text">@color/textColorPrimaryInverse</item>
@@ -187,7 +187,6 @@
         <!-- Custom Attributes-->
         <item name="selectable_list_drawable">@drawable/list_item_selector</item>
         <item name="selectable_library_drawable">@drawable/library_item_selector_amoled</item>
-        <item name="background_card">@color/neko_primary</item>
     </style>
 
     <!--===============-->

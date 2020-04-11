@@ -4,15 +4,15 @@
     <item>
         <selector>
             <item android:state_selected="true">
-                <color android:color="@color/cardBackground"/>
+                <color android:color="?attr/background_card" />
             </item>
 
             <item android:state_activated="true">
-                <color android:color="@color/dialogBackground"/>
+                <color android:color="@color/dialogBackground" />
             </item>
 
             <item>
-                <color android:color="@color/dialogBackground"/>
+                <color android:color="@color/dialogBackground" />
             </item>
         </selector>
     </item>

@@ -9,7 +9,6 @@
     <color name="drawerPrimary">@color/neko_accent</color>
     <color name="oldNavBarBackground">#B3000000</color>
     <color name="snackbarBackground">#FFFFFF</color>
-    <color name="cardBackground">#212121</color>
     <color name="rippleColor">@color/md_white_1000_20</color>
     <color name="fullRippleColor">#707070</color>
     <color name="dialogBackground">#171717</color>

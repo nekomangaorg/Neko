@@ -11,7 +11,6 @@
     <color name="mainStatus">#AFFAFAFA</color>
     <color name="blueStatus">@color/neko_status</color>
     <color name="blackStatus">#AF000000</color>
-    <color name="cardBackground">#FFFFFF</color>
     <color name="splashBackground">@color/neko_primary_variant</color>
     <color name="snackbarBackground">#323232</color>
     <color name="trueSnackbarBackground">#323232</color>

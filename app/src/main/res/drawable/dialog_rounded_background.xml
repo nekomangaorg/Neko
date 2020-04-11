@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shape="rectangle" >
+    android:shape="rectangle">
 
-    <solid android:color="@color/cardBackground" />
+    <solid android:color="?attr/background_card" />
 
     <corners android:radius="10dip" />
 
