@@ -120,9 +120,9 @@ class MangaHeaderHolder(
         else {
             manga_author.text = "${manga.author?.trim()}, ${manga.artist}"
         }
-        manga_summary.text = manga.description?.trim() ?: itemView.context.getString(
-            R.string.no_description
-        )
+        manga_summary.text =
+            if (manga.description.isNullOrBlank()) itemView.context.getString(R.string.no_description)
+            else manga.description?.trim()
 
         if (item.isLocked) sub_item_group.referencedIds =
             intArrayOf(R.id.manga_summary, R.id.manga_summary_label, R.id.button_layout)
