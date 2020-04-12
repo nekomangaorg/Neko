@@ -73,10 +73,13 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers) {
         if (result.isEmpty()) {
             track.status = FollowStatus.UNFOLLOWED.int
         } else {
-            track.status = result[0].follow_type
+            val follow = result.first()
+            track.status = follow.follow_type
             if (result[0].chapter.isNotBlank()) {
-                track.last_chapter_read = result[0].chapter.toInt()
+                track.last_chapter_read = follow.chapter.toInt()
             }
+            track.tracking_url = MdUtil.baseUrl + follow.manga_id.toString()
+            track.title = follow.title
         }
         return track
     }
@@ -180,15 +183,27 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers) {
 
     suspend fun fetchTrackingInfo(manga: SManga): Track {
         return withContext(Dispatchers.IO) {
+            val track = fetchTrackingInfo(manga.url)
+            if (track.tracking_url.isBlank()) {
+                track.tracking_url = MdUtil.baseUrl + manga.url
+            }
+            if (track.title.isBlank()) {
+                track.title = manga.title
+            }
+            track
+        }
+    }
+
+    suspend fun fetchTrackingInfo(url: String): Track {
+        return withContext(Dispatchers.IO) {
             val request = GET(
-                "${MdUtil.baseUrl}${MdUtil.followsMangaApi}" + getMangaId(manga.url),
+                "${MdUtil.baseUrl}${MdUtil.followsMangaApi}" + getMangaId(url),
                 headers,
                 CacheControl.FORCE_NETWORK
             )
             val response = client.newCall(request).execute()
             val track = followStatusParse(response)
-            track.tracking_url = MdUtil.baseUrl + manga.url
-            track.title = manga.title
+
             track
         }
     }

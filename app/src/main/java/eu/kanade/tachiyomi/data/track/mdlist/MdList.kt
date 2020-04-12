@@ -67,6 +67,16 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
         }
     }
 
+    override fun isCompletedStatus(index: Int) =
+        getStatusList()[index] == FollowStatus.COMPLETED.int
+
+    override suspend fun bind(track: Track): Track {
+        val remoteTrack = mdex.fetchTrackingInfo(track.tracking_url)
+        track.copyPersonalFrom(remoteTrack)
+        track.library_id = remoteTrack.library_id
+        return update(track)
+    }
+
     @SuppressLint("MissingSuperCall")
     override fun logout() = throw Exception("not used")
 
