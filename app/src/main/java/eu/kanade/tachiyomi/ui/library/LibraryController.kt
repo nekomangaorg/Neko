@@ -829,6 +829,7 @@ open class LibraryController(
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_search -> expandActionViewFromInteraction = true
+            R.id.action_library_display -> DisplayBottomSheet(this).show()
             else -> return super.onOptionsItemSelected(item)
         }
         return true
