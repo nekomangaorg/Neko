@@ -184,12 +184,9 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers) {
     suspend fun fetchTrackingInfo(manga: SManga): Track {
         return withContext(Dispatchers.IO) {
             val track = fetchTrackingInfo(manga.url)
-            if (track.tracking_url.isBlank()) {
-                track.tracking_url = MdUtil.baseUrl + manga.url
-            }
-            if (track.title.isBlank()) {
-                track.title = manga.title
-            }
+            track.tracking_url = MdUtil.baseUrl + manga.url
+            track.title = manga.title
+
             track
         }
     }
