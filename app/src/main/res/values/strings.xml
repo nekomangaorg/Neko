@@ -402,6 +402,7 @@
     <string name="copy_now">Copy now</string>
     <string name="select">Select</string>
     <string name="migrate">Migrate</string>
+    <string name="migrate_">Migrate %1$s</string>
     <string name="copy_value">Copy</string>
     <string name="no_chapters_found_for_migration">No chapters found, this manga cannot be used for
         migration</string>

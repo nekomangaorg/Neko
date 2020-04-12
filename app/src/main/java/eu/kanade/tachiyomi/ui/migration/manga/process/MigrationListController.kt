@@ -14,6 +14,7 @@ import androidx.core.graphics.ColorUtils
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import com.afollestad.materialdialogs.MaterialDialog
+import com.bluelinelabs.conductor.changehandler.FadeChangeHandler
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -27,10 +28,13 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.main.BottomNavBarInterface
+import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.migration.MigrationMangaDialog
 import eu.kanade.tachiyomi.ui.migration.SearchController
+import eu.kanade.tachiyomi.ui.migration.manga.design.PreMigrationController
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.system.await
+import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
@@ -383,15 +387,38 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
     fun migrateMangas() {
         launchUI {
             adapter?.performMigrations(false)
-            router.popCurrentController()
+            navigateOut()
         }
     }
 
     fun copyMangas() {
         launchUI {
             adapter?.performMigrations(true)
-            router.popCurrentController()
+            navigateOut()
         }
+    }
+
+    private fun navigateOut() {
+        if (migratingManga?.size == 1) {
+            launchUI {
+                val hasDetails = router.backstack.any { it.controller() is MangaDetailsController }
+                if (hasDetails) {
+                    val manga = migratingManga?.firstOrNull()?.searchResult?.get()?.let {
+                        db.getManga(it).executeOnIO()
+                    }
+                    if (manga != null) {
+                        val newStack = router.backstack.filter {
+                            it.controller() !is MangaDetailsController &&
+                            it.controller() !is MigrationListController &&
+                            it.controller() !is PreMigrationController
+                        } + MangaDetailsController(manga).withFadeTransaction()
+                        router.setBackstack(newStack, FadeChangeHandler())
+                        return@launchUI
+                    }
+                }
+                router.popCurrentController()
+            }
+        } else router.popCurrentController()
     }
 
     override fun handleBack(): Boolean {

@@ -13,6 +13,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.injectLazy
+import java.util.Date
 
 class MigrationProcessAdapter(
     val controller: MigrationListController
@@ -101,8 +102,8 @@ class MigrationProcessAdapter(
         // Update chapters read
         if (MigrationFlags.hasChapters(flags)) {
             val prevMangaChapters = db.getChapters(prevManga).executeAsBlocking()
-            val maxChapterRead = prevMangaChapters.filter { it.read }
-                .maxBy { it.chapter_number }?.chapter_number
+            val maxChapterRead =
+                prevMangaChapters.filter { it.read }.maxBy { it.chapter_number }?.chapter_number
             if (maxChapterRead != null) {
                 val dbChapters = db.getChapters(manga).executeAsBlocking()
                 for (chapter in dbChapters) {
@@ -134,10 +135,10 @@ class MigrationProcessAdapter(
             db.updateMangaFavorite(prevManga).executeAsBlocking()
         }
         manga.favorite = true
+        if (replace) manga.date_added = prevManga.date_added
+        else manga.date_added = Date().time
         db.updateMangaFavorite(manga).executeAsBlocking()
-
-        // SearchPresenter#networkToLocalManga may have updated the manga title, so ensure db gets updated title
+        db.updateMangaAdded(manga).executeAsBlocking()
         db.updateMangaTitle(manga).executeAsBlocking()
-        // }
     }
 }
