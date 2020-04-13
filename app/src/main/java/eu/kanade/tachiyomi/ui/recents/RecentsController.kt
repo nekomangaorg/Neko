@@ -365,7 +365,8 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
     }
 
     override fun showSheet() {
-        dl_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
+        if (dl_bottom_sheet.sheetBehavior?.isHideable == false || presenter.downloadManager.hasQueue())
+            dl_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
     }
 
     override fun toggleSheet() {

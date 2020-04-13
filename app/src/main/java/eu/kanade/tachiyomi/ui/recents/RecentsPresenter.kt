@@ -30,7 +30,7 @@ import kotlin.math.abs
 class RecentsPresenter(
     val controller: RecentsController,
     val preferences: PreferencesHelper = Injekt.get(),
-    private val downloadManager: DownloadManager = Injekt.get(),
+    val downloadManager: DownloadManager = Injekt.get(),
     private val db: DatabaseHelper = Injekt.get()
 ) : DownloadQueue.DownloadListener, LibraryServiceListener {
 

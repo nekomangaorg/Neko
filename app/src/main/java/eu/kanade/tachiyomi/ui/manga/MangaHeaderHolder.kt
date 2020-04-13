@@ -12,6 +12,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.signature.ObjectKey
 import com.google.android.material.button.MaterialButton
+import com.jakewharton.rxbinding.view.RxMenuItem.checked
 import com.mikepenz.iconics.typeface.IIcon
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
@@ -68,9 +69,6 @@ class MangaHeaderHolder(
             adapter.delegate.tagClicked(it)
         }
         chapter_layout.setOnClickListener { adapter.delegate.showChapterFilter() }
-        if (startExpanded)
-            expandDesc()
-        similar_button.setOnClickListener { adapter.delegate.openSimilar() }
         share_button.setOnClickListener { adapter.delegate.prepareToShareManga() }
         favorite_button.setOnClickListener {
             adapter.delegate.favoriteManga(false)
@@ -150,8 +148,8 @@ class MangaHeaderHolder(
                 DrawableHelper.standardIcon24(
                     context, when {
                         item.isLocked -> MaterialDesignDx.Icon.gmf_lock
-                        item.manga.favorite -> CommunityMaterial.Icon.cmd_bookmark as IIcon
-                        else -> CommunityMaterial.Icon.cmd_bookmark_plus_outline as IIcon
+                        item.manga.favorite -> CommunityMaterial.Icon2.cmd_heart as IIcon
+                        else -> CommunityMaterial.Icon2.cmd_heart_outline as IIcon
                     }
                 )
             )
