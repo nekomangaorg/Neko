@@ -692,7 +692,7 @@ class MangaDetailsController : BaseController,
         menu.findItem(R.id.action_mark_all_as_read).isVisible =
             presenter.getNextUnreadChapter() != null && !presenter.isLockedFromSearch
         menu.findItem(R.id.action_mark_all_as_unread).isVisible =
-            !presenter.allUnread() && !presenter.isLockedFromSearch
+            presenter.anyUnread() && !presenter.isLockedFromSearch
         menu.findItem(R.id.action_remove_downloads).isVisible =
             presenter.hasDownloads() && !presenter.isLockedFromSearch
         menu.findItem(R.id.remove_non_bookmarked).isVisible =

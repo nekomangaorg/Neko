@@ -427,6 +427,10 @@ class ReaderPresenter(
         if (manga.isWebtoon()) {
             return ReaderActivity.WEBTOON_WITHOUT_MARGIN
         }
+        if (manga.viewer == -1) {
+            manga.viewer = manga.defaultReaderType()
+            db.updateMangaViewer(manga).asRxObservable().subscribe()
+        }
         return if (manga.viewer == 0) preferences.defaultViewer() else manga.viewer
     }
 
