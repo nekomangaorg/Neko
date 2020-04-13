@@ -442,19 +442,19 @@ class LibraryUpdateService(
                 setContentTitle(manga.title)
                 color = ContextCompat.getColor(this@LibraryUpdateService, R.color.colorAccent)
                 val chaptersNames = if (chapterNames.size > 5) {
-                    "${chapterNames.take(4).joinToString(", ")}, " +
+                    "${chapterNames.take(4).joinToString("\n")}, " +
                         resources.getQuantityString(
                             R.plurals.notification_and_n_more,
                             (chapterNames.size - 4), (chapterNames.size - 4)
                         )
-                } else chapterNames.joinToString(", ")
+                } else chapterNames.joinToString("\n")
                 setContentText(chaptersNames)
                 setStyle(NotificationCompat.BigTextStyle().bigText(chaptersNames))
                 priority = NotificationCompat.PRIORITY_HIGH
                 setGroup(Notifications.GROUP_NEW_CHAPTERS)
                 setContentIntent(
                     NotificationReceiver.openChapterPendingActivity(
-                        this@LibraryUpdateService, manga, chapters.first()
+                        this@LibraryUpdateService, manga, cha pters . first ()
                     )
                 )
                 addAction(
