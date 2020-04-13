@@ -9,8 +9,14 @@ import java.text.DecimalFormatSymbols
 class RecentMangaAdapter(val delegate: RecentsInterface) :
     BaseChapterAdapter<IFlexible<*>>(delegate) {
 
+    private var isAnimating = false
     init {
         setDisplayHeadersAtStartUp(true)
+    }
+
+    fun updateItems(items: List<IFlexible<*>>?) {
+        updateDataSet(items, isAnimating)
+        isAnimating = false
     }
 
     val decimalFormat = DecimalFormat("#.###", DecimalFormatSymbols()
@@ -28,6 +34,7 @@ class RecentMangaAdapter(val delegate: RecentsInterface) :
 
     override fun onItemSwiped(position: Int, direction: Int) {
         super.onItemSwiped(position, direction)
+        isAnimating = true
         when (direction) {
             ItemTouchHelper.LEFT -> delegate.markAsRead(position)
         }

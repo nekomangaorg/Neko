@@ -227,7 +227,7 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
 
     fun showLists(recents: List<RecentMangaItem>) {
         swipe_refresh.isRefreshing = LibraryUpdateService.isRunning()
-        adapter.updateDataSet(recents)
+        adapter.updateItems(recents)
         adapter.removeAllScrollableHeaders()
         if (presenter.viewType > 0)
             adapter.addScrollableHeader(presenter.generalHeader)
