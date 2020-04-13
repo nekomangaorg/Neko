@@ -215,7 +215,11 @@ open class BrowseCatalogueController(bundle: Bundle) :
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        (activity as? MainActivity)?.hideNavigationIcon()
+        if (bundle?.getBoolean(APPLY_INSET) == true) {
+            (activity as? MainActivity)?.hideNavigationIcon()
+        } else {
+            (activity as? MainActivity)?.showNavigationArrow()
+        }
         inflater.inflate(R.menu.catalogue_list, menu)
 
         // Initialize search menu
@@ -533,17 +537,18 @@ open class BrowseCatalogueController(bundle: Bundle) :
         if (manga.favorite) {
             presenter.changeMangaFavorite(manga)
             adapter?.notifyItemChanged(position)
-            snack = catalouge_layout?.snack(R.string.removed_from_library, Snackbar.LENGTH_INDEFINITE) {
-                setAction(R.string.undo) {
-                    if (!manga.favorite) addManga(manga, position)
-                }
-                addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
-                    override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
-                        super.onDismissed(transientBottomBar, event)
-                        if (!manga.favorite) presenter.confirmDeletion(manga)
+            snack =
+                catalouge_layout?.snack(R.string.removed_from_library, Snackbar.LENGTH_INDEFINITE) {
+                    setAction(R.string.undo) {
+                        if (!manga.favorite) addManga(manga, position)
                     }
-                })
-            }
+                    addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
+                        override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+                            super.onDismissed(transientBottomBar, event)
+                            if (!manga.favorite) presenter.confirmDeletion(manga)
+                        }
+                    })
+                }
             (activity as? MainActivity)?.setUndoSnackBar(snack)
         } else {
             addManga(manga, position)

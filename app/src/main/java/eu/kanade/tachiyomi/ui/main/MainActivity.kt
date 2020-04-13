@@ -259,8 +259,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
         toolbar.navigationIcon = if (enabled) dismissDrawable else searchDrawable
     }
 
-    fun setNavigationArrow() {
-        window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+    fun showNavigationArrow() {
         toolbar.navigationIcon = drawerArrow
     }
 
@@ -477,7 +476,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
             window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
             toolbar.navigationIcon = searchDrawable
         } else {
-            setNavigationArrow()
+            showNavigationArrow()
         }
         drawerArrow?.progress = 1f
 
