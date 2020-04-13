@@ -145,7 +145,8 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                     }) return@setOnNavigationItemSelectedListener false
             }
             continueSwitchingTabs = false
-            preferences.lastTab().set(item.itemId)
+            if (item.itemId != R.id.nav_browse)
+                preferences.lastTab().set(item.itemId)
             val currentRoot = router.backstack.firstOrNull()
             if (currentRoot?.tag()?.toIntOrNull() != id) {
                 setRoot(when (id) {
@@ -311,12 +312,12 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
     private fun setExtensionsBadge() {
         val updates = preferences.extensionUpdatesCount().getOrDefault()
         if (updates > 0) {
-            val badge = bottom_nav.getOrCreateBadge(R.id.nav_catalogues)
+            val badge = bottom_nav.getOrCreateBadge(R.id.nav_browse)
             badge.number = updates
             badge.backgroundColor = getResourceColor(R.attr.badgeColor)
             badge.badgeTextColor = Color.WHITE
         } else {
-            bottom_nav.removeBadge(R.id.nav_catalogues)
+            bottom_nav.removeBadge(R.id.nav_browse)
         }
     }
 
@@ -367,9 +368,9 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                 }
                 router.pushController(controller.withFadeTransaction())
             }
-            SHORTCUT_CATALOGUES -> bottom_nav.selectedItemId = R.id.nav_catalogues
+            SHORTCUT_CATALOGUES -> bottom_nav.selectedItemId = R.id.nav_browse
             SHORTCUT_EXTENSIONS -> {
-                bottom_nav.selectedItemId = R.id.nav_catalogues
+                bottom_nav.selectedItemId = R.id.nav_browse
                 router.popToRoot()
                 bottom_nav.post {
                     val controller =

@@ -177,7 +177,10 @@
     <string name="history">History</string>
     <string name="recently_read">Recently read</string>
     <string name="recent_updates">Recent updates</string>
-    <string name="this_will_remove_the_read_date_question">This will remove the read date of this chapter. Are you sure?</string>
+    <string name="this_will_remove_the_read_date_for_x_question">This will remove the read date of
+        \"%1$s\". Are you sure?</string>
+    <string name="this_will_remove_the_read_date_question">This will remove the read date of this
+        chapter. Are you sure?</string>
     <string name="reset_all_chapters_for_this_">Reset all chapters for this %1$s</string>
     <string name="source_dash_chapter_">%1$s - Ch.%2$s</string>
     <string name="last_read_">Last read %1$s</string>
@@ -190,8 +193,12 @@
     <string name="search_recents">Search recents…</string>
     <string name="no_recent_chapters">No recent chapters</string>
     <string name="no_recently_read_manga">No recently read manga</string>
-    <string name="group_recents">Group recents</string>
-    <string name="ungroup_recents">Ungroup recents</string>
+    <string name="group_all">Group all</string>
+    <string name="ungroup_all">Ungroup all</string>
+    <string name="only_history">Only history</string>
+    <string name="only_updates">Only updates</string>
+    <string name="reset_chapter_question">Reset chapter?</string>
+    <string name="press_and_hold_to_reset_history">Press and hold to reset chapter history</string>
 
     <!-- Browse -->
     <string name="search_filters">Search filters</string>

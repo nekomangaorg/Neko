@@ -10,6 +10,7 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.ui.manga.chapter.BaseChapterHolder
+import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.visibleIf
 import kotlinx.android.synthetic.main.download_button.*
 import kotlinx.android.synthetic.main.recent_manga_item.*
@@ -37,9 +38,21 @@ class RecentMangaHolder(
 
     fun bind(item: RecentMangaItem) {
         download_button.visibleIf(item.mch.manga.source != LocalSource.ID)
-        subtitle.text = item.mch.manga.title
-        val isSearch = adapter.delegate.isSearching()
-        title.text = item.chapter.name
+        title.apply {
+            text = item.chapter.name
+            setTextColor(when {
+                item.chapter.bookmark -> context.getResourceColor(R.attr.colorAccent)
+                item.chapter.read -> context.getResourceColor(android.R.attr.textColorHint)
+                else -> context.getResourceColor(android.R.attr.textColorPrimary)
+            })
+        }
+        subtitle.apply {
+            text = item.mch.manga.title
+            setTextColor(when {
+                item.chapter.read -> context.getResourceColor(android.R.attr.textColorHint)
+                else -> context.getResourceColor(android.R.attr.textColorPrimary)
+            })
+        }
         val notValidNum = item.mch.chapter.chapter_number <= 0
         body.text = when {
             item.mch.chapter.id == null -> body.context.getString(
@@ -77,11 +90,16 @@ class RecentMangaHolder(
         GlideApp.with(itemView.context).load(item.mch.manga).diskCacheStrategy(DiskCacheStrategy
             .AUTOMATIC)
             .signature(ObjectKey(MangaImpl.getLastCoverFetch(item.mch.manga.id!!).toString())).into(cover_thumbnail)
-        // adapter.delegate.setCover(item.mch.manga, cover_thumbnail)
         notifyStatus(
             if (adapter.isSelected(adapterPosition)) Download.CHECKED else item.status,
             item.progress
         )
+    }
+
+    override fun onLongClick(view: View?): Boolean {
+        super.onLongClick(view)
+        val item = adapter.getItem(adapterPosition) as? RecentMangaItem ?: return false
+        return item.mch.history.id != null
     }
 
     fun notifyStatus(status: Int, progress: Int) =
