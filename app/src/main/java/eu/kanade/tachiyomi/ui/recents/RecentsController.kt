@@ -8,6 +8,7 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -20,6 +21,8 @@ import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.database.models.History
+import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
@@ -32,7 +35,9 @@ import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.recent_updates.RecentChaptersController
 import eu.kanade.tachiyomi.ui.recently_read.RecentlyReadController
+import eu.kanade.tachiyomi.ui.recently_read.RemoveHistoryDialog
 import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.applyWindowInsetsForRootController
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
@@ -54,9 +59,11 @@ import kotlin.math.max
 class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
     RecentMangaAdapter.RecentsInterface,
     FlexibleAdapter.OnItemClickListener,
+    FlexibleAdapter.OnItemLongClickListener,
     FlexibleAdapter.OnItemMoveListener,
     RootSearchInterface,
-    BottomSheetController {
+    BottomSheetController,
+    RemoveHistoryDialog.Listener {
 
     init {
         setHasOptionsMenu(true)
@@ -112,7 +119,10 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
         }
 
         presenter.onCreate()
-        if (presenter.recentItems.isNotEmpty()) adapter.updateDataSet(presenter.recentItems)
+        if (presenter.recentItems.isNotEmpty()) {
+            adapter.updateDataSet(presenter.recentItems)
+            adapter.addScrollableHeader(presenter.generalHeader)
+        }
 
         dl_bottom_sheet.onCreate(this)
 
@@ -173,6 +183,7 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
     fun reEnableSwipe() {
         swipe_refresh.isRefreshing = false
     }
+
     override fun onItemMove(fromPosition: Int, toPosition: Int) { }
 
     override fun shouldMoveItem(fromPosition: Int, toPosition: Int) = true
@@ -217,6 +228,9 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
     fun showLists(recents: List<RecentMangaItem>) {
         swipe_refresh.isRefreshing = LibraryUpdateService.isRunning()
         adapter.updateDataSet(recents)
+        adapter.removeAllScrollableHeaders()
+        if (presenter.viewType > 0)
+            adapter.addScrollableHeader(presenter.generalHeader)
         if (lastChapterId != null) {
             refreshItem(lastChapterId ?: 0L)
             lastChapterId = null
@@ -287,6 +301,25 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
         return true
     }
 
+    override fun onItemLongClick(position: Int) {
+        val item = adapter.getItem(position) as? RecentMangaItem ?: return
+        val manga = item.mch.manga
+        val history = item.mch.history
+        val chapter = item.mch.chapter
+        if (history.id != null)
+            RemoveHistoryDialog(this, manga, history, chapter).showDialog(router)
+    }
+
+    override fun removeHistory(manga: Manga, history: History, all: Boolean) {
+        if (all) {
+            // Reset last read of chapter to 0L
+            presenter.removeAllFromHistory(manga.id!!)
+        } else {
+            // Remove all chapters belonging to manga from library
+            presenter.removeFromHistory(history)
+        }
+    }
+
     override fun markAsRead(position: Int) {
         val item = adapter.getItem(position) as? RecentMangaItem ?: return
         val chapter = item.chapter
@@ -324,10 +357,13 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
         } else {
             inflater.inflate(R.menu.recents, menu)
 
-            val viewItem = menu.findItem(R.id.action_view)
-            val endless = presenter.groupRecents
-            viewItem.setTitle(if (endless) R.string.group_recents else R.string.ungroup_recents)
-            viewItem.setIcon(if (endless) R.drawable.ic_view_stream_24dp else R.drawable.ic_view_headline_24dp)
+            when (presenter.viewType) {
+                0 -> menu.findItem(R.id.action_group_all)
+                1 -> menu.findItem(R.id.action_ungroup_all)
+                2 -> menu.findItem(R.id.action_only_history)
+                3 -> menu.findItem(R.id.action_only_updates)
+                else -> null
+            }?.isChecked = true
 
             val searchItem = menu.findItem(R.id.action_search)
             val searchView = searchItem.actionView as SearchView
@@ -386,8 +422,16 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
         if (showingDownloads)
             return dl_bottom_sheet.onOptionsItemSelected(item)
         when (item.itemId) {
-            R.id.action_view -> {
-                presenter.toggleGroupRecents()
+            R.id.action_group_all, R.id.action_ungroup_all, R.id.action_only_history,
+            R.id.action_only_updates -> {
+                presenter.toggleGroupRecents(when (item.itemId) {
+                R.id.action_ungroup_all -> 1
+                R.id.action_only_history -> 2
+                R.id.action_only_updates -> 3
+                    else -> 0
+                })
+                if (item.itemId == R.id.action_only_history)
+                    activity?.toast(R.string.press_and_hold_to_reset_history, Toast.LENGTH_LONG)
                 activity?.invalidateOptionsMenu()
             }
         }

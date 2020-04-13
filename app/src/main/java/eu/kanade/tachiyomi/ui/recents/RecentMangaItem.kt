@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.recents
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import eu.davidea.flexibleadapter.FlexibleAdapter
+import eu.davidea.flexibleadapter.items.AbstractHeaderItem
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
@@ -13,10 +14,9 @@ import eu.kanade.tachiyomi.ui.manga.chapter.BaseChapterItem
 class RecentMangaItem(
     val mch: MangaChapterHistory = MangaChapterHistory.createBlank(),
     chapter: Chapter = ChapterImpl(),
-    header:
-    RecentMangaHeaderItem?
+    header: AbstractHeaderItem<*>?
 ) :
-    BaseChapterItem<RecentMangaHolder, RecentMangaHeaderItem>(chapter, header) {
+    BaseChapterItem<RecentMangaHolder, AbstractHeaderItem<*>>(chapter, header) {
 
     override fun getLayoutRes(): Int {
         return if (mch.manga.id == null) R.layout.recents_footer_item
@@ -37,14 +37,15 @@ class RecentMangaItem(
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other is RecentMangaItem) {
-            return if (mch.manga.id == null) header?.recentsType == other.header?.recentsType
+            return if (mch.manga.id == null) (header as? RecentMangaHeaderItem)?.recentsType ==
+                (other.header as? RecentMangaHeaderItem)?.recentsType
             else chapter.id == other.chapter.id
         }
         return false
     }
 
     override fun hashCode(): Int {
-        return if (mch.manga.id == null) -(header?.recentsType ?: 0).hashCode()
+        return if (mch.manga.id == null) -((header as? RecentMangaHeaderItem)?.recentsType ?: 0).hashCode()
         else (chapter.id ?: 0L).hashCode()
     }
 
@@ -54,7 +55,7 @@ class RecentMangaItem(
         position: Int,
         payloads: MutableList<Any?>?
     ) {
-        if (mch.manga.id == null) holder.bind(header?.recentsType ?: 0)
+        if (mch.manga.id == null) holder.bind((header as? RecentMangaHeaderItem)?.recentsType ?: 0)
         else holder.bind(this)
     }
 }

@@ -2,6 +2,8 @@ package eu.kanade.tachiyomi.ui.recents
 
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
+import eu.kanade.tachiyomi.data.database.models.History
+import eu.kanade.tachiyomi.data.database.models.HistoryImpl
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaChapterHistory
@@ -13,6 +15,7 @@ import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.ui.recent_updates.DateItem
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -24,6 +27,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.Calendar
 import java.util.Date
+import java.util.TreeMap
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 
@@ -41,10 +45,10 @@ class RecentsPresenter(
     var query = ""
     private val newAdditionsHeader = RecentMangaHeaderItem(RecentMangaHeaderItem.NEWLY_ADDED)
     private val newChaptersHeader = RecentMangaHeaderItem(RecentMangaHeaderItem.NEW_CHAPTERS)
-    private val endlessHeader = RecentMangaHeaderItem(-1)
+    val generalHeader = RecentMangaHeaderItem(-1)
     private val continueReadingHeader = RecentMangaHeaderItem(RecentMangaHeaderItem
         .CONTINUE_READING)
-    var groupRecents = preferences.groupRecents().getOrDefault()
+    var viewType: Int = preferences.recentsViewType().getOrDefault()
 
     fun onCreate() {
         downloadManager.addListener(this)
@@ -60,12 +64,13 @@ class RecentsPresenter(
     fun getRecents() {
         val oldQuery = query
         scope.launch {
-            val isEndless = groupRecents && query.isEmpty()
+            val isUngrouped = viewType > 0 && query.isEmpty()
+            // groupRecents && query.isEmpty()
             val cal = Calendar.getInstance().apply {
                 time = Date()
                 when {
                     query.isNotEmpty() -> add(Calendar.YEAR, -50)
-                    isEndless -> add(Calendar.MONTH, -1)
+                    isUngrouped -> add(Calendar.MONTH, -1)
                     else -> add(Calendar.MONTH, -1)
                 }
             }
@@ -74,7 +79,7 @@ class RecentsPresenter(
                 time = Date()
                 when {
                     query.isNotEmpty() -> add(Calendar.YEAR, -50)
-                    isEndless -> add(Calendar.MONTH, -1)
+                    isUngrouped -> add(Calendar.MONTH, -1)
                     else -> add(Calendar.WEEK_OF_YEAR, -1)
                 }
             }
@@ -83,19 +88,30 @@ class RecentsPresenter(
                 time = Date()
                 when {
                     query.isNotEmpty() -> add(Calendar.YEAR, -50)
-                    isEndless -> add(Calendar.MONTH, -1)
+                    isUngrouped -> add(Calendar.MONTH, -1)
                     else -> add(Calendar.DAY_OF_YEAR, -1)
                 }
             }
 
-            val cReading =
-                if (query.isEmpty()) db.getRecentsWithUnread(cal.time, query, isEndless).executeOnIO()
-                else db.getRecentMangaLimit(cal.time, 8, query).executeOnIO()
-            val rUpdates = db.getUpdatedManga(calWeek.time, query, isEndless).executeOnIO()
+            val cReading = if (viewType != 3)
+                if (query.isEmpty() && viewType != 2)
+                    db.getRecentsWithUnread(cal.time, query, isUngrouped).executeOnIO()
+                else db.getRecentMangaLimit(
+                    cal.time,
+                    if (viewType == 2) 200 else 8,
+                    query).executeOnIO() else emptyList()
+            val rUpdates = when {
+                viewType == 3 -> db.getRecentChapters(calWeek.time).executeOnIO().map {
+                    MangaChapterHistory(it.manga, it.chapter, HistoryImpl())
+                }
+                viewType != 2 -> db.getUpdatedManga(calWeek.time, query, isUngrouped).executeOnIO()
+                else -> emptyList()
+            }
             rUpdates.forEach {
                 it.history.last_read = it.chapter.date_fetch
             }
-            val nAdditions = db.getRecentlyAdded(calDay.time, query, isEndless).executeOnIO()
+            val nAdditions = if (viewType < 2)
+                db.getRecentlyAdded(calDay.time, query, isUngrouped).executeOnIO() else emptyList()
             nAdditions.forEach {
                 it.history.last_read = it.manga.date_added
             }
@@ -103,19 +119,21 @@ class RecentsPresenter(
             val mangaList = (cReading + rUpdates + nAdditions).sortedByDescending {
                 it.history.last_read
             }.distinctBy {
-                if (query.isEmpty()) it.manga.id else it.chapter.id
+                if (query.isEmpty() && viewType != 3) it.manga.id else it.chapter.id
             }
             val pairs = mangaList.mapNotNull {
-                val chapter = if (it.chapter.read || it.chapter.id == null) getNextChapter(it.manga)
-                    else if (it.history.id == null) getFirstUpdatedChapter(it.manga, it.chapter)
-                    else it.chapter
-                if (chapter == null) if (query.isNotEmpty() && it.chapter.id != null) Pair(
-                    it, it.chapter
-                )
+                val chapter = when {
+                    viewType == 3 -> it.chapter
+                    it.chapter.read || it.chapter.id == null -> getNextChapter(it.manga)
+                    it.history.id == null -> getFirstUpdatedChapter(it.manga, it.chapter)
+                    else -> it.chapter
+                }
+                if (chapter == null) if ((query.isNotEmpty() || viewType > 1) &&
+                    it.chapter.id != null) Pair(it, it.chapter)
                 else null
                 else Pair(it, chapter)
             }
-            if (query.isEmpty() && !groupRecents) {
+            if (query.isEmpty() && !isUngrouped) {
                 val nChaptersItems =
                     pairs.filter { it.first.history.id == null && it.first.chapter.id != null }
                         .sortedWith(Comparator<Pair<MangaChapterHistory, Chapter>> { f1, f2 ->
@@ -148,9 +166,20 @@ class RecentsPresenter(
                             it.firstOrNull()?.mch?.history?.last_read ?: 0L
                         }.flatten()
             } else {
-                val header = if (isEndless) endlessHeader else null
-                recentItems = pairs.map { RecentMangaItem(it.first, it.second, header) }
-                if (isEndless && recentItems.isEmpty()) {
+                recentItems =
+                    if (viewType == 3) {
+                        val map = TreeMap<Date, MutableList<Pair<MangaChapterHistory, Chapter>>> {
+                                d1, d2 -> d2
+                            .compareTo(d1) }
+                        val byDay =
+                            pairs.groupByTo(map, { getMapKey(it.first.history.last_read) })
+                        byDay.flatMap {
+                            val dateItem = DateItem(it.key, true)
+                            it.value.map { item ->
+                                RecentMangaItem(item.first, item.second, dateItem) }
+                        }
+                    } else pairs.map { RecentMangaItem(it.first, it.second, null) }
+                if (isUngrouped && recentItems.isEmpty()) {
                     recentItems = listOf(
                         RecentMangaItem(header = newChaptersHeader),
                         RecentMangaItem(header = continueReadingHeader))
@@ -183,9 +212,9 @@ class RecentsPresenter(
         scope.cancel()
     }
 
-    fun toggleGroupRecents() {
-        preferences.groupRecents().set(!groupRecents)
-        groupRecents = !groupRecents
+    fun toggleGroupRecents(pref: Int) {
+        preferences.recentsViewType().set(pref)
+        viewType = pref
         getRecents()
     }
 
@@ -237,6 +266,22 @@ class RecentsPresenter(
     }
 
     /**
+     * Get date as time key
+     *
+     * @param date desired date
+     * @return date as time key
+     */
+    private fun getMapKey(date: Long): Date {
+        val cal = Calendar.getInstance()
+        cal.time = Date(date)
+        cal[Calendar.HOUR_OF_DAY] = 0
+        cal[Calendar.MINUTE] = 0
+        cal[Calendar.SECOND] = 0
+        cal[Calendar.MILLISECOND] = 0
+        return cal.time
+    }
+
+    /**
      * Downloads the given list of chapters with the manager.
      * @param chapter the chapter to download.
      */
@@ -272,7 +317,29 @@ class RecentsPresenter(
         }
     }
 
-    private companion object {
+    // History
+    /**
+     * Reset last read of chapter to 0L
+     * @param history history belonging to chapter
+     */
+    fun removeFromHistory(history: History) {
+        history.last_read = 0L
+        db.updateHistoryLastRead(history).executeAsBlocking()
+        getRecents()
+    }
+
+    /**
+     * Removes all chapters belonging to manga from history.
+     * @param mangaId id of manga
+     */
+    fun removeAllFromHistory(mangaId: Long) {
+        val history = db.getHistoryByMangaId(mangaId).executeAsBlocking()
+        history.forEach { it.last_read = 0L }
+        db.updateHistoryLastRead(history).executeAsBlocking()
+        getRecents()
+    }
+
+    companion object {
         var lastRecents: List<RecentMangaItem>? = null
     }
 }
