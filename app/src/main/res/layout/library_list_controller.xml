@@ -10,7 +10,7 @@
         android:id="@+id/progress"
         android:layout_gravity="center"
         android:layout_width="75dp"
-        android:layout_height="75dp"/>
+        android:layout_height="75dp" />
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipe_refresh"
@@ -38,7 +38,7 @@
             android:elevation="10dp"
             android:layout_gravity="end"
             android:background="@drawable/fast_scroll_background"
-            android:backgroundTint="@color/md_grey_800"
+            android:backgroundTint="@color/md_black_1000"
             android:paddingTop="8dp"
             android:paddingBottom="8dp"
             android:paddingStart="3dp"
@@ -55,7 +55,7 @@
             tools:alpha="1"
             android:layout_marginEnd="50dp"
             android:background="@drawable/round_textview_background"
-            android:backgroundTint="@color/md_grey_800_85"
+            android:backgroundTint="@color/md_black_1000"
             android:padding="10dp"
             android:textColor="@android:color/white"
             app:layout_constraintEnd_toStartOf="@id/fast_scroller"

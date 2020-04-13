@@ -39,7 +39,6 @@
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/title_text"
-            style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -52,6 +51,7 @@
             android:maxLines="1"
             android:textAlignment="center"
             android:textColor="?actionBarTintColor"
+            android:fontFamily="@font/metropolis_medium"
             android:textSize="18sp"
             tools:text="Downloads" />
     </LinearLayout>
@@ -66,13 +66,13 @@
             android:layout_height="match_parent"
             android:id="@+id/dl_recycler"
             android:clipToPadding="false"
-            tools:listitem="@layout/download_item"/>
+            tools:listitem="@layout/download_item" />
 
         <eu.kanade.tachiyomi.widget.EmptyView
             android:id="@+id/empty_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:visibility="gone"/>
+            android:visibility="gone" />
     </FrameLayout>
 </eu.kanade.tachiyomi.ui.download.DownloadBottomSheet>

@@ -21,8 +21,6 @@ abstract class BaseActivity : AppCompatActivity() {
         setTheme(
             when {
                 ThemeUtil.isAMOLEDTheme(theme) -> R.style.Theme_Tachiyomi_Amoled
-                ThemeUtil.isBlueTheme(theme) -> R.style.Theme_Tachiyomi_AllBlue
-                ThemeUtil.isNekoTheme(theme) -> R.style.Theme_Neko
                 else -> R.style.Theme_Tachiyomi
             }
         )

@@ -21,8 +21,11 @@ import kotlinx.android.synthetic.main.catalogue_list_item.*
  * @param adapter the adapter handling this holder.
  * @constructor creates a new catalogue holder.
  */
-class CatalogueListHolder(private val view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>) :
-        CatalogueHolder(view, adapter) {
+class CatalogueListHolder(
+    private val view: View,
+    adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>
+) :
+    CatalogueHolder(view, adapter) {
 
     /**
      * Method called from [CatalogueAdapter.onBindViewHolder]. It updates the data for this

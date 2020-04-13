@@ -6,7 +6,7 @@ import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import com.google.android.material.appbar.MaterialToolbar
 import kotlinx.android.synthetic.main.main_activity.view.*
 
-class CenteredToolbar@JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
+class CenteredToolbar @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     MaterialToolbar(context, attrs) {
 
     override fun setTitle(resId: Int) {

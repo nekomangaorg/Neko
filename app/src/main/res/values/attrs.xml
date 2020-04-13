@@ -1,35 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <attr name="typeface" format="enum">
-        <enum name="pathwayGothic" value="0" />
-        />
-    </attr>
-
-    <declare-styleable name="CustomFontTextView">
-        <attr name="typeface"/>
-    </declare-styleable>
-
     <declare-styleable name="MinMaxNumberPicker">
-        <attr name="min" format="integer"/>
-        <attr name="max" format="integer"/>
+        <attr name="min" format="integer" />
+        <attr name="max" format="integer" />
     </declare-styleable>
 
     <declare-styleable name="NegativeSeekBar">
-        <attr name="min_seek" format="integer"/>
-        <attr name="max_seek" format="integer"/>
+        <attr name="min_seek" format="integer" />
+        <attr name="max_seek" format="integer" />
     </declare-styleable>
 
-    <attr name="navigation_view_theme" format="reference"/>
-    <attr name="actionBarTintColor" format="color"/>
-    <attr name="tabBarIconColor" format="reference|integer"/>
-    <attr name="tabBarIconInactive" format="reference|integer"/>
+    <attr name="navigation_view_theme" format="reference" />
+    <attr name="actionBarTintColor" format="color" />
+    <attr name="tabBarIconColor" format="reference|integer" />
+    <attr name="tabBarIconInactive" format="reference|integer" />
     <attr name="selectable_list_drawable" format="reference|integer" />
-    <attr name="selectable_library_drawable" format="reference|integer"/>
-    <attr name="text_color_primary" format="reference|integer"/>
-    <attr name="background_card" format="reference|integer"/>
-    <attr name="icon_color" format="reference|integer"/>
-    <attr name="snackbar_background" format="reference|integer"/>
-    <attr name="snackbar_text" format="reference|integer"/>
-    <attr name="badgeColor" format="reference|integer"/>
+    <attr name="selectable_library_drawable" format="reference|integer" />
+    <attr name="text_color_primary" format="reference|integer" />
+    <attr name="background_card" format="reference|integer" />
+    <attr name="icon_color" format="reference|integer" />
+    <attr name="snackbar_background" format="reference|integer" />
+    <attr name="snackbar_text" format="reference|integer" />
+    <attr name="badgeColor" format="reference|integer" />
 </resources>

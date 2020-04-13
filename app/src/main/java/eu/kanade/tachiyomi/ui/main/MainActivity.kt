@@ -95,8 +95,6 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
         extraViewForUndo = extraViewToCheck
     }
 
-    lateinit var tabAnimator: TabsAnimator
-
     override fun onCreate(savedInstanceState: Bundle?) {
         // Create a webview before extensions do or else they will break night mode theme
         // https://stackoverflow.com/questions/54191883

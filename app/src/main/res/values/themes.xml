@@ -9,10 +9,10 @@
     <style name="Theme.Base" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="android:forceDarkAllowed" tools:targetApi="29">false</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
-        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimary">@color/bluePrimary</item>
         <item name="colorPrimaryVariant">@color/colorPrimary</item>
         <item name="colorSecondary">@color/background</item>
-        <item name="colorPrimaryDark">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/bluePrimary</item>
         <item name="colorControlActivated">@color/colorAccent</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:textColorPrimary">@color/textColorPrimary</item>
@@ -26,6 +26,7 @@
         <item name="android:divider">@color/divider</item>
         <item name="android:listDivider">@drawable/line_divider_light</item>
         <item name="actionModeStyle">@style/CustomActionModeStyle</item>
+        <item name="android:fontFamily">@font/metropolis_regular</item>
         <item name="tabBarIconColor">?colorAccent</item>
         <item name="tabBarIconInactive">@color/colorPrimaryInactive</item>
 
@@ -56,8 +57,8 @@
         <!-- Material Dialog colors -->
         <item name="md_color_title">@color/textColorPrimary</item>
         <item name="md_color_content">@color/textColorSecondary</item>
-        <item name="md_color_button_text">?attr/text_color_primary</item>
-        <item name="md_background_color">?attr/colorPrimary</item>
+        <item name="md_color_button_text">@color/colorAccent</item>
+        <item name="md_background_color">@color/dialog</item>
         <item name="md_button_casing">literal</item>
         <item name="md_corner_radius">16dp</item>
 
@@ -80,7 +81,6 @@
     </style>
 
     <style name="Theme.Tachiyomi.Amoled" parent="Theme.Tachiyomi" />
-
     <!--==============-->
     <!-- Reader Theme -->
     <!--==============-->
@@ -171,22 +171,6 @@
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:statusBarColor">?colorPrimaryDark</item>
         <item name="android:navigationBarColor">?colorPrimaryDark</item>
-    </style>
-
-    <style name="Theme.Neko" parent="Theme.Tachiyomi">
-        <item name="colorPrimary">@color/neko_primary</item>
-        <item name="colorSecondary">@color/neko_primary</item>
-        <item name="colorPrimaryVariant">@color/neko_primary</item>
-        <item name="colorOnPrimary">@color/colorAmoledPrimary</item>
-        <item name="colorPrimaryDark">@color/colorAmoledPrimary</item>
-        <item name="android:colorBackground">@color/neko_primary_variant</item>
-        <item name="android:statusBarColor">@color/neko_primary</item>
-        <item name="snackbar_background">@color/neko_primary_variant</item>
-        <item name="snackbar_text">@color/md_white_1000</item>
-
-        <!-- Custom Attributes-->
-        <item name="selectable_list_drawable">@drawable/list_item_selector</item>
-        <item name="selectable_library_drawable">@drawable/library_item_selector_amoled</item>
     </style>
 
     <!--===============-->
