@@ -168,7 +168,7 @@ class LibraryController(
                     text_view_m.translationY = view.height *
                         (index.toFloat() / (adapter.headerItems.size + 1))
                     - text_view_m.height / 2 + 16.dpToPx
-                    text_view_m.translationX = 50f.dpToPx
+                    text_view_m.translationX = 45f.dpToPx
                     text_view_m.alpha = 1f
                     text_view_m.text = headerItem.category.name
                 }
