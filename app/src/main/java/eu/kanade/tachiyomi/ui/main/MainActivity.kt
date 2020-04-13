@@ -334,7 +334,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
     }
 
     private fun getExtensionUpdates() {
-        if (Date().time >= preferences.lastExtCheck().getOrDefault() + TimeUnit.HOURS.toMillis(1)) {
+        if (Date().time >= preferences.lastExtCheck().getOrDefault() + TimeUnit.HOURS.toMillis(6)) {
             GlobalScope.launch(Dispatchers.IO) {
                 val preferences: PreferencesHelper by injectLazy()
                 try {
