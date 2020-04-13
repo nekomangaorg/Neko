@@ -93,7 +93,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         this.snackBar = snackBar
         canDismissSnackBar = false
         launchUI {
-            delay(2000)
+            delay(1000)
             if (this@MainActivity.snackBar == snackBar) {
                 canDismissSnackBar = true
             }

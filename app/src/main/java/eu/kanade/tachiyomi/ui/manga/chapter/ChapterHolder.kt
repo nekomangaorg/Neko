@@ -86,8 +86,8 @@ class ChapterHolder(
             )
             bookmark.setImageDrawable(
                 ContextCompat.getDrawable(
-                    read.context, if (item.bookmark) R.drawable.star_off
-                    else R.drawable.star
+                    read.context, if (item.bookmark) R.drawable.ic_bookmark_off_24dp
+                    else R.drawable.ic_bookmark_24dp
                 )
             )
         }

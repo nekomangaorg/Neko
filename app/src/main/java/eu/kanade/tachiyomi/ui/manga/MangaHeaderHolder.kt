@@ -142,8 +142,8 @@ class MangaHeaderHolder(
             icon = ContextCompat.getDrawable(
                 itemView.context, when {
                     item.isLocked -> R.drawable.ic_lock_white_24dp
-                    manga.favorite -> R.drawable.ic_bookmark_white_24dp
-                    else -> R.drawable.ic_add_to_library_24dp
+                    manga.favorite -> R.drawable.ic_heart_24dp
+                    else -> R.drawable.ic_heart_outline_24dp
                 }
             )
             text = itemView.resources.getString(
