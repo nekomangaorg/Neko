@@ -454,7 +454,7 @@ class LibraryUpdateService(
                 setGroup(Notifications.GROUP_NEW_CHAPTERS)
                 setContentIntent(
                     NotificationReceiver.openChapterPendingActivity(
-                        this@LibraryUpdateService, manga, cha pters . first ()
+                        this@LibraryUpdateService, manga, chapters.first()
                     )
                 )
                 addAction(

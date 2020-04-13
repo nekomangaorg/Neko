@@ -105,7 +105,7 @@ dependencies {
 
     implementation("com.google.firebase:firebase-core:17.3.0")
     implementation("com.google.firebase:firebase-analytics:17.3.0")
-    implementation("com.google.firebase:firebase-crashlytics:17.0.0-beta03")
+    implementation("com.google.firebase:firebase-crashlytics:17.0.0-beta04")
 
     val lifecycleVersion = "2.1.0"
     implementation("androidx.lifecycle:lifecycle-extensions:$lifecycleVersion")
@@ -197,7 +197,6 @@ dependencies {
     implementation("com.afollestad.material-dialogs:input:3.3.0")
     implementation("me.zhanghai.android.systemuihelper:library:1.0.0")
     implementation("com.nightlynexus.viewstatepageradapter:viewstatepageradapter:1.1.0")
-    implementation("com.github.mthli:Slice:v1.2")
     implementation("com.reddit:indicator-fast-scroll:1.2.1")
 
     implementation("com.github.kizitonwose:AndroidTagGroup:1.6.0")
