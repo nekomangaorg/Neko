@@ -37,7 +37,6 @@ import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.download.DownloadServiceListener
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
@@ -140,7 +139,6 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
                     }) return@setOnNavigationItemSelectedListener false
             }
             continueSwitchingTabs = false
-            preferences.lastTab().set(item.itemId)
             val currentRoot = router.backstack.firstOrNull()
             if (currentRoot?.tag()?.toIntOrNull() != id) {
                 when (id) {
@@ -198,9 +196,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
         if (!router.hasRootController()) {
             // Set start screen
             if (!handleIntentAction(intent)) {
-                val lastItemId =
-                    bottom_nav.menu.findItem(preferences.lastTab().getOrDefault())?.itemId
-                bottom_nav.selectedItemId = lastItemId ?: R.id.nav_library
+                bottom_nav.selectedItemId = R.id.nav_library
             }
         }
 
@@ -346,7 +342,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
 
     fun setBrowseRoot() {
         toolbar.navigationIcon = null
-        setRoot(BrowseCatalogueController(source), R.id.nav_catalogues)
+        setRoot(BrowseCatalogueController(source), R.id.nav_browse)
     }
 
     protected open fun handleIntentAction(intent: Intent): Boolean {
@@ -364,7 +360,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
                 }
                 router.pushController(controller.withFadeTransaction())
             }
-            SHORTCUT_CATALOGUES -> bottom_nav.selectedItemId = R.id.nav_catalogues
+            SHORTCUT_CATALOGUES -> bottom_nav.selectedItemId = R.id.nav_browse
             SHORTCUT_MANGA -> {
                 val extras = intent.extras ?: return false
                 if (router.backstack.isEmpty()) bottom_nav.selectedItemId = R.id.nav_library

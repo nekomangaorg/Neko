@@ -70,7 +70,6 @@ import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
@@ -90,7 +89,6 @@ import eu.kanade.tachiyomi.ui.manga.chapter.ChaptersSortBottomSheet
 import eu.kanade.tachiyomi.ui.manga.external.ExternalBottomSheet
 import eu.kanade.tachiyomi.ui.manga.track.TrackItem
 import eu.kanade.tachiyomi.ui.manga.track.TrackingBottomSheet
-import eu.kanade.tachiyomi.ui.migration.manga.design.PreMigrationController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.ui.similar.SimilarController
@@ -696,15 +694,10 @@ class MangaDetailsController : BaseController,
         menu.findItem(R.id.action_mark_all_as_unread).isVisible =
             !presenter.allUnread() && !presenter.isLockedFromSearch
         menu.findItem(R.id.action_remove_downloads).isVisible =
-            presenter.hasDownloads() && !presenter.isLockedFromSearch &&
-                manga?.source != LocalSource.ID
+            presenter.hasDownloads() && !presenter.isLockedFromSearch
         menu.findItem(R.id.remove_non_bookmarked).isVisible =
             presenter.hasBookmark() && !presenter.isLockedFromSearch
         menu.findItem(R.id.action_mark_all_as_unread).isVisible = presenter.isTracked()
-        menu.findItem(R.id.action_migrate).isVisible = !presenter.isLockedFromSearch &&
-            manga?.source != LocalSource.ID && presenter.manga.favorite
-        menu.findItem(R.id.action_migrate).title = view?.context?.getString(R.string.migrate_,
-            presenter.manga.mangaType(view!!.context))
         val iconPrimary = view?.context?.getResourceColor(android.R.attr.textColorPrimary)
             ?: Color.BLACK
         menu.findItem(R.id.action_download).icon?.mutate()?.setTint(iconPrimary)
@@ -736,11 +729,6 @@ class MangaDetailsController : BaseController,
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_refresh_tracking -> presenter.refreshTrackers()
-            R.id.action_migrate ->
-                PreMigrationController.navigateToMigration(
-                    presenter.preferences.skipPreMigration().getOrDefault(),
-                    router,
-                    listOf(manga!!.id!!))
             R.id.action_mark_all_as_read -> {
                 MaterialDialog(view!!.context).message(R.string.mark_all_as_read)
                     .positiveButton(R.string.marked_as_read) {

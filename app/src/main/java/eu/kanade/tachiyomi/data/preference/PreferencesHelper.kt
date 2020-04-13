@@ -43,18 +43,22 @@ class PreferencesHelper(val context: Context) {
     private val rxPrefs = RxSharedPreferences.create(prefs)
 
     private val defaultDownloadsDir = Uri.fromFile(
-            File(Environment.getExternalStorageDirectory().absolutePath + File.separator +
-                    context.getString(R.string.app_name), "downloads"))
+        File(
+            Environment.getExternalStorageDirectory().absolutePath + File.separator +
+                context.getString(R.string.app_name), "downloads"
+        )
+    )
 
     private val defaultBackupDir = Uri.fromFile(
-            File(Environment.getExternalStorageDirectory().absolutePath + File.separator +
-                    context.getString(R.string.app_name), "backup"))
+        File(
+            Environment.getExternalStorageDirectory().absolutePath + File.separator +
+                context.getString(R.string.app_name), "backup"
+        )
+    )
 
     fun getInt(key: String, default: Int?) = rxPrefs.getInteger(key, default)
     fun getStringPref(key: String, default: String?) = rxPrefs.getString(key, default)
     fun getStringSet(key: String, default: Set<String>) = rxPrefs.getStringSet(key, default)
-
-    fun lastTab() = rxPrefs.getInteger("last_tab", 0)
 
     fun clear() = prefs.edit().clear().apply()
 
@@ -120,7 +124,8 @@ class PreferencesHelper(val context: Context) {
 
     fun catalogueAsList() = rxPrefs.getBoolean(Keys.catalogueAsList, false)
 
-    fun enabledLanguages() = rxPrefs.getStringSet(Keys.enabledLanguages, setOf("en", Locale.getDefault().language))
+    fun enabledLanguages() =
+        rxPrefs.getStringSet(Keys.enabledLanguages, setOf("en", Locale.getDefault().language))
 
     fun sourceSorting() = rxPrefs.getInteger(Keys.sourcesSort, 0)
 
@@ -130,9 +135,9 @@ class PreferencesHelper(val context: Context) {
 
     fun setSourceCredentials(source: Source, username: String, password: String) {
         prefs.edit()
-                .putString(Keys.sourceUsername(source.id), username)
-                .putString(Keys.sourcePassword(source.id), password)
-                .apply()
+            .putString(Keys.sourceUsername(source.id), username)
+            .putString(Keys.sourcePassword(source.id), password)
+            .apply()
     }
 
     fun trackUsername(sync: TrackService) = prefs.getString(Keys.trackUsername(sync.id), "")
@@ -141,9 +146,9 @@ class PreferencesHelper(val context: Context) {
 
     fun setTrackCredentials(sync: TrackService, username: String, password: String) {
         prefs.edit()
-                .putString(Keys.trackUsername(sync.id), username)
-                .putString(Keys.trackPassword(sync.id), password)
-                .apply()
+            .putString(Keys.trackUsername(sync.id), username)
+            .putString(Keys.trackPassword(sync.id), password)
+            .apply()
     }
 
     fun trackToken(sync: TrackService) = rxPrefs.getString(Keys.trackToken(sync.id), "")
@@ -152,9 +157,14 @@ class PreferencesHelper(val context: Context) {
 
     fun backupsDirectory() = rxPrefs.getString(Keys.backupDirectory, defaultBackupDir.toString())
 
-    fun dateFormat() = rxPrefs.getObject(Keys.dateFormat, DateFormat.getDateInstance(DateFormat.SHORT), DateFormatConverter())
+    fun dateFormat() = rxPrefs.getObject(
+        Keys.dateFormat,
+        DateFormat.getDateInstance(DateFormat.SHORT),
+        DateFormatConverter()
+    )
 
-    fun downloadsDirectory() = rxPrefs.getString(Keys.downloadsDirectory, defaultDownloadsDir.toString())
+    fun downloadsDirectory() =
+        rxPrefs.getString(Keys.downloadsDirectory, defaultDownloadsDir.toString())
 
     fun downloadOnlyOverWifi() = prefs.getBoolean(Keys.downloadOnlyOverWifi, true)
 
