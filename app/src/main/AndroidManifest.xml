@@ -20,7 +20,6 @@
         android:fullBackupContent="@xml/backup_rules"
         android:hasFragileUserData="true"
         android:hardwareAccelerated="true"
-        android:usesCleartextTraffic="true"
         android:icon="@mipmap/ic_launcher"
         android:requestLegacyExternalStorage="true"
         android:roundIcon="@mipmap/ic_launcher_round"
@@ -115,6 +114,10 @@
 
         <service
             android:name=".data.backup.BackupRestoreService"
+            android:exported="false" />
+
+        <service
+            android:name=".data.similar.SimilarUpdateService"
             android:exported="false" />
 
     </application>

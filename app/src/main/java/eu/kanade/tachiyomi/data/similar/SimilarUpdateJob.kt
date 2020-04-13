@@ -4,9 +4,9 @@ import com.evernote.android.job.Job
 import com.evernote.android.job.JobManager
 import com.evernote.android.job.JobRequest
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import java.util.concurrent.TimeUnit
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.util.concurrent.TimeUnit
 
 class SimilarUpdateJob : Job() {
 
@@ -31,7 +31,7 @@ class SimilarUpdateJob : Job() {
 
             // Build the download job
             JobRequest.Builder(TAG)
-                .setPeriodic(TimeUnit.HOURS.toMillis(24), TimeUnit.MINUTES.toMillis(60))
+                .setPeriodic(TimeUnit.HOURS.toMillis(144), TimeUnit.MINUTES.toMillis(60))
                 .setRequiredNetworkType(wifiRestriction)
                 .setRequiresCharging(acRestriction)
                 .setRequirementsEnforced(true)

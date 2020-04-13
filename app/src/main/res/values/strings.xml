@@ -395,7 +395,7 @@
     <string name="add_tracking">Add tracking</string>
 
     <!-- Similar -->
-    <string name="similar">Similar Manga</string>
+    <string name="similar">Similar Manga (Beta)</string>
     <string name="similar_settings">Similar Manga Settings</string>
     <string name="similar_screen">Show Similar Manga</string>
     <string name="similar_update_restriction">Similar Manga update restrictions</string>
