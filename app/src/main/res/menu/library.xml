@@ -12,10 +12,18 @@
         app:showAsAction="collapseActionView|ifRoom" />
 
     <item
+        android:id="@+id/action_library_display"
+        android:icon="@drawable/ic_tune_white_24dp"
+        android:visible="false"
+        android:title="@string/display_options"
+        app:showAsAction="ifRoom"
+        />
+
+    <item
         android:id="@+id/action_settings"
         android:icon="@drawable/ic_settings_white_24dp"
         android:title="@string/settings"
-        app:showAsAction="never"
+        app:showAsAction="ifRoom"
         />
 
 </menu>
