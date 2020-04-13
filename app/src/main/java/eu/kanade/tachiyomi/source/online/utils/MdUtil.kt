@@ -16,7 +16,8 @@ class MdUtil {
         val englishDescriptionTags = listOf(
             "[b][u]English:[/u][/b]",
             "[b][u]English[/u][/b]",
-            "[English]:"
+            "[English]:",
+            "[B][ENG][/B]"
         )
 
         val descriptionLanguages = listOf(
@@ -40,10 +41,12 @@ class MdUtil {
             "[b][u]Portuguese / Portugu[/u][/b]",
             "[b][u]Portuguese / Portugu&ecirc;s:[/u][/b]",
             "[b] Portuguese (BR) / Portugu & ecirc; s (BR): [/ b]",
+            "[hr][B][PTBR][/B]",
             "French - Français:",
             "[b][u]French[/u][/b]",
             "[b][u]French / Fran&ccedil;ais[/u][/b]",
             "[b][u]Turkish / T&uuml;rk&ccedil;e[/u][/b]",
+            "[hr][u][b]Turkish/T&uuml;rk&ccedil;e[/b][/u]",
             "[b][u]Arabic / العربية[/u][/b]",
             "[hr][b]Links:[/b]",
             "Links:",

@@ -38,8 +38,6 @@ interface SManga : Serializable {
 
     var anime_planet_id: String?
 
-    fun hasCustomCover() = thumbnail_url?.startsWith("Custom-") == true
-
     fun copyFrom(other: SManga) {
         if (other.author != null)
             author = other.author
@@ -53,7 +51,7 @@ interface SManga : Serializable {
         if (other.genre != null)
             genre = other.genre
 
-        if (other.thumbnail_url != null && !hasCustomCover())
+        if (other.thumbnail_url != null)
             thumbnail_url = other.thumbnail_url
 
         if (other.lang_flag != null)

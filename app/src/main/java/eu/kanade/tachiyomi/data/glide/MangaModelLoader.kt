@@ -112,7 +112,6 @@ class MangaModelLoader : ModelLoader<Manga, InputStream> {
         } else {
             // Get the file from the url, removing the scheme if present, or from the cache if no url.
             val file = when {
-                manga.hasCustomCover() -> coverCache.getCoverFile(manga.thumbnail_url!!)
                 url != null -> File(url.substringAfter("file://"))
                 else -> null
             }

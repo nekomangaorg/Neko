@@ -402,7 +402,7 @@ class MangaDetailsPresenter(
                 manga.copyFrom(networkManga)
                 manga.initialized = true
                 db.insertManga(manga).executeAsBlocking()
-                if (thumbnailUrl != networkManga.thumbnail_url && !manga.hasCustomCover()) {
+                if (thumbnailUrl != networkManga.thumbnail_url) {
                     MangaImpl.setLastCoverFetch(manga.id!!, Date().time)
                     withContext(Dispatchers.Main) { controller.setPaletteColor() }
                 }
@@ -663,17 +663,6 @@ class MangaDetailsPresenter(
         stream.flush()
         stream.close()
         return destFile
-    }
-
-    fun clearCover() {
-        if (manga.hasCustomCover()) {
-            coverCache.deleteFromCache(manga.thumbnail_url!!)
-            manga.thumbnail_url = manga.thumbnail_url?.removePrefix("Custom-")
-            db.insertManga(manga).executeAsBlocking()
-            MangaImpl.setLastCoverFetch(manga.id!!, Date().time)
-            controller.updateHeader()
-            controller.setPaletteColor()
-        }
     }
 
     fun isTracked(): Boolean =
