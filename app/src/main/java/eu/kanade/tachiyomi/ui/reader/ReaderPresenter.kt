@@ -535,7 +535,11 @@ class ReaderPresenter(
                 } else {
                     val thumbUrl = manga.thumbnail_url ?: throw Exception("Image url not found")
                     if (manga.favorite) {
-                        coverCache.copyToCache(thumbUrl, stream())
+                        if (!manga.hasCustomCover()) {
+                            manga.thumbnail_url = "Custom-${manga.thumbnail_url ?: manga.id!!}"
+                            db.insertManga(manga).executeAsBlocking()
+                        }
+                        coverCache.copyToCache(manga.thumbnail_url!!, stream())
                         MangaImpl.setLastCoverFetch(manga.id!!, Date().time)
                         SetAsCoverResult.Success
                     } else {
