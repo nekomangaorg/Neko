@@ -40,4 +40,13 @@ class ChapterItem(chapter: Chapter, val manga: Manga) :
     ) {
         holder.bind(this, manga)
     }
+
+    override fun unbindViewHolder(
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>?,
+        holder: ChapterHolder?,
+        position: Int
+    ) {
+        super.unbindViewHolder(adapter, holder, position)
+        (adapter as MangaDetailsAdapter).controller.dismissPopup(position)
+    }
 }
