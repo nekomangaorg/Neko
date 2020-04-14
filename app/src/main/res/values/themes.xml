@@ -9,7 +9,7 @@
     <style name="Theme.Base" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="android:forceDarkAllowed" tools:targetApi="29">false</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
-        <item name="colorPrimary">@color/bluePrimary</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryVariant">@color/colorPrimary</item>
         <item name="colorSecondary">@color/background</item>
         <item name="colorPrimaryDark">@color/bluePrimary</item>
@@ -68,17 +68,6 @@
 
     <style name="Theme.Tachiyomi" parent="Theme.Base" />
 
-    <style name="Theme.Tachiyomi.AllBlue" parent="Theme.Tachiyomi">
-        <item name="colorPrimaryVariant">@color/bluePrimary</item>
-        <item name="colorSecondary">@color/bluePrimary</item>
-        <item name="tabBarIconColor">@color/md_white_1000</item>
-        <item name="tabBarIconInactive">@color/md_white_1000_50</item>
-        <item name="android:statusBarColor">@color/blueStatus</item>
-        <item name="actionBarTintColor">@color/md_white_1000</item>
-        <item name="actionBarTheme">@style/Theme.ActionBar.Dark.DayNight</item>
-        <item name="android:windowLightStatusBar">false</item>
-        <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
-    </style>
 
     <style name="Theme.Tachiyomi.Amoled" parent="Theme.Tachiyomi" />
     <!--==============-->

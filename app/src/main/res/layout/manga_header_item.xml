@@ -83,7 +83,7 @@
 
     <TextView
         android:id="@+id/manga_full_title"
-        style="@style/TextAppearance.MaterialComponents.Headline6"
+        style="@style/TextAppearance.Bold"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="12dp"
@@ -106,8 +106,7 @@
         android:ellipsize="end"
         android:maxLines="2"
         android:text="@string/author"
-        android:textAppearance="@style/TextAppearance.Regular.Body1.SemiBold"
-        android:textColor="?android:attr/textColorSecondary"
+        style="@style/TextAppearance.Secondary"
         android:textIsSelectable="false"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@id/manga_full_title"
@@ -115,7 +114,7 @@
 
     <TextView
         android:id="@+id/manga_status"
-        style="@style/TextAppearance.Regular.Body1.Secondary"
+        style="@style/TextAppearance.Secondary"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
@@ -126,7 +125,7 @@
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/manga_source"
-        style="@style/TextAppearance.Regular.Body1.Secondary"
+        style="@style/TextAppearance.Secondary"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
@@ -223,7 +222,7 @@
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/manga_summary_label"
-        style="@style/TextAppearance.MaterialComponents.Headline6"
+        style="@style/TextAppearance.Bold"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -234,11 +233,12 @@
         android:textSize="17sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/button_layout"
+
         tools:text="About this manga" />
 
     <TextView
         android:id="@+id/manga_summary"
-        style="@style/TextAppearance.Regular.Body1.Secondary"
+        style="@style/TextAppearance.Regular"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -246,6 +246,7 @@
         android:layout_marginEnd="16dp"
         android:clickable="true"
         android:focusable="true"
+        android:textColor="@color/md_black_1000_70"
         android:maxLines="3"
         app:layout_constraintBottom_toTopOf="@id/manga_genres_tags"
         app:layout_constraintEnd_toEndOf="parent"
@@ -316,9 +317,9 @@
         android:layout_marginEnd="16dp"
         android:visibility="gone"
         app:atg_backgroundColor="@android:color/transparent"
-        app:atg_borderColor="@color/bluePrimary"
+        app:atg_borderColor="@color/textColorPrimary"
         app:atg_borderStrokeWidth="1dp"
-        app:atg_textColor="@color/bluePrimary"
+        app:atg_textColor="@color/textColorPrimary"
         app:layout_constrainedHeight="true"
         app:layout_constraintBottom_toTopOf="@id/less_button"
         app:layout_constraintEnd_toEndOf="parent"
@@ -372,7 +373,7 @@
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/chapters_title"
-            style="@style/TextAppearance.MaterialComponents.Headline6"
+            style="@style/TextAppearance.Bold"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
