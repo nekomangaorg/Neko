@@ -241,7 +241,7 @@ open class LibraryController(
                 !adapter.isHeader(adapter.getItem(position)) &&
                 position != adapter.itemCount - 1) null
             else if (letter != null) FastScrollItemIndicator.Text(letter)
-            else FastScrollItemIndicator.Icon(R.drawable.star)
+            else FastScrollItemIndicator.Icon(R.drawable.ic_star_24dp)
         })
         fast_scroller.useDefaultScroller = false
         fast_scroller.itemIndicatorSelectedCallbacks += object :

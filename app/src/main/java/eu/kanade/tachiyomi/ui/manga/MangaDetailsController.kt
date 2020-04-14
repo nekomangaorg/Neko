@@ -359,7 +359,7 @@ class MangaDetailsController : BaseController,
             when {
                 presenter.scrollType == 0 -> null
                 letter != null -> FastScrollItemIndicator.Text(letter)
-                else -> FastScrollItemIndicator.Icon(R.drawable.star)
+                else -> FastScrollItemIndicator.Icon(R.drawable.ic_star_24dp)
             }
         })
         fast_scroller.useDefaultScroller = false

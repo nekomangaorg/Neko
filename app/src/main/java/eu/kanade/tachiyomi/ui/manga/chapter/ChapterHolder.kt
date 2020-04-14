@@ -76,8 +76,8 @@ class ChapterHolder(
         if (front_view.translationX == 0f) {
             read.setImageDrawable(
                 ContextCompat.getDrawable(
-                    read.context, if (item.read) R.drawable.eye_off
-                    else R.drawable.eye
+                    read.context, if (item.read) R.drawable.ic_eye_off_24dp
+                    else R.drawable.ic_eye_24dp
                 )
             )
             bookmark.setImageDrawable(

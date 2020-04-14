@@ -23,7 +23,7 @@
             android:tint="@color/md_white_1000"
             android:layout_gravity="end|center"
             android:layout_marginEnd="21dp"
-            android:src="@drawable/eye" />
+            android:src="@drawable/ic_eye_24dp" />
     </FrameLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
