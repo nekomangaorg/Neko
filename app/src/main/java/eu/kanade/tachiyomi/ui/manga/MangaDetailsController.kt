@@ -178,6 +178,7 @@ class MangaDetailsController : BaseController,
     private var textAnim: ViewPropertyAnimator? = null
     private var scrollAnim: ViewPropertyAnimator? = null
     var isTablet = false
+    var chapterPopupMenu: Pair<Int, PopupMenu>? = null
 
     // Tablet Layout
     var tabletRecycler: RecyclerView? = null
@@ -647,6 +648,7 @@ class MangaDetailsController : BaseController,
         val item = (adapter.getItem(position) as? ChapterItem) ?: return
         val itemView = getHolder(item)?.itemView ?: return
         val popup = PopupMenu(itemView.context, itemView)
+        chapterPopupMenu = position to popup
 
         // Inflate our menu resource into the PopupMenu's Menu
         popup.menuInflater.inflate(R.menu.chapter_single, popup.menu)
@@ -656,11 +658,19 @@ class MangaDetailsController : BaseController,
             when (menuItem.itemId) {
                 R.id.action_mark_previous_as_read -> markPreviousAsRead(item)
             }
+            chapterPopupMenu = null
             true
         }
 
         // Finally show the PopupMenu
         popup.show()
+    }
+
+    fun dismissPopup(position: Int) {
+        if (chapterPopupMenu != null && chapterPopupMenu?.first == position) {
+            chapterPopupMenu?.second?.dismiss()
+            chapterPopupMenu = null
+        }
     }
 
     private fun markPreviousAsRead(chapter: ChapterItem) {
