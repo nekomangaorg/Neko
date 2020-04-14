@@ -56,28 +56,27 @@ class LibraryPresenter(
 
     private val source by lazy { Injekt.get<SourceManager>().getMangadex() }
 
-    /**
-     * Categories of the library.
-     */
+    /** Current categories of the library. */
     var categories: List<Category> = emptyList()
         private set
 
+    /** All categories of the library, in case they are hidden because of hide categories is on */
     var allCategories: List<Category> = emptyList()
         private set
 
-    /**
-     * List of all manga to update the
-     */
+    /** List of all manga to update the */
     var libraryItems: List<LibraryItem> = emptyList()
     private var allLibraryItems: List<LibraryItem> = emptyList()
 
     private var totalChapters: Map<Long, Int>? = null
 
+    /** Save the current list to speed up loading later */
     fun onDestroy() {
         lastLibraryItems = libraryItems
         lastCategories = categories
     }
 
+    /** Restore the static items to speed up reloading the view */
     fun onRestore() {
         libraryItems = lastLibraryItems ?: return
         categories = lastCategories ?: return
@@ -85,6 +84,7 @@ class LibraryPresenter(
         lastLibraryItems = null
     }
 
+    /** Get favorited manga for library and sort and filter it */
     fun getLibrary() {
         launchUI {
             totalChapters = null
@@ -110,11 +110,11 @@ class LibraryPresenter(
     }
 
     /**
-     * Applies library filters to the given map of manga.
+     * Applies library filters to the given list of manga.
      *
-     * @param map the map to filter.
+     * @param items the items to filter.
      */
-    private fun applyFilters(map: List<LibraryItem>): List<LibraryItem> {
+    private fun applyFilters(items: List<LibraryItem>): List<LibraryItem> {
         val filterDownloaded = preferences.filterDownloaded().getOrDefault()
 
         val filterUnread = preferences.filterUnread().getOrDefault()
@@ -127,7 +127,7 @@ class LibraryPresenter(
 
         val filterTrackers = FilterBottomSheet.FILTER_TRACKER
 
-        return map.filter f@{ item ->
+        return items.filter f@{ item ->
             if (item.manga.isBlank()) {
                 return@f filterDownloaded == 0 && filterUnread == 0 && filterCompleted == 0 &&
                     filterTracked == 0 && filterMangaType == 0
@@ -195,7 +195,7 @@ class LibraryPresenter(
     /**
      * Sets downloaded chapter count to each manga.
      *
-     * @param map the map of manga.
+     * @param itemList the map of manga.
      */
     private fun setDownloadCount(itemList: List<LibraryItem>) {
         if (!preferences.downloadBadge().getOrDefault()) {
@@ -219,11 +219,11 @@ class LibraryPresenter(
     }
 
     /**
-     * Applies library sorting to the given map of manga.
+     * Applies library sorting to the given list of manga.
      *
-     * @param map the map to sort.
+     * @param itemList the map to sort.
      */
-    private fun applySort(map: List<LibraryItem>): List<LibraryItem> {
+    private fun applySort(itemList: List<LibraryItem>): List<LibraryItem> {
         val sortingMode = preferences.librarySortingMode().getOrDefault()
 
         val lastReadManga by lazy {
@@ -249,10 +249,8 @@ class LibraryPresenter(
                     val manga2LastRead = lastReadManga[i2.manga.id!!] ?: lastReadManga.size
                     manga1LastRead.compareTo(manga2LastRead)
                 }
-                sortingMode == LibrarySort.LATEST_CHAPTER -> i2.manga.last_update.compareTo(
-                    i1
-                        .manga.last_update
-                )
+                sortingMode == LibrarySort.LATEST_CHAPTER -> i2.manga.last_update.compareTo(i1
+                    .manga.last_update)
                 sortingMode == LibrarySort.UNREAD ->
                     when {
                         i1.manga.unread == i2.manga.unread -> 0
@@ -284,9 +282,10 @@ class LibraryPresenter(
         else
             Collections.reverseOrder(sortFn)
 
-        return map.sortedWith(comparator)
+        return itemList.sortedWith(comparator)
     }
 
+    /** Set the total chapters for the manga in the library */
     private fun setTotalChapters() {
         if (totalChapters != null) return
         val mangaMap = allLibraryItems
@@ -295,6 +294,10 @@ class LibraryPresenter(
         }.toMap()
     }
 
+    /** Gets the category by id
+     *
+     * @param categoryId id of the categoty to get
+     */
     private fun getCategory(categoryId: Int): Category {
         val category = categories.find { it.id == categoryId } ?: createDefaultCategory()
         if (category.isFirst == null) {
@@ -305,14 +308,20 @@ class LibraryPresenter(
         return category
     }
 
+    /**
+     * Sort 2 manga by the category's sorting
+     *
+     * @param i1 the first manga
+     * @param i2 the second manga to compare
+     * @param lastReadManga map of the last read of the library
+     */
     private fun sortCategory(
         i1: LibraryItem,
         i2: LibraryItem,
-        lastReadManga: Map<Long, Int>,
-        initCat: Category? = null
+        lastReadManga: Map<Long, Int>
     ): Int {
-        return if (initCat != null || i1.manga.category == i2.manga.category) {
-            val category = initCat ?: allCategories.find { it.id == i1.manga.category } ?: return 0
+        return if (i1.manga.category == i2.manga.category) {
+            val category = allCategories.find { it.id == i1.manga.category } ?: return 0
             if (category.mangaOrder.isNullOrEmpty() && category.mangaSort == null) {
                 category.changeSortTo(preferences.librarySortingMode().getOrDefault())
                 if (category.id == 0) preferences.defaultMangaOrder()
@@ -375,6 +384,12 @@ class LibraryPresenter(
         }
     }
 
+    /**
+     * Sort 2 manga by the their title (and remove articles if need be)
+     *
+     * @param i1 the first manga
+     * @param i2 the second manga to compare
+     */
     private fun sortAlphabetical(i1: LibraryItem, i2: LibraryItem): Int {
         return if (preferences.removeArticles().getOrDefault())
             i1.manga.title.removeArticles().compareTo(i2.manga.title.removeArticles(), true)
@@ -384,7 +399,7 @@ class LibraryPresenter(
     /**
      * Get the categories and all its manga from the database.
      *
-     * @return an observable of the categories and its manga.
+     * @return an list of all the manga in a itemized form.
      */
     private fun getLibraryFromDB(): List<LibraryItem> {
         val categories = db.getCategories().executeAsBlocking().toMutableList()
@@ -394,11 +409,9 @@ class LibraryPresenter(
         val seekPref = preferences.alwaysShowSeeker()
         if (!showCategories)
             libraryManga = libraryManga.distinctBy { it.id }
-        val categoryAll = Category.createAll(
-            context,
+        val categoryAll = Category.createAll(context,
             preferences.librarySortingMode().getOrDefault(),
-            preferences.librarySortingAscending().getOrDefault()
-        )
+            preferences.librarySortingAscending().getOrDefault())
         val catItemAll = LibraryHeaderItem({ categoryAll }, -1, seekPref)
         val categorySet = mutableSetOf<Int>()
         val headerItems = (categories.mapNotNull { category ->
@@ -418,15 +431,13 @@ class LibraryPresenter(
             categories.forEach { category ->
                 if (category.id ?: 0 <= 0 && !categorySet.contains(category.id)) {
                     val headerItem = headerItems[category.id ?: 0]
-                    items.add(
-                        LibraryItem(
-                            LibraryManga.createBlank(category.id!!),
-                            libraryLayout,
-                            preferences.uniformGrid(),
-                            preferences.alwaysShowSeeker(),
-                            headerItem
-                        )
-                    )
+                    items.add(LibraryItem(
+                        LibraryManga.createBlank(category.id!!),
+                        libraryLayout,
+                        preferences.uniformGrid(),
+                        preferences.alwaysShowSeeker(),
+                        headerItem
+                    ))
                 }
             }
         }
@@ -444,6 +455,7 @@ class LibraryPresenter(
         return items
     }
 
+    /** Create a default category with the sort set */
     private fun createDefaultCategory(): Category {
         val default = Category.createDefault(context)
         default.order = -1
@@ -453,9 +465,7 @@ class LibraryPresenter(
         return default
     }
 
-    /**
-     * Requests the library to be filtered.
-     */
+    /** Requests the library to be filtered. */
     fun requestFilterUpdate() {
         launchUI {
             var mangaMap = allLibraryItems
@@ -466,9 +476,7 @@ class LibraryPresenter(
         }
     }
 
-    /**
-     * Requests the library to have download badges added/removed.
-     */
+    /** Requests the library to have download badges added/removed. */
     fun requestDownloadBadgesUpdate() {
         launchUI {
             val mangaMap = allLibraryItems
@@ -481,9 +489,7 @@ class LibraryPresenter(
         }
     }
 
-    /**
-     * Requests the library to have unread badges changed.
-     */
+    /** Requests the library to have unread badges changed. */
     fun requestUnreadBadgesUpdate() {
         launchUI {
             val mangaMap = allLibraryItems
@@ -496,9 +502,7 @@ class LibraryPresenter(
         }
     }
 
-    /**
-     * Requests the library to be sorted.
-     */
+    /** Requests the library to be sorted. */
     private fun requestSortUpdate() {
         launchUI {
             var mangaMap = libraryItems
@@ -516,8 +520,8 @@ class LibraryPresenter(
     fun getCommonCategories(mangas: List<Manga>): Collection<Category> {
         if (mangas.isEmpty()) return emptyList()
         return mangas.toSet()
-            .map { db.getCategoriesForManga(it).executeAsBlocking() }
-            .reduce { set1: Iterable<Category>, set2 -> set1.intersect(set2).toMutableList() }
+                .map { db.getCategoriesForManga(it).executeAsBlocking() }
+                .reduce { set1: Iterable<Category>, set2 -> set1.intersect(set2).toMutableList() }
     }
 
     /**
@@ -536,6 +540,7 @@ class LibraryPresenter(
         }
     }
 
+    /** Remove manga from the library and delete the downloads */
     fun confirmDeletion(mangas: List<Manga>) {
         scope.launch {
             val mangaToDelete = mangas.distinctBy { it.id }
@@ -549,6 +554,7 @@ class LibraryPresenter(
         }
     }
 
+    /** Called when Library Service updates a manga, update the item as well */
     fun updateManga(manga: LibraryManga) {
         scope.launch {
             val rawMap = allLibraryItems
@@ -567,6 +573,7 @@ class LibraryPresenter(
         }
     }
 
+    /** Undo the removal of the manga once in library */
     fun reAddMangas(mangas: List<Manga>) {
         scope.launch {
             val mangaToAdd = mangas.distinctBy { it.id }
@@ -595,11 +602,13 @@ class LibraryPresenter(
         getLibrary()
     }
 
+    /** Returns first unread chapter of a manga */
     fun getFirstUnread(manga: Manga): Chapter? {
         val chapters = db.getChapters(manga).executeAsBlocking()
         return chapters.sortedByDescending { it.source_order }.find { !it.read }
     }
 
+    /** Update a category's sorting */
     fun sortCategory(catId: Int, order: Int) {
         val category = categories.find { catId == it.id } ?: return
         category.mangaSort = ('a' + (order - 1))
@@ -615,6 +624,7 @@ class LibraryPresenter(
         }
     }
 
+    /** Update a category's order */
     fun rearrangeCategory(catId: Int?, mangaIds: List<Long>) {
         scope.launch {
             val category = categories.find { catId == it.id } ?: return@launch
@@ -626,6 +636,7 @@ class LibraryPresenter(
         }
     }
 
+    /** Shift a manga's category via drag & drop */
     fun moveMangaToCategory(
         manga: LibraryManga,
         catId: Int?,
@@ -642,8 +653,8 @@ class LibraryPresenter(
             val categories =
                 if (catId == 0) emptyList()
                 else
-                    db.getCategoriesForManga(manga).executeOnIO()
-                        .filter { it.id != oldCatId } + listOf(category)
+                db.getCategoriesForManga(manga).executeOnIO()
+                .filter { it.id != oldCatId } + listOf(category)
 
             for (cat in categories) {
                 mc.add(MangaCategory.create(manga, cat))
@@ -663,11 +674,13 @@ class LibraryPresenter(
         }
     }
 
+    /** Returns if manga is in a category by id */
     fun mangaIsInCategory(manga: LibraryManga, catId: Int?): Boolean {
         val categories = db.getCategoriesForManga(manga).executeAsBlocking().map { it.id }
         return catId in categories
     }
 
+    /** sync selectd manga to mangadex follows */
     fun syncMangaToDex(mangaList: List<Manga>) {
         scope.launch {
             withContext(Dispatchers.IO) {
