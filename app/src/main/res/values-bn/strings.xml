@@ -213,7 +213,7 @@
     <string name="updating_category">ধরণ আপডেট হচ্ছে</string>
     <string name="local">স্থানীয়</string>
     <string name="no_more_results">আর কিছু নেই</string>
-    <string name="local_manga">স্থানীয় মাংগা</string>
+    <string name="local_library">স্থানীয় মাংগা</string>
     <string name="other">অন্যসব</string>
     <string name="global_search">সার্বজনীন খোঁজ…</string>
     <string name="latest">সর্বশেষ</string>

@@ -204,7 +204,7 @@
     <string name="search_filters">Search filters</string>
     <string name="no_more_results">No more results</string>
     <string name="no_results_found">No results found</string>
-    <string name="local_manga">Local manga</string>
+    <string name="local_library">Local library</string>
     <string name="other">Other</string>
     <string name="global_search">Global search…</string>
     <string name="latest">Latest</string>

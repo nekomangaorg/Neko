@@ -207,7 +207,7 @@
     <string name="unknown_error">Unbekannter Fehler</string>
     <string name="updating_category">Kategorie wird aktualisiert</string>
     <string name="no_more_results">Keine weiteren Ergebnisse</string>
-    <string name="local_manga">Lokale Manga</string>
+    <string name="local_library">Lokale Manga</string>
     <string name="manga_not_in_db">Dieser Manga wurde aus der Datenbank entfernt!</string>
     <string name="manga_detail_tab">Info</string>
     <string name="description">Beschreibung</string>

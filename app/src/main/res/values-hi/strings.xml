@@ -211,7 +211,7 @@
     <string name="updating_category">श्रेणी अपडेट कर रहा है</string>
     <string name="local">लोकल</string>
     <string name="no_more_results">कोई और परिणाम नहीं है</string>
-    <string name="local_manga">लोकल मंगा</string>
+    <string name="local_library">लोकल मंगा</string>
     <string name="other">अन्य</string>
     <string name="global_search">वैश्विक खोज …</string>
     <string name="latest">नवीनतम</string>

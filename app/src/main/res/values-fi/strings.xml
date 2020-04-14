@@ -333,7 +333,7 @@
     <string name="restore_backup">Palauta varmuuskopio</string>
     <string name="backup_location">Varmuuskopio kansio</string>
     <string name="search_filters">Hakusuodattimet</string>
-    <string name="local_manga">Paikalliset sarjat</string>
+    <string name="local_library">Paikalliset sarjat</string>
     <string name="other">Muut</string>
     <string name="latest">Viimeisimmät</string>
     <string name="browse">Selaa</string>

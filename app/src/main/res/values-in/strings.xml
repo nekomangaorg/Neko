@@ -209,7 +209,7 @@
     <string name="unknown_error">Terdapat suatu kesalahan</string>
     <string name="updating_category">Memperbarui kategori</string>
     <string name="no_more_results">Tidak ada hasil lainnya</string>
-    <string name="local_manga">Manga lokal</string>
+    <string name="local_library">Manga lokal</string>
     <string name="manga_not_in_db">Manga ini telah dihapus dari database!</string>
     <string name="manga_detail_tab">Info</string>
     <string name="description">Deskripsi</string>

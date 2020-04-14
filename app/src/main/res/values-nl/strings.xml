@@ -161,7 +161,7 @@
     <string name="unknown_error">Onbekende fout</string>
     <string name="updating_category">Categorie bijwerken</string>
     <string name="no_more_results">Geen verdere resultaten</string>
-    <string name="local_manga">Lokale manga</string>
+    <string name="local_library">Lokale manga</string>
     <string name="manga_not_in_db">Deze manga is verwijderd uit de databank!</string>
     <string name="manga_detail_tab">Info</string>
     <string name="description">Beschrijving</string>

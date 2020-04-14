@@ -326,7 +326,7 @@
     <string name="what_should_backup">어떤 항목들을 백업하겠습니까\?</string>
     <string name="clear_database_completed">항목 삭제됨</string>
     <string name="local">로컬</string>
-    <string name="local_manga">로컬 만화</string>
+    <string name="local_library">로컬 만화</string>
     <string name="other">기타</string>
     <string name="browse">찾아보기</string>
     <string name="manga_not_in_db">이 만화는 데이터베이스에서 제거되었습니다!</string>

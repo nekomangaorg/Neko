@@ -322,7 +322,7 @@
     <string name="refresh_tracking_metadata">Ricarica metadati progresso</string>
     <string name="updates_tracking_details">Aggiorna stato, voto e ultimo capitolo letto dalla funzione segna progresso</string>
     <string name="no_more_results">Non ci sono altri risultati</string>
-    <string name="local_manga">Manga locale</string>
+    <string name="local_library">Manga locale</string>
     <string name="last_chapter">Ultimo capitolo</string>
     <string name="paused">In pausa</string>
     <string name="manga_tracking_tab">Monitoraggio</string>

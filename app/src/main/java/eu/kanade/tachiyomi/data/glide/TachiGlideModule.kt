@@ -26,12 +26,6 @@ class TachiGlideModule : AppGlideModule() {
     override fun applyOptions(context: Context, builder: GlideBuilder) {
         builder.setDiskCache(InternalCacheDiskCacheFactory(context, 50 * 1024 * 1024))
         builder.setDefaultRequestOptions(RequestOptions().format(DecodeFormat.PREFER_RGB_565))
-        // val memoryCacheSizeBytes = 1024 * 1024 * 100 // 100mb
-        // builder.setMemoryCache(LruResourceCache(memoryCacheSizeBytes.toLong()))
-
-            /* builder.setDefaultTransitionOptions(
-            Drawable::class.java,
-                DrawableTransitionOptions.withCrossFade())*/
     }
 
     override fun registerComponents(context: Context, glide: Glide, registry: Registry) {

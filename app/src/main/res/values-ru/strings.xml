@@ -297,7 +297,7 @@
 
     <string name="loading">Загрузка…</string>
 
-    <string name="local_manga">Локальная манга</string>
+    <string name="local_library">Локальная манга</string>
     <string name="local">Локальная</string>
 
     <plurals name="after_minutes">

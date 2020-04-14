@@ -241,7 +241,7 @@
     <string name="local">Lokal</string>
     <string name="search_filters">Sök filter</string>
     <string name="no_more_results">Inga mer resultat</string>
-    <string name="local_manga">Lokal manga</string>
+    <string name="local_library">Lokal manga</string>
     <string name="other">Andra</string>
     <string name="global_search">Global sökning…</string>
     <string name="latest">Senaste</string>

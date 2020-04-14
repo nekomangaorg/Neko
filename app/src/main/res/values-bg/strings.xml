@@ -329,7 +329,7 @@
     <string name="restoring_backup">Възстановяване на копие</string>
     <string name="refresh_tracking_metadata">Обнови метаданните на проследяването</string>
     <string name="updates_tracking_details">Обновява статус, оценка и последно прочетена глава от услугите за проследяване</string>
-    <string name="local_manga">Локална манга</string>
+    <string name="local_library">Локална манга</string>
     <string name="last_chapter">Последна глава</string>
     <string name="paused">На пауза</string>
     <string name="download_paused">Изтеглянето спряно</string>

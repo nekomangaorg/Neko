@@ -255,7 +255,7 @@
     <string name="local">Lokal</string>
     <string name="search_filters">Pagsasala sa Paghahanap</string>
     <string name="no_more_results">Wala nang mga resulta</string>
-    <string name="local_manga">Lokal na manga</string>
+    <string name="local_library">Lokal na manga</string>
     <string name="other">Iba pa</string>
     <string name="global_search">Pangkalahatang paghahanap…</string>
     <string name="latest">Pinakabago</string>

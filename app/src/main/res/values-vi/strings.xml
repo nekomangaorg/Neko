@@ -361,7 +361,7 @@
     <string name="updates_tracking_details">Cập nhật trạng thái, điểm số và chương cuối đã đọc từ dịch vụ theo dõi</string>
     <string name="local">Địa phương</string>
     <string name="search_filters">Bộ lọc tìm kiếm</string>
-    <string name="local_manga">Truyện tranh địa phương</string>
+    <string name="local_library">Truyện tranh địa phương</string>
     <string name="other">Khác</string>
     <string name="global_search">Tìm kiếm toàn cầu…</string>
     <string name="latest">Mới nhất</string>

@@ -209,7 +209,7 @@ Além disso, verifique se as fontes que requerem uma conta foram configuradas co
     <string name="unknown_error">Erro desconhecido</string>
     <string name="updating_category">Atualizando categoria</string>
     <string name="no_more_results">Não há mais resultados</string>
-    <string name="local_manga">Mangá local</string>
+    <string name="local_library">Mangá local</string>
     <string name="manga_not_in_db">Este mangá foi excluído do seu banco de dados!</string>
     <string name="manga_detail_tab">Informações</string>
     <string name="description">Descrição</string>

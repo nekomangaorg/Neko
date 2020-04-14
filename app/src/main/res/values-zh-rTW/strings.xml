@@ -261,7 +261,7 @@
     <string name="unknown_error">不明的錯誤</string>
     <string name="local">本機</string>
     <string name="no_more_results">沒有更多結果</string>
-    <string name="local_manga">本機漫畫</string>
+    <string name="local_library">本機漫畫</string>
     <string name="other">其他</string>
     <string name="browse">瀏覽</string>
     <string name="manga_detail_tab">簡介</string>

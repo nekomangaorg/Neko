@@ -214,7 +214,7 @@
     <string name="unknown_error">خطأ غير معروف</string>
     <string name="updating_category">جار تحديث الفئات</string>
     <string name="no_more_results">لا يوجد نتائج أخرى</string>
-    <string name="local_manga">المانجا المحلية</string>
+    <string name="local_library">المانجا المحلية</string>
     <string name="other">أخرى</string>
     <string name="global_search">البحث الشامل…</string>
     <string name="latest">اﻷخيرة</string>

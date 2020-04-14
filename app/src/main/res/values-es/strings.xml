@@ -307,7 +307,7 @@ También asegúrese de haber iniciado sesión en las fuentes que lo requieren an
     <string name="refresh_tracking_metadata">Actualizar metadatos de seguimiento</string>
     <string name="updates_tracking_details">Actualización de estado, puntuación y último capítulo leído en los servicios de seguimiento</string>
     <string name="no_more_results">No hay más resultados</string>
-    <string name="local_manga">Manga local</string>
+    <string name="local_library">Manga local</string>
     <string name="manga_not_in_db">Este manga fue removido de la base de datos!</string>
     <string name="last_chapter">Ultimo capítulo</string>
     <string name="circular">Icono circular</string>

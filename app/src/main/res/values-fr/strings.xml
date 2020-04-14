@@ -301,7 +301,7 @@
     <string name="amoled_black">Thème AMOLED</string>
     <string name="default_category">Catégorie par défaut</string>
     <string name="download_paused">Téléchargement en pause</string>
-    <string name="local_manga">Manga locaux</string>
+    <string name="local_library">Manga locaux</string>
     <string name="last_chapter">Dernier chapitre</string>
     <string name="paused">En pause</string>
     <string name="restore">Restaurer</string>
