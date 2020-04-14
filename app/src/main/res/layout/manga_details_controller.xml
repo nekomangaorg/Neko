@@ -13,17 +13,21 @@
         android:layout_height="match_parent"
         android:background="?android:colorBackground">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycler"
+
+        <LinearLayout
+            android:id="@+id/linear_recycler_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:clipToPadding="false"
-            android:nestedScrollingEnabled="false"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/chapters_title"
-            tools:listitem="@layout/chapters_item"/>
+            android:orientation="horizontal">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:layout_weight="0.25"
+                tools:listitem="@layout/chapters_item" />
+        </LinearLayout>
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -33,16 +37,16 @@
 
         <com.reddit.indicatorfastscroll.FastScrollerView
             android:id="@+id/fast_scroller"
-            android:textColor="?android:attr/textColorPrimary"
-            app:iconColor="?android:attr/textColorPrimary"
             android:layout_width="25dp"
             android:layout_height="0dp"
-            android:elevation="10dp"
             android:layout_gravity="end"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"
+            android:elevation="10dp"
             android:paddingStart="1dp"
+            android:paddingTop="8dp"
             android:paddingEnd="0dp"
+            android:paddingBottom="8dp"
+            android:textColor="?android:attr/textColorPrimary"
+            app:iconColor="?android:attr/textColorPrimary"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -52,15 +56,15 @@
             android:id="@+id/text_view_m"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:alpha="0"
-            tools:alpha="1"
             android:layout_marginEnd="50dp"
+            android:alpha="0"
             android:background="@drawable/round_textview_background"
             android:backgroundTint="@color/md_grey_800_85"
             android:padding="8dp"
             android:textColor="@android:color/white"
             app:layout_constraintEnd_toStartOf="@id/fast_scroller"
             app:layout_constraintTop_toTopOf="@id/fast_scroller"
+            tools:alpha="1"
             tools:text="sdfsdf" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -76,7 +80,6 @@
         tools:background="@color/md_black_1000" />
 
 
-
     <ImageView
         android:id="@+id/manga_cover_full"
         android:layout_width="match_parent"
@@ -84,9 +87,9 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
-        android:elevation="10dp"
-        android:translationZ="20dp"
         android:layout_marginBottom="16dp"
         android:contentDescription="@string/cover_of_image"
+        android:elevation="10dp"
+        android:translationZ="20dp"
         android:visibility="invisible" />
 </FrameLayout>
