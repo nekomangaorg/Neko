@@ -33,7 +33,7 @@
         style="?android:attr/progressBarStyleHorizontal"
         android:progressDrawable="@drawable/circle_progress"
         android:layout_gravity="center"
-        android:progressTint="@color/colorAccent"
+        android:progressTint="@color/download"
         android:progressBackgroundTint="@color/material_on_surface_disabled"/>
 
 

@@ -21,8 +21,9 @@ class DownloadButton @JvmOverloads constructor(context: Context, attrs: Attribut
         R.color.divider)
     private val disabledColor = ContextCompat.getColor(context,
         R.color.material_on_surface_disabled)
+    private val primaryColor = context.getResourceColor(android.R.attr.textColorPrimaryInverse)
     private val downloadedColor = ContextCompat.getColor(context,
-        R.color.material_green_800)
+        R.color.download)
     private val errorColor = ContextCompat.getColor(context,
         R.color.red_error)
     private val filledCircle = ContextCompat.getDrawable(context,
@@ -94,7 +95,7 @@ class DownloadButton @JvmOverloads constructor(context: Context, attrs: Attribut
                 download_progress_indeterminate.gone()
                 download_border.setImageDrawable(filledCircle)
                 download_border.drawable.setTint(downloadedColor)
-                download_icon.drawable.setTint(Color.WHITE)
+                download_icon.drawable.setTint(primaryColor)
             }
             Download.ERROR -> {
                 download_progress.gone()
