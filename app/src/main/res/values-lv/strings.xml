@@ -9,8 +9,6 @@
     <string name="settings">Iestatījumi</string>
     <string name="download_queue">Lejupieladēšanas rinda</string>
     <string name="library">Mana bibliotēka</string>
-    <string name="recently_read">Nesen izlasīti</string>
-    <string name="catalogues">Katalogi</string>
     <string name="recent_updates">Bibliotēkas atjauninājumi</string>
     <string name="selected_">Atlasīts: %1$d</string>
 
@@ -19,7 +17,6 @@
     <string name="bookmarked">Ar grāmatzīmēm</string>
     <string name="unread">Neizlasītie</string>
     <string name="read">Izlasītie</string>
-    <string name="remove_filter">Dzēst filtru</string>
     <string name="alphabetically">Alfabētiski</string>
     <string name="total_chapters">Nodaļu daudzums</string>
     <string name="last_read">Pēdēji izlasīti</string>
@@ -27,13 +24,9 @@
     <string name="search">Meklēt</string>
     <string name="select_all">Atlasīt visus</string>
     <string name="mark_as_read">Atzīmēt kā izlasītu</string>
-    <string name="mark_as_unread">Atzīmēt kā neizlasītu</string>
     <string name="mark_previous_as_read">Atzīmēt iepriekšējus kā izlasītus</string>
     <string name="download">Lejupieladēt</string>
-    <string name="bookmark">Grāmatzīme</string>
-    <string name="remove_bookmark">Dzēst grāmatzīmi</string>
     <string name="delete">Dzēst</string>
-    <string name="update_library">Atjaunināt bibliotēku</string>
     <string name="edit">Rediģēt</string>
     <string name="add">Pievienot</string>
     <string name="add_category">Pievienot kategoriju</string>
@@ -45,19 +38,14 @@
     <string name="pause">Pārtraukt</string>
     <string name="clear">Notīrīt</string>
     <string name="close">Aizvērt</string>
-    <string name="previous_chapter">Iepriekšēja nodaļa</string>
-    <string name="next_chapter">Nākama nodaļa</string>
     <string name="retry">Mēģināt vēlreiz</string>
     <string name="remove">Dzēst</string>
     <string name="resume">Turpināt</string>
-    <string name="move">Pārvietot</string>
     <string name="open_in_browser">Atvērt pārlūkā</string>
     <string name="add_to_home_screen">Pievienot mājas ekrānam</string>
-    <string name="display_mode">Mainīt radīšanas režīmu</string>
     <string name="display">Radīt</string>
     <string name="compact_grid">Režģis</string>
     <string name="list">Saraksts</string>
-    <string name="set_filter">Filtrēt</string>
     <string name="cancel">Atcelt</string>
     <string name="sort">Kārtot</string>
     <string name="install">Instalēt</string>
@@ -70,14 +58,12 @@
 
     <string name="loading">Ieladēšana…</string>
 
-    <string name="app_not_available">Programma nav pieejama</string>
     <string name="updates">Atjauninājumi</string>
 
     <string name="general">Vispārīgas</string>
     <string name="reader">Lasītājs</string>
     <string name="downloads">Lejupieladējumi</string>
     <string name="sources">Avoti</string>
-    <string name="pref_category_tracking">Sekošana</string>
     <string name="advanced">Papildu iestatījumi</string>
     <string name="about">Par programmu</string>
 

@@ -5,8 +5,6 @@
     <string name="settings">Настройки</string>
     <string name="download_queue">Изтегляния</string>
     <string name="library">Моята библиотека</string>
-    <string name="recently_read">Наскоро прочетени</string>
-    <string name="catalogues">Каталози</string>
     <string name="recent_updates">Наскоро обновени</string>
     <string name="selected_">Избрани: %1$d</string>
     <!-- Actions -->
@@ -15,20 +13,15 @@
     <string name="bookmarked">Отбелязани</string>
     <string name="unread">Непрочетени</string>
     <string name="read">Прочетени</string>
-    <string name="remove_filter">Премахни филтрирането</string>
     <string name="alphabetically">Азбучен ред</string>
     <string name="last_read">Последно четене</string>
     <string name="last_updated">Последно обновление</string>
     <string name="search">Търсене</string>
     <string name="select_all">Избери всички</string>
     <string name="mark_as_read">Отбележи като прочетена</string>
-    <string name="mark_as_unread">Отбележи като непрочетена</string>
     <string name="mark_previous_as_read">Отбележи предните глави като прочетени</string>
     <string name="download">Изтегли</string>
-    <string name="bookmark">Отметни</string>
-    <string name="remove_bookmark">Премахни отметката</string>
     <string name="delete">Изтрий</string>
-    <string name="update_library">Обнови библиотеката</string>
     <string name="edit">Редактирай</string>
     <string name="add">Добави</string>
     <string name="add_category">Добави категория</string>
@@ -39,18 +32,14 @@
     <string name="stop">Спри</string>
     <string name="pause">Паузирай</string>
     <string name="clear">Изчисти</string>
-    <string name="previous_chapter">Предишна глава</string>
-    <string name="next_chapter">Следваща глава</string>
     <string name="retry">Опитай пак</string>
     <string name="remove">Премахни</string>
     <string name="resume">Продължи</string>
     <string name="open_in_browser">Отвори в браузър</string>
     <string name="add_to_home_screen">Добави към началния си екран</string>
-    <string name="display_mode">Промяна на режима на показване</string>
     <string name="display">Показване</string>
     <string name="compact_grid">Решетка</string>
     <string name="list">Списък</string>
-    <string name="set_filter">Сложи филтър</string>
     <string name="cancel">Отмени</string>
     <string name="sort">Сортирай</string>
     <string name="install">Инсталирай</string>
@@ -66,13 +55,9 @@
     <string name="reader">Четец</string>
     <string name="downloads">Изтегляния</string>
     <string name="sources">Източници</string>
-    <string name="pref_category_tracking">Следене</string>
     <string name="advanced">Разширени настройки</string>
     <string name="about">За приложението</string>
     <!-- General section -->
-    <string name="pref_library_columns">Манга на ред</string>
-    <string name="portrait">Портретно</string>
-    <string name="landscape">Пейзажно</string>
     <string name="default_value">По подразбиране</string>
     <string name="library_update_frequency">Честота на обновяване на библиотеката</string>
     <string name="manual">Самостоятелно</string>
@@ -96,10 +81,8 @@
     <string name="dark">Тъмна тема</string>
     <string name="dark_blue">Тъмно син</string>
     <string name="amoled_black">AMOLED тема</string>
-    <string name="system_theme">Система по подразбиране</string>
     <string name="system_default_amoled">Система по подразбиране (AMOLED)</string>
     <string name="system_default_all_blue">Система по подразбиране(Тъмно син)</string>
-    <string name="pref_start_screen">Начален екран</string>
     <string name="language">Език</string>
     <string name="system_default">По подразбиране</string>
     <!-- Reader section -->
@@ -115,7 +98,6 @@
     <string name="background_color">Цвят на фона</string>
     <string name="white">Бял</string>
     <string name="black">Черен</string>
-    <string name="pref_viewer_type">Посока на четене</string>
     <string name="default_viewer">По подразбиране</string>
     <string name="left_to_right_viewer">От ляво надясно</string>
     <string name="right_to_left_viewer">От дясно наляво</string>
@@ -148,7 +130,6 @@
     <string name="remove_when_marked_as_read">Изтрий, щом маркирам като прочетено</string>
     <string name="remove_after_read">Изтривай след прочитане</string>
     <string name="custom_location">Персонализирана директория</string>
-    <string name="disabled">Изключено</string>
     <string name="last_read_chapter">Последно прочетена глава</string>
     <string name="second_to_last">Втора последно прочетена глава</string>
     <string name="third_to_last">Трета последно прочетена глава</string>
@@ -187,13 +168,10 @@
     <string name="could_not_log_in">Получи се грешка при влизане</string>
     <string name="unknown_error">Неизвестна грешка</string>
     <!-- Library fragment -->
-    <string name="updating_category">Обновяване на категорията</string>
     <!-- Catalogue fragment -->
     <string name="no_more_results">Няма повече резултати</string>
     <!-- Manga activity -->
-    <string name="manga_not_in_db">Тази манга беше премахната от базата данни!</string>
     <!-- Manga info fragment -->
-    <string name="manga_detail_tab">Инфо</string>
     <string name="description">Описание</string>
     <string name="ongoing">Излизаща</string>
     <string name="unknown">Неизвестно</string>
@@ -201,7 +179,6 @@
     <string name="author">Автор</string>
     <string name="artist">Артист</string>
     <string name="status">Статус</string>
-    <string name="source">Източник</string>
     <string name="circular">Кръгла икона</string>
     <string name="rounded">Заоблена икона</string>
     <string name="square">Квадратна икона</string>
@@ -209,27 +186,13 @@
     <string name="icon_shape">Форма на икона</string>
     <string name="could_not_create_shortcut">Пряк път не можа да бъде създаден!</string>
     <!-- Manga chapters fragment -->
-    <string name="manga_chapters_tab">Глави</string>
     <string name="chapter_">Глава %1$s</string>
-    <string name="chapter_downloaded">Изтеглена</string>
-    <string name="chapter_queued">На изчакване</string>
     <string name="downloading">Изтегляне</string>
     <string name="downloading_progress">Изтегляне (%1$d/%2$d)</string>
-    <string name="error">Грешка</string>
-    <string name="show_title">Покажи заглавие</string>
-    <string name="chapter_number">Показвай номера на главата</string>
-    <string name="sorting_mode">Сортиране</string>
-    <string name="sort_by_source">По източник</string>
-    <string name="sort_by_number">По ред на главите</string>
-    <string name="manga_download">Изтегли</string>
-    <string name="download_1">Изтегли следващата глава</string>
     <string name="next_5_unread">Изтегли следващите 5 глави</string>
-    <string name="download_10">Изтегли следващите 10 глави</string>
     <string name="all_chapters">Изтегли всички глави</string>
     <string name="all_unread_chapters">Изтегли непрочетени глави</string>
-    <string name="delete_selected_chapters">Сигурни ли сте, че искате да изтриете избраните глави?</string>
     <!-- MyAnimeList fragment -->
-    <string name="manga_tracking_tab">Следене</string>
     <string name="reading">В прочит</string>
     <string name="completed">Завършена</string>
     <string name="dropped">Изоставена</string>
@@ -240,12 +203,9 @@
     <string name="chapters">Глави</string>
     <!-- Category activity -->
     <string name="category_with_name_exists">Категория със същото име вече съществува!</string>
-    <string name="snack_categories_deleted">Категориите бяха изтрити</string>
     <!-- Dialog option with checkbox view -->
     <string name="this_will_remove_the_read_date_question">Това ще премахне датата на прочитане на главата. Сигурни ли сте?</string>
-    <string name="dialog_with_checkbox_reset">Изчисти всички дати за тази манга</string>
     <!-- SnackBar -->
-    <string name="snack_add_to_library">Добавяне на мангата към библиотеката\?</string>
     <!-- Image notifier -->
     <string name="picture_saved">Изображението запазено</string>
     <string name="options">Опции</string>
@@ -273,25 +233,20 @@
     <string name="select_backup_file">Изберете резервно копие</string>
     <!--UpdateCheck-->
     <string name="new_version_available">Достъпна е нова актуализация!</string>
-    <string name="update_check_confirm">Изтегли</string>
     <string name="ignore">Игнорирай</string>
     <string name="no_new_updates_available">Няма налични актуализации</string>
     <string name="searching_for_updates">Търсене на актуализации</string>
     <!--UpdateCheck Notifications-->
-    <string name="update_check_notification_download_in_progress">Изтегля се</string>
     <string name="download_complete">Изтегляне завършено</string>
     <string name="download_error">Грешка при изтегляне</string>
     <string name="update_available">Налична актуализация</string>
     <!--Content Description-->
     <string name="cover_of_image">Корица</string>
     <!-- Information Text -->
-    <string name="no_downloads">Нямате изтегляния</string>
     <string name="no_recent_chapters">Нямате скорошни глави</string>
     <string name="no_recently_read_manga">Няматe наскоро прочетена манга</string>
     <string name="library_is_empty_add_from_browse">Библиотеката Ви е празна, можете да я напълните от менюто Каталози.</string>
     <!-- Download Notification -->
-    <string name="download_notifier_downloader_title">Изтегли</string>
-    <string name="download_notifier_title_error">Грешка</string>
     <string name="could_not_download_unexpected_error">Имаше неочаквана грешка при изтеглянето на главата</string>
     <string name="no_wifi_connection">Няма налична Wi-Fi връзка</string>
     <string name="no_network_connection">Няма налична мрежова връзка</string>
@@ -301,10 +256,8 @@
     <string name="history">История</string>
     <string name="total_chapters">Общ брой глави</string>
     <string name="close">Затвори</string>
-    <string name="move">Премести</string>
     <string name="create">Създай</string>
     <string name="restore">Възстанови</string>
-    <string name="app_not_available">Приложението не е достъпно</string>
     <string name="updates">Обновления</string>
     <string name="weekly">Ежеседмично</string>
     <string name="default_category">Категория по подразбиране</string>
@@ -330,7 +283,6 @@
     <string name="refresh_tracking_metadata">Обнови метаданните на проследяването</string>
     <string name="updates_tracking_details">Обновява статус, оценка и последно прочетена глава от услугите за проследяване</string>
     <string name="local_library">Локална манга</string>
-    <string name="last_chapter">Последна глава</string>
     <string name="paused">На пауза</string>
     <string name="download_paused">Изтеглянето спряно</string>
     <string name="restore_message">За възстановяването се изтеглят данни от източника, за които може да бъде отчетен разход на данни. Също проверете дали сте влезли коректно в източниците, които го изискват, преди възстановяването.</string>
@@ -340,19 +292,13 @@
     <string name="browse">Търсене</string>
     <string name="shortcut_created">Прекият път беше добавен към началния екран.</string>
     <string name="common">Общи</string>
-    <string name="channel_downloader">Изтегляния</string>
     <string name="download_badge">Изтегляне на значки</string>
     <string name="local">Локална</string>
-    <string name="information_empty_category">Нямате категории. Натиснете плюса, за да създадете такава и да организирате библиотеката си.</string>
     <string name="source_migration">Смяна на източник</string>
     <string name="extensions">Разширения</string>
     <string name="extension_info">Информация</string>
-    <string name="all_lang">Всички</string>
     <string name="details">Подробности</string>
-    <string name="ext_update">Обнови</string>
-    <string name="ext_install">Инсталирай</string>
     <string name="pending">На изчакване</string>
-    <string name="ext_downloading">Изтегля се</string>
     <string name="installing">Инсталира се</string>
     <string name="installed">Инсталирани</string>
     <string name="trust">Потвърдени</string>
@@ -372,21 +318,16 @@
     <string name="normal">Нормална</string>
     <string name="fast">Бързо</string>
     <string name="search_filters">Филтри за търсене</string>
-    <string name="manga_info_full_title_label">Заглавие</string>
     <string name="added_to_library">Добавена към библиотеката</string>
     <string name="removed_from_library">Премахната от библиотеката</string>
-    <string name="updated">Обновена</string>
     <string name="_copied_to_clipboard">%1$s копирано към клипборда</string>
-    <string name="custom_download">Изтегли определен брой</string>
     <string name="custom_range">Изтегли определен брой</string>
-    <string name="select_data_to_include">Изберете кои данни ще мигрирате</string>
     <string name="select">Избери</string>
     <string name="migrate">Мигрирай</string>
     <string name="copy">Копирай</string>
     <string name="pager_viewer">Страница</string>
     <string name="source_not_installed_">Източникът не е инсталиран: %1$s</string>
     <string name="rereading">Препрочитане</string>
-    <string name="track_status">Статус</string>
     <string name="started">Начало</string>
     <string name="type">Тип</string>
     <string name="url_not_set_click_again">Мангата няма връзка с акаунта, молим отново да натиснете заглавието и да изберете мангата</string>
@@ -399,12 +340,10 @@
     <string name="loading_pages">Зареждане на страниците…</string>
     <string name="failed_to_load_pages_">Не бяха заредени успешно: %1$s страници</string>
     <string name="long_tap_dialog">Показване на прозорец след натискане</string>
-    <string name="reader_pull_up_for_more_options">Издърпайте за повече опции</string>
     <string name="open_in_web_view">Отвори онлайн</string>
     <string name="true_32bit_color">32-битови цветове</string>
     <string name="skip_read_chapters">Пропускай прочетените глави</string>
     <string name="color_filter_blend_mode">Режим на цветовия филтър</string>
-    <string name="filter_mode_default">По подразбиране</string>
     <string name="overlay">Наложен</string>
     <string name="multiply">Умножен</string>
     <string name="screen">Екранен</string>

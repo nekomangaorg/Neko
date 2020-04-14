@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<eu.kanade.tachiyomi.ui.catalogue.browse.CatalogueSearchSheet xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/diplay_bottom_sheet"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-</eu.kanade.tachiyomi.ui.catalogue.browse.CatalogueSearchSheet>

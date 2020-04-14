@@ -3,7 +3,6 @@
     <!-- Application Colors -->
     <color name="colorPrimary">@color/md_white_1000</color>
     <color name="colorPrimaryInactive">#C2424242</color>
-    <color name="drawerColor">#54759E</color>
     <color name="colorPrimaryDark">@color/md_white_1000</color>
     <color name="drawerHighlight">@color/md_black_1000_12</color>
     <color name="drawerPrimary">@color/bluePrimary</color>
@@ -22,9 +21,7 @@
     <color name="actionModeShadow">@color/md_black_1000_38</color>
     <!-- Dark Application Colors -->
     <color name="colorAmoledPrimary">@color/md_black_1000</color>
-    <color name="readerPrimary">#212121</color>
     <color name="readerDarkBackground">#1C1C1D</color>
-    <color name="button_bg">@color/md_white_1000</color>
     <color name="gray_button">#404040</color>
     <color name="darkPrimaryTranslucent">@color/darkPrimaryColor</color>
 
@@ -35,7 +32,6 @@
     <color name="textColorHint">@color/md_black_1000_38</color>
     <color name="textColorHintInverse">@color/md_white_1000_50</color>
     <color name="divider">@color/md_black_1000_12</color>
-    <color name="oldNavBarBackground">#B3FFFFFF</color>
     <color name="badgeColor">@color/material_red_accent_700</color>
     <color name="download">@color/material_green_800</color>
 
@@ -52,7 +48,6 @@
 
     <!-- Text Colors -->
     <color name="md_black_1000_87">#DE000000</color>
-    <color name="md_black_1000_70">#B3000000</color>
     <color name="md_black_1000_54">#8A000000</color>
     <color name="md_black_1000_38">#61000000</color>
     <color name="md_black_1000_12">#1F000000</color>
@@ -70,21 +65,15 @@
     <color name="md_black_1000">#000000</color>
 
     <color name="md_grey_50">#FAFAFA</color>
-    <color name="md_grey_200">#CCCCCC</color>
     <color name="md_grey_800">#424242</color>
     <color name="md_grey_800_85">#DF424242</color>
 
     <color name="md_blue_A200_50">#80448AFF</color>
 
     <color name="md_blue_A400">#2979FF</color>
-    <color name="md_blue_A400_87">#DE2979FF</color>
     <color name="md_blue_A400_38">#612979FF</color>
 
     <color name="md_red_500">#F44336</color>
-
-    <color name="md_red_500_87">#DEF44336</color>
-
-    <color name="md_teal_500">#009688</color>
 
     <color name="pale_green">#99CC99</color>
 </resources>

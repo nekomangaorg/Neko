@@ -45,10 +45,4 @@
         <item>@string/screen</item>
     </string-array>
 
-    <string-array name="library_display">
-        <item>@string/list</item>
-        <item>@string/compact_grid</item>
-        <item>@string/comfortable_grid</item>
-    </string-array>
-
 </resources>

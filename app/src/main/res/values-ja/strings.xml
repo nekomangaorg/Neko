@@ -8,8 +8,6 @@
     <string name="settings">設定</string>
     <string name="download_queue">ダウンロードキュー</string>
     <string name="library">ライブラリ</string>
-    <string name="recently_read">最近読んだ</string>
-    <string name="catalogues">カタログ</string>
     <string name="recent_updates">ライブラリの更新歴</string>
     <string name="selected_">選択: %1$d</string>
     <string name="filter">フィルター</string>
@@ -17,7 +15,6 @@
     <string name="bookmarked">お気に入り</string>
     <string name="unread">未読</string>
     <string name="read">既読</string>
-    <string name="remove_filter">フィルタを削除</string>
     <string name="alphabetically">アルファベット順</string>
     <string name="total_chapters">すべての章</string>
     <string name="last_read">最後に読んだ</string>
@@ -25,8 +22,6 @@
     <string name="search">検索</string>
     <string name="select_all">すべて選択</string>
     <string name="download">ダウンロード</string>
-    <string name="bookmark">ブックマーク</string>
-    <string name="remove_bookmark">ブックマークを削除</string>
     <string name="compact_grid">グリッド</string>
     <string name="list">リスト</string>
     <string name="sort">ソート</string>
@@ -35,9 +30,7 @@
     <string name="extension_info">拡張機能の情報</string>
     <string name="source_migration">ソース移行</string>
     <string name="mark_as_read">既読にする</string>
-    <string name="mark_as_unread">未読としてマーク</string>
     <string name="delete">削除する</string>
-    <string name="update_library">ライブラリを更新する</string>
     <string name="edit">編集</string>
     <string name="add_category">カテゴリを追加</string>
     <string name="edit_categories">カテゴリを編集</string>
@@ -45,13 +38,10 @@
     <string name="pause">一時停止</string>
     <string name="clear">クリア</string>
     <string name="close">クリア</string>
-    <string name="previous_chapter">前の章</string>
-    <string name="next_chapter">次の章</string>
     <string name="retry">リトライ</string>
     <string name="resume">履歴書</string>
     <string name="open_in_browser">ブラウザで開く</string>
     <string name="add_to_home_screen">ホーム画面に追加</string>
-    <string name="display_mode">表示モードを変更する</string>
     <string name="display">表示</string>
     <string name="download_badge">バッジをダウンロードする</string>
     <string name="cancel">キャンセル</string>
@@ -61,14 +51,11 @@
     <string name="create">作成する</string>
     <string name="restore">リストア</string>
     <string name="loading">読み込み中…</string>
-    <string name="app_not_available">利用できないアプリケーション</string>
     <string name="general">全般</string>
     <string name="downloads">ダウンロード</string>
     <string name="sources">出典</string>
     <string name="advanced">高度な</string>
     <string name="about">約</string>
-    <string name="portrait">ポートレート</string>
-    <string name="landscape">景観</string>
     <string name="default_value">デフォルト</string>
     <string name="library_update_frequency">ライブラリ更新頻度</string>
     <string name="manual">マニュアル</string>
@@ -93,17 +80,12 @@
     <string name="dark">ダークテーマ</string>
     <string name="amoled_black">AMOLEDテーマ</string>
     <string name="dark_blue">ダークブルー</string>
-    <string name="pref_start_screen">スタート画面</string>
     <string name="language">言語</string>
     <string name="system_default">システム標準</string>
     <string name="default_category">デフォルトカテゴリ</string>
     <string name="always_ask">毎回尋ねる</string>
-    <string name="all_lang">すべて</string>
     <string name="details">詳細</string>
-    <string name="ext_update">更新</string>
-    <string name="ext_install">インストール</string>
     <string name="pending">保留</string>
-    <string name="ext_downloading">ダウンロード中</string>
     <string name="installing">インストール</string>
     <string name="installed">インストール済み</string>
     <string name="trust">トラスト</string>
@@ -125,7 +107,6 @@
     <string name="background_color">背景色</string>
     <string name="white">白</string>
     <string name="black">ブラック</string>
-    <string name="pref_viewer_type">デフォルトビューア</string>
     <string name="default_viewer">デフォルト</string>
     <string name="left_to_right_viewer">左から右</string>
     <string name="right_to_left_viewer">右から左</string>
@@ -158,7 +139,6 @@
     <string name="remove_when_marked_as_read">既読としてマークされている場合は削除</string>
     <string name="remove_after_read">読んだ後に削除</string>
     <string name="custom_location">カスタムディレクトリ</string>
-    <string name="disabled">無効</string>
     <string name="second_to_last">最後の章の2番目</string>
     <string name="download_new_chapters">新しい章をダウンロードする</string>
     <string name="categories_to_include_in_download">ダウンロードに含まれるカテゴリ</string>
@@ -187,7 +167,6 @@
     <string name="show_password">パスワードを表示</string>
     <string name="login">ログイン</string>
     <string name="successfully_logged_in">ログイン成功</string>
-    <string name="system_theme">システム標準</string>
     <string name="system_default_all_blue">システム標準 (ダークブルー)</string>
     <string name="system_default_amoled">システム標準 (AMOLED)</string>
     <string name="add">追加</string>

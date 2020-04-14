@@ -5,14 +5,8 @@
 
     <dimen name="fab_size">56dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
-    <dimen name="fab_list_padding">88dp</dimen>
-
-    <dimen name="dialog_content_padding">24dp</dimen>
-    <dimen name="dialog_margin_top_content">20dp</dimen>
 
     <!--Nav header-->
-    <dimen name="navigation_drawer_header_height">158dp</dimen>
-    <dimen name="navigation_drawer_header_margin">41dp</dimen>
 
     <dimen name="bottom_sheet_width">0dp</dimen>
 </resources>
