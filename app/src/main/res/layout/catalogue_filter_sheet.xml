@@ -34,6 +34,8 @@
             android:layout_width="wrap_content"
             android:textColor="?attr/tabBarIconColor"
             android:layout_height="match_parent"
+            android:textSize="16sp"
+            android:letterSpacing="0.0"
             android:text="@string/reset"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -55,15 +57,15 @@
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Title Text" />
 
-        <ImageView
-            android:id="@+id/dismiss_button"
-            style="@style/Theme.Widget.CustomImageButton"
-            android:layout_width="30dp"
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/search_btn"
+            style="@style/Theme.Widget.Button.TextButton"
+            android:textSize="16sp"
+            android:letterSpacing="0.0"
+            android:layout_width="wrap_content"
+            android:textColor="?attr/tabBarIconColor"
             android:layout_height="match_parent"
-            android:layout_gravity="end"
-            android:layout_marginEnd="12dp"
-            android:src="@drawable/ic_expand_more_white_24dp"
-            android:tint="?attr/actionBarTintColor"
+            android:text="@string/search"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

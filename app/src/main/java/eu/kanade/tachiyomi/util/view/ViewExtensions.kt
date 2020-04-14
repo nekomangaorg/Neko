@@ -341,9 +341,16 @@ fun Controller.scrollViewWith(
     activity?.appbar?.y = 0f
     val attrsArray = intArrayOf(android.R.attr.actionBarSize)
     val array = recycler.context.obtainStyledAttributes(attrsArray)
-    val appBarHeight = array.getDimensionPixelSize(0, 0)
+    var appBarHeight = if (activity!!.toolbar.height > 0) activity!!.toolbar.height
+        else array.getDimensionPixelSize(0, 0)
     array.recycle()
     swipeRefreshLayout?.setDistanceToTriggerSync(150.dpToPx)
+    activity!!.toolbar.post {
+        if (activity!!.toolbar.height > 0) {
+            appBarHeight = activity!!.toolbar.height
+            recycler.requestApplyInsets()
+        }
+    }
     recycler.doOnApplyWindowInsets { view, insets, _ ->
         val headerHeight = insets.systemWindowInsetTop + appBarHeight
         if (!customPadding) view.updatePaddingRelative(
@@ -467,14 +474,9 @@ fun BottomSheetDialog.setEdgeToEdge(
         activity.window.decorView.rootWindowInsets.systemWindowInsetRight == 0)
         contentView.systemUiVisibility = contentView.systemUiVisibility
             .or(View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION)
-    /*contentView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-        leftMargin = activity.window.decorView.rootWindowInsets.systemWindowInsetLeft
-        rightMargin = activity.window.decorView.rootWindowInsets.systemWindowInsetRight
-    }*/
     if (setTopMargin > 0) (contentView.parent as View).updateLayoutParams<ViewGroup.MarginLayoutParams> {
         height =
             activity.window.decorView.height - activity.window.decorView.rootWindowInsets.systemWindowInsetTop - setTopMargin
-        // activity.window.decorView.rootWindowInsets.systemWindowInsetTop // + setTopMargin
     }
     else if (setTopMargin == 0) contentView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
         topMargin = activity.window.decorView.rootWindowInsets.systemWindowInsetTop

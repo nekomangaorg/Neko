@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/diplay_bottom_sheet"
+    android:id="@+id/display_bottom_sheet"
     android:layout_width="match_parent"
+    android:background="@drawable/bg_bottom_sheet_dialog_fragment"
     android:layout_height="wrap_content">
 
     <androidx.core.widget.NestedScrollView
@@ -15,7 +16,6 @@
             style="@style/BottomSheetDialogTheme"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_bottom_sheet_dialog_fragment"
             android:orientation="vertical"
             android:paddingTop="12dp"
             app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
@@ -154,6 +154,17 @@
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
+
+    <ImageView
+        android:id="@+id/pill"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:alpha="0.25"
+        android:contentDescription="@string/drag_handle"
+        android:src="@drawable/draggable_pill"
+        android:tint="?android:attr/textColorPrimary"
+        android:layout_gravity="center|top"/>
 
     <ImageView
         android:id="@+id/close_button"

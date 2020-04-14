@@ -16,6 +16,7 @@ import eu.kanade.tachiyomi.util.view.setEdgeToEdge
 import eu.kanade.tachiyomi.util.view.visInvisIf
 import eu.kanade.tachiyomi.util.view.visibleIf
 import kotlinx.android.synthetic.main.chapter_sort_bottom_sheet.*
+import kotlin.math.max
 
 class ChaptersSortBottomSheet(controller: MangaDetailsController) : BottomSheetDialog
     (controller.activity!!, R.style.BottomSheetDialogTheme) {
@@ -37,7 +38,12 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) : BottomSheetD
         sheetBehavior.peekHeight = 415.dpToPx + height
 
         sheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
-            override fun onSlide(bottomSheet: View, progress: Float) { }
+            override fun onSlide(bottomSheet: View, progress: Float) {
+                if (progress.isNaN())
+                    pill.alpha = 0f
+                else
+                    pill.alpha = (1 - max(0f, progress)) * 0.25f
+            }
 
             override fun onStateChanged(p0: View, state: Int) {
                 if (state == BottomSheetBehavior.STATE_EXPANDED) {
@@ -65,6 +71,7 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) : BottomSheetD
                 settings_scroll_view!!.height < bottom_sheet.height +
                     settings_scroll_view.paddingTop + settings_scroll_view.paddingBottom
             close_button.visibleIf(isScrollable)
+            pill.visibleIf(!isScrollable)
         }
 
         setOnDismissListener {

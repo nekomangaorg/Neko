@@ -8,7 +8,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.CompoundButton
 import android.widget.Spinner
-import androidx.core.widget.NestedScrollView
 import com.f2prateek.rx.preferences.Preference
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -22,9 +21,11 @@ import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.setBottomEdge
 import eu.kanade.tachiyomi.util.view.setEdgeToEdge
 import eu.kanade.tachiyomi.util.view.visible
+import eu.kanade.tachiyomi.util.view.visibleIf
 import eu.kanade.tachiyomi.widget.IgnoreFirstSpinnerListener
 import kotlinx.android.synthetic.main.reader_settings_sheet.*
 import uy.kohesive.injekt.injectLazy
+import kotlin.math.max
 
 /**
  * Sheet to show reader and viewer preferences.
@@ -39,18 +40,14 @@ class ReaderSettingsSheet(private val activity: ReaderActivity) :
 
     private var sheetBehavior: BottomSheetBehavior<*>
 
-    val scroll: NestedScrollView
-
     init {
         // Use activity theme for this layout
         val view = activity.layoutInflater.inflate(R.layout.reader_settings_sheet, null)
-        scroll = NestedScrollView(activity)
-        scroll.addView(view)
-        setContentView(scroll)
+        setContentView(view)
 
-        sheetBehavior = BottomSheetBehavior.from(scroll.parent as ViewGroup)
+        sheetBehavior = BottomSheetBehavior.from(view.parent as ViewGroup)
         setEdgeToEdge(
-            activity, scroll, if (context.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE)
+            activity, view, if (context.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE)
                 0 else -1
         )
         window?.navigationBarColor = Color.TRANSPARENT
@@ -58,10 +55,15 @@ class ReaderSettingsSheet(private val activity: ReaderActivity) :
                 .getOrDefault() == 0 && activity.window.decorView.rootWindowInsets.systemWindowInsetRight == 0 && activity.window.decorView.rootWindowInsets.systemWindowInsetLeft == 0
         ) window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
         val height = activity.window.decorView.rootWindowInsets.systemWindowInsetBottom
-        sheetBehavior.peekHeight = 200.dpToPx + height
+        sheetBehavior.peekHeight = 500.dpToPx + height
 
         sheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
-            override fun onSlide(bottomSheet: View, progress: Float) {}
+            override fun onSlide(bottomSheet: View, progress: Float) {
+                if (progress.isNaN())
+                    pill.alpha = 0f
+                else
+                    pill.alpha = (1 - max(0f, progress)) * 0.25f
+            }
 
             override fun onStateChanged(p0: View, state: Int) {
                 if (state == BottomSheetBehavior.STATE_EXPANDED) {
@@ -91,12 +93,13 @@ class ReaderSettingsSheet(private val activity: ReaderActivity) :
         close_button.setOnClickListener {
             dismiss()
         }
-    }
-
-    override fun onStart() {
-        super.onStart()
-        sheetBehavior.skipCollapsed = true
-        sheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+        settings_scroll_view.viewTreeObserver.addOnGlobalLayoutListener {
+            val isScrollable =
+                settings_scroll_view.height < constraint_layout.height +
+                    settings_scroll_view.paddingTop + settings_scroll_view.paddingBottom
+            close_button.visibleIf(isScrollable)
+            pill.visibleIf(!isScrollable)
+        }
     }
 
     /**
