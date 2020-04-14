@@ -97,7 +97,6 @@ import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.ui.similar.SimilarController
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.storage.getUriCompat
-import eu.kanade.tachiyomi.util.system.ThemeUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
@@ -557,40 +556,32 @@ class MangaDetailsController : BaseController,
     }
 
     private fun setActionBar(forThis: Boolean) {
-        val currentNightMode =
-            activity!!.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        // if the theme is using inverted toolbar color
-        if (currentNightMode == Configuration.UI_MODE_NIGHT_NO && ThemeUtil.isBlueTheme(
-                presenter.preferences.theme()
-            )
-        ) {
-            if (forThis)
-                (activity as MainActivity).appbar.context.setTheme(
-                    R.style
-                        .ThemeOverlay_AppCompat_DayNight_ActionBar
-                )
-            else
-                (activity as MainActivity).appbar.context.setTheme(
-                    R.style
-                        .Theme_ActionBar_Dark_DayNight
-                )
+        /* val currentNightMode =
+             activity!!.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+         // if the theme is using inverted toolbar color
+         if (currentNightMode == Configuration.UI_MODE_NIGHT_NO && ThemeUtil.isBlueTheme(presenter.preferences.theme())) {
+             if (forThis) {
+                 (activity as MainActivity).appbar.context.setTheme(R.style.ThemeOverlay_AppCompat_DayNight_ActionBar)
+             } else {
+                 (activity as MainActivity).appbar.context.setTheme(R.style.Theme_ActionBar_Dark_DayNight)
+             }
 
-            val iconPrimary = view?.context?.getResourceColor(
-                if (forThis) android.R.attr.textColorPrimary
-                else R.attr.actionBarTintColor
-            ) ?: Color.BLACK
-            (activity as MainActivity).toolbar.setTitleTextColor(iconPrimary)
-            (activity as MainActivity).drawerArrow?.color = iconPrimary
-            (activity as MainActivity).toolbar.overflowIcon?.setTint(iconPrimary)
-            if (forThis) activity!!.main_content.systemUiVisibility =
-                activity!!.main_content.systemUiVisibility.or(
-                    View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-                )
-            else activity!!.main_content.systemUiVisibility =
-                activity!!.main_content.systemUiVisibility.rem(
-                    View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-                )
-        }
+             val iconPrimary = view?.context?.getResourceColor(
+                 if (forThis) android.R.attr.textColorPrimary
+                 else R.attr.actionBarTintColor
+             ) ?: Color.BLACK
+             (activity as MainActivity).toolbar.setTitleTextColor(iconPrimary)
+             (activity as MainActivity).drawerArrow?.color = iconPrimary
+             (activity as MainActivity).toolbar.overflowIcon?.setTint(iconPrimary)
+             if (forThis) activity!!.main_content.systemUiVisibility =
+                 activity!!.main_content.systemUiVisibility.or(
+                     View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                 )
+             else activity!!.main_content.systemUiVisibility =
+                 activity!!.main_content.systemUiVisibility.rem(
+                     View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                 )
+         }*/
     }
 
     fun setRefresh(enabled: Boolean) {

@@ -206,18 +206,7 @@
         <item name="android:background">?attr/selectable_list_drawable</item>
     </style>
 
-    <style name="BottomNavigationTheme" parent="Widget.MaterialComponents.BottomNavigationView">
-        <item name="colorPrimary">?colorAccent</item>
-    </style>
-
     <!-- set the rounded drawable as background to your bottom sheet -->
-    <style name="BottomSheet" parent="@style/Widget.Design.BottomSheet.Modal">
-        <item name="android:background">@drawable/bg_bottom_sheet_dialog_fragment</item>
-    </style>
-
-    <style name="RoundedBottomSheetDialogTheme" parent="@style/Theme.MaterialComponents.BottomSheetDialog">
-        <item name="android:background">@android:color/transparent</item>
-    </style>
 
     <style name="BottomSheetDialogTheme" parent="@style/Theme.MaterialComponents.BottomSheetDialog">
         <item name="android:windowIsFloating">false</item>
@@ -275,14 +264,14 @@
     <style name="Theme.Widget.Button.TextButton" parent="Widget.MaterialComponents.Button.TextButton">
         <item name="android:textAllCaps">false</item>
         <item name="rippleColor">@color/fullRippleColor</item>
-        <item name="android:textColor">@color/textColorPrimary</item>
+        <item name="android:textColor">?colorAccent</item>
     </style>
 
     <style name="Theme.Widget.CustomImageButton">
         <item name="android:background">@drawable/round_ripple</item>
         <item name="android:clickable">true</item>
         <item name="android:focusable">true</item>
-        <item name="android:tint">?colorPrimary</item>
+        <item name="android:tint">?colorAccent</item>
     </style>
 
     <!--===-->
@@ -302,17 +291,5 @@
     </style>
 
     <style name="FilePickerAlertDialogTheme" parent="Theme.AppCompat.Light.Dialog.Alert"></style>
-
-    <style name="SheetDialog" parent="Theme.Design.Light.BottomSheetDialog">
-        <!--<item name="android:windowCloseOnTouchOutside">false</item>-->
-        <item name="android:windowIsTranslucent">true</item>
-        <item name="android:windowContentOverlay">@null</item>
-        <item name="android:colorBackground">@android:color/transparent</item>
-        <item name="android:backgroundDimEnabled">true</item>
-        <item name="android:backgroundDimAmount">0.3</item>
-        <item name="android:windowFrame">@null</item>
-        <item name="android:windowIsFloating">true</item>
-    </style>
-
 
 </resources>

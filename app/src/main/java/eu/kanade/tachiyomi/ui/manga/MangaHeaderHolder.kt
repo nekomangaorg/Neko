@@ -64,7 +64,7 @@ class MangaHeaderHolder(
                 adapter.delegate.tagClicked(it)
             }
             chapter_layout.setOnClickListener { adapter.delegate.showChapterFilter() }
-            webview_button.setOnClickListener { adapter.delegate.openInWebView() }
+            webview_button.setOnClickListener { adapter.delegate.showExternalSheet() }
             share_button.setOnClickListener { adapter.delegate.prepareToShareManga() }
             favorite_button.setOnClickListener {
                 adapter.delegate.favoriteManga(false)

@@ -19,7 +19,7 @@
     <!-- Amoled Theme -->
     <!--==============-->
     <style name="Theme.Tachiyomi.Amoled" parent="Theme.Tachiyomi">
-        <item name="colorPrimary">@color/md_white_1000</item>
+        <item name="colorPrimary">@color/colorAmoledPrimary</item>
         <item name="colorSecondary">@color/colorAmoledPrimary</item>
         <item name="colorPrimaryVariant">@color/colorAmoledPrimary</item>
         <item name="colorOnPrimary">@color/colorAmoledPrimary</item>

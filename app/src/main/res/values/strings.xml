@@ -444,14 +444,8 @@
 
     <!-- General settings -->
     <string name="app_theme">App theme</string>
-    <string name="light_blue">Light Blue</string>
-    <string name="dark">Dark</string>
     <string name="amoled_black">AMOLED Black</string>
-    <string name="dark_blue">Dark Blue</string>
-    <string name="solid_blue">Solid Blue</string>
     <string name="white_theme">Pure White</string>
-    <string name="system_default_amoled">System default (White + Black)</string>
-    <string name="system_default_blue_accents">System default (Blue Accents)</string>
     <string name="language">Language</string>
     <string name="system_default">System default</string>
     <string name="date_format">Date format</string>
