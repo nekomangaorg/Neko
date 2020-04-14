@@ -87,7 +87,10 @@ class LibraryPresenter(
             totalChapters = null
             val mangaMap = withContext(Dispatchers.IO) {
                 val library = getLibraryFromDB()
-                library.apply { setDownloadCount(library) }
+                library.apply {
+                    setDownloadCount(library)
+                    setUnreadBadge(library)
+                }
                 allLibraryItems = library
                 var mangaMap = library
                 mangaMap = applyFilters(mangaMap)
@@ -477,7 +480,7 @@ class LibraryPresenter(
         launchUI {
             val mangaMap = allLibraryItems
             withContext(Dispatchers.IO) { setUnreadBadge(mangaMap) }
-            libraryItems = mangaMap
+            allLibraryItems = mangaMap
             val current = libraryItems
             withContext(Dispatchers.IO) { setUnreadBadge(current) }
             libraryItems = current
