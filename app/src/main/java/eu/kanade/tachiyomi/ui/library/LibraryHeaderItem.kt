@@ -28,6 +28,7 @@ import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.invisible
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
+import eu.kanade.tachiyomi.util.view.visInvisIf
 import eu.kanade.tachiyomi.util.view.visible
 import kotlinx.android.synthetic.main.library_category_header_item.view.*
 
@@ -142,7 +143,7 @@ class LibraryHeaderItem(
                 else -> {
                     catProgress.gone()
                     checkboxImage.gone()
-                    updateButton.visible()
+                    updateButton.visInvisIf(!(category.isFirst == true && category.isLast == true))
                 }
             }
         }

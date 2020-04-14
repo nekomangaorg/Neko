@@ -96,13 +96,17 @@ class LibraryCategoryAdapter(val libraryListener: LibraryListener) :
         val preferences: PreferencesHelper by injectLazy()
         val db: DatabaseHelper by injectLazy()
         if (position == itemCount - 1) return "-"
+        val sorting = if (preferences.hideCategories().getOrDefault())
+            preferences.hideCategories().getOrDefault()
+        else (headerItems.firstOrNull() as? LibraryHeaderItem)?.category?.sortingMode()
+        ?: LibrarySort.DRAG_AND_DROP
         return when (val item: IFlexible<*>? = getItem(position)) {
             is LibraryHeaderItem ->
                 if (preferences.hideCategories().getOrDefault() || item.category.id == 0) null
                 else item.category.name.first().toString() +
                     "\u200B".repeat(max(0, item.category.order))
             is LibraryItem -> {
-                when (preferences.librarySortingMode().getOrDefault()) {
+                when (sorting) {
                     LibrarySort.DRAG_AND_DROP -> {
                         val category = db.getCategoriesForManga(item.manga).executeAsBlocking()
                             .firstOrNull()
