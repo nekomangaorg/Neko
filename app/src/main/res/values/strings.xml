@@ -41,8 +41,6 @@
     <string name="chapters">Chapters</string>
     <string name="new_chapters">New chapters</string>
     <string name="unread">Unread</string>
-    <string name="bookmark">Bookmark</string>
-    <string name="previously_read_chapter">Previously read Chapter %1$s</string>
     <string name="last_read_chapter_">Last read Chapter %1$s</string>
     <string name="chapter_">Chapter %1$s</string>
     <string name="chapter_x_of_y">Chapter %1$d of %2$d</string>
@@ -107,7 +105,6 @@
     <string name="library">Library</string>
     <string name="updating_library">Updating library</string>
     <string name="selected_">Selected: %1$d</string>
-    <string name="update_library">Update library</string>
     <string name="local">Local</string>
     <string name="remove_from_library_question">Remove from library?</string>
     <string name="library_search_hint">Search title, tags, source</string>
@@ -138,7 +135,6 @@
     <string name="medium">Medium</string>
     <string name="large">Large</string>
     <string name="grid_options">Grid options</string>
-    <string name="badges">Badges</string>
     <string name="hide_badges">Hide badges</string>
     <string name="show_badges">Show badges</string>
     <string name="show_count">Show count</string>
@@ -178,7 +174,6 @@
     <string name="updates">Updates</string>
     <string name="newly_added">Newly added</string>
     <string name="history">History</string>
-    <string name="recently_read">Recently read</string>
     <string name="recent_updates">Recent updates</string>
     <string name="this_will_remove_the_read_date_for_x_question">This will remove the read date of
         \"%1$s\". Are you sure?</string>
@@ -192,7 +187,6 @@
     <string name="added_">Added %1$s</string>
     <string name="view_history">View history</string>
     <string name="view_all_updates">View all updates</string>
-    <string name="no_search_result">No search results</string>
     <string name="search_recents">Search recents…</string>
     <string name="no_recent_chapters">No recent chapters</string>
     <string name="no_recently_read_manga">No recently read manga</string>
@@ -242,10 +236,6 @@
     <plurals name="extension_updates_available">
         <item quantity="one">Extension update available</item>
         <item quantity="other">%d extension updates available</item>
-    </plurals>
-    <plurals name="notification_and_n_more_ext">
-        <item quantity="one">and %1$d more extension</item>
-        <item quantity="other">and %1$d more extensions</item>
     </plurals>
 
     <!-- Reader -->
@@ -542,7 +532,6 @@
     <string name="show_password">Show password</string>
     <string name="login">Login</string>
     <string name="logout">Logout</string>
-    <string name="logout_from_">Logout from %1$s?</string>
     <string name="successfully_logged_in">Successfully logged in</string>
     <string name="successfully_logged_out">You are now logged out</string>
     <string name="could_not_log_in">Could not log in</string>
@@ -562,7 +551,6 @@
     <string name="downloading_progress">Downloading (%1$d/%2$d)</string>
     <string name="invalid_download_location">Invalid download location</string>
     <string name="download_paused">Download paused</string>
-    <string name="no_downloads">No downloads</string>
     <string name="nothing_is_downloading">Nothing is currently downloading</string>
     <string name="download_complete">Download complete</string>
     <string name="download_error">Download error</string>
@@ -597,7 +585,6 @@
     <string name="daily">Daily</string>
     <string name="every_2_days">Every 2 days</string>
     <string name="weekly">Weekly</string>
-    <string name="monthly">Monthly</string>
     <plurals name="after_minutes">
         <item quantity="one">After %1$s minute</item>
         <item quantity="other">After %1$s minutes</item>
@@ -617,11 +604,9 @@
     <string name="alphabetically">Alphabetically</string>
     <string name="always">Always</string>
     <string name="always_ask">Always ask</string>
-    <string name="app_not_available">App not available</string>
     <string name="auto">Auto</string>
     <string name="automatic">Automatic</string>
     <string name="back">Back</string>
-    <string name="backdrop_of_image">Backdrop image of manga</string>
     <string name="bottom">Bottom</string>
     <string name="bug_report">Report a Bug</string>
     <string name="cancel">Cancel</string>
@@ -634,12 +619,10 @@
     <string name="create">Create</string>
     <string name="default_value">Default</string>
     <string name="delete">Delete</string>
-    <string name="disabled">Disabled</string>
     <string name="display">Display</string>
     <string name="drag_handle">Drag handle</string>
     <string name="edit">Edit</string>
     <string name="enabled">Enabled</string>
-    <string name="error">Error</string>
     <string name="fast">Fast</string>
     <string name="filter">Filter</string>
     <string name="forward">Forward</string>
@@ -653,10 +636,8 @@
     <string name="mark_all_as_read">Mark all as read</string>
     <string name="mark_all_as_unread">Mark all as unread</string>
     <string name="mark_as_read">Mark as read</string>
-    <string name="mark_as_unread">Mark as unread</string>
     <string name="mark_previous_as_read">Mark previous as read</string>
     <string name="more">More</string>
-    <string name="move">Move</string>
     <string name="move_to_bottom">Move to bottom</string>
     <string name="move_to_top">Move to top</string>
     <string name="moved_to_">Moved to %1$s</string>

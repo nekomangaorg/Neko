@@ -45,12 +45,6 @@
         <item>@string/screen</item>
     </string-array>
 
-    <string-array name="library_display">
-        <item>@string/list</item>
-        <item>@string/compact_grid</item>
-        <item>@string/comfortable_grid</item>
-    </string-array>
-
     <string-array name="follows_options">
         <item>@string/follows_unfollowed</item>
         <item>@string/follows_reading</item>
@@ -76,5 +70,4 @@
         <item>20</item>
         <item>25</item>
     </string-array>
-
 </resources>

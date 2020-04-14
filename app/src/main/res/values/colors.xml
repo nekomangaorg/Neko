@@ -48,7 +48,6 @@
 
     <!-- Text Colors -->
     <color name="md_black_1000_87">#DE000000</color>
-    <color name="md_black_1000_70">#B3000000</color>
     <color name="md_black_1000_54">#8A000000</color>
     <color name="md_black_1000_38">#61000000</color>
     <color name="md_black_1000_12">#1F000000</color>
@@ -68,21 +67,15 @@
     <color name="md_black_1000">#000000</color>
 
     <color name="md_grey_50">#FAFAFA</color>
-    <color name="md_grey_200">#CCCCCC</color>
     <color name="md_grey_800">#424242</color>
     <color name="md_grey_800_85">#DF424242</color>
 
     <color name="md_blue_A200_50">#80448AFF</color>
 
     <color name="md_blue_A400">#2979FF</color>
-    <color name="md_blue_A400_87">#DE2979FF</color>
     <color name="md_blue_A400_38">#612979FF</color>
 
     <color name="md_red_500">#F44336</color>
-
-    <color name="md_red_500_87">#DEF44336</color>
-
-    <color name="md_teal_500">#009688</color>
 
     <color name="pale_green">#99CC99</color>
 
