@@ -75,8 +75,15 @@ class MangaDetailsPresenter(
         private set
 
     var headerItem = MangaHeaderItem(manga, controller.fromCatalogue)
+    var tabletChapterHeaderItem: MangaHeaderItem? = null
 
     fun onCreate() {
+        headerItem.startExpanded = controller.hasTabletHeight() || headerItem.startExpanded
+        headerItem.isTablet = controller.isTablet
+        if (controller.isTablet) {
+            tabletChapterHeaderItem = MangaHeaderItem(manga, false)
+            tabletChapterHeaderItem?.isChapterHeader = true
+        }
         isLockedFromSearch = SecureActivityDelegate.shouldBeLocked()
         headerItem.isLocked = isLockedFromSearch
         downloadManager.addListener(this)
@@ -225,6 +232,8 @@ class MangaDetailsPresenter(
      * @return an observable of the list of chapters filtered and sorted.
      */
     private fun applyChapterFilters(chapterList: List<ChapterItem>): List<ChapterItem> {
+        if (isLockedFromSearch)
+            return chapterList
         var chapters = chapterList
         if (onlyUnread()) {
             chapters = chapters.filter { !it.read }

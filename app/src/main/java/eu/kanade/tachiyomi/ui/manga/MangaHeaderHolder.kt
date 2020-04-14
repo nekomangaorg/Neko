@@ -12,7 +12,6 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.signature.ObjectKey
 import com.google.android.material.button.MaterialButton
-import com.jakewharton.rxbinding.view.RxMenuItem.checked
 import com.mikepenz.iconics.typeface.IIcon
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
@@ -36,61 +35,60 @@ import kotlinx.android.synthetic.main.manga_header_item.*
 class MangaHeaderHolder(
     private val view: View,
     private val adapter: MangaDetailsAdapter,
-    startExpanded: Boolean
+    startExpanded: Boolean,
+    isTablet: Boolean = false
 ) : BaseFlexibleViewHolder(view, adapter) {
 
     init {
-        start_reading_button.setOnClickListener { adapter.delegate.readNextChapter() }
-        top_view.updateLayoutParams<ConstraintLayout.LayoutParams> {
-            height = adapter.delegate.topCoverHeight()
-        }
-        more_button.setOnClickListener { expandDesc() }
-        manga_summary.setOnClickListener { expandDesc() }
-        manga_summary.setOnLongClickListener {
-            if (manga_summary.isTextSelectable && !adapter.recyclerView.canScrollVertically(-1)) {
-                (adapter.delegate as MangaDetailsController).swipe_refresh.isEnabled = false
-            }
-            false
-        }
-        manga_summary.setOnTouchListener { _, event ->
-            if (event.actionMasked == MotionEvent.ACTION_UP)
-                (adapter.delegate as MangaDetailsController).swipe_refresh.isEnabled = true
-            false
-        }
-        less_button.setOnClickListener {
-            manga_summary.setTextIsSelectable(false)
-            manga_summary.maxLines = 3
-            manga_summary.setOnClickListener { expandDesc() }
-            manga_genres_tags.gone()
-            less_button.gone()
-            more_button_group.visible()
-        }
-        manga_genres_tags.setOnTagClickListener {
-            adapter.delegate.tagClicked(it)
-        }
         chapter_layout.setOnClickListener { adapter.delegate.showChapterFilter() }
-        share_button.setOnClickListener { adapter.delegate.prepareToShareManga() }
-        favorite_button.setOnClickListener {
-            adapter.delegate.favoriteManga(false)
-        }
-        favorite_button.setOnLongClickListener {
-            adapter.delegate.favoriteManga(true)
-            true
-        }
-        manga_full_title.setOnLongClickListener {
-            adapter.delegate.copyToClipboard(manga_full_title.text.toString(), R.string.title)
-            true
-        }
-        manga_author.setOnLongClickListener {
-            adapter.delegate.copyToClipboard(manga_author.text.toString(), R.string.author)
-            true
-        }
-        manga_cover.setOnClickListener { adapter.delegate.zoomImageFromThumb(cover_card) }
-        track_button.setOnClickListener { adapter.delegate.showTrackingSheet() }
-        webview_button.setOnClickListener { adapter.delegate.showExternalSheet() }
+        if (start_reading_button != null) {
+            start_reading_button.setOnClickListener { adapter.delegate.readNextChapter() }
+            top_view.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                height = adapter.delegate.topCoverHeight()
+            }
+            more_button.setOnClickListener { expandDesc() }
+            manga_summary.setOnClickListener { expandDesc() }
+            manga_summary.setOnLongClickListener {
+                if (manga_summary.isTextSelectable && !adapter.recyclerView.canScrollVertically(-1)) {
+                    (adapter.delegate as MangaDetailsController).swipe_refresh.isEnabled = false
+                }
+                false
+            }
+            manga_summary.setOnTouchListener { _, event ->
+                if (event.actionMasked == MotionEvent.ACTION_UP) (adapter.delegate as MangaDetailsController).swipe_refresh.isEnabled =
+                    true
+                false
+            }
+            less_button.setOnClickListener { collapseDesc() }
+            manga_genres_tags.setOnTagClickListener {
+                adapter.delegate.tagClicked(it)
+            }
+            chapter_layout.setOnClickListener { adapter.delegate.showChapterFilter() }
+            webview_button.setOnClickListener { adapter.delegate.openInWebView() }
+            share_button.setOnClickListener { adapter.delegate.prepareToShareManga() }
+            favorite_button.setOnClickListener {
+                adapter.delegate.favoriteManga(false)
+            }
+            favorite_button.setOnLongClickListener {
+                adapter.delegate.favoriteManga(true)
+                true
+            }
+            manga_full_title.setOnLongClickListener {
+                adapter.delegate.copyToClipboard(manga_full_title.text.toString(), R.string.title)
+                true
+            }
+            manga_author.setOnLongClickListener {
+                adapter.delegate.copyToClipboard(manga_author.text.toString(), R.string.author)
+                true
+            }
+            manga_cover.setOnClickListener { adapter.delegate.zoomImageFromThumb(cover_card) }
+            track_button.setOnClickListener { adapter.delegate.showTrackingSheet() }
+            webview_button.setOnClickListener { adapter.delegate.showExternalSheet() }
 
-        if (startExpanded)
-            expandDesc()
+            if (startExpanded) expandDesc()
+            else collapseDesc()
+            if (isTablet) chapter_layout.gone()
+        }
     }
 
     private fun expandDesc() {
@@ -101,6 +99,22 @@ class MangaHeaderHolder(
             less_button.visible()
             more_button_group.gone()
         }
+    }
+
+    private fun collapseDesc() {
+        manga_summary.setTextIsSelectable(false)
+        manga_summary.maxLines = 3
+        manga_summary.setOnClickListener { expandDesc() }
+        manga_genres_tags.gone()
+        less_button.gone()
+        more_button_group.visible()
+    }
+
+    fun bindChapters() {
+        val presenter = adapter.delegate.mangaPresenter()
+        val count = presenter.chapters.size
+        chapters_title.text = itemView.resources.getQuantityString(R.plurals.chapters, count, count)
+        filters_text.text = presenter.currentFilters()
     }
 
     @SuppressLint("SetTextI18n")

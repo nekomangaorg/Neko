@@ -19,6 +19,7 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
+import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -28,10 +29,12 @@ import android.view.ViewGroup
 import android.view.ViewPropertyAnimator
 import android.view.animation.DecelerateInterpolator
 import android.view.inputmethod.InputMethodManager
+import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.PopupMenu
 import androidx.appcompat.widget.SearchView
+import androidx.core.content.ContextCompat
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.ColorUtils
@@ -98,6 +101,7 @@ import eu.kanade.tachiyomi.util.system.ThemeUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.pxToDp
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.getText
@@ -170,6 +174,15 @@ class MangaDetailsController : BaseController,
     var refreshTracker: Int? = null
     private var textAnim: ViewPropertyAnimator? = null
     private var scrollAnim: ViewPropertyAnimator? = null
+    var isTablet = false
+
+    // Tablet Layout
+    var tabletRecycler: RecyclerView? = null
+
+    /**
+     * Adapter containing a list of chapters.
+     */
+    private var tabletAdapter: MangaDetailsAdapter? = null
 
     /**
      * Library search query.
@@ -197,7 +210,7 @@ class MangaDetailsController : BaseController,
     }
 
     override fun getTitle(): String? {
-        return if (toolbarIsColored) manga?.title else null
+        return if (toolbarIsColored && !isTablet) manga?.title else null
     }
 
     override fun onViewCreated(view: View) {
@@ -205,8 +218,28 @@ class MangaDetailsController : BaseController,
         coverColor = null
 
         // Init RecyclerView and adapter
-        adapter =
-            MangaDetailsAdapter(this, view.context)
+        adapter = MangaDetailsAdapter(this, view.context)
+        isTablet = isTabletSize()
+        if (isTablet) {
+            tabletRecycler = RecyclerView(view.context)
+            linear_recycler_layout.addView(tabletRecycler, 0)
+            tabletRecycler?.updateLayoutParams<LinearLayout.LayoutParams> {
+                weight = 0.4f
+                height = ViewGroup.LayoutParams.MATCH_PARENT
+                width = ViewGroup.LayoutParams.MATCH_PARENT
+            }
+            tabletRecycler?.clipToPadding = false
+            tabletAdapter = MangaDetailsAdapter(this, view.context)
+            tabletRecycler?.adapter = tabletAdapter
+            tabletRecycler?.layoutManager = LinearLayoutManager(view.context)
+            val divider = View(view.context)
+            divider.setBackgroundColor(ContextCompat.getColor(view.context, R.color.divider))
+            linear_recycler_layout.addView(divider, 1)
+            divider.updateLayoutParams<LinearLayout.LayoutParams> {
+                height = ViewGroup.LayoutParams.MATCH_PARENT
+                width = 1.dpToPx
+            }
+        }
 
         recycler.adapter = adapter
         adapter?.isSwipeEnabled = true
@@ -229,11 +262,13 @@ class MangaDetailsController : BaseController,
         activity!!.appbar.elevation = 0f
 
         recycler.doOnApplyWindowInsets { v, insets, _ ->
+            v.updatePaddingRelative(bottom = insets.systemWindowInsetBottom)
+            tabletRecycler?.updatePaddingRelative(bottom = insets.systemWindowInsetBottom)
             headerHeight = appbarHeight + insets.systemWindowInsetTop
             statusBarHeight = insets.systemWindowInsetTop
             swipe_refresh.setProgressViewOffset(false, (-40).dpToPx, headerHeight + offset)
-            (recycler.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder)
-                ?.setTopHeight(headerHeight)
+            if (isTablet) v.updatePaddingRelative(top = headerHeight + 1.dpToPx)
+            getHeader()?.setTopHeight(headerHeight)
             fast_scroll_layout.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 topMargin = headerHeight
                 bottomMargin = insets.systemWindowInsetBottom
@@ -242,48 +277,57 @@ class MangaDetailsController : BaseController,
         }
 
         presenter.onCreate()
-        fast_scroller.translationX = if (showScroll) 0f else 25f.dpToPx
+        fast_scroller.translationX = if (showScroll || isTablet) 0f else 25f.dpToPx
         recycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 val atTop = !recycler.canScrollVertically(-1)
-                val tY = getHeader()?.backdrop?.translationY ?: 0f
-                getHeader()?.backdrop?.translationY = max(0f, tY + dy * 0.25f)
-                if (router?.backstack?.lastOrNull()
-                        ?.controller() == this@MangaDetailsController && statusBarHeight > -1 && activity != null && activity!!.appbar.height > 0
-                ) {
-                    activity!!.appbar.y -= dy
-                    activity!!.appbar.y = MathUtils.clamp(
-                        activity!!.appbar.y, -activity!!.appbar.height.toFloat(), 0f
-                    )
-                }
-                val appBarY = activity?.appbar?.y ?: 0f
-                if ((!atTop && !toolbarIsColored && (appBarY < (-headerHeight + 1) || (dy < 0 && appBarY == 0f))) || (atTop && toolbarIsColored)) {
-                    colorToolbar(!atTop)
+                if (!isTablet) {
+                    val tY = getHeader()?.backdrop?.translationY ?: 0f
+                    getHeader()?.backdrop?.translationY = max(0f, tY + dy * 0.25f)
+                    if (router?.backstack?.lastOrNull()
+                            ?.controller() == this@MangaDetailsController && statusBarHeight > -1 && activity != null && activity!!.appbar.height > 0
+                    ) {
+                        activity!!.appbar.y -= dy
+                        activity!!.appbar.y = MathUtils.clamp(
+                            activity!!.appbar.y, -activity!!.appbar.height.toFloat(), 0f
+                        )
+                    }
+                    val appBarY = activity?.appbar?.y ?: 0f
+                    if ((!atTop && !toolbarIsColored && (appBarY < (-headerHeight + 1) || (dy < 0 && appBarY == 0f))) || (atTop && toolbarIsColored)) {
+                        colorToolbar(!atTop)
+                    }
+                } else {
+                    if ((!atTop && !toolbarIsColored) || (atTop && toolbarIsColored)) {
+                        colorToolbar(!atTop)
+                    }
                 }
                 if (atTop) {
                     getHeader()?.backdrop?.translationY = 0f
                     activity!!.appbar.y = 0f
                 }
-                val fPosition =
-                    (recycler.layoutManager as LinearLayoutManager).findFirstCompletelyVisibleItemPosition()
-                if (fPosition > 0 && !showScroll) {
-                    showScroll = true
-                    scrollAnim?.cancel()
-                    scrollAnim = fast_scroller.animate().setDuration(100).translationX(0f)
-                    scrollAnim?.start()
-                } else if (fPosition <= 0 && showScroll) {
-                    showScroll = false
-                    scrollAnim?.cancel()
-                    scrollAnim = fast_scroller.animate().setDuration(100).translationX(25f.dpToPx)
-                    scrollAnim?.start()
+                if (!isTablet) {
+                    val fPosition =
+                        (recycler.layoutManager as LinearLayoutManager).findFirstCompletelyVisibleItemPosition()
+                    if (fPosition > 0 && !showScroll) {
+                        showScroll = true
+                        scrollAnim?.cancel()
+                        scrollAnim = fast_scroller.animate().setDuration(100).translationX(0f)
+                        scrollAnim?.start()
+                    } else if (fPosition <= 0 && showScroll) {
+                        showScroll = false
+                        scrollAnim?.cancel()
+                        scrollAnim =
+                            fast_scroller.animate().setDuration(100).translationX(25f.dpToPx)
+                        scrollAnim?.start()
+                    }
                 }
             }
 
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 val atTop = !recycler.canScrollVertically(-1)
-                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                if (newState == RecyclerView.SCROLL_STATE_IDLE && !isTablet) {
                     if (router?.backstack?.lastOrNull()
                             ?.controller() == this@MangaDetailsController && statusBarHeight > -1 && activity != null &&
                         activity!!.appbar.height > 0
@@ -412,8 +456,7 @@ class MangaDetailsController : BaseController,
                             )
                             else it?.getDarkVibrantColor(colorBack)) ?: colorBack
                         coverColor = backDropColor
-                        (recycler.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder)
-                            ?.setBackDrop(backDropColor)
+                        getHeader()?.setBackDrop(backDropColor)
                         if (toolbarIsColored) {
                             val translucentColor = ColorUtils.setAlphaComponent(backDropColor, 175)
                             (activity as MainActivity).toolbar.setBackgroundColor(translucentColor)
@@ -455,12 +498,35 @@ class MangaDetailsController : BaseController,
         )
     }
 
+    private fun isTabletSize(): Boolean {
+        val activity = activity ?: return false
+        if ((activity.resources.configuration.screenLayout and Configuration
+                .SCREENLAYOUT_SIZE_MASK) < Configuration.SCREENLAYOUT_SIZE_LARGE
+        )
+            return false
+        val displayMetrics = DisplayMetrics()
+        activity.windowManager?.defaultDisplay?.getMetrics(displayMetrics)
+        return displayMetrics.widthPixels.pxToDp >= 720
+    }
+
+    fun hasTabletHeight(): Boolean {
+        val activity = activity ?: return false
+        if ((activity.resources.configuration.screenLayout and Configuration
+                .SCREENLAYOUT_SIZE_MASK) < Configuration.SCREENLAYOUT_SIZE_LARGE
+        ) return false
+        val displayMetrics = DisplayMetrics()
+        activity.windowManager?.defaultDisplay?.getMetrics(displayMetrics)
+        return displayMetrics.heightPixels.pxToDp >= 720
+    }
+
     private fun getHolder(chapter: Chapter): ChapterHolder? {
         return recycler?.findViewHolderForItemId(chapter.id!!) as? ChapterHolder
     }
 
-    private fun getHeader(): MangaHeaderHolder? =
-        recycler.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder
+    private fun getHeader(): MangaHeaderHolder? {
+        return if (isTablet) tabletRecycler?.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder
+        else recycler.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder
+    }
 
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
         super.onChangeStarted(handler, type)
@@ -716,9 +782,10 @@ class MangaDetailsController : BaseController,
 
         setOnQueryTextChangeListener(searchView) {
             query = it ?: ""
-            if (query.isNotEmpty()) {
-                (recycler.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder)?.collapse()
-            } else (recycler.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder)?.expand()
+            if (!isTablet) {
+                if (query.isNotEmpty()) getHeader()?.collapse()
+                else getHeader()?.expand()
+            }
 
             adapter?.setFilter(query)
             adapter?.performFilter()
@@ -1056,8 +1123,7 @@ class MangaDetailsController : BaseController,
             if (!manga.favorite) {
                 toggleMangaFavorite()
             } else {
-                val headerHolder =
-                    recycler.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder ?: return
+                val headerHolder = getHeader() ?: return
                 val popup = PopupMenu(view!!.context, headerHolder.favorite_button)
                 popup.menu.add(R.string.remove_from_library)
 
@@ -1124,8 +1190,7 @@ class MangaDetailsController : BaseController,
                 }
             })
         }
-        val favButton = (recycler.findViewHolderForAdapterPosition(0)
-            as? MangaHeaderHolder)?.favorite_button
+        val favButton = getHeader()?.favorite_button
         (activity as? MainActivity)?.setUndoSnackBar(snack, favButton)
     }
 
@@ -1251,7 +1316,12 @@ class MangaDetailsController : BaseController,
      * Called to set the last used catalogue at the top of the view.
      */
     private fun addMangaHeader() {
-        if (adapter?.scrollableHeaders?.isEmpty() == true) {
+        if (tabletAdapter?.scrollableHeaders?.isEmpty() == true) {
+            tabletAdapter?.removeAllScrollableHeaders()
+            tabletAdapter?.addScrollableHeader(presenter.headerItem)
+            adapter?.removeAllScrollableHeaders()
+            adapter?.addScrollableHeader(presenter.tabletChapterHeaderItem!!)
+        } else if (!isTablet && adapter?.scrollableHeaders?.isEmpty() == true) {
             adapter?.removeAllScrollableHeaders()
             adapter?.addScrollableHeader(presenter.headerItem)
         }

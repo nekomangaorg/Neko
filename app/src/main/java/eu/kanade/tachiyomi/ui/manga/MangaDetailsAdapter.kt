@@ -22,7 +22,6 @@ class MangaDetailsAdapter(
 
     var items: List<ChapterItem> = emptyList()
 
-    private var isAnimating = false
     val delegate: MangaDetailsInterface = controller
     val presenter = controller.presenter
 
@@ -51,17 +50,15 @@ class MangaDetailsAdapter(
     fun performFilter() {
         val s = getFilter(String::class.java)
         if (s.isNullOrBlank()) {
-            updateDataSet(items, isAnimating)
+            updateDataSet(items)
         } else {
             updateDataSet(items.filter { it.name.contains(s, true) ||
-                it.scanlator?.contains(s, true) == true }, isAnimating)
+                it.scanlator?.contains(s, true) == true })
         }
-        isAnimating = false
     }
 
     override fun onItemSwiped(position: Int, direction: Int) {
         super.onItemSwiped(position, direction)
-        isAnimating = true
         when (direction) {
             ItemTouchHelper.RIGHT -> controller.bookmarkChapter(position)
             ItemTouchHelper.LEFT -> controller.toggleReadChapter(position)
