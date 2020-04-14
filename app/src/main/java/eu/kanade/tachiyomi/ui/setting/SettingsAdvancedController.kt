@@ -2,11 +2,9 @@ package eu.kanade.tachiyomi.ui.setting
 
 import android.app.Dialog
 import android.os.Bundle
-import androidx.preference.PreferenceScreen
 import android.widget.Toast
+import androidx.preference.PreferenceScreen
 import com.afollestad.materialdialogs.MaterialDialog
-import com.bluelinelabs.conductor.RouterTransaction
-import com.bluelinelabs.conductor.changehandler.FadeChangeHandler
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.ChapterCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -16,14 +14,13 @@ import eu.kanade.tachiyomi.data.library.LibraryUpdateService.Target
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
-import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import eu.kanade.tachiyomi.util.system.toast
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
@@ -40,17 +37,17 @@ class SettingsAdvancedController : SettingsController() {
     private val db: DatabaseHelper by injectLazy()
 
     override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
-        titleRes = R.string.pref_category_advanced
+        titleRes = R.string.advanced
 
         preference {
             key = CLEAR_CACHE_KEY
-            titleRes = R.string.pref_clear_chapter_cache
-            summary = context.getString(R.string.used_cache, chapterCache.readableSize)
+            titleRes = R.string.clear_chapter_cache
+            summary = context.getString(R.string.used_, chapterCache.readableSize)
 
             onClick { clearChapterCache() }
         }
         preference {
-            titleRes = R.string.pref_clear_cookies
+            titleRes = R.string.clear_cookies
 
             onClick {
                 network.cookieManager.removeAll()
@@ -58,8 +55,8 @@ class SettingsAdvancedController : SettingsController() {
             }
         }
         preference {
-            titleRes = R.string.pref_clear_database
-            summaryRes = R.string.pref_clear_database_summary
+            titleRes = R.string.clear_database
+            summaryRes = R.string.clear_database_summary
 
             onClick {
                 val ctrl = ClearDatabaseDialogController()
@@ -68,21 +65,21 @@ class SettingsAdvancedController : SettingsController() {
             }
         }
         preference {
-            titleRes = R.string.pref_refresh_library_metadata
-            summaryRes = R.string.pref_refresh_library_metadata_summary
+            titleRes = R.string.refresh_library_metadata
+            summaryRes = R.string.updates_covers_genres_desc
 
             onClick { LibraryUpdateService.start(context, target = Target.DETAILS) }
         }
         preference {
-            titleRes = R.string.pref_refresh_library_tracking
-            summaryRes = R.string.pref_refresh_library_tracking_summary
+            titleRes = R.string.refresh_tracking_metadata
+            summaryRes = R.string.updates_tracking_details
 
             onClick { LibraryUpdateService.start(context, target = Target.TRACKING) }
         }
         preference {
-            titleRes = R.string.pref_clean_downloads
+            titleRes = R.string.clean_up_downloaded_chapters
 
-            summaryRes = R.string.pref_clean_downloads_summary
+            summaryRes = R.string.delete_unused_chapters
 
             onClick { cleanupDownloads() }
         }
@@ -104,7 +101,7 @@ class SettingsAdvancedController : SettingsController() {
             launchUI {
                 val activity = activity ?: return@launchUI
                 val cleanupString =
-                    if (foldersCleared == 0) activity.getString(R.string.no_cleanup_done)
+                    if (foldersCleared == 0) activity.getString(R.string.no_folders_to_cleanup)
                     else resources!!.getQuantityString(
                         R.plurals.cleanup_done,
                         foldersCleared,
@@ -113,7 +110,6 @@ class SettingsAdvancedController : SettingsController() {
                 activity.toast(cleanupString, Toast.LENGTH_LONG)
             }
         }
-
     }
 
     private fun clearChapterCache() {
@@ -134,10 +130,10 @@ class SettingsAdvancedController : SettingsController() {
                 }, {
                     activity?.toast(R.string.cache_delete_error)
                 }, {
-                    activity?.toast(resources?.getQuantityString(R.plurals.cache_deleted,
+                    activity?.toast(resources?.getQuantityString(R.plurals.cache_cleared,
                         deletedFiles, deletedFiles))
                     findPreference(CLEAR_CACHE_KEY)?.summary =
-                            resources?.getString(R.string.used_cache, chapterCache.readableSize)
+                            resources?.getString(R.string.used_, chapterCache.readableSize)
                 })
     }
 
@@ -153,12 +149,6 @@ class SettingsAdvancedController : SettingsController() {
     }
 
     private fun clearDatabase() {
-        // Avoid weird behavior by going back to the library.
-        val newBackstack = listOf(RouterTransaction.with(LibraryController())) +
-                router.backstack.drop(1)
-
-        router.setBackstack(newBackstack, FadeChangeHandler())
-
         db.deleteMangasNotInLibrary().executeAsBlocking()
         db.deleteHistoryNoLastRead().executeAsBlocking()
         activity?.toast(R.string.clear_database_completed)

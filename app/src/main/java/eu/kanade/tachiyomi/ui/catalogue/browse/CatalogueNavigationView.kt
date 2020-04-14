@@ -8,11 +8,9 @@ import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.view.inflate
 import eu.kanade.tachiyomi.widget.SimpleNavigationView
-import kotlinx.android.synthetic.main.catalogue_drawer_content.view.*
 
-
-class CatalogueNavigationView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null)
-    : SimpleNavigationView(context, attrs) {
+class CatalogueNavigationView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
+    SimpleNavigationView(context, attrs) {
 
     val adapter: FlexibleAdapter<IFlexible<*>> = FlexibleAdapter<IFlexible<*>>(null)
             .setDisplayHeadersAtStartUp(true)
@@ -28,13 +26,16 @@ class CatalogueNavigationView @JvmOverloads constructor(context: Context, attrs:
         val view = inflate(R.layout.catalogue_drawer_content)
         ((view as ViewGroup).getChildAt(1) as ViewGroup).addView(recycler)
         addView(view)
-        title.text = context.getString(R.string.source_search_options)
-        search_btn.setOnClickListener { onSearchClicked() }
+        // title.text = context.getString(R.string.source_search_options)
+        /*search_btn.setOnClickListener { onSearchClicked() }
         reset_btn.setOnClickListener { onResetClicked() }
+        view.search_layout.setOnApplyWindowInsetsListener { v, insets ->
+            view.updatePaddingRelative(bottom = insets.systemWindowInsetBottom)
+            insets
+        }*/
     }
 
     fun setFilters(items: List<IFlexible<*>>) {
         adapter.updateDataSet(items)
     }
-
 }

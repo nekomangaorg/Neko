@@ -1,6 +1,13 @@
 package eu.kanade.tachiyomi.data.database.models
 
+import android.content.Context
+import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.ui.reader.ReaderActivity
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
+import java.util.Locale
 
 interface Manga : SManga {
 
@@ -12,6 +19,8 @@ interface Manga : SManga {
 
     var last_update: Long
 
+    var date_added: Long
+
     var viewer: Int
 
     var chapter_flags: Int
@@ -20,14 +29,108 @@ interface Manga : SManga {
 
     fun setChapterOrder(order: Int) {
         setFlags(order, SORT_MASK)
+        setFlags(SORT_LOCAL, SORT_SELF_MASK)
     }
+
+    fun setSortToGlobal() = setFlags(SORT_GLOBAL, SORT_SELF_MASK)
 
     private fun setFlags(flag: Int, mask: Int) {
         chapter_flags = chapter_flags and mask.inv() or (flag and mask)
     }
 
-    fun sortDescending(): Boolean {
-        return chapter_flags and SORT_MASK == SORT_DESC
+    fun sortDescending(): Boolean = chapter_flags and SORT_MASK == SORT_DESC
+
+    fun usesLocalSort(): Boolean = chapter_flags and SORT_SELF_MASK == SORT_LOCAL
+
+    fun sortDescending(defaultDesc: Boolean): Boolean {
+        return if (chapter_flags and SORT_SELF_MASK == SORT_GLOBAL) defaultDesc
+        else sortDescending()
+    }
+
+    fun showChapterTitle(defaultShow: Boolean): Boolean = chapter_flags and DISPLAY_MASK == DISPLAY_NUMBER
+
+    fun mangaType(context: Context): String {
+        return context.getString(when (mangaType()) {
+            TYPE_WEBTOON -> R.string.webtoon
+            TYPE_MANHWA -> R.string.manhwa
+            TYPE_MANHUA -> R.string.manhua
+            TYPE_COMIC -> R.string.comic
+            else -> R.string.manga
+        }).toLowerCase(Locale.getDefault())
+    }
+
+    /**
+     * The type of comic the manga is (ie. manga, manhwa, manhua)
+     */
+    fun mangaType(): Int {
+        val sourceName = Injekt.get<SourceManager>().getOrStub(source).name
+        val currentTags = genre?.split(",")?.map { it.trim().toLowerCase(Locale.US) }
+        return if (currentTags?.any
+            { tag ->
+                tag.startsWith("japanese") || tag == "manga"
+            } == true)
+            TYPE_MANGA
+        else if (currentTags?.any
+            { tag ->
+                tag.startsWith("english") || tag == "comic"
+            } == true || isComicSource(sourceName))
+            TYPE_COMIC
+        else if (currentTags?.any
+            { tag ->
+                tag.startsWith("chinese") || tag == "manhua"
+            } == true ||
+            sourceName.contains("manhua", true))
+            TYPE_MANHUA
+        else if (currentTags?.any
+            { tag ->
+                tag == "long strip" || tag == "manhwa"
+            } == true || isWebtoonSource(sourceName))
+            TYPE_MANHWA
+        else if (currentTags?.any
+            { tag ->
+                tag.startsWith("webtoon")
+            } == true)
+            TYPE_WEBTOON
+        else TYPE_MANGA
+    }
+
+    /**
+     * The type the reader should use. Different from manga type as certain manga has different
+     * read types
+     */
+    fun defaultReaderType(): Int {
+        val sourceName = Injekt.get<SourceManager>().getOrStub(source).name
+        val currentTags = genre?.split(",")?.map { it.trim().toLowerCase(Locale.US) }
+        return if (currentTags?.any
+            { tag ->
+                tag == "long strip" || tag == "manhwa" ||
+                    tag.contains("webtoon")
+            } == true || isWebtoonSource(sourceName) ||
+            sourceName.contains("tapastic", true))
+            ReaderActivity.WEBTOON
+        else if (currentTags?.any
+            { tag ->
+                tag.startsWith("chinese") || tag == "manhua" ||
+                    tag.startsWith("english") || tag == "comic"
+            } == true || isComicSource(sourceName) ||
+            sourceName.contains("manhua", true))
+            ReaderActivity.LEFT_TO_RIGHT
+        else 0
+    }
+
+    fun isWebtoonSource(sourceName: String): Boolean {
+        return sourceName.contains("webtoon", true) ||
+            sourceName.contains("manwha", true) ||
+            sourceName.contains("toonily", true)
+    }
+
+    fun isComicSource(sourceName: String): Boolean {
+        return sourceName.contains("gunnerkrigg", true) ||
+            sourceName.contains("gunnerkrigg", true) ||
+            sourceName.contains("dilbert", true) ||
+            sourceName.contains("cyanide", true) ||
+            sourceName.contains("xkcd", true) ||
+            sourceName.contains("tapastic", true)
     }
 
     // Used to display the chapter's title one way or another
@@ -57,6 +160,10 @@ interface Manga : SManga {
         const val SORT_ASC = 0x00000001
         const val SORT_MASK = 0x00000001
 
+        const val SORT_GLOBAL = 0x00000000
+        const val SORT_LOCAL = 0x00001000
+        const val SORT_SELF_MASK = 0x00001000
+
         // Generic filter that does not filter anything
         const val SHOW_ALL = 0x00000000
 
@@ -80,6 +187,12 @@ interface Manga : SManga {
         const val DISPLAY_NUMBER = 0x00100000
         const val DISPLAY_MASK = 0x00100000
 
+        const val TYPE_MANGA = 0
+        const val TYPE_MANHWA = 1
+        const val TYPE_MANHUA = 2
+        const val TYPE_COMIC = 3
+        const val TYPE_WEBTOON = 4
+
         fun create(source: Long): Manga = MangaImpl().apply {
             this.source = source
         }
@@ -90,5 +203,4 @@ interface Manga : SManga {
             this.source = source
         }
     }
-
 }

@@ -46,6 +46,9 @@ class PagerConfig(private val viewer: PagerViewer, preferences: PreferencesHelpe
     var readerTheme = 0
         private set
 
+    var alwaysShowChapterTransition = true
+        private set
+
     init {
         preferences.readWithTapping()
             .register({ tappingEnabled = it })
@@ -76,6 +79,9 @@ class PagerConfig(private val viewer: PagerViewer, preferences: PreferencesHelpe
 
         preferences.readerTheme()
                 .register({ readerTheme = it })
+
+        preferences.alwaysShowChapterTransition()
+                .register({ alwaysShowChapterTransition = it })
     }
 
     fun unsubscribe() {
@@ -83,8 +89,8 @@ class PagerConfig(private val viewer: PagerViewer, preferences: PreferencesHelpe
     }
 
     private fun <T> Preference<T>.register(
-            valueAssignment: (T) -> Unit,
-            onChanged: (T) -> Unit = {}
+        valueAssignment: (T) -> Unit,
+        onChanged: (T) -> Unit = {}
     ) {
         asObservable()
             .doOnNext(valueAssignment)
@@ -115,5 +121,4 @@ class PagerConfig(private val viewer: PagerViewer, preferences: PreferencesHelpe
     enum class ZoomType {
         Left, Center, Right
     }
-
 }

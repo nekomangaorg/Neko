@@ -50,5 +50,4 @@ class EpubPageLoader(file: File) : PageLoader() {
             Page.READY
         })
     }
-
 }

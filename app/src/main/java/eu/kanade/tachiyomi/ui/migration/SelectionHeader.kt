@@ -31,14 +31,18 @@ class SelectionHeader : AbstractHeaderItem<SelectionHeader.Holder>() {
     /**
      * Binds this item to the given view holder.
      */
-    override fun bindViewHolder(adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>, holder: Holder,
-                                position: Int, payloads: MutableList<Any?>?) {
+    override fun bindViewHolder(
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
+        holder: Holder,
+        position: Int,
+        payloads: MutableList<Any?>?
+    ) {
         // Intentionally empty
     }
 
     class Holder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>) : BaseFlexibleViewHolder(view, adapter) {
         init {
-            title.text = view.context.getString(R.string.migration_selection_prompt)
+            title.text = view.context.getString(R.string.select_a_source_to_migrate_from)
         }
     }
 

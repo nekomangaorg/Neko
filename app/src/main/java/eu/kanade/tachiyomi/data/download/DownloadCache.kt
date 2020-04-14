@@ -27,10 +27,10 @@ import java.util.concurrent.TimeUnit
  * @param preferences the preferences of the app.
  */
 class DownloadCache(
-        private val context: Context,
-        private val provider: DownloadProvider,
-        private val sourceManager: SourceManager,
-        private val preferences: PreferencesHelper = Injekt.get()
+    private val context: Context,
+    private val provider: DownloadProvider,
+    private val sourceManager: SourceManager,
+    private val preferences: PreferencesHelper = Injekt.get()
 ) {
 
     /**
@@ -78,7 +78,9 @@ class DownloadCache(
         checkRenew()
 
         val files = mangaFiles[manga.id] ?: return false
-        return files.any { it in provider.getValidChapterDirNames(chapter) }
+        return files.any { file -> provider.getValidChapterDirNames(chapter).any {
+            it.toLowerCase() == file.toLowerCase()
+        } }
     }
 
     /**
@@ -117,7 +119,7 @@ class DownloadCache(
                     onlineSources.find { provider.getSourceDirName(it) == entry.key }?.id
                 }
 
-        val db:DatabaseHelper by injectLazy()
+        val db: DatabaseHelper by injectLazy()
         val mangas = db.getMangas().executeAsBlocking().groupBy { it.source }
 
         sourceDirs.forEach { sourceValue ->
@@ -140,10 +142,10 @@ class DownloadCache(
             }
             val trueMangaDirs = mangaDirs.mapNotNull { mangaDir ->
                 val manga = sourceMangas.firstOrNull()?.find { DiskUtil.buildValidFilename(
-                    it.originalTitle()).toLowerCase() == mangaDir.key
-                    .toLowerCase() && it.source == sourceValue.key } ?:
-                sourceMangas.lastOrNull()?.find { DiskUtil.buildValidFilename(
-                    it.originalTitle()).toLowerCase() == mangaDir.key
+                    it.title).toLowerCase() == mangaDir.key
+                    .toLowerCase() && it.source == sourceValue.key }
+                ?: sourceMangas.lastOrNull()?.find { DiskUtil.buildValidFilename(
+                    it.title).toLowerCase() == mangaDir.key
                     .toLowerCase() && it.source == sourceValue.key }
                 val id = manga?.id ?: return@mapNotNull null
                 id to mangaDir.value.files
@@ -167,8 +169,7 @@ class DownloadCache(
         val files = mangaFiles[id]
         if (files == null) {
             mangaFiles[id] = mutableSetOf(chapterDirName)
-        }
-        else {
+        } else {
             mangaFiles[id]?.add(chapterDirName)
         }
     }
@@ -214,7 +215,6 @@ class DownloadCache(
         sourceDir.files = list
     }*/
 
-
     /**
      * Removes a manga that has been deleted from this cache.
      *
@@ -228,20 +228,26 @@ class DownloadCache(
     /**
      * Class to store the files under the root downloads directory.
      */
-    private class RootDirectory(val dir: UniFile,
-                                var files: Map<Long, SourceDirectory> = hashMapOf())
+    private class RootDirectory(
+        val dir: UniFile,
+        var files: Map<Long, SourceDirectory> = hashMapOf()
+    )
 
     /**
      * Class to store the files under a source directory.
      */
-    private class SourceDirectory(val dir: UniFile,
-                                  var files: Map<Long, MutableSet<String>> = hashMapOf())
+    private class SourceDirectory(
+        val dir: UniFile,
+        var files: Map<Long, MutableSet<String>> = hashMapOf()
+    )
 
     /**
      * Class to store the files under a manga directory.
      */
-    private class MangaDirectory(val dir: UniFile,
-                                 var files: MutableSet<String> = hashSetOf())
+    private class MangaDirectory(
+        val dir: UniFile,
+        var files: MutableSet<String> = hashSetOf()
+    )
 
     /**
      * Returns a new map containing only the key entries of [transform] that are not null.
@@ -265,5 +271,4 @@ class DownloadCache(
         }
         return destination
     }
-
 }

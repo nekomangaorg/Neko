@@ -1,11 +1,11 @@
 package eu.kanade.tachiyomi.ui.catalogue.browse
 
 import android.view.View
+import androidx.recyclerview.widget.RecyclerView
 import eu.davidea.flexibleadapter.FlexibleAdapter
+import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
-import androidx.recyclerview.widget.RecyclerView
-import eu.davidea.flexibleadapter.items.IFlexible
 
 /**
  * Generic class used to hold the displayed data of a manga in the catalogue.
@@ -23,7 +23,6 @@ abstract class CatalogueHolder(view: View, adapter: FlexibleAdapter<IFlexible<Re
      * @param manga the manga to bind.
      */
     abstract fun onSetValues(manga: Manga)
-
 
     /**
      * Updates the image for this holder. Useful to update the image when the manga is initialized

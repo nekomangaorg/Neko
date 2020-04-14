@@ -1,14 +1,14 @@
 package eu.kanade.tachiyomi.ui.download
 
 import android.view.View
-import android.widget.PopupMenu
+import androidx.appcompat.widget.PopupMenu
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.setVectorCompat
+import eu.kanade.tachiyomi.util.view.visibleIf
 import kotlinx.android.synthetic.main.download_item.*
-import kotlinx.android.synthetic.main.download_item.migration_menu
 
 /**
  * Class used to hold the data of a download.
@@ -38,7 +38,7 @@ class DownloadHolder(private val view: View, val adapter: DownloadAdapter) :
         chapter_title.text = download.chapter.name
 
         // Update the manga title
-        manga_title.text = download.manga.currentTitle()
+        manga_full_title.text = download.manga.title
 
         // Update the progress bar and the number of downloaded pages
         val pages = download.pages
@@ -52,11 +52,11 @@ class DownloadHolder(private val view: View, val adapter: DownloadAdapter) :
             notifyDownloadedPages()
         }
 
+        migration_menu.visibleIf(adapterPosition != 0 || adapterPosition != adapter.itemCount - 1)
         migration_menu.setVectorCompat(
             R.drawable.ic_more_vert_black_24dp, view.context
             .getResourceColor(R.attr.icon_color))
     }
-
 
     /**
      * Updates the progress bar of the download.
@@ -66,7 +66,7 @@ class DownloadHolder(private val view: View, val adapter: DownloadAdapter) :
         if (download_progress.max == 1) {
             download_progress.max = pages.size * 100
         }
-        download_progress.progress = download.totalProgress
+        download_progress.progress = download.pageProgress
     }
 
     /**
@@ -81,7 +81,6 @@ class DownloadHolder(private val view: View, val adapter: DownloadAdapter) :
         super.onItemReleased(position)
         adapter.downloadItemListener.onItemReleased(position)
     }
-
 
     private fun showPopupMenu(view: View) {
         val item = adapter.getItem(adapterPosition) ?: return
@@ -98,7 +97,6 @@ class DownloadHolder(private val view: View, val adapter: DownloadAdapter) :
         popup.menu.findItem(R.id.move_to_bottom).isVisible = adapterPosition != adapter
             .itemCount - 1
 
-
         // Set a listener so we are notified if a menu item is clicked
         popup.setOnMenuItemClickListener { menuItem ->
             adapter.downloadItemListener.onMenuItemClick(adapterPosition, menuItem)
@@ -109,4 +107,15 @@ class DownloadHolder(private val view: View, val adapter: DownloadAdapter) :
         popup.show()
     }
 
+    override fun getFrontView(): View {
+        return front_view
+    }
+
+    override fun getRearRightView(): View {
+        return right_view
+    }
+
+    override fun getRearLeftView(): View {
+        return left_view
+    }
 }

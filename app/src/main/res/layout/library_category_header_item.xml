@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical">
+
+
+    <ImageView
+        android:id="@+id/checkbox"
+        android:padding="5dp"
+        android:visibility="gone"
+        tools:visibility="visible"
+        tools:tint="?attr/colorAccent"
+        android:layout_width="wrap_content"
+        android:contentDescription="@string/select_all"
+        android:clickable="true"
+        android:focusable="true"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_check_circle_white_24dp"
+        android:layout_marginStart="2dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="@+id/category_title"
+        app:layout_constraintEnd_toStartOf="@+id/category_title"
+        app:layout_constraintTop_toTopOf="@+id/category_title"
+        />
+
+    <TextView
+        android:id="@+id/category_title"
+        style="@style/TextAppearance.MaterialComponents.Headline6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginBottom="10dp"
+        android:ellipsize="end"
+        android:gravity="center|start"
+        android:inputType="none"
+        android:maxLines="2"
+        android:layout_marginTop="32dp"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintStart_toEndOf="@+id/checkbox"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/update_button"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        tools:text="Title dfdsfsfsfsfsfdsfsfsfs" />
+
+    <Space
+        android:id="@+id/space"
+        android:layout_width="0dp"
+        android:layout_height="20dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/category_sort"
+        app:layout_constraintStart_toEndOf="@id/update_button"
+        app:layout_constraintWidth_min="1dp" />
+
+    <ImageView
+        android:id="@+id/update_button"
+        android:layout_width="wrap_content"
+        android:layout_height="35dp"
+        android:padding="5dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:tint="?attr/colorAccent"
+        android:src="@drawable/ic_refresh_white_24dp"
+        app:layout_constraintBottom_toBottomOf="@id/category_title"
+        app:layout_constraintTop_toTopOf="@id/category_title"
+        app:layout_constraintEnd_toStartOf="@id/space"
+        app:layout_constraintStart_toEndOf="@id/category_title"
+        app:rippleColor="@color/fullRippleColor" />
+
+    <ProgressBar
+        android:id="@+id/cat_progress"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="5dp"
+        android:visibility="gone"
+        tools:visibility="visible"
+        app:layout_constraintTop_toTopOf="@id/update_button"
+        app:layout_constraintBottom_toBottomOf="@id/update_button"
+        app:layout_constraintStart_toStartOf="@id/update_button"
+        app:layout_constraintEnd_toEndOf="@id/update_button"/>
+
+    <TextView
+        android:id="@+id/category_sort"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="2dp"
+        android:clickable="true"
+        android:drawableEnd="@drawable/ic_sort_white_24dp"
+        android:drawablePadding="6dp"
+        android:drawableTint="@color/gray_button"
+        android:ellipsize="start"
+        android:focusable="true"
+        android:gravity="center|end"
+        android:background="@drawable/square_ripple"
+        android:maxLines="2"
+        android:padding="6dp"
+        android:textAlignment="textEnd"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="12sp"
+        android:textStyle="normal"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintBottom_toBottomOf="@id/category_title"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@id/space"
+        app:layout_constraintTop_toTopOf="@id/category_title"
+        app:layout_constraintWidth_min="100dp"
+        tools:text="Drag and Drop" />
+</androidx.constraintlayout.widget.ConstraintLayout>

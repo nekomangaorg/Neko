@@ -5,6 +5,7 @@ import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.updater.UpdaterJob
+import eu.kanade.tachiyomi.ui.library.LibraryPresenter
 import java.io.File
 
 object Migrations {
@@ -25,7 +26,7 @@ object Migrations {
                 if (BuildConfig.INCLUDE_UPDATER && preferences.automaticUpdates()) {
                     UpdaterJob.setupTask()
                 }
-                return false
+                return BuildConfig.DEBUG
             }
 
             if (oldVersion < 14) {
@@ -63,9 +64,10 @@ object Migrations {
             }
             if (oldVersion < 54)
                 DownloadProvider(context).renameChaapters()
+            if (oldVersion < 62)
+                LibraryPresenter.updateDB()
             return true
         }
         return false
     }
-
 }

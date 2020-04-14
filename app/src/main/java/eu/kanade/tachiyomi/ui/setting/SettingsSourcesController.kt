@@ -35,11 +35,11 @@ class SettingsSourcesController : SettingsController(),
 
     private var orderedLangs = listOf<String>()
     private var langPrefs = mutableListOf<Pair<String, SwitchPreferenceCategory>>()
-    private var sourcesByLang:TreeMap<String, MutableList<HttpSource>> = TreeMap()
+    private var sourcesByLang: TreeMap<String, MutableList<HttpSource>> = TreeMap()
     private var sorting = SourcesSort.Alpha
 
     override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
-        titleRes = R.string.pref_category_sources
+        titleRes = R.string.filter
         sorting = SourcesSort.from(preferences.sourceSorting().getOrDefault()) ?: SourcesSort.Alpha
         activity?.invalidateOptionsMenu()
         // Get the list of active language codes.
@@ -93,7 +93,7 @@ class SettingsSourcesController : SettingsController(),
 
         val selectAllPreference = CheckBoxPreference(group.context).apply {
 
-            title = "\t\t${context.getString(R.string.pref_category_all_sources)}"
+            title = "\t\t${context.getString(R.string.all_sources)}"
             key = "all_${sources.first().lang}"
             isPersistent = false
             isChecked = sources.all { it.id.toString() !in hiddenCatalogues }

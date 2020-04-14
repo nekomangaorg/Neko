@@ -96,6 +96,21 @@ class DownloadManager(val context: Context) {
     fun clearQueue(isNotification: Boolean = false) {
         deletePendingDownloads(*downloader.queue.toTypedArray())
         downloader.clearQueue(isNotification)
+        DownloadService.callListeners(false)
+    }
+
+    fun startDownloadNow(chapter: Chapter) {
+        val download = downloader.queue.find { it.chapter.id == chapter.id } ?: return
+        val queue = downloader.queue.toMutableList()
+        queue.remove(download)
+        queue.add(0, download)
+        reorderQueue(queue)
+        if (isPaused()) {
+            if (DownloadService.isRunning(context))
+                downloader.start()
+            else
+                DownloadService.start(context)
+        }
     }
 
     /**
@@ -113,13 +128,14 @@ class DownloadManager(val context: Context) {
         downloader.pause()
         downloader.queue.clear()
         downloader.queue.addAll(downloads)
-        if(!wasPaused){
+        if (!wasPaused) {
             downloader.start()
         }
     }
 
     fun isPaused() = downloader.isPaused()
 
+    fun hasQueue() = downloader.queue.isNotEmpty()
 
     /**
      * Tells the downloader to enqueue the given list of chapters.
@@ -219,11 +235,13 @@ class DownloadManager(val context: Context) {
         }
         downloader.pause()
         downloader.queue.remove(chapters)
-        if(!wasPaused && downloader.queue.isNotEmpty()){
+        if (!wasPaused && downloader.queue.isNotEmpty()) {
             downloader.start()
-        }
-        else if (downloader.queue.isEmpty() && DownloadService.isRunning(context)) {
+        } else if (downloader.queue.isEmpty() && DownloadService.isRunning(context)) {
             DownloadService.stop(context)
+        } else if (downloader.queue.isEmpty()) {
+            DownloadService.callListeners(false)
+            downloader.stop()
         }
         queue.remove(chapters)
         val chapterDirs = provider.findChapterDirs(chapters, manga, source) + provider.findTempChapterDirs(chapters, manga, source)
@@ -253,7 +271,7 @@ class DownloadManager(val context: Context) {
         cleaned += readChapterDirs.size
         cache.removeChapters(readChapters, manga)
         if (cache.getDownloadCount(manga) == 0) {
-            provider.findChapterDirs(allChapters, manga, source).firstOrNull()?.parentFile?.delete()// Delete manga directory if empty
+            provider.findChapterDirs(allChapters, manga, source).firstOrNull()?.parentFile?.delete() // Delete manga directory if empty
         }
         return cleaned
     }
@@ -292,4 +310,6 @@ class DownloadManager(val context: Context) {
         }
     }
 
+    fun addListener(listener: DownloadQueue.DownloadListener) = queue.addListener(listener)
+    fun removeListener(listener: DownloadQueue.DownloadListener) = queue.removeListener(listener)
 }

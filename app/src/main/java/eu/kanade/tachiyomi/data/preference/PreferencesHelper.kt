@@ -8,13 +8,12 @@ import androidx.preference.PreferenceManager
 import com.f2prateek.rx.preferences.Preference
 import com.f2prateek.rx.preferences.RxSharedPreferences
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.source.Source
 import java.io.File
-import java.util.Locale
 import java.text.DateFormat
 import java.text.SimpleDateFormat
+import java.util.Locale
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 
 fun <T> Preference<T>.getOrDefault(): T = get() ?: defaultValue()!!
@@ -54,7 +53,7 @@ class PreferencesHelper(val context: Context) {
     fun getStringPref(key: String, default: String?) = rxPrefs.getString(key, default)
     fun getStringSet(key: String, default: Set<String>) = rxPrefs.getStringSet(key, default)
 
-    fun startScreen() = prefs.getInt(Keys.startScreen, 1)
+    fun lastTab() = rxPrefs.getInteger("last_tab", 0)
 
     fun clear() = prefs.edit().clear().apply()
 
@@ -174,7 +173,15 @@ class PreferencesHelper(val context: Context) {
 
     fun libraryUpdatePrioritization() = rxPrefs.getInteger(Keys.libraryUpdatePrioritization, 0)
 
-    fun libraryAsList() = rxPrefs.getBoolean(Keys.libraryAsList, false)
+    fun libraryLayout() = rxPrefs.getInteger(Keys.libraryLayout, 1)
+
+    fun gridSize() = rxPrefs.getInteger(Keys.gridSize, 1)
+
+    fun alwaysShowSeeker() = rxPrefs.getBoolean("always_show_seeker", false)
+
+    fun uniformGrid() = rxPrefs.getBoolean(Keys.uniformGrid, true)
+
+    fun chaptersDescAsDefault() = rxPrefs.getBoolean("chapters_desc_as_default", true)
 
     fun downloadBadge() = rxPrefs.getBoolean(Keys.downloadBadge, false)
 
@@ -184,7 +191,9 @@ class PreferencesHelper(val context: Context) {
 
     fun filterCompleted() = rxPrefs.getInteger(Keys.filterCompleted, 0)
 
-    fun filterTracked() = rxPrefs.getInteger(Keys.filterTrcaked, 0)
+    fun filterTracked() = rxPrefs.getInteger(Keys.filterTracked, 0)
+
+    fun filterMangaType() = rxPrefs.getInteger(Keys.filterMangaType, 0)
 
     fun hideCategories() = rxPrefs.getBoolean("hide_categories", false)
 
@@ -214,6 +223,8 @@ class PreferencesHelper(val context: Context) {
 
     fun lastUnlock() = rxPrefs.getLong(Keys.lastUnlock, 0)
 
+    fun secureScreen() = rxPrefs.getBoolean(Keys.secureScreen, false)
+
     fun removeArticles() = rxPrefs.getBoolean(Keys.removeArticles, false)
 
     fun migrateFlags() = rxPrefs.getInteger("migrate_flags", Int.MAX_VALUE)
@@ -230,16 +241,17 @@ class PreferencesHelper(val context: Context) {
 
     fun refreshCoversToo() = rxPrefs.getBoolean(Keys.refreshCoversToo, true)
 
+    fun updateOnRefresh() = rxPrefs.getInteger(Keys.updateOnRefresh, -1)
+
     fun extensionUpdatesCount() = rxPrefs.getInteger("ext_updates_count", 0)
+
+    fun recentsViewType() = rxPrefs.getInteger("recents_view_type", 0)
 
     fun lastExtCheck() = rxPrefs.getLong("last_ext_check", 0)
 
-    fun upgradeFilters() {
-        val filterDl = rxPrefs.getBoolean(Keys.filterDownloaded, false).getOrDefault()
-        val filterUn = rxPrefs.getBoolean(Keys.filterUnread, false).getOrDefault()
-        val filterCm = rxPrefs.getBoolean(Keys.filterCompleted, false).getOrDefault()
-        filterDownloaded().set(if (filterDl) 1 else 0)
-        filterUnread().set(if (filterUn) 1 else 0)
-        filterCompleted().set(if (filterCm) 1 else 0)
-    }
+    fun unreadBadgeType() = rxPrefs.getInteger("unread_badge_type", 2)
+
+    fun hideFiltersAtStart() = rxPrefs.getBoolean("hide_filters_at_start", false)
+
+    fun alwaysShowChapterTransition() = rxPrefs.getBoolean(Keys.alwaysShowChapterTransition, true)
 }

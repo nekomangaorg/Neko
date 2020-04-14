@@ -24,9 +24,9 @@ import kotlin.math.min
  * user also approximately knows how much the operation will take.
  */
 class ReaderProgressBar @JvmOverloads constructor(
-        context: Context,
-        attrs: AttributeSet? = null,
-        defStyleAttr: Int = 0
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 
     /**
@@ -157,7 +157,7 @@ class ReaderProgressBar @JvmOverloads constructor(
         if (!animate) {
             visibility = View.GONE
         } else {
-            ObjectAnimator.ofFloat(this, "alpha",  1f, 0f).apply {
+            ObjectAnimator.ofFloat(this, "alpha", 1f, 0f).apply {
                 interpolator = DecelerateInterpolator()
                 duration = 1000
                 addListener(object : AnimatorListenerAdapter() {
@@ -209,5 +209,4 @@ class ReaderProgressBar @JvmOverloads constructor(
             start()
         }
     }
-
 }

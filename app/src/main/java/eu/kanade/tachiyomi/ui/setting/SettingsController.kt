@@ -2,22 +2,20 @@ package eu.kanade.tachiyomi.ui.setting
 
 import android.content.Context
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
-import androidx.preference.PreferenceController
-import androidx.preference.PreferenceScreen
 import android.util.TypedValue
 import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
+import androidx.preference.PreferenceController
+import androidx.preference.PreferenceScreen
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
-import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
-import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
-import eu.kanade.tachiyomi.util.view.updatePaddingRelative
+import eu.kanade.tachiyomi.util.view.scrollViewWith
 import rx.Observable
 import rx.Subscription
 import rx.subscriptions.CompositeSubscription
@@ -36,7 +34,7 @@ abstract class SettingsController : PreferenceController() {
             untilDestroySubscriptions = CompositeSubscription()
         }
         val view = super.onCreateView(inflater, container, savedInstanceState)
-        listView.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
+        scrollViewWith(listView, padBottom = true)
         return view
     }
 
@@ -79,6 +77,7 @@ abstract class SettingsController : PreferenceController() {
         if (type.isEnter) {
             setTitle()
         }
+        setHasOptionsMenu(type.isEnter)
         super.onChangeStarted(handler, type)
     }
 

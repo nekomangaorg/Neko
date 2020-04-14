@@ -7,23 +7,20 @@ import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.LoginSource
 import eu.kanade.tachiyomi.util.system.toast
-import kotlinx.android.synthetic.main.pref_account_login.view.dialog_title
-import kotlinx.android.synthetic.main.pref_account_login.view.login
-import kotlinx.android.synthetic.main.pref_account_login.view.password
-import kotlinx.android.synthetic.main.pref_account_login.view.username
+import kotlinx.android.synthetic.main.pref_account_login.view.*
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class SourceLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle) {
+class SourceLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle = bundle) {
 
     private val source = Injekt.get<SourceManager>().get(args.getLong("key")) as LoginSource
 
     constructor(source: Source) : this(Bundle().apply { putLong("key", source.id) })
 
     override fun setCredentialsOnView(view: View) = with(view) {
-        dialog_title.text = context.getString(R.string.login_title, source.toString())
+        dialog_title.text = context.getString(R.string.log_in_to_, source.toString())
         username.setText(preferences.sourceUsername(source))
         password.setText(preferences.sourcePassword(source))
     }
@@ -47,7 +44,7 @@ class SourceLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle) 
                                     password.text.toString())
 
                             dialog?.dismiss()
-                            context.toast(R.string.login_success)
+                            context.toast(R.string.successfully_logged_in)
                         } else {
                             preferences.setSourceCredentials(source, "", "")
                             login.progress = -1
@@ -68,5 +65,4 @@ class SourceLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle) 
     interface Listener {
         fun loginDialogClosed(source: LoginSource)
     }
-
 }

@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.ui.catalogue.filter
 
 import android.annotation.SuppressLint
-import com.google.android.material.R
 import android.view.View
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
@@ -10,12 +9,13 @@ import eu.davidea.flexibleadapter.items.AbstractHeaderItem
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.davidea.viewholders.FlexibleViewHolder
 import eu.kanade.tachiyomi.source.model.Filter
+import eu.kanade.tachiyomi.util.system.getResourceColor
 
 class HeaderItem(val filter: Filter.Header) : AbstractHeaderItem<HeaderItem.Holder>() {
 
     @SuppressLint("PrivateResource")
     override fun getLayoutRes(): Int {
-        return R.layout.design_navigation_item_subheader
+        return com.google.android.material.R.layout.design_navigation_item_subheader
     }
 
     override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): Holder {
@@ -25,6 +25,7 @@ class HeaderItem(val filter: Filter.Header) : AbstractHeaderItem<HeaderItem.Hold
     override fun bindViewHolder(adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>, holder: Holder, position: Int, payloads: MutableList<Any?>?) {
         val view = holder.itemView as TextView
         view.text = filter.name
+        view.setTextColor(view.context.getResourceColor(android.R.attr.textColorPrimary))
     }
 
     override fun equals(other: Any?): Boolean {

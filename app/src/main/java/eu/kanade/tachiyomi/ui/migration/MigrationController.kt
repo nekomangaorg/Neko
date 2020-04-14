@@ -11,13 +11,11 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
-import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.migration.manga.design.PreMigrationController
-import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationListController
-import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
 import eu.kanade.tachiyomi.util.system.await
 import eu.kanade.tachiyomi.util.system.launchUI
-import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationProcedureConfig
+import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
+import eu.kanade.tachiyomi.util.view.applyWindowInsetsForController
 import kotlinx.android.synthetic.main.migration_controller.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -47,7 +45,7 @@ class MigrationController : NucleusController<MigrationPresenter>(),
         return inflater.inflate(R.layout.migration_controller, container, false)
     }
 
-    fun searchController(manga:Manga): SearchController {
+    fun searchController(manga: Manga): SearchController {
         val controller = SearchController(manga)
         controller.targetController = this
 
@@ -56,6 +54,7 @@ class MigrationController : NucleusController<MigrationPresenter>(),
 
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
+        view.applyWindowInsetsForController()
 
         adapter = FlexibleAdapter(null, this)
         migration_recycler.layoutManager =
@@ -84,19 +83,24 @@ class MigrationController : NucleusController<MigrationPresenter>(),
 
     fun render(state: ViewState) {
         if (state.selectedSource == null) {
-            title = resources?.getString(R.string.label_migration)
+            title = resources?.getString(R.string.source_migration)
             if (adapter !is SourceAdapter) {
                 adapter = SourceAdapter(this)
                 migration_recycler.adapter = adapter
             }
             adapter?.updateDataSet(state.sourcesWithManga)
         } else {
+            val switching = title == resources?.getString(R.string.source_migration)
             title = state.selectedSource.toString()
             if (adapter !is MangaAdapter) {
                 adapter = MangaAdapter(this)
                 migration_recycler.adapter = adapter
             }
-            adapter?.updateDataSet(state.mangaForSource)
+            adapter?.updateDataSet(state.mangaForSource, true)
+            /*if (switching) launchUI {
+                migration_recycler.alpha = 0f
+                migration_recycler.animate().alpha(1f).setStartDelay(100).setDuration(200).start()
+            }*/
         }
     }
 
@@ -104,10 +108,9 @@ class MigrationController : NucleusController<MigrationPresenter>(),
         val item = adapter?.getItem(position) ?: return false
 
         if (item is MangaItem) {
-            val controller = SearchController(item.manga)
-            controller.targetController = this
-
-            router.pushController(controller.withFadeTransaction())
+            PreMigrationController.navigateToMigration(Injekt.get<PreferencesHelper>().skipPreMigration().getOrDefault(),
+                router,
+                listOf(item.manga.id!!))
         } else if (item is SourceItem) {
             presenter.setSelectedSource(item.source)
         }
@@ -128,15 +131,9 @@ class MigrationController : NucleusController<MigrationPresenter>(),
             val sourceMangas =
                 manga.asSequence().filter { it.source == item.source.id }.map { it.id!! }.toList()
             withContext(Dispatchers.Main) {
-                router.pushController(
-                    if (Injekt.get<PreferencesHelper>().skipPreMigration().getOrDefault()) {
-                        MigrationListController.create(
-                            MigrationProcedureConfig(sourceMangas, null)
-                        )
-                    } else {
-                        PreMigrationController.create(sourceMangas)
-                    }.withFadeTransaction()
-                )
+                PreMigrationController.navigateToMigration(Injekt.get<PreferencesHelper>().skipPreMigration().getOrDefault(),
+                    router,
+                    sourceMangas)
             }
         }
     }

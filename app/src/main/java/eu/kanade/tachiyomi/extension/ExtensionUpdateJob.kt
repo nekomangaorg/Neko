@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.extension
 
-
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
@@ -23,7 +22,7 @@ class ExtensionUpdateJob : Job() {
 
     override fun onRunJob(params: Params): Result {
         GlobalScope.launch(Dispatchers.IO) {
-            val pendingUpdates = ExtensionGithubApi().checkforUpdates(context)
+            val pendingUpdates = ExtensionGithubApi().checkForUpdates(context)
             if (pendingUpdates.isNotEmpty()) {
                 val names = pendingUpdates.map { it.name }
                 val preferences: PreferencesHelper by injectLazy()
@@ -33,17 +32,11 @@ class ExtensionUpdateJob : Job() {
                         context.notification(Notifications.CHANNEL_UPDATES_TO_EXTS) {
                             setContentTitle(
                                 context.resources.getQuantityString(
-                                    R.plurals.update_check_notification_ext_updates, names
+                                    R.plurals.extension_updates_available, names
                                         .size, names.size
                                 )
                             )
-                            val extNames = if (names.size > 5) {
-                                "${names.take(4).joinToString(", ")}, " +
-                                    context.resources.getQuantityString(
-                                    R.plurals.notification_and_n_more_ext,
-                                        (names.size - 4), (names.size - 4)
-                                )
-                            } else names.joinToString(", ")
+                            val extNames = names.joinToString(", ")
                             setContentText(extNames)
                             setStyle(NotificationCompat.BigTextStyle().bigText(extNames))
                             setSmallIcon(R.drawable.ic_extension_update)

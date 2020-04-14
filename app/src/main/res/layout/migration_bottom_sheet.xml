@@ -2,18 +2,21 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/constraintLayout"
+    android:id="@+id/constraint_layout"
+    tools:background="@android:color/black"
     android:layout_width="match_parent"
+    style="@style/Theme.MaterialComponents.BottomSheetDialog"
     android:layout_height="match_parent"
     android:background="@android:color/transparent"
     android:orientation="vertical">
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/options_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
-        android:background="@drawable/dialog_rounded_background"
+        android:background="@drawable/bg_bottom_sheet_dialog_fragment"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -58,7 +61,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:checked="true"
-            android:text="@string/track"
+            android:text="@string/tracking"
             app:layout_constraintBottom_toBottomOf="@+id/mig_categories"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
@@ -102,7 +105,7 @@
             android:id="@+id/extra_search_param"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="0dp"
             android:text="@string/include_extra_search_parameter"
             app:layout_constraintEnd_toEndOf="@+id/sourceGroup"
             app:layout_constraintStart_toStartOf="@+id/sourceGroup"
@@ -115,7 +118,7 @@
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:ems="10"
-            android:hint="@string/search_parameter"
+            android:hint="@string/search_parameter_eg"
             android:importantForAutofill="no"
             android:inputType="textPersonName"
             app:layout_constraintEnd_toEndOf="parent"
@@ -133,17 +136,26 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="@+id/extra_search_param"
             app:layout_constraintStart_toStartOf="@+id/extra_search_param"
-            app:layout_constraintTop_toBottomOf="@+id/extra_search_param_text" />
+            app:layout_constraintTop_toBottomOf="@+id/extra_search_param_text"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <View
+        android:id="@+id/fab_guider"
+        android:layout_width="2dp"
+        app:layout_constraintTop_toTopOf="@+id/options_layout"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_height="30dp" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
+        style="@style/Theme.Widget.FAB"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
+        android:layout_marginEnd="10dp"
         android:src="@drawable/ic_arrow_forward_white_24dp"
-        app:layout_anchor="@id/constraintLayout"
+        app:layout_anchor="@id/constraint_layout"
         app:layout_anchorGravity="bottom|end"
+        app:layout_constraintBottom_toBottomOf="@id/fab_guider"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

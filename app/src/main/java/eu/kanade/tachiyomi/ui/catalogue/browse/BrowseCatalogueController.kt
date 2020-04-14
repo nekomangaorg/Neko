@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.catalogue.browse
 
-import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
@@ -9,11 +8,9 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.SearchView
-import androidx.core.view.GravityCompat
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.f2prateek.rx.preferences.Preference
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.jakewharton.rxbinding.support.v7.widget.queryTextChangeEvents
@@ -23,31 +20,29 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.source.CatalogueSource
+import eu.kanade.tachiyomi.source.model.Filter
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
-import eu.kanade.tachiyomi.ui.base.controller.SecondaryDrawerController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.catalogue.CatalogueController
 import eu.kanade.tachiyomi.ui.library.ChangeMangaCategoriesDialog
-import eu.kanade.tachiyomi.ui.library.HeightTopWindowInsetsListener
 import eu.kanade.tachiyomi.ui.main.MainActivity
-import eu.kanade.tachiyomi.ui.manga.MangaController
+import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
-import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
-import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
+import eu.kanade.tachiyomi.util.system.connectivityManager
+import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.inflate
-import eu.kanade.tachiyomi.util.view.marginTop
+import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
-import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.visible
-import eu.kanade.tachiyomi.util.system.connectivityManager
+import eu.kanade.tachiyomi.util.view.visibleIf
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import kotlinx.android.synthetic.main.catalogue_controller.*
-import kotlinx.android.synthetic.main.main_activity.*
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
@@ -60,18 +55,19 @@ import java.util.concurrent.TimeUnit
  */
 open class BrowseCatalogueController(bundle: Bundle) :
         NucleusController<BrowseCataloguePresenter>(bundle),
-        SecondaryDrawerController,
         FlexibleAdapter.OnItemClickListener,
         FlexibleAdapter.OnItemLongClickListener,
         FlexibleAdapter.EndlessScrollListener,
         ChangeMangaCategoriesDialog.Listener {
 
-    constructor(source: CatalogueSource,
+    constructor(
+        source: CatalogueSource,
         searchQuery: String? = null,
-        smartSearchConfig: CatalogueController.SmartSearchConfig? = null) : this(Bundle().apply {
+        smartSearchConfig: CatalogueController.SmartSearchConfig? = null
+    ) : this(Bundle().apply {
         putLong(SOURCE_ID_KEY, source.id)
 
-        if(searchQuery != null)
+        if (searchQuery != null)
             putString(SEARCH_QUERY_KEY, searchQuery)
 
         if (smartSearchConfig != null)
@@ -105,17 +101,12 @@ open class BrowseCatalogueController(bundle: Bundle) :
     /**
      * Recycler view with the list of results.
      */
-    private var recycler: androidx.recyclerview.widget.RecyclerView? = null
+    private var recycler: RecyclerView? = null
 
     /**
      * Subscription for the search view.
      */
     private var searchViewSubscription: Subscription? = null
-
-    /**
-     * Subscription for the number of manga per row.
-     */
-    private var numColumnsSubscription: Subscription? = null
 
     /**
      * Endless loading item.
@@ -147,12 +138,12 @@ open class BrowseCatalogueController(bundle: Bundle) :
 
         navView?.setFilters(presenter.filterItems)
 
+        fab.visibleIf(presenter.sourceFilters.isNotEmpty())
+        fab.setOnClickListener { showFilters() }
         progress?.visible()
     }
 
     override fun onDestroyView(view: View) {
-        numColumnsSubscription?.unsubscribe()
-        numColumnsSubscription = null
         searchViewSubscription?.unsubscribe()
         searchViewSubscription = null
         adapter = null
@@ -161,58 +152,10 @@ open class BrowseCatalogueController(bundle: Bundle) :
         super.onDestroyView(view)
     }
 
-    override fun createSecondaryDrawer(drawer: androidx.drawerlayout.widget.DrawerLayout): ViewGroup? {
-        // Inflate and prepare drawer
-        val navView = drawer.inflate(R.layout.catalogue_drawer) as CatalogueNavigationView
-        this.navView = navView
-        navView.setFilters(presenter.filterItems)
-
-        drawer.setDrawerLockMode(androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_UNLOCKED, GravityCompat.END)
-
-        navView.onSearchClicked = {
-            val allDefault = presenter.sourceFilters == presenter.source.getFilterList()
-            showProgressBar()
-            adapter?.clear()
-            drawer.closeDrawer(GravityCompat.END)
-            presenter.setSourceFilter(if (allDefault) FilterList() else presenter.sourceFilters)
-        }
-
-        navView.onResetClicked = {
-            presenter.appliedFilters = FilterList()
-            val newFilters = presenter.source.getFilterList()
-            presenter.sourceFilters = newFilters
-            navView.setFilters(presenter.filterItems)
-        }
-        drawer.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
-            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
-            View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-
-        val statusScrim = navView.findViewById(R.id.status_bar_scrim) as View
-        statusScrim.setOnApplyWindowInsetsListener(HeightTopWindowInsetsListener)
-        val titleView = navView.findViewById(R.id.title_background) as View
-        val titleMarginTop = titleView.marginTop
-        navView.doOnApplyWindowInsets { v, insets, padding ->
-            v.updatePaddingRelative(
-                bottom = padding.bottom + insets.systemWindowInsetBottom,
-                end = padding.right + insets.systemWindowInsetRight
-            )
-            titleView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                topMargin = titleMarginTop + insets.systemWindowInsetTop
-            }
-        }
-        return navView
-    }
-
-    override fun cleanupSecondaryDrawer(drawer: androidx.drawerlayout.widget.DrawerLayout) {
-        navView = null
-    }
-
     private fun setupRecycler(view: View) {
-        numColumnsSubscription?.unsubscribe()
-
-        var oldPosition = androidx.recyclerview.widget.RecyclerView.NO_POSITION
+        var oldPosition = RecyclerView.NO_POSITION
         val oldRecycler = catalogue_view?.getChildAt(1)
-        if (oldRecycler is androidx.recyclerview.widget.RecyclerView) {
+        if (oldRecycler is RecyclerView) {
             oldPosition = (oldRecycler.layoutManager as androidx.recyclerview.widget.LinearLayoutManager).findFirstVisibleItemPosition()
             oldRecycler.adapter = null
 
@@ -228,11 +171,11 @@ open class BrowseCatalogueController(bundle: Bundle) :
             }
         } else {
             (catalogue_view.inflate(R.layout.catalogue_recycler_autofit) as AutofitRecyclerView).apply {
-                numColumnsSubscription = getColumnsPreferenceForCurrentOrientation().asObservable()
-                        .doOnNext { spanCount = it }
-                        .skip(1)
-                        // Set again the adapter to recalculate the covers height
-                        .subscribe { adapter = this@BrowseCatalogueController.adapter }
+                columnWidth = when (preferences.gridSize().getOrDefault()) {
+                    0 -> 1f
+                    2 -> 1.66f
+                    else -> 1.25f
+                }
 
                 (layoutManager as androidx.recyclerview.widget.GridLayoutManager).spanSizeLookup = object : androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup() {
                     override fun getSpanSize(position: Int): Int {
@@ -244,12 +187,27 @@ open class BrowseCatalogueController(bundle: Bundle) :
                 }
             }
         }
+        recycler.clipToPadding = false
         recycler.setHasFixedSize(true)
         recycler.adapter = adapter
 
+        scrollViewWith(recycler, true) { insets ->
+            fab.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                bottomMargin = insets.systemWindowInsetBottom + 16.dpToPx
+            }
+        }
+
+        recycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                if (dy <= 0)
+                    fab.extend()
+                else
+                    fab.shrink()
+            }
+        })
+
         catalogue_view.addView(recycler, 1)
-        recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
-        if (oldPosition != androidx.recyclerview.widget.RecyclerView.NO_POSITION) {
+        if (oldPosition != RecyclerView.NO_POSITION) {
             recycler.layoutManager?.scrollToPosition(oldPosition)
         }
         this.recycler = recycler
@@ -292,18 +250,6 @@ open class BrowseCatalogueController(bundle: Bundle) :
             }
         )
 
-        // Setup filters button
-        menu.findItem(R.id.action_set_filter).apply {
-            icon.mutate()
-            if (presenter.sourceFilters.isEmpty()) {
-                isEnabled = false
-                icon.alpha = 128
-            } else {
-                isEnabled = true
-                icon.alpha = 255
-            }
-        }
-
         // Show next display mode
         menu.findItem(R.id.action_display_mode).apply {
             val icon = if (presenter.isListMode)
@@ -325,11 +271,61 @@ open class BrowseCatalogueController(bundle: Bundle) :
         when (item.itemId) {
             R.id.action_search -> expandActionViewFromInteraction = true
             R.id.action_display_mode -> swapDisplayMode()
-            R.id.action_set_filter -> navView?.let { activity?.drawer?.openDrawer(GravityCompat.END) }
             R.id.action_open_in_web_view -> openInWebView()
             else -> return super.onOptionsItemSelected(item)
         }
         return true
+    }
+
+    private fun showFilters() {
+        val sheet = CatalogueSearchSheet(activity!!)
+        sheet.setFilters(presenter.filterItems)
+        presenter.filtersChanged = false
+        val oldFilters = mutableListOf<Any?>()
+        for (i in presenter.sourceFilters) {
+            if (i is Filter.Group<*>) {
+                val subFilters = mutableListOf<Any?>()
+                for (j in i.state) {
+                    subFilters.add((j as Filter<*>).state)
+                }
+                oldFilters.add(subFilters)
+            } else {
+                oldFilters.add(i.state)
+            }
+        }
+        sheet.onSearchClicked = {
+            var matches = true
+            for (i in presenter.sourceFilters.indices) {
+                val filter = oldFilters[i]
+                if (filter is List<*>) {
+                    for (j in filter.indices) {
+                        if (filter[j] !=
+                            ((presenter.sourceFilters[i] as Filter.Group<*>).state[j] as
+                                Filter<*>).state) {
+                            matches = false
+                            break
+                        }
+                    }
+                } else if (oldFilters[i] != presenter.sourceFilters[i].state) {
+                    matches = false
+                    break
+                }
+            }
+            if (!matches) {
+                val allDefault = presenter.sourceFilters == presenter.source.getFilterList()
+                showProgressBar()
+                adapter?.clear()
+                presenter.setSourceFilter(if (allDefault) FilterList() else presenter.sourceFilters)
+            }
+        }
+
+        sheet.onResetClicked = {
+            presenter.appliedFilters = FilterList()
+            val newFilters = presenter.source.getFilterList()
+            presenter.sourceFilters = newFilters
+            sheet.setFilters(presenter.filterItems)
+        }
+        sheet.show()
     }
 
     private fun openInWebView() {
@@ -386,7 +382,7 @@ open class BrowseCatalogueController(bundle: Bundle) :
         snack?.dismiss()
         val message = if (error is NoResultsException) catalogue_view.context.getString(R.string.no_results_found) else (error.message ?: "")
         snack = catalouge_layout?.snack(message, Snackbar.LENGTH_INDEFINITE) {
-            setAction(R.string.action_retry) {
+            setAction(R.string.retry) {
                 // If not the first page, show bottom progress bar.
                 if (adapter.mainItemCount > 0) {
                     val item = progressItem ?: return@setAction
@@ -453,18 +449,6 @@ open class BrowseCatalogueController(bundle: Bundle) :
     }
 
     /**
-     * Returns a preference for the number of manga per row based on the current orientation.
-     *
-     * @return the preference.
-     */
-    fun getColumnsPreferenceForCurrentOrientation(): Preference<Int> {
-        return if (resources?.configuration?.orientation == Configuration.ORIENTATION_PORTRAIT)
-            preferences.portraitColumns()
-        else
-            preferences.landscapeColumns()
-    }
-
-    /**
      * Returns the view holder for the given manga.
      *
      * @param manga the manga to find.
@@ -507,7 +491,7 @@ open class BrowseCatalogueController(bundle: Bundle) :
      */
     override fun onItemClick(view: View?, position: Int): Boolean {
         val item = adapter?.getItem(position) as? CatalogueItem ?: return false
-        router.pushController(MangaController(item.manga, true).withFadeTransaction())
+        router.pushController(MangaDetailsController(item.manga, true).withFadeTransaction())
 
         return false
     }
@@ -527,8 +511,8 @@ open class BrowseCatalogueController(bundle: Bundle) :
         if (manga.favorite) {
             presenter.changeMangaFavorite(manga)
             adapter?.notifyItemChanged(position)
-            snack = catalouge_layout?.snack(R.string.manga_removed_library, Snackbar.LENGTH_INDEFINITE) {
-                setAction(R.string.action_undo) {
+            snack = catalouge_layout?.snack(R.string.removed_from_library, Snackbar.LENGTH_INDEFINITE) {
+                setAction(R.string.undo) {
                     if (!manga.favorite) addManga(manga, position)
                 }
                 addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
@@ -541,7 +525,7 @@ open class BrowseCatalogueController(bundle: Bundle) :
             (activity as? MainActivity)?.setUndoSnackBar(snack)
         } else {
             addManga(manga, position)
-            snack = catalouge_layout?.snack(R.string.manga_added_library)
+            snack = catalouge_layout?.snack(R.string.added_to_library)
         }
     }
 
@@ -588,5 +572,4 @@ open class BrowseCatalogueController(bundle: Bundle) :
         const val SEARCH_QUERY_KEY = "searchQuery"
         const val SMART_SEARCH_CONFIG_KEY = "smartSearchConfig"
     }
-
 }

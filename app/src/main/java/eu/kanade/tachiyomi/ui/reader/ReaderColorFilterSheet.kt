@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.reader
 
 import android.graphics.Color
+import android.os.Build
 import android.view.View
 import android.view.ViewGroup
 import android.widget.SeekBar
@@ -11,11 +12,12 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.util.lang.plusAssign
+import eu.kanade.tachiyomi.util.view.setBottomEdge
+import eu.kanade.tachiyomi.util.view.setEdgeToEdge
 import eu.kanade.tachiyomi.widget.IgnoreFirstSpinnerListener
 import eu.kanade.tachiyomi.widget.SimpleSeekBarListener
 import kotlinx.android.synthetic.main.reader_color_filter.*
-import kotlinx.android.synthetic.main.reader_color_filter_sheet.brightness_overlay
-import kotlinx.android.synthetic.main.reader_color_filter_sheet.color_overlay
+import kotlinx.android.synthetic.main.reader_color_filter_sheet.*
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.subscriptions.CompositeSubscription
@@ -26,7 +28,8 @@ import kotlin.math.abs
 /**
  * Color filter sheet to toggle custom filter and brightness overlay.
  */
-class ReaderColorFilterSheet(activity: ReaderActivity) : BottomSheetDialog(activity) {
+class ReaderColorFilterSheet(activity: ReaderActivity) : BottomSheetDialog
+    (activity, R.style.BottomSheetDialogTheme) {
 
     private val preferences by injectLazy<PreferencesHelper>()
 
@@ -50,6 +53,15 @@ class ReaderColorFilterSheet(activity: ReaderActivity) : BottomSheetDialog(activ
     init {
         val view = activity.layoutInflater.inflate(R.layout.reader_color_filter_sheet, null)
         setContentView(view)
+
+        setEdgeToEdge(activity, view, 0)
+        window?.navigationBarColor = Color.TRANSPARENT
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
+            preferences.readerTheme().getOrDefault() == 0 &&
+            activity.window.decorView.rootWindowInsets.systemWindowInsetRight == 0 &&
+            activity.window.decorView.rootWindowInsets.systemWindowInsetLeft == 0)
+            window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+        setBottomEdge(brightness_seekbar, activity)
 
         sheetBehavior = BottomSheetBehavior.from(view.parent as ViewGroup)
 
@@ -90,6 +102,12 @@ class ReaderColorFilterSheet(activity: ReaderActivity) : BottomSheetDialog(activ
             preferences.customBrightness().set(isChecked)
         }
 
+        /*color_filter_mode.setOnClickListener {
+            val popupMenu = PopupMenu(context, color_filter_mode)
+
+            popupMenu.menuInflater.inflate(R.menu.download_single, popupMenu.menu)
+            popupMenu.show()
+        }*/
         color_filter_mode.onItemSelectedListener = IgnoreFirstSpinnerListener { position ->
             preferences.colorFilterMode().set(position)
         }
@@ -181,7 +199,7 @@ class ReaderColorFilterSheet(activity: ReaderActivity) : BottomSheetDialog(activ
         val green = getGreenFromColor(color)
         val blue = getBlueFromColor(color)
 
-        //Initialize values
+        // Initialize values
         with(view) {
             txt_color_filter_alpha_value.text = alpha.toString()
 
@@ -324,5 +342,4 @@ class ReaderColorFilterSheet(activity: ReaderActivity) : BottomSheetDialog(activ
         /** Integer mask of blue value **/
         const val BLUE_MASK: Long = 0x000000FF
     }
-
 }

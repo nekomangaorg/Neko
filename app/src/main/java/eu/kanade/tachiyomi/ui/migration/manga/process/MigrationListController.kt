@@ -14,6 +14,7 @@ import androidx.core.graphics.ColorUtils
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import com.afollestad.materialdialogs.MaterialDialog
+import com.bluelinelabs.conductor.changehandler.FadeChangeHandler
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -23,16 +24,23 @@ import eu.kanade.tachiyomi.smartsearch.SmartSearchEngine
 import eu.kanade.tachiyomi.source.CatalogueSource
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
+import eu.kanade.tachiyomi.ui.main.BottomNavBarInterface
+import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.migration.MigrationMangaDialog
 import eu.kanade.tachiyomi.ui.migration.SearchController
-import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
-import eu.kanade.tachiyomi.util.system.await
-import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.ui.migration.manga.design.PreMigrationController
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
+import eu.kanade.tachiyomi.util.system.await
+import eu.kanade.tachiyomi.util.system.executeOnIO
+import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
-import kotlinx.android.synthetic.main.chapters_controller.*
+import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
+import eu.kanade.tachiyomi.util.view.applyWindowInsetsForController
+import kotlinx.android.synthetic.main.migration_list_controller.*
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -44,13 +52,13 @@ import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 import rx.schedulers.Schedulers
+import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.coroutines.CoroutineContext
 
 class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
-    MigrationProcessAdapter.MigrationProcessInterface,
-    CoroutineScope {
+    MigrationProcessAdapter.MigrationProcessInterface, BottomNavBarInterface, CoroutineScope {
 
     init {
         setHasOptionsMenu(true)
@@ -68,9 +76,10 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
 
     private val smartSearchEngine = SmartSearchEngine(coroutineContext, config?.extraSearchParams)
 
-    private var migrationsJob: Job? = null
+    var migrationsJob: Job? = null
+        private set
     private var migratingManga: MutableList<MigratingManga>? = null
-    private var selectedPosition:Int? = null
+    private var selectedPosition: Int? = null
     private var manaulMigrations = 0
 
     override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
@@ -78,13 +87,15 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
     }
 
     override fun getTitle(): String? {
-        return resources?.getString(R.string.migration) + " (${adapter?.items?.count { it.manga
-            .migrationStatus != MigrationStatus.RUNNUNG }}/${adapter?.itemCount ?: 0})"
+        return resources?.getString(R.string.migration) + " (${adapter?.items?.count {
+            it.manga.migrationStatus != MigrationStatus.RUNNUNG
+        }}/${adapter?.itemCount ?: 0})"
     }
 
     override fun onViewCreated(view: View) {
 
         super.onViewCreated(view)
+        view.applyWindowInsetsForController()
         setTitle()
         val config = this.config ?: return
 
@@ -103,23 +114,24 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
         recycler.setHasFixedSize(true)
         recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
 
-        adapter?.updateDataSet(newMigratingManga.map { it.toModal() } )
+        adapter?.updateDataSet(newMigratingManga.map { it.toModal() })
 
-        if(migrationsJob == null) {
+        if (migrationsJob == null) {
             migrationsJob = launch {
                 runMigrations(newMigratingManga)
             }
         }
     }
 
-    suspend fun runMigrations(mangas: List<MigratingManga>) {
+    private suspend fun runMigrations(mangas: List<MigratingManga>) {
         val useSourceWithMost = preferences.useSourceWithMost().getOrDefault()
 
         val sources = preferences.migrationSources().getOrDefault().split("/").mapNotNull {
             val value = it.toLongOrNull() ?: return
-            sourceManager.get(value) as? CatalogueSource }
+            sourceManager.get(value) as? CatalogueSource
+        }
         if (config == null) return
-        for(manga in mangas) {
+        for (manga in mangas) {
             if (migrationsJob?.isCancelled == true) {
                 break
             }
@@ -127,10 +139,10 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
             if (manga.mangaId !in config.mangaIds) {
                 continue
             }
-            if(!manga.searchResult.initialized && manga.migrationJob.isActive) {
+            if (!manga.searchResult.initialized && manga.migrationJob.isActive) {
                 val mangaObj = manga.manga()
 
-                if(mangaObj == null) {
+                if (mangaObj == null) {
                     manga.searchResult.initialize(null)
                     continue
                 }
@@ -142,7 +154,7 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
                         val validSources = sources.filter {
                             it.id != mangaSource.id
                         }
-                        if(useSourceWithMost) {
+                        if (useSourceWithMost) {
                             val sourceSemaphore = Semaphore(3)
                             val processedSources = AtomicInteger()
 
@@ -150,20 +162,33 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
                                 async {
                                     sourceSemaphore.withPermit {
                                         try {
-                                           /* val searchResult = if (useSmartSearch) {
-                                                smartSearchEngine.smartSearch(source, mangaObj.title)
-                                            } else {*/
-                                            val searchResult = smartSearchEngine
-                                                .normalSearch(source, mangaObj.originalTitle())
+                                            /* val searchResult = if (useSmartSearch) {
+                                                 smartSearchEngine.smartSearch(source, mangaObj.title)
+                                             } else {*/
+                                            val searchResult = smartSearchEngine.normalSearch(
+                                                    source,
+                                                    mangaObj.title
+                                                )
 
-                                            if(searchResult != null) {
-                                                val localManga = smartSearchEngine.networkToLocalManga(searchResult, source.id)
-                                                val chapters = source.fetchChapterList(localManga).toSingle().await(
-                                                    Schedulers.io())
+                                            if (searchResult != null) {
+                                                val localManga =
+                                                    smartSearchEngine.networkToLocalManga(
+                                                        searchResult,
+                                                        source.id
+                                                    )
+                                                val chapters =
+                                                    source.fetchChapterList(localManga).toSingle()
+                                                        .await(
+                                                            Schedulers.io()
+                                                        )
                                                 try {
-                                                    syncChaptersWithSource(db, chapters, localManga, source)
-                                                }
-                                                catch (e: Exception) {
+                                                    syncChaptersWithSource(
+                                                        db,
+                                                        chapters,
+                                                        localManga,
+                                                        source
+                                                    )
+                                                } catch (e: Exception) {
                                                     return@async null
                                                 }
                                                 manga.progress.send(validSources.size to processedSources.incrementAndGet())
@@ -171,10 +196,10 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
                                             } else {
                                                 null
                                             }
-                                        } catch(e: CancellationException) {
+                                        } catch (e: CancellationException) {
                                             // Ignore cancellations
                                             throw e
-                                        } catch(e: Exception) {
+                                        } catch (e: Exception) {
                                             null
                                         }
                                     }
@@ -183,56 +208,65 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
                         } else {
                             validSources.forEachIndexed { index, source ->
                                 val searchResult = try {
-                                    val searchResult =  smartSearchEngine
-                                        .normalSearch(source, mangaObj.originalTitle())
+                                    val searchResult = smartSearchEngine.normalSearch(
+                                            source,
+                                            mangaObj.title
+                                        )
 
                                     if (searchResult != null) {
-                                        val localManga = smartSearchEngine.networkToLocalManga(searchResult, source.id)
-                                        val chapters = source.fetchChapterList(localManga).toSingle().await(
-                                            Schedulers.io())
+                                        val localManga = smartSearchEngine.networkToLocalManga(
+                                            searchResult,
+                                            source.id
+                                        )
+                                        val chapters = try {
+                                            source.fetchChapterList(localManga).toSingle()
+                                                .await(Schedulers.io())
+                                        } catch (e: java.lang.Exception) {
+                                            Timber.e(e)
+                                            emptyList<SChapter>()
+                                        } ?: emptyList()
                                         withContext(Dispatchers.IO) {
                                             syncChaptersWithSource(db, chapters, localManga, source)
                                         }
                                         localManga
                                     } else null
-                                } catch(e: CancellationException) {
+                                } catch (e: CancellationException) {
                                     // Ignore cancellations
                                     throw e
-                                } catch(e: Exception) {
+                                } catch (e: Exception) {
                                     null
                                 }
 
                                 manga.progress.send(validSources.size to (index + 1))
 
-                                if(searchResult != null) return@async searchResult
+                                if (searchResult != null) return@async searchResult
                             }
 
                             null
                         }
                     }.await()
-                } catch(e: CancellationException) {
+                } catch (e: CancellationException) {
                     // Ignore canceled migrations
                     continue
                 }
 
-                if(result != null && result.thumbnail_url == null) {
+                if (result != null && result.thumbnail_url == null) {
                     try {
-                        val newManga = sourceManager.getOrStub(result.source)
-                            .fetchMangaDetails(result)
-                            .toSingle()
-                            .await()
+                        val newManga =
+                            sourceManager.getOrStub(result.source).fetchMangaDetails(result)
+                                .toSingle().await()
                         result.copyFrom(newManga)
 
                         db.insertManga(result).executeAsBlocking()
-                    } catch(e: CancellationException) {
+                    } catch (e: CancellationException) {
                         // Ignore cancellations
                         throw e
-                    } catch(e: Exception) {
+                    } catch (e: Exception) {
                     }
                 }
 
-                manga.migrationStatus = if (result == null) MigrationStatus.MANGA_NOT_FOUND else
-                    MigrationStatus.MANGA_FOUND
+                manga.migrationStatus =
+                    if (result == null) MigrationStatus.MANGA_NOT_FOUND else MigrationStatus.MANGA_FOUND
                 adapter?.sourceFinished()
                 manga.searchResult.initialize(result?.id)
             }
@@ -264,8 +298,7 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
             ids.removeAt(index)
             config.mangaIds = ids
             val index2 = migratingManga?.indexOf(item.manga) ?: return
-            if (index2 > -1)
-                migratingManga?.removeAt(index2)
+            if (index2 > -1) migratingManga?.removeAt(index2)
         }
     }
 
@@ -296,7 +329,7 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
                 }
             }
             R.id.action_skip -> adapter?.removeManga(position)
-            R.id.action_migrate_now ->  {
+            R.id.action_migrate_now -> {
                 adapter?.migrateManga(position, false)
                 manaulMigrations++
             }
@@ -345,7 +378,7 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
                 adapter?.notifyDataSetChanged()
             } else {
                 migratingManga.manga.migrationStatus = MigrationStatus.MANGA_NOT_FOUND
-                activity?.toast(R.string.error_fetching_migration, Toast.LENGTH_LONG)
+                activity?.toast(R.string.no_chapters_found_for_migration, Toast.LENGTH_LONG)
                 adapter?.notifyDataSetChanged()
             }
         }
@@ -354,22 +387,45 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
     fun migrateMangas() {
         launchUI {
             adapter?.performMigrations(false)
-            router.popCurrentController()
+            navigateOut()
         }
     }
 
     fun copyMangas() {
         launchUI {
             adapter?.performMigrations(true)
-            router.popCurrentController()
+            navigateOut()
         }
+    }
+
+    private fun navigateOut() {
+        if (migratingManga?.size == 1) {
+            launchUI {
+                val hasDetails = router.backstack.any { it.controller() is MangaDetailsController }
+                if (hasDetails) {
+                    val manga = migratingManga?.firstOrNull()?.searchResult?.get()?.let {
+                        db.getManga(it).executeOnIO()
+                    }
+                    if (manga != null) {
+                        val newStack = router.backstack.filter {
+                            it.controller() !is MangaDetailsController &&
+                            it.controller() !is MigrationListController &&
+                            it.controller() !is PreMigrationController
+                        } + MangaDetailsController(manga).withFadeTransaction()
+                        router.setBackstack(newStack, FadeChangeHandler())
+                        return@launchUI
+                    }
+                }
+                router.popCurrentController()
+            }
+        } else router.popCurrentController()
     }
 
     override fun handleBack(): Boolean {
         activity?.let {
             MaterialDialog(it).show {
-                title(R.string.stop_migration)
-                positiveButton (R.string.action_stop)  {
+                title(R.string.stop_migrating)
+                positiveButton(R.string.stop) {
                     router.popCurrentController()
                     migrationsJob?.cancel()
                 }
@@ -400,9 +456,13 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
                 resources!!, R.drawable.ic_done_white_24dp, null
             )
         }
-        val translucentWhite = ColorUtils.setAlphaComponent(Color.WHITE, 127)
-        menuCopy.icon?.setTint(if (allMangasDone) Color.WHITE else translucentWhite)
-        menuMigrate?.icon?.setTint(if (allMangasDone) Color.WHITE else translucentWhite)
+
+        menuCopy.icon.mutate()
+        menuMigrate.icon.mutate()
+        val tintColor = activity?.getResourceColor(R.attr.actionBarTintColor) ?: Color.WHITE
+        val translucentWhite = ColorUtils.setAlphaComponent(tintColor, 127)
+        menuCopy.icon?.setTint(if (allMangasDone) tintColor else translucentWhite)
+        menuMigrate?.icon?.setTint(if (allMangasDone) tintColor else translucentWhite)
         menuCopy.isEnabled = allMangasDone
         menuMigrate.isEnabled = allMangasDone
     }
@@ -411,17 +471,43 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
         val totalManga = adapter?.itemCount ?: 0
         val mangaSkipped = adapter?.mangasSkipped() ?: 0
         when (item.itemId) {
-            R.id.action_copy_manga -> MigrationMangaDialog(this, true, totalManga, mangaSkipped)
-                .showDialog(router)
-            R.id.action_migrate_manga -> MigrationMangaDialog(this, false, totalManga, mangaSkipped)
-                .showDialog(router)
+            R.id.action_copy_manga -> MigrationMangaDialog(
+                this,
+                true,
+                totalManga,
+                mangaSkipped
+            ).showDialog(router)
+            R.id.action_migrate_manga -> MigrationMangaDialog(
+                this,
+                false,
+                totalManga,
+                mangaSkipped
+            ).showDialog(router)
             else -> return super.onOptionsItemSelected(item)
+        }
+        return true
+    }
+
+    override fun canChangeTabs(block: () -> Unit): Boolean {
+        if (migrationsJob?.isCancelled == false || adapter?.allMangasDone() == true) {
+            activity?.let {
+                MaterialDialog(it).show {
+                    title(R.string.stop_migrating)
+                    positiveButton(R.string.stop) {
+                        block()
+                        migrationsJob?.cancel()
+                    }
+                    negativeButton(android.R.string.cancel)
+                }
+            }
+            return false
         }
         return true
     }
 
     companion object {
         const val CONFIG_EXTRA = "config_extra"
+        const val TAG = "migration_list"
 
         fun create(config: MigrationProcedureConfig): MigrationListController {
             return MigrationListController(Bundle().apply {

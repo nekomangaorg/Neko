@@ -8,8 +8,8 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.anilist.AnilistApi
-import eu.kanade.tachiyomi.data.track.shikimori.ShikimoriApi
 import eu.kanade.tachiyomi.data.track.bangumi.BangumiApi
+import eu.kanade.tachiyomi.data.track.shikimori.ShikimoriApi
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.widget.preference.LoginPreference
 import eu.kanade.tachiyomi.widget.preference.TrackLoginDialog
@@ -22,11 +22,11 @@ class SettingsTrackingController : SettingsController(),
     private val trackManager: TrackManager by injectLazy()
 
     override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
-        titleRes = R.string.pref_category_tracking
+        titleRes = R.string.tracking
 
         switchPreference {
             key = Keys.autoUpdateTrack
-            titleRes = R.string.pref_auto_update_manga_sync
+            titleRes = R.string.sync_chapters_after_reading
             defaultValue = true
         }
         preferenceCategory {
@@ -42,7 +42,7 @@ class SettingsTrackingController : SettingsController(),
             trackPreference(trackManager.aniList) {
                 onClick {
                     val tabsIntent = CustomTabsIntent.Builder()
-                            .setToolbarColor(context.getResourceColor(R.attr.colorPrimary))
+                            .setToolbarColor(context.getResourceColor(R.attr.colorPrimaryVariant))
                             .build()
                     tabsIntent.intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
                     tabsIntent.launchUrl(activity!!, AnilistApi.authUrl())
@@ -50,7 +50,7 @@ class SettingsTrackingController : SettingsController(),
             }
             trackPreference(trackManager.kitsu) {
                 onClick {
-                    val dialog = TrackLoginDialog(trackManager.kitsu)
+                    val dialog = TrackLoginDialog(trackManager.kitsu, context.getString(R.string.email))
                     dialog.targetController = this@SettingsTrackingController
                     dialog.showDialog(router)
                 }
@@ -58,7 +58,7 @@ class SettingsTrackingController : SettingsController(),
             trackPreference(trackManager.shikimori) {
                 onClick {
                     val tabsIntent = CustomTabsIntent.Builder()
-                            .setToolbarColor(context.getResourceColor(R.attr.colorPrimary))
+                            .setToolbarColor(context.getResourceColor(R.attr.colorPrimaryVariant))
                             .build()
                     tabsIntent.intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
                     tabsIntent.launchUrl(activity!!, ShikimoriApi.authUrl())
@@ -67,7 +67,7 @@ class SettingsTrackingController : SettingsController(),
             trackPreference(trackManager.bangumi) {
                 onClick {
                     val tabsIntent = CustomTabsIntent.Builder()
-                            .setToolbarColor(context.getResourceColor(R.attr.colorPrimary))
+                            .setToolbarColor(context.getResourceColor(R.attr.colorPrimaryVariant))
                             .build()
                     tabsIntent.intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
                     tabsIntent.launchUrl(activity!!, BangumiApi.authUrl())
@@ -77,8 +77,8 @@ class SettingsTrackingController : SettingsController(),
     }
 
     inline fun PreferenceScreen.trackPreference(
-            service: TrackService,
-            block: (@DSL LoginPreference).() -> Unit
+        service: TrackService,
+        block: (@DSL LoginPreference).() -> Unit
     ): LoginPreference {
         return initThenAdd(LoginPreference(context).apply {
             key = Keys.trackUsername(service.id)
@@ -101,5 +101,4 @@ class SettingsTrackingController : SettingsController(),
     override fun trackDialogClosed(service: TrackService) {
         updatePreference(service.id)
     }
-
 }

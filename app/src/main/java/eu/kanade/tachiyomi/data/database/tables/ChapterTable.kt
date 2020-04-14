@@ -24,6 +24,8 @@ object ChapterTable {
 
     const val COL_LAST_PAGE_READ = "last_page_read"
 
+    const val COL_PAGES_LEFT = "pages_left"
+
     const val COL_CHAPTER_NUMBER = "chapter_number"
 
     const val COL_SOURCE_ORDER = "source_order"
@@ -38,6 +40,7 @@ object ChapterTable {
             $COL_READ BOOLEAN NOT NULL,
             $COL_BOOKMARK BOOLEAN NOT NULL,
             $COL_LAST_PAGE_READ INT NOT NULL,
+            $COL_PAGES_LEFT INT NOT NULL,
             $COL_CHAPTER_NUMBER FLOAT NOT NULL,
             $COL_SOURCE_ORDER INTEGER NOT NULL,
             $COL_DATE_FETCH LONG NOT NULL,
@@ -62,4 +65,6 @@ object ChapterTable {
     val addScanlator: String
         get() = "ALTER TABLE $TABLE ADD COLUMN $COL_SCANLATOR TEXT DEFAULT NULL"
 
+    val pagesLeftQuery: String
+        get() = "ALTER TABLE $TABLE ADD COLUMN $COL_PAGES_LEFT INTEGER DEFAULT 0"
 }

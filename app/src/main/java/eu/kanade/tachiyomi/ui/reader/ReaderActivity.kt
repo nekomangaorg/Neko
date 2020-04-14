@@ -11,14 +11,19 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
-import android.view.*
+import android.view.KeyEvent
+import android.view.Menu
+import android.view.MenuItem
+import android.view.MotionEvent
+import android.view.View
+import android.view.WindowManager
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.biometric.BiometricManager
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.snackbar.Snackbar
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -27,9 +32,9 @@ import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.base.activity.BaseRxActivity
-import eu.kanade.tachiyomi.ui.main.BiometricActivity
-import eu.kanade.tachiyomi.ui.main.MainActivity
-import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.*
+import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.AddToLibraryFirst
+import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.Error
+import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.Success
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
@@ -41,10 +46,12 @@ import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
 import eu.kanade.tachiyomi.util.lang.plusAssign
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.GLUtil
+import eu.kanade.tachiyomi.util.system.ThemeUtil
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.gone
+import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.widget.SimpleAnimationListener
 import eu.kanade.tachiyomi.widget.SimpleSeekBarListener
@@ -60,7 +67,7 @@ import rx.subscriptions.CompositeSubscription
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 import java.io.File
-import java.util.*
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 
@@ -122,6 +129,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
     @Suppress("DEPRECATION")
     private var progressDialog: ProgressDialog? = null
 
+    private var snackbar: Snackbar? = null
+
     companion object {
         @Suppress("unused")
         const val LEFT_TO_RIGHT = 1
@@ -143,20 +152,14 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
     /**
      * Called when the activity is created. Initializes the presenter and configuration.
      */
-    override fun onCreate(savedState: Bundle?) {
-        AppCompatDelegate.setDefaultNightMode(
-            when (preferences.theme()) {
-                1 -> AppCompatDelegate.MODE_NIGHT_NO
-                2, 3, 4 -> AppCompatDelegate.MODE_NIGHT_YES
-                else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-            }
-        )
+    override fun onCreate(savedInstanceState: Bundle?) {
+        AppCompatDelegate.setDefaultNightMode(ThemeUtil.nightMode(preferences.theme()))
         setTheme(when (preferences.readerTheme().getOrDefault()) {
             0 -> R.style.Theme_Base_Reader_Light
             1 -> R.style.Theme_Base_Reader_Dark
             else -> R.style.Theme_Base_Reader
         })
-        super.onCreate(savedState)
+        super.onCreate(savedInstanceState)
         setContentView(R.layout.reader_activity)
 
         setNotchCutoutMode()
@@ -174,8 +177,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
             else presenter.init(manga, chapterUrl)
         }
 
-        if (savedState != null) {
-            menuVisible = savedState.getBoolean(::menuVisible.name)
+        if (savedInstanceState != null) {
+            menuVisible = savedInstanceState.getBoolean(::menuVisible.name)
         }
 
         config = ReaderConfig()
@@ -195,6 +198,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
         bottomSheet = null
         progressDialog?.dismiss()
         progressDialog = null
+        snackbar?.dismiss()
+        snackbar = null
     }
 
     /**
@@ -322,6 +327,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
         menuVisible = visible
         if (visible) coroutine?.cancel()
         if (visible) {
+            snackbar?.dismiss()
             systemUi?.show()
             reader_menu.visibility = View.VISIBLE
             reader_menu_bottom.visibility = View.VISIBLE
@@ -356,8 +362,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
                     val bottomAnimation = AnimationUtils.loadAnimation(this, R.anim.exit_to_bottom)
                     reader_menu_bottom.startAnimation(bottomAnimation)
                 }
-            }
-            else
+            } else
                 reader_menu.visibility = View.GONE
         }
         menuStickyVisible = false
@@ -369,11 +374,32 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
      */
     fun setManga(manga: Manga) {
         val prevViewer = viewer
-        val newViewer = when (presenter.getMangaViewer()) {
+        val noDefault = manga.viewer == -1
+        val mangaViewer = presenter.getMangaViewer()
+        val newViewer = when (mangaViewer) {
             RIGHT_TO_LEFT -> R2LPagerViewer(this)
             VERTICAL -> VerticalPagerViewer(this)
             WEBTOON -> WebtoonViewer(this)
             else -> L2RPagerViewer(this)
+        }
+
+        if (noDefault && presenter.manga?.viewer!! > 0) {
+            snackbar = reader_layout.snack(
+                getString(
+                    R.string.reading_, getString(
+                        when (mangaViewer) {
+                            RIGHT_TO_LEFT -> R.string.right_to_left_viewer
+                            VERTICAL -> R.string.vertical_viewer
+                            WEBTOON -> R.string.webtoon_style
+                            else -> R.string.left_to_right_viewer
+                        }
+                    ).toLowerCase(Locale.getDefault())
+                ), 8000
+            ) {
+                setAction(R.string.use_default) {
+                    presenter.setMangaViewer(0)
+                }
+            }
         }
 
         // Destroy previous viewer if there was one
@@ -384,7 +410,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
         viewer = newViewer
         viewer_container.addView(newViewer.getView())
 
-        toolbar.title = manga.currentTitle()
+        toolbar.title = manga.title
 
         page_seekbar.isRTL = newViewer is R2LPagerViewer
 
@@ -461,7 +487,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
      */
     @SuppressLint("SetTextI18n")
     fun onPageSelected(page: ReaderPage) {
-        presenter.onPageSelected(page)
+        val newChapter = presenter.onPageSelected(page)
         val pages = page.chapter.pages ?: return
 
         // Set bottom page number
@@ -474,6 +500,10 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
         } else {
             right_page_text.text = "${page.number}"
             left_page_text.text = "${pages.size}"
+        }
+
+        if (newChapter && config?.showNewChapter == false) {
+            systemUi?.show()
         }
 
         // Set seekbar progress
@@ -522,23 +552,6 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
         presenter.shareImage(page)
     }
 
-    override fun onResume() {
-        super.onResume()
-        val useBiometrics = preferences.useBiometrics().getOrDefault()
-        if (useBiometrics && BiometricManager.from(this)
-                .canAuthenticate() == BiometricManager.BIOMETRIC_SUCCESS) {
-            if (!MainActivity.unlocked && (preferences.lockAfter().getOrDefault() <= 0 || Date()
-                    .time >=
-                    preferences.lastUnlock().getOrDefault() + 60 * 1000 * preferences.lockAfter().getOrDefault())) {
-                val intent = Intent(this, BiometricActivity::class.java)
-                startActivity(intent)
-                this.overridePendingTransition(0, 0)
-            }
-        }
-        else if (useBiometrics)
-            preferences.useBiometrics().set(false)
-    }
-
     /**
      * Called from the presenter when a page is ready to be shared. It shows Android's default
      * sharing tool.
@@ -551,7 +564,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
             clipData = ClipData.newRawUri(null, stream)
             type = "image/*"
         }
-        startActivity(Intent.createChooser(intent, getString(R.string.action_share)))
+        startActivity(Intent.createChooser(intent, getString(R.string.share)))
     }
 
     /**
@@ -592,8 +605,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
     fun onSetAsCoverResult(result: ReaderPresenter.SetAsCoverResult) {
         toast(when (result) {
             Success -> R.string.cover_updated
-            AddToLibraryFirst -> R.string.notification_first_add_to_library
-            Error -> R.string.notification_cover_update_failed
+            AddToLibraryFirst -> R.string.must_be_in_library_to_edit
+            Error -> R.string.failed_to_update_cover
         })
     }
 
@@ -621,8 +634,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
                 })
                 toolbar.startAnimation(toolbarAnimation)
             }
-        }
-        else {
+        } else {
             if (menuStickyVisible && !menuVisible) {
                 setMenuVisibility(false, animate = false)
             }
@@ -638,15 +650,13 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
 
             val currentOrientation = resources.configuration.orientation
 
-            if(currentOrientation == Configuration.ORIENTATION_LANDSCAPE) {
+            if (currentOrientation == Configuration.ORIENTATION_LANDSCAPE) {
                 val params = window.attributes
                 params.layoutInDisplayCutoutMode =
                         WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER
             }
-
         }
     }
-
 
     /**
      * Class that handles the user preferences of the reader.
@@ -667,6 +677,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
          * Custom color filter subscription.
          */
         private var customFilterColorSubscription: Subscription? = null
+
+        var showNewChapter = false
 
         /**
          * Initializes the reader subscriptions.
@@ -704,6 +716,9 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
 
             subscriptions += preferences.colorFilterMode().asObservable()
                 .subscribe { setColorFilter(preferences.colorFilter().getOrDefault()) }
+
+            subscriptions += preferences.alwaysShowChapterTransition().asObservable()
+                .subscribe { showNewChapter = it }
         }
 
         /**
@@ -853,7 +868,5 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
             color_overlay.visibility = View.VISIBLE
             color_overlay.setFilterColor(value, preferences.colorFilterMode().getOrDefault())
         }
-
     }
-
 }

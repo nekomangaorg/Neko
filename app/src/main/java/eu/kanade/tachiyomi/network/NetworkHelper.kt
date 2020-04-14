@@ -21,5 +21,4 @@ class NetworkHelper(context: Context) {
     val cloudflareClient = client.newBuilder()
             .addInterceptor(CloudflareInterceptor(context))
             .build()
-
 }

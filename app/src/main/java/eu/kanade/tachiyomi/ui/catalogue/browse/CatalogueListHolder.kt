@@ -1,15 +1,17 @@
 package eu.kanade.tachiyomi.ui.catalogue.browse
 
 import android.view.View
+import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import eu.davidea.flexibleadapter.FlexibleAdapter
+import eu.davidea.flexibleadapter.items.IFlexible
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.glide.GlideApp
-import androidx.recyclerview.widget.RecyclerView
-import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.util.system.getResourceColor
-import kotlinx.android.synthetic.main.catalogue_list_item.thumbnail
-import kotlinx.android.synthetic.main.catalogue_list_item.title
+import eu.kanade.tachiyomi.widget.StateImageViewTarget
+import kotlinx.android.synthetic.main.catalogue_list_item.*
 
 /**
  * Class used to hold the displayed data of a manga in the catalogue, like the cover or the title.
@@ -22,9 +24,6 @@ import kotlinx.android.synthetic.main.catalogue_list_item.title
 class CatalogueListHolder(private val view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>) :
         CatalogueHolder(view, adapter) {
 
-    private val favoriteColor = view.context.getResourceColor(android.R.attr.textColorHint)
-    private val unfavoriteColor = view.context.getResourceColor(android.R.attr.textColorPrimary)
-
     /**
      * Method called from [CatalogueAdapter.onBindViewHolder]. It updates the data for this
      * holder with the given manga.
@@ -32,24 +31,27 @@ class CatalogueListHolder(private val view: View, adapter: FlexibleAdapter<IFlex
      * @param manga the manga to bind.
      */
     override fun onSetValues(manga: Manga) {
-        title.text = manga.originalTitle()
-        title.setTextColor(if (manga.favorite) favoriteColor else unfavoriteColor)
+        title.text = manga.title
+        with(subtitle) {
+            visibility = if (manga.favorite) View.VISIBLE else View.GONE
+            text = view.resources.getString(R.string.in_library)
+            setTextColor(view.context.getResourceColor(android.R.attr.colorAccent))
+        }
 
         setImage(manga)
     }
 
     override fun setImage(manga: Manga) {
-        GlideApp.with(view.context).clear(thumbnail)
-        if (!manga.thumbnail_url.isNullOrEmpty()) {
+        if (manga.thumbnail_url.isNullOrEmpty()) {
+            GlideApp.with(view.context).clear(contentView)
+        } else {
             GlideApp.with(view.context)
-                    .load(manga)
-                    .diskCacheStrategy(DiskCacheStrategy.DATA)
-                    .centerCrop()
-                    .circleCrop()
-                    .dontAnimate()
-                    .placeholder(android.R.color.transparent)
-                    .into(thumbnail)
+                .load(manga)
+                .diskCacheStrategy(DiskCacheStrategy.DATA)
+                .dontAnimate()
+                .placeholder(android.R.color.transparent)
+                .transition(DrawableTransitionOptions.withCrossFade())
+                .into(StateImageViewTarget(cover_thumbnail, progress))
         }
     }
-
 }

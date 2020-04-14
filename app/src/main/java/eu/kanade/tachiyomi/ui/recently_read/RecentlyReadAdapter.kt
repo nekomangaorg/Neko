@@ -18,8 +18,8 @@ import java.text.DecimalFormatSymbols
  * @param controller a RecentlyReadController object
  * @constructor creates an instance of the adapter.
  */
-class RecentlyReadAdapter(controller: RecentlyReadController)
-: FlexibleAdapter<IFlexible<*>>(null, controller, true) {
+class RecentlyReadAdapter(controller: RecentlyReadController) :
+        FlexibleAdapter<IFlexible<*>>(null, controller, true) {
 
     val sourceManager by injectLazy<SourceManager>()
 
@@ -48,6 +48,6 @@ class RecentlyReadAdapter(controller: RecentlyReadController)
     }
 
     interface OnCoverClickListener {
-        fun onCoverClick(position: Int, lastTouchY: Float)
+        fun onCoverClick(position: Int)
     }
 }

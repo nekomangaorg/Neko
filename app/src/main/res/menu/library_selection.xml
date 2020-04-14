@@ -4,44 +4,19 @@
       xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item android:id="@+id/action_move_to_category"
-          android:title="@string/action_move_category"
+          android:title="@string/move_to_categories"
           android:icon="@drawable/ic_label_white_24dp"
           app:showAsAction="ifRoom"/>
 
     <item android:id="@+id/action_delete"
-          android:title="@string/action_remove"
-          android:icon="@drawable/ic_delete_white_24dp"
-          app:showAsAction="ifRoom"/>
-
-    <item android:id="@+id/action_select_all"
-        android:title="@string/action_select_all"
-        android:icon="@drawable/ic_select_all_white_24dp"
+        android:title="@string/remove"
+        android:icon="@drawable/ic_delete_white_24dp"
         app:showAsAction="ifRoom"/>
 
     <item
         android:id="@+id/action_migrate"
-        android:title="@string/label_migration"
+        android:icon="@drawable/ic_swap_calls_white_24dp"
+        android:title="@string/source_migration"
         app:showAsAction="ifRoom" />
-
-    <item
-        android:id="@+id/action_hide_title"
-        android:title="@string/action_hide_title"
-        app:showAsAction="never" />
-
-
-    <item
-        android:id="@+id/action_move_manga"
-        android:title="@string/action_move"
-        app:showAsAction="never"
-        >
-        <menu >
-            <item
-                android:id="@+id/action_to_top"
-                android:title="@string/action_move_to_top" />
-            <item
-                android:id="@+id/action_to_bottom"
-                android:title="@string/action_move_to_bottom" />
-        </menu>
-    </item>
 
 </menu>

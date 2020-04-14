@@ -6,12 +6,14 @@ import eu.kanade.tachiyomi.data.database.DbProvider
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaChapter
+import eu.kanade.tachiyomi.data.database.models.MangaChapterHistory
 import eu.kanade.tachiyomi.data.database.resolvers.ChapterBackupPutResolver
 import eu.kanade.tachiyomi.data.database.resolvers.ChapterProgressPutResolver
 import eu.kanade.tachiyomi.data.database.resolvers.ChapterSourceOrderPutResolver
 import eu.kanade.tachiyomi.data.database.resolvers.MangaChapterGetResolver
+import eu.kanade.tachiyomi.data.database.resolvers.MangaChapterHistoryGetResolver
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable
-import java.util.*
+import java.util.Date
 
 interface ChapterQueries : DbProvider {
 
@@ -33,6 +35,16 @@ interface ChapterQueries : DbProvider {
                     .build())
             .withGetResolver(MangaChapterGetResolver.INSTANCE)
             .prepare()
+
+    fun getUpdatedManga(date: Date, search: String = "", endless: Boolean) = db.get()
+        .listOfObjects(MangaChapterHistory::class.java)
+        .withQuery(RawQuery.builder()
+            .query(getRecentsQueryDistinct(search, endless))
+            .args(date.time)
+            .observesTables(ChapterTable.TABLE)
+            .build())
+        .withGetResolver(MangaChapterHistoryGetResolver.INSTANCE)
+        .prepare()
 
     fun getChapter(id: Long) = db.get()
             .`object`(Chapter::class.java)
@@ -88,5 +100,4 @@ interface ChapterQueries : DbProvider {
             .objects(chapters)
             .withPutResolver(ChapterSourceOrderPutResolver())
             .prepare()
-
 }

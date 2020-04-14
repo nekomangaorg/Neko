@@ -119,5 +119,3 @@ class UpdaterService : IntentService(UpdaterService::class.java.name) {
         }
     }
 }
-
-

@@ -1,14 +1,13 @@
 package eu.kanade.tachiyomi.ui.recent_updates
 
 import android.view.View
-import android.widget.PopupMenu
+import androidx.core.content.ContextCompat
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.glide.GlideApp
-import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
+import eu.kanade.tachiyomi.ui.manga.chapter.BaseChapterHolder
 import eu.kanade.tachiyomi.util.system.getResourceColor
-import eu.kanade.tachiyomi.util.view.setVectorCompat
+import kotlinx.android.synthetic.main.download_button.*
 import kotlinx.android.synthetic.main.recent_chapters_item.*
 
 /**
@@ -22,7 +21,7 @@ import kotlinx.android.synthetic.main.recent_chapters_item.*
  * @constructor creates a new recent chapter holder.
  */
 class RecentChapterHolder(private val view: View, private val adapter: RecentChaptersAdapter) :
-        BaseFlexibleViewHolder(view, adapter) {
+    BaseChapterHolder(view, adapter) {
 
     /**
      * Color of read chapter
@@ -40,10 +39,6 @@ class RecentChapterHolder(private val view: View, private val adapter: RecentCha
     private var item: RecentChapterItem? = null
 
     init {
-        // We need to post a Runnable to show the popup to make sure that the PopupMenu is
-        // correctly positioned. The reason being that the view may change position before the
-        // PopupMenu is shown.
-        chapter_menu.setOnClickListener { it.post { showPopupMenu(it) } }
         manga_cover.setOnClickListener {
             adapter.coverClickListener.onCoverClick(adapterPosition)
         }
@@ -61,10 +56,16 @@ class RecentChapterHolder(private val view: View, private val adapter: RecentCha
         chapter_title.text = item.chapter.name
 
         // Set manga title
-        manga_title.text = item.manga.currentTitle()
+        manga_full_title.text = item.manga.title
 
-        // Set the correct drawable for dropdown and update the tint to match theme.
-        chapter_menu_icon.setVectorCompat(R.drawable.ic_more_horiz_black_24dp, view.context.getResourceColor(R.attr.icon_color))
+        if (front_view.translationX == 0f) {
+            read.setImageDrawable(
+                ContextCompat.getDrawable(
+                    read.context, if (item.read) R.drawable.ic_eye_off_24dp
+                    else R.drawable.ic_eye_24dp
+                )
+            )
+        }
 
         // Set cover
         GlideApp.with(itemView.context).clear(manga_cover)
@@ -79,14 +80,27 @@ class RecentChapterHolder(private val view: View, private val adapter: RecentCha
         // Check if chapter is read and set correct color
         if (item.chapter.read) {
             chapter_title.setTextColor(readColor)
-            manga_title.setTextColor(readColor)
+            manga_full_title.setTextColor(readColor)
         } else {
             chapter_title.setTextColor(unreadColor)
-            manga_title.setTextColor(unreadColor)
+            manga_full_title.setTextColor(unreadColor)
         }
 
         // Set chapter status
-        notifyStatus(item.status)
+        notifyStatus(item.status, item.progress)
+        resetFrontView()
+    }
+
+    private fun resetFrontView() {
+        if (front_view.translationX != 0f) itemView.post { adapter.notifyItemChanged(adapterPosition) }
+    }
+
+    override fun getFrontView(): View {
+        return front_view
+    }
+
+    override fun getRearRightView(): View {
+        return right_view
     }
 
     /**
@@ -94,59 +108,6 @@ class RecentChapterHolder(private val view: View, private val adapter: RecentCha
      *
      * @param status download status
      */
-    fun notifyStatus(status: Int) = with(download_text) {
-        when (status) {
-            Download.QUEUE -> setText(R.string.chapter_queued)
-            Download.DOWNLOADING -> setText(R.string.chapter_downloading)
-            Download.DOWNLOADED -> setText(R.string.chapter_downloaded)
-            Download.ERROR -> setText(R.string.chapter_error)
-            else -> text = ""
-        }
-    }
-
-    /**
-     * Show pop up menu
-     *
-     * @param view view containing popup menu.
-     */
-    private fun showPopupMenu(view: View) = item?.let { item ->
-        // Create a PopupMenu, giving it the clicked view for an anchor
-        val popup = PopupMenu(view.context, view)
-
-        // Inflate our menu resource into the PopupMenu's Menu
-        popup.menuInflater.inflate(R.menu.chapter_recent, popup.menu)
-
-        // Hide download and show delete if the chapter is downloaded and
-        if (item.isDownloaded) {
-            popup.menu.findItem(R.id.action_download).isVisible = false
-            popup.menu.findItem(R.id.action_delete).isVisible = true
-        }
-
-        // Hide mark as unread when the chapter is unread
-        if (!item.chapter.read /*&& mangaChapter.chapter.last_page_read == 0*/) {
-            popup.menu.findItem(R.id.action_mark_as_unread).isVisible = false
-        }
-
-        // Hide mark as read when the chapter is read
-        if (item.chapter.read) {
-            popup.menu.findItem(R.id.action_mark_as_read).isVisible = false
-        }
-
-        // Set a listener so we are notified if a menu item is clicked
-        popup.setOnMenuItemClickListener { menuItem ->
-            with(adapter.controller) {
-                when (menuItem.itemId) {
-                    R.id.action_download -> downloadChapter(item)
-                    R.id.action_delete -> deleteChapter(item)
-                    R.id.action_mark_as_read -> markAsRead(listOf(item))
-                    R.id.action_mark_as_unread -> markAsUnread(listOf(item))
-                }
-            }
-
-            true
-        }
-
-        // Finally show the PopupMenu
-        popup.show()
-    }
+    fun notifyStatus(status: Int, progress: Int) =
+        download_button.setDownloadStatus(status, progress)
 }

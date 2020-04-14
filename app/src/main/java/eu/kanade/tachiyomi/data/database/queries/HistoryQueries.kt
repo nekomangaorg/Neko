@@ -8,7 +8,8 @@ import eu.kanade.tachiyomi.data.database.models.MangaChapterHistory
 import eu.kanade.tachiyomi.data.database.resolvers.HistoryLastReadPutResolver
 import eu.kanade.tachiyomi.data.database.resolvers.MangaChapterHistoryGetResolver
 import eu.kanade.tachiyomi.data.database.tables.HistoryTable
-import java.util.*
+import eu.kanade.tachiyomi.data.database.tables.MangaTable
+import java.util.Date
 
 interface HistoryQueries : DbProvider {
 
@@ -38,10 +39,40 @@ interface HistoryQueries : DbProvider {
      * @param date recent date range
      * @offset offset the db by
      */
+    fun getRecentlyAdded(date: Date, search: String = "", endless: Boolean) = db.get()
+        .listOfObjects(MangaChapterHistory::class.java)
+        .withQuery(RawQuery.builder()
+            .query(getRecentAdditionsQuery(search, endless))
+            .args(date.time)
+            .observesTables(MangaTable.TABLE)
+            .build())
+        .withGetResolver(MangaChapterHistoryGetResolver.INSTANCE)
+        .prepare()
+
+    /**
+     * Returns history of recent manga containing last read chapter in 25s
+     * @param date recent date range
+     * @offset offset the db by
+     */
     fun getRecentMangaLimit(date: Date, limit: Int = 0, search: String = "") = db.get()
         .listOfObjects(MangaChapterHistory::class.java)
         .withQuery(RawQuery.builder()
             .query(getRecentMangasLimitQuery(limit, search))
+            .args(date.time)
+            .observesTables(HistoryTable.TABLE)
+            .build())
+        .withGetResolver(MangaChapterHistoryGetResolver.INSTANCE)
+        .prepare()
+
+    /**
+     * Returns history of recent manga containing last read chapter in 25s
+     * @param date recent date range
+     * @offset offset the db by
+     */
+    fun getRecentsWithUnread(date: Date, search: String = "", endless: Boolean) = db.get()
+        .listOfObjects(MangaChapterHistory::class.java)
+        .withQuery(RawQuery.builder()
+            .query(getRecentReadWithUnreadChapters(search, endless))
             .args(date.time)
             .observesTables(HistoryTable.TABLE)
             .build())

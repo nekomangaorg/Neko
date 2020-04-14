@@ -10,10 +10,12 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlin.coroutines.CoroutineContext
 
-class MigratingManga(private val db: DatabaseHelper,
-                     private val sourceManager: SourceManager,
-                     val mangaId: Long,
-                     parentContext: CoroutineContext) {
+class MigratingManga(
+    private val db: DatabaseHelper,
+    private val sourceManager: SourceManager,
+    val mangaId: Long,
+    parentContext: CoroutineContext
+) {
     val searchResult = DeferredField<Long?>()
 
     // <MAX, PROGRESS>
@@ -21,12 +23,12 @@ class MigratingManga(private val db: DatabaseHelper,
 
     val migrationJob = parentContext + SupervisorJob() + Dispatchers.Default
 
-    var migrationStatus:Int = MigrationStatus.RUNNUNG
+    var migrationStatus: Int = MigrationStatus.RUNNUNG
 
     @Volatile
     private var manga: Manga? = null
     suspend fun manga(): Manga? {
-        if(manga == null) manga = db.getManga(mangaId).executeAsBlocking()
+        if (manga == null) manga = db.getManga(mangaId).executeAsBlocking()
         return manga
     }
 

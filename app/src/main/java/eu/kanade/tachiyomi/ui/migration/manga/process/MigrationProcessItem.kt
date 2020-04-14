@@ -18,10 +18,12 @@ class MigrationProcessItem(val manga: MigratingManga) :
         return MigrationProcessHolder(view, adapter as MigrationProcessAdapter)
     }
 
-    override fun bindViewHolder(adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
+    override fun bindViewHolder(
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
         holder: MigrationProcessHolder,
         position: Int,
-        payloads: MutableList<Any?>?) {
+        payloads: MutableList<Any?>?
+    ) {
         holder.bind(this)
     }
 
@@ -36,5 +38,4 @@ class MigrationProcessItem(val manga: MigratingManga) :
     override fun hashCode(): Int {
         return manga.mangaId.toInt()
     }
-
 }

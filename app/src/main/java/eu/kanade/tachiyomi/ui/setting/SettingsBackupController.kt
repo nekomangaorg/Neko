@@ -3,7 +3,11 @@ package eu.kanade.tachiyomi.ui.setting
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.app.Activity
 import android.app.Dialog
-import android.content.*
+import android.content.ActivityNotFoundException
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
@@ -54,8 +58,8 @@ class SettingsBackupController : SettingsController() {
         titleRes = R.string.backup
 
         preference {
-            titleRes = R.string.pref_create_backup
-            summaryRes = R.string.pref_create_backup_summ
+            titleRes = R.string.create_backup
+            summaryRes = R.string.can_be_used_to_restore
 
             onClick {
                 val ctrl = CreateBackupDialog()
@@ -64,27 +68,27 @@ class SettingsBackupController : SettingsController() {
             }
         }
         preference {
-            titleRes = R.string.pref_restore_backup
-            summaryRes = R.string.pref_restore_backup_summ
+            titleRes = R.string.restore_backup
+            summaryRes = R.string.restore_from_backup_file
 
             onClick {
                 val intent = Intent(Intent.ACTION_GET_CONTENT)
                 intent.addCategory(Intent.CATEGORY_OPENABLE)
                 intent.type = "application/*"
-                val title = resources?.getString(R.string.file_select_backup)
+                val title = resources?.getString(R.string.select_backup_file)
                 val chooser = Intent.createChooser(intent, title)
                 startActivityForResult(chooser, CODE_BACKUP_RESTORE)
             }
         }
         preferenceCategory {
-            titleRes = R.string.pref_backup_service_category
+            titleRes = R.string.service
 
             intListPreference(activity) {
                 key = Keys.backupInterval
-                titleRes = R.string.pref_backup_interval
-                entriesRes = arrayOf(R.string.update_never, R.string.update_6hour,
-                        R.string.update_12hour, R.string.update_24hour,
-                        R.string.update_48hour, R.string.update_weekly)
+                titleRes = R.string.backup_frequency
+                entriesRes = arrayOf(R.string.manual, R.string.every_6_hours,
+                        R.string.every_12_hours, R.string.daily,
+                        R.string.every_2_days, R.string.weekly)
                 entryValues = listOf(0, 6, 12, 24, 48, 168)
                 defaultValue = 0
 
@@ -101,14 +105,14 @@ class SettingsBackupController : SettingsController() {
             }
             val backupDir = preference {
                 key = Keys.backupDirectory
-                titleRes = R.string.pref_backup_directory
+                titleRes = R.string.backup_location
 
                 onClick {
                     val currentDir = preferences.backupsDirectory().getOrDefault()
-                    try{
+                    try {
                         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
                         startActivityForResult(intent, CODE_BACKUP_DIR)
-                    } catch (e: ActivityNotFoundException){
+                    } catch (e: ActivityNotFoundException) {
                         // Fall back to custom picker on error
                         startActivityForResult(preferences.context.getFilePicker(currentDir), CODE_BACKUP_DIR)
                     }
@@ -122,7 +126,7 @@ class SettingsBackupController : SettingsController() {
             }
             val backupNumber = intListPreference(activity) {
                 key = Keys.numberOfBackups
-                titleRes = R.string.pref_backup_slots
+                titleRes = R.string.max_auto_backups
                 entries = listOf("1", "2", "3", "4", "5")
                 entryRange = 1..5
                 defaultValue = 1
@@ -134,7 +138,6 @@ class SettingsBackupController : SettingsController() {
                         backupNumber.isVisible = it > 0
                     }
         }
-
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -203,15 +206,14 @@ class SettingsBackupController : SettingsController() {
         override fun onCreateDialog(savedViewState: Bundle?): Dialog {
             val activity = activity!!
             val options = arrayOf(R.string.manga, R.string.categories, R.string.chapters,
-                    R.string.track, R.string.history)
+                    R.string.tracking, R.string.history)
                     .map { activity.getString(it) }
 
             return MaterialDialog(activity)
-                    .title(R.string.pref_create_backup)
-                    .message(R.string.backup_choice)
+                    .title(R.string.create_backup)
+                    .message(R.string.what_should_backup)
                 .listItemsMultiChoice(items = options, disabledIndices = intArrayOf(0),
-                    initialSelection = intArrayOf(0))
-                    { _, positions, _ ->
+                    initialSelection = intArrayOf(0)) { _, positions, _ ->
                         var flags = 0
                         for (i in 1 until positions.size) {
                             when (positions[i]) {
@@ -224,7 +226,7 @@ class SettingsBackupController : SettingsController() {
 
                         (targetController as? SettingsBackupController)?.createBackup(flags)
                     }
-                    .positiveButton(R.string.action_create)
+                    .positiveButton(R.string.create)
                     .negativeButton(android.R.string.cancel)
         }
     }
@@ -240,9 +242,9 @@ class SettingsBackupController : SettingsController() {
             return MaterialDialog(activity).apply {
                 title(R.string.backup_created)
                 if (uniFile.filePath != null)
-                    message(text = resources?.getString(R.string.file_saved, uniFile.filePath))
-                positiveButton(R.string.action_close)
-                negativeButton(R.string.action_share) {
+                    message(text = resources?.getString(R.string.file_saved_at_, uniFile.filePath))
+                positiveButton(R.string.close)
+                negativeButton(R.string.share) {
                     val sendIntent = Intent(Intent.ACTION_SEND)
                     sendIntent.type = "application/json"
                     sendIntent.putExtra(Intent.EXTRA_STREAM, uniFile.uri)
@@ -263,9 +265,9 @@ class SettingsBackupController : SettingsController() {
 
         override fun onCreateDialog(savedViewState: Bundle?): Dialog {
             return MaterialDialog(activity!!)
-                    .title(R.string.pref_restore_backup)
-                    .message(R.string.backup_restore_content)
-                    .positiveButton(R.string.action_restore) {
+                    .title(R.string.restore_backup)
+                    .message(R.string.restore_message)
+                    .positiveButton(R.string.restore) {
                         val context = applicationContext
                         if (context != null) {
                             activity?.toast(R.string.restoring_backup)
@@ -307,5 +309,4 @@ class SettingsBackupController : SettingsController() {
         const val TAG_CREATING_BACKUP_DIALOG = "CreatingBackupDialog"
         const val TAG_RESTORING_BACKUP_DIALOG = "RestoringBackupDialog"
     }
-
 }

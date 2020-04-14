@@ -7,17 +7,28 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import uy.kohesive.injekt.injectLazy
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Locale
+
+data class OAuth(
+    val access_token: String,
+    val token_type: String,
+    val expires: Long,
+    val expires_in: Long
+) {
+
+    fun isExpired() = System.currentTimeMillis() > expires
+}
 
 data class ALManga(
-        val media_id: Int,
-        val title_romaji: String,
-        val image_url_lge: String,
-        val description: String?,
-        val type: String,
-        val publishing_status: String,
-        val start_date_fuzzy: Long,
-        val total_chapters: Int) {
+    val media_id: Int,
+    val title_romaji: String,
+    val image_url_lge: String,
+    val description: String?,
+    val type: String,
+    val publishing_status: String,
+    val start_date_fuzzy: Long,
+    val total_chapters: Int
+) {
 
     fun toTrack() = TrackSearch.create(TrackManager.ANILIST).apply {
         media_id = this@ALManga.media_id
@@ -40,11 +51,12 @@ data class ALManga(
 }
 
 data class ALUserManga(
-        val library_id: Long,
-        val list_status: String,
-        val score_raw: Int,
-        val chapters_read: Int,
-        val manga: ALManga) {
+    val library_id: Long,
+    val list_status: String,
+    val score_raw: Int,
+    val chapters_read: Int,
+    val manga: ALManga
+) {
 
     fun toTrack() = Track.create(TrackManager.ANILIST).apply {
         media_id = manga.media_id
@@ -55,10 +67,10 @@ data class ALUserManga(
         total_chapters = manga.total_chapters
     }
 
-    fun toTrackStatus() = when (list_status) {
+    private fun toTrackStatus() = when (list_status) {
         "CURRENT" -> Anilist.READING
         "COMPLETED" -> Anilist.COMPLETED
-        "PAUSED" -> Anilist.ON_HOLD
+        "PAUSED" -> Anilist.PAUSED
         "DROPPED" -> Anilist.DROPPED
         "PLANNING" -> Anilist.PLANNING
         "REPEATING" -> Anilist.REPEATING
@@ -69,7 +81,7 @@ data class ALUserManga(
 fun Track.toAnilistStatus() = when (status) {
     Anilist.READING -> "CURRENT"
     Anilist.COMPLETED -> "COMPLETED"
-    Anilist.ON_HOLD -> "PAUSED"
+    Anilist.PAUSED -> "PAUSED"
     Anilist.DROPPED -> "DROPPED"
     Anilist.PLANNING -> "PLANNING"
     Anilist.REPEATING -> "REPEATING"

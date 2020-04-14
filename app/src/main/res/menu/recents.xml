@@ -1,0 +1,39 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".MainActivity">
+    <item
+        android:id="@+id/action_search"
+        android:icon="@drawable/ic_search_white_24dp"
+        android:title="@string/search"
+        android:visible="false"
+        app:actionViewClass="androidx.appcompat.widget.SearchView"
+        app:showAsAction="ifRoom|collapseActionView" />
+    <item
+        android:id="@+id/action_filter"
+        android:icon="@drawable/ic_filter_list_white_24dp"
+        android:title="@string/group_all"
+        app:showAsAction="ifRoom">
+        <menu>
+            <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/action_group_all"
+                    android:title="@string/group_all" />
+                <item
+                    android:id="@+id/action_ungroup_all"
+                    android:title="@string/ungroup_all" />
+                <item
+                    android:id="@+id/action_only_history"
+                    android:title="@string/only_history" />
+                <item
+                    android:id="@+id/action_only_updates"
+                    android:title="@string/only_updates" />
+            </group>
+        </menu>
+    </item>
+    <item
+        android:id="@+id/action_settings"
+        android:icon="@drawable/ic_settings_white_24dp"
+        android:title="@string/settings"
+        app:showAsAction="ifRoom" />
+</menu>

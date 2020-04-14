@@ -1,46 +1,62 @@
 package eu.kanade.tachiyomi.ui.setting
 
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import androidx.preference.PreferenceScreen
+import com.bluelinelabs.conductor.Controller
+import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.preference.PreferenceKeys
-import eu.kanade.tachiyomi.data.updater.UpdaterJob
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
+import eu.kanade.tachiyomi.ui.migration.MigrationController
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.system.openInBrowser
 
 class SettingsMainController : SettingsController() {
+
+    init {
+        setHasOptionsMenu(true)
+    }
+
     override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
-        titleRes = R.string.label_settings
+        titleRes = R.string.settings
 
         val tintColor = context.getResourceColor(R.attr.colorAccent)
 
         preference {
-            iconRes = R.drawable.ic_tune_black_24dp
+            iconRes = R.drawable.ic_tune_white_24dp
             iconTint = tintColor
-            titleRes = R.string.pref_category_general
+            titleRes = R.string.general
             onClick { navigateTo(SettingsGeneralController()) }
         }
         preference {
             iconRes = R.drawable.ic_book_black_24dp
             iconTint = tintColor
-            titleRes = R.string.pref_category_library
+            titleRes = R.string.library
             onClick { navigateTo(SettingsLibraryController()) }
         }
         preference {
-            iconRes = R.drawable.ic_chrome_reader_mode_black_24dp
+            iconRes = R.drawable.ic_read_24dp
             iconTint = tintColor
-            titleRes = R.string.pref_category_reader
+            titleRes = R.string.reader
             onClick { navigateTo(SettingsReaderController()) }
         }
         preference {
             iconRes = R.drawable.ic_file_download_black_24dp
             iconTint = tintColor
-            titleRes = R.string.pref_category_downloads
+            titleRes = R.string.downloads
             onClick { navigateTo(SettingsDownloadController()) }
+        }
+        preference {
+            iconRes = R.drawable.ic_swap_calls_white_24dp
+            iconTint = tintColor
+            titleRes = R.string.source_migration
+            onClick { navigateTo(MigrationController()) }
         }
         preference {
             iconRes = R.drawable.ic_sync_black_24dp
             iconTint = tintColor
-            titleRes = R.string.pref_category_tracking
+            titleRes = R.string.tracking
             onClick { navigateTo(SettingsTrackingController()) }
         }
         preference {
@@ -52,18 +68,36 @@ class SettingsMainController : SettingsController() {
         preference {
             iconRes = R.drawable.ic_code_black_24dp
             iconTint = tintColor
-            titleRes = R.string.pref_category_advanced
+            titleRes = R.string.advanced
             onClick { navigateTo(SettingsAdvancedController()) }
         }
         preference {
-            iconRes = R.drawable.ic_help_black_24dp
+            iconRes = R.drawable.ic_info_black_24dp
             iconTint = tintColor
-            titleRes = R.string.pref_category_about
+            titleRes = R.string.about
             onClick { navigateTo(SettingsAboutController()) }
         }
     }
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.settings_main, menu)
+        menu.findItem(R.id.action_bug_report).isVisible = BuildConfig.DEBUG
+    }
 
-    private fun navigateTo(controller: SettingsController) {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.action_help -> activity?.openInBrowser(URL_HELP)
+            R.id.action_bug_report -> activity?.openInBrowser(URL_BUG_REPORT)
+            else -> return super.onOptionsItemSelected(item)
+        }
+        return true
+    }
+
+    private fun navigateTo(controller: Controller) {
         router.pushController(controller.withFadeTransaction())
+    }
+
+    private companion object {
+        private const val URL_HELP = "https://tachiyomi.org/help/"
+        private const val URL_BUG_REPORT = "https://github.com/Jays2Kings/tachiyomiJ2K/issues"
     }
 }

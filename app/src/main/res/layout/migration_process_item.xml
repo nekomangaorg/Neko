@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:gravity="center">
 
     <include
         android:id="@+id/migration_manga_card_from"
-        layout="@layout/migration_manga_card"
+        layout="@layout/catalogue_grid_item"
         android:layout_width="150dp"
+        app:layout_constraintVertical_bias="1.0"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/imageView"
@@ -34,7 +34,8 @@
 
     <include
         android:id="@+id/migration_manga_card_to"
-        layout="@layout/migration_manga_card"
+        layout="@layout/catalogue_grid_item"
+        app:layout_constraintVertical_bias="1.0"
         android:layout_width="150dp"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -47,7 +48,7 @@
         android:id="@+id/migration_menu"
         android:layout_width="48dp"
         android:layout_height="wrap_content"
-        android:contentDescription="@string/description_cover"
+        android:contentDescription="@string/cover_of_image"
         android:paddingTop="30dp"
         android:paddingBottom="30dp"
         android:layout_marginBottom="45dp"

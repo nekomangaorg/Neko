@@ -25,19 +25,23 @@ import eu.kanade.tachiyomi.data.backup.models.Backup.TRACK
 import eu.kanade.tachiyomi.data.backup.models.Backup.VERSION
 import eu.kanade.tachiyomi.data.backup.models.DHistory
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
-import eu.kanade.tachiyomi.data.database.models.*
+import eu.kanade.tachiyomi.data.database.models.ChapterImpl
+import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.MangaImpl
+import eu.kanade.tachiyomi.data.database.models.Track
+import eu.kanade.tachiyomi.data.database.models.TrackImpl
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.SourceNotFoundException
 import eu.kanade.tachiyomi.util.lang.chop
 import eu.kanade.tachiyomi.util.storage.getUriCompat
+import eu.kanade.tachiyomi.util.system.isServiceRunning
 import eu.kanade.tachiyomi.util.system.notificationManager
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import eu.kanade.tachiyomi.util.system.isServiceRunning
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 import java.io.File
@@ -49,7 +53,6 @@ import java.util.concurrent.TimeUnit
  * Restores backup from json file
  */
 class BackupRestoreService : Service() {
-
 
     /**
      * Wake lock that will be held until the service is destroyed.
@@ -83,7 +86,6 @@ class BackupRestoreService : Service() {
      */
     private val trackingErrors = mutableListOf<String>()
 
-
     /**
      * List containing missing sources
      */
@@ -108,7 +110,6 @@ class BackupRestoreService : Service() {
      * Tracking manager
      */
     internal val trackManager: TrackManager by injectLazy()
-
 
     /**
      * Method called when the service is created. It injects dependencies and acquire the wake lock.
@@ -147,9 +148,7 @@ class BackupRestoreService : Service() {
      * @return the start value of the command.
      */
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (intent == null) return START_NOT_STICKY
-
-        val uri = intent.getParcelableExtra<Uri>(BackupConst.EXTRA_URI) ?: return START_NOT_STICKY
+        val uri = intent?.getParcelableExtra<Uri>(BackupConst.EXTRA_URI) ?: return START_NOT_STICKY
 
         // Unsubscribe from any previous subscription if needed.
         job?.cancel()
@@ -159,7 +158,7 @@ class BackupRestoreService : Service() {
             stopSelf(startId)
         }
         job = GlobalScope.launch(handler) {
-            restoreBackup(uri!!)
+            restoreBackup(uri)
         }
         job?.invokeOnCompletion { stopSelf(startId) }
 
@@ -179,7 +178,7 @@ class BackupRestoreService : Service() {
      */
     private suspend fun restoreBackup(uri: Uri) {
         val reader = JsonReader(contentResolver.openInputStream(uri)!!.bufferedReader())
-        val json = JsonParser().parse(reader).asJsonObject
+        val json = JsonParser.parseReader(reader).asJsonObject
 
         // Get parser version
         val version = json.get(VERSION)?.asInt ?: 1
@@ -214,7 +213,6 @@ class BackupRestoreService : Service() {
         showResultNotification(logFile.parent, logFile.name)
     }
 
-
     /**Restore categories if they were backed up
      *
      */
@@ -244,8 +242,7 @@ class BackupRestoreService : Service() {
             if (job?.isCancelled == false) {
                 showProgressNotification(restoreProgress, totalAmount, manga.title)
                 restoreProgress += 1
-            }
-            else {
+            } else {
                 throw java.lang.Exception("Job was cancelled")
             }
             val dbManga = backupManager.getMangaFromDatabase(manga)
@@ -260,7 +257,7 @@ class BackupRestoreService : Service() {
             }
 
             if (!dbMangaExists || !backupManager.restoreChaptersForManga(manga, chapters)) {
-                //manga gets chapters added
+                // manga gets chapters added
                 backupManager.restoreChapterFetch(source, manga, chapters)
             }
             // Restore categories
@@ -278,8 +275,7 @@ class BackupRestoreService : Service() {
                 val cause = e.cause
                 if (cause is SourceNotFoundException) {
                     sourcesMissing.add(cause.id)
-                }
-                else if (e.message?.contains("licensed", true) == true) {
+                } else if (e.message?.contains("licensed", true) == true) {
                     lincensedManga++
                 }
                 errors.add("${manga.title} - ${cause?.message ?: e.message}")
@@ -294,19 +290,19 @@ class BackupRestoreService : Service() {
      * @param manga manga that needs updating.
      * @param tracks list containing tracks from restore file.
      */
-    private fun trackingFetch(manga: Manga, tracks: List<Track>) {
+    private suspend fun trackingFetch(manga: Manga, tracks: List<Track>) {
         tracks.forEach { track ->
             val service = trackManager.getService(track.sync_id)
             if (service != null && service.isLogged) {
-                service.refresh(track)
-                        .doOnNext { db.insertTrack(it).executeAsBlocking() }
-                        .onErrorReturn {
-                            errors.add("${manga.title} - ${it.message}")
-                            track
-                        }
+                try {
+                    service.refresh(track)
+                    db.insertTrack(track).executeAsBlocking()
+                } catch (e: Exception) {
+                    errors.add("${manga.title} - ${e.message}")
+                }
             } else {
                 errors.add("${manga.title} - ${service?.name} not logged in")
-                val notLoggedIn = getString(R.string.not_logged_into, service?.name)
+                val notLoggedIn = getString(R.string.not_logged_into_, service?.name)
                 trackingErrors.add(notLoggedIn)
             }
         }
@@ -355,7 +351,6 @@ class BackupRestoreService : Service() {
         NotificationReceiver.cancelRestorePendingBroadcast(this)
     }
 
-
     /**
      * Shows the notification containing the currently updating manga and the progress.
      *
@@ -366,7 +361,7 @@ class BackupRestoreService : Service() {
     private fun showProgressNotification(current: Int, total: Int, title: String) {
         notificationManager.notify(Notifications.ID_RESTORE_PROGRESS, progressNotification
                 .setContentTitle(title.chop(30))
-                .setContentText(getString(R.string.backup_restoring_progress, restoreProgress,
+                .setContentText(getString(R.string.restoring_progress, restoreProgress,
                     totalAmount))
                 .setProgress(total, current, false)
                 .build())
@@ -392,7 +387,7 @@ class BackupRestoreService : Service() {
             content.add(trackingErrorsString)
         }
         if (cancelled > 0)
-            content.add(getString(R.string.restore_completed_content_2, cancelled))
+            content.add(getString(R.string.restore_content_skipped, cancelled))
 
         val restoreString = content.joinToString("\n")
 
@@ -405,7 +400,7 @@ class BackupRestoreService : Service() {
                 .setColor(ContextCompat.getColor(this, R.color.colorAccent))
         if (errors.size > 0 && !path.isNullOrEmpty() && !file.isNullOrEmpty()) {
             resultNotification.addAction(R.drawable.ic_clear_grey_24dp_img, getString(R.string
-                .notification_action_error_log), getErrorLogIntent(path, file))
+                .view_all_errors), getErrorLogIntent(path, file))
         }
         notificationManager.notify(Notifications.ID_RESTORE_COMPLETE, resultNotification.build())
     }

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_search"
+        android:icon="@drawable/ic_search_white_24dp"
+        android:title="@string/search"
+        app:actionViewClass="androidx.appcompat.widget.SearchView"
+        app:showAsAction="collapseActionView|ifRoom" />
+
+    <item
+        android:id="@+id/action_download"
+        android:icon="@drawable/ic_file_download_white_24dp"
+        android:title="@string/download"
+        app:showAsAction="ifRoom">
+        <menu>
+            <item
+                android:id="@+id/download_next"
+                android:title="@string/next_unread_chapter" />
+            <item
+                android:id="@+id/download_next_5"
+                android:title="@string/next_5_unread" />
+            <item
+                android:id="@+id/download_custom"
+                android:title="@string/custom_range" />
+            <item
+                android:id="@+id/download_unread"
+                android:title="@string/all_unread_chapters" />
+            <item
+                android:id="@+id/download_all"
+                android:title="@string/all_chapters" />
+        </menu>
+    </item>
+
+    <item
+        android:id="@+id/action_mark_all_as_read"
+        android:icon="@drawable/ic_done_all_white_24dp"
+        android:title="@string/mark_all_as_read"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_mark_all_as_unread"
+        android:title="@string/mark_all_as_unread"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_refresh_tracking"
+        android:icon="@drawable/ic_refresh_white_24dp"
+        android:title="@string/refresh_tracking"
+
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_remove_downloads"
+        android:title="@string/remove_downloads"
+        app:showAsAction="never">
+        <menu>
+            <item
+                android:id="@+id/remove_all"
+                android:title="@string/all_chapters" />
+            <item
+                android:id="@+id/remove_non_bookmarked"
+                android:title="@string/all_but_bookmarked_chapters" />
+            <item
+                android:id="@+id/remove_read"
+                android:title="@string/all_read_chapters" />
+        </menu>
+    </item>
+    <item
+        android:id="@+id/action_edit"
+        android:icon="@drawable/ic_edit_white_24dp"
+        android:title="@string/edit"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_migrate"
+        android:icon="@drawable/ic_swap_calls_white_24dp"
+        android:title="@string/migrate"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_add_to_home_screen"
+        android:title="@string/add_to_home_screen"
+        app:showAsAction="never" />
+
+</menu>

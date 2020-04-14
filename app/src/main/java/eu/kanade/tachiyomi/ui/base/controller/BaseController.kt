@@ -1,11 +1,11 @@
 package eu.kanade.tachiyomi.ui.base.controller
 
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
@@ -61,8 +61,12 @@ abstract class BaseController(bundle: Bundle? = null) : RestoreViewOnCreateContr
         if (type.isEnter) {
             setTitle()
         }
+        setHasOptionsMenu(type.isEnter)
         super.onChangeStarted(handler, type)
     }
+
+    val onRoot: Boolean
+        get() = router.backstack.lastOrNull()?.controller() == this
 
     open fun getTitle(): String? {
         return null
@@ -77,7 +81,8 @@ abstract class BaseController(bundle: Bundle? = null) : RestoreViewOnCreateContr
             parentController = parentController.parentController
         }
 
-        (activity as? AppCompatActivity)?.supportActionBar?.title = getTitle()
+        if (router.backstack.lastOrNull()?.controller() == this)
+            (activity as? AppCompatActivity)?.supportActionBar?.title = getTitle()
     }
 
     private fun Controller.instance(): String {
@@ -122,5 +127,4 @@ abstract class BaseController(bundle: Bundle? = null) : RestoreViewOnCreateContr
             true
         }
     }
-
 }

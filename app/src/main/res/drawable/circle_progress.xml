@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android" >
+    <item android:id="@android:id/progress">
+        <rotate
+            android:fromDegrees="270"
+            android:toDegrees="270"
+            android:pivotX="50%"
+            android:pivotY="50%" >
+            <shape
+                android:shape="ring"
+                android:thickness="2dp">
+                <gradient
+                    android:centerColor="@color/gray_button"
+                    android:endColor="@color/gray_button"
+                    android:startColor="@color/gray_button"
+                    android:type="sweep" />
+            </shape>
+        </rotate>
+    </item>
+</layer-list>

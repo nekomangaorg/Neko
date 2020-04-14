@@ -3,12 +3,10 @@ package eu.kanade.tachiyomi.data.track
 import androidx.annotation.CallSuper
 import androidx.annotation.DrawableRes
 import eu.kanade.tachiyomi.data.database.models.Track
-import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.network.NetworkHelper
 import okhttp3.OkHttpClient
-import rx.Completable
-import rx.Observable
 import uy.kohesive.injekt.injectLazy
 
 abstract class TrackService(val id: Int) {
@@ -29,6 +27,8 @@ abstract class TrackService(val id: Int) {
 
     abstract fun getStatusList(): List<Int>
 
+    abstract fun isCompletedStatus(index: Int): Boolean
+
     abstract fun getStatus(status: Int): String
 
     abstract fun getScoreList(): List<String>
@@ -39,17 +39,15 @@ abstract class TrackService(val id: Int) {
 
     abstract fun displayScore(track: Track): String
 
-    abstract fun add(track: Track): Observable<Track>
+    abstract suspend fun update(track: Track): Track
 
-    abstract fun update(track: Track): Observable<Track>
+    abstract suspend fun bind(track: Track): Track
 
-    abstract fun bind(track: Track): Observable<Track>
+    abstract suspend fun search(query: String): List<TrackSearch>
 
-    abstract fun search(query: String): Observable<List<TrackSearch>>
+    abstract suspend fun refresh(track: Track): Track
 
-    abstract fun refresh(track: Track): Observable<Track>
-
-    abstract fun login(username: String, password: String): Completable
+    abstract suspend fun login(username: String, password: String): Boolean
 
     @CallSuper
     open fun logout() {

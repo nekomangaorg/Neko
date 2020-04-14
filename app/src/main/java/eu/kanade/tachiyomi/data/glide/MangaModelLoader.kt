@@ -3,7 +3,12 @@ package eu.kanade.tachiyomi.data.glide
 import android.util.LruCache
 import com.bumptech.glide.integration.okhttp3.OkHttpStreamFetcher
 import com.bumptech.glide.load.Options
-import com.bumptech.glide.load.model.*
+import com.bumptech.glide.load.model.GlideUrl
+import com.bumptech.glide.load.model.Headers
+import com.bumptech.glide.load.model.LazyHeaders
+import com.bumptech.glide.load.model.ModelLoader
+import com.bumptech.glide.load.model.ModelLoaderFactory
+import com.bumptech.glide.load.model.MultiModelLoaderFactory
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.network.NetworkHelper
@@ -14,7 +19,6 @@ import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 import java.io.File
 import java.io.InputStream
-
 
 /**
  * A class for loading a cover associated with a [Manga] that can be present in our own cache.
@@ -78,15 +82,16 @@ class MangaModelLoader : ModelLoader<Manga, InputStream> {
      * @param width the width of the view where the resource will be loaded.
      * @param height the height of the view where the resource will be loaded.
      */
-    override fun buildLoadData(manga: Manga, width: Int, height: Int,
-                               options: Options): ModelLoader.LoadData<InputStream>? {
+    override fun buildLoadData(
+        manga: Manga,
+        width: Int,
+        height: Int,
+        options: Options
+    ): ModelLoader.LoadData<InputStream>? {
         // Check thumbnail is not null or empty
         val url = manga.thumbnail_url
-        if (url == null || url.isEmpty()) {
-            return null
-        }
 
-        if (url.startsWith("http")) {
+        if (url?.startsWith("http") == true) {
             val source = sourceManager.get(manga.source) as? HttpSource
             val glideUrl = GlideUrl(url, getHeaders(manga, source))
 
@@ -105,8 +110,14 @@ class MangaModelLoader : ModelLoader<Manga, InputStream> {
             // Return an instance of the fetcher providing the needed elements.
             return ModelLoader.LoadData(MangaSignature(manga, file), libraryFetcher)
         } else {
-            // Get the file from the url, removing the scheme if present.
-            val file = File(url.substringAfter("file://"))
+            // Get the file from the url, removing the scheme if present, or from the cache if no url.
+            val file = when {
+                manga.hasCustomCover() -> coverCache.getCoverFile(manga.thumbnail_url!!)
+                url != null -> File(url.substringAfter("file://"))
+                else -> null
+            }
+
+            if (file?.exists() != true) return null
 
             // Return an instance of the fetcher providing the needed elements.
             return ModelLoader.LoadData(MangaSignature(manga, file), FileFetcher(file))
@@ -142,5 +153,4 @@ class MangaModelLoader : ModelLoader<Manga, InputStream> {
             value
         }
     }
-
 }

@@ -23,68 +23,22 @@ interface SManga : Serializable {
 
     var initialized: Boolean
 
-    fun currentTitle(): String {
-        val splitTitle = title.split(splitter)
-        return splitTitle.first()
-    }
-
-    fun originalTitle(): String {
-        val splitTitle = title.split(splitter)
-        return splitTitle.last()
-    }
-
-    fun currentGenres() = split(genre, true)
-
-    fun originalGenres() = split(genre, false)
-
-    fun currentDesc() = split(description, true)
-
-    fun originalDesc() = split(description, false)
-
-    fun currentAuthor() = split(author, true)
-
-    fun originalAuthor() = split(author, false)
-
-    fun currentArtist() = split(artist, true)
-
-    fun originalArtist() = split(artist, false)
-
-    private fun split(string: String?, first: Boolean):String? {
-        val split = string?.split(splitter) ?: return null
-        val s = if (first) split.first() else split.last()
-        return if (s.isBlank()) null else s
-    }
+    fun hasCustomCover() = thumbnail_url?.startsWith("Custom-") == true
 
     fun copyFrom(other: SManga) {
         if (other.author != null)
-            author = if (currentAuthor() != originalAuthor()) {
-                val current = currentAuthor()
-                val og = other.author
-                "${current}$splitter${og}"
-            } else other.author
+            author = other.author
 
         if (other.artist != null)
-            artist = if (currentArtist() != originalArtist()) {
-                val current = currentArtist()
-                val og = other.artist
-                "${current}$splitter${og}"
-            } else other.artist
+            artist = other.artist
 
         if (other.description != null)
-            description = if (currentDesc() != originalDesc()) {
-                val current = currentDesc()
-                val og = other.description
-                "${current}$splitter${og}"
-            } else other.description
+            description = other.description
 
         if (other.genre != null)
-            genre = if (currentGenres() != originalGenres()) {
-                val current = currentGenres()
-                val og = other.genre
-                "${current}$splitter${og}"
-            } else other.genre
+            genre = other.genre
 
-        if (other.thumbnail_url != null)
+        if (other.thumbnail_url != null && !hasCustomCover())
             thumbnail_url = other.thumbnail_url
 
         status = other.status
@@ -98,11 +52,9 @@ interface SManga : Serializable {
         const val ONGOING = 1
         const val COMPLETED = 2
         const val LICENSED = 3
-        const val splitter = "▒ ▒∩▒"
 
         fun create(): SManga {
             return MangaImpl()
         }
     }
-
 }

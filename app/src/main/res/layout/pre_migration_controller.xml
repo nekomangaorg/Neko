@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     android:animateLayoutChanges="true">
 
     <androidx.recyclerview.widget.RecyclerView
@@ -28,6 +29,7 @@
         app:layout_anchor="@id/recycler"
         app:layout_anchorGravity="bottom|right|end"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:backgroundTint="?attr/colorAccent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

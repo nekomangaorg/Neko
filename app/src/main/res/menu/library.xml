@@ -1,57 +1,30 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:app="http://schemas.android.com/apk/res-auto"
       xmlns:tools="http://schemas.android.com/tools"
-      tools:context=".MainActivity">
+      tools:context=".MainActivity"
+      app:tint="@android:color/black">
 
     <item
         android:id="@+id/action_search"
         android:icon="@drawable/ic_search_white_24dp"
-        android:title="@string/action_search"
+        android:title="@string/search"
+        android:visible="false"
         app:actionViewClass="androidx.appcompat.widget.SearchView"
-        app:showAsAction="collapseActionView|ifRoom"/>
+        app:showAsAction="collapseActionView|ifRoom" />
 
     <item
-        android:id="@+id/action_filter"
-        android:icon="@drawable/ic_filter_list_white_24dp"
-        android:title="@string/action_filter"
-        app:showAsAction="ifRoom"/>
+        android:id="@+id/action_library_display"
+        android:icon="@drawable/ic_tune_white_24dp"
+        android:visible="false"
+        android:title="@string/display_options"
+        app:showAsAction="ifRoom"
+        />
 
     <item
-        android:id="@+id/action_edit_categories"
-        android:title="@string/action_edit_categories"
-        app:showAsAction="never"/>
-
-    <item
-        android:id="@+id/action_source_migration"
-        android:title="@string/label_migration"
-        app:showAsAction="never"/>
-
-    <item
-        android:id="@+id/action_reorganize"
-        android:title="@string/action_sort_by"
-        app:showAsAction="never">
-        <menu>
-            <group android:id="@+id/reorder_group"
-                android:checkableBehavior="single">
-                <item
-                    android:id="@+id/action_alpha_asc"
-                    android:title="@string/title"/>
-                <item
-                    android:id="@+id/action_update_asc"
-                    android:title="@string/action_sort_last_updated"/>
-                <item
-                    android:id="@+id/action_unread"
-                    android:title="@string/action_filter_unread"/>
-                <item
-                    android:id="@+id/action_last_read"
-                    android:title="@string/action_sort_last_read"/>
-
-            </group>
-
-            <item
-                android:id="@+id/action_reverse"
-                android:title="@string/action_reverse_order"/>
-        </menu>
-    </item>
+        android:id="@+id/action_settings"
+        android:icon="@drawable/ic_settings_white_24dp"
+        android:title="@string/settings"
+        app:showAsAction="ifRoom"
+        />
 
 </menu>

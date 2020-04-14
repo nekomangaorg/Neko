@@ -13,7 +13,7 @@
         android:background="?attr/selectable_list_drawable">
 
         <ImageView
-            android:id="@+id/image"
+            android:id="@+id/edit_button"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:padding="8dp"
@@ -33,7 +33,7 @@
             android:ellipsize="end"
             android:textAppearance="@style/TextAppearance.Regular.SubHeading"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/image"
+            app:layout_constraintStart_toEndOf="@+id/edit_button"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/source_latest"
             tools:text="Source title"/>

@@ -12,7 +12,7 @@ import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import java.util.*
+import java.util.TreeMap
 import java.util.concurrent.TimeUnit
 
 /**
@@ -23,8 +23,8 @@ import java.util.concurrent.TimeUnit
  * @param preferences application preferences.
  */
 class CataloguePresenter(
-        val sourceManager: SourceManager = Injekt.get(),
-        private val preferences: PreferencesHelper = Injekt.get()
+    val sourceManager: SourceManager = Injekt.get(),
+    private val preferences: PreferencesHelper = Injekt.get()
 ) : BasePresenter<CatalogueController>() {
 
     /**

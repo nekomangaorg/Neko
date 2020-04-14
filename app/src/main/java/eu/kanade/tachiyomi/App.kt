@@ -16,7 +16,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.updater.UpdaterJob
 import eu.kanade.tachiyomi.extension.ExtensionUpdateJob
-import eu.kanade.tachiyomi.ui.main.MainActivity
+import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.system.LocaleHelper
 import org.acra.ACRA
 import org.acra.annotation.ReportsCrashes
@@ -52,10 +52,10 @@ open class App : Application(), LifecycleObserver {
 
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
     fun onAppBackgrounded() {
-        //App in background
+        // App in background
         val preferences: PreferencesHelper by injectLazy()
         if (preferences.lockAfter().getOrDefault() >= 0) {
-            MainActivity.unlocked = false
+            SecureActivityDelegate.locked = true
         }
     }
 
@@ -92,5 +92,4 @@ open class App : Application(), LifecycleObserver {
     protected open fun setupNotificationChannels() {
         Notifications.createChannels(this)
     }
-
 }

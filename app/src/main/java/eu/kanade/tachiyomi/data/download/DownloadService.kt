@@ -40,12 +40,29 @@ class DownloadService : Service() {
          */
         val runningRelay: BehaviorRelay<Boolean> = BehaviorRelay.create(false)
 
+        private val listeners = mutableSetOf<DownloadServiceListener>()
+
+        fun addListener(listener: DownloadServiceListener) {
+            listeners.add(listener)
+        }
+
+        fun removeListener(listener: DownloadServiceListener) {
+            listeners.remove(listener)
+        }
+
+        fun callListeners(downloading: Boolean? = null) {
+            val downloadManager: DownloadManager by injectLazy()
+            listeners.forEach {
+                it.downloadStatusChanged(downloading ?: downloadManager.hasQueue())
+            }
+        }
         /**
          * Starts this service.
          *
          * @param context the application context.
          */
         fun start(context: Context) {
+            callListeners()
             val intent = Intent(context, DownloadService::class.java)
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
                 context.startService(intent)
@@ -116,6 +133,7 @@ class DownloadService : Service() {
         runningRelay.call(false)
         subscriptions.unsubscribe()
         downloadManager.stopDownloads()
+        callListeners(downloadManager.hasQueue())
         wakeLock.releaseIfNeeded()
         super.onDestroy()
     }
@@ -124,7 +142,7 @@ class DownloadService : Service() {
      * Not used.
      */
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        return Service.START_NOT_STICKY
+        return START_NOT_STICKY
     }
 
     /**
@@ -145,7 +163,7 @@ class DownloadService : Service() {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({ state -> onNetworkStateChanged(state)
                 }, {
-                    toast(R.string.download_queue_error)
+                    toast(R.string.could_not_download_chapter_can_try_again)
                     stopSelf()
                 })
     }
@@ -159,14 +177,14 @@ class DownloadService : Service() {
         when (connectivity.state) {
             CONNECTED -> {
                 if (preferences.downloadOnlyOverWifi() && connectivityManager.isActiveNetworkMetered) {
-                    downloadManager.stopDownloads(getString(R.string.download_notifier_text_only_wifi))
+                    downloadManager.stopDownloads(getString(R.string.no_wifi_connection))
                 } else {
                     val started = downloadManager.startDownloads()
                     if (!started) stopSelf()
                 }
             }
             DISCONNECTED -> {
-                downloadManager.stopDownloads(getString(R.string.download_notifier_no_network))
+                downloadManager.stopDownloads(getString(R.string.no_network_connection))
             }
             else -> { /* Do nothing */ }
         }
@@ -200,8 +218,11 @@ class DownloadService : Service() {
 
     private fun getPlaceholderNotification(): Notification {
         return NotificationCompat.Builder(this, Notifications.CHANNEL_DOWNLOADER)
-            .setContentTitle(getString(R.string.download_notifier_downloader_title))
+            .setContentTitle(getString(R.string.downloading))
             .build()
     }
+}
 
+interface DownloadServiceListener {
+    fun downloadStatusChanged(downloading: Boolean)
 }

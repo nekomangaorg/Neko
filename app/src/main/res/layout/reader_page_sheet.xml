@@ -2,7 +2,8 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="?android:colorBackground"
+    style="@style/BottomSheetDialogTheme"
+    android:background="@drawable/bg_bottom_sheet_dialog_fragment"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
@@ -52,7 +53,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="32dp"
-            android:text="@string/action_share"/>
+            android:text="@string/share"/>
 
     </LinearLayout>
 
@@ -77,7 +78,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="32dp"
-            android:text="@string/action_save"/>
+            android:text="@string/save"/>
 
     </LinearLayout>
 

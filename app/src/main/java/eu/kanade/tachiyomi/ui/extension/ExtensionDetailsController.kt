@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.ui.extension
 
 import android.annotation.SuppressLint
-import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
 import android.util.TypedValue
@@ -30,9 +29,10 @@ import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.online.LoginSource
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.setting.preferenceCategory
-import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
-import eu.kanade.tachiyomi.widget.preference.ListMatPreference
 import eu.kanade.tachiyomi.util.system.LocaleHelper
+import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
+import eu.kanade.tachiyomi.util.view.applyWindowInsetsForController
+import eu.kanade.tachiyomi.widget.preference.ListMatPreference
 import eu.kanade.tachiyomi.widget.preference.LoginPreference
 import eu.kanade.tachiyomi.widget.preference.SourceLoginDialog
 import kotlinx.android.synthetic.main.extension_detail_controller.*
@@ -63,19 +63,20 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
     }
 
     override fun getTitle(): String? {
-        return resources?.getString(R.string.label_extension_info)
+        return resources?.getString(R.string.extension_info)
     }
 
     @SuppressLint("PrivateResource")
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
+        view.applyWindowInsetsForController()
 
         val extension = presenter.extension ?: return
         val context = view.context
 
         extension_title.text = extension.name
-        extension_version.text = context.getString(R.string.ext_version_info, extension.versionName)
-        extension_lang.text = context.getString(R.string.ext_language_info, LocaleHelper.getDisplayName(extension.lang, context))
+        extension_version.text = context.getString(R.string.version_, extension.versionName)
+        extension_lang.text = context.getString(R.string.language_, LocaleHelper.getDisplayName(extension.lang, context))
         extension_pkg.text = extension.pkgName
         extension.getApplicationIcon(context)?.let { extension_icon.setImageDrawable(it) }
         extension_uninstall_button.clicks().subscribeUntilDestroy {
@@ -111,7 +112,7 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
 
         if (screen.preferenceCount == 0) {
             extension_prefs_empty_view.show(R.drawable.ic_no_settings,
-                    R.string.ext_empty_preferences)
+                    R.string.empty_preferences_for_extension)
         }
     }
 
@@ -222,5 +223,4 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
         const val PKGNAME_KEY = "pkg_name"
         const val LASTOPENPREFERENCE_KEY = "last_open_preference"
     }
-
 }

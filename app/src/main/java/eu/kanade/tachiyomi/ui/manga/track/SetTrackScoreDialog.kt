@@ -6,7 +6,6 @@ import android.widget.NumberPicker
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.customview.customView
 import com.afollestad.materialdialogs.customview.getCustomView
-import com.bluelinelabs.conductor.Controller
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackManager
@@ -14,15 +13,15 @@ import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class SetTrackScoreDialog<T> : DialogController
-        where T : Controller, T : SetTrackScoreDialog.Listener {
+class SetTrackScoreDialog<T> : DialogController where T : SetTrackScoreDialog.Listener {
 
     private val item: TrackItem
+    private lateinit var listener: Listener
 
     constructor(target: T, item: TrackItem) : super(Bundle().apply {
         putSerializable(KEY_ITEM_TRACK, item.track)
     }) {
-        targetController = target
+        listener = target
         this.item = item
     }
 
@@ -36,20 +35,16 @@ class SetTrackScoreDialog<T> : DialogController
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
         val item = item
 
-        val dialog = MaterialDialog(activity!!)
-            .title(R.string.score)
+        val dialog = MaterialDialog(activity!!).title(R.string.score)
             .customView(R.layout.track_score_dialog, scrollable = false)
-            .negativeButton(android.R.string.cancel)
-            .positiveButton(android.R.string.ok) { dialog ->
+            .negativeButton(android.R.string.cancel).positiveButton(android.R.string.ok) { dialog ->
                 val view = dialog.getCustomView()
                 // Remove focus to update selected number
                 val np: NumberPicker = view.findViewById(R.id.score_picker)
                 np.clearFocus()
 
-                (targetController as? Listener)?.setScore(item, np.value)
-
+                listener.setScore(item, np.value)
             }
-
 
         val view = dialog.getCustomView()
         val np: NumberPicker = view.findViewById(R.id.score_picker)
@@ -74,5 +69,4 @@ class SetTrackScoreDialog<T> : DialogController
     private companion object {
         const val KEY_ITEM_TRACK = "SetTrackScoreDialog.item.track"
     }
-
 }

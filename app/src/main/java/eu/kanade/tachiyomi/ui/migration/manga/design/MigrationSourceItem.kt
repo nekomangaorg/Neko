@@ -11,7 +11,7 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
 import kotlinx.android.parcel.Parcelize
 
-class MigrationSourceItem(val source: HttpSource, var sourceEnabled: Boolean): AbstractFlexibleItem<MigrationSourceHolder>() {
+class MigrationSourceItem(val source: HttpSource, var sourceEnabled: Boolean) : AbstractFlexibleItem<MigrationSourceHolder>() {
     override fun getLayoutRes() = R.layout.migration_source_item
 
     override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): MigrationSourceHolder {
@@ -26,10 +26,12 @@ class MigrationSourceItem(val source: HttpSource, var sourceEnabled: Boolean): A
      * @param position The position of this item in the adapter.
      * @param payloads List of partial changes.
      */
-    override fun bindViewHolder(adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
-                                holder: MigrationSourceHolder,
-                                position: Int,
-                                payloads: List<Any?>?) {
+    override fun bindViewHolder(
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
+        holder: MigrationSourceHolder,
+        position: Int,
+        payloads: List<Any?>?
+    ) {
         holder.bind(source, sourceEnabled)
     }
 
@@ -53,7 +55,7 @@ class MigrationSourceItem(val source: HttpSource, var sourceEnabled: Boolean): A
     }
 
     @Parcelize
-    data class ParcelableSI(val sourceId: Long, val sourceEnabled: Boolean): Parcelable
+    data class ParcelableSI(val sourceId: Long, val sourceEnabled: Boolean) : Parcelable
 
     fun asParcelable(): ParcelableSI {
         return ParcelableSI(source.id, sourceEnabled)

@@ -12,17 +12,28 @@ import com.dd.processbutton.iml.ActionProcessButton
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
+import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.widget.SimpleTextWatcher
 import kotlinx.android.synthetic.main.pref_account_login.view.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import rx.Subscription
 import uy.kohesive.injekt.injectLazy
 
-abstract class LoginDialogPreference(bundle: Bundle? = null) : DialogController(bundle) {
+abstract class LoginDialogPreference(
+    private val usernameLabel: String? = null,
+    bundle: Bundle? = null
+) :
+    DialogController(bundle) {
 
     var v: View? = null
         private set
 
     val preferences: PreferencesHelper by injectLazy()
+
+    val scope = CoroutineScope(Job() + Dispatchers.Main)
 
     var requestSubscription: Subscription? = null
 
@@ -32,9 +43,6 @@ abstract class LoginDialogPreference(bundle: Bundle? = null) : DialogController(
         val dialog = MaterialDialog(activity!!).apply {
             customView(R.layout.pref_account_login, scrollable = false)
             positiveButton(android.R.string.cancel)
-            if (canLogout) {
-                negativeButton(R.string.logout) { logout() }
-            }
         }
 
         onViewCreated(dialog.view)
@@ -42,7 +50,7 @@ abstract class LoginDialogPreference(bundle: Bundle? = null) : DialogController(
         return dialog
     }
 
-    open fun logout() { }
+    open fun logout() {}
 
     fun onViewCreated(view: View) {
         v = view.apply {
@@ -53,10 +61,19 @@ abstract class LoginDialogPreference(bundle: Bundle? = null) : DialogController(
                     password.transformationMethod = PasswordTransformationMethod()
             }
 
+            if (!usernameLabel.isNullOrEmpty()) {
+                username_label.text = usernameLabel
+            }
+
             login.setMode(ActionProcessButton.Mode.ENDLESS)
             login.setOnClickListener { checkLogin() }
 
             setCredentialsOnView(this)
+
+            if (canLogout && !username.text.isNullOrEmpty()) {
+                logout.visible()
+                logout.setOnClickListener { logout() }
+            }
 
             show_password.isEnabled = password.text.isNullOrEmpty()
 
@@ -68,7 +85,6 @@ abstract class LoginDialogPreference(bundle: Bundle? = null) : DialogController(
                 }
             })
         }
-
     }
 
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
@@ -79,11 +95,11 @@ abstract class LoginDialogPreference(bundle: Bundle? = null) : DialogController(
     }
 
     open fun onDialogClosed() {
+        scope.cancel()
         requestSubscription?.unsubscribe()
     }
 
     protected abstract fun checkLogin()
 
     protected abstract fun setCredentialsOnView(view: View)
-
 }

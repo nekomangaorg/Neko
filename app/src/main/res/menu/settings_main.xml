@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_bug_report"
+        android:title="@string/bug_report"
+        android:icon="@drawable/ic_bug_report_white_24dp"
+        app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/action_help"
+        android:title="@string/help"
+        android:icon="@drawable/ic_help_black_24dp"
+        app:showAsAction="always"/>
+</menu>

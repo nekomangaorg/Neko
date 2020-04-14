@@ -14,8 +14,9 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.CatalogueSource
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
-import eu.kanade.tachiyomi.ui.manga.MangaController
+import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
+import eu.kanade.tachiyomi.util.view.applyWindowInsetsForController
 import kotlinx.android.synthetic.main.catalogue_global_search_controller.*
 
 /**
@@ -24,8 +25,8 @@ import kotlinx.android.synthetic.main.catalogue_global_search_controller.*
  * [CatalogueSearchCardAdapter.OnMangaClickListener] called when manga is clicked in global search
  */
 open class CatalogueSearchController(
-        protected val initialQuery: String? = null,
-        protected val extensionFilter: String? = null
+    protected val initialQuery: String? = null,
+    protected val extensionFilter: String? = null
 ) : NucleusController<CatalogueSearchPresenter>(),
         CatalogueSearchCardAdapter.OnMangaClickListener {
 
@@ -34,7 +35,7 @@ open class CatalogueSearchController(
      */
     protected var adapter: CatalogueSearchAdapter? = null
 
-    private var customTitle:String? = null
+    private var customTitle: String? = null
 
     /**
      * Called when controller is initialized.
@@ -79,7 +80,7 @@ open class CatalogueSearchController(
      */
     override fun onMangaClick(manga: Manga) {
         // Open MangaController.
-        router.pushController(MangaController(manga, true).withFadeTransaction())
+        router.pushController(MangaDetailsController(manga, true).withFadeTransaction())
     }
 
     /**
@@ -135,6 +136,7 @@ open class CatalogueSearchController(
      */
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
+        view.applyWindowInsetsForController()
 
         adapter = CatalogueSearchAdapter(this)
 
@@ -142,8 +144,7 @@ open class CatalogueSearchController(
         recycler.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(view.context)
         recycler.adapter = adapter
         recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
-        if (extensionFilter != null)
-        {
+        if (extensionFilter != null) {
             customTitle = view.context?.getString(R.string.loading)
             setTitle()
         }
@@ -193,12 +194,11 @@ open class CatalogueSearchController(
             val results = searchResult.first().results
             if (results != null && results.size == 1) {
                 val manga = results.first().manga
-                router.replaceTopController(MangaController(manga,true,fromExtension = true)
+                router.replaceTopController(MangaDetailsController(manga, true)
                     .withFadeTransaction()
                 )
                 return
-            }
-            else if (results != null) {
+            } else if (results != null) {
                 customTitle = null
                 setTitle()
                 activity?.invalidateOptionsMenu()
@@ -215,5 +215,4 @@ open class CatalogueSearchController(
     fun onMangaInitialized(source: CatalogueSource, manga: Manga) {
         getHolder(source)?.setImage(manga)
     }
-
 }

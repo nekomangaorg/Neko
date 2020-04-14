@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/library_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ProgressBar
+        android:id="@+id/progress"
+        android:layout_gravity="center"
+        android:layout_width="75dp"
+        android:layout_height="75dp"/>
+
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <FrameLayout
+            android:id="@+id/recycler_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <include layout="@layout/library_grid_recycler" />
+        </FrameLayout>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <com.reddit.indicatorfastscroll.FastScrollerView
+            android:id="@+id/fast_scroller"
+            android:textColor="?android:attr/textColorPrimaryInverse"
+            android:layout_width="25dp"
+            android:layout_height="wrap_content"
+            android:elevation="10dp"
+            android:layout_gravity="end"
+            android:background="@drawable/fast_scroll_background"
+            android:backgroundTint="@color/md_grey_800"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:paddingStart="3dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="visible" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/text_view_m"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:alpha="0"
+            tools:alpha="1"
+            android:layout_marginEnd="50dp"
+            android:background="@drawable/round_textview_background"
+            android:backgroundTint="@color/md_grey_800_85"
+            android:padding="10dp"
+            android:textColor="@android:color/white"
+            app:layout_constraintEnd_toStartOf="@id/fast_scroller"
+            app:layout_constraintTop_toTopOf="@id/fast_scroller"
+            tools:text="Category" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <eu.kanade.tachiyomi.widget.EmptyView
+        android:id="@+id/empty_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone" />
+
+    <View
+        android:id="@+id/shadow"
+        android:layout_width="match_parent"
+        android:layout_height="24dp"
+        android:alpha="0.5"
+        android:background="@drawable/shape_gradient_top_shadow"
+        android:paddingBottom="10dp"
+        app:layout_anchor="@id/bottom_sheet"
+        app:layout_anchorGravity="top" />
+
+    <!-- Adding bottom sheet after main content -->
+    <include layout="@layout/filter_bottom_sheet" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab"
+        style="@style/Theme.Widget.FABFixed"
+        android:layout_gravity="center"
+        android:clickable="false"
+        android:focusable="false"
+        android:scaleX="0"
+        android:scaleY="0"
+        android:visibility="gone"
+        app:layout_anchor="@id/bottom_sheet"
+        app:layout_anchorGravity="end|top"
+        app:srcCompat="@drawable/ic_file_download_white_24dp" />
+
+    <View
+        android:id="@+id/shadow2"
+        android:layout_width="match_parent"
+        android:layout_height="8dp"
+        android:layout_gravity="bottom"
+        android:alpha="0.25"
+        android:background="@drawable/shape_gradient_top_shadow" />
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

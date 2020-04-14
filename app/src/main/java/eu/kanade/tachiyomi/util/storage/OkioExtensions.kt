@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.util.storage
 
 import okio.BufferedSource
-import okio.Okio
 import okio.buffer
 import okio.sink
 import java.io.File

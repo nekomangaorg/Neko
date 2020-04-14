@@ -10,7 +10,6 @@ import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.storage.saveTo
 import okhttp3.Response
-import okio.Okio
 import okio.buffer
 import okio.sink
 import rx.Observable
@@ -136,7 +135,6 @@ class ChapterCache(private val context: Context) {
             diskCache.flush()
             editor.commit()
             editor.abortUnlessCommitted()
-
         } catch (e: Exception) {
             // Ignore.
         } finally {
@@ -202,4 +200,3 @@ class ChapterCache(private val context: Context) {
         return "${chapter.manga_id}${chapter.url}"
     }
 }
-

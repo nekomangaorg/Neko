@@ -4,7 +4,6 @@ import android.app.Dialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.view.View
 import androidx.preference.PreferenceScreen
 import com.afollestad.materialdialogs.MaterialDialog
 import eu.kanade.tachiyomi.BuildConfig
@@ -16,11 +15,13 @@ import eu.kanade.tachiyomi.data.updater.UpdateResult
 import eu.kanade.tachiyomi.data.updater.UpdaterService
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.main.ChangelogDialogController
-import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.lang.toTimestampString
-import rx.Subscription
-import rx.android.schedulers.AndroidSchedulers
-import rx.schedulers.Schedulers
+import eu.kanade.tachiyomi.util.system.toast
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 import java.text.DateFormat
@@ -43,17 +44,17 @@ class SettingsAboutController : SettingsController() {
     /**
      * The subscribtion service of the obtained release object
      */
-    private var releaseSubscription: Subscription? = null
+    private val scope = CoroutineScope(Job() + Dispatchers.IO)
 
     private val isUpdaterEnabled = BuildConfig.INCLUDE_UPDATER
 
     override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
-        titleRes = R.string.pref_category_about
+        titleRes = R.string.about
 
         switchPreference {
             key = "acra.enable"
-            titleRes = R.string.pref_enable_acra
-            summaryRes = R.string.pref_acra_summary
+            titleRes = R.string.send_crash_report
+            summaryRes = R.string.helps_fix_bugs
             defaultValue = true
         }
         preference {
@@ -95,40 +96,37 @@ class SettingsAboutController : SettingsController() {
         }
     }
 
-    override fun onDestroyView(view: View) {
-        super.onDestroyView(view)
-        releaseSubscription?.unsubscribe()
-        releaseSubscription = null
-    }
-
     /**
      * Checks version and shows a user prompt if an update is available.
      */
     private fun checkVersion() {
         if (activity == null) return
 
-        activity?.toast(R.string.update_check_look_for_updates)
-        releaseSubscription?.unsubscribe()
-        releaseSubscription = updateChecker.checkForUpdate()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ result ->
-                    when (result) {
-                        is UpdateResult.NewUpdate<*> -> {
-                            val body = result.release.info
-                            val url = result.release.downloadLink
+        activity?.toast(R.string.searching_for_updates)
+        scope.launch {
+            val result = try {
+                updateChecker.checkForUpdate()
+            } catch (error: Exception) {
+                activity?.toast(error.message)
+                Timber.e(error)
+            }
+            when (result) {
+                is UpdateResult.NewUpdate<*> -> {
+                    val body = result.release.info
+                    val url = result.release.downloadLink
 
-                            // Create confirmation window
-                            NewUpdateDialogController(body, url).showDialog(router)
-                        }
-                        is UpdateResult.NoNewUpdate -> {
-                            activity?.toast(R.string.update_check_no_new_updates)
-                        }
+                    // Create confirmation window
+                    withContext(Dispatchers.Main) {
+                        NewUpdateDialogController(body, url).showDialog(router)
                     }
-                }, { error ->
-                    activity?.toast(error.message)
-                    Timber.e(error)
-                })
+                }
+                is UpdateResult.NoNewUpdate -> {
+                    withContext(Dispatchers.Main) {
+                        activity?.toast(R.string.no_new_updates_available)
+                    }
+                }
+            }
+        }
     }
 
     class NewUpdateDialogController(bundle: Bundle? = null) : DialogController(bundle) {
@@ -140,9 +138,9 @@ class SettingsAboutController : SettingsController() {
 
         override fun onCreateDialog(savedViewState: Bundle?): Dialog {
             return MaterialDialog(activity!!)
-                    .title(R.string.update_check_title)
+                    .title(R.string.new_version_available)
                     .message(text = args.getString(BODY_KEY) ?: "")
-                    .positiveButton(R.string.update_check_confirm)  {
+                    .positiveButton(R.string.download) {
                         val appContext = applicationContext
                         if (appContext != null) {
                             // Start download
@@ -150,7 +148,7 @@ class SettingsAboutController : SettingsController() {
                             UpdaterService.downloadUpdate(appContext, url)
                         }
                     }
-                    .negativeButton(R.string.update_check_ignore)
+                    .negativeButton(R.string.ignore)
         }
 
         private companion object {

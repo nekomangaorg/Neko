@@ -4,8 +4,6 @@ import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadProvider
 import eu.kanade.tachiyomi.source.model.SManga
 import uy.kohesive.injekt.injectLazy
-import kotlin.collections.MutableMap
-import kotlin.collections.mutableMapOf
 import kotlin.collections.set
 
 open class MangaImpl : Manga {
@@ -36,22 +34,20 @@ open class MangaImpl : Manga {
 
     override var initialized: Boolean = false
 
-    override var viewer: Int = 0
+    override var viewer: Int = -1
 
     override var chapter_flags: Int = 0
 
     override var hide_title: Boolean = false
 
+    override var date_added: Long = 0
+
     override fun copyFrom(other: SManga) {
         if (other is MangaImpl && (other as MangaImpl)::title.isInitialized &&
-            !other.title.isBlank() && other.title != originalTitle()) {
-            val oldTitle = originalTitle()
-            title = if (currentTitle() != originalTitle()) {
-                val customTitle = currentTitle()
-                val trueTitle = other.title
-                "${customTitle}${SManga.splitter}${trueTitle}"
-            } else other.title
-            val db:DownloadManager by injectLazy()
+            !other.title.isBlank() && other.title != title) {
+            val oldTitle = title
+            title = other.title
+            val db: DownloadManager by injectLazy()
             val provider = DownloadProvider(db.context)
             provider.renameMangaFolder(oldTitle, title, source)
         }
@@ -65,7 +61,6 @@ open class MangaImpl : Manga {
         val manga = other as Manga
 
         return url == manga.url
-
     }
 
     override fun hashCode(): Int {
@@ -73,7 +68,7 @@ open class MangaImpl : Manga {
     }
 
     companion object {
-        private var lastCoverFetch:HashMap<Long, Long> = hashMapOf()
+        private var lastCoverFetch: HashMap<Long, Long> = hashMapOf()
 
         fun setLastCoverFetch(id: Long, time: Long) {
             lastCoverFetch[id] = time
@@ -81,5 +76,4 @@ open class MangaImpl : Manga {
 
         fun getLastCoverFetch(id: Long) = lastCoverFetch[id] ?: 0
     }
-
 }

@@ -13,38 +13,25 @@ class CategoryAdapter(controller: CategoryController) :
     /**
      * Listener called when an item of the list is released.
      */
-    val onItemReleaseListener: OnItemReleaseListener = controller
-
-    /**
-     * Clears the active selections from the list and the model.
-     */
-    override fun clearSelection() {
-        super.clearSelection()
-        (0 until itemCount).forEach { getItem(it)?.isSelected = false }
-    }
+    val categoryItemListener: CategoryItemListener = controller
 
     /**
      * Clears the active selections from the model.
      */
-    fun clearModelSelection() {
-        selectedPositions.forEach { getItem(it)?.isSelected = false }
+    fun resetEditing(position: Int) {
+        for (i in 0..itemCount) {
+            getItem(i)?.isEditing = false
+        }
+        getItem(position)?.isEditing = true
+        notifyDataSetChanged()
     }
 
-    /**
-     * Toggles the selection of the given position.
-     *
-     * @param position The position to toggle.
-     */
-    override fun toggleSelection(position: Int) {
-        super.toggleSelection(position)
-        getItem(position)?.isSelected = isSelected(position)
-    }
-
-    interface OnItemReleaseListener {
+    interface CategoryItemListener {
         /**
          * Called when an item of the list is released.
          */
         fun onItemReleased(position: Int)
+        fun onCategoryRename(position: Int, newName: String): Boolean
+        fun onItemDelete(position: Int)
     }
-
 }

@@ -1,8 +1,9 @@
 package eu.kanade.tachiyomi.ui.extension
 
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.view.View
 import androidx.core.content.ContextCompat
-import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.extension.model.Extension
@@ -10,6 +11,8 @@ import eu.kanade.tachiyomi.extension.model.InstallStep
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.ui.base.holder.SlicedHolder
 import eu.kanade.tachiyomi.util.system.LocaleHelper
+import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.view.resetStrokeColor
 import io.github.mthli.slice.Slice
 import kotlinx.android.synthetic.main.extension_card_item.*
 
@@ -40,16 +43,16 @@ class ExtensionHolder(view: View, override val adapter: ExtensionAdapter) :
         lang.text = if (extension !is Extension.Untrusted) {
             LocaleHelper.getDisplayName(extension.lang, itemView.context)
         } else {
-            itemView.context.getString(R.string.ext_untrusted).toUpperCase()
+            itemView.context.getString(R.string.untrusted).toUpperCase()
         }
 
-        GlideApp.with(itemView.context).clear(image)
+        GlideApp.with(itemView.context).clear(edit_button)
         if (extension is Extension.Available) {
             GlideApp.with(itemView.context)
                     .load(extension.iconUrl)
-                    .into(image)
+                    .into(edit_button)
         } else {
-            extension.getApplicationIcon(itemView.context)?.let { image.setImageDrawable(it) }
+            extension.getApplicationIcon(itemView.context)?.let { edit_button.setImageDrawable(it) }
         }
         bindButton(item)
     }
@@ -60,19 +63,19 @@ class ExtensionHolder(view: View, override val adapter: ExtensionAdapter) :
         isClickable = true
         isActivated = false
 
-        background = VectorDrawableCompat.create(resources!!, R.drawable.button_bg_transparent, null)
-        setTextColor(ContextCompat.getColorStateList(context, R.drawable.button_bg_transparent))
+        setTextColor(ContextCompat.getColorStateList(context, R.drawable.button_text_state))
+        backgroundTintList = ContextCompat.getColorStateList(context, android.R.color.transparent)
 
+        resetStrokeColor()
         val extension = item.extension
-
         val installStep = item.installStep
         if (installStep != null) {
             setText(when (installStep) {
-                InstallStep.Pending -> R.string.ext_pending
-                InstallStep.Downloading -> R.string.ext_downloading
-                InstallStep.Installing -> R.string.ext_installing
-                InstallStep.Installed -> R.string.ext_installed
-                InstallStep.Error -> R.string.action_retry
+                InstallStep.Pending -> R.string.pending
+                InstallStep.Downloading -> R.string.downloading
+                InstallStep.Installing -> R.string.installing
+                InstallStep.Installed -> R.string.installed
+                InstallStep.Error -> R.string.retry
             })
             if (installStep != InstallStep.Error) {
                 isEnabled = false
@@ -82,24 +85,25 @@ class ExtensionHolder(view: View, override val adapter: ExtensionAdapter) :
             when {
                 extension.hasUpdate -> {
                     isActivated = true
-                    setText(R.string.ext_update)
+                    backgroundTintList = ColorStateList.valueOf(
+                        context.getResourceColor(R.attr.colorAccent))
+                    strokeColor = ColorStateList.valueOf(Color.TRANSPARENT)
+                    setText(R.string.update)
                 }
                 extension.isObsolete -> {
                     // Red outline
-                    background = VectorDrawableCompat.create(resources, R.drawable.button_bg_error, null)
                     setTextColor(ContextCompat.getColorStateList(context, R.drawable.button_bg_error))
 
-                    setText(R.string.ext_obsolete)
+                    setText(R.string.obsolete)
                 }
                 else -> {
-                    setText(R.string.ext_details)
+                    setText(R.string.details)
                 }
             }
         } else if (extension is Extension.Untrusted) {
-            setText(R.string.ext_trust)
+            setText(R.string.trust)
         } else {
-            setText(R.string.ext_install)
+            setText(R.string.install)
         }
     }
-
 }

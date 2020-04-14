@@ -1,11 +1,12 @@
 package eu.kanade.tachiyomi.ui.manga.track
 
-import androidx.recyclerview.widget.RecyclerView
 import android.view.ViewGroup
+import androidx.recyclerview.widget.RecyclerView
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.util.view.inflate
 
-class TrackAdapter(controller: TrackController) : RecyclerView.Adapter<TrackHolder>() {
+class TrackAdapter(controller: OnClickListener) : RecyclerView.Adapter<TrackHolder>() {
 
     var items = emptyList<TrackItem>()
         set(value) {
@@ -34,12 +35,15 @@ class TrackAdapter(controller: TrackController) : RecyclerView.Adapter<TrackHold
         holder.bind(items[position])
     }
 
+    fun indexOf(item: TrackService?): Int {
+        return items.indexOfFirst { item?.id == it.service.id }
+    }
+
     interface OnClickListener {
         fun onLogoClick(position: Int)
-        fun onTitleClick(position: Int)
+        fun onSetClick(position: Int)
         fun onStatusClick(position: Int)
         fun onChaptersClick(position: Int)
         fun onScoreClick(position: Int)
     }
-
 }

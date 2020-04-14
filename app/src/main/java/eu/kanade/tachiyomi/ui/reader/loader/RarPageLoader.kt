@@ -83,5 +83,4 @@ class RarPageLoader(file: File) : PageLoader() {
         }
         return pipeIn
     }
-
 }

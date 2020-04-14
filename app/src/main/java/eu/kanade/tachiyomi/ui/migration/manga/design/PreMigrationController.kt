@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bluelinelabs.conductor.Router
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import eu.davidea.flexibleadapter.FlexibleAdapter
@@ -17,13 +18,13 @@ import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationListController
+import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationProcedureConfig
+import eu.kanade.tachiyomi.util.view.applyWindowInsetsForController
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.marginBottom
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
-import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationProcedureConfig
-import kotlinx.android.synthetic.main.pre_migration_controller.fab
-import kotlinx.android.synthetic.main.pre_migration_controller.recycler
+import kotlinx.android.synthetic.main.pre_migration_controller.*
 import uy.kohesive.injekt.injectLazy
 
 class PreMigrationController(bundle: Bundle? = null) : BaseController(bundle), FlexibleAdapter
@@ -37,7 +38,7 @@ class PreMigrationController(bundle: Bundle? = null) : BaseController(bundle), F
 
     private var showingOptions = false
 
-    private var dialog:BottomSheetDialog? = null
+    private var dialog: BottomSheetDialog? = null
 
     override fun getTitle() = "Select target sources"
 
@@ -47,6 +48,7 @@ class PreMigrationController(bundle: Bundle? = null) : BaseController(bundle), F
 
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
+        view.applyWindowInsetsForController()
 
         val ourAdapter = adapter ?: MigrationSourceAdapter(
                 getEnabledSources().map { MigrationSourceItem(it, isEnabled(it.id.toString())) },
@@ -62,7 +64,7 @@ class PreMigrationController(bundle: Bundle? = null) : BaseController(bundle), F
         val fabBaseMarginBottom = fab?.marginBottom ?: 0
         recycler.doOnApplyWindowInsets { v, insets, padding ->
 
-            fab?.updateLayoutParams<ViewGroup.MarginLayoutParams>  {
+            fab?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 bottomMargin = fabBaseMarginBottom + insets.systemWindowInsetBottom
             }
             // offset the recycler by the fab's inset + some inset on top
@@ -72,7 +74,7 @@ class PreMigrationController(bundle: Bundle? = null) : BaseController(bundle), F
 
         fab.setOnClickListener {
             if (dialog?.isShowing != true) {
-                dialog = MigrationBottomSheetDialog(activity!!, R.style.SheetDialog, this)
+                dialog = MigrationBottomSheetDialog(activity!!, this)
                 dialog?.show()
                 val bottomSheet = dialog?.findViewById<FrameLayout>(
                     com.google.android.material.R.id.design_bottom_sheet
@@ -86,7 +88,7 @@ class PreMigrationController(bundle: Bundle? = null) : BaseController(bundle), F
         }
     }
 
-    override fun startMigration(extraParam:String?) {
+    override fun startMigration(extraParam: String?) {
         val listOfSources = adapter?.items?.filter {
             it.sourceEnabled
         }?.joinToString("/") { it.source.id.toString() }
@@ -98,7 +100,7 @@ class PreMigrationController(bundle: Bundle? = null) : BaseController(bundle), F
                     config.toList(),
                     extraSearchParams = extraParam
                 )
-            ).withFadeTransaction())
+            ).withFadeTransaction().tag(MigrationListController.TAG))
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -111,7 +113,6 @@ class PreMigrationController(bundle: Bundle? = null) : BaseController(bundle), F
         super.onRestoreInstanceState(savedInstanceState)
         adapter?.onRestoreInstanceState(savedInstanceState)
     }
-
 
     override fun onItemClick(view: View, position: Int): Boolean {
         adapter?.getItem(position)?.let {
@@ -135,14 +136,14 @@ class PreMigrationController(bundle: Bundle? = null) : BaseController(bundle), F
             .sortedBy { "(${it.lang}) ${it.name}" }
         sources =
             sources.filter { isEnabled(it.id.toString()) }.sortedBy { sourcesSaved.indexOf(it.id
-                .toString() )
+                .toString())
             } +
                 sources.filterNot { isEnabled(it.id.toString()) }
 
         return sources
     }
 
-    fun isEnabled(id:String): Boolean {
+    fun isEnabled(id: String): Boolean {
         val sourcesSaved = prefs.migrationSources().getOrDefault()
         val hiddenCatalogues = prefs.hiddenCatalogues().getOrDefault()
         return if (sourcesSaved.isEmpty()) id !in hiddenCatalogues
@@ -151,6 +152,18 @@ class PreMigrationController(bundle: Bundle? = null) : BaseController(bundle), F
 
     companion object {
         private const val MANGA_IDS_EXTRA = "manga_ids"
+
+        fun navigateToMigration(skipPre: Boolean, router: Router, mangaIds: List<Long>) {
+            router.pushController(
+                if (skipPre) {
+                    MigrationListController.create(
+                        MigrationProcedureConfig(mangaIds, null)
+                    )
+                } else {
+                    create(mangaIds)
+                }.withFadeTransaction().tag(if (skipPre) MigrationListController.TAG else null)
+            )
+        }
 
         fun create(mangaIds: List<Long>): PreMigrationController {
             return PreMigrationController(Bundle().apply {

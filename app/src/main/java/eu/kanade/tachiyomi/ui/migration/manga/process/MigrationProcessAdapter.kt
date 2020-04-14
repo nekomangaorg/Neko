@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.migration.manga.process
 
-import android.content.Context
 import android.view.MenuItem
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -14,15 +13,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.injectLazy
+import java.util.Date
 
 class MigrationProcessAdapter(
     val controller: MigrationListController
 ) : FlexibleAdapter<MigrationProcessItem>(null, controller, true) {
 
-
     private val db: DatabaseHelper by injectLazy()
     var items: List<MigrationProcessItem> = emptyList()
-    val preferences:PreferencesHelper by injectLazy()
+    val preferences: PreferencesHelper by injectLazy()
 
     val menuItemListener: MigrationProcessInterface = controller
 
@@ -46,7 +45,7 @@ class MigrationProcessAdapter(
     }
 
     fun allMangasDone() = (items.all { it.manga.migrationStatus != MigrationStatus
-        .RUNNUNG } && items.any {  it.manga.migrationStatus == MigrationStatus.MANGA_FOUND })
+        .RUNNUNG } && items.any { it.manga.migrationStatus == MigrationStatus.MANGA_FOUND })
 
     fun mangasSkipped() = (items.count { it.manga.migrationStatus == MigrationStatus.MANGA_NOT_FOUND })
 
@@ -93,16 +92,18 @@ class MigrationProcessAdapter(
         sourceFinished()
     }
 
-    private fun migrateMangaInternal(prevManga: Manga,
+    private fun migrateMangaInternal(
+        prevManga: Manga,
         manga: Manga,
-        replace: Boolean) {
+        replace: Boolean
+    ) {
         if (controller.config == null) return
         val flags = preferences.migrateFlags().getOrDefault()
         // Update chapters read
         if (MigrationFlags.hasChapters(flags)) {
             val prevMangaChapters = db.getChapters(prevManga).executeAsBlocking()
-            val maxChapterRead = prevMangaChapters.filter { it.read }
-                .maxBy { it.chapter_number }?.chapter_number
+            val maxChapterRead =
+                prevMangaChapters.filter { it.read }.maxBy { it.chapter_number }?.chapter_number
             if (maxChapterRead != null) {
                 val dbChapters = db.getChapters(manga).executeAsBlocking()
                 for (chapter in dbChapters) {
@@ -134,10 +135,10 @@ class MigrationProcessAdapter(
             db.updateMangaFavorite(prevManga).executeAsBlocking()
         }
         manga.favorite = true
+        if (replace) manga.date_added = prevManga.date_added
+        else manga.date_added = Date().time
         db.updateMangaFavorite(manga).executeAsBlocking()
-
-        // SearchPresenter#networkToLocalManga may have updated the manga title, so ensure db gets updated title
+        db.updateMangaAdded(manga).executeAsBlocking()
         db.updateMangaTitle(manga).executeAsBlocking()
-        //}
     }
 }

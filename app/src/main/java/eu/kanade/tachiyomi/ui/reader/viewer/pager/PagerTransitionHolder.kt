@@ -27,8 +27,8 @@ import rx.android.schedulers.AndroidSchedulers
  */
 @SuppressLint("ViewConstructor")
 class PagerTransitionHolder(
-        val viewer: PagerViewer,
-        val transition: ChapterTransition
+    val viewer: PagerViewer,
+    val transition: ChapterTransition
 ) : LinearLayout(viewer.activity), ViewPagerAdapter.PositionableView {
 
     /**
@@ -46,8 +46,8 @@ class PagerTransitionHolder(
      * Text view used to display the text of the current and next/prev chapters.
      */
     private var textView = TextView(context).apply {
-        //if (Build.VERSION.SDK_INT >= 23)
-        //setTextColor(context.getResourceColor(R.attr.))
+        // if (Build.VERSION.SDK_INT >= 23)
+        // setTextColor(context.getResourceColor(R.attr.))
         textSize = 17.5F
         wrapContent()
     }
@@ -93,16 +93,16 @@ class PagerTransitionHolder(
 
         textView.text = if (nextChapter != null) {
             SpannableStringBuilder().apply {
-                append(context.getString(R.string.transition_finished))
+                append(context.getString(R.string.finished))
                 setSpan(StyleSpan(Typeface.BOLD), 0, length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
                 append("\n${transition.from.chapter.name}\n\n")
                 val currSize = length
-                append(context.getString(R.string.transition_next))
+                append(context.getString(R.string.next))
                 setSpan(StyleSpan(Typeface.BOLD), currSize, length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
                 append("\n${nextChapter.chapter.name}\n\n")
             }
         } else {
-            context.getString(R.string.transition_no_next)
+            context.getString(R.string.theres_no_next_chapter)
         }
 
         if (nextChapter != null) {
@@ -118,16 +118,16 @@ class PagerTransitionHolder(
 
         textView.text = if (prevChapter != null) {
             SpannableStringBuilder().apply {
-                append(context.getString(R.string.transition_current))
+                append(context.getString(R.string.current))
                 setSpan(StyleSpan(Typeface.BOLD), 0, length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
                 append("\n${transition.from.chapter.name}\n\n")
                 val currSize = length
-                append(context.getString(R.string.transition_previous))
+                append(context.getString(R.string.previous))
                 setSpan(StyleSpan(Typeface.BOLD), currSize, length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
                 append("\n${prevChapter.chapter.name}\n\n")
             }
         } else {
-            context.getString(R.string.transition_no_previous)
+            context.getString(R.string.theres_no_previous_chapter)
         }
 
         if (prevChapter != null) {
@@ -162,7 +162,7 @@ class PagerTransitionHolder(
 
         val textView = AppCompatTextView(context).apply {
             wrapContent()
-            setText(R.string.transition_pages_loading)
+            setText(R.string.loading_pages)
         }
 
         pagesContainer.addView(progress)
@@ -182,12 +182,12 @@ class PagerTransitionHolder(
     private fun setError(error: Throwable) {
         val textView = AppCompatTextView(context).apply {
             wrapContent()
-            text = context.getString(R.string.transition_pages_error, error.message)
+            text = context.getString(R.string.failed_to_load_pages_, error.message)
         }
 
         val retryBtn = PagerButton(context, viewer).apply {
             wrapContent()
-            setText(R.string.action_retry)
+            setText(R.string.retry)
             setOnClickListener {
                 val toChapter = transition.to
                 if (toChapter != null) {
@@ -206,5 +206,4 @@ class PagerTransitionHolder(
     private fun View.wrapContent() {
         layoutParams = ViewGroup.LayoutParams(WRAP_CONTENT, WRAP_CONTENT)
     }
-
 }

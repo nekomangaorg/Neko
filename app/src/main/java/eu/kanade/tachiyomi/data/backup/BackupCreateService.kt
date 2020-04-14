@@ -45,7 +45,6 @@ class BackupCreateService : IntentService(NAME) {
             }
             context.startService(intent)
         }
-
     }
 
     private val backupManager by lazy { BackupManager(this) }
@@ -60,5 +59,4 @@ class BackupCreateService : IntentService(NAME) {
         if (uri != null)
             backupManager.createBackup(uri, flags, false)
     }
-
 }

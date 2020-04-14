@@ -9,7 +9,7 @@ import eu.kanade.tachiyomi.data.database.inTransactionReturn
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.tables.MangaTable
 
-class MangaInfoPutResolver(val reset:Boolean = false): PutResolver<Manga>() {
+class MangaInfoPutResolver(val reset: Boolean = false) : PutResolver<Manga>() {
 
     override fun performPut(db: StorIOSQLite, manga: Manga) = db.inTransactionReturn {
         val updateQuery = mapToUpdateQuery(manga)
@@ -34,12 +34,11 @@ class MangaInfoPutResolver(val reset:Boolean = false): PutResolver<Manga>() {
     }
 
     fun resetToContentValues(manga: Manga) = ContentValues(1).apply {
-        put(MangaTable.COL_TITLE, manga.originalTitle())
-        put(MangaTable.COL_GENRE, manga.originalGenres())
-        put(MangaTable.COL_AUTHOR, manga.originalAuthor())
-        put(MangaTable.COL_ARTIST, manga.originalArtist())
-        put(MangaTable.COL_DESCRIPTION, manga.originalDesc())
+        val splitter = "▒ ▒∩▒"
+        put(MangaTable.COL_TITLE, manga.title.split(splitter).last())
+        put(MangaTable.COL_GENRE, manga.genre?.split(splitter)?.lastOrNull())
+        put(MangaTable.COL_AUTHOR, manga.author?.split(splitter)?.lastOrNull())
+        put(MangaTable.COL_ARTIST, manga.artist?.split(splitter)?.lastOrNull())
+        put(MangaTable.COL_DESCRIPTION, manga.description?.split(splitter)?.lastOrNull())
     }
-
-
 }

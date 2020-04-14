@@ -113,5 +113,4 @@ class EpubFile(file: File) : Closeable {
             }
         }
     }
-
 }

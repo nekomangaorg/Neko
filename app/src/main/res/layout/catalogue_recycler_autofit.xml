@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<eu.kanade.tachiyomi.widget.AutofitRecyclerView
-    android:id="@+id/catalogue_recycler"
+<eu.kanade.tachiyomi.widget.AutofitRecyclerView android:id="@+id/catalogue_recycler"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     style="@style/Theme.Widget.GridView.Catalogue"
     android:layout_width="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
     android:layout_height="match_parent"
-    android:columnWidth="140dp"
+    android:columnWidth="120dp"
     android:clipToPadding="false"
-    tools:listitem="@layout/catalogue_grid_item" />
+    tools:listitem="@layout/catalogue_grid_item"
+    xmlns:app="http://schemas.android.com/apk/res-auto" />

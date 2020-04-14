@@ -37,5 +37,4 @@ class DirectoryPageLoader(val file: File) : PageLoader() {
     override fun getPage(page: ReaderPage): Observable<Int> {
         return Observable.just(Page.READY)
     }
-
 }

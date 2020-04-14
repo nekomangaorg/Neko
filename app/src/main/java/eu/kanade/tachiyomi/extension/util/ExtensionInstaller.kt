@@ -245,5 +245,4 @@ internal class ExtensionInstaller(private val context: Context) {
         const val APK_MIME = "application/vnd.android.package-archive"
         const val EXTRA_DOWNLOAD_ID = "ExtensionInstaller.extra.DOWNLOAD_ID"
     }
-
 }

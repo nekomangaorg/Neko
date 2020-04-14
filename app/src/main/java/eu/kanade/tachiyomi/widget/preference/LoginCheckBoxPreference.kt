@@ -2,22 +2,21 @@ package eu.kanade.tachiyomi.widget.preference
 
 import android.content.Context
 import android.graphics.Color
-import androidx.preference.CheckBoxPreference
-import androidx.preference.PreferenceViewHolder
 import android.util.AttributeSet
 import android.view.View
+import androidx.preference.CheckBoxPreference
+import androidx.preference.PreferenceViewHolder
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.LoginSource
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.setVectorCompat
-import kotlinx.android.synthetic.main.pref_item_source.view.login
-import kotlinx.android.synthetic.main.pref_item_source.view.login_frame
+import kotlinx.android.synthetic.main.pref_item_source.view.*
 
 class LoginCheckBoxPreference @JvmOverloads constructor(
-        context: Context,
-        val source: HttpSource,
-        attrs: AttributeSet? = null
+    context: Context,
+    val source: HttpSource,
+    attrs: AttributeSet? = null
 ) : CheckBoxPreference(context, attrs) {
 
     init {
@@ -51,8 +50,7 @@ class LoginCheckBoxPreference @JvmOverloads constructor(
     }
 
     // Make method public
-    override public fun notifyChanged() {
+    public override fun notifyChanged() {
         super.notifyChanged()
     }
-
 }

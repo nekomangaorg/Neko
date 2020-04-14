@@ -3,29 +3,42 @@ package eu.kanade.tachiyomi.ui.library
 import android.annotation.SuppressLint
 import android.view.Gravity
 import android.view.View
-import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import android.view.ViewGroup
 import android.widget.FrameLayout
+import android.widget.ImageView
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.f2prateek.rx.preferences.Preference
 import eu.davidea.flexibleadapter.FlexibleAdapter
-import eu.davidea.flexibleadapter.items.AbstractFlexibleItem
+import eu.davidea.flexibleadapter.items.AbstractSectionableItem
 import eu.davidea.flexibleadapter.items.IFilterable
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import kotlinx.android.synthetic.main.catalogue_grid_item.view.*
 import uy.kohesive.injekt.injectLazy
 
-class LibraryItem(val manga: LibraryManga, private val libraryAsList: Preference<Boolean>) :
-        AbstractFlexibleItem<LibraryHolder>(), IFilterable<String> {
+class LibraryItem(
+    val manga: LibraryManga,
+    private val libraryLayout: Preference<Int>,
+    private val fixedSize: Preference<Boolean>,
+    private val showFastScroll: Preference<Boolean>,
+    header: LibraryHeaderItem?
+) :
+    AbstractSectionableItem<LibraryHolder, LibraryHeaderItem?>(header), IFilterable<String> {
 
     var downloadCount = -1
+    var unreadType = 2
+    var chapterCount = -1
 
     override fun getLayoutRes(): Int {
-        return if (libraryAsList.getOrDefault())
+        return if (libraryLayout.getOrDefault() == 0 || manga.isBlank())
             R.layout.catalogue_list_item
         else
             R.layout.catalogue_grid_item
@@ -34,23 +47,64 @@ class LibraryItem(val manga: LibraryManga, private val libraryAsList: Preference
     override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): LibraryHolder {
         val parent = adapter.recyclerView
         return if (parent is AutofitRecyclerView) {
-            view.apply {
-                val coverHeight = parent.itemWidth / 3 * 4
-                card.layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, coverHeight)
-                gradient.layoutParams = FrameLayout.LayoutParams(
-                        MATCH_PARENT, coverHeight / 2, Gravity.BOTTOM)
+            val libraryLayout = libraryLayout.getOrDefault()
+            val isFixedSize = fixedSize.getOrDefault()
+            if (libraryLayout == 0 || manga.isBlank()) {
+                LibraryListHolder(view, adapter as LibraryCategoryAdapter, showFastScroll.getOrDefault())
+            } else {
+                view.apply {
+                    val coverHeight = (parent.itemWidth / 3f * 4f).toInt()
+                    if (libraryLayout == 1) {
+                        gradient.layoutParams = FrameLayout.LayoutParams(
+                            FrameLayout.LayoutParams.MATCH_PARENT,
+                            (coverHeight * 0.66f).toInt(),
+                            Gravity.BOTTOM)
+                        card.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                            bottomMargin = 6.dpToPx
+                        }
+                    } else if (libraryLayout == 2) {
+                        constraint_layout.background = ContextCompat.getDrawable(
+                            context, R.drawable.library_item_selector
+                        )
+                    }
+                    if (isFixedSize) {
+                        constraint_layout.layoutParams = FrameLayout.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
+                        )
+                        cover_thumbnail.maxHeight = Int.MAX_VALUE
+                        cover_thumbnail.minimumHeight = 0
+                        constraint_layout.minHeight = 0
+                        cover_thumbnail.scaleType = ImageView.ScaleType.CENTER_CROP
+                        cover_thumbnail.adjustViewBounds = false
+                        cover_thumbnail.layoutParams = FrameLayout.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            (parent.itemWidth / 3f * 3.7f).toInt()
+                        )
+                    } else {
+                        constraint_layout.minHeight = coverHeight
+                        cover_thumbnail.minimumHeight = (parent.itemWidth / 3f * 3.6f).toInt()
+                        cover_thumbnail.maxHeight = (parent.itemWidth / 3f * 6f).toInt()
+                    }
+                }
+                LibraryGridHolder(
+                    view,
+                    adapter as LibraryCategoryAdapter,
+                    parent.itemWidth,
+                    libraryLayout == 1,
+                    isFixedSize
+                )
             }
-            LibraryGridHolder(view, adapter)
         } else {
-            LibraryListHolder(view, adapter)
+            LibraryListHolder(view, adapter as LibraryCategoryAdapter, showFastScroll.getOrDefault())
         }
     }
 
-    override fun bindViewHolder(adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
-                                holder: LibraryHolder,
-                                position: Int,
-                                payloads: MutableList<Any?>?) {
-
+    override fun bindViewHolder(
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
+        holder: LibraryHolder,
+        position: Int,
+        payloads: MutableList<Any?>?
+    ) {
         holder.onSetValues(this)
     }
 
@@ -58,7 +112,15 @@ class LibraryItem(val manga: LibraryManga, private val libraryAsList: Preference
      * Returns true if this item is draggable.
      */
     override fun isDraggable(): Boolean {
-        return true
+        return !manga.isBlank()
+    }
+
+    override fun isEnabled(): Boolean {
+        return !manga.isBlank()
+    }
+
+    override fun isSelectable(): Boolean {
+        return !manga.isBlank()
     }
 
     /**
@@ -68,19 +130,19 @@ class LibraryItem(val manga: LibraryManga, private val libraryAsList: Preference
      * @return true if the manga should be included, false otherwise.
      */
     override fun filter(constraint: String): Boolean {
+        if (manga.isBlank())
+            return constraint.isEmpty()
         val sourceManager by injectLazy<SourceManager>()
         val sourceName = if (manga.source == 0L) "Local" else
             sourceManager.getOrStub(manga.source).name
-        return manga.currentTitle().contains(constraint, true) ||
-            manga.originalTitle().contains(constraint, true) ||
-            (manga.currentAuthor()?.contains(constraint, true) ?: false) ||
-            (manga.currentArtist()?.contains(constraint, true) ?: false) ||
+        return manga.title.contains(constraint, true) ||
+            (manga.author?.contains(constraint, true) ?: false) ||
+            (manga.artist?.contains(constraint, true) ?: false) ||
             sourceName.contains(constraint, true) ||
             if (constraint.contains(",")) {
-                val genres = manga.currentGenres()?.split(", ")
+                val genres = manga.genre?.split(", ")
                 constraint.split(",").all { containsGenre(it.trim(), genres) }
-            }
-           else containsGenre(constraint, manga.currentGenres()?.split(", "))
+            } else containsGenre(constraint, manga.genre?.split(", "))
     }
 
     @SuppressLint("DefaultLocale")
@@ -89,7 +151,7 @@ class LibraryItem(val manga: LibraryManga, private val libraryAsList: Preference
         return if (tag.startsWith("-"))
             genres?.find {
                 it.trim().toLowerCase() == tag.substringAfter("-").toLowerCase()
-            }                   == null
+            } == null
         else
             genres?.find {
                 it.trim().toLowerCase() == tag.toLowerCase() } != null
@@ -97,12 +159,12 @@ class LibraryItem(val manga: LibraryManga, private val libraryAsList: Preference
 
     override fun equals(other: Any?): Boolean {
         if (other is LibraryItem) {
-            return manga.id == other.manga.id
+            return manga.id == other.manga.id && manga.category == other.manga.category
         }
         return false
     }
 
     override fun hashCode(): Int {
-        return manga.id!!.hashCode()
+        return (manga.id!! + (manga.category shl 50).toLong()).hashCode() // !!.hashCode()
     }
 }

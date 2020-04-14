@@ -97,7 +97,9 @@ object PreferenceKeys {
 
     const val filterCompleted = "pref_filter_completed_key"
 
-    const val filterTrcaked = "pref_filter_tracked_key"
+    const val filterTracked = "pref_filter_tracked_key"
+
+    const val filterMangaType = "pref_filter_manga_type_key"
 
     const val librarySortingMode = "library_sorting_mode"
 
@@ -105,13 +107,17 @@ object PreferenceKeys {
 
     const val automaticExtUpdates = "automatic_ext_updates"
 
-    const val startScreen = "start_screen"
-
     const val downloadNew = "download_new"
 
     const val downloadNewCategories = "download_new_categories"
 
-    const val libraryAsList = "pref_display_library_as_list"
+    const val libraryLayout = "pref_display_library_layout"
+
+    const val gridSize = "grid_size"
+
+    const val uniformGrid = "uniform_grid"
+
+    const val libraryAsSingleList = "library_as_single_list"
 
     const val lang = "app_language"
 
@@ -129,11 +135,17 @@ object PreferenceKeys {
 
     const val lastUnlock = "last_unlock"
 
+    const val secureScreen = "secure_screen"
+
     const val removeArticles = "remove_articles"
 
     const val skipPreMigration = "skip_pre_migration"
 
     const val refreshCoversToo = "refresh_covers_too"
+
+    const val updateOnRefresh = "update_on_refresh"
+
+    const val alwaysShowChapterTransition = "always_show_chapter_transition"
 
     @Deprecated("Use the preferences of the source")
     fun sourceUsername(sourceId: Long) = "pref_source_username_$sourceId"
@@ -148,5 +160,4 @@ object PreferenceKeys {
     fun trackPassword(syncId: Int) = "pref_mangasync_password_$syncId"
 
     fun trackToken(syncId: Int) = "track_token_$syncId"
-
 }

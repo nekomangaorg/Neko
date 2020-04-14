@@ -16,7 +16,19 @@ import eu.kanade.tachiyomi.source.model.Filter
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
-import eu.kanade.tachiyomi.ui.catalogue.filter.*
+import eu.kanade.tachiyomi.ui.catalogue.filter.CheckboxItem
+import eu.kanade.tachiyomi.ui.catalogue.filter.CheckboxSectionItem
+import eu.kanade.tachiyomi.ui.catalogue.filter.GroupItem
+import eu.kanade.tachiyomi.ui.catalogue.filter.HeaderItem
+import eu.kanade.tachiyomi.ui.catalogue.filter.SelectItem
+import eu.kanade.tachiyomi.ui.catalogue.filter.SelectSectionItem
+import eu.kanade.tachiyomi.ui.catalogue.filter.SeparatorItem
+import eu.kanade.tachiyomi.ui.catalogue.filter.SortGroup
+import eu.kanade.tachiyomi.ui.catalogue.filter.SortItem
+import eu.kanade.tachiyomi.ui.catalogue.filter.TextItem
+import eu.kanade.tachiyomi.ui.catalogue.filter.TextSectionItem
+import eu.kanade.tachiyomi.ui.catalogue.filter.TriStateItem
+import eu.kanade.tachiyomi.ui.catalogue.filter.TriStateSectionItem
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
@@ -25,16 +37,17 @@ import rx.subjects.PublishSubject
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.util.Date
 
 /**
  * Presenter of [BrowseCatalogueController].
  */
 open class BrowseCataloguePresenter(
-        sourceId: Long,
-        sourceManager: SourceManager = Injekt.get(),
-        private val db: DatabaseHelper = Injekt.get(),
-        private val prefs: PreferencesHelper = Injekt.get(),
-        private val coverCache: CoverCache = Injekt.get()
+    sourceId: Long,
+    sourceManager: SourceManager = Injekt.get(),
+    private val db: DatabaseHelper = Injekt.get(),
+    private val prefs: PreferencesHelper = Injekt.get(),
+    private val coverCache: CoverCache = Injekt.get()
 ) : BasePresenter<BrowseCatalogueController>() {
 
     /**
@@ -48,12 +61,15 @@ open class BrowseCataloguePresenter(
     var query = ""
         private set
 
+    var filtersChanged = false
+
     /**
      * Modifiable list of filters.
      */
     var sourceFilters = FilterList()
         set(value) {
             field = value
+            filtersChanged = true
             filterItems = value.toItems()
         }
 
@@ -133,6 +149,7 @@ open class BrowseCataloguePresenter(
         val sourceId = source.id
 
         val catalogueAsList = prefs.catalogueAsList()
+        val catalougeListType = prefs.libraryLayout()
 
         // Prepare the pager.
         pagerSubscription?.let { remove(it) }
@@ -140,7 +157,7 @@ open class BrowseCataloguePresenter(
                 .observeOn(Schedulers.io())
                 .map { it.first to it.second.map { networkToLocalManga(it, sourceId) } }
                 .doOnNext { initializeMangas(it.second) }
-                .map { it.first to it.second.map { CatalogueItem(it, catalogueAsList) } }
+                .map { it.first to it.second.map { CatalogueItem(it, catalogueAsList, catalougeListType) } }
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeReplay({ view, (page, mangas) ->
                     view.onAddPage(page, mangas)
@@ -217,8 +234,7 @@ open class BrowseCataloguePresenter(
             val result = db.insertManga(newManga).executeAsBlocking()
             newManga.id = result.insertedId()
             localManga = newManga
-        }
-        else if (localManga.title.isBlank()) {
+        } else if (localManga.title.isBlank()) {
             localManga.title = sManga.title
             db.insertManga(localManga).executeAsBlocking()
         }
@@ -258,13 +274,19 @@ open class BrowseCataloguePresenter(
      */
     fun changeMangaFavorite(manga: Manga) {
         manga.favorite = !manga.favorite
+
+        when (manga.favorite) {
+            true -> manga.date_added = Date().time
+            false -> manga.date_added = 0
+        }
+
         db.insertManga(manga).executeAsBlocking()
     }
 
     fun confirmDeletion(manga: Manga) {
         coverCache.deleteFromCache(manga.thumbnail_url)
         val downloadManager: DownloadManager = Injekt.get()
-        downloadManager.deleteManga(manga,source)
+        downloadManager.deleteManga(manga, source)
         db.resetMangaInfo(manga).executeAsBlocking()
     }
 
@@ -381,5 +403,4 @@ open class BrowseCataloguePresenter(
             changeMangaFavorite(manga)
         }
     }
-
 }

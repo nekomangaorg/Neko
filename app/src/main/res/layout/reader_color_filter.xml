@@ -2,8 +2,9 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/constraint_layout"
     android:padding="16dp">
 
     <androidx.legacy.widget.Space
@@ -18,7 +19,7 @@
         android:id="@+id/switch_color_filter"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="@string/pref_custom_color_filter"
+        android:text="@string/use_custom_color_filter"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
@@ -41,7 +42,7 @@
         android:id="@+id/txt_color_filter_red_symbol"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/color_filter_r_value"
+        android:text="@string/red_initial"
         android:textAppearance="@style/TextAppearance.Regular.SubHeading.Secondary"
         app:layout_constraintTop_toTopOf="@id/seekbar_color_filter_red"
         app:layout_constraintBottom_toBottomOf="@id/seekbar_color_filter_red"
@@ -75,7 +76,7 @@
         android:id="@+id/txt_color_filter_green_symbol"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/color_filter_g_value"
+        android:text="@string/green_initial"
         android:textAppearance="@style/TextAppearance.Regular.SubHeading.Secondary"
         app:layout_constraintTop_toTopOf="@id/seekbar_color_filter_green"
         app:layout_constraintBottom_toBottomOf="@id/seekbar_color_filter_green"
@@ -109,7 +110,7 @@
         android:id="@+id/txt_color_filter_blue_symbol"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/color_filter_b_value"
+        android:text="@string/blue_initial"
         android:textAppearance="@style/TextAppearance.Regular.SubHeading.Secondary"
         app:layout_constraintTop_toTopOf="@id/seekbar_color_filter_blue"
         app:layout_constraintBottom_toBottomOf="@id/seekbar_color_filter_blue"
@@ -143,7 +144,7 @@
         android:id="@+id/txt_color_filter_alpha_symbol"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/color_filter_a_value"
+        android:text="@string/alpha_initial"
         android:textAppearance="@style/TextAppearance.Regular.SubHeading.Secondary"
         app:layout_constraintTop_toTopOf="@id/seekbar_color_filter_alpha"
         app:layout_constraintBottom_toBottomOf="@id/seekbar_color_filter_alpha"
@@ -165,7 +166,7 @@
         android:id="@+id/color_filter_mode_text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="@string/pref_color_filter_mode"
+        android:text="@string/color_filter_blend_mode"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/color_filter_mode"
         app:layout_constraintBaseline_toBaselineOf="@id/color_filter_mode"/>
@@ -177,7 +178,7 @@
         android:layout_marginTop="16dp"
         android:entries="@array/color_filter_modes"
         app:layout_constraintTop_toBottomOf="@id/seekbar_color_filter_alpha"
-        app:layout_constraintStart_toEndOf="@id/verticalcenter"
+        app:layout_constraintStart_toEndOf="@id/bottom_line"
         app:layout_constraintEnd_toEndOf="@id/spinner_end" />
 
     <!-- Brightness -->
@@ -187,7 +188,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="@string/pref_custom_brightness"
+        android:text="@string/use_custom_brightness"
         app:layout_constraintTop_toBottomOf="@id/color_filter_mode_text"/>
 
     <!-- Brightness value -->
@@ -202,6 +203,7 @@
         app:layout_constraintTop_toBottomOf="@id/custom_brightness"
         app:layout_constraintStart_toEndOf="@id/txt_brightness_seekbar_icon"
         app:layout_constraintEnd_toStartOf="@id/txt_brightness_seekbar_value"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:max_seek="100"
         app:min_seek="-75" />
 
@@ -226,7 +228,7 @@
         app:layout_constraintEnd_toEndOf="parent"/>
 
     <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/verticalcenter"
+        android:id="@+id/bottom_line"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"

@@ -36,7 +36,7 @@ class CategoryRenameDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
      */
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
         return MaterialDialog(activity!!)
-                .title(R.string.action_rename_category)
+                .title(R.string.rename_category)
                 .negativeButton(android.R.string.cancel)
                 .input(hintRes = R.string.name, prefill = currentName) { _, input ->
                     currentName = input.toString()
@@ -81,5 +81,4 @@ class CategoryRenameDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
     private companion object {
         const val CATEGORY_KEY = "CategoryRenameDialog.category"
     }
-
 }

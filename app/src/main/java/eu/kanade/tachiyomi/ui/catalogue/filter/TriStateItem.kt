@@ -73,5 +73,4 @@ open class TriStateItem(val filter: Filter.TriState) : AbstractFlexibleItem<TriS
             text.compoundDrawablePadding = 20.dpToPx
         }
     }
-
 }

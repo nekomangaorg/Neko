@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.util.view
 
-
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 

@@ -18,12 +18,13 @@ import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.catalogue.global_search.CatalogueSearchController
 import eu.kanade.tachiyomi.ui.catalogue.global_search.CatalogueSearchPresenter
+import eu.kanade.tachiyomi.ui.main.BottomNavBarInterface
 import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationListController
 import uy.kohesive.injekt.injectLazy
 
 class SearchController(
-        private var manga: Manga? = null
-) : CatalogueSearchController(manga?.originalTitle()) {
+    private var manga: Manga? = null
+) : CatalogueSearchController(manga?.title), BottomNavBarInterface {
 
     private var newManga: Manga? = null
     private var progress = 1
@@ -36,12 +37,10 @@ class SearchController(
         setHasOptionsMenu(true)
     }
 
-
     override fun getTitle(): String? {
         if (totalProgress > 1) {
             return "($progress/$totalProgress) ${super.getTitle()}"
-        }
-        else
+        } else
             return super.getTitle()
     }
 
@@ -100,7 +99,7 @@ class SearchController(
 
     private fun replaceWithNewSearchController(manga: Manga?) {
         if (manga != null) {
-            //router.popCurrentController()
+            // router.popCurrentController()
             val searchController = SearchController(manga)
             searchController.targetController = targetController
             searchController.progress = progress + 1
@@ -139,21 +138,20 @@ class SearchController(
             val preselected = MigrationFlags.getEnabledFlagsPositions(prefValue)
 
             return MaterialDialog(activity!!)
-                    .message(R.string.migration_dialog_what_to_include)
+                    .message(R.string.data_to_include_in_migration)
                     .listItemsMultiChoice(items = MigrationFlags.titles.map
                     { resources?.getString(it) as CharSequence },
-                        initialSelection = preselected.toIntArray()) {  _, positions, _ ->
+                        initialSelection = preselected.toIntArray()) { _, positions, _ ->
                         val newValue = MigrationFlags.getFlagsFromPositions(positions.toTypedArray())
                         preferences.migrateFlags().set(newValue)
                     }
                     .positiveButton(R.string.migrate) {
                         (targetController as? SearchController)?.migrateManga()
                     }
-                    .negativeButton(R.string.copy) {
+                    .negativeButton(R.string.copy_value) {
                         (targetController as? SearchController)?.copyManga()
                     }
         }
-
     }
 
     /**
@@ -191,5 +189,10 @@ class SearchController(
             }
     }
 
-
+    override fun canChangeTabs(block: () -> Unit): Boolean {
+        val migrationListController = router.getControllerWithTag(MigrationListController.TAG)
+        as? BottomNavBarInterface
+        if (migrationListController != null) return migrationListController.canChangeTabs(block)
+        return true
+    }
 }

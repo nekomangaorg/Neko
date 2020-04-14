@@ -5,14 +5,20 @@
     <!--Toolbars-->
     <!--========-->
 
-    <style name="Theme.ActionBar.DayNight" parent="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
-        <item name="popupTheme">@style/ThemeOverlay.AppCompat.Light</item>
+    <style name="Theme.ActionBar.Dark.DayNight"
+        parent="@style/ThemeOverlay.MaterialComponents.Dark.ActionBar">
+        <item name="popupTheme">@style/ThemeOverlay.MaterialComponents.Light</item>
     </style>
 
     <!--====-->
     <!--Tabs-->
     <!--====-->
     <style name="Theme.ActionBar.Tab" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="CustomActionModeStyle" parent="Base.Widget.AppCompat.ActionMode">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="background">@drawable/action_mode_bg</item>
+    </style>
 
     <!--===========-->
     <!--AlertDialog-->
@@ -41,7 +47,7 @@
     </style>
 
     <style name="TextAppearance.Regular">
-        <item name="android:fontFamily">sans-serif-regular</item>
+        <item name="android:fontFamily">sans-serif</item>
     </style>
 
     <style name="TextAppearance.Regular.Body1">
@@ -50,6 +56,10 @@
 
     <style name="TextAppearance.Regular.Body1.Bold">
         <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="TextAppearance.Regular.Body1.SemiBold">
+        <item name="android:fontFamily">sans-serif-medium</item>
     </style>
 
     <style name="TextAppearance.Regular.Body1.Light">
@@ -104,12 +114,6 @@
         <item name="android:textColor">?android:attr/textColorHint</item>
     </style>
 
-    <style name="TextAppearance.Medium.Button">
-        <item name="android:textSize">14sp</item>
-        <item name="android:textAllCaps">true</item>
-        <item name="android:textColor">?attr/colorAccent</item>
-    </style>
-
     <!--=======-->
     <!--Widgets-->
     <!--=======-->
@@ -123,6 +127,8 @@
         <item name="android:layout_margin">@dimen/fab_margin</item>
         <item name="android:scaleType">fitCenter</item>
         <item name="layout_anchorGravity">bottom|right|end</item>
+        <item name="tint">@color/md_white_1000</item>
+        <item name="backgroundTint">?attr/colorAccent</item>
         <item name="android:tint">@color/md_white_1000</item>
     </style>
 
@@ -134,10 +140,12 @@
         <item name="android:scaleType">fitCenter</item>
         <item name="layout_anchorGravity">bottom|right|end</item>
         <item name="android:tint">@color/md_white_1000</item>
+        <item name="tint">@color/md_white_1000</item>
+        <item name="backgroundTint">?attr/colorAccent</item>
         <item name="layout_behavior">eu.kanade.tachiyomi.widget.FABMoveBehaviour</item>
     </style>
 
-    <style name="Theme.Widget.CardView" parent="CardView">
+    <style name="Theme.Widget.CardView" parent="Widget.MaterialComponents.CardView">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:padding">@dimen/material_component_cards_top_and_bottom_padding</item>
@@ -168,7 +176,6 @@
     </style>
 
     <style name="Theme.Widget.GridView.Catalogue">
-        <item name="android:padding">5dp</item>
         <item name="android:gravity">top|left</item>
         <item name="android:smoothScrollbar">true</item>
         <item name="android:cacheColorHint">?android:attr/textColorHint</item>
@@ -183,15 +190,32 @@
         <item name="android:background">?attr/selectable_list_drawable</item>
     </style>
 
+    <!-- set the rounded drawable as background to your bottom sheet -->
+
+    <style name="BottomSheetDialogTheme" parent="@style/Theme.MaterialComponents.BottomSheetDialog">
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:colorBackground">@android:color/transparent</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
+
+    <style name="Theme.Widget.TextInputLayout.OutlinedBox.Dense" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense">
+        <item name="boxStrokeColor">@color/text_input_stroke</item>
+        <item name="hintTextColor">?colorAccent</item>
+        <item name="android:textColorHint">?android:attr/textColorHint</item>
+    </style>
+
     <!--==============-->
     <!--Widgets.Button-->
     <!--==============-->
     <style name="Theme.Widget.Button" parent="Widget.AppCompat.Button"/>
 
-    <style name="Theme.Widget.Button.Colored" parent="Widget.AppCompat.Button.Colored"/>
+    <style name="Theme.Widget.Button.Colored" parent="Widget.MaterialComponents.Button">
+        <item name="backgroundTint">?attr/colorAccent</item>
+    </style>
 
-    <style name="Theme.Widget.Button.Borderless" parent="Widget.AppCompat.Button.Borderless">
+    <style name="Theme.Widget.Button.Borderless" parent="Widget.MaterialComponents.Button.TextButton">
         <item name="android:textColor">?attr/colorAccent</item>
+        <item name="rippleColor">@color/fullRippleColor</item>
     </style>
 
     <style name="Theme.Widget.Button.Borderless.Negative">
@@ -203,6 +227,37 @@
         <item name="android:minWidth">48dip</item>
     </style>
 
+    <style name="Theme.Widget.Button.RoundedOutline" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:letterSpacing">0.0</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="iconTint">?colorAccent</item>
+        <item name="rippleColor">@color/fullRippleColor</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="cornerRadius">20dp</item>
+    </style>
+
+    <style name="Theme.Widget.Button.Primary" parent="Widget.MaterialComponents.Button">
+        <item name="android:textAllCaps">false</item>
+        <item name="backgroundTint">@color/mtrl_btn_bg_selector</item>
+        <item name="android:textColor">@color/primary_button_text_color_selector</item>
+        <item name="android:letterSpacing">0.0</item>
+    </style>
+
+    <style name="Theme.Widget.Button.TextButton" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:textAllCaps">false</item>
+        <item name="rippleColor">@color/fullRippleColor</item>
+        <item name="android:textColor">?colorAccent</item>
+    </style>
+
+    <style name="Theme.Widget.CustomImageButton">
+        <item name="android:background">@drawable/round_ripple</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:tint">?colorAccent</item>
+    </style>
+    
     <!--===-->
     <!--OLD-->
     <!--===-->
@@ -220,16 +275,5 @@
     </style>
 
     <style name="FilePickerAlertDialogTheme" parent="Theme.AppCompat.Light.Dialog.Alert"></style>
-
-    <style name="SheetDialog" parent="Theme.Design.Light.BottomSheetDialog">
-        <!--<item name="android:windowCloseOnTouchOutside">false</item>-->
-        <item name="android:windowIsTranslucent">true</item>
-        <item name="android:windowContentOverlay">@null</item>
-        <item name="android:colorBackground">     @android:color/transparent</item>
-        <item name="android:backgroundDimEnabled">true</item>
-        <item name="android:backgroundDimAmount">0.3</item>
-        <item name="android:windowFrame">@null</item>
-        <item name="android:windowIsFloating">true</item>
-    </style>
 
 </resources>

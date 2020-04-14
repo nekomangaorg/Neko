@@ -18,11 +18,12 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.catalogue.browse.ProgressItem
-import eu.kanade.tachiyomi.ui.manga.MangaController
+import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
+import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import kotlinx.android.synthetic.main.recently_read_controller.*
 
@@ -52,15 +53,14 @@ class RecentlyReadController(bundle: Bundle? = null) : BaseController(bundle),
      * Endless loading item.
      */
     private var progressItem: ProgressItem? = null
-    private var observeLater:Boolean = false
+    private var observeLater: Boolean = false
     private var query = ""
 
     private var presenter = RecentlyReadPresenter(this)
     private var recentItems: MutableList<RecentlyReadItem>? = null
 
-
     override fun getTitle(): String? {
-        return resources?.getString(R.string.label_recent_manga)
+        return resources?.getString(R.string.history)
     }
 
     override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
@@ -74,7 +74,7 @@ class RecentlyReadController(bundle: Bundle? = null) : BaseController(bundle),
      */
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
-
+        // view.applyWindowInsetsForController()
         // Initialize adapter
         adapter = RecentlyReadAdapter(this)
         recycler.adapter = adapter
@@ -82,6 +82,7 @@ class RecentlyReadController(bundle: Bundle? = null) : BaseController(bundle),
         recycler.setHasFixedSize(true)
         recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
         resetProgressItem()
+        scrollViewWith(recycler, padBottom = true)
 
         if (recentItems != null)
             adapter?.updateDataSet(recentItems!!.toList())
@@ -96,7 +97,11 @@ class RecentlyReadController(bundle: Bundle? = null) : BaseController(bundle),
     override fun onActivityResumed(activity: Activity) {
         super.onActivityResumed(activity)
         if (observeLater) {
-            presenter.observe()
+            launchUI {
+                val manga = presenter.refresh(query)
+                recentItems = manga.toMutableList()
+                adapter?.updateDataSet(manga)
+            }
             observeLater = false
         }
     }
@@ -123,7 +128,8 @@ class RecentlyReadController(bundle: Bundle? = null) : BaseController(bundle),
         if (size > 0) {
             empty_view?.hide()
         } else {
-            empty_view.show(R.drawable.ic_glasses_black_128dp, R.string.information_no_recent_manga)
+            empty_view.show(R.drawable.ic_history_white_128dp, R.string
+                .no_recently_read_manga)
         }
     }
 
@@ -157,7 +163,7 @@ class RecentlyReadController(bundle: Bundle? = null) : BaseController(bundle),
             val intent = ReaderActivity.newIntent(activity, manga, nextChapter)
             startActivity(intent)
         } else {
-            activity.toast(R.string.no_next_chapter)
+            activity.toast(R.string.next_chapter_not_found)
         }
     }
 
@@ -166,9 +172,9 @@ class RecentlyReadController(bundle: Bundle? = null) : BaseController(bundle),
         RemoveHistoryDialog(this, manga, history).showDialog(router)
     }
 
-    override fun onCoverClick(position: Int, lastTouchY: Float) {
+    override fun onCoverClick(position: Int) {
         val manga = (adapter?.getItem(position) as? RecentlyReadItem)?.mch?.manga ?: return
-        router.pushController(MangaController(manga, lastTouchY).withFadeTransaction())
+        router.pushController(MangaDetailsController(manga).withFadeTransaction())
     }
 
     override fun removeHistory(manga: Manga, history: History, all: Boolean) {
@@ -216,4 +222,16 @@ class RecentlyReadController(bundle: Bundle? = null) : BaseController(bundle),
             }
         })
     }
+
+    /*override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.action_recents -> {
+                router.setRoot(
+                    RecentChaptersController().withFadeTransaction().tag(R.id.nav_recents.toString()))
+                Injekt.get<PreferencesHelper>().showRecentUpdates().set(true)
+                (activity as? MainActivity)?.updateRecentsIcon()
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }*/
 }

@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <style name="Theme.Tachiyomi" parent="Theme.Base">
-        <item name="android:navigationBarColor">@color/oldNavBarBackground</item>
-    </style>
-</resources>

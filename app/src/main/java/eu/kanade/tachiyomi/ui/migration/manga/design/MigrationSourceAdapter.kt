@@ -5,9 +5,10 @@ import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.kanade.tachiyomi.source.SourceManager
 import uy.kohesive.injekt.injectLazy
 
-class MigrationSourceAdapter(var items: List<MigrationSourceItem>,
-                             val controllerPre: PreMigrationController
-): FlexibleAdapter<MigrationSourceItem>(
+class MigrationSourceAdapter(
+    var items: List<MigrationSourceItem>,
+    val controllerPre: PreMigrationController
+) : FlexibleAdapter<MigrationSourceItem>(
         items,
         controllerPre,
         true
@@ -21,7 +22,7 @@ class MigrationSourceAdapter(var items: List<MigrationSourceItem>,
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        val sourceManager:SourceManager by injectLazy()
+        val sourceManager: SourceManager by injectLazy()
         savedInstanceState.getParcelableArrayList<MigrationSourceItem.ParcelableSI>(
             SELECTED_SOURCES_KEY
         )?.let {

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<eu.kanade.tachiyomi.ui.library.filter.FilterTagGroup xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal" android:layout_width="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@drawable/round_textview_border"
+    android:layout_margin="5dp"
+    android:layout_height="32dp">
+    <TextView
+        android:id="@+id/firstButton"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
+        android:textSize="15sp"
+        android:textColor="?android:attr/textColorPrimary"
+        android:background="@drawable/rounded_ripple"
+        android:clickable="true"
+        android:focusable="true"
+        android:textStyle="normal"
+        tools:text="Item 1"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"/>
+
+    <View
+        android:id="@+id/separator1"
+        android:layout_width="1dp"
+        android:layout_height="20dp"
+        android:layout_gravity="center"
+        android:background="?android:attr/textColorSecondary"/>
+    <TextView
+        android:id="@+id/secondButton"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
+        android:textSize="15sp"
+        android:textColor="?android:attr/textColorPrimary"
+        android:background="@drawable/rounded_ripple"
+        android:clickable="true"
+        android:focusable="true"
+        android:textStyle="normal"
+        tools:text="Item 2"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"/>
+
+    <View
+        android:id="@+id/separator2"
+        android:layout_width="1dp"
+        android:layout_height="20dp"
+        android:layout_gravity="center"
+        android:background="?android:attr/textColorSecondary"/>
+    <TextView
+        android:id="@+id/thirdButton"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
+        android:textSize="15sp"
+        android:textColor="?android:attr/textColorPrimary"
+        android:background="@drawable/rounded_ripple"
+        android:clickable="true"
+        android:focusable="true"
+        android:textStyle="normal"
+        tools:text="Item 3"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"/>
+</eu.kanade.tachiyomi.ui.library.filter.FilterTagGroup>

@@ -55,8 +55,8 @@ object LocaleHelper {
     fun getDisplayName(lang: String?, context: Context): String {
         return when (lang) {
             null -> ""
-            "" -> context.getString(R.string.other_source)
-            "all" -> context.getString(R.string.all_lang)
+            "" -> context.getString(R.string.other)
+            "all" -> context.getString(R.string.all)
             else -> {
                 val locale = getLocale(lang)
                 locale.getDisplayName(locale).capitalize()
@@ -141,5 +141,4 @@ object LocaleHelper {
         }
         return newConfig
     }
-
 }

@@ -136,28 +136,28 @@ class DownloadPendingDeleter(context: Context) {
      * Class used to save an entry of chapters with their manga into preferences.
      */
     private data class Entry(
-            val chapters: List<ChapterEntry>,
-            val manga: MangaEntry
+        val chapters: List<ChapterEntry>,
+        val manga: MangaEntry
     )
 
     /**
      * Class used to save an entry for a chapter into preferences.
      */
     private data class ChapterEntry(
-            val id: Long,
-            val url: String,
-            val name: String,
-            val scanlator: String?
+        val id: Long,
+        val url: String,
+        val name: String,
+        val scanlator: String?
     )
 
     /**
      * Class used to save an entry for a manga into preferences.
      */
     private data class MangaEntry(
-            val id: Long,
-            val url: String,
-            val title: String,
-            val source: Long
+        val id: Long,
+        val url: String,
+        val title: String,
+        val source: Long
     )
 
     /**
@@ -194,5 +194,4 @@ class DownloadPendingDeleter(context: Context) {
             it.name = name
         }
     }
-
 }

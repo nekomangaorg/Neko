@@ -47,8 +47,8 @@ class BangumiInterceptor(val bangumi: Bangumi, val gson: Gson) : Interceptor {
         return chain.proceed(authRequest)
     }
 
-    fun newAuth(oauth: OAuth?) {
-        this.oauth = if (oauth == null) null else OAuth(
+    fun newAuth(oauth: OAuth) {
+        this.oauth = OAuth(
                 oauth.access_token,
                 oauth.token_type,
                 System.currentTimeMillis() / 1000,
@@ -57,5 +57,9 @@ class BangumiInterceptor(val bangumi: Bangumi, val gson: Gson) : Interceptor {
                 this.oauth?.user_id)
 
         bangumi.saveToken(oauth)
+    }
+
+    fun clearOauth() {
+        bangumi.saveToken(null)
     }
 }

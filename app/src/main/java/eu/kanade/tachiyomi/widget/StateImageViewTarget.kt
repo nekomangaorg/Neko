@@ -1,10 +1,10 @@
 package eu.kanade.tachiyomi.widget
 
 import android.graphics.drawable.Drawable
-import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import android.view.View
 import android.widget.ImageView
 import android.widget.ImageView.ScaleType
+import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import com.bumptech.glide.request.target.ImageViewTarget
 import com.bumptech.glide.request.transition.Transition
 import eu.kanade.tachiyomi.R
@@ -21,10 +21,12 @@ import eu.kanade.tachiyomi.util.view.visible
  * @param errorDrawableRes the error drawable resource to show.
  * @param errorScaleType the scale type for the error drawable, [ScaleType.CENTER] by default.
  */
-class StateImageViewTarget(view: ImageView,
-                           val progress: View? = null,
-                           val errorDrawableRes: Int = R.drawable.ic_broken_image_grey_24dp,
-                           val errorScaleType: ScaleType = ScaleType.CENTER) :
+class StateImageViewTarget(
+    view: ImageView,
+    val progress: View? = null,
+    val errorDrawableRes: Int = R.drawable.ic_broken_image_grey_24dp,
+    val errorScaleType: ScaleType = ScaleType.CENTER
+) :
 
         ImageViewTarget<Drawable>(view) {
 

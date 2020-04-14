@@ -19,8 +19,12 @@ class ChangeMangaCategoriesDialog<T>(bundle: Bundle? = null) :
 
     private var preselected = emptyArray<Int>()
 
-    constructor(target: T, mangas: List<Manga>, categories: List<Category>,
-                preselected: Array<Int>) : this() {
+    constructor(
+        target: T,
+        mangas: List<Manga>,
+        categories: List<Category>,
+        preselected: Array<Int>
+    ) : this() {
 
         this.mangas = mangas
         this.categories = categories
@@ -30,7 +34,7 @@ class ChangeMangaCategoriesDialog<T>(bundle: Bundle? = null) :
 
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
         return MaterialDialog(activity!!)
-            .title(R.string.action_move_category)
+            .title(R.string.move_to_categories)
             .listItemsMultiChoice(
                 items = categories.map { it.name },
                 initialSelection = preselected.toIntArray(),
@@ -46,5 +50,4 @@ class ChangeMangaCategoriesDialog<T>(bundle: Bundle? = null) :
     interface Listener {
         fun updateCategoriesForMangas(mangas: List<Manga>, categories: List<Category>)
     }
-
 }

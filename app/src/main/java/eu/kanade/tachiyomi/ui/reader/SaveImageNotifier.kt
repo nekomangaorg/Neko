@@ -66,11 +66,11 @@ class SaveImageNotifier(private val context: Context) {
             setContentIntent(NotificationHandler.openImagePendingActivity(context, file))
             // Share action
             addAction(R.drawable.ic_share_grey_24dp,
-                    context.getString(R.string.action_share),
+                    context.getString(R.string.share),
                     NotificationReceiver.shareImagePendingBroadcast(context, file.absolutePath, notificationId))
             // Delete action
             addAction(R.drawable.ic_delete_grey_24dp,
-                    context.getString(R.string.action_delete),
+                    context.getString(R.string.delete),
                     NotificationReceiver.deleteImagePendingBroadcast(context, file.absolutePath, notificationId))
 
             updateNotification()
@@ -96,11 +96,10 @@ class SaveImageNotifier(private val context: Context) {
     fun onError(error: String?) {
         // Create notification
         with(notificationBuilder) {
-            setContentTitle(context.getString(R.string.download_notifier_title_error))
+            setContentTitle(context.getString(R.string.download_error))
             setContentText(error ?: context.getString(R.string.unknown_error))
             setSmallIcon(android.R.drawable.ic_menu_report_image)
         }
         updateNotification()
     }
-
 }
