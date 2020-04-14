@@ -16,8 +16,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.setEdgeToEdge
-import kotlinx.android.synthetic.main.catalogue_drawer_content.*
-import kotlinx.android.synthetic.main.catalogue_drawer_content.view.*
+import kotlinx.android.synthetic.main.catalogue_filter_sheet.*
 import uy.kohesive.injekt.injectLazy
 
 class CatalogueSearchSheet(activity: Activity) :
@@ -48,17 +47,13 @@ class CatalogueSearchSheet(activity: Activity) :
     var onFollowsClicked = {}
 
     init {
-        val view = activity.layoutInflater.inflate(R.layout.catalogue_drawer_content, null)
+        val view = activity.layoutInflater.inflate(R.layout.catalogue_filter_sheet, null)
         setContentView(view)
         toolbar_title.text = context.getString(R.string.search_filters)
-        dismiss_button.setOnClickListener { dismiss() }
+        search_btn.setOnClickListener { dismiss() }
         reset_btn.setOnClickListener { onResetClicked() }
         follows_btn.setOnClickListener { onFollowsClicked() }
         random_manga_btn.setOnClickListener { onRandomClicked() }
-        /*view.search_layout.setOnApplyWindowInsetsListener { v, insets ->
-            view.updatePaddingRelative(bottom = insets.systemWindowInsetBottom)
-            insets
-        }*/
 
         recycler.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
         recycler.clipToPadding = false
@@ -73,7 +68,6 @@ class CatalogueSearchSheet(activity: Activity) :
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && preferences.readerTheme()
                 .getOrDefault() == 0 && activity.window.decorView.rootWindowInsets.systemWindowInsetRight == 0 && activity.window.decorView.rootWindowInsets.systemWindowInsetLeft == 0
         ) window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
-        val height = activity.window.decorView.rootWindowInsets.systemWindowInsetBottom
 
         sheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onSlide(bottomSheet: View, progress: Float) {}
@@ -104,11 +98,6 @@ class CatalogueSearchSheet(activity: Activity) :
                 }
             }
         })
-    }
-
-    override fun onStart() {
-        super.onStart()
-        sheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
     }
 
     override fun dismiss() {

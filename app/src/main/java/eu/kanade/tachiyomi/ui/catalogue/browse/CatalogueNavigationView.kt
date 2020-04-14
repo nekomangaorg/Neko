@@ -24,7 +24,7 @@ class CatalogueNavigationView @JvmOverloads constructor(context: Context, attrs:
     init {
         recycler.adapter = adapter
         recycler.setHasFixedSize(true)
-        val view = inflate(R.layout.catalogue_drawer_content)
+        val view = inflate(R.layout.catalogue_filter_sheet)
         ((view as ViewGroup).getChildAt(1) as ViewGroup).addView(recycler)
         addView(view)
 
