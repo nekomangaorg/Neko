@@ -136,6 +136,9 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
             override fun onSlide(bottomSheet: View, progress: Float) {
                 shadow2.alpha = (1 - abs(progress)) * 0.25f
                 shadow.alpha = (1 - abs(progress)) * 0.5f
+                if (progress >= 0) activity?.appbar?.elevation = max(
+                    progress * 15f, if (recycler.canScrollVertically(-1)) 15f else 0f
+                )
                 sheet_layout.alpha = 1 - progress
                 activity?.appbar?.y = max(activity!!.appbar.y, -headerHeight * (1 - progress))
                 val oldShow = showingDownloads

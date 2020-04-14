@@ -15,8 +15,7 @@ import com.bluelinelabs.conductor.ControllerChangeType
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
-import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
-import eu.kanade.tachiyomi.util.view.applyWindowInsetsForController
+import eu.kanade.tachiyomi.util.view.scrollViewWith
 import rx.Observable
 import rx.Subscription
 import rx.subscriptions.CompositeSubscription
@@ -35,8 +34,7 @@ abstract class SettingsController : PreferenceController() {
             untilDestroySubscriptions = CompositeSubscription()
         }
         val view = super.onCreateView(inflater, container, savedInstanceState)
-        view.applyWindowInsetsForController()
-        listView.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
+        scrollViewWith(listView, padBottom = true)
         return view
     }
 

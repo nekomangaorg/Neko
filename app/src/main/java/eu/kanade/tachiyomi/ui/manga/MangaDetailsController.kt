@@ -226,6 +226,7 @@ class MangaDetailsController : BaseController,
         var statusBarHeight = -1
         swipe_refresh.setStyle()
         swipe_refresh.setDistanceToTriggerSync(70.dpToPx)
+        activity!!.appbar.elevation = 0f
 
         recycler.doOnApplyWindowInsets { v, insets, _ ->
             headerHeight = appbarHeight + insets.systemWindowInsetTop
