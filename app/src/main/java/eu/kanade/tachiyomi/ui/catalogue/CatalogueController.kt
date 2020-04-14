@@ -145,6 +145,9 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
         .BottomSheetCallback() {
             override fun onSlide(bottomSheet: View, progress: Float) {
                 shadow2.alpha = (1 - max(0f, progress)) * 0.25f
+                activity?.appbar?.elevation = max(progress * 15f,
+                    if (recycler.canScrollVertically(-1)) 15f else 0f)
+
                 sheet_layout.alpha = 1 - progress
                 activity?.appbar?.y = max(activity!!.appbar.y, -headerHeight * (1 - progress))
                 val oldShow = showingExtenions

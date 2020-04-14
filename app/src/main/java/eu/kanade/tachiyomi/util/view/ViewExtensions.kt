@@ -2,6 +2,7 @@
 
 package eu.kanade.tachiyomi.util.view
 
+import android.animation.ValueAnimator
 import android.app.Activity
 import android.content.Context
 import android.content.res.ColorStateList
@@ -30,6 +31,8 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.amulyakhare.textdrawable.TextDrawable
 import com.amulyakhare.textdrawable.util.ColorGenerator
 import com.bluelinelabs.conductor.Controller
+import com.bluelinelabs.conductor.ControllerChangeHandler
+import com.bluelinelabs.conductor.ControllerChangeType
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.snackbar.Snackbar
@@ -353,6 +356,31 @@ fun Controller.scrollViewWith(
         statusBarHeight = insets.systemWindowInsetTop
         afterInsets?.invoke(insets)
     }
+    var elevationAnim: ValueAnimator? = null
+    var elevate = false
+    val elevateFunc: (Boolean) -> Unit = { el ->
+        elevate = el
+        elevationAnim?.cancel()
+        elevationAnim = ValueAnimator.ofFloat(
+            activity!!.appbar.elevation, if (el) 15f else 0f
+        )
+        elevationAnim?.addUpdateListener { valueAnimator ->
+            activity!!.appbar.elevation = valueAnimator.animatedValue as Float
+        }
+        elevationAnim?.start()
+    }
+    addLifecycleListener(object : Controller.LifecycleListener() {
+        override fun onChangeStart(
+            controller: Controller,
+            changeHandler: ControllerChangeHandler,
+            changeType: ControllerChangeType
+        ) {
+            super.onChangeStart(controller, changeHandler, changeType)
+            if (changeType.isEnter)
+                elevateFunc(elevate)
+        }
+    })
+    elevateFunc(recycler.canScrollVertically(-1))
     recycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
             super.onScrolled(recyclerView, dx, dy)
@@ -365,11 +393,15 @@ fun Controller.scrollViewWith(
                     ) ?: 0
                     activity!!.appbar.animate().y(0f).setDuration(shortAnimationDuration.toLong())
                         .start()
+                    if (elevate) elevateFunc(false)
                 } else {
                     activity!!.appbar.y -= dy
                     activity!!.appbar.y = clamp(
                         activity!!.appbar.y, -activity!!.appbar.height.toFloat(), 0f
                     )
+                    if ((activity!!.appbar.y <= -activity!!.appbar.height.toFloat() ||
+                            dy == 0 && activity!!.appbar.y == 0f) && !elevate)
+                        elevateFunc(true)
                 }
             }
         }
@@ -393,6 +425,10 @@ fun Controller.scrollViewWith(
                             if (closerToTop && !atTop) (-activity!!.appbar.height.toFloat())
                             else 0f
                         ).setDuration(shortAnimationDuration.toLong()).start()
+                    if (recycler.canScrollVertically(-1) && !elevate)
+                        elevateFunc(true)
+                    else if (!recycler.canScrollVertically(-1) && elevate)
+                        elevateFunc(false)
                 }
             }
         }
