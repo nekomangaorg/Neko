@@ -367,7 +367,6 @@ class NotificationReceiver : BroadcastReceiver() {
          * @return [PendingIntent]
          */
         internal fun shareImagePendingBroadcast(context: Context, path: String, notificationId: Int): PendingIntent {
-            // val shareIntent = ShareStartingActivity.newIntent(context, path)
             val shareIntent = Intent(Intent.ACTION_SEND).apply {
                 val uri = File(path).getUriCompat(context)
                 putExtra(Intent.EXTRA_STREAM, uri)
@@ -375,7 +374,6 @@ class NotificationReceiver : BroadcastReceiver() {
                 clipData = ClipData.newRawUri(null, uri)
                 type = "image/*"
             }
-            // val shareIntent2 = Intent.createChooser(shareIntent, context.getString(R.string.action_share))
             return PendingIntent.getActivity(context, 0, shareIntent, PendingIntent
                 .FLAG_CANCEL_CURRENT)
         }
