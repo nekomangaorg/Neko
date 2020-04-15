@@ -509,7 +509,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
         } else if (chapters_bottom_sheet.shouldCollaspe && chapters_bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) {
             chapters_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
         }
-        if (chapters_bottom_sheet.selectedChapterId != presenter.getCurrentChapter()?.chapter?.id)
+        if (chapters_bottom_sheet.selectedChapterId != page.chapter.chapter.id)
             chapters_bottom_sheet.refreshList()
         chapters_bottom_sheet.shouldCollaspe = true
 
