@@ -7,11 +7,13 @@ import com.jakewharton.rxrelay.BehaviorRelay
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
+import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.SourceManager
@@ -24,8 +26,11 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.system.ImageUtil
+import eu.kanade.tachiyomi.util.system.executeOnIO
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import rx.Completable
@@ -50,6 +55,8 @@ class ReaderPresenter(
     private val coverCache: CoverCache = Injekt.get(),
     private val preferences: PreferencesHelper = Injekt.get()
 ) : BasePresenter<ReaderActivity>() {
+
+    private var scope = CoroutineScope(Job() + Dispatchers.Default)
 
     /**
      * The manga loaded in the reader. It can be null when instantiated for a short time.
@@ -111,6 +118,8 @@ class ReaderPresenter(
             else -> error("Unknown sorting method")
         }.map(::ReaderChapter)
     }
+
+    var chapterItems = emptyList<ReaderChapterItem>()
 
     /**
      * Called when the presenter is created. It retrieves the saved active chapter if the process
@@ -180,6 +189,25 @@ class ReaderPresenter(
             .subscribeFirst({ _, _ ->
                 // Ignore onNext event
             }, ReaderActivity::setInitialChapterError)
+    }
+
+    suspend fun getChapters(): List<ReaderChapterItem> {
+        val manga = manga ?: return emptyList()
+        chapterItems = withContext(Dispatchers.IO) {
+            val list = db.getChapters(manga).executeOnIO().sortedBy {
+                when (manga.sorting) {
+                    Manga.SORTING_NUMBER -> it.chapter_number
+                    else -> it.source_order.toFloat()
+                }
+            }.map {
+                ReaderChapterItem(it, manga, it.id ==
+                    getCurrentChapter()?.chapter?.id ?: chapterId)
+            }
+            if (!manga.sortDescending(preferences.chaptersDescAsDefault().getOrDefault()))
+                list.reversed()
+            else list
+        }
+        return chapterItems
     }
 
     fun init(mangaId: Long, chapterUrl: String) {
@@ -270,25 +298,26 @@ class ReaderPresenter(
             .also(::add)
     }
 
-    /**
-     * Called when the user is going to load the prev/next chapter through the menu button. It
-     * sets the [isLoadingAdjacentChapterRelay] that the view uses to prevent any further
-     * interaction until the chapter is loaded.
-     */
-    private fun loadAdjacent(chapter: ReaderChapter) {
+    fun loadChapter(chapter: Chapter) {
         val loader = loader ?: return
 
-        Timber.d("Loading adjacent ${chapter.chapter.url}")
+        Timber.d("Loading adjacent ${chapter.url}")
 
         activeChapterSubscription?.unsubscribe()
-        activeChapterSubscription = getLoadObservable(loader, chapter)
+        activeChapterSubscription = getLoadObservable(loader, ReaderChapter(chapter))
             .doOnSubscribe { isLoadingAdjacentChapterRelay.call(true) }
             .doOnUnsubscribe { isLoadingAdjacentChapterRelay.call(false) }
             .subscribeFirst({ view, _ ->
                 view.moveToPageIndex(0)
+                view.refreshChapters()
             }, { _, _ ->
                 // Ignore onError event, viewers handle that state
             })
+    }
+
+    fun toggleBookmark(chapter: Chapter) {
+        chapter.bookmark = !chapter.bookmark
+        db.updateChapterProgress(chapter).executeAsBlocking()
     }
 
     /**
@@ -355,6 +384,8 @@ class ReaderPresenter(
      * Saves this [chapter] progress (last read page and whether it's read).
      */
     private fun saveChapterProgress(chapter: ReaderChapter) {
+        val dbChapter = db.getChapter(chapter.chapter.id!!).executeAsBlocking()
+        chapter.chapter.bookmark = dbChapter!!.bookmark
         db.updateChapterProgress(chapter.chapter).asRxCompletable()
             .onErrorComplete()
             .subscribeOn(Schedulers.io())
@@ -374,22 +405,6 @@ class ReaderPresenter(
      */
     fun preloadChapter(chapter: ReaderChapter) {
         preload(chapter)
-    }
-
-    /**
-     * Called from the activity to load and set the next chapter as active.
-     */
-    fun loadNextChapter() {
-        val nextChapter = viewerChaptersRelay.value?.nextChapter ?: return
-        loadAdjacent(nextChapter)
-    }
-
-    /**
-     * Called from the activity to load and set the previous chapter as active.
-     */
-    fun loadPreviousChapter() {
-        val prevChapter = viewerChaptersRelay.value?.prevChapter ?: return
-        loadAdjacent(prevChapter)
     }
 
     /**

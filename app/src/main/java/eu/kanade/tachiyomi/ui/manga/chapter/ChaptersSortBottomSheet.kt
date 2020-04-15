@@ -68,7 +68,7 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) : BottomSheetD
         close_button.setOnClickListener { dismiss() }
         settings_scroll_view.viewTreeObserver.addOnGlobalLayoutListener {
             val isScrollable =
-                settings_scroll_view!!.height < bottom_sheet.height +
+                settings_scroll_view!!.height < sort_layout.height +
                     settings_scroll_view.paddingTop + settings_scroll_view.paddingBottom
             close_button.visibleIf(isScrollable)
             pill.visibleIf(!isScrollable)

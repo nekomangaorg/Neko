@@ -8,6 +8,7 @@
 
     <style name="Theme.Base.Reader" parent="Theme.Base">
         <item name="colorPrimary">@color/darkPrimaryTranslucent</item>
+        <item name="android:enforceNavigationBarContrast" tools:targetApi="29">false</item>
         <item name="colorPrimaryDark">@color/darkPrimaryTranslucent</item>
         <item name="android:statusBarColor">?colorPrimaryDark</item>
         <item name="android:navigationBarColor">?colorPrimaryDark</item>

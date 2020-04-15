@@ -71,7 +71,7 @@ class DisplayBottomSheet(private val controller: LibraryController) : BottomShee
         }
         settings_scroll_view.viewTreeObserver.addOnGlobalLayoutListener {
             val isScrollable =
-                settings_scroll_view!!.height < bottom_sheet.height +
+                settings_scroll_view!!.height < display_layout.height +
                     settings_scroll_view.paddingTop + settings_scroll_view.paddingBottom
             close_button.visibleIf(isScrollable)
         }

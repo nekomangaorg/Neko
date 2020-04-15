@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
-    android:color="@color/gray_button">
+    android:color="@color/colorAccent">
     <item android:id="@android:id/mask">
         <shape android:shape="rectangle">
-            <solid android:color="@color/gray_button" />
+            <solid android:color="@color/colorAccent" />
             <corners android:radius="30dp" />
         </shape>
     </item>
@@ -24,7 +24,7 @@
                     <size
                         android:width="32dp"
                         android:height="32dp" />
-                    <solid android:color="@color/gray_button" />
+                    <solid android:color="@color/colorAccent" />
                 </shape>
             </item>
         </selector>
