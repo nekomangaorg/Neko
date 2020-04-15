@@ -26,7 +26,7 @@ class MangadexLogoutDialog(bundle: Bundle? = null) : DialogController(bundle) {
 
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
         return MaterialDialog(activity!!)
-            .title(R.string.logout_from_, source.name)
+            .title(R.string.logout)
             .positiveButton(R.string.logout) {
                 launchNow {
 

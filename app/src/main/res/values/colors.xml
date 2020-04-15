@@ -48,6 +48,7 @@
 
     <!-- Text Colors -->
     <color name="md_black_1000_87">#DE000000</color>
+    <color name="md_black_1000_70">#B3000000</color>
     <color name="md_black_1000_54">#8A000000</color>
     <color name="md_black_1000_38">#61000000</color>
     <color name="md_black_1000_12">#1F000000</color>
