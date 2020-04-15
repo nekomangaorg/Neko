@@ -187,6 +187,9 @@ dependencies {
 // UI
     implementation("com.dmitrymalkovich.android:material-design-dimens:1.4")
     implementation("com.github.dmytrodanylyk.android-process-button:library:1.0.4")
+    val latestFastAdapterRelease = "5.0.0"
+    implementation("com.mikepenz:fastadapter:${latestFastAdapterRelease}")
+    implementation("com.mikepenz:fastadapter-extensions-binding:${latestFastAdapterRelease}")
     implementation("eu.davidea:flexible-adapter:5.1.0")
     implementation("eu.davidea:flexible-adapter-ui:1.0.0")
     implementation("com.mikepenz:fastadapter:5.0.0")

@@ -16,12 +16,14 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatDelegate
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.snackbar.Snackbar
 import eu.kanade.tachiyomi.R
@@ -47,12 +49,15 @@ import eu.kanade.tachiyomi.util.system.ThemeUtil
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
+import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.snack
+import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.widget.SimpleAnimationListener
 import eu.kanade.tachiyomi.widget.SimpleSeekBarListener
 import kotlinx.android.synthetic.main.reader_activity.*
+import kotlinx.android.synthetic.main.reader_chapters_sheet.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import me.zhanghai.android.systemuihelper.SystemUiHelper
@@ -120,6 +125,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
      */
     private var bottomSheet: BottomSheetDialog? = null
 
+    var sheetManageNavColor = false
+
     /**
      * Progress dialog used when switching chapters from the menu buttons.
      */
@@ -179,6 +186,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
             menuVisible = savedInstanceState.getBoolean(::menuVisible.name)
         }
 
+        chapters_bottom_sheet.setup(this)
         config = ReaderConfig()
         initializeMenu()
     }
@@ -189,6 +197,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
     override fun onDestroy() {
         super.onDestroy()
         viewer?.destroy()
+        chapters_bottom_sheet.adapter = null
         viewer = null
         config?.destroy()
         config = null
@@ -246,6 +255,9 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
             else -> return super.onOptionsItemSelected(item)
         }
         bottomSheet?.show()
+        if (chapters_bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) {
+            chapters_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
+        }
         return true
     }
 
@@ -254,6 +266,10 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
      * delegated to the presenter.
      */
     override fun onBackPressed() {
+        if (chapters_bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) {
+            chapters_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
+            return
+        }
         presenter.onBackPressed()
         super.onBackPressed()
     }
@@ -286,6 +302,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
             onBackPressed()
         }
 
+        BottomSheetBehavior.from(chapters_bottom_sheet).isHideable = true
         // Init listeners on bottom menu
         page_seekbar.setOnSeekBarChangeListener(object : SimpleSeekBarListener() {
             override fun onProgressChanged(seekBar: SeekBar, value: Int, fromUser: Boolean) {
@@ -294,27 +311,35 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
                 }
             }
         })
-        left_chapter.setOnClickListener {
-            if (viewer != null) {
-                if (viewer is R2LPagerViewer)
-                    loadNextChapter()
-                else
-                    loadPreviousChapter()
-            }
-        }
-        right_chapter.setOnClickListener {
-            if (viewer != null) {
-                if (viewer is R2LPagerViewer)
-                    loadPreviousChapter()
-                else
-                    loadNextChapter()
-            }
-        }
 
         // Set initial visibility
         setMenuVisibility(menuVisible)
         if (!menuVisible)
-            reader_menu_bottom.visibility = View.GONE
+            chapters_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_HIDDEN
+        reader_menu.doOnApplyWindowInsets { v, insets, _ ->
+            sheetManageNavColor = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && (insets
+                    .systemWindowInsetBottom != insets.tappableElementInsets.bottom)) {
+                window.navigationBarColor = Color.TRANSPARENT
+                false
+            }
+            // if in landscape with 2/3 button mode, fully opaque nav bar
+            else if (insets.systemWindowInsetLeft > 0 || insets.systemWindowInsetRight > 0) {
+                window.navigationBarColor = getResourceColor(R.attr.colorPrimary)
+                false
+            }
+            // if in portrait with 2/3 button mode, translucent nav bar
+            else {
+                true
+            }
+
+            toolbar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                topMargin = insets.systemWindowInsetTop
+            }
+            v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                leftMargin = insets.systemWindowInsetLeft
+                rightMargin = insets.systemWindowInsetRight
+            }
+        }
     }
 
     /**
@@ -328,10 +353,10 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
             snackbar?.dismiss()
             systemUi?.show()
             reader_menu.visibility = View.VISIBLE
-            reader_menu_bottom.visibility = View.VISIBLE
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                window.navigationBarColor = getResourceColor(R.attr.colorPrimaryDark)
-            }
+            if (chapters_bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED)
+                chapters_bottom_sheet.sheetBehavior?.isHideable = false
+            if (chapters_bottom_sheet.sheetBehavior?.state != BottomSheetBehavior.STATE_EXPANDED && sheetManageNavColor)
+                window.navigationBarColor = Color.TRANSPARENT // getResourceColor(R.attr.colorPrimaryDark)
             if (animate) {
                 if (!menuStickyVisible) {
                     val toolbarAnimation = AnimationUtils.loadAnimation(this, R.anim.enter_from_top)
@@ -342,8 +367,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
                     })
                     toolbar.startAnimation(toolbarAnimation)
                 }
-                val bottomAnimation = AnimationUtils.loadAnimation(this, R.anim.enter_from_bottom)
-                reader_menu_bottom.startAnimation(bottomAnimation)
+                BottomSheetBehavior.from(chapters_bottom_sheet).state = BottomSheetBehavior.STATE_COLLAPSED
             }
         } else {
             systemUi?.hide()
@@ -356,10 +380,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
                     }
                 })
                 toolbar.startAnimation(toolbarAnimation)
-                if (reader_menu_bottom.visibility != View.GONE) {
-                    val bottomAnimation = AnimationUtils.loadAnimation(this, R.anim.exit_to_bottom)
-                    reader_menu_bottom.startAnimation(bottomAnimation)
-                }
+                BottomSheetBehavior.from(chapters_bottom_sheet).isHideable = true
+                BottomSheetBehavior.from(chapters_bottom_sheet).state = BottomSheetBehavior.STATE_HIDDEN
             } else
                 reader_menu.visibility = View.GONE
         }
@@ -464,20 +486,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
         viewer.moveToPage(page)
     }
 
-    /**
-     * Tells the presenter to load the next chapter and mark it as active. The progress dialog
-     * should be automatically shown.
-     */
-    private fun loadNextChapter() {
-        presenter.loadNextChapter()
-    }
-
-    /**
-     * Tells the presenter to load the previous chapter and mark it as active. The progress dialog
-     * should be automatically shown.
-     */
-    private fun loadPreviousChapter() {
-        presenter.loadPreviousChapter()
+    fun refreshChapters() {
+        chapters_bottom_sheet.refreshList()
     }
 
     /**
@@ -491,19 +501,17 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
 
         // Set bottom page number
         page_number.text = "${page.number}/${pages.size}"
-
         // Set seekbar page number
-        if (viewer !is R2LPagerViewer) {
-            left_page_text.text = "${page.number}"
-            right_page_text.text = "${pages.size}"
-        } else {
-            right_page_text.text = "${page.number}"
-            left_page_text.text = "${pages.size}"
-        }
+        page_text.text = "${page.number} / ${pages.size}"
 
-        if (newChapter && config?.showNewChapter == false) {
-            systemUi?.show()
+        if (newChapter) {
+            if (config?.showNewChapter == false) systemUi?.show()
+        } else if (chapters_bottom_sheet.shouldCollaspe && chapters_bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) {
+            chapters_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
         }
+        if (chapters_bottom_sheet.selectedChapterId != presenter.getCurrentChapter()?.chapter?.id)
+            chapters_bottom_sheet.refreshList()
+        chapters_bottom_sheet.shouldCollaspe = true
 
         // Set seekbar progress
         page_seekbar.max = pages.lastIndex
@@ -516,6 +524,9 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
      */
     fun onPageLongTap(page: ReaderPage) {
         ReaderPageSheet(this, page).show()
+        if (chapters_bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) {
+            chapters_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
+        }
     }
 
     /**
@@ -600,10 +611,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
                         setMenuVisibility(false)
                     }
                 }
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    window.navigationBarColor = getColor(android.R.color.transparent)
-                }
-                reader_menu_bottom.visibility = View.GONE
+                if (sheetManageNavColor) window.navigationBarColor = getResourceColor(R.attr.colorPrimary)
                 reader_menu.visibility = View.VISIBLE
                 val toolbarAnimation = AnimationUtils.loadAnimation(this, R.anim.enter_from_top)
                 toolbarAnimation.setAnimationListener(object : SimpleAnimationListener() {

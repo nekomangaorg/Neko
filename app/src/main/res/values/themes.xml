@@ -75,6 +75,7 @@
     <!--==============-->
     <style name="Theme.Base.Reader" parent="Theme.Base">
         <item name="android:forceDarkAllowed" tools:targetApi="29">false</item>
+        <item name="android:enforceNavigationBarContrast" tools:targetApi="29">false</item>
         <item name="colorPrimary">@color/darkPrimaryTranslucent</item>
         <item name="colorPrimaryDark">@color/darkPrimaryTranslucent</item>
         <item name="android:colorBackground">@android:color/white</item>
@@ -88,6 +89,7 @@
 
     <style name="Theme.Base.Reader.Dark" parent="Theme.MaterialComponents.NoActionBar">
         <item name="android:forceDarkAllowed" tools:targetApi="29">false</item>
+        <item name="android:enforceNavigationBarContrast" tools:targetApi="29">false</item>
         <item name="colorPrimary">@color/darkPrimaryTranslucent</item>
         <item name="colorPrimaryDark">@color/darkPrimaryTranslucent</item>
         <item name="android:colorBackground">@android:color/black</item>
@@ -128,6 +130,7 @@
 
     <style name="Theme.Base.Reader.Light" parent="Theme.MaterialComponents.Light.NoActionBar">
         <item name="android:forceDarkAllowed" tools:targetApi="29">false</item>
+        <item name="android:enforceNavigationBarContrast" tools:targetApi="29">false</item>
         <item name="colorPrimary">@color/darkPrimaryTranslucent</item>
         <item name="colorPrimaryDark">@color/darkPrimaryTranslucent</item>
         <item name="android:colorBackground">@android:color/white</item>
@@ -145,6 +148,7 @@
         <!-- Themes -->
         <item name="windowActionModeOverlay">true</item>
         <item name="actionBarTheme">@style/Theme.ActionBar.Dark.DayNight</item>
+        <item name="actionBarTintColor">@color/md_white_1000</item>
         <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
         <item name="alertDialogTheme">@style/Theme.AlertDialog.DayNight</item>
 

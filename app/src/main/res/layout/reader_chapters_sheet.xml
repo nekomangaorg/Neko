@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<eu.kanade.tachiyomi.ui.reader.ReaderChapterSheet xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/chapters_bottom_sheet"
+    android:layout_width="match_parent"
+    android:layout_height="300dp"
+    android:background="@drawable/bg_bottom_sheet_black"
+    android:backgroundTint="@color/darkPrimaryTranslucent"
+    android:orientation="vertical"
+    app:behavior_peekHeight="?attr/actionBarSize"
+    app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+
+    <LinearLayout
+        android:id="@+id/title_layout"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:layout_gravity="top"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/chapters_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:tint="?actionBarTintColor"
+            android:tooltipText="@string/view_chapters"
+            android:background="?selectableItemBackgroundBorderless"
+            android:contentDescription="@string/next"
+            android:padding="@dimen/material_layout_keylines_screen_edge_margin"
+            app:srcCompat="@drawable/ic_format_list_numbered_24dp" />
+
+        <!--
+                Wonky way of setting height due to issues with horizontally centering the thumb in Android 5.
+                See https://stackoverflow.com/questions/15701767/android-thumb-is-not-centered-in-seekbar
+            -->
+        <eu.kanade.tachiyomi.ui.reader.ReaderSeekBar
+            android:id="@+id/page_seekbar"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            />
+
+        <TextView
+            android:id="@+id/page_text"
+            android:layout_width="100dp"
+            android:layout_height="match_parent"
+            android:tint="?actionBarTintColor"
+            android:gravity="center"
+            android:textSize="15sp"
+            tools:text="100 / 105" />
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/chapter_recycler"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="?android:attr/colorBackground"
+        android:alpha="0"
+        android:clipToPadding="false"
+        tools:listitem="@layout/reader_chapter_item"/>
+</eu.kanade.tachiyomi.ui.reader.ReaderChapterSheet>

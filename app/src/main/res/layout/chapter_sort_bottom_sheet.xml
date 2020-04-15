@@ -12,7 +12,7 @@
         android:layout_height="wrap_content">
 
         <LinearLayout
-            android:id="@+id/bottom_sheet"
+            android:id="@+id/sort_layout"
             style="@style/BottomSheetDialogTheme"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
