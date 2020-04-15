@@ -29,7 +29,11 @@ abstract class SettingsController : PreferenceController() {
     var untilDestroySubscriptions = CompositeSubscription()
         private set
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup,
+        savedInstanceState: Bundle?
+    ): View {
         if (untilDestroySubscriptions.isUnsubscribed) {
             untilDestroySubscriptions = CompositeSubscription()
         }
@@ -69,7 +73,6 @@ abstract class SettingsController : PreferenceController() {
             }
             parentController = parentController.parentController
         }
-
         (activity as? AppCompatActivity)?.supportActionBar?.title = getTitle()
     }
 

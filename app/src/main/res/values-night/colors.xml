@@ -23,7 +23,7 @@
     <color name="textColorHint">@color/md_white_1000_50</color>
     <color name="textColorHintInverse">@color/md_black_1000_38</color>
     <color name="divider">@color/md_white_1000_12</color>
-    <color name="download">@color/material_green_700</color>
+    <color name="download">@color/md_white_1000</color>
 
     <color name="background">#1C1C1D</color>
     <color name="dialog">#212121</color>

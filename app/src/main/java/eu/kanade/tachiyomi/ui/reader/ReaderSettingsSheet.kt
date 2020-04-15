@@ -9,7 +9,6 @@ import android.view.ViewGroup
 import android.widget.CompoundButton
 import android.widget.Spinner
 import androidx.annotation.ArrayRes
-import androidx.core.widget.NestedScrollView
 import com.f2prateek.rx.preferences.Preference
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog

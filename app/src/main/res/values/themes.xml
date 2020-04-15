@@ -9,10 +9,10 @@
     <style name="Theme.Base" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="android:forceDarkAllowed" tools:targetApi="29">false</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
-        <item name="colorPrimary">@color/bluePrimary</item>
+        <item name="colorPrimary">@color/md_black_1000</item>
         <item name="colorPrimaryVariant">@color/colorPrimary</item>
         <item name="colorSecondary">@color/background</item>
-        <item name="colorPrimaryDark">@color/bluePrimary</item>
+        <item name="colorPrimaryDark">@color/md_black_1000</item>
         <item name="colorControlActivated">@color/md_black_1000</item>
         <item name="colorAccent">@color/md_black_1000</item>
         <item name="android:textColorPrimary">@color/textColorPrimary</item>

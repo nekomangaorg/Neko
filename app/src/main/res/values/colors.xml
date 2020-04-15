@@ -22,18 +22,18 @@
     <!-- Dark Application Colors -->
     <color name="colorAmoledPrimary">@color/md_black_1000</color>
     <color name="readerDarkBackground">#1C1C1D</color>
-    <color name="gray_button">#404040</color>
+    <color name="gray_button">@color/md_black_1000</color>
     <color name="darkPrimaryTranslucent">@color/darkPrimaryColor</color>
 
-    <color name="textColorPrimary">@color/md_black_1000_87</color>
-    <color name="textColorSecondary">@color/md_black_1000_54</color>
+    <color name="textColorPrimary">@color/md_black_1000</color>
+    <color name="textColorSecondary">@color/md_black_1000_70</color>
     <color name="textColorPrimaryInverse">@color/md_white_1000</color>
     <color name="textColorSecondaryInverse">@color/md_white_1000_70</color>
     <color name="textColorHint">@color/md_black_1000_38</color>
     <color name="textColorHintInverse">@color/md_white_1000_50</color>
     <color name="divider">@color/md_black_1000_12</color>
     <color name="badgeColor">@color/material_red_accent_700</color>
-    <color name="download">@color/material_green_800</color>
+    <color name="download">@color/md_black_1000</color>
 
     <color name="preference_fallback_accent_color">@color/colorAccent</color>
     <color name="darkPrimaryColor">#212121</color>

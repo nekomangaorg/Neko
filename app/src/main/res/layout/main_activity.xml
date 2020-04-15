@@ -54,7 +54,7 @@
                     android:gravity="start"
                     android:maxLines="1"
                     android:textColor="?actionBarTintColor"
-                    android:fontFamily="@font/metropolis_regular"
+                    android:fontFamily="@font/metropolis_medium"
                     android:textSize="20sp"
                     tools:text="Title Text" />
             </LinearLayout>
