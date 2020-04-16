@@ -216,17 +216,15 @@ class MangaHeaderHolder(
             visibleIf(presenter.chapters.isNotEmpty() && !item.isLocked)
             isEnabled = (nextChapter != null)
             text = if (nextChapter != null) {
-                val number = adapter.decimalFormat.format(nextChapter.chapter_number.toDouble())
-                if (nextChapter.chapter_number > 0) resources.getString(
+                val readTxt =
+                    listOf(
+                        nextChapter.chapter.vol,
+                        nextChapter.chapter.chapter_txt
+                    ).joinToString(" ")
+                resources.getString(
                     if (nextChapter.last_page_read > 0) R.string.continue_reading_chapter_
-                    else R.string.start_reading_chapter_, number
+                    else R.string.start_reading_chapter_, readTxt
                 )
-                else {
-                    resources.getString(
-                        if (nextChapter.last_page_read > 0) R.string.continue_reading
-                        else R.string.start_reading
-                    )
-                }
             } else {
                 resources.getString(R.string.all_chapters_read)
             }

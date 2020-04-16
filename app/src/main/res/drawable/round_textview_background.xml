@@ -5,5 +5,5 @@
     <size
         android:height="25dp"
         android:width="25dp" />
-    <solid android:color="@color/drawerPrimary"/>
+    <solid android:color="?attr/text_color_primary"/>
 </shape>

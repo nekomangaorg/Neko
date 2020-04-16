@@ -285,6 +285,7 @@
     <com.google.android.material.button.MaterialButton
         android:id="@+id/more_button"
         style="@style/Theme.Widget.Button.TextButton"
+        android:fontFamily="@font/metropolis_medium"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
@@ -338,6 +339,7 @@
         android:text="@string/less"
         android:textAlignment="textEnd"
         android:visibility="gone"
+        android:fontFamily="@font/metropolis_medium"
         app:layout_constraintBottom_toTopOf="@id/start_reading_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

@@ -8,6 +8,12 @@ interface SChapter : Serializable {
 
     var name: String
 
+    var vol: String
+
+    var chapter_txt: String
+
+    var chapter_title: String
+
     var date_upload: Long
 
     var chapter_number: Float
@@ -16,6 +22,9 @@ interface SChapter : Serializable {
 
     fun copyFrom(other: SChapter) {
         name = other.name
+        vol = other.vol
+        chapter_title = other.chapter_title
+        chapter_txt = other.chapter_txt
         url = other.url
         date_upload = other.date_upload
         chapter_number = other.chapter_number

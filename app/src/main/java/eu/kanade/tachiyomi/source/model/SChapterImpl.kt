@@ -6,6 +6,12 @@ class SChapterImpl : SChapter {
 
     override lateinit var name: String
 
+    override var vol: String = ""
+
+    override var chapter_txt: String = ""
+
+    override var chapter_title: String = ""
+
     override var date_upload: Long = 0
 
     override var chapter_number: Float = -1f

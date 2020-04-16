@@ -6,11 +6,11 @@ import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.handlers.serializers.ApiMangaSerializer
 import eu.kanade.tachiyomi.source.online.handlers.serializers.ChapterSerializer
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
-import java.util.Date
 import kotlinx.serialization.json.Json
 import okhttp3.Response
 import org.jsoup.Jsoup
 import timber.log.Timber
+import java.util.Date
 
 class ApiMangaParser(val lang: String) {
     fun mangaDetailsParse(response: Response): SManga {
@@ -151,11 +151,15 @@ class ApiMangaParser(val lang: String) {
         // Build chapter name
 
         if (!networkChapter.volume.isNullOrBlank()) {
-            chapterName.add("Vol." + networkChapter.volume)
+            val vol = "Vol." + networkChapter.volume
+            chapterName.add(vol)
+            chapter.vol = vol
         }
 
         if (!networkChapter.chapter.isNullOrBlank()) {
-            chapterName.add("Ch." + networkChapter.chapter)
+            val chp = "Ch." + networkChapter.chapter
+            chapterName.add(chp)
+            chapter.chapter_txt = chp
         }
 
         if (!networkChapter.title.isNullOrBlank()) {
@@ -163,6 +167,7 @@ class ApiMangaParser(val lang: String) {
                 chapterName.add("-")
             }
             chapterName.add(networkChapter.title)
+            chapter.chapter_title = MdUtil.cleanString(networkChapter.title)
         }
 
         // if volume, chapter and title is empty its a oneshot

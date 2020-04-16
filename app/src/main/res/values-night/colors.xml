@@ -11,7 +11,7 @@
     <color name="rippleColor">@color/md_white_1000_20</color>
     <color name="fullRippleColor">#707070</color>
     <color name="dialogBackground">#171717</color>
-    <color name="colorAccent">@color/neko_accent</color>
+    <color name="colorAccent">@color/textColorPrimary</color>
     <color name="splashBackground">@color/md_black_1000</color>
     <color name="mainStatus">#AF1C1C1D</color>
     <color name="actionModeShadow">@color/md_white_1000_38</color>

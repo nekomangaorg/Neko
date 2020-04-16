@@ -17,7 +17,7 @@
     <color name="dialogBackground">@color/md_white_1000</color>
     <color name="fullRippleColor">#C2C2C2</color>
     <color name="rippleColor">@color/md_black_1000_12</color>
-    <color name="colorAccent">@color/md_blue_A400</color>
+    <color name="colorAccent">@color/textColorPrimary</color>
     <color name="actionModeShadow">@color/md_black_1000_38</color>
     <!-- Dark Application Colors -->
     <color name="colorAmoledPrimary">@color/md_black_1000</color>
@@ -89,8 +89,11 @@
     <color name="neko_status">@color/md_black_1000</color>
     <color name="neko_accent">@color/md_black_1000</color>
     <color name="neko_dark_accent">#AF367b92</color>
-    <color name="neko_badge_1">#3ea6aa</color>
-    <color name="neko_badge_2">#2d617e</color>
+    <color name="unread_badge">@color/md_white_1000</color>
+    <color name="unread_badge_text">@color/md_black_1000</color>
+    <color name="download_badge">@color/md_black_1000</color>
+    <color name="total_chapters_badge">@color/md_black_1000_54</color>
+    <color name="total_chapters_badge_text">@color/md_white_1000</color>
 
     <color name="neko_outrun_primary">#2E2157</color>
     <color name="neko_outrun_primary_variant">#241734</color>

@@ -3,8 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/display_bottom_sheet"
     android:layout_width="match_parent"
-    android:background="@drawable/bg_bottom_sheet_dialog_fragment"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_bottom_sheet_dialog_fragment">
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/settings_scroll_view"
@@ -22,8 +22,8 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:orientation="horizontal"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
 
                 <com.google.android.material.textview.MaterialTextView
                     style="@style/TextAppearance.MaterialComponents.Headline6"
@@ -54,6 +54,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:buttonTint="@color/textColorPrimary"
                     android:text="@string/newest_first" />
 
                 <com.google.android.material.radiobutton.MaterialRadioButton
@@ -62,6 +63,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="12dp"
                     android:layout_weight="1"
+
+                    android:buttonTint="@color/textColorPrimary"
                     android:text="@string/oldest_first" />
             </RadioGroup>
 
@@ -80,6 +83,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
                 android:layout_marginEnd="12dp"
+                android:buttonTint="@color/textColorPrimary"
                 android:text="@string/show_all" />
 
             <com.google.android.material.checkbox.MaterialCheckBox
@@ -88,6 +92,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
                 android:layout_marginEnd="12dp"
+                android:buttonTint="@color/textColorPrimary"
                 android:text="@string/show_read_chapters" />
 
             <com.google.android.material.checkbox.MaterialCheckBox
@@ -96,6 +101,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
                 android:layout_marginEnd="12dp"
+                android:buttonTint="@color/textColorPrimary"
                 android:text="@string/show_unread_chapters" />
 
             <com.google.android.material.checkbox.MaterialCheckBox
@@ -104,6 +110,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
                 android:layout_marginEnd="12dp"
+                android:buttonTint="@color/textColorPrimary"
                 android:text="@string/show_downloaded_chapters" />
 
             <com.google.android.material.checkbox.MaterialCheckBox
@@ -112,6 +119,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
                 android:layout_marginEnd="12dp"
+                android:buttonTint="@color/textColorPrimary"
                 android:text="@string/show_bookmarked_chapters" />
 
             <com.google.android.material.textview.MaterialTextView
@@ -135,12 +143,14 @@
                     android:id="@+id/sort_by_source"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:buttonTint="@color/textColorPrimary"
                     android:text="@string/sort_by_source_s_order" />
 
                 <com.google.android.material.radiobutton.MaterialRadioButton
                     android:id="@+id/sort_by_number"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:buttonTint="@color/textColorPrimary"
                     android:text="@string/sort_by_chapter_number" />
             </RadioGroup>
 
@@ -150,6 +160,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
                 android:layout_marginEnd="12dp"
+                android:buttonTint="@color/textColorPrimary"
                 android:text="@string/hide_chapter_titles" />
 
         </LinearLayout>
@@ -159,12 +170,12 @@
         android:id="@+id/pill"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center|top"
         android:layout_marginTop="5dp"
         android:alpha="0.25"
         android:contentDescription="@string/drag_handle"
         android:src="@drawable/draggable_pill"
-        android:tint="?android:attr/textColorPrimary"
-        android:layout_gravity="center|top"/>
+        android:tint="?android:attr/textColorPrimary" />
 
     <ImageView
         android:id="@+id/close_button"

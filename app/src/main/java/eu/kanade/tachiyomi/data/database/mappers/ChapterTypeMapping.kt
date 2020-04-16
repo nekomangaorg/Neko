@@ -13,6 +13,8 @@ import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.ChapterImpl
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable.COL_BOOKMARK
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable.COL_CHAPTER_NUMBER
+import eu.kanade.tachiyomi.data.database.tables.ChapterTable.COL_CHP_TITLE
+import eu.kanade.tachiyomi.data.database.tables.ChapterTable.COL_CHP_TXT
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable.COL_DATE_FETCH
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable.COL_DATE_UPLOAD
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable.COL_ID
@@ -24,31 +26,35 @@ import eu.kanade.tachiyomi.data.database.tables.ChapterTable.COL_READ
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable.COL_SCANLATOR
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable.COL_SOURCE_ORDER
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable.COL_URL
+import eu.kanade.tachiyomi.data.database.tables.ChapterTable.COL_VOL
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable.TABLE
 
 class ChapterTypeMapping : SQLiteTypeMapping<Chapter>(
-        ChapterPutResolver(),
-        ChapterGetResolver(),
-        ChapterDeleteResolver()
+    ChapterPutResolver(),
+    ChapterGetResolver(),
+    ChapterDeleteResolver()
 )
 
 class ChapterPutResolver : DefaultPutResolver<Chapter>() {
 
     override fun mapToInsertQuery(obj: Chapter) = InsertQuery.builder()
-            .table(TABLE)
-            .build()
+        .table(TABLE)
+        .build()
 
     override fun mapToUpdateQuery(obj: Chapter) = UpdateQuery.builder()
-            .table(TABLE)
-            .where("$COL_ID = ?")
-            .whereArgs(obj.id)
-            .build()
+        .table(TABLE)
+        .where("$COL_ID = ?")
+        .whereArgs(obj.id)
+        .build()
 
     override fun mapToContentValues(obj: Chapter) = ContentValues(11).apply {
         put(COL_ID, obj.id)
         put(COL_MANGA_ID, obj.manga_id)
         put(COL_URL, obj.url)
         put(COL_NAME, obj.name)
+        put(COL_CHP_TXT, obj.chapter_txt)
+        put(COL_CHP_TITLE, obj.chapter_title)
+        put(COL_VOL, obj.vol)
         put(COL_READ, obj.read)
         put(COL_SCANLATOR, obj.scanlator)
         put(COL_BOOKMARK, obj.bookmark)
@@ -68,6 +74,9 @@ class ChapterGetResolver : DefaultGetResolver<Chapter>() {
         manga_id = cursor.getLong(cursor.getColumnIndex(COL_MANGA_ID))
         url = cursor.getString(cursor.getColumnIndex(COL_URL))
         name = cursor.getString(cursor.getColumnIndex(COL_NAME))
+        vol = cursor.getString(cursor.getColumnIndex(COL_VOL))
+        chapter_txt = cursor.getString(cursor.getColumnIndex(COL_CHP_TXT))
+        chapter_title = cursor.getString(cursor.getColumnIndex(COL_CHP_TITLE))
         scanlator = cursor.getString(cursor.getColumnIndex(COL_SCANLATOR))
         read = cursor.getInt(cursor.getColumnIndex(COL_READ)) == 1
         bookmark = cursor.getInt(cursor.getColumnIndex(COL_BOOKMARK)) == 1
@@ -83,8 +92,8 @@ class ChapterGetResolver : DefaultGetResolver<Chapter>() {
 class ChapterDeleteResolver : DefaultDeleteResolver<Chapter>() {
 
     override fun mapToDeleteQuery(obj: Chapter) = DeleteQuery.builder()
-            .table(TABLE)
-            .where("$COL_ID = ?")
-            .whereArgs(obj.id)
-            .build()
+        .table(TABLE)
+        .where("$COL_ID = ?")
+        .whereArgs(obj.id)
+        .build()
 }

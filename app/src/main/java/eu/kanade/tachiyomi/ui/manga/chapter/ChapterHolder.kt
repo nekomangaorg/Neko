@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.manga.chapter
 import android.text.format.DateUtils
 import android.view.View
 import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.model.Download
@@ -13,7 +14,7 @@ import kotlinx.android.synthetic.main.download_button.*
 import java.util.Date
 
 class ChapterHolder(
-    view: View,
+    private val view: View,
     private val adapter: MangaDetailsAdapter
 ) : BaseChapterHolder(view, adapter) {
 
@@ -38,12 +39,24 @@ class ChapterHolder(
         download_button.visibility = View.VISIBLE
 
         if (isLocked) download_button.gone()
+        if (chapter.read) download_button.alpha = .3f
 
         // Set correct text color
         chapter_title.setTextColor(
             if (chapter.read && !isLocked) adapter.readColor else adapter.unreadColor
         )
-        if (chapter.bookmark && !isLocked) chapter_title.setTextColor(adapter.bookmarkedColor)
+        if (chapter.bookmark && !isLocked) {
+            chapter_title.setTextColor(adapter.bookmarkedColor)
+            chapter_title.typeface = ResourcesCompat.getFont(
+                view.context,
+                R.font.metropolis_semi_bold
+            )
+        } else {
+            chapter_title.typeface = ResourcesCompat.getFont(
+                view.context,
+                R.font.metropolis_regular
+            )
+        }
 
         val statuses = mutableListOf<String>()
 

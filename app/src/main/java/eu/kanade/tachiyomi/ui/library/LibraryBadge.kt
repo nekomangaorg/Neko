@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.ui.library
 
 import android.content.Context
-import android.graphics.Color
 import android.util.AttributeSet
 import android.view.View
 import androidx.core.content.ContextCompat
@@ -22,11 +21,13 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
             setTextColor(
                 if (unread == -1 && !showTotalChapters)
                     context.getResourceColor(android.R.attr.colorAccent)
-                else Color.WHITE
+                else if (showTotalChapters)
+                    ContextCompat.getColor(context, R.color.total_chapters_badge_text)
+                else ContextCompat.getColor(context, R.color.unread_badge_text)
             )
             setBackgroundColor(
-                if (showTotalChapters) ContextCompat.getColor(context, R.color.neko_badge_2)
-                else context.getResourceColor(android.R.attr.colorAccent)
+                if (showTotalChapters) ContextCompat.getColor(context, R.color.total_chapters_badge)
+                else ContextCompat.getColor(context, R.color.unread_badge)
             )
             visibility = when {
                 unread > 0 || unread == -1 || showTotalChapters -> View.VISIBLE
@@ -52,8 +53,8 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
                 .visibility != View.GONE
         ) View.VISIBLE else View.GONE
         unread_angle.setColorFilter(
-            if (showTotalChapters) ContextCompat.getColor(context, R.color.material_deep_purple_500)
-            else context.getResourceColor(android.R.attr.colorAccent)
+            if (showTotalChapters) ContextCompat.getColor(context, R.color.total_chapters_badge)
+            else ContextCompat.getColor(context, R.color.unread_badge)
         )
         if (unread_angle.visibility == View.VISIBLE) {
             download_text.updatePaddingRelative(end = 8.dpToPx)
