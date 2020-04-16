@@ -14,5 +14,9 @@ class LibraryManga : MangaImpl() {
             id = Long.MIN_VALUE
             category = categoryId
         }
+
+        fun createHide(categoryId: Int): LibraryManga = createBlank(categoryId).apply {
+            status = -1
+        }
     }
 }

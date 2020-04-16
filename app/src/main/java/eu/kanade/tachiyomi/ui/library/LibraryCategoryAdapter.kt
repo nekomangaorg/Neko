@@ -153,7 +153,7 @@ class LibraryCategoryAdapter(val libraryListener: LibraryListener) :
     }
 
     private fun getFirstLetter(name: String): String {
-        val letter = name.first()
+        val letter = name.firstOrNull() ?: '#'
         return if (letter.isLetter()) letter.toString()
             .toUpperCase(Locale.ROOT) else "#"
     }
@@ -272,5 +272,6 @@ class LibraryCategoryAdapter(val libraryListener: LibraryListener) :
         fun sortCategory(catId: Int, sortBy: Int)
         fun selectAll(position: Int)
         fun allSelected(position: Int): Boolean
+        fun toggleCategoryVisibility(position: Int)
     }
 }

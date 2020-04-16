@@ -521,7 +521,7 @@ class MangaDetailsPresenter(
         asyncUpdateMangaAndChapters()
     }
 
-    fun globalSort() = preferences.chaptersDescAsDefault().getOrDefault()
+    fun globalSort(): Boolean = preferences.chaptersDescAsDefault().getOrDefault()
 
     fun setGlobalChapterSort(descend: Boolean) {
         preferences.chaptersDescAsDefault().set(descend)

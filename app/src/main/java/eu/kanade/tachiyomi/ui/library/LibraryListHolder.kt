@@ -46,13 +46,23 @@ class LibraryListHolder(
      */
     override fun onSetValues(item: LibraryItem) {
 
+        title.visible()
+        constraint_layout.minHeight = 56.dpToPx
         if (item.manga.isBlank()) {
-            title.text = itemView.context.getString(R.string.category_is_empty)
+            constraint_layout.minHeight = 0
+            if (item.manga.status == -1) {
+                title.gone()
+            } else
+                title.text = itemView.context.getString(R.string.category_is_empty)
             title.textAlignment = View.TEXT_ALIGNMENT_CENTER
             card.gone()
             badge_view.gone()
+            play_layout.gone()
+            padding.gone()
+            subtitle.gone()
             return
         }
+        padding.visible()
         card.visible()
         title.textAlignment = View.TEXT_ALIGNMENT_TEXT_START
 
