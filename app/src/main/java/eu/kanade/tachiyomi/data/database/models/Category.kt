@@ -25,6 +25,8 @@ interface Category : Serializable {
     val nameLower: String
         get() = name.toLowerCase()
 
+    var isHidden: Boolean
+
     fun isAscending(): Boolean {
         return ((mangaSort?.minus('a') ?: 0) % 2) != 1
     }
@@ -47,7 +49,7 @@ interface Category : Serializable {
         LAST_READ_ASC, LAST_READ_DSC -> R.string.last_read
         TOTAL_ASC, TOTAL_DSC -> R.string.total_chapters
         DATE_ADDED_ASC, DATE_ADDED_DSC -> R.string.date_added
-        else -> R.string.drag_and_drop
+        else -> if (id == -1) R.string.category else R.string.drag_and_drop
     }
 
     fun catSortingMode(): Int? = when (mangaSort) {

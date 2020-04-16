@@ -787,6 +787,11 @@ open class LibraryController(
         return true
     }
 
+    override fun toggleCategoryVisibility(position: Int) {
+        val catId = (adapter.getItem(position) as? LibraryHeaderItem)?.category?.id ?: return
+        presenter.toggleCategoryVisibility(catId)
+    }
+
     override fun sortCategory(catId: Int, sortBy: Int) {
         presenter.sortCategory(catId, sortBy)
     }

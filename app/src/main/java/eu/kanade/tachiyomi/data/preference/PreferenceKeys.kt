@@ -51,10 +51,6 @@ object PreferenceKeys {
 
     const val readWithVolumeKeysInverted = "reader_volume_keys_inverted"
 
-    const val portraitColumns = "pref_library_columns_portrait_key"
-
-    const val landscapeColumns = "pref_library_columns_landscape_key"
-
     const val updateOnlyNonCompleted = "pref_update_only_non_completed_key"
 
     const val autoUpdateTrack = "pref_auto_update_manga_sync_key"

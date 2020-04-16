@@ -108,10 +108,6 @@ class PreferencesHelper(val context: Context) {
 
     fun readWithVolumeKeysInverted() = rxPrefs.getBoolean(Keys.readWithVolumeKeysInverted, false)
 
-    fun portraitColumns() = rxPrefs.getInteger(Keys.portraitColumns, 0)
-
-    fun landscapeColumns() = rxPrefs.getInteger(Keys.landscapeColumns, 0)
-
     fun updateOnlyNonCompleted() = prefs.getBoolean(Keys.updateOnlyNonCompleted, false)
 
     fun autoUpdateTrack() = prefs.getBoolean(Keys.autoUpdateTrack, true)
@@ -213,6 +209,8 @@ class PreferencesHelper(val context: Context) {
     fun librarySortingAscending() = rxPrefs.getBoolean("library_sorting_ascending", true)
 
     fun automaticUpdates() = prefs.getBoolean(Keys.automaticUpdates, true)
+
+    fun collapsedCategories() = rxPrefs.getStringSet("collapsed_categories", mutableSetOf())
 
     fun hiddenCatalogues() = rxPrefs.getStringSet("hidden_catalogues", mutableSetOf())
 

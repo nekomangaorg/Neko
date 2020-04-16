@@ -6,12 +6,11 @@
     android:layout_height="wrap_content"
     android:gravity="center_vertical">
 
-
     <ImageView
         android:id="@+id/checkbox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="2dp"
+        android:layout_marginStart="10dp"
         android:clickable="true"
         android:contentDescription="@string/select_all"
         android:focusable="true"
@@ -33,16 +32,17 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="32dp"
         android:layout_marginBottom="10dp"
+        android:background="@drawable/square_ripple"
         android:ellipsize="end"
         android:gravity="center|start"
         android:inputType="none"
         android:maxLines="2"
-        app:layout_constrainedWidth="true"
         android:textColor="?android:attr/textColorPrimary"
+        android:textSize="22sp"
+        app:layout_constrainedWidth="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/update_button"
         app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toEndOf="@+id/checkbox"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="Title dfdsfsfsfsfsfdsfsfsfs" />
 
@@ -106,6 +106,5 @@
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toEndOf="@id/space"
         app:layout_constraintTop_toTopOf="@id/category_title"
-        app:layout_constraintWidth_min="100dp"
         tools:text="Drag and Drop" />
 </androidx.constraintlayout.widget.ConstraintLayout>

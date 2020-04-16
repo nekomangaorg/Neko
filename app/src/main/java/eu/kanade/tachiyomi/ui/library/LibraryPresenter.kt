@@ -427,12 +427,27 @@ class LibraryPresenter(
             LibraryItem(it, libraryLayout, preferences.uniformGrid(), seekPref, headerItem)
         }.toMutableList()
 
+        val categoriesHidden = preferences.collapsedCategories().getOrDefault().mapNotNull {
+            it.toIntOrNull()
+        }.toMutableSet()
+
         if (showCategories) {
             categories.forEach { category ->
-                if (category.id ?: 0 <= 0 && !categorySet.contains(category.id)) {
-                    val headerItem = headerItems[category.id ?: 0]
+                val catId = category.id ?: return@forEach
+                if (catId > 0 && !categorySet.contains(catId)) {
+                    val headerItem = headerItems[catId]
                     items.add(LibraryItem(
-                        LibraryManga.createBlank(category.id!!),
+                        LibraryManga.createBlank(catId),
+                        libraryLayout,
+                        preferences.uniformGrid(),
+                        preferences.alwaysShowSeeker(),
+                        headerItem
+                    ))
+                } else if (catId in categoriesHidden) {
+                    val headerItem = headerItems[catId]
+                    items.removeAll { it.manga.category == catId }
+                    items.add(LibraryItem(
+                        LibraryManga.createHide(catId),
                         libraryLayout,
                         preferences.uniformGrid(),
                         preferences.alwaysShowSeeker(),
@@ -447,6 +462,10 @@ class LibraryPresenter(
 
         if (categorySet.contains(0))
             categories.add(0, createDefaultCategory())
+
+        categories.forEach {
+            it.isHidden = it.id in categoriesHidden
+        }
 
         this.allCategories = categories
         this.categories = if (!showCategories) arrayListOf(categoryAll)
@@ -680,6 +699,19 @@ class LibraryPresenter(
         return catId in categories
     }
 
+    fun toggleCategoryVisibility(categoryId: Int) {
+        if (categoryId <= -1) return
+        val categoriesHidden = preferences.collapsedCategories().getOrDefault().mapNotNull {
+            it.toIntOrNull()
+        }.toMutableSet()
+        if (categoryId in categoriesHidden)
+            categoriesHidden.remove(categoryId)
+        else
+            categoriesHidden.add(categoryId)
+        preferences.collapsedCategories().set(categoriesHidden.map { it.toString() }.toMutableSet())
+        getLibrary()
+    }
+
     /** sync selectd manga to mangadex follows */
     fun syncMangaToDex(mangaList: List<Manga>) {
         scope.launch {
@@ -692,6 +724,7 @@ class LibraryPresenter(
     }
 
     companion object {
+        // var catsHidden = mutableListOf<Int>()
         private var lastLibraryItems: List<LibraryItem>? = null
         private var lastCategories: List<Category>? = null
     }

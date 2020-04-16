@@ -18,11 +18,11 @@ import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.SelectableAdapter
 import eu.davidea.flexibleadapter.items.AbstractHeaderItem
 import eu.davidea.flexibleadapter.items.IFlexible
-import eu.davidea.viewholders.FlexibleViewHolder
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.getOrDefault
+import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.gone
@@ -30,7 +30,6 @@ import eu.kanade.tachiyomi.util.view.invisible
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.visInvisIf
 import eu.kanade.tachiyomi.util.view.visible
-import kotlinx.android.synthetic.main.library_category_header_item.view.*
 
 class LibraryHeaderItem(
     private val categoryF: (Int) -> Category,
@@ -83,7 +82,7 @@ class LibraryHeaderItem(
     }
 
     class Holder(val view: View, private val adapter: LibraryCategoryAdapter, padEnd: Boolean) :
-        FlexibleViewHolder(view, adapter, true) {
+        BaseFlexibleViewHolder(view, adapter, true) {
 
         private val sectionText: TextView = view.findViewById(R.id.category_title)
         private val sortText: TextView = view.findViewById(R.id.category_sort)
@@ -96,6 +95,10 @@ class LibraryHeaderItem(
                 marginEnd = (if (padEnd && adapter.recyclerView.paddingEnd == 0) 12 else 2).dpToPx
             }
             updateButton.setOnClickListener { addCategoryToUpdate() }
+            sectionText.setOnLongClickListener {
+                adapter.libraryListener.toggleCategoryVisibility(adapterPosition)
+                true
+            }
             sortText.setOnClickListener { it.post { showCatSortOptions() } }
             checkboxImage.setOnClickListener { selectAll() }
             updateButton.drawable.mutate()
@@ -109,20 +112,25 @@ class LibraryHeaderItem(
             if (category.isFirst == true && category.isLast == true) sectionText.text = ""
             else sectionText.text = category.name
             sortText.text = itemView.context.getString(R.string.sort_by_,
-                itemView.context.getString(
-                when (category.sortingMode()) {
-                    LibrarySort.LATEST_CHAPTER -> R.string.latest_chapter
-                    LibrarySort.DRAG_AND_DROP ->
-                        if (category.id == -1) R.string.category
-                        else R.string.drag_and_drop
-                    LibrarySort.TOTAL -> R.string.total_chapters
-                    LibrarySort.UNREAD -> R.string.unread
-                    LibrarySort.LAST_READ -> R.string.last_read
-                    LibrarySort.ALPHA -> R.string.title
-                    LibrarySort.DATE_ADDED -> R.string.date_added
-                    else -> R.string.drag_and_drop
+                itemView.context.getString(category.sortRes())
+            )
+
+            val isAscending = category.isAscending()
+            val sortingMode = category.sortingMode()
+            val sortDrawable = if (category.isHidden) R.drawable.ic_expand_more_white_24dp
+                else
+                when {
+                    sortingMode == LibrarySort.DRAG_AND_DROP || sortingMode == null -> R.drawable
+                        .ic_sort_white_24dp
+                    if (sortingMode == LibrarySort.DATE_ADDED ||
+                        sortingMode == LibrarySort.LATEST_CHAPTER ||
+                        sortingMode == LibrarySort.LAST_READ) !isAscending else isAscending ->
+                        R.drawable.ic_arrow_down_white_24dp
+                    else -> R.drawable.ic_arrow_up_white_24dp
                 }
-            ))
+
+            sortText.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, sortDrawable, 0)
+            sortText.setText(if (category.isHidden) R.string.collasped else category.sortRes())
 
             when {
                 adapter.mode == SelectableAdapter.Mode.MULTI -> {
@@ -157,8 +165,12 @@ class LibraryHeaderItem(
         private fun showCatSortOptions() {
             val category =
                 (adapter.getItem(adapterPosition) as? LibraryHeaderItem)?.category ?: return
+            if (category.isHidden) {
+                adapter.libraryListener.toggleCategoryVisibility(adapterPosition)
+                return
+            }
             // Create a PopupMenu, giving it the clicked view for an anchor
-            val popup = PopupMenu(itemView.context, view.category_sort)
+            val popup = PopupMenu(itemView.context, sortText)
 
             // Inflate our menu resource into the PopupMenu's Menu
             popup.menuInflater.inflate(
@@ -254,14 +266,17 @@ class LibraryHeaderItem(
 
         fun setSelection() {
             val allSelected = adapter.libraryListener.allSelected(adapterPosition)
-            val drawable =
-                ContextCompat.getDrawable(contentView.context,
-                if (allSelected) R.drawable.ic_check_circle_white_24dp else
-                    R.drawable.ic_radio_button_unchecked_white_24dp)
+            val drawable = ContextCompat.getDrawable(
+                contentView.context,
+                if (allSelected) R.drawable.ic_check_circle_white_24dp else R.drawable.ic_radio_button_unchecked_white_24dp
+            )
             val tintedDrawable = drawable?.mutate()
-            tintedDrawable?.setTint(ContextCompat.getColor(contentView.context,
-                if (allSelected) R.color.colorAccent
-                else R.color.gray_button))
+            tintedDrawable?.setTint(
+                ContextCompat.getColor(
+                    contentView.context, if (allSelected) R.color.colorAccent
+                    else R.color.gray_button
+                )
+            )
             checkboxImage.setImageDrawable(tintedDrawable)
         }
 
