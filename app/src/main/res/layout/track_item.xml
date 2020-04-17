@@ -10,8 +10,7 @@
         android:id="@+id/track_details"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:background="?attr/background_card">
+        android:layout_weight="1">
 
         <FrameLayout
             android:id="@+id/logo_container"

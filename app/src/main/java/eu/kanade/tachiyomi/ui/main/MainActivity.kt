@@ -129,6 +129,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
         var continueSwitchingTabs = false
         bottom_nav.setOnNavigationItemSelectedListener { item ->
             val id = item.itemId
+
             val currentController = router.backstack.lastOrNull()?.controller()
             if (!continueSwitchingTabs && currentController is BottomNavBarInterface) {
                 if (!currentController.canChangeTabs {

@@ -176,6 +176,7 @@
     <style name="Theme.Widget.CardView.Item">
         <item name="android:layout_marginTop">@dimen/space_between_cards</item>
         <item name="android:layout_marginBottom">@dimen/space_between_cards</item>
+        <item name="cardBackgroundColor">?android:attr/colorPrimary</item>
     </style>
 
     <style name="Theme.Widget.GridView">

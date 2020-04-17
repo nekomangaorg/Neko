@@ -10,6 +10,7 @@
     <color name="mainStatus">#AFFAFAFA</color>
     <color name="blueStatus">#AF54759E</color>
     <color name="blackStatus">#AF000000</color>
+    <color name="grey">#808080</color>
     <color name="cardBackground">#FFFFFF</color>
     <color name="splashBackground">@color/md_black_1000</color>
     <color name="snackbarBackground">#323232</color>

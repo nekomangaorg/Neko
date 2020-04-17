@@ -22,7 +22,7 @@
             android:id="@+id/chapters_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:tint="?actionBarTintColor"
+            android:tint="@color/md_white_1000"
             android:tooltipText="@string/view_chapters"
             android:background="?selectableItemBackgroundBorderless"
             android:contentDescription="@string/next"
@@ -37,14 +37,16 @@
             android:id="@+id/page_seekbar"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1"
-            />
+            android:thumbTint="@color/md_white_1000"
+            android:progressTint="@color/md_white_1000"
+            tools:progress="20"
+            android:layout_weight="1" />
 
         <TextView
             android:id="@+id/page_text"
             android:layout_width="100dp"
             android:layout_height="match_parent"
-            android:tint="?actionBarTintColor"
+            android:textColor="@color/md_white_1000"
             android:gravity="center"
             android:textSize="15sp"
             tools:text="100 / 105" />
@@ -57,5 +59,5 @@
         android:background="?android:attr/colorBackground"
         android:alpha="0"
         android:clipToPadding="false"
-        tools:listitem="@layout/reader_chapter_item"/>
+        tools:listitem="@layout/reader_chapter_item" />
 </eu.kanade.tachiyomi.ui.reader.ReaderChapterSheet>

@@ -101,7 +101,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
-            android:alpha="0.25"
+            android:alpha="0.7"
             android:contentDescription="@string/drag_handle"
             android:src="@drawable/draggable_pill"
             android:tint="?android:attr/textColorPrimary"

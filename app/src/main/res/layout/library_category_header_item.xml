@@ -22,7 +22,7 @@
         app:layout_constraintEnd_toStartOf="@+id/category_title"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/category_title"
-        tools:tint="?attr/colorAccent"
+        tools:tint="?android:textColorPrimary"
         tools:visibility="visible" />
 
     <TextView
@@ -38,6 +38,7 @@
         android:inputType="none"
         android:maxLines="2"
         app:layout_constrainedWidth="true"
+        android:textColor="?android:attr/textColorPrimary"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/update_button"
         app:layout_constraintHorizontal_bias="0.0"
@@ -62,7 +63,7 @@
         android:focusable="true"
         android:padding="5dp"
         android:src="@drawable/ic_refresh_white_24dp"
-        android:tint="?attr/colorAccent"
+        android:tint="?android:attr/textColorPrimary"
         app:layout_constraintBottom_toBottomOf="@id/category_title"
         app:layout_constraintEnd_toStartOf="@id/space"
         app:layout_constraintStart_toEndOf="@id/category_title"
@@ -91,7 +92,7 @@
         android:clickable="true"
         android:drawableEnd="@drawable/ic_sort_white_24dp"
         android:drawablePadding="6dp"
-        android:drawableTint="@color/md_black_1000"
+        android:drawableTint="?android:attr/textColorPrimary"
         android:ellipsize="start"
         android:focusable="true"
         android:gravity="center|end"

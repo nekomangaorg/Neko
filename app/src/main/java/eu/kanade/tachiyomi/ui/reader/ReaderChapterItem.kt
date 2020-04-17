@@ -7,20 +7,20 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
 import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.items.AbstractItem
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.util.system.getResourceColor
-import kotlinx.android.synthetic.main.chapters_item.*
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.Date
 
 class ReaderChapterItem(val chapter: Chapter, val manga: Manga, val isCurrent: Boolean) :
     AbstractItem<ReaderChapterItem.ViewHolder>
-    () {
+        () {
 
     var name: String? = null
     var description: String? = null
@@ -53,10 +53,21 @@ class ReaderChapterItem(val chapter: Chapter, val manga: Manga, val isCurrent: B
         private var unreadColor = view.context.getResourceColor(android.R.attr.textColorPrimary)
         private var activeColor = view.context.getResourceColor(android.R.attr.colorAccent)
 
-        private var unbookmark = ContextCompat.getDrawable(view.context, R.drawable
-            .ic_bookmark_border_24dp)
-        private var bookmark = ContextCompat.getDrawable(view.context, R.drawable
-            .ic_bookmark_24dp)
+        private var activeTypeFace =
+            ResourcesCompat.getFont(view.context, R.font.metropolis_black)
+        private var inactiveTypeFace =
+            ResourcesCompat.getFont(view.context, R.font.metropolis_thin)
+        private var bookmarkTypeFace =
+            ResourcesCompat.getFont(view.context, R.font.metropolis_medium)
+
+        private var unbookmark = ContextCompat.getDrawable(
+            view.context, R.drawable
+                .ic_bookmark_border_24dp
+        )
+        private var bookmark = ContextCompat.getDrawable(
+            view.context, R.drawable
+                .ic_bookmark_24dp
+        )
 
         override fun bindView(item: ReaderChapterItem, payloads: List<Any>) {
             val chapter = item.chapter
@@ -81,6 +92,12 @@ class ReaderChapterItem(val chapter: Chapter, val manga: Manga, val isCurrent: B
                 statuses.add(chapter.scanlator!!)
             }
 
+            chapterTitle.typeface = when {
+                item.isCurrent -> activeTypeFace
+                chapter.bookmark -> bookmarkTypeFace
+                else -> inactiveTypeFace
+            }
+
             chapterTitle.setTextColor(
                 when {
                     item.isCurrent -> activeColor
@@ -89,6 +106,12 @@ class ReaderChapterItem(val chapter: Chapter, val manga: Manga, val isCurrent: B
                 }
             )
 
+            chapterSubtitle.typeface = when {
+                item.isCurrent -> activeTypeFace
+                chapter.bookmark -> bookmarkTypeFace
+                else -> inactiveTypeFace
+            }
+
             chapterSubtitle.setTextColor(
                 when {
                     item.isCurrent -> activeColor
@@ -96,12 +119,16 @@ class ReaderChapterItem(val chapter: Chapter, val manga: Manga, val isCurrent: B
                     else -> unreadColor
                 }
             )
-            bookmarkImage.setImageDrawable(if (chapter.bookmark)
-                bookmark
-            else unbookmark)
-            bookmarkImage.imageTintList = ColorStateList.valueOf(if (chapter.bookmark)
-                activeColor
-            else readColor)
+            bookmarkImage.setImageDrawable(
+                if (chapter.bookmark)
+                    bookmark
+                else unbookmark
+            )
+            bookmarkImage.imageTintList = ColorStateList.valueOf(
+                if (chapter.bookmark)
+                    activeColor
+                else readColor
+            )
             chapterSubtitle.text = statuses.joinToString(" • ")
         }
 

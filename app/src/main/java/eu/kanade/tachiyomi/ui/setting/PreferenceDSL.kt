@@ -119,23 +119,33 @@ inline fun Preference.onChange(crossinline block: (Any?) -> Boolean) {
 
 var Preference.defaultValue: Any?
     get() = null // set only
-    set(value) { setDefaultValue(value) }
+    set(value) {
+        setDefaultValue(value)
+    }
 
 var Preference.titleRes: Int
     get() = 0 // set only
-    set(value) { setTitle(value) }
+    set(value) {
+        setTitle(value)
+    }
 
 var Preference.iconRes: Int
     get() = 0 // set only
-    set(value) { icon = VectorDrawableCompat.create(context.resources, value, context.theme) }
+    set(value) {
+        icon = VectorDrawableCompat.create(context.resources, value, context.theme)
+    }
 
 var Preference.summaryRes: Int
     get() = 0 // set only
-    set(value) { setSummary(value) }
+    set(value) {
+        setSummary(value)
+    }
 
 var Preference.iconTint: Int
     get() = 0 // set only
-    set(value) { DrawableCompat.setTint(icon, value) }
+    set(value) {
+        DrawableCompat.setTint(icon, value)
+    }
 
 var Preference.iconDrawable: Drawable
     get() = IconicsDrawable(context) // set only

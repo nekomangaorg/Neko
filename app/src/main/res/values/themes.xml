@@ -9,12 +9,17 @@
     <style name="Theme.Base" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="android:forceDarkAllowed" tools:targetApi="29">false</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
-        <item name="colorPrimary">@color/md_black_1000</item>
+        <item name="colorPrimary">@color/md_white_1000</item>
         <item name="colorPrimaryVariant">@color/colorPrimary</item>
         <item name="colorSecondary">@color/background</item>
         <item name="colorPrimaryDark">@color/md_black_1000</item>
-        <item name="colorControlActivated">@color/md_black_1000</item>
-        <item name="colorAccent">@color/md_black_1000</item>
+        <item name="colorControlNormal">?android:attr/textColorPrimary</item>
+        <item name="colorControlActivated">?android:attr/textColorPrimary</item>
+        <item name="colorControlHighlight">?android:attr/textColorPrimary</item>
+        <item name="colorButtonNormal">?android:attr/textColorPrimary</item>
+        <item name="colorSwitchThumbNormal">@color/grey</item>
+
+        <item name="colorAccent">?android:attr/textColorPrimary</item>
         <item name="android:textColorPrimary">@color/textColorPrimary</item>
         <item name="android:textColorSecondary">@color/textColorSecondary</item>
         <item name="android:textColorHint">@color/textColorHint</item>
@@ -109,6 +114,12 @@
         <item name="android:navigationBarColor">@color/darkPrimaryColor</item>
         <item name="actionBarTintColor">@color/md_white_1000</item>
 
+        <item name="colorControlNormal">?android:attr/textColorPrimaryInverse</item>
+        <item name="colorControlActivated">?android:attr/textColorPrimary</item>
+        <item name="colorControlHighlight">?android:attr/textColorPrimary</item>
+        <item name="colorButtonNormal">?android:attr/textColorPrimary</item>
+        <item name="colorSwitchThumbNormal">@color/grey</item>
+
         <!-- Themes -->
         <item name="windowActionModeOverlay">true</item>
         <item name="actionBarTheme">@style/ThemeOverlay.AppCompat.Dark.ActionBar</item>
@@ -135,8 +146,8 @@
         <item name="colorPrimaryDark">@color/darkPrimaryTranslucent</item>
         <item name="android:colorBackground">@android:color/white</item>
         <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:textColorPrimary">@color/md_black_1000_87</item>
-        <item name="android:textColorSecondary">@color/md_black_1000_54</item>
+        <item name="android:textColorPrimary">@color/md_black_1000</item>
+        <item name="android:textColorSecondary">@color/md_black_1000_70</item>
         <item name="android:textColorHint">@color/md_white_1000</item>
         <item name="android:textColorPrimaryInverse">@color/md_white_1000</item>
         <item name="android:textColorSecondaryInverse">@color/md_white_1000_70</item>
@@ -151,6 +162,12 @@
         <item name="actionBarTintColor">@color/md_white_1000</item>
         <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
         <item name="alertDialogTheme">@style/Theme.AlertDialog.DayNight</item>
+
+        <item name="colorControlNormal">?android:attr/textColorPrimaryInverse</item>
+        <item name="colorControlActivated">?android:attr/textColorPrimary</item>
+        <item name="colorControlHighlight">?android:attr/textColorPrimary</item>
+        <item name="colorButtonNormal">?android:attr/textColorPrimary</item>
+        <item name="colorSwitchThumbNormal">@color/grey</item>
 
 
         <!-- Custom Attributes-->

@@ -49,7 +49,7 @@ class ChapterHolder(
             chapter_title.setTextColor(adapter.bookmarkedColor)
             chapter_title.typeface = ResourcesCompat.getFont(
                 view.context,
-                R.font.metropolis_semi_bold
+                R.font.metropolis_extra_bold
             )
         } else {
             chapter_title.typeface = ResourcesCompat.getFont(

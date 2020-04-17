@@ -58,7 +58,9 @@
                 android:resource="@xml/searchable" />
             <!--suppress AndroidDomInspection -->
         </activity>
-        <activity android:name=".ui.reader.ReaderActivity" />
+        <activity
+            android:name=".ui.reader.ReaderActivity"
+            android:theme="@style/Theme.Tachiyomi" />
         <activity
             android:name=".ui.webview.WebViewActivity"
             android:configChanges="uiMode|orientation|screenSize" />
