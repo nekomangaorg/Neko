@@ -112,7 +112,7 @@ class WebtoonPageHolder(
     private var readImageHeaderSubscription: Subscription? = null
 
     init {
-        refreshLayoutParams()
+        frame.layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
     }
 
     /**
@@ -126,13 +126,13 @@ class WebtoonPageHolder(
 
     private fun refreshLayoutParams() {
         frame.layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply {
-            val floatPercent = (viewer.config.marginRatio.toFloat() / 100) // convert int to float percentage
-            val margin = Resources.getSystem().displayMetrics.widthPixels * floatPercent
+            if (!viewer.isContinuous) {
+                bottomMargin = 15.dpToPx
+            }
+
+            val margin = Resources.getSystem().displayMetrics.widthPixels * (viewer.config.sidePadding / 100f)
             marginEnd = margin.toInt()
             marginStart = margin.toInt()
-            if (viewer.config.marginBetweenPagesWebtoon) {
-                bottomMargin = (20f * Resources.getSystem().displayMetrics.density).toInt()
-            }
         }
     }
 

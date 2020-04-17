@@ -4,6 +4,7 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.RecyclerView
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
@@ -12,7 +13,7 @@ import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 /**
  * RecyclerView Adapter used by this [viewer] to where [ViewerChapters] updates are posted.
  */
-class WebtoonAdapter(val viewer: WebtoonViewer) : androidx.recyclerview.widget.RecyclerView.Adapter<androidx.recyclerview.widget.RecyclerView.ViewHolder>() {
+class WebtoonAdapter(val viewer: WebtoonViewer) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     /**
      * List of currently set items.
@@ -20,6 +21,7 @@ class WebtoonAdapter(val viewer: WebtoonViewer) : androidx.recyclerview.widget.R
     var items: List<Any> = emptyList()
         private set
 
+    var currentChapter: ReaderChapter? = null
     /**
      * Updates this adapter with the given [chapters]. It handles setting a few pages of the
      * next/previous chapter to allow seamless transitions.
@@ -47,6 +49,8 @@ class WebtoonAdapter(val viewer: WebtoonViewer) : androidx.recyclerview.widget.R
         if (currPages != null) {
             newItems.addAll(currPages)
         }
+
+        currentChapter = chapters.currChapter
 
         // Add next chapter transition and pages.
         if (forceTransition || chapters.nextChapter?.state !is ReaderChapter.State.Loaded) {
@@ -89,7 +93,7 @@ class WebtoonAdapter(val viewer: WebtoonViewer) : androidx.recyclerview.widget.R
     /**
      * Creates a new view holder for an item with the given [viewType].
      */
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): androidx.recyclerview.widget.RecyclerView.ViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when (viewType) {
             PAGE_VIEW -> {
                 val view = FrameLayout(parent.context)
@@ -106,7 +110,7 @@ class WebtoonAdapter(val viewer: WebtoonViewer) : androidx.recyclerview.widget.R
     /**
      * Binds an existing view [holder] with the item at the given [position].
      */
-    override fun onBindViewHolder(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val item = items[position]
         when (holder) {
             is WebtoonPageHolder -> holder.bind(item as ReaderPage)
@@ -117,7 +121,7 @@ class WebtoonAdapter(val viewer: WebtoonViewer) : androidx.recyclerview.widget.R
     /**
      * Recycles an existing view [holder] before adding it to the view pool.
      */
-    override fun onViewRecycled(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder) {
+    override fun onViewRecycled(holder: RecyclerView.ViewHolder) {
         when (holder) {
             is WebtoonPageHolder -> holder.recycle()
             is WebtoonTransitionHolder -> holder.recycle()

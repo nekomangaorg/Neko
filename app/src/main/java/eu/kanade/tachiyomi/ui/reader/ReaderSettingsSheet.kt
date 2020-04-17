@@ -8,7 +8,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.CompoundButton
 import android.widget.Spinner
-import androidx.annotation.ArrayRes
 import com.f2prateek.rx.preferences.Preference
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -56,7 +55,7 @@ class ReaderSettingsSheet(private val activity: ReaderActivity) :
                 .getOrDefault() == 0 && activity.window.decorView.rootWindowInsets.systemWindowInsetRight == 0 && activity.window.decorView.rootWindowInsets.systemWindowInsetLeft == 0
         ) window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
         val height = activity.window.decorView.rootWindowInsets.systemWindowInsetBottom
-        sheetBehavior.peekHeight = 500.dpToPx + height
+        sheetBehavior.peekHeight = 550.dpToPx + height
 
         sheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onSlide(bottomSheet: View, progress: Float) {
@@ -88,7 +87,7 @@ class ReaderSettingsSheet(private val activity: ReaderActivity) :
         }
 
         setBottomEdge(
-            if (activity.viewer is PagerViewer) page_transitions else crop_borders_webtoon, activity
+            if (activity.viewer is PagerViewer) page_transitions else webtoon_side_padding, activity
         )
 
         close_button.setOnClickListener {
@@ -139,10 +138,7 @@ class ReaderSettingsSheet(private val activity: ReaderActivity) :
         webtoon_prefs_group.visible()
         pager_prefs_group.gone()
         crop_borders_webtoon.bindToPreference(preferences.cropBordersWebtoon())
-        margin_ratio_webtoon.bindToIntPreference(
-            preferences.marginRatioWebtoon(),
-            R.array.webtoon_margin_ratio_values
-        )
+        webtoon_side_padding.bindToIntPreference(preferences.webtoonSidePadding(), R.array.webtoon_side_padding_values)
     }
 
     /**
@@ -169,15 +165,12 @@ class ReaderSettingsSheet(private val activity: ReaderActivity) :
     }
 
     /**
-     * Binds a spinner to a int preference. The position of the spinner item must
-     * correlate with the [Int value] resource item (in arrays.xml), which is a <string-array>
-     * of float values that will be parsed here and applied to the preference.
+     * Binds a spinner to an int preference. The position of the spinner item must
+     * correlate with the [intValues] resource item (in arrays.xml), which is a <string-array>
+     * of int values that will be parsed here and applied to the preference.
      */
-    private fun Spinner.bindToIntPreference(
-        pref: Preference<Int>,
-        @ArrayRes intValuesResource: Int
-    ) {
-        val intValues = resources.getStringArray(intValuesResource).map { it.toInt() }
+    private fun Spinner.bindToIntPreference(pref: Preference<Int>, @ArrayRes intValuesResource: Int) {
+        val intValues = resources.getStringArray(intValuesResource).map { it.toIntOrNull() }
         onItemSelectedListener = IgnoreFirstSpinnerListener { position ->
             pref.set(intValues[position])
         }

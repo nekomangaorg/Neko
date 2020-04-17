@@ -14,13 +14,13 @@ import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.ui.reader.viewer.BaseViewer
 import rx.subscriptions.CompositeSubscription
 import timber.log.Timber
-import java.lang.Math.max
-import java.lang.Math.min
+import kotlin.math.max
+import kotlin.math.min
 
 /**
  * Implementation of a [BaseViewer] to display pages with a [RecyclerView].
  */
-class WebtoonViewer(val activity: ReaderActivity, val showMargins: Boolean = false) : BaseViewer {
+class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = true) : BaseViewer {
 
     /**
      * Recycler view used by this viewer.
@@ -72,10 +72,11 @@ class WebtoonViewer(val activity: ReaderActivity, val showMargins: Boolean = fal
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 val position = layoutManager.findLastEndVisibleItemPosition()
                 val item = adapter.items.getOrNull(position)
+                val allowPreload = checkAllowPreload(item as? ReaderPage)
                 if (item != null && currentPage != item) {
                     currentPage = item
                     when (item) {
-                        is ReaderPage -> onPageSelected(item, position)
+                        is ReaderPage -> onPageSelected(item, allowPreload)
                         is ChapterTransition -> onTransitionSelected(item)
                     }
                 }
@@ -118,10 +119,29 @@ class WebtoonViewer(val activity: ReaderActivity, val showMargins: Boolean = fal
         config.imagePropertyChangedListener = {
             refreshAdapter()
         }
-        config.marginBetweenPagesWebtoon = showMargins
 
         frame.layoutParams = ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT)
         frame.addView(recycler)
+    }
+
+    private fun checkAllowPreload(page: ReaderPage?): Boolean {
+        // Page is transition page - preload allowed
+        page == null ?: return true
+
+        // Initial opening - preload allowed
+        currentPage == null ?: return true
+
+        val nextItem = adapter.items.getOrNull(adapter.items.count() - 1)
+        val nextChapter = (nextItem as? ChapterTransition.Next)?.to ?: (nextItem as? ReaderPage)?.chapter
+
+        // Allow preload for
+        // 1. Going between pages of same chapter
+        // 2. Next chapter page
+        return when (page!!.chapter) {
+            (currentPage as? ReaderPage)?.chapter -> true
+            nextChapter -> true
+            else -> false
+        }
     }
 
     /**
@@ -144,18 +164,20 @@ class WebtoonViewer(val activity: ReaderActivity, val showMargins: Boolean = fal
      * Called from the RecyclerView listener when a [page] is marked as active. It notifies the
      * activity of the change and requests the preload of the next chapter if this is the last page.
      */
-    private fun onPageSelected(page: ReaderPage, position: Int) {
+    private fun onPageSelected(page: ReaderPage, allowPreload: Boolean) {
         val pages = page.chapter.pages!! // Won't be null because it's the loaded chapter
         Timber.d("onPageSelected: ${page.number}/${pages.size}")
         activity.onPageSelected(page)
 
         // Preload next chapter once we're within the last 3 pages of the current chapter
         val inPreloadRange = pages.size - page.number < 3
-        if (inPreloadRange) {
+        if (inPreloadRange && allowPreload && page.chapter == adapter.currentChapter) {
             Timber.d("Request preload next chapter because we're at page ${page.number} of ${pages.size}")
-            val transition = adapter.items.getOrNull(pages.size + 1) as? ChapterTransition.Next
-            if (transition?.to != null) {
-                activity.requestPreloadChapter(transition.to)
+            val nextItem = adapter.items.getOrNull(adapter.items.size - 1)
+            val transitionChapter = (nextItem as? ChapterTransition.Next)?.to ?: (nextItem as?ReaderPage)?.chapter
+            if (transitionChapter != null) {
+                Timber.d("Requesting to preload chapter ${transitionChapter.chapter.chapter_number}")
+                activity.requestPreloadChapter(transitionChapter)
             }
         }
     }
@@ -265,10 +287,12 @@ class WebtoonViewer(val activity: ReaderActivity, val showMargins: Boolean = fal
 
     /**
      * Notifies adapter of changes around the current page to trigger a relayout in the recycler.
-     * Used when a image configuration is changed.
+     * Used when an image configuration is changed.
      */
     private fun refreshAdapter() {
         val position = layoutManager.findLastEndVisibleItemPosition()
-        adapter.notifyItemRangeChanged(max(0, position - 1), min(2, adapter.itemCount - position))
+        adapter.notifyItemRangeChanged(
+            max(0, position - 2),
+            min(position + 2, adapter.itemCount - 1))
     }
 }

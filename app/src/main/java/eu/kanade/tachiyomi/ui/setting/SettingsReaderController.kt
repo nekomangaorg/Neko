@@ -135,18 +135,6 @@ class SettingsReaderController : SettingsController() {
                 defaultValue = false
             }
 
-            intListPreference(activity) {
-                key = Keys.marginRatioWebtoon
-                titleRes = R.string.webtoon_side_margin
-                entriesRes = arrayOf(
-                    R.string.webtoon_side_margin_0,
-                    R.string.webtoon_side_margin_10, R.string.webtoon_side_margin_15,
-                    R.string.webtoon_side_margin_20, R.string.webtoon_side_margin_25
-                )
-                entryValues = listOf(0, 1, 15, 20, 25)
-                defaultValue = "0"
-            }
-        }
         preferenceCategory {
             titleRes = R.string.navigation
 

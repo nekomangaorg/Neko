@@ -205,7 +205,6 @@
                 app:layout_constraintTop_toBottomOf="@id/scale_type" />
 
             <com.google.android.material.switchmaterial.SwitchMaterial
-
                 android:id="@+id/crop_borders"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -215,7 +214,6 @@
                 app:layout_constraintTop_toBottomOf="@id/zoom_start" />
 
             <com.google.android.material.switchmaterial.SwitchMaterial
-
                 android:id="@+id/page_transitions"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -238,38 +236,36 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/end_general_preferences" />
 
-            <TextView
-                android:id="@+id/margin_ratio_text"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:text="@string/webtoon_side_margin"
-                android:textColor="?android:attr/textColorPrimary"
-                app:layout_constraintBaseline_toBaselineOf="@id/margin_ratio_webtoon"
-                app:layout_constraintEnd_toStartOf="@id/background_color"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/webtoon_prefs"
-                tools:text="@string/webtoon_side_margin" />
-
-            <androidx.appcompat.widget.AppCompatSpinner
-                android:id="@+id/margin_ratio_webtoon"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:entries="@array/webtoon_margin_ratio"
-                app:layout_constraintEnd_toEndOf="@id/spinner_end"
-                app:layout_constraintStart_toEndOf="@id/bottom_line"
-                app:layout_constraintTop_toBottomOf="@+id/webtoon_prefs" />
-
             <com.google.android.material.switchmaterial.SwitchMaterial
-
                 android:id="@+id/crop_borders_webtoon"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:text="@string/crop_borders"
                 android:textColor="?android:attr/textColorPrimary"
+                app:layout_constraintTop_toBottomOf="@id/webtoon_prefs" />
+
+            <TextView
+                android:id="@+id/webtoon_side_padding_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@string/pref_webtoon_side_padding"
+                app:layout_constraintEnd_toStartOf="@id/bottom_line"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintBaseline_toBaselineOf="@id/webtoon_side_padding"/>
+
+            <androidx.appcompat.widget.AppCompatSpinner
+                android:id="@+id/webtoon_side_padding"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"
+                app:layout_constraintEnd_toEndOf="@id/spinner_end"
+                app:layout_constraintStart_toEndOf="@id/bottom_line"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/margin_ratio_webtoon" />
+                android:entries="@array/webtoon_side_padding"
+                app:layout_constraintRight_toRightOf="@id/spinner_end"
+                app:layout_constraintTop_toBottomOf="@id/crop_borders_webtoon"/>
 
             <!-- Groups of preferences -->
 
@@ -278,7 +274,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
-                app:constraint_referenced_ids="pager_prefs,scale_type,scale_type_text,zoom_start_text,zoom_start,crop_borders,page_transitions"
+                app:constraint_referenced_ids="pager_prefs,scale_type,scale_type_text,
+                zoom_start_text,zoom_start,crop_borders,page_transitions"
                 tools:visibility="visible" />
 
             <androidx.constraintlayout.widget.Group
@@ -286,8 +283,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
-                app:constraint_referenced_ids="webtoon_prefs,crop_borders_webtoon,margin_ratio_text,margin_ratio_webtoon"
-                tools:visibility="visible" />
+                app:constraint_referenced_ids="webtoon_prefs,crop_borders_webtoon,
+                webtoon_side_padding_text,webtoon_side_padding" />
 
             <androidx.constraintlayout.widget.Guideline
                 android:id="@+id/bottom_line"
@@ -322,5 +319,5 @@
         android:contentDescription="@string/close"
         android:focusable="true"
         android:src="@drawable/ic_close_white_24dp"
-        android:tint="@color/gray_button" />
+        android:tint="?android:attr/textColorPrimary" />
 </FrameLayout>
