@@ -110,7 +110,7 @@ interface Manga : SManga {
             ReaderActivity.WEBTOON
         else if (currentTags?.any
             { tag ->
-                tag.startsWith("chinese") || tag == "manhua" ||
+                tag == "chinese" || tag == "manhua" ||
                     tag.startsWith("english") || tag == "comic"
             } == true || isComicSource(sourceName) ||
             sourceName.contains("manhua", true))
