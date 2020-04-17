@@ -15,8 +15,10 @@ class LibraryManga : MangaImpl() {
             category = categoryId
         }
 
-        fun createHide(categoryId: Int): LibraryManga = createBlank(categoryId).apply {
-            status = -1
-        }
+        fun createHide(categoryId: Int, title: String): LibraryManga =
+            createBlank(categoryId).apply {
+                    this.title = title
+                    status = -1
+                }
     }
 }
