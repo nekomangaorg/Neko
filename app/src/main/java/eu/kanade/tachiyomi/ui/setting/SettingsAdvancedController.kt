@@ -63,7 +63,7 @@ class SettingsAdvancedController : SettingsController() {
         preference {
             key = CLEAR_CACHE_IMAGES_KEY
             titleRes = R.string.clear_image_cache
-            summary = context.getString(R.string.used_, getChaperCacheSize())
+            summary = context.getString(R.string.used_, getChapterCacheSize())
 
             onClick { clearImageCache() }
         }
@@ -148,7 +148,7 @@ class SettingsAdvancedController : SettingsController() {
         }
     }
 
-    private fun getChaperCacheSize(): String {
+    private fun getChapterCacheSize(): String {
         val dirCache = GlideApp.getPhotoCacheDir(activity!!)
         val realSize1 = DiskUtil.getDirectorySize(dirCache!!)
         val realSize2 = DiskUtil.getDirectorySize(coverCache.cacheDir)
@@ -181,7 +181,7 @@ class SettingsAdvancedController : SettingsController() {
                     ), Toast.LENGTH_LONG
                 )
                 findPreference(CLEAR_CACHE_IMAGES_KEY)?.summary =
-                    resources?.getString(R.string.used_, getChaperCacheSize())
+                    resources?.getString(R.string.used_, getChapterCacheSize())
             }
         }
     }
@@ -219,10 +219,10 @@ class SettingsAdvancedController : SettingsController() {
         override fun onCreateDialog(savedViewState: Bundle?): Dialog {
             return MaterialDialog(activity!!)
                 .message(R.string.clear_database_confirmation)
-                    .positiveButton(android.R.string.ok) {
+                .positiveButton(android.R.string.ok) {
                     (targetController as? SettingsAdvancedController)?.clearDatabase()
                 }
-                    .negativeButton(android.R.string.cancel)
+                .negativeButton(android.R.string.cancel)
         }
     }
 

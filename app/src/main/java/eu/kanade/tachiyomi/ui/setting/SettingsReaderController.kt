@@ -103,7 +103,7 @@ class SettingsReaderController : SettingsController() {
             switchPreference {
                 key = Keys.trueColor
                 titleRes = R.string.true_32bit_color
-                defaultValue = false
+                defaultValue = true
             }
         }
         switchPreference {
@@ -134,6 +134,7 @@ class SettingsReaderController : SettingsController() {
                 titleRes = R.string.crop_borders
                 defaultValue = false
             }
+        }
 
         preferenceCategory {
             titleRes = R.string.navigation

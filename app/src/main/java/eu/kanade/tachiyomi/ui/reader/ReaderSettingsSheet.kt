@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.CompoundButton
 import android.widget.Spinner
+import androidx.annotation.ArrayRes
 import com.f2prateek.rx.preferences.Preference
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -47,7 +48,9 @@ class ReaderSettingsSheet(private val activity: ReaderActivity) :
 
         sheetBehavior = BottomSheetBehavior.from(view.parent as ViewGroup)
         setEdgeToEdge(
-            activity, view, if (context.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE)
+            activity,
+            view,
+            if (context.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE)
                 0 else -1
         )
         window?.navigationBarColor = Color.TRANSPARENT
@@ -138,7 +141,10 @@ class ReaderSettingsSheet(private val activity: ReaderActivity) :
         webtoon_prefs_group.visible()
         pager_prefs_group.gone()
         crop_borders_webtoon.bindToPreference(preferences.cropBordersWebtoon())
-        webtoon_side_padding.bindToIntPreference(preferences.webtoonSidePadding(), R.array.webtoon_side_padding_values)
+        webtoon_side_padding.bindToIntPreference(
+            preferences.webtoonSidePadding(),
+            R.array.webtoon_side_padding_values
+        )
     }
 
     /**
@@ -169,7 +175,10 @@ class ReaderSettingsSheet(private val activity: ReaderActivity) :
      * correlate with the [intValues] resource item (in arrays.xml), which is a <string-array>
      * of int values that will be parsed here and applied to the preference.
      */
-    private fun Spinner.bindToIntPreference(pref: Preference<Int>, @ArrayRes intValuesResource: Int) {
+    private fun Spinner.bindToIntPreference(
+        pref: Preference<Int>,
+        @ArrayRes intValuesResource: Int
+    ) {
         val intValues = resources.getStringArray(intValuesResource).map { it.toIntOrNull() }
         onItemSelectedListener = IgnoreFirstSpinnerListener { position ->
             pref.set(intValues[position])

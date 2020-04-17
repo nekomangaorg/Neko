@@ -188,11 +188,10 @@ dependencies {
     implementation("com.dmitrymalkovich.android:material-design-dimens:1.4")
     implementation("com.github.dmytrodanylyk.android-process-button:library:1.0.4")
     val latestFastAdapterRelease = "5.0.0"
-    implementation("com.mikepenz:fastadapter:${latestFastAdapterRelease}")
-    implementation("com.mikepenz:fastadapter-extensions-binding:${latestFastAdapterRelease}")
+    implementation("com.mikepenz:fastadapter:$latestFastAdapterRelease")
+    implementation("com.mikepenz:fastadapter-extensions-binding:$latestFastAdapterRelease")
     implementation("eu.davidea:flexible-adapter:5.1.0")
     implementation("eu.davidea:flexible-adapter-ui:1.0.0")
-    implementation("com.mikepenz:fastadapter:5.0.0")
     implementation("com.nononsenseapps:filepicker:2.5.2")
 //switch this to material dialog file picker
     implementation("com.github.amulyakhare:TextDrawable:558677e")
@@ -241,14 +240,9 @@ dependencies {
     implementation("info.debatty:java-string-similarity:1.2.1")
 }
 
-tasks.preBuild {
+/*tasks.preBuild {
     dependsOn(tasks.lintKotlin)
-}
+}*/
 tasks.lintKotlin {
     dependsOn(tasks.formatKotlin)
 }
-
-/*
-if (gradle.startParameter.taskRequests.toString().contains("Standard")) {
-    apply(mapOf("plugin" to "com.google.gms.google-services"))
-}*/

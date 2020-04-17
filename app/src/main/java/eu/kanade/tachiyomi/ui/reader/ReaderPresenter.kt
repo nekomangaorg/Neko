@@ -220,8 +220,10 @@ class ReaderPresenter(
                     else -> it.source_order.toFloat()
                 }
             }.map {
-                ReaderChapterItem(it, manga, it.id ==
-                    getCurrentChapter()?.chapter?.id ?: chapterId)
+                ReaderChapterItem(
+                    it, manga, it.id ==
+                        getCurrentChapter()?.chapter?.id ?: chapterId
+                )
             }
             if (!manga.sortDescending(preferences.chaptersDescAsDefault().getOrDefault()))
                 list.reversed()
@@ -439,14 +441,18 @@ class ReaderPresenter(
      */
     fun getMangaViewer(): Int {
         val manga = manga ?: return preferences.defaultViewer()
-        if (manga.isWebtoon()) {
-            return ReaderActivity.WEBTOON_WITHOUT_MARGIN
-        }
+
         if (manga.viewer == -1) {
             manga.viewer = manga.defaultReaderType()
             db.updateMangaViewer(manga).asRxObservable().subscribe()
         }
-        return if (manga.viewer == 0) preferences.defaultViewer() else manga.viewer
+
+        val viewer = if (manga.viewer == 0) preferences.defaultViewer() else manga.viewer
+
+        return when {
+            !manga.isWebtoon() && viewer == ReaderActivity.WEBTOON -> ReaderActivity.VERTICAL_PLUS
+            else -> viewer
+        }
     }
 
     /**
@@ -454,10 +460,7 @@ class ReaderPresenter(
      */
     fun setMangaViewer(viewer: Int) {
         val manga = manga ?: return
-        manga.viewer = when {
-            viewer == ReaderActivity.WEBTOON && manga.isWebtoon() -> ReaderActivity.WEBTOON_WITHOUT_MARGIN
-            else -> viewer
-        }
+        manga.viewer = viewer
 
         db.updateMangaViewer(manga).executeAsBlocking()
 
@@ -637,19 +640,20 @@ class ReaderPresenter(
             }
         }
     }
-        private fun shouldUpdateTracker(
-            service: TrackService?,
-            chapterRead: Int,
-            track: Track
-        ): Boolean {
-            if (service == null || !service.isLogged || chapterRead <= track.last_chapter_read) {
-                return false
-            }
-            if (service.isMdList() && track.status == FollowStatus.UNFOLLOWED.int) {
-                return false
-            }
-            return true
+
+    private fun shouldUpdateTracker(
+        service: TrackService?,
+        chapterRead: Int,
+        track: Track
+    ): Boolean {
+        if (service == null || !service.isLogged || chapterRead <= track.last_chapter_read) {
+            return false
         }
+        if (service.isMdList() && track.status == FollowStatus.UNFOLLOWED.int) {
+            return false
+        }
+        return true
+    }
 
     /**
      * Enqueues this [chapter] to be deleted when [deletePendingChapters] is called. The download
