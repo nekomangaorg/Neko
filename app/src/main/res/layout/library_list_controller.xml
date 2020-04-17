@@ -8,9 +8,9 @@
 
     <ProgressBar
         android:id="@+id/progress"
-        android:layout_gravity="center"
         android:layout_width="75dp"
-        android:layout_height="75dp" />
+        android:layout_height="75dp"
+        android:layout_gravity="center" />
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipe_refresh"
@@ -32,16 +32,17 @@
 
         <com.reddit.indicatorfastscroll.FastScrollerView
             android:id="@+id/fast_scroller"
-            android:textColor="?android:attr/textColorPrimaryInverse"
             android:layout_width="25dp"
             android:layout_height="wrap_content"
-            android:elevation="10dp"
             android:layout_gravity="end"
             android:background="@drawable/fast_scroll_background"
-            android:backgroundTint="@color/md_black_1000"
+            android:backgroundTint="?android:attr/textColorPrimary"
+            android:elevation="10dp"
+            app:iconColor="?android:attr/textColorPrimaryInverse"
+            android:paddingStart="3dp"
             android:paddingTop="8dp"
             android:paddingBottom="8dp"
-            android:paddingStart="3dp"
+            android:textColor="?android:attr/textColorPrimaryInverse"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -51,15 +52,15 @@
             android:id="@+id/text_view_m"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:alpha="0"
-            tools:alpha="1"
             android:layout_marginEnd="50dp"
+            android:alpha="0"
             android:background="@drawable/round_textview_background"
-            android:backgroundTint="@color/md_black_1000"
+            android:backgroundTint="?android:attr/textColorPrimary"
             android:padding="10dp"
-            android:textColor="@android:color/white"
+            android:textColor="?android:attr/textColorPrimaryInverse"
             app:layout_constraintEnd_toStartOf="@id/fast_scroller"
             app:layout_constraintTop_toTopOf="@id/fast_scroller"
+            tools:alpha="1"
             tools:text="Category" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 

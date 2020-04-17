@@ -2,7 +2,7 @@
 <resources>
     <!-- Application Colors -->
     <color name="colorPrimary">@color/md_white_1000</color>
-    <color name="colorPrimaryInactive">#C2424242</color>
+    <color name="colorPrimaryInactive">@color/md_black_1000</color>
     <color name="colorPrimaryDark">@color/md_white_1000</color>
     <color name="drawerHighlight">@color/md_black_1000_12</color>
     <color name="drawerPrimary">@color/bluePrimary</color>
