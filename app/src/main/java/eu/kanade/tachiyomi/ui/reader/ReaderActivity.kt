@@ -304,7 +304,6 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
             onBackPressed()
         }
 
-        BottomSheetBehavior.from(chapters_bottom_sheet).isHideable = true
         // Init listeners on bottom menu
         page_seekbar.setOnSeekBarChangeListener(object : SimpleSeekBarListener() {
             override fun onProgressChanged(seekBar: SeekBar, value: Int, fromUser: Boolean) {
@@ -316,6 +315,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
 
         // Set initial visibility
         setMenuVisibility(menuVisible)
+        chapters_bottom_sheet.sheetBehavior?.isHideable = !menuVisible
         if (!menuVisible)
             chapters_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_HIDDEN
         reader_menu.doOnApplyWindowInsets { v, insets, _ ->
