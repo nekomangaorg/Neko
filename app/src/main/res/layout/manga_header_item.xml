@@ -82,7 +82,7 @@
 
 
     <TextView
-        android:id="@+id/manga_full_title"
+        android:id="@+id/title"
         style="@style/TextAppearance.Bold"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -100,17 +100,17 @@
 
     <TextView
         android:id="@+id/manga_author"
+        style="@style/TextAppearance.Secondary"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
         android:ellipsize="end"
         android:maxLines="2"
         android:text="@string/author"
-        style="@style/TextAppearance.Secondary"
         android:textIsSelectable="false"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@id/manga_full_title"
-        app:layout_constraintTop_toBottomOf="@+id/manga_full_title" />
+        app:layout_constraintStart_toStartOf="@id/title"
+        app:layout_constraintTop_toBottomOf="@+id/title" />
 
     <TextView
         android:id="@+id/manga_status"
@@ -120,7 +120,7 @@
         android:layout_marginTop="4dp"
         android:text="@string/unknown_status"
         android:textIsSelectable="false"
-        app:layout_constraintStart_toStartOf="@id/manga_full_title"
+        app:layout_constraintStart_toStartOf="@id/title"
         app:layout_constraintTop_toBottomOf="@+id/manga_author" />
 
     <com.google.android.material.textview.MaterialTextView
@@ -133,7 +133,7 @@
         android:maxLines="1"
         android:textIsSelectable="false"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@id/manga_full_title"
+        app:layout_constraintStart_toStartOf="@id/title"
         app:layout_constraintTop_toBottomOf="@id/manga_status"
         tools:text="Mangadex (EN)" />
 
@@ -168,6 +168,7 @@
             android:layout_marginStart="6dp"
             android:layout_marginEnd="6dp"
             android:padding="5dp"
+            android:tooltipText="@string/add_to_library"
             tools:src="@drawable/ic_open_in_webview_white_24dp" />
 
         <ImageView
@@ -179,6 +180,7 @@
             android:layout_marginStart="6dp"
             android:layout_marginEnd="6dp"
             android:padding="5dp"
+            android:tooltipText="@string/tracking"
             tools:src="@drawable/ic_open_in_webview_white_24dp" />
 
         <ImageView
@@ -246,8 +248,8 @@
         android:layout_marginEnd="16dp"
         android:clickable="true"
         android:focusable="true"
-        android:textColor="?android:attr/textColorSecondary"
         android:maxLines="3"
+        android:textColor="?android:attr/textColorSecondary"
         app:layout_constraintBottom_toTopOf="@id/manga_genres_tags"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -285,10 +287,10 @@
     <com.google.android.material.button.MaterialButton
         android:id="@+id/more_button"
         style="@style/Theme.Widget.Button.TextButton"
-        android:fontFamily="@font/metropolis_medium"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="20dp"
+        android:fontFamily="@font/metropolis_medium"
         android:text="@string/more"
         android:textAlignment="textEnd"
         app:layout_constraintBottom_toBottomOf="@id/more_guide"
@@ -336,10 +338,10 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="20dp"
+        android:fontFamily="@font/metropolis_medium"
         android:text="@string/less"
         android:textAlignment="textEnd"
         android:visibility="gone"
-        android:fontFamily="@font/metropolis_medium"
         app:layout_constraintBottom_toTopOf="@id/start_reading_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -397,7 +399,7 @@
             android:background="@null"
             android:padding="5dp"
             android:src="@drawable/ic_filter_list_white_24dp"
-            android:tint="?colorAccent"
+            android:tint="?android:attr/textColorPrimary"
             app:layout_constraintBottom_toBottomOf="@id/chapters_title"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/chapters_title" />

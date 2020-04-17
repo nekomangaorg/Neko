@@ -44,7 +44,7 @@
             tools:src="@mipmap/ic_launcher" />
 
         <TextView
-            android:id="@+id/manga_full_title"
+            android:id="@+id/title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
@@ -70,7 +70,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/download_button"
             app:layout_constraintStart_toEndOf="@+id/manga_cover"
-            app:layout_constraintTop_toBottomOf="@+id/manga_full_title"
+            app:layout_constraintTop_toBottomOf="@+id/title"
             tools:text="Chapter title" />
 
         <include

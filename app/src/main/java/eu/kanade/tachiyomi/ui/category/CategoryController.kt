@@ -10,12 +10,11 @@ import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.category.CategoryPresenter.Companion.CREATE_CATEGORY_ORDER
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.system.toast
-import eu.kanade.tachiyomi.util.view.applyWindowInsetsForController
+import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.snack
 import kotlinx.android.synthetic.main.categories_controller.*
 
@@ -24,9 +23,7 @@ import kotlinx.android.synthetic.main.categories_controller.*
  */
 class CategoryController(bundle: Bundle? = null) : BaseController(bundle),
         FlexibleAdapter.OnItemClickListener,
-        CategoryAdapter.CategoryItemListener,
-        CategoryCreateDialog.Listener,
-        CategoryRenameDialog.Listener {
+        CategoryAdapter.CategoryItemListener {
 
     /**
      * Adapter containing category items.
@@ -67,7 +64,7 @@ class CategoryController(bundle: Bundle? = null) : BaseController(bundle),
      */
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
-        view.applyWindowInsetsForController()
+        scrollViewWith(recycler, padBottom = true)
 
         adapter = CategoryAdapter(this@CategoryController)
         recycler.layoutManager = LinearLayoutManager(view.context)
@@ -173,34 +170,6 @@ class CategoryController(bundle: Bundle? = null) : BaseController(bundle),
         presenter.deleteCategory(adapter.deletedItems.map { it.category }.firstOrNull())
         adapter.confirmDeletion()
         snack = null
-    }
-
-    /**
-     * Show a dialog to let the user change the category name.
-     *
-     * @param category The category to be edited.
-     */
-    private fun editCategory(category: Category) {
-        CategoryRenameDialog(this, category).showDialog(router)
-    }
-
-    /**
-     * Renames the given category with the given name.
-     *
-     * @param category The category to rename.
-     * @param name The new name of the category.
-     */
-    override fun renameCategory(category: Category, name: String) {
-        presenter.renameCategory(category, name)
-    }
-
-    /**
-     * Creates a new category with the given name.
-     *
-     * @param name The name of the new category.
-     */
-    override fun createCategory(name: String) {
-        presenter.createCategory(name)
     }
 
     /**

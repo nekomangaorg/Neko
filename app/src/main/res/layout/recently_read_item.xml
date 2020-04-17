@@ -28,7 +28,7 @@
                 android:padding="16dp">
 
                 <TextView
-                    android:id="@+id/manga_full_title"
+                    android:id="@+id/title"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:maxLines="2"
@@ -38,7 +38,7 @@
                     android:id="@+id/manga_source"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/manga_full_title"
+                    android:layout_below="@id/title"
                     android:textAppearance="@style/TextAppearance.Medium.Body2" />
 
                 <TextView

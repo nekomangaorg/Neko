@@ -273,5 +273,6 @@ class LibraryCategoryAdapter(val libraryListener: LibraryListener) :
         fun selectAll(position: Int)
         fun allSelected(position: Int): Boolean
         fun toggleCategoryVisibility(position: Int)
+        fun manageCategory(position: Int)
     }
 }

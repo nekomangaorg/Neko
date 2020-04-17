@@ -56,7 +56,7 @@ class RecentChapterHolder(private val view: View, private val adapter: RecentCha
         chapter_title.text = item.chapter.name
 
         // Set manga title
-        manga_full_title.text = item.manga.title
+        title.text = item.manga.title
 
         if (front_view.translationX == 0f) {
             read.setImageDrawable(
@@ -80,10 +80,10 @@ class RecentChapterHolder(private val view: View, private val adapter: RecentCha
         // Check if chapter is read and set correct color
         if (item.chapter.read) {
             chapter_title.setTextColor(readColor)
-            manga_full_title.setTextColor(readColor)
+            title.setTextColor(readColor)
         } else {
             chapter_title.setTextColor(unreadColor)
-            manga_full_title.setTextColor(unreadColor)
+            title.setTextColor(unreadColor)
         }
 
         // Set chapter status
