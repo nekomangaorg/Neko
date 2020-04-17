@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.reader.viewer.webtoon
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.res.Resources
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.view.Gravity
@@ -120,6 +121,19 @@ class WebtoonPageHolder(
     fun bind(page: ReaderPage) {
         this.page = page
         observeStatus()
+        refreshLayoutParams()
+    }
+
+    private fun refreshLayoutParams() {
+        frame.layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply {
+            if (!viewer.isContinuous) {
+                bottomMargin = 15.dpToPx
+            }
+
+            val margin = Resources.getSystem().displayMetrics.widthPixels * (viewer.config.sidePadding / 100f)
+            marginEnd = margin.toInt()
+            marginStart = margin.toInt()
+        }
     }
 
     /**

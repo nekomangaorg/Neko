@@ -14,8 +14,8 @@ class SettingsReaderController : SettingsController() {
             key = Keys.defaultViewer
             titleRes = R.string.default_viewer
             entriesRes = arrayOf(R.string.left_to_right_viewer, R.string.right_to_left_viewer,
-                    R.string.vertical_viewer, R.string.webtoon)
-            entryRange = 1..4
+                    R.string.vertical_viewer, R.string.webtoon, R.string.continuous_vertical)
+            entryRange = 1..5
             defaultValue = 1
         }
         intListPreference(activity) {

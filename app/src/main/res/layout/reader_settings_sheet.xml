@@ -98,7 +98,7 @@
                 app:layout_constraintStart_toEndOf="@id/bottom_line"
                 app:layout_constraintTop_toBottomOf="@id/rotation_mode" />
 
-            <androidx.appcompat.widget.SwitchCompat
+            <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/show_page_number"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -107,7 +107,7 @@
                 android:textColor="?android:attr/textColorSecondary"
                 app:layout_constraintTop_toBottomOf="@id/background_color" />
 
-            <androidx.appcompat.widget.SwitchCompat
+            <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/true_color"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -118,7 +118,7 @@
                 app:layout_constraintTop_toBottomOf="@id/show_page_number"
                 tools:visibility="visible" />
 
-            <androidx.appcompat.widget.SwitchCompat
+            <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/fullscreen"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -127,7 +127,7 @@
                 android:textColor="?android:attr/textColorSecondary"
                 app:layout_constraintTop_toBottomOf="@id/true_color" />
 
-            <androidx.appcompat.widget.SwitchCompat
+            <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/keepscreen"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -136,7 +136,7 @@
                 android:textColor="?android:attr/textColorSecondary"
                 app:layout_constraintTop_toBottomOf="@id/fullscreen" />
 
-            <androidx.appcompat.widget.SwitchCompat
+            <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/always_show_chapter_transition"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -201,7 +201,7 @@
                 app:layout_constraintStart_toEndOf="@id/bottom_line"
                 app:layout_constraintTop_toBottomOf="@id/scale_type" />
 
-            <androidx.appcompat.widget.SwitchCompat
+            <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/crop_borders"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -210,7 +210,7 @@
                 android:textColor="?android:attr/textColorSecondary"
                 app:layout_constraintTop_toBottomOf="@id/zoom_start" />
 
-            <androidx.appcompat.widget.SwitchCompat
+            <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/page_transitions"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -233,15 +233,36 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/end_general_preferences" />
 
-            <androidx.appcompat.widget.SwitchCompat
+            <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/crop_borders_webtoon"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:text="@string/crop_borders"
                 android:textColor="?android:attr/textColorSecondary"
-                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/webtoon_prefs" />
+
+            <TextView
+                android:id="@+id/webtoon_side_padding_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@string/pref_webtoon_side_padding"
+                app:layout_constraintEnd_toStartOf="@id/bottom_line"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintBaseline_toBaselineOf="@id/webtoon_side_padding"/>
+
+            <androidx.appcompat.widget.AppCompatSpinner
+                android:id="@+id/webtoon_side_padding"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"
+                app:layout_constraintEnd_toEndOf="@id/spinner_end"
+                app:layout_constraintStart_toEndOf="@id/bottom_line"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:entries="@array/webtoon_side_padding"
+                app:layout_constraintRight_toRightOf="@id/spinner_end"
+                app:layout_constraintTop_toBottomOf="@id/crop_borders_webtoon"/>
 
             <!-- Groups of preferences -->
 
@@ -250,7 +271,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
-                app:constraint_referenced_ids="pager_prefs,scale_type,scale_type_text,zoom_start_text,zoom_start,crop_borders,page_transitions"
+                app:constraint_referenced_ids="pager_prefs,scale_type,scale_type_text,
+                zoom_start_text,zoom_start,crop_borders,page_transitions"
                 tools:visibility="visible" />
 
             <androidx.constraintlayout.widget.Group
@@ -258,7 +280,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
-                app:constraint_referenced_ids="webtoon_prefs,crop_borders_webtoon" />
+                app:constraint_referenced_ids="webtoon_prefs,crop_borders_webtoon,
+                webtoon_side_padding_text,webtoon_side_padding" />
 
             <androidx.constraintlayout.widget.Guideline
                 android:id="@+id/bottom_line"
