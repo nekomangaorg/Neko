@@ -168,7 +168,7 @@
             android:layout_marginStart="6dp"
             android:layout_marginEnd="6dp"
             android:padding="5dp"
-            android:src="@drawable/ic_open_in_webview_white_24dp" />
+            tools:src="@drawable/ic_open_in_webview_white_24dp" />
 
         <ImageView
             android:id="@+id/track_button"
@@ -179,7 +179,7 @@
             android:layout_marginStart="6dp"
             android:layout_marginEnd="6dp"
             android:padding="5dp"
-            android:src="@drawable/ic_open_in_webview_white_24dp" />
+            tools:src="@drawable/ic_open_in_webview_white_24dp" />
 
         <ImageView
             android:id="@+id/similar_button"
@@ -190,7 +190,7 @@
             android:layout_marginStart="6dp"
             android:layout_marginEnd="6dp"
             android:padding="5dp"
-            android:src="@drawable/ic_open_in_webview_white_24dp" />
+            tools:src="@drawable/ic_open_in_webview_white_24dp" />
 
         <ImageView
             android:id="@+id/webview_button"
@@ -246,7 +246,7 @@
         android:layout_marginEnd="16dp"
         android:clickable="true"
         android:focusable="true"
-        android:textColor="@color/md_black_1000_70"
+        android:textColor="?android:attr/textColorSecondary"
         android:maxLines="3"
         app:layout_constraintBottom_toTopOf="@id/manga_genres_tags"
         app:layout_constraintEnd_toEndOf="parent"
@@ -318,9 +318,9 @@
         android:layout_marginEnd="16dp"
         android:visibility="gone"
         app:atg_backgroundColor="@android:color/transparent"
-        app:atg_borderColor="@color/textColorPrimary"
+        app:atg_borderColor="?android:attr/textColorPrimary"
         app:atg_borderStrokeWidth="1dp"
-        app:atg_textColor="@color/textColorPrimary"
+        app:atg_textColor="?android:attr/textColorPrimary"
         app:layout_constrainedHeight="true"
         app:layout_constraintBottom_toTopOf="@id/less_button"
         app:layout_constraintEnd_toEndOf="parent"

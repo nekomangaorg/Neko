@@ -253,7 +253,7 @@
         <item name="android:textAllCaps">true</item>
         <item name="android:letterSpacing">0.0</item>
         <item name="android:layout_height">40dp</item>
-        <item name="iconTint">?colorAccent</item>
+        <item name="iconTint">?android:attr/textColorPrimary</item>
         <item name="rippleColor">@color/fullRippleColor</item>
         <item name="strokeColor">@color/mtrl_btn_bg_selector</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
@@ -269,14 +269,14 @@
     <style name="Theme.Widget.Button.TextButton" parent="Widget.MaterialComponents.Button.TextButton">
         <item name="android:textAllCaps">false</item>
         <item name="rippleColor">@color/fullRippleColor</item>
-        <item name="android:textColor">?colorAccent</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
 
     <style name="Theme.Widget.CustomImageButton">
         <item name="android:background">@drawable/round_ripple</item>
         <item name="android:clickable">true</item>
         <item name="android:focusable">true</item>
-        <item name="android:tint">?colorAccent</item>
+        <item name="android:tint">?android:attr/textColorPrimary</item>
     </style>
 
     <!--===-->
@@ -296,5 +296,9 @@
     </style>
 
     <style name="FilePickerAlertDialogTheme" parent="Theme.AppCompat.Light.Dialog.Alert"></style>
+
+    <style name="NekoMaterialButtonTint">
+        <item name="buttonTint">?android:attr/textColorPrimary</item>
+    </style>
 
 </resources>

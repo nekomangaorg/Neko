@@ -51,20 +51,20 @@
 
                 <com.google.android.material.radiobutton.MaterialRadioButton
                     android:id="@+id/sort_newest"
+                    style="@style/NekoMaterialButtonTint"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:buttonTint="@color/textColorPrimary"
                     android:text="@string/newest_first" />
 
                 <com.google.android.material.radiobutton.MaterialRadioButton
                     android:id="@+id/sort_oldest"
+                    style="@style/NekoMaterialButtonTint"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="12dp"
-                    android:layout_weight="1"
 
-                    android:buttonTint="@color/textColorPrimary"
+                    android:layout_weight="1"
                     android:text="@string/oldest_first" />
             </RadioGroup>
 
@@ -79,47 +79,47 @@
 
             <com.google.android.material.checkbox.MaterialCheckBox
                 android:id="@+id/show_all"
+                style="@style/NekoMaterialButtonTint"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
                 android:layout_marginEnd="12dp"
-                android:buttonTint="@color/textColorPrimary"
                 android:text="@string/show_all" />
 
             <com.google.android.material.checkbox.MaterialCheckBox
                 android:id="@+id/show_read"
+                style="@style/NekoMaterialButtonTint"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
                 android:layout_marginEnd="12dp"
-                android:buttonTint="@color/textColorPrimary"
                 android:text="@string/show_read_chapters" />
 
             <com.google.android.material.checkbox.MaterialCheckBox
                 android:id="@+id/show_unread"
+                style="@style/NekoMaterialButtonTint"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
                 android:layout_marginEnd="12dp"
-                android:buttonTint="@color/textColorPrimary"
                 android:text="@string/show_unread_chapters" />
 
             <com.google.android.material.checkbox.MaterialCheckBox
                 android:id="@+id/show_download"
+                style="@style/NekoMaterialButtonTint"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
                 android:layout_marginEnd="12dp"
-                android:buttonTint="@color/textColorPrimary"
                 android:text="@string/show_downloaded_chapters" />
 
             <com.google.android.material.checkbox.MaterialCheckBox
                 android:id="@+id/show_bookmark"
+                style="@style/NekoMaterialButtonTint"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
                 android:layout_marginEnd="12dp"
-                android:buttonTint="@color/textColorPrimary"
                 android:text="@string/show_bookmarked_chapters" />
 
             <com.google.android.material.textview.MaterialTextView
@@ -141,26 +141,26 @@
 
                 <com.google.android.material.radiobutton.MaterialRadioButton
                     android:id="@+id/sort_by_source"
+                    style="@style/NekoMaterialButtonTint"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:buttonTint="@color/textColorPrimary"
                     android:text="@string/sort_by_source_s_order" />
 
                 <com.google.android.material.radiobutton.MaterialRadioButton
                     android:id="@+id/sort_by_number"
+                    style="@style/NekoMaterialButtonTint"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:buttonTint="@color/textColorPrimary"
                     android:text="@string/sort_by_chapter_number" />
             </RadioGroup>
 
             <com.google.android.material.checkbox.MaterialCheckBox
                 android:id="@+id/hide_titles"
+                style="@style/NekoMaterialButtonTint"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
                 android:layout_marginEnd="12dp"
-                android:buttonTint="@color/textColorPrimary"
                 android:text="@string/hide_chapter_titles" />
 
         </LinearLayout>
@@ -189,5 +189,5 @@
         android:contentDescription="@string/close"
         android:focusable="true"
         android:src="@drawable/ic_close_white_24dp"
-        android:tint="@color/gray_button" />
+        android:tint="@color/textColorPrimary" />
 </FrameLayout>
