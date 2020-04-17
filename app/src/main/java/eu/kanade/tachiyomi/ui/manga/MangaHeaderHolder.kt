@@ -69,8 +69,8 @@ class MangaHeaderHolder(
                 adapter.delegate.favoriteManga(true)
                 true
             }
-            manga_full_title.setOnLongClickListener {
-                adapter.delegate.copyToClipboard(manga_full_title.text.toString(), R.string.title)
+            title.setOnLongClickListener {
+                adapter.delegate.copyToClipboard(title.text.toString(), R.string.title)
                 true
             }
             manga_author.setOnLongClickListener {
@@ -114,7 +114,7 @@ class MangaHeaderHolder(
     @SuppressLint("SetTextI18n")
     fun bind(item: MangaHeaderItem, manga: Manga) {
         val presenter = adapter.delegate.mangaPresenter()
-        manga_full_title.text = manga.title
+        title.text = manga.title
 
         if (manga.genre.isNullOrBlank().not()) manga_genres_tags.setTags(
             manga.genre?.split(", ")?.map(String::trim)

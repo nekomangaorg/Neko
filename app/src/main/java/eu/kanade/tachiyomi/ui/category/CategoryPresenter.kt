@@ -71,7 +71,6 @@ class CategoryPresenter(
         cat.order = categories.map { it.order + 1 }.max() ?: 0
 
         // Insert into database.
-
         cat.mangaSort = 'a'
         db.insertCategory(cat).executeAsBlocking()
         val cats = db.getCategories().executeAsBlocking()

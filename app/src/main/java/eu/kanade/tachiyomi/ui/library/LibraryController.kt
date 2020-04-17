@@ -46,6 +46,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
+import eu.kanade.tachiyomi.ui.category.ManageCategoryDialog
 import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet
 import eu.kanade.tachiyomi.ui.main.BottomSheetController
 import eu.kanade.tachiyomi.ui.main.MainActivity
@@ -156,7 +157,7 @@ class LibraryController(
             if (order != null && order != activeCategory && lastItem == null) {
                 preferences.lastUsedCategory().set(order)
                 activeCategory = order
-                if (presenter.categories.size > 1 && dy != 0 && abs(dy) > 75) {
+                if (presenter.categories.size > 1 && dy != 0) {
                     val headerItem = getHeader() ?: return
                     val view = fast_scroller.getChildAt(0) ?: return
                     val index = adapter.headerItems.indexOf(headerItem)
@@ -807,6 +808,11 @@ class LibraryController(
     override fun toggleCategoryVisibility(position: Int) {
         val catId = (adapter.getItem(position) as? LibraryHeaderItem)?.category?.id ?: return
         presenter.toggleCategoryVisibility(catId)
+    }
+
+    override fun manageCategory(position: Int) {
+        val category = (adapter.getItem(position) as? LibraryHeaderItem)?.category ?: return
+        ManageCategoryDialog(this, category).showDialog(router)
     }
 
     override fun sortCategory(catId: Int, sortBy: Int) {

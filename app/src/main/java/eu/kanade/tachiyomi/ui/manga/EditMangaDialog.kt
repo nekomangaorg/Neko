@@ -71,8 +71,8 @@ class EditMangaDialog : DialogController {
 
         if (isLocal) {
             if (manga.title != manga.url)
-                view.manga_full_title.append(manga.title)
-            view.manga_full_title.hint = "${resources?.getString(R.string.title)}: ${manga.url}"
+                view.title.append(manga.title)
+            view.title.hint = "${resources?.getString(R.string.title)}: ${manga.url}"
             view.manga_author.append(manga.author ?: "")
             view.manga_artist.append(manga.artist ?: "")
             view.manga_description.append(manga.description ?: "")
@@ -103,7 +103,7 @@ class EditMangaDialog : DialogController {
     }
 
     private fun onPositiveButtonClick() {
-        infoController.presenter.updateManga(dialogView?.manga_full_title?.text.toString(),
+        infoController.presenter.updateManga(dialogView?.title?.text.toString(),
             dialogView?.manga_author?.text.toString(), dialogView?.manga_artist?.text.toString(),
             customCoverUri, dialogView?.manga_description?.text.toString(),
             dialogView?.manga_genres_tags?.tags)

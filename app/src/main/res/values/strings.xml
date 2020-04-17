@@ -78,6 +78,7 @@
     <string name="already_in_category">Manga already in category</string>
     <string name="add_category">Add category</string>
     <string name="edit_categories">Edit categories</string>
+    <string name="manage_category">Manage category</string>
     <string name="rename_category">Rename category</string>
     <string name="move_to_categories">Move to categories</string>
     <string name="hide_categories">Hide categories</string>
@@ -85,8 +86,10 @@
         <item quantity="one">%d category</item>
         <item quantity="other">%d categories</item>
     </plurals>
-    <string name="category_with_name_exists">A category with this name already exists!</string>
+    <string name="category_with_name_exists">A category with that name already exists!</string>
     <string name="category_deleted">Category deleted</string>
+    <string name="tip_long_press_category">Tip: Press and hold a category\'s name to collapse
+        section</string>
 
     <!-- Updates -->
     <string name="update">Update</string>
@@ -163,6 +166,7 @@
     <string name="use_last_saved_migration_preferences">Use last saved pre-migration preferences
     and sources to mass migrate</string>
     <string name="categories_to_include_in_global_update">Categories to include in global update</string>
+    <string name="include_in_global_update">Include in global update</string>
     <string name="auto_refresh_covers">Automatically refresh covers</string>
     <string name="auto_refresh_covers_summary">Refresh covers in library as well
         when updating library (overwrites local covers)</string>

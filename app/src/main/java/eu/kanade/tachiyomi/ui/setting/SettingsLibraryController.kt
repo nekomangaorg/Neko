@@ -64,16 +64,6 @@ class SettingsLibraryController : SettingsController() {
         preferenceCategory {
             titleRes = R.string.updates
             intListPreference(activity) {
-                key = Keys.updateOnRefresh
-                titleRes = R.string.categories_on_manual
-
-                entriesRes = arrayOf(
-                    R.string.first_category, R.string.categories_in_global_update
-                )
-                entryRange = 0..1
-                defaultValue = -1
-            }
-            intListPreference(activity) {
                 key = Keys.libraryUpdateInterval
                 titleRes = R.string.library_update_frequency
                 entriesRes = arrayOf(
@@ -136,13 +126,6 @@ class SettingsLibraryController : SettingsController() {
                 summaryRes = R.string.select_order_to_update
             }
 
-            switchPreference {
-                key = Keys.refreshCoversToo
-                titleRes = R.string.auto_refresh_covers
-                summaryRes = R.string.auto_refresh_covers_summary
-                defaultValue = true
-            }
-
             multiSelectListPreferenceMat(activity) {
                 key = Keys.libraryUpdateCategories
                 titleRes = R.string.categories_to_include_in_global_update
@@ -159,6 +142,23 @@ class SettingsLibraryController : SettingsController() {
                         if (selectedCategories.isEmpty()) context.getString(R.string.all)
                         else selectedCategories.joinToString { it.name }
                 }
+            }
+            intListPreference(activity) {
+                key = Keys.updateOnRefresh
+                titleRes = R.string.categories_on_manual
+
+                entriesRes = arrayOf(
+                    R.string.first_category, R.string.categories_in_global_update
+                )
+                entryRange = 0..1
+                defaultValue = -1
+            }
+
+            switchPreference {
+                key = Keys.refreshCoversToo
+                titleRes = R.string.auto_refresh_covers
+                summaryRes = R.string.auto_refresh_covers_summary
+                defaultValue = true
             }
         }
         if (preferences.skipPreMigration().getOrDefault() || preferences.migrationSources().getOrDefault().isNotEmpty()) {

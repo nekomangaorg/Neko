@@ -14,8 +14,7 @@ import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.migration.manga.design.PreMigrationController
 import eu.kanade.tachiyomi.util.system.await
 import eu.kanade.tachiyomi.util.system.launchUI
-import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
-import eu.kanade.tachiyomi.util.view.applyWindowInsetsForController
+import eu.kanade.tachiyomi.util.view.scrollViewWith
 import kotlinx.android.synthetic.main.migration_controller.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -54,13 +53,12 @@ class MigrationController : NucleusController<MigrationPresenter>(),
 
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
-        view.applyWindowInsetsForController()
+        scrollViewWith(migration_recycler, padBottom = true)
 
         adapter = FlexibleAdapter(null, this)
         migration_recycler.layoutManager =
             androidx.recyclerview.widget.LinearLayoutManager(view.context)
         migration_recycler.adapter = adapter
-        migration_recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
     }
 
     override fun onDestroyView(view: View) {

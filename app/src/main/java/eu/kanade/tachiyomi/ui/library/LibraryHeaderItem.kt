@@ -95,6 +95,7 @@ class LibraryHeaderItem(
                 marginEnd = (if (padEnd && adapter.recyclerView.paddingEnd == 0) 12 else 2).dpToPx
             }
             updateButton.setOnClickListener { addCategoryToUpdate() }
+            sectionText.setOnClickListener { adapter.libraryListener.manageCategory(adapterPosition) }
             sectionText.setOnLongClickListener {
                 adapter.libraryListener.toggleCategoryVisibility(adapterPosition)
                 true
