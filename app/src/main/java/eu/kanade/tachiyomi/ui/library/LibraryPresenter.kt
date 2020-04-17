@@ -299,8 +299,7 @@ class LibraryPresenter(
     private fun getCategory(categoryId: Int): Category {
         val category = categories.find { it.id == categoryId } ?: createDefaultCategory()
         if (category.isFirst == null) {
-            category.isFirst = (category.id ?: 0 <= 0 ||
-                (category.order == 0 && categories.none { it.id == 0 }))
+            category.isFirst = categories.minBy { it.order }?.id == category.id
         }
         if (category.isLast == null) category.isLast = categories.lastOrNull()?.id == category.id
         return category
@@ -324,7 +323,7 @@ class LibraryPresenter(
                 category.changeSortTo(preferences.librarySortingMode().getOrDefault())
                 if (category.id == 0) preferences.defaultMangaOrder()
                     .set(category.mangaSort.toString())
-                else db.insertCategory(category).asRxObservable().subscribe()
+                else if (category.id ?: 0 > 0) db.insertCategory(category).executeAsBlocking()
             }
             i1.chapterCount = -1
             i2.chapterCount = -1
@@ -405,22 +404,22 @@ class LibraryPresenter(
         val showCategories = !preferences.hideCategories().getOrDefault()
         var libraryManga = db.getLibraryMangas().executeAsBlocking()
         val seekPref = preferences.alwaysShowSeeker()
-        if (!showCategories)
-            libraryManga = libraryManga.distinctBy { it.id }
-        val categoryAll = Category.createAll(context,
+        if (!showCategories) libraryManga = libraryManga.distinctBy { it.id }
+        val categoryAll = Category.createAll(
+            context,
             preferences.librarySortingMode().getOrDefault(),
-            preferences.librarySortingAscending().getOrDefault())
+            preferences.librarySortingAscending().getOrDefault()
+        )
         val catItemAll = LibraryHeaderItem({ categoryAll }, -1, seekPref)
         val categorySet = mutableSetOf<Int>()
         val headerItems = (categories.mapNotNull { category ->
             val id = category.id
             if (id == null) null
             else id to LibraryHeaderItem({ getCategory(id) }, id, seekPref)
-        } + (-1 to catItemAll) +
-            (0 to LibraryHeaderItem({ getCategory(0) }, 0, seekPref))).toMap()
-        val items = libraryManga.map {
-            val headerItem = if (!showCategories) catItemAll else
-                headerItems[it.category]
+        } + (-1 to catItemAll) + (0 to LibraryHeaderItem({ getCategory(0) }, 0, seekPref))).toMap()
+        val items = libraryManga.mapNotNull {
+            val headerItem = (if (!showCategories) catItemAll
+            else headerItems[it.category]) ?: return@mapNotNull null
             categorySet.add(it.category)
             LibraryItem(it, libraryLayout, preferences.uniformGrid(), seekPref, headerItem)
         }.toMutableList()
@@ -434,23 +433,27 @@ class LibraryPresenter(
                 val catId = category.id ?: return@forEach
                 if (catId > 0 && !categorySet.contains(catId)) {
                     val headerItem = headerItems[catId]
-                    items.add(LibraryItem(
-                        LibraryManga.createBlank(catId),
-                        libraryLayout,
-                        preferences.uniformGrid(),
-                        preferences.alwaysShowSeeker(),
-                        headerItem
-                    ))
+                    if (headerItem != null) items.add(
+                        LibraryItem(
+                            LibraryManga.createBlank(catId),
+                            libraryLayout,
+                            preferences.uniformGrid(),
+                            preferences.alwaysShowSeeker(),
+                            headerItem
+                        )
+                    )
                 } else if (catId in categoriesHidden) {
-                    val headerItem = headerItems[catId]
                     items.removeAll { it.manga.category == catId }
-                    items.add(LibraryItem(
-                        LibraryManga.createHide(catId),
-                        libraryLayout,
-                        preferences.uniformGrid(),
-                        preferences.alwaysShowSeeker(),
-                        headerItem
-                    ))
+                    val headerItem = headerItems[catId]
+                    if (headerItem != null) items.add(
+                        LibraryItem(
+                            LibraryManga.createHide(catId),
+                            libraryLayout,
+                            preferences.uniformGrid(),
+                            preferences.alwaysShowSeeker(),
+                            headerItem
+                        )
+                    )
                 }
             }
         }
@@ -458,8 +461,7 @@ class LibraryPresenter(
         if (categories.size == 1 && showCategories) categories.first().name =
             context.getString(R.string.library)
 
-        if (categorySet.contains(0))
-            categories.add(0, createDefaultCategory())
+        if (categorySet.contains(0)) categories.add(0, createDefaultCategory())
 
         categories.forEach {
             it.isHidden = it.id in categoriesHidden
@@ -633,12 +635,11 @@ class LibraryPresenter(
             val sort = category.sortingMode() ?: LibrarySort.ALPHA
             preferences.librarySortingMode().set(sort)
             preferences.librarySortingAscending().set(category.isAscending())
-            requestSortUpdate()
-        } else {
+        } else if (catId > 0) {
             if (category.id == 0) preferences.defaultMangaOrder().set(category.mangaSort.toString())
             else Injekt.get<DatabaseHelper>().insertCategory(category).executeAsBlocking()
-            requestSortUpdate()
         }
+        requestSortUpdate()
     }
 
     /** Update a category's order */
@@ -711,7 +712,6 @@ class LibraryPresenter(
     }
 
     companion object {
-        // var catsHidden = mutableListOf<Int>()
         private var lastLibraryItems: List<LibraryItem>? = null
         private var lastCategories: List<Category>? = null
 

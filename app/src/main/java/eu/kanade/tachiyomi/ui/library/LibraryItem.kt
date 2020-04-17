@@ -29,9 +29,9 @@ class LibraryItem(
     private val libraryLayout: Preference<Int>,
     private val fixedSize: Preference<Boolean>,
     private val showFastScroll: Preference<Boolean>,
-    header: LibraryHeaderItem?
+    header: LibraryHeaderItem
 ) :
-    AbstractSectionableItem<LibraryHolder, LibraryHeaderItem?>(header), IFilterable<String> {
+    AbstractSectionableItem<LibraryHolder, LibraryHeaderItem>(header), IFilterable<String> {
 
     var downloadCount = -1
     var unreadType = 2
