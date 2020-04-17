@@ -795,7 +795,8 @@ open class LibraryController(
 
     override fun manageCategory(position: Int) {
         val category = (adapter.getItem(position) as? LibraryHeaderItem)?.category ?: return
-        ManageCategoryDialog(this, category).showDialog(router)
+        if (category.id ?: 0 > -1)
+            ManageCategoryDialog(this, category).showDialog(router)
     }
 
     override fun sortCategory(catId: Int, sortBy: Int) {
