@@ -510,6 +510,10 @@
             and read chapter folders</string>
     <string name="starting_cleanup">Starting cleanup</string>
     <string name="no_folders_to_cleanup">No folders to cleanup</string>
+    <string name="disable_battery_optimization">Disable battery optimization</string>
+    <string name="disable_if_issues_with_updating">Disable this if you are experiencing issues
+        with updating or restoring your library</string>
+    <string name="battery_optimization_disabled">Battery optimization is already disabled</string>
     <plurals name="cleanup_done">
         <item quantity="one">Cleanup done. Removed %d folder</item>
         <item quantity="other">Cleanup done. Removed %d folders</item>
