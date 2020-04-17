@@ -130,7 +130,7 @@ class LibraryItem(
      * @return true if the manga should be included, false otherwise.
      */
     override fun filter(constraint: String): Boolean {
-        if (manga.isBlank())
+        if (manga.isBlank() && manga.title.isBlank())
             return constraint.isEmpty()
         val sourceManager by injectLazy<SourceManager>()
         val sourceName = if (manga.source == 0L) "Local" else

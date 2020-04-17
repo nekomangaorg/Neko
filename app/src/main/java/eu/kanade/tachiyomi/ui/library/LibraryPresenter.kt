@@ -443,11 +443,15 @@ class LibraryPresenter(
                         )
                     )
                 } else if (catId in categoriesHidden) {
-                    items.removeAll { it.manga.category == catId }
+                    val mangaToRemove = items.filter { it.manga.category == catId }
+                    val mergedTitle = mangaToRemove.joinToString("-") {
+                        it.manga.title
+                    }
+                    items.removeAll(mangaToRemove)
                     val headerItem = headerItems[catId]
                     if (headerItem != null) items.add(
                         LibraryItem(
-                            LibraryManga.createHide(catId),
+                            LibraryManga.createHide(catId, mergedTitle),
                             libraryLayout,
                             preferences.uniformGrid(),
                             preferences.alwaysShowSeeker(),
