@@ -26,6 +26,7 @@ import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.snackbar.Snackbar
+import com.mikepenz.iconics.utils.IconicsMenuInflaterUtil
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -246,7 +247,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
      * Called when the options menu of the toolbar is being created. It adds our custom menu.
      */
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.reader, menu)
+        IconicsMenuInflaterUtil.inflate(menuInflater, this, R.menu.reader, menu)
         return true
     }
 

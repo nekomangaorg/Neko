@@ -1,5 +1,4 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -25,7 +24,7 @@
 
         <eu.kanade.tachiyomi.ui.reader.PageIndicatorTextView
             android:id="@+id/page_number"
-            style="@style/TextAppearance.Regular.Caption"
+            style="@style/TextAppearance.Bold"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|center_horizontal"
@@ -48,7 +47,7 @@
             android:layout_height="?attr/actionBarSize"
             android:background="?colorPrimary" />
 
-       <include layout="@layout/reader_chapters_sheet"/>
+        <include layout="@layout/reader_chapters_sheet" />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 

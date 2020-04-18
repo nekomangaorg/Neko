@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="300dp"
     android:background="@drawable/bg_bottom_sheet_black"
-    android:backgroundTint="@color/darkPrimaryTranslucent"
+    android:backgroundTint="?android:attr/colorPrimary"
     android:orientation="vertical"
     app:behavior_peekHeight="?attr/actionBarSize"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
@@ -22,7 +22,7 @@
             android:id="@+id/chapters_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:tint="@color/md_white_1000"
+            android:tint="?android:attr/textColorPrimary"
             android:tooltipText="@string/view_chapters"
             android:background="?selectableItemBackgroundBorderless"
             android:contentDescription="@string/next"
@@ -38,7 +38,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:thumbTint="@color/md_white_1000"
-            android:progressTint="@color/md_white_1000"
+            android:progressTint="?android:attr/textColorPrimary"
             tools:progress="20"
             android:layout_weight="1" />
 
@@ -46,7 +46,7 @@
             android:id="@+id/page_text"
             android:layout_width="100dp"
             android:layout_height="match_parent"
-            android:textColor="@color/md_white_1000"
+            android:textColor="?android:attr/textColorPrimary"
             android:gravity="center"
             android:textSize="15sp"
             tools:text="100 / 105" />

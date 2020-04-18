@@ -26,15 +26,16 @@
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/fab"
         android:layout_width="wrap_content"
-        app:backgroundTint="?colorAccent"
+        app:backgroundTint="?android:attr/textColorPrimaryInverse"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
         android:text="@string/filter"
+        android:elevation="4dp"
         android:textAllCaps="false"
-        android:textColor="@color/md_white_1000"
+        android:textColor="@color/textColorPrimary"
         app:icon="@drawable/ic_filter_list_white_24dp"
-        app:iconTint="@color/md_white_1000" />
+        app:iconTint="@color/textColorPrimary" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

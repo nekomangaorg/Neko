@@ -12,7 +12,7 @@
         <item name="colorPrimary">@color/md_white_1000</item>
         <item name="colorPrimaryVariant">@color/colorPrimary</item>
         <item name="colorSecondary">@color/background</item>
-        <item name="colorPrimaryDark">@color/md_black_1000</item>
+        <item name="colorPrimaryDark">@color/md_white_1000</item>
         <item name="colorControlNormal">?android:attr/textColorPrimary</item>
         <item name="colorControlActivated">?android:attr/textColorPrimary</item>
         <item name="colorControlHighlight">?android:attr/textColorPrimary</item>

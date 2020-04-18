@@ -113,7 +113,11 @@ open class BrowseCatalogueController(bundle: Bundle) :
     }
 
     override fun getTitle(): String? {
-        return presenter.source.name
+        if (bundle?.getBoolean(APPLY_INSET) == true) {
+            return presenter.source.name
+        } else {
+            return "Similar"
+        }
     }
 
     override fun createPresenter(): BrowseCataloguePresenter {
@@ -126,15 +130,17 @@ open class BrowseCatalogueController(bundle: Bundle) :
 
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
+
         if (bundle?.getBoolean(APPLY_INSET) == true) {
             view.applyWindowInsetsForRootController(activity!!.bottom_nav)
         }
-
+        
         // Initialize adapter, scroll listener and recycler views
         adapter = FlexibleAdapter(null, this)
         setupRecycler(view)
 
         fab.visibleIf(presenter.sourceFilters.isNotEmpty())
+        fab.alpha = 1f
         fab.setOnClickListener { showFilters() }
         progress?.visible()
     }
@@ -194,7 +200,7 @@ open class BrowseCatalogueController(bundle: Bundle) :
 
         scrollViewWith(recycler, true) { insets ->
             fab.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                bottomMargin = insets.systemWindowInsetBottom + 16.dpToPx
+                bottomMargin = insets.systemWindowInsetBottom + 12.dpToPx
             }
         }
 
