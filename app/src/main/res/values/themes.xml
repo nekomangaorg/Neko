@@ -46,7 +46,7 @@
         <item name="navigation_view_theme">@style/Theme.Widget.NavigationView</item>
         <item name="selectable_list_drawable">@drawable/list_item_selector</item>
         <item name="selectable_library_drawable">@drawable/library_item_selector_light</item>
-        <item name="text_color_primary">@color/textColorPrimary</item>
+        <item name="text_color_primary">?android:attr/textColorPrimary</item>
         <item name="background_card">?attr/colorPrimary</item>
         <item name="icon_color">@color/iconColor</item>
         <item name="snackbar_background">@color/snackbarBackground</item>
@@ -59,10 +59,10 @@
         <item name="android:colorEdgeEffect">@color/colorAccent</item>
 
         <!-- Material Dialog colors -->
-        <item name="md_color_title">@color/textColorPrimary</item>
-        <item name="md_color_content">@color/textColorSecondary</item>
-        <item name="md_color_button_text">@color/colorAccent</item>
-        <item name="md_background_color">@color/dialog</item>
+        <item name="md_color_title">?android:attr/textColorPrimary</item>
+        <item name="md_color_content">?android:attr/textColorSecondary</item>
+        <item name="md_color_button_text">?android:attr/textColorPrimary</item>
+        <item name="md_background_color">?android:attr/colorPrimary</item>
         <item name="md_button_casing">literal</item>
         <item name="md_corner_radius">16dp</item>
         <item name="android:windowLightStatusBar">true</item>
