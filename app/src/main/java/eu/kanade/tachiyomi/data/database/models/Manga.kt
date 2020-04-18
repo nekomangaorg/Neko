@@ -103,16 +103,14 @@ interface Manga : SManga {
         val currentTags = genre?.split(",")?.map { it.trim().toLowerCase(Locale.US) }
         return if (currentTags?.any
             { tag ->
-                tag == "long strip" || tag == "manhwa" ||
-                    tag.contains("webtoon")
-            } == true || isWebtoonSource(sourceName) ||
-            sourceName.contains("tapastic", true))
+                tag == "long strip" || tag == "manhwa" || tag.contains("webtoon")
+            } == true || isWebtoonSource(sourceName))
             ReaderActivity.WEBTOON
         else if (currentTags?.any
             { tag ->
                 tag == "chinese" || tag == "manhua" ||
                     tag.startsWith("english") || tag == "comic"
-            } == true || isComicSource(sourceName) ||
+            } == true || (isComicSource(sourceName) && !sourceName.contains("tapastic", true)) ||
             sourceName.contains("manhua", true))
             ReaderActivity.LEFT_TO_RIGHT
         else 0
@@ -126,7 +124,6 @@ interface Manga : SManga {
 
     fun isComicSource(sourceName: String): Boolean {
         return sourceName.contains("gunnerkrigg", true) ||
-            sourceName.contains("gunnerkrigg", true) ||
             sourceName.contains("dilbert", true) ||
             sourceName.contains("cyanide", true) ||
             sourceName.contains("xkcd", true) ||
