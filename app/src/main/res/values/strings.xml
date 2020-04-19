@@ -206,6 +206,7 @@
     <string name="local_library">Local library</string>
     <string name="other">Other</string>
     <string name="global_search">Global search…</string>
+    <string name="view_latest">View latest</string>
     <string name="latest">Latest</string>
     <string name="browse">Browse</string>
     <string name="in_library">In Library</string>

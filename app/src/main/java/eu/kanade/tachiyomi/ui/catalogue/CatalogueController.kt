@@ -75,7 +75,7 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
 
     var headerHeight = 0
 
-    var showingExtenions = false
+    var showingExtensions = false
 
     /**
      * Called when controller is initialized.
@@ -85,7 +85,7 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
     }
 
     override fun getTitle(): String? {
-        return if (showingExtenions)
+        return if (showingExtensions)
             applicationContext?.getString(R.string.extensions)
         else applicationContext?.getString(R.string.sources)
     }
@@ -114,7 +114,7 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
         // Create recycler and set adapter.
         recycler.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(view.context)
         recycler.adapter = adapter
-        recycler.addItemDecoration(SourceDividerItemDecoration(view.context))
+        // recycler.addItemDecoration(SourceDividerItemDecoration(view.context))
         val attrsArray = intArrayOf(android.R.attr.actionBarSize)
         val array = view.context.obtainStyledAttributes(attrsArray)
         val appBarHeight = array.getDimensionPixelSize(0, 0)
@@ -135,9 +135,9 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
 
                 sheet_layout.alpha = 1 - progress
                 activity?.appbar?.y = max(activity!!.appbar.y, -headerHeight * (1 - progress))
-                val oldShow = showingExtenions
-                showingExtenions = progress > 0.92f
-                if (oldShow != showingExtenions) {
+                val oldShow = showingExtensions
+                showingExtensions = progress > 0.92f
+                if (oldShow != showingExtensions) {
                     setTitle()
                     activity?.invalidateOptionsMenu()
                 }
@@ -149,7 +149,7 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
                     state == BottomSheetBehavior.STATE_COLLAPSED) {
                     sheet_layout.alpha =
                         if (state == BottomSheetBehavior.STATE_COLLAPSED) 1f else 0f
-                    showingExtenions = state == BottomSheetBehavior.STATE_EXPANDED
+                    showingExtensions = state == BottomSheetBehavior.STATE_EXPANDED
                     setTitle()
                     if (state == BottomSheetBehavior.STATE_EXPANDED)
                         ext_bottom_sheet.fetchOnlineExtensionsIfNeeded()
@@ -164,7 +164,7 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
             }
         })
 
-        if (showingExtenions) {
+        if (showingExtensions) {
             ext_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
         }
     }
@@ -276,7 +276,7 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
     }
 
     override fun expandSearch() {
-        if (showingExtenions)
+        if (showingExtensions)
             ext_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
         else activity?.toolbar?.menu?.findItem(R.id.action_search)?.expandActionView()
     }
@@ -288,8 +288,8 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
      * @param inflater used to load the menu xml.
      */
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        if (onRoot) (activity as? MainActivity)?.setDismissIcon(showingExtenions)
-        if (showingExtenions) {
+        if (onRoot) (activity as? MainActivity)?.setDismissIcon(showingExtensions)
+        if (showingExtensions) {
             // Inflate menu
             inflater.inflate(R.menu.extension_main, menu)
 
@@ -340,7 +340,7 @@ class CatalogueController : NucleusController<CataloguePresenter>(),
             // Initialize option to open catalogue settings.
             R.id.action_filter -> {
                 val controller =
-                    if (showingExtenions)
+                    if (showingExtensions)
                         SettingsExtensionsController()
                     else SettingsSourcesController()
                 router.pushController(

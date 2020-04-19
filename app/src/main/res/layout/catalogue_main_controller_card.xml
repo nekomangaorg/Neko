@@ -7,12 +7,12 @@
 
     <TextView
         android:id="@+id/title"
-        style="@style/TextAppearance.Regular.SubHeading"
+        style="@style/TextAppearance.MaterialComponents.Caption"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingTop="8dp"
         android:paddingBottom="8dp"
-        android:paddingStart="@dimen/material_component_text_fields_padding_above_and_below_label"
+        android:paddingStart="12dp"
         tools:text="Title" />
 
 </FrameLayout>

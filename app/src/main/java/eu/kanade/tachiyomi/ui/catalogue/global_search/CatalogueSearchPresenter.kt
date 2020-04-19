@@ -12,7 +12,6 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.online.LoginSource
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
 import eu.kanade.tachiyomi.ui.catalogue.browse.BrowseCataloguePresenter
 import rx.Observable
@@ -104,8 +103,8 @@ open class CatalogueSearchPresenter(
         val languages = preferencesHelper.enabledLanguages().getOrDefault()
         val hiddenCatalogues = preferencesHelper.hiddenCatalogues().getOrDefault()
 
-        return sourceManager.getCatalogueSources().filter { it.lang in languages }
-            .filterNot { it is LoginSource && !it.isLogged() }
+        return sourceManager.getCatalogueSources()
+            .filter { it.lang in languages }
             .filterNot { it.id.toString() in hiddenCatalogues }
             .sortedBy { "(${it.lang}) ${it.name}" }
     }
