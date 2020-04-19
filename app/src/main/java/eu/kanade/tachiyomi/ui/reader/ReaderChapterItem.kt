@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.reader
 
 import android.content.res.ColorStateList
+import android.graphics.Typeface
 import android.text.format.DateUtils
 import android.view.View
 import android.widget.FrameLayout
@@ -13,7 +14,6 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.util.system.getResourceColor
-import kotlinx.android.synthetic.main.chapters_item.*
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.Date
@@ -83,15 +83,22 @@ class ReaderChapterItem(val chapter: Chapter, val manga: Manga, val isCurrent: B
 
             chapterTitle.setTextColor(
                 when {
-                    item.isCurrent -> activeColor
-                    chapter.read -> readColor
+                    chapter.bookmark -> activeColor
+                    chapter.read && !item.isCurrent -> readColor
                     else -> unreadColor
                 }
             )
 
+            if (item.isCurrent) {
+                chapterTitle.setTypeface(null, Typeface.BOLD)
+                chapterSubtitle.setTypeface(null, Typeface.BOLD)
+            } else {
+                chapterTitle.setTypeface(null, Typeface.NORMAL)
+                chapterSubtitle.setTypeface(null, Typeface.NORMAL)
+            }
+
             chapterSubtitle.setTextColor(
                 when {
-                    item.isCurrent -> activeColor
                     chapter.read -> readColor
                     else -> unreadColor
                 }
