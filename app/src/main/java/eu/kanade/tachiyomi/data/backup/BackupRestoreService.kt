@@ -256,12 +256,13 @@ class BackupRestoreService : Service() {
                 backupManager.restoreMangaFetch(source, manga)
             }
 
+            // Restore categories
+            backupManager.restoreCategoriesForManga(manga, categories)
+
             if (!dbMangaExists || !backupManager.restoreChaptersForManga(manga, chapters)) {
                 // manga gets chapters added
                 backupManager.restoreChapterFetch(source, manga, chapters)
             }
-            // Restore categories
-            backupManager.restoreCategoriesForManga(manga, categories)
             // Restore history
             backupManager.restoreHistoryForManga(history)
             // Restore tracking
