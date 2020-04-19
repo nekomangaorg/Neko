@@ -85,7 +85,7 @@ class SettingsSourcesController : SettingsController() {
      * @param group the language category.
      */
     private fun addLanguageSources(group: PreferenceGroup, sources: List<HttpSource>) {
-        val hiddenCatalogues = preferences.hiddenCatalogues().getOrDefault()
+        val hiddenCatalogues = preferences.hiddenSources().getOrDefault()
 
         val selectAllPreference = CheckBoxPreference(group.context).apply {
 
@@ -97,12 +97,12 @@ class SettingsSourcesController : SettingsController() {
 
             onChange { newValue ->
                 val checked = newValue as Boolean
-                val current = preferences.hiddenCatalogues().get() ?: mutableSetOf()
+                val current = preferences.hiddenSources().get() ?: mutableSetOf()
                 if (checked)
                     current.removeAll(sources.map { it.id.toString() })
                 else
                     current.addAll(sources.map { it.id.toString() })
-                preferences.hiddenCatalogues().set(current)
+                preferences.hiddenSources().set(current)
                 group.removeAll()
                 addLanguageSources(group, sortedSources(sources))
                 true
@@ -126,9 +126,9 @@ class SettingsSourcesController : SettingsController() {
 
                 onChange { newValue ->
                     val checked = newValue as Boolean
-                    val current = preferences.hiddenCatalogues().getOrDefault()
+                    val current = preferences.hiddenSources().getOrDefault()
 
-                    preferences.hiddenCatalogues().set(
+                    preferences.hiddenSources().set(
                         if (checked) current - id
                         else current + id
                     )
@@ -220,7 +220,7 @@ class SettingsSourcesController : SettingsController() {
     private fun sortedSources(sources: List<HttpSource>?): List<HttpSource> {
         val sourceAlpha = sources.orEmpty().sortedBy { it.name }
         return if (sorting == SourcesSort.Enabled) {
-            val hiddenCatalogues = preferences.hiddenCatalogues().getOrDefault()
+            val hiddenCatalogues = preferences.hiddenSources().getOrDefault()
             sourceAlpha.filter { it.id.toString() !in hiddenCatalogues } +
                 sourceAlpha.filterNot { it.id.toString() !in hiddenCatalogues }
         } else {

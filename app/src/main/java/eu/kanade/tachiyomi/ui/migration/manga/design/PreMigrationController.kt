@@ -145,7 +145,7 @@ class PreMigrationController(bundle: Bundle? = null) : BaseController(bundle), F
 
     fun isEnabled(id: String): Boolean {
         val sourcesSaved = prefs.migrationSources().getOrDefault()
-        val hiddenCatalogues = prefs.hiddenCatalogues().getOrDefault()
+        val hiddenCatalogues = prefs.hiddenSources().getOrDefault()
         return if (sourcesSaved.isEmpty()) id !in hiddenCatalogues
         else sourcesSaved.split("/").contains(id)
     }

@@ -83,7 +83,7 @@ import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
-import eu.kanade.tachiyomi.ui.catalogue.CatalogueController
+import eu.kanade.tachiyomi.ui.source.SourceController
 import eu.kanade.tachiyomi.ui.library.ChangeMangaCategoriesDialog
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.main.MainActivity
@@ -136,7 +136,7 @@ class MangaDetailsController : BaseController,
     constructor(
         manga: Manga?,
         fromCatalogue: Boolean = false,
-        smartSearchConfig: CatalogueController.SmartSearchConfig? = null,
+        smartSearchConfig: SourceController.SmartSearchConfig? = null,
         update: Boolean = false
     ) : super(Bundle().apply {
         putLong(MANGA_EXTRA, manga?.id ?: 0)

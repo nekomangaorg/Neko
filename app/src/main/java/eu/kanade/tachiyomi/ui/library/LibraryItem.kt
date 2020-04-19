@@ -21,7 +21,7 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
-import kotlinx.android.synthetic.main.catalogue_grid_item.view.*
+import kotlinx.android.synthetic.main.manga_grid_item.view.*
 import uy.kohesive.injekt.injectLazy
 
 class LibraryItem(
@@ -39,9 +39,9 @@ class LibraryItem(
 
     override fun getLayoutRes(): Int {
         return if (libraryLayout.getOrDefault() == 0 || manga.isBlank())
-            R.layout.catalogue_list_item
+            R.layout.manga_list_item
         else
-            R.layout.catalogue_grid_item
+            R.layout.manga_grid_item
     }
 
     override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): LibraryHolder {

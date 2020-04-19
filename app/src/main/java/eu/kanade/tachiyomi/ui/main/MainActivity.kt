@@ -45,8 +45,6 @@ import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
-import eu.kanade.tachiyomi.ui.catalogue.CatalogueController
-import eu.kanade.tachiyomi.ui.catalogue.global_search.CatalogueSearchController
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.recent_updates.RecentChaptersController
@@ -55,6 +53,8 @@ import eu.kanade.tachiyomi.ui.recents.RecentsController
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.ui.setting.SettingsController
 import eu.kanade.tachiyomi.ui.setting.SettingsMainController
+import eu.kanade.tachiyomi.ui.source.SourceController
+import eu.kanade.tachiyomi.ui.source.global_search.SourceSearchController
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
@@ -152,7 +152,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                 setRoot(when (id) {
                     R.id.nav_library -> LibraryController()
                     R.id.nav_recents -> RecentsController()
-                    else -> CatalogueController()
+                    else -> SourceController()
                 }, id)
             } else if (currentRoot.tag()?.toIntOrNull() == id) {
                 if (router.backstackSize == 1) {
@@ -368,13 +368,13 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                 }
                 router.pushController(controller.withFadeTransaction())
             }
-            SHORTCUT_CATALOGUES -> bottom_nav.selectedItemId = R.id.nav_browse
+            SHORTCUT_BROWSE -> bottom_nav.selectedItemId = R.id.nav_browse
             SHORTCUT_EXTENSIONS -> {
                 bottom_nav.selectedItemId = R.id.nav_browse
                 router.popToRoot()
                 bottom_nav.post {
                     val controller =
-                        router.backstack.firstOrNull()?.controller() as? CatalogueController
+                        router.backstack.firstOrNull()?.controller() as? SourceController
                     controller?.showSheet()
                 }
             }
@@ -402,7 +402,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                     if (router.backstackSize > 1) {
                         router.popToRoot()
                     }
-                    router.pushController(CatalogueSearchController(query).withFadeTransaction())
+                    router.pushController(SourceSearchController(query).withFadeTransaction())
                 }
             }
             INTENT_SEARCH -> {
@@ -413,7 +413,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                         router.popToRoot()
                     }
                     router.pushController(
-                        CatalogueSearchController(
+                        SourceSearchController(
                             query,
                             filter
                         ).withFadeTransaction()
@@ -588,7 +588,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         const val SHORTCUT_LIBRARY = "eu.kanade.tachiyomi.SHOW_LIBRARY"
         const val SHORTCUT_RECENTLY_UPDATED = "eu.kanade.tachiyomi.SHOW_RECENTLY_UPDATED"
         const val SHORTCUT_RECENTLY_READ = "eu.kanade.tachiyomi.SHOW_RECENTLY_READ"
-        const val SHORTCUT_CATALOGUES = "eu.kanade.tachiyomi.SHOW_CATALOGUES"
+        const val SHORTCUT_BROWSE = "eu.kanade.tachiyomi.SHOW_BROWSE"
         const val SHORTCUT_DOWNLOADS = "eu.kanade.tachiyomi.SHOW_DOWNLOADS"
         const val SHORTCUT_MANGA = "eu.kanade.tachiyomi.SHOW_MANGA"
         const val SHORTCUT_EXTENSIONS = "eu.kanade.tachiyomi.EXTENSIONS"

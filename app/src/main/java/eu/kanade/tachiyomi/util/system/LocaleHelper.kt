@@ -7,7 +7,7 @@ import android.os.Build
 import android.view.ContextThemeWrapper
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.ui.catalogue.CataloguePresenter
+import eu.kanade.tachiyomi.ui.source.SourcePresenter
 import java.util.Locale
 import uy.kohesive.injekt.injectLazy
 
@@ -57,7 +57,7 @@ object LocaleHelper {
         return when (lang) {
             null -> ""
             "" -> context.getString(R.string.other)
-            CataloguePresenter.PINNED_KEY -> context.getString(R.string.pinned)
+            SourcePresenter.PINNED_KEY -> context.getString(R.string.pinned)
             "all" -> context.getString(R.string.all)
             else -> {
                 val locale = getLocale(lang)

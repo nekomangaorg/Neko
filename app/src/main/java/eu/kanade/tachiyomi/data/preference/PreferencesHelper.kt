@@ -115,7 +115,7 @@ class PreferencesHelper(val context: Context) {
 
     fun lastVersionCode() = rxPrefs.getInteger("last_version_code", 0)
 
-    fun catalogueAsList() = rxPrefs.getBoolean(Keys.catalogueAsList, false)
+    fun browseAsList() = rxPrefs.getBoolean(Keys.catalogueAsList, false)
 
     fun enabledLanguages() = rxPrefs.getStringSet(Keys.enabledLanguages, setOf("en", Locale.getDefault().language))
 
@@ -205,7 +205,7 @@ class PreferencesHelper(val context: Context) {
 
     fun collapsedCategories() = rxPrefs.getStringSet("collapsed_categories", mutableSetOf())
 
-    fun hiddenCatalogues() = rxPrefs.getStringSet("hidden_catalogues", mutableSetOf())
+    fun hiddenSources() = rxPrefs.getStringSet("hidden_catalogues", mutableSetOf())
 
     fun pinnedCatalogues() = rxPrefs.getStringSet("pinned_catalogues", emptySet())
 

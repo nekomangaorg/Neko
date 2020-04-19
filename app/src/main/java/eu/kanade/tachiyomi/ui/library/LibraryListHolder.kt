@@ -12,8 +12,8 @@ import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.visible
-import kotlinx.android.synthetic.main.catalogue_list_item.*
-import kotlinx.android.synthetic.main.catalogue_list_item.view.*
+import kotlinx.android.synthetic.main.manga_list_item.*
+import kotlinx.android.synthetic.main.manga_list_item.view.*
 import kotlinx.android.synthetic.main.unread_download_badge.*
 
 /**

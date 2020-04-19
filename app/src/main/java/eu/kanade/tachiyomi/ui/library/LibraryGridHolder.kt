@@ -9,7 +9,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.util.view.gone
-import kotlinx.android.synthetic.main.catalogue_grid_item.*
+import kotlinx.android.synthetic.main.manga_grid_item.*
 import kotlinx.android.synthetic.main.unread_download_badge.*
 
 /**

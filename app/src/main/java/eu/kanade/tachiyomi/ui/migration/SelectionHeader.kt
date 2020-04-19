@@ -7,7 +7,7 @@ import eu.davidea.flexibleadapter.items.AbstractHeaderItem
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
-import kotlinx.android.synthetic.main.catalogue_main_controller_card.*
+import kotlinx.android.synthetic.main.source_header_item.*
 
 /**
  * Item that contains the selection header.
@@ -18,7 +18,7 @@ class SelectionHeader : AbstractHeaderItem<SelectionHeader.Holder>() {
      * Returns the layout resource of this item.
      */
     override fun getLayoutRes(): Int {
-        return R.layout.catalogue_main_controller_card
+        return R.layout.source_header_item
     }
 
     /**

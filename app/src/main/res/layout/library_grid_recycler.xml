@@ -7,4 +7,4 @@
     android:layout_height="match_parent"
     android:columnWidth="140dp"
     android:clipToPadding="false"
-    tools:listitem="@layout/catalogue_grid_item" />
+    tools:listitem="@layout/manga_grid_item" />

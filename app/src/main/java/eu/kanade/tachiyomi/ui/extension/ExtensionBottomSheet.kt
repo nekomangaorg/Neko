@@ -16,7 +16,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
-import eu.kanade.tachiyomi.ui.catalogue.CatalogueController
+import eu.kanade.tachiyomi.ui.source.SourceController
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
@@ -44,9 +44,9 @@ ExtensionAdapter.OnButtonClickListener,
 
     private var extensions: List<ExtensionItem> = emptyList()
 
-    lateinit var controller: CatalogueController
+    lateinit var controller: SourceController
 
-    fun onCreate(controller: CatalogueController) {
+    fun onCreate(controller: SourceController) {
         // Initialize adapter, scroll listener and recycler views
         autoCheckItem = AutoCheckItem(presenter.getAutoCheckPref())
         adapter = ExtensionAdapter(this)
