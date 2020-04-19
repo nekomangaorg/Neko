@@ -6,7 +6,6 @@ import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.app.Activity
-import android.app.PendingIntent
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -35,10 +34,7 @@ import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.PopupMenu
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
-import androidx.core.content.pm.ShortcutInfoCompat
-import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.ColorUtils
-import androidx.core.graphics.drawable.IconCompat
 import androidx.core.math.MathUtils
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -53,7 +49,6 @@ import com.afollestad.materialdialogs.list.listItems
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
 import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import com.bumptech.glide.signature.ObjectKey
@@ -110,8 +105,6 @@ import eu.kanade.tachiyomi.util.view.setStyle
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
-import jp.wasabeef.glide.transformations.CropSquareTransformation
-import jp.wasabeef.glide.transformations.MaskTransformation
 import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.android.synthetic.main.manga_details_controller.*
 import kotlinx.android.synthetic.main.manga_header_item.*
@@ -214,6 +207,10 @@ class MangaDetailsController : BaseController,
 
     override fun getTitle(): String? {
         return if (toolbarIsColored && !isTablet) manga?.title else null
+    }
+
+    override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
+        return inflater.inflate(R.layout.manga_details_controller, container, false)
     }
 
     override fun onViewCreated(view: View) {
@@ -758,7 +755,6 @@ class MangaDetailsController : BaseController,
             R.string.edit else R.string.edit_cover)
         menu.findItem(R.id.action_download).isVisible = !presenter.isLockedFromSearch &&
             manga?.source != LocalSource.ID
-        menu.findItem(R.id.action_add_to_home_screen).isVisible = !presenter.isLockedFromSearch
         menu.findItem(R.id.action_mark_all_as_read).isVisible =
             presenter.getNextUnreadChapter() != null && !presenter.isLockedFromSearch
         menu.findItem(R.id.action_mark_all_as_unread).isVisible =
@@ -830,7 +826,6 @@ class MangaDetailsController : BaseController,
                 }
             }
             R.id.action_open_in_web_view -> openInWebView()
-            R.id.action_add_to_home_screen -> addToHomeScreen()
             R.id.action_refresh_tracking -> presenter.refreshTrackers()
             R.id.action_migrate ->
                 PreMigrationController.navigateToMigration(
@@ -979,99 +974,9 @@ class MangaDetailsController : BaseController,
         }
     }
 
-    /**
-     * Add a shortcut of the manga to the home screen
-     */
-    private fun addToHomeScreen() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            // TODO are transformations really unsupported or is it just the Pixel Launcher?
-            createShortcutForShape()
-        } else {
-            ChooseShapeDialog(this).showDialog(router)
-        }
-    }
-
-    /**
-     * Retrieves the bitmap of the shortcut with the requested shape and calls [createShortcut] when
-     * the resource is available.
-     *
-     * @param i The shape index to apply. Defaults to circle crop transformation.
-     */
-    fun createShortcutForShape(i: Int = 0) {
-        if (activity == null) return
-        GlideApp.with(activity!!)
-            .asBitmap()
-            .load(presenter.manga)
-            .diskCacheStrategy(DiskCacheStrategy.NONE)
-            .apply {
-                when (i) {
-                    0 -> circleCrop()
-                    1 -> transform(RoundedCorners(5))
-                    2 -> transform(CropSquareTransformation())
-                    3 -> centerCrop().transform(MaskTransformation(R.drawable.mask_star))
-                }
-            }
-            .into(object : CustomTarget<Bitmap>(128, 128) {
-                override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
-                    createShortcut(resource)
-                }
-
-                override fun onLoadCleared(placeholder: Drawable?) { }
-
-                override fun onLoadFailed(errorDrawable: Drawable?) {
-                    activity?.toast(R.string.could_not_create_shortcut)
-                }
-            })
-    }
-
-    /**
-     * Create shortcut using ShortcutManager.
-     *
-     * @param icon The image of the shortcut.
-     */
-    private fun createShortcut(icon: Bitmap) {
-        val activity = activity ?: return
-
-        // Create the shortcut intent.
-        val shortcutIntent = activity.intent
-            .setAction(MainActivity.SHORTCUT_MANGA)
-            .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            .putExtra(MANGA_EXTRA, presenter.manga.id)
-
-        // Check if shortcut placement is supported
-        if (ShortcutManagerCompat.isRequestPinShortcutSupported(activity)) {
-            val shortcutId = "manga-shortcut-${presenter.manga.title}-${presenter.source.name}"
-
-            // Create shortcut info
-            val shortcutInfo = ShortcutInfoCompat.Builder(activity, shortcutId)
-                .setShortLabel(presenter.manga.title)
-                .setIcon(IconCompat.createWithBitmap(icon))
-                .setIntent(shortcutIntent)
-                .build()
-
-            val successCallback = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                // Create the CallbackIntent.
-                val intent = ShortcutManagerCompat.createShortcutResultIntent(activity, shortcutInfo)
-
-                // Configure the intent so that the broadcast receiver gets the callback successfully.
-                PendingIntent.getBroadcast(activity, 0, intent, 0)
-            } else {
-                NotificationReceiver.shortcutCreatedBroadcast(activity)
-            }
-
-            // Request shortcut.
-            ShortcutManagerCompat.requestPinShortcut(activity, shortcutInfo,
-                successCallback.intentSender)
-        }
-    }
-
     override fun startDownloadRange(position: Int) {
         if (actionMode == null) createActionModeIfNeeded()
         onItemClick(null, position)
-    }
-
-    override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
-        return inflater.inflate(R.layout.manga_details_controller, container, false)
     }
 
     override fun coverColor(): Int? = coverColor

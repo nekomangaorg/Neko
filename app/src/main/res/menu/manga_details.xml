@@ -78,9 +78,4 @@
         android:title="@string/migrate"
         app:showAsAction="never" />
 
-    <item
-        android:id="@+id/action_add_to_home_screen"
-        android:title="@string/add_to_home_screen"
-        app:showAsAction="never" />
-
 </menu>

@@ -332,14 +332,6 @@
     <string name="added_to_library">Added to library</string>
     <string name="add_to_library">Add to Library</string>
     <string name="removed_from_library">Removed from library</string>
-    <string name="icon_shape">Icon shape</string>
-    <string name="circular">Circular</string>
-    <string name="rounded">Rounded</string>
-    <string name="square">Square</string>
-    <string name="star">Star</string>
-    <string name="add_to_home_screen">Add to home screen</string>
-    <string name="shortcut_created">Shortcut was added to home screen.</string>
-    <string name="could_not_create_shortcut">Could not create shortcut</string>
     <string name="_copied_to_clipboard">%1$s copied to clipboard</string>
     <string name="source_not_installed_">Source not installed: %1$s</string>
     <string name="no_description">No description</string>
