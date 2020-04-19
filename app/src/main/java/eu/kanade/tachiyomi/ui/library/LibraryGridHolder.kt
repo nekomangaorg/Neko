@@ -59,8 +59,7 @@ class LibraryGridHolder(
         compact_title.text = title.text
 
         setUnreadBadge(badge_view, item)
-        play_layout.visibility = if (item.manga.unread > 0 && item.unreadType > 0)
-            View.VISIBLE else View.GONE
+        setReadingButton(item)
 
         // Update the cover.
         if (item.manga.thumbnail_url == null) GlideApp.with(view.context).clear(cover_thumbnail)

@@ -253,6 +253,8 @@ class PreferencesHelper(val context: Context) {
 
     fun unreadBadgeType() = rxPrefs.getInteger("unread_badge_type", 2)
 
+    fun hideStartReadingButton() = rxPrefs.getBoolean("hide_reading_button", false)
+
     fun hideFiltersAtStart() = rxPrefs.getBoolean("hide_filters_at_start", false)
 
     fun alwaysShowChapterTransition() = rxPrefs.getBoolean(Keys.alwaysShowChapterTransition, true)

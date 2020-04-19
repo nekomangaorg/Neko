@@ -9,27 +9,27 @@ import android.widget.ImageView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
-import com.f2prateek.rx.preferences.Preference
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.AbstractSectionableItem
 import eu.davidea.flexibleadapter.items.IFilterable
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import kotlinx.android.synthetic.main.manga_grid_item.view.*
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
 class LibraryItem(
     val manga: LibraryManga,
-    private val libraryLayout: Preference<Int>,
-    private val fixedSize: Preference<Boolean>,
-    private val showFastScroll: Preference<Boolean>,
-    header: LibraryHeaderItem
+    header: LibraryHeaderItem,
+    private val preferences: PreferencesHelper = Injekt.get()
 ) :
     AbstractSectionableItem<LibraryHolder, LibraryHeaderItem>(header), IFilterable<String> {
 
@@ -37,8 +37,20 @@ class LibraryItem(
     var unreadType = 2
     var chapterCount = -1
 
+    private val showFastScroll: Boolean
+        get() = preferences.alwaysShowSeeker().getOrDefault()
+
+    private val uniformSize: Boolean
+        get() = preferences.uniformGrid().getOrDefault()
+
+    private val libraryLayout: Int
+        get() = preferences.libraryLayout().getOrDefault()
+
+    val hideReadingButton: Boolean
+        get() = preferences.hideStartReadingButton().getOrDefault()
+
     override fun getLayoutRes(): Int {
-        return if (libraryLayout.getOrDefault() == 0 || manga.isBlank())
+        return if (libraryLayout == 0 || manga.isBlank())
             R.layout.manga_list_item
         else
             R.layout.manga_grid_item
@@ -47,10 +59,10 @@ class LibraryItem(
     override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): LibraryHolder {
         val parent = adapter.recyclerView
         return if (parent is AutofitRecyclerView) {
-            val libraryLayout = libraryLayout.getOrDefault()
-            val isFixedSize = fixedSize.getOrDefault()
+            val libraryLayout = libraryLayout
+            val isFixedSize = uniformSize
             if (libraryLayout == 0 || manga.isBlank()) {
-                LibraryListHolder(view, adapter as LibraryCategoryAdapter, showFastScroll.getOrDefault())
+                LibraryListHolder(view, adapter as LibraryCategoryAdapter, showFastScroll)
             } else {
                 view.apply {
                     val coverHeight = (parent.itemWidth / 3f * 4f).toInt()
@@ -95,7 +107,7 @@ class LibraryItem(
                 )
             }
         } else {
-            LibraryListHolder(view, adapter as LibraryCategoryAdapter, showFastScroll.getOrDefault())
+            LibraryListHolder(view, adapter as LibraryCategoryAdapter, showFastScroll)
         }
     }
 

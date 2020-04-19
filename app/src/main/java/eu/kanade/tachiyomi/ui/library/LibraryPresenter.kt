@@ -400,7 +400,6 @@ class LibraryPresenter(
      */
     private fun getLibraryFromDB(): List<LibraryItem> {
         val categories = db.getCategories().executeAsBlocking().toMutableList()
-        val libraryLayout = preferences.libraryLayout()
         val showCategories = !preferences.hideCategories().getOrDefault()
         var libraryManga = db.getLibraryMangas().executeAsBlocking()
         val seekPref = preferences.alwaysShowSeeker()
@@ -421,7 +420,7 @@ class LibraryPresenter(
             val headerItem = (if (!showCategories) catItemAll
             else headerItems[it.category]) ?: return@mapNotNull null
             categorySet.add(it.category)
-            LibraryItem(it, libraryLayout, preferences.uniformGrid(), seekPref, headerItem)
+            LibraryItem(it, headerItem)
         }.toMutableList()
 
         val categoriesHidden = preferences.collapsedCategories().getOrDefault().mapNotNull {
@@ -434,13 +433,7 @@ class LibraryPresenter(
                 if (catId > 0 && !categorySet.contains(catId)) {
                     val headerItem = headerItems[catId]
                     if (headerItem != null) items.add(
-                        LibraryItem(
-                            LibraryManga.createBlank(catId),
-                            libraryLayout,
-                            preferences.uniformGrid(),
-                            preferences.alwaysShowSeeker(),
-                            headerItem
-                        )
+                        LibraryItem(LibraryManga.createBlank(catId), headerItem)
                     )
                 } else if (catId in categoriesHidden) {
                     val mangaToRemove = items.filter { it.manga.category == catId }
@@ -450,13 +443,7 @@ class LibraryPresenter(
                     items.removeAll(mangaToRemove)
                     val headerItem = headerItems[catId]
                     if (headerItem != null) items.add(
-                        LibraryItem(
-                            LibraryManga.createHide(catId, mergedTitle),
-                            libraryLayout,
-                            preferences.uniformGrid(),
-                            preferences.alwaysShowSeeker(),
-                            headerItem
-                        )
+                        LibraryItem(LibraryManga.createHide(catId, mergedTitle), headerItem)
                     )
                 }
             }

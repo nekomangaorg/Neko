@@ -33,6 +33,7 @@ class LibraryListHolder(
 ) : LibraryHolder(view, adapter) {
 
     init {
+        play_layout.setOnClickListener { playButtonClicked() }
         badge_view?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             marginEnd = (if (padEnd) 22 else 12).dpToPx
         }
@@ -74,9 +75,7 @@ class LibraryListHolder(
         subtitle.visibility = if (!item.manga.author.isNullOrBlank()) View.VISIBLE
         else View.GONE
 
-        play_layout.visibility = if (item.manga.unread > 0 && item.unreadType > 0)
-            View.VISIBLE else View.GONE
-        play_layout.setOnClickListener { playButtonClicked() }
+        setReadingButton(item)
 
         // Update the cover.
         if (item.manga.thumbnail_url == null) Glide.with(view.context).clear(cover_thumbnail)
