@@ -12,7 +12,7 @@
     <item
         android:id="@+id/action_filter"
         android:icon="@drawable/ic_filter_list_white_24dp"
-        android:title="@string/group_all"
+        android:title="@string/filter"
         app:showAsAction="ifRoom">
         <menu>
             <group android:checkableBehavior="single">

@@ -41,7 +41,6 @@ import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.drawable.IconCompat
 import androidx.core.math.MathUtils
 import androidx.palette.graphics.Palette
-import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -249,10 +248,7 @@ class MangaDetailsController : BaseController,
         adapter?.isSwipeEnabled = true
         recycler.layoutManager = LinearLayoutManager(view.context)
         recycler.addItemDecoration(
-            DividerItemDecoration(
-                view.context,
-                DividerItemDecoration.VERTICAL
-            )
+            MangaDetailsDivider(view.context)
         )
         recycler.setHasFixedSize(true)
         val attrsArray = intArrayOf(android.R.attr.actionBarSize)

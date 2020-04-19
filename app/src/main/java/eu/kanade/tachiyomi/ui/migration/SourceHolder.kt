@@ -3,37 +3,25 @@ package eu.kanade.tachiyomi.ui.migration
 import android.view.View
 import eu.kanade.tachiyomi.source.icon
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
-import eu.kanade.tachiyomi.ui.base.holder.SlicedHolder
 import eu.kanade.tachiyomi.util.view.roundTextIcon
-import io.github.mthli.slice.Slice
-import kotlinx.android.synthetic.main.source_item.card
+import kotlinx.android.synthetic.main.migration_card_item.*
 import kotlinx.android.synthetic.main.source_item.edit_button
 import kotlinx.android.synthetic.main.source_item.title
-import kotlinx.android.synthetic.main.migration_card_item.*
 
-class SourceHolder(view: View, override val adapter: SourceAdapter) :
-        BaseFlexibleViewHolder(view, adapter),
-        SlicedHolder {
-
-    override val slice = Slice(card).apply {
-        setColor(adapter.cardBackground)
-    }
-
-    override val viewToSlice: View
-        get() = card
+class SourceHolder(view: View, val adapter: SourceAdapter) :
+        BaseFlexibleViewHolder(view, adapter) {
 
     init {
         migration_auto.setOnClickListener {
-            adapter.selectClickListener?.onSelectClick(adapterPosition)
+            adapter.autoClickListener?.onAutoClick(adapterPosition)
         }
         migration_select.setOnClickListener {
-            adapter.autoClickListener?.onAutoClick(adapterPosition)
+            adapter.selectClickListener?.onSelectClick(adapterPosition)
         }
     }
 
     fun bind(item: SourceItem) {
         val source = item.source
-        setCardEdges(item)
 
         // Set source name
         title.text = source.name

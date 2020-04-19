@@ -9,23 +9,13 @@ import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.extension.model.InstallStep
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
-import eu.kanade.tachiyomi.ui.base.holder.SlicedHolder
 import eu.kanade.tachiyomi.util.system.LocaleHelper
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.resetStrokeColor
-import io.github.mthli.slice.Slice
 import kotlinx.android.synthetic.main.extension_card_item.*
 
-class ExtensionHolder(view: View, override val adapter: ExtensionAdapter) :
-        BaseFlexibleViewHolder(view, adapter),
-        SlicedHolder {
-
-    override val slice = Slice(card).apply {
-        setColor(adapter.cardBackground)
-    }
-
-    override val viewToSlice: View
-        get() = card
+class ExtensionHolder(view: View, val adapter: ExtensionAdapter) :
+        BaseFlexibleViewHolder(view, adapter) {
 
     init {
         ext_button.setOnClickListener {
@@ -35,7 +25,6 @@ class ExtensionHolder(view: View, override val adapter: ExtensionAdapter) :
 
     fun bind(item: ExtensionItem) {
         val extension = item.extension
-        setCardEdges(item)
 
         // Set source name
         ext_title.text = extension.name

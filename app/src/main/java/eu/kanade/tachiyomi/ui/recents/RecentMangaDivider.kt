@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.extension
+package eu.kanade.tachiyomi.ui.recents
 
 import android.content.Context
 import android.graphics.Canvas
@@ -7,7 +7,7 @@ import android.graphics.drawable.Drawable
 import android.view.View
 import eu.kanade.tachiyomi.util.system.dpToPx
 
-class ExtensionDividerItemDecoration(context: Context) : androidx.recyclerview.widget.RecyclerView.ItemDecoration() {
+class RecentMangaDivider(context: Context) : androidx.recyclerview.widget.RecyclerView.ItemDecoration() {
 
     private val divider: Drawable
 
@@ -22,8 +22,9 @@ class ExtensionDividerItemDecoration(context: Context) : androidx.recyclerview.w
         for (i in 0 until childCount - 1) {
             val child = parent.getChildAt(i)
             val holder = parent.getChildViewHolder(child)
-            if (holder is ExtensionHolder &&
-                    parent.getChildViewHolder(parent.getChildAt(i + 1)) is ExtensionHolder) {
+            if (holder is RecentMangaHolder &&
+                parent.getChildViewHolder(parent.getChildAt(i + 1)) is RecentMangaHolder
+            ) {
                 val params = child.layoutParams as androidx.recyclerview.widget.RecyclerView.LayoutParams
                 val top = child.bottom + params.bottomMargin
                 val bottom = top + divider.intrinsicHeight

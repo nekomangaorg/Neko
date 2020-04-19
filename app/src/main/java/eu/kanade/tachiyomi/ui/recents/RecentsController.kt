@@ -105,6 +105,9 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
         recycler.layoutManager = LinearLayoutManager(view.context)
         recycler.setHasFixedSize(true)
         recycler.recycledViewPool.setMaxRecycledViews(0, 0)
+        recycler.addItemDecoration(
+            RecentMangaDivider(view.context)
+        )
         adapter.isSwipeEnabled = true
         adapter.itemTouchHelperCallback.setSwipeFlags(
             ItemTouchHelper.LEFT
