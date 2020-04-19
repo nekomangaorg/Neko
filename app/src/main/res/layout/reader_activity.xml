@@ -38,7 +38,7 @@
         android:id="@+id/reader_menu"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:theme="?attr/actionBarTheme"
+        android:background="@android:color/transparent"
         android:visibility="invisible"
         tools:visibility="visible">
 
@@ -46,7 +46,7 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="?colorPrimary" />
+            android:background="?colorSecondary" />
 
        <include layout="@layout/reader_chapters_sheet"/>
 

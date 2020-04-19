@@ -53,11 +53,11 @@ class MigrationProcessHolder(
             val source = item.manga.mangaSource()
 
             migration_menu.setVectorCompat(
-                R.drawable.ic_more_vert_black_24dp, view.context.getResourceColor(R.attr.icon_color)
+                R.drawable.ic_more_vert_black_24dp, view.context.getResourceColor(android.R.attr.textColorPrimary)
             )
             skip_manga.setVectorCompat(
                 R.drawable.ic_close_white_24dp, view.context.getResourceColor(
-                    R.attr.icon_color
+                    android.R.attr.textColorPrimary
                 )
             )
             migration_menu.invisible()

@@ -113,7 +113,7 @@ class ReaderSettingsSheet(private val activity: ReaderActivity) :
         viewer.setSelection(activity.presenter.manga?.viewer ?: 0, false)
 
         rotation_mode.bindToPreference(preferences.rotation(), 1)
-        background_color.bindToPreference(preferences.readerTheme(), 0, true)
+        background_color.bindToPreference(preferences.readerTheme(), 0)
         show_page_number.bindToPreference(preferences.showPageNumber())
         fullscreen.bindToPreference(preferences.fullscreen())
         keepscreen.bindToPreference(preferences.keepScreenOn())
@@ -155,12 +155,10 @@ class ReaderSettingsSheet(private val activity: ReaderActivity) :
      */
     private fun Spinner.bindToPreference(
         pref: Preference<Int>,
-        offset: Int = 0,
-        shouldDismiss: Boolean = false
+        offset: Int = 0
     ) {
         onItemSelectedListener = IgnoreFirstSpinnerListener { position ->
             pref.set(position + offset)
-            if (shouldDismiss) dismiss()
         }
         setSelection(pref.getOrDefault() - offset, false)
     }

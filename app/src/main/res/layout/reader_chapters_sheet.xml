@@ -5,8 +5,8 @@
     android:id="@+id/chapters_bottom_sheet"
     android:layout_width="match_parent"
     android:layout_height="300dp"
-    android:background="@drawable/bg_bottom_sheet_black"
-    android:backgroundTint="@color/darkPrimaryTranslucent"
+    android:background="@drawable/bottom_sheet_rounded_background"
+    android:backgroundTint="?colorSecondary"
     android:orientation="vertical"
     app:behavior_peekHeight="?attr/actionBarSize"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">

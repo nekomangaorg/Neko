@@ -219,28 +219,26 @@ class HttpPageLoader(
     private fun HttpSource.getCachedImage(page: ReaderPage): Observable<ReaderPage> {
         val imageUrl = page.imageUrl ?: return Observable.just(page)
 
-        return Observable.just(page)
-            .flatMap {
+        return Observable.just(page).flatMap {
                 if (!chapterCache.isImageInCache(imageUrl)) {
                     cacheImage(page)
                 } else {
                     Observable.just(page)
                 }
-            }
-            .doOnNext {
+            }.doOnNext {
                 val readerTheme = preferences.readerTheme().getOrDefault()
                 if (readerTheme >= 2) {
                     val stream = chapterCache.getImageFile(imageUrl).inputStream()
                     val image = BitmapFactory.decodeStream(stream)
-                    page.bg = ImageUtil.autoSetBackground(image, readerTheme == 2)
+                    page.bg = ImageUtil.autoSetBackground(
+                        image, readerTheme == 2, preferences.context
+                    )
                     page.bgAlwaysWhite = readerTheme == 2
                     stream.close()
                 }
                 page.stream = { chapterCache.getImageFile(imageUrl).inputStream() }
                 page.status = Page.READY
-            }
-            .doOnError { page.status = Page.ERROR }
-            .onErrorReturn { page }
+            }.doOnError { page.status = Page.ERROR }.onErrorReturn { page }
     }
 
     /**

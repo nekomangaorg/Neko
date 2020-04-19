@@ -78,7 +78,7 @@ class PagerConfig(private val viewer: PagerViewer, preferences: PreferencesHelpe
             .register({ volumeKeysInverted = it })
 
         preferences.readerTheme()
-                .register({ readerTheme = it })
+                .register({ readerTheme = it }, { imagePropertyChangedListener?.invoke() })
 
         preferences.alwaysShowChapterTransition()
                 .register({ alwaysShowChapterTransition = it })

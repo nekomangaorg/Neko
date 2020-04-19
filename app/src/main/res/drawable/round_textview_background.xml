@@ -5,5 +5,5 @@
     <size
         android:height="25dp"
         android:width="25dp" />
-    <solid android:color="@color/drawerPrimary"/>
+    <solid android:color="@color/md_grey_800_85"/>
 </shape>

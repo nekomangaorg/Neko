@@ -22,6 +22,7 @@ import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.graphics.ColorUtils
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -130,6 +131,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
 
     var sheetManageNavColor = false
 
+    var lightStatusBar = false
+
     /**
      * Progress dialog used when switching chapters from the menu buttons.
      */
@@ -162,15 +165,24 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
      */
     override fun onCreate(savedInstanceState: Bundle?) {
         AppCompatDelegate.setDefaultNightMode(ThemeUtil.nightMode(preferences.theme()))
-        setTheme(when (preferences.readerTheme().getOrDefault()) {
-            0 -> R.style.Theme_Base_Reader_Light
-            1 -> R.style.Theme_Base_Reader_Dark
-            else -> R.style.Theme_Base_Reader
-        })
+        setTheme(ThemeUtil.theme(preferences.theme()))
         super.onCreate(savedInstanceState)
         setContentView(R.layout.reader_activity)
-
+        val a = obtainStyledAttributes(intArrayOf(android.R.attr.windowLightStatusBar))
+        lightStatusBar = a.getBoolean(0, false)
+        a.recycle()
         setNotchCutoutMode()
+        if (lightStatusBar) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) reader_layout.systemUiVisibility =
+                reader_layout.systemUiVisibility.or(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR)
+            reader_layout.systemUiVisibility =
+                reader_layout.systemUiVisibility.or(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
+        } else {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) reader_layout.systemUiVisibility =
+                reader_layout.systemUiVisibility.rem(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR)
+            reader_layout.systemUiVisibility =
+                reader_layout.systemUiVisibility.rem(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
+        }
 
         if (presenter.needsInit()) {
             val manga = intent.extras!!.getLong("manga", -1)
@@ -300,6 +312,10 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
     private fun initializeMenu() {
         // Set toolbar
         setSupportActionBar(toolbar)
+        val primaryColor = ColorUtils.setAlphaComponent(getResourceColor(R.attr.colorSecondary),
+            200)
+        toolbar.setBackgroundColor(primaryColor)
+        window.statusBarColor = primaryColor
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         toolbar.setNavigationOnClickListener {
             onBackPressed()
@@ -327,7 +343,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
             }
             // if in landscape with 2/3 button mode, fully opaque nav bar
             else if (insets.systemWindowInsetLeft > 0 || insets.systemWindowInsetRight > 0) {
-                window.navigationBarColor = getResourceColor(R.attr.colorPrimary)
+                window.navigationBarColor = getResourceColor(R.attr.colorSecondary)
                 false
             }
             // if in portrait with 2/3 button mode, translucent nav bar
@@ -701,10 +717,6 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
 
             subscriptions += Observable.merge(initialRotation, rotationUpdates)
                 .subscribe { setOrientation(it) }
-
-            subscriptions += preferences.readerTheme().asObservable()
-                .skip(1) // We only care about updates
-                .subscribe { recreate() }
 
             subscriptions += preferences.showPageNumber().asObservable()
                 .subscribe { setPageNumberVisibility(it) }

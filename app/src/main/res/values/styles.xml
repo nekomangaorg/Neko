@@ -30,15 +30,6 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
-    <!--==============-->
-    <!--NavigationView-->
-    <!--==============-->
-    <style name="Theme.Widget.NavigationView">
-        <item name="colorControlHighlight">@color/drawerHighlight</item>
-        <item name="colorPrimary">@color/drawerPrimary</item>
-    </style>
-
-
     <!--===============-->
     <!--Text Appearance-->
     <!--===============-->
@@ -186,7 +177,7 @@
 
 
     <style name="Theme.Widget.SpinnerItem" parent="Widget.AppCompat.DropDownItem.Spinner">
-        <item name="android:textColor">?attr/text_color_primary</item>
+        <item name="android:textColor">?android:textColorPrimary</item>
         <item name="android:background">?attr/selectable_list_drawable</item>
     </style>
 

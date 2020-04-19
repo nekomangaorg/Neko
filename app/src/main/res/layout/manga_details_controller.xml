@@ -59,7 +59,6 @@
             android:layout_marginEnd="50dp"
             android:alpha="0"
             android:background="@drawable/round_textview_background"
-            android:backgroundTint="@color/md_grey_800_85"
             android:padding="8dp"
             android:textColor="@android:color/white"
             app:layout_constraintEnd_toStartOf="@id/fast_scroller"

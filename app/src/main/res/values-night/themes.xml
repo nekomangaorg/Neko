@@ -6,16 +6,6 @@
         <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
     </style>
 
-    <style name="Theme.Base.Reader" parent="Theme.Base">
-        <item name="colorPrimary">@color/darkPrimaryTranslucent</item>
-        <item name="android:enforceNavigationBarContrast" tools:targetApi="29">false</item>
-        <item name="colorPrimaryDark">@color/darkPrimaryTranslucent</item>
-        <item name="android:statusBarColor">?colorPrimaryDark</item>
-        <item name="android:navigationBarColor">?colorPrimaryDark</item>
-        <item name="android:colorBackground">@color/readerDarkBackground</item>
-        <item name="android:windowLightStatusBar">false</item>
-    </style>
-
     <!--==============-->
     <!-- Amoled Theme -->
     <!--==============-->
@@ -27,12 +17,9 @@
         <item name="colorPrimaryDark">@color/colorAmoledPrimary</item>
         <item name="android:colorBackground">@color/md_black_1000</item>
         <item name="android:statusBarColor">@color/blackStatus</item>
-        <item name="snackbar_background">@color/trueSnackbarBackground</item>
-        <item name="snackbar_text">@color/textColorPrimary</item>
 
         <!-- Custom Attributes-->
         <item name="selectable_list_drawable">@drawable/list_item_selector</item>
-        <item name="selectable_library_drawable">@drawable/library_item_selector_amoled</item>
         <item name="background_card">@color/colorAmoledPrimary</item>
 
 

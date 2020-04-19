@@ -314,8 +314,6 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         if (updates > 0) {
             val badge = bottom_nav.getOrCreateBadge(R.id.nav_browse)
             badge.number = updates
-            badge.backgroundColor = getResourceColor(R.attr.badgeColor)
-            badge.badgeTextColor = Color.WHITE
         } else {
             bottom_nav.removeBadge(R.id.nav_browse)
         }

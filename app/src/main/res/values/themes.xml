@@ -24,7 +24,7 @@
         <item name="android:colorBackground">@color/background</item>
         <item name="android:listSelector">?colorAccent</item>
         <item name="android:divider">@color/divider</item>
-        <item name="android:listDivider">@drawable/line_divider_light</item>
+        <item name="android:listDivider">@drawable/line_divider</item>
         <item name="actionModeStyle">@style/CustomActionModeStyle</item>
         <item name="tabBarIconColor">?colorAccent</item>
         <item name="tabBarIconInactive">@color/colorPrimaryInactive</item>
@@ -34,20 +34,10 @@
         <item name="windowActionModeOverlay">true</item>
         <item name="actionBarTheme">@style/ThemeOverlay.AppCompat.DayNight.ActionBar</item>
         <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
-        <item name="alertDialogTheme">@style/Theme.AlertDialog.DayNight</item>
-
 
         <!-- Custom Attributes-->
-        <item name="navigation_view_theme">@style/Theme.Widget.NavigationView</item>
         <item name="selectable_list_drawable">@drawable/list_item_selector</item>
-        <item name="selectable_library_drawable">@drawable/library_item_selector_light</item>
-        <item name="text_color_primary">@color/textColorPrimary</item>
-        <item name="background_card">@color/cardBackground</item>
-        <item name="icon_color">@color/iconColor</item>
-        <item name="snackbar_background">@color/snackbarBackground</item>
-        <item name="snackbar_text">@color/textColorPrimaryInverse</item>
         <item name="actionBarTintColor">@color/textColorPrimary</item>
-        <item name="badgeColor">@color/badgeColor</item>
 
         <item name="android:statusBarColor">@color/mainStatus</item>
         <item name="android:navigationBarColor">#B3000000</item>
@@ -77,101 +67,6 @@
         <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
     </style>
     <style name="Theme.Tachiyomi.Amoled" parent="Theme.Tachiyomi"/>
-    <!--==============-->
-    <!-- Reader Theme -->
-    <!--==============-->
-    <style name="Theme.Base.Reader" parent="Theme.Base">
-        <item name="android:forceDarkAllowed" tools:targetApi="29">false</item>
-        <item name="android:enforceNavigationBarContrast" tools:targetApi="29">false</item>
-        <item name="colorPrimary">@color/darkPrimaryTranslucent</item>
-        <item name="colorPrimaryDark">@color/darkPrimaryTranslucent</item>
-        <item name="android:colorBackground">@android:color/white</item>
-        <item name="actionBarTheme">@style/ThemeOverlay.AppCompat.Dark.ActionBar</item>
-        <item name="actionBarTintColor">@color/md_white_1000</item>
-        <item name="android:statusBarColor">?colorPrimaryDark</item>
-        <item name="android:navigationBarColor">?colorPrimaryDark</item>
-        <item name="android:windowLightStatusBar">false</item>
-        <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
-    </style>
-
-    <style name="Theme.Base.Reader.Dark" parent="Theme.MaterialComponents.NoActionBar">
-        <item name="android:forceDarkAllowed" tools:targetApi="29">false</item>
-        <item name="android:enforceNavigationBarContrast" tools:targetApi="29">false</item>
-        <item name="colorPrimary">@color/darkPrimaryTranslucent</item>
-        <item name="colorPrimaryDark">@color/darkPrimaryTranslucent</item>
-        <item name="android:colorBackground">@android:color/black</item>
-        <item name="colorAccent">#3399FF</item>
-        <item name="android:textColorPrimary">@color/md_white_1000</item>
-        <item name="android:textColorSecondary">@color/md_white_1000_70</item>
-        <item name="android:textColorHint">@color/md_white_1000_50</item>
-        <item name="android:textColorPrimaryInverse">@color/md_black_1000_87</item>
-        <item name="android:textColorSecondaryInverse">@color/md_black_1000_54</item>
-        <item name="android:textColorHintInverse">@color/md_black_1000_38</item>
-        <item name="android:listSelector">?colorAccent</item>
-        <item name="android:divider">@android:color/transparent</item>
-        <item name="android:listDivider">@drawable/line_divider_dark</item>
-
-        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
-        <item name="android:statusBarColor">?colorPrimaryDark</item>
-        <item name="android:navigationBarColor">@color/darkPrimaryColor</item>
-        <item name="actionBarTintColor">@color/md_white_1000</item>
-
-        <!-- Themes -->
-        <item name="windowActionModeOverlay">true</item>
-        <item name="actionBarTheme">@style/ThemeOverlay.AppCompat.Dark.ActionBar</item>
-        <item name="actionBarPopupTheme">@style/ThemeOverlay.AppCompat</item>
-        <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
-        <item name="md_background_color">@android:color/transparent</item>
-        <item name="alertDialogTheme">@style/Theme.AlertDialog.DayNight</item>
-
-
-        <!-- Custom Attributes-->
-        <item name="navigation_view_theme">@style/Theme.Widget.NavigationView</item>
-        <item name="selectable_list_drawable">@drawable/list_item_selector_dark</item>
-        <item name="selectable_library_drawable">@drawable/library_item_selector_dark</item>
-        <item name="text_color_primary">@color/md_white_1000</item>
-        <item name="background_card">@android:color/transparent</item>
-        <item name="icon_color">@color/iconColor</item>
-
-    </style>
-
-    <style name="Theme.Base.Reader.Light" parent="Theme.MaterialComponents.Light.NoActionBar">
-        <item name="android:forceDarkAllowed" tools:targetApi="29">false</item>
-        <item name="android:enforceNavigationBarContrast" tools:targetApi="29">false</item>
-        <item name="colorPrimary">@color/darkPrimaryTranslucent</item>
-        <item name="colorPrimaryDark">@color/darkPrimaryTranslucent</item>
-        <item name="android:colorBackground">@android:color/white</item>
-        <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:textColorPrimary">@color/md_black_1000_87</item>
-        <item name="android:textColorSecondary">@color/md_black_1000_54</item>
-        <item name="android:textColorHint">@color/md_white_1000</item>
-        <item name="android:textColorPrimaryInverse">@color/md_white_1000</item>
-        <item name="android:textColorSecondaryInverse">@color/md_white_1000_70</item>
-        <item name="android:textColorHintInverse">@color/md_white_1000_50</item>
-        <item name="android:listSelector">?colorAccent</item>
-        <item name="android:divider">@color/md_white_1000_50</item>
-        <item name="android:listDivider">@drawable/line_divider_light</item>
-
-        <!-- Themes -->
-        <item name="windowActionModeOverlay">true</item>
-        <item name="actionBarTheme">@style/Theme.ActionBar.Dark.DayNight</item>
-        <item name="actionBarTintColor">@color/md_white_1000</item>
-        <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
-        <item name="alertDialogTheme">@style/Theme.AlertDialog.DayNight</item>
-
-
-        <!-- Custom Attributes-->
-        <item name="navigation_view_theme">@style/Theme.Widget.NavigationView</item>
-        <item name="selectable_list_drawable">@drawable/list_item_selector</item>
-        <item name="selectable_library_drawable">@drawable/library_item_selector_light</item>
-        <item name="text_color_primary">@color/md_black_1000_87</item>
-        <item name="background_card">@color/md_white_1000_50</item>
-        <item name="icon_color">@color/md_black_1000_54</item>
-
-        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
-        <item name="android:statusBarColor">?colorPrimaryDark</item>
-        <item name="android:navigationBarColor">?colorPrimaryDark</item>
-    </style>
 
     <!--===============-->
     <!-- Launch Screen -->
