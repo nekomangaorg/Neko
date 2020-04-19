@@ -834,9 +834,12 @@ class LibraryController(
     }
 
     override fun showSheet() {
-        if (bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_HIDDEN) bottom_sheet.sheetBehavior?.state =
-            BottomSheetBehavior.STATE_COLLAPSED
-        else bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
+        when {
+            bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_HIDDEN -> bottom_sheet.sheetBehavior?.state =
+                BottomSheetBehavior.STATE_COLLAPSED
+            bottom_sheet.sheetBehavior?.state != BottomSheetBehavior.STATE_EXPANDED -> bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
+            else -> DisplayBottomSheet(this).show()
+        }
     }
 
     override fun toggleSheet() {
