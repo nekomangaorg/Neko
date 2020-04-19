@@ -10,13 +10,12 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.SearchView
-import com.afollestad.materialdialogs.MaterialDialog
-import com.afollestad.materialdialogs.list.listItems
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
 import com.bluelinelabs.conductor.RouterTransaction
 import com.bluelinelabs.conductor.changehandler.FadeChangeHandler
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.snackbar.Snackbar
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
@@ -38,6 +37,7 @@ import eu.kanade.tachiyomi.ui.source.latest.LatestUpdatesController
 import eu.kanade.tachiyomi.util.view.applyWindowInsetsForRootController
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
+import eu.kanade.tachiyomi.util.view.snack
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.extensions_bottom_sheet.*
 import kotlinx.android.synthetic.main.main_activity.*
@@ -54,7 +54,6 @@ import kotlin.math.max
  */
 class SourceController : NucleusController<SourcePresenter>(),
         FlexibleAdapter.OnItemClickListener,
-        FlexibleAdapter.OnItemLongClickListener,
         SourceAdapter.OnBrowseClickListener,
         RootSearchInterface,
         BottomSheetController,
@@ -76,6 +75,8 @@ class SourceController : NucleusController<SourcePresenter>(),
     var headerHeight = 0
 
     var showingExtensions = false
+
+    var snackbar: Snackbar? = null
 
     /**
      * Called when controller is initialized.
@@ -114,6 +115,7 @@ class SourceController : NucleusController<SourcePresenter>(),
         // Create recycler and set adapter.
         recycler.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(view.context)
         recycler.adapter = adapter
+        adapter?.isSwipeEnabled = true
         // recycler.addItemDecoration(SourceDividerItemDecoration(view.context))
         val attrsArray = intArrayOf(android.R.attr.actionBarSize)
         val array = view.context.obtainStyledAttributes(attrsArray)
@@ -216,29 +218,22 @@ class SourceController : NucleusController<SourcePresenter>(),
         return false
     }
 
-    override fun onItemLongClick(position: Int) {
-        val activity = activity ?: return
-        val item = adapter?.getItem(position) as? SourceItem ?: return
-        val isPinned = item.header?.code?.equals(SourcePresenter.PINNED_KEY) ?: false
-
-        MaterialDialog(activity)
-                .title(text = item.source.name)
-                .listItems(items = listOf(
-                    activity.getString(R.string.hide),
-                    activity.getString(if (isPinned) R.string.unpin else R.string.pin)
-                ), waitForPositiveButton = false, selection = { _, index, _ ->
-                    when (index) {
-                        0 -> hideCatalogue(item.source)
-                        1 -> pinCatalogue(item.source, isPinned)
-                    }
-                }).show()
-    }
-
-    private fun hideCatalogue(source: Source) {
+    fun hideCatalogue(position: Int) {
+        val source = (adapter?.getItem(position) as? SourceItem)?.source ?: return
         val current = preferences.hiddenSources().getOrDefault()
         preferences.hiddenSources().set(current + source.id.toString())
 
         presenter.updateSources()
+
+        snackbar = view?.snack(R.string.source_hidden, Snackbar.LENGTH_INDEFINITE) {
+            anchorView = ext_bottom_sheet
+            setAction(R.string.undo) {
+                val newCurrent = preferences.hiddenSources().getOrDefault()
+                preferences.hiddenSources().set(newCurrent - source.id.toString())
+                presenter.updateSources()
+            }
+        }
+        (activity as? MainActivity)?.setUndoSnackBar(snackbar)
     }
 
     private fun pinCatalogue(source: Source, isPinned: Boolean) {
@@ -256,7 +251,10 @@ class SourceController : NucleusController<SourcePresenter>(),
      * Called when browse is clicked in [SourceAdapter]
      */
     override fun onBrowseClick(position: Int) {
-        onItemClick(view!!, position)
+        val item = adapter?.getItem(position) as? SourceItem ?: return
+        val isPinned = item.isPinned ?: item.header?.code?.equals(SourcePresenter.PINNED_KEY)
+        ?: false
+        pinCatalogue(item.source, isPinned)
     }
 
     /**

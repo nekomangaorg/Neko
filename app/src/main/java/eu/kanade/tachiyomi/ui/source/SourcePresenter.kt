@@ -33,6 +33,7 @@ class SourcePresenter(
      * Subscription for retrieving enabled sources.
      */
     private var sourceSubscription: Subscription? = null
+    private var lastUsedSubscription: Subscription? = null
 
     override fun onCreate(savedState: Bundle?) {
         super.onCreate(savedState)
@@ -63,11 +64,12 @@ class SourcePresenter(
         var sourceItems = byLang.flatMap {
             val langItem = LangItem(it.key)
             it.value.map { source ->
+                val isPinned = source.id.toString() in pinnedCatalogues
                 if (source.id.toString() in pinnedCatalogues) {
                     pinnedSources.add(SourceItem(source, LangItem(PINNED_KEY)))
                 }
 
-                SourceItem(source, langItem)
+                SourceItem(source, langItem, isPinned)
             }
         }
 
@@ -80,20 +82,25 @@ class SourcePresenter(
     }
 
     private fun loadLastUsedSource() {
+        lastUsedSubscription?.unsubscribe()
         val sharedObs = preferences.lastUsedCatalogueSource().asObservable().share()
 
         // Emit the first item immediately but delay subsequent emissions by 500ms.
-        Observable.merge(
+        lastUsedSubscription = Observable.merge(
                 sharedObs.take(1),
                 sharedObs.skip(1).delay(500, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread()))
                 .distinctUntilChanged()
-                .map { (sourceManager.get(it) as? CatalogueSource)?.let { SourceItem(it) } }
+                .map { (sourceManager.get(it) as? CatalogueSource)?.let { source ->
+                    val pinnedCatalogues = preferences.pinnedCatalogues().getOrDefault()
+                    val isPinned = source.id.toString() in pinnedCatalogues
+                    SourceItem(source, null, isPinned) } }
                 .subscribeLatestCache(SourceController::setLastUsedSource)
     }
 
     fun updateSources() {
         sources = getEnabledSources()
         loadSources()
+        loadLastUsedSource()
     }
 
     /**

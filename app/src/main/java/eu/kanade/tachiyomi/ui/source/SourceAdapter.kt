@@ -29,6 +29,11 @@ class SourceAdapter(val controller: SourceController) :
      */
     val latestClickListener: OnLatestClickListener = controller
 
+    override fun onItemSwiped(position: Int, direction: Int) {
+        super.onItemSwiped(position, direction)
+        controller.hideCatalogue(position)
+    }
+
     /**
      * Listener which should be called when user clicks browse.
      * Note: Should only be handled by [SourceController]

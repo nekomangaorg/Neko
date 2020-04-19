@@ -21,6 +21,10 @@ data class LangItem(val code: String) : AbstractHeaderItem<LangHolder>() {
         return R.layout.source_header_item
     }
 
+    override fun isSwipeable(): Boolean {
+        return false
+    }
+
     /**
      * Creates a new view holder for this item.
      */

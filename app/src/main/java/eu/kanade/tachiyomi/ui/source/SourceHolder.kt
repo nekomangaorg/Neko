@@ -1,8 +1,11 @@
 package eu.kanade.tachiyomi.ui.source
 
+import android.content.res.ColorStateList
 import android.view.View
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.icon
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
+import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.roundTextIcon
 import eu.kanade.tachiyomi.util.view.visible
@@ -19,6 +22,9 @@ class SourceHolder(view: View, val adapter: SourceAdapter) :
         get() = card*/
 
     init {
+        source_pin.setOnClickListener {
+            adapter.browseClickListener.onBrowseClick(adapterPosition)
+        }
         source_latest.setOnClickListener {
             adapter.latestClickListener.onLatestClick(adapterPosition)
         }
@@ -30,6 +36,20 @@ class SourceHolder(view: View, val adapter: SourceAdapter) :
 
         // Set source name
         title.text = source.name
+
+        val isPinned = item.isPinned ?: item.header?.code?.equals(SourcePresenter.PINNED_KEY) ?: false
+        source_pin.apply {
+            imageTintList = ColorStateList.valueOf(
+                context.getResourceColor(
+                    if (isPinned) R.attr.colorAccent
+                    else android.R.attr.textColorSecondary
+                )
+            )
+            setImageResource(
+                if (isPinned) R.drawable.ic_pin_24dp
+                else R.drawable.ic_pin_outline_24dp
+            )
+        }
 
         // Set circle letter image.
         itemView.post {
@@ -43,5 +63,17 @@ class SourceHolder(view: View, val adapter: SourceAdapter) :
         } else {
             source_latest.gone()
         }
+    }
+
+    override fun getFrontView(): View {
+        return card
+    }
+
+    override fun getRearLeftView(): View {
+        return left_view
+    }
+
+    override fun getRearRightView(): View {
+        return right_view
     }
 }

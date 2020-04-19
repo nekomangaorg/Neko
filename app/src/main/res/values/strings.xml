@@ -213,6 +213,7 @@
     <string name="search_extensions">Search extensions…</string>
     <string name="all_sources">All sources</string>
     <string name="sources">Sources</string>
+    <string name="source_hidden">Source hidden</string>
 
     <!-- Other Screens -->
 
