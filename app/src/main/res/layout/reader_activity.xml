@@ -41,12 +41,24 @@
         android:background="@android:color/transparent"
         android:visibility="invisible"
         tools:visibility="visible">
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/appbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:theme="?attr/actionBarTheme"
+            android:background="?attr/colorSecondary"
+            android:stateListAnimator="@null"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="?colorSecondary" />
+            android:background="@android:color/transparent" />
+
+        </com.google.android.material.appbar.AppBarLayout>
 
        <include layout="@layout/reader_chapters_sheet"/>
 

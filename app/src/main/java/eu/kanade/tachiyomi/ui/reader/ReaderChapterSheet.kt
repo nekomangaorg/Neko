@@ -67,6 +67,7 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
         }
         sheetBehavior?.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onSlide(bottomSheet: View, progress: Float) {
+                pill.alpha = (1 - max(0f, progress)) * 0.25f
                 val trueProgress = max(progress, 0f)
                 backgroundTintList =
                     ColorStateList.valueOf(lerpColor(primary, fullPrimary, trueProgress))

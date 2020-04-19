@@ -314,8 +314,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
         setSupportActionBar(toolbar)
         val primaryColor = ColorUtils.setAlphaComponent(getResourceColor(R.attr.colorSecondary),
             200)
-        toolbar.setBackgroundColor(primaryColor)
-        window.statusBarColor = primaryColor
+        appbar.setBackgroundColor(primaryColor)
+        window.statusBarColor = Color.TRANSPARENT
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         toolbar.setNavigationOnClickListener {
             onBackPressed()
@@ -384,7 +384,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
                             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
                         }
                     })
-                    toolbar.startAnimation(toolbarAnimation)
+                    appbar.startAnimation(toolbarAnimation)
                 }
                 BottomSheetBehavior.from(chapters_bottom_sheet).state = BottomSheetBehavior.STATE_COLLAPSED
             }
@@ -398,7 +398,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
                         reader_menu.visibility = View.GONE
                     }
                 })
-                toolbar.startAnimation(toolbarAnimation)
+                appbar.startAnimation(toolbarAnimation)
                 BottomSheetBehavior.from(chapters_bottom_sheet).isHideable = true
                 BottomSheetBehavior.from(chapters_bottom_sheet).state = BottomSheetBehavior.STATE_HIDDEN
             } else
@@ -658,7 +658,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
                         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
                     }
                 })
-                toolbar.startAnimation(toolbarAnimation)
+                appbar.startAnimation(toolbarAnimation)
             }
         } else {
             if (menuStickyVisible && !menuVisible) {
