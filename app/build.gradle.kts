@@ -112,7 +112,7 @@ dependencies {
 
     implementation("androidx.multidex:multidex:2.0.1")
 
-    implementation("com.google.firebase:firebase-core:17.2.3")
+    implementation("com.google.firebase:firebase-core:17.3.0")
 
     val lifecycleVersion = "2.1.0"
     implementation("androidx.lifecycle:lifecycle-extensions:$lifecycleVersion")
@@ -176,9 +176,6 @@ dependencies {
     implementation("com.github.bumptech.glide:glide:$glideVersion")
     implementation("com.github.bumptech.glide:okhttp3-integration:$glideVersion")
     kapt("com.github.bumptech.glide:compiler:$glideVersion")
-
-// Transformations
-    implementation("jp.wasabeef:glide-transformations:4.1.0")
 
 // Logging
     implementation("com.jakewharton.timber:timber:4.7.1")
