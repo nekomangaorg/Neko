@@ -346,7 +346,7 @@
         android:layout_height="wrap_content"
         android:tooltipText="@string/sort_and_filter"
         app:layout_constraintEnd_toEndOf="parent"
-        android:background="?selectable_list_drawable"
+        android:background="@drawable/list_item_selector"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/start_reading_button">
 

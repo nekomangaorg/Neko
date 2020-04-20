@@ -18,11 +18,6 @@
         <item name="android:colorBackground">@color/md_black_1000</item>
         <item name="android:statusBarColor">@color/blackStatus</item>
 
-        <!-- Custom Attributes-->
-        <item name="selectable_list_drawable">@drawable/list_item_selector</item>
-        <item name="background_card">@color/colorAmoledPrimary</item>
-
-
         <!-- Material Dialog colors -->
         <item name="md_color_title">@color/textColorPrimary</item>
         <item name="md_color_content">@color/textColorSecondary</item>

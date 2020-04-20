@@ -5,7 +5,7 @@
     android:id="@+id/chapter_layout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?selectable_list_drawable"
+    android:background="@drawable/list_item_selector"
     android:tooltipText="@string/sort_and_filter"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"

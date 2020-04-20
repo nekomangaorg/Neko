@@ -23,6 +23,4 @@
     <attr name="actionBarTintColor" format="color"/>
     <attr name="tabBarIconColor" format="reference|integer"/>
     <attr name="tabBarIconInactive" format="reference|integer"/>
-    <attr name="selectable_list_drawable" format="reference|integer" />
-    <attr name="background_card" format="reference|integer"/>
 </resources>

@@ -2,8 +2,6 @@ package eu.kanade.tachiyomi.ui.source
 
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
-import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.util.system.getResourceColor
 
 /**
  * Adapter that holds the catalogue cards.
@@ -12,8 +10,6 @@ import eu.kanade.tachiyomi.util.system.getResourceColor
  */
 class SourceAdapter(val controller: SourceController) :
         FlexibleAdapter<IFlexible<*>>(null, controller, true) {
-
-    val cardBackground = controller.activity!!.getResourceColor(R.attr.background_card)
 
     init {
         setDisplayHeadersAtStartUp(true)
