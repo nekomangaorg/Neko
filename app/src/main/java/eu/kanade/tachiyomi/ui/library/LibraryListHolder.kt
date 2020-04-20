@@ -52,6 +52,7 @@ class LibraryListHolder(
         if (item.manga.isBlank()) {
             constraint_layout.minHeight = 0
             if (item.manga.status == -1) {
+                title.text = null
                 title.gone()
             } else
                 title.text = itemView.context.getString(R.string.category_is_empty)

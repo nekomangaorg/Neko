@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.util.view.gone
+import eu.kanade.tachiyomi.util.view.visibleIf
 import kotlinx.android.synthetic.main.manga_grid_item.*
 import kotlinx.android.synthetic.main.unread_download_badge.*
 
@@ -53,6 +54,7 @@ class LibraryGridHolder(
      */
     override fun onSetValues(item: LibraryItem) {
         // Update the title and subtitle of the manga.
+        constraint_layout.visibleIf(!item.manga.isBlank())
         title.text = item.manga.title
         subtitle.text = item.manga.author?.trim()
 
