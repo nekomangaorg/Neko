@@ -206,7 +206,8 @@ object ImageUtil {
 
     fun Boolean.toInt() = if (this) 1 else 0
     private fun isDark(color: Int): Boolean {
-        return Color.red(color) < 40 && Color.blue(color) < 40 && Color.green(color) < 40
+        return Color.red(color) < 40 && Color.blue(color) < 40 && Color.green(color) < 40 &&
+            Color.alpha(color) > 200
     }
 
     private fun pixelIsClose(color1: Int, color2: Int): Boolean {
