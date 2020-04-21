@@ -71,7 +71,7 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
         if (preferences.libraryUpdateInterval().getOrDefault() > 0 &&
             !updatePref(preferences.libraryUpdateCategories(), view.include_global)) {
             preferences.libraryUpdateInterval().set(0)
-            LibraryUpdateJob.cancelTask()
+            LibraryUpdateJob.setupTask(0)
         }
     }
 

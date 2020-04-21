@@ -151,7 +151,9 @@ dependencies {
     implementation("org.jsoup:jsoup:1.13.1")
 
 // Job scheduling
-    implementation("com.evernote:android-job:1.4.2")
+    val workManagerVersion = "2.3.3"
+    implementation("android.arch.work:work-runtime:$workManagerVersion")
+    implementation("android.arch.work:work-runtime-ktx:$workManagerVersion")
     implementation("com.google.android.gms:play-services-gcm:17.0.0")
 
 // Changelog

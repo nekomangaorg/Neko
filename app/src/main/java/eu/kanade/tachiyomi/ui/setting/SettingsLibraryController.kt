@@ -81,7 +81,7 @@ class SettingsLibraryController : SettingsController() {
 
                 onChange { newValue ->
                     // Always cancel the previous task, it seems that sometimes they are not updated.
-                    LibraryUpdateJob.cancelTask()
+                    LibraryUpdateJob.setupTask(0)
 
                     val interval = newValue as Int
                     if (interval > 0) {
