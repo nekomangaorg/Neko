@@ -181,7 +181,6 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
             false -> reader_layout.systemUiVisibility.rem(systemUiFlag)
         }
 
-
         if (presenter.needsInit()) {
             val manga = intent.extras!!.getLong("manga", -1)
             val chapter = intent.extras!!.getLong("chapter", -1)
