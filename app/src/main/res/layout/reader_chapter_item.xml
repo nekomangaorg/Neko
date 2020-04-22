@@ -4,9 +4,9 @@
     android:id="@+id/reader_chapter_layout"
     android:layout_width="match_parent"
     android:layout_height="60dp"
+    android:background="@drawable/list_item_selector"
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toEndOf="parent"
-    android:background="@drawable/list_item_selector"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent">
 
@@ -59,6 +59,6 @@
             android:layout_height="30dp"
             android:layout_gravity="center"
             android:src="@drawable/ic_bookmark_border_24dp"
-            android:tint="?android:attr/textColorHint"/>
+            android:tint="?android:attr/textColorHint" />
     </FrameLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

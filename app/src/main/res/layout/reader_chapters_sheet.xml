@@ -66,8 +66,8 @@
                 android:layout_width="100dp"
                 android:layout_height="match_parent"
                 android:gravity="center"
-                android:textSize="15sp"
                 android:textColor="?actionBarTintColor"
+                android:textSize="15sp"
                 tools:text="100 / 105" />
         </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>

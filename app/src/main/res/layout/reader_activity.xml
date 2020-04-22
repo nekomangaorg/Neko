@@ -1,9 +1,9 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/reader_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/reader_layout"
     android:gravity="center">
 
     <FrameLayout
@@ -41,26 +41,27 @@
         android:background="@android:color/transparent"
         android:visibility="invisible"
         tools:visibility="visible">
+
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/appbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:theme="?attr/actionBarTheme"
             android:background="?attr/colorSecondary"
             android:stateListAnimator="@null"
+            android:theme="?attr/actionBarTheme"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@android:color/transparent" />
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="@android:color/transparent" />
 
         </com.google.android.material.appbar.AppBarLayout>
 
-       <include layout="@layout/reader_chapters_sheet"/>
+        <include layout="@layout/reader_chapters_sheet" />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
