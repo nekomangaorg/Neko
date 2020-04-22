@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.util.system
 
 import android.annotation.SuppressLint
+import android.annotation.SuppressLint
 import android.app.ActivityManager
 import android.app.Notification
 import android.app.NotificationManager
@@ -70,10 +71,10 @@ inline fun Context.notification(channelId: String, func: NotificationCompat.Buil
  */
 fun Context.getFilePicker(currentDir: String): Intent {
     return Intent(this, CustomLayoutPickerActivity::class.java)
-        .putExtra(FilePickerActivity.EXTRA_ALLOW_MULTIPLE, false)
-        .putExtra(FilePickerActivity.EXTRA_ALLOW_CREATE_DIR, true)
-        .putExtra(FilePickerActivity.EXTRA_MODE, FilePickerActivity.MODE_DIR)
-        .putExtra(FilePickerActivity.EXTRA_START_PATH, currentDir)
+            .putExtra(FilePickerActivity.EXTRA_ALLOW_MULTIPLE, false)
+            .putExtra(FilePickerActivity.EXTRA_ALLOW_CREATE_DIR, true)
+            .putExtra(FilePickerActivity.EXTRA_MODE, FilePickerActivity.MODE_DIR)
+            .putExtra(FilePickerActivity.EXTRA_START_PATH, currentDir)
 }
 
 /**
@@ -83,7 +84,7 @@ fun Context.getFilePicker(currentDir: String): Intent {
  * @return true if it has permissions.
  */
 fun Context.hasPermission(permission: String) =
-    ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
+        ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
 
 /**
  * Returns the color for the given attribute.
@@ -98,12 +99,21 @@ fun Context.getResourceColor(@AttrRes resource: Int): Int {
 }
 
 /**
- * Returns the color
+ * Returns the color from ContextCompat
  *
- * @param resource the attribute.
+ * @param resource the color.
  */
 fun Context.contextCompatColor(@ColorRes resource: Int): Int {
     return ContextCompat.getColor(this, resource)
+}
+
+/**
+ * Returns the color from ContextCompat
+ *
+ * @param resource the color.
+ */
+fun Context.contextCompatDrawable(@DrawableRes resource: Int): Drawable? {
+    return ContextCompat.getDrawable(this, resource)
 }
 
 /**
@@ -122,14 +132,6 @@ fun Context.iconicsDrawable(icon: IIcon, size: Int = 24, color: Int = R.attr.col
     }
 }
 
-/**
- * Returns the context compat drawable
- *
- * @param resource the attribute.
- */
-fun Context.contextCompatDrawable(@DrawableRes resource: Int): Drawable? {
-    return ContextCompat.getDrawable(this, resource)
-}
 
 /**
  * Converts to dp.
@@ -208,7 +210,7 @@ fun Context.isServiceRunning(serviceClass: Class<*>): Boolean {
     val manager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
     @Suppress("DEPRECATION")
     return manager.getRunningServices(Integer.MAX_VALUE)
-        .any { className == it.service.className }
+            .any { className == it.service.className }
 }
 
 /**
@@ -218,8 +220,8 @@ fun Context.openInBrowser(url: String) {
     try {
         val parsedUrl = Uri.parse(url)
         val intent = CustomTabsIntent.Builder()
-            .setToolbarColor(getResourceColor(R.attr.colorPrimaryVariant))
-            .build()
+                .setToolbarColor(getResourceColor(R.attr.colorPrimaryVariant))
+                .build()
         intent.launchUrl(this, parsedUrl)
     } catch (e: Exception) {
         toast(e.message)
