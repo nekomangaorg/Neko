@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.ui.reader
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
-import android.os.Build
 import android.util.AttributeSet
 import android.view.View
 import android.widget.LinearLayout
@@ -16,6 +15,7 @@ import com.mikepenz.fastadapter.adapters.ItemAdapter
 import com.mikepenz.fastadapter.listeners.ClickEventHook
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.system.getBottomInsets
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
@@ -39,24 +39,28 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
     fun setup(activity: ReaderActivity) {
         presenter = activity.presenter
         val fullPrimary = activity.getResourceColor(R.attr.colorSecondary)
-        val primary = ColorUtils.setAlphaComponent( fullPrimary, 200)
+        val primary = ColorUtils.setAlphaComponent(fullPrimary, 200)
 
         sheetBehavior = BottomSheetBehavior.from(this)
         chapters_button.setOnClickListener {
-            if (sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) sheetBehavior?.state =
-                BottomSheetBehavior.STATE_COLLAPSED
-            else sheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
+            if (sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) {
+                sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
+            } else {
+                sheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
+            }
         }
+
         val peek = sheetBehavior?.peekHeight ?: 30.dpToPx
         post {
-            chapter_recycler.alpha =
-                if (sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) 1f else 0f
+            chapter_recycler.alpha = when (sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) {
+                true -> 1f
+                false -> 0f
+            }
         }
 
         chapters_bottom_sheet.doOnApplyWindowInsets { _, insets, _ ->
-            sheetBehavior?.peekHeight =
-                peek + if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) insets.mandatorySystemGestureInsets.bottom
-                else insets.systemWindowInsetBottom
+            sheetBehavior?.peekHeight = peek + insets.getBottomInsets()
+
             chapters_bottom_sheet.updateLayoutParams<MarginLayoutParams> {
                 height = 280.dpToPx + insets.systemWindowInsetBottom
             }
