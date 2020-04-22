@@ -495,7 +495,8 @@ class LibraryController(
             justStarted = false
             if (recycler_layout.alpha == 0f) recycler_layout.animate().alpha(1f).setDuration(500)
                 .start()
-        } else if (justStarted && freshStart) {
+        } else recycler_layout.alpha = 1f
+        if (justStarted && freshStart) {
             scrollToHeader(activeCategory)
             fast_scroller.translationX = 0f
             view?.post {

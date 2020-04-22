@@ -18,7 +18,6 @@ import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet
 import eu.kanade.tachiyomi.util.lang.removeArticles
 import eu.kanade.tachiyomi.util.system.executeOnIO
-import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_EXCLUDE
 import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_IGNORE
 import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_INCLUDE
@@ -82,23 +81,22 @@ class LibraryPresenter(
 
     /** Get favorited manga for library and sort and filter it */
     fun getLibrary() {
-        launchUI {
+        scope.launch {
             totalChapters = null
-            val mangaMap = withContext(Dispatchers.IO) {
-                val library = getLibraryFromDB()
-                library.apply {
-                    setDownloadCount(library)
-                    setUnreadBadge(library)
-                }
-                allLibraryItems = library
-                var mangaMap = library
-                mangaMap = applyFilters(mangaMap)
-                mangaMap = applySort(mangaMap)
-                mangaMap
+            val library = withContext(Dispatchers.IO) { getLibraryFromDB() }
+            library.apply {
+                setDownloadCount(library)
+                setUnreadBadge(library)
             }
+            allLibraryItems = library
+            var mangaMap = library
+            mangaMap = applyFilters(mangaMap)
+            mangaMap = applySort(mangaMap)
             val freshStart = libraryItems.isEmpty()
             libraryItems = mangaMap
-            view.onNextLibraryUpdate(libraryItems, freshStart)
+            withContext(Dispatchers.Main) {
+                view.onNextLibraryUpdate(libraryItems, freshStart)
+            }
             withContext(Dispatchers.IO) {
                 setTotalChapters()
             }
@@ -473,48 +471,56 @@ class LibraryPresenter(
 
     /** Requests the library to be filtered. */
     fun requestFilterUpdate() {
-        launchUI {
+        scope.launch {
             var mangaMap = allLibraryItems
-            mangaMap = withContext(Dispatchers.IO) { applyFilters(mangaMap) }
-            mangaMap = withContext(Dispatchers.IO) { applySort(mangaMap) }
+            mangaMap = applyFilters(mangaMap)
+            mangaMap = applySort(mangaMap)
             libraryItems = mangaMap
-            view.onNextLibraryUpdate(libraryItems)
+            withContext(Dispatchers.Main) {
+                view.onNextLibraryUpdate(libraryItems)
+            }
         }
     }
 
     /** Requests the library to have download badges added/removed. */
     fun requestDownloadBadgesUpdate() {
-        launchUI {
+        scope.launch {
             val mangaMap = allLibraryItems
-            withContext(Dispatchers.IO) { setDownloadCount(mangaMap) }
+            setDownloadCount(mangaMap)
             allLibraryItems = mangaMap
             val current = libraryItems
-            withContext(Dispatchers.IO) { setDownloadCount(current) }
+            setDownloadCount(current)
             libraryItems = current
-            view.onNextLibraryUpdate(libraryItems)
+            withContext(Dispatchers.Main) {
+                view.onNextLibraryUpdate(libraryItems)
+            }
         }
     }
 
     /** Requests the library to have unread badges changed. */
     fun requestUnreadBadgesUpdate() {
-        launchUI {
+        scope.launch {
             val mangaMap = allLibraryItems
-            withContext(Dispatchers.IO) { setUnreadBadge(mangaMap) }
+            setUnreadBadge(mangaMap)
             allLibraryItems = mangaMap
             val current = libraryItems
-            withContext(Dispatchers.IO) { setUnreadBadge(current) }
+            setUnreadBadge(current)
             libraryItems = current
-            view.onNextLibraryUpdate(libraryItems)
+            withContext(Dispatchers.Main) {
+                view.onNextLibraryUpdate(libraryItems)
+            }
         }
     }
 
     /** Requests the library to be sorted. */
     private fun requestSortUpdate() {
-        launchUI {
+        scope.launch {
             var mangaMap = libraryItems
-            mangaMap = withContext(Dispatchers.IO) { applySort(mangaMap) }
+            mangaMap = applySort(mangaMap)
             libraryItems = mangaMap
-            view.onNextLibraryUpdate(libraryItems)
+            withContext(Dispatchers.Main) {
+                view.onNextLibraryUpdate(libraryItems)
+            }
         }
     }
 
