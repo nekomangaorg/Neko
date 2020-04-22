@@ -38,12 +38,9 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
 
     fun setup(activity: ReaderActivity) {
         presenter = activity.presenter
-        val primary = ColorUtils.setAlphaComponent(
-            activity.getResourceColor(
-                R.attr.colorSecondary
-            ), 200
-        )
         val fullPrimary = activity.getResourceColor(R.attr.colorSecondary)
+        val primary = ColorUtils.setAlphaComponent( fullPrimary, 200)
+
         sheetBehavior = BottomSheetBehavior.from(this)
         chapters_button.setOnClickListener {
             if (sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) sheetBehavior?.state =
