@@ -58,8 +58,6 @@ class ReaderPresenter(
     private val preferences: PreferencesHelper = Injekt.get()
 ) : BasePresenter<ReaderActivity>() {
 
-    private var scope = CoroutineScope(Job() + Dispatchers.Default)
-
     /**
      * The manga loaded in the reader. It can be null when instantiated for a short time.
      */
