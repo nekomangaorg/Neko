@@ -23,23 +23,18 @@ class SettingsSimilarController : SettingsController() {
             titleRes = R.string.similar_screen
             defaultValue = false
             onClick {
-                if (isChecked) {
-                    SimilarUpdateJob.setupTask()
-                    SimilarUpdateJob.runTaskNow()
-                } else {
-                    SimilarUpdateJob.cancelTask()
-                }
+                SimilarUpdateJob.setupTask()
             }
         }
 
-        multiSelectListPreferenceMat(activity) {
+        multiSelectListPreferenceMat(activity)
+        {
             key = Keys.similarUpdateRestriction
             titleRes = R.string.similar_update_restriction
             entriesRes = arrayOf(R.string.wifi, R.string.charging)
             entryValues = listOf("wifi", "ac")
             customSummaryRes = R.string.similar_update_restriction_summary
             onChange {
-                SimilarUpdateJob.cancelTask()
                 SimilarUpdateJob.setupTask()
                 true
             }

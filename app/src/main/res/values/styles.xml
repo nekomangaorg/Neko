@@ -49,7 +49,7 @@
     </style>
 
     <style name="TextAppearance.Regular.Body1.SemiBold">
-        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:fontFamily">@font/metropolis_semi_bold</item>
     </style>
 
     <style name="TextAppearance.Regular.Body1.Light">
@@ -58,16 +58,6 @@
 
     <style name="TextAppearance.Regular.Body1.Secondary">
         <item name="android:textColor">?android:attr/textColorSecondary</item>
-    </style>
-
-    <style name="TextAppearance.Bold">
-        <item name="android:fontFamily">@font/metropolis_medium</item>
-        <item name="android:textColor">@color/textColorPrimary</item>
-    </style>
-
-    <style name="TextAppearance.Secondary">
-        <item name="android:fontFamily">@font/metropolis_thin</item>
-        <item name="android:textColor">@color/textColorPrimary</item>
     </style>
 
     <style name="TextAppearance.Regular.Caption">
@@ -99,7 +89,7 @@
     </style>
 
     <style name="TextAppearance.Medium">
-        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:fontFamily">@font/metropolis_medium</item>
     </style>
 
     <style name="TextAppearance.Medium.Title">

@@ -41,6 +41,7 @@ class SettingsMainController : SettingsController() {
         }
         preference {
             iconDrawable = context.iconicsDrawable(MaterialDesignDx.Icon.gmf_chrome_reader_mode, size = size)
+            titleRes = R.string.reader
             onClick { navigateTo(SettingsReaderController()) }
         }
         preference {

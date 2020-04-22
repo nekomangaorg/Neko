@@ -7,8 +7,8 @@ import com.bluelinelabs.conductor.Controller
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
-import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
+import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
 import eu.kanade.tachiyomi.util.view.gone
 import kotlinx.android.synthetic.main.main_activity.*
 
@@ -43,7 +43,7 @@ class SearchActivity : MainActivity() {
         to: Controller?,
         from: Controller?,
         isPush:
-            Boolean
+        Boolean
     ) {
         if (from is DialogController || to is DialogController) {
             return
@@ -77,7 +77,7 @@ class SearchActivity : MainActivity() {
                     if (router.backstackSize > 1) {
                         router.popToRoot()
                     }
-                    router.replaceTopController(BrowseSourceController(query, filter).withFadeTransaction())
+                    router.replaceTopController(BrowseSourceController(source, query).withFadeTransaction())
                 }
             }
             else -> return false

@@ -58,7 +58,8 @@ class RecentChaptersPresenter(
             val items = byDay.flatMap {
                 val dateItem = DateItem(it.key)
                 it.value.map { mc ->
-                    RecentChapterItem(mc.chapter, mc.manga, dateItem) }
+                    RecentChapterItem(mc.chapter, mc.manga, dateItem)
+                }
             }
             setDownloadedChapters(items)
             chapters = items
@@ -150,7 +151,7 @@ class RecentChaptersPresenter(
      * @param chapter the chapter to delete.
      */
     fun deleteChapter(chapter: Chapter, manga: Manga, update: Boolean = true) {
-        val source = Injekt.get<SourceManager>().getOrStub(manga.source)
+        val source = Injekt.get<SourceManager>().getMangadex()
         downloadManager.deleteChapters(listOf(chapter), manga, source)
 
         if (update) {

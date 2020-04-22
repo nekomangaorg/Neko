@@ -17,6 +17,7 @@ import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.Mangadex
 import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
+import eu.kanade.tachiyomi.ui.catalogue.follows.FollowsPager
 import eu.kanade.tachiyomi.ui.source.filter.CheckboxItem
 import eu.kanade.tachiyomi.ui.source.filter.CheckboxSectionItem
 import eu.kanade.tachiyomi.ui.source.filter.GroupItem
@@ -122,7 +123,7 @@ open class BrowseSourcePresenter(
         }
 
         add(prefs.browseAsList().asObservable()
-                .subscribe { setDisplayMode(it) })
+            .subscribe { setDisplayMode(it) })
 
         restartPager()
     }
@@ -148,7 +149,7 @@ open class BrowseSourcePresenter(
         if (followsPager) {
             pager = FollowsPager(source)
         } else {
-        pager = createPager(query, filters)
+            pager = createPager(query, filters)
         }
 
         val sourceId = source.id
@@ -159,16 +160,16 @@ open class BrowseSourcePresenter(
         // Prepare the pager.
         pagerSubscription?.let { remove(it) }
         pagerSubscription = pager.results()
-                .observeOn(Schedulers.io())
-                .map { it.first to it.second.map { networkToLocalManga(it, sourceId) } }
-                .doOnNext { initializeMangas(it.second) }
-                .map { it.first to it.second.map { BrowseSourceItem(it, browseAsList, sourceListType) } }
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeReplay({ view, (page, mangas) ->
-                    view.onAddPage(page, mangas)
-                }, { _, error ->
-                    Timber.e(error)
-                })
+            .observeOn(Schedulers.io())
+            .map { it.first to it.second.map { networkToLocalManga(it, sourceId) } }
+            .doOnNext { initializeMangas(it.second) }
+            .map { it.first to it.second.map { BrowseSourceItem(it, browseAsList, sourceListType) } }
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeReplay({ view, (page, mangas) ->
+                view.onAddPage(page, mangas)
+            }, { _, error ->
+                Timber.e(error)
+            })
 
         // Request first page.
         requestNext()
@@ -182,9 +183,9 @@ open class BrowseSourcePresenter(
 
         pageSubscription?.let { remove(it) }
         pageSubscription = Observable.defer { pager.requestNext() }
-                .subscribeFirst({ _, _ ->
-                    // Nothing to do when onNext is emitted.
-                }, BrowseSourceController::onAddPageError)
+            .subscribeFirst({ _, _ ->
+                // Nothing to do when onNext is emitted.
+            }, BrowseSourceController::onAddPageError)
     }
 
     /**
@@ -210,18 +211,18 @@ open class BrowseSourcePresenter(
     private fun subscribeToMangaInitializer() {
         initializerSubscription?.let { remove(it) }
         initializerSubscription = mangaDetailSubject.observeOn(Schedulers.io())
-                .flatMap { Observable.from(it) }
-                .filter { it.thumbnail_url == null && !it.initialized }
-                .concatMap { getMangaDetailsObservable(it) }
-                .onBackpressureBuffer()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ manga ->
-                    @Suppress("DEPRECATION")
-                    view?.onMangaInitialized(manga)
-                }, { error ->
-                    Timber.e(error)
-                })
-                .apply { add(this) }
+            .flatMap { Observable.from(it) }
+            .filter { it.thumbnail_url == null && !it.initialized }
+            .concatMap { getMangaDetailsObservable(it) }
+            .onBackpressureBuffer()
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({ manga ->
+                @Suppress("DEPRECATION")
+                view?.onMangaInitialized(manga)
+            }, { error ->
+                Timber.e(error)
+            })
+            .apply { add(this) }
     }
 
     /**
@@ -260,13 +261,13 @@ open class BrowseSourcePresenter(
      */
     private fun getMangaDetailsObservable(manga: Manga): Observable<Manga> {
         return source.fetchMangaDetailsObservable(manga)
-                .flatMap { networkManga ->
-                    manga.copyFrom(networkManga)
-                    manga.initialized = true
-                    db.insertManga(manga).executeAsBlocking()
-                    Observable.just(manga)
-                }
-                .onErrorResumeNext { Observable.just(manga) }
+            .flatMap { networkManga ->
+                manga.copyFrom(networkManga)
+                manga.initialized = true
+                db.insertManga(manga).executeAsBlocking()
+                Observable.just(manga)
+            }
+            .onErrorResumeNext { Observable.just(manga) }
     }
 
     /**

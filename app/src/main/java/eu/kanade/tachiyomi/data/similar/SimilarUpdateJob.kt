@@ -26,8 +26,8 @@ class SimilarUpdateJob(private val context: Context, workerParams: WorkerParamet
 
         fun setupTask() {
             val preferences = Injekt.get<PreferencesHelper>()
-            val interval = preferences.similarEnabled()
-            if (interval) {
+            val enabled = preferences.similarEnabled()
+            if (enabled) {
                 val restrictions = preferences.similarUpdateRestriction()!!
                 val acRestriction = "ac" in restrictions
                 val wifiRestriction = if ("wifi" in restrictions)

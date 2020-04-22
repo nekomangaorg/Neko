@@ -2,6 +2,8 @@ package eu.kanade.tachiyomi.ui.library
 
 import android.app.Activity
 import android.content.Context
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.LayoutInflater
@@ -50,7 +52,9 @@ import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.RootSearchInterface
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
+import eu.kanade.tachiyomi.util.system.contextCompatDrawable
 import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.applyWindowInsetsForRootController
@@ -163,7 +167,7 @@ class LibraryController(
                     // fastScroll height * indicator position - center text - fastScroll padding
                     text_view_m.translationY = view.height *
                         (index.toFloat() / (adapter.headerItems.size + 1))
-                    - text_view_m.height / 2 + 16.dpToPx
+                    -text_view_m.height / 2 + 16.dpToPx
                     text_view_m.translationX = 45f.dpToPx
                     text_view_m.alpha = 1f
                     text_view_m.text = headerItem.category.name
@@ -200,9 +204,9 @@ class LibraryController(
 
     private fun setFastScrollBackground() {
         val context = activity ?: return
-        fast_scroller.background = if (!alwaysShowScroller) ContextCompat.getDrawable(
-            context, R.drawable.fast_scroll_background
-        ) else null
+        fast_scroller.background = if (!alwaysShowScroller)
+            context.contextCompatDrawable(R.drawable.fast_scroll_background)
+        else null
         fast_scroller.textColor = ColorStateList.valueOf(
             if (!alwaysShowScroller) Color.WHITE
             else context.getResourceColor(android.R.attr.textColorPrimary)
@@ -236,7 +240,8 @@ class LibraryController(
             val letter = adapter.getSectionText(position)
             if (!singleCategory &&
                 !adapter.isHeader(adapter.getItem(position)) &&
-                position != adapter.itemCount - 1) null
+                position != adapter.itemCount - 1
+            ) null
             else if (letter != null) FastScrollItemIndicator.Text(letter)
             else FastScrollItemIndicator.Icon(R.drawable.ic_star_24dp)
         })

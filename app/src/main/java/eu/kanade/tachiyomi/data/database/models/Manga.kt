@@ -53,13 +53,15 @@ interface Manga : SManga {
     fun showChapterTitle(defaultShow: Boolean): Boolean = chapter_flags and DISPLAY_MASK == DISPLAY_NUMBER
 
     fun mangaType(context: Context): String {
-        return context.getString(when (mangaType()) {
-            TYPE_WEBTOON -> R.string.webtoon
-            TYPE_MANHWA -> R.string.manhwa
-            TYPE_MANHUA -> R.string.manhua
-            TYPE_COMIC -> R.string.comic
-            else -> R.string.manga
-        }).toLowerCase(Locale.getDefault())
+        return context.getString(
+            when (mangaType()) {
+                TYPE_WEBTOON -> R.string.webtoon
+                TYPE_MANHWA -> R.string.manhwa
+                TYPE_MANHUA -> R.string.manhua
+                TYPE_COMIC -> R.string.comic
+                else -> R.string.manga
+            }
+        ).toLowerCase(Locale.getDefault())
     }
 
     /**
@@ -84,14 +86,16 @@ interface Manga : SManga {
         return if (currentTags?.any
             { tag ->
                 tag == "long strip" || tag == "manhwa" || tag.contains("webtoon")
-            } == true || isWebtoonSource(sourceName))
+            } == true || isWebtoonSource(sourceName)
+        )
             ReaderActivity.WEBTOON
         else if (currentTags?.any
             { tag ->
                 tag == "chinese" || tag == "manhua" ||
                     tag.startsWith("english") || tag == "comic"
             } == true || (isComicSource(sourceName) && !sourceName.contains("tapastic", true)) ||
-            sourceName.contains("manhua", true))
+            sourceName.contains("manhua", true)
+        )
             ReaderActivity.LEFT_TO_RIGHT
         else 0
     }
@@ -123,9 +127,6 @@ interface Manga : SManga {
         }
         return list.toList()
     }
-
-    fun Manga.isWebtoon() = this.genre?.contains("long strip", true) ?: false
-
 
     // Used to display the chapter's title one way or another
     var displayMode: Int
@@ -198,3 +199,5 @@ interface Manga : SManga {
         }
     }
 }
+
+fun Manga.isWebtoon() = this.genre?.contains("long strip", true) ?: false

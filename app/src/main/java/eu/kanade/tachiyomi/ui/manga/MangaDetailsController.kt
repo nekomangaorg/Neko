@@ -67,7 +67,6 @@ import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
@@ -89,10 +88,10 @@ import eu.kanade.tachiyomi.ui.manga.track.TrackItem
 import eu.kanade.tachiyomi.ui.manga.track.TrackingBottomSheet
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
-import eu.kanade.tachiyomi.ui.source.SourceController
 import eu.kanade.tachiyomi.ui.similar.SimilarController
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.storage.getUriCompat
+import eu.kanade.tachiyomi.util.system.ThemeUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
@@ -112,8 +111,6 @@ import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File
-import java.util.Locale
-import java.io.IOException
 import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.max
@@ -511,14 +508,17 @@ class MangaDetailsController : BaseController,
             translucentColor
         } else Color.TRANSPARENT
         (activity as MainActivity).appbar.setBackgroundColor(Color.TRANSPARENT)
-        (activity as MainActivity).toolbar.setBackgroundColor(activity?.window?.statusBarColor
-            ?: Color.TRANSPARENT)
+        (activity as MainActivity).toolbar.setBackgroundColor(
+            activity?.window?.statusBarColor
+                ?: Color.TRANSPARENT
+        )
     }
 
     private fun isTabletSize(): Boolean {
         val activity = activity ?: return false
         if ((activity.resources.configuration.screenLayout and Configuration
-                .SCREENLAYOUT_SIZE_MASK) < Configuration.SCREENLAYOUT_SIZE_LARGE)
+                .SCREENLAYOUT_SIZE_MASK) < Configuration.SCREENLAYOUT_SIZE_LARGE
+        )
             return false
         val displayMetrics = DisplayMetrics()
         activity.windowManager?.defaultDisplay?.getMetrics(displayMetrics)
@@ -528,7 +528,8 @@ class MangaDetailsController : BaseController,
     fun hasTabletHeight(): Boolean {
         val activity = activity ?: return false
         if ((activity.resources.configuration.screenLayout and Configuration
-                .SCREENLAYOUT_SIZE_MASK) < Configuration.SCREENLAYOUT_SIZE_LARGE) return false
+                .SCREENLAYOUT_SIZE_MASK) < Configuration.SCREENLAYOUT_SIZE_LARGE
+        ) return false
         val displayMetrics = DisplayMetrics()
         activity.windowManager?.defaultDisplay?.getMetrics(displayMetrics)
         return displayMetrics.heightPixels.pxToDp >= 720
@@ -600,8 +601,10 @@ class MangaDetailsController : BaseController,
 
     //region Recycler methods
     fun updateChapterDownload(download: Download) {
-        getHolder(download.chapter)?.notifyStatus(download.status, presenter.isLockedFromSearch,
-            download.progress)
+        getHolder(download.chapter)?.notifyStatus(
+            download.status, presenter.isLockedFromSearch,
+            download.progress
+        )
     }
 
     private fun getHolder(chapter: Chapter): ChapterHolder? {
@@ -968,10 +971,13 @@ class MangaDetailsController : BaseController,
     private fun downloadChapters(chapters: List<ChapterItem>) {
         val view = view ?: return
         presenter.downloadChapters(chapters)
-        val text = view.context.getString(R.string.add_x_to_library, presenter.manga.mangaType
-            (view.context).toLowerCase(Locale.ROOT))
+        val text = view.context.getString(
+            R.string.add_x_to_library, presenter.manga.mangaType
+                (view.context).toLowerCase(Locale.ROOT)
+        )
         if (!presenter.manga.favorite && (snack == null ||
-                snack?.getText() != text)) {
+                snack?.getText() != text)
+        ) {
             snack = view.snack(text, Snackbar.LENGTH_INDEFINITE) {
                 setAction(R.string.add) {
                     presenter.setFavorite(true)
@@ -1001,7 +1007,9 @@ class MangaDetailsController : BaseController,
         if (item != null) {
             openChapter(item.chapter)
         } else if (snack == null || snack?.getText() != view?.context?.getString(
-                R.string.next_chapter_not_found)) {
+                R.string.next_chapter_not_found
+            )
+        ) {
             snack = view?.snack(R.string.next_chapter_not_found, Snackbar.LENGTH_LONG) {
                 addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
                     override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
@@ -1233,8 +1241,10 @@ class MangaDetailsController : BaseController,
     }
 
     override fun onPrepareActionMode(mode: ActionMode?, menu: Menu?): Boolean {
-        mode?.title = view?.context?.getString(if (startingDLChapterPos == null)
-            R.string.select_starting_chapter else R.string.select_ending_chapter)
+        mode?.title = view?.context?.getString(
+            if (startingDLChapterPos == null)
+                R.string.select_starting_chapter else R.string.select_ending_chapter
+        )
         return false
     }
 
@@ -1262,7 +1272,6 @@ class MangaDetailsController : BaseController,
         startActivity(intent)
     }
     //endregion
-
 
     override fun zoomImageFromThumb(thumbView: View) {
         // If there's an animation in progress, cancel it immediately and proceed with this one.

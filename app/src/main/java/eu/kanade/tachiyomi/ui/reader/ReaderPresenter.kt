@@ -220,8 +220,10 @@ class ReaderPresenter(
                     else -> it.source_order.toFloat()
                 }
             }.map {
-                ReaderChapterItem(it, manga, it.id ==
-                    getCurrentChapter()?.chapter?.id ?: chapterId)
+                ReaderChapterItem(
+                    it, manga, it.id ==
+                        getCurrentChapter()?.chapter?.id ?: chapterId
+                )
             }
             if (!manga.sortDescending(preferences.chaptersDescAsDefault().getOrDefault()))
                 list.reversed()

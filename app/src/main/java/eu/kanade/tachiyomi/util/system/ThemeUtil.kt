@@ -5,9 +5,12 @@ import androidx.appcompat.app.AppCompatDelegate
 import eu.kanade.tachiyomi.R
 
 object ThemeUtil {
+    fun isBlueTheme(theme: Int): Boolean {
+        return theme == 4 || theme == 8 || theme == 7
+    }
 
     fun isAMOLEDTheme(theme: Int): Boolean {
-        return theme == 3
+        return theme == 3 || theme == 6
     }
 
     fun theme(theme: Int): Int {
@@ -27,8 +30,8 @@ object ThemeUtil {
 
     fun nightMode(theme: Int): Int {
         return when (theme) {
-            2 -> AppCompatDelegate.MODE_NIGHT_NO
-            3 -> AppCompatDelegate.MODE_NIGHT_YES
+            1, 8 -> AppCompatDelegate.MODE_NIGHT_NO
+            2, 3, 4 -> AppCompatDelegate.MODE_NIGHT_YES
             else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
         }
     }

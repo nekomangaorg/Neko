@@ -2,13 +2,13 @@ package eu.kanade.tachiyomi.ui.manga.similar
 
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.model.FilterList
-import eu.kanade.tachiyomi.ui.catalogue.browse.BrowseCataloguePresenter
-import eu.kanade.tachiyomi.ui.catalogue.browse.Pager
+import eu.kanade.tachiyomi.ui.source.browse.BrowseSourcePresenter
+import eu.kanade.tachiyomi.ui.source.browse.Pager
 
 /**
- * Presenter of [SimilarController]. Inherit BrowseCataloguePresenter.
+ * Presenter of [SimilarController]. Inherit BrowseSourcePresenter.
  */
-class SimilarPresenter(sourceId: Long) : BrowseCataloguePresenter(sourceId) {
+class SimilarPresenter(sourceId: Long) : BrowseSourcePresenter(sourceId) {
 
     var manga: Manga? = null
         private set
