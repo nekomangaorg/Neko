@@ -2,54 +2,37 @@
 <resources>
     <!-- Application Colors -->
     <color name="colorPrimary">@color/md_white_1000</color>
-    <color name="colorPrimaryInactive">@color/md_black_1000</color>
+    <color name="colorPrimaryInactive">#C2424242</color>
     <color name="colorPrimaryDark">@color/md_white_1000</color>
-    <color name="drawerHighlight">@color/md_black_1000_12</color>
-    <color name="drawerPrimary">@color/bluePrimary</color>
     <color name="bluePrimary">#54759E</color>
     <color name="mainStatus">#AFFAFAFA</color>
     <color name="blueStatus">#AF54759E</color>
     <color name="blackStatus">#AF000000</color>
-    <color name="grey">#808080</color>
-    <color name="cardBackground">#FFFFFF</color>
-    <color name="splashBackground">@color/md_black_1000</color>
-    <color name="snackbarBackground">#323232</color>
-    <color name="trueSnackbarBackground">#323232</color>
+    <color name="splashBackground">@color/bluePrimary</color>
     <color name="dialogBackground">@color/md_white_1000</color>
     <color name="fullRippleColor">#C2C2C2</color>
     <color name="rippleColor">@color/md_black_1000_12</color>
-    <color name="colorAccent">@color/textColorPrimary</color>
+    <color name="colorAccent">@color/md_blue_A400</color>
     <color name="actionModeShadow">@color/md_black_1000_38</color>
-    <!-- Dark Application Colors -->
-    <color name="colorAmoledPrimary">@color/md_black_1000</color>
-    <color name="readerDarkBackground">#1C1C1D</color>
-    <color name="gray_button">@color/md_black_1000</color>
-    <color name="darkPrimaryTranslucent">@color/darkPrimaryColor</color>
+    <color name="gray_button">#404040</color>
 
-    <color name="textColorPrimary">@color/md_black_1000</color>
-    <color name="textColorSecondary">@color/md_black_1000_70</color>
+    <color name="colorAmoledPrimary">@color/md_black_1000</color>
+
+    <color name="textColorPrimary">@color/md_black_1000_87</color>
+    <color name="textColorSecondary">@color/md_black_1000_54</color>
     <color name="textColorPrimaryInverse">@color/md_white_1000</color>
     <color name="textColorSecondaryInverse">@color/md_white_1000_70</color>
     <color name="textColorHint">@color/md_black_1000_38</color>
     <color name="textColorHintInverse">@color/md_white_1000_50</color>
     <color name="divider">@color/md_black_1000_12</color>
     <color name="badgeColor">@color/material_red_accent_700</color>
-    <color name="download">@color/md_black_1000</color>
-
-    <color name="preference_fallback_accent_color">@color/colorAccent</color>
-    <color name="darkPrimaryColor">#212121</color>
+    <color name="download">@color/material_green_800</color>
 
     <color name="background">@color/md_grey_50</color>
     <color name="dialog">@color/md_white_1000</color>
 
-    <color name="selectorColor">@color/md_blue_A400_38</color>
-    <color name="iconColor">@color/md_black_1000_54</color>
-
-    <!-- Reader Theme -->
-
     <!-- Text Colors -->
     <color name="md_black_1000_87">#DE000000</color>
-    <color name="md_black_1000_70">#B3000000</color>
     <color name="md_black_1000_54">#8A000000</color>
     <color name="md_black_1000_38">#61000000</color>
     <color name="md_black_1000_12">#1F000000</color>
@@ -62,8 +45,6 @@
     <color name="md_white_1000_20">#33FFFFFF</color>
     <color name="md_white_1000_38">#61FFFFFF</color>
     <color name="md_white_1000_12">#1FFFFFFF</color>
-
-    <!-- other colors -->
 
     <!-- Material Design Colors -->
     <color name="md_black_1000">#000000</color>
@@ -109,5 +90,4 @@
     <color name="neko_miami_accent">#DB3EB1</color>
     <color name="neko_miami_dark_accent">#AFDB3EB1</color>
     <color name="neko_miami_badge_1">#F706CF</color>
-
 </resources>

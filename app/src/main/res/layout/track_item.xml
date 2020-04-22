@@ -10,7 +10,8 @@
         android:id="@+id/track_details"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:background="?md_background_color">
 
         <FrameLayout
             android:id="@+id/logo_container"
@@ -33,7 +34,7 @@
                 android:contentDescription="@string/tracking"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                tools:src="@drawable/tracker_mal" />
+                tools:src="@drawable/ic_tracker_mal" />
 
             <ProgressBar
                 android:id="@+id/progress"
@@ -161,7 +162,7 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/track_status"
-                app:layout_constraintEnd_toStartOf="@id/track_chapters" />
+                app:layout_constraintEnd_toStartOf="@id/track_chapters"/>
 
             <View
                 android:layout_width="1dp"
@@ -173,7 +174,7 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/track_chapters"
-                app:layout_constraintEnd_toStartOf="@id/score_container" />
+                app:layout_constraintEnd_toStartOf="@id/score_container"/>
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <com.google.android.material.button.MaterialButton

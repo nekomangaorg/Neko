@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.graphics.PointF
+import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.view.GestureDetector
@@ -36,6 +37,7 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderProgressBar
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerConfig.ZoomType
 import eu.kanade.tachiyomi.util.system.ImageUtil
+import eu.kanade.tachiyomi.util.system.ThemeUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.gone
@@ -272,7 +274,9 @@ class PagerPageHolder(
                             }
                         }
                     } else {
-                        initSubsamplingImageView().setImage(ImageSource.inputStream(openStream!!))
+                        val imageView = initSubsamplingImageView()
+                        imageView.setImage(ImageSource.inputStream(openStream!!))
+                        imageView.background = ColorDrawable(ThemeUtil.readerBackgroundColor(viewer.config.readerTheme))
                     }
                 } else {
                     val imageView = initImageView()
@@ -292,7 +296,7 @@ class PagerPageHolder(
             val preferences by injectLazy<PreferencesHelper>()
             ImageUtil.autoSetBackground(BitmapFactory.decodeByteArray(
                 bytesArray, 0, bytesArray.size
-            ), preferences.readerTheme().getOrDefault() == 2)
+            ), preferences.readerTheme().getOrDefault() == 2, context)
         }
     }
 

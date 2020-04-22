@@ -23,53 +23,41 @@ class SettingsReaderController : SettingsController() {
         intListPreference(activity) {
             key = Keys.imageScaleType
             titleRes = R.string.scale_type
-            entriesRes = arrayOf(
-                R.string.fit_screen, R.string.stretch,
-                R.string.fit_width, R.string.fit_height,
-                R.string.original_size, R.string.smart_fit
-            )
+            entriesRes = arrayOf(R.string.fit_screen, R.string.stretch,
+                    R.string.fit_width, R.string.fit_height,
+                    R.string.original_size, R.string.smart_fit)
             entryRange = 1..6
             defaultValue = 1
         }
         intListPreference(activity) {
             key = Keys.zoomStart
             titleRes = R.string.zoom_start_position
-            entriesRes = arrayOf(
-                R.string.automatic, R.string.left,
-                R.string.right, R.string.center
-            )
+            entriesRes = arrayOf(R.string.automatic, R.string.left,
+                    R.string.right, R.string.center)
             entryRange = 1..4
             defaultValue = 1
         }
         intListPreference(activity) {
             key = Keys.rotation
             titleRes = R.string.rotation
-            entriesRes = arrayOf(
-                R.string.free, R.string.lock,
-                R.string.force_portrait, R.string.force_landscape
-            )
+            entriesRes = arrayOf(R.string.free, R.string.lock,
+                    R.string.force_portrait, R.string.force_landscape)
             entryRange = 1..4
             defaultValue = 1
         }
         intListPreference(activity) {
             key = Keys.readerTheme
             titleRes = R.string.background_color
-            entriesRes = arrayOf(
-                R.string.white, R.string.black, R.string
-                    .smart_based_on_page, R.string.smart_based_on_page_and_theme
-            )
+            entriesRes = arrayOf(R.string.white, R.string.black, R.string
+                .smart_based_on_page, R.string.smart_based_on_page_and_theme)
             entryRange = 0..3
             defaultValue = 2
         }
         intListPreference(activity) {
             key = Keys.doubleTapAnimationSpeed
             titleRes = R.string.double_tap_anim_speed
-            entries = listOf(
-                context.getString(R.string.no_animation), context.getString(
-                    R
-                        .string.fast
-                ), context.getString(R.string.normal)
-            )
+            entries = listOf(context.getString(R.string.no_animation), context.getString(R
+                .string.fast), context.getString(R.string.normal))
             entryValues = listOf(1, 250, 500) // using a value of 0 breaks the image viewer, so
             // min is 1
             defaultValue = 500

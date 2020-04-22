@@ -120,7 +120,7 @@ class PreferencesHelper(val context: Context) {
 
     fun lastVersionCode() = rxPrefs.getInteger("last_version_code", 0)
 
-    fun catalogueAsList() = rxPrefs.getBoolean(Keys.catalogueAsList, false)
+    fun browseAsList() = rxPrefs.getBoolean(Keys.catalogueAsList, false)
 
     fun enabledLanguages() =
         rxPrefs.getStringSet(Keys.enabledLanguages, setOf("en", Locale.getDefault().language))
@@ -155,14 +155,9 @@ class PreferencesHelper(val context: Context) {
 
     fun backupsDirectory() = rxPrefs.getString(Keys.backupDirectory, defaultBackupDir.toString())
 
-    fun dateFormat() = rxPrefs.getObject(
-        Keys.dateFormat,
-        DateFormat.getDateInstance(DateFormat.SHORT),
-        DateFormatConverter()
-    )
+    fun dateFormat() = rxPrefs.getObject(Keys.dateFormat, DateFormat.getDateInstance(DateFormat.SHORT), DateFormatConverter())
 
-    fun downloadsDirectory() =
-        rxPrefs.getString(Keys.downloadsDirectory, defaultDownloadsDir.toString())
+    fun downloadsDirectory() = rxPrefs.getString(Keys.downloadsDirectory, defaultDownloadsDir.toString())
 
     fun downloadOnlyOverWifi() = prefs.getBoolean(Keys.downloadOnlyOverWifi, true)
 
@@ -212,9 +207,13 @@ class PreferencesHelper(val context: Context) {
 
     fun automaticUpdates() = prefs.getBoolean(Keys.automaticUpdates, true)
 
+    fun automaticExtUpdates() = rxPrefs.getBoolean(Keys.automaticExtUpdates, false)
+
     fun collapsedCategories() = rxPrefs.getStringSet("collapsed_categories", mutableSetOf())
 
-    fun hiddenCatalogues() = rxPrefs.getStringSet("hidden_catalogues", mutableSetOf())
+    fun hiddenSources() = rxPrefs.getStringSet("hidden_catalogues", mutableSetOf())
+
+    fun pinnedCatalogues() = rxPrefs.getStringSet("pinned_catalogues", emptySet())
 
     fun downloadNew() = rxPrefs.getBoolean(Keys.downloadNew, false)
 
@@ -252,11 +251,15 @@ class PreferencesHelper(val context: Context) {
 
     fun updateOnRefresh() = rxPrefs.getInteger(Keys.updateOnRefresh, -1)
 
+    fun extensionUpdatesCount() = rxPrefs.getInteger("ext_updates_count", 0)
+
     fun recentsViewType() = rxPrefs.getInteger("recents_view_type", 0)
 
     fun lastExtCheck() = rxPrefs.getLong("last_ext_check", 0)
 
     fun unreadBadgeType() = rxPrefs.getInteger("unread_badge_type", 2)
+
+    fun hideStartReadingButton() = rxPrefs.getBoolean("hide_reading_button", false)
 
     fun hideFiltersAtStart() = rxPrefs.getBoolean("hide_filters_at_start", false)
 
@@ -266,7 +269,9 @@ class PreferencesHelper(val context: Context) {
 
     fun skipFiltered() = prefs.getBoolean(Keys.skipFiltered, false)
 
-    fun similarEnabled() = prefs.getBoolean(Keys.similarEnabled, false)
+    fun similarEnabled() = prefs.getBoolean(Keys.similarEnabled, true)
+
+    fun similarUpdateInterval() = rxPrefs.getInteger(Keys.libraryUpdateInterval, 7)
 
     fun similarUpdateRestriction() = prefs.getStringSet(Keys.similarUpdateRestriction, emptySet())
 

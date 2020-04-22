@@ -6,7 +6,6 @@ import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.app.Activity
-import android.app.PendingIntent
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -35,13 +34,9 @@ import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.PopupMenu
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
-import androidx.core.content.pm.ShortcutInfoCompat
-import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.ColorUtils
-import androidx.core.graphics.drawable.IconCompat
 import androidx.core.math.MathUtils
 import androidx.palette.graphics.Palette
-import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -53,7 +48,6 @@ import com.afollestad.materialdialogs.MaterialDialog
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
 import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import com.bumptech.glide.signature.ObjectKey
@@ -73,6 +67,7 @@ import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
+import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
@@ -94,6 +89,7 @@ import eu.kanade.tachiyomi.ui.manga.track.TrackItem
 import eu.kanade.tachiyomi.ui.manga.track.TrackingBottomSheet
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
+import eu.kanade.tachiyomi.ui.source.SourceController
 import eu.kanade.tachiyomi.ui.similar.SimilarController
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.storage.getUriCompat
@@ -109,8 +105,6 @@ import eu.kanade.tachiyomi.util.view.setStyle
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
-import jp.wasabeef.glide.transformations.CropSquareTransformation
-import jp.wasabeef.glide.transformations.MaskTransformation
 import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.android.synthetic.main.manga_details_controller.*
 import kotlinx.android.synthetic.main.manga_header_item.*
@@ -118,6 +112,8 @@ import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File
+import java.util.Locale
+import java.io.IOException
 import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.max
@@ -173,30 +169,16 @@ class MangaDetailsController : BaseController,
     var refreshTracker: Int? = null
     private var textAnim: ViewPropertyAnimator? = null
     private var scrollAnim: ViewPropertyAnimator? = null
-    var isTablet = false
     var chapterPopupMenu: Pair<Int, PopupMenu>? = null
 
     // Tablet Layout
+    var isTablet = false
     var tabletRecycler: RecyclerView? = null
-
-    /**
-     * Adapter containing a list of chapters.
-     */
     private var tabletAdapter: MangaDetailsAdapter? = null
 
-    /**
-     * Library search query.
-     */
     private var query = ""
-
-    /**
-     * Adapter containing a list of chapters.
-     */
     private var adapter: MangaDetailsAdapter? = null
 
-    /**
-     * Action mode for selections.
-     */
     private var actionMode: ActionMode? = null
 
     // Hold a reference to the current animator, so that it can be canceled mid-way.
@@ -205,20 +187,41 @@ class MangaDetailsController : BaseController,
     var showScroll = false
     var headerHeight = 0
 
-    init {
-        setHasOptionsMenu(true)
-    }
-
     override fun getTitle(): String? {
         return if (toolbarIsColored && !isTablet) manga?.title else null
     }
 
+    override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
+        return inflater.inflate(R.layout.manga_details_controller, container, false)
+    }
+
+    //region UI Methods
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
         coverColor = null
 
-        // Init RecyclerView and adapter
-        adapter = MangaDetailsAdapter(this, view.context)
+        setTabletMode(view)
+        setRecycler(view)
+        setPaletteColor()
+        setFastScroller()
+
+        presenter.onCreate()
+        swipe_refresh.isRefreshing = presenter.isLoading
+        if (manga?.initialized != true)
+            swipe_refresh.post { swipe_refresh.isRefreshing = true }
+        swipe_refresh.setOnRefreshListener { presenter.refreshAll() }
+    }
+
+    override fun onDestroyView(view: View) {
+        snack?.dismiss()
+        presenter.onDestroy()
+        adapter = null
+        trackingBottomSheet = null
+        super.onDestroyView(view)
+    }
+
+    /** Check if device is tablet, and create a second recycler to hold the details header if so */
+    private fun setTabletMode(view: View) {
         isTablet = isTabletSize()
         if (isTablet) {
             tabletRecycler = RecyclerView(view.context)
@@ -240,15 +243,17 @@ class MangaDetailsController : BaseController,
                 width = 1.dpToPx
             }
         }
+    }
+
+    /** Set adapter, insets, and scroll listener for recycler view */
+    private fun setRecycler(view: View) {
+        adapter = MangaDetailsAdapter(this, view.context)
 
         recycler.adapter = adapter
         adapter?.isSwipeEnabled = true
         recycler.layoutManager = LinearLayoutManager(view.context)
         recycler.addItemDecoration(
-            DividerItemDecoration(
-                view.context,
-                DividerItemDecoration.VERTICAL
-            )
+            MangaDetailsDivider(view.context)
         )
         recycler.setHasFixedSize(true)
         val attrsArray = intArrayOf(android.R.attr.actionBarSize)
@@ -276,8 +281,6 @@ class MangaDetailsController : BaseController,
             v.updatePaddingRelative(bottom = insets.systemWindowInsetBottom)
         }
 
-        presenter.onCreate()
-        fast_scroller.translationX = if (showScroll || isTablet) 0f else 25f.dpToPx
         recycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
@@ -352,8 +355,10 @@ class MangaDetailsController : BaseController,
                 }
             }
         })
-        setPaletteColor()
+    }
 
+    private fun setFastScroller() {
+        fast_scroller.translationX = if (showScroll || isTablet) 0f else 25f.dpToPx
         fast_scroller.setupWithRecyclerView(recycler, { position ->
             val letter = adapter?.getSectionText(position)
             when {
@@ -385,14 +390,9 @@ class MangaDetailsController : BaseController,
                 colorToolbar(itemPosition > 0, false)
             }
         }
-
-        swipe_refresh.isRefreshing = presenter.isLoading
-        if (manga?.initialized != true)
-            swipe_refresh.post { swipe_refresh.isRefreshing = true }
-
-        swipe_refresh.setOnRefreshListener { presenter.refreshAll() }
     }
 
+    /** Set the toolbar to fully transparent or colored and translucent */
     fun colorToolbar(isColor: Boolean, animate: Boolean = true) {
         if (isColor == toolbarIsColored) return
         toolbarIsColored = isColor
@@ -431,6 +431,7 @@ class MangaDetailsController : BaseController,
         }
     }
 
+    /** Get the color of the manga cover based on the current theme */
     fun setPaletteColor() {
         val view = view ?: return
         GlideApp.with(view.context).load(manga)
@@ -469,6 +470,72 @@ class MangaDetailsController : BaseController,
             })
     }
 
+    /** Set toolbar theme for themes that are inverted (ie. light blue theme) */
+    private fun setActionBar(forThis: Boolean) {
+        val currentNightMode =
+            activity!!.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+        // if the theme is using inverted toolbar color
+        if (currentNightMode == Configuration.UI_MODE_NIGHT_NO && ThemeUtil.isBlueTheme(
+                presenter.preferences.theme()
+            )
+        ) {
+            if (forThis) (activity as MainActivity).appbar.context.setTheme(
+                R.style.ThemeOverlay_AppCompat_DayNight_ActionBar
+            )
+            else (activity as MainActivity).appbar.context.setTheme(
+                R.style.Theme_ActionBar_Dark_DayNight
+            )
+
+            val iconPrimary = view?.context?.getResourceColor(
+                if (forThis) android.R.attr.textColorPrimary
+                else R.attr.actionBarTintColor
+            ) ?: Color.BLACK
+            (activity as MainActivity).toolbar.setTitleTextColor(iconPrimary)
+            (activity as MainActivity).drawerArrow?.color = iconPrimary
+            (activity as MainActivity).toolbar.overflowIcon?.setTint(iconPrimary)
+            if (forThis) activity!!.main_content.systemUiVisibility =
+                activity!!.main_content.systemUiVisibility.or(
+                    View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                )
+            else activity!!.main_content.systemUiVisibility =
+                activity!!.main_content.systemUiVisibility.rem(
+                    View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                )
+        }
+    }
+
+    private fun setStatusBarAndToolbar() {
+        activity?.window?.statusBarColor = if (toolbarIsColored) {
+            val translucentColor = ColorUtils.setAlphaComponent(coverColor ?: Color.TRANSPARENT, 175)
+            (activity as MainActivity).toolbar.setBackgroundColor(translucentColor)
+            translucentColor
+        } else Color.TRANSPARENT
+        (activity as MainActivity).appbar.setBackgroundColor(Color.TRANSPARENT)
+        (activity as MainActivity).toolbar.setBackgroundColor(activity?.window?.statusBarColor
+            ?: Color.TRANSPARENT)
+    }
+
+    private fun isTabletSize(): Boolean {
+        val activity = activity ?: return false
+        if ((activity.resources.configuration.screenLayout and Configuration
+                .SCREENLAYOUT_SIZE_MASK) < Configuration.SCREENLAYOUT_SIZE_LARGE)
+            return false
+        val displayMetrics = DisplayMetrics()
+        activity.windowManager?.defaultDisplay?.getMetrics(displayMetrics)
+        return displayMetrics.widthPixels.pxToDp >= 720
+    }
+
+    fun hasTabletHeight(): Boolean {
+        val activity = activity ?: return false
+        if ((activity.resources.configuration.screenLayout and Configuration
+                .SCREENLAYOUT_SIZE_MASK) < Configuration.SCREENLAYOUT_SIZE_LARGE) return false
+        val displayMetrics = DisplayMetrics()
+        activity.windowManager?.defaultDisplay?.getMetrics(displayMetrics)
+        return displayMetrics.heightPixels.pxToDp >= 720
+    }
+    //endregion
+
+    //region Lifecycle methods
     override fun onActivityResumed(activity: Activity) {
         super.onActivityResumed(activity)
         presenter.isLockedFromSearch = SecureActivityDelegate.shouldBeLocked()
@@ -484,48 +551,6 @@ class MangaDetailsController : BaseController,
         if (isCurrentController) {
             setStatusBarAndToolbar()
         }
-    }
-
-    fun showError(message: String) {
-        swipe_refresh?.isRefreshing = presenter.isLoading
-        view?.snack(message)
-    }
-
-    fun updateChapterDownload(download: Download) {
-        getHolder(download.chapter)?.notifyStatus(
-            download.status, presenter.isLockedFromSearch,
-            download.progress
-        )
-    }
-
-    private fun isTabletSize(): Boolean {
-        val activity = activity ?: return false
-        if ((activity.resources.configuration.screenLayout and Configuration
-                .SCREENLAYOUT_SIZE_MASK) < Configuration.SCREENLAYOUT_SIZE_LARGE
-        )
-            return false
-        val displayMetrics = DisplayMetrics()
-        activity.windowManager?.defaultDisplay?.getMetrics(displayMetrics)
-        return displayMetrics.widthPixels.pxToDp >= 720
-    }
-
-    fun hasTabletHeight(): Boolean {
-        val activity = activity ?: return false
-        if ((activity.resources.configuration.screenLayout and Configuration
-                .SCREENLAYOUT_SIZE_MASK) < Configuration.SCREENLAYOUT_SIZE_LARGE
-        ) return false
-        val displayMetrics = DisplayMetrics()
-        activity.windowManager?.defaultDisplay?.getMetrics(displayMetrics)
-        return displayMetrics.heightPixels.pxToDp >= 720
-    }
-
-    private fun getHolder(chapter: Chapter): ChapterHolder? {
-        return recycler?.findViewHolderForItemId(chapter.id!!) as? ChapterHolder
-    }
-
-    private fun getHeader(): MangaHeaderHolder? {
-        return if (isTablet) tabletRecycler?.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder
-        else recycler.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder
     }
 
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
@@ -555,37 +580,37 @@ class MangaDetailsController : BaseController,
         }
     }
 
-    private fun setActionBar(forThis: Boolean) {
-        /* val currentNightMode =
-             activity!!.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-         // if the theme is using inverted toolbar color
-         if (currentNightMode == Configuration.UI_MODE_NIGHT_NO && ThemeUtil.isBlueTheme(presenter.preferences.theme())) {
-             if (forThis) {
-                 (activity as MainActivity).appbar.context.setTheme(R.style.ThemeOverlay_AppCompat_DayNight_ActionBar)
-             } else {
-                 (activity as MainActivity).appbar.context.setTheme(R.style.Theme_ActionBar_Dark_DayNight)
-             }
+    override fun handleBack(): Boolean {
+        if (manga_cover_full?.visibility == View.VISIBLE) {
+            manga_cover_full?.performClick()
+            return true
+        }
+        return super.handleBack()
+    }
+    //endregion
 
-             val iconPrimary = view?.context?.getResourceColor(
-                 if (forThis) android.R.attr.textColorPrimary
-                 else R.attr.actionBarTintColor
-             ) ?: Color.BLACK
-             (activity as MainActivity).toolbar.setTitleTextColor(iconPrimary)
-             (activity as MainActivity).drawerArrow?.color = iconPrimary
-             (activity as MainActivity).toolbar.overflowIcon?.setTint(iconPrimary)
-             if (forThis) activity!!.main_content.systemUiVisibility =
-                 activity!!.main_content.systemUiVisibility.or(
-                     View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-                 )
-             else activity!!.main_content.systemUiVisibility =
-                 activity!!.main_content.systemUiVisibility.rem(
-                     View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-                 )
-         }*/
+    fun showError(message: String) {
+        swipe_refresh?.isRefreshing = presenter.isLoading
+        view?.snack(message)
     }
 
     fun setRefresh(enabled: Boolean) {
         swipe_refresh.isRefreshing = enabled
+    }
+
+    //region Recycler methods
+    fun updateChapterDownload(download: Download) {
+        getHolder(download.chapter)?.notifyStatus(download.status, presenter.isLockedFromSearch,
+            download.progress)
+    }
+
+    private fun getHolder(chapter: Chapter): ChapterHolder? {
+        return recycler?.findViewHolderForItemId(chapter.id!!) as? ChapterHolder
+    }
+
+    private fun getHeader(): MangaHeaderHolder? {
+        return if (isTablet) tabletRecycler?.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder
+        else recycler.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder
     }
 
     fun updateHeader() {
@@ -604,6 +629,18 @@ class MangaDetailsController : BaseController,
         adapter?.setChapters(chapters)
         addMangaHeader()
         activity?.invalidateOptionsMenu()
+    }
+
+    private fun addMangaHeader() {
+        if (tabletAdapter?.scrollableHeaders?.isEmpty() == true) {
+            tabletAdapter?.removeAllScrollableHeaders()
+            tabletAdapter?.addScrollableHeader(presenter.headerItem)
+            adapter?.removeAllScrollableHeaders()
+            adapter?.addScrollableHeader(presenter.tabletChapterHeaderItem!!)
+        } else if (!isTablet && adapter?.scrollableHeaders?.isEmpty() == true) {
+            adapter?.removeAllScrollableHeaders()
+            adapter?.addScrollableHeader(presenter.headerItem)
+        }
     }
 
     fun refreshAdapter() = adapter?.notifyDataSetChanged()
@@ -665,6 +702,18 @@ class MangaDetailsController : BaseController,
         // Finally show the PopupMenu
         popup.show()
     }
+
+    override fun onActionStateChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
+        swipe_refresh.isEnabled = actionState != ItemTouchHelper.ACTION_STATE_SWIPE
+    }
+
+    override fun onItemMove(fromPosition: Int, toPosition: Int) {
+    }
+
+    override fun shouldMoveItem(fromPosition: Int, toPosition: Int): Boolean {
+        return true
+    }
+    //endregion
 
     fun dismissPopup(position: Int) {
         if (chapterPopupMenu != null && chapterPopupMenu?.first == position) {
@@ -746,14 +795,7 @@ class MangaDetailsController : BaseController,
         startActivity(intent)
     }
 
-    override fun onDestroyView(view: View) {
-        snack?.dismiss()
-        presenter.onDestroy()
-        adapter = null
-        trackingBottomSheet = null
-        super.onDestroyView(view)
-    }
-
+    //region action bar menu methods
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.manga_details, menu)
         menu.findItem(R.id.action_download).isVisible = !presenter.isLockedFromSearch
@@ -765,7 +807,6 @@ class MangaDetailsController : BaseController,
             presenter.hasDownloads() && !presenter.isLockedFromSearch
         menu.findItem(R.id.remove_non_bookmarked).isVisible =
             presenter.hasBookmark() && !presenter.isLockedFromSearch
-        menu.findItem(R.id.action_mark_all_as_unread).isVisible = presenter.isTracked()
         val iconPrimary = view?.context?.getResourceColor(android.R.attr.textColorPrimary)
             ?: Color.BLACK
         menu.findItem(R.id.action_download).icon?.mutate()?.setTint(iconPrimary)
@@ -799,8 +840,8 @@ class MangaDetailsController : BaseController,
         when (item.itemId) {
             R.id.action_refresh_tracking -> presenter.refreshTrackers()
             R.id.action_mark_all_as_read -> {
-                MaterialDialog(view!!.context).message(R.string.mark_all_as_read)
-                    .positiveButton(R.string.marked_as_read) {
+                MaterialDialog(view!!.context).message(R.string.mark_all_chapters_as_read)
+                    .positiveButton(R.string.mark_as_read) {
                         markAsRead(presenter.chapters)
                     }.negativeButton(android.R.string.cancel).show()
             }
@@ -813,10 +854,8 @@ class MangaDetailsController : BaseController,
         }
         return true
     }
+    //endregion
 
-    /**
-     * Called to run Intent with [Intent.ACTION_SEND], which show share dialog.
-     */
     override fun prepareToShareManga() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && coverDrawable != null)
             GlideApp.with(activity!!).asBitmap().load(presenter.manga).into(object :
@@ -834,9 +873,6 @@ class MangaDetailsController : BaseController,
         else shareManga()
     }
 
-    /**
-     * Called to run Intent with [Intent.ACTION_SEND], which show share dialog.
-     */
     fun shareManga(cover: File? = null) {
         val context = view?.context ?: return
 
@@ -912,6 +948,18 @@ class MangaDetailsController : BaseController,
         }
     }
 
+    private fun isLocked(): Boolean {
+        if (presenter.isLockedFromSearch) {
+            SecureActivityDelegate.promptLockIfNeeded(activity)
+            return true
+        }
+        return false
+    }
+
+    //region Interface methods
+    override fun coverColor(): Int? = coverColor
+    override fun topCoverHeight(): Int = headerHeight
+
     override fun startDownloadNow(position: Int) {
         val chapter = (adapter?.getItem(position) as? ChapterItem) ?: return
         presenter.startDownloadingNow(chapter)
@@ -920,13 +968,10 @@ class MangaDetailsController : BaseController,
     private fun downloadChapters(chapters: List<ChapterItem>) {
         val view = view ?: return
         presenter.downloadChapters(chapters)
-        val text = view.context.getString(
-            R.string.add_x_to_library, presenter.manga.mangaType
-                (view.context).toLowerCase(Locale.ROOT)
-        )
+        val text = view.context.getString(R.string.add_x_to_library, presenter.manga.mangaType
+            (view.context).toLowerCase(Locale.ROOT))
         if (!presenter.manga.favorite && (snack == null ||
-                snack?.getText() != text)
-        ) {
+                snack?.getText() != text)) {
             snack = view.snack(text, Snackbar.LENGTH_INDEFINITE) {
                 setAction(R.string.add) {
                     presenter.setFavorite(true)
@@ -942,106 +987,10 @@ class MangaDetailsController : BaseController,
         }
     }
 
-    /**
-     * Add a shortcut of the manga to the home screen
-     */
-    private fun addToHomeScreen() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            // TODO are transformations really unsupported or is it just the Pixel Launcher?
-            createShortcutForShape()
-        } else {
-            ChooseShapeDialog(this).showDialog(router)
-        }
-    }
-
-    /**
-     * Retrieves the bitmap of the shortcut with the requested shape and calls [createShortcut] when
-     * the resource is available.
-     *
-     * @param i The shape index to apply. Defaults to circle crop transformation.
-     */
-    fun createShortcutForShape(i: Int = 0) {
-        if (activity == null) return
-        GlideApp.with(activity!!)
-            .asBitmap()
-            .load(presenter.manga)
-            .diskCacheStrategy(DiskCacheStrategy.NONE)
-            .apply {
-                when (i) {
-                    0 -> circleCrop()
-                    1 -> transform(RoundedCorners(5))
-                    2 -> transform(CropSquareTransformation())
-                    3 -> centerCrop().transform(MaskTransformation(R.drawable.mask_star))
-                }
-            }
-            .into(object : CustomTarget<Bitmap>(128, 128) {
-                override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
-                    createShortcut(resource)
-                }
-
-                override fun onLoadCleared(placeholder: Drawable?) {}
-
-                override fun onLoadFailed(errorDrawable: Drawable?) {
-                    activity?.toast(R.string.could_not_create_shortcut)
-                }
-            })
-    }
-
-    /**
-     * Create shortcut using ShortcutManager.
-     *
-     * @param icon The image of the shortcut.
-     */
-    private fun createShortcut(icon: Bitmap) {
-        val activity = activity ?: return
-
-        // Create the shortcut intent.
-        val shortcutIntent = activity.intent
-            .setAction(MainActivity.SHORTCUT_MANGA)
-            .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            .putExtra(MANGA_EXTRA, presenter.manga.id)
-
-        // Check if shortcut placement is supported
-        if (ShortcutManagerCompat.isRequestPinShortcutSupported(activity)) {
-            val shortcutId = "manga-shortcut-${presenter.manga.title}-${presenter.source.name}"
-
-            // Create shortcut info
-            val shortcutInfo = ShortcutInfoCompat.Builder(activity, shortcutId)
-                .setShortLabel(presenter.manga.title)
-                .setIcon(IconCompat.createWithBitmap(icon))
-                .setIntent(shortcutIntent)
-                .build()
-
-            val successCallback = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                // Create the CallbackIntent.
-                val intent =
-                    ShortcutManagerCompat.createShortcutResultIntent(activity, shortcutInfo)
-
-                // Configure the intent so that the broadcast receiver gets the callback successfully.
-                PendingIntent.getBroadcast(activity, 0, intent, 0)
-            } else {
-                NotificationReceiver.shortcutCreatedBroadcast(activity)
-            }
-
-            // Request shortcut.
-            ShortcutManagerCompat.requestPinShortcut(
-                activity, shortcutInfo,
-                successCallback.intentSender
-            )
-        }
-    }
-
     override fun startDownloadRange(position: Int) {
         if (actionMode == null) createActionModeIfNeeded()
         onItemClick(null, position)
     }
-
-    override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
-        return inflater.inflate(R.layout.manga_details_controller, container, false)
-    }
-
-    override fun coverColor(): Int? = coverColor
-    override fun topCoverHeight(): Int = headerHeight
 
     override fun readNextChapter() {
         if (activity is SearchActivity && presenter.isLockedFromSearch) {
@@ -1052,9 +1001,7 @@ class MangaDetailsController : BaseController,
         if (item != null) {
             openChapter(item.chapter)
         } else if (snack == null || snack?.getText() != view?.context?.getString(
-                R.string.next_chapter_not_found
-            )
-        ) {
+                R.string.next_chapter_not_found)) {
             snack = view?.snack(R.string.next_chapter_not_found, Snackbar.LENGTH_LONG) {
                 addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
                     override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
@@ -1093,14 +1040,6 @@ class MangaDetailsController : BaseController,
 
     override fun showChapterFilter() {
         ChaptersSortBottomSheet(this).show()
-    }
-
-    private fun isLocked(): Boolean {
-        if (presenter.isLockedFromSearch) {
-            SecureActivityDelegate.promptLockIfNeeded(activity)
-            return true
-        }
-        return false
     }
 
     override fun favoriteManga(longPress: Boolean) {
@@ -1221,14 +1160,6 @@ class MangaDetailsController : BaseController,
         snack = view.snack(view.context.getString(R.string._copied_to_clipboard, contentType))
     }
 
-    override fun handleBack(): Boolean {
-        if (manga_cover_full?.visibility == View.VISIBLE) {
-            manga_cover_full?.performClick()
-            return true
-        }
-        return super.handleBack()
-    }
-
     override fun showTrackingSheet() {
         if (isLocked()) return
         trackingBottomSheet =
@@ -1242,6 +1173,10 @@ class MangaDetailsController : BaseController,
             ExternalBottomSheet(this)
         externalBottomSheet?.show()
     }
+
+    //endregion
+
+    //region Tracking methods
 
     fun refreshTracking(trackings: List<TrackItem>) {
         trackingBottomSheet?.onNextTrackings(trackings)
@@ -1264,10 +1199,9 @@ class MangaDetailsController : BaseController,
         Timber.e(error)
         trackingBottomSheet?.onSearchResultsError(error)
     }
+    //endregion
 
-    /**
-     * Creates the action mode if it's not created already.
-     */
+    //region Action mode methods
     private fun createActionModeIfNeeded() {
         if (actionMode == null) {
             actionMode = (activity as AppCompatActivity).startSupportActionMode(this)
@@ -1298,6 +1232,12 @@ class MangaDetailsController : BaseController,
         return true
     }
 
+    override fun onPrepareActionMode(mode: ActionMode?, menu: Menu?): Boolean {
+        mode?.title = view?.context?.getString(if (startingDLChapterPos == null)
+            R.string.select_starting_chapter else R.string.select_ending_chapter)
+        return false
+    }
+
     override fun onDestroyActionMode(mode: ActionMode?) {
         actionMode = null
         setStatusBarAndToolbar()
@@ -1313,43 +1253,6 @@ class MangaDetailsController : BaseController,
         return
     }
 
-    /**
-     * Called to set the last used catalogue at the top of the view.
-     */
-    private fun addMangaHeader() {
-        if (tabletAdapter?.scrollableHeaders?.isEmpty() == true) {
-            tabletAdapter?.removeAllScrollableHeaders()
-            tabletAdapter?.addScrollableHeader(presenter.headerItem)
-            adapter?.removeAllScrollableHeaders()
-            adapter?.addScrollableHeader(presenter.tabletChapterHeaderItem!!)
-        } else if (!isTablet && adapter?.scrollableHeaders?.isEmpty() == true) {
-            adapter?.removeAllScrollableHeaders()
-            adapter?.addScrollableHeader(presenter.headerItem)
-        }
-    }
-
-    private fun setStatusBarAndToolbar() {
-        activity?.window?.statusBarColor = if (toolbarIsColored) {
-            val translucentColor =
-                ColorUtils.setAlphaComponent(coverColor ?: Color.TRANSPARENT, 175)
-            (activity as MainActivity).toolbar.setBackgroundColor(translucentColor)
-            translucentColor
-        } else Color.TRANSPARENT
-        (activity as MainActivity).appbar.setBackgroundColor(Color.TRANSPARENT)
-        (activity as MainActivity).toolbar.setBackgroundColor(
-            activity?.window?.statusBarColor
-                ?: Color.TRANSPARENT
-        )
-    }
-
-    override fun onPrepareActionMode(mode: ActionMode?, menu: Menu?): Boolean {
-        mode?.title = view?.context?.getString(
-            if (startingDLChapterPos == null)
-                R.string.select_starting_chapter else R.string.select_ending_chapter
-        )
-        return false
-    }
-
     private fun viewComments(chapter: ChapterItem) {
         val activity = activity ?: return
         val url = MdUtil.baseUrl + "/chapter/" + MdUtil.getChapterId(chapter.url) + "/comments"
@@ -1358,17 +1261,8 @@ class MangaDetailsController : BaseController,
         destroyActionModeIfNeeded()
         startActivity(intent)
     }
+    //endregion
 
-    override fun onActionStateChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
-        swipe_refresh.isEnabled = actionState != ItemTouchHelper.ACTION_STATE_SWIPE
-    }
-
-    override fun onItemMove(fromPosition: Int, toPosition: Int) {
-    }
-
-    override fun shouldMoveItem(fromPosition: Int, toPosition: Int): Boolean {
-        return true
-    }
 
     override fun zoomImageFromThumb(thumbView: View) {
         // If there's an animation in progress, cancel it immediately and proceed with this one.
@@ -1502,7 +1396,6 @@ class MangaDetailsController : BaseController,
 
     companion object {
         const val UPDATE_EXTRA = "update"
-        const val SMART_SEARCH_CONFIG_EXTRA = "smartSearchConfig"
 
         const val FROM_CATALOGUE_EXTRA = "from_catalogue"
         const val MANGA_EXTRA = "manga"

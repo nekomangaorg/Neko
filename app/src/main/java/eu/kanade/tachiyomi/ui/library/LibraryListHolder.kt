@@ -12,8 +12,8 @@ import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.visible
-import kotlinx.android.synthetic.main.catalogue_list_item.*
-import kotlinx.android.synthetic.main.catalogue_list_item.view.*
+import kotlinx.android.synthetic.main.manga_list_item.*
+import kotlinx.android.synthetic.main.manga_list_item.view.*
 import kotlinx.android.synthetic.main.unread_download_badge.*
 
 /**
@@ -33,6 +33,7 @@ class LibraryListHolder(
 ) : LibraryHolder(view, adapter) {
 
     init {
+        play_layout.setOnClickListener { playButtonClicked() }
         badge_view?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             marginEnd = (if (padEnd) 22 else 12).dpToPx
         }
@@ -51,6 +52,7 @@ class LibraryListHolder(
         if (item.manga.isBlank()) {
             constraint_layout.minHeight = 0
             if (item.manga.status == -1) {
+                title.text = null
                 title.gone()
             } else
                 title.text = itemView.context.getString(R.string.category_is_empty)
@@ -74,9 +76,7 @@ class LibraryListHolder(
         subtitle.visibility = if (!item.manga.author.isNullOrBlank()) View.VISIBLE
         else View.GONE
 
-        play_layout.visibility = if (item.manga.unread > 0 && item.unreadType > 0)
-            View.VISIBLE else View.GONE
-        play_layout.setOnClickListener { playButtonClicked() }
+        setReadingButton(item)
 
         // Update the cover.
         if (item.manga.thumbnail_url == null) Glide.with(view.context).clear(cover_thumbnail)

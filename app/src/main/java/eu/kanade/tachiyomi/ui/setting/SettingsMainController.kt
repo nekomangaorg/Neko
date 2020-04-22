@@ -5,14 +5,12 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import androidx.preference.PreferenceScreen
 import com.bluelinelabs.conductor.Controller
-import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
-import com.mikepenz.iconics.utils.colorInt
-import com.mikepenz.iconics.utils.sizeDp
+import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
-import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.system.iconicsDrawable
 import eu.kanade.tachiyomi.util.system.openInBrowser
 
 class SettingsMainController : SettingsController() {
@@ -21,79 +19,59 @@ class SettingsMainController : SettingsController() {
         setHasOptionsMenu(true)
     }
 
-    private val size = 18
-
     override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
         titleRes = R.string.settings
 
-        val tintColor = context.getResourceColor(R.attr.text_color_primary)
+        val size = 18
 
         preference {
-            iconRes = R.drawable.ic_tune_white_24dp
-            iconTint = tintColor
+            iconDrawable = context.iconicsDrawable(MaterialDesignDx.Icon.gmf_tune, size = size)
             titleRes = R.string.general
             onClick { navigateTo(SettingsGeneralController()) }
         }
         preference {
-            iconRes = R.drawable.ic_book_black_24dp
-            iconTint = tintColor
+            iconDrawable = context.iconicsDrawable(MaterialDesignDx.Icon.gmf_book, size = size)
             titleRes = R.string.library
             onClick { navigateTo(SettingsLibraryController()) }
         }
         preference {
-            iconDrawable =
-                IconicsDrawable(context, CommunityMaterial.Icon.cmd_google_chrome).apply {
-                    colorInt = tintColor
-                    sizeDp = size
-                }
-
+            iconDrawable = context.iconicsDrawable(CommunityMaterial.Icon.cmd_google_chrome, size = size)
             titleRes = R.string.site_specific_settings
             onClick { navigateTo(SettingsSiteController()) }
         }
         preference {
-            iconRes = R.drawable.ic_read_24dp
-            iconTint = tintColor
-            titleRes = R.string.reader
+            iconDrawable = context.iconicsDrawable(MaterialDesignDx.Icon.gmf_chrome_reader_mode, size = size)
             onClick { navigateTo(SettingsReaderController()) }
         }
         preference {
-            iconRes = R.drawable.ic_file_download_black_24dp
-            iconTint = tintColor
+            iconDrawable = context.iconicsDrawable(MaterialDesignDx.Icon.gmf_file_download, size = size)
             titleRes = R.string.downloads
             onClick { navigateTo(SettingsDownloadController()) }
         }
 
         preference {
-            iconRes = R.drawable.ic_sync_black_24dp
-            iconTint = tintColor
+            iconDrawable = context.iconicsDrawable(MaterialDesignDx.Icon.gmf_sync, size = size)
+
             titleRes = R.string.tracking
             onClick { navigateTo(SettingsTrackingController()) }
         }
         preference {
-            iconDrawable =
-                IconicsDrawable(context, CommunityMaterial.Icon.cmd_chart_histogram).apply {
-                    colorInt = tintColor
-                    sizeDp = size
-                }
-
+            iconDrawable = context.iconicsDrawable(CommunityMaterial.Icon.cmd_chart_histogram, size = size)
             titleRes = R.string.similar
             onClick { navigateTo(SettingsSimilarController()) }
         }
         preference {
-            iconRes = R.drawable.ic_backup_black_24dp
-            iconTint = tintColor
+            iconDrawable = context.iconicsDrawable(MaterialDesignDx.Icon.gmf_backup, size = size)
             titleRes = R.string.backup
             onClick { navigateTo(SettingsBackupController()) }
         }
         preference {
-            iconRes = R.drawable.ic_code_black_24dp
-            iconTint = tintColor
+            iconDrawable = context.iconicsDrawable(MaterialDesignDx.Icon.gmf_code, size = size)
             titleRes = R.string.advanced
             onClick { navigateTo(SettingsAdvancedController()) }
         }
         preference {
-            iconRes = R.drawable.ic_info_black_24dp
-            iconTint = tintColor
+            iconDrawable = context.iconicsDrawable(MaterialDesignDx.Icon.gmf_info, size = size)
             titleRes = R.string.about
             onClick { navigateTo(SettingsAboutController()) }
         }

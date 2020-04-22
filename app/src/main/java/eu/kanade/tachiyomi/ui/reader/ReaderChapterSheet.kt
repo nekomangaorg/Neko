@@ -6,7 +6,6 @@ import android.graphics.Color
 import android.os.Build
 import android.util.AttributeSet
 import android.view.View
-import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.core.graphics.ColorUtils
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -39,7 +38,12 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
 
     fun setup(activity: ReaderActivity) {
         presenter = activity.presenter
-        val primary = activity.getResourceColor(R.attr.colorPrimary)
+        val primary = ColorUtils.setAlphaComponent(
+            activity.getResourceColor(
+                R.attr.colorSecondary
+            ), 200
+        )
+        val fullPrimary = activity.getResourceColor(R.attr.colorSecondary)
         sheetBehavior = BottomSheetBehavior.from(this)
         chapters_button.setOnClickListener {
             if (sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) sheetBehavior?.state =
@@ -56,16 +60,17 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
             sheetBehavior?.peekHeight =
                 peek + if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) insets.mandatorySystemGestureInsets.bottom
                 else insets.systemWindowInsetBottom
-            chapters_bottom_sheet.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            chapters_bottom_sheet.updateLayoutParams<MarginLayoutParams> {
                 height = 280.dpToPx + insets.systemWindowInsetBottom
             }
             chapter_recycler.updatePaddingRelative(bottom = insets.systemWindowInsetBottom)
         }
         sheetBehavior?.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onSlide(bottomSheet: View, progress: Float) {
+                pill.alpha = (1 - max(0f, progress)) * 0.25f
                 val trueProgress = max(progress, 0f)
                 backgroundTintList =
-                    ColorStateList.valueOf(lerpColor(primary, primary, trueProgress))
+                    ColorStateList.valueOf(lerpColor(primary, fullPrimary, trueProgress))
                 chapter_recycler.alpha = trueProgress
                 if (activity.sheetManageNavColor) activity.window.navigationBarColor =
                     lerpColor(ColorUtils.setAlphaComponent(primary, 0), primary, trueProgress)
@@ -115,6 +120,11 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                 refreshList()
             }
         })
+
+        backgroundTintList = ColorStateList.valueOf(
+            if (sheetBehavior?.state != BottomSheetBehavior.STATE_EXPANDED) primary
+            else fullPrimary
+        )
 
         chapter_recycler.layoutManager = LinearLayoutManager(context)
         refreshList()

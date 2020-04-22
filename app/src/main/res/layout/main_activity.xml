@@ -24,9 +24,9 @@
         android:id="@+id/appbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:theme="?attr/actionBarTheme"
         android:background="?attr/colorSecondary"
         android:stateListAnimator="@null"
+        android:theme="?attr/actionBarTheme"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -59,22 +59,6 @@
                     tools:text="Title Text" />
             </LinearLayout>
         </eu.kanade.tachiyomi.ui.base.CenteredToolbar>
-
-        <com.google.android.material.tabs.TabLayout
-            android:id="@+id/tabs"
-            android:visibility="gone"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="?colorPrimary"
-            android:theme="@style/Theme.ActionBar.Tab"
-            app:tabGravity="center"
-            app:tabIndicatorColor="?attr/actionBarTintColor"
-            app:tabInlineLabel="true"
-            app:tabMinWidth="75dp"
-            app:tabMode="auto"
-            app:tabRippleColor="@color/rippleColor"
-            app:tabTextColor="?attr/actionBarTintColor" />
-
     </com.google.android.material.appbar.AppBarLayout>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView

@@ -24,7 +24,7 @@ internal class DownloadNotifier(private val context: Context) {
      */
     private val notification by lazy {
         NotificationCompat.Builder(context, Notifications.CHANNEL_DOWNLOADER)
-            .setLargeIcon(BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher))
+                .setLargeIcon(BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher))
     }
 
     /**
@@ -78,20 +78,16 @@ internal class DownloadNotifier(private val context: Context) {
                 setContentIntent(NotificationHandler.openDownloadManagerPendingActivity(context))
                 isDownloading = true
                 // Pause action
-                addAction(
-                    R.drawable.ic_av_pause_grey_24dp_img,
+                addAction(R.drawable.ic_av_pause_grey_24dp_img,
                     context.getString(R.string.pause),
-                    NotificationReceiver.pauseDownloadsPendingBroadcast(context)
-                )
+                    NotificationReceiver.pauseDownloadsPendingBroadcast(context))
             }
 
             if (download != null) {
                 val title = download.manga.title.chop(15)
                 val quotedTitle = Pattern.quote(title)
-                val chapter = download.chapter.name.replaceFirst(
-                    "$quotedTitle[\\s]*[-]*[\\s]*"
-                        .toRegex(RegexOption.IGNORE_CASE), ""
-                )
+                val chapter = download.chapter.name.replaceFirst("$quotedTitle[\\s]*[-]*[\\s]*"
+                    .toRegex(RegexOption.IGNORE_CASE), "")
                 setContentTitle("$title - $chapter".chop(30))
                 setContentText(
                     context.getString(R.string.downloading)
@@ -129,23 +125,17 @@ internal class DownloadNotifier(private val context: Context) {
                 setContentIntent(NotificationHandler.openDownloadManagerPendingActivity(context))
                 isDownloading = true
                 // Pause action
-                addAction(
-                    R.drawable.ic_av_pause_grey_24dp_img,
-                    context.getString(R.string.pause),
-                    NotificationReceiver.pauseDownloadsPendingBroadcast(context)
-                )
+                addAction(R.drawable.ic_av_pause_grey_24dp_img,
+                        context.getString(R.string.pause),
+                        NotificationReceiver.pauseDownloadsPendingBroadcast(context))
             }
 
             val title = download.manga.title.chop(15)
             val quotedTitle = Pattern.quote(title)
-            val chapter = download.chapter.name.replaceFirst(
-                "$quotedTitle[\\s]*[-]*[\\s]*".toRegex(RegexOption.IGNORE_CASE), ""
-            )
+            val chapter = download.chapter.name.replaceFirst("$quotedTitle[\\s]*[-]*[\\s]*".toRegex(RegexOption.IGNORE_CASE), "")
             setContentTitle("$title - $chapter".chop(30))
-            setContentText(
-                context.getString(R.string.downloading_progress)
-                    .format(download.downloadedImages, download.pages!!.size)
-            )
+            setContentText(context.getString(R.string.downloading_progress)
+                    .format(download.downloadedImages, download.pages!!.size))
             setStyle(null)
             setProgress(download.pages!!.size, download.downloadedImages, false)
         }
@@ -220,11 +210,7 @@ internal class DownloadNotifier(private val context: Context) {
         with(notification) {
             setContentTitle(chapter ?: context.getString(R.string.download_error))
             setContentText(error ?: context.getString(R.string.could_not_download_unexpected_error))
-            setStyle(
-                NotificationCompat.BigTextStyle().bigText(
-                    error ?: context.getString(R.string.could_not_download_unexpected_error)
-                )
-            )
+            setStyle(NotificationCompat.BigTextStyle().bigText(error ?: context.getString(R.string.could_not_download_unexpected_error)))
             setSmallIcon(android.R.drawable.stat_sys_warning)
             setCategory(NotificationCompat.CATEGORY_ERROR)
             clearActions()

@@ -6,6 +6,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
+import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.category.CategoryController
 import uy.kohesive.injekt.Injekt
@@ -80,7 +81,7 @@ class SettingsLibraryController : SettingsController() {
 
                 onChange { newValue ->
                     // Always cancel the previous task, it seems that sometimes they are not updated.
-                    LibraryUpdateJob.cancelTask()
+                    LibraryUpdateJob.setupTask(0)
 
                     val interval = newValue as Int
                     if (interval > 0) {
@@ -153,12 +154,6 @@ class SettingsLibraryController : SettingsController() {
                 defaultValue = -1
             }
 
-            switchPreference {
-                key = Keys.refreshCoversToo
-                titleRes = R.string.auto_refresh_covers
-                summaryRes = R.string.auto_refresh_covers_summary
-                defaultValue = true
-            }
         }
     }
 }

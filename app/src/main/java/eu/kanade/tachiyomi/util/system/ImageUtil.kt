@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.util.system
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
@@ -55,8 +56,9 @@ object ImageUtil {
         return null
     }
 
-    fun autoSetBackground(image: Bitmap?, useWhiteAlways: Boolean): Drawable {
-        val backgroundColor = if (useWhiteAlways) Color.WHITE else android.R.attr.colorBackground
+    fun autoSetBackground(image: Bitmap?, useWhiteAlways: Boolean, context: Context): Drawable {
+        val backgroundColor = if (useWhiteAlways) Color.WHITE else
+            context.getResourceColor(android.R.attr.colorBackground)
         if (image == null) return ColorDrawable(backgroundColor)
         if (image.width < 50 || image.height < 50)
             return ColorDrawable(backgroundColor)
@@ -204,7 +206,8 @@ object ImageUtil {
 
     fun Boolean.toInt() = if (this) 1 else 0
     private fun isDark(color: Int): Boolean {
-        return Color.red(color) < 40 && Color.blue(color) < 40 && Color.green(color) < 40
+        return Color.red(color) < 40 && Color.blue(color) < 40 && Color.green(color) < 40 &&
+            Color.alpha(color) > 200
     }
 
     private fun pixelIsClose(color1: Int, color2: Int): Boolean {

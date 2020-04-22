@@ -43,7 +43,6 @@ import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
-import eu.kanade.tachiyomi.ui.catalogue.browse.BrowseCatalogueController
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.recent_updates.RecentChaptersController
@@ -52,6 +51,7 @@ import eu.kanade.tachiyomi.ui.recents.RecentsController
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.ui.setting.SettingsController
 import eu.kanade.tachiyomi.ui.setting.SettingsMainController
+import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
@@ -95,6 +95,8 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
         extraViewForUndo = extraViewToCheck
     }
 
+    lateinit var tabAnimator: TabsAnimator
+
     override fun onCreate(savedInstanceState: Bundle?) {
         // Create a webview before extensions do or else they will break night mode theme
         // https://stackoverflow.com/questions/54191883
@@ -129,7 +131,6 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
         var continueSwitchingTabs = false
         bottom_nav.setOnNavigationItemSelectedListener { item ->
             val id = item.itemId
-
             val currentController = router.backstack.lastOrNull()?.controller()
             if (!continueSwitchingTabs && currentController is BottomNavBarInterface) {
                 if (!currentController.canChangeTabs {
@@ -341,7 +342,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
 
     fun setBrowseRoot() {
         toolbar.navigationIcon = null
-        setRoot(BrowseCatalogueController(source), R.id.nav_browse)
+        setRoot(BrowseSourceController(source), R.id.nav_browse)
     }
 
     protected open fun handleIntentAction(intent: Intent): Boolean {
@@ -359,7 +360,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
                 }
                 router.pushController(controller.withFadeTransaction())
             }
-            SHORTCUT_CATALOGUES -> bottom_nav.selectedItemId = R.id.nav_browse
+            SHORTCUT_BROWSE -> bottom_nav.selectedItemId = R.id.nav_browse
             SHORTCUT_MANGA -> {
                 val extras = intent.extras ?: return false
                 if (router.backstack.isEmpty()) bottom_nav.selectedItemId = R.id.nav_library
@@ -383,7 +384,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
                         router.popToRoot()
                     }
                     router.pushController(
-                        BrowseCatalogueController(
+                        BrowseSourceController(
                             source,
                             query
                         ).withFadeTransaction()
@@ -557,7 +558,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
         const val SHORTCUT_LIBRARY = "eu.kanade.tachiyomi.SHOW_LIBRARY"
         const val SHORTCUT_RECENTLY_UPDATED = "eu.kanade.tachiyomi.SHOW_RECENTLY_UPDATED"
         const val SHORTCUT_RECENTLY_READ = "eu.kanade.tachiyomi.SHOW_RECENTLY_READ"
-        const val SHORTCUT_CATALOGUES = "eu.kanade.tachiyomi.SHOW_CATALOGUES"
+        const val SHORTCUT_BROWSE = "eu.kanade.tachiyomi.SHOW_BROWSE"
         const val SHORTCUT_DOWNLOADS = "eu.kanade.tachiyomi.SHOW_DOWNLOADS"
         const val SHORTCUT_MANGA = "eu.kanade.tachiyomi.SHOW_MANGA"
 

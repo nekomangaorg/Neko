@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <FrameLayout
+        android:id="@+id/right_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/red_error"
+        android:visibility="gone">
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/close_right"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="end|center"
+            android:gravity="center"
+            android:layout_marginEnd="21dp"
+            android:contentDescription="@string/cancel"
+            android:src="@drawable/ic_close_white_24dp"
+            android:text="@string/hide"
+            android:textColor="@color/md_white_1000" />
+    </FrameLayout>
+
+
+    <FrameLayout
+        android:id="@+id/left_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/red_error">
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/close_left"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="start|center"
+            android:layout_marginStart="21dp"
+            android:gravity="center"
+            android:src="@drawable/ic_close_white_24dp"
+            android:text="@string/hide"
+            android:textColor="@color/md_white_1000" />
+    </FrameLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/card"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/material_component_lists_two_line_height"
+        android:background="@drawable/list_item_selector">
+
+        <ImageView
+            android:id="@+id/edit_button"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="6dp"
+            android:padding="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:src="@mipmap/ic_launcher_round" />
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:paddingStart="0dp"
+            android:paddingEnd="8dp"
+            android:ellipsize="end"
+            android:textColor="?android:textColorPrimary"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/source_latest"
+            app:layout_constraintStart_toEndOf="@+id/edit_button"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Source title" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/source_latest"
+            style="@style/Theme.Widget.Button.TextButton"
+            android:textColor="?colorAccent"
+            android:layout_marginEnd="4dp"
+            android:textAllCaps="false"
+            android:layout_width="wrap_content"
+            android:letterSpacing="0.0"
+            android:text="@string/view_latest"
+            android:layout_height="match_parent"
+            app:layout_constraintEnd_toStartOf="@id/source_pin"/>
+
+        <ImageButton
+            android:id="@+id/source_pin"
+            android:layout_marginEnd="8dp"
+            style="@style/Theme.Widget.CustomImageButton"
+            android:src="@drawable/ic_pin_24dp"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_margin="10dp"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</FrameLayout>

@@ -22,6 +22,7 @@ import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.graphics.ColorUtils
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -129,6 +130,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
 
     var sheetManageNavColor = false
 
+    var lightStatusBar = false
+
     /**
      * Progress dialog used when switching chapters from the menu buttons.
      */
@@ -161,17 +164,24 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
      */
     override fun onCreate(savedInstanceState: Bundle?) {
         AppCompatDelegate.setDefaultNightMode(ThemeUtil.nightMode(preferences.theme()))
-        val theme = preferences.theme()
-        setTheme(
-            when {
-                ThemeUtil.isAMOLEDTheme(theme) -> R.style.Theme_Tachiyomi_Amoled
-                else -> R.style.Theme_Tachiyomi
-            }
-        )
+        setTheme(ThemeUtil.theme(preferences.theme()))
         super.onCreate(savedInstanceState)
         setContentView(R.layout.reader_activity)
-
+        val a = obtainStyledAttributes(intArrayOf(android.R.attr.windowLightStatusBar))
+        lightStatusBar = a.getBoolean(0, false)
+        a.recycle()
         setNotchCutoutMode()
+        if (lightStatusBar) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) reader_layout.systemUiVisibility =
+                reader_layout.systemUiVisibility.or(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR)
+            reader_layout.systemUiVisibility =
+                reader_layout.systemUiVisibility.or(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
+        } else {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) reader_layout.systemUiVisibility =
+                reader_layout.systemUiVisibility.rem(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR)
+            reader_layout.systemUiVisibility =
+                reader_layout.systemUiVisibility.rem(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
+        }
 
         if (presenter.needsInit()) {
             val manga = intent.extras!!.getLong("manga", -1)
@@ -181,11 +191,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
                 finish()
                 return
             }
-            NotificationReceiver.dismissNotification(
-                this,
-                manga.hashCode(),
-                Notifications.ID_NEW_CHAPTERS
-            )
+            NotificationReceiver.dismissNotification(this, manga.hashCode(), Notifications.ID_NEW_CHAPTERS)
             if (chapter > -1) presenter.init(manga, chapter)
             else presenter.init(manga, chapterUrl)
         }
@@ -305,6 +311,10 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
     private fun initializeMenu() {
         // Set toolbar
         setSupportActionBar(toolbar)
+        val primaryColor = ColorUtils.setAlphaComponent(getResourceColor(R.attr.colorSecondary),
+            200)
+        appbar.setBackgroundColor(primaryColor)
+        window.statusBarColor = Color.TRANSPARENT
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         toolbar.setNavigationOnClickListener {
             onBackPressed()
@@ -326,14 +336,13 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
             chapters_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_HIDDEN
         reader_menu.doOnApplyWindowInsets { v, insets, _ ->
             sheetManageNavColor = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && (insets
-                    .systemWindowInsetBottom != insets.tappableElementInsets.bottom)
-            ) {
+                    .systemWindowInsetBottom != insets.tappableElementInsets.bottom)) {
                 window.navigationBarColor = Color.TRANSPARENT
                 false
             }
             // if in landscape with 2/3 button mode, fully opaque nav bar
             else if (insets.systemWindowInsetLeft > 0 || insets.systemWindowInsetRight > 0) {
-                window.navigationBarColor = getResourceColor(R.attr.colorPrimary)
+                window.navigationBarColor = getResourceColor(R.attr.colorSecondary)
                 false
             }
             // if in portrait with 2/3 button mode, translucent nav bar
@@ -365,8 +374,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
             if (chapters_bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED)
                 chapters_bottom_sheet.sheetBehavior?.isHideable = false
             if (chapters_bottom_sheet.sheetBehavior?.state != BottomSheetBehavior.STATE_EXPANDED && sheetManageNavColor)
-                window.navigationBarColor =
-                    Color.TRANSPARENT // getResourceColor(R.attr.colorPrimaryDark)
+                window.navigationBarColor = Color.TRANSPARENT // getResourceColor(R.attr.colorPrimaryDark)
             if (animate) {
                 if (!menuStickyVisible) {
                     val toolbarAnimation = AnimationUtils.loadAnimation(this, R.anim.enter_from_top)
@@ -375,10 +383,9 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
                             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
                         }
                     })
-                    toolbar.startAnimation(toolbarAnimation)
+                    appbar.startAnimation(toolbarAnimation)
                 }
-                BottomSheetBehavior.from(chapters_bottom_sheet).state =
-                    BottomSheetBehavior.STATE_COLLAPSED
+                BottomSheetBehavior.from(chapters_bottom_sheet).state = BottomSheetBehavior.STATE_COLLAPSED
             }
         } else {
             systemUi?.hide()
@@ -390,10 +397,9 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
                         reader_menu.visibility = View.GONE
                     }
                 })
-                toolbar.startAnimation(toolbarAnimation)
+                appbar.startAnimation(toolbarAnimation)
                 BottomSheetBehavior.from(chapters_bottom_sheet).isHideable = true
-                BottomSheetBehavior.from(chapters_bottom_sheet).state =
-                    BottomSheetBehavior.STATE_HIDDEN
+                BottomSheetBehavior.from(chapters_bottom_sheet).state = BottomSheetBehavior.STATE_HIDDEN
             } else
                 reader_menu.visibility = View.GONE
         }
@@ -429,7 +435,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
                     ).toLowerCase(Locale.getDefault())
                 ), 8000
             ) {
-                setAction(R.string.use_default) {
+                if (mangaViewer != WEBTOON) setAction(R.string.use_default) {
                     presenter.setMangaViewer(0)
                 }
             }
@@ -623,8 +629,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
                         setMenuVisibility(false)
                     }
                 }
-                if (sheetManageNavColor) window.navigationBarColor =
-                    getResourceColor(R.attr.colorPrimary)
+                if (sheetManageNavColor) window.navigationBarColor = getResourceColor(R.attr.colorPrimary)
                 reader_menu.visibility = View.VISIBLE
                 val toolbarAnimation = AnimationUtils.loadAnimation(this, R.anim.enter_from_top)
                 toolbarAnimation.setAnimationListener(object : SimpleAnimationListener() {
@@ -632,7 +637,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
                         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
                     }
                 })
-                toolbar.startAnimation(toolbarAnimation)
+                appbar.startAnimation(toolbarAnimation)
             }
         } else {
             if (menuStickyVisible && !menuVisible) {
@@ -653,7 +658,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
             if (currentOrientation == Configuration.ORIENTATION_LANDSCAPE) {
                 val params = window.attributes
                 params.layoutInDisplayCutoutMode =
-                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER
+                        WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER
             }
         }
     }
@@ -691,10 +696,6 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
 
             subscriptions += Observable.merge(initialRotation, rotationUpdates)
                 .subscribe { setOrientation(it) }
-
-            subscriptions += preferences.readerTheme().asObservable()
-                .skip(1) // We only care about updates
-                .subscribe { recreate() }
 
             subscriptions += preferences.showPageNumber().asObservable()
                 .subscribe { setPageNumberVisibility(it) }

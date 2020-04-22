@@ -149,6 +149,8 @@ object PreferenceKeys {
 
     const val similarEnabled = "pref_related_show_tab_key"
 
+    const val similarUpdateInterval = "related_update_interval"
+
     const val similarUpdateRestriction = "related_update_restriction"
 
     const val showR18 = "show_r18"

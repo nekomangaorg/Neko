@@ -13,7 +13,7 @@
         android:layout_height="30dp"
         android:layout_gravity="center"
         android:src="@drawable/border_circle"
-        android:padding="3dp" />
+        android:padding="3dp"/>
 
     <ProgressBar
         android:id="@+id/download_progress_indeterminate"
@@ -22,7 +22,7 @@
         android:visibility="gone"
         android:layout_gravity="center"
         android:indeterminate="true"
-        android:indeterminateTint="@color/material_on_surface_disabled" />
+        android:indeterminateTint="@color/material_on_surface_disabled"/>
 
     <ProgressBar
         android:id="@+id/download_progress"
@@ -33,8 +33,8 @@
         style="?android:attr/progressBarStyleHorizontal"
         android:progressDrawable="@drawable/circle_progress"
         android:layout_gravity="center"
-        android:progressTint="@color/colorAccent"
-        android:progressBackgroundTint="@color/material_on_surface_disabled" />
+        android:progressTint="@color/download"
+        android:progressBackgroundTint="@color/material_on_surface_disabled"/>
 
 
     <ImageView

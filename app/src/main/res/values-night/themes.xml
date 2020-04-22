@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <style name="Theme.Tachiyomi" parent="Theme.Base">
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
+    </style>
 
     <!--==============-->
     <!-- Amoled Theme -->
@@ -10,16 +15,14 @@
         <item name="colorPrimaryVariant">@color/colorAmoledPrimary</item>
         <item name="colorOnPrimary">@color/colorAmoledPrimary</item>
         <item name="colorPrimaryDark">@color/colorAmoledPrimary</item>
-        <item name="colorControlActivated">@color/md_white_1000</item>
-        <item name="colorControlNormal">@color/md_white_1000</item>
         <item name="android:colorBackground">@color/md_black_1000</item>
         <item name="android:statusBarColor">@color/blackStatus</item>
-        <item name="snackbar_background">@color/trueSnackbarBackground</item>
-        <item name="snackbar_text">@color/textColorPrimary</item>
 
-        <!-- Custom Attributes-->
-        <item name="selectable_list_drawable">@drawable/list_item_selector</item>
-        <item name="selectable_library_drawable">@drawable/library_item_selector_amoled</item>
-
+        <!-- Material Dialog colors -->
+        <item name="md_color_title">@color/textColorPrimary</item>
+        <item name="md_color_content">@color/textColorSecondary</item>
+        <item name="md_color_button_text">@color/colorAccent</item>
+        <item name="md_background_color">@color/colorAmoledPrimary</item>
+        <item name="md_corner_radius">16dp</item>
     </style>
 </resources>

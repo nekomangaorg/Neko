@@ -105,6 +105,9 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
         recycler.layoutManager = LinearLayoutManager(view.context)
         recycler.setHasFixedSize(true)
         recycler.recycledViewPool.setMaxRecycledViews(0, 0)
+        recycler.addItemDecoration(
+            RecentMangaDivider(view.context)
+        )
         adapter.isSwipeEnabled = true
         adapter.itemTouchHelperCallback.setSwipeFlags(
             ItemTouchHelper.LEFT
@@ -253,8 +256,7 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
     private fun refreshItem(chapterId: Long) {
         val recentItemPos = adapter.currentItems.indexOfFirst {
             it is RecentMangaItem &&
-                it.mch.chapter.id == chapterId
-        }
+            it.mch.chapter.id == chapterId }
         if (recentItemPos > -1) adapter.notifyItemChanged(recentItemPos)
     }
 

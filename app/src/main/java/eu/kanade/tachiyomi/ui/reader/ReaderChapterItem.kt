@@ -1,13 +1,13 @@
 package eu.kanade.tachiyomi.ui.reader
 
 import android.content.res.ColorStateList
+import android.graphics.Typeface
 import android.text.format.DateUtils
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
-import androidx.core.content.res.ResourcesCompat
 import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.items.AbstractItem
 import eu.kanade.tachiyomi.R
@@ -53,21 +53,10 @@ class ReaderChapterItem(val chapter: Chapter, val manga: Manga, val isCurrent: B
         private var unreadColor = view.context.getResourceColor(android.R.attr.textColorPrimary)
         private var activeColor = view.context.getResourceColor(android.R.attr.colorAccent)
 
-        private var activeTypeFace =
-            ResourcesCompat.getFont(view.context, R.font.metropolis_black)
-        private var inactiveTypeFace =
-            ResourcesCompat.getFont(view.context, R.font.metropolis_thin)
-        private var bookmarkTypeFace =
-            ResourcesCompat.getFont(view.context, R.font.metropolis_medium)
-
-        private var unbookmark = ContextCompat.getDrawable(
-            view.context, R.drawable
-                .ic_bookmark_border_24dp
-        )
-        private var bookmark = ContextCompat.getDrawable(
-            view.context, R.drawable
-                .ic_bookmark_24dp
-        )
+        private var unbookmark = ContextCompat.getDrawable(view.context, R.drawable
+            .ic_bookmark_border_24dp)
+        private var bookmark = ContextCompat.getDrawable(view.context, R.drawable
+            .ic_bookmark_24dp)
 
         override fun bindView(item: ReaderChapterItem, payloads: List<Any>) {
             val chapter = item.chapter
@@ -92,43 +81,34 @@ class ReaderChapterItem(val chapter: Chapter, val manga: Manga, val isCurrent: B
                 statuses.add(chapter.scanlator!!)
             }
 
-            chapterTitle.typeface = when {
-                item.isCurrent -> activeTypeFace
-                chapter.bookmark -> bookmarkTypeFace
-                else -> inactiveTypeFace
-            }
-
             chapterTitle.setTextColor(
                 when {
-                    item.isCurrent -> activeColor
-                    chapter.read -> readColor
+                    chapter.bookmark -> activeColor
+                    chapter.read && !item.isCurrent -> readColor
                     else -> unreadColor
                 }
             )
 
-            chapterSubtitle.typeface = when {
-                item.isCurrent -> activeTypeFace
-                chapter.bookmark -> bookmarkTypeFace
-                else -> inactiveTypeFace
+            if (item.isCurrent) {
+                chapterTitle.setTypeface(null, Typeface.BOLD)
+                chapterSubtitle.setTypeface(null, Typeface.BOLD)
+            } else {
+                chapterTitle.setTypeface(null, Typeface.NORMAL)
+                chapterSubtitle.setTypeface(null, Typeface.NORMAL)
             }
 
             chapterSubtitle.setTextColor(
                 when {
-                    item.isCurrent -> activeColor
                     chapter.read -> readColor
                     else -> unreadColor
                 }
             )
-            bookmarkImage.setImageDrawable(
-                if (chapter.bookmark)
-                    bookmark
-                else unbookmark
-            )
-            bookmarkImage.imageTintList = ColorStateList.valueOf(
-                if (chapter.bookmark)
-                    activeColor
-                else readColor
-            )
+            bookmarkImage.setImageDrawable(if (chapter.bookmark)
+                bookmark
+            else unbookmark)
+            bookmarkImage.imageTintList = ColorStateList.valueOf(if (chapter.bookmark)
+                activeColor
+            else readColor)
             chapterSubtitle.text = statuses.joinToString(" • ")
         }
 

@@ -220,10 +220,8 @@ class ReaderPresenter(
                     else -> it.source_order.toFloat()
                 }
             }.map {
-                ReaderChapterItem(
-                    it, manga, it.id ==
-                        getCurrentChapter()?.chapter?.id ?: chapterId
-                )
+                ReaderChapterItem(it, manga, it.id ==
+                    getCurrentChapter()?.chapter?.id ?: chapterId)
             }
             if (!manga.sortDescending(preferences.chaptersDescAsDefault().getOrDefault()))
                 list.reversed()
@@ -441,7 +439,6 @@ class ReaderPresenter(
      */
     fun getMangaViewer(): Int {
         val manga = manga ?: return preferences.defaultViewer()
-
         if (manga.viewer == -1) {
             manga.viewer = manga.defaultReaderType()
             db.updateMangaViewer(manga).asRxObservable().subscribe()
@@ -461,7 +458,6 @@ class ReaderPresenter(
     fun setMangaViewer(viewer: Int) {
         val manga = manga ?: return
         manga.viewer = viewer
-
         db.updateMangaViewer(manga).executeAsBlocking()
 
         Observable.timer(250, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())

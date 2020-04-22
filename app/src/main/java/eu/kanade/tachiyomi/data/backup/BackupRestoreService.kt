@@ -277,12 +277,13 @@ class BackupRestoreService : Service() {
                 backupManager.restoreMangaFetch(source, manga)
             }
 
+            // Restore categories
+            backupManager.restoreCategoriesForManga(manga, categories)
+
             if (!dbMangaExists || !backupManager.restoreChaptersForManga(manga, chapters)) {
                 // manga gets chapters added
                 backupManager.restoreChapterFetch(source, manga, chapters)
             }
-            // Restore categories
-            backupManager.restoreCategoriesForManga(manga, categories)
             // Restore history
             backupManager.restoreHistoryForManga(history)
             // Restore tracking
@@ -376,12 +377,8 @@ class BackupRestoreService : Service() {
         notificationManager.notify(
             Notifications.ID_RESTORE_PROGRESS, progressNotification
                 .setContentTitle(title.chop(30))
-                .setContentText(
-                    getString(
-                        R.string.restoring_progress, restoreProgress,
-                        totalAmount
-                    )
-                )
+                .setContentText(getString(R.string.restoring_progress, restoreProgress,
+                    totalAmount))
                 .setProgress(total, current, false)
                 .build()
         )

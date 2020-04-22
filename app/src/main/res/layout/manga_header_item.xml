@@ -83,7 +83,7 @@
 
     <TextView
         android:id="@+id/title"
-        style="@style/TextAppearance.Bold"
+        style="@style/TextAppearance.MaterialComponents.Headline6"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="12dp"
@@ -100,13 +100,14 @@
 
     <TextView
         android:id="@+id/manga_author"
-        style="@style/TextAppearance.Secondary"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
         android:ellipsize="end"
         android:maxLines="2"
         android:text="@string/author"
+        android:textAppearance="@style/TextAppearance.Regular.Body1.SemiBold"
+        android:textColor="?android:attr/textColorSecondary"
         android:textIsSelectable="false"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@id/title"
@@ -114,7 +115,7 @@
 
     <TextView
         android:id="@+id/manga_status"
-        style="@style/TextAppearance.Secondary"
+        style="@style/TextAppearance.Regular.Body1.Secondary"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
@@ -125,7 +126,7 @@
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/manga_source"
-        style="@style/TextAppearance.Secondary"
+        style="@style/TextAppearance.Regular.Body1.Secondary"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
@@ -161,19 +162,19 @@
 
         <ImageView
             android:id="@+id/favorite_button"
-            style="@style/Theme.Widget.CustomImageButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginStart="6dp"
             android:layout_marginEnd="6dp"
             android:padding="5dp"
+            android:background="@drawable/round_ripple"
             android:tooltipText="@string/add_to_library"
+            tools:background="@color/md_black_1000"
             tools:src="@drawable/ic_open_in_webview_white_24dp" />
 
-        <ImageView
+        <com.mikepenz.iconics.view.IconicsImageView
             android:id="@+id/track_button"
-            style="@style/Theme.Widget.CustomImageButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -181,22 +182,26 @@
             android:layout_marginEnd="6dp"
             android:padding="5dp"
             android:tooltipText="@string/tracking"
-            tools:src="@drawable/ic_open_in_webview_white_24dp" />
+            app:iiv_icon="gmf_art_track"
+            app:iiv_size="28dp"
+            style="@style/Neko.Iconics"
+            tools:background="@color/md_black_1000" />
 
-        <ImageView
+        <com.mikepenz.iconics.view.IconicsImageView
             android:id="@+id/similar_button"
-            style="@style/Theme.Widget.CustomImageButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginStart="6dp"
             android:layout_marginEnd="6dp"
             android:padding="5dp"
-            tools:src="@drawable/ic_open_in_webview_white_24dp" />
+            app:iiv_icon="gmf_account_tree"
+            style="@style/Neko.Iconics"
+            android:tooltipText="@string/similar"
+            tools:background="@color/md_black_1000" />
 
-        <ImageView
+        <com.mikepenz.iconics.view.IconicsImageView
             android:id="@+id/webview_button"
-            style="@style/Theme.Widget.CustomImageButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -204,12 +209,13 @@
             android:layout_marginEnd="6dp"
             android:contentDescription="@string/open_in_web_view"
             android:padding="5dp"
-            android:tooltipText="@string/open_in_web_view"
-            tools:src="@drawable/ic_open_in_webview_white_24dp" />
+            app:iiv_icon="cmd_web"
+            style="@style/Neko.Iconics"
+            android:tooltipText="@string/open_external"
+            tools:background="@color/md_black_1000" />
 
-        <ImageView
+        <com.mikepenz.iconics.view.IconicsImageView
             android:id="@+id/share_button"
-            style="@style/Theme.Widget.CustomImageButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -217,14 +223,16 @@
             android:layout_marginEnd="6dp"
             android:contentDescription="@string/share"
             android:padding="5dp"
+            app:iiv_icon="gmf_share"
+            style="@style/Neko.Iconics"
             android:tooltipText="@string/share"
-            tools:src="@drawable/ic_open_in_webview_white_24dp" />
+            tools:background="@color/md_black_1000" />
 
     </LinearLayout>
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/manga_summary_label"
-        style="@style/TextAppearance.Bold"
+        style="@style/TextAppearance.MaterialComponents.Headline6"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -235,12 +243,11 @@
         android:textSize="17sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/button_layout"
-
         tools:text="About this manga" />
 
     <TextView
         android:id="@+id/manga_summary"
-        style="@style/TextAppearance.Regular"
+        style="@style/TextAppearance.Regular.Body1.Secondary"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -249,7 +256,6 @@
         android:clickable="true"
         android:focusable="true"
         android:maxLines="3"
-        android:textColor="?android:attr/textColorSecondary"
         app:layout_constraintBottom_toTopOf="@id/manga_genres_tags"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -289,8 +295,7 @@
         style="@style/Theme.Widget.Button.TextButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="20dp"
-        android:fontFamily="@font/metropolis_medium"
+        android:layout_marginEnd="8dp"
         android:text="@string/more"
         android:textAlignment="textEnd"
         app:layout_constraintBottom_toBottomOf="@id/more_guide"
@@ -320,9 +325,9 @@
         android:layout_marginEnd="16dp"
         android:visibility="gone"
         app:atg_backgroundColor="@android:color/transparent"
-        app:atg_borderColor="?android:attr/textColorPrimary"
+        app:atg_borderColor="@color/colorAccent"
         app:atg_borderStrokeWidth="1dp"
-        app:atg_textColor="?android:attr/textColorPrimary"
+        app:atg_textColor="@color/colorAccent"
         app:layout_constrainedHeight="true"
         app:layout_constraintBottom_toTopOf="@id/less_button"
         app:layout_constraintEnd_toEndOf="parent"
@@ -337,8 +342,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginEnd="20dp"
-        android:fontFamily="@font/metropolis_medium"
+        android:layout_marginEnd="8dp"
         android:text="@string/less"
         android:textAlignment="textEnd"
         android:visibility="gone"
@@ -351,7 +355,7 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/start_reading_button"
-        style="@style/Theme.Widget.Button.Primary.Outline"
+        style="@style/Theme.Widget.Button.Primary"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -367,39 +371,38 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/chapter_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
-        android:background="?selectable_list_drawable"
+        android:layout_height="wrap_content"
         android:tooltipText="@string/sort_and_filter"
         app:layout_constraintEnd_toEndOf="parent"
+        android:background="@drawable/list_item_selector"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/start_reading_button">
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/chapters_title"
-            style="@style/TextAppearance.Bold"
+            style="@style/TextAppearance.MaterialComponents.Headline6"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="18dp"
             android:layout_marginBottom="12dp"
             android:maxLines="1"
             android:text="@string/chapters"
             android:textSize="17sp"
+            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/filters_text"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintStart_toStartOf="parent" />
 
         <ImageView
             android:id="@+id/filter_button"
+            android:tint="?colorAccent"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="20dp"
             android:background="@null"
             android:padding="5dp"
             android:src="@drawable/ic_filter_list_white_24dp"
-            android:tint="?android:attr/textColorPrimary"
             app:layout_constraintBottom_toBottomOf="@id/chapters_title"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/chapters_title" />
@@ -414,11 +417,11 @@
             android:padding="5dp"
             android:textAlignment="textEnd"
             android:textColor="?android:textColorHint"
-            app:layout_constraintBaseline_toBaselineOf="@id/chapters_title"
             app:layout_constraintBottom_toBottomOf="@id/filter_button"
             app:layout_constraintEnd_toStartOf="@id/filter_button"
             app:layout_constraintStart_toEndOf="@+id/chapters_title"
             app:layout_constraintTop_toTopOf="@id/filter_button"
+            app:layout_constraintBaseline_toBaselineOf="@id/chapters_title"
             tools:text="Read, Unread, Bookmarked, Downloaded, All" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

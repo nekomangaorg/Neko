@@ -38,18 +38,22 @@ class RecentMangaHolder(
         download_button.visibility = View.VISIBLE
         title.apply {
             text = item.chapter.name
-            setTextColor(when {
-                item.chapter.bookmark -> context.getResourceColor(R.attr.colorAccent)
-                item.chapter.read -> context.getResourceColor(android.R.attr.textColorHint)
-                else -> context.getResourceColor(android.R.attr.textColorPrimary)
-            })
+            setTextColor(
+                when {
+                    item.chapter.bookmark -> context.getResourceColor(R.attr.colorAccent)
+                    item.chapter.read -> context.getResourceColor(android.R.attr.textColorHint)
+                    else -> context.getResourceColor(android.R.attr.textColorPrimary)
+                }
+            )
         }
         subtitle.apply {
             text = item.mch.manga.title
-            setTextColor(when {
-                item.chapter.read -> context.getResourceColor(android.R.attr.textColorHint)
-                else -> context.getResourceColor(android.R.attr.textColorPrimary)
-            })
+            setTextColor(
+                when {
+                    item.chapter.read -> context.getResourceColor(android.R.attr.textColorHint)
+                    else -> context.getResourceColor(android.R.attr.textColorPrimary)
+                }
+            )
         }
         val notValidNum = item.mch.chapter.chapter_number <= 0
         body.text = when {
@@ -69,9 +73,9 @@ class RecentMangaHolder(
                         item.mch.history.last_read, Date().time, DateUtils.MINUTE_IN_MILLIS
                     ).toString()
                 ) + "\n" + body.context.getString(
-                if (notValidNum) R.string.last_read_ else R.string.last_read_chapter_,
-                if (notValidNum) item.mch.chapter.name else adapter.decimalFormat.format(item.mch.chapter.chapter_number)
-            )
+                    if (notValidNum) R.string.last_read_ else R.string.last_read_chapter_,
+                    if (notValidNum) item.mch.chapter.name else adapter.decimalFormat.format(item.mch.chapter.chapter_number)
+                )
             item.chapter.pages_left > 0 && !item.chapter.read -> body.context.getString(
                 R.string.read_, DateUtils.getRelativeTimeSpanString(
                     item.mch.history.last_read, Date().time, DateUtils.MINUTE_IN_MILLIS
@@ -85,8 +89,10 @@ class RecentMangaHolder(
                 ).toString()
             )
         }
-        GlideApp.with(itemView.context).load(item.mch.manga).diskCacheStrategy(DiskCacheStrategy
-            .AUTOMATIC)
+        GlideApp.with(itemView.context).load(item.mch.manga).diskCacheStrategy(
+            DiskCacheStrategy
+                .AUTOMATIC
+        )
             .signature(ObjectKey(MangaImpl.getLastCoverFetch(item.mch.manga.id!!).toString())).into(cover_thumbnail)
         notifyStatus(
             if (adapter.isSelected(adapterPosition)) Download.CHECKED else item.status,

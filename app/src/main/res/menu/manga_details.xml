@@ -46,9 +46,7 @@
 
     <item
         android:id="@+id/action_refresh_tracking"
-        android:icon="@drawable/ic_refresh_white_24dp"
         android:title="@string/refresh_tracking"
-
         app:showAsAction="never" />
     <item
         android:id="@+id/action_remove_downloads"
@@ -67,8 +65,8 @@
         </menu>
     </item>
     <item
-        android:id="@+id/action_add_to_home_screen"
-        android:title="@string/add_to_home_screen"
+        android:id="@+id/action_edit"
+        android:title="@string/edit"
         app:showAsAction="never" />
 
 </menu>

@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.ui.base.activity
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.main.SearchActivity
 import eu.kanade.tachiyomi.ui.security.BiometricActivity
@@ -17,13 +16,7 @@ abstract class BaseActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AppCompatDelegate.setDefaultNightMode(ThemeUtil.nightMode(preferences.theme()))
-        val theme = preferences.theme()
-        setTheme(
-            when {
-                ThemeUtil.isAMOLEDTheme(theme) -> R.style.Theme_Tachiyomi_Amoled
-                else -> R.style.Theme_Tachiyomi
-            }
-        )
+        setTheme(ThemeUtil.theme(preferences.theme()))
         super.onCreate(savedInstanceState)
         SecureActivityDelegate.setSecure(this)
     }

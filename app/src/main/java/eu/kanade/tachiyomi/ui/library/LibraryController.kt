@@ -71,7 +71,7 @@ import uy.kohesive.injekt.api.get
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
-open class LibraryController(
+class LibraryController(
     bundle: Bundle? = null,
     private val preferences: PreferencesHelper = Injekt.get()
 ) : BaseController(bundle),
@@ -163,7 +163,7 @@ open class LibraryController(
                     // fastScroll height * indicator position - center text - fastScroll padding
                     text_view_m.translationY = view.height *
                         (index.toFloat() / (adapter.headerItems.size + 1))
-                    -text_view_m.height / 2 + 16.dpToPx
+                    - text_view_m.height / 2 + 16.dpToPx
                     text_view_m.translationX = 45f.dpToPx
                     text_view_m.alpha = 1f
                     text_view_m.text = headerItem.category.name
@@ -194,9 +194,20 @@ open class LibraryController(
     private fun hideScroller(duration: Long = 1000) {
         if (alwaysShowScroller) return
         scrollAnim =
-            fast_scroller.animate().setStartDelay(duration).setDuration(250)
-                .translationX(25f.dpToPx)
+            fast_scroller.animate().setStartDelay(duration).setDuration(250).translationX(25f.dpToPx)
         scrollAnim?.start()
+    }
+
+    private fun setFastScrollBackground() {
+        val context = activity ?: return
+        fast_scroller.background = if (!alwaysShowScroller) ContextCompat.getDrawable(
+            context, R.drawable.fast_scroll_background
+        ) else null
+        fast_scroller.textColor = ColorStateList.valueOf(
+            if (!alwaysShowScroller) Color.WHITE
+            else context.getResourceColor(android.R.attr.textColorPrimary)
+        )
+        fast_scroller.iconColor = fast_scroller.textColor
     }
 
     override fun onViewCreated(view: View) {
@@ -204,6 +215,7 @@ open class LibraryController(
         view.applyWindowInsetsForRootController(activity!!.bottom_nav)
         if (!::presenter.isInitialized) presenter = LibraryPresenter(this)
         if (!alwaysShowScroller) fast_scroller.translationX = 25f.dpToPx
+        setFastScrollBackground()
 
         adapter = LibraryCategoryAdapter(this)
         adapter.expandItemsAtStartUp()
@@ -224,8 +236,7 @@ open class LibraryController(
             val letter = adapter.getSectionText(position)
             if (!singleCategory &&
                 !adapter.isHeader(adapter.getItem(position)) &&
-                position != adapter.itemCount - 1
-            ) null
+                position != adapter.itemCount - 1) null
             else if (letter != null) FastScrollItemIndicator.Text(letter)
             else FastScrollItemIndicator.Icon(R.drawable.ic_star_24dp)
         })
@@ -384,6 +395,7 @@ open class LibraryController(
 
     fun updateShowScrollbar(show: Boolean) {
         alwaysShowScroller = show
+        setFastScrollBackground()
         if (libraryLayout == 0) reattachAdapter()
         scrollAnim?.cancel()
         if (show) fast_scroller.translationX = 0f
@@ -478,7 +490,8 @@ open class LibraryController(
             justStarted = false
             if (recycler_layout.alpha == 0f) recycler_layout.animate().alpha(1f).setDuration(500)
                 .start()
-        } else if (justStarted && freshStart) {
+        } else recycler_layout.alpha = 1f
+        if (justStarted && freshStart) {
             scrollToHeader(activeCategory)
             fast_scroller.translationX = 0f
             view?.post {
@@ -817,9 +830,12 @@ open class LibraryController(
     }
 
     override fun showSheet() {
-        if (bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_HIDDEN) bottom_sheet.sheetBehavior?.state =
-            BottomSheetBehavior.STATE_COLLAPSED
-        else bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
+        when {
+            bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_HIDDEN -> bottom_sheet.sheetBehavior?.state =
+                BottomSheetBehavior.STATE_COLLAPSED
+            bottom_sheet.sheetBehavior?.state != BottomSheetBehavior.STATE_EXPANDED -> bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
+            else -> DisplayBottomSheet(this).show()
+        }
     }
 
     override fun toggleSheet() {

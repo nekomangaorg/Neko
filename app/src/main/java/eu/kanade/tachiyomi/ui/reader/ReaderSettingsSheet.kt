@@ -48,9 +48,7 @@ class ReaderSettingsSheet(private val activity: ReaderActivity) :
 
         sheetBehavior = BottomSheetBehavior.from(view.parent as ViewGroup)
         setEdgeToEdge(
-            activity,
-            view,
-            if (context.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE)
+            activity, view, if (context.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE)
                 0 else -1
         )
         window?.navigationBarColor = Color.TRANSPARENT
@@ -115,7 +113,7 @@ class ReaderSettingsSheet(private val activity: ReaderActivity) :
         viewer.setSelection(activity.presenter.manga?.viewer ?: 0, false)
 
         rotation_mode.bindToPreference(preferences.rotation(), 1)
-        background_color.bindToPreference(preferences.readerTheme(), 0, true)
+        background_color.bindToPreference(preferences.readerTheme(), 0)
         show_page_number.bindToPreference(preferences.showPageNumber())
         fullscreen.bindToPreference(preferences.fullscreen())
         keepscreen.bindToPreference(preferences.keepScreenOn())
@@ -141,10 +139,7 @@ class ReaderSettingsSheet(private val activity: ReaderActivity) :
         webtoon_prefs_group.visible()
         pager_prefs_group.gone()
         crop_borders_webtoon.bindToPreference(preferences.cropBordersWebtoon())
-        webtoon_side_padding.bindToIntPreference(
-            preferences.webtoonSidePadding(),
-            R.array.webtoon_side_padding_values
-        )
+        webtoon_side_padding.bindToIntPreference(preferences.webtoonSidePadding(), R.array.webtoon_side_padding_values)
     }
 
     /**
@@ -160,12 +155,10 @@ class ReaderSettingsSheet(private val activity: ReaderActivity) :
      */
     private fun Spinner.bindToPreference(
         pref: Preference<Int>,
-        offset: Int = 0,
-        shouldDismiss: Boolean = false
+        offset: Int = 0
     ) {
         onItemSelectedListener = IgnoreFirstSpinnerListener { position ->
             pref.set(position + offset)
-            if (shouldDismiss) dismiss()
         }
         setSelection(pref.getOrDefault() - offset, false)
     }
@@ -175,10 +168,7 @@ class ReaderSettingsSheet(private val activity: ReaderActivity) :
      * correlate with the [intValues] resource item (in arrays.xml), which is a <string-array>
      * of int values that will be parsed here and applied to the preference.
      */
-    private fun Spinner.bindToIntPreference(
-        pref: Preference<Int>,
-        @ArrayRes intValuesResource: Int
-    ) {
+    private fun Spinner.bindToIntPreference(pref: Preference<Int>, @ArrayRes intValuesResource: Int) {
         val intValues = resources.getStringArray(intValuesResource).map { it.toIntOrNull() }
         onItemSelectedListener = IgnoreFirstSpinnerListener { position ->
             pref.set(intValues[position])

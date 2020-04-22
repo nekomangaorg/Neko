@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.library
 
 import android.view.View
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
+import kotlinx.android.synthetic.main.manga_grid_item.*
 
 /**
  * Generic class used to hold the displayed data of a manga in the library.
@@ -36,6 +37,11 @@ abstract class LibraryHolder(
                 else -> item.downloadCount
             },
             item.chapterCount > -1)
+    }
+
+    fun setReadingButton(item: LibraryItem) {
+        play_layout.visibility = if (item.manga.unread > 0 && item.unreadType > 0 && !item.hideReadingButton)
+            View.VISIBLE else View.GONE
     }
 
     /**

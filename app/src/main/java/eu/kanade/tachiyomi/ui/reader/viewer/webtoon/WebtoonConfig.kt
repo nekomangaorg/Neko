@@ -40,6 +40,9 @@ class WebtoonConfig(preferences: PreferencesHelper = Injekt.get()) {
     var sidePadding = 0
         private set
 
+    var readerTheme = 0
+        private set
+
     init {
         preferences.readWithTapping()
             .register({ tappingEnabled = it })
@@ -64,6 +67,9 @@ class WebtoonConfig(preferences: PreferencesHelper = Injekt.get()) {
 
         preferences.webtoonSidePadding()
             .register({ sidePadding = it }, { imagePropertyChangedListener?.invoke() })
+
+        preferences.readerTheme()
+            .register({ readerTheme = it }, { imagePropertyChangedListener?.invoke() })
     }
 
     fun unsubscribe() {

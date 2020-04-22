@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/display_bottom_sheet"
     android:layout_width="match_parent"
-    android:background="@drawable/bg_bottom_sheet_dialog_fragment"
+    android:background="@drawable/bottom_sheet_rounded_background"
     android:layout_height="match_parent">
 
     <androidx.recyclerview.widget.RecyclerView

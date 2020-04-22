@@ -15,7 +15,7 @@
             </item>
 
             <item android:id="@android:id/mask">
-                <color android:color="?android:attr/colorPrimary" />
+                <color android:color="?md_background_color" />
             </item>
         </selector>
     </item>

@@ -35,7 +35,7 @@ android {
         minSdkVersion(24)
         targetSdkVersion(29)
         applicationId = "tachiyomi.mangadex"
-        versionCode = 51
+        versionCode = 53
         versionName = "2.0.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
@@ -86,13 +86,12 @@ androidExtensions {
 dependencies {
 // Modified dependencies
     implementation("com.github.inorichi:subsampling-scale-image-view:ac0dae7")
-
 // Android support library
     implementation("androidx.appcompat:appcompat:1.1.0")
     implementation("androidx.cardview:cardview:1.0.0")
     implementation("com.google.android.material:material:1.1.0")
     implementation("androidx.recyclerview:recyclerview:1.1.0")
-    implementation("androidx.preference:preference:1.1.0")
+    implementation("androidx.preference:preference:1.1.1")
     implementation("androidx.annotation:annotation:1.1.0")
     implementation("androidx.browser:browser:1.2.0")
     implementation("androidx.biometric:biometric:1.0.1")
@@ -146,13 +145,15 @@ dependencies {
     implementation("org.jsoup:jsoup:1.13.1")
 
 //Icons
-    implementation("com.mikepenz:iconics-core:5.0.1@aar")
-    implementation("com.mikepenz:iconics-views:5.0.1@aar")
+    implementation("com.mikepenz:iconics-core:5.0.2@aar")
+    implementation("com.mikepenz:iconics-views:5.0.2@aar")
     implementation("com.mikepenz:community-material-typeface:5.0.45.1-kotlin@aar")
     implementation("com.mikepenz:material-design-icons-dx-typeface:5.0.1.0-kotlin@aar")
 
 // Job scheduling
-    implementation("com.evernote:android-job:1.4.2")
+    val workManagerVersion = "2.3.3"
+    implementation("android.arch.work:work-runtime:$workManagerVersion")
+    implementation("android.arch.work:work-runtime-ktx:$workManagerVersion")
     implementation("com.google.android.gms:play-services-gcm:17.0.0")
 
 // Changelog
@@ -178,9 +179,6 @@ dependencies {
     implementation("com.github.bumptech.glide:okhttp3-integration:$glideVersion")
     kapt("com.github.bumptech.glide:compiler:$glideVersion")
 
-// Transformations
-    implementation("jp.wasabeef:glide-transformations:4.1.0")
-
 // Logging
     implementation("com.jakewharton.timber:timber:4.7.1")
 
@@ -188,8 +186,8 @@ dependencies {
     implementation("com.dmitrymalkovich.android:material-design-dimens:1.4")
     implementation("com.github.dmytrodanylyk.android-process-button:library:1.0.4")
     val latestFastAdapterRelease = "5.0.0"
-    implementation("com.mikepenz:fastadapter:$latestFastAdapterRelease")
-    implementation("com.mikepenz:fastadapter-extensions-binding:$latestFastAdapterRelease")
+    implementation("com.mikepenz:fastadapter:${latestFastAdapterRelease}")
+    implementation("com.mikepenz:fastadapter-extensions-binding:${latestFastAdapterRelease}")
     implementation("eu.davidea:flexible-adapter:5.1.0")
     implementation("eu.davidea:flexible-adapter-ui:1.0.0")
     implementation("com.nononsenseapps:filepicker:2.5.2")

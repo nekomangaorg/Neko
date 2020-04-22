@@ -5,7 +5,7 @@
     android:id="@+id/bottom_sheet"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/bg_bottom_sheet_dialog_fragment"
+    android:background="@drawable/bottom_sheet_rounded_background"
     android:forceDarkAllowed="false">
 
     <androidx.core.widget.NestedScrollView
@@ -47,7 +47,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:text="@string/viewer_for_this_series"
-                android:textColor="?android:attr/textColorPrimary"
                 app:layout_constraintBaseline_toBaselineOf="@id/viewer"
                 app:layout_constraintEnd_toStartOf="@id/bottom_line"
                 app:layout_constraintStart_toStartOf="parent" />
@@ -67,7 +66,6 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:text="@string/rotation"
-                android:textColor="?android:attr/textColorPrimary"
                 app:layout_constraintBaseline_toBaselineOf="@id/rotation_mode"
                 app:layout_constraintEnd_toStartOf="@id/bottom_line"
                 app:layout_constraintStart_toStartOf="parent" />
@@ -86,7 +84,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:text="@string/background_color"
-                android:textColor="?android:attr/textColorPrimary"
                 app:layout_constraintBaseline_toBaselineOf="@id/background_color"
                 app:layout_constraintEnd_toStartOf="@id/background_color"
                 app:layout_constraintStart_toStartOf="parent" />
@@ -107,7 +104,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:text="@string/show_page_number"
-                android:textColor="?android:attr/textColorPrimary"
+                android:textColor="?android:attr/textColorSecondary"
                 app:layout_constraintTop_toBottomOf="@id/background_color" />
 
             <com.google.android.material.switchmaterial.SwitchMaterial
@@ -116,7 +113,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="0dp"
                 android:text="@string/true_32bit_color"
-                android:textColor="?android:attr/textColorPrimary"
+                android:textColor="?android:attr/textColorSecondary"
                 android:visibility="gone"
                 app:layout_constraintTop_toBottomOf="@id/show_page_number"
                 tools:visibility="visible" />
@@ -127,7 +124,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="0dp"
                 android:text="@string/fullscreen"
-                android:textColor="?android:attr/textColorPrimary"
+                android:textColor="?android:attr/textColorSecondary"
                 app:layout_constraintTop_toBottomOf="@id/true_color" />
 
             <com.google.android.material.switchmaterial.SwitchMaterial
@@ -136,7 +133,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="0dp"
                 android:text="@string/keep_screen_on"
-                android:textColor="?android:attr/textColorPrimary"
+                android:textColor="?android:attr/textColorSecondary"
                 app:layout_constraintTop_toBottomOf="@id/fullscreen" />
 
             <com.google.android.material.switchmaterial.SwitchMaterial
@@ -144,7 +141,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/always_show_chapter_transition"
-                android:textColor="?android:attr/textColorPrimary"
+                android:textColor="?android:attr/textColorSecondary"
                 app:layout_constraintTop_toBottomOf="@id/keepscreen" />
 
             <androidx.legacy.widget.Space
@@ -210,7 +207,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:text="@string/crop_borders"
-                android:textColor="?android:attr/textColorPrimary"
+                android:textColor="?android:attr/textColorSecondary"
                 app:layout_constraintTop_toBottomOf="@id/zoom_start" />
 
             <com.google.android.material.switchmaterial.SwitchMaterial
@@ -219,7 +216,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="0dp"
                 android:text="@string/page_transitions"
-                android:textColor="?android:attr/textColorPrimary"
+                android:textColor="?android:attr/textColorSecondary"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/crop_borders" />
 
@@ -242,7 +239,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:text="@string/crop_borders"
-                android:textColor="?android:attr/textColorPrimary"
+                android:textColor="?android:attr/textColorSecondary"
                 app:layout_constraintTop_toBottomOf="@id/webtoon_prefs" />
 
             <TextView
@@ -319,5 +316,5 @@
         android:contentDescription="@string/close"
         android:focusable="true"
         android:src="@drawable/ic_close_white_24dp"
-        android:tint="?android:attr/textColorPrimary" />
+        android:tint="@color/gray_button" />
 </FrameLayout>

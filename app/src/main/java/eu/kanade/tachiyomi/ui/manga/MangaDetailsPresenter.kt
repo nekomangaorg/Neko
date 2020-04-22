@@ -64,6 +64,7 @@ class MangaDetailsPresenter(
     private val seasonRegex = Regex("""(Season |S)([0-9]+)?""")
 
     private val trackManager: TrackManager by lazy { Injekt.get<TrackManager>() }
+
     private val loggedServices by lazy { trackManager.services.filter { it.isLogged } }
     var tracks = emptyList<Track>()
 
@@ -323,7 +324,6 @@ class MangaDetailsPresenter(
     private fun hasTensOfChapters(chapters: List<ChapterItem>): Boolean {
         return chapters.size in 21..300
     }
-
     /**
      * Returns the next unread chapter or null if everything is read.
      */

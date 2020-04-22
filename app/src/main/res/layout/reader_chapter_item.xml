@@ -6,7 +6,7 @@
     android:layout_height="60dp"
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toEndOf="parent"
-    android:background="?attr/selectable_list_drawable"
+    android:background="@drawable/list_item_selector"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent">
 

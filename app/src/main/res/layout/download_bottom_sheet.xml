@@ -6,7 +6,7 @@
     style="@style/BottomSheetDialogTheme"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_bottom_sheet_dialog_fragment"
+    android:background="@drawable/bottom_sheet_rounded_background"
     android:backgroundTint="?android:attr/colorBackground"
     android:orientation="vertical"
     app:behavior_peekHeight="48sp"
@@ -17,7 +17,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="@drawable/bg_bottom_sheet_dialog_fragment"
+        android:background="@drawable/bottom_sheet_rounded_background"
         android:backgroundTint="?attr/colorPrimaryVariant"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -39,6 +39,7 @@
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/title_text"
+            style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -51,7 +52,6 @@
             android:maxLines="1"
             android:textAlignment="center"
             android:textColor="?actionBarTintColor"
-            android:fontFamily="@font/metropolis_medium"
             android:textSize="18sp"
             tools:text="Downloads" />
     </LinearLayout>

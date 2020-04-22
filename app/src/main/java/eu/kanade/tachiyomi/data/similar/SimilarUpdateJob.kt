@@ -1,54 +1,54 @@
 package eu.kanade.tachiyomi.data.similar
 
-import com.evernote.android.job.Job
-import com.evernote.android.job.JobManager
-import com.evernote.android.job.JobRequest
+import android.content.Context
+import androidx.work.Constraints
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.NetworkType
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.Worker
+import androidx.work.WorkerParameters
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.concurrent.TimeUnit
 
-class SimilarUpdateJob : Job() {
+class SimilarUpdateJob(private val context: Context, workerParams: WorkerParameters) :
+    Worker(context, workerParams) {
 
-    override fun onRunJob(params: Params): Result {
+    override fun doWork(): Result {
         SimilarUpdateService.start(context)
-        return Result.SUCCESS
+        return Result.success()
     }
 
     companion object {
         const val TAG = "RelatedUpdate"
 
         fun setupTask() {
-
-            // Get if we should have any download restrictions
             val preferences = Injekt.get<PreferencesHelper>()
-            val restrictions = preferences.similarUpdateRestriction()!!
-            val acRestriction = "ac" in restrictions
-            val wifiRestriction = if ("wifi" in restrictions)
-                JobRequest.NetworkType.UNMETERED
-            else
-                JobRequest.NetworkType.CONNECTED
+            val interval = preferences.similarEnabled()
+            if (interval) {
+                val restrictions = preferences.similarUpdateRestriction()!!
+                val acRestriction = "ac" in restrictions
+                val wifiRestriction = if ("wifi" in restrictions)
+                    NetworkType.UNMETERED
+                else
+                    NetworkType.CONNECTED
 
-            // Build the download job
-            JobRequest.Builder(TAG)
-                .setPeriodic(TimeUnit.HOURS.toMillis(144), TimeUnit.MINUTES.toMillis(60))
-                .setRequiredNetworkType(wifiRestriction)
-                .setRequiresCharging(acRestriction)
-                .setRequirementsEnforced(true)
-                .setUpdateCurrent(true)
-                .build()
-                .schedule()
-        }
+                val constraints = Constraints.Builder()
+                    .setRequiredNetworkType(wifiRestriction)
+                    .setRequiresCharging(acRestriction)
+                    .build()
 
-        fun runTaskNow() {
-            JobRequest.Builder(TAG)
-                .startNow()
-                .build()
-                .schedule()
-        }
+                val request = PeriodicWorkRequestBuilder<SimilarUpdateJob>(3, TimeUnit.DAYS, 1, TimeUnit.HOURS)
+                    .addTag(TAG)
+                    .setConstraints(constraints)
+                    .build()
 
-        fun cancelTask() {
-            JobManager.instance().cancelAllForTag(TAG)
+                WorkManager.getInstance().enqueueUniquePeriodicWork(TAG, ExistingPeriodicWorkPolicy.REPLACE, request)
+            } else {
+                WorkManager.getInstance().cancelAllWorkByTag(TAG)
+            }
         }
     }
 }

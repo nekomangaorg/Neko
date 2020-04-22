@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -14,7 +15,7 @@
 
     <!-- Color filter -->
 
-    <com.google.android.material.switchmaterial.SwitchMaterial
+    <androidx.appcompat.widget.SwitchCompat
         android:id="@+id/switch_color_filter"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -45,7 +46,7 @@
         android:textAppearance="@style/TextAppearance.Regular.SubHeading.Secondary"
         app:layout_constraintTop_toTopOf="@id/seekbar_color_filter_red"
         app:layout_constraintBottom_toBottomOf="@id/seekbar_color_filter_red"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"/>
 
     <TextView
         android:id="@+id/txt_color_filter_red_value"
@@ -55,7 +56,7 @@
         android:textAppearance="@style/TextAppearance.Regular.SubHeading.Secondary"
         app:layout_constraintTop_toTopOf="@id/seekbar_color_filter_red"
         app:layout_constraintBottom_toBottomOf="@id/seekbar_color_filter_red"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"/>
 
     <!-- Green filter -->
 
@@ -79,7 +80,7 @@
         android:textAppearance="@style/TextAppearance.Regular.SubHeading.Secondary"
         app:layout_constraintTop_toTopOf="@id/seekbar_color_filter_green"
         app:layout_constraintBottom_toBottomOf="@id/seekbar_color_filter_green"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"/>
 
     <TextView
         android:id="@+id/txt_color_filter_green_value"
@@ -89,7 +90,7 @@
         android:textAppearance="@style/TextAppearance.Regular.SubHeading.Secondary"
         app:layout_constraintTop_toTopOf="@id/seekbar_color_filter_green"
         app:layout_constraintBottom_toBottomOf="@id/seekbar_color_filter_green"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"/>
 
     <!-- Blue filter -->
 
@@ -113,7 +114,7 @@
         android:textAppearance="@style/TextAppearance.Regular.SubHeading.Secondary"
         app:layout_constraintTop_toTopOf="@id/seekbar_color_filter_blue"
         app:layout_constraintBottom_toBottomOf="@id/seekbar_color_filter_blue"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"/>
 
     <TextView
         android:id="@+id/txt_color_filter_blue_value"
@@ -123,7 +124,7 @@
         android:textAppearance="@style/TextAppearance.Regular.SubHeading.Secondary"
         app:layout_constraintTop_toTopOf="@id/seekbar_color_filter_blue"
         app:layout_constraintBottom_toBottomOf="@id/seekbar_color_filter_blue"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"/>
 
     <!-- Alpha filter -->
 
@@ -147,7 +148,7 @@
         android:textAppearance="@style/TextAppearance.Regular.SubHeading.Secondary"
         app:layout_constraintTop_toTopOf="@id/seekbar_color_filter_alpha"
         app:layout_constraintBottom_toBottomOf="@id/seekbar_color_filter_alpha"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"/>
 
     <TextView
         android:id="@+id/txt_color_filter_alpha_value"
@@ -157,7 +158,7 @@
         android:textAppearance="@style/TextAppearance.Regular.SubHeading.Secondary"
         app:layout_constraintTop_toTopOf="@id/seekbar_color_filter_alpha"
         app:layout_constraintBottom_toBottomOf="@id/seekbar_color_filter_alpha"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"/>
 
     <!-- Filter mode -->
 
@@ -168,7 +169,7 @@
         android:text="@string/color_filter_blend_mode"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/color_filter_mode"
-        app:layout_constraintBaseline_toBaselineOf="@id/color_filter_mode" />
+        app:layout_constraintBaseline_toBaselineOf="@id/color_filter_mode"/>
 
     <androidx.appcompat.widget.AppCompatSpinner
         android:id="@+id/color_filter_mode"
@@ -182,13 +183,13 @@
 
     <!-- Brightness -->
 
-    <com.google.android.material.switchmaterial.SwitchMaterial
+    <androidx.appcompat.widget.SwitchCompat
         android:id="@+id/custom_brightness"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:text="@string/use_custom_brightness"
-        app:layout_constraintTop_toBottomOf="@id/color_filter_mode_text" />
+        app:layout_constraintTop_toBottomOf="@id/color_filter_mode_text"/>
 
     <!-- Brightness value -->
 
@@ -215,7 +216,7 @@
         app:srcCompat="@drawable/ic_brightness_5_black_24dp"
         app:layout_constraintTop_toTopOf="@id/brightness_seekbar"
         app:layout_constraintBottom_toBottomOf="@id/brightness_seekbar"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"/>
 
     <TextView
         android:id="@+id/txt_brightness_seekbar_value"
@@ -224,7 +225,7 @@
         android:textAppearance="@style/TextAppearance.Regular.SubHeading.Secondary"
         app:layout_constraintTop_toTopOf="@id/brightness_seekbar"
         app:layout_constraintBottom_toBottomOf="@id/brightness_seekbar"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"/>
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/bottom_line"

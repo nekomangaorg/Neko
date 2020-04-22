@@ -24,7 +24,6 @@ import androidx.annotation.Px
 import androidx.appcompat.widget.SearchView
 import androidx.core.graphics.ColorUtils
 import androidx.core.math.MathUtils.clamp
-import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -38,6 +37,7 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.snackbar.Snackbar
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.util.system.ThemeUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import kotlinx.android.synthetic.main.main_activity.*
@@ -67,28 +67,19 @@ fun View.snack(
     f: (Snackbar.() -> Unit)? = null
 ): Snackbar {
     val snack = Snackbar.make(this, message, length)
-    /* when {
-         Build.VERSION.SDK_INT >= 23 ->  {
-             val leftM = if (this is CoordinatorLayout) 0 else rootWindowInsets.systemWindowInsetLeft
-             val rightM = if (this is CoordinatorLayout) 0
-             else rootWindowInsets.systemWindowInsetRight
-                 snack.config(context, rootWindowInsets
-                 .systemWindowInsetBottom, rightM, leftM)
-         }
-         else -> snack.config(context)
-     }*/
     if (f != null) {
         snack.f()
     }
     val theme = Injekt.get<PreferencesHelper>().theme()
-    if (theme == 3) {
+    val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+    if (ThemeUtil.isAMOLEDTheme(theme) && currentNightMode == Configuration.UI_MODE_NIGHT_YES) {
         val textView: TextView =
             snack.view.findViewById(com.google.android.material.R.id.snackbar_text)
         val button: Button? =
             snack.view.findViewById(com.google.android.material.R.id.snackbar_action)
-        textView.setTextColor(context.getResourceColor(R.attr.snackbar_text))
-        button?.setTextColor(context.getResourceColor(R.attr.snackbar_text))
-        snack.config(context)
+        textView.setTextColor(Color.WHITE)
+        button?.setTextColor(Color.WHITE)
+        snack.view.backgroundTintList = ColorStateList.valueOf(Color.DKGRAY)
     }
     snack.show()
     return snack
@@ -100,20 +91,6 @@ fun View.snack(
     f: (Snackbar.() -> Unit)? = null
 ): Snackbar {
     return snack(context.getString(resource), length, f)
-}
-
-fun Snackbar.config(
-    context: Context,
-    bottomMargin: Int = 0,
-    rightMargin: Int = 0,
-    leftMargin: Int = 0
-) {
-    val params = this.view.layoutParams as ViewGroup.MarginLayoutParams
-    params.setMargins(12 + leftMargin, 12, 12 + rightMargin, 12 + bottomMargin)
-    this.view.layoutParams = params
-    this.view.background = context.getDrawable(R.drawable.bg_snackbar)
-
-    ViewCompat.setElevation(this.view, 6f)
 }
 
 fun Snackbar.getText(): CharSequence {
@@ -131,10 +108,6 @@ inline fun View.invisible() {
 
 inline fun View.gone() {
     visibility = View.GONE
-}
-
-inline fun View.visibleIf(block: () -> Boolean) {
-    visibility = if (block()) View.VISIBLE else View.GONE
 }
 
 inline fun View.visibleIf(show: Boolean) {

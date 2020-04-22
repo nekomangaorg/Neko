@@ -22,11 +22,11 @@ import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.system.getResourceColor
-import eu.kanade.tachiyomi.util.view.DrawableHelper
+import eu.kanade.tachiyomi.util.system.iconicsDrawable
 import eu.kanade.tachiyomi.util.view.gone
-import eu.kanade.tachiyomi.util.view.invisible
 import eu.kanade.tachiyomi.util.view.resetStrokeColor
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
+import eu.kanade.tachiyomi.util.view.visInvisIf
 import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.util.view.visibleIf
 import kotlinx.android.synthetic.main.manga_details_controller.*
@@ -63,7 +63,6 @@ class MangaHeaderHolder(
             manga_genres_tags.setOnTagClickListener {
                 adapter.delegate.tagClicked(it)
             }
-            chapter_layout.setOnClickListener { adapter.delegate.showChapterFilter() }
             webview_button.setOnClickListener { adapter.delegate.showExternalSheet() }
             similar_button.setOnClickListener { adapter.delegate.openSimilar() }
             share_button.setOnClickListener { adapter.delegate.prepareToShareManga() }
@@ -159,15 +158,12 @@ class MangaHeaderHolder(
             R.string.about_this_, manga.mangaType(itemView.context)
         )
         with(favorite_button) {
-            setImageDrawable(
-                DrawableHelper.standardIcon24(
-                    context, when {
-                        item.isLocked -> MaterialDesignDx.Icon.gmf_lock
-                        item.manga.favorite -> CommunityMaterial.Icon2.cmd_heart as IIcon
-                        else -> CommunityMaterial.Icon2.cmd_heart_outline as IIcon
-                    }
-                )
-            )
+            val icon = when {
+                item.isLocked -> MaterialDesignDx.Icon.gmf_lock
+                item.manga.favorite -> CommunityMaterial.Icon2.cmd_heart as IIcon
+                else -> CommunityMaterial.Icon2.cmd_heart_outline as IIcon
+            }
+            setImageDrawable(context.iconicsDrawable(icon))
         }
         true_backdrop.setBackgroundColor(
             adapter.delegate.coverColor()
@@ -177,39 +173,19 @@ class MangaHeaderHolder(
         val tracked = presenter.isTracked() && !item.isLocked
 
         with(track_button) {
-            setImageDrawable(
-                DrawableHelper.standardIcon32(
-                    itemView.context,
-                    MaterialDesignDx.Icon.gmf_art_track
-                )
-            )
+            setImageDrawable(context.iconicsDrawable(MaterialDesignDx.Icon.gmf_art_track, size = 32))
         }
 
         with(similar_button) {
             visibleIf(presenter.similarEnabled())
-            setImageDrawable(
-                DrawableHelper.standardIcon24(
-                    itemView.context,
-                    MaterialDesignDx.Icon.gmf_account_tree
-                )
-            )
+            setImageDrawable(context.iconicsDrawable(MaterialDesignDx.Icon.gmf_account_tree))
         }
 
         with(webview_button) {
-            setImageDrawable(
-                DrawableHelper.standardIcon24(
-                    itemView.context,
-                    CommunityMaterial.Icon2.cmd_web
-                )
-            )
+            setImageDrawable(context.iconicsDrawable(CommunityMaterial.Icon2.cmd_web))
         }
         with(share_button) {
-            setImageDrawable(
-                DrawableHelper.standardIcon24(
-                    itemView.context,
-                    MaterialDesignDx.Icon.gmf_share
-                )
-            )
+            setImageDrawable(context.iconicsDrawable(MaterialDesignDx.Icon.gmf_share))
         }
 
         with(start_reading_button) {
@@ -218,10 +194,7 @@ class MangaHeaderHolder(
             isEnabled = (nextChapter != null)
             text = if (nextChapter != null) {
                 val readTxt =
-                    listOf(
-                        nextChapter.chapter.vol,
-                        nextChapter.chapter.chapter_txt
-                    ).joinToString(" ")
+                    listOf(nextChapter.chapter.vol, nextChapter.chapter.chapter_txt).joinToString(" ")
                 resources.getString(
                     if (nextChapter.last_page_read > 0) R.string.continue_reading_chapter_
                     else R.string.start_reading_chapter_, readTxt
@@ -288,22 +261,19 @@ class MangaHeaderHolder(
     }
 
     fun collapse() {
+        val shouldHide = more_button.visibility == View.VISIBLE || more_button.visibility == View.INVISIBLE
         sub_item_group.gone()
-        if (more_button.visibility == View.VISIBLE || more_button.visibility == View.INVISIBLE)
-            more_button_group.invisible()
-        else {
-            less_button.gone()
-            manga_genres_tags.gone()
-        }
+        more_button_group.visInvisIf(!shouldHide)
+        less_button.visibleIf(shouldHide)
+        manga_genres_tags.visibleIf(shouldHide)
     }
 
     fun expand() {
+        val shouldShow = more_button.visibility == View.VISIBLE || more_button.visibility == View.INVISIBLE
+        more_button_group.visibleIf(shouldShow)
         sub_item_group.visible()
-        if (more_button.visibility == View.VISIBLE || more_button.visibility == View.INVISIBLE) more_button_group.visible()
-        else {
-            less_button.visible()
-            manga_genres_tags.visible()
-        }
+        less_button.visibleIf(shouldShow.not())
+        manga_genres_tags.visibleIf(shouldShow.not())
     }
 
     override fun onLongClick(view: View?): Boolean {

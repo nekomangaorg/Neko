@@ -98,6 +98,9 @@ class DisplayBottomSheet(private val controller: LibraryController) : BottomShee
         unread_badge_group.bindToPreference(preferences.unreadBadgeType()) {
             controller.presenter.requestUnreadBadgesUpdate()
         }
+        hide_reading.bindToPreference(preferences.hideStartReadingButton()) {
+            controller.reattachAdapter()
+        }
         hide_filters.bindToPreference(preferences.hideFiltersAtStart())
     }
 

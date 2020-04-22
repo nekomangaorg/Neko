@@ -152,7 +152,7 @@ class WebtoonTransitionHolder(
                     is ReaderChapter.State.Error -> setError(state.error, transition)
                     is ReaderChapter.State.Loaded -> setLoaded()
                 }
-                pagesContainer.visibleIf { pagesContainer.childCount > 0 }
+                pagesContainer.visibleIf(pagesContainer.childCount > 0)
             }
 
         addSubscription(statusSubscription)
