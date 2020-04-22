@@ -21,7 +21,6 @@ import android.view.WindowManager
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.SeekBar
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.graphics.ColorUtils
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
@@ -245,10 +244,10 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
         if (hasFocus) {
-            if (menuStickyVisible)
-                setMenuVisibility(false)
-            else
-                setMenuVisibility(menuVisible, animate = false)
+            when (menuStickyVisible) {
+                true -> setMenuVisibility(false)
+                false -> setMenuVisibility(menuVisible, animate = false)
+            }
         }
     }
 
@@ -374,10 +373,13 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
             snackbar?.dismiss()
             systemUi?.show()
             reader_menu.visibility = View.VISIBLE
-            if (chapters_bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED)
+
+            if (chapters_bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) {
                 chapters_bottom_sheet.sheetBehavior?.isHideable = false
-            if (chapters_bottom_sheet.sheetBehavior?.state != BottomSheetBehavior.STATE_EXPANDED && sheetManageNavColor)
+            }
+            if (chapters_bottom_sheet.sheetBehavior?.state != BottomSheetBehavior.STATE_EXPANDED && sheetManageNavColor) {
                 window.navigationBarColor = Color.TRANSPARENT // getResourceColor(R.attr.colorPrimaryDark)
+            }
             if (animate) {
                 if (!menuStickyVisible) {
                     val toolbarAnimation = AnimationUtils.loadAnimation(this, R.anim.enter_from_top)
