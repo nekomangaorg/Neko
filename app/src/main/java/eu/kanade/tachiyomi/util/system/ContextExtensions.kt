@@ -9,11 +9,14 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.content.res.Resources
+import android.graphics.drawable.Drawable
 import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.PowerManager
 import android.widget.Toast
 import androidx.annotation.AttrRes
+import androidx.annotation.ColorRes
+import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.app.NotificationCompat
@@ -87,6 +90,24 @@ fun Context.getResourceColor(@AttrRes resource: Int): Int {
     val attrValue = typedArray.getColor(0, 0)
     typedArray.recycle()
     return attrValue
+}
+
+/**
+ * Returns the color from ContextCompat
+ *
+ * @param resource the color.
+ */
+fun Context.contextCompatColor(@ColorRes resource: Int): Int {
+    return ContextCompat.getColor(this, resource)
+}
+
+/**
+ * Returns the color from ContextCompat
+ *
+ * @param resource the color.
+ */
+fun Context.contextCompatDrawable(@DrawableRes resource: Int): Drawable? {
+    return ContextCompat.getDrawable(this, resource)
 }
 
 /**
