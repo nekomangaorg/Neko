@@ -200,12 +200,12 @@ class MangaDetailsController : BaseController,
         super.onViewCreated(view)
         coverColor = null
 
-        presenter.onCreate()
         setTabletMode(view)
         setRecycler(view)
         setPaletteColor()
         setFastScroller()
 
+        presenter.onCreate()
         swipe_refresh.isRefreshing = presenter.isLoading
         if (manga?.initialized != true)
             swipe_refresh.post { swipe_refresh.isRefreshing = true }
@@ -552,7 +552,6 @@ class MangaDetailsController : BaseController,
             setStatusBarAndToolbar()
         }
     }
-
 
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
         super.onChangeStarted(handler, type)
