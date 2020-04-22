@@ -192,8 +192,11 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
                 return
             }
             NotificationReceiver.dismissNotification(this, manga.hashCode(), Notifications.ID_NEW_CHAPTERS)
-            if (chapter > -1) presenter.init(manga, chapter)
-            else presenter.init(manga, chapterUrl)
+
+            when(chapter> -1){
+                true -> presenter.init(manga, chapter)
+                false -> presenter.init(manga, chapterUrl)
+            }
         }
 
         if (savedInstanceState != null) {
