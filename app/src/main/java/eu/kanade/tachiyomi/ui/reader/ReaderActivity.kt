@@ -21,6 +21,7 @@ import android.view.WindowManager
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.SeekBar
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.graphics.ColorUtils
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
@@ -171,17 +172,16 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
         lightStatusBar = a.getBoolean(0, false)
         a.recycle()
         setNotchCutoutMode()
-        if (lightStatusBar) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) reader_layout.systemUiVisibility =
-                reader_layout.systemUiVisibility.or(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR)
-            reader_layout.systemUiVisibility =
-                reader_layout.systemUiVisibility.or(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
-        } else {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) reader_layout.systemUiVisibility =
-                reader_layout.systemUiVisibility.rem(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR)
-            reader_layout.systemUiVisibility =
-                reader_layout.systemUiVisibility.rem(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
+
+        val systemUiFlag = when(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            true -> View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+            false -> View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
         }
+        reader_layout.systemUiVisibility =when(lightStatusBar){
+            true -> reader_layout.systemUiVisibility.or(systemUiFlag)
+            false -> reader_layout.systemUiVisibility.rem(systemUiFlag)
+        }
+
 
         if (presenter.needsInit()) {
             val manga = intent.extras!!.getLong("manga", -1)
