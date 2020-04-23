@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.library
 
+import android.app.Activity
 import android.view.Gravity
 import android.view.View
 import android.widget.FrameLayout
@@ -78,6 +79,7 @@ class LibraryGridHolder(
     }
 
     private fun setCover(manga: Manga, id: Long) {
+        if ((adapter.recyclerView.context as? Activity)?.isDestroyed == true) return
         GlideApp.with(adapter.recyclerView.context).load(manga)
             .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
             .signature(ObjectKey(MangaImpl.getLastCoverFetch(id).toString()))
