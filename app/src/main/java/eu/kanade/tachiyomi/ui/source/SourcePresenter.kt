@@ -87,14 +87,16 @@ class SourcePresenter(
 
         // Emit the first item immediately but delay subsequent emissions by 500ms.
         lastUsedSubscription = Observable.merge(
-                sharedObs.take(1),
-                sharedObs.skip(1).delay(500, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread()))
-                .distinctUntilChanged()
-                .map { (sourceManager.get(it) as? CatalogueSource)?.let { source ->
+            sharedObs.take(1),
+            sharedObs.skip(1).delay(500, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
+        ).distinctUntilChanged().map {
+                (sourceManager.get(it) as? CatalogueSource)?.let { source ->
                     val pinnedCatalogues = preferences.pinnedCatalogues().getOrDefault()
                     val isPinned = source.id.toString() in pinnedCatalogues
-                    SourceItem(source, null, isPinned) } }
-                .subscribeLatestCache(SourceController::setLastUsedSource)
+                    if (isPinned) null
+                    else SourceItem(source, null, isPinned)
+                }
+            }.subscribeLatestCache(SourceController::setLastUsedSource)
     }
 
     fun updateSources() {
@@ -121,5 +123,6 @@ class SourcePresenter(
 
     companion object {
         const val PINNED_KEY = "pinned"
+        const val LAST_USED_KEY = "last_used"
     }
 }

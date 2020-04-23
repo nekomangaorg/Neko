@@ -8,8 +8,8 @@ import android.view.ContextThemeWrapper
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.source.SourcePresenter
-import java.util.Locale
 import uy.kohesive.injekt.injectLazy
+import java.util.Locale
 
 /**
  * Utility class to change the application's language in runtime.
@@ -58,6 +58,7 @@ object LocaleHelper {
             null -> ""
             "" -> context.getString(R.string.other)
             SourcePresenter.PINNED_KEY -> context.getString(R.string.pinned)
+            SourcePresenter.LAST_USED_KEY -> context.getString(R.string.last_used)
             "all" -> context.getString(R.string.all)
             else -> {
                 val locale = getLocale(lang)
