@@ -172,9 +172,9 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
         a.recycle()
         setNotchCutoutMode()
 
-        val systemUiFlag = when (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            true -> View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
-            false -> View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+        var systemUiFlag = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            systemUiFlag = systemUiFlag.or(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR)
         }
         reader_layout.systemUiVisibility = when (lightStatusBar) {
             true -> reader_layout.systemUiVisibility.or(systemUiFlag)
