@@ -41,10 +41,10 @@ class SettingsDownloadController : SettingsController() {
             }
 
             preferences.downloadsDirectory().asObservable()
-                    .subscribeUntilDestroy { path ->
-                        val dir = UniFile.fromUri(context, Uri.parse(path))
-                        summary = dir.filePath ?: path
-                    }
+                .subscribeUntilDestroy { path ->
+                    val dir = UniFile.fromUri(context, Uri.parse(path))
+                    summary = dir.filePath ?: path
+                }
         }
         switchPreference {
             key = Keys.downloadOnlyOverWifi
@@ -62,9 +62,11 @@ class SettingsDownloadController : SettingsController() {
             intListPreference(activity) {
                 key = Keys.removeAfterReadSlots
                 titleRes = R.string.remove_after_read
-                entriesRes = arrayOf(R.string.never, R.string.last_read_chapter,
-                        R.string.second_to_last, R.string.third_to_last, R.string.fourth_to_last,
-                        R.string.fifth_to_last)
+                entriesRes = arrayOf(
+                    R.string.never, R.string.last_read_chapter,
+                    R.string.second_to_last, R.string.third_to_last, R.string.fourth_to_last,
+                    R.string.fifth_to_last
+                )
                 entryRange = -1..4
                 defaultValue = -1
             }
@@ -88,19 +90,19 @@ class SettingsDownloadController : SettingsController() {
                 allSelectionRes = R.string.all
 
                 preferences.downloadNew().asObservable()
-                        .subscribeUntilDestroy { isVisible = it }
+                    .subscribeUntilDestroy { isVisible = it }
 
                 preferences.downloadNewCategories().asObservable()
-                        .subscribeUntilDestroy {
-                            val selectedCategories = it
-                                    .mapNotNull { id -> dbCategories.find { it.id == id.toInt() } }
-                                    .sortedBy { it.order }
+                    .subscribeUntilDestroy {
+                        val selectedCategories = it
+                            .mapNotNull { id -> dbCategories.find { it.id == id.toInt() } }
+                            .sortedBy { it.order }
 
-                            customSummary = if (selectedCategories.isEmpty())
-                                resources?.getString(R.string.all)
-                            else
-                                selectedCategories.joinToString { it.name }
-                        }
+                        customSummary = if (selectedCategories.isEmpty())
+                            resources?.getString(R.string.all)
+                        else
+                            selectedCategories.joinToString { it.name }
+                    }
             }
         }
     }
@@ -111,7 +113,7 @@ class SettingsDownloadController : SettingsController() {
                 val context = applicationContext ?: return
                 val uri = data.data
                 val flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or
-                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION
 
                 if (uri != null) {
                     @Suppress("NewApi")
@@ -161,11 +163,11 @@ class SettingsDownloadController : SettingsController() {
 
         private fun getExternalDirs(): List<File> {
             val defaultDir = Environment.getExternalStorageDirectory().absolutePath +
-                    File.separator + resources?.getString(R.string.app_name) +
-                    File.separator + "downloads"
+                File.separator + resources?.getString(R.string.neko_app_name) +
+                File.separator + "downloads"
 
             return mutableListOf(File(defaultDir)) +
-                    ContextCompat.getExternalFilesDirs(activity!!, "").filterNotNull()
+                ContextCompat.getExternalFilesDirs(activity!!, "").filterNotNull()
         }
     }
 

@@ -28,7 +28,7 @@ class UpdaterService : IntentService(UpdaterService::class.java.name) {
     override fun onHandleIntent(intent: Intent?) {
         if (intent == null) return
 
-        val title = intent.getStringExtra(EXTRA_DOWNLOAD_TITLE) ?: getString(R.string.app_name)
+        val title = intent.getStringExtra(EXTRA_DOWNLOAD_TITLE) ?: getString(R.string.neko_app_name)
         val url = intent.getStringExtra(EXTRA_DOWNLOAD_URL) ?: return
         downloadApk(title, url)
     }
@@ -97,7 +97,7 @@ class UpdaterService : IntentService(UpdaterService::class.java.name) {
          * @param context the application context.
          * @param url the url to the new update.
          */
-        fun downloadUpdate(context: Context, url: String, title: String = context.getString(R.string.app_name)) {
+        fun downloadUpdate(context: Context, url: String, title: String = context.getString(R.string.neko_app_name)) {
             val intent = Intent(context, UpdaterService::class.java).apply {
                 putExtra(EXTRA_DOWNLOAD_TITLE, title)
                 putExtra(EXTRA_DOWNLOAD_URL, url)

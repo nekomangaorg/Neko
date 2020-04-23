@@ -45,14 +45,14 @@ class PreferencesHelper(val context: Context) {
     private val defaultDownloadsDir = Uri.fromFile(
         File(
             Environment.getExternalStorageDirectory().absolutePath + File.separator +
-                context.getString(R.string.app_name), "downloads"
+                context.getString(R.string.neko_app_name), "downloads"
         )
     )
 
     private val defaultBackupDir = Uri.fromFile(
         File(
             Environment.getExternalStorageDirectory().absolutePath + File.separator +
-                context.getString(R.string.app_name), "backup"
+                context.getString(R.string.neko_app_name), "backup"
         )
     )
 
@@ -206,7 +206,7 @@ class PreferencesHelper(val context: Context) {
     fun librarySortingAscending() = rxPrefs.getBoolean("library_sorting_ascending", true)
 
     fun automaticUpdates() = prefs.getBoolean(Keys.automaticUpdates, true)
-    
+
     fun collapsedCategories() = rxPrefs.getStringSet("collapsed_categories", mutableSetOf())
 
     fun hiddenSources() = rxPrefs.getStringSet("hidden_catalogues", mutableSetOf())

@@ -104,7 +104,7 @@ class LibraryUpdateService(
      */
     private val progressNotification by lazy {
         NotificationCompat.Builder(this, Notifications.CHANNEL_LIBRARY)
-            .setContentTitle(getString(R.string.app_name))
+            .setContentTitle(getString(R.string.neko_app_name))
             .setSmallIcon(R.drawable.ic_refresh_white_24dp_img)
             .setLargeIcon(notificationBitmap)
             .setOngoing(true)

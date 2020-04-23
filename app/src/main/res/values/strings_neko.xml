@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+    <string name="neko_app_name" translatable="false">Neko</string>
+
     <!-- Status -->
     <string name="hiatus">Hiatus</string>
     <string name="cancelled">Cancelled</string>

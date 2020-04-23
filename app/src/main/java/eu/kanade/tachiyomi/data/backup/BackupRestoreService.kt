@@ -346,7 +346,7 @@ class BackupRestoreService : Service() {
      */
     private val progressNotification by lazy {
         NotificationCompat.Builder(this, Notifications.CHANNEL_RESTORE)
-            .setContentTitle(getString(R.string.app_name))
+            .setContentTitle(getString(R.string.neko_app_name))
             .setSmallIcon(R.drawable.ic_neko_notification)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
@@ -377,8 +377,12 @@ class BackupRestoreService : Service() {
         notificationManager.notify(
             Notifications.ID_RESTORE_PROGRESS, progressNotification
                 .setContentTitle(title.chop(30))
-                .setContentText(getString(R.string.restoring_progress, restoreProgress,
-                    totalAmount))
+                .setContentText(
+                    getString(
+                        R.string.restoring_progress, restoreProgress,
+                        totalAmount
+                    )
+                )
                 .setProgress(total, current, false)
                 .build()
         )
@@ -428,8 +432,12 @@ class BackupRestoreService : Service() {
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setColor(ContextCompat.getColor(this, R.color.colorAccent))
         if (errors.size > 0 && !path.isNullOrEmpty() && !file.isNullOrEmpty()) {
-            resultNotification.addAction(R.drawable.ic_clear_grey_24dp_img, getString(R.string
-                .view_all_errors), getErrorLogIntent(path, file))
+            resultNotification.addAction(
+                R.drawable.ic_clear_grey_24dp_img, getString(
+                    R.string
+                        .view_all_errors
+                ), getErrorLogIntent(path, file)
+            )
         }
         notificationManager.notify(Notifications.ID_RESTORE_COMPLETE, resultNotification.build())
     }

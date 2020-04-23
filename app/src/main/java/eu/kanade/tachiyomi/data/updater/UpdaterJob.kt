@@ -35,7 +35,7 @@ class UpdaterJob(private val context: Context, workerParams: WorkerParameters) :
             }
 
             NotificationCompat.Builder(context, Notifications.CHANNEL_COMMON).update {
-                setContentTitle(context.getString(R.string.app_name))
+                setContentTitle(context.getString(R.string.neko_app_name))
                 setContentText(context.getString(R.string.update_available))
                 setSmallIcon(android.R.drawable.stat_sys_download_done)
                 color = ContextCompat.getColor(context, R.color.colorAccent)
@@ -62,15 +62,16 @@ class UpdaterJob(private val context: Context, workerParams: WorkerParameters) :
 
         fun setupTask() {
             val constraints = Constraints.Builder()
-                    .setRequiredNetworkType(NetworkType.CONNECTED)
-                    .build()
+                .setRequiredNetworkType(NetworkType.CONNECTED)
+                .build()
 
             val request = PeriodicWorkRequestBuilder<UpdaterJob>(
-                    1, TimeUnit.DAYS,
-                    1, TimeUnit.HOURS)
-                    .addTag(TAG)
-                    .setConstraints(constraints)
-                    .build()
+                1, TimeUnit.DAYS,
+                1, TimeUnit.HOURS
+            )
+                .addTag(TAG)
+                .setConstraints(constraints)
+                .build()
 
             WorkManager.getInstance().enqueueUniquePeriodicWork(TAG, ExistingPeriodicWorkPolicy.REPLACE, request)
         }
