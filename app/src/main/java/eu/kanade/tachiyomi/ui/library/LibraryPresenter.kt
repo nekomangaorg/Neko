@@ -431,7 +431,7 @@ class LibraryPresenter(
         if (showCategories) {
             categories.forEach { category ->
                 val catId = category.id ?: return@forEach
-                if (catId > 0 && !categorySet.contains(catId)) {
+                if (catId > 0 && !categorySet.contains(catId) && catId !in categoriesHidden) {
                     val headerItem = headerItems[catId]
                     if (headerItem != null) items.add(
                         LibraryItem(LibraryManga.createBlank(catId), headerItem)
