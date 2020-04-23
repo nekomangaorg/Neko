@@ -23,12 +23,11 @@ import eu.kanade.tachiyomi.data.backup.BackupRestoreService
 import eu.kanade.tachiyomi.data.backup.models.Backup
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
-import eu.kanade.tachiyomi.ui.base.controller.popControllerWithTag
-import eu.kanade.tachiyomi.ui.base.controller.requestPermissionsSafe
 import eu.kanade.tachiyomi.util.system.getFilePicker
 import eu.kanade.tachiyomi.util.system.registerLocalReceiver
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.system.unregisterLocalReceiver
+import eu.kanade.tachiyomi.util.view.requestPermissionsSafe
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 
 class SettingsBackupController : SettingsController() {
@@ -285,16 +284,10 @@ class SettingsBackupController : SettingsController() {
         override fun onReceive(context: Context, intent: Intent) {
             when (intent.getStringExtra(BackupConst.ACTION)) {
                 BackupConst.ACTION_BACKUP_COMPLETED_DIALOG -> {
-                    router.popControllerWithTag(TAG_CREATING_BACKUP_DIALOG)
                     val uri = Uri.parse(intent.getStringExtra(BackupConst.EXTRA_URI))
                     CreatedBackupDialog(uri).showDialog(router)
                 }
                 BackupConst.ACTION_ERROR_BACKUP_DIALOG -> {
-                    router.popControllerWithTag(TAG_CREATING_BACKUP_DIALOG)
-                    context.toast(intent.getStringExtra(BackupConst.EXTRA_ERROR_MESSAGE))
-                }
-                BackupConst.ACTION_ERROR_RESTORE_DIALOG -> {
-                    router.popControllerWithTag(TAG_RESTORING_BACKUP_DIALOG)
                     context.toast(intent.getStringExtra(BackupConst.EXTRA_ERROR_MESSAGE))
                 }
             }
@@ -305,8 +298,5 @@ class SettingsBackupController : SettingsController() {
         const val CODE_BACKUP_CREATE = 501
         const val CODE_BACKUP_RESTORE = 502
         const val CODE_BACKUP_DIR = 503
-
-        const val TAG_CREATING_BACKUP_DIALOG = "CreatingBackupDialog"
-        const val TAG_RESTORING_BACKUP_DIALOG = "RestoringBackupDialog"
     }
 }
