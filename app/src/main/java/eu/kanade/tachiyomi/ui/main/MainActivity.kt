@@ -55,6 +55,8 @@ import eu.kanade.tachiyomi.ui.setting.SettingsMainController
 import eu.kanade.tachiyomi.ui.source.SourceController
 import eu.kanade.tachiyomi.ui.source.global_search.SourceSearchController
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.system.hasSideNavBar
+import eu.kanade.tachiyomi.util.system.isBottomTappable
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
@@ -266,18 +268,17 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         window.navigationBarColor = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O_MR1) {
             // basically if in landscape on a phone
             // For lollipop, draw opaque nav bar
-            if (insets.systemWindowInsetLeft > 0 || insets.systemWindowInsetRight > 0)
+            if (insets.hasSideNavBar())
                 Color.BLACK
             else Color.argb(179, 0, 0, 0)
         }
         // if the android q+ device has gesture nav, transparent nav bar
         // this is here in case some crazy with a notch uses landscape
-        else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && (insets
-                .systemWindowInsetBottom != insets.tappableElementInsets.bottom)) {
+        else if (insets.isBottomTappable()) {
             getColor(android.R.color.transparent)
         }
         // if in landscape with 2/3 button mode, fully opaque nav bar
-        else if (insets.systemWindowInsetLeft > 0 || insets.systemWindowInsetRight > 0) {
+        else if (insets.hasSideNavBar()) {
             getResourceColor(R.attr.colorPrimaryVariant)
         }
         // if in portrait with 2/3 button mode, translucent nav bar

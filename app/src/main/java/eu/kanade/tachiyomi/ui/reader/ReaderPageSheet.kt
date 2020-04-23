@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
+import eu.kanade.tachiyomi.util.system.hasSideNavBar
 import eu.kanade.tachiyomi.util.view.setBottomEdge
 import eu.kanade.tachiyomi.util.view.setEdgeToEdge
 import kotlinx.android.synthetic.main.reader_page_sheet.*
@@ -37,8 +38,7 @@ class ReaderPageSheet(
         window?.navigationBarColor = Color.TRANSPARENT
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
             Injekt.get<PreferencesHelper>().readerTheme().getOrDefault() == 0 &&
-            activity.window.decorView.rootWindowInsets.systemWindowInsetRight == 0 &&
-            activity.window.decorView.rootWindowInsets.systemWindowInsetLeft == 0)
+            !activity.window.decorView.rootWindowInsets.hasSideNavBar())
             window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
 
         setBottomEdge(save_layout, activity)

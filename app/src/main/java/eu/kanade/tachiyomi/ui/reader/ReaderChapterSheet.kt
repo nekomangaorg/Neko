@@ -15,7 +15,7 @@ import com.mikepenz.fastadapter.adapters.ItemAdapter
 import com.mikepenz.fastadapter.listeners.ClickEventHook
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.system.dpToPx
-import eu.kanade.tachiyomi.util.system.getBottomInsets
+import eu.kanade.tachiyomi.util.system.getBottomGestureInsets
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
@@ -59,7 +59,7 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
         }
 
         chapters_bottom_sheet.doOnApplyWindowInsets { _, insets, _ ->
-            sheetBehavior?.peekHeight = peek + insets.getBottomInsets()
+            sheetBehavior?.peekHeight = peek + insets.getBottomGestureInsets()
 
             chapters_bottom_sheet.updateLayoutParams<MarginLayoutParams> {
                 height = 280.dpToPx + insets.systemWindowInsetBottom
