@@ -26,16 +26,8 @@
     
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/fab"
-        android:layout_width="wrap_content"
-        app:backgroundTint="?colorAccent"
+        style="@style/Theme.Widget.FAB"
         android:text="@string/filter"
-        android:layout_gravity="bottom|end"
-        app:icon="@drawable/ic_filter_list_white_24dp"
-        app:iconTint="@color/md_white_1000"
-        android:textColor="@color/md_white_1000"
-        android:textAllCaps="false"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
-        android:layout_height="wrap_content"/>
+        app:icon="@drawable/ic_filter_list_white_24dp"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

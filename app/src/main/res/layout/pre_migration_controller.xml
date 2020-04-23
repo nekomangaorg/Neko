@@ -22,14 +22,10 @@
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
-        style="@style/Theme.Widget.FABFixed"
-        android:clickable="true"
-        android:focusable="true"
+        style="@style/Theme.Widget.FAB"
         android:src="@drawable/ic_arrow_forward_white_24dp"
         app:layout_anchor="@id/recycler"
-        app:layout_anchorGravity="bottom|right|end"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:backgroundTint="?attr/colorAccent" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
