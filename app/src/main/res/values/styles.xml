@@ -118,21 +118,12 @@
         <item name="android:scaleType">fitCenter</item>
         <item name="layout_anchorGravity">bottom|right|end</item>
         <item name="tint">@color/md_white_1000</item>
+        <item name="android:minHeight">@dimen/fab_size</item>
         <item name="backgroundTint">?attr/colorAccent</item>
         <item name="android:tint">@color/md_white_1000</item>
-    </style>
-
-    <style name="Theme.Widget.FABFixed">
-        <item name="android:layout_height">@dimen/fab_size</item>
-        <item name="android:layout_width">@dimen/fab_size</item>
-        <item name="android:layout_gravity">bottom|end</item>
-        <item name="android:layout_margin">@dimen/fab_margin</item>
-        <item name="android:scaleType">fitCenter</item>
-        <item name="layout_anchorGravity">bottom|right|end</item>
-        <item name="android:tint">@color/md_white_1000</item>
-        <item name="tint">@color/md_white_1000</item>
-        <item name="backgroundTint">?attr/colorAccent</item>
-        <item name="layout_behavior">eu.kanade.tachiyomi.widget.FABMoveBehaviour</item>
+        <item name="iconTint">@android:color/white</item>
+        <item name="textAllCaps">false</item>
+        <item name="android:textColor">@android:color/white</item>
     </style>
 
     <style name="Theme.Widget.CardView" parent="Widget.MaterialComponents.CardView">
