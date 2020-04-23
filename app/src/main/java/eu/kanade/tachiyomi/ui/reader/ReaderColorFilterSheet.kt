@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.util.lang.plusAssign
+import eu.kanade.tachiyomi.util.system.hasSideNavBar
 import eu.kanade.tachiyomi.util.view.setBottomEdge
 import eu.kanade.tachiyomi.util.view.setEdgeToEdge
 import eu.kanade.tachiyomi.widget.IgnoreFirstSpinnerListener
@@ -58,8 +59,7 @@ class ReaderColorFilterSheet(activity: ReaderActivity) : BottomSheetDialog
         window?.navigationBarColor = Color.TRANSPARENT
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
             preferences.readerTheme().getOrDefault() == 0 &&
-            activity.window.decorView.rootWindowInsets.systemWindowInsetRight == 0 &&
-            activity.window.decorView.rootWindowInsets.systemWindowInsetLeft == 0)
+            !activity.window.decorView.rootWindowInsets.hasSideNavBar())
             window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
         setBottomEdge(brightness_seekbar, activity)
 

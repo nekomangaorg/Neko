@@ -49,6 +49,8 @@ import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.GLUtil
 import eu.kanade.tachiyomi.util.system.ThemeUtil
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.system.hasSideNavBar
+import eu.kanade.tachiyomi.util.system.isBottomTappable
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
@@ -338,20 +340,19 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
         if (!menuVisible)
             chapters_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_HIDDEN
         reader_menu.doOnApplyWindowInsets { v, insets, _ ->
-            sheetManageNavColor = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && (insets
-                    .systemWindowInsetBottom != insets.tappableElementInsets.bottom)
-            ) {
-                window.navigationBarColor = Color.TRANSPARENT
-                false
-            }
-            // if in landscape with 2/3 button mode, fully opaque nav bar
-            else if (insets.systemWindowInsetLeft > 0 || insets.systemWindowInsetRight > 0) {
-                window.navigationBarColor = getResourceColor(R.attr.colorSecondary)
-                false
-            }
-            // if in portrait with 2/3 button mode, translucent nav bar
-            else {
-                true
+            sheetManageNavColor = when {
+                insets.isBottomTappable() -> {
+                    window.navigationBarColor = Color.TRANSPARENT
+                    false
+                }
+                insets.hasSideNavBar() -> {
+                    window.navigationBarColor = getResourceColor(R.attr.colorSecondary)
+                    false
+                }
+                // if in portrait with 2/3 button mode, translucent nav bar
+                else -> {
+                    true
+                }
             }
 
             toolbar.updateLayoutParams<ViewGroup.MarginLayoutParams> {

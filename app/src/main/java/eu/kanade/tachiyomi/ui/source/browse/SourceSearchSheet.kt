@@ -15,6 +15,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.system.hasSideNavBar
 import eu.kanade.tachiyomi.util.view.setEdgeToEdge
 import kotlinx.android.synthetic.main.source_filter_sheet.*
 import uy.kohesive.injekt.injectLazy
@@ -65,9 +66,10 @@ class SourceSearchSheet(activity: Activity) :
         setEdgeToEdge(
             activity, view, 50.dpToPx
         )
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && preferences.readerTheme()
-                .getOrDefault() == 0 && activity.window.decorView.rootWindowInsets.systemWindowInsetRight == 0 && activity.window.decorView.rootWindowInsets.systemWindowInsetLeft == 0
-        ) window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
+            preferences.readerTheme().getOrDefault() == 0 &&
+            !activity.window.decorView.rootWindowInsets.hasSideNavBar())
+            window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
 
         sheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onSlide(bottomSheet: View, progress: Float) {}
