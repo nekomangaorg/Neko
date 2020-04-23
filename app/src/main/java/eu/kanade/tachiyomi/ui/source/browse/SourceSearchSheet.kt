@@ -3,7 +3,7 @@ package eu.kanade.tachiyomi.ui.source.browse
 import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.app.Activity
-import android.os.Build
+import android.view.ActionMode
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -13,9 +13,8 @@ import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.util.system.dpToPx
-import eu.kanade.tachiyomi.util.system.hasSideNavBar
+import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
 import eu.kanade.tachiyomi.util.view.setEdgeToEdge
 import kotlinx.android.synthetic.main.source_filter_sheet.*
 import uy.kohesive.injekt.injectLazy
@@ -50,20 +49,27 @@ class SourceSearchSheet(activity: Activity) :
         search_btn.setOnClickListener { dismiss() }
         reset_btn.setOnClickListener { onResetClicked() }
 
-        recycler.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
-        recycler.clipToPadding = false
-        recycler.adapter = adapter
-        recycler.setHasFixedSize(true)
         sheetBehavior = BottomSheetBehavior.from(view.parent as ViewGroup)
         sheetBehavior.skipCollapsed = true
         sheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
         setEdgeToEdge(
             activity, view, 50.dpToPx
         )
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
-            preferences.readerTheme().getOrDefault() == 0 &&
-            !activity.window.decorView.rootWindowInsets.hasSideNavBar())
-            window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+
+        recycler.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
+        recycler.clipToPadding = false
+        recycler.adapter = adapter
+        recycler.setHasFixedSize(true)
+        recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
+
+        // the spinner in the recycler can break the sheet's layout on change
+        // this is to reset it back
+        source_filter_sheet.post {
+            (source_filter_sheet.parent as View).fitsSystemWindows = false
+            source_filter_sheet.viewTreeObserver.addOnDrawListener {
+                (source_filter_sheet.parent as View).fitsSystemWindows = false
+            }
+        }
 
         sheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onSlide(bottomSheet: View, progress: Float) {}
@@ -94,6 +100,14 @@ class SourceSearchSheet(activity: Activity) :
                 }
             }
         })
+    }
+
+    override fun onWindowStartingActionMode(
+        callback: ActionMode.Callback?,
+        type: Int
+    ): ActionMode? {
+        (source_filter_sheet.parent as View).fitsSystemWindows = false
+        return super.onWindowStartingActionMode(callback, type)
     }
 
     override fun dismiss() {

@@ -2,19 +2,18 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/source_filter_sheet"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/bottom_sheet_rounded_background"
-    android:backgroundTint="?android:attr/colorBackground"
-    android:orientation="vertical">
+    android:backgroundTint="?android:attr/colorBackground">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="?attr/actionBarSize"
-        android:clipToPadding="false"
-        android:fitsSystemWindows="true" />
+        android:clipToPadding="false" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/title_layout"
