@@ -65,10 +65,7 @@ class DisplayBottomSheet(private val controller: LibraryController) : BottomShee
         super.onCreate(savedInstanceState)
         initGeneralPreferences()
         setBottomEdge(hide_filters, activity)
-        close_button.setOnClickListener {
-            dismiss()
-            true
-        }
+        close_button.setOnClickListener { dismiss() }
         settings_scroll_view.viewTreeObserver.addOnGlobalLayoutListener {
             val isScrollable =
                 settings_scroll_view!!.height < display_layout.height +

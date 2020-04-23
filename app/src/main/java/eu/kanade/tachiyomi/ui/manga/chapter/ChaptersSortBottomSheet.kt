@@ -71,7 +71,8 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) : BottomSheetD
                 settings_scroll_view!!.height < sort_layout.height +
                     settings_scroll_view.paddingTop + settings_scroll_view.paddingBottom
             close_button.visibleIf(isScrollable)
-            pill.visibleIf(!isScrollable)
+            // making the view gone somehow breaks the layout so lets make it invisible
+            pill.visInvisIf(!isScrollable)
         }
 
         setOnDismissListener {
