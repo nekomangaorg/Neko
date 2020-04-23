@@ -14,12 +14,12 @@ import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
-import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.util.view.visibleIf
+import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import kotlinx.android.synthetic.main.manga_category_dialog.view.*
 import uy.kohesive.injekt.injectLazy
 
@@ -68,7 +68,8 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
             preferences.downloadNew().set(true)
         }
         if (preferences.libraryUpdateInterval().getOrDefault() > 0 &&
-            !updatePref(preferences.libraryUpdateCategories(), view.include_global)) {
+            !updatePref(preferences.libraryUpdateCategories(), view.include_global)
+        ) {
             preferences.libraryUpdateInterval().set(0)
             LibraryUpdateJob.setupTask(0)
         }
@@ -91,9 +92,11 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
         view.title.hint = category.name
         view.title.append(category.name)
         val downloadNew = preferences.downloadNew().getOrDefault()
-        setCheckbox(view.download_new,
+        setCheckbox(
+            view.download_new,
             preferences.downloadNewCategories(),
-            true)
+            true
+        )
         if (downloadNew && preferences.downloadNewCategories().getOrDefault().isEmpty())
             view.download_new.gone()
         else if (!downloadNew)
