@@ -170,7 +170,7 @@ class LibraryPresenter(
                         }
                     }
                 } else if (filterTracked == STATE_EXCLUDE) {
-                    if (!hasTrack && filterTrackers.isEmpty()) return@f false
+                    if (hasTrack && filterTrackers.isEmpty()) return@f false
                     if (filterTrackers.isNotEmpty()) {
                         if (service != null) {
                             val hasServiceTrack = tracks.any { it.sync_id == service.id }
