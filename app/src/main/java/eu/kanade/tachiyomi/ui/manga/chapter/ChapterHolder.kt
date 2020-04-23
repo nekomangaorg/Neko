@@ -100,6 +100,7 @@ class ChapterHolder(
                 )
             )
         }
+        
         chapter_scanlator.setTextColor(if (chapter.read) adapter.readColor else adapter.unreadColor)
         chapter_scanlator.text = statuses.joinToString(" • ")
         notifyStatus(
