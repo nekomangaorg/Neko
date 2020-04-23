@@ -7,12 +7,12 @@ import android.view.View
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.core.content.ContextCompat
 import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.items.AbstractItem
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.util.system.contextCompatDrawable
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
@@ -53,10 +53,8 @@ class ReaderChapterItem(val chapter: Chapter, val manga: Manga, val isCurrent: B
         private var unreadColor = view.context.getResourceColor(android.R.attr.textColorPrimary)
         private var activeColor = view.context.getResourceColor(android.R.attr.colorAccent)
 
-        private var unbookmark = ContextCompat.getDrawable(view.context, R.drawable
-            .ic_bookmark_border_24dp)
-        private var bookmark = ContextCompat.getDrawable(view.context, R.drawable
-            .ic_bookmark_24dp)
+        private var unbookmark = view.context.contextCompatDrawable(R.drawable.ic_bookmark_border_24dp)
+        private var bookmark = view.context.contextCompatDrawable(R.drawable.ic_bookmark_24dp)
 
         override fun bindView(item: ReaderChapterItem, payloads: List<Any>) {
             val chapter = item.chapter

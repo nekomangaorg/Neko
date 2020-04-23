@@ -4,8 +4,6 @@ import android.app.Dialog
 import android.os.Bundle
 import android.view.View
 import com.afollestad.materialdialogs.MaterialDialog
-import com.afollestad.materialdialogs.WhichButton
-import com.afollestad.materialdialogs.actions.setActionButtonEnabled
 import com.afollestad.materialdialogs.customview.customView
 import com.jakewharton.rxbinding.widget.itemClicks
 import com.jakewharton.rxbinding.widget.textChanges
@@ -64,7 +62,9 @@ class TrackSearchDialog : DialogController {
             customView(viewRes = R.layout.track_search_dialog, scrollable = false)
             negativeButton(android.R.string.cancel)
             positiveButton(R.string.clear) { onPositiveButtonClick() }
-            setActionButtonEnabled(WhichButton.POSITIVE, wasPreviouslyTracked)
+            if (wasPreviouslyTracked) {
+                positiveButton(R.string.clear) { onPositiveButtonClick() }
+            }
         }
 
         if (subscriptions.isUnsubscribed) {

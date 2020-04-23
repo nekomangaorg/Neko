@@ -114,6 +114,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
         private set
 
     private var coroutine: Job? = null
+
     /**
      * System UI helper to hide status & navigation bar on all different API levels.
      */
@@ -172,16 +173,14 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
         lightStatusBar = a.getBoolean(0, false)
         a.recycle()
         setNotchCutoutMode()
-        if (lightStatusBar) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) reader_layout.systemUiVisibility =
-                reader_layout.systemUiVisibility.or(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR)
-            reader_layout.systemUiVisibility =
-                reader_layout.systemUiVisibility.or(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
-        } else {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) reader_layout.systemUiVisibility =
-                reader_layout.systemUiVisibility.rem(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR)
-            reader_layout.systemUiVisibility =
-                reader_layout.systemUiVisibility.rem(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
+
+        val systemUiFlag = when (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            true -> View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+            false -> View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+        }
+        reader_layout.systemUiVisibility = when (lightStatusBar) {
+            true -> reader_layout.systemUiVisibility.or(systemUiFlag)
+            false -> reader_layout.systemUiVisibility.rem(systemUiFlag)
         }
 
         if (presenter.needsInit()) {
@@ -193,8 +192,11 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
                 return
             }
             NotificationReceiver.dismissNotification(this, manga.hashCode(), Notifications.ID_NEW_CHAPTERS)
-            if (chapter > -1) presenter.init(manga, chapter)
-            else presenter.init(manga, chapterUrl)
+
+            when (chapter > -1) {
+                true -> presenter.init(manga, chapter)
+                false -> presenter.init(manga, chapterUrl)
+            }
         }
 
         if (savedInstanceState != null) {
@@ -243,10 +245,10 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
         if (hasFocus) {
-            if (menuStickyVisible)
-                setMenuVisibility(false)
-            else
-                setMenuVisibility(menuVisible, animate = false)
+            when (menuStickyVisible) {
+                true -> setMenuVisibility(false)
+                false -> setMenuVisibility(menuVisible, animate = false)
+            }
         }
     }
 
@@ -312,8 +314,10 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
     private fun initializeMenu() {
         // Set toolbar
         setSupportActionBar(toolbar)
-        val primaryColor = ColorUtils.setAlphaComponent(getResourceColor(R.attr.colorSecondary),
-            200)
+        val primaryColor = ColorUtils.setAlphaComponent(
+            getResourceColor(R.attr.colorSecondary),
+            200
+        )
         appbar.setBackgroundColor(primaryColor)
         window.statusBarColor = Color.TRANSPARENT
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -337,7 +341,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
             chapters_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_HIDDEN
         reader_menu.doOnApplyWindowInsets { v, insets, _ ->
             sheetManageNavColor = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && (insets
-                    .systemWindowInsetBottom != insets.tappableElementInsets.bottom)) {
+                    .systemWindowInsetBottom != insets.tappableElementInsets.bottom)
+            ) {
                 window.navigationBarColor = Color.TRANSPARENT
                 false
             }
@@ -372,10 +377,13 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
             snackbar?.dismiss()
             systemUi?.show()
             reader_menu.visibility = View.VISIBLE
-            if (chapters_bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED)
+
+            if (chapters_bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) {
                 chapters_bottom_sheet.sheetBehavior?.isHideable = false
-            if (chapters_bottom_sheet.sheetBehavior?.state != BottomSheetBehavior.STATE_EXPANDED && sheetManageNavColor)
+            }
+            if (chapters_bottom_sheet.sheetBehavior?.state != BottomSheetBehavior.STATE_EXPANDED && sheetManageNavColor) {
                 window.navigationBarColor = Color.TRANSPARENT // getResourceColor(R.attr.colorPrimaryDark)
+            }
             if (animate) {
                 if (!menuStickyVisible) {
                     val toolbarAnimation = AnimationUtils.loadAnimation(this, R.anim.enter_from_top)
@@ -401,8 +409,9 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
                 appbar.startAnimation(toolbarAnimation)
                 BottomSheetBehavior.from(chapters_bottom_sheet).isHideable = true
                 BottomSheetBehavior.from(chapters_bottom_sheet).state = BottomSheetBehavior.STATE_HIDDEN
-            } else
+            } else {
                 reader_menu.visibility = View.GONE
+            }
         }
         menuStickyVisible = false
     }
@@ -524,12 +533,15 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
         page_text.text = "${page.number} / ${pages.size}"
 
         if (newChapter) {
-            if (config?.showNewChapter == false) systemUi?.show()
+            if (config?.showNewChapter == false) {
+                systemUi?.show()
+            }
         } else if (chapters_bottom_sheet.shouldCollaspe && chapters_bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) {
             chapters_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
         }
-        if (chapters_bottom_sheet.selectedChapterId != page.chapter.chapter.id)
+        if (chapters_bottom_sheet.selectedChapterId != page.chapter.chapter.id) {
             chapters_bottom_sheet.refreshList()
+        }
         chapters_bottom_sheet.shouldCollaspe = true
 
         // Set seekbar progress
@@ -632,11 +644,13 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
      * depending on the [result].
      */
     fun onSetAsCoverResult(result: ReaderPresenter.SetAsCoverResult) {
-        toast(when (result) {
-            Success -> R.string.cover_updated
-            AddToLibraryFirst -> R.string.must_be_in_library_to_edit
-            Error -> R.string.failed_to_update_cover
-        })
+        toast(
+            when (result) {
+                Success -> R.string.cover_updated
+                AddToLibraryFirst -> R.string.must_be_in_library_to_edit
+                Error -> R.string.failed_to_update_cover
+            }
+        )
     }
 
     override fun onVisibilityChange(visible: Boolean) {
@@ -679,7 +693,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
             if (currentOrientation == Configuration.ORIENTATION_LANDSCAPE) {
                 val params = window.attributes
                 params.layoutInDisplayCutoutMode =
-                        WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER
+                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER
             }
         }
     }
