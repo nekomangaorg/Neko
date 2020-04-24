@@ -22,6 +22,7 @@ import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.system.isLTR
 import eu.kanade.tachiyomi.util.system.iconicsDrawable
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.resetStrokeColor
@@ -60,6 +61,8 @@ class MangaHeaderHolder(
                     true
                 false
             }
+            if (!itemView.resources.isLTR)
+                more_bg_gradient.rotation = 180f
             less_button.setOnClickListener { collapseDesc() }
             manga_genres_tags.setOnTagClickListener {
                 adapter.delegate.tagClicked(it)

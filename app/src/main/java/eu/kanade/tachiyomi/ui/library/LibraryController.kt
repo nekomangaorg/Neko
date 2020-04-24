@@ -53,6 +53,7 @@ import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.system.contextCompatDrawable
 import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.system.dpToPxEnd
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
@@ -167,8 +168,8 @@ class LibraryController(
                     // fastScroll height * indicator position - center text - fastScroll padding
                     text_view_m.translationY = view.height *
                         (index.toFloat() / (adapter.headerItems.size + 1))
-                    -text_view_m.height / 2 + 16.dpToPx
-                    text_view_m.translationX = 45f.dpToPx
+                    - text_view_m.height / 2 + 16.dpToPx
+                    text_view_m.translationX = 45f.dpToPxEnd
                     text_view_m.alpha = 1f
                     text_view_m.text = headerItem.category.name
                 }
@@ -188,7 +189,7 @@ class LibraryController(
                 }
                 RecyclerView.SCROLL_STATE_IDLE -> {
                     scrollAnim = fast_scroller.animate().setStartDelay(1000).setDuration(250)
-                        .translationX(25f.dpToPx)
+                        .translationX(25f.dpToPxEnd)
                     scrollAnim?.start()
                 }
             }
@@ -198,7 +199,8 @@ class LibraryController(
     private fun hideScroller(duration: Long = 1000) {
         if (alwaysShowScroller) return
         scrollAnim =
-            fast_scroller.animate().setStartDelay(duration).setDuration(250).translationX(25f.dpToPx)
+            fast_scroller.animate().setStartDelay(duration).setDuration(250)
+                .translationX(25f.dpToPxEnd)
         scrollAnim?.start()
     }
 
@@ -218,7 +220,7 @@ class LibraryController(
         super.onViewCreated(view)
         view.applyWindowInsetsForRootController(activity!!.bottom_nav)
         if (!::presenter.isInitialized) presenter = LibraryPresenter(this)
-        if (!alwaysShowScroller) fast_scroller.translationX = 25f.dpToPx
+        if (!alwaysShowScroller) fast_scroller.translationX = 25f.dpToPxEnd
         setFastScrollBackground()
 
         adapter = LibraryCategoryAdapter(this)
@@ -240,8 +242,7 @@ class LibraryController(
             val letter = adapter.getSectionText(position)
             if (!singleCategory &&
                 !adapter.isHeader(adapter.getItem(position)) &&
-                position != adapter.itemCount - 1
-            ) null
+                position != adapter.itemCount - 1) null
             else if (letter != null) FastScrollItemIndicator.Text(letter)
             else FastScrollItemIndicator.Icon(R.drawable.ic_star_24dp)
         })
