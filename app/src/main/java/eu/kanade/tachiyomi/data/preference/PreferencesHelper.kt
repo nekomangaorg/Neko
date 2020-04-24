@@ -267,7 +267,7 @@ class PreferencesHelper(val context: Context) {
 
     fun skipFiltered() = prefs.getBoolean(Keys.skipFiltered, false)
 
-    fun similarEnabled() = prefs.getBoolean(Keys.similarEnabled, true)
+    fun similarEnabled() = prefs.getBoolean(Keys.similarEnabled, false)
 
     fun similarUpdateInterval() = rxPrefs.getInteger(Keys.libraryUpdateInterval, 7)
 

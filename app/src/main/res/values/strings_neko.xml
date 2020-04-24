@@ -43,11 +43,11 @@
     <string name="similar_loading_complete_error">Error trying to load/process similar manga</string>
     <string name="similar_loading_progress_start">Downloading similar manga data file…</string>
     <string name="similar_screen_summary_message">
-        This is an beta feature where one can get manga recommendations.
+        This is a feature where one can get manga recommendations.
         This is a recommendation system outside of MangaDex, and works by matching by genres,
         demographics, content type, themes, and then using term frequency–inverse document frequency (Tfidf) to get the
-        similarity of two manga\'s descriptions. When enabled this file will download immediately
-        and then auto download a refreshed file every 24 hours. The file is about 20mb in size.
+        similarity of two manga\'s descriptions. When enabled this file will download immediately!!
+        Then auto download a refreshed file every 3 day. The file is about 20mb in size.
     </string>
     <string name="similar_credit_message">
         For more information and to view the source code:\n%s
