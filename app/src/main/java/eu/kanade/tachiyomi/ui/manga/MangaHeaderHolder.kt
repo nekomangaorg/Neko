@@ -74,6 +74,9 @@ class MangaHeaderHolder(
                 adapter.delegate.favoriteManga(true)
                 true
             }
+            title.setOnClickListener {
+                title.maxLines = Integer.MAX_VALUE
+            }
             title.setOnLongClickListener {
                 adapter.delegate.copyToClipboard(title.text.toString(), R.string.title)
                 true
@@ -109,6 +112,9 @@ class MangaHeaderHolder(
         manga_genres_tags.gone()
         less_button.gone()
         more_button_group.visible()
+        adapter.recyclerView.post {
+            adapter.delegate.updateScroll()
+        }
     }
 
     fun bindChapters() {

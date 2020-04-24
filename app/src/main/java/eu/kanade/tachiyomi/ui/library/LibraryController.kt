@@ -291,11 +291,11 @@ class LibraryController(
         val tv = TypedValue()
         activity!!.theme.resolveAttribute(R.attr.actionBarTintColor, tv, true)
         swipe_refresh.setStyle()
-        scrollViewWith(recycler, swipeRefreshLayout = swipe_refresh) { insets ->
+        scrollViewWith(recycler, swipeRefreshLayout = swipe_refresh, afterInsets = { insets ->
             fast_scroller.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 topMargin = insets.systemWindowInsetTop
             }
-        }
+        })
 
         swipe_refresh.setOnRefreshListener {
             swipe_refresh.isRefreshing = false

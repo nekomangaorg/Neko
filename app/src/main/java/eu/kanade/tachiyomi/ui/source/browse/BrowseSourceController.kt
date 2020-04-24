@@ -192,11 +192,11 @@ open class BrowseSourceController(bundle: Bundle) :
         recycler.setHasFixedSize(true)
         recycler.adapter = adapter
 
-        scrollViewWith(recycler, true) { insets ->
+        scrollViewWith(recycler, true, afterInsets = { insets ->
             fab.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 bottomMargin = insets.systemWindowInsetBottom + 16.dpToPx
             }
-        }
+        })
 
         recycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
