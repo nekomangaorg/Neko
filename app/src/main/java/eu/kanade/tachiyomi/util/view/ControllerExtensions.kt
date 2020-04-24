@@ -108,6 +108,8 @@ fun Controller.scrollViewWith(
             super.onChangeStart(controller, changeHandler, changeType)
             if (changeType.isEnter)
                 elevateFunc(elevate)
+            else
+                elevationAnim?.cancel()
         }
     })
     elevateFunc(recycler.canScrollVertically(-1))
