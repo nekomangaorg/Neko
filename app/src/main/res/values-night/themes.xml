@@ -4,6 +4,7 @@
     <style name="Theme.Tachiyomi" parent="Theme.Base">
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
+
     </style>
 
     <!--==============-->

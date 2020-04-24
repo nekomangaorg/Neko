@@ -4,15 +4,15 @@
     <color name="colorPrimary">@color/md_white_1000</color>
     <color name="colorPrimaryInactive">#C2424242</color>
     <color name="colorPrimaryDark">@color/md_white_1000</color>
-    <color name="bluePrimary">#54759E</color>
+    <color name="bluePrimary">@color/neko_primary</color>
     <color name="mainStatus">#AFFAFAFA</color>
     <color name="blueStatus">#AF54759E</color>
     <color name="blackStatus">#AF000000</color>
-    <color name="splashBackground">@color/bluePrimary</color>
+    <color name="splashBackground">@color/neko_green</color>
     <color name="dialogBackground">@color/md_white_1000</color>
     <color name="fullRippleColor">#C2C2C2</color>
     <color name="rippleColor">@color/md_black_1000_12</color>
-    <color name="colorAccent">@color/md_blue_A400</color>
+    <color name="colorAccent">@color/neko_accent</color>
     <color name="actionModeShadow">@color/md_black_1000_38</color>
     <color name="gray_button">#404040</color>
 
@@ -21,11 +21,11 @@
     <color name="bookmarked_chapter">@color/colorAccent</color>
     <color name="active_chapter">@color/colorAccent</color>
 
-    <color name="unread_badge">@color/colorAccent</color>
-    <color name="unread_badge_text">@color/md_white_1000</color>
-    <color name="download_badge">@color/pale_green</color>
-    <color name="download_badge_text">@color/md_black_1000</color>
-    <color name="total_badge">@color/material_deep_purple_500</color>
+    <color name="unread_badge">@color/neko_green</color>
+    <color name="unread_badge_text">@color/md_black_1000</color>
+    <color name="download_badge">@color/colorAccent</color>
+    <color name="download_badge_text">@color/md_white_1000</color>
+    <color name="total_badge">@color/neko_green_complementary</color>
     <color name="total_badge_text">@color/md_white_1000</color>
 
     <color name="colorAmoledPrimary">@color/md_black_1000</color>
@@ -37,8 +37,7 @@
     <color name="textColorHint">@color/md_black_1000_38</color>
     <color name="textColorHintInverse">@color/md_white_1000_50</color>
     <color name="divider">@color/md_black_1000_12</color>
-    <color name="badgeColor">@color/material_red_accent_700</color>
-    <color name="download">@color/material_green_800</color>
+    <color name="download">@color/neko_accent</color>
 
     <color name="background">@color/md_grey_50</color>
     <color name="dialog">@color/md_white_1000</color>
@@ -65,29 +64,21 @@
     <color name="md_grey_800">#424242</color>
     <color name="md_grey_800_85">#DF424242</color>
 
-    <color name="md_blue_A200_50">#80448AFF</color>
-
-    <color name="md_blue_A400">#2979FF</color>
-    <color name="md_blue_A400_38">#612979FF</color>
 
     <color name="md_red_500">#F44336</color>
 
-    <color name="pale_green">#99CC99</color>
-
     <!-- other colors -->
 
-    <color name="mangadex_orange">#F79421</color>
 
-    <color name="neko_primary">@color/md_white_1000</color>
-    <color name="neko_primary_variant">@color/md_black_1000</color>
-    <color name="neko_status">@color/md_black_1000</color>
-    <color name="neko_accent">@color/md_black_1000</color>
-    <color name="neko_dark_accent">#AF367b92</color>
-    <color name="unread_badge">@color/md_white_1000</color>
-    <color name="unread_badge_text">@color/md_black_1000</color>
-    <color name="download_badge">@color/md_black_1000</color>
-    <color name="total_chapters_badge">@color/md_black_1000_54</color>
-    <color name="total_chapters_badge_text">@color/md_white_1000</color>
+    <color name="neko_primary">#101820</color>
+    <color name="neko_accent">#101820</color>
+    <color name="neko_variant">#2E2157</color>
+
+
+    <color name="mangadex_orange">#F79421</color>
+    <color name="neko_green">#3DDA83</color>
+    <color name="neko_green_complementary">#aa206c</color>
+    <color name="neko_green_darker">#20aa5e</color>
 
     <color name="neko_outrun_primary">#2E2157</color>
     <color name="neko_outrun_primary_variant">#241734</color>

@@ -5,9 +5,9 @@
 
 
     <item
-        android:width="64dp"
-        android:height="64dp"
-        android:drawable="@drawable/ic_tachi"
+        android:width="188dp"
+        android:height="188dp"
+        android:drawable="@drawable/ic_launcher_foreground"
         android:gravity="center" />
 
 </layer-list>

@@ -4,7 +4,7 @@
     <!--============-->
     <!-- Base Theme -->
     <!--============-->
-    <style name="Theme"/>
+    <style name="Theme" />
 
     <style name="Theme.Base" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="android:forceDarkAllowed" tools:targetApi="29">false</item>
@@ -47,6 +47,7 @@
         <item name="md_color_content">@color/textColorSecondary</item>
         <item name="md_color_button_text">@color/colorAccent</item>
         <item name="md_background_color">@color/dialog</item>
+        <item name="md_color_widget">@color/colorAccent</item>
         <item name="md_button_casing">literal</item>
         <item name="md_corner_radius">16dp</item>
 
@@ -54,7 +55,8 @@
         <item name="android:windowLightNavigationBar" tools:targetApi="27">true</item>
     </style>
 
-    <style name="Theme.Tachiyomi" parent="Theme.Base"/>
+    <style name="Theme.Tachiyomi" parent="Theme.Base" />
+
     <style name="Theme.Tachiyomi.AllBlue" parent="Theme.Tachiyomi">
         <item name="colorPrimaryVariant">@color/bluePrimary</item>
         <item name="colorSecondary">@color/bluePrimary</item>
@@ -66,7 +68,8 @@
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
     </style>
-    <style name="Theme.Tachiyomi.Amoled" parent="Theme.Tachiyomi"/>
+
+    <style name="Theme.Tachiyomi.Amoled" parent="Theme.Tachiyomi" />
 
     <!--===============-->
     <!-- Launch Screen -->
