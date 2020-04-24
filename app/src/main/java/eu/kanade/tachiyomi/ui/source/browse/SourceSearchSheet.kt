@@ -31,9 +31,13 @@ class SourceSearchSheet(activity: Activity) :
 
     private var elevationAnimator: ValueAnimator? = null
 
+    private var bottomElevationAnimator: ValueAnimator? = null
+
     var filterChanged = true
 
     var isNotElevated = false
+
+    var isBottomElevated = true
 
     val adapter: FlexibleAdapter<IFlexible<*>> = FlexibleAdapter<IFlexible<*>>(null)
         .setDisplayHeadersAtStartUp(true)
@@ -103,6 +107,20 @@ class SourceSearchSheet(activity: Activity) :
                     )
                     elevationAnimator?.duration = 100
                     elevationAnimator?.start()
+                }
+                val atBottom = !recycler.canScrollVertically(1)
+                if (atBottom != isBottomElevated) {
+                    bottomElevationAnimator?.cancel()
+                    isBottomElevated = atBottom
+                    bottomElevationAnimator?.cancel()
+                    bottomElevationAnimator = ObjectAnimator.ofFloat(
+                        footer_layout,
+                        "elevation",
+                        footer_layout.elevation,
+                        if (atBottom) 0f else 20f.dpToPx
+                    )
+                    bottomElevationAnimator?.duration = 100
+                    bottomElevationAnimator?.start()
                 }
             }
         })

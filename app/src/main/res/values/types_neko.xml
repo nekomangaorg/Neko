@@ -93,11 +93,10 @@
         <!--Your custom type style here-->
     </style>
 
-    <style name="Neko.Button" parent="Theme.Widget.Button">
-        <item name="android:textAllCaps">false</item>
-        <item name="backgroundTint">@color/mtrl_btn_bg_selector</item>
-        <item name="android:textColor">@color/primary_button_text_color_selector</item>
-        <item name="android:letterSpacing">0.0</item>
+    <style name="Neko.Button" parent="Theme.Widget.Button"></style>
+
+    <style name="Neko.Button.TextButton" parent="Theme.Widget.Button.TextButton">
+        <item name="fontFamily">@font/metropolis_medium</item>
     </style>
 
     <style name="Neko.Button.RoundedOutline" parent="Theme.Widget.Button.RoundedOutline">
