@@ -5,7 +5,6 @@ import eu.davidea.flexibleadapter.items.AbstractSectionableItem
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.model.Page
-import eu.kanade.tachiyomi.util.system.HashCode
 
 abstract class BaseChapterItem<T : BaseChapterHolder, H : AbstractHeaderItem<*>>(
     val chapter:
@@ -41,6 +40,6 @@ Chapter,
     }
 
     override fun hashCode(): Int {
-        return HashCode.generate(chapter.id ?: 0L, chapter.name)
+        return (chapter.id ?: 0L).hashCode()
     }
 }

@@ -194,15 +194,6 @@ class MangaDetailsPresenter(
     }
 
     /**
-     * Sets the sorting method and requests an UI update.
-     * @param sort the sorting mode.
-     */
-    fun setSorting(sort: Int) {
-        manga.sorting = sort
-        db.updateFlags(manga).executeAsBlocking()
-    }
-
-    /**
      * Whether the display only downloaded filter is enabled.
      */
     fun onlyDownloaded() = manga.downloadedFilter == Manga.SHOW_DOWNLOADED
@@ -339,17 +330,6 @@ class MangaDetailsPresenter(
         chapters.filter { !it.read && it.status == Download.NOT_DOWNLOADED }.distinctBy { it.name }
             .sortedByDescending { it.source_order }
 
-    /**
-     * Returns the next unread chapter or null if everything is read.
-     */
-    fun getNewestChapterTime(): Long? {
-        return chapters.maxBy { it.date_upload }?.date_upload
-    }
-
-    fun getLatestChapter(): Float? {
-        return chapters.maxBy { it.chapter_number }?.chapter_number
-    }
-
     fun startDownloadingNow(chapter: Chapter) {
         downloadManager.startDownloadNow(chapter)
     }
@@ -360,10 +340,6 @@ class MangaDetailsPresenter(
      */
     fun downloadChapters(chapters: List<ChapterItem>) {
         downloadManager.downloadChapters(manga, chapters.filter { !it.isDownloaded })
-    }
-
-    fun restartDownloads() {
-        if (downloadManager.isPaused()) downloadManager.startDownloads()
     }
 
     /**

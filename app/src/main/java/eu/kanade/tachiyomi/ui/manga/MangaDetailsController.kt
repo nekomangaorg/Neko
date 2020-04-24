@@ -669,6 +669,7 @@ class MangaDetailsController : BaseController,
                         chapterList = presenter.chapters.subList(startingPosition - 1, position)
                 }
                 downloadChapters(chapterList)
+                presenter.fetchChapters(false)
                 adapter?.removeSelection(startingPosition)
                 (recycler.findViewHolderForAdapterPosition(startingPosition) as? BaseFlexibleViewHolder)
                     ?.toggleActivation()
@@ -692,7 +693,6 @@ class MangaDetailsController : BaseController,
         popup.menuInflater.inflate(R.menu.chapter_single, popup.menu)
 
         popup.setOnMenuItemClickListener { menuItem ->
-            val chapters = listOf(item)
             when (menuItem.itemId) {
                 R.id.action_mark_previous_as_read -> markPreviousAsRead(item)
                 R.id.action_view_comments -> viewComments(chapters[0])
