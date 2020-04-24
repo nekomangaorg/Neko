@@ -73,8 +73,10 @@ class DownloadBottomSheet @JvmOverloads constructor(
         }
         update()
         setInformationView()
-        if (sheetBehavior?.state != BottomSheetBehavior.STATE_EXPANDED && sheetBehavior?.isHideable == true) sheetBehavior?.state =
-            BottomSheetBehavior.STATE_HIDDEN
+        if (!controller.hasQueue()) {
+            sheetBehavior?.isHideable = true
+            sheetBehavior?.state = BottomSheetBehavior.STATE_HIDDEN
+        }
     }
 
     fun update() {
@@ -215,7 +217,6 @@ class DownloadBottomSheet @JvmOverloads constructor(
             sheetBehavior?.skipCollapsed = !hasQueue
             if (sheetBehavior?.state == BottomSheetBehavior.STATE_HIDDEN) sheetBehavior?.state =
                 BottomSheetBehavior.STATE_COLLAPSED
-            sheetBehavior?.isHideable = !hasQueue
         } else {
             sheetBehavior?.isHideable = !hasQueue
             sheetBehavior?.skipCollapsed = !hasQueue

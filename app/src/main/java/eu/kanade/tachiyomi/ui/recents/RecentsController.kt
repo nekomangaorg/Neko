@@ -165,6 +165,22 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
                     activity?.invalidateOptionsMenu()
                 }
 
+                if (state == BottomSheetBehavior.STATE_COLLAPSED) {
+                    if (hasQueue()) {
+                        dl_bottom_sheet.sheetBehavior?.isHideable = false
+                    } else {
+                        dl_bottom_sheet.sheetBehavior?.isHideable = true
+                        dl_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_HIDDEN
+                    }
+                } else if (state == BottomSheetBehavior.STATE_HIDDEN) {
+                    if (!hasQueue()) {
+                        dl_bottom_sheet.sheetBehavior?.skipCollapsed = true
+                    } else {
+                        dl_bottom_sheet.sheetBehavior?.skipCollapsed = false
+                        dl_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
+                    }
+                }
+
                 if (state == BottomSheetBehavior.STATE_HIDDEN || state == BottomSheetBehavior.STATE_COLLAPSED) {
                     shadow2.alpha = if (state == BottomSheetBehavior.STATE_COLLAPSED) 0.25f else 0f
                     shadow.alpha = if (state == BottomSheetBehavior.STATE_COLLAPSED) 0.5f else 0f
@@ -407,8 +423,10 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
         }
     }
 
+    fun hasQueue() = presenter.downloadManager.hasQueue()
+
     override fun showSheet() {
-        if (dl_bottom_sheet.sheetBehavior?.isHideable == false || presenter.downloadManager.hasQueue())
+        if (dl_bottom_sheet.sheetBehavior?.isHideable == false || hasQueue())
             dl_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
     }
 
