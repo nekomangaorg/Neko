@@ -3,7 +3,6 @@
 
     <string name="neko_app_name" translatable="false">Neko</string>
 
-    <string name="black">Black</string>
     <string name="system_default_dark">System_Default (White + Dark)</string>
 
 

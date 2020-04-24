@@ -54,16 +54,16 @@
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/title"
-        style="@style/TextAppearance.Regular.Body1.SemiBold"
+        style="@style/Neko.Headline5"
+        android:textSize="18sp"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="12dp"
-        android:layout_marginTop="2dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="6dp"
         android:ellipsize="end"
         android:maxLines="3"
         android:textColor="?android:attr/textColorPrimary"
-        android:textSize="16sp"
         app:layout_constrainedWidth="true"
         app:layout_constraintEnd_toStartOf="@+id/play_layout"
         app:layout_constraintHorizontal_bias="0.0"
@@ -73,7 +73,7 @@
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/subtitle"
-        style="@style/TextAppearance.MaterialComponents.Body1"
+        style="@style/Neko.Body1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="6dp"
@@ -120,7 +120,8 @@
 
     </FrameLayout>
 
-    <include layout="@layout/unread_download_badge"
+    <include
+        layout="@layout/unread_download_badge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="2dp"
@@ -128,7 +129,7 @@
         android:layout_marginEnd="12dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.constraintlayout.widget.Barrier
         android:id="@+id/bottom_line"
