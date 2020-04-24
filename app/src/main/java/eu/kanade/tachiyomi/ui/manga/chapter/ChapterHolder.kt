@@ -7,7 +7,6 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsAdapter
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
-import eu.kanade.tachiyomi.util.system.contextCompatDrawable
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.visibleIf
 import kotlinx.android.synthetic.main.chapters_item.*
@@ -41,13 +40,7 @@ class ChapterHolder(
         localSource = manga.source == LocalSource.ID
         download_button.visibleIf(!localSource && !isLocked)
 
-        var chapterColor = when {
-            isLocked -> adapter.unreadColor
-            chapter.bookmark && chapter.read -> adapter.bookmarkedAndReadColor
-            chapter.bookmark -> adapter.bookmarkedColor
-            chapter.read -> adapter.readColor
-            else -> adapter.unreadColor
-        }
+        val chapterColor = ChapterUtil.chapterColor(itemView.context, item, isLocked)
 
         // Set correct text color
         chapter_title.setTextColor(chapterColor)
@@ -75,30 +68,20 @@ class ChapterHolder(
         chapter.scanlator?.isNotBlank()?.let { statuses.add(chapter.scanlator!!) }
 
         if (front_view.translationX == 0f) {
-            read.setImageDrawable(
-                read.context.contextCompatDrawable(
-                    when (item.read) {
-                        true -> R.drawable.ic_eye_off_24dp
-                        false -> R.drawable.ic_eye_24dp
-                    }
-                )
+            read.setImageResource(
+                if (item.read) R.drawable.ic_eye_off_24dp else R.drawable.ic_eye_24dp
             )
-            bookmark.setImageDrawable(
-                read.context.contextCompatDrawable(
-                    when (item.bookmark) {
-                        true -> R.drawable.ic_bookmark_off_24dp
-                        false -> R.drawable.ic_bookmark_24dp
-                    }
-                )
+            bookmark.setImageResource(
+                if (item.bookmark) R.drawable.ic_bookmark_off_24dp else R.drawable.ic_bookmark_24dp
             )
         }
         // this will color the scanlator the same bookmarks
         chapter_scanlator.setTextColor(chapterColor)
         chapter_scanlator.text = statuses.joinToString(" • ")
 
-        val status = when (adapter.isSelected(adapterPosition)) {
-            true -> Download.CHECKED
-            false -> item.status
+        val status = when {
+            adapter.isSelected(adapterPosition) -> Download.CHECKED
+            else -> item.status
         }
 
         notifyStatus(status, item.isLocked, item.progress)

@@ -10,7 +10,7 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.ui.manga.chapter.BaseChapterHolder
-import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.view.visibleIf
 import kotlinx.android.synthetic.main.download_button.*
 import kotlinx.android.synthetic.main.recent_manga_item.*
@@ -38,20 +38,14 @@ class RecentMangaHolder(
 
     fun bind(item: RecentMangaItem) {
         download_button.visibleIf(item.mch.manga.source != LocalSource.ID)
+
         title.apply {
             text = item.chapter.name
-            setTextColor(when {
-                item.chapter.bookmark -> context.getResourceColor(R.attr.colorAccent)
-                item.chapter.read -> context.getResourceColor(android.R.attr.textColorHint)
-                else -> context.getResourceColor(android.R.attr.textColorPrimary)
-            })
+            setTextColor(ChapterUtil.chapterColor(context, item))
         }
         subtitle.apply {
             text = item.mch.manga.title
-            setTextColor(when {
-                item.chapter.read -> context.getResourceColor(android.R.attr.textColorHint)
-                else -> context.getResourceColor(android.R.attr.textColorPrimary)
-            })
+            setTextColor(ChapterUtil.readColor(context, item))
         }
         val notValidNum = item.mch.chapter.chapter_number <= 0
         body.text = when {

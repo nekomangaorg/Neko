@@ -18,12 +18,36 @@ class ChapterUtil {
             }
         }
 
-        fun readColor(context: Context): Int = context.contextCompatColor(R.color.read_chapter)
+        fun chapterColor(context: Context, chapter: Chapter, hideStatus: Boolean = false): Int {
+            return when {
+                hideStatus -> unreadColor(context)
+                chapter.bookmark && chapter.read -> bookmarkedAndReadColor(context)
+                chapter.bookmark -> bookmarkedColor(context)
+                chapter.read -> readColor(context)
+                else -> unreadColor(context)
+            }
+        }
 
-        fun unreadColor(context: Context): Int = context.contextCompatColor(R.color.unread_chapter)
+        fun readColor(context: Context, chapter: Chapter): Int {
+            return when {
+                chapter.read -> readColor(context)
+                else -> unreadColor(context)
+            }
+        }
 
-        fun bookmarkedColor(context: Context): Int = context.contextCompatColor(R.color.bookmarked_chapter)
+        fun bookmarkColor(context: Context, chapter: Chapter): Int {
+            return when {
+                chapter.bookmark -> bookmarkedColor(context)
+                else -> readColor(context)
+            }
+        }
 
-        fun bookmarkedAndReadColor(context: Context): Int = ColorUtils.setAlphaComponent(context.contextCompatColor(R.color.bookmarked_chapter), 150)
+        private fun readColor(context: Context): Int = context.contextCompatColor(R.color.read_chapter)
+
+        private fun unreadColor(context: Context): Int = context.contextCompatColor(R.color.unread_chapter)
+
+        private fun bookmarkedColor(context: Context): Int = context.contextCompatColor(R.color.bookmarked_chapter)
+
+        private fun bookmarkedAndReadColor(context: Context): Int = ColorUtils.setAlphaComponent(context.contextCompatColor(R.color.bookmarked_chapter), 150)
     }
 }
