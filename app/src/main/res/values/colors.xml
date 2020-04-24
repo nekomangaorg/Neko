@@ -18,7 +18,7 @@
 
     <color name="read_chapter">@color/textColorHint</color>
     <color name="unread_chapter">@color/textColorPrimary</color>
-    <color name="bookmarked_chapter">@color/colorAccent</color>
+    <color name="bookmarked_chapter">@color/neko_green_darker</color>
     <color name="active_chapter">@color/colorAccent</color>
 
     <color name="unread_badge">@color/neko_green</color>

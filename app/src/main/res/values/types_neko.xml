@@ -102,15 +102,16 @@
 
     <style name="Neko.Button.RoundedOutline" parent="Theme.Widget.Button.RoundedOutline">
         <item name="strokeColor">?attr/colorAccent</item>
-        <item name="fontFamily">@font/metropolis_medium</item>
+        <item name="android:letterSpacing">-0.02</item>
         <item name="android:textAllCaps">true</item>
+        <item name="fontFamily">@font/metropolis_medium</item>
     </style>
 
 
     <style name="Neko.Caption" parent="TextAppearance.MaterialComponents.Caption">
-        <item name="fontFamily">@font/metropolis_regular</item>
-        <item name="android:textColor">@color/material_on_background_emphasis_medium</item>
-        <!--Your custom type style here-->
+        <item name="fontFamily">@font/metropolis_medium</item>
+        <item name="android:textColor">@color/textColorHint</item>
+        <item name="android:textSize">12sp</item>
     </style>
 
     <style name="Neko.Overline" parent="TextAppearance.MaterialComponents.Overline">

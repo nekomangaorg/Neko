@@ -62,7 +62,8 @@
 
         <TextView
             android:id="@+id/chapter_title"
-            style="@style/TextAppearance.MaterialComponents.Body2"
+            style="@style/Neko.Condensed.Medium"
+            android:textSize="15sp"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
@@ -77,7 +78,8 @@
 
         <TextView
             android:id="@+id/chapter_scanlator"
-            style="@style/TextAppearance.MaterialComponents.Caption"
+            style="@style/Neko.Condensed"
+            android:textColor="@color/textColorSecondary"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"

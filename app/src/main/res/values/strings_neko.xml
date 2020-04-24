@@ -3,6 +3,10 @@
 
     <string name="neko_app_name" translatable="false">Neko</string>
 
+    <string name="black">Black</string>
+    <string name="system_default_dark">System_Default (White + Dark)</string>
+
+
     <!-- Status -->
     <string name="hiatus">Hiatus</string>
     <string name="cancelled">Cancelled</string>
@@ -11,9 +15,11 @@
     <!--Browse -->
     <string name="random_manga">Random Manga</string>
 
-    <!-- Manga -->
+    <!-- Manga Details-->
     <string name="open_external">Open external links</string>
     <string name="view_comments">View comments</string>
+    <string name="start_reading_">Start reading %1$s</string>
+    <string name="continue_reading_">Continue reading %1$s</string>
 
     <!-- Follows -->
     <string name="follows">My follows</string>
