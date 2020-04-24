@@ -26,6 +26,7 @@ class MdUtil {
             "[b] [u] Russian / Русский [/ u] [/ b]",
             "[hr][u][b]Russian / Русский:[/b][/u]",
             "[u][b]Russian / Русский:[/b][/u]",
+            "[hr][b][u]Russian / Русский:[/u][/b]",
             "German/Deutsch:",
             "[b][u]German / Deutsch[/u][/b]",
             "[b][u]Espa&ntilde;ol / Spanish:[/u][/b]",

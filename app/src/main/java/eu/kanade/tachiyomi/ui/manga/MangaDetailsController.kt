@@ -695,8 +695,7 @@ class MangaDetailsController : BaseController,
         popup.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.action_mark_previous_as_read -> markPreviousAsRead(item)
-                R.id.action_view_comments -> viewComments(chapters[0])
-                R.id.action_mark_all_as_unread -> markAsUnread(chapters)
+                R.id.action_view_comments -> viewComments(item)
             }
             chapterPopupMenu = null
             true
