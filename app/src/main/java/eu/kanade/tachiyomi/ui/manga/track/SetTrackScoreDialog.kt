@@ -36,7 +36,7 @@ class SetTrackScoreDialog<T> : DialogController where T : SetTrackScoreDialog.Li
         val item = item
 
         val dialog = MaterialDialog(activity!!).title(R.string.score)
-            .customView(R.layout.track_score_dialog, scrollable = false)
+            .customView(R.layout.track_score_dialog)
             .negativeButton(android.R.string.cancel).positiveButton(android.R.string.ok) { dialog ->
                 val view = dialog.getCustomView()
                 // Remove focus to update selected number

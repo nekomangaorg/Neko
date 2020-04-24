@@ -38,7 +38,7 @@ class SetTrackChaptersDialog<T> : DialogController
 
         val dialog = MaterialDialog(activity!!)
             .title(R.string.chapters)
-            .customView(viewRes = R.layout.track_chapters_dialog, scrollable = false)
+            .customView(viewRes = R.layout.track_chapters_dialog)
             .negativeButton(android.R.string.cancel)
             .positiveButton(android.R.string.ok) { dialog ->
                 val view = dialog.getCustomView()
