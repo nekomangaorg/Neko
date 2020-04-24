@@ -49,9 +49,9 @@
         android:id="@+id/top_view"
         android:layout_width="match_parent"
         android:layout_height="100dp"
-        android:layout_marginTop="0dp"
         app:layout_constraintBottom_toTopOf="@id/cover_card"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -116,11 +116,13 @@
     <TextView
         android:id="@+id/manga_status"
         style="@style/TextAppearance.Regular.Body1.Secondary"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
+        android:layout_marginEnd="16dp"
         android:text="@string/unknown_status"
         android:textIsSelectable="false"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@id/title"
         app:layout_constraintTop_toBottomOf="@+id/manga_author" />
 
@@ -268,7 +270,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:text="@string/more"
-        android:textAlignment="textEnd"
+        android:textAlignment="viewEnd"
         app:layout_constraintBottom_toBottomOf="@id/more_guide"
         app:layout_constraintEnd_toEndOf="parent"
         app:rippleColor="@null" />

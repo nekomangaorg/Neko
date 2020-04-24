@@ -93,6 +93,7 @@ import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.ThemeUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.system.dpToPxEnd
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.pxToDp
@@ -293,7 +294,7 @@ class MangaDetailsController : BaseController,
                         showScroll = show
                         scrollAnim?.cancel()
                         scrollAnim = fast_scroller.animate().setDuration(100).translationX(
-                            if (show) 0f else 25f.dpToPx)
+                            if (show) 0f else 25f.dpToPxEnd)
                         scrollAnim?.start()
                     }
                     if (fPosition > 0 && !showScroll) {
@@ -312,7 +313,7 @@ class MangaDetailsController : BaseController,
     }
 
     private fun setFastScroller() {
-        fast_scroller.translationX = if (showScroll || isTablet) 0f else 25f.dpToPx
+        fast_scroller.translationX = if (showScroll || isTablet) 0f else 25f.dpToPxEnd
         fast_scroller.setupWithRecyclerView(recycler, { position ->
             val letter = adapter?.getSectionText(position)
             when {

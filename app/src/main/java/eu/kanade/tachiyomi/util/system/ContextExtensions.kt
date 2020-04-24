@@ -9,14 +9,13 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.content.res.Resources
-import android.graphics.drawable.Drawable
 import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.PowerManager
+import android.view.View
 import android.widget.Toast
 import androidx.annotation.AttrRes
 import androidx.annotation.ColorRes
-import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.app.NotificationCompat
@@ -102,15 +101,6 @@ fun Context.contextCompatColor(@ColorRes resource: Int): Int {
 }
 
 /**
- * Returns the color from ContextCompat
- *
- * @param resource the color.
- */
-fun Context.contextCompatDrawable(@DrawableRes resource: Int): Drawable? {
-    return ContextCompat.getDrawable(this, resource)
-}
-
-/**
  * Converts to dp.
  */
 val Int.pxToDp: Int
@@ -124,6 +114,14 @@ val Int.dpToPx: Int
 
 val Float.dpToPx: Float
     get() = (this * Resources.getSystem().displayMetrics.density)
+
+/** Converts to px and takes into account LTR/RTL layout */
+val Float.dpToPxEnd: Float
+    get() = (this * Resources.getSystem().displayMetrics.density *
+        if (Resources.getSystem().isLTR) 1 else -1)
+
+val Resources.isLTR
+    get() = configuration.layoutDirection == View.LAYOUT_DIRECTION_LTR
 
 /**
  * Property to get the notification manager from the context.
