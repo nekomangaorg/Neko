@@ -6,6 +6,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.ui.manga.chapter.BaseChapterHolder
+import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import kotlinx.android.synthetic.main.download_button.*
 import kotlinx.android.synthetic.main.recent_chapters_item.*
@@ -77,14 +78,9 @@ class RecentChapterHolder(private val view: View, private val adapter: RecentCha
                     .into(manga_cover)
         }
 
-        // Check if chapter is read and set correct color
-        if (item.chapter.read) {
-            chapter_title.setTextColor(readColor)
-            title.setTextColor(readColor)
-        } else {
-            chapter_title.setTextColor(unreadColor)
-            title.setTextColor(unreadColor)
-        }
+        val chapterColor = ChapterUtil.chapterColor(itemView.context, item)
+        chapter_title.setTextColor(chapterColor)
+        title.setTextColor(chapterColor)
 
         // Set chapter status
         notifyStatus(item.status, item.progress)

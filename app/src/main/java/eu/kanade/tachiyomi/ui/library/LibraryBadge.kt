@@ -2,13 +2,11 @@ package eu.kanade.tachiyomi.ui.library
 
 import android.content.Context
 import android.util.AttributeSet
-import android.view.View
 import com.google.android.material.card.MaterialCardView
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.system.contextCompatColor
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.gone
-import eu.kanade.tachiyomi.util.view.isNotGone
 import eu.kanade.tachiyomi.util.view.isVisible
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.visibleIf
@@ -20,20 +18,20 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
     fun setUnreadDownload(unread: Int, downloads: Int, showTotalChapters: Boolean) {
         // Update the unread count and its visibility.
 
-        val unreadBadgeBackground = when (showTotalChapters) {
-            true -> context.contextCompatColor(R.color.total_badge)
-            false -> context.contextCompatColor(R.color.unread_badge)
-        }
+        val unreadBadgeBackground = context.contextCompatColor(
+            if (showTotalChapters) R.color.total_badge else R.color.unread_badge
+        )
 
         with(unread_text) {
             visibleIf(unread > 0 || unread == -1 || showTotalChapters)
-
+            if (!isVisible()) { return@with }
             text = if (unread == -1) "0" else unread.toString()
             setTextColor(
-                when (unread == -1 && !showTotalChapters) {
-                    true -> context.contextCompatColor(R.color.unread_badge) // hide the 0 in the badge
-                    false -> context.contextCompatColor(R.color.unread_badge_text)
-                }
+                context.contextCompatColor(
+                    // hide the badge text when preference is only show badge
+                    if (unread == -1 && !showTotalChapters) R.color.unread_badge
+                    else R.color.unread_badge_text
+                )
             )
             setBackgroundColor(unreadBadgeBackground)
         }
@@ -41,6 +39,7 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
         // Update the download count or local status and its visibility.
         with(download_text) {
             visibleIf(downloads == -2 || downloads > 0)
+            if (!isVisible()) { return@with }
             text = if (downloads == -2) {
                 resources.getString(R.string.local)
             } else {
@@ -49,10 +48,10 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
         }
 
         // Show the badge card if unread or downloads exists
-        this.visibleIf(download_text.isVisible() || unread_text.isNotGone())
+        visibleIf(download_text.isVisible() || unread_text.isVisible())
 
         // Show the angles divider if both unread and downloads exists
-        unread_angle.visibleIf(download_text.isVisible() && unread_text.isNotGone())
+        unread_angle.visibleIf(download_text.isVisible() && unread_text.isVisible())
 
         unread_angle.setColorFilter(unreadBadgeBackground)
         if (unread_angle.isVisible()) {
