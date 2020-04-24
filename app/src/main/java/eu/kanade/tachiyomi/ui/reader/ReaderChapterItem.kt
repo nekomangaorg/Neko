@@ -73,8 +73,8 @@ class ReaderChapterItem(val chapter: Chapter, val manga: Manga, val isCurrent: B
             chapterSubtitle.setTextColor(chapterColor)
 
             bookmarkImage.setImageResource(
-                if (chapter.bookmark) R.drawable.ic_bookmark_border_24dp
-                else R.drawable.ic_bookmark_24dp
+                if (chapter.bookmark) R.drawable.ic_bookmark_24dp
+                else R.drawable.ic_bookmark_border_24dp
             )
 
             val drawableColor = ChapterUtil.bookmarkColor(itemView.context, chapter)
