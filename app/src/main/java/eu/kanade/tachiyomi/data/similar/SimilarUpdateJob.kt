@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.Worker
@@ -25,6 +26,7 @@ class SimilarUpdateJob(private val context: Context, workerParams: WorkerParamet
         const val TAG = "RelatedUpdate"
 
         fun setupTask() {
+
             val preferences = Injekt.get<PreferencesHelper>()
             val enabled = preferences.similarEnabled()
             if (enabled) {
@@ -44,7 +46,7 @@ class SimilarUpdateJob(private val context: Context, workerParams: WorkerParamet
                     .addTag(TAG)
                     .setConstraints(constraints)
                     .build()
-
+                WorkManager.getInstance().enqueue(OneTimeWorkRequestBuilder<SimilarUpdateJob>().build())
                 WorkManager.getInstance().enqueueUniquePeriodicWork(TAG, ExistingPeriodicWorkPolicy.REPLACE, request)
             } else {
                 WorkManager.getInstance().cancelAllWorkByTag(TAG)

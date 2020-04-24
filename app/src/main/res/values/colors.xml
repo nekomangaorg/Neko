@@ -37,7 +37,7 @@
     <color name="textColorHint">@color/md_black_1000_38</color>
     <color name="textColorHintInverse">@color/md_white_1000_50</color>
     <color name="divider">@color/md_black_1000_12</color>
-    <color name="download">@color/neko_accent</color>
+    <color name="download">@color/neko_green</color>
 
     <color name="background">@color/md_grey_50</color>
     <color name="dialog">@color/md_white_1000</color>
