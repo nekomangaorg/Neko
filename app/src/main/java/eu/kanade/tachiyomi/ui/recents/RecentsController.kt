@@ -124,7 +124,9 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
         presenter.onCreate()
         if (presenter.recentItems.isNotEmpty()) {
             adapter.updateDataSet(presenter.recentItems)
-            adapter.addScrollableHeader(presenter.generalHeader)
+            if (presenter.viewType > 0) {
+                adapter.addScrollableHeader(presenter.generalHeader)
+            }
         }
 
         dl_bottom_sheet.onCreate(this)
