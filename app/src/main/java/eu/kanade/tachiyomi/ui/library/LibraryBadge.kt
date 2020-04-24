@@ -24,12 +24,15 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
 
         with(unread_text) {
             visibleIf(unread > 0 || unread == -1 || showTotalChapters)
-            if (!isVisible()) { return@with }
+            if (!isVisible()) {
+                return@with
+            }
             text = if (unread == -1) "0" else unread.toString()
             setTextColor(
                 context.contextCompatColor(
                     // hide the badge text when preference is only show badge
                     if (unread == -1 && !showTotalChapters) R.color.unread_badge
+                    else if (showTotalChapters) R.color.total_badge_text
                     else R.color.unread_badge_text
                 )
             )
@@ -39,7 +42,9 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
         // Update the download count or local status and its visibility.
         with(download_text) {
             visibleIf(downloads == -2 || downloads > 0)
-            if (!isVisible()) { return@with }
+            if (!isVisible()) {
+                return@with
+            }
             text = if (downloads == -2) {
                 resources.getString(R.string.local)
             } else {

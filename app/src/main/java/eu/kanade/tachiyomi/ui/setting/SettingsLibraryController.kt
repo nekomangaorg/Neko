@@ -6,7 +6,6 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.category.CategoryController
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import uy.kohesive.injekt.Injekt
@@ -77,7 +76,7 @@ class SettingsLibraryController : SettingsController() {
                     R.string.every_2_days
                 )
                 entryValues = listOf(0, 1, 2, 3, 6, 12, 24, 48)
-                defaultValue = 0
+                defaultValue = 24
 
                 onChange { newValue ->
                     // Always cancel the previous task, it seems that sometimes they are not updated.

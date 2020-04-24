@@ -17,22 +17,38 @@ class DownloadButton @JvmOverloads constructor(context: Context, attrs: Attribut
     FrameLayout(context, attrs) {
 
     private val activeColor = context.getResourceColor(R.attr.colorAccent)
-    private val progressBGColor = ContextCompat.getColor(context,
-        R.color.divider)
-    private val disabledColor = ContextCompat.getColor(context,
-        R.color.material_on_surface_disabled)
-    private val downloadedColor = ContextCompat.getColor(context,
-        R.color.download)
-    private val errorColor = ContextCompat.getColor(context,
-        R.color.red_error)
-    private val filledCircle = ContextCompat.getDrawable(context,
-        R.drawable.filled_circle)?.mutate()
-    private val borderCircle = ContextCompat.getDrawable(context,
-        R.drawable.border_circle)?.mutate()
-    private val downloadDrawable = ContextCompat.getDrawable(context,
-        R.drawable.ic_arrow_down_white_24dp)?.mutate()
-    private val checkDrawable = ContextCompat.getDrawable(context,
-        R.drawable.ic_check_white_24dp)?.mutate()
+    private val progressBGColor = ContextCompat.getColor(
+        context,
+        R.color.divider
+    )
+    private val disabledColor = ContextCompat.getColor(
+        context,
+        R.color.material_on_surface_disabled
+    )
+    private val downloadedColor = ContextCompat.getColor(
+        context,
+        R.color.download
+    )
+    private val errorColor = ContextCompat.getColor(
+        context,
+        R.color.red_error
+    )
+    private val filledCircle = ContextCompat.getDrawable(
+        context,
+        R.drawable.filled_circle
+    )?.mutate()
+    private val borderCircle = ContextCompat.getDrawable(
+        context,
+        R.drawable.border_circle
+    )?.mutate()
+    private val downloadDrawable = ContextCompat.getDrawable(
+        context,
+        R.drawable.ic_arrow_down_white_24dp
+    )?.mutate()
+    private val checkDrawable = ContextCompat.getDrawable(
+        context,
+        R.drawable.ic_check_white_24dp
+    )?.mutate()
     private var isAnimating = false
     private var iconAnimation: ObjectAnimator? = null
 
@@ -42,8 +58,10 @@ class DownloadButton @JvmOverloads constructor(context: Context, attrs: Attribut
             download_icon.alpha = 1f
             isAnimating = false
         }
-        download_icon.setImageDrawable(if (state == Download.CHECKED)
-            checkDrawable else downloadDrawable)
+        download_icon.setImageDrawable(
+            if (state == Download.CHECKED)
+                checkDrawable else downloadDrawable
+        )
         when (state) {
             Download.CHECKED -> {
                 download_progress.gone()
@@ -94,7 +112,7 @@ class DownloadButton @JvmOverloads constructor(context: Context, attrs: Attribut
                 download_progress_indeterminate.gone()
                 download_border.setImageDrawable(filledCircle)
                 download_border.drawable.setTint(downloadedColor)
-                download_icon.drawable.setTint(Color.WHITE)
+                download_icon.drawable.setTint(Color.BLACK)
             }
             Download.ERROR -> {
                 download_progress.gone()

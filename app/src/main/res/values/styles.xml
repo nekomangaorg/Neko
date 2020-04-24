@@ -231,6 +231,7 @@
         <item name="android:textAllCaps">false</item>
         <item name="android:letterSpacing">0.0</item>
         <item name="android:textColor">?colorAccent</item>
+        <item name="fontFamily">@font/metropolis_semi_bold</item>
     </style>
 
 
