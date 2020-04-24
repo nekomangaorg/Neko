@@ -40,6 +40,7 @@
             android:tint="@color/md_white_1000"
             android:src="@drawable/ic_close_white_24dp" />
     </FrameLayout>
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:id="@+id/front_view"
@@ -63,13 +64,14 @@
 
         <TextView
             android:id="@+id/title"
+            style="@style/Neko.Headline6"
+            android:textSize="15sp"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:layout_toEndOf="@id/reorder"
             android:ellipsize="end"
             android:maxLines="1"
-            android:textAppearance="@style/TextAppearance.Regular.Body1"
             app:layout_constraintEnd_toStartOf="@+id/download_progress_text"
             app:layout_constraintStart_toEndOf="@+id/reorder"
             app:layout_constraintTop_toTopOf="parent"
@@ -77,6 +79,8 @@
 
         <TextView
             android:id="@+id/chapter_title"
+            style="@style/Neko.Headline6"
+            android:textSize="12sp"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
@@ -104,11 +108,11 @@
 
         <TextView
             android:id="@+id/download_progress_text"
+            style="@style/Neko.Caption"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_toEndOf="@id/title"
             android:maxLines="1"
-            android:textAppearance="@style/TextAppearance.Regular.Caption.Hint"
             app:layout_constraintBottom_toBottomOf="@+id/title"
             android:layout_marginEnd="16dp"
             app:layout_constraintEnd_toStartOf="@+id/migration_menu"
