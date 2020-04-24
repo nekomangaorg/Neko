@@ -31,6 +31,7 @@ import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.util.view.visibleIf
 import kotlinx.android.synthetic.main.manga_details_controller.*
 import kotlinx.android.synthetic.main.manga_header_item.*
+import java.util.Locale
 
 class MangaHeaderHolder(
     private val view: View,
@@ -222,7 +223,15 @@ class MangaHeaderHolder(
                 else -> R.string.unknown
             }
         ))
-        manga_source.text = presenter.source.toString()
+
+
+        manga_lang_flag.visibility = View.VISIBLE
+        when (manga.lang_flag?.toLowerCase(Locale.US)) {
+            "cn" -> manga_lang_flag.setImageResource(R.drawable.ic_flag_china)
+            "kr" -> manga_lang_flag.setImageResource(R.drawable.ic_flag_korea)
+            "jp" -> manga_lang_flag.setImageResource(R.drawable.ic_flag_japan)
+            else -> manga_lang_flag.visibility = View.GONE
+        }
 
         filters_text.text = presenter.currentFilters()
 

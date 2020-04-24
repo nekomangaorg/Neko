@@ -26,7 +26,7 @@
 
     <TextView
         android:id="@+id/category_title"
-        style="@style/TextAppearance.MaterialComponents.Headline6"
+        style="@style/Neko.Headline6"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingStart="4dp"

@@ -27,7 +27,7 @@
                 android:layout_height="wrap_content">
 
                 <com.google.android.material.textview.MaterialTextView
-                    style="@style/TextAppearance.MaterialComponents.Headline6"
+                    style="@style/Neko.Headline6"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingStart="16dp"
@@ -67,7 +67,7 @@
             </RadioGroup>
 
             <com.google.android.material.textview.MaterialTextView
-                style="@style/TextAppearance.MaterialComponents.Headline6"
+                style="@style/Neko.Headline6"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
@@ -116,7 +116,7 @@
                 android:text="@string/show_bookmarked_chapters" />
 
             <com.google.android.material.textview.MaterialTextView
-                style="@style/TextAppearance.MaterialComponents.Headline6"
+                style="@style/Neko.Headline6"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
@@ -165,7 +165,7 @@
         android:contentDescription="@string/drag_handle"
         android:src="@drawable/draggable_pill"
         android:tint="?android:attr/textColorPrimary"
-        android:layout_gravity="center|top"/>
+        android:layout_gravity="center|top" />
 
     <ImageView
         android:id="@+id/close_button"

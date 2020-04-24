@@ -13,7 +13,7 @@
         android:layout_marginStart="12dp"
         android:layout_marginTop="5dp"
         android:layout_marginBottom="8dp"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
+        android:textAppearance="@style/Neko.Headline6"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -32,7 +32,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         android:text="@string/history"
-        style="@style/Theme.Widget.Button.RoundedOutline"/>
+        style="@style/Theme.Widget.Button.RoundedOutline" />
 
 
     <com.google.android.material.button.MaterialButton
@@ -46,5 +46,5 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         android:text="@string/updates"
-        style="@style/Theme.Widget.Button.RoundedOutline"/>
+        style="@style/Theme.Widget.Button.RoundedOutline" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -64,9 +64,4 @@
                 android:title="@string/all_read_chapters" />
         </menu>
     </item>
-    <item
-        android:id="@+id/action_edit"
-        android:title="@string/edit"
-        app:showAsAction="never" />
-
 </menu>

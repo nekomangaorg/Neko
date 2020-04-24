@@ -57,7 +57,7 @@
 
             <TextView
                 android:id="@+id/track_title"
-                style="@style/TextAppearance.MaterialComponents.Headline6"
+                style="@style/Neko.Headline6"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:background="@drawable/card_item_selector"
@@ -162,7 +162,7 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/track_status"
-                app:layout_constraintEnd_toStartOf="@id/track_chapters"/>
+                app:layout_constraintEnd_toStartOf="@id/track_chapters" />
 
             <View
                 android:layout_width="1dp"
@@ -174,7 +174,7 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/track_chapters"
-                app:layout_constraintEnd_toStartOf="@id/score_container"/>
+                app:layout_constraintEnd_toStartOf="@id/score_container" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <com.google.android.material.button.MaterialButton

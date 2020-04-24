@@ -83,7 +83,7 @@
 
     <TextView
         android:id="@+id/title"
-        style="@style/TextAppearance.MaterialComponents.Headline6"
+        style="@style/Neko.Headline5"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="12dp"
@@ -92,7 +92,6 @@
         android:maxLines="4"
         android:text="@string/title"
         android:textIsSelectable="false"
-        android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/cover_card"
         app:layout_constraintTop_toTopOf="@id/cover_card"
@@ -100,14 +99,13 @@
 
     <TextView
         android:id="@+id/manga_author"
+        style="@style/Neko.Subtitle1"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
         android:ellipsize="end"
         android:maxLines="2"
         android:text="@string/author"
-        android:textAppearance="@style/TextAppearance.Regular.Body1.SemiBold"
-        android:textColor="?android:attr/textColorSecondary"
         android:textIsSelectable="false"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@id/title"
@@ -115,7 +113,7 @@
 
     <TextView
         android:id="@+id/manga_status"
-        style="@style/TextAppearance.Regular.Body1.Secondary"
+        style="@style/Neko.Subtitle1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
@@ -124,19 +122,15 @@
         app:layout_constraintStart_toStartOf="@id/title"
         app:layout_constraintTop_toBottomOf="@+id/manga_author" />
 
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/manga_source"
-        style="@style/TextAppearance.Regular.Body1.Secondary"
-        android:layout_width="0dp"
+    <ImageView
+        android:id="@+id/manga_lang_flag"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:textIsSelectable="false"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="8dp"
         app:layout_constraintStart_toStartOf="@id/title"
-        app:layout_constraintTop_toBottomOf="@id/manga_status"
-        tools:text="Mangadex (EN)" />
+        tools:src="@drawable/ic_flag_japan"
+        app:layout_constraintTop_toBottomOf="@id/manga_status" />
 
     <androidx.constraintlayout.widget.Barrier
         android:id="@+id/bottom_line"
@@ -232,7 +226,8 @@
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/manga_summary_label"
-        style="@style/TextAppearance.MaterialComponents.Headline6"
+        style="@style/Neko.Headline5"
+        android:textSize="17sp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -240,15 +235,16 @@
         android:layout_marginEnd="16dp"
         android:text="@string/description"
         android:textIsSelectable="false"
-        android:textSize="17sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/button_layout"
         tools:text="About this manga" />
 
     <TextView
         android:id="@+id/manga_summary"
-        style="@style/TextAppearance.Regular.Body1.Secondary"
+        style="@style/Neko.Condensed"
         android:layout_width="match_parent"
+        android:textSize="16sp"
+        android:textColor="@color/textColorSecondary"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="4dp"
@@ -328,9 +324,11 @@
         app:atg_borderColor="@color/colorAccent"
         app:atg_borderStrokeWidth="1dp"
         app:atg_textColor="@color/colorAccent"
+        app:atg_textSize="14sp"
         app:layout_constrainedHeight="true"
         app:layout_constraintBottom_toTopOf="@id/less_button"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/manga_summary"
         tools:layout_height="100dp"
@@ -355,9 +353,7 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/start_reading_button"
-        style="@style/Theme.Widget.Button.RoundedOutline"
-        app:strokeColor="?attr/colorAccent"
-        android:textAllCaps="true"
+        style="@style/Neko.Button.RoundedOutline"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -383,7 +379,7 @@
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/chapters_title"
-            style="@style/TextAppearance.MaterialComponents.Headline6"
+            style="@style/Neko.Headline4"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
@@ -412,6 +408,8 @@
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/filters_text"
+            style="@style/Neko.Body1"
+            android:textSize="13sp"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
@@ -419,7 +417,6 @@
             android:maxLines="2"
             android:padding="5dp"
             android:textAlignment="textEnd"
-            android:textColor="?android:textColorHint"
             app:layout_constraintBottom_toBottomOf="@id/filter_button"
             app:layout_constraintEnd_toStartOf="@id/filter_button"
             app:layout_constraintStart_toEndOf="@+id/chapters_title"
