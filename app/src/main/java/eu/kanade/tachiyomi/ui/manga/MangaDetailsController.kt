@@ -35,7 +35,6 @@ import androidx.appcompat.widget.PopupMenu
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
-import androidx.core.math.MathUtils
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -98,8 +97,8 @@ import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.pxToDp
 import eu.kanade.tachiyomi.util.system.toast
-import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.getText
+import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import eu.kanade.tachiyomi.util.view.setStyle
 import eu.kanade.tachiyomi.util.view.snack
@@ -114,7 +113,6 @@ import uy.kohesive.injekt.api.get
 import java.io.File
 import java.io.IOException
 import java.util.Locale
-import kotlin.math.abs
 import kotlin.math.max
 
 class MangaDetailsController : BaseController,
@@ -261,98 +259,54 @@ class MangaDetailsController : BaseController,
         val appbarHeight = array.getDimensionPixelSize(0, 0)
         array.recycle()
         val offset = 10.dpToPx
-        var statusBarHeight = -1
         swipe_refresh.setStyle()
         swipe_refresh.setDistanceToTriggerSync(70.dpToPx)
         activity!!.appbar.elevation = 0f
 
-        recycler.doOnApplyWindowInsets { v, insets, _ ->
-            v.updatePaddingRelative(bottom = insets.systemWindowInsetBottom)
+        scrollViewWith(recycler, padBottom = true, customPadding = true, afterInsets = { insets ->
+            recycler.updatePaddingRelative(bottom = insets.systemWindowInsetBottom)
             tabletRecycler?.updatePaddingRelative(bottom = insets.systemWindowInsetBottom)
             headerHeight = appbarHeight + insets.systemWindowInsetTop
-            statusBarHeight = insets.systemWindowInsetTop
             swipe_refresh.setProgressViewOffset(false, (-40).dpToPx, headerHeight + offset)
-            if (isTablet) v.updatePaddingRelative(top = headerHeight + 1.dpToPx)
+            // 1dp extra to line up chapter header and manga header
+            if (isTablet) recycler.updatePaddingRelative(top = headerHeight + 1.dpToPx)
             getHeader()?.setTopHeight(headerHeight)
             fast_scroll_layout.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 topMargin = headerHeight
                 bottomMargin = insets.systemWindowInsetBottom
             }
-            v.updatePaddingRelative(bottom = insets.systemWindowInsetBottom)
-        }
+        }, liftOnScroll = {
+            colorToolbar(it)
+        })
 
         recycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
-                val atTop = !recycler.canScrollVertically(-1)
                 if (!isTablet) {
+                    val atTop = !recycler.canScrollVertically(-1)
                     val tY = getHeader()?.backdrop?.translationY ?: 0f
                     getHeader()?.backdrop?.translationY = max(0f, tY + dy * 0.25f)
-                    if (router?.backstack?.lastOrNull()
-                            ?.controller() == this@MangaDetailsController && statusBarHeight > -1 && activity != null && activity!!.appbar.height > 0
-                    ) {
-                        activity!!.appbar.y -= dy
-                        activity!!.appbar.y = MathUtils.clamp(
-                            activity!!.appbar.y, -activity!!.appbar.height.toFloat(), 0f
-                        )
-                    }
-                    val appBarY = activity?.appbar?.y ?: 0f
-                    if ((!atTop && !toolbarIsColored && (appBarY < (-headerHeight + 1) || (dy < 0 && appBarY == 0f))) || (atTop && toolbarIsColored)) {
-                        colorToolbar(!atTop)
-                    }
-                } else {
-                    if ((!atTop && !toolbarIsColored) || (atTop && toolbarIsColored)) {
-                        colorToolbar(!atTop)
-                    }
-                }
-                if (atTop) {
-                    getHeader()?.backdrop?.translationY = 0f
-                    activity!!.appbar.y = 0f
-                }
-                if (!isTablet) {
+                    if (atTop) getHeader()?.backdrop?.translationY = 0f
                     val fPosition =
                         (recycler.layoutManager as LinearLayoutManager).findFirstCompletelyVisibleItemPosition()
+                    val scrollFunc: (Boolean) -> Unit = { show ->
+                        showScroll = show
+                        scrollAnim?.cancel()
+                        scrollAnim = fast_scroller.animate().setDuration(100).translationX(
+                            if (show) 0f else 25f.dpToPx)
+                        scrollAnim?.start()
+                    }
                     if (fPosition > 0 && !showScroll) {
-                        showScroll = true
-                        scrollAnim?.cancel()
-                        scrollAnim = fast_scroller.animate().setDuration(100).translationX(0f)
-                        scrollAnim?.start()
+                        scrollFunc(true)
                     } else if (fPosition <= 0 && showScroll) {
-                        showScroll = false
-                        scrollAnim?.cancel()
-                        scrollAnim =
-                            fast_scroller.animate().setDuration(100).translationX(25f.dpToPx)
-                        scrollAnim?.start()
+                        scrollFunc(false)
                     }
                 }
             }
 
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                super.onScrollStateChanged(recyclerView, newState)
                 val atTop = !recycler.canScrollVertically(-1)
-                if (newState == RecyclerView.SCROLL_STATE_IDLE && !isTablet) {
-                    if (router?.backstack?.lastOrNull()
-                            ?.controller() == this@MangaDetailsController && statusBarHeight > -1 && activity != null &&
-                        activity!!.appbar.height > 0
-                    ) {
-                        val halfWay = abs((-activity!!.appbar.height.toFloat()) / 2)
-                        val shortAnimationDuration = resources?.getInteger(
-                            android.R.integer.config_shortAnimTime
-                        ) ?: 0
-                        val closerToTop = abs(activity!!.appbar.y) - halfWay > 0
-                        activity!!.appbar.animate().y(
-                            if (closerToTop && !atTop) (-activity!!.appbar.height.toFloat())
-                            else 0f
-                        ).setDuration(shortAnimationDuration.toLong()).start()
-                        if (!closerToTop && !atTop && !toolbarIsColored)
-                            colorToolbar(true)
-                    }
-                }
-                if (atTop && toolbarIsColored) colorToolbar(false)
-                if (atTop) {
-                    getHeader()?.backdrop?.translationY = 0f
-                    activity!!.appbar.y = 0f
-                }
+                if (atTop) getHeader()?.backdrop?.translationY = 0f
             }
         })
     }
@@ -1002,6 +956,15 @@ class MangaDetailsController : BaseController,
     override fun startDownloadNow(position: Int) {
         val chapter = (adapter?.getItem(position) as? ChapterItem) ?: return
         presenter.startDownloadingNow(chapter)
+    }
+
+    // In case the recycler is at the bottom and collapsing the header makes it unscrollable
+    override fun updateScroll() {
+        if (!recycler.canScrollVertically(-1)) {
+            getHeader()?.backdrop?.translationY = 0f
+            activity?.appbar?.y = 0f
+            colorToolbar(isColor = false, animate = false)
+        }
     }
 
     private fun downloadChapters(chapters: List<ChapterItem>) {

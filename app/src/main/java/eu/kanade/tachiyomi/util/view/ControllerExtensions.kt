@@ -9,7 +9,6 @@ import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
 import androidx.core.math.MathUtils
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.bluelinelabs.conductor.Controller
@@ -53,9 +52,9 @@ fun Controller.scrollViewWith(
     recycler: RecyclerView,
     padBottom: Boolean = false,
     customPadding: Boolean = false,
-    skipFirstSnap: Boolean = false,
     swipeRefreshLayout: SwipeRefreshLayout? = null,
-    afterInsets: ((WindowInsets) -> Unit)? = null
+    afterInsets: ((WindowInsets) -> Unit)? = null,
+    liftOnScroll: ((Boolean) -> Unit)? = null
 ) {
     var statusBarHeight = -1
     activity?.appbar?.y = 0f
@@ -87,14 +86,18 @@ fun Controller.scrollViewWith(
     var elevate = false
     val elevateFunc: (Boolean) -> Unit = { el ->
         elevate = el
-        elevationAnim?.cancel()
-        elevationAnim = ValueAnimator.ofFloat(
-            activity!!.appbar.elevation, if (el) 15f else 0f
-        )
-        elevationAnim?.addUpdateListener { valueAnimator ->
-            activity!!.appbar.elevation = valueAnimator.animatedValue as Float
+        if (liftOnScroll != null) {
+            liftOnScroll.invoke(el)
+        } else {
+            elevationAnim?.cancel()
+            elevationAnim = ValueAnimator.ofFloat(
+                activity!!.appbar.elevation, if (el) 15f else 0f
+            )
+            elevationAnim?.addUpdateListener { valueAnimator ->
+                activity!!.appbar.elevation = valueAnimator.animatedValue as Float
+            }
+            elevationAnim?.start()
         }
-        elevationAnim?.start()
     }
     addLifecycleListener(object : Controller.LifecycleListener() {
         override fun onChangeStart(
@@ -144,10 +147,7 @@ fun Controller.scrollViewWith(
                         R.integer.config_shortAnimTime
                     ) ?: 0
                     val closerToTop = abs(activity!!.appbar.y) - halfWay > 0
-                    val atTop = (!customPadding &&
-                        (recycler.layoutManager as LinearLayoutManager)
-                            .findFirstVisibleItemPosition() < 2 && !skipFirstSnap) ||
-                        !recycler.canScrollVertically(-1)
+                    val atTop = !recycler.canScrollVertically(-1)
                     activity!!.appbar.animate().y(
                         if (closerToTop && !atTop) (-activity!!.appbar.height.toFloat())
                         else 0f

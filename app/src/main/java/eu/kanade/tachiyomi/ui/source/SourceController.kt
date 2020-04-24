@@ -121,9 +121,9 @@ class SourceController : NucleusController<SourcePresenter>(),
         val array = view.context.obtainStyledAttributes(attrsArray)
         val appBarHeight = array.getDimensionPixelSize(0, 0)
         array.recycle()
-        scrollViewWith(recycler) {
+        scrollViewWith(recycler, afterInsets = {
             headerHeight = it.systemWindowInsetTop + appBarHeight
-        }
+        })
 
         requestPermissionsSafe(arrayOf(WRITE_EXTERNAL_STORAGE), 301)
         ext_bottom_sheet.onCreate(this)

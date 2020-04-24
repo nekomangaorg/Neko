@@ -134,5 +134,6 @@ class MangaDetailsAdapter(
         fun copyToClipboard(content: String, label: Int)
         fun zoomImageFromThumb(thumbView: View)
         fun showTrackingSheet()
+        fun updateScroll()
     }
 }

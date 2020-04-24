@@ -117,9 +117,9 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
         val appBarHeight = array.getDimensionPixelSize(0, 0)
         array.recycle()
         swipe_refresh.setStyle()
-        scrollViewWith(recycler, skipFirstSnap = true, swipeRefreshLayout = swipe_refresh) {
+        scrollViewWith(recycler, swipeRefreshLayout = swipe_refresh, afterInsets = {
             headerHeight = it.systemWindowInsetTop + appBarHeight
-        }
+        })
 
         presenter.onCreate()
         if (presenter.recentItems.isNotEmpty()) {
