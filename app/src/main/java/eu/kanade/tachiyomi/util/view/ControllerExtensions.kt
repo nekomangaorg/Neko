@@ -116,7 +116,7 @@ fun Controller.scrollViewWith(
             ) {
                 if (!recycler.canScrollVertically(-1)) {
                     val shortAnimationDuration = resources?.getInteger(
-                        android.R.integer.config_shortAnimTime
+                        R.integer.config_shortAnimTime
                     ) ?: 0
                     activity!!.appbar.animate().y(0f).setDuration(shortAnimationDuration.toLong())
                         .start()
@@ -141,7 +141,7 @@ fun Controller.scrollViewWith(
                 ) {
                     val halfWay = abs((-activity!!.appbar.height.toFloat()) / 2)
                     val shortAnimationDuration = resources?.getInteger(
-                        android.R.integer.config_shortAnimTime
+                        R.integer.config_shortAnimTime
                     ) ?: 0
                     val closerToTop = abs(activity!!.appbar.y) - halfWay > 0
                     val atTop = (!customPadding &&
