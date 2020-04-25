@@ -101,7 +101,7 @@ dependencies {
     implementation("androidx.cardview:cardview:1.0.0")
     implementation("com.google.android.material:material:1.1.0")
     implementation("androidx.recyclerview:recyclerview:1.1.0")
-    implementation("androidx.preference:preference:1.1.0")
+    implementation("androidx.preference:preference:1.1.1")
     implementation("androidx.annotation:annotation:1.1.0")
     implementation("androidx.browser:browser:1.2.0")
     implementation("androidx.biometric:biometric:1.0.1")
