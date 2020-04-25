@@ -84,7 +84,7 @@ androidExtensions {
 }
 
 dependencies {
-// Modified dependencies
+    // Modified dependencies
     implementation("com.github.inorichi:subsampling-scale-image-view:ac0dae7")
 // Android support library
     implementation("androidx.appcompat:appcompat:1.1.0")
