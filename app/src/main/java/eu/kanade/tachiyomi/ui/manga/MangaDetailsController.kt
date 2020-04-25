@@ -26,6 +26,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewPropertyAnimator
+import android.view.WindowInsets
 import android.view.animation.DecelerateInterpolator
 import android.view.inputmethod.InputMethodManager
 import android.widget.LinearLayout
@@ -93,11 +94,11 @@ import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.ThemeUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
-import eu.kanade.tachiyomi.util.system.dpToPxEnd
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.pxToDp
 import eu.kanade.tachiyomi.util.system.toast
+import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.getText
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
@@ -264,21 +265,17 @@ class MangaDetailsController : BaseController,
         swipe_refresh.setDistanceToTriggerSync(70.dpToPx)
         activity!!.appbar.elevation = 0f
 
-        scrollViewWith(recycler, padBottom = true, customPadding = true, afterInsets = { insets ->
-            recycler.updatePaddingRelative(bottom = insets.systemWindowInsetBottom)
-            tabletRecycler?.updatePaddingRelative(bottom = insets.systemWindowInsetBottom)
-            headerHeight = appbarHeight + insets.systemWindowInsetTop
-            swipe_refresh.setProgressViewOffset(false, (-40).dpToPx, headerHeight + offset)
-            // 1dp extra to line up chapter header and manga header
-            if (isTablet) recycler.updatePaddingRelative(top = headerHeight + 1.dpToPx)
-            getHeader()?.setTopHeight(headerHeight)
-            fast_scroll_layout.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                topMargin = headerHeight
-                bottomMargin = insets.systemWindowInsetBottom
+        if (isTablet) {
+            recycler.doOnApplyWindowInsets { _, insets, _ ->
+                setInsets(insets, appbarHeight, offset)
             }
-        }, liftOnScroll = {
-            colorToolbar(it)
-        })
+        } else {
+            scrollViewWith(recycler, padBottom = true, customPadding = true, afterInsets = { insets ->
+                setInsets(insets, appbarHeight, offset)
+            }, liftOnScroll = {
+                colorToolbar(it)
+            })
+        }
 
         recycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
@@ -288,20 +285,6 @@ class MangaDetailsController : BaseController,
                     val tY = getHeader()?.backdrop?.translationY ?: 0f
                     getHeader()?.backdrop?.translationY = max(0f, tY + dy * 0.25f)
                     if (atTop) getHeader()?.backdrop?.translationY = 0f
-                    val fPosition =
-                        (recycler.layoutManager as LinearLayoutManager).findFirstCompletelyVisibleItemPosition()
-                    val scrollFunc: (Boolean) -> Unit = { show ->
-                        showScroll = show
-                        scrollAnim?.cancel()
-                        scrollAnim = fast_scroller.animate().setDuration(100).translationX(
-                            if (show) 0f else 25f.dpToPxEnd)
-                        scrollAnim?.start()
-                    }
-                    if (fPosition > 0 && !showScroll) {
-                        scrollFunc(true)
-                    } else if (fPosition <= 0 && showScroll) {
-                        scrollFunc(false)
-                    }
                 }
             }
 
@@ -312,8 +295,22 @@ class MangaDetailsController : BaseController,
         })
     }
 
+    fun setInsets(insets: WindowInsets, appbarHeight: Int, offset: Int) {
+        recycler.updatePaddingRelative(bottom = insets.systemWindowInsetBottom)
+        tabletRecycler?.updatePaddingRelative(bottom = insets.systemWindowInsetBottom)
+        headerHeight = appbarHeight + insets.systemWindowInsetTop
+        swipe_refresh.setProgressViewOffset(false, (-40).dpToPx, headerHeight + offset)
+        // 1dp extra to line up chapter header and manga header
+        if (isTablet) recycler.updatePaddingRelative(top = headerHeight + 1.dpToPx)
+        getHeader()?.setTopHeight(headerHeight)
+        fast_scroll_layout.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            topMargin = headerHeight
+            bottomMargin = insets.systemWindowInsetBottom
+        }
+    }
+
     private fun setFastScroller() {
-        fast_scroller.translationX = if (showScroll || isTablet) 0f else 25f.dpToPxEnd
+        // fast_scroller.translationX = if (showScroll || isTablet) 0f else 25f.dpToPxEnd
         fast_scroller.setupWithRecyclerView(recycler, { position ->
             val letter = adapter?.getSectionText(position)
             when {
