@@ -117,6 +117,9 @@ dependencies {
     implementation("com.f2prateek.rx.preferences:rx-preferences:1.0.2")
     implementation("com.github.pwittchen:reactivenetwork:0.13.0")
 
+    // Coroutines
+    implementation("com.github.tfcporciuncula:flow-preferences:1.1.1")
+
 // Network client
     val okhttpVersion = "4.3.1"
     implementation("com.squareup.okhttp3:okhttp:$okhttpVersion")
