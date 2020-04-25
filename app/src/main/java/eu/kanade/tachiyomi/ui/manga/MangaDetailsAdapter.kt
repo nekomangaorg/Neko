@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.manga
 
-import android.content.Context
 import android.view.View
 import androidx.recyclerview.widget.ItemTouchHelper
 import eu.davidea.flexibleadapter.items.IFlexible
@@ -13,11 +12,13 @@ import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 
 class MangaDetailsAdapter(
-    val controller: MangaDetailsController,
-    context: Context
+    val controller: MangaDetailsController
 ) : BaseChapterAdapter<IFlexible<*>>(controller) {
 
     val preferences: PreferencesHelper by injectLazy()
+
+    val hasShownSwipeTut
+        get() = preferences.shownChapterSwipeTutorial()
 
     var items: List<ChapterItem> = emptyList()
 

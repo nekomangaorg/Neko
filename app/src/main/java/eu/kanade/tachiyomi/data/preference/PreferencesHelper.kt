@@ -7,6 +7,7 @@ import android.os.Environment
 import androidx.preference.PreferenceManager
 import com.f2prateek.rx.preferences.Preference
 import com.f2prateek.rx.preferences.RxSharedPreferences
+import com.tfcporciuncula.flow.FlowSharedPreferences
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.source.Source
@@ -40,6 +41,7 @@ class PreferencesHelper(val context: Context) {
 
     private val prefs = PreferenceManager.getDefaultSharedPreferences(context)
     private val rxPrefs = RxSharedPreferences.create(prefs)
+    private val flowPrefs = FlowSharedPreferences(prefs)
 
     private val defaultDownloadsDir = Uri.fromFile(
             File(Environment.getExternalStorageDirectory().absolutePath + File.separator +
@@ -258,4 +260,9 @@ class PreferencesHelper(val context: Context) {
     fun hideFiltersAtStart() = rxPrefs.getBoolean("hide_filters_at_start", false)
 
     fun alwaysShowChapterTransition() = rxPrefs.getBoolean(Keys.alwaysShowChapterTransition, true)
+
+    // Tutorial preference
+    fun shownFilterTutorial() = flowPrefs.getBoolean("shown_filter_tutorial", false)
+
+    fun shownChapterSwipeTutorial() = flowPrefs.getBoolean("shown_swipe_tutorial", false)
 }

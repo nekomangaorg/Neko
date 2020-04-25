@@ -77,7 +77,7 @@
         android:alpha="0.5"
         android:background="@drawable/shape_gradient_top_shadow"
         android:paddingBottom="10dp"
-        app:layout_anchor="@id/bottom_sheet"
+        app:layout_anchor="@id/filter_bottom_sheet"
         app:layout_anchorGravity="top" />
 
     <!-- Adding bottom sheet after main content -->

@@ -14,7 +14,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewPropertyAnimator
 import android.view.inputmethod.InputMethodManager
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.SearchView
@@ -27,6 +26,7 @@ import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.list.listItemsSingleChoice
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
+import com.github.florent37.viewtooltip.ViewTooltip
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
@@ -57,7 +57,6 @@ import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.dpToPxEnd
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
-import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.applyWindowInsetsForRootController
 import eu.kanade.tachiyomi.util.view.getItemView
 import eu.kanade.tachiyomi.util.view.gone
@@ -140,6 +139,7 @@ class LibraryController(
     private var textAnim: ViewPropertyAnimator? = null
     private var scrollAnim: ViewPropertyAnimator? = null
     private var alwaysShowScroller: Boolean = preferences.alwaysShowSeeker().getOrDefault()
+    private var filterTooltip: ViewTooltip? = null
 
     override fun getTitle(): String? {
         return view?.context?.getString(R.string.library)
@@ -195,6 +195,28 @@ class LibraryController(
                     scrollAnim?.start()
                 }
             }
+        }
+    }
+
+    private fun showFilterTip() {
+        if (preferences.shownFilterTutorial().get()) return
+        val activity = activity ?: return
+        val icon = activity.bottom_nav.getItemView(R.id.nav_library) ?: return
+        filterTooltip =
+            ViewTooltip.on(activity, icon).autoHide(false, 0L).align(ViewTooltip.ALIGN.START)
+                .position(ViewTooltip.Position.TOP).text(R.string.tap_library_to_show_filters)
+                .color(activity.getResourceColor(R.attr.colorAccent))
+                .textSize(TypedValue.COMPLEX_UNIT_SP, 15f).textColor(Color.WHITE).withShadow(false)
+                .corner(30).arrowWidth(15).arrowHeight(15).distanceWithView(0)
+
+        filterTooltip?.show()
+    }
+
+    private fun closeTip() {
+        if (filterTooltip != null) {
+            filterTooltip?.close()
+            filterTooltip = null
+            preferences.shownFilterTutorial().set(true)
         }
     }
 
@@ -447,7 +469,7 @@ class LibraryController(
             presenter.getLibrary()
             DownloadService.callListeners()
             LibraryUpdateService.setListener(this)
-        }
+        } else closeTip()
         if (type == ControllerChangeType.POP_ENTER) filter_bottom_sheet.hideIfPossible()
     }
 
@@ -836,6 +858,7 @@ class LibraryController(
     }
 
     override fun showSheet() {
+        closeTip()
         when {
             filter_bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_HIDDEN -> filter_bottom_sheet.sheetBehavior?.state =
                 BottomSheetBehavior.STATE_COLLAPSED

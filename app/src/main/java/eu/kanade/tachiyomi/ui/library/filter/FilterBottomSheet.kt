@@ -133,6 +133,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             pill.alpha = 0f
         }
         if (state == BottomSheetBehavior.STATE_HIDDEN) {
+            onGroupClicked(ACTION_HIDE_FILTER_TIP)
             reSortViews()
             shadow?.alpha = 0f
             pager?.updatePaddingRelative(bottom = 0)

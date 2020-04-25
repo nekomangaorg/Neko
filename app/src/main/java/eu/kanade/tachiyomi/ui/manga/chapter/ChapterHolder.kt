@@ -1,5 +1,7 @@
 package eu.kanade.tachiyomi.ui.manga.chapter
 
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
 import android.view.View
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -7,8 +9,13 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsAdapter
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
+import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.gone
+import eu.kanade.tachiyomi.util.view.isVisible
+import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.util.view.visibleIf
+import eu.kanade.tachiyomi.widget.EndAnimatorListener
+import eu.kanade.tachiyomi.widget.StartAnimatorListener
 import kotlinx.android.synthetic.main.chapters_item.*
 import kotlinx.android.synthetic.main.download_button.*
 
@@ -86,6 +93,39 @@ class ChapterHolder(
 
         notifyStatus(status, item.isLocked, item.progress)
         resetFrontView()
+        if (adapterPosition == 1) {
+            if (!adapter.hasShownSwipeTut.get())
+                showSlideAnimation()
+        }
+    }
+
+    private fun showSlideAnimation() {
+        val slide = 100f.dpToPx
+        val animatorSet = AnimatorSet()
+        val anim1 = slideAnimation(0f, slide)
+        anim1.startDelay = 1000
+        anim1.addListener(StartAnimatorListener { left_view.visible() })
+        val anim2 = slideAnimation(slide, -slide)
+        anim2.duration = 600
+        anim2.startDelay = 500
+        anim2.addUpdateListener {
+            if (left_view.isVisible() && front_view.translationX <= 0) {
+                left_view.gone()
+                right_view.visible()
+            }
+        }
+        val anim3 = slideAnimation(-slide, 0f)
+        anim3.startDelay = 750
+        animatorSet.playSequentially(anim1, anim2, anim3)
+        animatorSet.addListener(EndAnimatorListener {
+            adapter.hasShownSwipeTut.set(true)
+        })
+        animatorSet.start()
+    }
+
+    private fun slideAnimation(from: Float, to: Float): ObjectAnimator {
+        return ObjectAnimator.ofFloat(front_view, View.TRANSLATION_X, from, to)
+            .setDuration(300)
     }
 
     override fun getFrontView(): View {
