@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/bottom_sheet"
+    android:id="@+id/filter_bottom_sheet"
     style="@style/BottomSheetDialogTheme"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"

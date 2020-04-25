@@ -7,6 +7,7 @@ import android.os.Environment
 import androidx.preference.PreferenceManager
 import com.f2prateek.rx.preferences.Preference
 import com.f2prateek.rx.preferences.RxSharedPreferences
+import com.tfcporciuncula.flow.FlowSharedPreferences
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.source.Source
@@ -41,6 +42,7 @@ class PreferencesHelper(val context: Context) {
 
     private val prefs = PreferenceManager.getDefaultSharedPreferences(context)
     private val rxPrefs = RxSharedPreferences.create(prefs)
+    private val flowPrefs = FlowSharedPreferences(prefs)
 
     private val defaultDownloadsDir = Uri.fromFile(
         File(
@@ -122,8 +124,7 @@ class PreferencesHelper(val context: Context) {
 
     fun browseAsList() = rxPrefs.getBoolean(Keys.catalogueAsList, false)
 
-    fun enabledLanguages() =
-        rxPrefs.getStringSet(Keys.enabledLanguages, setOf("en", Locale.getDefault().language))
+    fun enabledLanguages() = rxPrefs.getStringSet(Keys.enabledLanguages, setOf("en", Locale.getDefault().language))
 
     fun sourceSorting() = rxPrefs.getInteger(Keys.sourcesSort, 0)
 
@@ -207,6 +208,8 @@ class PreferencesHelper(val context: Context) {
 
     fun automaticUpdates() = prefs.getBoolean(Keys.automaticUpdates, true)
 
+    fun automaticExtUpdates() = rxPrefs.getBoolean(Keys.automaticExtUpdates, false)
+
     fun collapsedCategories() = rxPrefs.getStringSet("collapsed_categories", mutableSetOf())
 
     fun hiddenSources() = rxPrefs.getStringSet("hidden_catalogues", mutableSetOf())
@@ -262,6 +265,11 @@ class PreferencesHelper(val context: Context) {
     fun hideFiltersAtStart() = rxPrefs.getBoolean("hide_filters_at_start", false)
 
     fun alwaysShowChapterTransition() = rxPrefs.getBoolean(Keys.alwaysShowChapterTransition, true)
+
+    // Tutorial preference
+    fun shownFilterTutorial() = flowPrefs.getBoolean("shown_filter_tutorial", false)
+
+    fun shownChapterSwipeTutorial() = flowPrefs.getBoolean("shown_swipe_tutorial", false)
 
     fun marginRatioWebtoon() = rxPrefs.getInteger(Keys.marginRatioWebtoon, 0)
 

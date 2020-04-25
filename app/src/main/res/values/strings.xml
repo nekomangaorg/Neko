@@ -140,7 +140,7 @@
     <string name="hide_badges">Hide badges</string>
     <string name="show_badges">Show badges</string>
     <string name="show_count">Show count</string>
-    <string name="hide_filters_tip">To show filters again, tap the Library icon</string>
+    <string name="tap_library_to_show_filters">Tap the Library icon to show filters</string>
     <string name="display_as">Display as</string>
 
     <!-- Library update service notifications -->

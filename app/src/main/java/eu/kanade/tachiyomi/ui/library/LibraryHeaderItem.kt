@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.library
 
+import android.annotation.SuppressLint
 import android.graphics.drawable.Drawable
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
@@ -164,6 +165,8 @@ class LibraryHeaderItem(
                 updateButton.invisible()
             }
         }
+
+        @SuppressLint("RestrictedApi")
         private fun showCatSortOptions() {
             val category =
                 (adapter.getItem(adapterPosition) as? LibraryHeaderItem)?.category ?: return

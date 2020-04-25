@@ -228,7 +228,7 @@ class MangaDetailsController : BaseController,
                 width = ViewGroup.LayoutParams.MATCH_PARENT
             }
             tabletRecycler?.clipToPadding = false
-            tabletAdapter = MangaDetailsAdapter(this, view.context)
+            tabletAdapter = MangaDetailsAdapter(this)
             tabletRecycler?.adapter = tabletAdapter
             tabletRecycler?.layoutManager = LinearLayoutManager(view.context)
             val divider = View(view.context)
@@ -243,7 +243,7 @@ class MangaDetailsController : BaseController,
 
     /** Set adapter, insets, and scroll listener for recycler view */
     private fun setRecycler(view: View) {
-        adapter = MangaDetailsAdapter(this, view.context)
+        adapter = MangaDetailsAdapter(this)
 
         recycler.adapter = adapter
         adapter?.isSwipeEnabled = true
