@@ -82,7 +82,7 @@
             android:layout_width="0dp"
             android:layout_height="1dp"
             android:alpha="0.25"
-            android:background="?android:attr/textColorHint"
+            android:background="@color/strong_divider"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/logo_container"
             app:layout_constraintTop_toBottomOf="@+id/status_container" />
@@ -158,7 +158,7 @@
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="10dp"
                 android:alpha="0.25"
-                android:background="?android:attr/textColorHint"
+                android:background="@color/strong_divider"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/track_status"
@@ -170,7 +170,7 @@
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="10dp"
                 android:alpha="0.25"
-                android:background="?android:attr/textColorHint"
+                android:background="@color/strong_divider"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/track_chapters"
@@ -198,7 +198,6 @@
             android:id="@+id/track_group"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:visibility="gone"
             app:constraint_referenced_ids="sub_tracking_layout,status_container,divider" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
