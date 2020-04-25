@@ -37,6 +37,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.download.DownloadServiceListener
+import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
@@ -59,6 +60,8 @@ import eu.kanade.tachiyomi.util.system.hasSideNavBar
 import eu.kanade.tachiyomi.util.system.isBottomTappable
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
+import eu.kanade.tachiyomi.util.view.getItemView
+import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePadding
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
@@ -137,6 +140,26 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         )
 
         var continueSwitchingTabs = false
+        bottom_nav.getItemView(R.id.nav_library)?.setOnLongClickListener {
+            if (!LibraryUpdateService.isRunning()) {
+                LibraryUpdateService.start(this)
+                main_content.snack(R.string.updating_library) {
+                    anchorView = bottom_nav
+                }
+            }
+            true
+        }
+        for (id in listOf(R.id.nav_recents, R.id.nav_browse)) {
+            bottom_nav.getItemView(id)?.setOnLongClickListener {
+                bottom_nav.selectedItemId = id
+                bottom_nav.post {
+                    val controller =
+                        router.backstack.firstOrNull()?.controller() as? BottomSheetController
+                    controller?.toggleSheet()
+                }
+                true
+            }
+        }
         bottom_nav.setOnNavigationItemSelectedListener { item ->
             val id = item.itemId
             val currentController = router.backstack.lastOrNull()?.controller()

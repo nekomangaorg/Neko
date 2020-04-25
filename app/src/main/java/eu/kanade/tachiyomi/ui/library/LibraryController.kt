@@ -59,6 +59,7 @@ import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.applyWindowInsetsForRootController
+import eu.kanade.tachiyomi.util.view.getItemView
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
@@ -148,10 +149,10 @@ class LibraryController(
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
             super.onScrolled(recyclerView, dx, dy)
             val order = getCategoryOrder()
-            if (bottom_sheet.canHide()) {
+            if (filter_bottom_sheet.canHide()) {
                 scrollDistance += abs(dy)
                 if (scrollDistance > scrollDistanceTilHidden) {
-                    bottom_sheet.hideIfPossible()
+                    filter_bottom_sheet.hideIfPossible()
                     scrollDistance = 0f
                 }
             } else scrollDistance = 0f
@@ -335,15 +336,13 @@ class LibraryController(
             createActionModeIfNeeded()
         }
 
-        bottom_sheet.onCreate(recycler_layout)
+        filter_bottom_sheet.onCreate(recycler_layout)
 
-        bottom_sheet.onGroupClicked = {
+        filter_bottom_sheet.onGroupClicked = {
             when (it) {
                 FilterBottomSheet.ACTION_REFRESH -> onRefresh()
                 FilterBottomSheet.ACTION_FILTER -> onFilterChanged()
-                FilterBottomSheet.ACTION_HIDE_FILTER_TIP -> activity?.toast(
-                    R.string.hide_filters_tip, Toast.LENGTH_LONG
-                )
+                FilterBottomSheet.ACTION_HIDE_FILTER_TIP -> showFilterTip()
                 FilterBottomSheet.ACTION_DISPLAY -> DisplayBottomSheet(this).show()
             }
         }
@@ -418,7 +417,7 @@ class LibraryController(
         val view = view ?: return
         LibraryUpdateService.start(view.context, category)
         snack = view.snack(R.string.updating_library) {
-            anchorView = bottom_sheet
+            anchorView = filter_bottom_sheet
         }
     }
 
@@ -449,7 +448,7 @@ class LibraryController(
             DownloadService.callListeners()
             LibraryUpdateService.setListener(this)
         }
-        if (type == ControllerChangeType.POP_ENTER) bottom_sheet.hideIfPossible()
+        if (type == ControllerChangeType.POP_ENTER) filter_bottom_sheet.hideIfPossible()
     }
 
     override fun onActivityResumed(activity: Activity) {
@@ -485,7 +484,7 @@ class LibraryController(
         } else {
             empty_view?.show(
                 R.drawable.ic_book_black_128dp,
-                if (bottom_sheet.hasActiveFilters()) R.string.no_matches_for_filters
+                if (filter_bottom_sheet.hasActiveFilters()) R.string.no_matches_for_filters
                 else R.string.library_is_empty_add_from_browse
             )
         }
@@ -632,7 +631,7 @@ class LibraryController(
 
     override fun canDrag(): Boolean {
         val filterOff =
-            !bottom_sheet.hasActiveFilters() && !preferences.hideCategories().getOrDefault()
+            !filter_bottom_sheet.hasActiveFilters() && !preferences.hideCategories().getOrDefault()
         return filterOff && adapter.mode != SelectableAdapter.Mode.MULTI
     }
 
@@ -758,7 +757,7 @@ class LibraryController(
             if (presenter.mangaIsInCategory(item.manga, newHeader?.category?.id)) {
                 adapter.moveItem(position, lastItemPosition!!)
                 snack = view?.snack(R.string.already_in_category) {
-                    anchorView = bottom_sheet
+                    anchorView = filter_bottom_sheet
                 }
                 return
             }
@@ -781,7 +780,7 @@ class LibraryController(
         snack = view?.snack(
             resources!!.getString(R.string.moved_to_, category.name)
         ) {
-            anchorView = bottom_sheet
+            anchorView = filter_bottom_sheet
             setAction(R.string.undo) {
                 manga.category = category.id!!
                 presenter.moveMangaToCategory(manga, oldCatId, mangaIds)
@@ -802,7 +801,7 @@ class LibraryController(
                 }, category.name
             ), Snackbar.LENGTH_LONG
         ) {
-            anchorView = bottom_sheet
+            anchorView = filter_bottom_sheet
         }
         if (!inQueue) LibraryUpdateService.start(view!!.context, category)
         return true
@@ -838,27 +837,28 @@ class LibraryController(
 
     override fun showSheet() {
         when {
-            bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_HIDDEN -> bottom_sheet.sheetBehavior?.state =
+            filter_bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_HIDDEN -> filter_bottom_sheet.sheetBehavior?.state =
                 BottomSheetBehavior.STATE_COLLAPSED
-            bottom_sheet.sheetBehavior?.state != BottomSheetBehavior.STATE_EXPANDED -> bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
+            filter_bottom_sheet.sheetBehavior?.state != BottomSheetBehavior.STATE_EXPANDED -> filter_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
             else -> DisplayBottomSheet(this).show()
         }
     }
 
     override fun toggleSheet() {
+        closeTip()
         when {
-            bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_HIDDEN -> bottom_sheet.sheetBehavior?.state =
+            filter_bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_HIDDEN -> filter_bottom_sheet.sheetBehavior?.state =
                 BottomSheetBehavior.STATE_COLLAPSED
-            bottom_sheet.sheetBehavior?.state != BottomSheetBehavior.STATE_EXPANDED -> bottom_sheet.sheetBehavior?.state =
+            filter_bottom_sheet.sheetBehavior?.state != BottomSheetBehavior.STATE_EXPANDED -> filter_bottom_sheet.sheetBehavior?.state =
                 BottomSheetBehavior.STATE_EXPANDED
-            bottom_sheet.sheetBehavior?.isHideable == true -> bottom_sheet.sheetBehavior?.state =
+            filter_bottom_sheet.sheetBehavior?.isHideable == true -> filter_bottom_sheet.sheetBehavior?.state =
                 BottomSheetBehavior.STATE_HIDDEN
-            else -> bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
+            else -> filter_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
         }
     }
 
     override fun handleSheetBack(): Boolean {
-        val sheetBehavior = BottomSheetBehavior.from(bottom_sheet)
+        val sheetBehavior = BottomSheetBehavior.from(filter_bottom_sheet)
         if (sheetBehavior.state != BottomSheetBehavior.STATE_COLLAPSED && sheetBehavior.state != BottomSheetBehavior.STATE_HIDDEN) {
             sheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
             return true
@@ -888,7 +888,6 @@ class LibraryController(
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_search -> expandActionViewFromInteraction = true
-            R.id.action_library_display -> DisplayBottomSheet(this).show()
             else -> return super.onOptionsItemSelected(item)
         }
         return true
@@ -965,7 +964,7 @@ class LibraryController(
         snack = view?.snack(
             activity?.getString(R.string.removed_from_library) ?: "", Snackbar.LENGTH_INDEFINITE
         ) {
-            anchorView = bottom_sheet
+            anchorView = filter_bottom_sheet
             var undoing = false
             setAction(R.string.undo) {
                 presenter.reAddMangas(mangas)

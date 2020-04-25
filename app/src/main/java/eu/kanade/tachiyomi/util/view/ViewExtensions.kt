@@ -2,6 +2,7 @@
 
 package eu.kanade.tachiyomi.util.view
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.res.ColorStateList
 import android.content.res.Configuration
@@ -17,11 +18,16 @@ import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.annotation.IdRes
 import androidx.annotation.Px
+import androidx.appcompat.view.menu.MenuBuilder
 import androidx.core.graphics.ColorUtils
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.amulyakhare.textdrawable.TextDrawable
 import com.amulyakhare.textdrawable.util.ColorGenerator
+import com.google.android.material.bottomnavigation.BottomNavigationItemView
+import com.google.android.material.bottomnavigation.BottomNavigationMenuView
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.snackbar.Snackbar
@@ -322,4 +328,10 @@ fun MaterialButton.resetStrokeColor() {
             ), 31
         )
     )
+}
+
+@SuppressLint("RestrictedApi")
+fun BottomNavigationView.getItemView(@IdRes id: Int): BottomNavigationItemView? {
+    val order = (menu as MenuBuilder).findItemIndex(id)
+    return (getChildAt(0) as BottomNavigationMenuView).getChildAt(order) as? BottomNavigationItemView
 }

@@ -432,8 +432,7 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
 
     override fun toggleSheet() {
         if (showingDownloads) dl_bottom_sheet.dismiss()
-        else if (dl_bottom_sheet.sheetBehavior?.isHideable == false) dl_bottom_sheet.sheetBehavior?.state =
-            BottomSheetBehavior.STATE_EXPANDED
+        else dl_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
     }
 
     override fun expandSearch() {
