@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.util.system.contextCompatColor
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.isVisible
+import eu.kanade.tachiyomi.util.view.setTextColorRes
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.visibleIf
 import kotlinx.android.synthetic.main.unread_download_badge.view.*
@@ -28,13 +29,13 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
                 return@with
             }
             text = if (unread == -1) "0" else unread.toString()
-            setTextColor(
-                context.contextCompatColor(
-                    // hide the badge text when preference is only show badge
-                    if (unread == -1 && !showTotalChapters) R.color.unread_badge
-                    else if (showTotalChapters) R.color.total_badge_text
-                    else R.color.unread_badge_text
-                )
+            setTextColorRes(
+                // hide the badge text when preference is only show badge
+                when {
+                    unread == -1 && !showTotalChapters -> R.color.unread_badge
+                    showTotalChapters -> R.color.total_badge_text
+                    else -> R.color.unread_badge_text
+                }
             )
             setBackgroundColor(unreadBadgeBackground)
         }
