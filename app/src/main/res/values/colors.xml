@@ -28,6 +28,7 @@
     <color name="textColorPrimary">@color/md_black_1000_87</color>
     <color name="textColorPrimaryInverse">@color/md_white_1000</color>
 
+    <color name="strong_divider">@color/md_black_1000_38</color>
     <color name="divider">@color/md_black_1000_12</color>
     <color name="badgeColor">@color/material_red_accent_700</color>
     <color name="download">@color/material_green_800</color>
