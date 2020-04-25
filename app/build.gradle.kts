@@ -91,12 +91,11 @@ shortcutHelper {
 }
 
 dependencies {
-// Modified dependencies
+    // Modified dependencies
     implementation("com.github.inorichi:subsampling-scale-image-view:ac0dae7")
     implementation("com.github.inorichi:junrar-android:634c1f5")
 
-
-// Android support library
+    // Android support library
     implementation("androidx.appcompat:appcompat:1.1.0")
     implementation("androidx.cardview:cardview:1.0.0")
     implementation("com.google.android.material:material:1.1.0")
@@ -118,71 +117,71 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-extensions:$lifecycleVersion")
     implementation("androidx.lifecycle:lifecycle-common-java8:$lifecycleVersion")
 
-// ReactiveX
+    // ReactiveX
     implementation("io.reactivex:rxandroid:1.2.1")
     implementation("io.reactivex:rxjava:1.3.8")
     implementation("com.jakewharton.rxrelay:rxrelay:1.2.0")
     implementation("com.f2prateek.rx.preferences:rx-preferences:1.0.2")
     implementation("com.github.pwittchen:reactivenetwork:0.13.0")
 
-// Network client
+    // Network client
     val okhttpVersion = "4.3.1"
     implementation("com.squareup.okhttp3:okhttp:$okhttpVersion")
     implementation("com.squareup.okhttp3:logging-interceptor:$okhttpVersion")
     implementation("com.squareup.okio:okio:2.4.3")
 
-// REST
+    // REST
     val retrofitVersion = "2.7.1"
     implementation("com.squareup.retrofit2:retrofit:$retrofitVersion")
     implementation("com.squareup.retrofit2:converter-gson:$retrofitVersion")
 
-// JSON
+    // JSON
     implementation("com.google.code.gson:gson:2.8.6")
     implementation("com.github.salomonbrys.kotson:kotson:2.5.0")
 
-// JavaScript engine
+    // JavaScript engine
     implementation("com.squareup.duktape:duktape-android:1.3.0")
 
-// Disk
+    // Disk
     implementation("com.jakewharton:disklrucache:2.0.2")
     implementation("com.github.inorichi:unifile:e9ee588")
 
-// HTML parser
+    // HTML parser
     implementation("org.jsoup:jsoup:1.13.1")
 
-// Job scheduling
+    // Job scheduling
     val workManagerVersion = "2.3.3"
     implementation("android.arch.work:work-runtime:$workManagerVersion")
     implementation("android.arch.work:work-runtime-ktx:$workManagerVersion")
     implementation("com.google.android.gms:play-services-gcm:17.0.0")
 
-// Changelog
+    // Changelog
     implementation("com.github.gabrielemariotti.changeloglib:changelog:2.1.0")
 
-// Database
+    // Database
     implementation("androidx.sqlite:sqlite:2.1.0")
     implementation("com.github.inorichi.storio:storio-common:8be19de@aar")
     implementation("com.github.inorichi.storio:storio-sqlite:8be19de@aar")
     implementation("io.requery:sqlite-android:3.31.0")
 
-// Model View Presenter
+    // Model View Presenter
     val nucleusVersion = "3.0.0"
     implementation("info.android15.nucleus:nucleus:$nucleusVersion")
     implementation("info.android15.nucleus:nucleus-support-v7:$nucleusVersion")
 
-// Dependency injection
+    // Dependency injection
     implementation("com.github.inorichi.injekt:injekt-core:65b0440")
 
-// Image library
+    // Image library
     val glideVersion = "4.11.0"
     implementation("com.github.bumptech.glide:glide:$glideVersion")
     implementation("com.github.bumptech.glide:okhttp3-integration:$glideVersion")
     kapt("com.github.bumptech.glide:compiler:$glideVersion")
 
-// Logging
+    // Logging
     implementation("com.jakewharton.timber:timber:4.7.1")
 
-// UI
+    // UI
     implementation("com.dmitrymalkovich.android:material-design-dimens:1.4")
     implementation("com.github.dmytrodanylyk.android-process-button:library:1.0.4")
     val latestFastAdapterRelease = "5.0.0"
@@ -203,21 +202,21 @@ dependencies {
     implementation("com.github.chrisbanes:PhotoView:2.3.0")
     implementation("com.github.carlosesco:DirectionalViewPager:a844dbca0a")
 
-// Conductor
+    // Conductor
     implementation("com.bluelinelabs:conductor:2.1.5")
     implementation("com.bluelinelabs:conductor-support:2.1.5") {
         exclude("group", "com.android.support")
     }
     implementation("com.github.inorichi:conductor-support-preference:a32c357")
 
-// RxBindings
+    // RxBindings
     val rxbindingsVersion = "1.0.1"
     implementation("com.jakewharton.rxbinding:rxbinding-kotlin:$rxbindingsVersion")
     implementation("com.jakewharton.rxbinding:rxbinding-appcompat-v7-kotlin:$rxbindingsVersion")
     implementation("com.jakewharton.rxbinding:rxbinding-support-v4-kotlin:$rxbindingsVersion")
     implementation("com.jakewharton.rxbinding:rxbinding-recyclerview-v7-kotlin:$rxbindingsVersion")
 
-// Tests
+    // Tests
     testImplementation("junit:junit:4.13")
     testImplementation("org.assertj:assertj-core:3.12.2")
     testImplementation("org.mockito:mockito-core:1.10.19")
