@@ -18,6 +18,7 @@ import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.annotation.ColorRes
 import androidx.annotation.IdRes
 import androidx.annotation.Px
 import androidx.appcompat.view.menu.MenuBuilder
@@ -34,6 +35,7 @@ import com.google.android.material.snackbar.Snackbar
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.system.ThemeUtil
+import eu.kanade.tachiyomi.util.system.contextCompatColor
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -328,6 +330,10 @@ fun MaterialButton.resetStrokeColor() {
             ), 31
         )
     )
+}
+
+fun TextView.setTextColorRes(@ColorRes id: Int) {
+    setTextColor(context.contextCompatColor(id))
 }
 
 @SuppressLint("RestrictedApi")
