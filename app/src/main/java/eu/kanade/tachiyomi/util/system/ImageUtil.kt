@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
+import eu.kanade.tachiyomi.R
 import java.io.InputStream
 import java.net.URLConnection
 import kotlin.math.abs
@@ -56,9 +57,9 @@ object ImageUtil {
         return null
     }
 
-    fun autoSetBackground(image: Bitmap?, useWhiteAlways: Boolean, context: Context): Drawable {
-        val backgroundColor = if (useWhiteAlways) Color.WHITE else
-            context.getResourceColor(android.R.attr.colorBackground)
+    fun autoSetBackground(image: Bitmap?, alwaysUseWhite: Boolean, context: Context): Drawable {
+        val backgroundColor = if (alwaysUseWhite) Color.WHITE else
+            context.getResourceColor(R.attr.readerBackground)
         if (image == null) return ColorDrawable(backgroundColor)
         if (image.width < 50 || image.height < 50)
             return ColorDrawable(backgroundColor)

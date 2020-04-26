@@ -12,6 +12,7 @@
     </declare-styleable>
 
     <attr name="actionBarTintColor" format="color"/>
+    <attr name="readerBackground" format="color"/>
     <attr name="tabBarIconColor" format="reference|integer"/>
     <attr name="tabBarIconInactive" format="reference|integer"/>
 </resources>
