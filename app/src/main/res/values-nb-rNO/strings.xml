@@ -209,7 +209,7 @@
     <string name="local">Lokal</string>
     <string name="search_filters">Søkefilter</string>
     <string name="no_more_results">Ingen flere resultater</string>
-    <string name="local_library">Lokal manga</string>
+    <string name="local_source">Lokal manga</string>
     <string name="other">Andre</string>
     <string name="global_search">Globalt søk…</string>
     <string name="latest">Seneste</string>

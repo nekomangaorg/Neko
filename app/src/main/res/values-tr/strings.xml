@@ -215,7 +215,7 @@
     <string name="local">Yerel</string>
     <string name="search_filters">Arama süzgeçleri</string>
     <string name="no_more_results">Başka sonuç yok</string>
-    <string name="local_library">Yerel manga</string>
+    <string name="local_source">Yerel manga</string>
     <string name="other">Diğer</string>
     <string name="global_search">Genel arama…</string>
     <string name="latest">En son</string>

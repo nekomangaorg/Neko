@@ -275,7 +275,7 @@
     <string name="what_should_backup">어떤 항목들을 백업하겠습니까\?</string>
     <string name="clear_database_completed">항목 삭제됨</string>
     <string name="local">로컬</string>
-    <string name="local_library">로컬 만화</string>
+    <string name="local_source">로컬 만화</string>
     <string name="other">기타</string>
     <string name="browse">찾아보기</string>
     <string name="licensed">판권작</string>

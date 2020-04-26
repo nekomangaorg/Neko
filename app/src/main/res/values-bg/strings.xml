@@ -282,7 +282,7 @@
     <string name="restoring_backup">Възстановяване на копие</string>
     <string name="refresh_tracking_metadata">Обнови метаданните на проследяването</string>
     <string name="updates_tracking_details">Обновява статус, оценка и последно прочетена глава от услугите за проследяване</string>
-    <string name="local_library">Локална манга</string>
+    <string name="local_source">Локална манга</string>
     <string name="paused">На пауза</string>
     <string name="download_paused">Изтеглянето спряно</string>
     <string name="restore_message">За възстановяването се изтеглят данни от източника, за които може да бъде отчетен разход на данни. Също проверете дали сте влезли коректно в източниците, които го изискват, преди възстановяването.</string>

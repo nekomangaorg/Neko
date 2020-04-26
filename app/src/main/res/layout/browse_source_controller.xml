@@ -30,4 +30,15 @@
         android:text="@string/filter"
         app:icon="@drawable/ic_filter_list_white_24dp"/>
 
+    <eu.kanade.tachiyomi.widget.EmptyView
+        android:id="@+id/empty_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        android:gravity="center"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/extension_uninstall_button"/>
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

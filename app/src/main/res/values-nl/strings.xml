@@ -144,7 +144,7 @@
     <string name="login">Log in</string>
     <string name="unknown_error">Onbekende fout</string>
     <string name="no_more_results">Geen verdere resultaten</string>
-    <string name="local_library">Lokale manga</string>
+    <string name="local_source">Lokale manga</string>
     <string name="description">Beschrijving</string>
     <string name="unknown">Onbekend</string>
     <string name="author">Auteur</string>

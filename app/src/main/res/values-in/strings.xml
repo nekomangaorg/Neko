@@ -188,7 +188,7 @@
     <string name="could_not_log_in">Login gagal</string>
     <string name="unknown_error">Terdapat suatu kesalahan</string>
     <string name="no_more_results">Tidak ada hasil lainnya</string>
-    <string name="local_library">Manga lokal</string>
+    <string name="local_source">Manga lokal</string>
     <string name="description">Deskripsi</string>
     <string name="ongoing">Berlanjut</string>
     <string name="unknown">Tidak diketahui</string>

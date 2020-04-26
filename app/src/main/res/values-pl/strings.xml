@@ -352,7 +352,7 @@
     <string name="search_filters">Filtry wyszukiwania</string>
     <string name="no_more_results">Nie ma więcej wyników</string>
     <string name="no_results_found">Nie znaleziono wyników</string>
-    <string name="local_library">Lokalne mangi</string>
+    <string name="local_source">Lokalne mangi</string>
     <string name="other">Inne</string>
     <string name="global_search">Wyszukiwanie globalne…</string>
     <string name="latest">Najnowsze</string>

@@ -215,7 +215,7 @@
     <string name="local">ท้องถิ่น</string>
     <string name="search_filters">ตัวกรองค้นหา</string>
     <string name="no_more_results">ไม่มีผลลัพธ์เพิ่มเติม</string>
-    <string name="local_library">มังงะภายในเครื่อง</string>
+    <string name="local_source">มังงะภายในเครื่อง</string>
     <string name="other">อื่น ๆ</string>
     <string name="global_search">ค้นหาทั้งหมด…</string>
     <string name="latest">ล่าสุด</string>

@@ -216,7 +216,7 @@
     <string name="local">Τοπικό</string>
     <string name="search_filters">Φίλτρα αναζήτησης</string>
     <string name="no_more_results">Δεν υπάρχουν άλλα αποτελέσματα</string>
-    <string name="local_library">Τοπικά manga</string>
+    <string name="local_source">Τοπικά manga</string>
     <string name="other">Άλλα</string>
     <string name="global_search">Καθολική αναζήτηση…</string>
     <string name="latest">Τελευταίο</string>

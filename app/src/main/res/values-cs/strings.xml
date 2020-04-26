@@ -249,7 +249,7 @@
     <string name="helps_fix_bugs">Pomáhá opravit chyby. Nebudou odeslány žádné citlivé údaje</string>
     <string name="local">Lokální</string>
     <string name="search_filters">Filtry vyhledávání</string>
-    <string name="local_library">Lokální manga</string>
+    <string name="local_source">Lokální manga</string>
     <string name="other">Ostatní</string>
     <string name="latest">Nejnovější</string>
     <string name="browse">Procházet</string>

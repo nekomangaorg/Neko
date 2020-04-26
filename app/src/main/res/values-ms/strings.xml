@@ -189,7 +189,7 @@
     <string name="unknown_error">Ralat tidak diketahui</string>
     <string name="local">Setempat</string>
     <string name="no_more_results">Tiada lagi hasil</string>
-    <string name="local_library">Manga setempat</string>
+    <string name="local_source">Manga setempat</string>
     <string name="other">Lain</string>
     <string name="global_search">Carian keseluruhan…</string>
     <string name="latest">Terkini</string>

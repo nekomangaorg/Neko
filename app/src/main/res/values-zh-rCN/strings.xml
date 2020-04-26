@@ -215,7 +215,7 @@
     <string name="local">本地</string>
     <string name="search_filters">按分类搜索</string>
     <string name="no_more_results">找不到更多结果</string>
-    <string name="local_library">本地漫画</string>
+    <string name="local_source">本地漫画</string>
     <string name="other">其它</string>
     <string name="global_search">全局搜索…</string>
     <string name="latest">最近更新</string>

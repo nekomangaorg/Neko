@@ -218,7 +218,7 @@
     <string name="local">Local</string>
     <string name="search_filters">Filtres de cerca</string>
     <string name="no_more_results">No hi ha més resultats</string>
-    <string name="local_library">Manga en local</string>
+    <string name="local_source">Manga en local</string>
     <string name="other">Altres</string>
     <string name="global_search">Cerca global…</string>
     <string name="latest">Recents</string>

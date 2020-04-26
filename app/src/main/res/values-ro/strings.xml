@@ -215,7 +215,7 @@
     <string name="local">Local</string>
     <string name="search_filters">Filtre de căutare</string>
     <string name="no_more_results">Nu mai sunt rezultate</string>
-    <string name="local_library">Manga local</string>
+    <string name="local_source">Manga local</string>
     <string name="other">Altele</string>
     <string name="global_search">Căutare globală…</string>
     <string name="latest">Cel mai recent</string>

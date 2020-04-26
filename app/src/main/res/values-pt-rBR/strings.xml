@@ -188,7 +188,7 @@ Além disso, verifique se as fontes que requerem uma conta foram configuradas co
     <string name="could_not_log_in">Erro ao fazer login</string>
     <string name="unknown_error">Erro desconhecido</string>
     <string name="no_more_results">Não há mais resultados</string>
-    <string name="local_library">Mangá local</string>
+    <string name="local_source">Mangá local</string>
     <string name="description">Descrição</string>
     <string name="ongoing">Em andamento</string>
     <string name="unknown">Desconhecido</string>

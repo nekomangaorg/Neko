@@ -217,7 +217,7 @@
     <string name="local">Lokalno</string>
     <string name="search_filters">Filteri pretrage</string>
     <string name="no_more_results">Nema više rezultata</string>
-    <string name="local_library">Lokalna manga</string>
+    <string name="local_source">Lokalna manga</string>
     <string name="other">Ostalo</string>
     <string name="global_search">Globalno pretraživanje…</string>
     <string name="latest">Poslednje</string>

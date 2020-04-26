@@ -186,7 +186,7 @@
     <string name="could_not_log_in">Anmeldungsfehler</string>
     <string name="unknown_error">Unbekannter Fehler</string>
     <string name="no_more_results">Keine weiteren Ergebnisse</string>
-    <string name="local_library">Lokale Manga</string>
+    <string name="local_source">Lokale Manga</string>
     <string name="description">Beschreibung</string>
     <string name="ongoing">Fortlaufend</string>
     <string name="unknown">Unbekannt</string>
