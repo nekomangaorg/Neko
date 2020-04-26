@@ -53,6 +53,7 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
 
     private fun onPositiveButtonClick() {
         val view = dialogView ?: return
+        if (category.id ?: 0 <= 0) return
         val text = view.title.text.toString()
         val categoryExists = categoryExists(text)
         if (text.isNotBlank() && !categoryExists && !text.equals(category.name, true)) {
@@ -85,6 +86,12 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
     }
 
     fun onViewCreated(view: View) {
+        if (category.id ?: 0 <= 0) {
+            view.title.gone()
+            view.download_new.gone()
+            view.include_global.gone()
+            return
+        }
         view.edit_categories.setOnClickListener {
             router.popCurrentController()
             router.pushController(CategoryController().withFadeTransaction())
