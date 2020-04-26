@@ -424,6 +424,7 @@ class LibraryPresenter(
             it.toIntOrNull()
         }.toMutableSet()
 
+        if (categorySet.contains(0)) categories.add(0, createDefaultCategory())
         if (showCategories) {
             categories.forEach { category ->
                 val catId = category.id ?: return@forEach
@@ -435,7 +436,7 @@ class LibraryPresenter(
                 } else if (catId in categoriesHidden) {
                     val mangaToRemove = items.filter { it.manga.category == catId }
                     val mergedTitle = mangaToRemove.joinToString("-") {
-                        it.manga.title
+                        it.manga.title + "-" + it.manga.author
                     }
                     items.removeAll(mangaToRemove)
                     val headerItem = headerItems[catId]
@@ -445,8 +446,6 @@ class LibraryPresenter(
                 }
             }
         }
-
-        if (categorySet.contains(0)) categories.add(0, createDefaultCategory())
 
         categories.forEach {
             it.isHidden = it.id in categoriesHidden
