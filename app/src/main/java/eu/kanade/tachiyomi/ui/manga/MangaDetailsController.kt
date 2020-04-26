@@ -94,6 +94,7 @@ import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.ThemeUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.pxToDp
 import eu.kanade.tachiyomi.util.system.toast
@@ -396,17 +397,15 @@ class MangaDetailsController : BaseController,
                     coverDrawable = resource
                     val bitmapCover = resource as? BitmapDrawable ?: return
                     Palette.from(bitmapCover.bitmap).generate {
-                        if (recycler == null) return@generate
-                        val currentNightMode =
-                            recycler.resources!!.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+                        if (recycler == null || it == null) return@generate
                         val colorBack = view.context.getResourceColor(
                             android.R.attr.colorBackground
                         )
-                        val backDropColor =
-                            (if (currentNightMode == Configuration.UI_MODE_NIGHT_NO) it?.getLightVibrantColor(
-                                colorBack
-                            )
-                            else it?.getDarkVibrantColor(colorBack)) ?: colorBack
+                        val backDropColor = if (!view.context.isInNightMode()) {
+                            it.getLightVibrantColor(colorBack)
+                        } else {
+                            it.getDarkVibrantColor(colorBack)
+                        }
                         coverColor = backDropColor
                         getHeader()?.setBackDrop(backDropColor)
                         if (toolbarIsColored) {
@@ -423,10 +422,9 @@ class MangaDetailsController : BaseController,
 
     /** Set toolbar theme for themes that are inverted (ie. light blue theme) */
     private fun setActionBar(forThis: Boolean) {
-        val currentNightMode =
-            activity!!.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+        val activity = activity ?: return
         // if the theme is using inverted toolbar color
-        if (currentNightMode == Configuration.UI_MODE_NIGHT_NO && ThemeUtil.isBlueTheme(
+        if (!activity.isInNightMode() && ThemeUtil.isBlueTheme(
                 presenter.preferences.theme()
             )
         ) {
@@ -441,15 +439,15 @@ class MangaDetailsController : BaseController,
                 if (forThis) android.R.attr.textColorPrimary
                 else R.attr.actionBarTintColor
             ) ?: Color.BLACK
-            (activity as MainActivity).toolbar.setTitleTextColor(iconPrimary)
-            (activity as MainActivity).drawerArrow?.color = iconPrimary
-            (activity as MainActivity).toolbar.overflowIcon?.setTint(iconPrimary)
-            if (forThis) activity!!.main_content.systemUiVisibility =
-                activity!!.main_content.systemUiVisibility.or(
+            activity.toolbar.setTitleTextColor(iconPrimary)
+            activity.drawerArrow?.color = iconPrimary
+            activity.toolbar.overflowIcon?.setTint(iconPrimary)
+            if (forThis) activity.main_content.systemUiVisibility =
+                activity.main_content.systemUiVisibility.or(
                     View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
                 )
-            else activity!!.main_content.systemUiVisibility =
-                activity!!.main_content.systemUiVisibility.rem(
+            else activity.main_content.systemUiVisibility =
+                activity.main_content.systemUiVisibility.rem(
                     View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
                 )
         }
