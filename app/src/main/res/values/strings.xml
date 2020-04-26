@@ -204,7 +204,7 @@
     <string name="search_filters">Search filters</string>
     <string name="no_more_results">No more results</string>
     <string name="no_results_found">No results found</string>
-    <string name="local_library">Local library</string>
+    <string name="local_source">Local source</string>
     <string name="other">Other</string>
     <string name="global_search">Global search…</string>
     <string name="view_latest">View latest</string>
@@ -216,6 +216,8 @@
     <string name="sources">Sources</string>
     <string name="source_hidden">Source hidden</string>
     <string name="last_used">Last Used</string>
+    <string name="local_source_help_guide">Local source guide</string>
+    <string name="check_site_in_web">Check website in WebView</string>
 
     <!-- Other Screens -->
 

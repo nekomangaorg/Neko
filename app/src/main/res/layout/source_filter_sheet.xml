@@ -60,7 +60,6 @@
             android:id="@+id/search_btn"
             style="@style/Neko.Button.TextButton"
             android:textSize="16sp"
-            android:letterSpacing="0.0"
             android:layout_width="wrap_content"
             android:textColor="?attr/tabBarIconColor"
             android:layout_height="match_parent"

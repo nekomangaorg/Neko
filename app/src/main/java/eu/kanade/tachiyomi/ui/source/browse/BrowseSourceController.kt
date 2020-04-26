@@ -33,6 +33,7 @@ import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.system.connectivityManager
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.applyWindowInsetsForRootController
+import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.inflate
 import eu.kanade.tachiyomi.util.view.scrollViewWith
@@ -42,6 +43,7 @@ import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.util.view.visibleIf
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
+import eu.kanade.tachiyomi.widget.EmptyView
 import kotlinx.android.synthetic.main.browse_source_controller.*
 import kotlinx.android.synthetic.main.main_activity.*
 import rx.Observable
@@ -399,18 +401,49 @@ open class BrowseSourceController(bundle: Bundle) :
         hideProgressBar()
 
         snack?.dismiss()
-        val message = if (error is NoResultsException) catalogue_view.context.getString(R.string.no_results_found) else (error.message ?: "")
-        snack = source_layout?.snack(message, Snackbar.LENGTH_INDEFINITE) {
-            setAction(R.string.retry) {
-                // If not the first page, show bottom progress bar.
-                if (adapter.mainItemCount > 0) {
-                    val item = progressItem ?: return@setAction
-                    adapter.addScrollableFooterWithDelay(item, 0, true)
-                } else {
-                    showProgressBar()
-                presenter.requestNext()
-                }
+
+        val message = getErrorMessage(error)
+        val retryAction = View.OnClickListener {
+
+            // If not the first page, show bottom progress bar.
+            if (adapter.mainItemCount > 0 && progressItem != null) {
+                adapter.addScrollableFooterWithDelay(progressItem!!, 0, true)
+            } else {
+                showProgressBar()
             }
+            presenter.requestNext()
+        }
+
+        if (adapter.isEmpty) {
+            val actions = emptyList<EmptyView.Action>().toMutableList()
+
+            actions += if (presenter.source is LocalSource) {
+                EmptyView.Action(R.string.local_source_help_guide, View.OnClickListener { openLocalSourceHelpGuide() })
+            } else {
+                EmptyView.Action(R.string.retry, retryAction)
+            }
+
+            if (presenter.source is HttpSource) {
+                actions += EmptyView.Action(R.string.open_in_webview, View.OnClickListener { openInWebView() })
+            }
+
+            empty_view.show(R.drawable.ic_local_library_24dp, message, actions)
+        } else {
+            snack = source_layout?.snack(message, Snackbar.LENGTH_INDEFINITE) {
+                setAction(R.string.retry, retryAction)
+            }
+        }
+    }
+
+    private fun getErrorMessage(error: Throwable): String {
+        if (error is NoResultsException) {
+            return activity!!.getString(R.string.no_results_found)
+        }
+
+        return when {
+            error.message == null -> ""
+            error.message!!.startsWith("HTTP error") -> "${error.message}: ${activity!!.getString(R.string.check_site_in_web)}"
+            else -> error.message!!
         }
     }
 
