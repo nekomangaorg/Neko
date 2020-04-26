@@ -436,9 +436,13 @@ class ReaderPresenter(
      * Returns the viewer position used by this manga or the default one.
      */
     fun getMangaViewer(): Int {
-        val manga = manga ?: return preferences.defaultViewer()
-        if (manga.viewer == -1) {
-            manga.viewer = manga.defaultReaderType()
+        val default = preferences.defaultViewer()
+        val manga = manga ?: return default
+        val readerType = manga.defaultReaderType()
+        if (manga.viewer == -1 || (readerType == ReaderActivity.WEBTOON && readerType != manga.viewer)) {
+            val cantSwitchToLTR =
+                (readerType == ReaderActivity.LEFT_TO_RIGHT && default != ReaderActivity.RIGHT_TO_LEFT)
+            manga.viewer = if (cantSwitchToLTR) 0 else readerType
             db.updateMangaViewer(manga).asRxObservable().subscribe()
         }
 
