@@ -203,7 +203,7 @@
             android:layout_gravity="center"
             android:layout_marginStart="6dp"
             android:layout_marginEnd="6dp"
-            android:contentDescription="@string/open_in_web_view"
+            android:contentDescription="@string/open_in_webview"
             android:padding="5dp"
             app:iiv_icon="cmd_web"
             style="@style/Neko.Iconics"
