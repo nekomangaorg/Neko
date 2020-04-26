@@ -8,7 +8,6 @@ import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.Point
-import android.graphics.Typeface
 import android.os.Build
 import android.view.View
 import android.view.ViewGroup
@@ -16,7 +15,6 @@ import android.view.ViewTreeObserver
 import android.view.WindowInsets
 import android.widget.Button
 import android.widget.FrameLayout
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.ColorRes
 import androidx.annotation.IdRes
@@ -24,8 +22,6 @@ import androidx.annotation.Px
 import androidx.appcompat.view.menu.MenuBuilder
 import androidx.core.graphics.ColorUtils
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.amulyakhare.textdrawable.TextDrawable
-import com.amulyakhare.textdrawable.util.ColorGenerator
 import com.google.android.material.bottomnavigation.BottomNavigationItemView
 import com.google.android.material.bottomnavigation.BottomNavigationMenuView
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -39,7 +35,6 @@ import eu.kanade.tachiyomi.util.system.contextCompatColor
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import kotlin.math.min
 
 /**
  * Returns coordinates of view.
@@ -115,23 +110,6 @@ inline fun View.visibleIf(show: Boolean) {
 
 inline fun View.visInvisIf(show: Boolean) {
     visibility = if (show) View.VISIBLE else View.INVISIBLE
-}
-
-/**
- * Returns a TextDrawable determined by input
- *
- * @param text text of [TextDrawable]
- * @param random random color
- */
-fun ImageView.roundTextIcon(text: String) {
-    val size = min(this.width, this.height)
-    val letter = text.take(1).toUpperCase()
-    setImageDrawable(
-        TextDrawable.builder().beginConfig().width(size).height(size).textColor(Color.WHITE)
-            .useFont(Typeface.DEFAULT).endConfig().buildRound(
-                letter, ColorGenerator.MATERIAL.getColor(letter)
-            )
-    )
 }
 
 inline val View.marginTop: Int
