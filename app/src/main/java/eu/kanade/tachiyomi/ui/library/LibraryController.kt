@@ -56,6 +56,7 @@ import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.dpToPxEnd
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.applyWindowInsetsForRootController
 import eu.kanade.tachiyomi.util.view.getItemView
 import eu.kanade.tachiyomi.util.view.gone
@@ -169,7 +170,7 @@ class LibraryController(
                     // fastScroll height * indicator position - center text - fastScroll padding
                     text_view_m.translationY = view.height *
                         (index.toFloat() / (adapter.headerItems.size + 1))
-                    - text_view_m.height / 2 + 16.dpToPx
+                    -text_view_m.height / 2 + 16.dpToPx
                     text_view_m.translationX = 45f.dpToPxEnd
                     text_view_m.alpha = 1f
                     text_view_m.text = headerItem.category.name
@@ -265,7 +266,8 @@ class LibraryController(
             val letter = adapter.getSectionText(position)
             if (!singleCategory &&
                 !adapter.isHeader(adapter.getItem(position)) &&
-                position != adapter.itemCount - 1) null
+                position != adapter.itemCount - 1
+            ) null
             else if (letter != null) FastScrollItemIndicator.Text(letter)
             else FastScrollItemIndicator.Icon(R.drawable.ic_star_24dp)
         })

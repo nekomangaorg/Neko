@@ -79,7 +79,7 @@
         <TextView
             android:id="@+id/chapter_scanlator"
             style="@style/Neko.Condensed"
-            android:textColor="@color/textColorSecondary"
+            android:textColor="@color/text_color_secondary"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"

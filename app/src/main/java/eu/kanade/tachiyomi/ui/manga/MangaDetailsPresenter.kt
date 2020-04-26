@@ -35,6 +35,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.Injekt
@@ -102,6 +103,7 @@ class MangaDetailsPresenter(
         fetchExternalLinks()
         fetchTrackings()
         refreshTrackers()
+        similarToolTip()
     }
 
     fun onDestroy() {
@@ -315,6 +317,7 @@ class MangaDetailsPresenter(
     private fun hasTensOfChapters(chapters: List<ChapterItem>): Boolean {
         return chapters.size in 21..300
     }
+
     /**
      * Returns the next unread chapter or null if everything is read.
      */
@@ -653,8 +656,6 @@ class MangaDetailsPresenter(
     fun isTracked(): Boolean =
         loggedServices.any { service -> tracks.any { it.sync_id == service.id } }
 
-    fun hasTrackers(): Boolean = loggedServices.isNotEmpty()
-
     fun similarEnabled(): Boolean = preferences.similarEnabled()
 
     // Tracking
@@ -808,6 +809,20 @@ class MangaDetailsPresenter(
         val track = item.track!!
         track.last_chapter_read = chapterNumber
         updateRemote(track, item.service)
+    }
+
+    fun similarToolTip() {
+        if (similarEnabled() && !preferences.shownSimilarTutorial().get()) {
+            scope.launch {
+                withContext(Dispatchers.IO) {
+                    delay(1500)
+                    withContext(Dispatchers.Main) {
+                        controller.showSimilarToopTip()
+                        preferences.shownSimilarTutorial().set(true)
+                    }
+                }
+            }
+        }
     }
 
     companion object {

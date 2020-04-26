@@ -142,7 +142,7 @@
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/subtitle"
                 style="@style/Neko.Condensed.Medium"
-                android:textColor="@color/textColorSecondary"
+                android:textColor="@color/text_color_secondary"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="-1dp"

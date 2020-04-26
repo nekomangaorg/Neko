@@ -50,7 +50,7 @@
 
     <style name="Neko.Subtitle2" parent="TextAppearance.MaterialComponents.Subtitle2">
         <item name="fontFamily">@font/metropolis_regular</item>
-        <item name="android:textColor">@color/textColorSecondary</item>
+        <item name="android:textColor">@color/text_color_hint</item>
     </style>
 
     <style name="Neko.Subtitle2.Medium" parent="TextAppearance.MaterialComponents.Subtitle2">
@@ -109,7 +109,7 @@
 
     <style name="Neko.Caption" parent="TextAppearance.MaterialComponents.Caption">
         <item name="fontFamily">@font/metropolis_medium</item>
-        <item name="android:textColor">@color/textColorHint</item>
+        <item name="android:textColor">@color/text_color_hint</item>
         <item name="android:textSize">12sp</item>
     </style>
 

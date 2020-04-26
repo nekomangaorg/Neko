@@ -19,14 +19,14 @@ class MangaDetailsAdapter(
 
     val hasShownSwipeTut
         get() = preferences.shownChapterSwipeTutorial()
-
+    
     var items: List<ChapterItem> = emptyList()
 
     val delegate: MangaDetailsInterface = controller
     val presenter = controller.presenter
 
     val decimalFormat = DecimalFormat("#.###", DecimalFormatSymbols()
-            .apply { decimalSeparator = '.' })
+        .apply { decimalSeparator = '.' })
 
     fun setChapters(items: List<ChapterItem>?) {
         this.items = items ?: emptyList()
@@ -46,8 +46,10 @@ class MangaDetailsAdapter(
         if (s.isNullOrBlank()) {
             updateDataSet(items)
         } else {
-            updateDataSet(items.filter { it.name.contains(s, true) ||
-                it.scanlator?.contains(s, true) == true })
+            updateDataSet(items.filter {
+                it.name.contains(s, true) ||
+                    it.scanlator?.contains(s, true) == true
+            })
         }
     }
 
@@ -67,7 +69,7 @@ class MangaDetailsAdapter(
                 presenter.getGroupNumber(chapter)?.toString() ?: "*"
             MangaDetailsPresenter.HUNDREDS_OF_CHAPTERS ->
                 if (chapter.chapter_number < 0) "*"
-            else (chapter.chapter_number / 100).toInt().toString()
+                else (chapter.chapter_number / 100).toInt().toString()
             MangaDetailsPresenter.TENS_OF_CHAPTERS ->
                 if (chapter.chapter_number < 0) "*"
                 else (chapter.chapter_number / 10).toInt().toString()
@@ -84,7 +86,8 @@ class MangaDetailsAdapter(
                 val volume = presenter.getGroupNumber(chapter)
                 if (volume != null) recyclerView.context.getString(
                     if (scrollType == MangaDetailsPresenter.MULTIPLE_SEASONS) R.string.season_
-                    else R.string.volume_, volume)
+                    else R.string.volume_, volume
+                )
                 else recyclerView.context.getString(R.string.unknown)
             }
             MangaDetailsPresenter.HUNDREDS_OF_CHAPTERS -> recyclerView.context.getString(

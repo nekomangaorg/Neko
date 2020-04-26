@@ -1,17 +1,13 @@
 package eu.kanade.tachiyomi.ui.manga
 
 import android.annotation.SuppressLint
-import android.content.res.ColorStateList
-import android.graphics.Color
+import android.app.Activity
 import android.view.MotionEvent
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.content.ContextCompat
-import androidx.core.graphics.ColorUtils
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.signature.ObjectKey
-import com.google.android.material.button.MaterialButton
 import com.mikepenz.iconics.typeface.IIcon
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
@@ -22,10 +18,9 @@ import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.system.getResourceColor
-import eu.kanade.tachiyomi.util.system.isLTR
 import eu.kanade.tachiyomi.util.system.iconicsDrawable
+import eu.kanade.tachiyomi.util.system.isLTR
 import eu.kanade.tachiyomi.util.view.gone
-import eu.kanade.tachiyomi.util.view.resetStrokeColor
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.visInvisIf
 import eu.kanade.tachiyomi.util.view.visible
@@ -253,21 +248,6 @@ class MangaHeaderHolder(
             .transition(DrawableTransitionOptions.withCrossFade()).into(backdrop)
     }
 
-    private fun MaterialButton.checked(checked: Boolean) {
-        if (checked) {
-            backgroundTintList = ColorStateList.valueOf(
-                ColorUtils.setAlphaComponent(
-                    context.getResourceColor(R.attr.colorAccent), 75
-                )
-            )
-            strokeColor = ColorStateList.valueOf(Color.TRANSPARENT)
-        } else {
-            resetStrokeColor()
-            backgroundTintList =
-                ContextCompat.getColorStateList(context, android.R.color.transparent)
-        }
-    }
-
     fun setTopHeight(newHeight: Int) {
         top_view.updateLayoutParams<ConstraintLayout.LayoutParams> {
             height = newHeight
@@ -292,6 +272,11 @@ class MangaHeaderHolder(
         sub_item_group.visible()
         less_button.visibleIf(shouldShow.not())
         manga_genres_tags.visibleIf(shouldShow.not())
+    }
+
+    fun showSimilarToolTip(activity: Activity?) {
+        val act = activity ?: return
+        SimilarToolTip(activity, view.context, similar_button)
     }
 
     override fun onLongClick(view: View?): Boolean {

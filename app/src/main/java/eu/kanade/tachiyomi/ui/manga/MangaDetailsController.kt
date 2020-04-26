@@ -50,6 +50,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import com.bumptech.glide.signature.ObjectKey
+import com.github.florent37.viewtooltip.ViewTooltip
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.reddit.indicatorfastscroll.FastScrollItemIndicator
@@ -166,6 +167,7 @@ class MangaDetailsController : BaseController,
     private var textAnim: ViewPropertyAnimator? = null
     private var scrollAnim: ViewPropertyAnimator? = null
     var chapterPopupMenu: Pair<Int, PopupMenu>? = null
+    private var similarTooltip: ViewTooltip? = null
 
     // Tablet Layout
     var isTablet = false
@@ -291,7 +293,8 @@ class MangaDetailsController : BaseController,
                         showScroll = show
                         scrollAnim?.cancel()
                         scrollAnim = fast_scroller.animate().setDuration(100).translationX(
-                            if (show) 0f else 25f.dpToPxEnd)
+                            if (show) 0f else 25f.dpToPxEnd
+                        )
                         scrollAnim?.start()
                     }
                     if (fPosition > 0 && !showScroll) {
@@ -489,6 +492,11 @@ class MangaDetailsController : BaseController,
         activity.windowManager?.defaultDisplay?.getMetrics(displayMetrics)
         return displayMetrics.heightPixels.pxToDp >= 720
     }
+
+    fun showSimilarToopTip() {
+        getHeader()?.showSimilarToolTip(activity)
+    }
+
     //endregion
 
     //region Lifecycle methods

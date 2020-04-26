@@ -19,6 +19,7 @@
     <string name="view_comments">View comments</string>
     <string name="start_reading_">Start reading %1$s</string>
     <string name="continue_reading_">Continue reading %1$s</string>
+    <string name="tap_to_show_similar_manga">Tap here to show similar manga</string>
 
     <!-- Follows -->
     <string name="follows">My follows</string>

@@ -208,8 +208,6 @@ class PreferencesHelper(val context: Context) {
 
     fun automaticUpdates() = prefs.getBoolean(Keys.automaticUpdates, true)
 
-    fun automaticExtUpdates() = rxPrefs.getBoolean(Keys.automaticExtUpdates, false)
-
     fun collapsedCategories() = rxPrefs.getStringSet("collapsed_categories", mutableSetOf())
 
     fun hiddenSources() = rxPrefs.getStringSet("hidden_catalogues", mutableSetOf())
@@ -271,14 +269,12 @@ class PreferencesHelper(val context: Context) {
 
     fun shownChapterSwipeTutorial() = flowPrefs.getBoolean("shown_swipe_tutorial", false)
 
-    fun marginRatioWebtoon() = rxPrefs.getInteger(Keys.marginRatioWebtoon, 0)
+    fun shownSimilarTutorial() = flowPrefs.getBoolean("shown_similar_tutorial", false)
 
     fun skipFiltered() = prefs.getBoolean(Keys.skipFiltered, false)
 
     fun similarEnabled() = prefs.getBoolean(Keys.similarEnabled, false)
-
-    fun similarUpdateInterval() = rxPrefs.getInteger(Keys.libraryUpdateInterval, 7)
-
+    
     fun similarUpdateRestriction() = prefs.getStringSet(Keys.similarUpdateRestriction, emptySet())
 
     fun lowQualityCovers() = prefs.getBoolean(Keys.lowQualityCovers, false)
