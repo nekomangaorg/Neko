@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.util.storage.DiskUtil
+import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 
 /**
@@ -51,7 +52,8 @@ class DownloadProvider(private val context: Context) {
         try {
             return downloadsDir.createDirectory(getSourceDirName(source))
                 .createDirectory(getMangaDirName(manga))
-        } catch (e: NullPointerException) {
+        } catch (e: Exception) {
+            Timber.e(e)
             throw Exception(context.getString(R.string.invalid_download_location))
         }
     }
@@ -197,12 +199,25 @@ class DownloadProvider(private val context: Context) {
         return DiskUtil.buildValidFilename(chapter.name + " - " + chapter.url.substringAfterLast("/"))
     }
 
+    fun getJ2kChapterName(chapter: Chapter): String {
+        return DiskUtil.buildValidFilename(
+            if (chapter.scanlator != null) "${chapter.scanlator}_${chapter.name}"
+            else chapter.name
+        )
+    }
+
     /**
      * Returns valid downloaded chapter directory names.
      *
      * @param chapter the chapter to query.
      */
     fun getValidChapterDirNames(chapter: Chapter): List<String> {
-        return listOf(getChapterDirName(chapter))
+        return listOf(
+            getChapterDirName(chapter),
+            //chater names from j2k
+            getJ2kChapterName(chapter),
+            // Legacy chapter directory name used in v0.8.4 and before
+            DiskUtil.buildValidFilename(chapter.name)
+        )
     }
 }
