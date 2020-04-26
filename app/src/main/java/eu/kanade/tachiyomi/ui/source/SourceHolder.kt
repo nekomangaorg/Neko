@@ -54,9 +54,10 @@ class SourceHolder(view: View, val adapter: SourceAdapter) :
         // Set circle letter image.
         itemView.post {
             val icon = source.icon()
-            if (icon != null) edit_button.setImageDrawable(source.icon())
-            else if (item.source.id == LocalSource.ID)
-                edit_button.setImageResource(R.mipmap.ic_local_source)
+            when {
+                icon != null -> edit_button.setImageDrawable(icon)
+                item.source.id == LocalSource.ID -> edit_button.setImageResource(R.mipmap.ic_local_source)
+            }
         }
 
         if (source.supportsLatest) {

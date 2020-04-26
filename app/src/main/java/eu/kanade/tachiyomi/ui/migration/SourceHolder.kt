@@ -27,8 +27,7 @@ class SourceHolder(view: View, val adapter: SourceAdapter) :
 
         // Set circle letter image.
         itemView.post {
-            val icon = source.icon()
-            if (icon != null) edit_button.setImageDrawable(source.icon())
+            edit_button.setImageDrawable(source.icon())
         }
     }
 }
