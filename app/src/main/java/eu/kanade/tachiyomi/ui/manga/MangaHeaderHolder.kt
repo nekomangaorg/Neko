@@ -23,6 +23,7 @@ import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.isLTR
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.invisible
+import eu.kanade.tachiyomi.util.view.isVisible
 import eu.kanade.tachiyomi.util.view.resetStrokeColor
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.visible
@@ -36,6 +37,9 @@ class MangaHeaderHolder(
     startExpanded: Boolean,
     isTablet: Boolean = false
 ) : BaseFlexibleViewHolder(view, adapter) {
+
+    var showReadingButton = true
+    var showMoreButton = true
 
     init {
         chapter_layout.setOnClickListener { adapter.delegate.showChapterFilter() }
@@ -139,20 +143,15 @@ class MangaHeaderHolder(
             if (manga.description.isNullOrBlank()) itemView.context.getString(R.string.no_description)
             else manga.description?.trim()
 
-        if (item.isLocked) sub_item_group.referencedIds =
-            intArrayOf(R.id.manga_summary, R.id.manga_summary_label, R.id.button_layout)
-        else sub_item_group.referencedIds = intArrayOf(
-            R.id.start_reading_button,
-            R.id.manga_summary,
-            R.id.manga_summary_label,
-            R.id.button_layout
-        )
-
         manga_summary.post {
             if (sub_item_group.visibility != View.GONE) {
                 if ((manga_summary.lineCount < 3 && manga.genre.isNullOrBlank()) || less_button.visibility == View.VISIBLE) {
+                    manga_summary.setTextIsSelectable(true)
                     more_button_group.gone()
-                } else more_button_group.visible()
+                    showMoreButton = false
+                } else {
+                    more_button_group.visible()
+                }
             }
             if (adapter.hasFilter()) collapse()
             else expand()
@@ -200,7 +199,8 @@ class MangaHeaderHolder(
 
         with(start_reading_button) {
             val nextChapter = presenter.getNextUnreadChapter()
-            visibleIf(presenter.chapters.isNotEmpty() && !item.isLocked)
+            visibleIf(presenter.chapters.isNotEmpty() && !item.isLocked && !adapter.hasFilter())
+            showReadingButton = isVisible()
             isEnabled = (nextChapter != null)
             text = if (nextChapter != null) {
                 val number = adapter.decimalFormat.format(nextChapter.chapter_number.toDouble())
@@ -292,6 +292,7 @@ class MangaHeaderHolder(
 
     fun collapse() {
         sub_item_group.gone()
+        start_reading_button.gone()
         if (more_button.visibility == View.VISIBLE || more_button.visibility == View.INVISIBLE)
             more_button_group.invisible()
         else {
@@ -302,11 +303,15 @@ class MangaHeaderHolder(
 
     fun expand() {
         sub_item_group.visible()
-        if (more_button.visibility == View.VISIBLE || more_button.visibility == View.INVISIBLE) more_button_group.visible()
+        if (!showMoreButton) more_button_group.gone()
         else {
-            less_button.visible()
-            manga_genres_tags.visible()
+            if (manga_summary.maxLines != Integer.MAX_VALUE) more_button_group.visible()
+            else {
+                less_button.visible()
+                manga_genres_tags.visible()
+            }
         }
+        start_reading_button.visibleIf(showReadingButton)
     }
 
     override fun onLongClick(view: View?): Boolean {
