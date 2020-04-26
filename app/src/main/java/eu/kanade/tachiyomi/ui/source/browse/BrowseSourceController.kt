@@ -401,16 +401,22 @@ open class BrowseSourceController(bundle: Bundle) :
             val actions = emptyList<EmptyView.Action>().toMutableList()
 
             actions += if (presenter.source is LocalSource) {
-                EmptyView.Action(R.string.local_source_help_guide, View.OnClickListener { openLocalSourceHelpGuide() })
+                EmptyView.Action(R.string.local_source_help_guide,
+                    View.OnClickListener { openLocalSourceHelpGuide() })
             } else {
                 EmptyView.Action(R.string.retry, retryAction)
             }
 
             if (presenter.source is HttpSource) {
-                actions += EmptyView.Action(R.string.open_in_webview, View.OnClickListener { openInWebView() })
+                actions += EmptyView.Action(R.string.open_in_webview,
+                    View.OnClickListener { openInWebView() })
             }
 
-            empty_view.show(R.drawable.ic_local_library_24dp, message, actions)
+            empty_view.show(
+                if (presenter.source is HttpSource) R.drawable.ic_browse_24dp else R.drawable.ic_local_library_24dp,
+                message,
+                actions
+            )
         } else {
             snack = source_layout?.snack(message, Snackbar.LENGTH_INDEFINITE) {
                 setAction(R.string.retry, retryAction)
@@ -506,6 +512,7 @@ open class BrowseSourceController(bundle: Bundle) :
      * Shows the progress bar.
      */
     private fun showProgressBar() {
+        empty_view.gone()
         progress?.visible()
         snack?.dismiss()
         snack = null
@@ -515,6 +522,7 @@ open class BrowseSourceController(bundle: Bundle) :
      * Hides active progress bars.
      */
     private fun hideProgressBar() {
+        empty_view.gone()
         progress?.gone()
     }
 
