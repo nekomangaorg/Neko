@@ -5,7 +5,6 @@ package eu.kanade.tachiyomi.util.view
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.res.ColorStateList
-import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.Point
 import android.os.Build
@@ -33,6 +32,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.system.ThemeUtil
 import eu.kanade.tachiyomi.util.system.contextCompatColor
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.system.isInNightMode
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -61,8 +61,7 @@ fun View.snack(
         snack.f()
     }
     val theme = Injekt.get<PreferencesHelper>().theme()
-    val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-    if (ThemeUtil.isAMOLEDTheme(theme) && currentNightMode == Configuration.UI_MODE_NIGHT_YES) {
+    if (ThemeUtil.isAMOLEDTheme(theme) && context.isInNightMode()) {
         val textView: TextView =
             snack.view.findViewById(com.google.android.material.R.id.snackbar_text)
         val button: Button? =
