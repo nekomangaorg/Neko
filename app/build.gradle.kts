@@ -193,7 +193,6 @@ dependencies {
     implementation("eu.davidea:flexible-adapter:5.1.0")
     implementation("eu.davidea:flexible-adapter-ui:1.0.0")
     implementation("com.nononsenseapps:filepicker:2.5.2")
-    implementation("com.github.amulyakhare:TextDrawable:558677e")
     implementation("com.afollestad.material-dialogs:core:3.3.0")
     implementation("com.afollestad.material-dialogs:input:3.3.0")
     implementation("me.zhanghai.android.systemuihelper:library:1.0.0")
