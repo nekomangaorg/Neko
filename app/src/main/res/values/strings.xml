@@ -170,7 +170,7 @@
     <string name="include_in_global_update">Include in global update</string>
     <string name="auto_refresh_covers">Automatically refresh covers</string>
     <string name="auto_refresh_covers_summary">Refresh covers in library as well
-        when updating library (overwrites local covers)</string>
+        when updating library</string>
 
     <!-- Recents -->
     <string name="recents">Recents</string>
