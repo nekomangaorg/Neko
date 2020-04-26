@@ -210,8 +210,6 @@ class MangaDetailsController : BaseController,
 
         presenter.onCreate()
         swipe_refresh.isRefreshing = presenter.isLoading
-        if (manga?.initialized != true)
-            swipe_refresh.post { swipe_refresh.isRefreshing = true }
         swipe_refresh.setOnRefreshListener { presenter.refreshAll() }
     }
 
@@ -556,6 +554,16 @@ class MangaDetailsController : BaseController,
                     android.R.attr.statusBarColor
                 ) ?: colorSecondary
             }
+        }
+    }
+
+    override fun onChangeEnded(
+        changeHandler: ControllerChangeHandler,
+        type: ControllerChangeType
+    ) {
+        super.onChangeEnded(changeHandler, type)
+        if (type == ControllerChangeType.PUSH_ENTER) {
+            swipe_refresh?.isRefreshing = presenter.isLoading
         }
     }
 
