@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.recents
 
-import android.text.format.DateUtils
 import android.view.View
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.signature.ObjectKey
@@ -11,10 +10,10 @@ import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.ui.manga.chapter.BaseChapterHolder
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
+import eu.kanade.tachiyomi.util.system.timeSpanFromNow
 import eu.kanade.tachiyomi.util.view.visibleIf
 import kotlinx.android.synthetic.main.download_button.*
 import kotlinx.android.synthetic.main.recent_manga_item.*
-import java.util.Date
 
 class RecentMangaHolder(
     view: View,
@@ -50,35 +49,25 @@ class RecentMangaHolder(
         val notValidNum = item.mch.chapter.chapter_number <= 0
         body.text = when {
             item.mch.chapter.id == null -> body.context.getString(
-                R.string.added_, DateUtils.getRelativeTimeSpanString(
-                    item.mch.manga.date_added, Date().time, DateUtils.MINUTE_IN_MILLIS
-                ).toString()
+                R.string.added_, item.mch.manga.date_added.timeSpanFromNow
             )
             item.mch.history.id == null -> body.context.getString(
-                R.string.updated_, DateUtils.getRelativeTimeSpanString(
-                    item.chapter.date_upload, Date().time, DateUtils.HOUR_IN_MILLIS
-                ).toString()
+                R.string.updated_, item.chapter.date_upload.timeSpanFromNow
             )
             item.chapter.id != item.mch.chapter.id ->
                 body.context.getString(
-                    R.string.read_, DateUtils.getRelativeTimeSpanString(
-                        item.mch.history.last_read, Date().time, DateUtils.MINUTE_IN_MILLIS
-                    ).toString()
+                    R.string.read_, item.mch.history.last_read.timeSpanFromNow
                 ) + "\n" + body.context.getString(
                 if (notValidNum) R.string.last_read_ else R.string.last_read_chapter_,
                 if (notValidNum) item.mch.chapter.name else adapter.decimalFormat.format(item.mch.chapter.chapter_number)
             )
             item.chapter.pages_left > 0 && !item.chapter.read -> body.context.getString(
-                R.string.read_, DateUtils.getRelativeTimeSpanString(
-                    item.mch.history.last_read, Date().time, DateUtils.MINUTE_IN_MILLIS
-                ).toString()
+                R.string.read_, item.mch.history.last_read.timeSpanFromNow
             ) + "\n" + itemView.resources.getQuantityString(
                 R.plurals.pages_left, item.chapter.pages_left, item.chapter.pages_left
             )
             else -> body.context.getString(
-                R.string.read_, DateUtils.getRelativeTimeSpanString(
-                    item.mch.history.last_read, Date().time, DateUtils.MINUTE_IN_MILLIS
-                ).toString()
+                R.string.read_, item.mch.history.last_read.timeSpanFromNow
             )
         }
         GlideApp.with(itemView.context).load(item.mch.manga).diskCacheStrategy(DiskCacheStrategy
