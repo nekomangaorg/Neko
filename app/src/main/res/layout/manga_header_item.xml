@@ -310,8 +310,7 @@
         android:id="@+id/sub_item_group"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:constraint_referenced_ids="start_reading_button,
-        manga_summary,manga_summary_label,button_layout" />
+        app:constraint_referenced_ids="manga_summary,manga_summary_label,button_layout" />
 
     <me.gujun.android.taggroup.TagGroup
         android:id="@+id/manga_genres_tags"
@@ -358,6 +357,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
+        android:visibility="gone"
         android:layout_marginTop="12dp"
         android:layout_marginEnd="24dp"
         android:text="@string/start_reading"
