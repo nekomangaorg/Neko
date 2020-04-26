@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.ui.library
 
 import android.app.Activity
 import android.content.Context
-import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
 import android.util.TypedValue
@@ -17,7 +16,6 @@ import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.SearchView
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -60,9 +58,13 @@ import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.applyWindowInsetsForRootController
 import eu.kanade.tachiyomi.util.view.getItemView
 import eu.kanade.tachiyomi.util.view.gone
+import eu.kanade.tachiyomi.util.view.hide
 import eu.kanade.tachiyomi.util.view.scrollViewWith
+import eu.kanade.tachiyomi.util.view.setBackground
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
+import eu.kanade.tachiyomi.util.view.setStartTranslationX
 import eu.kanade.tachiyomi.util.view.setStyle
+import eu.kanade.tachiyomi.util.view.show
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
@@ -185,14 +187,11 @@ class LibraryController(
                 RecyclerView.SCROLL_STATE_DRAGGING -> {
                     scrollAnim?.cancel()
                     if (fast_scroller.translationX != 0f) {
-                        fast_scroller.animate().setStartDelay(0).setDuration(100).translationX(0f)
-                            .start()
+                        fast_scroller.show()
                     }
                 }
                 RecyclerView.SCROLL_STATE_IDLE -> {
-                    scrollAnim = fast_scroller.animate().setStartDelay(1000).setDuration(250)
-                        .translationX(25f.dpToPxEnd)
-                    scrollAnim?.start()
+                    scrollAnim = fast_scroller.hide()
                 }
             }
         }
@@ -220,32 +219,12 @@ class LibraryController(
         }
     }
 
-    private fun hideScroller(duration: Long = 1000) {
-        if (alwaysShowScroller) return
-        scrollAnim =
-            fast_scroller.animate().setStartDelay(duration).setDuration(250)
-                .translationX(25f.dpToPxEnd)
-        scrollAnim?.start()
-    }
-
-    private fun setFastScrollBackground() {
-        val context = activity ?: return
-        fast_scroller.background = if (!alwaysShowScroller) ContextCompat.getDrawable(
-            context, R.drawable.fast_scroll_background
-        ) else null
-        fast_scroller.textColor = ColorStateList.valueOf(
-            if (!alwaysShowScroller) Color.WHITE
-            else context.getResourceColor(android.R.attr.textColorPrimary)
-        )
-        fast_scroller.iconColor = fast_scroller.textColor
-    }
-
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
         view.applyWindowInsetsForRootController(activity!!.bottom_nav)
         if (!::presenter.isInitialized) presenter = LibraryPresenter(this)
-        if (!alwaysShowScroller) fast_scroller.translationX = 25f.dpToPxEnd
-        setFastScrollBackground()
+        fast_scroller.setStartTranslationX(!alwaysShowScroller)
+        fast_scroller.setBackground(!alwaysShowScroller)
 
         adapter = LibraryCategoryAdapter(this)
         adapter.expandItemsAtStartUp()
@@ -279,7 +258,10 @@ class LibraryController(
                 itemPosition: Int
             ) {
                 fast_scroller.translationX = 0f
-                hideScroller(2000)
+                if (!alwaysShowScroller) {
+                    scrollAnim?.cancel()
+                    scrollAnim = fast_scroller.hide(2000)
+                }
 
                 textAnim?.cancel()
                 textAnim = text_view_m.animate().alpha(0f).setDuration(250L).setStartDelay(2000)
@@ -423,11 +405,11 @@ class LibraryController(
 
     fun updateShowScrollbar(show: Boolean) {
         alwaysShowScroller = show
-        setFastScrollBackground()
+        fast_scroller.setBackground(!show)
         if (libraryLayout == 0) reattachAdapter()
         scrollAnim?.cancel()
         if (show) fast_scroller.translationX = 0f
-        else hideScroller()
+        else scrollAnim = fast_scroller.hide()
         setRecyclerLayout()
     }
 
@@ -521,9 +503,11 @@ class LibraryController(
         } else recycler_layout.alpha = 1f
         if (justStarted && freshStart) {
             scrollToHeader(activeCategory)
-            fast_scroller.translationX = 0f
-            view?.post {
-                hideScroller(2000)
+            if (!alwaysShowScroller) {
+                fast_scroller.show(false)
+                view?.post {
+                    scrollAnim = fast_scroller.hide(2000)
+                }
             }
         }
         adapter.isLongPressDragEnabled = canDrag()

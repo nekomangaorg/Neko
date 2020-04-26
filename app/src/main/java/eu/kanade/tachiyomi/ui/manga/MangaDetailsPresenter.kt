@@ -67,7 +67,7 @@ class MangaDetailsPresenter(
     private val seasonRegex = Regex("""(Season |S)([0-9]+)?""")
 
     private val loggedServices by lazy { Injekt.get<TrackManager>().services.filter { it.isLogged } }
-    var tracks = emptyList<Track>()
+    private var tracks = emptyList<Track>()
 
     var trackList: List<TrackItem> = emptyList()
 
