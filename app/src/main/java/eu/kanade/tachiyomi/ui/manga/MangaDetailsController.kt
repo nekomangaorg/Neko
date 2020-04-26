@@ -100,9 +100,13 @@ import eu.kanade.tachiyomi.util.system.pxToDp
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.getText
+import eu.kanade.tachiyomi.util.view.hide
 import eu.kanade.tachiyomi.util.view.scrollViewWith
+import eu.kanade.tachiyomi.util.view.setBackground
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
+import eu.kanade.tachiyomi.util.view.setStartTranslationX
 import eu.kanade.tachiyomi.util.view.setStyle
+import eu.kanade.tachiyomi.util.view.show
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
@@ -184,7 +188,6 @@ class MangaDetailsController : BaseController,
     // Hold a reference to the current animator, so that it can be canceled mid-way.
     private var currentAnimator: Animator? = null
 
-    var showScroll = false
     var headerHeight = 0
 
     override fun getTitle(): String? {
@@ -291,11 +294,22 @@ class MangaDetailsController : BaseController,
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 val atTop = !recycler.canScrollVertically(-1)
                 if (atTop) getHeader()?.backdrop?.translationY = 0f
+                when (newState) {
+                    RecyclerView.SCROLL_STATE_DRAGGING -> {
+                        scrollAnim?.cancel()
+                        if (fast_scroller.translationX != 0f) {
+                            showFastScroller()
+                        }
+                    }
+                    RecyclerView.SCROLL_STATE_IDLE -> {
+                        scrollAnim = fast_scroller.hide()
+                    }
+                }
             }
         })
     }
 
-    fun setInsets(insets: WindowInsets, appbarHeight: Int, offset: Int) {
+    private fun setInsets(insets: WindowInsets, appbarHeight: Int, offset: Int) {
         recycler.updatePaddingRelative(bottom = insets.systemWindowInsetBottom)
         tabletRecycler?.updatePaddingRelative(bottom = insets.systemWindowInsetBottom)
         headerHeight = appbarHeight + insets.systemWindowInsetTop
@@ -310,7 +324,8 @@ class MangaDetailsController : BaseController,
     }
 
     private fun setFastScroller() {
-        // fast_scroller.translationX = if (showScroll || isTablet) 0f else 25f.dpToPxEnd
+        fast_scroller.setStartTranslationX(true)
+        fast_scroller.setBackground(true)
         fast_scroller.setupWithRecyclerView(recycler, { position ->
             val letter = adapter?.getSectionText(position)
             when {
@@ -327,6 +342,9 @@ class MangaDetailsController : BaseController,
                 indicatorCenterY: Int,
                 itemPosition: Int
             ) {
+                scrollAnim?.cancel()
+                scrollAnim = fast_scroller.hide(2000)
+
                 textAnim?.cancel()
                 textAnim = text_view_m.animate().alpha(0f).setDuration(250L).setStartDelay(1000)
                 textAnim?.start()
@@ -339,7 +357,9 @@ class MangaDetailsController : BaseController,
                 (recycler.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
                     itemPosition, headerHeight
                 )
-                colorToolbar(itemPosition > 0, false)
+                if (!isTablet) {
+                    colorToolbar(itemPosition > 0, false)
+                }
             }
         }
     }
@@ -590,6 +610,12 @@ class MangaDetailsController : BaseController,
         adapter?.setChapters(chapters)
         addMangaHeader()
         activity?.invalidateOptionsMenu()
+    }
+
+    private fun showFastScroller(animate: Boolean = true) {
+        if (presenter.scrollType != 0) {
+            fast_scroller.show(animate)
+        }
     }
 
     private fun addMangaHeader() {

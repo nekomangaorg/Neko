@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
@@ -17,6 +18,7 @@ import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
+import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.iconicsDrawable
 import eu.kanade.tachiyomi.util.system.isLTR
@@ -62,8 +64,9 @@ class MangaHeaderHolder(
                     true
                 false
             }
-            if (!itemView.resources.isLTR)
+            if (!itemView.resources.isLTR) {
                 more_bg_gradient.rotation = 180f
+            }
             less_button.setOnClickListener { collapseDesc() }
             manga_genres_tags.setOnTagClickListener {
                 adapter.delegate.tagClicked(it)
@@ -96,6 +99,10 @@ class MangaHeaderHolder(
             if (startExpanded) expandDesc()
             else collapseDesc()
             if (isTablet) chapter_layout.gone()
+        } else {
+            filter_button.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                marginEnd = 12.dpToPx
+            }
         }
     }
 
