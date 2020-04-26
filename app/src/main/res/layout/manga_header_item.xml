@@ -166,7 +166,7 @@
             android:id="@+id/favorite_button"
             style="@style/Theme.Widget.Button.RoundedOutline"
             android:text="@string/add_to_library"
-            app:icon="@drawable/ic_add_to_library_24dp" />
+            app:icon="@drawable/ic_heart_outline_24dp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/track_button"
@@ -174,7 +174,6 @@
             android:layout_marginStart="6dp"
             android:text="@string/tracking"
             app:icon="@drawable/ic_sync_black_24dp" />
-
 
         <ImageView
             android:id="@+id/webview_button"
@@ -305,8 +304,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/manga_summary"
-        tools:layout_height="100dp"
-        tools:visibility="visible" />
+        tools:layout_height="100dp" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/less_button"
