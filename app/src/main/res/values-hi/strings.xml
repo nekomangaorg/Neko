@@ -303,7 +303,7 @@
     <string name="failed_to_load_pages_">पृष्ठों को लोड करने में विफल है: %1$s</string>
     <string name="dark_blue">गहरा नीला</string>
     <string name="long_tap_dialog">संवाद के लिए लंबी प्रेस</string>
-    <string name="open_in_web_view">वेब दृश्य में खोलें</string>
+    <string name="open_in_webview">वेब दृश्य में खोलें</string>
     <string name="true_32bit_color">32 बिट रंग</string>
     <string name="skip_read_chapters">पढ़े हुए अध्यायों को छोड़ें</string>
     <string name="color_filter_blend_mode">रंग फिल्टर मिश्रण मोड</string>

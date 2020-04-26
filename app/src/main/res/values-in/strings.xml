@@ -302,7 +302,7 @@
     <string name="theres_no_previous_chapter">Tidak ada chapter sebelumnya</string>
     <string name="loading_pages">Memuat halaman…</string>
     <string name="failed_to_load_pages_">Gagal memuat halaman: %1$s</string>
-    <string name="open_in_web_view">Buka di sini</string>
+    <string name="open_in_webview">Buka di sini</string>
     <string name="true_32bit_color">Warna 32-bit</string>
     <string name="skip_read_chapters">Lewati bab yang sudah dibaca</string>
     <string name="long_tap_dialog">Dialog ketuk dan tahan</string>

@@ -261,7 +261,7 @@
     <string name="source_migration">Pindah sumber</string>
     <string name="extensions">Tambahan</string>
     <string name="extension_info">Info Tambahan</string>
-    <string name="open_in_web_view">Buka dalam WebView</string>
+    <string name="open_in_webview">Buka dalam WebView</string>
     <string name="dark_blue">Biru gelap</string>
     <string name="details">Perincian</string>
     <string name="pending">Masih menunggu</string>

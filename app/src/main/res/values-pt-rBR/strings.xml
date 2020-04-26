@@ -305,7 +305,7 @@ Além disso, verifique se as fontes que requerem uma conta foram configuradas co
     <string name="failed_to_load_pages_">Falha ao carregar páginas: %1$s</string>
     <string name="dark_blue">Azul escuro</string>
     <string name="long_tap_dialog">Diálogo de toque longo</string>
-    <string name="open_in_web_view">Abra em webview</string>
+    <string name="open_in_webview">Abra em webview</string>
     <string name="true_32bit_color">32-bit color</string>
     <string name="skip_read_chapters">Pular capítulos lidos</string>
     <string name="screen">Tela</string>

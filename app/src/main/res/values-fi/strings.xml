@@ -87,7 +87,7 @@
     <string name="remove">Poista</string>
     <string name="resume">Jatka</string>
     <string name="open_in_browser">Avaa selaimessa</string>
-    <string name="open_in_web_view">Avaa WebViewissä</string>
+    <string name="open_in_webview">Avaa WebViewissä</string>
     <string name="add_to_home_screen">Lisää kotinäytölle</string>
     <string name="display">Näkymä</string>
     <string name="compact_grid">Ruudukko</string>

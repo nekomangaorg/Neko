@@ -45,7 +45,7 @@
     <string name="remove">Odstrániť</string>
     <string name="resume">Pokračovať</string>
     <string name="open_in_browser">Otvoriť v browseri</string>
-    <string name="open_in_web_view">Otvoriť vo web view</string>
+    <string name="open_in_webview">Otvoriť vo web view</string>
     <string name="add_to_home_screen">Pridať na plochu</string>
     <string name="display">Zobraziť</string>
     <string name="compact_grid">Mriežka</string>

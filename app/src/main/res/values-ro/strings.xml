@@ -303,7 +303,7 @@
     <string name="no_network_connection">Nici o conexiune la internet valabilă</string>
     <string name="download_paused">Descărcare oprită</string>
     <string name="common">General</string>
-    <string name="open_in_web_view">Deschide în vizualizare web</string>
+    <string name="open_in_webview">Deschide în vizualizare web</string>
     <string name="true_32bit_color">Culoare 32-bit</string>
     <string name="color_filter_blend_mode">Mod filtru de culoare</string>
     <string name="overlay">Acoperire</string>

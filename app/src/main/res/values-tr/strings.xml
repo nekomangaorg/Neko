@@ -305,7 +305,7 @@
     <string name="failed_to_load_pages_">Sayfalar yüklenemedi: %1$s</string>
     <string name="dark_blue">Koyu mavi</string>
     <string name="long_tap_dialog">Uzun dokunma iletişim kutusu</string>
-    <string name="open_in_web_view">Web görünümünde aç</string>
+    <string name="open_in_webview">Web görünümünde aç</string>
     <string name="true_32bit_color">32-bit renk</string>
     <string name="skip_read_chapters">Okunmuş olarak işaretli bölümleri atla</string>
     <string name="color_filter_blend_mode">Renk süzgeçi karışım kipi</string>

@@ -307,7 +307,7 @@ Zorg ook dat je ingelogd bent voor bronnen die dit vereisen alvorens je het teru
     <string name="copy">Kopiëren</string>
     <string name="system_default_all_blue">Systeemstandaard (Tumman sininen)</string>
     <string name="system_default_amoled">Systeemstandaard (AMOLED)</string>
-    <string name="open_in_web_view">Openen in webview</string>
+    <string name="open_in_webview">Openen in webview</string>
     <string name="true_32bit_color">32-bit kleuren</string>
     <string name="skip_read_chapters">Hoofdstukken die gemarkeerd zijn als gelezen overslaan</string>
     <string name="overlay">Overlapping</string>

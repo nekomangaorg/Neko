@@ -305,7 +305,7 @@
     <string name="download_paused">Λήψη σε παύση</string>
     <string name="common">Κοινό</string>
     <string name="long_tap_dialog">Παραταταμένο πάτημα διαλόγου</string>
-    <string name="open_in_web_view">Άνοιγμα σε Web View</string>
+    <string name="open_in_webview">Άνοιγμα σε Web View</string>
     <string name="true_32bit_color">32-bit χρώμα</string>
     <string name="skip_read_chapters">Προσπέραση διαβαζμένων κεφαλέων</string>
     <string name="overlay">επικάλυψη</string>

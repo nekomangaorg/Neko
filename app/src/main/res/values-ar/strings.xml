@@ -308,7 +308,7 @@
     <string name="loading_pages">جار تحميل الصّفحات…</string>
     <string name="failed_to_load_pages_">فشل تحميل الصّفحات: %1$s</string>
     <string name="long_tap_dialog">معلومات بضغطة مستمرة</string>
-    <string name="open_in_web_view">فتح في web view</string>
+    <string name="open_in_webview">فتح في web view</string>
     <string name="true_32bit_color">الوان 32bit</string>
     <string name="skip_read_chapters">تخطي الفصول المقروءة</string>
     <string name="overlay">غطاءالغطاء</string>

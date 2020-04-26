@@ -305,7 +305,7 @@
     <string name="download_paused">Завантаження призупинено</string>
     <string name="common">Звичайний</string>
     <string name="long_tap_dialog">Діалог тривалого тицяння</string>
-    <string name="open_in_web_view">Відкрити у web view</string>
+    <string name="open_in_webview">Відкрити у web view</string>
     <string name="true_32bit_color">32-бітний колір</string>
     <string name="skip_read_chapters">Пропускати глави, відмічені як прочитані</string>
     <string name="color_filter_blend_mode">Режим накладання кольорового фільтру</string>

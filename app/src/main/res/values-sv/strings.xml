@@ -304,7 +304,7 @@
     <string name="no_network_connection">Ingen nätverksanslutning tillgänglig</string>
     <string name="download_paused">Nedladdning pausad</string>
     <string name="common">Vanlig</string>
-    <string name="open_in_web_view">Öppna i webbvisning</string>
+    <string name="open_in_webview">Öppna i webbvisning</string>
     <string name="true_32bit_color">32-bitars färg</string>
     <string name="skip_read_chapters">Skippa över kapitel markerad som läst</string>
     <string name="long_tap_dialog">Långtrycks dialog</string>

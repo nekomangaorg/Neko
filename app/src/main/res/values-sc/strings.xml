@@ -305,7 +305,7 @@
     <string name="no_network_connection">Peruna connessione de retza disponìbile</string>
     <string name="download_paused">Iscarrigamentu in pàusa</string>
     <string name="common">Comunu</string>
-    <string name="open_in_web_view">Aberi in sa vista</string>
+    <string name="open_in_webview">Aberi in sa vista</string>
     <string name="true_32bit_color">Colore a 32 bit</string>
     <string name="skip_read_chapters">Brinca sos capìtulos marcados comente lèghidos</string>
     <string name="color_filter_blend_mode">Modalidade de fusione de su filtru colore</string>

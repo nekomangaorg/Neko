@@ -101,7 +101,7 @@
     <string name="keep_screen_on">Behold skjerm på</string>
     <string name="navigation">Navigasjon</string>
     <string name="tracking">Sporing</string>
-    <string name="open_in_web_view">Nettvisning</string>
+    <string name="open_in_webview">Nettvisning</string>
     <string name="library_update_frequency">Frekvens for oppdatering av bibliotek</string>
     <string name="categories_to_include_in_global_update">Kategorier inkludert i global oppdatering</string>
     <string name="library_update_restriction">Restriksjoner for oppdatering av bibliotek</string>

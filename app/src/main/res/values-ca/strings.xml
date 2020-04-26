@@ -307,7 +307,7 @@
     <string name="download_paused">Descàrrega pausada</string>
     <string name="common">Comú</string>
     <string name="long_tap_dialog">Finestra de toc llarg</string>
-    <string name="open_in_web_view">Obre en una visualització web</string>
+    <string name="open_in_webview">Obre en una visualització web</string>
     <string name="true_32bit_color">Color de 32 bits</string>
     <string name="skip_read_chapters">Omet els capítols marcats com a llegits</string>
     <string name="color_filter_blend_mode">Mode de mescla del filtre de color</string>

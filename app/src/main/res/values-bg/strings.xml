@@ -340,7 +340,7 @@
     <string name="loading_pages">Зареждане на страниците…</string>
     <string name="failed_to_load_pages_">Не бяха заредени успешно: %1$s страници</string>
     <string name="long_tap_dialog">Показване на прозорец след натискане</string>
-    <string name="open_in_web_view">Отвори онлайн</string>
+    <string name="open_in_webview">Отвори онлайн</string>
     <string name="true_32bit_color">32-битови цветове</string>
     <string name="skip_read_chapters">Пропускай прочетените глави</string>
     <string name="color_filter_blend_mode">Режим на цветовия филтър</string>

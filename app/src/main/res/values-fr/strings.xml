@@ -339,7 +339,7 @@ Assurez-vous que vous êtes connecté à des sources qui le demande avant de com
     <string name="copy">Copier</string>
     <string name="dark_blue">Bleu foncé</string>
     <string name="long_tap_dialog">Menu contextuel (appui prolongé)</string>
-    <string name="open_in_web_view">Ouvrir dans le navigateur intégré</string>
+    <string name="open_in_webview">Ouvrir dans le navigateur intégré</string>
     <string name="true_32bit_color">Couleurs à 32 bits</string>
     <string name="skip_read_chapters">Passer les chapitres marqués comme lus</string>
     <string name="multiply">Multiplier</string>

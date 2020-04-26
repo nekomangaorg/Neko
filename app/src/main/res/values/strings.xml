@@ -647,7 +647,7 @@
     <string name="normal">Normal</string>
     <string name="oldest">Oldest</string>
     <string name="open_in_browser">Open in browser</string>
-    <string name="open_in_web_view">Open in web view</string>
+    <string name="open_in_webview">Open in WebView</string>
     <string name="options">Options</string>
     <string name="pause">Pause</string>
     <string name="picture_saved">Picture saved</string>

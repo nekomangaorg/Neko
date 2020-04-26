@@ -305,7 +305,7 @@
     <string name="no_network_connection">네트워크 연결 사용 불가능</string>
     <string name="common">일반</string>
     <string name="long_tap_dialog">길게 눌러 대화상자 표시</string>
-    <string name="open_in_web_view">웹뷰로 열기</string>
+    <string name="open_in_webview">웹뷰로 열기</string>
     <string name="true_32bit_color">32비트 컬러</string>
     <string name="skip_read_chapters">읽음 표시된 챕터 건너뛰기</string>
     <string name="color_filter_blend_mode">컬러 필터 블렌딩 모드</string>

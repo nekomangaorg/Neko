@@ -136,7 +136,7 @@
     <string name="pending">Függőben</string>
     <string name="installing">Telepítés</string>
     <string name="installed">Telepítve</string>
-    <string name="open_in_web_view">Webnézet</string>
+    <string name="open_in_webview">Webnézet</string>
     <string name="help">Segítség</string>
     <string name="library_update_order">Könyvtár frissítési sorrend</string>
 </resources>

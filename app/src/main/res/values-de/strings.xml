@@ -302,7 +302,7 @@
     <string name="theres_no_previous_chapter">Es gibt kein vorheriges Kapitel</string>
     <string name="loading_pages">Lade Seiten…</string>
     <string name="failed_to_load_pages_">Seiten konnten nicht geladen werden: %1$s</string>
-    <string name="open_in_web_view">In Webansicht öffnen</string>
+    <string name="open_in_webview">In Webansicht öffnen</string>
     <string name="true_32bit_color">32-bit Farbe</string>
     <string name="skip_read_chapters">Überspringe als gelesen markierte Kapitel</string>
     <string name="long_tap_dialog">Lange für Dialog tippen</string>

@@ -306,7 +306,7 @@
     <string name="failed_to_load_pages_">পৃষ্ঠা লোড করতে ব্যর্থ হয়েছে: %1$s</string>
     <string name="url_not_set_click_again">মাংগা ইউআরএল সেট না শিরোনাম ক্লিক করুন এবং আবার মাংগা নির্বাচন করুন</string>
     <string name="long_tap_dialog">দীর্ঘক্ষণ ট্যাপ ডায়ালগ</string>
-    <string name="open_in_web_view">ওয়েব দর্শনে খুলুন</string>
+    <string name="open_in_webview">ওয়েব দর্শনে খুলুন</string>
     <string name="true_32bit_color">৩২-বিট রঙ</string>
     <string name="skip_read_chapters">পঠিত অধ্যায়গুলো এড়িয়ে যান</string>
     <string name="color_filter_blend_mode">রঙ ফিল্টার মিশ্রন মোড</string>

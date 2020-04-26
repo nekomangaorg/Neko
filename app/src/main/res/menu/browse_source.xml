@@ -18,7 +18,7 @@
     <item
         android:id="@+id/action_open_in_web_view"
         android:icon="@drawable/ic_open_in_webview_white_24dp"
-        android:title="@string/open_in_web_view"
+        android:title="@string/open_in_webview"
         app:showAsAction="ifRoom" />
 
 </menu>

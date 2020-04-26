@@ -43,7 +43,7 @@
     <string name="remove">移除</string>
     <string name="resume">繼續閱讀</string>
     <string name="open_in_browser">在瀏覽器中開啟</string>
-    <string name="open_in_web_view">在 WebView 中開啟</string>
+    <string name="open_in_webview">在 WebView 中開啟</string>
     <string name="add_to_home_screen">新增至主畫面</string>
     <string name="display">檢視</string>
     <string name="compact_grid">格狀</string>

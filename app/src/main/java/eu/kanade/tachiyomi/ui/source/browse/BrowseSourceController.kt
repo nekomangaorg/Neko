@@ -207,7 +207,7 @@ open class BrowseSourceController(bundle: Bundle) :
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.catalogue_list, menu)
+        inflater.inflate(R.menu.browse_source, menu)
 
         // Initialize search menu
         val searchItem = menu.findItem(R.id.action_search)

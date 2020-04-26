@@ -308,7 +308,7 @@
     <string name="long_tap_dialog">长按菜单</string>
     <string name="system_default_all_blue">系统默认 (暗蓝色主题)</string>
     <string name="system_default_amoled">系统默认 (AMOLED)</string>
-    <string name="open_in_web_view">用外部浏览器打开</string>
+    <string name="open_in_webview">用外部浏览器打开</string>
     <string name="true_32bit_color">32位色彩</string>
     <string name="skip_read_chapters">跳过已读章节</string>
     <string name="color_filter_blend_mode">滤镜调和模式</string>

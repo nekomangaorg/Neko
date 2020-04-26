@@ -341,7 +341,7 @@
     <string name="system_default_all_blue">Mặc định hệ thống (Xanh đậm)</string>
     <string name="system_default_amoled">Mặc định hệ thống (AMOLED)</string>
     <string name="long_tap_dialog">Nhấn giữ mở hộp thoại</string>
-    <string name="open_in_web_view">Mở bằng webview</string>
+    <string name="open_in_webview">Mở bằng webview</string>
     <string name="true_32bit_color">Màu 32-bit</string>
     <string name="skip_read_chapters">Bỏ qua chap đã đọc</string>
     <string name="color_filter_blend_mode">Chế độ hòa trộn bộ lọc màu</string>

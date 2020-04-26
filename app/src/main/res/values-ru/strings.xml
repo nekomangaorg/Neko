@@ -34,7 +34,7 @@
     <string name="newest">Сначала новые</string>
     <string name="oldest">Сначала старые</string>
     <string name="open_in_browser">Открыть в браузере</string>
-    <string name="open_in_web_view">Открыть в Web View</string>
+    <string name="open_in_webview">Открыть в Web View</string>
     <string name="pause">Пауза</string>
     <string name="remove">Удалить</string>
     <string name="rename_category">Переименовать категорию</string>

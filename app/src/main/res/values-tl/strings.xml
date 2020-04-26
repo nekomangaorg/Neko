@@ -44,7 +44,7 @@
     <string name="remove">Tanggalin</string>
     <string name="resume">Ipagpatuloy</string>
     <string name="open_in_browser">Buksan sa browser</string>
-    <string name="open_in_web_view">Buksan sa web view</string>
+    <string name="open_in_webview">Buksan sa web view</string>
     <string name="add_to_home_screen">Ilagay sa home screen</string>
     <string name="display">Display</string>
     <string name="compact_grid">Pa-grid</string>

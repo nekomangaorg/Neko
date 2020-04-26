@@ -58,7 +58,7 @@
     <string name="remove">Usuń</string>
     <string name="resume">Wznów</string>
     <string name="open_in_browser">Otwórz w przeglądarce</string>
-    <string name="open_in_web_view">Otwórz w webview</string>
+    <string name="open_in_webview">Otwórz w webview</string>
     <string name="add_to_home_screen">Dodaj do ekranu głównego</string>
     <string name="display">Widok</string>
     <string name="compact_grid">Siatka</string>

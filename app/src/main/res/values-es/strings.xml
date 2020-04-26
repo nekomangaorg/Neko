@@ -334,7 +334,7 @@ También asegúrese de haber iniciado sesión en las fuentes que lo requieren an
     <string name="pager_viewer">Paginado</string>
     <string name="dark_blue">Azul oscuro</string>
     <string name="long_tap_dialog">Diálogo de toque largo</string>
-    <string name="open_in_web_view">Abrir en vista web</string>
+    <string name="open_in_webview">Abrir en vista web</string>
     <string name="skip_read_chapters">Saltar capítulos marcados como leídos</string>
     <string name="true_32bit_color">Color en 32 bits</string>
     <string name="color_filter_blend_mode">Modo de mezcla de filtro de color</string>
