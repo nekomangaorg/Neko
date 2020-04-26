@@ -6,6 +6,7 @@ import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.view.View
 import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.system.isLTR
 
 class ExtensionDividerItemDecoration(context: Context) : androidx.recyclerview.widget.RecyclerView.ItemDecoration() {
 
@@ -27,8 +28,9 @@ class ExtensionDividerItemDecoration(context: Context) : androidx.recyclerview.w
                 val params = child.layoutParams as androidx.recyclerview.widget.RecyclerView.LayoutParams
                 val top = child.bottom + params.bottomMargin
                 val bottom = top + divider.intrinsicHeight
-                val left = parent.paddingStart + 12.dpToPx
-                val right = parent.width - parent.paddingEnd
+                val left = parent.paddingStart + if (parent.context.resources.isLTR) 12.dpToPx else 0
+                val right =
+                    parent.width - parent.paddingEnd - if (!parent.context.resources.isLTR) 12.dpToPx else 0
 
                 divider.setBounds(left, top, right, bottom)
                 divider.draw(c)
