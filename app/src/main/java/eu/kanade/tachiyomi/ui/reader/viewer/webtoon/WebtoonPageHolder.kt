@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.reader.viewer.webtoon
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.Resources
+import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.view.Gravity
@@ -33,6 +34,7 @@ import eu.kanade.tachiyomi.ui.reader.viewer.ReaderProgressBar
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.gone
+import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.visible
 import rx.Observable
 import rx.Subscription
@@ -113,6 +115,7 @@ class WebtoonPageHolder(
 
     init {
         frame.layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
+        frame.setBackgroundColor(Color.BLACK)
     }
 
     /**
@@ -126,13 +129,12 @@ class WebtoonPageHolder(
 
     private fun refreshLayoutParams() {
         frame.layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply {
-            if (!viewer.isContinuous) {
-                bottomMargin = 15.dpToPx
-            }
-
             val margin = Resources.getSystem().displayMetrics.widthPixels * (viewer.config.sidePadding / 100f)
             marginEnd = margin.toInt()
             marginStart = margin.toInt()
+        }
+        if (!viewer.isContinuous) {
+            frame.updatePaddingRelative(bottom = 15.dpToPx)
         }
     }
 

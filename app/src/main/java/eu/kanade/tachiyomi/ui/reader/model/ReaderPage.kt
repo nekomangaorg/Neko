@@ -10,7 +10,7 @@ class ReaderPage(
     imageUrl: String? = null,
     var stream: (() -> InputStream)? = null,
     var bg: Drawable? = null,
-    var bgAlwaysWhite: Boolean? = null
+    var bgType: Int? = null
 ) : Page(index, url, imageUrl, null) {
 
     lateinit var chapter: ReaderChapter

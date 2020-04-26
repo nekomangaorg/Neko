@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
+import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerPageHolder
 import eu.kanade.tachiyomi.util.lang.plusAssign
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import rx.Completable
@@ -38,14 +39,8 @@ class HttpPageLoader(
      */
     private val queue = PriorityBlockingQueue<PriorityPage>()
 
-    /**
-     * Current active subscriptions.
-     */
     private val subscriptions = CompositeSubscription()
 
-    /**
-     * Preferences helper.
-     */
     private val preferences by injectLazy<PreferencesHelper>()
     private val preloadSize = 4
 
@@ -233,7 +228,7 @@ class HttpPageLoader(
                     page.bg = ImageUtil.autoSetBackground(
                         image, readerTheme == 2, preferences.context
                     )
-                    page.bgAlwaysWhite = readerTheme == 2
+                    page.bgType = PagerPageHolder.getBGType(readerTheme, preferences.context)
                     stream.close()
                 }
                 page.stream = { chapterCache.getImageFile(imageUrl).inputStream() }

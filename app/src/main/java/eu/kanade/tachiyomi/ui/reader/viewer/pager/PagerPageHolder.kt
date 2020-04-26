@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.reader.viewer.pager
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.graphics.PointF
@@ -39,6 +40,7 @@ import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerConfig.ZoomType
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.ThemeUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.visible
@@ -255,8 +257,10 @@ class PagerPageHolder(
                 if (!isAnimated) {
                     if (viewer.config.readerTheme >= 2) {
                         val imageView = initSubsamplingImageView()
-                        if (page.bg != null &&
-                            page.bgAlwaysWhite == (viewer.config.readerTheme == 2)) {
+                        if (page.bg != null && page.bgType == getBGType(
+                                viewer.config.readerTheme,
+                                context
+                            )) {
                             imageView.setImage(ImageSource.inputStream(openStream!!))
                             imageView.background = page.bg
                         }
@@ -270,7 +274,7 @@ class PagerPageHolder(
                             launchUI {
                                 imageView.background = setBG(bytesArray)
                                 page.bg = imageView.background
-                                page.bgAlwaysWhite = viewer.config.readerTheme == 2
+                                page.bgType = getBGType(viewer.config.readerTheme, context)
                             }
                         }
                     } else {
@@ -281,8 +285,12 @@ class PagerPageHolder(
                 } else {
                     val imageView = initImageView()
                     imageView.setImage(openStream!!)
-                    if (viewer.config.readerTheme >= 2 && page.bg != null)
+                    if (viewer.config.readerTheme >= 2 && page.bg != null) {
                         imageView.background = page.bg
+                    } else if (viewer.config.readerTheme < 2) {
+                        imageView.background =
+                            ColorDrawable(ThemeUtil.readerBackgroundColor(viewer.config.readerTheme))
+                    }
                 }
             }
             // Keep the Rx stream alive to close the input stream only when unsubscribed
@@ -511,5 +519,13 @@ class PagerPageHolder(
                 }
             })
             .into(this)
+    }
+
+    companion object {
+        fun getBGType(readerTheme: Int, context: Context): Int {
+            return if (readerTheme == 3) {
+                if (context.isInNightMode()) 2 else 1
+            } else 0
+        }
     }
 }
