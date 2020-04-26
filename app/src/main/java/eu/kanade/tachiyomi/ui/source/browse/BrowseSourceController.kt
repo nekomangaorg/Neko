@@ -393,7 +393,7 @@ open class BrowseSourceController(bundle: Bundle) :
         }
         adapter.onLoadMoreComplete(mangas)
     }
-
+    
     /**
      * Called from the presenter when the network request fails.
      *
@@ -409,7 +409,6 @@ open class BrowseSourceController(bundle: Bundle) :
 
         val message = getErrorMessage(error)
         val retryAction = View.OnClickListener {
-
             // If not the first page, show bottom progress bar.
             if (adapter.mainItemCount > 0 && progressItem != null) {
                 adapter.addScrollableFooterWithDelay(progressItem!!, 0, true)
