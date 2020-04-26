@@ -56,7 +56,7 @@ class SourceHolder(view: View, val adapter: SourceAdapter) :
             val icon = source.icon()
             if (icon != null) edit_button.setImageDrawable(source.icon())
             else if (item.source.id == LocalSource.ID)
-                edit_button.setImageResource(R.drawable.ic_local_source_32dp)
+                edit_button.setImageResource(R.mipmap.ic_local_source)
         }
 
         if (source.supportsLatest) {
