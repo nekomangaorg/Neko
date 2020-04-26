@@ -3,11 +3,11 @@ package eu.kanade.tachiyomi.ui.source
 import android.content.res.ColorStateList
 import android.view.View
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.icon
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.gone
-import eu.kanade.tachiyomi.util.view.roundTextIcon
 import eu.kanade.tachiyomi.util.view.visible
 import kotlinx.android.synthetic.main.source_item.*
 
@@ -55,7 +55,8 @@ class SourceHolder(view: View, val adapter: SourceAdapter) :
         itemView.post {
             val icon = source.icon()
             if (icon != null) edit_button.setImageDrawable(source.icon())
-            else edit_button.roundTextIcon(source.name)
+            else if (item.source.id == LocalSource.ID)
+                edit_button.setImageResource(R.drawable.ic_local_source_32dp)
         }
 
         if (source.supportsLatest) {

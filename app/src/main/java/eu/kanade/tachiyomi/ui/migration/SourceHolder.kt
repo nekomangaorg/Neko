@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.ui.migration
 import android.view.View
 import eu.kanade.tachiyomi.source.icon
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
-import eu.kanade.tachiyomi.util.view.roundTextIcon
 import kotlinx.android.synthetic.main.migration_card_item.*
 import kotlinx.android.synthetic.main.source_item.edit_button
 import kotlinx.android.synthetic.main.source_item.title
@@ -30,7 +29,6 @@ class SourceHolder(view: View, val adapter: SourceAdapter) :
         itemView.post {
             val icon = source.icon()
             if (icon != null) edit_button.setImageDrawable(source.icon())
-            else edit_button.roundTextIcon(source.name)
         }
     }
 }

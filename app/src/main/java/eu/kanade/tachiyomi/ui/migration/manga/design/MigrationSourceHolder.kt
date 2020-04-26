@@ -7,7 +7,6 @@ import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.source.icon
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
-import eu.kanade.tachiyomi.util.view.roundTextIcon
 import kotlinx.android.synthetic.main.migration_source_item.*
 import uy.kohesive.injekt.injectLazy
 
@@ -27,7 +26,6 @@ class MigrationSourceHolder(view: View, val adapter: MigrationSourceAdapter) :
         itemView.post {
             val icon = source.icon()
             if (icon != null) edit_button.setImageDrawable(source.icon())
-            else edit_button.roundTextIcon(source.name)
         }
 
         if (sourceEnabled) {
