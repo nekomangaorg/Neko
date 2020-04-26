@@ -38,6 +38,29 @@
             tools:ignore="ContentDescription"
             tools:src="@mipmap/ic_launcher" />
 
+        <FrameLayout
+            android:id="@+id/play_layout"
+            android:layout_width="@dimen/material_component_lists_single_line_with_avatar_height"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:clickable="true"
+            android:focusable="true"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <ImageView
+                android:id="@+id/play_button"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_gravity="center"
+                android:background="@drawable/round_play_background"
+                android:contentDescription="@string/start_reading"
+                android:padding="6dp"
+                android:src="@drawable/ic_start_reading_white_24dp"
+                android:tint="@android:color/white" />
+
+        </FrameLayout>
+
         <ProgressBar
             android:id="@+id/progress"
             style="?android:attr/progressBarStyleSmall"
@@ -65,7 +88,7 @@
         android:textColor="?android:attr/textColorPrimary"
         android:textSize="16sp"
         app:layout_constrainedWidth="true"
-        app:layout_constraintEnd_toStartOf="@+id/play_layout"
+        app:layout_constraintEnd_toStartOf="@+id/badge_view"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@+id/card"
         app:layout_constraintTop_toTopOf="parent"
@@ -84,41 +107,12 @@
         android:textColor="?android:attr/textColorSecondary"
         android:textSize="14sp"
         app:layout_constrainedWidth="true"
-        app:layout_constraintEnd_toStartOf="@+id/play_layout"
+        app:layout_constraintEnd_toStartOf="@+id/badge_view"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@+id/title"
         app:layout_constraintTop_toBottomOf="@+id/title"
         app:layout_constraintVertical_bias="0.0"
         tools:text="Manga artist" />
-
-    <FrameLayout
-        android:id="@+id/play_layout"
-        android:layout_width="wrap_content"
-        android:layout_height="55dp"
-        android:layout_marginTop="4dp"
-        android:layout_marginBottom="6dp"
-        android:layout_gravity="center"
-        app:layout_constraintEnd_toStartOf="@id/badge_view"
-        app:layout_constraintTop_toTopOf="@id/badge_view"
-        app:layout_constraintBottom_toBottomOf="@id/badge_view"
-        android:layout_marginEnd="8dp"
-        android:clickable="true"
-        android:focusable="true"
-        android:visibility="gone"
-        tools:visibility="visible">
-
-        <ImageView
-            android:id="@+id/play_button"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_gravity="center"
-            android:background="@drawable/round_play_background"
-            android:contentDescription="@string/start_reading"
-            android:padding="6dp"
-            android:src="@drawable/ic_start_reading_white_24dp"
-            android:tint="@android:color/white" />
-
-    </FrameLayout>
 
     <include layout="@layout/unread_download_badge"
         android:layout_width="wrap_content"
