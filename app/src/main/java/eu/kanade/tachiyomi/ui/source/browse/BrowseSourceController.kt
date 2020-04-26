@@ -29,11 +29,11 @@ import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.library.ChangeMangaCategoriesDialog
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
+import eu.kanade.tachiyomi.ui.similar.FollowsController
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.system.connectivityManager
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.applyWindowInsetsForRootController
-import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.inflate
 import eu.kanade.tachiyomi.util.view.scrollViewWith
@@ -57,11 +57,11 @@ import java.util.concurrent.TimeUnit
  * Controller to manage the catalogues available in the app.
  */
 open class BrowseSourceController(bundle: Bundle) :
-        NucleusController<BrowseSourcePresenter>(bundle),
-        FlexibleAdapter.OnItemClickListener,
-        FlexibleAdapter.OnItemLongClickListener,
-        FlexibleAdapter.EndlessScrollListener,
-        ChangeMangaCategoriesDialog.Listener {
+    NucleusController<BrowseSourcePresenter>(bundle),
+    FlexibleAdapter.OnItemClickListener,
+    FlexibleAdapter.OnItemLongClickListener,
+    FlexibleAdapter.EndlessScrollListener,
+    ChangeMangaCategoriesDialog.Listener {
 
     constructor(
         source: Source,
@@ -115,7 +115,10 @@ open class BrowseSourceController(bundle: Bundle) :
     }
 
     override fun getTitle(): String? {
-        if (bundle?.getBoolean(APPLY_INSET) == true) {
+
+        if (bundle?.getBoolean(FOLLOWS) == true) {
+            return "My follows"
+        } else if (bundle?.getBoolean(APPLY_INSET) == true) {
             return presenter.source.name
         } else {
             return "Similar"
@@ -222,7 +225,7 @@ open class BrowseSourceController(bundle: Bundle) :
         } else {
             (activity as? MainActivity)?.showNavigationArrow()
         }
-        inflater.inflate(R.menu.catalogue_list, menu)
+        inflater.inflate(R.menu.browse_source, menu)
 
         // Initialize search menu
         val searchItem = menu.findItem(R.id.action_search)
@@ -309,7 +312,8 @@ open class BrowseSourceController(bundle: Bundle) :
                     for (j in filter.indices) {
                         if (filter[j] !=
                             ((presenter.sourceFilters[i] as Filter.Group<*>).state[j] as
-                                Filter<*>).state) {
+                                Filter<*>).state
+                        ) {
                             matches = false
                             break
                         }
@@ -343,17 +347,18 @@ open class BrowseSourceController(bundle: Bundle) :
         sheet.onFollowsClicked = {
             sheet.dismiss()
             adapter?.clear()
-            presenter.restartPager("", followsPager = true)
+            router.pushController(FollowsController(args.getLong(SOURCE_ID_KEY)).withFadeTransaction())
         }
-
         sheet.show()
     }
 
     private fun openInWebView() {
         val source = presenter.source as? HttpSource ?: return
         val activity = activity ?: return
-        val intent = WebViewActivity.newIntent(activity, source.id, source.baseUrl, presenter
-            .source.name)
+        val intent = WebViewActivity.newIntent(
+            activity, source.id, source.baseUrl, presenter
+                .source.name
+        )
         startActivity(intent)
     }
 
@@ -417,15 +422,9 @@ open class BrowseSourceController(bundle: Bundle) :
         if (adapter.isEmpty) {
             val actions = emptyList<EmptyView.Action>().toMutableList()
 
-            actions += if (presenter.source is LocalSource) {
-                EmptyView.Action(R.string.local_source_help_guide, View.OnClickListener { openLocalSourceHelpGuide() })
-            } else {
-                EmptyView.Action(R.string.retry, retryAction)
-            }
+            actions += EmptyView.Action(R.string.retry, retryAction)
+            actions += EmptyView.Action(R.string.open_in_webview, View.OnClickListener { openInWebView() })
 
-            if (presenter.source is HttpSource) {
-                actions += EmptyView.Action(R.string.open_in_webview, View.OnClickListener { openInWebView() })
-            }
 
             empty_view.show(R.drawable.ic_local_library_24dp, message, actions)
         } else {
@@ -602,7 +601,7 @@ open class BrowseSourceController(bundle: Bundle) :
                 }.toTypedArray()
 
                 ChangeMangaCategoriesDialog(this, listOf(manga), categories, preselected)
-                        .showDialog(router)
+                    .showDialog(router)
             }
         }
     }
@@ -622,5 +621,6 @@ open class BrowseSourceController(bundle: Bundle) :
         const val SOURCE_ID_KEY = "sourceId"
         const val SEARCH_QUERY_KEY = "searchQuery"
         const val APPLY_INSET = "applyInset"
+        const val FOLLOWS = "follows"
     }
 }

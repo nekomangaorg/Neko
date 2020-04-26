@@ -87,6 +87,7 @@
             style="@style/Neko.Button.TextButton"
             android:layout_width="wrap_content"
             android:textColor="?attr/tabBarIconColor"
+            android:textSize="16sp"
             android:layout_height="match_parent"
             android:text="@string/random_manga"
             android:layout_marginStart="8dp"
@@ -102,6 +103,7 @@
             android:layout_height="match_parent"
             android:text="@string/follows"
             android:layout_marginEnd="8dp"
+            android:textSize="16sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
