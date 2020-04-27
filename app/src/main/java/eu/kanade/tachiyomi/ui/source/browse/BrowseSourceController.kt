@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.jakewharton.rxbinding.support.v7.widget.queryTextChangeEvents
+import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
@@ -115,14 +116,7 @@ open class BrowseSourceController(bundle: Bundle) :
     }
 
     override fun getTitle(): String? {
-
-        if (bundle?.getBoolean(FOLLOWS) == true) {
-            return "My follows"
-        } else if (bundle?.getBoolean(APPLY_INSET) == true) {
-            return presenter.source.name
-        } else {
-            return "Similar"
-        }
+        return presenter.source.name
     }
 
     override fun createPresenter(): BrowseSourcePresenter {
@@ -426,7 +420,7 @@ open class BrowseSourceController(bundle: Bundle) :
 
 
             empty_view.show(
-                if (presenter.source is HttpSource) R.drawable.ic_browse_24dp else R.drawable.ic_local_library_24dp,
+                CommunityMaterial.Icon.cmd_compass_off,
                 message,
                 actions
             )

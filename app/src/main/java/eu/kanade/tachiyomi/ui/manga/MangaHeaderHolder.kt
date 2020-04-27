@@ -23,9 +23,7 @@ import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.iconicsDrawable
 import eu.kanade.tachiyomi.util.system.isLTR
 import eu.kanade.tachiyomi.util.view.gone
-import eu.kanade.tachiyomi.util.view.invisible
 import eu.kanade.tachiyomi.util.view.isVisible
-import eu.kanade.tachiyomi.util.view.resetStrokeColor
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.visInvisIf
 import eu.kanade.tachiyomi.util.view.visible
@@ -292,8 +290,6 @@ class MangaHeaderHolder(
     fun showSimilarToolTip(activity: Activity?) {
         val act = activity ?: return
         SimilarToolTip(activity, view.context, similar_button)
-        }
-        start_reading_button.visibleIf(showReadingButton)
     }
 
     override fun onLongClick(view: View?): Boolean {

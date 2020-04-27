@@ -27,6 +27,10 @@ class SimilarController(bundle: Bundle) : BrowseSourceController(bundle) {
         this.manga = manga
     }
 
+    override fun getTitle(): String? {
+        return view?.context?.getString(R.string.similar)
+    }
+
     override fun createPresenter(): BrowseSourcePresenter {
         return SimilarPresenter(this.manga!!, args.getLong(SOURCE_ID_KEY))
     }

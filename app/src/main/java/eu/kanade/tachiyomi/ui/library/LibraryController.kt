@@ -50,12 +50,10 @@ import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.RootSearchInterface
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
-import eu.kanade.tachiyomi.util.system.contextCompatDrawable
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.dpToPxEnd
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
-import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.applyWindowInsetsForRootController
 import eu.kanade.tachiyomi.util.view.getItemView
 import eu.kanade.tachiyomi.util.view.gone
@@ -246,7 +244,8 @@ class LibraryController(
             val letter = adapter.getSectionText(position)
             if (!singleCategory &&
                 !adapter.isHeader(adapter.getItem(position)) &&
-                position != adapter.itemCount - 1) null
+                position != adapter.itemCount - 1
+            ) null
             else if (letter != null) FastScrollItemIndicator.Text(letter)
             else FastScrollItemIndicator.Icon(R.drawable.ic_star_24dp)
         })
@@ -957,7 +956,7 @@ class LibraryController(
             R.id.action_sync_to_dex -> {
                 presenter.syncMangaToDex(selectedMangas.toList())
                 destroyActionModeIfNeeded()
-                applicationContext?.toast("Adding to mangadex follows")
+                view?.snack("Adding to Mangadex follows as reading")
             }
             else -> return false
         }

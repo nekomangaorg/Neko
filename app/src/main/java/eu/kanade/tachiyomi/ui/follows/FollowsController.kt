@@ -25,6 +25,10 @@ class FollowsController(bundle: Bundle) : BrowseSourceController(bundle) {
         return FollowsPresenter(args.getLong(SOURCE_ID_KEY))
     }
 
+    override fun getTitle(): String? {
+        return view?.context?.getString(R.string.follows)
+    }
+
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
         fab.gone()
