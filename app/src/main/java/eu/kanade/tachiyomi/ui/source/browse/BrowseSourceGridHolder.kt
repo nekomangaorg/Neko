@@ -27,7 +27,8 @@ import kotlinx.android.synthetic.main.unread_download_badge.*
 class BrowseSourceGridHolder(
     private val view: View,
     private val adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
-    compact: Boolean
+    compact: Boolean,
+    private val isFollows: Boolean = false
 ) : BrowseSourceHolder(view, adapter) {
 
     init {
@@ -49,7 +50,11 @@ class BrowseSourceGridHolder(
         // Update the title of the manga.
         title.text = manga.title
         compact_title.text = title.text
-        badge_view.setInLibrary(manga.favorite)
+        when (isFollows) {
+            true -> badge_view.setStatus(manga.follow_status!!, manga.favorite)
+            false -> badge_view.setInLibrary(manga.favorite)
+
+        }
 
         // Update the cover.
         setImage(manga)

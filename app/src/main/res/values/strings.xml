@@ -468,7 +468,7 @@
     <string name="backup_created">Backup created</string>
     <string name="restore_completed">Restore completed</string>
     <string name="restore_error">Restore error</string>
-    <string name="restore_completed_content">%1$s Restored. %2$s errors found</string>
+    <string name="restore_completed_content">%1$s Manga Restored. %2$s errors found</string>
     <string name="restore_content_skipped">%1$d skipped</string>
     <string name="restore_message">Restore uses the network to fetch data, carrier costs may apply.\n\nMake sure you have installed all necessary extensions and are logged in to sources and tracking services before restoring.</string>
     <string name="file_saved_at_">File saved at %1$s</string>

@@ -64,6 +64,8 @@ open class BrowseSourcePresenter(
 
     var filtersChanged = false
 
+    var isFollows = false
+
     /**
      * Modifiable list of filters.
      */
@@ -156,9 +158,9 @@ open class BrowseSourcePresenter(
         pagerSubscription?.let { remove(it) }
         pagerSubscription = pager.results()
             .observeOn(Schedulers.io())
-            .map { it.first to it.second.map { networkToLocalManga(it, sourceId) } }
+            .map { it.first to it.second.map { networkToLocalManga(it, sourceId, isFollows) } }
             .doOnNext { initializeMangas(it.second) }
-            .map { it.first to it.second.map { BrowseSourceItem(it, browseAsList, sourceListType) } }
+            .map { it.first to it.second.map { BrowseSourceItem(it, browseAsList, sourceListType, isFollows) } }
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeReplay({ view, (page, mangas) ->
                 view.onAddPage(page, mangas)
@@ -227,9 +229,9 @@ open class BrowseSourcePresenter(
      * @param sManga the manga from the source.
      * @return a manga from the database.
      */
-    private fun networkToLocalManga(sManga: SManga, sourceId: Long): Manga {
+    private fun networkToLocalManga(sManga: SManga, sourceId: Long, isFollows: Boolean = false): Manga {
         var localManga = db.getManga(sManga.url, sourceId).executeAsBlocking()
-        if (localManga == null) {
+        if (localManga == null || isFollows) {
             val newManga = Manga.create(sManga.url, sManga.title, sourceId)
             newManga.copyFrom(sManga)
             val result = db.insertManga(newManga).executeAsBlocking()

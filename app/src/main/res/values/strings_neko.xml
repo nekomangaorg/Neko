@@ -5,6 +5,15 @@
 
     <string name="system_default_dark">System_Default (White + Dark)</string>
 
+    <!-- Backup -->
+    <string name="restore_completed_successful">%1$s/%2$s Manga restored</string>
+    <string name="restore_completed_errors">%1$s errors were found</string>
+    <string name="restore_skipped">%1$s/%2$s manga were skipped because they were not Mangadex</string>
+    <plurals name="restore_categories">
+        <item quantity="one">%d category restored</item>
+        <item quantity="other">%d categories restored</item>
+    </plurals>
+
 
     <!-- Status -->
     <string name="hiatus">Hiatus</string>

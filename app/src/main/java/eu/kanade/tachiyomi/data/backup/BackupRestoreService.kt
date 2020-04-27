@@ -77,6 +77,8 @@ class BackupRestoreService : Service() {
 
     private var skippedAmount = 0
 
+    private var categoriesAmount = 0
+
     /**
      * List containing errors
      */
@@ -205,7 +207,7 @@ class BackupRestoreService : Service() {
             isMangaDex
         }
         // +1 for categories
-        totalAmount = mangasJson.size() + 1
+        totalAmount = mangasJson.size()
         skippedAmount = mangasJson.size() - mangdexManga.count()
         restoreAmount = mangdexManga.count()
         trackingErrors.clear()
@@ -238,11 +240,11 @@ class BackupRestoreService : Service() {
         val element = json.get(CATEGORIES)
         if (element != null) {
             backupManager.restoreCategories(element.asJsonArray)
+            categoriesAmount = element.asJsonArray.size()
             restoreAmount += 1
             restoreProgress += 1
+            totalAmount += 1
             showProgressNotification(restoreProgress, totalAmount, "Categories added")
-        } else {
-            totalAmount -= 1
         }
     }
 
@@ -392,28 +394,40 @@ class BackupRestoreService : Service() {
      * Show the result notification with option to show the error log
      */
     private fun showResultNotification(path: String?, file: String?) {
+        val content = mutableListOf<String>()
+        if (categoriesAmount > 0) {
+            content.add(
+                resources.getQuantityString(
+                    R.plurals.restore_categories,
+                    categoriesAmount,
+                    categoriesAmount
+                )
+            )
+        }
 
-        val content = mutableListOf(
+        content.add(
             getString(
-                R.string.restore_completed_content, restoreProgress
-                    .toString(), errors.size.toString()
+                R.string.restore_completed_successful, restoreProgress
+                    .toString(), restoreAmount.toString()
             )
         )
-        val sourceMissingCount = sourcesMissing.distinct().size
-        if (sourceMissingCount > 0)
+
+        content.add(
+            getString(
+                R.string.restore_completed_errors, errors.size.toString()
+            )
+        )
+
+        if (skippedAmount > 0) {
             content.add(
-                resources.getQuantityString(
-                    R.plurals.sources_missing,
-                    sourceMissingCount, sourceMissingCount
+                getString(
+                    R.string.restore_skipped,
+                    skippedAmount.toString(),
+                    totalAmount.toString()
                 )
             )
-        if (licensedManga > 0)
-            content.add(
-                resources.getQuantityString(
-                    R.plurals.licensed_manga, licensedManga,
-                    licensedManga
-                )
-            )
+        }
+
         val trackingErrors = trackingErrors.distinct()
         if (trackingErrors.isNotEmpty()) {
             val trackingErrorsString = trackingErrors.distinct().joinToString("\n")

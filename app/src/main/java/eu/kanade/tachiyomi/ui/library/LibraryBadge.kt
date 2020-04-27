@@ -4,12 +4,14 @@ import android.content.Context
 import android.util.AttributeSet
 import com.google.android.material.card.MaterialCardView
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.util.system.contextCompatColor
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.isVisible
 import eu.kanade.tachiyomi.util.view.setTextColorRes
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
+import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.util.view.visibleIf
 import kotlinx.android.synthetic.main.unread_download_badge.view.*
 
@@ -79,5 +81,26 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
         unread_text.updatePaddingRelative(start = 5.dpToPx)
         unread_text.visibleIf(inLibrary)
         unread_text.text = resources.getText(R.string.in_library)
+    }
+
+    fun setStatus(status: FollowStatus, inLibrary: Boolean) {
+        this.visible()
+
+        unread_angle.visibleIf(inLibrary)
+        download_text.visibleIf(inLibrary)
+        download_text.text = resources.getText(R.string.in_library)
+
+        unread_text.updatePaddingRelative(start = 5.dpToPx)
+        unread_text.visible()
+        val statusText = when (status) {
+            FollowStatus.READING -> R.string.follows_reading
+            FollowStatus.UNFOLLOWED -> R.string.follows_unfollowed
+            FollowStatus.COMPLETED -> R.string.follows_completed
+            FollowStatus.ON_HOLD -> R.string.follows_on_hold
+            FollowStatus.PLAN_TO_READ -> R.string.follows_plan_to_read
+            FollowStatus.DROPPED -> R.string.follows_dropped
+            FollowStatus.RE_READING -> R.string.follows_re_reading
+        }
+        unread_text.text = resources.getText(statusText)
     }
 }

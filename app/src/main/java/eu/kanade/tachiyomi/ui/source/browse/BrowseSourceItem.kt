@@ -23,9 +23,10 @@ import kotlinx.android.synthetic.main.manga_grid_item.view.*
 class BrowseSourceItem(
     val manga: Manga,
     private val catalogueAsList: Preference<Boolean>,
-    private val catalogueListType: Preference<Int>
+    private val catalogueListType: Preference<Int>,
+    private val isFollows: Boolean = false
 ) :
-        AbstractFlexibleItem<BrowseSourceHolder>() {
+    AbstractFlexibleItem<BrowseSourceHolder>() {
 
     override fun getLayoutRes(): Int {
         return if (catalogueAsList.getOrDefault())
@@ -44,7 +45,8 @@ class BrowseSourceItem(
                     gradient.layoutParams = FrameLayout.LayoutParams(
                         FrameLayout.LayoutParams.MATCH_PARENT,
                         (coverHeight * 0.66f).toInt(),
-                        Gravity.BOTTOM)
+                        Gravity.BOTTOM
+                    )
                     card.updateLayoutParams<ConstraintLayout.LayoutParams> {
                         bottomMargin = 6.dpToPx
                     }
@@ -66,7 +68,7 @@ class BrowseSourceItem(
                     (parent.itemWidth / 3f * 3.7f).toInt()
                 )
             }
-            BrowseSourceGridHolder(view, adapter, listType == 1)
+            BrowseSourceGridHolder(view, adapter, listType == 1, isFollows = isFollows)
         } else {
             BrowseSourceListHolder(view, adapter)
         }
