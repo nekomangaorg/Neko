@@ -686,6 +686,7 @@ class MangaDetailsPresenter(
             downloadManager.context.contentResolver.openInputStream(uri) ?: return false
         if (manga.source == LocalSource.ID) {
             LocalSource.updateCover(downloadManager.context, manga, inputStream)
+            MangaImpl.setLastCoverFetch(manga.id!!, Date().time)
             return true
         }
 
