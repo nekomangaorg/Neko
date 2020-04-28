@@ -155,7 +155,6 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
             val intent = Intent(context, ReaderActivity::class.java)
             intent.putExtra("manga", manga.id)
             intent.putExtra("chapter", chapter.id)
-            intent.putExtra("chapterUrl", chapter.url)
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
             return intent
         }
@@ -186,17 +185,13 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
         if (presenter.needsInit()) {
             val manga = intent.extras!!.getLong("manga", -1)
             val chapter = intent.extras!!.getLong("chapter", -1)
-            val chapterUrl = intent.extras!!.getString("chapterUrl", "")
-            if (manga == -1L || chapterUrl == "" && chapter == -1L) {
+            if (manga == -1L || chapter == -1L) {
                 finish()
                 return
             }
             NotificationReceiver.dismissNotification(this, manga.hashCode(), Notifications.ID_NEW_CHAPTERS)
 
-            when (chapter > -1) {
-                true -> presenter.init(manga, chapter)
-                false -> presenter.init(manga, chapterUrl)
-            }
+            presenter.init(manga, chapter)
         }
 
         if (savedInstanceState != null) {
