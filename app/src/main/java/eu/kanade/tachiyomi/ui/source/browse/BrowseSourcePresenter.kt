@@ -403,7 +403,8 @@ open class BrowseSourcePresenter(
 
             moveMangaToCategories(manga, selectedCategories.filter { it.id != 0 })
         } else {
-            changeMangaFavorite(manga)
+            if (!manga.favorite)
+                changeMangaFavorite(manga)
         }
     }
 
