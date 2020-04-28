@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.ui.main
 import android.animation.Animator
 import android.animation.AnimatorSet
 import android.animation.ValueAnimator
-import android.app.SearchManager
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.Rect
@@ -54,7 +53,6 @@ import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.ui.setting.SettingsController
 import eu.kanade.tachiyomi.ui.setting.SettingsMainController
 import eu.kanade.tachiyomi.ui.source.SourceController
-import eu.kanade.tachiyomi.ui.source.global_search.SourceSearchController
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.hasSideNavBar
 import eu.kanade.tachiyomi.util.system.isBottomTappable
