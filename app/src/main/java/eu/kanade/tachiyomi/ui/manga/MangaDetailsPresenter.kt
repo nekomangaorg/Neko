@@ -375,6 +375,7 @@ class MangaDetailsPresenter(
         if (update) controller.updateChapters(this.chapters)
     }
 
+    /** Refresh Manga Info and Chapter List (not tracking) */
     fun refreshAll() {
         scope.launch {
             isLoading = true
@@ -590,8 +591,8 @@ class MangaDetailsPresenter(
      * @param manga the manga to move.
      * @param category the selected category, or null for default category.
      */
-    fun moveMangaToCategory(manga: Manga, category: Category?) {
-        moveMangaToCategories(manga, listOfNotNull(category))
+    fun moveMangaToCategory(category: Category?) {
+        moveMangaToCategories(listOfNotNull(category))
     }
 
     /**
@@ -600,7 +601,7 @@ class MangaDetailsPresenter(
      * @param manga the manga to move.
      * @param categories the selected categories.
      */
-    fun moveMangaToCategories(manga: Manga, categories: List<Category>) {
+    fun moveMangaToCategories(categories: List<Category>) {
         val mc = categories.filter { it.id != 0 }.map { MangaCategory.create(manga, it) }
         db.setMangaCategories(mc, listOf(manga))
     }
@@ -611,7 +612,7 @@ class MangaDetailsPresenter(
      * @param manga the manga to get categories from.
      * @return Array of category ids the manga is in, if none returns default id
      */
-    fun getMangaCategoryIds(manga: Manga): Array<Int> {
+    fun getMangaCategoryIds(): Array<Int> {
         val categories = db.getCategoriesForManga(manga).executeAsBlocking()
         return categories.mapNotNull { it.id }.toTypedArray()
     }
