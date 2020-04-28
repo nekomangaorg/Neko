@@ -1032,7 +1032,7 @@ class MangaDetailsController : BaseController,
             return
         }
         if (chapter.status != Download.NOT_DOWNLOADED && chapter.status != Download.ERROR) {
-            presenter.deleteChapters(listOf(chapter))
+            presenter.deleteChapter(chapter)
         } else {
             if (chapter.status == Download.ERROR)
                 DownloadService.start(view.context)
