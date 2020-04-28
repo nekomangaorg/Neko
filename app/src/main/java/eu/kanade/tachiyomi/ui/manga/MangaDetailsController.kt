@@ -1064,7 +1064,7 @@ class MangaDetailsController : BaseController,
                 presenter.toggleFavorite()
                 showAddedSnack()
             }
-            val ids = presenter.getMangaCategoryIds(manga)
+            val ids = presenter.getMangaCategoryIds()
             val preselected = ids.mapNotNull { id ->
                 categories.indexOfFirst { it.id == id }.takeIf { it != -1 }
             }.toTypedArray()
@@ -1091,24 +1091,23 @@ class MangaDetailsController : BaseController,
     }
 
     private fun toggleMangaFavorite() {
-        val manga = presenter.manga
         if (presenter.toggleFavorite()) {
             val categories = presenter.getCategories()
             val defaultCategoryId = presenter.preferences.defaultCategory()
             val defaultCategory = categories.find { it.id == defaultCategoryId }
             when {
-                defaultCategory != null -> presenter.moveMangaToCategory(manga, defaultCategory)
+                defaultCategory != null -> presenter.moveMangaToCategory(defaultCategory)
                 defaultCategoryId == 0 || categories.isEmpty() -> // 'Default' or no category
-                    presenter.moveMangaToCategory(manga, null)
+                    presenter.moveMangaToCategory(null)
                 else -> {
-                    val ids = presenter.getMangaCategoryIds(manga)
+                    val ids = presenter.getMangaCategoryIds()
                     val preselected = ids.mapNotNull { id ->
                         categories.indexOfFirst { it.id == id }.takeIf { it != -1 }
                     }.toTypedArray()
 
                     AddToLibraryCategoriesDialog(
                         this,
-                        manga,
+                        presenter.manga,
                         categories,
                         preselected
                     ).showDialog(router)
@@ -1150,12 +1149,11 @@ class MangaDetailsController : BaseController,
     override fun mangaPresenter(): MangaDetailsPresenter = presenter
 
     override fun updateCategoriesForMangas(mangas: List<Manga>, categories: List<Category>) {
-        val manga = mangas.firstOrNull() ?: return
-        presenter.moveMangaToCategories(manga, categories)
+        presenter.moveMangaToCategories(categories)
     }
 
     override fun updateCategoriesForManga(manga: Manga?, categories: List<Category>) {
-        manga?.let { presenter.moveMangaToCategories(manga, categories) }
+        manga?.let { presenter.moveMangaToCategories(categories) }
     }
 
     override fun addToLibraryCancelled(manga: Manga?, position: Int) {
