@@ -342,6 +342,24 @@ class MangaDetailsPresenter(
 
     /**
      * Deletes the given list of chapter.
+     * @param chapter the chapter to delete.
+     */
+    fun deleteChapter(chapter: ChapterItem) {
+        downloadManager.deleteChapters(listOf(chapter), manga, source)
+        val downloads = downloadManager.queue.toMutableList()
+        downloads.remove(chapter.download)
+        downloadManager.reorderQueue(downloads)
+
+        this.chapters.find { it.id == chapter.id }?.apply {
+            status = Download.NOT_DOWNLOADED
+            download = null
+        }
+
+        controller.updateChapters(this.chapters)
+    }
+
+    /**
+     * Deletes the given list of chapter.
      * @param chapters the list of chapters to delete.
      */
     fun deleteChapters(chapters: List<ChapterItem>, update: Boolean = true) {
