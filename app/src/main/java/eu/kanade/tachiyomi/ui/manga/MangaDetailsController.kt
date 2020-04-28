@@ -77,6 +77,7 @@ import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
+import eu.kanade.tachiyomi.ui.library.AddToLibraryCategoriesDialog
 import eu.kanade.tachiyomi.ui.library.ChangeMangaCategoriesDialog
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.main.MainActivity
@@ -128,7 +129,8 @@ class MangaDetailsController : BaseController,
     ActionMode.Callback,
     MangaDetailsAdapter.MangaDetailsInterface,
     FlexibleAdapter.OnItemMoveListener,
-    ChangeMangaCategoriesDialog.Listener {
+    ChangeMangaCategoriesDialog.Listener,
+    AddToLibraryCategoriesDialog.Listener {
 
     constructor(
         manga: Manga?,
@@ -1128,9 +1130,9 @@ class MangaDetailsController : BaseController,
                         categories.indexOfFirst { it.id == id }.takeIf { it != -1 }
                     }.toTypedArray()
 
-                    ChangeMangaCategoriesDialog(
+                    AddToLibraryCategoriesDialog(
                         this,
-                        listOf(manga),
+                        manga,
                         categories,
                         preselected
                     ).showDialog(router)
@@ -1174,6 +1176,14 @@ class MangaDetailsController : BaseController,
     override fun updateCategoriesForMangas(mangas: List<Manga>, categories: List<Category>) {
         val manga = mangas.firstOrNull() ?: return
         presenter.moveMangaToCategories(manga, categories)
+    }
+
+    override fun updateCategoriesForManga(manga: Manga?, categories: List<Category>) {
+        manga?.let { presenter.moveMangaToCategories(manga, categories) }
+    }
+
+    override fun addToLibraryCancelled(manga: Manga?, position: Int) {
+        manga?.let { presenter.toggleFavorite() }
     }
 
     /**
