@@ -32,6 +32,7 @@
         <activity
             android:name=".ui.main.MainActivity"
             android:windowSoftInputMode="adjustPan"
+            android:label="@string/app_short_name"
             android:theme="@style/Theme.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
