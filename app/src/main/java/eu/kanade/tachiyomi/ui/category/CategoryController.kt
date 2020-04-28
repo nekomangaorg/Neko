@@ -136,6 +136,7 @@ class CategoryController(bundle: Bundle? = null) : BaseController(bundle),
     }
 
     private fun deleteCategory(position: Int) {
+        confirmDelete()
         adapter?.removeItem(position)
         snack =
             view?.snack(R.string.category_deleted, Snackbar.LENGTH_INDEFINITE) {
