@@ -398,21 +398,6 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
                     controller?.showSheet()
                 }
             }
-
-            INTENT_SEARCH -> {
-                val query = intent.getStringExtra(INTENT_SEARCH_QUERY)
-                if (query != null && query.isNotEmpty()) {
-                    if (router.backstackSize > 1) {
-                        router.popToRoot()
-                    }
-                    router.replaceTopController(
-                        BrowseSourceController(
-                            source,
-                            query
-                        ).withFadeTransaction()
-                    )
-                }
-            }
             else -> return false
         }
         return true
