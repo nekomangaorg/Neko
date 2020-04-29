@@ -4,6 +4,7 @@
     <style name="Theme.Tachiyomi" parent="Theme.Base">
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
+        <item name="colorSecondaryVariant">@color/colorPrimary</item>
 
     </style>
 
@@ -14,6 +15,7 @@
         <item name="colorPrimary">@color/colorAmoledPrimary</item>
         <item name="colorSecondary">@color/colorAmoledPrimary</item>
         <item name="colorPrimaryVariant">@color/colorAmoledPrimary</item>
+        <item name="colorSecondaryVariant">@color/colorAmoledPrimary</item>
         <item name="colorOnPrimary">@color/colorAmoledPrimary</item>
         <item name="colorPrimaryDark">@color/colorAmoledPrimary</item>
         <item name="android:colorBackground">@color/colorAmoledPrimary</item>

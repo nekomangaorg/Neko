@@ -2,6 +2,18 @@
 <changelog bulletedList="true">
     <changelogversion
         changeDate=""
+        versionName="v2.0.0">
+        <changelogtext>Complete redesign of UI and flow courtesy of Jays2Kings from TachiyomiJ2K</changelogtext>
+        <changelogtext>New Themes</changelogtext>
+        <changelogtext>Add ability to read downloads from other Tachiyomi forks</changelogtext>
+        <changelogtext>Mangadex manga urls now are deeplinked and can be opened in app</changelogtext>
+        <changelogtext>Added badges in My follows to see follow status more clearly</changelogtext>
+        <changelogtext>New Global font</changelogtext>
+        <changelogtext>Android 5 support has been dropped</changelogtext>
+
+    </changelogversion>
+    <changelogversion
+        changeDate=""
         versionName="v1.7.2">
         <changelogtext>Long press and select manga in library can now be synced to MDlist as follows</changelogtext>
         <changelogtext>Long press a chapter gives option to view comments for chapter</changelogtext>

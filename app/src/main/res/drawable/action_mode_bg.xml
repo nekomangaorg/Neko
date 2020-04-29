@@ -2,7 +2,7 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:bottom="5dp">
         <shape>
-            <solid android:color="?attr/colorPrimaryVariant"/>
+            <solid android:color="?attr/colorSecondaryVariant"/>
         </shape>
     </item>
     <item android:height="5dp" android:gravity="bottom">

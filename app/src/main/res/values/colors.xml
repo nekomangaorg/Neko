@@ -35,6 +35,8 @@
     <color name="background">@color/md_grey_50</color>
     <color name="dialog">@color/md_white_1000</color>
 
+    <color name="elevated_dark_background">#121212</color>
+
     <!-- Text Colors -->
     <color name="md_black_1000_87">#DE000000</color>
     <color name="md_black_1000_54">#8A000000</color>
