@@ -60,7 +60,10 @@ class LocalSource(private val context: Context) : CatalogueSource {
 
         private fun getBaseDirectories(context: Context): List<File> {
             val c = context.getString(R.string.app_name) + File.separator + "local"
-            return DiskUtil.getExternalStorages(context).map { File(it.absolutePath, c) }
+            val oldLibrary = "Tachiyomi" + File.separator + "local"
+            return DiskUtil.getExternalStorages(context).map {
+                listOf(File(it.absolutePath, c), File(it.absolutePath, oldLibrary))
+            }.flatten()
         }
     }
 
