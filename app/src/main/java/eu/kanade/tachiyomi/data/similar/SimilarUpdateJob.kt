@@ -25,7 +25,7 @@ class SimilarUpdateJob(private val context: Context, workerParams: WorkerParamet
     companion object {
         const val TAG = "RelatedUpdate"
 
-        fun setupTask() {
+        fun setupTask(skipInitial: Boolean = false) {
 
             val preferences = Injekt.get<PreferencesHelper>()
             val enabled = preferences.similarEnabled()
@@ -46,7 +46,9 @@ class SimilarUpdateJob(private val context: Context, workerParams: WorkerParamet
                     .addTag(TAG)
                     .setConstraints(constraints)
                     .build()
-                WorkManager.getInstance().enqueue(OneTimeWorkRequestBuilder<SimilarUpdateJob>().build())
+                if (!skipInitial) {
+                    WorkManager.getInstance().enqueue(OneTimeWorkRequestBuilder<SimilarUpdateJob>().build())
+                }
                 WorkManager.getInstance().enqueueUniquePeriodicWork(TAG, ExistingPeriodicWorkPolicy.REPLACE, request)
             } else {
                 WorkManager.getInstance().cancelAllWorkByTag(TAG)

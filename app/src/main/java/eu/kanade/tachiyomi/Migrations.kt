@@ -36,7 +36,7 @@ object Migrations {
             if (oldVersion < 53) {
                 LibraryUpdateJob.setupTask()
                 BackupCreatorJob.setupTask()
-                SimilarUpdateJob.setupTask()
+                SimilarUpdateJob.setupTask(true)
             }
             return true
         }
