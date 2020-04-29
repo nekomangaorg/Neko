@@ -201,7 +201,7 @@ class LibraryController(
         val activity = activity ?: return
         val icon = activity.bottom_nav.getItemView(R.id.nav_library) ?: return
         filterTooltip =
-            ViewTooltip.on(activity, icon).autoHide(false, 0L).align(ViewTooltip.ALIGN.START)
+            ViewTooltip.on(activity, icon).autoHide(true, 3000).align(ViewTooltip.ALIGN.START)
                 .position(ViewTooltip.Position.TOP).text(R.string.tap_library_to_show_filters)
                 .color(activity.getResourceColor(R.attr.colorAccent))
                 .textSize(TypedValue.COMPLEX_UNIT_SP, 15f).textColor(Color.WHITE).withShadow(false)

@@ -54,6 +54,7 @@ import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.ui.setting.SettingsController
 import eu.kanade.tachiyomi.ui.setting.SettingsMainController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
+import eu.kanade.tachiyomi.util.system.contextCompatDrawable
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.hasSideNavBar
 import eu.kanade.tachiyomi.util.system.isBottomTappable
@@ -70,6 +71,7 @@ import kotlinx.coroutines.delay
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import uy.kohesive.injekt.injectLazy
 import kotlin.math.abs
 
 open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLoginDialog.Listener {
