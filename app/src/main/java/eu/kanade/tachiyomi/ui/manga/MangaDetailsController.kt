@@ -1022,7 +1022,7 @@ class MangaDetailsController : BaseController,
 
     // In case the recycler is at the bottom and collapsing the header makes it unscrollable
     override fun updateScroll() {
-        if (!recycler.canScrollVertically(-1)) {
+        if (recycler?.canScrollVertically(-1) == false) {
             getHeader()?.backdrop?.translationY = 0f
             activity?.appbar?.y = 0f
             colorToolbar(isColor = false, animate = false)
