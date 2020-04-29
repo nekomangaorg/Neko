@@ -542,9 +542,10 @@ class MangaDetailsController : BaseController,
             val colorSecondary = activity?.getResourceColor(
                 R.attr.colorSecondary
             ) ?: Color.BLACK
-            if (router.backstack.last().controller() !is MangaDetailsController) {
-                (activity as MainActivity).appbar.setBackgroundColor(colorSecondary)
-                (activity as MainActivity).toolbar.setBackgroundColor(colorSecondary)
+            if (router.backstackSize > 0 &&
+                router.backstack.last().controller() !is MangaDetailsController) {
+                (activity as? MainActivity)?.appbar?.setBackgroundColor(colorSecondary)
+                (activity as? MainActivity)?.toolbar?.setBackgroundColor(colorSecondary)
 
                 activity?.window?.statusBarColor = activity?.getResourceColor(
                     android.R.attr.statusBarColor
