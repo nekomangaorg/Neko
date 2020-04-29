@@ -67,10 +67,13 @@ open class BrowseSourceController(bundle: Bundle) :
     constructor(
         source: Source,
         searchQuery: String? = null,
-        applyInset: Boolean = true
-    ) : this(Bundle().apply {
+        applyInset: Boolean = true,
+        deepLink: Boolean = false
+    ) : this(Bundle().apply
+    {
         putLong(SOURCE_ID_KEY, source.id)
         putBoolean(APPLY_INSET, applyInset)
+        putBoolean(DEEP_LINK, deepLink)
 
         if (searchQuery != null)
             putString(SEARCH_QUERY_KEY, searchQuery)
@@ -120,7 +123,7 @@ open class BrowseSourceController(bundle: Bundle) :
     }
 
     override fun createPresenter(): BrowseSourcePresenter {
-        return BrowseSourcePresenter(args.getLong(SOURCE_ID_KEY))
+        return BrowseSourcePresenter(args.getLong(SOURCE_ID_KEY), args.getString(SEARCH_QUERY_KEY) ?: "", args.getBoolean(DEEP_LINK))
     }
 
     override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
@@ -130,6 +133,9 @@ open class BrowseSourceController(bundle: Bundle) :
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
 
+        if (presenter.source.isLogged().not()) {
+            view?.snack("You must be logged it.  please login")
+        }
         if (bundle?.getBoolean(APPLY_INSET) == true) {
             view.applyWindowInsetsForRootController(activity!!.bottom_nav)
         }
@@ -370,6 +376,10 @@ open class BrowseSourceController(bundle: Bundle) :
         adapter?.clear()
 
         presenter.restartPager(newQuery)
+    }
+
+    fun goDirectlyForDeepLink(manga: Manga) {
+        router.replaceTopController(MangaDetailsController(manga, true).withFadeTransaction())
     }
 
     /**
@@ -620,6 +630,7 @@ open class BrowseSourceController(bundle: Bundle) :
         const val SOURCE_ID_KEY = "sourceId"
         const val SEARCH_QUERY_KEY = "searchQuery"
         const val APPLY_INSET = "applyInset"
+        const val DEEP_LINK = "deepLink"
         const val FOLLOWS = "follows"
     }
 }

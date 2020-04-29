@@ -34,30 +34,12 @@
             android:theme="@style/Theme.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <meta-data
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable" />
-        </activity>
-        <activity
-            android:name=".ui.main.SearchActivity"
-            android:theme="@style/Theme.Splash">
-            <intent-filter>
-                <action android:name="android.intent.action.SEARCH" />
-                <action android:name="com.google.android.gms.actions.SEARCH_ACTION" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="eu.kanade.tachiyomi.SEARCH" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-
-            <meta-data
-                android:name="android.app.searchable"
-                android:resource="@xml/searchable" />
-            <!--suppress AndroidDomInspection -->
         </activity>
         <activity
             android:name=".ui.reader.ReaderActivity"
@@ -84,6 +66,43 @@
                     android:scheme="neko" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".ui.main.DeepLinkActivity"
+            android:launchMode="singleTask"
+            android:theme="@android:style/Theme.NoDisplay">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:scheme="https"
+                    android:host="www.mangadex.org"
+                    android:pathPattern="/manga/..*" />
+                <data
+                    android:scheme="https"
+                    android:host="mangadex.org"
+                    android:pathPattern="/manga/..*" />
+                <data
+                    android:scheme="https"
+                    android:host="www.mangadex.cc"
+                    android:pathPattern="/manga/..*" />
+                <data
+                    android:scheme="https"
+                    android:host="www.mangadex.cc"
+                    android:pathPattern="/manga/..*" />
+            </intent-filter>
+
+
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable" />
+        </activity>
+
+        <activity
+            android:name=".ui.main.SearchActivity"
+            android:theme="@style/Theme.Tachiyomi" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

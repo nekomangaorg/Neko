@@ -90,6 +90,7 @@
         android:layout_marginTop="20dp"
         android:text="@string/login"
         android:textColor="@android:color/white"
+        app:pb_colorNormal="@color/neko_green_darker"
         app:pb_textComplete="@string/successfully_logged_in"
         app:pb_textError="@string/could_not_log_in" />
 

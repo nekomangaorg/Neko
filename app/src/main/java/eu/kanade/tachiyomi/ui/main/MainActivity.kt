@@ -401,12 +401,11 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
 
             INTENT_SEARCH -> {
                 val query = intent.getStringExtra(INTENT_SEARCH_QUERY)
-                val filter = intent.getStringExtra(INTENT_SEARCH_FILTER)
                 if (query != null && query.isNotEmpty()) {
                     if (router.backstackSize > 1) {
                         router.popToRoot()
                     }
-                    router.pushController(
+                    router.replaceTopController(
                         BrowseSourceController(
                             source,
                             query
@@ -585,7 +584,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
         const val SHORTCUT_DOWNLOADS = "eu.kanade.tachiyomi.SHOW_DOWNLOADS"
         const val SHORTCUT_MANGA = "eu.kanade.tachiyomi.SHOW_MANGA"
 
-        const val INTENT_SEARCH = "eu.kanade.tachiyomi.SEARCH"
+        const val INTENT_SEARCH = "neko.SEARCH"
         const val INTENT_SEARCH_QUERY = "query"
         const val INTENT_SEARCH_FILTER = "filter"
     }

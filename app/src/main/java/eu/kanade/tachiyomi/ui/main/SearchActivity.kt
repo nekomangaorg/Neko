@@ -5,12 +5,14 @@ import android.content.Intent
 import android.os.Bundle
 import com.bluelinelabs.conductor.Controller
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
+import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import kotlinx.android.synthetic.main.main_activity.*
+import timber.log.Timber
 
 class SearchActivity : MainActivity() {
 
@@ -71,15 +73,20 @@ class SearchActivity : MainActivity() {
                 }
             }
             INTENT_SEARCH -> {
-                val query = intent.getStringExtra(INTENT_SEARCH_QUERY)
-                val filter = intent.getStringExtra(INTENT_SEARCH_FILTER)
-                if (query != null && query.isNotEmpty()) {
-                    if (router.backstackSize > 1) {
-                        router.popToRoot()
+                val pathSegments = intent?.data?.pathSegments
+                if (pathSegments != null && pathSegments.size > 1) {
+                    Timber.e(pathSegments[0])
+                    val id = pathSegments[1]
+                    if (id != null && id.isNotEmpty()) {
+                        if (router.backstackSize > 1) {
+                            router.popToRoot()
+                        }
+                        val query = "${SearchHandler.PREFIX_ID_SEARCH}$id"
+                        router.replaceTopController(BrowseSourceController(source, query, true, true).withFadeTransaction())
                     }
-                    router.replaceTopController(BrowseSourceController(source, query).withFadeTransaction())
                 }
             }
+
             else -> return false
         }
         return true

@@ -45,6 +45,8 @@ import java.util.Date
  */
 open class BrowseSourcePresenter(
     sourceId: Long,
+    var query: String = "",
+    var isDeepLink: Boolean = false,
     sourceManager: SourceManager = Injekt.get(),
     private val db: DatabaseHelper = Injekt.get(),
     private val prefs: PreferencesHelper = Injekt.get(),
@@ -55,12 +57,6 @@ open class BrowseSourcePresenter(
      * Selected source.
      */
     val source = sourceManager.get(sourceId)!!
-
-    /**
-     * Query from the view.
-     */
-    var query = ""
-        private set
 
     var filtersChanged = false
 
@@ -142,6 +138,10 @@ open class BrowseSourcePresenter(
      */
     fun restartPager(query: String = this.query, filters: FilterList = this.appliedFilters) {
         this.query = query
+        if (this.query.startsWith("neko://")) {
+            this.query = this.query.substringAfter("neko://")
+            isDeepLink = true
+        }
         this.appliedFilters = filters
 
         subscribeToMangaInitializer()
@@ -163,6 +163,9 @@ open class BrowseSourcePresenter(
             .map { it.first to it.second.map { BrowseSourceItem(it, browseAsList, sourceListType, isFollows) } }
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeReplay({ view, (page, mangas) ->
+                if (isDeepLink) {
+                    view.goDirectlyForDeepLink(mangas.first().manga)
+                }
                 view.onAddPage(page, mangas)
             }, { _, error ->
                 Timber.e(error)
