@@ -564,6 +564,9 @@
     <string name="download_complete">Download complete</string>
     <string name="download_error">Download error</string>
     <string name="could_not_download_chapter_can_try_again">Could not download chapters. You can try again in the downloads section</string>
+    <string name="manage_whats_downloading">Manage what\'s downloading</string>
+    <string name="visit_recents_for_download_queue">Visit the recents tab to access the download
+        queue. You can also double tap or press and hold for quicker access</string>
 
     <!-- Download Notification -->
     <string name="could_not_download_unexpected_error">Could not download chapter due to unexpected error</string>

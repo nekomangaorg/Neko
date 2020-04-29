@@ -29,6 +29,8 @@ import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.Router
 import com.bluelinelabs.conductor.RouterTransaction
 import com.bluelinelabs.conductor.changehandler.FadeChangeHandler
+import com.getkeepsafe.taptargetview.TapTarget
+import com.getkeepsafe.taptargetview.TapTargetView
 import com.google.android.material.snackbar.Snackbar
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.Migrations
@@ -38,7 +40,6 @@ import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.download.DownloadServiceListener
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.extension.api.ExtensionGithubApi
 import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
@@ -53,6 +54,7 @@ import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.ui.setting.SettingsController
 import eu.kanade.tachiyomi.ui.setting.SettingsMainController
 import eu.kanade.tachiyomi.ui.source.SourceController
+import eu.kanade.tachiyomi.util.system.contextCompatDrawable
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.hasSideNavBar
 import eu.kanade.tachiyomi.util.system.isBottomTappable
@@ -69,8 +71,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 import java.util.Date
 import java.util.concurrent.TimeUnit
@@ -91,6 +91,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
     private var canDismissSnackBar = false
 
     private var animationSet: AnimatorSet? = null
+    private val downloadManager: DownloadManager by injectLazy()
 
     fun setUndoSnackBar(snackBar: Snackbar?, extraViewToCheck: View? = null) {
         this.snackBar = snackBar
@@ -255,6 +256,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                 handler: ControllerChangeHandler
             ) {
                 appbar.y = 0f
+                showDLQueueTutorial()
             }
         })
 
@@ -346,6 +348,32 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         // setting in case someone comes from the search activity to main
         getExtensionUpdates()
         DownloadService.callListeners()
+        showDLQueueTutorial()
+    }
+
+    private fun showDLQueueTutorial() {
+        if (router.backstackSize == 1 && this !is SearchActivity &&
+            downloadManager.hasQueue() && !preferences.shownDownloadQueueTutorial().get()
+        ) {
+            val recentsItem = bottom_nav.getItemView(R.id.nav_recents) ?: return
+            preferences.shownDownloadQueueTutorial().set(true)
+            TapTargetView.showFor(this,
+                TapTarget.forView(
+                    recentsItem,
+                    getString(R.string.manage_whats_downloading),
+                    getString(R.string.visit_recents_for_download_queue)
+                ).outerCircleColor(R.color.colorAccent).outerCircleAlpha(0.95f).titleTextSize(20)
+                    .titleTextColor(android.R.color.white).descriptionTextSize(16)
+                    .descriptionTextColor(R.color.md_white_1000_76)
+                    .icon(contextCompatDrawable(R.drawable.ic_recent_read_32dp))
+                    .targetCircleColor(android.R.color.white).targetRadius(45),
+                object : TapTargetView.Listener() {
+                    override fun onTargetClick(view: TapTargetView) {
+                        super.onTargetClick(view)
+                        bottom_nav.selectedItemId = R.id.nav_recents
+                    }
+                })
+        }
     }
 
     override fun onPause() {
@@ -356,7 +384,6 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
     private fun getExtensionUpdates() {
         if (Date().time >= preferences.lastExtCheck().getOrDefault() + TimeUnit.HOURS.toMillis(6)) {
             GlobalScope.launch(Dispatchers.IO) {
-                val preferences: PreferencesHelper by injectLazy()
                 try {
                     val pendingUpdates = ExtensionGithubApi().checkForUpdates(this@MainActivity)
                     preferences.extensionUpdatesCount().set(pendingUpdates.size)
@@ -529,11 +556,11 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
     }
 
     override fun downloadStatusChanged(downloading: Boolean) {
-        val downloadManager = Injekt.get<DownloadManager>()
         val hasQueue = downloading || downloadManager.hasQueue()
         launchUI {
             if (hasQueue) {
                 bottom_nav?.getOrCreateBadge(R.id.nav_recents)
+                showDLQueueTutorial()
             } else {
                 bottom_nav?.removeBadge(R.id.nav_recents)
             }

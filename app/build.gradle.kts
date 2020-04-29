@@ -204,6 +204,7 @@ dependencies {
     implementation("com.github.chrisbanes:PhotoView:2.3.0")
     implementation("com.github.carlosesco:DirectionalViewPager:a844dbca0a")
     implementation("com.github.florent37:viewtooltip:1.2.2")
+    implementation("com.getkeepsafe.taptargetview:taptargetview:1.13.0")
 
     // Conductor
     implementation("com.bluelinelabs:conductor:2.1.5")
