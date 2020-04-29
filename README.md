@@ -1,90 +1,49 @@
-# ![app icon](./.github/readme-images/app-icon.png)Tachiyomi
-Tachiyomi is a free and open source manga reader for Android 5.0 and above.
+<h1 align="center">
+  <br>
+  <a href="https://github.com/CarlosEsco/Neko"><img src="./.github/readme-images/logo.png" alt="Neko" width="200"></a>
+  <br>
+  Neko
+  <br>
+</h1>
+---
 
-![screenshots of app](./.github/readme-images/theming-screenshots.gif)
+<p align="center">A Free, Open source unofficial manga reader for MangaDex</p>
 
-## Newest Release
-[v0.9.81](https://github.com/Jays2Kings/tachiyomi/releases)
+---
 
-## Features
+Need info? Check the [Wiki](https://github.com/CarlosEsco/Neko/wiki)
+ | or [Create an issue](https://github.com/CarlosEsco/Neko/issues/new/choose)
+ | For [Feature Request](https://github.com/CarlosEsco/Neko/issues/new?assignees=&labels=Feature+Request&template=feature_request.md&title=%5BFeature+Request%5D)
+ | Check [our project Board](https://github.com/CarlosEsco/Neko/projects/1)
+ 
+ [![release](https://img.shields.io/github/release/CarlosEsco/Neko.svg?maxAge=3600&style=for-the-badge&label=download%20(autoupdate%20included))](https://github.com/CarlosEsco/Neko/releases)
+ [![Stars](https://img.shields.io/github/stars/CarlosEsco/Neko.svg?style=for-the-badge)](https://github.com/CarlosEsco/Neko/releases)
+ [![GitHub license](https://img.shields.io/github/license/CarlosEsco/Neko.svg?style=for-the-badge)](https://github.com/CarlosEsco/Neko/blob/master/LICENSE)
 
-Features of Tachiyomi include:
-* Online reading from sources such as KissManga, MangaDex, [and more](https://github.com/inorichi/tachiyomi-extensions)
-* Local reading of downloaded manga
-* A configurable reader with multiple viewers, reading directions and other settings.
-* [MyAnimeList](https://myanimelist.net/), [AniList](https://anilist.co/), [Kitsu](https://kitsu.io/explore/anime), and [Shikimori](https://shikimori.one) support
-* Categories to organize your library
-* Light and dark themes
-* Schedule updating your library for new chapters
-* Create backups locally to read offline or to your desired cloud service 
+---
 
-Plus some new features in this fork such as:
-* Android 10 Dark Theme support: You can have Tachiyomi follow the system theme as well as customize which dark theme to use for dark mode
-* Android 10 edge to edge support (and a translucent nav bar for older versions): no more small ugly bar for the gesture navigation
-* Automatic background based on manga page: For those that like having a white background to match the content, this will automatically set the background to match for moments such as a flashback section of a manga
-* [Richer New chapters notifications](https://raw.githubusercontent.com/Jays2Kings/tachiyomi/master/.github/readme-images/new%20notifcations%20collasped.png): Now as a group of notifications, [expanding out to show more information](https://raw.githubusercontent.com/Jays2Kings/tachiyomi/master/.github/readme-images/new%20notifcations.png) about the new chapters (like chapter name and manga cover). Tapping on it will bring you right into the chapter or expand it to mark it as read or view all chapters
-* [New material snackbar](https://raw.githubusercontent.com/Jays2Kings/tachiyomi/master/.github/readme-images/material%20snackbar.png): Removing manga now auto deletes chapters and has an undo button in case you change your mind
-* Multi Source Migration from library
-* Notification separation of updating library and new chapters
-* [Share sheets upgrade for Android 10](https://raw.githubusercontent.com/Jays2Kings/tachiyomi/master/.github/readme-images/share%20menu.png)
-* Reader seekbar overrides switch app gesture in Android 10, so no more accidents for that
-* Option to hide manga titles in grid view
-* Filter out your library by searching for tags (ex. "Comedy" or "Slice of Life") or exclude mangas by a tag (ex. "-Shounen" or "-Romance"). Tapping on these tags also performs a local search. You can also search multiple tags (ex. "Romance, -Harem, Comedy")
-* Tri-State Filters on library
-* Filter extensions based on your locale
-* Webview Navigation
-* Fingerprint/Biometrics lock
-* Range Select for Library and Chapters: long Press on an item then long press on another to select everything in between
-* Automatically checks for extension updates
-* Batch Auto-Source Migration (taken from [TachiyomiEH](https://github.com/NerdNumber9/TachiyomiEH))
-* Drag & Drop Sorting in Library
-* Improved Download queue, including reordering and cancelling downloads
-* Recently Read goes all the way back to the beginning of time
-* Restoring backups in the background (taken from [Neko](https://github.com/CarlosEsco/Neko)
-* Expanding manga thumbnails
-* Automatically check for extension updates
-* More Material Stuff
+## Screenshots:
+<img src="./.github/readme-images/screenshot_1.png" align="center" height="350" />
+<img src="./.github/readme-images/screenshot_2.png" align="center"  height="350" />
+<img src="./.github/readme-images/screenshot_3.png" align="center" height="350"  />
 
-## Issues, Feature Requests and Contributing
+## About:
+This is a <a href="https://mangadex.org/">Mangadex</a> specific fork of <a href="https://github.com/inorichi/tachiyomi">Tachiyomi</a> and <a href="https://github.com/Jays2Kings/tachiyomiJ2K">TachiyomiJ2K</a>.  This contains features specific to Mangadex
+ that those versions cannot offer.  It also features almost every feature that J2K has except for other sources, and local sources.
 
-Please make sure to read the full guidelines. Your issue may be closed without warning if you do not.
+## Mangadex specific features:
+- Supports native login to MangaDex and supports 2FA
+- MDList support
+- Similar Manga recommendations
+- Manually sync of Manga to and from Mangadex follows list
 
-<details><summary>Issues</summary>
 
-1. **Before reporting a new issue, take a look at the [FAQ](https://github.com/inorichi/tachiyomi/wiki/FAQ), the [changelog](https://github.com/inorichi/tachiyomi/releases) and the already opened [issues](https://github.com/inorichi/tachiyomi/issues).**
-2. If you are unsure, ask here: [![Discord](https://img.shields.io/discord/349436576037732353.svg)](https://discord.gg/tachiyomi)
+## Download
+Get the app from our [releases page](https://github.com/CarlosEsco/Neko/releases).
 
-</details>
-
-<details><summary>Bugs</summary>
-
-* Include version (Setting > About > Version)
- * If not latest, try updating, it may have already been solved
- * Dev version is equal to the number of commits as seen in the main page
-* Include steps to reproduce (if not obvious from description)
-* Include screenshot (if needed)
-* If it could be device-dependent, try reproducing on another device (if possible)
-* For large logs use http://pastebin.com/ (or similar)
-* Don't group unrelated requests into one issue
-
-DO: https://github.com/inorichi/tachiyomi/issues/24 https://github.com/inorichi/tachiyomi/issues/71
-
-DON'T: https://github.com/inorichi/tachiyomi/issues/75
-
-</details>
-
-<details><summary>Feature Requests</summary>
-
-* Write a detailed issue, explaning what it should do or how. Avoid writing just "like X app does"
-* Include screenshot (if needed)
-
-Catalogue requests should be created at https://github.com/inorichi/tachiyomi-extensions, they do not belong in this repository.
-</details>
-
-## FAQ
-
-[See our website.](https://tachiyomi.org/)
-You can also reach out to us on [Discord](https://discord.gg/tachiyomi).
+## Thanks
+- Inorichi for making the original Tachiyomi 
+- Jays2King for the wonderful new ui of J2K
 
 ## License
 
@@ -101,6 +60,8 @@ You can also reach out to us on [Discord](https://discord.gg/tachiyomi).
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
+    
+    Modifications copyright (C) 2019 Carlos Escobedo
 
 ## Disclaimer
 

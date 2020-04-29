@@ -11,11 +11,7 @@ assignees: ''
 
 I acknowledge that:
 
-- I have updated to the latest version of the app (latest J2K is v0.9.82)
-- I will **not** use this template for beta bugs, and instead use the beta bug template provided
-- I will only report bugs exclusive to this fork. I have checked that is not an issue on the main tachiyomi version (https://github.com/inorichi/tachiyomi)
-- I have updated all extensions
-- If this is an issue with an extension/source, that I should be opening an issue in https://github.com/inorichi/tachiyomi-extensions
+- I have updated to the latest version of the app
 
 **DELETE THIS SECTION IF YOU HAVE READ AND ACKNOWLEDGED IT**
 
