@@ -1,3 +1,5 @@
 package eu.kanade.tachiyomi.ui.source.browse
 
-class NoResultsException : Exception()
+class NoResultsException(val isSimilar: Boolean = false) : Exception() {
+
+}

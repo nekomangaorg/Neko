@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.similar
 import android.os.Bundle
 import android.view.Menu
 import android.view.View
+import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.Source
@@ -44,5 +45,18 @@ class SimilarController(bundle: Bundle) : BrowseSourceController(bundle) {
         super.onPrepareOptionsMenu(menu)
         menu.findItem(R.id.action_search).isVisible = false
         menu.findItem(R.id.action_open_in_web_view).isVisible = false
+    }
+
+    /**
+     * Called from the presenter when the network request fails.
+     *
+     * @param error the error received.
+     */
+    override fun onAddPageError(error: Throwable) {
+        super.onAddPageError(error)
+        empty_view.show(
+            CommunityMaterial.Icon.cmd_compass_off,
+            "No Similar Manga found"
+        )
     }
 }

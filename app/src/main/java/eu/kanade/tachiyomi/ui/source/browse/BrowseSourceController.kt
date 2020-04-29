@@ -403,7 +403,7 @@ open class BrowseSourceController(bundle: Bundle) :
      *
      * @param error the error received.
      */
-    fun onAddPageError(error: Throwable) {
+    open fun onAddPageError(error: Throwable) {
         Timber.e(error)
         val adapter = adapter ?: return
         adapter.onLoadMoreComplete(null)
