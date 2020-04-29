@@ -45,6 +45,9 @@ import androidx.transition.ChangeImageTransform
 import androidx.transition.TransitionManager
 import androidx.transition.TransitionSet
 import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.checkbox.checkBoxPrompt
+import com.afollestad.materialdialogs.checkbox.isCheckPromptChecked
+import com.afollestad.materialdialogs.list.listItems
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
 import com.bumptech.glide.load.engine.DiskCacheStrategy
@@ -583,6 +586,31 @@ class MangaDetailsController : BaseController,
     fun showError(message: String) {
         swipe_refresh?.isRefreshing = presenter.isLoading
         view?.snack(message)
+    }
+
+    fun showChaptersRemovedPopup(deletedChapters: List<ChapterItem>) {
+        val context = activity ?: return
+        val deleteRemovedPref = presenter.preferences.deleteRemovedChapters()
+        when (deleteRemovedPref.get()) {
+            2 -> {
+                presenter.deleteChapters(deletedChapters, false)
+                return
+            }
+            1 -> return
+            else -> {
+                MaterialDialog(context).title(R.string.chapters_removed).message(
+                    text = context.resources.getQuantityString(R.plurals.deleted_chapters,
+                        deletedChapters.size,
+                        deletedChapters.size,
+                        deletedChapters.joinToString("\n") { "${it.name}" })
+                ).positiveButton(R.string.delete) {
+                    presenter.deleteChapters(deletedChapters, false)
+                    if (it.isCheckPromptChecked()) deleteRemovedPref.set(2)
+                }.negativeButton(R.string.keep) {
+                    if (it.isCheckPromptChecked()) deleteRemovedPref.set(1)
+                }.cancelOnTouchOutside(false).checkBoxPrompt(R.string.remember_this_choice) {}.show()
+            }
+        }
     }
 
     fun setRefresh(enabled: Boolean) {

@@ -79,6 +79,8 @@ object PreferenceKeys {
 
     const val removeAfterReadSlots = "remove_after_read_slots"
 
+    const val deleteRemovedChapters = "delete_removed_chapters"
+
     const val removeAfterMarkedAsRead = "pref_remove_after_marked_as_read_key"
 
     const val libraryUpdateInterval = "pref_library_update_interval_key"

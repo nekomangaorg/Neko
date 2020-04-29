@@ -99,6 +99,11 @@ class LibraryUpdateService(
     // List containing new updates
     private val newUpdates = mutableMapOf<LibraryManga, Array<Chapter>>()
 
+    // For updates delete removed chapters if not preference is set as well
+    private val deleteRemoved by lazy {
+        preferences.deleteRemovedChapters().get() != 1
+    }
+
     /**
      * Cached progress notification to avoid creating a lot.
      */
@@ -318,6 +323,14 @@ class LibraryUpdateService(
                     }
                     newUpdates[manga] =
                         newChapters.first.sortedBy { it.chapter_number }.toTypedArray()
+                }
+                if (deleteRemoved && newChapters.second.isNotEmpty()) {
+                    val removedChapters = newChapters.second.filter {
+                        downloadManager.isChapterDownloaded(it, manga)
+                    }
+                    if (removedChapters.isNotEmpty()) {
+                        downloadManager.deleteChapters(removedChapters, manga, source)
+                    }
                 }
                 if (newChapters.first.size + newChapters.second.size > 0) listener?.onUpdateManga(
                     manga

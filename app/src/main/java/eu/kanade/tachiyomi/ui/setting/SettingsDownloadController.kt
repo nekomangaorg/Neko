@@ -104,6 +104,20 @@ class SettingsDownloadController : SettingsController() {
                             selectedCategories.joinToString { it.name }
                     }
             }
+            preferenceCategory {
+                intListPreference(activity) {
+                    key = Keys.deleteRemovedChapters
+                    titleRes = R.string.delete_removed_chapters
+                    customSummary = activity?.getString(R.string.delete_downloaded_if_removed_online)
+                    entriesRes = arrayOf(
+                        R.string.ask_on_chapters_page,
+                        R.string.always_keep,
+                        R.string.always_delete
+                    )
+                    entryRange = 0..2
+                    defaultValue = 0
+                }
+            }
         }
     }
 

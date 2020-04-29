@@ -264,7 +264,9 @@ class PreferencesHelper(val context: Context) {
 
     fun alwaysShowChapterTransition() = rxPrefs.getBoolean(Keys.alwaysShowChapterTransition, true)
 
-    // Tutorial preference
+    fun deleteRemovedChapters() = flowPrefs.getInt(Keys.deleteRemovedChapters, 0)
+
+    // Tutorial preferences
     fun shownFilterTutorial() = flowPrefs.getBoolean("shown_filter_tutorial", false)
 
     fun shownChapterSwipeTutorial() = flowPrefs.getBoolean("shown_swipe_tutorial", false)

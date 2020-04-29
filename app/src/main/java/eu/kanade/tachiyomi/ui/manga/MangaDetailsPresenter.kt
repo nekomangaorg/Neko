@@ -428,6 +428,19 @@ class MangaDetailsPresenter(
                             .map { it.toModel() })
                     }
                 }
+                if (newChapters.second.isNotEmpty()) {
+                    val removedChaptersId = newChapters.second.map { it.id }
+                    val removedChapters = this@MangaDetailsPresenter.chapters.filter {
+                        it.id in removedChaptersId && it.isDownloaded
+                    }
+                    if (removedChapters.isNotEmpty()) {
+                        withContext(Dispatchers.Main) {
+                            controller.showChaptersRemovedPopup(
+                                removedChapters
+                            )
+                        }
+                    }
+                }
                 withContext(Dispatchers.IO) { updateChapters() }
             }
             isLoading = false
