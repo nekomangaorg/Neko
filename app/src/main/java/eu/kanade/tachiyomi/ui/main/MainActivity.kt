@@ -29,6 +29,8 @@ import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.Router
 import com.bluelinelabs.conductor.RouterTransaction
 import com.bluelinelabs.conductor.changehandler.FadeChangeHandler
+import com.getkeepsafe.taptargetview.TapTarget
+import com.getkeepsafe.taptargetview.TapTargetView
 import com.google.android.material.snackbar.Snackbar
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.Migrations
@@ -87,6 +89,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
     private var canDismissSnackBar = false
 
     private var animationSet: AnimatorSet? = null
+    private val downloadManager: DownloadManager by injectLazy()
 
     fun setUndoSnackBar(snackBar: Snackbar?, extraViewToCheck: View? = null) {
         this.snackBar = snackBar
@@ -255,6 +258,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
                 handler: ControllerChangeHandler
             ) {
                 appbar.y = 0f
+                showDLQueueTutorial()
             }
         })
 
@@ -339,6 +343,32 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
         super.onResume()
         // setting in case someone comes from the search activity to main
         DownloadService.callListeners()
+        showDLQueueTutorial()
+    }
+
+    private fun showDLQueueTutorial() {
+        if (router.backstackSize == 1 && this !is SearchActivity &&
+            downloadManager.hasQueue() && !preferences.shownDownloadQueueTutorial().get()
+        ) {
+            val recentsItem = bottom_nav.getItemView(R.id.nav_recents) ?: return
+            preferences.shownDownloadQueueTutorial().set(true)
+            TapTargetView.showFor(this,
+                TapTarget.forView(
+                    recentsItem,
+                    getString(R.string.manage_whats_downloading),
+                    getString(R.string.visit_recents_for_download_queue)
+                ).outerCircleColor(R.color.colorAccent).outerCircleAlpha(0.95f).titleTextSize(20)
+                    .titleTextColor(android.R.color.white).descriptionTextSize(16)
+                    .descriptionTextColor(R.color.md_white_1000_76)
+                    .icon(contextCompatDrawable(R.drawable.ic_recent_read_32dp))
+                    .targetCircleColor(android.R.color.white).targetRadius(45),
+                object : TapTargetView.Listener() {
+                    override fun onTargetClick(view: TapTargetView) {
+                        super.onTargetClick(view)
+                        bottom_nav.selectedItemId = R.id.nav_recents
+                    }
+                })
+        }
     }
 
     override fun onPause() {
@@ -514,11 +544,11 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
     }
 
     override fun downloadStatusChanged(downloading: Boolean) {
-        val downloadManager = Injekt.get<DownloadManager>()
         val hasQueue = downloading || downloadManager.hasQueue()
         launchUI {
             if (hasQueue) {
                 bottom_nav?.getOrCreateBadge(R.id.nav_recents)
+                showDLQueueTutorial()
             } else {
                 bottom_nav?.removeBadge(R.id.nav_recents)
             }

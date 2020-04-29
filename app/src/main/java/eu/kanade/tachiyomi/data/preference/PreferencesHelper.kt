@@ -271,12 +271,14 @@ class PreferencesHelper(val context: Context) {
 
     fun shownChapterSwipeTutorial() = flowPrefs.getBoolean("shown_swipe_tutorial", false)
 
+    fun shownDownloadQueueTutorial() = flowPrefs.getBoolean("shown_download_queue", false)
+
     fun shownSimilarTutorial() = flowPrefs.getBoolean("shown_similar_tutorial", false)
 
     fun skipFiltered() = prefs.getBoolean(Keys.skipFiltered, false)
 
     fun similarEnabled() = prefs.getBoolean(Keys.similarEnabled, false)
-    
+
     fun similarUpdateRestriction() = prefs.getStringSet(Keys.similarUpdateRestriction, emptySet())
 
     fun lowQualityCovers() = prefs.getBoolean(Keys.lowQualityCovers, false)
