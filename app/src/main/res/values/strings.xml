@@ -47,6 +47,7 @@
     <string name="marked_as_read">Marked as read</string>
     <string name="marked_as_unread">Marked as unread</string>
     <string name="removed_bookmark">Removed bookmark</string>
+    <string name="chapters_removed">Chapters removed.</string>
     <plurals name="remove_n_chapters">
         <item quantity="one">Remove %1$d downloaded chapter?</item>
         <item quantity="other">Remove %1$d downloaded chapters?</item>
@@ -368,6 +369,13 @@
     <string name="reset_cover">Reset cover</string>
     <string name="failed_to_update_cover">Failed to update cover</string>
     <string name="must_be_in_library_to_edit">Manga must be in your library to edit</string>
+    <string name="remember_this_choice">Remember this choice</string>
+    <plurals name="deleted_chapters">
+        <item quantity="one">A chapter has been removed from the source:\n%2$s\nDelete
+            its download?</item>
+        <item quantity="other">%1$s chapters have been removed from the source:\n%2$s\n\nDelete
+            their downloads?</item>
+    </plurals>
 
     <!-- Tracking -->
     <string name="tracking">Tracking</string>
@@ -575,6 +583,12 @@
     <string name="fifth_to_last">Fifth to last chapter</string>
     <string name="download_new_chapters">Download new chapters</string>
     <string name="categories_to_include_in_download">Categories to include in download</string>
+    <string name="delete_removed_chapters">Delete removed chapters</string>
+    <string name="delete_downloaded_if_removed_online">Delete downloaded chapters if the source
+        has removed the chapter online</string>
+    <string name="ask_on_chapters_page">Delete during global updates, ask on chapters page</string>
+    <string name="always_keep">Always keep</string>
+    <string name="always_delete">Always delete</string>
 
     <!-- Time -->
     <string name="manual">Manual</string>
@@ -633,6 +647,7 @@
     <string name="hide">Hide</string>
     <string name="ignore">Ignore</string>
     <string name="install">Install</string>
+    <string name="keep">Keep</string>
     <string name="left">Left</string>
     <string name="less">Less</string>
     <string name="loading">Loading…</string>

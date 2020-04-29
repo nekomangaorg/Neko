@@ -149,7 +149,7 @@ fun syncChaptersWithSource(
         db.updateLastUpdated(manga).executeAsBlocking()
     }
 
-    return Pair(toAdd.subtract(readded).toList(), toDelete.subtract(readded).toList())
+    return Pair(toAdd.subtract(readded).toList(), toDelete - readded)
 }
 
 // checks if the chapter in db needs updated
