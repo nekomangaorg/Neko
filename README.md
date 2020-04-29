@@ -23,11 +23,7 @@ Need info? Check the [Wiki](https://github.com/CarlosEsco/Neko/wiki)
 ---
 
 ## Screenshots:
-<img src="./.github/readme-images/screenshot_1.png" align="center" height="350" />
-&nbsp;&nbsp;
-<img src="./.github/readme-images/screenshot_2.png" align="center"  height="350" />
-&nbsp;&nbsp;
-<img src="./.github/readme-images/screenshot_3.png" align="center" height="350"  />
+<img src="./.github/readme-images/screenshots.png" align="center" height="350" />
 
 ## About:
 This is a <a href="https://mangadex.org/">Mangadex</a> specific fork of <a href="https://github.com/inorichi/tachiyomi">Tachiyomi</a> and <a href="https://github.com/Jays2Kings/tachiyomiJ2K">TachiyomiJ2K</a>.  This contains features specific to Mangadex
