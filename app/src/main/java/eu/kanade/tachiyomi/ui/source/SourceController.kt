@@ -183,6 +183,9 @@ class SourceController : NucleusController<SourcePresenter>(),
         }
     }
 
+    override fun sheetIsExpanded(): Boolean = ext_bottom_sheet.sheetBehavior?.state ==
+        BottomSheetBehavior.STATE_EXPANDED
+
     override fun handleSheetBack(): Boolean {
         if (ext_bottom_sheet.sheetBehavior?.state != BottomSheetBehavior.STATE_COLLAPSED) {
             ext_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED

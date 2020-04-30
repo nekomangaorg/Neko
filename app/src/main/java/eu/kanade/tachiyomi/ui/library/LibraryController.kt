@@ -863,6 +863,8 @@ class LibraryController(
         }
     }
 
+    override fun sheetIsExpanded(): Boolean = false
+
     override fun handleSheetBack(): Boolean {
         val sheetBehavior = BottomSheetBehavior.from(filter_bottom_sheet)
         if (sheetBehavior.state != BottomSheetBehavior.STATE_COLLAPSED && sheetBehavior.state != BottomSheetBehavior.STATE_HIDDEN) {

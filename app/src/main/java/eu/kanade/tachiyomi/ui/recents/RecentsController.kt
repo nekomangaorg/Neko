@@ -438,6 +438,9 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
         else dl_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
     }
 
+    override fun sheetIsExpanded(): Boolean = dl_bottom_sheet.sheetBehavior?.state ==
+        BottomSheetBehavior.STATE_EXPANDED
+
     override fun expandSearch() {
         if (showingDownloads) {
             dl_bottom_sheet.dismiss()
