@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.recents
 
+import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.app.Activity
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -38,6 +39,7 @@ import eu.kanade.tachiyomi.ui.recently_read.RemoveHistoryDialog
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.applyWindowInsetsForRootController
+import eu.kanade.tachiyomi.util.view.requestPermissionsSafe
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import eu.kanade.tachiyomi.util.view.setStyle
@@ -202,10 +204,11 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
             dl_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
         }
         setPadding(dl_bottom_sheet.sheetBehavior?.isHideable == true)
+        requestPermissionsSafe(arrayOf(WRITE_EXTERNAL_STORAGE), 301)
     }
 
     fun setRefreshing(refresh: Boolean) {
-        swipe_refresh.isRefreshing = false
+        swipe_refresh.isRefreshing = refresh
     }
 
     override fun onItemMove(fromPosition: Int, toPosition: Int) { }
