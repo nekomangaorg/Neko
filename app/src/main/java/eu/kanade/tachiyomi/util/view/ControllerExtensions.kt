@@ -4,6 +4,7 @@ import android.R
 import android.animation.ValueAnimator
 import android.content.Context
 import android.content.pm.PackageManager
+import android.view.ViewGroup
 import android.view.WindowInsets
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.widget.SearchView
@@ -73,9 +74,11 @@ fun Controller.scrollViewWith(
         }
     }
     val randomTag = Random.nextLong()
+    var headerHeight = 0
+    var lastY = 0f
 
     recycler.doOnApplyWindowInsets { view, insets, _ ->
-        val headerHeight = insets.systemWindowInsetTop + appBarHeight
+        headerHeight = insets.systemWindowInsetTop + appBarHeight
         if (!customPadding) view.updatePaddingRelative(
             top = headerHeight,
             bottom = if (padBottom) insets.systemWindowInsetBottom else view.paddingBottom
@@ -112,6 +115,17 @@ fun Controller.scrollViewWith(
             super.onChangeStart(controller, changeHandler, changeType)
             if (changeType.isEnter) {
                 elevateFunc(elevate)
+                if (!customPadding && changeType == ControllerChangeType.POP_ENTER &&
+                    recycler.marginTop > 0) {
+                    recycler.updatePaddingRelative(
+                        top = headerHeight
+                    )
+                    recycler.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                        topMargin = 0
+                    }
+                    recycler.scrollBy(0, -headerHeight)
+                }
+                lastY = 0f
                 activity!!.toolbar.tag = randomTag
                 activity!!.toolbar.setOnClickListener {
                     if ((this@scrollViewWith as? BottomSheetController)?.sheetIsExpanded() != true) {
@@ -121,6 +135,15 @@ fun Controller.scrollViewWith(
                     }
                 }
             } else {
+                if (!customPadding && lastY == 0f) {
+                    recycler.updatePaddingRelative(
+                        top = 0
+                    )
+                    recycler.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                        topMargin = headerHeight
+                    }
+                    recycler.scrollBy(0, headerHeight)
+                }
                 elevationAnim?.cancel()
                 if (activity!!.toolbar.tag == randomTag)
                     activity!!.toolbar.setOnClickListener(null)
@@ -140,6 +163,7 @@ fun Controller.scrollViewWith(
                     ) ?: 0
                     activity!!.appbar.animate().y(0f).setDuration(shortAnimationDuration.toLong())
                         .start()
+                    lastY = 0f
                     if (elevate) elevateFunc(false)
                 } else {
                     activity!!.appbar.y -= dy
@@ -149,6 +173,7 @@ fun Controller.scrollViewWith(
                     if ((activity!!.appbar.y <= -activity!!.appbar.height.toFloat() ||
                             dy == 0 && activity!!.appbar.y == 0f) && !elevate)
                         elevateFunc(true)
+                    lastY = activity!!.appbar.y
                 }
             }
         }
@@ -165,14 +190,10 @@ fun Controller.scrollViewWith(
                     ) ?: 0
                     val closerToTop = abs(activity!!.appbar.y) - halfWay > 0
                     val atTop = !recycler.canScrollVertically(-1)
-                    activity!!.appbar.animate().y(
-                        if (closerToTop && !atTop) (-activity!!.appbar.height.toFloat())
-                        else 0f
-                    ).setDuration(shortAnimationDuration.toLong()).start()
-                    if (recycler.canScrollVertically(-1) && !elevate)
-                        elevateFunc(true)
-                    else if (!recycler.canScrollVertically(-1) && elevate)
-                        elevateFunc(false)
+                    lastY = if (closerToTop && !atTop) (-activity!!.appbar.height.toFloat()) else 0f
+                    activity!!.appbar.animate().y(lastY).setDuration(shortAnimationDuration.toLong()).start()
+                    if (recycler.canScrollVertically(-1) && !elevate) elevateFunc(true)
+                    else if (!recycler.canScrollVertically(-1) && elevate) elevateFunc(false)
                 }
             }
         }
