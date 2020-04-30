@@ -242,8 +242,13 @@ class RecentsPresenter(
     }
 
     override fun onUpdateManga(manga: LibraryManga) {
-        if (manga.id == null) scope.launch(Dispatchers.Main) { controller.reEnableSwipe() }
-        else getRecents()
+        if (manga.id == null && !LibraryUpdateService.isRunning()) {
+            scope.launch(Dispatchers.Main) { controller.setRefreshing(false) }
+        } else if (manga.id == null) {
+            scope.launch(Dispatchers.Main) { controller.setRefreshing(true) }
+        } else {
+            getRecents()
+        }
     }
 
     /**

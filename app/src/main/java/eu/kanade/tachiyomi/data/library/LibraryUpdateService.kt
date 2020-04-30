@@ -152,13 +152,14 @@ class LibraryUpdateService(
         } else {
             val categoriesToUpdate =
                 preferences.libraryUpdateCategories().getOrDefault().map(String::toInt)
-            categoryIds.addAll(categoriesToUpdate)
-            if (categoriesToUpdate.isNotEmpty())
+            if (categoriesToUpdate.isNotEmpty()) {
+                categoryIds.addAll(categoriesToUpdate)
                 db.getLibraryMangas().executeAsBlocking()
-                    .filter { it.category in categoriesToUpdate }
-                    .distinctBy { it.id }
-            else
+                    .filter { it.category in categoriesToUpdate }.distinctBy { it.id }
+            } else {
+                categoryIds.addAll(db.getCategories().executeAsBlocking().mapNotNull { it.id } + 0)
                 db.getLibraryMangas().executeAsBlocking().distinctBy { it.id }
+            }
         }
         if (target == Target.CHAPTERS && preferences.updateOnlyNonCompleted()) {
             listToUpdate = listToUpdate.filter { it.status != SManga.COMPLETED }
@@ -238,6 +239,9 @@ class LibraryUpdateService(
             Timber.e(exception)
             stopSelf(startId)
         }
+
+        if(target == Target.CHAPTERS) listener?.onUpdateManga(LibraryManga())
+
         job = GlobalScope.launch(handler) {
             when (target) {
                 Target.SYNC_FOLLOWS -> syncFollows()
@@ -249,6 +253,7 @@ class LibraryUpdateService(
     }
 
     private suspend fun updateChaptersJob(mangaToAdd: List<LibraryManga>) {
+
         // List containing categories that get included in downloads.
         val categoriesToDownload =
             preferences.downloadNewCategories().getOrDefault().map(String::toInt)
