@@ -154,7 +154,7 @@ class LibraryHeaderItem(
                 else -> {
                     catProgress.gone()
                     checkboxImage.gone()
-                    updateButton.visInvisIf(!(category.isFirst == true && category.isLast == true))
+                    updateButton.visInvisIf(category.id ?: 0 > -1)
                 }
             }
         }

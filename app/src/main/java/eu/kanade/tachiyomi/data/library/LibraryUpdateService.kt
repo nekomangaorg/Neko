@@ -241,13 +241,14 @@ class LibraryUpdateService(
         } else {
             val categoriesToUpdate =
                 preferences.libraryUpdateCategories().getOrDefault().map(String::toInt)
-            categoryIds.addAll(categoriesToUpdate)
-            if (categoriesToUpdate.isNotEmpty())
+            if (categoriesToUpdate.isNotEmpty()) {
+                categoryIds.addAll(categoriesToUpdate)
                 db.getLibraryMangas().executeAsBlocking()
-                    .filter { it.category in categoriesToUpdate }
-                    .distinctBy { it.id }
-            else
+                    .filter { it.category in categoriesToUpdate }.distinctBy { it.id }
+            } else {
+                categoryIds.addAll(db.getCategories().executeAsBlocking().mapNotNull { it.id } + 0)
                 db.getLibraryMangas().executeAsBlocking().distinctBy { it.id }
+            }
         }
         if (target == Target.CHAPTERS && preferences.updateOnlyNonCompleted()) {
             listToUpdate = listToUpdate.filter { it.status != SManga.COMPLETED }
@@ -339,12 +340,13 @@ class LibraryUpdateService(
             Timber.e(exception)
             stopSelf(startId)
         }
-        if (target == Target.CHAPTERS) {
-            job = GlobalScope.launch(handler) {
+        job = if (target == Target.CHAPTERS) {
+            listener?.onUpdateManga(LibraryManga())
+            GlobalScope.launch(handler) {
                 updateChaptersJob(mangaToAdd)
             }
         } else {
-            job = GlobalScope.launch(handler) {
+            GlobalScope.launch(handler) {
                 updateTrackings(mangaToAdd)
             }
         }

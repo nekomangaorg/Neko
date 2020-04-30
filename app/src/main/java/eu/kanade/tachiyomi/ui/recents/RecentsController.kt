@@ -204,7 +204,7 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
         setPadding(dl_bottom_sheet.sheetBehavior?.isHideable == true)
     }
 
-    fun reEnableSwipe() {
+    fun setRefreshing(refresh: Boolean) {
         swipe_refresh.isRefreshing = false
     }
 
