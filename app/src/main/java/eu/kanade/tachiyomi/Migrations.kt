@@ -29,6 +29,7 @@ object Migrations {
                     UpdaterJob.setupTask()
                 }
                 ExtensionUpdateJob.setupTask()
+                LibraryUpdateJob.setupTask()
                 return BuildConfig.DEBUG
             }
 
