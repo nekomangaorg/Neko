@@ -18,6 +18,7 @@ import com.bluelinelabs.conductor.ControllerChangeType
 import com.bluelinelabs.conductor.RouterTransaction
 import com.bluelinelabs.conductor.changehandler.FadeChangeHandler
 import eu.kanade.tachiyomi.ui.main.BottomSheetController
+import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.util.system.dpToPx
 import kotlinx.android.synthetic.main.main_activity.*
 import kotlin.math.abs
@@ -135,7 +136,9 @@ fun Controller.scrollViewWith(
                     }
                 }
             } else {
-                if (!customPadding && lastY == 0f) {
+                if (!customPadding && lastY == 0f &&
+                    router.backstack.lastOrNull()?.controller() is MangaDetailsController
+                    ) {
                     recycler.updatePaddingRelative(
                         top = 0
                     )
