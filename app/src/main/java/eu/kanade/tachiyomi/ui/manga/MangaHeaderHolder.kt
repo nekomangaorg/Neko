@@ -154,10 +154,10 @@ class MangaHeaderHolder(
 
         manga_summary.post {
             if (sub_item_group.visibility != View.GONE) {
-                if ((manga_summary.lineCount < 3 && manga.genre.isNullOrBlank()) || less_button.visibility == View.VISIBLE) {
+                if ((manga_summary.lineCount < 3 && manga.genre.isNullOrBlank()) || less_button.isVisible()) {
                     manga_summary.setTextIsSelectable(true)
                     more_button_group.gone()
-                    showMoreButton = false
+                    showMoreButton = less_button.isVisible()
                 } else {
                     more_button_group.visible()
                 }
