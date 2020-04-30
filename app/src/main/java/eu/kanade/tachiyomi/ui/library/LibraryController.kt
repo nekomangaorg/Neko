@@ -452,7 +452,6 @@ class LibraryController(
             DownloadService.callListeners()
             LibraryUpdateService.setListener(this)
         } else closeTip()
-        if (type == ControllerChangeType.POP_ENTER) filter_bottom_sheet.hideIfPossible()
     }
 
     override fun onActivityResumed(activity: Activity) {
