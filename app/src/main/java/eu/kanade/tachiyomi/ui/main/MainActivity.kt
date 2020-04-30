@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.main
 
-import android.animation.Animator
 import android.animation.AnimatorSet
 import android.animation.ValueAnimator
 import android.content.Intent
@@ -64,7 +63,9 @@ import eu.kanade.tachiyomi.util.view.getItemView
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePadding
+import eu.kanade.tachiyomi.util.view.visibleIf
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
+import eu.kanade.tachiyomi.widget.EndAnimatorListener
 import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -92,6 +93,8 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
 
     private var animationSet: AnimatorSet? = null
     private val downloadManager: DownloadManager by injectLazy()
+    private val hideBottomNav
+        get() = router.backstackSize > 1 && router.backstack[1].controller() !is DialogController
 
     fun setUndoSnackBar(snackBar: Snackbar?, extraViewToCheck: View? = null) {
         this.snackBar = snackBar
@@ -233,8 +236,8 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             } else onBackPressed()
         }
 
-        bottom_nav.visibility = if (router.backstackSize > 1) View.GONE else View.VISIBLE
-        bottom_nav.alpha = if (router.backstackSize > 1) 0f else 1f
+        bottom_nav.visibleIf(!hideBottomNav)
+        bottom_nav.alpha = if (hideBottomNav) 0f else 1f
         router.addChangeListener(object : ControllerChangeHandler.ControllerChangeListener {
             override fun onChangeStarted(
                 to: Controller?,
@@ -525,34 +528,22 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         }
         drawerArrow?.progress = 1f
 
-        if (to !is DialogController) {
-            bottom_nav.visibility =
-                if (router.backstackSize == 0 || (router.backstackSize <= 1 && !isPush)) View.VISIBLE else bottom_nav.visibility
-            animationSet?.cancel()
-            animationSet = AnimatorSet()
-            val alphaAnimation = ValueAnimator.ofFloat(
-                bottom_nav.alpha, if (router.backstackSize > 1) 0f else 1f
-            )
-            alphaAnimation.addUpdateListener { valueAnimator ->
-                bottom_nav.alpha = valueAnimator.animatedValue as Float
-            }
-            alphaAnimation.addListener(object : Animator.AnimatorListener {
-                override fun onAnimationEnd(animation: Animator?) {
-                    bottom_nav.visibility =
-                        if (router.backstackSize > 1) View.GONE else View.VISIBLE
-                }
-
-                override fun onAnimationCancel(animation: Animator?) {}
-
-                override fun onAnimationRepeat(animation: Animator?) {}
-
-                override fun onAnimationStart(animation: Animator?) {}
-            })
-            alphaAnimation.duration = 200
-            alphaAnimation.startDelay = 50
-            animationSet?.playTogether(alphaAnimation)
-            animationSet?.start()
+        bottom_nav.visibility = if (!hideBottomNav) View.VISIBLE else bottom_nav.visibility
+        animationSet?.cancel()
+        animationSet = AnimatorSet()
+        val alphaAnimation = ValueAnimator.ofFloat(
+            bottom_nav.alpha, if (hideBottomNav) 0f else 1f
+        )
+        alphaAnimation.addUpdateListener { valueAnimator ->
+            bottom_nav.alpha = valueAnimator.animatedValue as Float
         }
+        alphaAnimation.addListener(EndAnimatorListener {
+            bottom_nav.visibility = if (hideBottomNav) View.GONE else View.VISIBLE
+        })
+        alphaAnimation.duration = 200
+        alphaAnimation.startDelay = 50
+        animationSet?.playTogether(alphaAnimation)
+        animationSet?.start()
     }
 
     override fun downloadStatusChanged(downloading: Boolean) {
