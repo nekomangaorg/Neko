@@ -16,9 +16,11 @@ import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
 import com.bluelinelabs.conductor.RouterTransaction
 import com.bluelinelabs.conductor.changehandler.FadeChangeHandler
+import eu.kanade.tachiyomi.ui.main.BottomSheetController
 import eu.kanade.tachiyomi.util.system.dpToPx
 import kotlinx.android.synthetic.main.main_activity.*
 import kotlin.math.abs
+import kotlin.random.Random
 
 fun Controller.setOnQueryTextChangeListener(
     searchView: SearchView,
@@ -70,6 +72,8 @@ fun Controller.scrollViewWith(
             recycler.requestApplyInsets()
         }
     }
+    val randomTag = Random.nextLong()
+
     recycler.doOnApplyWindowInsets { view, insets, _ ->
         val headerHeight = insets.systemWindowInsetTop + appBarHeight
         if (!customPadding) view.updatePaddingRelative(
@@ -106,10 +110,21 @@ fun Controller.scrollViewWith(
             changeType: ControllerChangeType
         ) {
             super.onChangeStart(controller, changeHandler, changeType)
-            if (changeType.isEnter)
+            if (changeType.isEnter) {
                 elevateFunc(elevate)
-            else
+                activity!!.toolbar.tag = randomTag
+                activity!!.toolbar.setOnClickListener {
+                    if ((this@scrollViewWith as? BottomSheetController)?.sheetIsExpanded() != true) {
+                        recycler.scrollToPosition(0)
+                    } else {
+                        (this@scrollViewWith as? BottomSheetController)?.toggleSheet()
+                    }
+                }
+            } else {
                 elevationAnim?.cancel()
+                if (activity!!.toolbar.tag == randomTag)
+                    activity!!.toolbar.setOnClickListener(null)
+            }
         }
     })
     elevateFunc(recycler.canScrollVertically(-1))

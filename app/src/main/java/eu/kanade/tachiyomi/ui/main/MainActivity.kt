@@ -613,4 +613,5 @@ interface BottomSheetController {
     fun showSheet()
     fun toggleSheet()
     fun handleSheetBack(): Boolean
+    fun sheetIsExpanded(): Boolean
 }
