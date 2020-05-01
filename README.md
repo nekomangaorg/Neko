@@ -40,8 +40,8 @@ This is a <a href="https://mangadex.org/">Mangadex</a> specific fork of <a href=
 Get the app from our [releases page](https://github.com/CarlosEsco/Neko/releases).
 
 ## Thanks
-- Inorichi for making the original Tachiyomi 
-- Jays2King for the wonderful new ui of J2K
+- <a href="https://github.com/inorichi">Inorichi</a> for making the original Tachiyomi
+- <a href="https://github.com/Jays2Kings">Jays2Kings</a> for the wonderful new ui of J2K
 
 ## License
 
