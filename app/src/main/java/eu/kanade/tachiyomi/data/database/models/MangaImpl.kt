@@ -77,7 +77,8 @@ open class MangaImpl : Manga {
     }
 
     override fun hashCode(): Int {
-        return url.hashCode()
+        if (::url.isInitialized) return url.hashCode()
+        else return (id ?: 0L).hashCode()
     }
 
     companion object {

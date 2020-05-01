@@ -18,8 +18,8 @@ class SearchActivity : MainActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        toolbar.navigationIcon = drawerArrow
-        toolbar.setNavigationOnClickListener {
+        toolbar?.navigationIcon = drawerArrow
+        toolbar?.setNavigationOnClickListener {
             popToRoot()
         }
     }

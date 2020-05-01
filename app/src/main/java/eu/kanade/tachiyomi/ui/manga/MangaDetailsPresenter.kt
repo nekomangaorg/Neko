@@ -482,7 +482,9 @@ class MangaDetailsPresenter(
                 updateChapters()
                 withContext(Dispatchers.Main) { controller.updateChapters(this@MangaDetailsPresenter.chapters) }
             } catch (e: java.lang.Exception) {
-                controller.showError(trimException(e))
+                withContext(Dispatchers.Main) {
+                    controller.showError(trimException(e))
+                }
             }
         }
     }
