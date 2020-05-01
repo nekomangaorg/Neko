@@ -3,6 +3,9 @@
     <changelogversion
         changeDate=""
         versionName="v2.0.0">
+        <changelogtext>Lots of changes as this was a complete rebase based on TachiyomiJ2K. A high level summary is below but please explore as there are a lot more things added. If its in the new J2K
+            it's probably in here also.
+        </changelogtext>
         <changelogtext>Complete redesign of UI and flow with bottom navigation, courtesy of Jays2Kings from TachiyomiJ2K</changelogtext>
         <changelogtext>New Themes</changelogtext>
         <changelogtext>Add ability to read downloads from other Tachiyomi forks</changelogtext>
@@ -11,7 +14,7 @@
         <changelogtext>New Global font</changelogtext>
         <changelogtext>Android 5 support has been dropped</changelogtext>
         <changelogtext>Switched crash reporting library to use firebase crashlytics</changelogtext>
-        <changelogtext>Plus many more quality of life changes</changelogtext>
+        <changelogtext>Plus many more changes!! please explore</changelogtext>
     </changelogversion>
     <changelogversion
         changeDate=""
