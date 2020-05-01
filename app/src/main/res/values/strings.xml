@@ -531,6 +531,9 @@
     <string name="build_time">Build time</string>
     <string name="send_crash_report">Send crash reports</string>
     <string name="helps_fix_bugs">Helps fix any bugs. No sensitive data will be sent</string>
+    <string name="whats_new">What\'s new in this release</string>
+    <string name="website">Website</string>
+    <string name="open_source_licenses">Open source licenses</string>
 
     <!-- Login dialog -->
     <string name="log_in_to_">Log in to %1$s</string>

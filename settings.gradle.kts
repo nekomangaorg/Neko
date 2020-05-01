@@ -16,6 +16,8 @@ pluginManagement {
                 useModule("com.google.gms:google-services:4.3.3")
             } else if (requested.id.id.equals("com.google.firebase.crashlytics")) {
                 useModule("com.google.firebase:firebase-crashlytics-gradle:2.0.0-beta03")
+            }else if(requested.id.id.equals("com.google.android.gms.oss-licenses-plugin")){
+                useModule("com.google.android.gms:oss-licenses-plugin:0.10.2")
             }
 
         }
