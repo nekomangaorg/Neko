@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Bundle
 import androidx.preference.PreferenceScreen
 import com.afollestad.materialdialogs.MaterialDialog
+import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -51,12 +52,16 @@ class SettingsAboutController : SettingsController() {
     override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
         titleRes = R.string.about
 
-        switchPreference {
-            key = "acra.enable"
-            titleRes = R.string.send_crash_report
-            summaryRes = R.string.helps_fix_bugs
-            defaultValue = true
+        preference {
+            titleRes = R.string.website
+            val url = "https://tachiyomi.org"
+            summary = url
+            onClick {
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                startActivity(intent)
+            }
         }
+
         preference {
             title = "Discord"
             val url = "https://discord.gg/tachiyomi"
@@ -75,23 +80,45 @@ class SettingsAboutController : SettingsController() {
                 startActivity(intent)
             }
         }
-        preference {
-            titleRes = R.string.version
-            summary = if (BuildConfig.DEBUG)
-                "r" + BuildConfig.COMMIT_COUNT
-            else
-                BuildConfig.VERSION_NAME
-
-            if (isUpdaterEnabled) {
-                onClick { checkVersion() }
+        preferenceCategory {
+            preference {
+                titleRes = R.string.whats_new
+                onClick {
+                    val intent = Intent(
+                        Intent.ACTION_VIEW, Uri.parse(
+                            if (BuildConfig.DEBUG) {
+                                "https://github.com/Jays2Kings/tachiyomiJ2K/commits/master"
+                            } else {
+                                "https://github.com/Jays2Kings/tachiyomiJ2K/releases/tag/v${BuildConfig.VERSION_NAME}"
+                            }
+                        )
+                    )
+                    startActivity(intent)
+                }
             }
-        }
-        preference {
-            titleRes = R.string.build_time
-            summary = getFormattedBuildTime()
+            preference {
+                titleRes = R.string.version
+                summary = if (BuildConfig.DEBUG) "r" + BuildConfig.COMMIT_COUNT
+                else BuildConfig.VERSION_NAME
 
-            onClick {
-                ChangelogDialogController().showDialog(router)
+                if (isUpdaterEnabled) {
+                    onClick { checkVersion() }
+                }
+            }
+            preference {
+                titleRes = R.string.build_time
+                summary = getFormattedBuildTime()
+
+                onClick {
+                    ChangelogDialogController().showDialog(router)
+                }
+            }
+            preference {
+                titleRes = R.string.open_source_licenses
+
+                onClick {
+                    startActivity(Intent(activity, OssLicensesMenuActivity::class.java))
+                }
             }
         }
     }
@@ -159,7 +186,7 @@ class SettingsAboutController : SettingsController() {
 
     private fun getFormattedBuildTime(): String {
         try {
-            val inputDf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'", Locale.US)
+            val inputDf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS", Locale.getDefault())
             inputDf.timeZone = TimeZone.getTimeZone("UTC")
             val buildTime = inputDf.parse(BuildConfig.BUILD_TIME) ?: return BuildConfig.BUILD_TIME
 

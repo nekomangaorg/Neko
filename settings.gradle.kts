@@ -16,6 +16,8 @@ pluginManagement {
                 useModule("com.google.gms:google-services:4.3.3")
             }else if(requested.id.id.equals("com.github.zellius.shortcut-helper")){
                 useModule("com.github.zellius:android-shortcut-gradle-plugin:0.1.2")
+            }else if(requested.id.id.equals("com.google.android.gms.oss-licenses-plugin")){
+                useModule("com.google.android.gms:oss-licenses-plugin:0.10.2")
             }
 
         }

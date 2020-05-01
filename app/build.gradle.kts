@@ -5,6 +5,7 @@ import java.time.format.DateTimeFormatter
 
 plugins {
     id("com.android.application")
+    id("com.google.android.gms.oss-licenses-plugin")
     kotlin("android")
     kotlin("android.extensions")
     kotlin("kapt")
@@ -243,6 +244,8 @@ dependencies {
 
     // Text distance
     implementation("info.debatty:java-string-similarity:1.2.1")
+
+    implementation("com.google.android.gms:play-services-oss-licenses:17.0.0")
 }
 
 tasks.preBuild {
