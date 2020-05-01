@@ -5,7 +5,6 @@
   Neko
   <br>
 </h1>
----
 
 <p align="center">A Free, Open source unofficial manga reader for MangaDex</p>
 
@@ -22,26 +21,24 @@ Need info? Check the [Wiki](https://github.com/CarlosEsco/Neko/wiki)
 
 ---
 
+## About
+This is a [MangaDex](https://mangadex.org/) specific fork of [Tachiyomi](https://tachiyomi.org/) and [TachiyomiJ2K](https://tachiyomi.org/forks/TachiyomiJ2K/). This contains features specific to **MangaDex** that those versions cannot offer. It also features almost every feature that **J2K** has except for other sources and local sources.
+
 ## Screenshots:
 <img src="./.github/readme-images/screenshots.png" align="center" height="350" />
 
-## About:
-This is a <a href="https://mangadex.org/">Mangadex</a> specific fork of <a href="https://github.com/inorichi/tachiyomi">Tachiyomi</a> and <a href="https://github.com/Jays2Kings/tachiyomiJ2K">TachiyomiJ2K</a>.  This contains features specific to Mangadex
- that those versions cannot offer.  It also features almost every feature that J2K has except for other sources, and local sources.
-
 ## Mangadex specific features:
-- Supports native login to MangaDex and supports 2FA
+- Supports native login to **MangaDex** and supports 2FA
 - MDList support
 - Similar Manga recommendations
-- Manually sync of Manga to and from Mangadex follows list
-
+- Manually sync of Manga to and from **MangaDex** follows list
 
 ## Download
 Get the app from our [releases page](https://github.com/CarlosEsco/Neko/releases).
 
-## Thanks
-- Inorichi for making the original Tachiyomi 
-- Jays2King for the wonderful new ui of J2K
+## Credits
+- [Inorichi](https://github.com/inorichi/) for making the original **Tachiyomi** 
+- [Jays2King](https://github.com/Jays2Kings/) for the wonderful new UI of **J2K**
 
 ## License
 
