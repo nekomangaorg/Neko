@@ -11,7 +11,7 @@
 
     <color name="rippleColor">@color/md_white_1000_20</color>
     <color name="fullRippleColor">#707070</color>
-    <color name="splashBackground">#212121</color>
+    <color name="splashBackground">@color/colorAccent</color>
     <color name="actionModeShadow">@color/md_black_1000</color>
 
     <color name="textColorPrimary">@color/md_white_1000</color>
