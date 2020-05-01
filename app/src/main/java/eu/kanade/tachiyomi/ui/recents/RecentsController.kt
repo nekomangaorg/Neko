@@ -208,7 +208,7 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
     }
 
     fun setRefreshing(refresh: Boolean) {
-        swipe_refresh.isRefreshing = refresh
+        swipe_refresh?.isRefreshing = refresh
     }
 
     override fun onItemMove(fromPosition: Int, toPosition: Int) { }
