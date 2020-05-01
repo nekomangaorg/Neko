@@ -163,7 +163,7 @@ class LibraryController(
                 activeCategory = order
                 if (presenter.categories.size > 1 && dy != 0) {
                     val headerItem = getHeader() ?: return
-                    val view = fast_scroller.getChildAt(0) ?: return
+                    val view = fast_scroller?.getChildAt(0) ?: return
                     val index = adapter.headerItems.indexOf(headerItem)
                     textAnim?.cancel()
                     textAnim = text_view_m.animate().alpha(0f).setDuration(250L).setStartDelay(2000)
@@ -186,12 +186,12 @@ class LibraryController(
             when (newState) {
                 RecyclerView.SCROLL_STATE_DRAGGING -> {
                     scrollAnim?.cancel()
-                    if (fast_scroller.translationX != 0f) {
-                        fast_scroller.show()
+                    if (fast_scroller?.translationX != 0f) {
+                        fast_scroller?.show()
                     }
                 }
                 RecyclerView.SCROLL_STATE_IDLE -> {
-                    scrollAnim = fast_scroller.hide()
+                    scrollAnim = fast_scroller?.hide()
                 }
             }
         }
@@ -299,7 +299,7 @@ class LibraryController(
         activity!!.theme.resolveAttribute(R.attr.actionBarTintColor, tv, true)
         swipe_refresh.setStyle()
         scrollViewWith(recycler, swipeRefreshLayout = swipe_refresh, afterInsets = { insets ->
-            fast_scroller.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            fast_scroller?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 topMargin = insets.systemWindowInsetTop
             }
         })
@@ -405,11 +405,11 @@ class LibraryController(
 
     fun updateShowScrollbar(show: Boolean) {
         alwaysShowScroller = show
-        fast_scroller.setBackground(!show)
+        fast_scroller?.setBackground(!show)
         if (libraryLayout == 0) reattachAdapter()
         scrollAnim?.cancel()
-        if (show) fast_scroller.translationX = 0f
-        else scrollAnim = fast_scroller.hide()
+        if (show) fast_scroller?.translationX = 0f
+        else scrollAnim = fast_scroller?.hide()
         setRecyclerLayout()
     }
 
@@ -503,9 +503,9 @@ class LibraryController(
         if (justStarted && freshStart) {
             scrollToHeader(activeCategory)
             if (!alwaysShowScroller) {
-                fast_scroller.show(false)
+                fast_scroller?.show(false)
                 view?.post {
-                    scrollAnim = fast_scroller.hide(2000)
+                    scrollAnim = fast_scroller?.hide(2000)
                 }
             }
         }
