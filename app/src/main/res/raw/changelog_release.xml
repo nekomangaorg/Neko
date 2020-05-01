@@ -2,6 +2,17 @@
 <changelog bulletedList="true">
     <changelogversion
         changeDate=""
+        versionName="v2.0.2">
+        <changelogtext>fix anilist login</changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
+        versionName="v2.0.1">
+        <changelogtext>bug fixes</changelogtext>
+        <changelogtext>Change notification icon</changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
         versionName="v2.0.0">
         <changelogtext>Lots of changes as this was a complete rebase based on TachiyomiJ2K. A high level summary is below but please explore as there are a lot more things added. If its in the new J2K
             it's probably in here also.
