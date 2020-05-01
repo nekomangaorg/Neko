@@ -627,7 +627,7 @@ class LibraryPresenter(
             val sort = category.sortingMode() ?: LibrarySort.ALPHA
             preferences.librarySortingMode().set(sort)
             preferences.librarySortingAscending().set(category.isAscending())
-        } else if (catId > 0) {
+        } else if (catId >= 0) {
             if (category.id == 0) preferences.defaultMangaOrder().set(category.mangaSort.toString())
             else Injekt.get<DatabaseHelper>().insertCategory(category).executeAsBlocking()
         }
