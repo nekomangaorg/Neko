@@ -29,10 +29,10 @@ Need info? Check the [Wiki](https://github.com/CarlosEsco/Neko/wiki)
 This is a <a href="https://mangadex.org/">Mangadex</a> specific fork of <a href="https://github.com/inorichi/tachiyomi">Tachiyomi</a> and <a href="https://github.com/Jays2Kings/tachiyomiJ2K">TachiyomiJ2K</a>.  This contains features specific to Mangadex
  that those versions cannot offer.  It also features almost every feature that J2K has except for other sources, and local sources.
 
-## Mangadex specific features:
+## Specific features:
 - Supports native login to MangaDex and supports 2FA
-- MDList support
-- Similar Manga recommendations
+- MDList support as a tracker
+- Similar Manga recommendations when enabled in settings
 - Manually sync of Manga to and from Mangadex follows list
 
 
