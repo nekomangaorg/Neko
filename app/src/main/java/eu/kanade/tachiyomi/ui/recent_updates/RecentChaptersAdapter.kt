@@ -9,7 +9,6 @@ class RecentChaptersAdapter(val controller: RecentChaptersController) :
 
     val coverClickListener: OnCoverClickListener = controller
     var recents = emptyList<RecentChapterItem>()
-    private var isAnimating = false
 
     init {
         setDisplayHeadersAtStartUp(true)
@@ -24,11 +23,10 @@ class RecentChaptersAdapter(val controller: RecentChaptersController) :
     fun performFilter() {
         val s = getFilter(String::class.java)
         if (s.isNullOrBlank()) {
-            updateDataSet(recents, isAnimating)
+            updateDataSet(recents)
         } else {
-            updateDataSet(recents.filter { it.filter(s) }, isAnimating)
+            updateDataSet(recents.filter { it.filter(s) })
         }
-        isAnimating = false
     }
 
     interface OnCoverClickListener {
@@ -37,7 +35,6 @@ class RecentChaptersAdapter(val controller: RecentChaptersController) :
 
     override fun onItemSwiped(position: Int, direction: Int) {
         super.onItemSwiped(position, direction)
-        isAnimating = true
         when (direction) {
             ItemTouchHelper.LEFT -> controller.toggleMarkAsRead(position)
         }
