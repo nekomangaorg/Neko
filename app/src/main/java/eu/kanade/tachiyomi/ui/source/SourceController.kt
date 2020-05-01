@@ -131,7 +131,7 @@ class SourceController : NucleusController<SourcePresenter>(),
         ext_bottom_sheet.sheetBehavior?.addBottomSheetCallback(object : BottomSheetBehavior
         .BottomSheetCallback() {
             override fun onSlide(bottomSheet: View, progress: Float) {
-                shadow2.alpha = (1 - max(0f, progress)) * 0.25f
+                shadow2?.alpha = (1 - max(0f, progress)) * 0.25f
                 activity?.appbar?.elevation = max(progress * 15f,
                     if (recycler.canScrollVertically(-1)) 15f else 0f)
 
