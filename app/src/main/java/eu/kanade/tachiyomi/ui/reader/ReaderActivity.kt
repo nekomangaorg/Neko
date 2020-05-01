@@ -660,7 +660,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
                         setMenuVisibility(false)
                     }
                 }
-                if (sheetManageNavColor) window.navigationBarColor = getResourceColor(R.attr.colorPrimary)
+                if (sheetManageNavColor) window.navigationBarColor = getResourceColor(R.attr.colorSecondary)
                 reader_menu.visibility = View.VISIBLE
                 val toolbarAnimation = AnimationUtils.loadAnimation(this, R.anim.enter_from_top)
                 toolbarAnimation.setAnimationListener(object : SimpleAnimationListener() {
