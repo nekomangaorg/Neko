@@ -1,49 +1,40 @@
 # ![app icon](./.github/readme-images/app-icon.png)Tachiyomi
 Tachiyomi is a free and open source manga reader for Android 5.0 and above.
 
-![screenshots of app](./.github/readme-images/theming-screenshots.gif)
+![screenshots of app](./.github/readme-images/screens.png)
 
 ## Newest Release
-[v0.9.82](https://github.com/Jays2Kings/tachiyomi/releases)
+[v1.0.0](https://github.com/Jays2Kings/tachiyomiJ2K/releases)
 
 ## Features
 
 Features of Tachiyomi include:
-* Online reading from sources such as KissManga, MangaDex, [and more](https://github.com/inorichi/tachiyomi-extensions)
+* Online reading from sources such as MangaDex, MangaSee, Mangakakalot, [and more](https://github.com/inorichi/tachiyomi-extensions)
 * Local reading of downloaded manga
 * A configurable reader with multiple viewers, reading directions and other settings.
 * [MyAnimeList](https://myanimelist.net/), [AniList](https://anilist.co/), [Kitsu](https://kitsu.io/explore/anime), and [Shikimori](https://shikimori.one) support
 * Categories to organize your library
-* Light and dark themes
+* Automatic light and dark themes
 * Schedule updating your library for new chapters
 * Create backups locally to read offline or to your desired cloud service 
 
 Plus some new features in this fork such as:
-* Android 10 Dark Theme support: You can have Tachiyomi follow the system theme as well as customize which dark theme to use for dark mode
+* New Manga details screens
+* New Recents page: Providing quick access to newly added manga, new chapters, and to continue where you left on in a series
 * Android 10 edge to edge support (and a translucent nav bar for older versions): no more small ugly bar for the gesture navigation
-* Automatic background based on manga page: For those that like having a white background to match the content, this will automatically set the background to match for moments such as a flashback section of a manga
-* [Richer New chapters notifications](https://raw.githubusercontent.com/Jays2Kings/tachiyomi/master/.github/readme-images/new%20notifcations%20collasped.png): Now as a group of notifications, [expanding out to show more information](https://raw.githubusercontent.com/Jays2Kings/tachiyomi/master/.github/readme-images/new%20notifcations.png) about the new chapters (like chapter name and manga cover). Tapping on it will bring you right into the chapter or expand it to mark it as read or view all chapters
-* [New material snackbar](https://raw.githubusercontent.com/Jays2Kings/tachiyomi/master/.github/readme-images/material%20snackbar.png): Removing manga now auto deletes chapters and has an undo button in case you change your mind
-* Multi Source Migration from library
-* Notification separation of updating library and new chapters
-* [Share sheets upgrade for Android 10](https://raw.githubusercontent.com/Jays2Kings/tachiyomi/master/.github/readme-images/share%20menu.png)
-* Reader seekbar overrides switch app gesture in Android 10, so no more accidents for that
-* Option to hide manga titles in grid view
-* Filter out your library by searching for tags (ex. "Comedy" or "Slice of Life") or exclude mangas by a tag (ex. "-Shounen" or "-Romance"). Tapping on these tags also performs a local search. You can also search multiple tags (ex. "Romance, -Harem, Comedy")
-* Tri-State Filters on library
-* Filter extensions based on your locale
-* Webview Navigation
-* Fingerprint/Biometrics lock
-* Range Select for Library and Chapters: long Press on an item then long press on another to select everything in between
-* Automatically checks for extension updates
+* Smart background based on manga page: For those that like having a white background to match the content, this will automatically set the background to match for moments such as a flashback section of a manga
+* [New material snackbar](.github/readme-images/material%20snackbar.png): Removing manga now auto deletes chapters and has an undo button in case you change your mind
 * Batch Auto-Source Migration (taken from [TachiyomiEH](https://github.com/NerdNumber9/TachiyomiEH))
+* [Share sheets upgrade for Android 10](.github/readme-images/share%20menu.png)
+* View all chapters right in the reader
+* Tri-State Filters on library
 * Drag & Drop Sorting in Library
-* Improved Download queue, including reordering and cancelling downloads
-* Recently Read goes all the way back to the beginning of time
+* Individual Category sorting
+* Library redesigned as a single list view
+* Read history goes all the way back to the beginning of time
 * Restoring backups in the background (taken from [Neko](https://github.com/CarlosEsco/Neko)
 * Expanding manga thumbnails
-* Automatically check for extension updates
-* More Material Stuff
+* A lot more Material Design 2 additions
 
 ## Issues, Feature Requests and Contributing
 
