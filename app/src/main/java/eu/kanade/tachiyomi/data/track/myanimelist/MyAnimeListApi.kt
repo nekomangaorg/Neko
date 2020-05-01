@@ -40,18 +40,18 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
                     .select("tbody").select("tr").drop(1)
 
                 matches.filter { row -> row.select(TD)[2].text() != "Novel" }.map { row ->
-                        TrackSearch.create(TrackManager.MYANIMELIST).apply {
-                            title = row.searchTitle()
-                            media_id = row.searchMediaId()
-                            total_chapters = row.searchTotalChapters()
-                            summary = row.searchSummary()
-                            cover_url = row.searchCoverUrl()
-                            tracking_url = mangaUrl(media_id)
-                            publishing_status = row.searchPublishingStatus()
-                            publishing_type = row.searchPublishingType()
-                            start_date = row.searchStartDate()
-                        }
-                    }.toList()
+                    TrackSearch.create(TrackManager.MYANIMELIST).apply {
+                        title = row.searchTitle()
+                        media_id = row.searchMediaId()
+                        total_chapters = row.searchTotalChapters()
+                        summary = row.searchSummary()
+                        cover_url = row.searchCoverUrl()
+                        tracking_url = mangaUrl(media_id)
+                        publishing_status = row.searchPublishingStatus()
+                        publishing_type = row.searchPublishingType()
+                        start_date = row.searchStartDate()
+                    }
+                }.toList()
             }
         }
     }
@@ -133,16 +133,16 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
         val results = getListXml(getListUrl()).select("manga")
 
         return results.map {
-                TrackSearch.create(TrackManager.MYANIMELIST).apply {
-                    title = it.selectText("manga_title")!!
-                    media_id = it.selectInt("manga_mangadb_id")
-                    last_chapter_read = it.selectInt("my_read_chapters")
-                    status = getStatus(it.selectText("my_status")!!)
-                    score = it.selectInt("my_score").toFloat()
-                    total_chapters = it.selectInt("manga_chapters")
-                    tracking_url = mangaUrl(media_id)
-                }
-            }.toList()
+            TrackSearch.create(TrackManager.MYANIMELIST).apply {
+                title = it.selectText("manga_title")!!
+                media_id = it.selectInt("manga_mangadb_id")
+                last_chapter_read = it.selectInt("my_read_chapters")
+                status = getStatus(it.selectText("my_status")!!)
+                score = it.selectInt("my_score").toFloat()
+                total_chapters = it.selectInt("manga_chapters")
+                tracking_url = mangaUrl(media_id)
+            }
+        }.toList()
     }
 
     private suspend fun getListUrl(): String {
