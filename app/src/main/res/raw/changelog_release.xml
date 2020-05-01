@@ -3,14 +3,15 @@
     <changelogversion
         changeDate=""
         versionName="v2.0.0">
-        <changelogtext>Complete redesign of UI and flow courtesy of Jays2Kings from TachiyomiJ2K</changelogtext>
+        <changelogtext>Complete redesign of UI and flow with bottom navigation, courtesy of Jays2Kings from TachiyomiJ2K</changelogtext>
         <changelogtext>New Themes</changelogtext>
         <changelogtext>Add ability to read downloads from other Tachiyomi forks</changelogtext>
         <changelogtext>Mangadex manga urls now are deeplinked and can be opened in app</changelogtext>
         <changelogtext>Added badges in My follows to see follow status more clearly</changelogtext>
         <changelogtext>New Global font</changelogtext>
         <changelogtext>Android 5 support has been dropped</changelogtext>
-
+        <changelogtext>Switched crash reporting library to use firebase crashlytics</changelogtext>
+        <changelogtext>Plus many more quality of life changes</changelogtext>
     </changelogversion>
     <changelogversion
         changeDate=""
@@ -35,7 +36,7 @@
         <changelogtext>Changed related tab name to similar</changelogtext>
         <changelogtext>improved similar tabs background work</changelogtext>
         <changelogtext>improved cache and cover updating when library updates</changelogtext>
-        <changelogtext>remove image server option that doesnt exist anymore</changelogtext>
+        <changelogtext>remove image server option that doesn't exist anymore</changelogtext>
         <changelogtext>fix color issues on tracking cards</changelogtext>
         <changelogtext>low quality covers now work on follows and similar pages</changelogtext>
     </changelogversion>

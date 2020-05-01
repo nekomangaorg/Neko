@@ -100,7 +100,7 @@ class SettingsAboutController : SettingsController() {
                             if (BuildConfig.DEBUG) {
                                 "https://github.com/CarlosEsco/Neko/commits/master"
                             } else {
-                                "https://github.com/CarlosEsco/Neko/releases/tag/v${BuildConfig.VERSION_NAME}"
+                                "https://github.com/CarlosEsco/Neko/releases/tag/${BuildConfig.VERSION_NAME}"
                             }
                         )
                     )
