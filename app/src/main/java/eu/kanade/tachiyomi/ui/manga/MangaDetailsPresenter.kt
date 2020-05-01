@@ -421,7 +421,7 @@ class MangaDetailsPresenter(
                     val downloadNew = preferences.downloadNew().getOrDefault()
                     val categoriesToDownload =
                         preferences.downloadNewCategories().getOrDefault().map(String::toInt)
-                    val shouldDownload =
+                    val shouldDownload = !controller.fromCatalogue &&
                         (downloadNew && (categoriesToDownload.isEmpty() || getMangaCategoryIds().any { it in categoriesToDownload }))
                     if (shouldDownload) {
                         downloadChapters(newChapters.first.sortedBy { it.chapter_number }
