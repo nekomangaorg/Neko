@@ -50,9 +50,9 @@ import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.RootSearchInterface
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
+import eu.kanade.tachiyomi.util.system.contextCompatColor
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.dpToPxEnd
-import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.applyWindowInsetsForRootController
 import eu.kanade.tachiyomi.util.view.getItemView
@@ -200,12 +200,11 @@ class LibraryController(
         if (preferences.shownFilterTutorial().get()) return
         val activity = activity ?: return
         val icon = activity.bottom_nav.getItemView(R.id.nav_library) ?: return
-        filterTooltip =
-            ViewTooltip.on(activity, icon).autoHide(true, 3000).align(ViewTooltip.ALIGN.START)
-                .position(ViewTooltip.Position.TOP).text(R.string.tap_library_to_show_filters)
-                .color(activity.getResourceColor(R.attr.colorAccent))
-                .textSize(TypedValue.COMPLEX_UNIT_SP, 15f).textColor(Color.WHITE).withShadow(false)
-                .corner(30).arrowWidth(15).arrowHeight(15).distanceWithView(0)
+
+        filterTooltip = ViewTooltip.on(activity, icon).autoHide(true, 4000).align(ViewTooltip.ALIGN.CENTER)
+            .position(ViewTooltip.Position.TOP).text(R.string.tap_library_to_show_filters)
+            .color(view!!.context!!.contextCompatColor(R.color.neko_green))
+            .textSize(TypedValue.COMPLEX_UNIT_SP, 15f).textColor(Color.BLACK)
 
         filterTooltip?.show()
     }
