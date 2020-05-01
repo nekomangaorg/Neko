@@ -5,17 +5,17 @@
     <item
         android:id="@+id/action_custom_filter"
         app:ico_icon="cmd_brightness_6"
-        app:ico_color="@color/md_white_1000"
+        app:ico_color="?android:attr/textColorPrimary"
         app:ico_size="20dp"
         android:title="@string/custom_filter"
         app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/action_settings"
-        app:ico_icon="cmd-settings"
-        app:ico_color="@color/md_white_1000"
+        app:ico_icon="gmf_settings"
+        app:ico_color="?android:attr/textColorPrimary"
         app:ico_size="20dp"
-        android:title="@string/label_settings"
+        android:title="@string/settings"
         app:showAsAction="ifRoom"
         />
 

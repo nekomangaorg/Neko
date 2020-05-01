@@ -1,20 +1,24 @@
 ---
-name: Feature request
-about: Suggest an idea for this project
-title: "[Feature Request]"
-labels: Feature Request
+name: "\U0001F31F Feature request"
+about: Suggest a feature to improve Tachiyomi
+title: "[Feature Request] Write short description here"
+labels: feature
 assignees: ''
 
 ---
 
-**Is your feature request related to a problem? Please describe.**
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+**PLEASE READ THIS**
 
-**Describe the solution you'd like**
-A clear and concise description of what you want to happen.
+I acknowledge that:
 
-**Describe alternatives you've considered**
-A clear and concise description of any alternative solutions or features you've considered.
+- I have updated to the latest version of the app
 
-**Additional context**
-Add any other context or screenshots about the feature request here.
+**DELETE THIS SECTION IF YOU HAVE READ AND ACKNOWLEDGED IT**
+
+---
+
+### Why/User Benefit/User Problem
+(explain why this feature should be added)
+
+### What/Requirements
+(explain how this feature would behave)

@@ -211,11 +211,7 @@ class BackupTest {
         // Restore manga with fetch observable
         val networkManga = getSingleManga("One Piece")
         networkManga.description = "This is a description"
-        `when`(source.fetchMangaDetailsObservable(jsonManga)).thenReturn(
-            Observable.just(
-                networkManga
-            )
-        )
+        `when`(source.fetchMangaDetails(jsonManga)).thenReturn(Observable.just(networkManga))
 
         GlobalScope.launch {
             try {
@@ -260,7 +256,7 @@ class BackupTest {
         // Create list
         val chaptersRemote = ArrayList<Chapter>()
         (1..10).mapTo(chaptersRemote) { getSingleChapter("Chapter $it") }
-        `when`(source.fetchChapterListObservable(manga)).thenReturn(Observable.just(chaptersRemote))
+        `when`(source.fetchChapterList(manga)).thenReturn(Observable.just(chaptersRemote))
 
         // Call restoreChapterFetchObservable
         GlobalScope.launch {
@@ -291,8 +287,7 @@ class BackupTest {
         val chapter = getSingleChapter("Chapter 1")
         chapter.manga_id = manga.id
         chapter.read = true
-        chapter.id =
-            backupManager.databaseHelper.insertChapter(chapter).executeAsBlocking().insertedId()
+        chapter.id = backupManager.databaseHelper.insertChapter(chapter).executeAsBlocking().insertedId()
 
         val historyJson = getSingleHistory(chapter)
 
@@ -306,8 +301,7 @@ class BackupTest {
         // Restore categories
         backupManager.restoreHistoryForManga(history)
 
-        val historyDB =
-            backupManager.databaseHelper.getHistoryByMangaId(manga.id!!).executeAsBlocking()
+        val historyDB = backupManager.databaseHelper.getHistoryByMangaId(manga.id!!).executeAsBlocking()
         assertThat(historyDB).hasSize(1)
         assertThat(historyDB[0].last_read).isEqualTo(1000)
     }
@@ -324,8 +318,7 @@ class BackupTest {
         val manga = getSingleManga("One Piece")
         val manga2 = getSingleManga("Bleach")
         manga.id = backupManager.databaseHelper.insertManga(manga).executeAsBlocking().insertedId()
-        manga2.id =
-            backupManager.databaseHelper.insertManga(manga2).executeAsBlocking().insertedId()
+        manga2.id = backupManager.databaseHelper.insertManga(manga2).executeAsBlocking().insertedId()
 
         // Create track and add it to database
         // This tests duplicate errors.
@@ -409,7 +402,6 @@ class BackupTest {
         val track = TrackImpl()
         track.title = manga.title
         track.manga_id = manga.id!!
-        track.media_id = 1
         track.sync_id = 1
         return track
     }

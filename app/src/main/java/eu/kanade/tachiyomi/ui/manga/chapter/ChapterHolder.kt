@@ -1,127 +1,148 @@
 package eu.kanade.tachiyomi.ui.manga.chapter
 
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
 import android.view.View
-import android.widget.PopupMenu
-import com.mikepenz.iconics.IconicsDrawable
-import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
-import com.mikepenz.iconics.utils.colorInt
-import com.mikepenz.iconics.utils.sizeDp
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.model.Download
-import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
-import eu.kanade.tachiyomi.util.getResourceColor
-import eu.kanade.tachiyomi.util.gone
-import java.util.Date
+import eu.kanade.tachiyomi.ui.manga.MangaDetailsAdapter
+import eu.kanade.tachiyomi.util.chapter.ChapterUtil
+import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.view.gone
+import eu.kanade.tachiyomi.util.view.isVisible
+import eu.kanade.tachiyomi.util.view.visible
+import eu.kanade.tachiyomi.util.view.visibleIf
+import eu.kanade.tachiyomi.widget.EndAnimatorListener
+import eu.kanade.tachiyomi.widget.StartAnimatorListener
 import kotlinx.android.synthetic.main.chapters_item.*
+import kotlinx.android.synthetic.main.download_button.*
 
 class ChapterHolder(
-    private val view: View,
-    private val adapter: ChaptersAdapter
-) : BaseFlexibleViewHolder(view, adapter) {
+    view: View,
+    private val adapter: MangaDetailsAdapter
+) : BaseChapterHolder(view, adapter) {
 
     init {
-        // We need to post a Runnable to show the popup to make sure that the PopupMenu is
-        // correctly positioned. The reason being that the view may change position before the
-        // PopupMenu is shown.
-        chapter_menu.setOnClickListener { it.post { showPopupMenu(it) } }
+        download_button.setOnLongClickListener {
+            adapter.delegate.startDownloadRange(adapterPosition)
+            true
+        }
     }
 
     fun bind(item: ChapterItem, manga: Manga) {
         val chapter = item.chapter
-
+        val isLocked = item.isLocked
         chapter_title.text = when (manga.displayMode) {
             Manga.DISPLAY_NUMBER -> {
                 val number = adapter.decimalFormat.format(chapter.chapter_number.toDouble())
-                itemView.context.getString(R.string.display_mode_chapter, number)
+                itemView.context.getString(R.string.chapter_, number)
             }
             else -> chapter.name
         }
 
-        // Set the correct drawable for dropdown and update the tint to match theme.
-        // Set the correct drawable for dropdown and update the tint to match theme.
-        chapter_menu.setImageDrawable(
-            IconicsDrawable(view.context).icon(CommunityMaterial.Icon.cmd_dots_vertical)
-                .sizeDp(18).colorInt(view.context.getResourceColor(R.attr.icon_color))
-        )
+        val chapterColor = ChapterUtil.chapterColor(itemView.context, item, isLocked)
+
         // Set correct text color
-        chapter_title.setTextColor(if (chapter.read) adapter.readColor else adapter.unreadColor)
-        if (chapter.bookmark) chapter_title.setTextColor(adapter.bookmarkedColor)
+        chapter_title.setTextColor(chapterColor)
 
-        if (chapter.date_upload > 0) {
-            chapter_date.text = adapter.dateFormat.format(Date(chapter.date_upload))
-            chapter_date.setTextColor(if (chapter.read) adapter.readColor else adapter.unreadColor)
-        } else {
-            chapter_date.text = ""
+        val statuses = mutableListOf<String>()
+
+        ChapterUtil.relativeDate(chapter)?.let { statuses.add(it) }
+
+        val showPagesLeft = !chapter.read && chapter.last_page_read > 0 && !isLocked
+
+        if (showPagesLeft && chapter.pages_left > 0) {
+            statuses.add(
+                itemView.resources.getQuantityString(
+                    R.plurals.pages_left, chapter.pages_left, chapter.pages_left
+                )
+            )
+        } else if (showPagesLeft) {
+            statuses.add(
+                itemView.context.getString(
+                    R.string.page_, chapter.last_page_read + 1
+                )
+            )
         }
 
-        // add scanlator if exists
-        chapter_scanlator.text = chapter.scanlator
-        // allow longer titles if there is no scanlator (most sources)
-        if (chapter_scanlator.text.isNullOrBlank()) {
-            chapter_title.maxLines = 2
-            chapter_scanlator.gone()
-        } else {
-            chapter_title.maxLines = 1
+        chapter.scanlator?.isNotBlank()?.let { statuses.add(chapter.scanlator!!) }
+
+        if (front_view.translationX == 0f) {
+            read.setImageResource(
+                if (item.read) R.drawable.ic_eye_off_24dp else R.drawable.ic_eye_24dp
+            )
+            bookmark.setImageResource(
+                if (item.bookmark) R.drawable.ic_bookmark_off_24dp else R.drawable.ic_bookmark_24dp
+            )
+        }
+        // this will color the scanlator the same bookmarks
+        chapter_scanlator.setTextColor(chapterColor)
+        chapter_scanlator.text = statuses.joinToString(" • ")
+
+        val status = when {
+            adapter.isSelected(adapterPosition) -> Download.CHECKED
+            else -> item.status
         }
 
-        chapter_pages.text = if (chapter.last_page_read > 1) {
-            itemView.context.getString(R.string.chapter_progress, chapter.last_page_read + 1)
-        } else {
-            ""
+        notifyStatus(status, item.isLocked, item.progress)
+        resetFrontView()
+        if (adapterPosition == 1) {
+            if (!adapter.hasShownSwipeTut.get())
+                showSlideAnimation()
         }
-
-        notifyStatus(item.status)
     }
 
-    fun notifyStatus(status: Int) = with(download_text) {
-        when (status) {
-            Download.QUEUE -> setText(R.string.chapter_queued)
-            Download.DOWNLOADING -> setText(R.string.chapter_downloading)
-            Download.DOWNLOADED -> setText(R.string.chapter_downloaded)
-            Download.ERROR -> setText(R.string.chapter_error)
-            else -> text = ""
+    private fun showSlideAnimation() {
+        val slide = 100f.dpToPx
+        val animatorSet = AnimatorSet()
+        val anim1 = slideAnimation(0f, slide)
+        anim1.startDelay = 1000
+        anim1.addListener(StartAnimatorListener { left_view.visible() })
+        val anim2 = slideAnimation(slide, -slide)
+        anim2.duration = 600
+        anim2.startDelay = 500
+        anim2.addUpdateListener {
+            if (left_view.isVisible() && front_view.translationX <= 0) {
+                left_view.gone()
+                right_view.visible()
+            }
         }
+        val anim3 = slideAnimation(-slide, 0f)
+        anim3.startDelay = 750
+        animatorSet.playSequentially(anim1, anim2, anim3)
+        animatorSet.addListener(EndAnimatorListener {
+            adapter.hasShownSwipeTut.set(true)
+        })
+        animatorSet.start()
     }
 
-    private fun showPopupMenu(view: View) {
-        val item = adapter.getItem(adapterPosition) ?: return
+    private fun slideAnimation(from: Float, to: Float): ObjectAnimator {
+        return ObjectAnimator.ofFloat(front_view, View.TRANSLATION_X, from, to)
+            .setDuration(300)
+    }
 
-        // Create a PopupMenu, giving it the clicked view for an anchor
-        val popup = PopupMenu(view.context, view)
+    override fun getFrontView(): View {
+        return front_view
+    }
 
-        // Inflate our menu resource into the PopupMenu's Menu
-        popup.menuInflater.inflate(R.menu.chapter_single, popup.menu)
+    override fun getRearRightView(): View {
+        return right_view
+    }
 
-        val chapter = item.chapter
+    override fun getRearLeftView(): View {
+        return left_view
+    }
 
-        // Hide download and show delete if the chapter is downloaded
-        if (item.isDownloaded) {
-            popup.menu.findItem(R.id.action_download).isVisible = false
-            popup.menu.findItem(R.id.action_delete).isVisible = true
+    private fun resetFrontView() {
+        if (front_view.translationX != 0f) itemView.post { adapter.notifyItemChanged(adapterPosition) }
+    }
+
+    fun notifyStatus(status: Int, locked: Boolean, progress: Int) = with(download_button) {
+        if (locked) {
+            gone()
+            return
         }
-
-        // Hide bookmark if bookmark
-        popup.menu.findItem(R.id.action_bookmark).isVisible = !chapter.bookmark
-        popup.menu.findItem(R.id.action_remove_bookmark).isVisible = chapter.bookmark
-
-        // Hide mark as unread when the chapter is unread
-        if (!chapter.read && chapter.last_page_read == 0) {
-            popup.menu.findItem(R.id.action_mark_as_unread).isVisible = false
-        }
-
-        // Hide mark as read when the chapter is read
-        if (chapter.read) {
-            popup.menu.findItem(R.id.action_mark_as_read).isVisible = false
-        }
-
-        // Set a listener so we are notified if a menu item is clicked
-        popup.setOnMenuItemClickListener { menuItem ->
-            adapter.menuItemListener.onMenuItemClick(adapterPosition, menuItem)
-            true
-        }
-
-        // Finally show the PopupMenu
-        popup.show()
+        setDownloadStatus(status, progress)
     }
 }

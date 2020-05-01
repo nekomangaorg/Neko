@@ -5,7 +5,6 @@ import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.POST
 import eu.kanade.tachiyomi.network.POSTWithCookie
-import eu.kanade.tachiyomi.network.asObservable
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.model.Page
@@ -19,8 +18,6 @@ import eu.kanade.tachiyomi.source.online.handlers.PopularHandler
 import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
 import eu.kanade.tachiyomi.source.online.handlers.SimilarHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
-import java.net.URLEncoder
-import kotlin.collections.set
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.FormBody
@@ -28,6 +25,8 @@ import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
 import rx.Observable
 import uy.kohesive.injekt.injectLazy
+import java.net.URLEncoder
+import kotlin.collections.set
 
 open class Mangadex(
     override val lang: String,
@@ -137,7 +136,6 @@ open class Mangadex(
     }
 
     override suspend fun fetchChapterList(manga: SManga): List<SChapter> {
-
         return MangaHandler(clientBuilder(), headers, internalLang).fetchChapterList(manga)
     }
 
@@ -166,6 +164,13 @@ open class Mangadex(
         return FollowsHandler(clientBuilder(), headers).fetchTrackingInfo(manga)
     }
 
+    override suspend fun fetchTrackingInfo(url: String): Track {
+        if (!isLogged()) {
+            throw Exception("Not Logged in")
+        }
+        return FollowsHandler(clientBuilder(), headers).fetchTrackingInfo(url)
+    }
+
     override fun fetchMangaSimilarObservable(page: Int, manga: Manga): Observable<MangasPage> {
         return SimilarHandler().fetchSimilar(manga)
     }
@@ -175,30 +180,31 @@ open class Mangadex(
         return network.cookieManager.get(httpUrl).any { it.name == REMEMBER_ME }
     }
 
-    override fun login(
+    override suspend fun login(
         username: String,
         password: String,
         twoFactorCode: String
-    ): Observable<Boolean> {
-        val formBody = FormBody.Builder()
-            .add("login_username", username)
-            .add("login_password", password)
-            .add("no_js", "1")
-            .add("remember_me", "1")
+    ): Boolean {
+        return withContext(Dispatchers.IO) {
+            val formBody = FormBody.Builder()
+                .add("login_username", username)
+                .add("login_password", password)
+                .add("no_js", "1")
+                .add("remember_me", "1")
 
-        twoFactorCode.let {
-            formBody.add("two_factor", it)
-        }
+            twoFactorCode.let {
+                formBody.add("two_factor", it)
+            }
 
-        return clientBuilder().newCall(
+            val response = clientBuilder().newCall(
                 POST(
                     "$baseUrl/ajax/actions.ajax.php?function=login",
                     headers,
                     formBody.build()
                 )
-            )
-            .asObservable()
-            .map { it.body!!.string().isEmpty() }
+            ).execute()
+            response.body!!.string().isEmpty()
+        }
     }
 
     override suspend fun logout(): Boolean {

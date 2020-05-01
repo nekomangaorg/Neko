@@ -1,25 +1,27 @@
 package eu.kanade.tachiyomi.data.track.myanimelist
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import okhttp3.Interceptor
 import okhttp3.Request
 import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import okio.Buffer
 import org.json.JSONObject
 
 class MyAnimeListInterceptor(private val myanimelist: MyAnimeList) : Interceptor {
 
+    val scope = CoroutineScope(Job() + Dispatchers.Main)
+
     override fun intercept(chain: Interceptor.Chain): Response {
-        myanimelist.ensureLoggedIn()
-
-        val request = chain.request()
-        var response = chain.proceed(updateRequest(request))
-        if (response.code == 400) {
-            myanimelist.refreshLogin()
-            response = chain.proceed(updateRequest(request))
+        scope.launch {
+            myanimelist.ensureLoggedIn()
         }
-
-        return response
+        val request = chain.request()
+        return chain.proceed(updateRequest(request))
     }
 
     private fun updateRequest(request: Request): Request {
@@ -44,17 +46,16 @@ class MyAnimeListInterceptor(private val myanimelist: MyAnimeList) : Interceptor
     private fun updateFormBody(requestBody: RequestBody): RequestBody {
         val formString = bodyToString(requestBody)
 
-        return RequestBody.create(
-            requestBody.contentType(),
-            "$formString${if (formString.isNotEmpty()) "&" else ""}${MyAnimelistApi.CSRF}=${myanimelist.getCSRF()}"
+        return "$formString${if (formString.isNotEmpty()) "&" else ""}${MyAnimeListApi.CSRF}=${myanimelist.getCSRF()}".toRequestBody(
+            requestBody.contentType()
         )
     }
 
     private fun updateJsonBody(requestBody: RequestBody): RequestBody {
         val jsonString = bodyToString(requestBody)
         val newBody = JSONObject(jsonString)
-            .put(MyAnimelistApi.CSRF, myanimelist.getCSRF())
+            .put(MyAnimeListApi.CSRF, myanimelist.getCSRF())
 
-        return RequestBody.create(requestBody.contentType(), newBody.toString())
+        return newBody.toString().toRequestBody(requestBody.contentType())
     }
 }

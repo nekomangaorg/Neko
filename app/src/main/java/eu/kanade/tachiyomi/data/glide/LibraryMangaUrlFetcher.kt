@@ -21,7 +21,7 @@ class LibraryMangaUrlFetcher(
     private val manga: Manga,
     private val file: File
 ) :
-    FileFetcher(file) {
+FileFetcher(file) {
 
     override fun loadData(priority: Priority, callback: DataFetcher.DataCallback<in InputStream>) {
         if (!file.exists()) {

@@ -1,94 +1,136 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingTop="@dimen/material_component_lists_padding_above_list"
-    android:paddingBottom="@dimen/material_component_lists_padding_above_list">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <TextView
-        android:id="@+id/download_progress_text"
-        android:layout_width="wrap_content"
+    <FrameLayout
+        android:id="@+id/right_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        android:background="@color/red_error">
+
+        <ImageView
+            android:id="@+id/close_right"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:tint="@color/md_white_1000"
+            android:layout_gravity="end|center"
+            android:contentDescription="@string/cancel"
+            android:layout_marginEnd="21dp"
+            android:src="@drawable/ic_close_white_24dp" />
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/left_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        android:background="@color/red_error">
+
+        <ImageView
+            android:id="@+id/close_left"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:contentDescription="@string/cancel"
+            android:layout_gravity="start|center"
+            android:layout_marginStart="21dp"
+            android:tint="@color/md_white_1000"
+            android:src="@drawable/ic_close_white_24dp" />
+    </FrameLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:id="@+id/front_view"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:gravity="end"
-        android:maxLines="1"
-        android:textAppearance="@style/TextAppearance.Regular.Caption.Hint"
-        app:layout_constraintBottom_toBottomOf="@id/manga_title"
-        app:layout_constraintEnd_toStartOf="@+id/remove_download"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toEndOf="@+id/manga_title"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="(0/10)" />
+        android:background="?android:attr/colorBackground"
+        android:paddingTop="@dimen/material_component_lists_padding_above_list">
 
-    <TextView
-        android:id="@+id/manga_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_marginBottom="21dp"
-        android:layout_toStartOf="@id/download_progress_text"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:textAppearance="@style/TextAppearance.Regular.Body1"
-        app:layout_constraintBottom_toTopOf="@+id/download_progress"
-        app:layout_constraintEnd_toStartOf="@+id/remove_download"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toEndOf="@+id/reorder"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0"
-        tools:text="Manga title" />
+        <ImageView
+            android:id="@+id/reorder"
+            android:layout_width="@dimen/material_component_lists_single_line_with_avatar_height"
+            android:layout_height="0dp"
+            android:layout_alignParentStart="true"
+            android:layout_gravity="start"
+            android:contentDescription="@string/reorder"
+            android:scaleType="center"
+            android:tint="?android:attr/textColorPrimary"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_drag_handle_black_24dp" />
 
-    <TextView
-        android:id="@+id/chapter_title"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/manga_title"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:textAppearance="@style/TextAppearance.Regular.Caption"
-        app:layout_constraintEnd_toStartOf="@+id/remove_download"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toEndOf="@+id/reorder"
-        app:layout_constraintTop_toBottomOf="@+id/manga_title"
-        tools:text="Chapter Title" />
+        <TextView
+            android:id="@+id/title"
+            style="@style/Neko.Headline6"
+            android:textSize="15sp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_toEndOf="@id/reorder"
+            android:ellipsize="end"
+            android:maxLines="1"
+            app:layout_constraintEnd_toStartOf="@+id/download_progress_text"
+            app:layout_constraintStart_toEndOf="@+id/reorder"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Manga title" />
 
-    <ProgressBar
-        android:id="@+id/download_progress"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/chapter_title"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/remove_download"
-        app:layout_constraintStart_toEndOf="@+id/reorder" />
+        <TextView
+            android:id="@+id/chapter_title"
+            style="@style/Neko.Headline6"
+            android:textSize="12sp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:layout_toEndOf="@id/reorder"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textAppearance="@style/TextAppearance.Regular.Caption"
+            app:layout_constraintEnd_toStartOf="@+id/migration_menu"
+            android:layout_marginEnd="16dp"
+            app:layout_constraintStart_toStartOf="@+id/title"
+            app:layout_constraintTop_toBottomOf="@+id/title"
+            tools:text="Chapter Title" />
 
-    <com.mikepenz.iconics.view.IconicsImageView
-        android:id="@+id/reorder"
-        android:layout_width="@dimen/material_component_lists_single_line_with_avatar_height"
-        android:layout_height="@dimen/material_component_lists_single_line_with_avatar_height"
-        android:layout_gravity="start"
-        android:scaleType="center"
-        app:iiv_color="@color/md_grey_400"
-        app:iiv_icon="cmd-reorder-horizontal"
-        app:iiv_padding="16dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        <ProgressBar
+            android:id="@+id/download_progress"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/migration_menu"
+            app:layout_constraintStart_toEndOf="@+id/reorder"
+            android:layout_marginEnd="16dp"
+            app:layout_constraintTop_toBottomOf="@+id/chapter_title" />
 
-    <com.mikepenz.iconics.view.IconicsImageView
-        android:id="@+id/remove_download"
-        android:layout_width="@dimen/material_component_lists_single_line_with_avatar_height"
-        android:layout_height="@dimen/material_component_lists_single_line_with_avatar_height"
-        android:layout_gravity="end"
-        android:scaleType="center"
-        app:iiv_color="@color/md_grey_400"
-        app:iiv_icon="gmf-delete"
-        app:iiv_padding="16dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        <TextView
+            android:id="@+id/download_progress_text"
+            style="@style/Neko.Caption"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/title"
+            android:maxLines="1"
+            app:layout_constraintBottom_toBottomOf="@+id/title"
+            android:layout_marginEnd="16dp"
+            app:layout_constraintEnd_toStartOf="@+id/migration_menu"
+            app:layout_constraintTop_toTopOf="@+id/title"
+            tools:text="(0/10)" />
 
+        <ImageView
+            android:id="@+id/migration_menu"
+            android:layout_width="44dp"
+            android:layout_height="@dimen/material_component_lists_single_line_with_avatar_height"
+            android:layout_toEndOf="@id/download_progress_text"
+            android:contentDescription="@string/cover_of_image"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_more_vert_black_24dp" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</FrameLayout>

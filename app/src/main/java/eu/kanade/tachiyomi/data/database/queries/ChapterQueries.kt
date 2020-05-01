@@ -6,58 +6,71 @@ import eu.kanade.tachiyomi.data.database.DbProvider
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaChapter
+import eu.kanade.tachiyomi.data.database.models.MangaChapterHistory
 import eu.kanade.tachiyomi.data.database.resolvers.ChapterBackupPutResolver
 import eu.kanade.tachiyomi.data.database.resolvers.ChapterProgressPutResolver
 import eu.kanade.tachiyomi.data.database.resolvers.ChapterSourceOrderPutResolver
 import eu.kanade.tachiyomi.data.database.resolvers.MangaChapterGetResolver
+import eu.kanade.tachiyomi.data.database.resolvers.MangaChapterHistoryGetResolver
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable
 import java.util.Date
 
 interface ChapterQueries : DbProvider {
 
     fun getChapters(manga: Manga) = db.get()
-        .listOfObjects(Chapter::class.java)
-        .withQuery(
-            Query.builder()
-                .table(ChapterTable.TABLE)
-                .where("${ChapterTable.COL_MANGA_ID} = ?")
-                .whereArgs(manga.id)
-                .build()
-        )
-        .prepare()
+            .listOfObjects(Chapter::class.java)
+            .withQuery(Query.builder()
+                    .table(ChapterTable.TABLE)
+                    .where("${ChapterTable.COL_MANGA_ID} = ?")
+                    .whereArgs(manga.id)
+                    .build())
+            .prepare()
 
     fun getRecentChapters(date: Date) = db.get()
-        .listOfObjects(MangaChapter::class.java)
-        .withQuery(
-            RawQuery.builder()
-                .query(getRecentsQuery())
-                .args(date.time)
-                .observesTables(ChapterTable.TABLE)
-                .build()
-        )
-        .withGetResolver(MangaChapterGetResolver.INSTANCE)
+            .listOfObjects(MangaChapter::class.java)
+            .withQuery(RawQuery.builder()
+                    .query(getRecentsQuery())
+                    .args(date.time)
+                    .observesTables(ChapterTable.TABLE)
+                    .build())
+            .withGetResolver(MangaChapterGetResolver.INSTANCE)
+            .prepare()
+
+    fun getUpdatedManga(date: Date, search: String = "", endless: Boolean) = db.get()
+        .listOfObjects(MangaChapterHistory::class.java)
+        .withQuery(RawQuery.builder()
+            .query(getRecentsQueryDistinct(search, endless))
+            .args(date.time)
+            .observesTables(ChapterTable.TABLE)
+            .build())
+        .withGetResolver(MangaChapterHistoryGetResolver.INSTANCE)
         .prepare()
 
     fun getChapter(id: Long) = db.get()
-        .`object`(Chapter::class.java)
-        .withQuery(
-            Query.builder()
-                .table(ChapterTable.TABLE)
-                .where("${ChapterTable.COL_ID} = ?")
-                .whereArgs(id)
-                .build()
-        )
-        .prepare()
+            .`object`(Chapter::class.java)
+            .withQuery(Query.builder()
+                    .table(ChapterTable.TABLE)
+                    .where("${ChapterTable.COL_ID} = ?")
+                    .whereArgs(id)
+                    .build())
+            .prepare()
 
     fun getChapter(url: String) = db.get()
+            .`object`(Chapter::class.java)
+            .withQuery(Query.builder()
+                    .table(ChapterTable.TABLE)
+                    .where("${ChapterTable.COL_URL} = ?")
+                    .whereArgs(url)
+                    .build())
+            .prepare()
+
+    fun getChapter(url: String, mangaId: Long) = db.get()
         .`object`(Chapter::class.java)
-        .withQuery(
-            Query.builder()
-                .table(ChapterTable.TABLE)
-                .where("${ChapterTable.COL_URL} = ?")
-                .whereArgs(url)
-                .build()
-        )
+        .withQuery(Query.builder()
+            .table(ChapterTable.TABLE)
+            .where("${ChapterTable.COL_URL} = ? AND ${ChapterTable.COL_MANGA_ID} = ?")
+            .whereArgs(url, mangaId)
+            .build())
         .prepare()
 
     fun insertChapter(chapter: Chapter) = db.put().`object`(chapter).prepare()
@@ -69,22 +82,22 @@ interface ChapterQueries : DbProvider {
     fun deleteChapters(chapters: List<Chapter>) = db.delete().objects(chapters).prepare()
 
     fun updateChaptersBackup(chapters: List<Chapter>) = db.put()
-        .objects(chapters)
-        .withPutResolver(ChapterBackupPutResolver())
-        .prepare()
+            .objects(chapters)
+            .withPutResolver(ChapterBackupPutResolver())
+            .prepare()
 
     fun updateChapterProgress(chapter: Chapter) = db.put()
-        .`object`(chapter)
-        .withPutResolver(ChapterProgressPutResolver())
-        .prepare()
+            .`object`(chapter)
+            .withPutResolver(ChapterProgressPutResolver())
+            .prepare()
 
     fun updateChaptersProgress(chapters: List<Chapter>) = db.put()
-        .objects(chapters)
-        .withPutResolver(ChapterProgressPutResolver())
-        .prepare()
+            .objects(chapters)
+            .withPutResolver(ChapterProgressPutResolver())
+            .prepare()
 
     fun fixChaptersSourceOrder(chapters: List<Chapter>) = db.put()
-        .objects(chapters)
-        .withPutResolver(ChapterSourceOrderPutResolver())
-        .prepare()
+            .objects(chapters)
+            .withPutResolver(ChapterSourceOrderPutResolver())
+            .prepare()
 }

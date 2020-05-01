@@ -15,6 +15,7 @@ import com.bluelinelabs.conductor.ControllerChangeType
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
+import eu.kanade.tachiyomi.util.view.scrollViewWith
 import rx.Observable
 import rx.Subscription
 import rx.subscriptions.CompositeSubscription
@@ -36,7 +37,9 @@ abstract class SettingsController : PreferenceController() {
         if (untilDestroySubscriptions.isUnsubscribed) {
             untilDestroySubscriptions = CompositeSubscription()
         }
-        return super.onCreateView(inflater, container, savedInstanceState)
+        val view = super.onCreateView(inflater, container, savedInstanceState)
+        scrollViewWith(listView, padBottom = true)
+        return view
     }
 
     override fun onDestroyView(view: View) {
@@ -70,7 +73,6 @@ abstract class SettingsController : PreferenceController() {
             }
             parentController = parentController.parentController
         }
-
         (activity as? AppCompatActivity)?.supportActionBar?.title = getTitle()
     }
 
@@ -78,6 +80,7 @@ abstract class SettingsController : PreferenceController() {
         if (type.isEnter) {
             setTitle()
         }
+        setHasOptionsMenu(type.isEnter)
         super.onChangeStarted(handler, type)
     }
 

@@ -2,7 +2,7 @@ package eu.kanade.tachiyomi.ui.reader.viewer.pager
 
 import com.f2prateek.rx.preferences.Preference
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.util.addTo
+import eu.kanade.tachiyomi.util.lang.addTo
 import rx.subscriptions.CompositeSubscription
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -43,6 +43,12 @@ class PagerConfig(private val viewer: PagerViewer, preferences: PreferencesHelpe
     var doubleTapAnimDuration = 500
         private set
 
+    var readerTheme = 0
+        private set
+
+    var alwaysShowChapterTransition = true
+        private set
+
     init {
         preferences.readWithTapping()
             .register({ tappingEnabled = it })
@@ -70,6 +76,12 @@ class PagerConfig(private val viewer: PagerViewer, preferences: PreferencesHelpe
 
         preferences.readWithVolumeKeysInverted()
             .register({ volumeKeysInverted = it })
+
+        preferences.readerTheme()
+                .register({ readerTheme = it }, { imagePropertyChangedListener?.invoke() })
+
+        preferences.alwaysShowChapterTransition()
+                .register({ alwaysShowChapterTransition = it })
     }
 
     fun unsubscribe() {

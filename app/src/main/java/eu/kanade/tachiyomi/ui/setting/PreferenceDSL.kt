@@ -4,6 +4,7 @@ import android.app.Activity
 import android.graphics.drawable.Drawable
 import androidx.preference.CheckBoxPreference
 import androidx.preference.DialogPreference
+import androidx.preference.DropDownPreference
 import androidx.preference.EditTextPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
@@ -38,6 +39,11 @@ inline fun PreferenceGroup.checkBoxPreference(block: (@DSL CheckBoxPreference).(
 
 inline fun PreferenceGroup.editTextPreference(block: (@DSL EditTextPreference).() -> Unit): EditTextPreference {
     return initThenAdd(EditTextPreference(context), block).also(::initDialog)
+}
+
+inline fun PreferenceGroup.dropDownPreference(block: (@DSL DropDownPreference).() -> Unit):
+    DropDownPreference {
+    return initThenAdd(DropDownPreference(context), block).also(::initDialog)
 }
 
 inline fun PreferenceGroup.listPreference(
@@ -121,14 +127,14 @@ var Preference.titleRes: Int
         setTitle(value)
     }
 
-var Preference.iconDrawable: Drawable
-    get() = IconicsDrawable(context) // set only
-    set(value) {
-        icon = value
-    }
-
 var Preference.summaryRes: Int
     get() = 0 // set only
     set(value) {
         setSummary(value)
+    }
+
+var Preference.iconDrawable: Drawable
+    get() = IconicsDrawable(context) // set only
+    set(value) {
+        icon = value
     }

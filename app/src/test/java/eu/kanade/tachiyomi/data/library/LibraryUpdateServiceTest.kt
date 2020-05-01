@@ -11,7 +11,6 @@ import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.online.HttpSource
-import java.util.ArrayList
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -29,6 +28,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.InjektModule
 import uy.kohesive.injekt.api.InjektRegistrar
 import uy.kohesive.injekt.api.addSingleton
+import java.util.ArrayList
 
 @Config(constants = BuildConfig::class, sdk = intArrayOf(Build.VERSION_CODES.LOLLIPOP))
 @RunWith(CustomRobolectricGradleTestRunner::class)
@@ -61,11 +61,11 @@ class LibraryUpdateServiceTest {
     fun testLifecycle() {
         // Smoke test
         Robolectric.buildService(LibraryUpdateService::class.java)
-            .attach()
-            .create()
-            .startCommand(0, 0)
-            .destroy()
-            .get()
+                .attach()
+                .create()
+                .startCommand(0, 0)
+                .destroy()
+                .get()
     }
 
     @Test
@@ -76,9 +76,9 @@ class LibraryUpdateServiceTest {
 
         val sourceChapters = createChapters("/chapter1", "/chapter2")
 
-        `when`(source.fetchChapterListObservable(manga)).thenReturn(Observable.just(sourceChapters))
+        `when`(source.fetchChapterList(manga)).thenReturn(Observable.just(sourceChapters))
 
-        service.updateManga(manga)
+        service.updateManga(manga).subscribe()
 
         assertThat(service.db.getChapters(manga).executeAsBlocking()).hasSize(2)
     }
@@ -93,17 +93,13 @@ class LibraryUpdateServiceTest {
         val chapters3 = createChapters("/achapter1", "/achapter2")
 
         // One of the updates will fail
-        `when`(source.fetchChapterListObservable(favManga[0])).thenReturn(Observable.just(chapters))
-        `when`(source.fetchChapterListObservable(favManga[1])).thenReturn(
-            Observable.error<List<SChapter>>(
-                Exception()
-            )
-        )
-        `when`(source.fetchChapterListObservable(favManga[2])).thenReturn(Observable.just(chapters3))
+        `when`(source.fetchChapterList(favManga[0])).thenReturn(Observable.just(chapters))
+        `when`(source.fetchChapterList(favManga[1])).thenReturn(Observable.error<List<SChapter>>(Exception()))
+        `when`(source.fetchChapterList(favManga[2])).thenReturn(Observable.just(chapters3))
 
         val intent = Intent()
         val target = LibraryUpdateService.Target.CHAPTERS
-        service.updateChapterList(service.getMangaToUpdate(intent, target)).subscribe()
+        service.updateDetails(favManga).subscribe()
 
         // There are 3 network attempts and 2 insertions (1 request failed)
         assertThat(service.db.getChapters(favManga[0]).executeAsBlocking()).hasSize(2)

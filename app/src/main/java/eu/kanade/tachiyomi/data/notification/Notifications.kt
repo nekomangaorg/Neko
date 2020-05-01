@@ -5,7 +5,7 @@ import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.util.notificationManager
+import eu.kanade.tachiyomi.util.system.notificationManager
 
 /**
  * Class to manage the basic information of all the notifications used in the app.
@@ -62,41 +62,37 @@ object Notifications {
     fun createChannels(context: Context) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
 
-        val channels = listOf(
-            NotificationChannel(
-                CHANNEL_COMMON,
-                context.getString(R.string.channel_common),
-                NotificationManager.IMPORTANCE_LOW
-            ),
-            NotificationChannel(
-                CHANNEL_LIBRARY,
-                context.getString(R.string.channel_library),
-                NotificationManager.IMPORTANCE_LOW
-            ).apply {
-                setShowBadge(false)
-            },
-            NotificationChannel(
-                CHANNEL_DOWNLOADER,
-                context.getString(R.string.channel_downloader),
-                NotificationManager.IMPORTANCE_LOW
-            ).apply {
-                setShowBadge(false)
-            },
+        val channels = listOf(NotificationChannel(
+            CHANNEL_COMMON,
+            context.getString(R.string.common),
+            NotificationManager.IMPORTANCE_LOW
+        ), NotificationChannel(
+            CHANNEL_LIBRARY,
+            context.getString(R.string.updating_library),
+            NotificationManager.IMPORTANCE_LOW
+        ).apply {
+            setShowBadge(false)
+        }, NotificationChannel(
+            CHANNEL_DOWNLOADER,
+            context.getString(R.string.downloads),
+            NotificationManager.IMPORTANCE_LOW
+        ).apply {
+            setShowBadge(false)
+        },
             NotificationChannel(
                 CHANNEL_NEW_CHAPTERS,
-                context.getString(R.string.channel_new_chapters),
+                context.getString(R.string.new_chapters),
                 NotificationManager.IMPORTANCE_DEFAULT
-            ),
-            NotificationChannel(
+            ), NotificationChannel(
                 CHANNEL_RESTORE,
-                context.getString(R.string.channel_backup_restore),
+                context.getString(R.string.restoring_backup),
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
                 setShowBadge(false)
             },
             NotificationChannel(
                 CHANNEL_SIMILAR,
-                context.getString(R.string.channel_manga_similar),
+                context.getString(R.string.similar),
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
                 setShowBadge(false)

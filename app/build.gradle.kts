@@ -1,34 +1,51 @@
+import java.io.ByteArrayOutputStream
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
 plugins {
     id("com.android.application")
+    id("com.google.android.gms.oss-licenses-plugin")
     kotlin("android")
     kotlin("android.extensions")
     kotlin("kapt")
     id("org.jmailen.kotlinter") version "2.3.1"
-    id("com.github.ben-manes.versions") version "0.28.0"
     id("org.jetbrains.kotlin.plugin.serialization")
-    id("com.google.gms.google-services") apply false
+    id("com.google.firebase.crashlytics")
+    id("com.google.gms.google-services") //apply false
 }
 
-val BUILD_TIME = DateTimeFormatter.ISO_DATE_TIME.format(LocalDateTime.now(ZoneOffset.UTC))
+fun getBuildTime() = DateTimeFormatter.ISO_DATE_TIME.format(LocalDateTime.now(ZoneOffset.UTC))
+fun getCommitCount() = runCommand("git rev-list --count HEAD")
+fun getGitSha() = runCommand("git rev-parse --short HEAD")
 
+fun runCommand(command: String): String {
+    val byteOut = ByteArrayOutputStream()
+    project.exec {
+        commandLine = command.split(" ")
+        standardOutput = byteOut
+    }
+    return String(byteOut.toByteArray()).trim()
+}
 
 android {
     compileSdkVersion(29)
-    buildToolsVersion("29.0.2")
+    buildToolsVersion("29.0.3")
 
     defaultConfig {
-        minSdkVersion(21)
+        minSdkVersion(24)
         targetSdkVersion(29)
         applicationId = "tachiyomi.mangadex"
-        versionCode = 51
-        versionName = "1.7.2"
+        versionCode = 53
+        versionName = "2.0.0"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
         setProperty("archivesBaseName", "Neko")
-        buildConfigField("String", "BUILD_TIME", "\"${BUILD_TIME}\"")
+        buildConfigField("String", "COMMIT_COUNT", "\"${getCommitCount()}\"")
+        buildConfigField("String", "COMMIT_SHA", "\"${getGitSha()}\"")
+        buildConfigField("String", "BUILD_TIME", "\"${getBuildTime()}\"")
+        buildConfigField("Boolean", "INCLUDE_UPDATER", "false")
+
         ndk {
             abiFilters("armeabi-v7a", "arm64-v8a", "x86")
         }
@@ -37,18 +54,22 @@ android {
         getByName("debug") {
             applicationIdSuffix = ".debug"
         }
-
     }
+
+    flavorDimensions("default")
+
+    productFlavors {
+        create("standard") {
+            buildConfigField("Boolean", "INCLUDE_UPDATER", "true")
+        }
+        create("dev") {
+            resConfig("en")
+        }
+    }
+
     lintOptions {
         isAbortOnError = false
         isCheckReleaseBuilds = false
-    }
-    packagingOptions {
-        exclude("META-INF/DEPENDENCIES")
-        exclude("LICENSE.txt")
-        exclude("META-INF/LICENSE")
-        exclude("META-INF/LICENSE.txt")
-        exclude("META-INF/NOTICE")
     }
 
     compileOptions {
@@ -64,28 +85,31 @@ androidExtensions {
 }
 
 dependencies {
-// Modified dependencies
+    // Modified dependencies
     implementation("com.github.inorichi:subsampling-scale-image-view:ac0dae7")
-
 // Android support library
     implementation("androidx.appcompat:appcompat:1.1.0")
     implementation("androidx.cardview:cardview:1.0.0")
     implementation("com.google.android.material:material:1.1.0")
     implementation("androidx.recyclerview:recyclerview:1.1.0")
-    implementation("androidx.preference:preference:1.1.0")
+    implementation("androidx.preference:preference:1.1.1")
     implementation("androidx.annotation:annotation:1.1.0")
     implementation("androidx.browser:browser:1.2.0")
     implementation("androidx.biometric:biometric:1.0.1")
+    implementation("androidx.palette:palette:1.0.0")
+
 
     implementation("androidx.constraintlayout:constraintlayout:1.1.3")
 
     implementation("androidx.multidex:multidex:2.0.1")
 
-    implementation("com.google.firebase:firebase-core:17.2.3")
+    implementation("com.google.firebase:firebase-core:17.3.0")
+    implementation("com.google.firebase:firebase-analytics:17.3.0")
+    implementation("com.google.firebase:firebase-crashlytics:17.0.0-beta04")
 
-    val lifecycle_version = "2.1.0"
-    implementation("androidx.lifecycle:lifecycle-extensions:$lifecycle_version")
-    implementation("androidx.lifecycle:lifecycle-common-java8:$lifecycle_version")
+    val lifecycleVersion = "2.1.0"
+    implementation("androidx.lifecycle:lifecycle-extensions:$lifecycleVersion")
+    implementation("androidx.lifecycle:lifecycle-common-java8:$lifecycleVersion")
 
 // ReactiveX
     implementation("io.reactivex:rxandroid:1.2.1")
@@ -94,17 +118,19 @@ dependencies {
     implementation("com.f2prateek.rx.preferences:rx-preferences:1.0.2")
     implementation("com.github.pwittchen:reactivenetwork:0.13.0")
 
+    // Coroutines
+    implementation("com.github.tfcporciuncula:flow-preferences:1.1.1")
+
 // Network client
-    val okhttp_version = "4.2.1"
-    implementation("com.squareup.okhttp3:okhttp:$okhttp_version")
-    implementation("com.squareup.okhttp3:logging-interceptor:$okhttp_version")
+    val okhttpVersion = "4.3.1"
+    implementation("com.squareup.okhttp3:okhttp:$okhttpVersion")
+    implementation("com.squareup.okhttp3:logging-interceptor:$okhttpVersion")
     implementation("com.squareup.okio:okio:2.4.3")
 
 // REST
-    val retrofit_version = "2.7.2"
-    implementation("com.squareup.retrofit2:retrofit:$retrofit_version")
-    implementation("com.squareup.retrofit2:converter-gson:$retrofit_version")
-    implementation("com.squareup.retrofit2:adapter-rxjava:$retrofit_version")
+    val retrofitVersion = "2.7.2"
+    implementation("com.squareup.retrofit2:retrofit:$retrofitVersion")
+    implementation("com.squareup.retrofit2:converter-gson:$retrofitVersion")
     implementation("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:0.5.0")
 
 // JSON
@@ -120,16 +146,18 @@ dependencies {
     implementation("com.github.inorichi:unifile:e9ee588")
 
 // HTML parser
-    implementation("org.jsoup:jsoup:1.12.2")
+    implementation("org.jsoup:jsoup:1.13.1")
 
 //Icons
-    implementation("com.mikepenz:iconics-core:4.0.2@aar")
-    implementation("com.mikepenz:iconics-views:4.0.2@aar")
-    implementation("com.mikepenz:community-material-typeface:3.7.95.4-kotlin@aar")
+    implementation("com.mikepenz:iconics-core:5.0.2@aar")
+    implementation("com.mikepenz:iconics-views:5.0.2@aar")
+    implementation("com.mikepenz:community-material-typeface:5.0.45.1-kotlin@aar")
     implementation("com.mikepenz:material-design-icons-dx-typeface:5.0.1.0-kotlin@aar")
 
 // Job scheduling
-    implementation("com.evernote:android-job:1.4.2")
+    val workManagerVersion = "2.3.3"
+    implementation("android.arch.work:work-runtime:$workManagerVersion")
+    implementation("android.arch.work:work-runtime-ktx:$workManagerVersion")
     implementation("com.google.android.gms:play-services-gcm:17.0.0")
 
 // Changelog
@@ -142,21 +170,18 @@ dependencies {
     implementation("io.requery:sqlite-android:3.31.0")
 
 // Model View Presenter
-    val nucleus_version = "3.0.0"
-    implementation("info.android15.nucleus:nucleus:$nucleus_version")
-    implementation("info.android15.nucleus:nucleus-support-v7:$nucleus_version")
+    val nucleusVersion = "3.0.0"
+    implementation("info.android15.nucleus:nucleus:$nucleusVersion")
+    implementation("info.android15.nucleus:nucleus-support-v7:$nucleusVersion")
 
 // Dependency injection
     implementation("com.github.inorichi.injekt:injekt-core:65b0440")
 
 // Image library
-    val glide_version = "4.11.0"
-    implementation("com.github.bumptech.glide:glide:$glide_version")
-    implementation("com.github.bumptech.glide:okhttp3-integration:$glide_version")
-    kapt("com.github.bumptech.glide:compiler:$glide_version")
-
-// Transformations
-    implementation("jp.wasabeef:glide-transformations:4.1.0")
+    val glideVersion = "4.11.0"
+    implementation("com.github.bumptech.glide:glide:$glideVersion")
+    implementation("com.github.bumptech.glide:okhttp3-integration:$glideVersion")
+    kapt("com.github.bumptech.glide:compiler:$glideVersion")
 
 // Logging
     implementation("com.jakewharton.timber:timber:4.7.1")
@@ -164,18 +189,23 @@ dependencies {
 // UI
     implementation("com.dmitrymalkovich.android:material-design-dimens:1.4")
     implementation("com.github.dmytrodanylyk.android-process-button:library:1.0.4")
+    val latestFastAdapterRelease = "5.0.0"
+    implementation("com.mikepenz:fastadapter:${latestFastAdapterRelease}")
+    implementation("com.mikepenz:fastadapter-extensions-binding:${latestFastAdapterRelease}")
     implementation("eu.davidea:flexible-adapter:5.1.0")
     implementation("eu.davidea:flexible-adapter-ui:1.0.0")
     implementation("com.nononsenseapps:filepicker:2.5.2")
-//switch this to material dialog file picker
-    implementation("com.github.amulyakhare:TextDrawable:558677e")
-    implementation("com.afollestad.material-dialogs:core:3.3.0")
-    implementation("com.afollestad.material-dialogs:input:3.3.0")
+    implementation("com.afollestad.material-dialogs:core:3.1.1")
+    implementation("com.afollestad.material-dialogs:input:3.1.1")
     implementation("me.zhanghai.android.systemuihelper:library:1.0.0")
     implementation("com.nightlynexus.viewstatepageradapter:viewstatepageradapter:1.1.0")
+    implementation("com.reddit:indicator-fast-scroll:1.2.1")
+
     implementation("com.github.kizitonwose:AndroidTagGroup:1.6.0")
     implementation("com.github.chrisbanes:PhotoView:2.3.0")
     implementation("com.github.carlosesco:DirectionalViewPager:a844dbca0a")
+    implementation("com.github.florent37:viewtooltip:1.2.2")
+    implementation("com.getkeepsafe.taptargetview:taptargetview:1.13.0")
 
 // Conductor
     implementation("com.bluelinelabs:conductor:2.1.5")
@@ -185,44 +215,38 @@ dependencies {
     implementation("com.github.inorichi:conductor-support-preference:a32c357")
 
 // RxBindings
-    val rxbindings_version = "1.0.1"
-    implementation("com.jakewharton.rxbinding:rxbinding-kotlin:$rxbindings_version")
-    implementation("com.jakewharton.rxbinding:rxbinding-appcompat-v7-kotlin:$rxbindings_version")
-    implementation("com.jakewharton.rxbinding:rxbinding-support-v4-kotlin:$rxbindings_version")
-    implementation("com.jakewharton.rxbinding:rxbinding-recyclerview-v7-kotlin:$rxbindings_version")
-
-//badge library
-    implementation("com.github.nekocode:Badge:2.1")
+    val rxbindingsVersion = "1.0.1"
+    implementation("com.jakewharton.rxbinding:rxbinding-kotlin:$rxbindingsVersion")
+    implementation("com.jakewharton.rxbinding:rxbinding-appcompat-v7-kotlin:$rxbindingsVersion")
+    implementation("com.jakewharton.rxbinding:rxbinding-support-v4-kotlin:$rxbindingsVersion")
+    implementation("com.jakewharton.rxbinding:rxbinding-recyclerview-v7-kotlin:$rxbindingsVersion")
 
 // Tests
     testImplementation("junit:junit:4.13")
-    testImplementation("org.assertj:assertj-core:1.7.1")
+    testImplementation("org.assertj:assertj-core:3.12.2")
     testImplementation("org.mockito:mockito-core:1.10.19")
 
-    val robolectric_version = "3.1.4"
-    testImplementation("org.robolectric:robolectric:$robolectric_version")
-    testImplementation("org.robolectric:shadows-multidex:$robolectric_version")
-    testImplementation("org.robolectric:shadows-play-services:$robolectric_version")
+    val robolectricVersion = "3.1.4"
+    testImplementation("org.robolectric:robolectric:$robolectricVersion")
+    testImplementation("org.robolectric:shadows-multidex:$robolectricVersion")
+    testImplementation("org.robolectric:shadows-play-services:$robolectricVersion")
 
 
     implementation(kotlin("stdlib", org.jetbrains.kotlin.config.KotlinCompilerVersion.VERSION))
 
-    val coroutines_version = "1.3.3"
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version")
+    val coroutinesVersion = "1.3.3"
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion")
 
-    val acraVersion = "5.5.0"
-    implementation("ch.acra:acra-http:$acraVersion")
-    implementation("ch.acra:acra-mail:$acraVersion")
+    // Text distance
+    implementation("info.debatty:java-string-similarity:1.2.1")
+
+    implementation("com.google.android.gms:play-services-oss-licenses:17.0.0")
 }
 
-tasks.preBuild {
+/*tasks.preBuild {
     dependsOn(tasks.lintKotlin)
-}
+}*/
 tasks.lintKotlin {
     dependsOn(tasks.formatKotlin)
-}
-
-if (gradle.startParameter.taskRequests.toString().contains("Standard")) {
-    apply(mapOf("plugin" to "com.google.gms.google-services"))
 }

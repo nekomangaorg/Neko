@@ -44,11 +44,7 @@ abstract class BaseController(bundle: Bundle? = null) : RestoreViewOnCreateContr
     override val containerView: View?
         get() = view
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup,
-        savedViewState: Bundle?
-    ): View {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup, savedViewState: Bundle?): View {
         return inflateView(inflater, container)
     }
 
@@ -59,14 +55,18 @@ abstract class BaseController(bundle: Bundle? = null) : RestoreViewOnCreateContr
 
     abstract fun inflateView(inflater: LayoutInflater, container: ViewGroup): View
 
-    open fun onViewCreated(view: View) {}
+    open fun onViewCreated(view: View) { }
 
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
         if (type.isEnter) {
             setTitle()
         }
+        setHasOptionsMenu(type.isEnter)
         super.onChangeStarted(handler, type)
     }
+
+    val onRoot: Boolean
+        get() = router.backstack.lastOrNull()?.controller() == this
 
     open fun getTitle(): String? {
         return null
@@ -81,7 +81,8 @@ abstract class BaseController(bundle: Bundle? = null) : RestoreViewOnCreateContr
             parentController = parentController.parentController
         }
 
-        (activity as? AppCompatActivity)?.supportActionBar?.title = getTitle()
+        if (router.backstack.lastOrNull()?.controller() == this)
+            (activity as? AppCompatActivity)?.supportActionBar?.title = getTitle()
     }
 
     private fun Controller.instance(): String {
@@ -94,11 +95,7 @@ abstract class BaseController(bundle: Bundle? = null) : RestoreViewOnCreateContr
      * Issue link: https://issuetracker.google.com/issues/37657375
      */
     var expandActionViewFromInteraction = false
-
-    fun MenuItem.fixExpand(
-        onExpand: ((MenuItem) -> Boolean)? = null,
-        onCollapse: ((MenuItem) -> Boolean)? = null
-    ) {
+    fun MenuItem.fixExpand(onExpand: ((MenuItem) -> Boolean)? = null, onCollapse: ((MenuItem) -> Boolean)? = null) {
         setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
             override fun onMenuItemActionExpand(item: MenuItem): Boolean {
                 return onExpand?.invoke(item) ?: true

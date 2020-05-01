@@ -10,6 +10,12 @@ class ChapterImpl : Chapter {
 
     override lateinit var name: String
 
+    override var vol: String = ""
+
+    override var chapter_txt: String = ""
+
+    override var chapter_title: String = ""
+
     override var scanlator: String? = null
 
     override var read: Boolean = false
@@ -17,6 +23,8 @@ class ChapterImpl : Chapter {
     override var bookmark: Boolean = false
 
     override var last_page_read: Int = 0
+
+    override var pages_left: Int = 0
 
     override var date_fetch: Long = 0
 

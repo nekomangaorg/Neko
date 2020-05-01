@@ -76,6 +76,11 @@ interface Source {
     suspend fun fetchTrackingInfo(manga: SManga): Track
 
     /**
+     * Get a MdList Track of the manga
+     */
+    suspend fun fetchTrackingInfo(url: String): Track
+
+    /**
      * Returns the list of filters for the source.
      */
     fun getFilterList(): FilterList
@@ -132,7 +137,7 @@ interface Source {
 
     fun isLogged(): Boolean
 
-    fun login(username: String, password: String, twoFactorCode: String = ""): Observable<Boolean>
+    suspend fun login(username: String, password: String, twoFactorCode: String = ""): Boolean
 
     suspend fun logout(): Boolean
 }

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/chapter_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/list_item_selector"
+    android:tooltipText="@string/sort_and_filter"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/start_reading_button">
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/chapters_title"
+        style="@style/Neko.Headline6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="12dp"
+        android:maxLines="1"
+        android:text="@string/chapters"
+        android:textSize="17sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/filters_text"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/filter_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="20dp"
+        android:background="@null"
+        android:padding="5dp"
+        android:src="@drawable/ic_filter_list_white_24dp"
+        android:tint="?colorAccent"
+        app:layout_constraintBottom_toBottomOf="@id/chapters_title"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/chapters_title" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/filters_text"
+        tools:text="Read, Unread, Bookmarked, Downloaded, All"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="6dp"
+        android:maxLines="2"
+        android:padding="5dp"
+        android:textAlignment="textEnd"
+        android:textColor="?android:textColorHint"
+        app:layout_constraintBaseline_toBaselineOf="@id/chapters_title"
+        app:layout_constraintBottom_toBottomOf="@id/filter_button"
+        app:layout_constraintEnd_toStartOf="@id/filter_button"
+        app:layout_constraintStart_toEndOf="@+id/chapters_title"
+        app:layout_constraintTop_toTopOf="@id/filter_button" />
+</androidx.constraintlayout.widget.ConstraintLayout>

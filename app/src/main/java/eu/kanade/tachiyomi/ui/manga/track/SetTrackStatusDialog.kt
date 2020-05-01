@@ -4,7 +4,6 @@ import android.app.Dialog
 import android.os.Bundle
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.list.listItemsSingleChoice
-import com.bluelinelabs.conductor.Controller
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackManager
@@ -13,14 +12,15 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 class SetTrackStatusDialog<T> : DialogController
-        where T : Controller, T : SetTrackStatusDialog.Listener {
+        where T : SetTrackStatusDialog.Listener {
 
     private val item: TrackItem
+    private lateinit var listener: Listener
 
     constructor(target: T, item: TrackItem) : super(Bundle().apply {
         putSerializable(KEY_ITEM_TRACK, item.track)
     }) {
-        targetController = target
+        listener = target
         this.item = item
     }
 
@@ -38,13 +38,13 @@ class SetTrackStatusDialog<T> : DialogController
         val selectedIndex = statusList.indexOf(item.track?.status)
 
         return MaterialDialog(activity!!)
-                .title(R.string.status)
-                .negativeButton(android.R.string.cancel)
-                .listItemsSingleChoice(items = statusString, initialSelection = selectedIndex,
-                        waitForPositiveButton = false) { dialog, position, _ ->
-                    (targetController as? Listener)?.setStatus(item, position)
-                    dialog.dismiss()
-                }
+            .title(R.string.status)
+            .negativeButton(android.R.string.cancel)
+            .listItemsSingleChoice(items = statusString, initialSelection = selectedIndex,
+                waitForPositiveButton = false) { dialog, position, _ ->
+                listener.setStatus(item, position)
+                dialog.dismiss()
+            }
     }
 
     interface Listener {

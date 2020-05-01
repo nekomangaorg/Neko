@@ -11,13 +11,13 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.handlers.MangaPlusHandler
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
-import java.security.MessageDigest
 import okhttp3.Headers
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import rx.Observable
 import uy.kohesive.injekt.injectLazy
+import java.security.MessageDigest
 
 /**
  * A simple implementation for sources from a website.
@@ -57,7 +57,8 @@ abstract class HttpSource : Source {
     override val id by lazy {
         val key = "${name.toLowerCase()}/$lang/$versionId"
         val bytes = MessageDigest.getInstance("MD5").digest(key.toByteArray())
-        (0..7).map { bytes[it].toLong() and 0xff shl 8 * (7 - it) }.reduce(Long::or) and Long.MAX_VALUE
+        (0..7).map { bytes[it].toLong() and 0xff shl 8 * (7 - it) }
+            .reduce(Long::or) and Long.MAX_VALUE
     }
 
     /**
@@ -97,12 +98,12 @@ abstract class HttpSource : Source {
     open fun fetchImageUrl(page: Page): Observable<String> {
         if (page.imageUrl!!.contains("mangaplus", true)) {
             return MangaPlusHandler(client).client.newCall(GET(page.imageUrl!!, headers))
-                    .asObservableSuccess()
-                    .map { "" }
-        }
-        return client.newCall(GET(page.imageUrl!!, headers))
                 .asObservableSuccess()
                 .map { "" }
+        }
+        return client.newCall(GET(page.imageUrl!!, headers))
+            .asObservableSuccess()
+            .map { "" }
     }
 
     /**
@@ -113,10 +114,10 @@ abstract class HttpSource : Source {
     fun fetchImage(page: Page): Observable<Response> {
         if (page.imageUrl!!.contains("mangaplus", true)) {
             return MangaPlusHandler(client).client.newCall(GET(page.imageUrl!!, headers))
-                    .asObservableSuccess()
+                .asObservableSuccess()
         }
         return client.newCallWithProgress(GET(page.imageUrl!!, headers), page)
-                .asObservableSuccess()
+            .asObservableSuccess()
     }
 
     /**

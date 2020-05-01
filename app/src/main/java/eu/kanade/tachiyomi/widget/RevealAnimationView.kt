@@ -18,26 +18,25 @@ class RevealAnimationView @JvmOverloads constructor(context: Context, attrs: Att
      * @param initialRadius size of radius of animation
      */
     fun hideRevealEffect(centerX: Int, centerY: Int, initialRadius: Int) {
+        // Make the view visible.
+        this.visibility = View.VISIBLE
 
-            // Make the view visible.
-            this.visibility = View.VISIBLE
+        // Create the animation (the final radius is zero).
+        val anim = ViewAnimationUtils.createCircularReveal(
+                this, centerX, centerY, initialRadius.toFloat(), 0f)
 
-            // Create the animation (the final radius is zero).
-            val anim = ViewAnimationUtils.createCircularReveal(
-                    this, centerX, centerY, initialRadius.toFloat(), 0f)
+        // Set duration of animation.
+        anim.duration = 500
 
-            // Set duration of animation.
-            anim.duration = 500
+        // make the view invisible when the animation is done
+        anim.addListener(object : AnimatorListenerAdapter() {
+            override fun onAnimationEnd(animation: Animator) {
+                super.onAnimationEnd(animation)
+                this@RevealAnimationView.visibility = View.INVISIBLE
+            }
+        })
 
-            // make the view invisible when the animation is done
-            anim.addListener(object : AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: Animator) {
-                    super.onAnimationEnd(animation)
-                    this@RevealAnimationView.visibility = View.INVISIBLE
-                }
-            })
-
-            anim.start()
+        anim.start()
     }
 
     /**
@@ -50,20 +49,19 @@ class RevealAnimationView @JvmOverloads constructor(context: Context, attrs: Att
      * @return sdk version lower then 21
      */
     fun showRevealEffect(centerX: Int, centerY: Int, listener: Animator.AnimatorListener): Boolean {
+        this.visibility = View.VISIBLE
 
-            this.visibility = View.VISIBLE
+        val height = this.height
 
-            val height = this.height
+        // Create animation
+        val anim = ViewAnimationUtils.createCircularReveal(
+                this, centerX, centerY, 0f, height.toFloat())
 
-            // Create animation
-            val anim = ViewAnimationUtils.createCircularReveal(
-                    this, centerX, centerY, 0f, height.toFloat())
+        // Set duration of animation
+        anim.duration = 350
 
-            // Set duration of animation
-            anim.duration = 350
-
-            anim.addListener(listener)
-            anim.start()
-            return true
-        }
+        anim.addListener(listener)
+        anim.start()
+        return true
+    }
 }

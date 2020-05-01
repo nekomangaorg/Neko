@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/cv_manga"
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/history_card"
     style="@style/Theme.Widget.CardView.Item"
     android:padding="0dp">
 
@@ -14,7 +15,7 @@
             android:layout_width="100dp"
             android:layout_height="match_parent"
             android:clickable="true"
-            android:contentDescription="@string/description_cover"
+            android:contentDescription="@string/cover_of_image"
             android:scaleType="centerCrop" />
 
         <RelativeLayout
@@ -29,7 +30,7 @@
                 android:padding="16dp">
 
                 <TextView
-                    android:id="@+id/manga_title"
+                    android:id="@+id/title"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:maxLines="2"
@@ -39,7 +40,7 @@
                     android:id="@+id/manga_source"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/manga_title"
+                    android:layout_below="@id/title"
                     android:textAppearance="@style/TextAppearance.Medium.Body2" />
 
                 <TextView
@@ -56,7 +57,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
-                android:text="@string/action_remove" />
+                android:text="@string/remove" />
 
             <Button
                 style="@style/Theme.Widget.Button.Borderless"
@@ -65,8 +66,10 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:layout_toEndOf="@id/remove"
-                android:layout_toRightOf="@id/remove"
-                android:text="@string/action_resume"/>
+                android:text="@string/resume"/>
+
         </RelativeLayout>
+
     </LinearLayout>
-</androidx.cardview.widget.CardView>
+
+</com.google.android.material.card.MaterialCardView>

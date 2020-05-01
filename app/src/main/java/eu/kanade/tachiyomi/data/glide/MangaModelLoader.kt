@@ -14,11 +14,11 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
-import java.io.File
-import java.io.InputStream
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
+import java.io.File
+import java.io.InputStream
 
 /**
  * A class for loading a cover associated with a [Manga] that can be present in our own cache.
@@ -90,11 +90,8 @@ class MangaModelLoader : ModelLoader<Manga, InputStream> {
     ): ModelLoader.LoadData<InputStream>? {
         // Check thumbnail is not null or empty
         val url = manga.thumbnail_url
-        if (url == null || url.isEmpty()) {
-            return null
-        }
 
-        if (url.startsWith("http")) {
+        if (url?.startsWith("http") == true) {
             val source = sourceManager.get(manga.source) as? HttpSource
             val glideUrl = GlideUrl(url, getHeaders(manga, source))
 
@@ -113,8 +110,13 @@ class MangaModelLoader : ModelLoader<Manga, InputStream> {
             // Return an instance of the fetcher providing the needed elements.
             return ModelLoader.LoadData(MangaSignature(manga, file), libraryFetcher)
         } else {
-            // Get the file from the url, removing the scheme if present.
-            val file = File(url.substringAfter("file://"))
+            // Get the file from the url, removing the scheme if present, or from the cache if no url.
+            val file = when {
+                url != null -> File(url.substringAfter("file://"))
+                else -> null
+            }
+
+            if (file?.exists() != true) return null
 
             // Return an instance of the fetcher providing the needed elements.
             return ModelLoader.LoadData(MangaSignature(manga, file), FileFetcher(file))

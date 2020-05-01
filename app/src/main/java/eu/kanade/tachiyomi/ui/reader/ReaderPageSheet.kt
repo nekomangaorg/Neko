@@ -1,17 +1,21 @@
 package eu.kanade.tachiyomi.ui.reader
 
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.mikepenz.iconics.IconicsDrawable
-import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
-import com.mikepenz.iconics.utils.colorInt
-import com.mikepenz.iconics.utils.sizeDp
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
+import eu.kanade.tachiyomi.util.system.hasSideNavBar
+import eu.kanade.tachiyomi.util.view.setBottomEdge
+import eu.kanade.tachiyomi.util.view.setEdgeToEdge
 import kotlinx.android.synthetic.main.reader_page_sheet.*
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 
 /**
  * Sheet to show when a page is long clicked.
@@ -19,7 +23,7 @@ import kotlinx.android.synthetic.main.reader_page_sheet.*
 class ReaderPageSheet(
     private val activity: ReaderActivity,
     private val page: ReaderPage
-) : BottomSheetDialog(activity) {
+) : BottomSheetDialog(activity, R.style.BottomSheetDialogTheme) {
 
     /**
      * View used on this sheet.
@@ -28,6 +32,15 @@ class ReaderPageSheet(
 
     init {
         setContentView(view)
+        setEdgeToEdge(activity, view)
+        window?.navigationBarColor = Color.TRANSPARENT
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
+            Injekt.get<PreferencesHelper>().readerTheme().getOrDefault() == 0 &&
+            !activity.window.decorView.rootWindowInsets.hasSideNavBar())
+            window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+
+        setBottomEdge(save_layout, activity)
+
         share_layout.setOnClickListener { share() }
         save_layout.setOnClickListener { save() }
     }
@@ -38,14 +51,6 @@ class ReaderPageSheet(
         if (width > 0) {
             window?.setLayout(width, ViewGroup.LayoutParams.MATCH_PARENT)
         }
-    }
-
-    override fun setContentView(view: View) {
-        super.setContentView(view!!)
-        share_image.setImageDrawable(IconicsDrawable(context).icon(CommunityMaterial.Icon2.cmd_share_variant)
-                .colorInt(Color.GRAY).sizeDp(20))
-        save_image.setImageDrawable(IconicsDrawable(context).icon(CommunityMaterial.Icon.cmd_download)
-                .colorInt(Color.GRAY).sizeDp(20))
     }
 
     /**

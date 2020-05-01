@@ -16,17 +16,18 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.SeekBar
-import androidx.biometric.BiometricManager
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.graphics.ColorUtils
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
-import com.mikepenz.iconics.IconicsDrawable
-import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.snackbar.Snackbar
 import com.mikepenz.iconics.utils.IconicsMenuInflaterUtil
-import com.mikepenz.iconics.utils.colorInt
-import com.mikepenz.iconics.utils.sizeDp
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -35,8 +36,6 @@ import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.base.activity.BaseRxActivity
-import eu.kanade.tachiyomi.ui.main.BiometricActivity
-import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
@@ -45,18 +44,26 @@ import eu.kanade.tachiyomi.ui.reader.viewer.pager.L2RPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.R2LPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.VerticalPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
-import eu.kanade.tachiyomi.util.GLUtil
-import eu.kanade.tachiyomi.util.getUriCompat
-import eu.kanade.tachiyomi.util.gone
-import eu.kanade.tachiyomi.util.plusAssign
-import eu.kanade.tachiyomi.util.toast
-import eu.kanade.tachiyomi.util.visible
+import eu.kanade.tachiyomi.util.lang.plusAssign
+import eu.kanade.tachiyomi.util.storage.getUriCompat
+import eu.kanade.tachiyomi.util.system.GLUtil
+import eu.kanade.tachiyomi.util.system.ThemeUtil
+import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.system.hasSideNavBar
+import eu.kanade.tachiyomi.util.system.isBottomTappable
+import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.toast
+import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
+import eu.kanade.tachiyomi.util.view.gone
+import eu.kanade.tachiyomi.util.view.snack
+import eu.kanade.tachiyomi.util.view.updateLayoutParams
+import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.widget.SimpleAnimationListener
 import eu.kanade.tachiyomi.widget.SimpleSeekBarListener
-import java.io.File
-import java.util.Date
-import java.util.concurrent.TimeUnit
 import kotlinx.android.synthetic.main.reader_activity.*
+import kotlinx.android.synthetic.main.reader_chapters_sheet.*
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import me.zhanghai.android.systemuihelper.SystemUiHelper
 import nucleus.factory.RequiresPresenter
 import rx.Observable
@@ -65,13 +72,18 @@ import rx.android.schedulers.AndroidSchedulers
 import rx.subscriptions.CompositeSubscription
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
+import java.io.File
+import java.util.Locale
+import java.util.concurrent.TimeUnit
+import kotlin.math.abs
 
 /**
  * Activity containing the reader of Tachiyomi. This activity is mostly a container of the
  * viewers, to which calls from the presenter or UI events are delegated.
  */
 @RequiresPresenter(ReaderPresenter::class)
-class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
+class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
+    SystemUiHelper.OnVisibilityChangeListener {
 
     /**
      * Preferences helper.
@@ -96,6 +108,14 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         private set
 
     /**
+     * Whether the menu should stay visible.
+     */
+    var menuStickyVisible = false
+        private set
+
+    private var coroutine: Job? = null
+
+    /**
      * System UI helper to hide status & navigation bar on all different API levels.
      */
     private var systemUi: SystemUiHelper? = null
@@ -106,10 +126,21 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
     private var config: ReaderConfig? = null
 
     /**
+     * Current Bottom Sheet on display, used to dismiss
+     */
+    private var bottomSheet: BottomSheetDialog? = null
+
+    var sheetManageNavColor = false
+
+    var lightStatusBar = false
+
+    /**
      * Progress dialog used when switching chapters from the menu buttons.
      */
     @Suppress("DEPRECATION")
     private var progressDialog: ProgressDialog? = null
+
+    private var snackbar: Snackbar? = null
 
     companion object {
         @Suppress("unused")
@@ -117,17 +148,13 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         const val RIGHT_TO_LEFT = 2
         const val VERTICAL = 3
         const val WEBTOON = 4
-        const val WEBTOON_WITHOUT_MARGIN = 5
+        const val VERTICAL_PLUS = 5
 
-        fun newIntent(
-            context: Context,
-            manga: Manga,
-            chapter: Chapter
-        ): Intent {
+        fun newIntent(context: Context, manga: Manga, chapter: Chapter):
+            Intent {
             val intent = Intent(context, ReaderActivity::class.java)
             intent.putExtra("manga", manga.id)
             intent.putExtra("chapter", chapter.id)
-            intent.putExtra("chapterUrl", chapter.url)
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
             return intent
         }
@@ -136,37 +163,42 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
     /**
      * Called when the activity is created. Initializes the presenter and configuration.
      */
-    override fun onCreate(savedState: Bundle?) {
-        setTheme(
-            when (preferences.readerTheme().getOrDefault()) {
-                0 -> R.style.Theme_Reader_Light
-                else -> R.style.Theme_Reader
-            }
-        )
-        super.onCreate(savedState)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        AppCompatDelegate.setDefaultNightMode(ThemeUtil.nightMode(preferences.theme()))
+        setTheme(ThemeUtil.theme(preferences.theme()))
+        super.onCreate(savedInstanceState)
         setContentView(R.layout.reader_activity)
+        val a = obtainStyledAttributes(intArrayOf(android.R.attr.windowLightStatusBar))
+        lightStatusBar = a.getBoolean(0, false)
+        a.recycle()
+        setNotchCutoutMode()
+
+        var systemUiFlag = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            systemUiFlag = systemUiFlag.or(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR)
+        }
+        reader_layout.systemUiVisibility = when (lightStatusBar) {
+            true -> reader_layout.systemUiVisibility.or(systemUiFlag)
+            false -> reader_layout.systemUiVisibility.rem(systemUiFlag)
+        }
 
         if (presenter.needsInit()) {
             val manga = intent.extras!!.getLong("manga", -1)
             val chapter = intent.extras!!.getLong("chapter", -1)
-            val chapterUrl = intent.extras!!.getString("chapterUrl", "")
-            if (manga == -1L || chapterUrl == "" && chapter == -1L) {
+            if (manga == -1L || chapter == -1L) {
                 finish()
                 return
             }
-            NotificationReceiver.dismissNotification(
-                this,
-                manga.hashCode(),
-                Notifications.ID_NEW_CHAPTERS
-            )
-            if (chapter > -1) presenter.init(manga, chapter)
-            else presenter.init(manga, chapterUrl)
+            NotificationReceiver.dismissNotification(this, manga.hashCode(), Notifications.ID_NEW_CHAPTERS)
+
+            presenter.init(manga, chapter)
         }
 
-        if (savedState != null) {
-            menuVisible = savedState.getBoolean(::menuVisible.name)
+        if (savedInstanceState != null) {
+            menuVisible = savedInstanceState.getBoolean(::menuVisible.name)
         }
 
+        chapters_bottom_sheet.setup(this)
         config = ReaderConfig()
         initializeMenu()
     }
@@ -177,11 +209,16 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
     override fun onDestroy() {
         super.onDestroy()
         viewer?.destroy()
+        chapters_bottom_sheet.adapter = null
         viewer = null
         config?.destroy()
         config = null
+        bottomSheet?.dismiss()
+        bottomSheet = null
         progressDialog?.dismiss()
         progressDialog = null
+        snackbar?.dismiss()
+        snackbar = null
     }
 
     /**
@@ -203,7 +240,10 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
         if (hasFocus) {
-            setMenuVisibility(menuVisible, animate = false)
+            when (menuStickyVisible) {
+                true -> setMenuVisibility(false)
+                false -> setMenuVisibility(menuVisible, animate = false)
+            }
         }
     }
 
@@ -220,10 +260,15 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
      * entries.
      */
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.action_settings -> ReaderSettingsSheet(this).show()
-            R.id.action_custom_filter -> ReaderColorFilterSheet(this).show()
+        coroutine?.cancel()
+        bottomSheet = when (item.itemId) {
+            R.id.action_settings -> ReaderSettingsSheet(this)
+            R.id.action_custom_filter -> ReaderColorFilterSheet(this)
             else -> return super.onOptionsItemSelected(item)
+        }
+        bottomSheet?.show()
+        if (chapters_bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) {
+            chapters_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
         }
         return true
     }
@@ -233,6 +278,10 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
      * delegated to the presenter.
      */
     override fun onBackPressed() {
+        if (chapters_bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) {
+            chapters_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
+            return
+        }
         presenter.onBackPressed()
         super.onBackPressed()
     }
@@ -260,6 +309,12 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
     private fun initializeMenu() {
         // Set toolbar
         setSupportActionBar(toolbar)
+        val primaryColor = ColorUtils.setAlphaComponent(
+            getResourceColor(R.attr.colorSecondary),
+            200
+        )
+        appbar.setBackgroundColor(primaryColor)
+        window.statusBarColor = Color.TRANSPARENT
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         toolbar.setNavigationOnClickListener {
             onBackPressed()
@@ -273,39 +328,36 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
                 }
             }
         })
-        left_chapter.setImageDrawable(
-            IconicsDrawable(applicationContext)
-                .icon(CommunityMaterial.Icon2.cmd_skip_previous)
-                .colorInt(Color.WHITE)
-                .sizeDp(18)
-        )
-
-        left_chapter.setOnClickListener {
-            if (viewer != null) {
-                if (viewer is R2LPagerViewer)
-                    loadNextChapter()
-                else
-                    loadPreviousChapter()
-            }
-        }
-        right_chapter.setImageDrawable(
-            IconicsDrawable(applicationContext)
-                .icon(CommunityMaterial.Icon2.cmd_skip_next)
-                .colorInt(Color.WHITE)
-                .sizeDp(18)
-        )
-
-        right_chapter.setOnClickListener {
-            if (viewer != null) {
-                if (viewer is R2LPagerViewer)
-                    loadPreviousChapter()
-                else
-                    loadNextChapter()
-            }
-        }
 
         // Set initial visibility
         setMenuVisibility(menuVisible)
+        chapters_bottom_sheet.sheetBehavior?.isHideable = !menuVisible
+        if (!menuVisible)
+            chapters_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_HIDDEN
+        reader_menu.doOnApplyWindowInsets { v, insets, _ ->
+            sheetManageNavColor = when {
+                insets.isBottomTappable() -> {
+                    window.navigationBarColor = Color.TRANSPARENT
+                    false
+                }
+                insets.hasSideNavBar() -> {
+                    window.navigationBarColor = getResourceColor(R.attr.colorSecondary)
+                    false
+                }
+                // if in portrait with 2/3 button mode, translucent nav bar
+                else -> {
+                    true
+                }
+            }
+
+            toolbar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                topMargin = insets.systemWindowInsetTop
+            }
+            v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                leftMargin = insets.systemWindowInsetLeft
+                rightMargin = insets.systemWindowInsetRight
+            }
+        }
     }
 
     /**
@@ -314,26 +366,29 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
      */
     private fun setMenuVisibility(visible: Boolean, animate: Boolean = true) {
         menuVisible = visible
+        if (visible) coroutine?.cancel()
         if (visible) {
+            snackbar?.dismiss()
             systemUi?.show()
             reader_menu.visibility = View.VISIBLE
 
+            if (chapters_bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) {
+                chapters_bottom_sheet.sheetBehavior?.isHideable = false
+            }
+            if (chapters_bottom_sheet.sheetBehavior?.state != BottomSheetBehavior.STATE_EXPANDED && sheetManageNavColor) {
+                window.navigationBarColor = Color.TRANSPARENT // getResourceColor(R.attr.colorPrimaryDark)
+            }
             if (animate) {
-                val toolbarAnimation = AnimationUtils.loadAnimation(this, R.anim.enter_from_top)
-                toolbarAnimation.setAnimationListener(object : SimpleAnimationListener() {
-                    override fun onAnimationStart(animation: Animation) {
-                        // Fix status bar being translucent the first time it's opened.
-                        if (Build.VERSION.SDK_INT >= 21) {
-                            window.addFlags(
-                                WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
-                            )
+                if (!menuStickyVisible) {
+                    val toolbarAnimation = AnimationUtils.loadAnimation(this, R.anim.enter_from_top)
+                    toolbarAnimation.setAnimationListener(object : SimpleAnimationListener() {
+                        override fun onAnimationStart(animation: Animation) {
+                            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
                         }
-                    }
-                })
-                toolbar.startAnimation(toolbarAnimation)
-
-                val bottomAnimation = AnimationUtils.loadAnimation(this, R.anim.enter_from_bottom)
-                reader_menu_bottom.startAnimation(bottomAnimation)
+                    })
+                    appbar.startAnimation(toolbarAnimation)
+                }
+                BottomSheetBehavior.from(chapters_bottom_sheet).state = BottomSheetBehavior.STATE_COLLAPSED
             }
         } else {
             systemUi?.hide()
@@ -345,12 +400,14 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
                         reader_menu.visibility = View.GONE
                     }
                 })
-                toolbar.startAnimation(toolbarAnimation)
-
-                val bottomAnimation = AnimationUtils.loadAnimation(this, R.anim.exit_to_bottom)
-                reader_menu_bottom.startAnimation(bottomAnimation)
+                appbar.startAnimation(toolbarAnimation)
+                BottomSheetBehavior.from(chapters_bottom_sheet).isHideable = true
+                BottomSheetBehavior.from(chapters_bottom_sheet).state = BottomSheetBehavior.STATE_HIDDEN
+            } else {
+                reader_menu.visibility = View.GONE
             }
         }
+        menuStickyVisible = false
     }
 
     /**
@@ -359,12 +416,33 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
      */
     fun setManga(manga: Manga) {
         val prevViewer = viewer
-        val newViewer = when (presenter.getMangaViewer()) {
+        val noDefault = manga.viewer == -1
+        val mangaViewer = presenter.getMangaViewer()
+        val newViewer = when (mangaViewer) {
             RIGHT_TO_LEFT -> R2LPagerViewer(this)
             VERTICAL -> VerticalPagerViewer(this)
-            WEBTOON -> WebtoonViewer(this, true)
-            WEBTOON_WITHOUT_MARGIN -> WebtoonViewer(this)
+            WEBTOON -> WebtoonViewer(this)
+            VERTICAL_PLUS -> WebtoonViewer(this, isContinuous = false)
             else -> L2RPagerViewer(this)
+        }
+
+        if (noDefault && presenter.manga?.viewer!! > 0) {
+            snackbar = reader_layout.snack(
+                getString(
+                    R.string.reading_, getString(
+                        when (mangaViewer) {
+                            RIGHT_TO_LEFT -> R.string.right_to_left_viewer
+                            VERTICAL -> R.string.vertical_viewer
+                            WEBTOON -> R.string.webtoon_style
+                            else -> R.string.left_to_right_viewer
+                        }
+                    ).toLowerCase(Locale.getDefault())
+                ), 8000
+            ) {
+                if (mangaViewer != WEBTOON) setAction(R.string.use_default) {
+                    presenter.setMangaViewer(0)
+                }
+            }
         }
 
         // Destroy previous viewer if there was one
@@ -430,20 +508,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         viewer.moveToPage(page)
     }
 
-    /**
-     * Tells the presenter to load the next chapter and mark it as active. The progress dialog
-     * should be automatically shown.
-     */
-    private fun loadNextChapter() {
-        presenter.loadNextChapter()
-    }
-
-    /**
-     * Tells the presenter to load the previous chapter and mark it as active. The progress dialog
-     * should be automatically shown.
-     */
-    private fun loadPreviousChapter() {
-        presenter.loadPreviousChapter()
+    fun refreshChapters() {
+        chapters_bottom_sheet.refreshList()
     }
 
     /**
@@ -452,20 +518,25 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
      */
     @SuppressLint("SetTextI18n")
     fun onPageSelected(page: ReaderPage) {
-        presenter.onPageSelected(page)
+        val newChapter = presenter.onPageSelected(page)
         val pages = page.chapter.pages ?: return
 
         // Set bottom page number
         page_number.text = "${page.number}/${pages.size}"
-
         // Set seekbar page number
-        if (viewer !is R2LPagerViewer) {
-            left_page_text.text = "${page.number}"
-            right_page_text.text = "${pages.size}"
-        } else {
-            right_page_text.text = "${page.number}"
-            left_page_text.text = "${pages.size}"
+        page_text.text = "${page.number} / ${pages.size}"
+
+        if (newChapter) {
+            if (config?.showNewChapter == false) {
+                systemUi?.show()
+            }
+        } else if (chapters_bottom_sheet.shouldCollaspe && chapters_bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) {
+            chapters_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
         }
+        if (chapters_bottom_sheet.selectedChapterId != page.chapter.chapter.id) {
+            chapters_bottom_sheet.refreshList()
+        }
+        chapters_bottom_sheet.shouldCollaspe = true
 
         // Set seekbar progress
         page_seekbar.max = pages.lastIndex
@@ -478,6 +549,9 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
      */
     fun onPageLongTap(page: ReaderPage) {
         ReaderPageSheet(this, page).show()
+        if (chapters_bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) {
+            chapters_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
+        }
     }
 
     /**
@@ -513,25 +587,6 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         presenter.shareImage(page)
     }
 
-    override fun onResume() {
-        super.onResume()
-        val useBiometrics = preferences.useBiometrics().getOrDefault()
-        if (useBiometrics && BiometricManager.from(this)
-                .canAuthenticate() == BiometricManager.BIOMETRIC_SUCCESS
-        ) {
-            if (!MainActivity.unlocked && (preferences.lockAfter().getOrDefault() <= 0 || Date()
-                    .time >=
-                    preferences.lastUnlock().getOrDefault() + 60 * 1000 * preferences.lockAfter()
-                    .getOrDefault())
-            ) {
-                val intent = Intent(this, BiometricActivity::class.java)
-                startActivity(intent)
-                this.overridePendingTransition(0, 0)
-            }
-        } else if (useBiometrics)
-            preferences.useBiometrics().set(false)
-    }
-
     /**
      * Called from the presenter when a page is ready to be shared. It shows Android's default
      * sharing tool.
@@ -544,7 +599,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
             clipData = ClipData.newRawUri(null, stream)
             type = "image/*"
         }
-        startActivity(Intent.createChooser(intent, getString(R.string.action_share)))
+        startActivity(Intent.createChooser(intent, getString(R.string.share)))
     }
 
     /**
@@ -570,6 +625,51 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         }
     }
 
+    override fun onVisibilityChange(visible: Boolean) {
+        if (visible && !menuStickyVisible && !menuVisible) {
+            menuStickyVisible = visible
+            if (visible) {
+                coroutine = launchUI {
+                    delay(2000)
+                    if (systemUi?.isShowing == true) {
+                        menuStickyVisible = false
+                        setMenuVisibility(false)
+                    }
+                }
+                if (sheetManageNavColor) window.navigationBarColor = getResourceColor(R.attr.colorPrimary)
+                reader_menu.visibility = View.VISIBLE
+                val toolbarAnimation = AnimationUtils.loadAnimation(this, R.anim.enter_from_top)
+                toolbarAnimation.setAnimationListener(object : SimpleAnimationListener() {
+                    override fun onAnimationStart(animation: Animation) {
+                        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+                    }
+                })
+                appbar.startAnimation(toolbarAnimation)
+            }
+        } else {
+            if (menuStickyVisible && !menuVisible) {
+                setMenuVisibility(false, animate = false)
+            }
+            coroutine?.cancel()
+        }
+    }
+
+    /**
+     * Sets notch cutout mode to "NEVER", if mobile is in a landscape view
+     */
+    private fun setNotchCutoutMode() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+
+            val currentOrientation = resources.configuration.orientation
+
+            if (currentOrientation == Configuration.ORIENTATION_LANDSCAPE) {
+                val params = window.attributes
+                params.layoutInDisplayCutoutMode =
+                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER
+            }
+        }
+    }
+
     /**
      * Class that handles the user preferences of the reader.
      */
@@ -590,6 +690,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
          */
         private var customFilterColorSubscription: Subscription? = null
 
+        var showNewChapter = false
+
         /**
          * Initializes the reader subscriptions.
          */
@@ -601,10 +703,6 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
 
             subscriptions += Observable.merge(initialRotation, rotationUpdates)
                 .subscribe { setOrientation(it) }
-
-            subscriptions += preferences.readerTheme().asObservable()
-                .skip(1) // We only care about updates
-                .subscribe { recreate() }
 
             subscriptions += preferences.showPageNumber().asObservable()
                 .subscribe { setPageNumberVisibility(it) }
@@ -626,6 +724,9 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
 
             subscriptions += preferences.colorFilterMode().asObservable()
                 .subscribe { setColorFilter(preferences.colorFilter().getOrDefault()) }
+
+            subscriptions += preferences.alwaysShowChapterTransition().asObservable()
+                .subscribe { showNewChapter = it }
         }
 
         /**
@@ -687,10 +788,9 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         private fun setFullscreen(enabled: Boolean) {
             systemUi = if (enabled) {
                 val level = SystemUiHelper.LEVEL_IMMERSIVE
-                val flags = SystemUiHelper.FLAG_IMMERSIVE_STICKY or
-                    SystemUiHelper.FLAG_LAYOUT_IN_SCREEN_OLDER_DEVICES
+                val flags = SystemUiHelper.FLAG_LAYOUT_IN_SCREEN_OLDER_DEVICES
 
-                SystemUiHelper(this@ReaderActivity, level, flags)
+                SystemUiHelper(this@ReaderActivity, level, flags, this@ReaderActivity)
             } else {
                 null
             }
@@ -748,8 +848,12 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         private fun setCustomBrightnessValue(value: Int) {
             // Calculate and set reader brightness.
             val readerBrightness = when {
-                value > 0 -> value / 100f
-                value < 0 -> 0.01f
+                value > 0 -> {
+                    value / 100f
+                }
+                value < 0 -> {
+                    0.01f
+                }
                 else -> WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
             }
 
@@ -758,7 +862,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
             // Set black overlay visibility.
             if (value < 0) {
                 brightness_overlay.visibility = View.VISIBLE
-                val alpha = (Math.abs(value) * 2.56).toInt()
+                val alpha = (abs(value) * 2.56).toInt()
                 brightness_overlay.setBackgroundColor(Color.argb(alpha, 0, 0, 0))
             } else {
                 brightness_overlay.visibility = View.GONE

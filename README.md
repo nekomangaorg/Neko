@@ -5,10 +5,9 @@
   Neko
   <br>
 </h1>
-
 ---
 
-<p align="center">A Free, Open source unofficial manga reader for MangaDex and a fork of <a href="https://github.com/inorichi/tachiyomi">Tachiyomi</a></p>
+<p align="center">A Free, Open source unofficial manga reader for MangaDex</p>
 
 ---
 
@@ -24,39 +23,25 @@ Need info? Check the [Wiki](https://github.com/CarlosEsco/Neko/wiki)
 ---
 
 ## Screenshots:
-<img src="./.github/readme-images/screenshots.png" align="center" />
+<img src="./.github/readme-images/screenshots.png" align="center" height="350" />
 
-## Goal:
-Using Tachiyomi as a base to add MangaDex specific features.
+## About:
+This is a <a href="https://mangadex.org/">Mangadex</a> specific fork of <a href="https://github.com/inorichi/tachiyomi">Tachiyomi</a> and <a href="https://github.com/Jays2Kings/tachiyomiJ2K">TachiyomiJ2K</a>.  This contains features specific to Mangadex
+ that those versions cannot offer.  It also features almost every feature that J2K has except for other sources, and local sources.
 
-## Features:
-- Supports login to MangaDex
-- Local reading of downloaded manga
-- [MyAnimeList](https://myanimelist.net/), [AniList](https://anilist.co/), [Kitsu](https://kitsu.io/explore/anime) support.
-- Schedule updating your library for new chapters.
-- Create backups locally to read offline or to your desired cloud service. 
+## Mangadex specific features:
+- Supports native login to MangaDex and supports 2FA
+- MDList support
+- Similar Manga recommendations
+- Manually sync of Manga to and from Mangadex follows list
 
-## Differences Compared to Tachiyomi
-- Built in login with 2FA support
-- Different theme
-- Minor UI changes
-- Flags for source language in manga info page
-- Select chapters between option
-- All the mangadex statuses
-- Sort library by date added
-- View mdlist follows
-- Reorder and delete downloads in download queue
-- Ability skip chapters that are hidden or read
-- Manga covers update when a manga info update is triggered
-- Tri-state filter when filtering in library
-- Ability to lock with biometrics
-- Filter out your library by searching for tags (ex. "Comedy" or "Slice of Life")
-- Exclude mangas by a tag (ex. "-Shounen" or "-Romance").
-- Tapping on tags performs a local library search
-- Range select chapters with select between
 
 ## Download
 Get the app from our [releases page](https://github.com/CarlosEsco/Neko/releases).
+
+## Thanks
+- Inorichi for making the original Tachiyomi 
+- Jays2King for the wonderful new ui of J2K
 
 ## License
 

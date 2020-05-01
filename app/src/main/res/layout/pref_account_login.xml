@@ -15,14 +15,14 @@
         android:textStyle="bold" />
 
     <View
-        android:id="@+id/titleDivider"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_marginTop="6dp"
         android:layout_marginBottom="24dp"
-        android:background="@color/dividerLight" />
+        android:layout_marginTop="6dp"
+        android:background="@color/divider" />
 
     <TextView
+        android:id="@+id/username_label"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/username" />
@@ -45,43 +45,12 @@
         android:ems="10"
         android:inputType="textPassword" />
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <CheckBox
-            android:id="@+id/show_password"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:layout_weight="1.0"
-            android:text="@string/show_password" />
-
-        <CheckBox
-            android:id="@+id/two_factor_check"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:layout_weight="1.0"
-            android:text="@string/two_factor" />
-    </LinearLayout>
-
-    <TextView
-        android:id="@+id/two_factor_static"
-        android:layout_width="match_parent"
+    <CheckBox
+        android:id="@+id/show_password"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:visibility="gone"
-        android:text="@string/two_factor" />
-
-    <EditText
-        android:id="@+id/two_factor_edit"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:visibility="gone" />
-
+        android:text="@string/show_password" />
 
     <com.dd.processbutton.iml.ActionProcessButton
         android:id="@+id/login"
@@ -90,9 +59,20 @@
         android:layout_marginTop="20dp"
         android:text="@string/login"
         android:textColor="@android:color/white"
-        app:pb_textComplete="@string/login_success"
-        app:pb_textError="@string/invalid_login"
-        app:pb_textProgress="@string/processing" />
+        app:pb_colorNormal="@color/neko_green_darker"
+        app:pb_textComplete="@string/successfully_logged_in"
+        app:pb_textError="@string/could_not_log_in"
+        app:pb_textProgress="@string/loading" />
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/logout"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:background="@color/md_grey_800"
+        android:layout_width="match_parent"
+        android:visibility="gone"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="@string/logout"
+        android:textColor="?colorAccent" />
 
 </LinearLayout>

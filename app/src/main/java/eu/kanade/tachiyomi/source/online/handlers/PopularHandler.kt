@@ -7,7 +7,7 @@ import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.asJsoup
-import eu.kanade.tachiyomi.util.setUrlWithoutDomain
+import eu.kanade.tachiyomi.util.site.setUrlWithoutDomain
 import okhttp3.Headers
 import okhttp3.OkHttpClient
 import okhttp3.Request

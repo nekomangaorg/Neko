@@ -10,17 +10,17 @@ import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.download.model.DownloadQueue
+import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.online.HttpSource
-import eu.kanade.tachiyomi.util.DiskUtil
-import eu.kanade.tachiyomi.util.ImageUtil
-import eu.kanade.tachiyomi.util.RetryWithDelay
-import eu.kanade.tachiyomi.util.launchNow
-import eu.kanade.tachiyomi.util.launchUI
-import eu.kanade.tachiyomi.util.plusAssign
-import eu.kanade.tachiyomi.util.saveTo
-import java.io.File
+import eu.kanade.tachiyomi.util.lang.RetryWithDelay
+import eu.kanade.tachiyomi.util.lang.plusAssign
+import eu.kanade.tachiyomi.util.storage.DiskUtil
+import eu.kanade.tachiyomi.util.storage.saveTo
+import eu.kanade.tachiyomi.util.system.ImageUtil
+import eu.kanade.tachiyomi.util.system.launchNow
+import eu.kanade.tachiyomi.util.system.launchUI
 import kotlinx.coroutines.async
 import okhttp3.Response
 import rx.Observable
@@ -28,6 +28,7 @@ import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 import rx.subscriptions.CompositeSubscription
 import timber.log.Timber
+import java.io.File
 
 /**
  * This class is the one in charge of downloading chapters.
@@ -83,13 +84,13 @@ class Downloader(
     /**
      * Whether the downloader is running.
      */
-    @Volatile
-    private var isRunning: Boolean = false
+    @Volatile private var isRunning: Boolean = false
 
     init {
         launchNow {
             val chapters = async { store.restore() }
             queue.addAll(chapters.await())
+            DownloadService.callListeners()
         }
     }
 
@@ -119,17 +120,19 @@ class Downloader(
     fun stop(reason: String? = null) {
         destroySubscriptions()
         queue
-            .filter { it.status == Download.DOWNLOADING }
-            .forEach { it.status = Download.ERROR }
+                .filter { it.status == Download.DOWNLOADING }
+                .forEach { it.status = Download.ERROR }
 
         if (reason != null) {
             notifier.onWarning(reason)
         } else {
             if (notifier.paused) {
-                notifier.paused = false
-                notifier.onDownloadPaused()
-            } else if (notifier.isSingleChapter && !notifier.errorThrown) {
-                notifier.isSingleChapter = false
+                if (queue.isEmpty()) {
+                    notifier.dismiss()
+                } else {
+                    notifier.paused = false
+                    notifier.onDownloadPaused()
+                }
             } else {
                 notifier.dismiss()
             }
@@ -142,8 +145,8 @@ class Downloader(
     fun pause() {
         destroySubscriptions()
         queue
-            .filter { it.status == Download.DOWNLOADING }
-            .forEach { it.status = Download.QUEUE }
+                .filter { it.status == Download.DOWNLOADING }
+                .forEach { it.status = Download.QUEUE }
         notifier.paused = true
     }
 
@@ -163,8 +166,8 @@ class Downloader(
         // Needed to update the chapter view
         if (isNotification) {
             queue
-                .filter { it.status == Download.QUEUE }
-                .forEach { it.status = Download.NOT_DOWNLOADED }
+                    .filter { it.status == Download.QUEUE }
+                    .forEach { it.status = Download.NOT_DOWNLOADED }
         }
         queue.clear()
         notifier.dismiss()
@@ -184,7 +187,7 @@ class Downloader(
         }
         queue.remove(manga)
         if (queue.isEmpty()) {
-            DownloadService.stop(context)
+            if (DownloadService.isRunning(context)) DownloadService.stop(context)
             stop()
         }
         notifier.dismiss()
@@ -200,16 +203,15 @@ class Downloader(
         subscriptions.clear()
 
         subscriptions += downloadsRelay.concatMapIterable { it }
-            .concatMap { downloadChapter(it).subscribeOn(Schedulers.io()) }
-            .onBackpressureBuffer()
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({
-                completeDownload(it)
-            }, { error ->
-                DownloadService.stop(context)
-                Timber.e(error)
-                notifier.onError(error.message)
-            })
+                .concatMap { downloadChapter(it).subscribeOn(Schedulers.io()) }
+                .onBackpressureBuffer()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({ completeDownload(it)
+                }, { error ->
+                    DownloadService.stop(context)
+                    Timber.e(error)
+                    notifier.onError(error.message)
+                })
     }
 
     /**
@@ -230,47 +232,42 @@ class Downloader(
      * @param chapters the list of chapters to download.
      * @param autoStart whether to start the downloader after enqueing the chapters.
      */
-    fun queueChapters(manga: Manga, chapters: List<Chapter>, autoStart: Boolean) = launchUI {
-        val source = sourceManager.get(manga.source) as? HttpSource ?: return@launchUI
-
-        val wasQueueEmpty = queue.isEmpty()
-        // Called in background thread, the operation can be slow with SAF.
-        val chaptersWithoutDir = async {
-            val mangaDir = provider.findMangaDir(manga, source)
-
-            chapters
-                // Avoid downloading chapters with the same name.
-                .distinctBy { it.name }
-                // Filter out those already downloaded.
-                .filter { mangaDir?.findFile(provider.getChapterDirName(it)) == null }
-                // Add chapters to queue from the start.
-                .sortedByDescending { it.source_order }
-        }
-
-        // Runs in main thread (synchronization needed).
-        val chaptersToQueue = chaptersWithoutDir.await()
-            // Filter out those already enqueued.
-            .filter { chapter -> queue.none { it.chapter.id == chapter.id } }
-            // Create a download for each one.
-            .map { Download(source, manga, it) }
-
-        if (chaptersToQueue.isNotEmpty()) {
-            queue.addAll(chaptersToQueue)
-
-            // Initialize queue size.
-            notifier.initialQueueSize = queue.size
-
-            if (isRunning) {
-                // Send the list of downloads to the downloader.
-                downloadsRelay.call(chaptersToQueue)
+    fun queueChapters(manga: Manga, chapters: List<Chapter>, autoStart: Boolean) =
+        launchUI {
+            val source = sourceManager.get(manga.source) as? HttpSource ?: return@launchUI
+            val wasEmpty = queue.isEmpty()
+            // Called in background thread, the operation can be slow with SAF.
+            val chaptersWithoutDir = async {
+                chapters
+                    // Filter out those already downloaded.
+                    .filter { provider.findChapterDir(it, manga, source) == null }
+                    // Add chapters to queue from the start.
+                    .sortedByDescending { it.source_order }
             }
 
-            // Start downloader if needed
-            if (autoStart && wasQueueEmpty) {
-                DownloadService.start(this@Downloader.context)
+            // Runs in main thread (synchronization needed).
+            val chaptersToQueue = chaptersWithoutDir.await()
+                // Filter out those already enqueued.
+                .filter { chapter -> queue.none { it.chapter.id == chapter.id } }
+                // Create a download for each one.
+                .map { Download(source, manga, it) }
+
+            if (chaptersToQueue.isNotEmpty()) {
+                queue.addAll(chaptersToQueue)
+
+                if (isRunning) {
+                    // Send the list of downloads to the downloader.
+                    downloadsRelay.call(chaptersToQueue)
+                }
+
+                // Start downloader if needed
+                if (autoStart && wasEmpty) {
+                    DownloadService.start(this@Downloader.context)
+                } else if (!isRunning && !LibraryUpdateService.isRunning()) {
+                    notifier.onDownloadPaused()
+                }
             }
         }
-    }
 
     /**
      * Returns the observable which downloads a chapter.
@@ -285,44 +282,43 @@ class Downloader(
         val pageListObservable = if (download.pages == null) {
             // Pull page list from network and add them to download object
             download.source.fetchPageList(download.chapter)
-                .doOnNext { pages ->
-                    if (pages.isEmpty()) {
-                        throw Exception("Page list is empty")
+                    .doOnNext { pages ->
+                        if (pages.isEmpty()) {
+                            throw Exception("Page list is empty")
+                        }
+                        download.pages = pages
                     }
-                    download.pages = pages
-                }
         } else {
             // Or if the page list already exists, start from the file
             Observable.just(download.pages!!)
         }
 
         pageListObservable
-            .doOnNext { _ ->
-                // Delete all temporary (unfinished) files
-                tmpDir.listFiles()
-                    ?.filter { it.name!!.endsWith(".tmp") }
-                    ?.forEach { it.delete() }
+                .doOnNext { _ ->
+                    // Delete all temporary (unfinished) files
+                    tmpDir.listFiles()
+                            ?.filter { it.name!!.endsWith(".tmp") }
+                            ?.forEach { it.delete() }
 
-                download.downloadedImages = 0
-                download.status = Download.DOWNLOADING
-            }
-            // Get all the URLs to the source images, fetch pages if necessary
-            .flatMap { Observable.from(it) }
-            // Start downloading images, consider we can have downloaded images already
-            .concatMap { page -> getOrDownloadImage(page, download, tmpDir) }
-            // Do when page is downloaded.
-            .doOnNext { notifier.onProgressChange(download) }
-            .toList()
-            .map { _ -> download }
-            // Do after download completes
-            .doOnNext { ensureSuccessfulDownload(download, mangaDir, tmpDir, chapterDirname) }
-            // If the page list threw, it will resume here
-            .onErrorReturn { error ->
-                download.status = Download.ERROR
-                tmpDir.delete()
-                notifier.onError(error.message, download.chapter.name)
-                download
-            }
+                    download.downloadedImages = 0
+                    download.status = Download.DOWNLOADING
+                }
+                // Get all the URLs to the source images, fetch pages if necessary
+                .flatMap { Observable.from(it) }
+                // Start downloading images, consider we can have downloaded images already
+                .concatMap { page -> getOrDownloadImage(page, download, tmpDir) }
+                // Do when page is downloaded.
+                .doOnNext { notifier.onProgressChange(download) }
+                .toList()
+                .map { _ -> download }
+                // Do after download completes
+                .doOnNext { ensureSuccessfulDownload(download, mangaDir, tmpDir, chapterDirname) }
+                // If the page list threw, it will resume here
+                .onErrorReturn { error ->
+                    download.status = Download.ERROR
+                    notifier.onError(error.message, download.chapter.name)
+                    download
+                }
     }
 
     /**
@@ -333,11 +329,7 @@ class Downloader(
      * @param download the download of the page.
      * @param tmpDir the temporary directory of the download.
      */
-    private fun getOrDownloadImage(
-        page: Page,
-        download: Download,
-        tmpDir: UniFile
-    ): Observable<Page> {
+    private fun getOrDownloadImage(page: Page, download: Download, tmpDir: UniFile): Observable<Page> {
         // If the image URL is empty, do nothing
         if (page.imageUrl == null)
             return Observable.just(page)
@@ -360,20 +352,20 @@ class Downloader(
         }
 
         return pageObservable
-            // When the image is ready, set image path, progress (just in case) and status
-            .doOnNext { file ->
-                page.uri = file.uri
-                page.progress = 100
-                download.downloadedImages++
-                page.status = Page.READY
-            }
-            .map { page }
-            // Mark this page as error and allow to download the remaining
-            .onErrorReturn {
-                page.progress = 0
-                page.status = Page.ERROR
-                page
-            }
+                // When the image is ready, set image path, progress (just in case) and status
+                .doOnNext { file ->
+                    page.uri = file.uri
+                    page.progress = 100
+                    download.downloadedImages++
+                    page.status = Page.READY
+                }
+                .map { page }
+                // Mark this page as error and allow to download the remaining
+                .onErrorReturn {
+                    page.progress = 0
+                    page.status = Page.ERROR
+                    page
+                }
     }
 
     /**
@@ -409,30 +401,25 @@ class Downloader(
      * @param tmpDir the temporary directory of the download.
      * @param filename the filename of the image.
      */
-    private fun downloadImage(
-        page: Page,
-        source: HttpSource,
-        tmpDir: UniFile,
-        filename: String
-    ): Observable<UniFile> {
+    private fun downloadImage(page: Page, source: HttpSource, tmpDir: UniFile, filename: String): Observable<UniFile> {
         page.status = Page.DOWNLOAD_IMAGE
         page.progress = 0
         return source.fetchImage(page)
-            .map { response ->
-                val file = tmpDir.createFile("$filename.tmp")
-                try {
-                    response.body!!.source().saveTo(file.openOutputStream())
-                    val extension = getImageExtension(response, file)
-                    file.renameTo("$filename.$extension")
-                } catch (e: Exception) {
-                    response.close()
-                    file.delete()
-                    throw e
+                .map { response ->
+                    val file = tmpDir.createFile("$filename.tmp")
+                    try {
+                        response.body!!.source().saveTo(file.openOutputStream())
+                        val extension = getImageExtension(response, file)
+                        file.renameTo("$filename.$extension")
+                    } catch (e: Exception) {
+                        response.close()
+                        file.delete()
+                        throw e
+                    }
+                    file
                 }
-                file
-            }
-            // Retry 3 times, waiting 2, 4 and 8 seconds between attempts.
-            .retryWhen(RetryWithDelay(3, { (2 shl it - 1) * 1000 }, Schedulers.trampoline()))
+                // Retry 3 times, waiting 2, 4 and 8 seconds between attempts.
+                .retryWhen(RetryWithDelay(3, { (2 shl it - 1) * 1000 }, Schedulers.trampoline()))
     }
 
     /**
@@ -445,7 +432,7 @@ class Downloader(
     private fun getImageExtension(response: Response, file: UniFile): String {
         // Read content type if available.
         val mime = response.body?.contentType()?.let { ct -> "${ct.type}/${ct.subtype}" }
-        // Else guess from the uri.
+            // Else guess from the uri.
             ?: context.contentResolver.getType(file.uri)
             // Else read magic numbers.
             ?: ImageUtil.findImageType { file.openInputStream() }?.mime
@@ -481,10 +468,8 @@ class Downloader(
         if (download.status == Download.DOWNLOADED) {
             tmpDir.renameTo(dirname)
             cache.addChapter(dirname, mangaDir, download.manga)
+
             DiskUtil.createNoMediaFile(tmpDir, context)
-        } else {
-            // delete the temp directory
-            tmpDir.delete()
         }
     }
 
@@ -498,11 +483,12 @@ class Downloader(
             queue.remove(download)
         }
         if (areAllDownloadsFinished()) {
-            if (notifier.isSingleChapter && !notifier.errorThrown) {
-                notifier.onDownloadCompleted(download, queue)
-            }
             DownloadService.stop(context)
         }
+    }
+
+    fun setPlaceholder() {
+        notifier.setPlaceholder(queue.firstOrNull())
     }
 
     /**

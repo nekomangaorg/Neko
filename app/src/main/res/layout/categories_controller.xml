@@ -1,30 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             xmlns:tools="http://schemas.android.com/tools"
-             xmlns:app="http://schemas.android.com/apk/res-auto"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent">
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cat_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clipToPadding="false"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:choiceMode="multipleChoice"
-        android:paddingBottom="@dimen/fab_list_padding"
         android:clipToPadding="false"
         tools:listitem="@layout/categories_item" />
 
-    <!--Fab icon set programmatically-->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab"
-        app:layout_anchor="@id/recycler"
-        style="@style/Theme.Widget.FAB"/>
-
-    <eu.kanade.tachiyomi.widget.EmptyView
-        android:id="@+id/empty_view"
-        android:visibility="gone"
-        android:layout_width="wrap_content"
-        android:layout_gravity="center"
-        android:layout_height="wrap_content" />
-
-</FrameLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

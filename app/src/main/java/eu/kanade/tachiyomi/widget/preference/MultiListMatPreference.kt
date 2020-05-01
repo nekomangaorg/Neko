@@ -23,10 +23,15 @@ class MultiListMatPreference @JvmOverloads constructor(
     var customSummaryRes: Int
         get() = 0
         set(value) { customSummary = context.getString(value) }
-    var customSummary: String? = null
 
     override fun getSummary(): CharSequence {
-        return customSummary ?: super.getSummary()
+        if (customSummary != null) return customSummary!!
+        return prefs.getStringSet(key, emptySet<String>()).getOrDefault().mapNotNull {
+            if (entryValues.indexOf(it) == -1) null
+            else entryValues.indexOf(it) + if (allSelectionRes != null) 1 else 0
+        }.toIntArray().joinToString(",") {
+            entries[it]
+        }
     }
 
     @SuppressLint("CheckResult")

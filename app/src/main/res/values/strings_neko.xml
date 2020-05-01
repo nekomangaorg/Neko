@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="neko_app_name" translatable="false">Neko</string>
+
+    <string name="system_default_dark">System Default (White + Dark)</string>
+
+    <!-- Backup -->
+    <string name="restore_completed_successful">%1$s/%2$s Manga restored</string>
+    <string name="restore_completed_errors">%1$s errors were found</string>
+    <string name="restore_skipped">%1$s/%2$s manga were skipped because they were not Mangadex</string>
+    <plurals name="restore_categories">
+        <item quantity="one">%d category restored</item>
+        <item quantity="other">%d categories restored</item>
+    </plurals>
+
+
+    <!-- Status -->
+    <string name="hiatus">Hiatus</string>
+    <string name="cancelled">Cancelled</string>
+    <string name="publication_complete">Publication Complete</string>
+
+    <!--Browse -->
+    <string name="random_manga">Random Manga</string>
+
+    <!-- Manga Details-->
+    <string name="open_external">Open external links</string>
+    <string name="view_comments">View comments</string>
+    <string name="start_reading_">Start reading %1$s</string>
+    <string name="continue_reading_">Continue reading %1$s</string>
+    <string name="tap_to_show_similar_manga">Tap here to show similar manga</string>
+
+
+    <!-- Follows -->
+    <string name="follows">My follows</string>
+    <string name="add_to_follows">Add to Mangadex follows</string>
+    <string name="follows_status">Follows Sstatus</string>
+    <string name="follows_unfollowed">Unfollowed</string>
+    <string name="follows_reading">Reading</string>
+    <string name="follows_completed">Completed</string>
+    <string name="follows_on_hold">On Hold</string>
+    <string name="follows_plan_to_read">Plan To Read</string>
+    <string name="follows_dropped">Dropped</string>
+    <string name="follows_re_reading">Re Reading</string>
+
+    <!-- Similar -->
+    <string name="similar">Similar manga</string>
+    <string name="similar_settings">Similar manga Settings</string>
+    <string name="similar_screen">Show Similar manga</string>
+    <string name="similar_update_restriction">Similar manga update restrictions</string>
+    <string name="similar_update_restriction_summary">Update only when the conditions are met</string>
+    <string name="similar_loading_percent">Updating similar manga (%1$d / %2$d updated)</string>
+    <string name="similar_loading_complete">Updating similar manga complete</string>
+    <string name="similar_loading_complete_error">Error trying to load/process similar manga</string>
+    <string name="similar_loading_progress_start">Downloading similar manga data file…</string>
+    <string name="similar_screen_summary_message">
+        This is a feature where one can get manga recommendations.
+        This is a recommendation system outside of MangaDex, and works by matching by genres,
+        demographics, content type, themes, and then using term frequency–inverse document frequency (Tfidf) to get the
+        similarity of two manga\'s descriptions. When enabled this file will download immediately!!
+        Then auto download a refreshed file every 3 day. The file is about 20mb in size.
+    </string>
+    <string name="similar_credit_message">
+        For more information and to view the source code:\n%s
+    </string>
+
+    <!-- Reader Settings -->
+    <string name="skip_hidden_chapters">Skip chapters hidden by filters</string>
+
+
+    <!-- Site Settings -->
+    <string name="site_specific_settings">MangaDex settings</string>
+    <string name="image_server">Choose image server</string>
+    <string name="show_r18_title">Default R18+ setting</string>
+    <string name="show_r18_show">show only R18+</string>
+    <string name="show_r18_no">Show No R18+</string>
+    <string name="show_r18_all">Show all</string>
+    <string name="sync_follows_to_library">Sync Mangadex manga into Neko</string>
+    <string name="sync_follows_to_library_summary">Pulls reading/rereading manga from Mangadex into your Neko library</string>
+    <string name="low_quality_covers">Use low quality thumbnails</string>
+    <string name="use_non_logged_in_network">Do not mark website chapters read</string>
+
+    <!-- Advanced Settings -->
+    <string name="clear_image_cache">Clear image cover cache</string>
+
+    <!-- Login dialog -->
+    <string name="two_factor">2FA Code</string>
+
+
+</resources>

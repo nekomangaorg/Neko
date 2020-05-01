@@ -1,32 +1,35 @@
 ---
-name: Bug report
-about: Create a report to help us improve
-title: "[bug]"
+name: "\U0001F41E Bug report"
+about: Report a bug
+title: "[Bug] Write short description here"
 labels: bug
 assignees: ''
 
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+**PLEASE READ THIS**
 
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+I acknowledge that:
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
+- I have updated to the latest version of the app
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
+**DELETE THIS SECTION IF YOU HAVE READ AND ACKNOWLEDGED IT**
 
-**Please complete the following information:**
- - Device: [e.g. Pixel 3XL]
- - Android Version: [e.g. Android 8.0.1]
- - Version [e.g. 1.0.0]
+---
 
-**Additional context**
-Add any other context about the problem here.
+### Device information
+* Tachiyomi version: ?
+* Android phone & version: ?
+
+## Steps to reproduce
+1. First step
+2. Second step
+
+### Expected behavior
+This should happen.
+
+### Actual behavior
+This happened instead.
+
+### Other details
+Additional details and attachments.

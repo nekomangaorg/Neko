@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/filter_bottom_sheet"
+    style="@style/BottomSheetDialogTheme"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bottom_sheet_rounded_background"
+    android:orientation="vertical"
+    app:behavior_peekHeight="60dp"
+    app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:id="@+id/sheet_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <HorizontalScrollView
+                android:id="@+id/filter_scroll"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:clipToPadding="false"
+                android:fadingEdgeLength="20dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="6dp"
+                android:requiresFadingEdge="horizontal"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:id="@+id/filter_layout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="20dp">
+
+                    <ImageView
+                        android:id="@+id/clear_button"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginEnd="10dp"
+                        android:background="@drawable/round_clear_border"
+                        android:clickable="true"
+                        android:contentDescription="@string/clear"
+                        android:focusable="true"
+                        android:padding="3dp"
+                        android:src="@drawable/ic_close_white_24dp"
+                        android:tint="@color/gray_button" />
+
+                </LinearLayout>
+            </HorizontalScrollView>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:orientation="horizontal">
+
+                <com.google.android.material.checkbox.MaterialCheckBox
+                    android:id="@+id/hide_categories"
+                    android:buttonTint="@color/textColorPrimary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="20dp"
+                    android:text="@string/hide_categories" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/view_options"
+                    style="@style/Theme.Widget.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/display_options"
+                    android:textColor="?android:attr/textColorPrimary"
+                    app:icon="@drawable/ic_tune_white_24dp"
+                    app:iconTint="?android:attr/textColorPrimary" />
+
+                <com.google.android.material.checkbox.MaterialCheckBox
+                    android:id="@+id/hide_filters"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="20dp"
+                    android:text="@string/start_with_filters_hidden"
+                    android:visibility="gone" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/pill"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:alpha="0.7"
+            android:contentDescription="@string/drag_handle"
+            android:src="@drawable/draggable_pill"
+            android:tint="?android:attr/textColorPrimary"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet>

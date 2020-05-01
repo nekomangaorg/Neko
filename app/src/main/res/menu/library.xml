@@ -1,45 +1,22 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    app:tint="@android:color/black"
     tools:context=".MainActivity">
 
     <item
         android:id="@+id/action_search"
-        app:ico_icon="cmd_magnify"
-        app:ico_size="20dp"
-        app:ico_color="@color/md_white_1000"
-        android:title="@string/action_search"
+        android:icon="@drawable/ic_search_white_24dp"
+        android:title="@string/search"
+        android:visible="false"
         app:actionViewClass="androidx.appcompat.widget.SearchView"
         app:showAsAction="collapseActionView|ifRoom" />
 
     <item
-        android:id="@+id/action_filter"
-        app:ico_icon="cmd_filter_variant"
-        app:ico_size="20dp"
-        app:ico_color="@color/md_white_1000"
-        android:title="@string/action_filter"
-        app:showAsAction="ifRoom" />
+        android:id="@+id/action_settings"
+        android:icon="@drawable/ic_settings_white_24dp"
+        android:title="@string/settings"
+        app:showAsAction="ifRoom"
+        />
 
-    <item
-        android:id="@+id/action_update_library"
-        app:ico_icon="cmd_refresh"
-        app:ico_size="20dp"
-        app:ico_color="@color/md_white_1000"
-        android:title="@string/action_update_library"
-        app:showAsAction="ifRoom" />
-
-    <item
-        android:title="@string/action_display"
-        app:showAsAction="never">
-        <menu>
-            <group android:checkableBehavior="single">
-                <item
-                    android:id="@+id/action_display_grid"
-                    android:title="@string/action_display_grid" />
-                <item
-                    android:id="@+id/action_display_list"
-                    android:title="@string/action_display_list" />
-            </group>
-        </menu>
-    </item>
 </menu>

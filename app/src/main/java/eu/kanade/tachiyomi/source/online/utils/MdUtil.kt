@@ -13,20 +13,48 @@ class MdUtil {
         const val followsAllApi = "/api/?type=manga_follows"
         const val followsMangaApi = "/api/?type=manga_follows&manga_id="
 
-        val descriptionLanguages = arrayListOf("[b][u]French[/u][/b]",
+        val englishDescriptionTags = listOf(
+            "[b][u]English:[/u][/b]",
+            "[b][u]English[/u][/b]",
+            "[English]:",
+            "[B][ENG][/B]"
+        )
+
+        val descriptionLanguages = listOf(
+            "[b][u]French[/u][/b]",
             "[b][u]Russian / Русский[/u][/b]",
+            "[b] [u] Russian / Русский [/ u] [/ b]",
+            "[hr][u][b]Russian / Русский:[/b][/u]",
+            "[u][b]Russian / Русский:[/b][/u]",
+            "[hr][b][u]Russian / Русский:[/u][/b]",
+            "RUS:",
             "German/Deutsch:",
             "[b][u]German / Deutsch[/u][/b]",
             "[b][u]Espa&ntilde;ol / Spanish:[/u][/b]",
+            "[hr][u][b]Spanish / Espa&ntilde;ol:[/b][/u]",
+            "[b] [u] Spanish / Espa & ntilde; ol: [/ u] [/ b]",
+            "[Espa&ntilde;ol]:",
+            "[b] Spanish: [/ b]",
             "[b][u]Italian / Italiano[/u][/b]",
+            "[b]Polish / polski[/b]",
             "[b][u]Portuguese (BR) / Portugu&ecirc;s (BR)[/u][/b]",
+            "[b]Portuguese (BR) / Portugu&ecirc;s (BR)[/b]",
             "[b][u]Português / Portuguese[/u][/b]",
             "[b][u]Portuguese / Portugu[/u][/b]",
+            "[b][u]Portuguese / Portugu&ecirc;s:[/u][/b]",
+            "[b] Portuguese (BR) / Portugu & ecirc; s (BR): [/ b]",
+            "[hr][B][PTBR][/B]",
             "French - Français:",
             "[b][u]French[/u][/b]",
             "[b][u]French / Fran&ccedil;ais[/u][/b]",
             "[b][u]Turkish / T&uuml;rk&ccedil;e[/u][/b]",
-            "[b][u]Arabic / العربية[/u][/b]")
+            "[hr][u][b]Turkish/T&uuml;rk&ccedil;e[/b][/u]",
+            "[b][u]Arabic / العربية[/u][/b]",
+            "[hr][b]Links:[/b]",
+            "Links:",
+            "[b]External Links :[/b]"
+
+        )
 
         // guess the thumbnail url is .jpg  this has a ~80% success rate
         fun formThumbUrl(mangaUrl: String, lowQuality: Boolean): String {
@@ -76,8 +104,12 @@ class MdUtil {
 
         fun cleanDescription(string: String): String {
             var newDescription = string
-            descriptionLanguages.forEach {
-                it -> newDescription = newDescription.substringBefore(it)
+            descriptionLanguages.forEach { it ->
+                newDescription = newDescription.substringBefore(it)
+            }
+
+            englishDescriptionTags.forEach { it ->
+                newDescription = newDescription.replace(it, "")
             }
             return cleanString(newDescription)
         }

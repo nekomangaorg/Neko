@@ -8,15 +8,12 @@ import android.view.ViewGroup
 import androidx.annotation.CallSuper
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
-import com.mikepenz.iconics.IconicsDrawable
-import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
-import com.mikepenz.iconics.utils.colorInt
-import com.mikepenz.iconics.utils.sizeDp
+import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.util.getResourceColor
+import eu.kanade.tachiyomi.util.system.getResourceColor
 
 /**
- * An alternative implementation of [android.support.design.widget.NavigationView], without menu
+ * An alternative implementation of [com.google.android.material.navigation.NavigationView], without menu
  * inflation and allowing customizable items (multiple selections, custom views, etc).
  */
 open class ExtendedNavigationView @JvmOverloads constructor(
@@ -69,6 +66,30 @@ open class ExtendedNavigationView @JvmOverloads constructor(
              * Returns the drawable associated to every possible each state.
              */
             abstract fun getStateDrawable(context: Context): Drawable?
+
+            /**
+             * Creates a vector tinted with the accent color.
+             *
+             * @param context any context.
+             * @param resId the vector resource to load and tint
+             */
+            fun tintVector(context: Context, resId: Int): Drawable {
+                return VectorDrawableCompat.create(context.resources, resId, context.theme)!!.apply {
+                    setTint(context.getResourceColor(R.attr.colorAccent))
+                }
+            }
+
+            /**
+             * Creates a vector tinted with the accent color.
+             *
+             * @param context any context.
+             * @param resId the vector resource to load and tint
+             */
+            fun tintVector(context: Context, resId: Int, colorId: Int): Drawable {
+                return VectorDrawableCompat.create(context.resources, resId, context.theme)!!.apply {
+                    setTint(context.getResourceColor(colorId))
+                }
+            }
         }
 
         /**
@@ -91,11 +112,9 @@ open class ExtendedNavigationView @JvmOverloads constructor(
 
             override fun getStateDrawable(context: Context): Drawable? {
                 return when (state) {
-                    SORT_ASC -> IconicsDrawable(context).icon(CommunityMaterial.Icon.cmd_arrow_up)
-                            .sizeDp(16).colorInt(context.getResourceColor(R.attr.colorAccent))
-                    SORT_DESC -> IconicsDrawable(context).icon(CommunityMaterial.Icon.cmd_arrow_down)
-                            .sizeDp(16).colorInt(context.getResourceColor(R.attr.colorAccent))
-                    SORT_NONE -> ContextCompat.getDrawable(context, R.drawable.empty_drawable_16dp)
+                    SORT_ASC -> tintVector(context, R.drawable.ic_arrow_up_white_32dp)
+                    SORT_DESC -> tintVector(context, R.drawable.ic_arrow_down_white_32dp)
+                    SORT_NONE -> ContextCompat.getDrawable(context, R.drawable.empty_drawable_32dp)
                     else -> null
                 }
             }
@@ -107,16 +126,16 @@ open class ExtendedNavigationView @JvmOverloads constructor(
                 const val STATE_IGNORE = 0
                 const val STATE_INCLUDE = 1
                 const val STATE_EXCLUDE = 2
+                const val STATE_REALLY_EXCLUDE = 3
             }
 
             override fun getStateDrawable(context: Context): Drawable? {
                 return when (state) {
-                    STATE_INCLUDE -> IconicsDrawable(context).icon(CommunityMaterial.Icon.cmd_check_box_outline)
-                            .sizeDp(16).colorInt(context.getResourceColor(R.attr.colorAccent))
-                    STATE_EXCLUDE -> IconicsDrawable(context).icon(CommunityMaterial.Icon.cmd_close_box_outline)
-                            .sizeDp(16).colorInt(context.getResourceColor(android.R.attr.textColorSecondary))
-                    else -> IconicsDrawable(context).icon(CommunityMaterial.Icon.cmd_checkbox_blank_outline)
-                            .sizeDp(16).colorInt(context.getResourceColor(android.R.attr.textColorSecondary))
+                    STATE_INCLUDE -> tintVector(context, R.drawable.ic_check_box_24dp)
+                    STATE_EXCLUDE -> tintVector(context, R.drawable.ic_check_box_x_24dp,
+                        android.R.attr.textColorSecondary)
+                    else -> tintVector(context, R.drawable.ic_check_box_outline_blank_24dp,
+                        android.R.attr.textColorSecondary)
                 }
             }
         }
@@ -191,8 +210,7 @@ open class ExtendedNavigationView @JvmOverloads constructor(
 
         @CallSuper
         override fun getItemViewType(position: Int): Int {
-            val item = items[position]
-            return when (item) {
+            return when (items[position]) {
                 is Item.Header -> VIEW_TYPE_HEADER
                 is Item.Separator -> VIEW_TYPE_SEPARATOR
                 is Item.Radio -> VIEW_TYPE_RADIO

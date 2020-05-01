@@ -1,0 +1,122 @@
+<resources>
+
+    <!--   <style name="Neko.Headline1" parent="TextAppearance.MaterialComponents.Headline1">
+           <item name="fontFamily">@font/metropolis_medium</item>
+           <item name="android:textColor">?android:attr/textColorPrimary</item>
+           &lt;!&ndash;Your custom type style here&ndash;&gt;
+       </style>
+
+       <style name="Neko.Headline2" parent="TextAppearance.MaterialComponents.Headline2">
+           <item name="fontFamily">@font/metropolis_medium</item>
+           <item name="android:textColor">?android:attr/textColorPrimary</item>
+           &lt;!&ndash;Your custom type style here&ndash;&gt;
+       </style>
+
+       <style name="Neko.Headline3" parent="TextAppearance.MaterialComponents.Headline3">
+           <item name="fontFamily">@font/metropolis_medium</item>
+           <item name="android:textColor">?android:attr/textColorPrimary</item>
+           &lt;!&ndash;Your custom type style here&ndash;&gt;
+       </style>
+       -->
+
+    <style name="Neko.Headline4" parent="TextAppearance.MaterialComponents.Headline4">
+        <item name="fontFamily">@font/metropolis_medium</item>
+        <item name="android:fontFamily">@font/metropolis_medium</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textSize">24sp</item>
+        <item name="android:letterSpacing">-.023</item>
+    </style>
+
+    <style name="Neko.Headline5" parent="TextAppearance.MaterialComponents.Headline5">
+        <item name="fontFamily">@font/metropolis_medium</item>
+        <item name="android:fontFamily">@font/metropolis_medium</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textSize">20sp</item>
+        <!--Your custom type style here-->
+    </style>
+
+    <style name="Neko.Headline6" parent="TextAppearance.MaterialComponents.Headline6">
+        <item name="fontFamily">@font/metropolis_regular</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:letterSpacing">-.023</item>
+    </style>
+
+    <style name="Neko.Subtitle1" parent="TextAppearance.MaterialComponents.Subtitle1">
+        <item name="fontFamily">@font/metropolis_medium</item>
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="Neko.Subtitle2" parent="TextAppearance.MaterialComponents.Subtitle2">
+        <item name="fontFamily">@font/metropolis_regular</item>
+        <item name="android:textColor">@color/text_color_hint</item>
+    </style>
+
+    <style name="Neko.Subtitle2.Medium" parent="TextAppearance.MaterialComponents.Subtitle2">
+        <item name="fontFamily">@font/metropolis_medium</item>
+        <item name="android:textColor">@color/material_on_background_emphasis_medium</item>
+        <!--Your custom type style here-->
+    </style>
+
+    <style name="Neko.Body1.Medium" parent="TextAppearance.MaterialComponents.Body1">
+        <item name="fontFamily">@font/metropolis_medium</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <!--Your custom type style here-->
+    </style>
+
+    <style name="Neko.Body1" parent="TextAppearance.MaterialComponents.Body1">
+        <item name="fontFamily">@font/metropolis_medium</item>
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
+        <!--Your custom type style here-->
+    </style>
+
+    <style name="Neko.Body2" parent="TextAppearance.MaterialComponents.Body2">
+        <item name="fontFamily">@font/metropolis_regular</item>
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
+        <!--Your custom type style here-->
+    </style>
+
+    <style name="Neko.Condensed" parent="TextAppearance.MaterialComponents.Headline6">
+        <item name="fontFamily">@font/metropolis_regular</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:letterSpacing">-.023</item>
+        <!--Your custom type style here-->
+    </style>
+
+    <style name="Neko.Condensed.Medium" parent="TextAppearance.MaterialComponents.Headline6">
+        <item name="fontFamily">@font/metropolis_medium</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:letterSpacing">-.023</item>
+        <!--Your custom type style here-->
+    </style>
+
+    <style name="Neko.Button" parent="Theme.Widget.Button"></style>
+
+    <style name="Neko.Button.TextButton" parent="Theme.Widget.Button.TextButton">
+        <item name="fontFamily">@font/metropolis_medium</item>
+    </style>
+
+    <style name="Neko.Button.RoundedOutline" parent="Theme.Widget.Button.RoundedOutline">
+        <item name="strokeColor">?attr/colorAccent</item>
+        <item name="android:letterSpacing">-0.02</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="fontFamily">@font/metropolis_medium</item>
+    </style>
+
+
+    <style name="Neko.Caption" parent="TextAppearance.MaterialComponents.Caption">
+        <item name="fontFamily">@font/metropolis_medium</item>
+        <item name="android:textColor">@color/text_color_hint</item>
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <style name="Neko.Overline" parent="TextAppearance.MaterialComponents.Overline">
+        <item name="fontFamily">@font/metropolis_medium</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <!--Your custom type style here-->
+    </style>
+
+</resources>

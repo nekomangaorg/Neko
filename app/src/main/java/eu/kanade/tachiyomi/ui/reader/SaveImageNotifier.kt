@@ -3,13 +3,14 @@ package eu.kanade.tachiyomi.ui.reader
 import android.content.Context
 import android.graphics.Bitmap
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.data.notification.NotificationHandler
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
-import eu.kanade.tachiyomi.util.notificationManager
+import eu.kanade.tachiyomi.util.system.notificationManager
 import java.io.File
 
 /**
@@ -53,23 +54,25 @@ class SaveImageNotifier(private val context: Context) {
     private fun showCompleteNotification(file: File, image: Bitmap) {
         with(notificationBuilder) {
             setContentTitle(context.getString(R.string.picture_saved))
-            setSmallIcon(R.drawable.ic_insert_photo_white)
+            setSmallIcon(R.drawable.ic_insert_photo_white_24dp)
             setStyle(NotificationCompat.BigPictureStyle().bigPicture(image))
             setLargeIcon(image)
             setAutoCancel(true)
+            color = ContextCompat.getColor(context, R.color.colorAccent)
             // Clear old actions if they exist
-            if (!mActions.isEmpty())
+            if (mActions.isNotEmpty())
                 mActions.clear()
 
             setContentIntent(NotificationHandler.openImagePendingActivity(context, file))
             // Share action
-            addAction(R.drawable.ic_share_grey,
-                    context.getString(R.string.action_share),
+            addAction(R.drawable.ic_share_grey_24dp,
+                    context.getString(R.string.share),
                     NotificationReceiver.shareImagePendingBroadcast(context, file.absolutePath, notificationId))
             // Delete action
-            addAction(R.drawable.ic_delete_grey,
-                    context.getString(R.string.action_delete),
+            addAction(R.drawable.ic_delete_grey_24dp,
+                    context.getString(R.string.delete),
                     NotificationReceiver.deleteImagePendingBroadcast(context, file.absolutePath, notificationId))
+
             updateNotification()
         }
     }
@@ -93,7 +96,7 @@ class SaveImageNotifier(private val context: Context) {
     fun onError(error: String?) {
         // Create notification
         with(notificationBuilder) {
-            setContentTitle(context.getString(R.string.download_notifier_title_error))
+            setContentTitle(context.getString(R.string.download_error))
             setContentText(error ?: context.getString(R.string.unknown_error))
             setSmallIcon(android.R.drawable.ic_menu_report_image)
         }

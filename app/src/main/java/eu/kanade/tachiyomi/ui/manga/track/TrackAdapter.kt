@@ -3,9 +3,10 @@ package eu.kanade.tachiyomi.ui.manga.track
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.util.inflate
+import eu.kanade.tachiyomi.data.track.TrackService
+import eu.kanade.tachiyomi.util.view.inflate
 
-class TrackAdapter(controller: TrackController) : RecyclerView.Adapter<TrackHolder>() {
+class TrackAdapter(controller: OnClickListener) : RecyclerView.Adapter<TrackHolder>() {
 
     var items = emptyList<TrackItem>()
         set(value) {
@@ -32,6 +33,10 @@ class TrackAdapter(controller: TrackController) : RecyclerView.Adapter<TrackHold
 
     override fun onBindViewHolder(holder: TrackHolder, position: Int) {
         holder.bind(items[position])
+    }
+
+    fun indexOf(item: TrackService?): Int {
+        return items.indexOfFirst { item?.id == it.service.id }
     }
 
     interface OnClickListener {

@@ -91,6 +91,22 @@ class DownloadPendingDeleter(context: Context) {
     }
 
     /**
+     * Returns the list of chapters to be deleted grouped by its manga.
+     *
+     * Note: the returned list of manga and chapters only contain basic information needed by the
+     * downloader, so don't use them for anything else.
+     */
+    @Synchronized
+    fun getPendingChapters(manga: Manga): List<Chapter>? {
+        val entries = decodeAll()
+        prefs.edit().clear().apply()
+        lastAddedEntry = null
+
+        val entry = entries.find { it.manga.id == manga.id }
+        return entry?.chapters?.map { it.toModel() }
+    }
+
+    /**
      * Decodes all the chapters from preferences.
      */
     private fun decodeAll(): List<Entry> {
@@ -130,7 +146,8 @@ class DownloadPendingDeleter(context: Context) {
     private data class ChapterEntry(
         val id: Long,
         val url: String,
-        val name: String
+        val name: String,
+        val scanlator: String?
     )
 
     /**
@@ -154,7 +171,7 @@ class DownloadPendingDeleter(context: Context) {
      * Returns a chapter entry from a chapter model.
      */
     private fun Chapter.toEntry(): ChapterEntry {
-        return ChapterEntry(id!!, url, name)
+        return ChapterEntry(id!!, url, name, scanlator)
     }
 
     /**
@@ -172,6 +189,7 @@ class DownloadPendingDeleter(context: Context) {
     private fun ChapterEntry.toModel(): Chapter {
         return Chapter.create().also {
             it.id = id
+            it.scanlator = scanlator
             it.url = url
             it.name = name
         }

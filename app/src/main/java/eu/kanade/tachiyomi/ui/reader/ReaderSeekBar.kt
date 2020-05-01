@@ -2,6 +2,8 @@ package eu.kanade.tachiyomi.ui.reader
 
 import android.content.Context
 import android.graphics.Canvas
+import android.graphics.Rect
+import android.os.Build
 import android.util.AttributeSet
 import android.view.MotionEvent
 import androidx.appcompat.widget.AppCompatSeekBar
@@ -18,6 +20,8 @@ class ReaderSeekBar @JvmOverloads constructor(
      * Whether the seekbar should draw from right to left.
      */
     var isRTL = false
+    private val boundingBox: Rect = Rect()
+    private val exclusions = listOf(boundingBox)
 
     /**
      * Draws the seekbar, translating the canvas if using a right to left reader.
@@ -40,5 +44,13 @@ class ReaderSeekBar @JvmOverloads constructor(
             event.setLocation(width - event.x, event.y)
         }
         return super.onTouchEvent(event)
+    }
+
+    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
+        super.onLayout(changed, left, top, right, bottom)
+        if (Build.VERSION.SDK_INT >= 29 && changed) {
+            boundingBox.set(left, top, right, bottom)
+            systemGestureExclusionRects = exclusions
+        }
     }
 }

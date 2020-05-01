@@ -1,58 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.drawerlayout.widget.DrawerLayout
-    android:id="@+id/drawer"
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_content"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true">
+    android:orientation="vertical">
 
-    <LinearLayout
-        android:orientation="vertical"
-        android:id="@+id/main_content"
+    <com.bluelinelabs.conductor.ChangeHandlerFrameLayout
+        android:id="@+id/controller_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <eu.kanade.tachiyomi.widget.ElevationAppBarLayout
-            android:id="@+id/appbar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <androidx.appcompat.widget.Toolbar
-                android:id="@+id/toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:background="?attr/colorPrimary"
-                android:theme="?attr/actionBarTheme"/>
-
-            <com.google.android.material.tabs.TabLayout
-                android:id="@+id/tabs"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:theme="@style/Theme.ActionBar.Tab"
-                app:tabIndicatorColor="@android:color/white"
-                app:tabInlineLabel="true"
-                app:tabGravity="center"
-                app:tabMode="scrollable"
-                app:tabMinWidth="75dp"/>
-
-        </eu.kanade.tachiyomi.widget.ElevationAppBarLayout>
-
-        <com.bluelinelabs.conductor.ChangeHandlerFrameLayout
-            android:id="@+id/controller_container"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
-    </LinearLayout>
-
-    <com.google.android.material.navigation.NavigationView
-        android:id="@+id/nav_view"
-        android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_gravity="start"
-        android:fitsSystemWindows="true"
-        android:theme="?attr/navigation_view_theme"
-        app:headerLayout="@layout/navigation_header"
-        app:menu="@menu/menu_navigation"/>
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0">
 
-</androidx.drawerlayout.widget.DrawerLayout>
+    </com.bluelinelabs.conductor.ChangeHandlerFrameLayout>
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorSecondary"
+        android:stateListAnimator="@null"
+        android:theme="?attr/actionBarTheme"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <eu.kanade.tachiyomi.ui.base.CenteredToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorSecondary">
+
+            <LinearLayout
+                android:id="@+id/title_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:orientation="horizontal">
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/toolbar_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:gravity="start"
+                    android:maxLines="1"
+                    android:textColor="?actionBarTintColor"
+                    android:fontFamily="@font/metropolis_medium"
+                    android:textSize="20sp"
+                    tools:text="Title Text" />
+            </LinearLayout>
+        </eu.kanade.tachiyomi.ui.base.CenteredToolbar>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottom_nav"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?colorPrimaryVariant"
+        app:itemIconTint="@drawable/bottom_nav_item_selector"
+        app:itemRippleColor="@color/rippleColor"
+        app:itemTextColor="@drawable/bottom_nav_item_selector"
+        app:labelVisibilityMode="labeled"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:menu="@menu/bottom_navigation"
+        app:tabRippleColor="@color/rippleColor"
+        app:tabTextColor="?attr/tabBarIconColor" />
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,14 +1,20 @@
 package eu.kanade.tachiyomi.ui.library
 
-import android.util.TypedValue
 import android.view.View
-import androidx.core.content.res.ResourcesCompat
-import cn.nekocode.badge.BadgeDrawable
+import android.view.ViewGroup
+import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
-import eu.davidea.flexibleadapter.FlexibleAdapter
+import com.bumptech.glide.signature.ObjectKey
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.glide.GlideApp
-import kotlinx.android.synthetic.main.catalogue_list_item.*
+import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.view.gone
+import eu.kanade.tachiyomi.util.view.updateLayoutParams
+import eu.kanade.tachiyomi.util.view.visible
+import kotlinx.android.synthetic.main.manga_list_item.*
+import kotlinx.android.synthetic.main.manga_list_item.view.*
+import kotlinx.android.synthetic.main.unread_download_badge.*
 
 /**
  * Class used to hold the displayed data of a manga in the library, like the cover or the title.
@@ -22,8 +28,16 @@ import kotlinx.android.synthetic.main.catalogue_list_item.*
 
 class LibraryListHolder(
     private val view: View,
-    private val adapter: FlexibleAdapter<*>
+    adapter: LibraryCategoryAdapter,
+    padEnd: Boolean
 ) : LibraryHolder(view, adapter) {
+
+    init {
+        play_layout.setOnClickListener { playButtonClicked() }
+        badge_view?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            marginEnd = (if (padEnd) 22 else 12).dpToPx
+        }
+    }
 
     /**
      * Method called from [LibraryCategoryAdapter.onBindViewHolder]. It updates the data for this
@@ -32,43 +46,65 @@ class LibraryListHolder(
      * @param item the manga item to bind.
      */
     override fun onSetValues(item: LibraryItem) {
+
+        title.visible()
+        constraint_layout.minHeight = 56.dpToPx
+        if (item.manga.isBlank()) {
+            constraint_layout.minHeight = 0
+            if (item.manga.status == -1) {
+                title.text = null
+                title.gone()
+            } else
+                title.text = itemView.context.getString(R.string.category_is_empty)
+            title.textAlignment = View.TEXT_ALIGNMENT_CENTER
+            card.gone()
+            badge_view.gone()
+            play_layout.gone()
+            padding.gone()
+            subtitle.gone()
+            return
+        }
+        padding.visible()
+        card.visible()
+        title.textAlignment = View.TEXT_ALIGNMENT_TEXT_START
+
         // Update the title of the manga.
         title.text = item.manga.title
+        setUnreadBadge(badge_view, item)
 
-        // Update the unread count and its visibility.
-        val unreadCount = (if (item.manga.unread > 0) item.manga.unread else "").toString()
-        val downloadCount = (if (item.downloadCount > 0) item.downloadCount else "").toString()
+        subtitle.text = item.manga.author?.trim()
+        subtitle.visibility = if (!item.manga.author.isNullOrBlank()) View.VISIBLE
+        else View.GONE
 
-        // Update the unread count and its visibility.
-        with(unread_text) {
-            visibility = if (item.manga.unread > 0 || item.downloadCount > 0) View.VISIBLE else View.GONE
-
-            val badge = BadgeDrawable.Builder()
-                    .type(BadgeDrawable.TYPE_WITH_TWO_TEXT_COMPLEMENTARY)
-                    .badgeColor(ResourcesCompat.getColor(resources, R.color.colorPrimary, null))
-                    .text1(unreadCount)
-                    .text2(downloadCount)
-                    .padding(10f, 10f, 10f, 10f, 10f)
-                    .textSize(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16f, resources.displayMetrics))
-                    .textColor(ResourcesCompat.getColor(resources, R.color.md_white_1000, null))
-                    .build()
-            text = badge.toSpannable()
-        }
-
-        // Create thumbnail onclick to simulate long click
-        thumbnail.setOnClickListener {
-            // Simulate long click on this view to enter selection mode
-            onLongClick(itemView)
-        }
+        setReadingButton(item)
 
         // Update the cover.
-        GlideApp.with(itemView.context).clear(thumbnail)
-        GlideApp.with(itemView.context)
-                .load(item.manga)
+        if (item.manga.thumbnail_url == null) Glide.with(view.context).clear(cover_thumbnail)
+        else {
+            val id = item.manga.id ?: return
+            val height = itemView.context.resources.getDimensionPixelSize(R.dimen
+                .material_component_lists_single_line_with_avatar_height)
+            GlideApp.with(view.context).load(item.manga)
                 .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
-                .centerCrop()
-                .circleCrop()
-                .dontAnimate()
-                .into(thumbnail)
+                .signature(ObjectKey(MangaImpl.getLastCoverFetch(id).toString()))
+                .override(height)
+                .into(cover_thumbnail)
+        }
+    }
+
+    private fun playButtonClicked() {
+        adapter.libraryListener.startReading(adapterPosition)
+    }
+
+    override fun onActionStateChanged(position: Int, actionState: Int) {
+        super.onActionStateChanged(position, actionState)
+        if (actionState == 2) {
+            view.card.isDragged = true
+        }
+    }
+
+    override fun onItemReleased(position: Int) {
+        super.onItemReleased(position)
+        view.card.isDragged = false
     }
 }

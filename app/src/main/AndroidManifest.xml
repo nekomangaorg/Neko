@@ -6,56 +6,54 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
     <uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
         android:name=".App"
         android:allowBackup="true"
         android:fullBackupContent="@xml/backup_rules"
-        android:requestLegacyExternalStorage="true"
+        android:hasFragileUserData="true"
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
+        android:requestLegacyExternalStorage="true"
         android:roundIcon="@mipmap/ic_launcher_round"
-        android:label="@string/app_name"
+        android:label="@string/neko_app_name"
         android:largeHeap="true"
-        android:theme="@style/Theme.Neko">
-
+        android:theme="@style/Theme.Tachiyomi"
+        android:networkSecurityConfig="@xml/network_security_config">
         <activity
             android:name=".ui.main.MainActivity"
-            android:launchMode="singleTop"
+            android:windowSoftInputMode="adjustPan"
             android:theme="@style/Theme.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-            <!--suppress AndroidDomInspection -->
-        </activity>
-        <activity
-            android:name=".ui.main.DeepLinkActivity"
-            android:launchMode="singleTask"
-            android:theme="@android:style/Theme.NoDisplay">
-            <intent-filter>
-                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <meta-data
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable" />
         </activity>
-        <activity android:name=".ui.reader.ReaderActivity" />
-        <activity android:name=".ui.main.BiometricActivity" />
+        <activity
+            android:name=".ui.reader.ReaderActivity"
+            android:theme="@style/Theme.Tachiyomi" />
         <activity
             android:name=".ui.webview.WebViewActivity"
             android:configChanges="uiMode|orientation|screenSize" />
+        <activity android:name=".ui.security.BiometricActivity" />
         <activity
             android:name=".widget.CustomLayoutPickerActivity"
-            android:label="@string/app_name"
+            android:label="@string/neko_app_name"
             android:theme="@style/FilePickerTheme" />
         <activity
-            android:name=".ui.setting.AnilistLoginActivity"
+            android:name=".ui.setting.track.AnilistLoginActivity"
             android:label="Anilist">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -68,6 +66,50 @@
                     android:scheme="neko" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".ui.main.DeepLinkActivity"
+            android:launchMode="singleTask"
+            android:theme="@android:style/Theme.NoDisplay">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:scheme="https"
+                    android:host="www.mangadex.org"
+                    android:pathPattern="/manga/..*" />
+                <data
+                    android:scheme="https"
+                    android:host="mangadex.org"
+                    android:pathPattern="/manga/..*" />
+                <data
+                    android:scheme="https"
+                    android:host="www.mangadex.cc"
+                    android:pathPattern="/manga/..*" />
+                <data
+                    android:scheme="https"
+                    android:host="www.mangadex.cc"
+                    android:pathPattern="/manga/..*" />
+            </intent-filter>
+
+
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable" />
+        </activity>
+
+        <activity
+            android:name=".ui.main.SearchActivity"
+            android:theme="@style/Theme.Tachiyomi" />
+
+        <activity
+            android:name="com.google.android.gms.oss.licenses.OssLicensesMenuActivity"
+            android:theme="@style/Theme.OSS" />
+        <activity
+            android:name="com.google.android.gms.oss.licenses.OssLicensesActivity"
+            android:theme="@style/Theme.OSS" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

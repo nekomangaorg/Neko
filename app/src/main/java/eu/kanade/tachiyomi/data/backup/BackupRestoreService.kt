@@ -33,19 +33,20 @@ import eu.kanade.tachiyomi.data.database.models.TrackImpl
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.track.TrackManager
-import eu.kanade.tachiyomi.util.chop
-import eu.kanade.tachiyomi.util.getUriCompat
-import eu.kanade.tachiyomi.util.isServiceRunning
-import eu.kanade.tachiyomi.util.notificationManager
-import java.io.File
-import java.text.SimpleDateFormat
-import java.util.Locale
+import eu.kanade.tachiyomi.util.lang.chop
+import eu.kanade.tachiyomi.util.storage.getUriCompat
+import eu.kanade.tachiyomi.util.system.isServiceRunning
+import eu.kanade.tachiyomi.util.system.notificationManager
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Locale
+import java.util.concurrent.TimeUnit
 
 /**
  * Restores backup from json file
@@ -72,9 +73,11 @@ class BackupRestoreService : Service() {
      */
     private var restoreAmount = 0
 
+    private var totalAmount = 0
+
     private var skippedAmount = 0
 
-    private var totalAmount = 0
+    private var categoriesAmount = 0
 
     /**
      * List containing errors
@@ -82,14 +85,24 @@ class BackupRestoreService : Service() {
     private val errors = mutableListOf<String>()
 
     /**
+     * count of cancelled
+     */
+    private var cancelled = 0
+
+    /**
      * List containing distinct errors
      */
     private val trackingErrors = mutableListOf<String>()
 
     /**
-     * count of cancelled
+     * List containing missing sources
      */
-    private var cancelled = 0
+    private val sourcesMissing = mutableListOf<Long>()
+
+    /**
+     * List containing missing sources
+     */
+    private var licensedManga = 0
 
     /**
      * Backup manager
@@ -115,7 +128,7 @@ class BackupRestoreService : Service() {
         wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).newWakeLock(
             PowerManager.PARTIAL_WAKE_LOCK, "BackupRestoreService:WakeLock"
         )
-        wakeLock.acquire(java.util.concurrent.TimeUnit.HOURS.toMillis(3))
+        wakeLock.acquire(TimeUnit.HOURS.toMillis(3))
     }
 
     /**
@@ -144,9 +157,7 @@ class BackupRestoreService : Service() {
      * @return the start value of the command.
      */
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (intent == null) return START_NOT_STICKY
-
-        val uri = intent.getParcelableExtra<Uri>(BackupConst.EXTRA_URI) ?: return START_NOT_STICKY
+        val uri = intent?.getParcelableExtra<Uri>(BackupConst.EXTRA_URI) ?: return START_NOT_STICKY
 
         // Unsubscribe from any previous subscription if needed.
         job?.cancel()
@@ -176,7 +187,7 @@ class BackupRestoreService : Service() {
      */
     private suspend fun restoreBackup(uri: Uri) {
         val reader = JsonReader(contentResolver.openInputStream(uri)!!.bufferedReader())
-        val json = JsonParser().parse(reader).asJsonObject
+        val json = JsonParser.parseReader(reader).asJsonObject
 
         // Get parser version
         val version = json.get(VERSION)?.asInt ?: 1
@@ -196,12 +207,13 @@ class BackupRestoreService : Service() {
             isMangaDex
         }
         // +1 for categories
-        totalAmount = mangasJson.size() + 1
+        totalAmount = mangasJson.size()
         skippedAmount = mangasJson.size() - mangdexManga.count()
         restoreAmount = mangdexManga.count()
-
-        errors.clear()
         trackingErrors.clear()
+        sourcesMissing.clear()
+        licensedManga = 0
+        errors.clear()
         cancelled = 0
         // Restore categories
         restoreCategories(json, backupManager)
@@ -228,11 +240,11 @@ class BackupRestoreService : Service() {
         val element = json.get(CATEGORIES)
         if (element != null) {
             backupManager.restoreCategories(element.asJsonArray)
+            categoriesAmount = element.asJsonArray.size()
             restoreAmount += 1
             restoreProgress += 1
+            totalAmount += 1
             showProgressNotification(restoreProgress, totalAmount, "Categories added")
-        } else {
-            totalAmount -= 1
         }
     }
 
@@ -267,12 +279,13 @@ class BackupRestoreService : Service() {
                 backupManager.restoreMangaFetch(source, manga)
             }
 
+            // Restore categories
+            backupManager.restoreCategoriesForManga(manga, categories)
+
             if (!dbMangaExists || !backupManager.restoreChaptersForManga(manga, chapters)) {
                 // manga gets chapters added
                 backupManager.restoreChapterFetch(source, manga, chapters)
             }
-            // Restore categories
-            backupManager.restoreCategoriesForManga(manga, categories)
             // Restore history
             backupManager.restoreHistoryForManga(history)
             // Restore tracking
@@ -281,7 +294,6 @@ class BackupRestoreService : Service() {
             trackingFetch(manga, tracks)
         } catch (e: Exception) {
             Timber.e(e)
-
             errors.add("${manga.title} - ${e.message}")
         }
     }
@@ -291,19 +303,19 @@ class BackupRestoreService : Service() {
      * @param manga manga that needs updating.
      * @param tracks list containing tracks from restore file.
      */
-    private fun trackingFetch(manga: Manga, tracks: List<Track>) {
+    private suspend fun trackingFetch(manga: Manga, tracks: List<Track>) {
         tracks.forEach { track ->
             val service = trackManager.getService(track.sync_id)
             if (service != null && service.isLogged) {
-                service.refresh(track)
-                    .doOnNext { db.insertTrack(it).executeAsBlocking() }
-                    .onErrorReturn {
-                        errors.add("${manga.title} - ${it.message}")
-                        track
-                    }
+                try {
+                    service.refresh(track)
+                    db.insertTrack(track).executeAsBlocking()
+                } catch (e: Exception) {
+                    errors.add("${manga.title} - ${e.message}")
+                }
             } else {
                 errors.add("${manga.title} - ${service?.name} not logged in")
-                val notLoggedIn = getString(R.string.not_logged_into, service?.name)
+                val notLoggedIn = getString(R.string.not_logged_into_, service?.name)
                 trackingErrors.add(notLoggedIn)
             }
         }
@@ -316,7 +328,8 @@ class BackupRestoreService : Service() {
         try {
             if (errors.isNotEmpty()) {
                 val destFile = File(externalCacheDir, "neko_restore.log")
-                SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.getDefault())
+                val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.getDefault())
+
                 destFile.bufferedWriter().use { out ->
                     errors.forEach { message ->
                         out.write("$message\n")
@@ -335,13 +348,17 @@ class BackupRestoreService : Service() {
      */
     private val progressNotification by lazy {
         NotificationCompat.Builder(this, Notifications.CHANNEL_RESTORE)
-            .setContentTitle(getString(R.string.app_name))
+            .setContentTitle(getString(R.string.neko_app_name))
             .setSmallIcon(R.drawable.ic_neko_notification)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .setAutoCancel(false)
-            .setColor(ContextCompat.getColor(this, R.color.colorPrimary))
-            .addAction(R.drawable.ic_clear_grey, getString(android.R.string.cancel), cancelIntent)
+            .setColor(ContextCompat.getColor(this, R.color.colorAccent))
+            .addAction(
+                R.drawable.ic_clear_grey_24dp_img,
+                getString(android.R.string.cancel),
+                cancelIntent
+            )
     }
 
     /**
@@ -364,7 +381,7 @@ class BackupRestoreService : Service() {
                 .setContentTitle(title.chop(30))
                 .setContentText(
                     getString(
-                        R.string.backup_restoring_progress, restoreProgress,
+                        R.string.restoring_progress, restoreProgress,
                         totalAmount
                     )
                 )
@@ -377,42 +394,47 @@ class BackupRestoreService : Service() {
      * Show the result notification with option to show the error log
      */
     private fun showResultNotification(path: String?, file: String?) {
+        val content = mutableListOf<String>()
+        if (categoriesAmount > 0) {
+            content.add(
+                resources.getQuantityString(
+                    R.plurals.restore_categories,
+                    categoriesAmount,
+                    categoriesAmount
+                )
+            )
+        }
 
-        val content = mutableListOf(
+        content.add(
             getString(
-                R.string.restore_completed_successful,
-                restoreProgress.toString()
+                R.string.restore_completed_successful, restoreProgress
+                    .toString(), restoreAmount.toString()
+            )
+        )
+
+        content.add(
+            getString(
+                R.string.restore_completed_errors, errors.size.toString()
             )
         )
 
         if (skippedAmount > 0) {
             content.add(
                 getString(
-                    R.string.restore_completed_skipped,
+                    R.string.restore_skipped,
                     skippedAmount.toString(),
                     totalAmount.toString()
                 )
             )
         }
 
-        if (errors.isNotEmpty()) {
-            content.add(getString(R.string.restore_completed_errors, errors.size.toString()))
-        }
-
+        val trackingErrors = trackingErrors.distinct()
         if (trackingErrors.isNotEmpty()) {
             val trackingErrorsString = trackingErrors.distinct().joinToString("\n")
             content.add(trackingErrorsString)
         }
-
-        if (cancelled > 0) {
-            content.add(
-                getString(
-                    R.string.restore_completed_cancelled,
-                    cancelled.toString(),
-                    totalAmount.toString()
-                )
-            )
-        }
+        if (cancelled > 0)
+            content.add(getString(R.string.restore_content_skipped, cancelled))
 
         val restoreString = content.joinToString("\n")
 
@@ -422,13 +444,13 @@ class BackupRestoreService : Service() {
             .setStyle(NotificationCompat.BigTextStyle().bigText(restoreString))
             .setSmallIcon(R.drawable.ic_neko_notification)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setColor(ContextCompat.getColor(this, R.color.colorPrimary))
-            .setColor(ContextCompat.getColor(this, R.color.colorAccentLight))
+            .setColor(ContextCompat.getColor(this, R.color.colorAccent))
         if (errors.size > 0 && !path.isNullOrEmpty() && !file.isNullOrEmpty()) {
             resultNotification.addAction(
-                R.drawable.ic_clear_grey,
-                getString(R.string.notification_action_error_log),
-                getErrorLogIntent(path, file)
+                R.drawable.ic_clear_grey_24dp_img, getString(
+                    R.string
+                        .view_all_errors
+                ), getErrorLogIntent(path, file)
             )
         }
         notificationManager.notify(Notifications.ID_RESTORE_COMPLETE, resultNotification.build())
@@ -441,10 +463,6 @@ class BackupRestoreService : Service() {
         val resultNotification = NotificationCompat.Builder(this, Notifications.CHANNEL_RESTORE)
             .setContentTitle(getString(R.string.restore_error))
             .setContentText(errorMessage)
-            .setStyle(
-                NotificationCompat.BigTextStyle()
-                    .bigText(errorMessage)
-            )
             .setSmallIcon(R.drawable.ic_error_grey)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setColor(ContextCompat.getColor(this, R.color.md_red_500))

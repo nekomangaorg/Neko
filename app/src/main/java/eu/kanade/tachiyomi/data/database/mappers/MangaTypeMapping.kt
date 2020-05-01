@@ -55,24 +55,25 @@ class MangaPutResolver : DefaultPutResolver<Manga>() {
             .whereArgs(obj.id)
             .build()
 
-    override fun mapToContentValues(obj: Manga) = ContentValues(17).apply {
+    override fun mapToContentValues(obj: Manga) = ContentValues(15).apply {
         put(COL_ID, obj.id)
         put(COL_SOURCE, obj.source)
         put(COL_URL, obj.url)
         put(COL_ARTIST, obj.artist)
         put(COL_AUTHOR, obj.author)
         put(COL_DESCRIPTION, obj.description)
-        put(COL_LANG_FLAG, obj.lang_flag)
         put(COL_GENRE, obj.genre)
         put(COL_TITLE, obj.title)
         put(COL_STATUS, obj.status)
         put(COL_THUMBNAIL_URL, obj.thumbnail_url)
         put(COL_FAVORITE, obj.favorite)
-        put(COL_DATE_ADDED, obj.date_added)
         put(COL_LAST_UPDATE, obj.last_update)
         put(COL_INITIALIZED, obj.initialized)
         put(COL_VIEWER, obj.viewer)
         put(COL_CHAPTER_FLAGS, obj.chapter_flags)
+        put(COL_DATE_ADDED, obj.date_added)
+        put(COL_DATE_ADDED, obj.date_added)
+        put(COL_LANG_FLAG, obj.lang_flag)
         put(COL_FOLLOW_STATUS, obj.follow_status?.int)
         put(COL_ANILIST_ID, obj.anilist_id)
         put(COL_KITSU_ID, obj.kitsu_id)
@@ -91,13 +92,6 @@ interface BaseMangaGetResolver {
         author = cursor.getString(cursor.getColumnIndex(COL_AUTHOR))
         description = cursor.getString(cursor.getColumnIndex(COL_DESCRIPTION))
         genre = cursor.getString(cursor.getColumnIndex(COL_GENRE))
-        lang_flag = cursor.getString(cursor.getColumnIndex(COL_LANG_FLAG))
-        anilist_id = cursor.getString(cursor.getColumnIndex(COL_ANILIST_ID))
-        kitsu_id = cursor.getString(cursor.getColumnIndex(COL_KITSU_ID))
-        my_anime_list_id = cursor.getString(cursor.getColumnIndex(COL_MY_ANIME_LIST_ID))
-        manga_updates_id = cursor.getString(cursor.getColumnIndex(COL_MANGA_UPDATES_ID))
-        anime_planet_id = cursor.getString(cursor.getColumnIndex(COL_ANIME_PLANET_ID))
-        date_added = cursor.getLong(cursor.getColumnIndex(COL_DATE_ADDED))
         title = cursor.getString(cursor.getColumnIndex(COL_TITLE))
         status = cursor.getInt(cursor.getColumnIndex(COL_STATUS))
         thumbnail_url = cursor.getString(cursor.getColumnIndex(COL_THUMBNAIL_URL))
@@ -106,7 +100,15 @@ interface BaseMangaGetResolver {
         initialized = cursor.getInt(cursor.getColumnIndex(COL_INITIALIZED)) == 1
         viewer = cursor.getInt(cursor.getColumnIndex(COL_VIEWER))
         chapter_flags = cursor.getInt(cursor.getColumnIndex(COL_CHAPTER_FLAGS))
-        follow_status = cursor.getInt(cursor.getColumnIndex(COL_FOLLOW_STATUS)).let { FollowStatus.fromInt(it) }
+        date_added = cursor.getLong(cursor.getColumnIndex(COL_DATE_ADDED))
+        lang_flag = cursor.getString(cursor.getColumnIndex(COL_LANG_FLAG))
+        anilist_id = cursor.getString(cursor.getColumnIndex(COL_ANILIST_ID))
+        kitsu_id = cursor.getString(cursor.getColumnIndex(COL_KITSU_ID))
+        my_anime_list_id = cursor.getString(cursor.getColumnIndex(COL_MY_ANIME_LIST_ID))
+        manga_updates_id = cursor.getString(cursor.getColumnIndex(COL_MANGA_UPDATES_ID))
+        anime_planet_id = cursor.getString(cursor.getColumnIndex(COL_ANIME_PLANET_ID))
+        follow_status =
+            cursor.getInt(cursor.getColumnIndex(COL_FOLLOW_STATUS)).let { FollowStatus.fromInt(it) }
     }
 }
 

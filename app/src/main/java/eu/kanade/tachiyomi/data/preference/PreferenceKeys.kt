@@ -51,19 +51,21 @@ object PreferenceKeys {
 
     const val readWithVolumeKeysInverted = "reader_volume_keys_inverted"
 
-    const val marginRatioWebtoon = "margin_ratio_webtoon_new"
-
-    const val portraitColumns = "pref_library_columns_portrait_key"
-
-    const val landscapeColumns = "pref_library_columns_landscape_key"
+    const val webtoonSidePadding = "webtoon_side_padding"
 
     const val updateOnlyNonCompleted = "pref_update_only_non_completed_key"
 
     const val autoUpdateTrack = "pref_auto_update_manga_sync_key"
 
+    const val lastUsedCatalogueSource = "last_catalogue_source"
+
     const val lastUsedCategory = "last_used_category"
 
     const val catalogueAsList = "pref_display_catalogue_as_list"
+
+    const val enabledLanguages = "source_languages"
+
+    const val sourcesSort = "sources_sort"
 
     const val backupDirectory = "backup_directory"
 
@@ -71,15 +73,13 @@ object PreferenceKeys {
 
     const val downloadOnlyOverWifi = "pref_download_only_over_wifi_key"
 
-    const val similarShowTab = "pref_related_show_tab_key"
-
-    const val similarUpdateRestriction = "related_update_restriction"
-
     const val numberOfBackups = "backup_slots"
 
     const val backupInterval = "backup_interval"
 
     const val removeAfterReadSlots = "remove_after_read_slots"
+
+    const val deleteRemovedChapters = "delete_removed_chapters"
 
     const val removeAfterMarkedAsRead = "pref_remove_after_marked_as_read_key"
 
@@ -89,43 +89,71 @@ object PreferenceKeys {
 
     const val libraryUpdateCategories = "library_update_categories"
 
+    const val libraryUpdatePrioritization = "library_update_prioritization"
+
     const val filterDownloaded = "pref_filter_downloaded_key"
 
     const val filterUnread = "pref_filter_unread_key"
 
     const val filterCompleted = "pref_filter_completed_key"
 
-    const val filterAnilist = "pref_filter_anilist_key"
+    const val filterTracked = "pref_filter_tracked_key"
 
-    const val filterKitsu = "pref_filter_kitsu_key"
-
-    const val filterMyanimelist = "pref_filter_myanimelist_key"
+    const val filterMangaType = "pref_filter_manga_type_key"
 
     const val librarySortingMode = "library_sorting_mode"
 
     const val automaticUpdates = "automatic_updates"
 
-    const val startScreen = "start_screen"
-
     const val downloadNew = "download_new"
 
     const val downloadNewCategories = "download_new_categories"
 
-    const val libraryAsList = "pref_display_library_as_list"
+    const val libraryLayout = "pref_display_library_layout"
+
+    const val gridSize = "grid_size"
+
+    const val uniformGrid = "uniform_grid"
+
+    const val libraryAsSingleList = "library_as_single_list"
 
     const val lang = "app_language"
+
+    const val dateFormat = "app_date_format"
 
     const val defaultCategory = "default_category"
 
     const val skipRead = "skip_read"
 
-    const val skipHidden = "skip_hidden"
+    const val downloadBadge = "display_download_badge"
 
     const val useBiometrics = "use_biometrics"
 
     const val lockAfter = "lock_after"
 
     const val lastUnlock = "last_unlock"
+
+    const val secureScreen = "secure_screen"
+
+    const val removeArticles = "remove_articles"
+
+    const val skipPreMigration = "skip_pre_migration"
+
+    const val refreshCoversToo = "refresh_covers_too"
+
+    const val updateOnRefresh = "update_on_refresh"
+
+    const val alwaysShowChapterTransition = "always_show_chapter_transition"
+
+    const val skipFiltered = "skip_hidden"
+
+    const val marginRatioWebtoon = "margin_ratio_webtoon_new"
+
+    const val similarEnabled = "pref_related_show_tab_key"
+
+    const val similarUpdateInterval = "related_update_interval"
+
+    const val similarUpdateRestriction = "related_update_restriction"
 
     const val showR18 = "show_r18"
 
@@ -135,9 +163,13 @@ object PreferenceKeys {
 
     const val useNonLoggedNetwork = "non_logged_in_network"
 
+    @Deprecated("Use the preferences of the source")
     fun sourceUsername(sourceId: Long) = "pref_source_username_$sourceId"
 
+    @Deprecated("Use the preferences of the source")
     fun sourcePassword(sourceId: Long) = "pref_source_password_$sourceId"
+
+    fun sourceSharedPref(sourceId: Long) = "source_$sourceId"
 
     fun trackUsername(syncId: Int) = "pref_mangasync_username_$syncId"
 

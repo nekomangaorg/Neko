@@ -9,7 +9,7 @@ import android.text.style.ScaleXSpan
 import android.util.AttributeSet
 import android.widget.TextView
 import androidx.appcompat.widget.AppCompatTextView
-import eu.kanade.tachiyomi.util.OutlineSpan
+import eu.kanade.tachiyomi.widget.OutlineSpan
 
 /**
  * Page indicator found at the bottom of the reader
@@ -48,8 +48,8 @@ class PageIndicatorTextView(
 
         // A span object with text outlining properties
         val spanOutline = OutlineSpan(
-                strokeColor = strokeColor,
-                strokeWidth = 4f
+            strokeColor = strokeColor,
+            strokeWidth = 4f
         )
     }
 }

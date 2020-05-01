@@ -3,14 +3,21 @@ package eu.kanade.tachiyomi.widget
 import android.content.Context
 import android.util.AttributeSet
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import eu.kanade.tachiyomi.util.system.pxToDp
+import kotlin.math.max
+import kotlin.math.roundToInt
 
 class AutofitRecyclerView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
-        RecyclerView(context, attrs) {
+        androidx.recyclerview.widget.RecyclerView(context, attrs) {
 
-    private val manager = GridLayoutManager(context, 1)
+    val manager = GridLayoutManager(context, 1)
 
-    private var columnWidth = -1
+    var columnWidth = -1f
+        set(value) {
+            field = value
+            if (measuredWidth > 0)
+                setSpan(true)
+        }
 
     var spanCount = 0
         set(value) {
@@ -21,24 +28,34 @@ class AutofitRecyclerView @JvmOverloads constructor(context: Context, attrs: Att
         }
 
     val itemWidth: Int
-        get() = measuredWidth / manager.spanCount
-
-    init {
-        if (attrs != null) {
-            val attrsArray = intArrayOf(android.R.attr.columnWidth)
-            val array = context.obtainStyledAttributes(attrs, attrsArray)
-            columnWidth = array.getDimensionPixelSize(0, -1)
-            array.recycle()
+        get() {
+            return if (spanCount == 0) measuredWidth / getTempSpan()
+            else measuredWidth / manager.spanCount
         }
 
+    init {
         layoutManager = manager
+    }
+
+    private fun getTempSpan(): Int {
+        if (spanCount == 0 && columnWidth > 0) {
+            val dpWidth = (measuredWidth.pxToDp / 100f).roundToInt()
+            return max(1, (dpWidth / columnWidth).roundToInt())
+        }
+        return 3
     }
 
     override fun onMeasure(widthSpec: Int, heightSpec: Int) {
         super.onMeasure(widthSpec, heightSpec)
-        if (spanCount == 0 && columnWidth > 0) {
-            val count = Math.max(1, measuredWidth / columnWidth)
+        setSpan()
+    }
+
+    private fun setSpan(force: Boolean = false) {
+        if ((spanCount == 0 || force) && columnWidth > 0) {
+            val dpWidth = (measuredWidth.pxToDp / 100f).roundToInt()
+            val count = max(1, (dpWidth / columnWidth).roundToInt())
             spanCount = count
+//            Timber.d("Dp width: $dpWidth - RSpan: $spanCount")
         }
     }
 }

@@ -1,14 +1,20 @@
 package eu.kanade.tachiyomi.ui.category
 
+import android.content.Context
+import android.graphics.drawable.Drawable
+import android.text.InputType
 import android.view.View
-import com.mikepenz.iconics.IconicsDrawable
-import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
-import com.mikepenz.iconics.utils.colorInt
-import com.mikepenz.iconics.utils.sizeDp
+import android.view.WindowManager
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
+import androidx.core.content.ContextCompat
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
-import eu.kanade.tachiyomi.util.getResourceColor
-import eu.kanade.tachiyomi.util.getRound
+import eu.kanade.tachiyomi.ui.category.CategoryPresenter.Companion.CREATE_CATEGORY_ORDER
+import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.view.gone
+import eu.kanade.tachiyomi.util.view.visible
 import kotlinx.android.synthetic.main.categories_item.*
 
 /**
@@ -20,14 +26,13 @@ import kotlinx.android.synthetic.main.categories_item.*
 class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleViewHolder(view, adapter) {
 
     init {
-        // Create round letter image onclick to simulate long click
-        image.setOnClickListener {
-            // Simulate long click on this view to enter selection mode
-            onLongClick(view)
+        edit_button.setOnClickListener {
+            submitChanges()
         }
-
-        setDragHandleView(reorder)
     }
+
+    var createCategory = false
+    private var regularDrawable: Drawable? = null
 
     /**
      * Binds this holder with the given category.
@@ -37,15 +42,85 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleVie
     fun bind(category: Category) {
         // Set capitalized title.
         title.text = category.name.capitalize()
-
-        // Update circle letter image.
-        itemView.post {
-            image.setImageDrawable(image.getRound(category.name.take(1).toUpperCase(), false))
+        edit_text.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                submitChanges()
+            }
+            true
         }
-        reorder.setImageDrawable(IconicsDrawable(contentView.context)
-                .icon(CommunityMaterial.Icon2.cmd_reorder_horizontal)
-                .sizeDp(18)
-                .colorInt(contentView.context.getResourceColor(android.R.attr.textColorPrimary)))
+        createCategory = category.order == CREATE_CATEGORY_ORDER
+        if (createCategory) {
+            title.setTextColor(ContextCompat.getColor(itemView.context, R.color.text_color_hint))
+            regularDrawable = ContextCompat.getDrawable(itemView.context, R.drawable
+                .ic_add_white_24dp)
+            image.gone()
+            edit_button.setImageDrawable(null)
+            edit_text.setText("")
+            edit_text.hint = title.text
+        } else {
+            title.setTextColor(ContextCompat.getColor(itemView.context, R.color.textColorPrimary))
+            regularDrawable = ContextCompat.getDrawable(itemView.context, R.drawable
+                .ic_drag_handle_black_24dp)
+            image.visible()
+            edit_text.setText(title.text)
+        }
+    }
+
+    fun isEditing(editing: Boolean) {
+        itemView.isActivated = editing
+        title.visibility = if (editing) View.INVISIBLE else View.VISIBLE
+        edit_text.visibility = if (!editing) View.INVISIBLE else View.VISIBLE
+        if (editing) {
+            edit_text.inputType = InputType.TYPE_TEXT_FLAG_AUTO_CORRECT
+            edit_text.requestFocus()
+            edit_text.selectAll()
+            edit_button.setImageDrawable(ContextCompat.getDrawable(itemView.context, R.drawable.ic_check_white_24dp))
+            edit_button.drawable.mutate().setTint(itemView.context.getResourceColor(R.attr.colorAccent))
+            showKeyboard()
+            if (!createCategory) {
+                reorder.setImageDrawable(
+                    ContextCompat.getDrawable(
+                        itemView.context, R.drawable.ic_delete_white_24dp
+                    )
+                )
+                reorder.setOnClickListener {
+                    adapter.categoryItemListener.onItemDelete(adapterPosition)
+                }
+            }
+        } else {
+            if (!createCategory) {
+                setDragHandleView(reorder)
+                edit_button.setImageDrawable(ContextCompat.getDrawable(itemView.context, R.drawable.ic_edit_white_24dp))
+            } else {
+                edit_button.setImageDrawable(null)
+                reorder.setOnTouchListener { _, _ -> true }
+            }
+            edit_text.clearFocus()
+            edit_button.drawable?.mutate()?.setTint(ContextCompat.getColor(itemView.context, R
+                .color.gray_button))
+            reorder.setImageDrawable(regularDrawable)
+        }
+    }
+
+    private fun submitChanges() {
+        if (edit_text.visibility == View.VISIBLE) {
+            if (adapter.categoryItemListener
+                    .onCategoryRename(adapterPosition, edit_text.text.toString())) {
+                isEditing(false)
+                edit_text.inputType = InputType.TYPE_NULL
+                if (!createCategory)
+                    title.text = edit_text.text.toString()
+            }
+        } else {
+            itemView.performClick()
+        }
+    }
+
+    private fun showKeyboard() {
+        val inputMethodManager: InputMethodManager =
+            itemView.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.showSoftInput(edit_text, WindowManager.LayoutParams
+            .SOFT_INPUT_ADJUST_PAN)
     }
 
     /**
@@ -55,6 +130,6 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleVie
      */
     override fun onItemReleased(position: Int) {
         super.onItemReleased(position)
-        adapter.onItemReleaseListener.onItemReleased(position)
+        adapter.categoryItemListener.onItemReleased(position)
     }
 }

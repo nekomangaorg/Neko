@@ -54,7 +54,7 @@ class NetworkHelper(context: Context) {
         val builder = OkHttpClient.Builder()
                 .connectTimeout(10, TimeUnit.SECONDS)
                 .readTimeout(30, TimeUnit.SECONDS)
-                .cache(Cache(cacheDir, cacheSize))
+            .cache(Cache(cacheDir, cacheSize))
                 .addNetworkInterceptor(rateLimitInterceptor)
 
         if (BuildConfig.DEBUG) {

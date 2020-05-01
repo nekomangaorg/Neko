@@ -15,12 +15,13 @@ open class MatPreference @JvmOverloads constructor(
     context: Context,
     attrs:
     AttributeSet? =
-            null
+        null
 ) :
-        Preference(context, attrs) {
+    Preference(context, attrs) {
 
     protected val prefs: PreferencesHelper = Injekt.get()
     private var isShowing = false
+    var customSummary: String? = null
 
     override fun onClick() {
         if (!isShowing)
@@ -28,6 +29,10 @@ open class MatPreference @JvmOverloads constructor(
                 onDismiss { this@MatPreference.isShowing = false }
             }.show()
         isShowing = true
+    }
+
+    override fun getSummary(): CharSequence {
+        return customSummary ?: super.getSummary()
     }
 
     open fun dialog(): MaterialDialog {

@@ -20,7 +20,7 @@ import uy.kohesive.injekt.injectLazy
  *
  * @param context the application context.
  */
-class DownloadManager(context: Context) {
+class DownloadManager(val context: Context) {
 
     /**
      * The sources manager.
@@ -77,6 +77,10 @@ class DownloadManager(context: Context) {
         downloader.stop(reason)
     }
 
+    fun setPlaceholder() {
+        downloader.setPlaceholder()
+    }
+
     /**
      * Tells the downloader to pause downloads.
      */
@@ -90,7 +94,23 @@ class DownloadManager(context: Context) {
      * @param isNotification value that determines if status is set (needed for view updates)
      */
     fun clearQueue(isNotification: Boolean = false) {
+        deletePendingDownloads(*downloader.queue.toTypedArray())
         downloader.clearQueue(isNotification)
+        DownloadService.callListeners(false)
+    }
+
+    fun startDownloadNow(chapter: Chapter) {
+        val download = downloader.queue.find { it.chapter.id == chapter.id } ?: return
+        val queue = downloader.queue.toMutableList()
+        queue.remove(download)
+        queue.add(0, download)
+        reorderQueue(queue)
+        if (isPaused()) {
+            if (DownloadService.isRunning(context))
+                downloader.start()
+            else
+                DownloadService.start(context)
+        }
     }
 
     /**
@@ -99,14 +119,23 @@ class DownloadManager(context: Context) {
      * @param downloads value to set the download queue to
      */
     fun reorderQueue(downloads: List<Download>) {
-        val wasPaused = downloader.isPaused()
+        val wasPaused = isPaused()
+        if (downloads.isEmpty()) {
+            DownloadService.stop(context)
+            downloader.queue.clear()
+            return
+        }
         downloader.pause()
         downloader.queue.clear()
         downloader.queue.addAll(downloads)
         if (!wasPaused) {
-        downloader.start()
+            downloader.start()
         }
     }
+
+    fun isPaused() = downloader.isPaused()
+
+    fun hasQueue() = downloader.queue.isNotEmpty()
 
     /**
      * Tells the downloader to enqueue the given list of chapters.
@@ -173,16 +202,49 @@ class DownloadManager(context: Context) {
         return cache.getDownloadCount(manga)
     }
 
+    /*fun renameCache(from: String, to: String, source: Long) {
+        cache.renameFolder(from, to, source)
+    }*/
+
     /**
-     * Deletes the directories of a list of downloaded chapters.
+     * Calls delete chapter, which deletes temp downloads
+     *  @param downloads list of downloads to cancel
+     */
+    fun deletePendingDownloads(vararg downloads: Download) {
+        val downloadsByManga = downloads.groupBy { it.manga.id }
+        downloadsByManga.map { entry ->
+            val manga = entry.value.first().manga
+            val source = entry.value.first().source
+            deleteChapters(entry.value.map { it.chapter }, manga, source)
+        }
+    }
+
+    /**
+     * Deletes the directories of a list of partially downloaded chapters.
      *
      * @param chapters the list of chapters to delete.
      * @param manga the manga of the chapters.
      * @param source the source of the chapters.
      */
     fun deleteChapters(chapters: List<Chapter>, manga: Manga, source: Source) {
+        val wasPaused = isPaused()
+        if (chapters.isEmpty()) {
+            DownloadService.stop(context)
+            downloader.queue.clear()
+            return
+        }
+        downloader.pause()
+        downloader.queue.remove(chapters)
+        if (!wasPaused && downloader.queue.isNotEmpty()) {
+            downloader.start()
+        } else if (downloader.queue.isEmpty() && DownloadService.isRunning(context)) {
+            DownloadService.stop(context)
+        } else if (downloader.queue.isEmpty()) {
+            DownloadService.callListeners(false)
+            downloader.stop()
+        }
         queue.remove(chapters)
-        val chapterDirs = provider.findChapterDirs(chapters, manga, source)
+        val chapterDirs = provider.findChapterDirs(chapters, manga, source) + provider.findTempChapterDirs(chapters, manga, source)
         chapterDirs.forEach { it.delete() }
         cache.removeChapters(chapters, manga)
         if (cache.getDownloadCount(manga) == 0) { // Delete manga directory if empty
@@ -221,6 +283,7 @@ class DownloadManager(context: Context) {
      * @param source the source of the manga.
      */
     fun deleteManga(manga: Manga, source: Source) {
+        downloader.clearQueue(manga, true)
         queue.remove(manga)
         provider.findMangaDir(manga, source)?.delete()
         cache.removeManga(manga)
@@ -246,4 +309,7 @@ class DownloadManager(context: Context) {
             deleteChapters(chapters, manga, source)
         }
     }
+
+    fun addListener(listener: DownloadQueue.DownloadListener) = queue.addListener(listener)
+    fun removeListener(listener: DownloadQueue.DownloadListener) = queue.removeListener(listener)
 }

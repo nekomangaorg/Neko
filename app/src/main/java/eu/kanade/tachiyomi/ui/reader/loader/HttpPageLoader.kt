@@ -1,14 +1,16 @@
 package eu.kanade.tachiyomi.ui.reader.loader
 
+import android.graphics.BitmapFactory
 import eu.kanade.tachiyomi.data.cache.ChapterCache
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
-import eu.kanade.tachiyomi.util.plusAssign
-import java.util.concurrent.PriorityBlockingQueue
-import java.util.concurrent.atomic.AtomicInteger
-import kotlin.math.min
+import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerPageHolder
+import eu.kanade.tachiyomi.util.lang.plusAssign
+import eu.kanade.tachiyomi.util.system.ImageUtil
 import rx.Completable
 import rx.Observable
 import rx.schedulers.Schedulers
@@ -18,6 +20,10 @@ import rx.subscriptions.CompositeSubscription
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import uy.kohesive.injekt.injectLazy
+import java.util.concurrent.PriorityBlockingQueue
+import java.util.concurrent.atomic.AtomicInteger
+import kotlin.math.min
 
 /**
  * Loader used to load chapters from an online source.
@@ -33,11 +39,9 @@ class HttpPageLoader(
      */
     private val queue = PriorityBlockingQueue<PriorityPage>()
 
-    /**
-     * Current active subscriptions.
-     */
     private val subscriptions = CompositeSubscription()
 
+    private val preferences by injectLazy<PreferencesHelper>()
     private val preloadSize = 4
 
     init {
@@ -210,20 +214,26 @@ class HttpPageLoader(
     private fun HttpSource.getCachedImage(page: ReaderPage): Observable<ReaderPage> {
         val imageUrl = page.imageUrl ?: return Observable.just(page)
 
-        return Observable.just(page)
-            .flatMap {
+        return Observable.just(page).flatMap {
                 if (!chapterCache.isImageInCache(imageUrl)) {
                     cacheImage(page)
                 } else {
                     Observable.just(page)
                 }
-            }
-            .doOnNext {
+            }.doOnNext {
+                val readerTheme = preferences.readerTheme().getOrDefault()
+                if (readerTheme >= 2) {
+                    val stream = chapterCache.getImageFile(imageUrl).inputStream()
+                    val image = BitmapFactory.decodeStream(stream)
+                    page.bg = ImageUtil.autoSetBackground(
+                        image, readerTheme == 2, preferences.context
+                    )
+                    page.bgType = PagerPageHolder.getBGType(readerTheme, preferences.context)
+                    stream.close()
+                }
                 page.stream = { chapterCache.getImageFile(imageUrl).inputStream() }
                 page.status = Page.READY
-            }
-            .doOnError { page.status = Page.ERROR }
-            .onErrorReturn { page }
+            }.doOnError { page.status = Page.ERROR }.onErrorReturn { page }
     }
 
     /**

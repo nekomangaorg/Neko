@@ -1,11 +1,13 @@
 package eu.kanade.tachiyomi.ui.category
 
-import android.os.Bundle
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
-import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
-import rx.Observable
-import rx.android.schedulers.AndroidSchedulers
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -13,27 +15,41 @@ import uy.kohesive.injekt.api.get
  * Presenter of [CategoryController]. Used to manage the categories of the library.
  */
 class CategoryPresenter(
-    private val db: DatabaseHelper = Injekt.get()
-) : BasePresenter<CategoryController>() {
+    private val controller: CategoryController,
+    private val db: DatabaseHelper = Injekt.get(),
+    preferences: PreferencesHelper = Injekt.get()
+) {
+
+    private val context = preferences.context
 
     /**
      * List containing categories.
      */
-    private var categories: List<Category> = emptyList()
+    private var categories: MutableList<Category> = mutableListOf()
 
     /**
      * Called when the presenter is created.
-     *
-     * @param savedState The saved state of this presenter.
      */
-    override fun onCreate(savedState: Bundle?) {
-        super.onCreate(savedState)
+    fun getCategories() {
+        if (categories.isNotEmpty()) {
+            controller.setCategories(categories.map(::CategoryItem))
+        }
+        GlobalScope.launch(Dispatchers.IO) {
+            categories.clear()
+            categories.add(newCategory())
+            categories.addAll(db.getCategories().executeAsBlocking())
+            val catItems = categories.map(::CategoryItem)
+            withContext(Dispatchers.Main) {
+                controller.setCategories(catItems)
+            }
+        }
+    }
 
-        db.getCategories().asRxObservable()
-                .doOnNext { categories = it }
-                .map { it.map(::CategoryItem) }
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeLatestCache(CategoryController::setCategories)
+    private fun newCategory(): Category {
+        val default = Category.create(context.getString(R.string.create_new_category))
+        default.order = CREATE_CATEGORY_ORDER
+        default.id = Int.MIN_VALUE
+        return default
     }
 
     /**
@@ -41,11 +57,11 @@ class CategoryPresenter(
      *
      * @param name The name of the category to create.
      */
-    fun createCategory(name: String) {
+    fun createCategory(name: String): Boolean {
         // Do not allow duplicate categories.
-        if (categoryExists(name)) {
-            Observable.just(Unit).subscribeFirst({ view, _ -> view.onCategoryExistsError() })
-            return
+        if (categoryExists(name, null)) {
+            controller.onCategoryExistsError()
+            return false
         }
 
         // Create category.
@@ -55,16 +71,25 @@ class CategoryPresenter(
         cat.order = categories.map { it.order + 1 }.max() ?: 0
 
         // Insert into database.
-        db.insertCategory(cat).asRxObservable().subscribe()
+        cat.mangaSort = 'a'
+        db.insertCategory(cat).executeAsBlocking()
+        val cats = db.getCategories().executeAsBlocking()
+        val newCat = cats.find { it.name == name } ?: return false
+        categories.add(1, newCat)
+        reorderCategories(categories)
+        return true
     }
 
     /**
      * Deletes the given categories from the database.
      *
-     * @param categories The list of categories to delete.
+     * @param category The category to delete.
      */
-    fun deleteCategories(categories: List<Category>) {
-        db.deleteCategories(categories).asRxObservable().subscribe()
+    fun deleteCategory(category: Category?) {
+        val safeCategory = category ?: return
+        db.deleteCategory(safeCategory).executeAsBlocking()
+        categories.remove(safeCategory)
+        controller.setCategories(categories.map(::CategoryItem))
     }
 
     /**
@@ -74,10 +99,12 @@ class CategoryPresenter(
      */
     fun reorderCategories(categories: List<Category>) {
         categories.forEachIndexed { i, category ->
-            category.order = i
+            if (category.order != CREATE_CATEGORY_ORDER)
+                category.order = i - 1
         }
-
-        db.insertCategories(categories).asRxObservable().subscribe()
+        db.insertCategories(categories.filter { it.order != CREATE_CATEGORY_ORDER }).executeAsBlocking()
+        this.categories = categories.sortedBy { it.order }.toMutableList()
+        controller.setCategories(categories.map(::CategoryItem))
     }
 
     /**
@@ -86,21 +113,28 @@ class CategoryPresenter(
      * @param category The category to rename.
      * @param name The new name of the category.
      */
-    fun renameCategory(category: Category, name: String) {
+    fun renameCategory(category: Category, name: String): Boolean {
         // Do not allow duplicate categories.
-        if (categoryExists(name)) {
-            Observable.just(Unit).subscribeFirst({ view, _ -> view.onCategoryExistsError() })
-            return
+        if (categoryExists(name, category.id)) {
+            controller.onCategoryExistsError()
+            return false
         }
 
         category.name = name
-        db.insertCategory(category).asRxObservable().subscribe()
+        db.insertCategory(category).executeAsBlocking()
+        categories.find { it.id == category.id }?.name = name
+        controller.setCategories(categories.map(::CategoryItem))
+        return true
     }
 
     /**
      * Returns true if a category with the given name already exists.
      */
-    fun categoryExists(name: String): Boolean {
-        return categories.any { it.name.equals(name, true) }
+    private fun categoryExists(name: String, id: Int?): Boolean {
+        return categories.any { it.name.equals(name, true) && id != it.id }
+    }
+
+    companion object {
+        const val CREATE_CATEGORY_ORDER = -2
     }
 }

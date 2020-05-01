@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.source.model
 
+import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import java.io.Serializable
 
@@ -17,15 +18,15 @@ interface SManga : Serializable {
 
     var genre: String?
 
-    var lang_flag: String?
-
     var status: Int
-
-    var follow_status: FollowStatus?
 
     var thumbnail_url: String?
 
     var initialized: Boolean
+
+    var follow_status: FollowStatus?
+
+    var lang_flag: String?
 
     var anilist_id: String?
 
@@ -38,14 +39,6 @@ interface SManga : Serializable {
     var anime_planet_id: String?
 
     fun copyFrom(other: SManga) {
-
-        if (url.isEmpty()) {
-            url = other.url
-        }
-        if (title.isEmpty()) {
-            title = other.title
-        }
-
         if (other.author != null)
             author = other.author
 
@@ -55,14 +48,14 @@ interface SManga : Serializable {
         if (other.description != null)
             description = other.description
 
-        if (other.lang_flag != null)
-            lang_flag = other.lang_flag
-
         if (other.genre != null)
             genre = other.genre
 
         if (other.thumbnail_url != null)
             thumbnail_url = other.thumbnail_url
+
+        if (other.lang_flag != null)
+            lang_flag = other.lang_flag
 
         if (other.follow_status != null)
             follow_status = other.follow_status
@@ -98,7 +91,7 @@ interface SManga : Serializable {
         const val HIATUS = 6
 
         fun create(): SManga {
-            return SMangaImpl()
+            return MangaImpl()
         }
     }
 }

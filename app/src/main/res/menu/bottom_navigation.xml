@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:id="@+id/group_feature">
+        <item
+            android:checked="true"
+            android:id="@+id/nav_library"
+            android:icon="@drawable/ic_library_selector_24dp"
+            android:title="@string/library" />
+        <item
+            android:id="@+id/nav_recents"
+            android:icon="@drawable/ic_recent_read_selector_24dp"
+            android:title="@string/recents" />
+        <item
+            android:id="@+id/nav_browse"
+            android:icon="@drawable/ic_browse_selector_24dp"
+            android:title="@string/browse" />
+    </group>
+</menu>

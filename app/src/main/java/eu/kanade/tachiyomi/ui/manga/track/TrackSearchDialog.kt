@@ -4,8 +4,6 @@ import android.app.Dialog
 import android.os.Bundle
 import android.view.View
 import com.afollestad.materialdialogs.MaterialDialog
-import com.afollestad.materialdialogs.WhichButton
-import com.afollestad.materialdialogs.actions.setActionButtonEnabled
 import com.afollestad.materialdialogs.customview.customView
 import com.jakewharton.rxbinding.widget.itemClicks
 import com.jakewharton.rxbinding.widget.textChanges
@@ -15,15 +13,15 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
-import eu.kanade.tachiyomi.util.plusAssign
-import java.util.concurrent.TimeUnit
-import kotlinx.android.synthetic.main.track_controller.*
+import eu.kanade.tachiyomi.ui.manga.MangaDetailsPresenter
+import eu.kanade.tachiyomi.util.lang.plusAssign
 import kotlinx.android.synthetic.main.track_search_dialog.view.*
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.subscriptions.CompositeSubscription
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.util.concurrent.TimeUnit
 
 class TrackSearchDialog : DialogController {
 
@@ -39,17 +37,18 @@ class TrackSearchDialog : DialogController {
 
     private var searchTextSubscription: Subscription? = null
 
-    private val trackController
-        get() = targetController as TrackController
+    private lateinit var bottomSheet: TrackingBottomSheet
 
     private var wasPreviouslyTracked: Boolean = false
+    private lateinit var presenter: MangaDetailsPresenter
 
-    constructor(target: TrackController, service: TrackService, wasTracked: Boolean) : super(Bundle()
-            .apply {
-                putInt(KEY_SERVICE, service.id)
-            }) {
+    constructor(target: TrackingBottomSheet, service: TrackService, wasTracked: Boolean) : super(Bundle()
+        .apply {
+            putInt(KEY_SERVICE, service.id)
+        }) {
         wasPreviouslyTracked = wasTracked
-        targetController = target
+        bottomSheet = target
+        presenter = target.presenter
         this.service = service
     }
 
@@ -60,12 +59,11 @@ class TrackSearchDialog : DialogController {
 
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
         val dialog = MaterialDialog(activity!!).apply {
-            customView(viewRes = R.layout.track_search_dialog, scrollable = true)
+            customView(viewRes = R.layout.track_search_dialog, scrollable = false)
             negativeButton(android.R.string.cancel)
-            positiveButton(
-                    if (wasPreviouslyTracked) R.string.action_clear
-                    else R.string.action_track) { onPositiveButtonClick() }
-            setActionButtonEnabled(WhichButton.POSITIVE, wasPreviouslyTracked)
+            if (wasPreviouslyTracked) {
+                positiveButton(R.string.clear) { onPositiveButtonClick() }
+            }
         }
 
         if (subscriptions.isUnsubscribed) {
@@ -88,17 +86,22 @@ class TrackSearchDialog : DialogController {
         selectedItem = null
 
         subscriptions += view.track_search_list.itemClicks().subscribe { position ->
-            selectedItem = adapter.getItem(position)
-            (dialog as? MaterialDialog)?.positiveButton(R.string.action_track)
-            (dialog as? MaterialDialog)?.setActionButtonEnabled(WhichButton.POSITIVE, true)
+            trackItem(position)
         }
 
         // Do an initial search based on the manga's title
         if (savedState == null) {
-            val title = trackController.presenter.manga.title
+            val title = presenter.manga.title
             view.track_search.append(title)
             search(title)
         }
+    }
+
+    private fun trackItem(position: Int) {
+        selectedItem = adapter?.getItem(position)
+        bottomSheet.refreshTrack(service)
+        presenter.registerTracking(selectedItem, service)
+        dismissDialog()
     }
 
     override fun onDestroyView(view: View) {
@@ -127,7 +130,7 @@ class TrackSearchDialog : DialogController {
         val view = dialogView ?: return
         view.progress.visibility = View.VISIBLE
         view.track_search_list.visibility = View.INVISIBLE
-        trackController.presenter.search(query, service)
+        presenter.trackSearch(query, service)
     }
 
     fun onSearchResults(results: List<TrackSearch>) {
@@ -137,9 +140,7 @@ class TrackSearchDialog : DialogController {
         view.track_search_list.visibility = View.VISIBLE
         adapter?.setItems(results)
         if (results.size == 1 && !wasPreviouslyTracked) {
-            selectedItem = adapter?.getItem(0)
-            (dialog as? MaterialDialog)?.positiveButton(R.string.action_track)
-            (dialog as? MaterialDialog)?.setActionButtonEnabled(WhichButton.POSITIVE, true)
+            trackItem(0)
         }
     }
 
@@ -151,8 +152,9 @@ class TrackSearchDialog : DialogController {
     }
 
     private fun onPositiveButtonClick() {
-        trackController.swipe_refresh.isRefreshing = true
-        trackController.presenter.registerTracking(selectedItem, service)
+        bottomSheet.refreshTrack(service)
+        presenter.registerTracking(null,
+            service)
     }
 
     private companion object {

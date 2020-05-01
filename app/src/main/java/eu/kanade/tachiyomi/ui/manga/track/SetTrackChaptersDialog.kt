@@ -6,7 +6,6 @@ import android.widget.NumberPicker
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.customview.customView
 import com.afollestad.materialdialogs.customview.getCustomView
-import com.bluelinelabs.conductor.Controller
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackManager
@@ -15,14 +14,15 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 class SetTrackChaptersDialog<T> : DialogController
-        where T : Controller, T : SetTrackChaptersDialog.Listener {
+        where T : SetTrackChaptersDialog.Listener {
 
     private val item: TrackItem
+    private lateinit var listener: Listener
 
     constructor(target: T, item: TrackItem) : super(Bundle().apply {
         putSerializable(KEY_ITEM_TRACK, item.track)
     }) {
-        targetController = target
+        listener = target
         this.item = item
     }
 
@@ -37,23 +37,28 @@ class SetTrackChaptersDialog<T> : DialogController
         val item = item
 
         val dialog = MaterialDialog(activity!!)
-                .title(R.string.chapters)
-                .customView(viewRes = R.layout.track_chapters_dialog, scrollable = false)
-                .negativeButton(android.R.string.cancel)
-                .positiveButton(android.R.string.ok) { dialog ->
-                    val view = dialog.getCustomView()
-                    // Remove focus to update selected number
-                    val np: NumberPicker = view.findViewById(R.id.chapters_picker)
-                    np.clearFocus()
-                    (targetController as? Listener)?.setChaptersRead(item, np.value)
-                }
+            .title(R.string.chapters)
+            .customView(viewRes = R.layout.track_chapters_dialog)
+            .negativeButton(android.R.string.cancel)
+            .positiveButton(android.R.string.ok) { dialog ->
+                val view = dialog.getCustomView()
+                // Remove focus to update selected number
+                val np: NumberPicker = view.findViewById(R.id.chapters_picker)
+                np.clearFocus()
+                listener.setChaptersRead(item, np.value)
+            }
 
         val view = dialog.getCustomView()
         val np: NumberPicker = view.findViewById(R.id.chapters_picker)
         // Set initial value
         np.value = item.track?.last_chapter_read ?: 0
-        // Don't allow to go from 0 to 9999
-        np.wrapSelectorWheel = false
+        if (item.track?.total_chapters ?: 0 > 0) {
+            np.wrapSelectorWheel = true
+            np.maxValue = item.track?.total_chapters ?: 0
+        } else {
+            // Don't allow to go from 0 to 9999
+            np.wrapSelectorWheel = false
+        }
 
         return dialog
     }

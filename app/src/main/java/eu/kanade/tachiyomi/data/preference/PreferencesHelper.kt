@@ -1,38 +1,60 @@
 package eu.kanade.tachiyomi.data.preference
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Environment
-import android.preference.PreferenceManager
+import androidx.preference.PreferenceManager
 import com.f2prateek.rx.preferences.Preference
 import com.f2prateek.rx.preferences.RxSharedPreferences
+import com.tfcporciuncula.flow.FlowSharedPreferences
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.online.Mangadex
 import java.io.File
+import java.text.DateFormat
+import java.text.SimpleDateFormat
+import java.util.Locale
+import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 
 fun <T> Preference<T>.getOrDefault(): T = get() ?: defaultValue()!!
 
 fun Preference<Boolean>.invert(): Boolean = getOrDefault().let { set(!it); !it }
 
+private class DateFormatConverter : Preference.Adapter<DateFormat> {
+    override fun get(key: String, preferences: SharedPreferences): DateFormat {
+        val dateFormat = preferences.getString(Keys.dateFormat, "")!!
+
+        if (dateFormat != "") {
+            return SimpleDateFormat(dateFormat, Locale.getDefault())
+        }
+
+        return DateFormat.getDateInstance(DateFormat.SHORT)
+    }
+
+    override fun set(key: String, value: DateFormat, editor: SharedPreferences.Editor) {
+        // No-op
+    }
+}
+
 class PreferencesHelper(val context: Context) {
 
     private val prefs = PreferenceManager.getDefaultSharedPreferences(context)
     private val rxPrefs = RxSharedPreferences.create(prefs)
+    private val flowPrefs = FlowSharedPreferences(prefs)
 
     private val defaultDownloadsDir = Uri.fromFile(
         File(
             Environment.getExternalStorageDirectory().absolutePath + File.separator +
-                context.getString(R.string.app_name), "downloads"
+                context.getString(R.string.neko_app_name), "downloads"
         )
     )
 
     private val defaultBackupDir = Uri.fromFile(
         File(
             Environment.getExternalStorageDirectory().absolutePath + File.separator +
-                context.getString(R.string.app_name), "backup"
+                context.getString(R.string.neko_app_name), "backup"
         )
     )
 
@@ -40,11 +62,9 @@ class PreferencesHelper(val context: Context) {
     fun getStringPref(key: String, default: String?) = rxPrefs.getString(key, default)
     fun getStringSet(key: String, default: Set<String>) = rxPrefs.getStringSet(key, default)
 
-    fun startScreen() = prefs.getInt(Keys.startScreen, 1)
-
     fun clear() = prefs.edit().clear().apply()
 
-    fun theme() = prefs.getInt(Keys.theme, 1)
+    fun theme() = prefs.getInt(Keys.theme, 5)
 
     fun rotation() = rxPrefs.getInteger(Keys.rotation, 1)
 
@@ -53,10 +73,6 @@ class PreferencesHelper(val context: Context) {
     fun doubleTapAnimSpeed() = rxPrefs.getInteger(Keys.doubleTapAnimationSpeed, 500)
 
     fun showPageNumber() = rxPrefs.getBoolean(Keys.showPageNumber, true)
-
-    fun r18() = prefs.getString(Keys.showR18, "0")
-
-    fun imageServer() = prefs.getString(Keys.imageServer, Mangadex.SERVER_PREF_ENTRY_VALUES.first())
 
     fun trueColor() = rxPrefs.getBoolean(Keys.trueColor, false)
 
@@ -80,17 +96,13 @@ class PreferencesHelper(val context: Context) {
 
     fun zoomStart() = rxPrefs.getInteger(Keys.zoomStart, 1)
 
-    fun readerTheme() = rxPrefs.getInteger(Keys.readerTheme, 0)
-
-    fun lowQualityCovers() = prefs.getBoolean(Keys.lowQualityCovers, false)
-
-    fun useNonLoggedNetwork() = prefs.getBoolean(Keys.useNonLoggedNetwork, false)
+    fun readerTheme() = rxPrefs.getInteger(Keys.readerTheme, 2)
 
     fun cropBorders() = rxPrefs.getBoolean(Keys.cropBorders, false)
 
     fun cropBordersWebtoon() = rxPrefs.getBoolean(Keys.cropBordersWebtoon, false)
 
-    fun marginRatioWebtoon() = rxPrefs.getInteger(Keys.marginRatioWebtoon, 0)
+    fun webtoonSidePadding() = rxPrefs.getInteger(Keys.webtoonSidePadding, 0)
 
     fun readWithTapping() = rxPrefs.getBoolean(Keys.readWithTapping, true)
 
@@ -100,19 +112,21 @@ class PreferencesHelper(val context: Context) {
 
     fun readWithVolumeKeysInverted() = rxPrefs.getBoolean(Keys.readWithVolumeKeysInverted, false)
 
-    fun portraitColumns() = rxPrefs.getInteger(Keys.portraitColumns, 0)
-
-    fun landscapeColumns() = rxPrefs.getInteger(Keys.landscapeColumns, 0)
-
     fun updateOnlyNonCompleted() = prefs.getBoolean(Keys.updateOnlyNonCompleted, false)
 
     fun autoUpdateTrack() = prefs.getBoolean(Keys.autoUpdateTrack, true)
+
+    fun lastUsedCatalogueSource() = rxPrefs.getLong(Keys.lastUsedCatalogueSource, -1)
 
     fun lastUsedCategory() = rxPrefs.getInteger(Keys.lastUsedCategory, 0)
 
     fun lastVersionCode() = rxPrefs.getInteger("last_version_code", 0)
 
-    fun catalogueAsList() = rxPrefs.getBoolean(Keys.catalogueAsList, false)
+    fun browseAsList() = rxPrefs.getBoolean(Keys.catalogueAsList, false)
+
+    fun enabledLanguages() = rxPrefs.getStringSet(Keys.enabledLanguages, setOf("en", Locale.getDefault().language))
+
+    fun sourceSorting() = rxPrefs.getInteger(Keys.sourcesSort, 0)
 
     fun sourceUsername(source: Source) = prefs.getString(Keys.sourceUsername(source.id), "")
 
@@ -142,14 +156,11 @@ class PreferencesHelper(val context: Context) {
 
     fun backupsDirectory() = rxPrefs.getString(Keys.backupDirectory, defaultBackupDir.toString())
 
-    fun downloadsDirectory() =
-        rxPrefs.getString(Keys.downloadsDirectory, defaultDownloadsDir.toString())
+    fun dateFormat() = rxPrefs.getObject(Keys.dateFormat, DateFormat.getDateInstance(DateFormat.SHORT), DateFormatConverter())
+
+    fun downloadsDirectory() = rxPrefs.getString(Keys.downloadsDirectory, defaultDownloadsDir.toString())
 
     fun downloadOnlyOverWifi() = prefs.getBoolean(Keys.downloadOnlyOverWifi, true)
-
-    fun similarShowTab() = prefs.getBoolean(Keys.similarShowTab, false)
-
-    fun similarUpdateRestriction() = prefs.getStringSet(Keys.similarUpdateRestriction, emptySet())
 
     fun numberOfBackups() = rxPrefs.getInteger(Keys.numberOfBackups, 1)
 
@@ -159,13 +170,25 @@ class PreferencesHelper(val context: Context) {
 
     fun removeAfterMarkedAsRead() = prefs.getBoolean(Keys.removeAfterMarkedAsRead, false)
 
-    fun libraryUpdateInterval() = rxPrefs.getInteger(Keys.libraryUpdateInterval, 0)
+    fun libraryUpdateInterval() = rxPrefs.getInteger(Keys.libraryUpdateInterval, 24)
 
     fun libraryUpdateRestriction() = prefs.getStringSet(Keys.libraryUpdateRestriction, emptySet())
 
     fun libraryUpdateCategories() = rxPrefs.getStringSet(Keys.libraryUpdateCategories, emptySet())
 
-    fun libraryAsList() = rxPrefs.getBoolean(Keys.libraryAsList, false)
+    fun libraryUpdatePrioritization() = rxPrefs.getInteger(Keys.libraryUpdatePrioritization, 0)
+
+    fun libraryLayout() = rxPrefs.getInteger(Keys.libraryLayout, 1)
+
+    fun gridSize() = rxPrefs.getInteger(Keys.gridSize, 1)
+
+    fun alwaysShowSeeker() = rxPrefs.getBoolean("always_show_seeker", false)
+
+    fun uniformGrid() = rxPrefs.getBoolean(Keys.uniformGrid, true)
+
+    fun chaptersDescAsDefault() = rxPrefs.getBoolean("chapters_desc_as_default", true)
+
+    fun downloadBadge() = rxPrefs.getBoolean(Keys.downloadBadge, false)
 
     fun filterDownloaded() = rxPrefs.getInteger(Keys.filterDownloaded, 0)
 
@@ -173,17 +196,23 @@ class PreferencesHelper(val context: Context) {
 
     fun filterCompleted() = rxPrefs.getInteger(Keys.filterCompleted, 0)
 
-    fun filterAnilist() = rxPrefs.getInteger(Keys.filterAnilist, 0)
+    fun filterTracked() = rxPrefs.getInteger(Keys.filterTracked, 0)
 
-    fun filterKitsu() = rxPrefs.getInteger(Keys.filterKitsu, 0)
+    fun filterMangaType() = rxPrefs.getInteger(Keys.filterMangaType, 0)
 
-    fun filterMyAnimeList() = rxPrefs.getInteger(Keys.filterMyanimelist, 0)
+    fun hideCategories() = rxPrefs.getBoolean("hide_categories", false)
 
     fun librarySortingMode() = rxPrefs.getInteger(Keys.librarySortingMode, 0)
 
     fun librarySortingAscending() = rxPrefs.getBoolean("library_sorting_ascending", true)
 
     fun automaticUpdates() = prefs.getBoolean(Keys.automaticUpdates, true)
+
+    fun collapsedCategories() = rxPrefs.getStringSet("collapsed_categories", mutableSetOf())
+
+    fun hiddenSources() = rxPrefs.getStringSet("hidden_catalogues", mutableSetOf())
+
+    fun pinnedCatalogues() = rxPrefs.getStringSet("pinned_catalogues", emptySet())
 
     fun downloadNew() = rxPrefs.getBoolean(Keys.downloadNew, false)
 
@@ -201,14 +230,62 @@ class PreferencesHelper(val context: Context) {
 
     fun lastUnlock() = rxPrefs.getLong(Keys.lastUnlock, 0)
 
-    fun skipHidden() = prefs.getBoolean(Keys.skipHidden, false)
+    fun secureScreen() = rxPrefs.getBoolean(Keys.secureScreen, false)
 
-    fun upgradeFilters() {
-        val filterDl = rxPrefs.getBoolean(Keys.filterDownloaded, false).getOrDefault()
-        val filterUn = rxPrefs.getBoolean(Keys.filterUnread, false).getOrDefault()
-        val filterCm = rxPrefs.getBoolean(Keys.filterCompleted, false).getOrDefault()
-        filterDownloaded().set(if (filterDl) 1 else 0)
-        filterUnread().set(if (filterUn) 1 else 0)
-        filterCompleted().set(if (filterCm) 1 else 0)
-    }
+    fun removeArticles() = rxPrefs.getBoolean(Keys.removeArticles, false)
+
+    fun migrateFlags() = rxPrefs.getInteger("migrate_flags", Int.MAX_VALUE)
+
+    fun trustedSignatures() = rxPrefs.getStringSet("trusted_signatures", emptySet())
+
+    fun migrationSources() = rxPrefs.getString("migrate_sources", "")
+
+    fun useSourceWithMost() = rxPrefs.getBoolean("use_source_with_most", false)
+
+    fun skipPreMigration() = rxPrefs.getBoolean(Keys.skipPreMigration, false)
+
+    fun defaultMangaOrder() = rxPrefs.getString("default_manga_order", "")
+
+    fun refreshCoversToo() = rxPrefs.getBoolean(Keys.refreshCoversToo, true)
+
+    fun updateOnRefresh() = rxPrefs.getInteger(Keys.updateOnRefresh, -1)
+
+    fun extensionUpdatesCount() = rxPrefs.getInteger("ext_updates_count", 0)
+
+    fun recentsViewType() = rxPrefs.getInteger("recents_view_type", 0)
+
+    fun lastExtCheck() = rxPrefs.getLong("last_ext_check", 0)
+
+    fun unreadBadgeType() = rxPrefs.getInteger("unread_badge_type", 2)
+
+    fun hideStartReadingButton() = rxPrefs.getBoolean("hide_reading_button", false)
+
+    fun hideFiltersAtStart() = rxPrefs.getBoolean("hide_filters_at_start", false)
+
+    fun alwaysShowChapterTransition() = rxPrefs.getBoolean(Keys.alwaysShowChapterTransition, true)
+
+    fun deleteRemovedChapters() = flowPrefs.getInt(Keys.deleteRemovedChapters, 0)
+
+    // Tutorial preferences
+    fun shownFilterTutorial() = flowPrefs.getBoolean("shown_filter_tutorial", false)
+
+    fun shownChapterSwipeTutorial() = flowPrefs.getBoolean("shown_swipe_tutorial", false)
+
+    fun shownDownloadQueueTutorial() = flowPrefs.getBoolean("shown_download_queue", false)
+
+    fun shownSimilarTutorial() = flowPrefs.getBoolean("shown_similar_tutorial", false)
+
+    fun skipFiltered() = prefs.getBoolean(Keys.skipFiltered, false)
+
+    fun similarEnabled() = prefs.getBoolean(Keys.similarEnabled, false)
+
+    fun similarUpdateRestriction() = prefs.getStringSet(Keys.similarUpdateRestriction, emptySet())
+
+    fun lowQualityCovers() = prefs.getBoolean(Keys.lowQualityCovers, false)
+
+    fun useNonLoggedNetwork() = prefs.getBoolean(Keys.useNonLoggedNetwork, false)
+
+    fun r18() = prefs.getString(Keys.showR18, "0")
+
+    fun imageServer() = prefs.getString(Keys.imageServer, Mangadex.SERVER_PREF_ENTRY_VALUES.first())
 }

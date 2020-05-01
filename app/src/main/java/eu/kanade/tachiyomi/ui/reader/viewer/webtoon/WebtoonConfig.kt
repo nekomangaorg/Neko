@@ -2,7 +2,7 @@ package eu.kanade.tachiyomi.ui.reader.viewer.webtoon
 
 import com.f2prateek.rx.preferences.Preference
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.util.addTo
+import eu.kanade.tachiyomi.util.lang.addTo
 import rx.subscriptions.CompositeSubscription
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -34,10 +34,14 @@ class WebtoonConfig(preferences: PreferencesHelper = Injekt.get()) {
     var doubleTapAnimDuration = 500
         private set
 
-    var marginRatio = 0
+    var alwaysShowChapterTransition = true
         private set
 
-    var marginBetweenPagesWebtoon = false
+    var sidePadding = 0
+        private set
+
+    var readerTheme = 0
+        private set
 
     init {
         preferences.readWithTapping()
@@ -58,8 +62,14 @@ class WebtoonConfig(preferences: PreferencesHelper = Injekt.get()) {
         preferences.readWithVolumeKeysInverted()
             .register({ volumeKeysInverted = it })
 
-        preferences.marginRatioWebtoon()
-            .register({ marginRatio = it }, { imagePropertyChangedListener?.invoke() })
+        preferences.alwaysShowChapterTransition()
+            .register({ alwaysShowChapterTransition = it })
+
+        preferences.webtoonSidePadding()
+            .register({ sidePadding = it }, { imagePropertyChangedListener?.invoke() })
+
+        preferences.readerTheme()
+            .register({ readerTheme = it }, { imagePropertyChangedListener?.invoke() })
     }
 
     fun unsubscribe() {

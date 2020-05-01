@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/source_filter_sheet"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bottom_sheet_rounded_background"
+    android:backgroundTint="?android:attr/colorBackground">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="?attr/actionBarSize"
+        android:layout_marginBottom="?attr/actionBarSize"
+        android:clipToPadding="false" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/title_layout"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:layout_gravity="top"
+        android:background="@drawable/bottom_sheet_rounded_background"
+        android:backgroundTint="?attr/colorSecondary"
+        android:clickable="true"
+        android:elevation="0dp"
+        android:focusable="true"
+        android:orientation="horizontal">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/reset_btn"
+            style="@style/Neko.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:textColor="?attr/tabBarIconColor"
+            android:layout_height="match_parent"
+            android:textSize="16sp"
+            android:letterSpacing="0.0"
+            android:text="@string/reset"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/toolbar_title"
+            style="@style/Neko.Headline5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="?actionBarTintColor"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Title Text" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/search_btn"
+            style="@style/Neko.Button.TextButton"
+            android:textSize="16sp"
+            android:layout_width="wrap_content"
+            android:textColor="?attr/tabBarIconColor"
+            android:layout_height="match_parent"
+            android:text="@string/search"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/footer_layout"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:layout_gravity="bottom"
+        android:background="@drawable/bottom_sheet_rounded_background"
+        android:backgroundTint="?attr/colorSecondary"
+        android:clickable="true"
+        android:elevation="0dp"
+        android:focusable="true"
+        android:orientation="horizontal">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/random_manga_btn"
+            style="@style/Neko.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:textColor="?attr/tabBarIconColor"
+            android:textSize="16sp"
+            android:layout_height="match_parent"
+            android:text="@string/random_manga"
+            android:layout_marginStart="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/follows_btn"
+            style="@style/Neko.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:textColor="?attr/tabBarIconColor"
+            android:layout_height="match_parent"
+            android:text="@string/follows"
+            android:layout_marginEnd="8dp"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</FrameLayout>

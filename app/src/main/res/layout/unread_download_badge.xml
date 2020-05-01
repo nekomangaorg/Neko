@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<eu.kanade.tachiyomi.ui.library.LibraryBadge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/badge_view"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    app:cardCornerRadius="10dp"
+    app:cardElevation="2dp"
+    android:layout_marginStart="2dp"
+    android:layout_marginTop="5dp"
+    android:visibility="gone"
+    tools:visibility="visible">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/download_text"
+            style="@style/TextAppearance.Regular.Caption.Light"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/download_badge"
+            android:gravity="center"
+            android:maxLines="1"
+            android:paddingStart="5dp"
+            android:paddingEnd="5dp"
+            android:textColor="@color/download_badge_text"
+            android:textSize="13sp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="1"
+            tools:paddingEnd="8dp"
+            tools:visibility="visible" />
+
+        <ImageView
+            android:id="@+id/unread_angle"
+            android:layout_width="10dp"
+            android:scaleType="fitXY"
+            android:layout_height="0dp"
+            android:src="@drawable/unread_angled_badge"
+            app:layout_constraintBottom_toBottomOf="@+id/unread_text"
+            app:layout_constraintEnd_toStartOf="@id/unread_text"
+            app:layout_constraintTop_toTopOf="@+id/unread_text"
+            tools:ignore="ContentDescription" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/unread_text"
+            style="@style/TextAppearance.Regular.Caption.Light"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/unread_badge"
+            android:gravity="center"
+            android:maxLines="1"
+            android:paddingStart="5dp"
+            android:paddingEnd="5dp"
+            android:textColor="@color/unread_badge_text"
+            android:textSize="13sp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/download_text"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/download_text"
+            app:layout_constraintTop_toTopOf="@+id/download_text"
+            tools:text="20"
+            tools:visibility="visible"
+            tools:paddingStart="2dp" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</eu.kanade.tachiyomi.ui.library.LibraryBadge>

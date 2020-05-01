@@ -13,16 +13,15 @@ import android.widget.Spinner
 import android.widget.TextView
 import androidx.appcompat.widget.TintTypedArray
 import androidx.core.view.ViewCompat
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.R
 import com.google.android.material.internal.ScrimInsetsFrameLayout
 import com.google.android.material.textfield.TextInputLayout
+import eu.kanade.tachiyomi.util.view.inflate
+import kotlin.math.min
 import eu.kanade.tachiyomi.R as TR
-import eu.kanade.tachiyomi.util.inflate
 
 @Suppress("LeakingThis")
-@SuppressLint("RestrictedApi")
+@SuppressLint("PrivateResource", "RestrictedApi")
 open class SimpleNavigationView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -38,39 +37,32 @@ open class SimpleNavigationView @JvmOverloads constructor(
     /**
      * Recycler view containing all the items.
      */
-    protected val recycler = RecyclerView(context)
+    val recycler = androidx.recyclerview.widget.RecyclerView(context)
 
     init {
         // Custom attributes
-        val a = TintTypedArray.obtainStyledAttributes(
-            context, attrs,
-            R.styleable.NavigationView, defStyleAttr,
-            R.style.Widget_Design_NavigationView
-        )
+        val a = TintTypedArray.obtainStyledAttributes(context, attrs,
+                R.styleable.NavigationView, defStyleAttr,
+                R.style.Widget_Design_NavigationView)
 
         ViewCompat.setBackground(
-            this, a.getDrawable(R.styleable.NavigationView_android_background)
-        )
+                this, a.getDrawable(R.styleable.NavigationView_android_background))
 
         if (a.hasValue(R.styleable.NavigationView_elevation)) {
-            ViewCompat.setElevation(
-                this, a.getDimensionPixelSize(
-                    R.styleable.NavigationView_elevation, 0
-                ).toFloat()
-            )
+            ViewCompat.setElevation(this, a.getDimensionPixelSize(
+                    R.styleable.NavigationView_elevation, 0).toFloat())
         }
 
         @Suppress("DEPRECATION")
-        ViewCompat.setFitsSystemWindows(
-            this,
-            a.getBoolean(R.styleable.NavigationView_android_fitsSystemWindows, false)
-        )
+        ViewCompat.setFitsSystemWindows(this,
+                a.getBoolean(R.styleable.NavigationView_android_fitsSystemWindows, false))
 
         maxWidth = a.getDimensionPixelSize(R.styleable.NavigationView_android_maxWidth, 0)
 
         a.recycle()
 
-        recycler.layoutManager = LinearLayoutManager(context)
+        recycler.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
+        recycler.clipToPadding = false
     }
 
     /**
@@ -80,8 +72,7 @@ open class SimpleNavigationView @JvmOverloads constructor(
     override fun onMeasure(widthSpec: Int, heightSpec: Int) {
         val width = when (MeasureSpec.getMode(widthSpec)) {
             MeasureSpec.AT_MOST -> MeasureSpec.makeMeasureSpec(
-                Math.min(MeasureSpec.getSize(widthSpec), maxWidth), MeasureSpec.EXACTLY
-            )
+                    min(MeasureSpec.getSize(widthSpec), maxWidth), MeasureSpec.EXACTLY)
             MeasureSpec.UNSPECIFIED -> MeasureSpec.makeMeasureSpec(maxWidth, MeasureSpec.EXACTLY)
             else -> widthSpec
         }
@@ -92,7 +83,7 @@ open class SimpleNavigationView @JvmOverloads constructor(
     /**
      * Base view holder.
      */
-    abstract class Holder(view: View) : RecyclerView.ViewHolder(view)
+    abstract class Holder(view: View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(view)
 
     /**
      * Separator view holder.

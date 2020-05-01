@@ -11,25 +11,18 @@ import eu.davidea.viewholders.FlexibleViewHolder
 import eu.kanade.tachiyomi.R
 import java.util.Date
 
-class DateItem(val date: Date) : AbstractHeaderItem<DateItem.Holder>() {
+class DateItem(val date: Date, val addedString: Boolean = false) : AbstractHeaderItem<DateItem
+.Holder>() {
 
     override fun getLayoutRes(): Int {
         return R.layout.recent_chapters_section_item
     }
 
-    override fun createViewHolder(
-        view: View,
-        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>
-    ): Holder? {
+    override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): Holder {
         return Holder(view, adapter)
     }
 
-    override fun bindViewHolder(
-        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
-        holder: Holder,
-        position: Int,
-        payloads: MutableList<Any>?
-    ) {
+    override fun bindViewHolder(adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>, holder: Holder, position: Int, payloads: MutableList<Any?>?) {
         holder.bind(this)
     }
 
@@ -45,16 +38,16 @@ class DateItem(val date: Date) : AbstractHeaderItem<DateItem.Holder>() {
         return date.hashCode()
     }
 
-    class Holder(view: View, adapter: FlexibleAdapter<*>) :
-        FlexibleViewHolder(view, adapter, true) {
+    class Holder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>) : FlexibleViewHolder(view, adapter, true) {
 
         private val now = Date().time
 
         val section_text: TextView = view.findViewById(R.id.section_text)
 
         fun bind(item: DateItem) {
+            val dateString = DateUtils.getRelativeTimeSpanString(item.date.time, now, DateUtils.DAY_IN_MILLIS)
             section_text.text =
-                DateUtils.getRelativeTimeSpanString(item.date.time, now, DateUtils.DAY_IN_MILLIS)
+                if (item.addedString) itemView.context.getString(R.string.added_, dateString) else dateString
         }
     }
 }

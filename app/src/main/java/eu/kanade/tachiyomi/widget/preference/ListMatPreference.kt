@@ -13,18 +13,16 @@ open class ListMatPreference @JvmOverloads constructor(
     activity: Activity?,
     context: Context,
     attrs: AttributeSet? =
-            null
+    null
 ) :
-        MatPreference(activity, context, attrs) {
+    MatPreference(activity, context, attrs) {
 
     var sharedPref: String? = null
     var otherPref: Preference? = null
     var entryValues: List<String> = emptyList()
     var entriesRes: Array<Int>
         get() = emptyArray()
-        set(value) {
-            entries = value.map { context.getString(it) }
-        }
+        set(value) { entries = value.map { context.getString(it) } }
     protected var defValue: String = ""
     var entries: List<String> = emptyList()
 
@@ -32,8 +30,8 @@ open class ListMatPreference @JvmOverloads constructor(
         super.onSetInitialValue(defaultValue)
         defValue = defaultValue as? String ?: defValue
     }
-
     override fun getSummary(): CharSequence {
+        if (customSummary != null) return customSummary!!
         val index = entryValues.indexOf(prefs.getStringPref(key, defValue).getOrDefault())
         return if (entries.isEmpty() || index == -1) ""
         else entries[index]
@@ -52,8 +50,8 @@ open class ListMatPreference @JvmOverloads constructor(
             settings.getString(key, "")
         } else prefs.getStringPref(key, defValue).getOrDefault())
         listItemsSingleChoice(items = entries,
-                waitForPositiveButton = false,
-                initialSelection = default) { _, pos, _ ->
+            waitForPositiveButton = false,
+            initialSelection = default) { _, pos, _ ->
             val value = entryValues[pos]
             if (sharedPref != null) {
                 val oldDef = if (default > -1) entries[default] else ""
@@ -63,9 +61,9 @@ open class ListMatPreference @JvmOverloads constructor(
                 edit.apply()
                 otherPref?.callChangeListener(value)
                 if (oldDef == otherPref?.summary || otherPref?.summary.isNullOrEmpty()) otherPref?.summary =
-                        entries[pos]
+                    entries[pos]
                 else otherPref?.summary = otherPref?.summary?.toString()?.replace(oldDef,
-                        entries[pos]
+                    entries[pos]
                 ) ?: entries[pos]
             } else {
                 prefs.getStringPref(key, defValue).set(value)

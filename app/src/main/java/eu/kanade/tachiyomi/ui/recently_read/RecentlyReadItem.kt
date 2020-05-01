@@ -14,10 +14,7 @@ class RecentlyReadItem(val mch: MangaChapterHistory) : AbstractFlexibleItem<Rece
         return R.layout.recently_read_item
     }
 
-    override fun createViewHolder(
-        view: View,
-        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>
-    ): RecentlyReadHolder {
+    override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): RecentlyReadHolder {
         return RecentlyReadHolder(view, adapter as RecentlyReadAdapter)
     }
 

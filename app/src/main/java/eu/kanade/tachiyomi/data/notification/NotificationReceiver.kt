@@ -10,7 +10,6 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Handler
-import eu.kanade.tachiyomi.BuildConfig.APPLICATION_ID as ID
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.backup.BackupRestoreService
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -19,16 +18,21 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.similar.SimilarUpdateService
+import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.main.MainActivity
-import eu.kanade.tachiyomi.ui.manga.MangaController
+import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
-import eu.kanade.tachiyomi.util.DiskUtil
-import eu.kanade.tachiyomi.util.getUriCompat
-import eu.kanade.tachiyomi.util.notificationManager
-import eu.kanade.tachiyomi.util.toast
-import java.io.File
+import eu.kanade.tachiyomi.util.storage.DiskUtil
+import eu.kanade.tachiyomi.util.storage.getUriCompat
+import eu.kanade.tachiyomi.util.system.notificationManager
+import eu.kanade.tachiyomi.util.system.toast
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
+import java.io.File
+import eu.kanade.tachiyomi.BuildConfig.APPLICATION_ID as ID
 
 /**
  * Global [BroadcastReceiver] that runs on UI thread
@@ -44,10 +48,7 @@ class NotificationReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         when (intent.action) {
             // Dismiss notification
-            ACTION_DISMISS_NOTIFICATION -> dismissNotification(
-                context,
-                intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
-            )
+            ACTION_DISMISS_NOTIFICATION -> dismissNotification(context, intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1))
             // Resume the download service
             ACTION_RESUME_DOWNLOADS -> DownloadService.start(context)
             // Pause the download service
@@ -57,28 +58,29 @@ class NotificationReceiver : BroadcastReceiver() {
             }
             // Clear the download queue
             ACTION_CLEAR_DOWNLOADS -> downloadManager.clearQueue(true)
-            // Show message notification created
-            ACTION_SHORTCUT_CREATED -> context.toast(R.string.shortcut_created)
             // Launch share activity and dismiss notification
-            ACTION_SHARE_IMAGE -> shareImage(
-                context, intent.getStringExtra(EXTRA_FILE_LOCATION),
-                intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
-            )
+            ACTION_SHARE_IMAGE -> shareImage(context, intent.getStringExtra(EXTRA_FILE_LOCATION),
+                    intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1))
             // Delete image from path and dismiss notification
-            ACTION_DELETE_IMAGE -> deleteImage(
-                context, intent.getStringExtra(EXTRA_FILE_LOCATION),
-                intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
-            )
+            ACTION_DELETE_IMAGE -> deleteImage(context, intent.getStringExtra(EXTRA_FILE_LOCATION),
+                    intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1))
             // Cancel library update and dismiss notification
             ACTION_CANCEL_LIBRARY_UPDATE -> cancelLibraryUpdate(context)
             ACTION_CANCEL_SIMILAR_UPDATE -> cancelSimilarUpdate(context)
             ACTION_CANCEL_RESTORE -> cancelRestoreUpdate(context)
             // Open reader activity
             ACTION_OPEN_CHAPTER -> {
-                openChapter(
-                    context, intent.getLongExtra(EXTRA_MANGA_ID, -1),
-                    intent.getLongExtra(EXTRA_CHAPTER_ID, -1)
+                openChapter(context, intent.getLongExtra(EXTRA_MANGA_ID, -1),
+                        intent.getLongExtra(EXTRA_CHAPTER_ID, -1))
+            }
+            ACTION_MARK_AS_READ -> {
+                val notificationId = intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
+                if (notificationId > -1) dismissNotification(
+                    context, notificationId, intent.getIntExtra(EXTRA_GROUP_ID, 0)
                 )
+                val urls = intent.getStringArrayExtra(EXTRA_CHAPTER_URL) ?: return
+                val mangaId = intent.getLongExtra(EXTRA_MANGA_ID, -1)
+                markAsRead(urls, mangaId)
             }
         }
     }
@@ -126,13 +128,12 @@ class NotificationReceiver : BroadcastReceiver() {
         val chapter = db.getChapter(chapterId).executeAsBlocking()
         context.sendBroadcast(Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS))
         if (manga != null && chapter != null) {
-            val intent =
-                ReaderActivity.newIntent(context, manga, chapter).apply {
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-                }
+            val intent = ReaderActivity.newIntent(context, manga, chapter).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
             context.startActivity(intent)
         } else {
-            context.toast(context.getString(R.string.no_next_chapter))
+            context.toast(context.getString(R.string.next_chapter_not_found))
         }
     }
 
@@ -176,7 +177,28 @@ class NotificationReceiver : BroadcastReceiver() {
     }
 
     /**
-     * Method called when user wants to stop a restore
+     * Method called when user wants to mark as read
+     *
+     * @param context context of application
+     * @param notificationId id of notification
+     */
+    private fun markAsRead(chapterUrls: Array<String>, mangaId: Long) {
+        val db: DatabaseHelper = Injekt.get()
+        chapterUrls.forEach {
+            val chapter = db.getChapter(it, mangaId).executeAsBlocking() ?: return
+            chapter.read = true
+            db.updateChapterProgress(chapter).executeAsBlocking()
+            val preferences: PreferencesHelper = Injekt.get()
+            if (preferences.removeAfterMarkedAsRead()) {
+                val manga = db.getManga(mangaId).executeAsBlocking() ?: return
+                val sourceManager: SourceManager = Injekt.get()
+                val source = sourceManager.get(manga.source) ?: return
+                downloadManager.deleteChapters(listOf(chapter), manga, source)
+            }
+        }
+    }
+
+    /* Method called when user wants to stop a restore
      *
      * @param context context of application
      * @param notificationId id of notification
@@ -201,7 +223,10 @@ class NotificationReceiver : BroadcastReceiver() {
         // Called to cancel library update.
         private const val ACTION_CANCEL_SIMILAR_UPDATE = "$ID.$NAME.CANCEL_SIMILAR_UPDATE"
 
-        // Called to cancel library update.
+        // Called to mark as read
+        private const val ACTION_MARK_AS_READ = "$ID.$NAME.MARK_AS_READ"
+
+        // Called to cancel restore
         private const val ACTION_CANCEL_RESTORE = "$ID.$NAME.CANCEL_RESTORE"
 
         // Called to open chapter
@@ -218,9 +243,6 @@ class NotificationReceiver : BroadcastReceiver() {
 
         // Called to clear downloads.
         private const val ACTION_CLEAR_DOWNLOADS = "$ID.$NAME.ACTION_CLEAR_DOWNLOADS"
-
-        // Called to notify user shortcut is created.
-        private const val ACTION_SHORTCUT_CREATED = "$ID.$NAME.ACTION_SHORTCUT_CREATED"
 
         // Called to dismiss notification.
         private const val ACTION_DISMISS_NOTIFICATION = "$ID.$NAME.ACTION_DISMISS_NOTIFICATION"
@@ -279,13 +301,6 @@ class NotificationReceiver : BroadcastReceiver() {
             return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
         }
 
-        internal fun shortcutCreatedBroadcast(context: Context): PendingIntent {
-            val intent = Intent(context, NotificationReceiver::class.java).apply {
-                action = ACTION_SHORTCUT_CREATED
-            }
-            return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
-        }
-
         /**
          * Returns [PendingIntent] that starts a service which dismissed the notification
          *
@@ -293,10 +308,7 @@ class NotificationReceiver : BroadcastReceiver() {
          * @param notificationId id of notification
          * @return [PendingIntent]
          */
-        internal fun dismissNotificationPendingBroadcast(
-            context: Context,
-            notificationId: Int
-        ): PendingIntent {
+        internal fun dismissNotificationPendingBroadcast(context: Context, notificationId: Int): PendingIntent {
             val intent = Intent(context, NotificationReceiver::class.java).apply {
                 action = ACTION_DISMISS_NOTIFICATION
                 putExtra(EXTRA_NOTIFICATION_ID, notificationId)
@@ -315,7 +327,7 @@ class NotificationReceiver : BroadcastReceiver() {
             context: Context,
             notificationId: Int,
             groupId: Int? =
-                null
+                        null
         ) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 val groupKey = context.notificationManager.activeNotifications.find {
@@ -342,12 +354,7 @@ class NotificationReceiver : BroadcastReceiver() {
          * @param notificationId id of notification
          * @return [PendingIntent]
          */
-        internal fun shareImagePendingBroadcast(
-            context: Context,
-            path: String,
-            notificationId: Int
-        ): PendingIntent {
-            // val shareIntent = ShareStartingActivity.newIntent(context, path)
+        internal fun shareImagePendingBroadcast(context: Context, path: String, notificationId: Int): PendingIntent {
             val shareIntent = Intent(Intent.ACTION_SEND).apply {
                 val uri = File(path).getUriCompat(context)
                 putExtra(Intent.EXTRA_STREAM, uri)
@@ -355,11 +362,8 @@ class NotificationReceiver : BroadcastReceiver() {
                 clipData = ClipData.newRawUri(null, uri)
                 type = "image/*"
             }
-            // val shareIntent2 = Intent.createChooser(shareIntent, context.getString(R.string.action_share))
-            return PendingIntent.getActivity(
-                context, 0, shareIntent, PendingIntent
-                    .FLAG_CANCEL_CURRENT
-            )
+            return PendingIntent.getActivity(context, 0, shareIntent, PendingIntent
+                .FLAG_CANCEL_CURRENT)
         }
 
         /**
@@ -370,11 +374,7 @@ class NotificationReceiver : BroadcastReceiver() {
          * @param notificationId id of notification
          * @return [PendingIntent]
          */
-        internal fun deleteImagePendingBroadcast(
-            context: Context,
-            path: String,
-            notificationId: Int
-        ): PendingIntent {
+        internal fun deleteImagePendingBroadcast(context: Context, path: String, notificationId: Int): PendingIntent {
             val intent = Intent(context, NotificationReceiver::class.java).apply {
                 action = ACTION_DELETE_IMAGE
                 putExtra(EXTRA_FILE_LOCATION, path)
@@ -394,17 +394,15 @@ class NotificationReceiver : BroadcastReceiver() {
             context: Context,
             manga: Manga,
             chapter:
-            Chapter
+                    Chapter
         ): PendingIntent {
             val newIntent = ReaderActivity.newIntent(context, manga, chapter)
-            return PendingIntent.getActivity(
-                context, manga.id.hashCode(), newIntent, PendingIntent
-                    .FLAG_UPDATE_CURRENT
-            )
+            return PendingIntent.getActivity(context, manga.id.hashCode(), newIntent, PendingIntent
+                .FLAG_UPDATE_CURRENT)
         }
 
         /**
-         * Returns [PendingIntent] that opens the manga info controller.
+         * Returns [PendingIntent] that opens the manga details controller.
          *
          * @param context context of application
          * @param manga manga of chapter
@@ -413,8 +411,8 @@ class NotificationReceiver : BroadcastReceiver() {
             PendingIntent {
             val newIntent =
                 Intent(context, MainActivity::class.java).setAction(MainActivity.SHORTCUT_MANGA)
-                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                    .putExtra(MangaController.MANGA_EXTRA, manga.id)
+                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                    .putExtra(MangaDetailsController.MANGA_EXTRA, manga.id)
                     .putExtra("notificationId", manga.id.hashCode())
                     .putExtra("groupId", groupId)
             return PendingIntent.getActivity(
@@ -429,9 +427,33 @@ class NotificationReceiver : BroadcastReceiver() {
             val toLaunch = Intent(Intent.ACTION_VIEW).apply {
                 setDataAndType(uri, "text/plain")
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION
             }
             return PendingIntent.getActivity(context, 0, toLaunch, 0)
+        }
+
+        /**
+         * Returns [PendingIntent] that marks a chapter as read and deletes it if preferred
+         *
+         * @param context context of application
+         * @param manga manga of chapter
+         */
+        internal fun markAsReadPendingBroadcast(
+            context: Context,
+            manga: Manga,
+            chapters:
+                        Array<Chapter>,
+            groupId: Int
+        ):
+            PendingIntent {
+            val newIntent = Intent(context, NotificationReceiver::class.java).apply {
+                action = ACTION_MARK_AS_READ
+                putExtra(EXTRA_CHAPTER_URL, chapters.map { it.url }.toTypedArray())
+                putExtra(EXTRA_MANGA_ID, manga.id)
+                putExtra(EXTRA_NOTIFICATION_ID, manga.id.hashCode())
+                putExtra(EXTRA_GROUP_ID, groupId)
+            }
+            return PendingIntent.getBroadcast(context, manga.id.hashCode(), newIntent, PendingIntent.FLAG_UPDATE_CURRENT)
         }
 
         /**

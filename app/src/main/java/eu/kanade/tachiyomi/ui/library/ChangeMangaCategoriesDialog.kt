@@ -33,16 +33,18 @@ class ChangeMangaCategoriesDialog<T>(bundle: Bundle? = null) :
     }
 
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
-        categories.map { it.name }
-
         return MaterialDialog(activity!!)
-                .title(R.string.action_move_category)
-                .listItemsMultiChoice(items = categories.map { it.name }, allowEmptySelection = true, initialSelection = preselected.toIntArray()) { dialog, selections, text ->
-                    val newCategories = selections.map { categories[it] }
-                    (targetController as? Listener)?.updateCategoriesForMangas(mangas, newCategories)
-                }
-                .positiveButton(android.R.string.ok)
-                .negativeButton(android.R.string.cancel)
+            .title(R.string.move_to_categories)
+            .listItemsMultiChoice(
+                items = categories.map { it.name },
+                initialSelection = preselected.toIntArray(),
+                allowEmptySelection = true
+            ) { _, selections, _ ->
+                val newCategories = selections.map { categories[it] }
+                (targetController as? Listener)?.updateCategoriesForMangas(mangas, newCategories)
+            }
+            .positiveButton(android.R.string.ok)
+            .negativeButton(android.R.string.cancel)
     }
 
     interface Listener {

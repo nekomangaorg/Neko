@@ -6,6 +6,7 @@ import android.widget.LinearLayout
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
+import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 
@@ -20,11 +21,12 @@ class WebtoonAdapter(val viewer: WebtoonViewer) : RecyclerView.Adapter<RecyclerV
     var items: List<Any> = emptyList()
         private set
 
+    var currentChapter: ReaderChapter? = null
     /**
      * Updates this adapter with the given [chapters]. It handles setting a few pages of the
      * next/previous chapter to allow seamless transitions.
      */
-    fun setChapters(chapters: ViewerChapters) {
+    fun setChapters(chapters: ViewerChapters, forceTransition: Boolean) {
         val newItems = mutableListOf<Any>()
 
         // Add previous chapter pages and transition.
@@ -36,7 +38,11 @@ class WebtoonAdapter(val viewer: WebtoonViewer) : RecyclerView.Adapter<RecyclerV
                 newItems.addAll(prevPages.takeLast(2))
             }
         }
-        newItems.add(ChapterTransition.Prev(chapters.currChapter, chapters.prevChapter))
+
+        // Skip transition page if the chapter is loaded & current page is not a transition page
+        if (forceTransition || chapters.prevChapter?.state !is ReaderChapter.State.Loaded) {
+            newItems.add(ChapterTransition.Prev(chapters.currChapter, chapters.prevChapter))
+        }
 
         // Add current chapter.
         val currPages = chapters.currChapter.pages
@@ -44,8 +50,13 @@ class WebtoonAdapter(val viewer: WebtoonViewer) : RecyclerView.Adapter<RecyclerV
             newItems.addAll(currPages)
         }
 
+        currentChapter = chapters.currChapter
+
         // Add next chapter transition and pages.
-        newItems.add(ChapterTransition.Next(chapters.currChapter, chapters.nextChapter))
+        if (forceTransition || chapters.nextChapter?.state !is ReaderChapter.State.Loaded) {
+            newItems.add(ChapterTransition.Next(chapters.currChapter, chapters.nextChapter))
+        }
+
         if (chapters.nextChapter != null) {
             // Add at most two pages, because this chapter will be selected before the user can
             // swap more pages.

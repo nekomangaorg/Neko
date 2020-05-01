@@ -19,6 +19,6 @@ object Backup {
 
     fun getDefaultFilename(): String {
         val date = SimpleDateFormat("yyyy-MM-dd_HH-mm", Locale.getDefault()).format(Date())
-        return "neko_$date.json"
+        return "tachiyomi_$date.json"
     }
 }

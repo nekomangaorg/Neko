@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class FollowsPageResult(
-    val result: List<Result>
+    val result: List<Result> = emptyList()
 )
 
 @Serializable

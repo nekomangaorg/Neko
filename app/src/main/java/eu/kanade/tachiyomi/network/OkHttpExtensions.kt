@@ -1,5 +1,15 @@
 package eu.kanade.tachiyomi.network
 
+import kotlinx.coroutines.suspendCancellableCoroutine
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.MediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
+import rx.Observable
+import rx.Producer
+import rx.Subscription
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
@@ -7,15 +17,6 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.zip.GZIPInputStream
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
-import kotlinx.coroutines.suspendCancellableCoroutine
-import okhttp3.Call
-import okhttp3.Callback
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.Response
-import rx.Observable
-import rx.Producer
-import rx.Subscription
 
 fun Call.asObservable(): Observable<Response> {
     return Observable.unsafeCreate { subscriber ->
@@ -59,11 +60,6 @@ suspend fun Call.await(): Response {
     return suspendCancellableCoroutine { continuation ->
         enqueue(object : Callback {
             override fun onResponse(call: Call, response: Response) {
-                if (!response.isSuccessful) {
-                    continuation.resumeWithException(Exception("HTTP error ${response.code}"))
-                    return
-                }
-
                 continuation.resume(response)
             }
 
@@ -95,17 +91,19 @@ fun Call.asObservableSuccess(): Observable<Response> {
 
 fun OkHttpClient.newCallWithProgress(request: Request, listener: ProgressListener): Call {
     val progressClient = newBuilder()
-        .cache(null)
-        .addNetworkInterceptor { chain ->
-            val originalResponse = chain.proceed(chain.request())
-            originalResponse.newBuilder()
-                .body(ProgressResponseBody(originalResponse.body!!, listener))
-                .build()
-        }
-        .build()
+            .cache(null)
+            .addNetworkInterceptor { chain ->
+                val originalResponse = chain.proceed(chain.request())
+                originalResponse.newBuilder()
+                        .body(ProgressResponseBody(originalResponse.body!!, listener))
+                        .build()
+            }
+            .build()
 
     return progressClient.newCall(request)
 }
+
+fun MediaType.Companion.jsonType(): MediaType = "application/json; charset=utf-8".toMediaTypeOrNull()!!
 
 fun Response.consumeBody(): String? {
     use {

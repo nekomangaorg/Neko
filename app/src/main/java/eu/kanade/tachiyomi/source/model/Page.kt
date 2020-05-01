@@ -18,11 +18,18 @@ open class Page(
         set(value) {
             field = value
             statusSubject?.onNext(value)
+            statusCallback?.invoke(this)
         }
 
     @Transient @Volatile var progress: Int = 0
+        set(value) {
+            field = value
+            statusCallback?.invoke(this)
+        }
 
     @Transient private var statusSubject: Subject<Int, Int>? = null
+
+    @Transient private var statusCallback: ((Page) -> Unit)? = null
 
     override fun update(bytesRead: Long, contentLength: Long, done: Boolean) {
         progress = if (contentLength > 0) {
@@ -36,8 +43,11 @@ open class Page(
         this.statusSubject = subject
     }
 
-    companion object {
+    fun setStatusCallback(f: ((Page) -> Unit)?) {
+        statusCallback = f
+    }
 
+    companion object {
         const val QUEUE = 0
         const val LOAD_PAGE = 1
         const val DOWNLOAD_IMAGE = 2

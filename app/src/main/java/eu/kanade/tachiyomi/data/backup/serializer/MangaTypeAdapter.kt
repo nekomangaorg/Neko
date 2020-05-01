@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.data.backup.serializer
 import com.github.salomonbrys.kotson.typeAdapter
 import com.google.gson.TypeAdapter
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
+import kotlin.math.max
 
 /**
  * JSON Serializer used to write / read [MangaImpl] to / from json
@@ -16,7 +17,7 @@ object MangaTypeAdapter {
                 value(it.url)
                 value(it.title)
                 value(it.source)
-                value(it.viewer)
+                value(max(0, it.viewer))
                 value(it.chapter_flags)
                 endArray()
             }

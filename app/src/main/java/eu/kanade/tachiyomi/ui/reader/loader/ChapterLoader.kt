@@ -25,7 +25,7 @@ class ChapterLoader(
      * completes if the chapter is already loaded.
      */
     fun loadChapter(chapter: ReaderChapter): Completable {
-        if (chapter.state is ReaderChapter.State.Loaded) {
+        if (chapterIsReady(chapter)) {
             return Completable.complete()
         }
 
@@ -52,12 +52,19 @@ class ChapterLoader(
 
                 // If the chapter is partially read, set the starting page to the last the user read
                 // otherwise use the requested page.
-                if (chapter.chapter.last_page_read > 0) {
+                if (!chapter.chapter.read) {
                     chapter.requestedPage = chapter.chapter.last_page_read
                 }
             }
             .toCompletable()
             .doOnError { chapter.state = ReaderChapter.State.Error(it) }
+    }
+
+    /**
+     * Checks [chapter] to be loaded based on present pages and loader in addition to state.
+     */
+    private fun chapterIsReady(chapter: ReaderChapter): Boolean {
+        return chapter.state is ReaderChapter.State.Loaded && chapter.pageLoader != null
     }
 
     /**
@@ -67,7 +74,8 @@ class ChapterLoader(
         val isDownloaded = downloadManager.isChapterDownloaded(chapter.chapter, manga, true)
         return when {
             isDownloaded -> DownloadPageLoader(chapter, manga, source, downloadManager)
-            else -> HttpPageLoader(chapter, source as HttpSource)
+            source is HttpSource -> HttpPageLoader(chapter, source)
+            else -> error("Loader not implemented")
         }
     }
 }

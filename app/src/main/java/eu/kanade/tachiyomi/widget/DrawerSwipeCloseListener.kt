@@ -5,19 +5,19 @@ import android.view.ViewGroup
 import androidx.drawerlayout.widget.DrawerLayout
 
 class DrawerSwipeCloseListener(
-    private val drawer: DrawerLayout,
+    private val drawer: androidx.drawerlayout.widget.DrawerLayout,
     private val navigationView: ViewGroup
-) : DrawerLayout.SimpleDrawerListener() {
+) : androidx.drawerlayout.widget.DrawerLayout.SimpleDrawerListener() {
 
     override fun onDrawerOpened(drawerView: View) {
         if (drawerView == navigationView) {
-            drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, drawerView)
+            drawer.setDrawerLockMode(androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_UNLOCKED, drawerView)
         }
     }
 
     override fun onDrawerClosed(drawerView: View) {
         if (drawerView == navigationView) {
-            drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, drawerView)
+            drawer.setDrawerLockMode(androidx.drawerlayout.widget.DrawerLayout.LOCK_MODE_LOCKED_CLOSED, drawerView)
         }
     }
 }

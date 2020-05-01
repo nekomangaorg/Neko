@@ -6,8 +6,9 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.MangaChapterHistory
 import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
-import java.util.Date
+import eu.kanade.tachiyomi.util.lang.toTimestampString
 import kotlinx.android.synthetic.main.recently_read_item.*
+import java.util.Date
 
 /**
  * Holder that contains recent manga item
@@ -47,24 +48,24 @@ class RecentlyReadHolder(
         val (manga, chapter, history) = item
 
         // Set manga title
-        manga_title.text = manga.title
+        title.text = manga.title
 
         // Set source + chapter title
         val formattedNumber = adapter.decimalFormat.format(chapter.chapter_number.toDouble())
-        manga_source.text = itemView.context.getString(R.string.recent_manga_source)
-            .format(adapter.sourceManager.getMangadex().toString(), formattedNumber)
+        manga_source.text = itemView.context.getString(R.string.source_dash_chapter_)
+                .format(adapter.sourceManager.getMangadex().toString(), formattedNumber)
 
         // Set last read timestamp title
-        last_read.text = adapter.dateFormat.format(Date(history.last_read))
+        last_read.text = Date(history.last_read).toTimestampString(adapter.dateFormat)
 
         // Set cover
         GlideApp.with(itemView.context).clear(cover)
         if (!manga.thumbnail_url.isNullOrEmpty()) {
             GlideApp.with(itemView.context)
-                .load(manga)
-                .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
-                .centerCrop()
-                .into(cover)
+                    .load(manga)
+                    .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+                    .centerCrop()
+                    .into(cover)
         }
     }
 }

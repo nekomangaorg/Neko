@@ -12,6 +12,12 @@ object ChapterTable {
 
     const val COL_NAME = "name"
 
+    const val COL_VOL = "vol"
+
+    const val COL_CHP_TXT = "chapter_txt"
+
+    const val COL_CHP_TITLE = "chapter_title"
+
     const val COL_READ = "read"
 
     const val COL_SCANLATOR = "scanlator"
@@ -24,6 +30,8 @@ object ChapterTable {
 
     const val COL_LAST_PAGE_READ = "last_page_read"
 
+    const val COL_PAGES_LEFT = "pages_left"
+
     const val COL_CHAPTER_NUMBER = "chapter_number"
 
     const val COL_SOURCE_ORDER = "source_order"
@@ -34,10 +42,14 @@ object ChapterTable {
             $COL_MANGA_ID INTEGER NOT NULL,
             $COL_URL TEXT NOT NULL,
             $COL_NAME TEXT NOT NULL,
+            $COL_CHP_TXT TEXT NOT NULL,
+            $COL_CHP_TITLE TEXT NOT NULL,
+            $COL_VOL TEXT NOT NULL,
             $COL_SCANLATOR TEXT,
             $COL_READ BOOLEAN NOT NULL,
             $COL_BOOKMARK BOOLEAN NOT NULL,
             $COL_LAST_PAGE_READ INT NOT NULL,
+            $COL_PAGES_LEFT INT NOT NULL,
             $COL_CHAPTER_NUMBER FLOAT NOT NULL,
             $COL_SOURCE_ORDER INTEGER NOT NULL,
             $COL_DATE_FETCH LONG NOT NULL,
@@ -51,14 +63,17 @@ object ChapterTable {
 
     val createUnreadChaptersIndexQuery: String
         get() = "CREATE INDEX ${TABLE}_unread_by_manga_index ON $TABLE($COL_MANGA_ID, $COL_READ) " +
-                "WHERE $COL_READ = 0"
+            "WHERE $COL_READ = 0"
 
-    val sourceOrderUpdateQuery: String
-        get() = "ALTER TABLE $TABLE ADD COLUMN $COL_SOURCE_ORDER INTEGER DEFAULT 0"
+    val addChapterCol: String
+        get() = "ALTER TABLE $TABLE ADD COLUMN $COL_CHP_TXT TEXT DEFAULT ''"
 
-    val bookmarkUpdateQuery: String
-        get() = "ALTER TABLE $TABLE ADD COLUMN $COL_BOOKMARK BOOLEAN DEFAULT FALSE"
+    val addVolumeCol: String
+        get() = "ALTER TABLE $TABLE ADD COLUMN $COL_VOL TEXT DEFAULT ''"
 
-    val addScanlator: String
-        get() = "ALTER TABLE $TABLE ADD COLUMN $COL_SCANLATOR TEXT DEFAULT NULL"
+    val addChapterTitleCol: String
+        get() = "ALTER TABLE $TABLE ADD COLUMN $COL_CHP_TITLE TEXT DEFAULT ''"
+
+    val pagesLeftQuery: String
+        get() = "ALTER TABLE $TABLE ADD COLUMN $COL_PAGES_LEFT INTEGER DEFAULT 0"
 }

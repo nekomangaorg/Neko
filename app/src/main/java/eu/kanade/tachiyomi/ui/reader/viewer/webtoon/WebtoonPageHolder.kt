@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.reader.viewer.webtoon
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.Resources
+import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.view.Gravity
@@ -19,6 +20,7 @@ import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
+import com.bumptech.glide.load.resource.gif.GifDrawable
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.request.transition.NoTransition
@@ -29,16 +31,17 @@ import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderProgressBar
-import eu.kanade.tachiyomi.util.ImageUtil
-import eu.kanade.tachiyomi.util.dpToPx
-import eu.kanade.tachiyomi.util.gone
-import eu.kanade.tachiyomi.util.visible
-import java.io.InputStream
-import java.util.concurrent.TimeUnit
+import eu.kanade.tachiyomi.util.system.ImageUtil
+import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.view.gone
+import eu.kanade.tachiyomi.util.view.updatePaddingRelative
+import eu.kanade.tachiyomi.util.view.visible
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
+import java.io.InputStream
+import java.util.concurrent.TimeUnit
 
 /**
  * Holder of the webtoon reader for a single page of a chapter.
@@ -111,7 +114,8 @@ class WebtoonPageHolder(
     private var readImageHeaderSubscription: Subscription? = null
 
     init {
-        refreshLayoutParams()
+        frame.layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
+        frame.setBackgroundColor(Color.BLACK)
     }
 
     /**
@@ -125,13 +129,12 @@ class WebtoonPageHolder(
 
     private fun refreshLayoutParams() {
         frame.layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply {
-            val floatPercent = (viewer.config.marginRatio.toFloat() / 100) // convert int to float percentage
-            val margin = Resources.getSystem().displayMetrics.widthPixels * floatPercent
+            val margin = Resources.getSystem().displayMetrics.widthPixels * (viewer.config.sidePadding / 100f)
             marginEnd = margin.toInt()
             marginStart = margin.toInt()
-            if (viewer.config.marginBetweenPagesWebtoon) {
-                bottomMargin = (20f * Resources.getSystem().displayMetrics.density).toInt()
-            }
+        }
+        if (!viewer.isContinuous) {
+            frame.updatePaddingRelative(bottom = 15.dpToPx)
         }
     }
 
@@ -162,8 +165,8 @@ class WebtoonPageHolder(
         val page = page ?: return
         val loader = page.chapter.pageLoader ?: return
         statusSubscription = loader.getPage(page)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe { processStatus(it) }
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe { processStatus(it) }
 
         addSubscription(statusSubscription)
     }
@@ -177,11 +180,11 @@ class WebtoonPageHolder(
         val page = page ?: return
 
         progressSubscription = Observable.interval(100, TimeUnit.MILLISECONDS)
-                .map { page.progress }
-                .distinctUntilChanged()
-                .onBackpressureLatest()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe { value -> progressBar.setProgress(value) }
+            .map { page.progress }
+            .distinctUntilChanged()
+            .onBackpressureLatest()
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe { value -> progressBar.setProgress(value) }
 
         addSubscription(progressSubscription)
     }
@@ -279,29 +282,29 @@ class WebtoonPageHolder(
 
         var openStream: InputStream? = null
         readImageHeaderSubscription = Observable
-                .fromCallable {
-                    val stream = streamFn().buffered(16)
-                    openStream = stream
+            .fromCallable {
+                val stream = streamFn().buffered(16)
+                openStream = stream
 
-                    ImageUtil.findImageType(stream) == ImageUtil.ImageType.GIF
+                ImageUtil.findImageType(stream) == ImageUtil.ImageType.GIF
+            }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnNext { isAnimated ->
+                if (!isAnimated) {
+                    val subsamplingView = initSubsamplingImageView()
+                    subsamplingView.visible()
+                    subsamplingView.setImage(ImageSource.inputStream(openStream!!))
+                } else {
+                    val imageView = initImageView()
+                    imageView.visible()
+                    imageView.setImage(openStream!!)
                 }
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnNext { isAnimated ->
-                    if (!isAnimated) {
-                        val subsamplingView = initSubsamplingImageView()
-                        subsamplingView.visible()
-                        subsamplingView.setImage(ImageSource.inputStream(openStream!!))
-                    } else {
-                        val imageView = initImageView()
-                        imageView.visible()
-                        imageView.setImage(openStream!!)
-                    }
-                }
-                // Keep the Rx stream alive to close the input stream only when unsubscribed
-                .flatMap { Observable.never<Unit>() }
-                .doOnUnsubscribe { openStream?.close() }
-                .subscribe({}, {})
+            }
+            // Keep the Rx stream alive to close the input stream only when unsubscribed
+            .flatMap { Observable.never<Unit>() }
+            .doOnUnsubscribe { openStream?.close() }
+            .subscribe({}, {})
 
         addSubscription(readImageHeaderSubscription)
     }
@@ -404,7 +407,7 @@ class WebtoonPageHolder(
                 gravity = Gravity.CENTER_HORIZONTAL
                 setMargins(0, parentHeight / 4, 0, 0)
             }
-            setText(R.string.action_retry)
+            setText(R.string.retry)
             setOnClickListener {
                 page?.let { it.chapter.pageLoader?.retryPage(it) }
             }
@@ -445,7 +448,7 @@ class WebtoonPageHolder(
             layoutParams = FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
                 setMargins(0, margins, 0, margins)
             }
-            setText(R.string.action_retry)
+            setText(R.string.retry)
             setOnClickListener {
                 page?.let { it.chapter.pageLoader?.retryPage(it) }
             }
@@ -459,7 +462,7 @@ class WebtoonPageHolder(
                 layoutParams = FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
                     setMargins(0, margins, 0, margins)
                 }
-                setText(R.string.action_open_in_browser)
+                setText(R.string.open_in_browser)
                 setOnClickListener {
                     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(imageUrl))
                     context.startActivity(intent)
@@ -489,32 +492,35 @@ class WebtoonPageHolder(
      */
     private fun ImageView.setImage(stream: InputStream) {
         GlideApp.with(this)
-                .load(stream)
-                .skipMemoryCache(true)
-                .diskCacheStrategy(DiskCacheStrategy.NONE)
-                .transition(DrawableTransitionOptions.with(NoTransition.getFactory()))
-                .listener(object : RequestListener<Drawable> {
-                    override fun onLoadFailed(
-                        e: GlideException?,
-                        model: Any?,
-                        target: Target<Drawable>?,
-                        isFirstResource: Boolean
-                    ): Boolean {
-                        onImageDecodeError()
-                        return false
-                    }
+            .load(stream)
+            .skipMemoryCache(true)
+            .diskCacheStrategy(DiskCacheStrategy.NONE)
+            .transition(DrawableTransitionOptions.with(NoTransition.getFactory()))
+            .listener(object : RequestListener<Drawable> {
+                override fun onLoadFailed(
+                    e: GlideException?,
+                    model: Any?,
+                    target: Target<Drawable>?,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    onImageDecodeError()
+                    return false
+                }
 
-                    override fun onResourceReady(
-                        resource: Drawable?,
-                        model: Any?,
-                        target: Target<Drawable>?,
-                        dataSource: DataSource?,
-                        isFirstResource: Boolean
-                    ): Boolean {
-                        onImageDecoded()
-                        return false
+                override fun onResourceReady(
+                    resource: Drawable?,
+                    model: Any?,
+                    target: Target<Drawable>?,
+                    dataSource: DataSource?,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    if (resource is GifDrawable) {
+                        resource.setLoopCount(GifDrawable.LOOP_INTRINSIC)
                     }
-                })
-                .into(this)
+                    onImageDecoded()
+                    return false
+                }
+            })
+            .into(this)
     }
 }
