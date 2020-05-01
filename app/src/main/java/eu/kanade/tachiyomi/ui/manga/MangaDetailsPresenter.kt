@@ -320,7 +320,7 @@ class MangaDetailsPresenter(
         return chapters.sortedByDescending { it.source_order }.find { !it.read }
     }
 
-    fun anyUnread(): Boolean = chapters.any { !it.read }
+    fun anyRead(): Boolean = chapters.any { it.read }
     fun hasBookmark(): Boolean = chapters.any { it.bookmark }
     fun hasDownloads(): Boolean = chapters.any { it.isDownloaded }
 

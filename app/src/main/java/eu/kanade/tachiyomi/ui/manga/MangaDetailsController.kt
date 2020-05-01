@@ -316,7 +316,7 @@ class MangaDetailsController : BaseController,
     }
 
     private fun setInsets(insets: WindowInsets, appbarHeight: Int, offset: Int) {
-        recycler.updatePaddingRelative(bottom = insets.systemWindowInsetBottom)
+        recycler?.updatePaddingRelative(bottom = insets.systemWindowInsetBottom)
         tabletRecycler?.updatePaddingRelative(bottom = insets.systemWindowInsetBottom)
         headerHeight = appbarHeight + insets.systemWindowInsetTop
         swipe_refresh.setProgressViewOffset(false, (-40).dpToPx, headerHeight + offset)
@@ -823,7 +823,7 @@ class MangaDetailsController : BaseController,
         menu.findItem(R.id.action_mark_all_as_read).isVisible =
             presenter.getNextUnreadChapter() != null && !presenter.isLockedFromSearch
         menu.findItem(R.id.action_mark_all_as_unread).isVisible =
-            presenter.anyUnread() && !presenter.isLockedFromSearch
+            presenter.anyRead() && !presenter.isLockedFromSearch
         menu.findItem(R.id.action_remove_downloads).isVisible =
             presenter.hasDownloads() && !presenter.isLockedFromSearch &&
                 manga?.source != LocalSource.ID
