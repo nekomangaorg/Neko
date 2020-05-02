@@ -130,6 +130,7 @@ class MangaDetailsAdapter(
         fun readNextChapter()
         fun topCoverHeight(): Int
         fun tagClicked(text: String)
+        fun globalSearch(text: String)
         fun showChapterFilter()
         fun favoriteManga(longPress: Boolean)
         fun copyToClipboard(content: String, label: Int)

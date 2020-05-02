@@ -40,8 +40,8 @@ class MangaHeaderHolder(
     isTablet: Boolean = false
 ) : BaseFlexibleViewHolder(view, adapter) {
 
-    var showReadingButton = true
-    var showMoreButton = true
+    private var showReadingButton = true
+    private var showMoreButton = true
 
     init {
         chapter_layout.setOnClickListener { adapter.delegate.showChapterFilter() }
@@ -80,7 +80,7 @@ class MangaHeaderHolder(
                 true
             }
             title.setOnClickListener {
-                title.maxLines = Integer.MAX_VALUE
+                title.text?.let { adapter.delegate.globalSearch(it.toString()) }
             }
             title.setOnLongClickListener {
                 adapter.delegate.copyToClipboard(title.text.toString(), R.string.title)
@@ -109,6 +109,7 @@ class MangaHeaderHolder(
             manga_genres_tags.visible()
             less_button.visible()
             more_button_group.gone()
+            title.maxLines = Integer.MAX_VALUE
         }
     }
 
@@ -119,6 +120,7 @@ class MangaHeaderHolder(
         manga_genres_tags.gone()
         less_button.gone()
         more_button_group.visible()
+        title.maxLines = 4
         adapter.recyclerView.post {
             adapter.delegate.updateScroll()
         }
