@@ -172,7 +172,7 @@ open class BrowseSourceController(bundle: Bundle) :
                     2 -> 1.25f
                     3 -> 1.66f
                     4 -> 3f
-                    else -> .66f
+                    else -> .75f
                 }
 
                 (layoutManager as androidx.recyclerview.widget.GridLayoutManager).spanSizeLookup = object : androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup() {
