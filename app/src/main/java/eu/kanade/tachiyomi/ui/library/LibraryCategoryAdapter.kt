@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.library
 
+import android.os.Build
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
@@ -103,7 +104,7 @@ class LibraryCategoryAdapter(val libraryListener: LibraryListener) :
         return when (val item: IFlexible<*>? = getItem(position)) {
             is LibraryHeaderItem ->
                 if (preferences.hideCategories().getOrDefault() || item.category.id == 0) null
-                else item.category.name.first().toString() +
+                else getFirstChar(item.category.name) +
                     "\u200B".repeat(max(0, item.category.order))
             is LibraryItem -> {
                 when (sorting) {
@@ -154,8 +155,7 @@ class LibraryCategoryAdapter(val libraryListener: LibraryListener) :
 
     private fun getFirstLetter(name: String): String {
         val letter = name.firstOrNull() ?: '#'
-        return if (letter.isLetter()) letter.toString()
-            .toUpperCase(Locale.ROOT) else "#"
+        return if (letter.isLetter()) getFirstChar(name) else "#"
     }
 
     override fun onCreateBubbleText(position: Int): String {
@@ -172,9 +172,9 @@ class LibraryCategoryAdapter(val libraryListener: LibraryListener) :
                     LibrarySort.DRAG_AND_DROP -> {
                         if (!preferences.hideCategories().getOrDefault()) {
                             val title = iFlexible.manga.title
-                            if (preferences.removeArticles().getOrDefault()) title.removeArticles()
-                                .substring(0, 1).toUpperCase(Locale.US)
-                            else title.substring(0, 1).toUpperCase(Locale.US)
+                            if (preferences.removeArticles().getOrDefault())
+                                getFirstChar(title.removeArticles())
+                            else getFirstChar(title)
                         } else {
                             val category = db.getCategoriesForManga(iFlexible.manga)
                                 .executeAsBlocking().firstOrNull()?.name
@@ -212,6 +212,16 @@ class LibraryCategoryAdapter(val libraryListener: LibraryListener) :
                 }
             }
             else -> ""
+        }
+    }
+
+    private fun getFirstChar(string: String): String {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            val chars = string.codePoints().toArray().firstOrNull() ?: return ""
+            val char = Character.toChars(chars)
+            return String(char).toUpperCase(Locale.US)
+        } else {
+            return string.toCharArray().firstOrNull()?.toString()?.toUpperCase(Locale.US) ?: ""
         }
     }
 

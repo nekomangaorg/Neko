@@ -119,6 +119,9 @@ class CategoryPresenter(
             controller.onCategoryExistsError()
             return false
         }
+        if (name.isBlank()) {
+            return false
+        }
 
         category.name = name
         db.insertCategory(category).executeAsBlocking()
