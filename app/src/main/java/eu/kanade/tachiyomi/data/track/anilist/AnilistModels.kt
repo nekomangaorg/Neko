@@ -74,7 +74,7 @@ data class ALUserManga(
         "DROPPED" -> Anilist.DROPPED
         "PLANNING" -> Anilist.PLANNING
         "REPEATING" -> Anilist.REPEATING
-        else -> throw NotImplementedError("Unknown status")
+        else -> Anilist.READING
     }
 }
 
@@ -85,7 +85,7 @@ fun Track.toAnilistStatus() = when (status) {
     Anilist.DROPPED -> "DROPPED"
     Anilist.PLANNING -> "PLANNING"
     Anilist.REPEATING -> "REPEATING"
-    else -> throw NotImplementedError("Unknown status")
+    else -> "CURRENT"
 }
 
 private val preferences: PreferencesHelper by injectLazy()
