@@ -12,6 +12,13 @@
         app:actionViewClass="androidx.appcompat.widget.SearchView"
         app:showAsAction="collapseActionView|ifRoom" />
 
+
+    <item
+        android:id="@+id/action_display_options"
+        android:icon="@drawable/ic_tune_white_24dp"
+        android:title="@string/display_options"
+        app:showAsAction="ifRoom" />
+
     <item
         android:id="@+id/action_settings"
         android:icon="@drawable/ic_settings_white_24dp"
