@@ -21,7 +21,6 @@ import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_EXCLUDE
 import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_IGNORE
 import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_INCLUDE
-import eu.kanade.tachiyomi.widget.ExtendedNavigationView.Item.TriStateGroup.Companion.STATE_REALLY_EXCLUDE
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -126,14 +125,17 @@ class LibraryPresenter(
                 return@f filterDownloaded == 0 && filterUnread == 0 && filterCompleted == 0 &&
                     filterTracked == 0 && filterMangaType == 0
             }
+
+            if (filterUnread == STATE_INCLUDE && item.manga.unread == 0) return@f false
+            if (filterUnread == STATE_EXCLUDE && item.manga.unread > 0) return@f false
+
             // Filter for unread chapters
-            if (filterUnread == STATE_INCLUDE && (item.manga.unread == 0 || db.getChapters(item.manga)
+            if (filterUnread == 3 && (item.manga.unread == 0 || db.getChapters(item.manga)
                     .executeAsBlocking().size != item.manga.unread)
             ) return@f false
-            if (filterUnread == STATE_EXCLUDE && (item.manga.unread == 0 || db.getChapters(item.manga)
+            if (filterUnread == 4 && (item.manga.unread == 0 || db.getChapters(item.manga)
                     .executeAsBlocking().size == item.manga.unread)
             ) return@f false
-            if (filterUnread == STATE_REALLY_EXCLUDE && item.manga.unread > 0) return@f false
 
             if (filterMangaType > 0) {
                 if (if (filterMangaType == Manga.TYPE_MANHWA) (filterMangaType != item.manga.mangaType() && filterMangaType != Manga.TYPE_WEBTOON)

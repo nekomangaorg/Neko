@@ -74,16 +74,16 @@ class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: Attribute
         thirdButton.setOnClickListener { toggleButton(2) }
     }
 
+    var state: Int
+        get() = buttons.indexOfFirst { it.isActivated }
+        set(index) = toggleButton(index, false)
+
     fun setState(preference: Preference<Int>) {
-        val index = preference.getOrDefault() - 1
-        if (index > -1)
-            toggleButton(index, false)
+        state = preference.getOrDefault() - 1
     }
 
     fun setState(text: String) {
-        val index = buttons.indexOfFirst { it.text == text && it.visibility == View.VISIBLE }
-        if (index > -1)
-            toggleButton(index, false)
+        state = buttons.indexOfFirst { it.text == text && it.visibility == View.VISIBLE }
     }
 
     fun reset() {
@@ -98,7 +98,8 @@ class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: Attribute
     }
 
     private fun toggleButton(index: Int, callBack: Boolean = true) {
-        if (itemCount == 0 || (isActivated && index != buttons.indexOfFirst { it.isActivated }))
+        if (index < 0 || itemCount == 0 ||
+            (isActivated && index != buttons.indexOfFirst { it.isActivated }))
             return
         if (callBack) {
             val transition = androidx.transition.AutoTransition()
