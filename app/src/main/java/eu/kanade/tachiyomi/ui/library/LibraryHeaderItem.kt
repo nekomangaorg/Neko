@@ -31,6 +31,7 @@ import eu.kanade.tachiyomi.util.view.invisible
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.visInvisIf
 import eu.kanade.tachiyomi.util.view.visible
+import kotlinx.android.synthetic.main.library_category_header_item.*
 
 class LibraryHeaderItem(
     private val categoryF: (Int) -> Category,
@@ -56,7 +57,7 @@ class LibraryHeaderItem(
         position: Int,
         payloads: MutableList<Any?>?
     ) {
-        holder.bind(categoryF(catId))
+        holder.bind(this)
     }
 
     val category: Category
@@ -89,69 +90,89 @@ class LibraryHeaderItem(
         private val sortText: TextView = view.findViewById(R.id.category_sort)
         private val updateButton: ImageView = view.findViewById(R.id.update_button)
         private val checkboxImage: ImageView = view.findViewById(R.id.checkbox)
+        private val expandImage: ImageView = view.findViewById(R.id.collapse_arrow)
         private val catProgress: ProgressBar = view.findViewById(R.id.cat_progress)
 
         init {
             sortText.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 marginEnd = (if (padEnd && adapter.recyclerView.paddingEnd == 0) 12 else 2).dpToPx
             }
-            updateButton.setOnClickListener { addCategoryToUpdate() }
-            sectionText.setOnClickListener { adapter.libraryListener.manageCategory(adapterPosition) }
-            sectionText.setOnLongClickListener {
+            category_header_layout.setOnClickListener {
                 adapter.libraryListener.toggleCategoryVisibility(adapterPosition)
+            }
+            updateButton.setOnClickListener { addCategoryToUpdate() }
+            sectionText.setOnLongClickListener {
+                adapter.libraryListener.manageCategory(adapterPosition)
                 true
+            }
+            sectionText.setOnClickListener {
+                adapter.libraryListener.toggleCategoryVisibility(adapterPosition)
             }
             sortText.setOnClickListener { it.post { showCatSortOptions() } }
             checkboxImage.setOnClickListener { selectAll() }
             updateButton.drawable.mutate()
         }
 
-        fun bind(category: Category) {
+        fun bind(item: LibraryHeaderItem) {
+            val index = adapter.headerItems.indexOf(item)
+            val previousIsCollapsed =
+                if (index > 0) {
+                    (adapter.headerItems[index - 1] as? LibraryHeaderItem)?.category?.isHidden
+                        ?: false
+                } else {
+                    false
+                }
+            val shorterMargin = adapter.headerItems.firstOrNull() == item
             sectionText.updateLayoutParams<ConstraintLayout.LayoutParams> {
-                topMargin =
-                    (if ((adapter.headerItems.firstOrNull() as? LibraryHeaderItem)?.catId == category.id) 2 else 44).dpToPx
+                topMargin = (when {
+                    shorterMargin -> 2
+                    previousIsCollapsed -> 5
+                    else -> 32
+                }).dpToPx
             }
+            val category = item.category
 
             if (category.isFirst == true && category.isLast == true) sectionText.text = ""
             else sectionText.text = category.name
-            sortText.text = itemView.context.getString(R.string.sort_by_,
-                itemView.context.getString(category.sortRes())
+            sortText.text = itemView.context.getString(
+                R.string.sort_by_, itemView.context.getString(category.sortRes())
             )
 
             val isAscending = category.isAscending()
             val sortingMode = category.sortingMode()
-            val sortDrawable = if (category.isHidden) R.drawable.ic_expand_more_white_24dp
-                else
-                when {
-                    sortingMode == LibrarySort.DRAG_AND_DROP || sortingMode == null -> R.drawable
-                        .ic_sort_white_24dp
-                    if (sortingMode == LibrarySort.DATE_ADDED ||
-                        sortingMode == LibrarySort.LATEST_CHAPTER ||
-                        sortingMode == LibrarySort.LAST_READ) !isAscending else isAscending ->
-                        R.drawable.ic_arrow_down_white_24dp
-                    else -> R.drawable.ic_arrow_up_white_24dp
-                }
+            val sortDrawable = if (category.isHidden) R.drawable.ic_expand_more_24dp
+            else when {
+                sortingMode == LibrarySort.DRAG_AND_DROP || sortingMode == null -> R.drawable.ic_sort_white_24dp
+                if (sortingMode == LibrarySort.DATE_ADDED || sortingMode == LibrarySort.LATEST_CHAPTER || sortingMode == LibrarySort.LAST_READ) !isAscending else isAscending -> R.drawable.ic_arrow_down_white_24dp
+                else -> R.drawable.ic_arrow_up_white_24dp
+            }
 
             sortText.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, sortDrawable, 0)
             sortText.setText(if (category.isHidden) R.string.collasped else category.sortRes())
-
+            expandImage.setImageResource(
+                if (category.isHidden) R.drawable.ic_expand_more_24dp
+                else R.drawable.ic_expand_less_24dp)
             when {
                 adapter.mode == SelectableAdapter.Mode.MULTI -> {
                     checkboxImage.visible()
+                    expandImage.invisible()
                     updateButton.gone()
                     catProgress.gone()
                     setSelection()
                 }
                 category.id == -1 -> {
+                    expandImage.gone()
                     checkboxImage.gone()
                     updateButton.gone()
                 }
                 LibraryUpdateService.categoryInQueue(category.id) -> {
+                    expandImage.visible()
                     checkboxImage.gone()
                     catProgress.visible()
                     updateButton.invisible()
                 }
                 else -> {
+                    expandImage.visible()
                     catProgress.gone()
                     checkboxImage.gone()
                     updateButton.visInvisIf(category.id ?: 0 > -1)

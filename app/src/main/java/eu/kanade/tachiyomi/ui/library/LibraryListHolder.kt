@@ -79,7 +79,9 @@ class LibraryListHolder(
 
         subtitle.text = item.manga.author?.trim()
         title.post {
-            subtitle.visibleIf(title.lineCount == 1 && !item.manga.author.isNullOrBlank())
+            if (title.text == item.manga.title) {
+                subtitle.visibleIf(title.lineCount == 1 && !item.manga.author.isNullOrBlank())
+            }
         }
 
         // Update the cover.
