@@ -103,7 +103,6 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         }
 
         val activeFilters = hasActiveFiltersFromPref()
-        sheetBehavior?.isHideable = !activeFilters
         if (activeFilters && sheetBehavior?.state == BottomSheetBehavior.STATE_HIDDEN &&
             sheetBehavior?.skipCollapsed == false)
             sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
@@ -285,20 +284,11 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             filterItems.remove(trackers!!)
         }
         val hasFilters = hasActiveFilters()
-        sheetBehavior?.isHideable = !hasFilters
         if (hasFilters && clearButton.parent == null)
             filter_layout.addView(clearButton, 0)
         else if (!hasFilters && clearButton.parent != null)
             filter_layout.removeView(clearButton)
     }
-
-    fun hideIfPossible() {
-        if (!hasActiveFilters() && sheetBehavior?.isHideable == true)
-            sheetBehavior?.state = BottomSheetBehavior.STATE_HIDDEN
-    }
-
-    fun canHide(): Boolean = sheetBehavior?.isHideable == true && sheetBehavior?.state !=
-        BottomSheetBehavior.STATE_HIDDEN
 
     private fun clearFilters() {
         preferences.filterDownloaded().set(0)
@@ -318,7 +308,6 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             filterItems.remove(trackers!!)
         reSortViews()
         onGroupClicked(ACTION_FILTER)
-        sheetBehavior?.isHideable = true
     }
 
     private fun reSortViews() {

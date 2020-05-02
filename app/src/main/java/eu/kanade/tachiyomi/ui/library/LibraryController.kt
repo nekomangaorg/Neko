@@ -150,10 +150,10 @@ class LibraryController(
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
             super.onScrolled(recyclerView, dx, dy)
             val order = getCategoryOrder()
-            if (filter_bottom_sheet.canHide()) {
+            if (filter_bottom_sheet.sheetBehavior?.state != BottomSheetBehavior.STATE_HIDDEN) {
                 scrollDistance += abs(dy)
                 if (scrollDistance > scrollDistanceTilHidden) {
-                    filter_bottom_sheet.hideIfPossible()
+                    filter_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_HIDDEN
                     scrollDistance = 0f
                 }
             } else scrollDistance = 0f
