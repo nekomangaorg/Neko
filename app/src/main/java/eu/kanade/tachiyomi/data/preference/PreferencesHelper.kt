@@ -269,4 +269,6 @@ class PreferencesHelper(val context: Context) {
     fun shownChapterSwipeTutorial() = flowPrefs.getBoolean("shown_swipe_tutorial", false)
 
     fun shownDownloadQueueTutorial() = flowPrefs.getBoolean("shown_download_queue", false)
+
+    fun shownLongPressCategoryTutorial() = flowPrefs.getBoolean("shown_long_press_category", false)
 }
