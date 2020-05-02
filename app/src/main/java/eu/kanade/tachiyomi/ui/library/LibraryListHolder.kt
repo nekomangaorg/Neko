@@ -51,6 +51,9 @@ class LibraryListHolder(
         constraint_layout.minHeight = 56.dpToPx
         if (item.manga.isBlank()) {
             constraint_layout.minHeight = 0
+            constraint_layout.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                height = ViewGroup.MarginLayoutParams.WRAP_CONTENT
+            }
             if (item.manga.status == -1) {
                 title.text = null
                 title.gone()
@@ -63,6 +66,9 @@ class LibraryListHolder(
             subtitle.gone()
             return
         }
+        constraint_layout.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            height = 52.dpToPx
+        }
         padding.visible()
         card.visible()
         title.textAlignment = View.TEXT_ALIGNMENT_TEXT_START
@@ -72,7 +78,9 @@ class LibraryListHolder(
         setUnreadBadge(badge_view, item)
 
         subtitle.text = item.manga.author?.trim()
-        subtitle.visibleIf(!item.manga.author.isNullOrBlank())
+        title.post {
+            subtitle.visibleIf(title.lineCount == 1 && !item.manga.author.isNullOrBlank())
+        }
 
         // Update the cover.
         if (item.manga.thumbnail_url == null) Glide.with(view.context).clear(cover_thumbnail)
