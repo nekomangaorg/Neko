@@ -436,7 +436,7 @@ class LibraryController(
                 2 -> 1.25f
                 3 -> 1.66f
                 4 -> 3f
-                else -> .66f
+                else -> .75f
             }
             recycler.updatePaddingRelative(
                 start = (if (alwaysShowScroller) 2 else 5).dpToPx,
