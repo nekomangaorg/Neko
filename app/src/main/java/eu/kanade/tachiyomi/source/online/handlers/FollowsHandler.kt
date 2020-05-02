@@ -102,8 +102,8 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers) {
         val manga = SManga.create()
         manga.title = MdUtil.cleanString(result.title)
         manga.url = "/manga/${result.manga_id}/"
-        manga.thumbnail_url = MdUtil.formThumbUrl(manga.url, preferences.lowQualityCovers())
         manga.follow_status = FollowStatus.fromInt(result.follow_type)
+        manga.initialized = false
         return manga
     }
 
