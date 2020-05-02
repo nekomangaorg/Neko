@@ -90,8 +90,7 @@
     </plurals>
     <string name="category_with_name_exists">A category with that name already exists!</string>
     <string name="category_deleted">Category deleted</string>
-    <string name="tip_long_press_category">Tip: Press and hold a category\'s name to collapse
-        section</string>
+    <string name="long_press_category">Press and hold to edit a category</string>
 
     <!-- Updates -->
     <string name="update">Update</string>

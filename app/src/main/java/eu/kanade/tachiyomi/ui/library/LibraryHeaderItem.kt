@@ -1,9 +1,12 @@
 package eu.kanade.tachiyomi.ui.library
 
 import android.annotation.SuppressLint
+import android.app.Activity
+import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
+import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
@@ -15,6 +18,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.f2prateek.rx.preferences.Preference
+import com.github.florent37.viewtooltip.ViewTooltip
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.SelectableAdapter
 import eu.davidea.flexibleadapter.items.AbstractHeaderItem
@@ -22,6 +26,7 @@ import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.system.dpToPx
@@ -32,6 +37,8 @@ import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.visInvisIf
 import eu.kanade.tachiyomi.util.view.visible
 import kotlinx.android.synthetic.main.library_category_header_item.*
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 
 class LibraryHeaderItem(
     private val categoryF: (Int) -> Category,
@@ -97,20 +104,31 @@ class LibraryHeaderItem(
             sortText.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 marginEnd = (if (padEnd && adapter.recyclerView.paddingEnd == 0) 12 else 2).dpToPx
             }
-            category_header_layout.setOnClickListener {
-                adapter.libraryListener.toggleCategoryVisibility(adapterPosition)
-            }
+            category_header_layout.setOnClickListener { toggleCategory() }
             updateButton.setOnClickListener { addCategoryToUpdate() }
             sectionText.setOnLongClickListener {
                 adapter.libraryListener.manageCategory(adapterPosition)
                 true
             }
-            sectionText.setOnClickListener {
-                adapter.libraryListener.toggleCategoryVisibility(adapterPosition)
-            }
+            sectionText.setOnClickListener { toggleCategory() }
             sortText.setOnClickListener { it.post { showCatSortOptions() } }
             checkboxImage.setOnClickListener { selectAll() }
             updateButton.drawable.mutate()
+        }
+
+        private fun toggleCategory() {
+            adapter.libraryListener.toggleCategoryVisibility(adapterPosition)
+            val tutorial = Injekt.get<PreferencesHelper>().shownLongPressCategoryTutorial()
+            if (!tutorial.get()) {
+                ViewTooltip.on(itemView.context as? Activity, sectionText).autoHide(true, 5000L)
+                    .align(ViewTooltip.ALIGN.START).position(ViewTooltip.Position.TOP)
+                    .text(R.string.long_press_category)
+                    .color(itemView.context.getResourceColor(R.attr.colorAccent))
+                    .textSize(TypedValue.COMPLEX_UNIT_SP, 15f).textColor(Color.WHITE)
+                    .withShadow(false).corner(30).arrowWidth(15).arrowHeight(15).distanceWithView(0)
+                    .show()
+                tutorial.set(true)
+            }
         }
 
         fun bind(item: LibraryHeaderItem) {

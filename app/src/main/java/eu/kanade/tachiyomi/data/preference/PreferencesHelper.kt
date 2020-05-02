@@ -273,6 +273,8 @@ class PreferencesHelper(val context: Context) {
 
     fun shownDownloadQueueTutorial() = flowPrefs.getBoolean("shown_download_queue", false)
 
+    fun shownLongPressCategoryTutorial() = flowPrefs.getBoolean("shown_long_press_category", false)
+
     fun shownSimilarTutorial() = flowPrefs.getBoolean("shown_similar_tutorial", false)
 
     fun skipFiltered() = prefs.getBoolean(Keys.skipFiltered, false)
