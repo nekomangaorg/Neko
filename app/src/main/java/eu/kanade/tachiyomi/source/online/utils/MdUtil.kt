@@ -59,12 +59,18 @@ class MdUtil {
         // guess the thumbnail url is .jpg  this has a ~80% success rate
         fun formThumbUrl(mangaUrl: String, lowQuality: Boolean): String {
             var ext = ".jpg"
-
             if (lowQuality) {
                 ext = ".thumb$ext"
             }
-
             return cdnUrl + "/images/manga/" + getMangaId(mangaUrl) + ext
+        }
+
+        // will change from large to thumbnail size images if needed
+        fun convertThumbUrlIfNeeded(thumbUrl: String, lowQuality: Boolean): String {
+            if (lowQuality) {
+                return thumbUrl.replace(".large.",".thumb.")
+            }
+            return thumbUrl.replace(".thumb.",".large.")
         }
 
         // Get the ID from the manga url

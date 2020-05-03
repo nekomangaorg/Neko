@@ -168,15 +168,23 @@ class SearchHandler(val client: OkHttpClient, private val headers: Headers, val 
 
     private fun searchMangaFromElement(element: Element): SManga {
         val manga = SManga.create()
-
         element.select("a.manga_title").first().let {
             val url = MdUtil.modifyMangaUrl(it.attr("href"))
             manga.setUrlWithoutDomain(url)
             manga.title = it.text().trim()
         }
-
-        manga.thumbnail_url = MdUtil.formThumbUrl(manga.url, preferences.lowQualityCovers())
-
+        // For our image, the file endings are not very consistent
+        // Thus we should try to parse the full image from the website
+        // If we can't find it then we will construct a guess of the image url
+        element.select("div.large_logo").first().let {
+            val elementImg = it.selectFirst("img")
+            if(elementImg != null) {
+                val urlClean = MdUtil.removeTimeParamUrl(elementImg.absUrl("src"))
+                manga.thumbnail_url = MdUtil.convertThumbUrlIfNeeded(urlClean, preferences.lowQualityCovers())
+            } else {
+                manga.thumbnail_url = MdUtil.formThumbUrl(manga.url, preferences.lowQualityCovers())
+            }
+        }
         return manga
     }
 
