@@ -70,8 +70,8 @@ interface Manga : SManga {
     fun mangaType(): Int {
         // lump everything as manga if not manhua or manhwa
         return when (lang_flag) {
-            "kr" -> TYPE_MANHUA
-            "cn" -> TYPE_MANHWA
+            "kr" -> TYPE_MANHWA
+            "cn" -> TYPE_MANHUA
             else -> TYPE_MANGA
         }
     }
