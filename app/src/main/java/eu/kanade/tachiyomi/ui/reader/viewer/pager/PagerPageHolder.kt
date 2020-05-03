@@ -339,7 +339,7 @@ class PagerPageHolder(
         return ReaderProgressBar(context, null).apply {
 
             val size = 48.dpToPx
-            layoutParams = FrameLayout.LayoutParams(size, size).apply {
+            layoutParams = LayoutParams(size, size).apply {
                 gravity = Gravity.CENTER
             }
         }
@@ -354,7 +354,7 @@ class PagerPageHolder(
         val config = viewer.config
 
         subsamplingImageView = SubsamplingScaleImageView(context).apply {
-            layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT)
+            layoutParams = LayoutParams(MATCH_PARENT, MATCH_PARENT)
             setMaxTileSize(viewer.activity.maxBitmapSize)
             setDoubleTapZoomStyle(SubsamplingScaleImageView.ZOOM_FOCUS_CENTER)
             setDoubleTapZoomDuration(config.doubleTapAnimDuration)
@@ -389,7 +389,7 @@ class PagerPageHolder(
         if (imageView != null) return imageView!!
 
         imageView = PhotoView(context, null).apply {
-            layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT)
+            layoutParams = LayoutParams(MATCH_PARENT, MATCH_PARENT)
             adjustViewBounds = true
             setZoomTransitionDuration(viewer.config.doubleTapAnimDuration)
             setScaleLevels(1f, 2f, 3f)
@@ -416,7 +416,7 @@ class PagerPageHolder(
         if (retryButton != null) return retryButton!!
 
         retryButton = PagerButton(context, viewer).apply {
-            layoutParams = FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
+            layoutParams = LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
                 gravity = Gravity.CENTER
             }
             setText(R.string.retry)
@@ -453,7 +453,7 @@ class PagerPageHolder(
         }
 
         PagerButton(context, viewer).apply {
-            layoutParams = FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
+            layoutParams = LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
                 setMargins(margins, margins, margins, margins)
             }
             setText(R.string.retry)
@@ -465,9 +465,9 @@ class PagerPageHolder(
         }
 
         val imageUrl = page.imageUrl
-        if (imageUrl.orEmpty().startsWith("http")) {
+        if (imageUrl.orEmpty().startsWith("http", true)) {
             PagerButton(context, viewer).apply {
-                layoutParams = FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
+                layoutParams = LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
                     setMargins(margins, margins, margins, margins)
                 }
                 setText(R.string.open_in_browser)

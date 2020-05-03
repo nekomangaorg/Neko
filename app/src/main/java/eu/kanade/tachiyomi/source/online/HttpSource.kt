@@ -343,8 +343,12 @@ abstract class HttpSource : CatalogueSource {
         return try {
             val uri = URI(orig)
             var out = uri.path
-            if (uri.query != null) out += "?" + uri.query
-            if (uri.fragment != null) out += "#" + uri.fragment
+            if (uri.query != null) {
+                out += "?" + uri.query
+            }
+            if (uri.fragment != null) {
+                out += "#" + uri.fragment
+            }
             out
         } catch (e: URISyntaxException) {
             orig
