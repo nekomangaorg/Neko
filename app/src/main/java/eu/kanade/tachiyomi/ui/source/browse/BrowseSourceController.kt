@@ -329,7 +329,7 @@ open class BrowseSourceController(bundle: Bundle) :
                 val allDefault = presenter.sourceFilters == presenter.source.getFilterList()
                 showProgressBar()
                 adapter?.clear()
-                presenter.setSourceFilter(if (allDefault) FilterList() else presenter.sourceFilters)
+                presenter.setSourceFilter(presenter.sourceFilters)
             }
         }
 
