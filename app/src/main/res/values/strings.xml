@@ -605,7 +605,9 @@
     <string name="every_12_hours">Every 12 hours</string>
     <string name="daily">Daily</string>
     <string name="every_2_days">Every 2 days</string>
+    <string name="every_3_days">Every 3 days</string>
     <string name="weekly">Weekly</string>
+    <string name="monthly">Monthly</string>
     <plurals name="after_minutes">
         <item quantity="one">After %1$s minute</item>
         <item quantity="other">After %1$s minutes</item>
