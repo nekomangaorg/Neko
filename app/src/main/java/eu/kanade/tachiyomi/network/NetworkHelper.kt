@@ -5,6 +5,7 @@ import android.os.SystemClock
 import eu.kanade.tachiyomi.BuildConfig
 import java.io.File
 import java.util.concurrent.TimeUnit
+import com.chuckerteam.chucker.api.ChuckerInterceptor
 import okhttp3.Cache
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -55,8 +56,8 @@ class NetworkHelper(context: Context) {
                 .connectTimeout(10, TimeUnit.SECONDS)
                 .readTimeout(30, TimeUnit.SECONDS)
             .cache(Cache(cacheDir, cacheSize))
+            .addInterceptor(ChuckerInterceptor(context))
                 .addNetworkInterceptor(rateLimitInterceptor)
-
         if (BuildConfig.DEBUG) {
             val httpLoggingInterceptor = HttpLoggingInterceptor()
             builder.addInterceptor(httpLoggingInterceptor.apply { httpLoggingInterceptor.level = HttpLoggingInterceptor.Level.BODY })
