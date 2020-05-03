@@ -27,15 +27,31 @@ class SettingsSimilarController : SettingsController() {
             }
         }
 
-        multiSelectListPreferenceMat(activity)
-        {
-            key = Keys.similarUpdateRestriction
-            titleRes = R.string.similar_update_restriction
-            entriesRes = arrayOf(R.string.wifi, R.string.charging)
-            entryValues = listOf("wifi", "ac")
-            customSummaryRes = R.string.similar_update_restriction_summary
-            onChange {
+        switchPreference {
+            key = Keys.similarOnlyOverWifi
+            titleRes = R.string.only_download_over_wifi
+            defaultValue = true
+            onClick {
                 SimilarUpdateJob.setupTask()
+            }
+        }
+
+        intListPreference(activity) {
+            key = Keys.similarUpdateInterval
+            titleRes = R.string.similar_update_fequency
+            entriesRes = arrayOf(
+                    R.string.manual,
+                    R.string.daily,
+                    R.string.every_2_days,
+                    R.string.every_3_days,
+                    R.string.weekly,
+                    R.string.monthly
+            )
+            entryValues = listOf(0, 1, 2, 3, 7, 30)
+            defaultValue = 3
+
+            onChange {
+                SimilarUpdateJob.setupTask(true)
                 true
             }
         }

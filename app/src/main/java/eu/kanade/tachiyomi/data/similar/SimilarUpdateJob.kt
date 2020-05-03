@@ -10,6 +10,7 @@ import androidx.work.WorkManager
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.preference.getOrDefault
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.concurrent.TimeUnit
@@ -29,27 +30,31 @@ class SimilarUpdateJob(private val context: Context, workerParams: WorkerParamet
 
             val preferences = Injekt.get<PreferencesHelper>()
             val enabled = preferences.similarEnabled()
+            val interval = preferences.similarUpdateInterval().getOrDefault()
             if (enabled) {
-                val restrictions = preferences.similarUpdateRestriction()!!
-                val acRestriction = "ac" in restrictions
-                val wifiRestriction = if ("wifi" in restrictions)
+
+                val wifiRestriction = if (preferences.similarOnlyOverWifi())
                     NetworkType.UNMETERED
                 else
                     NetworkType.CONNECTED
 
                 val constraints = Constraints.Builder()
                     .setRequiredNetworkType(wifiRestriction)
-                    .setRequiresCharging(acRestriction)
                     .build()
 
-                val request = PeriodicWorkRequestBuilder<SimilarUpdateJob>(3, TimeUnit.DAYS, 1, TimeUnit.HOURS)
+                val request = PeriodicWorkRequestBuilder<SimilarUpdateJob>(
+                        interval.toLong(), TimeUnit.DAYS,
+                        1, TimeUnit.HOURS
+                )
                     .addTag(TAG)
                     .setConstraints(constraints)
                     .build()
                 if (!skipInitial) {
-                    WorkManager.getInstance().enqueue(OneTimeWorkRequestBuilder<SimilarUpdateJob>().build())
+                    WorkManager.getInstance().enqueue(OneTimeWorkRequestBuilder<SimilarUpdateJob>().setConstraints(constraints).build())
                 }
-                WorkManager.getInstance().enqueueUniquePeriodicWork(TAG, ExistingPeriodicWorkPolicy.REPLACE, request)
+                if(interval > 0) {
+                    WorkManager.getInstance().enqueueUniquePeriodicWork(TAG, ExistingPeriodicWorkPolicy.REPLACE, request)
+                }
             } else {
                 WorkManager.getInstance().cancelAllWorkByTag(TAG)
             }

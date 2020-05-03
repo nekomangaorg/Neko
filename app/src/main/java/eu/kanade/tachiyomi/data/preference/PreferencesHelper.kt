@@ -283,7 +283,9 @@ class PreferencesHelper(val context: Context) {
 
     fun similarEnabled() = prefs.getBoolean(Keys.similarEnabled, false)
 
-    fun similarUpdateRestriction() = prefs.getStringSet(Keys.similarUpdateRestriction, emptySet())
+    fun similarOnlyOverWifi() = prefs.getBoolean(Keys.similarOnlyOverWifi, true)
+
+    fun similarUpdateInterval() = rxPrefs.getInteger(Keys.similarUpdateInterval, 3)
 
     fun lowQualityCovers() = prefs.getBoolean(Keys.lowQualityCovers, false)
 

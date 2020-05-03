@@ -153,7 +153,7 @@ object PreferenceKeys {
 
     const val similarUpdateInterval = "related_update_interval"
 
-    const val similarUpdateRestriction = "related_update_restriction"
+    const val similarOnlyOverWifi = "pref_simular_only_over_wifi_key"
 
     const val showR18 = "show_r18"
 

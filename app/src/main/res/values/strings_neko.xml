@@ -46,10 +46,9 @@
 
     <!-- Similar -->
     <string name="similar">Similar manga</string>
-    <string name="similar_settings">Similar manga Settings</string>
-    <string name="similar_screen">Show Similar manga</string>
-    <string name="similar_update_restriction">Similar manga update restrictions</string>
-    <string name="similar_update_restriction_summary">Update only when the conditions are met</string>
+    <string name="similar_settings">Similar Manga Settings</string>
+    <string name="similar_screen">Show similar manga</string>
+    <string name="similar_update_fequency">Similar update frequency</string>
     <string name="similar_loading_percent">Updating similar manga (%1$d / %2$d updated)</string>
     <string name="similar_loading_complete">Updating similar manga complete</string>
     <string name="similar_loading_complete_error">Error trying to load/process similar manga</string>
