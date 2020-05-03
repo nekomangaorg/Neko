@@ -22,8 +22,37 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
+            <LinearLayout
+                android:id="@+id/category_layout"
+                android:layout_width="match_parent"
+                android:layout_marginTop="?actionBarSize"
+                android:orientation="vertical"
+                android:gravity="top"
+                android:layout_height="wrap_content" >
+                <com.google.android.material.checkbox.MaterialCheckBox
+                    android:id="@+id/show_all"
+                    android:layout_marginStart="6dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/show_all"/>
+
+                <eu.kanade.tachiyomi.ui.library.category.CategoryRecyclerView
+                    android:id="@+id/category_recycler"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
             <include layout="@layout/library_grid_recycler" />
+
+            <View
+                android:id="@+id/recycler_cover"
+                android:layout_marginTop="?actionBarSize"
+                android:alpha="0"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="?android:colorBackground"/>
         </FrameLayout>
+
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout

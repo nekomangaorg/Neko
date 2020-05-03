@@ -9,5 +9,4 @@
     android:columnWidth="120dp"
     android:clipToPadding="false"
     tools:listitem="@layout/manga_grid_item"
-    android:background="?android:colorBackground"
     xmlns:app="http://schemas.android.com/apk/res-auto" />

@@ -263,6 +263,8 @@ class PreferencesHelper(val context: Context) {
 
     fun deleteRemovedChapters() = flowPrefs.getInt(Keys.deleteRemovedChapters, 0)
 
+    fun showAllCategories() = flowPrefs.getBoolean("show_all_categories", true)
+
     // Tutorial preferences
     fun shownFilterTutorial() = flowPrefs.getBoolean("shown_filter_tutorial", false)
 

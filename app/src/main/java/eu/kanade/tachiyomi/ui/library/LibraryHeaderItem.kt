@@ -36,6 +36,7 @@ import eu.kanade.tachiyomi.util.view.invisible
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.visInvisIf
 import eu.kanade.tachiyomi.util.view.visible
+import eu.kanade.tachiyomi.util.view.visibleIf
 import kotlinx.android.synthetic.main.library_category_header_item.*
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -184,16 +185,16 @@ class LibraryHeaderItem(
                     updateButton.gone()
                 }
                 LibraryUpdateService.categoryInQueue(category.id) -> {
-                    expandImage.visible()
+                    expandImage.visibleIf(adapter.headerItems.size > 1)
                     checkboxImage.gone()
                     catProgress.visible()
                     updateButton.invisible()
                 }
                 else -> {
-                    expandImage.visible()
+                    expandImage.visibleIf(adapter.headerItems.size > 1)
                     catProgress.gone()
                     checkboxImage.gone()
-                    updateButton.visInvisIf(category.id ?: 0 > -1)
+                    updateButton.visInvisIf(category.id ?: 0 > -1 && adapter.headerItems.size > 1)
                 }
             }
         }

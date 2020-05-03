@@ -60,7 +60,12 @@ class LibraryPresenter(
 
     /** List of all manga to update the */
     var libraryItems: List<LibraryItem> = emptyList()
+    private var sectionedLibraryItems: Map<Int, List<LibraryItem>> = emptyMap()
+    var currentCategory = -1
+        private set
     private var allLibraryItems: List<LibraryItem> = emptyList()
+    val showAllCategories
+        get() = preferences.showAllCategories().get()
 
     private var totalChapters: Map<Long, Int>? = null
 
@@ -92,13 +97,53 @@ class LibraryPresenter(
             mangaMap = applyFilters(mangaMap)
             mangaMap = applySort(mangaMap)
             val freshStart = libraryItems.isEmpty()
-            libraryItems = mangaMap
-            withContext(Dispatchers.Main) {
-                view.onNextLibraryUpdate(libraryItems, freshStart)
-            }
+            sectionLibrary(mangaMap, freshStart)
             withContext(Dispatchers.IO) {
                 setTotalChapters()
             }
+        }
+    }
+
+    fun getCurrentCategory() = categories.find { it.id == currentCategory }
+
+    fun switchSection(order: Int) {
+        preferences.lastUsedCategory().set(order)
+        val category = categories.find { it.order == order }?.id ?: return
+        currentCategory = category
+        view.onNextLibraryUpdate(sectionedLibraryItems[currentCategory] ?: emptyList())
+    }
+
+    fun restoreLibrary() {
+        val items = libraryItems
+        val show = showAllCategories || preferences.hideCategories().getOrDefault()
+        if (!show) {
+            sectionedLibraryItems = items.groupBy { it.manga.category }
+            if (currentCategory == -1) currentCategory = categories.find {
+                it.order == preferences.lastUsedCategory().getOrDefault()
+            }?.id ?: 0
+        }
+        view.onNextLibraryUpdate(
+            if (!show) sectionedLibraryItems[currentCategory]
+                ?: sectionedLibraryItems[categories.first().id] ?: emptyList()
+            else libraryItems, true
+        )
+    }
+
+    private suspend fun sectionLibrary(items: List<LibraryItem>, freshStart: Boolean = false) {
+        libraryItems = items
+        val show = showAllCategories || preferences.hideCategories().getOrDefault()
+        if (!show) {
+            sectionedLibraryItems = items.groupBy { it.manga.category }
+            if (currentCategory == -1) currentCategory = categories.find {
+                it.order == preferences.lastUsedCategory().getOrDefault()
+            }?.id ?: 0
+        }
+        withContext(Dispatchers.Main) {
+            view.onNextLibraryUpdate(
+                if (!show) sectionedLibraryItems[currentCategory]
+                ?: sectionedLibraryItems[categories.first().id] ?: emptyList()
+                else libraryItems, freshStart
+            )
         }
     }
 
@@ -402,6 +447,7 @@ class LibraryPresenter(
         val showCategories = !preferences.hideCategories().getOrDefault()
         var libraryManga = db.getLibraryMangas().executeAsBlocking()
         val seekPref = preferences.alwaysShowSeeker()
+        val showAll = showAllCategories
         if (!showCategories) libraryManga = libraryManga.distinctBy { it.id }
         val categoryAll = Category.createAll(
             context,
@@ -430,12 +476,13 @@ class LibraryPresenter(
         if (showCategories) {
             categories.forEach { category ->
                 val catId = category.id ?: return@forEach
-                if (catId > 0 && !categorySet.contains(catId) && catId !in categoriesHidden) {
+                if (catId > 0 && !categorySet.contains(catId) &&
+                    (catId !in categoriesHidden || !showAll)) {
                     val headerItem = headerItems[catId]
                     if (headerItem != null) items.add(
                         LibraryItem(LibraryManga.createBlank(catId), headerItem)
                     )
-                } else if (catId in categoriesHidden) {
+                } else if (catId in categoriesHidden && showAll) {
                     val mangaToRemove = items.filter { it.manga.category == catId }
                     val mergedTitle = mangaToRemove.joinToString("-") {
                         it.manga.title + "-" + it.manga.author
@@ -450,7 +497,7 @@ class LibraryPresenter(
         }
 
         categories.forEach {
-            it.isHidden = it.id in categoriesHidden
+            it.isHidden = it.id in categoriesHidden && showAll
         }
 
         this.allCategories = categories
@@ -476,10 +523,7 @@ class LibraryPresenter(
             var mangaMap = allLibraryItems
             mangaMap = applyFilters(mangaMap)
             mangaMap = applySort(mangaMap)
-            libraryItems = mangaMap
-            withContext(Dispatchers.Main) {
-                view.onNextLibraryUpdate(libraryItems)
-            }
+            sectionLibrary(mangaMap)
         }
     }
 
@@ -491,10 +535,7 @@ class LibraryPresenter(
             allLibraryItems = mangaMap
             val current = libraryItems
             setDownloadCount(current)
-            libraryItems = current
-            withContext(Dispatchers.Main) {
-                view.onNextLibraryUpdate(libraryItems)
-            }
+            sectionLibrary(current)
         }
     }
 
@@ -506,10 +547,7 @@ class LibraryPresenter(
             allLibraryItems = mangaMap
             val current = libraryItems
             setUnreadBadge(current)
-            libraryItems = current
-            withContext(Dispatchers.Main) {
-                view.onNextLibraryUpdate(libraryItems)
-            }
+            sectionLibrary(current)
         }
     }
 
@@ -518,10 +556,7 @@ class LibraryPresenter(
         scope.launch {
             var mangaMap = libraryItems
             mangaMap = applySort(mangaMap)
-            libraryItems = mangaMap
-            withContext(Dispatchers.Main) {
-                view.onNextLibraryUpdate(libraryItems)
-            }
+            sectionLibrary(mangaMap)
         }
     }
 

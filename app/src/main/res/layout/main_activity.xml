@@ -55,6 +55,16 @@
                     android:textColor="?actionBarTintColor"
                     android:textSize="20sp"
                     tools:text="Title Text" />
+
+                <ImageView
+                    android:id="@+id/dropdown"
+                    android:visibility="gone"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="4dp"
+                    android:src="@drawable/ic_arrow_drop_down_24dp"
+                    android:tint="?actionBarTintColor" />
             </LinearLayout>
         </eu.kanade.tachiyomi.ui.base.CenteredToolbar>
     </com.google.android.material.appbar.AppBarLayout>
