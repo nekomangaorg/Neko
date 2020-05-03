@@ -21,7 +21,7 @@ class SettingsSimilarController : SettingsController() {
         switchPreference {
             key = Keys.similarEnabled
             titleRes = R.string.similar_screen
-            defaultValue = true
+            defaultValue = false
             onClick {
                 SimilarUpdateJob.setupTask()
             }

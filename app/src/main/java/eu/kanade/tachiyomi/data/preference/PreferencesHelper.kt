@@ -281,7 +281,7 @@ class PreferencesHelper(val context: Context) {
 
     fun skipFiltered() = prefs.getBoolean(Keys.skipFiltered, false)
 
-    fun similarEnabled() = prefs.getBoolean(Keys.similarEnabled, true)
+    fun similarEnabled() = prefs.getBoolean(Keys.similarEnabled, false)
 
     fun similarOnlyOverWifi() = prefs.getBoolean(Keys.similarOnlyOverWifi, true)
 
