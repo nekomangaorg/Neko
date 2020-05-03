@@ -5,6 +5,7 @@ import android.net.Uri
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.similar.SimilarUpdateJob
+import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 
 class SettingsSimilarController : SettingsController() {
@@ -32,7 +33,16 @@ class SettingsSimilarController : SettingsController() {
             titleRes = R.string.only_download_over_wifi
             defaultValue = true
             onClick {
-                SimilarUpdateJob.setupTask()
+                SimilarUpdateJob.setupTask(true)
+            }
+        }
+
+        preference {
+            titleRes = R.string.similar_manually_update
+            summary = context.resources.getString(R.string.similar_manually_update_message)
+            onClick {
+                SimilarUpdateJob.doWorkNow()
+                context.toast(R.string.similar_manually_toast)
             }
         }
 
