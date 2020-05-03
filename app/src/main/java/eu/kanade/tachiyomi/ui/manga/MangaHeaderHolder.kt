@@ -39,8 +39,8 @@ class MangaHeaderHolder(
     isTablet: Boolean = false
 ) : BaseFlexibleViewHolder(view, adapter) {
 
-    var showReadingButton = true
-    var showMoreButton = true
+    private var showReadingButton = true
+    private var showMoreButton = true
 
     init {
         chapter_layout.setOnClickListener { adapter.delegate.showChapterFilter() }
@@ -79,9 +79,7 @@ class MangaHeaderHolder(
                 adapter.delegate.favoriteManga(true)
                 true
             }
-            title.setOnClickListener {
-                title.maxLines = Integer.MAX_VALUE
-            }
+
             title.setOnLongClickListener {
                 adapter.delegate.copyToClipboard(title.text.toString(), R.string.title)
                 true
