@@ -122,10 +122,10 @@ dependencies {
     implementation("com.github.tfcporciuncula:flow-preferences:1.1.1")
 
 // Network client
-    val okhttpVersion = "4.3.1"
+    val okhttpVersion = "4.5.0"
     implementation("com.squareup.okhttp3:okhttp:$okhttpVersion")
     implementation("com.squareup.okhttp3:logging-interceptor:$okhttpVersion")
-    implementation("com.squareup.okio:okio:2.4.3")
+    implementation("com.squareup.okio:okio:2.6.0")
 
 // REST
     val retrofitVersion = "2.7.2"
@@ -234,7 +234,7 @@ dependencies {
 
     implementation(kotlin("stdlib", org.jetbrains.kotlin.config.KotlinCompilerVersion.VERSION))
 
-    val coroutinesVersion = "1.3.3"
+    val coroutinesVersion = "1.3.5"
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion")
 
