@@ -180,7 +180,7 @@ class PreferencesHelper(val context: Context) {
 
     fun libraryLayout() = rxPrefs.getInteger(Keys.libraryLayout, 1)
 
-    fun gridSize() = rxPrefs.getInteger(Keys.gridSize, 1)
+    fun gridSize() = rxPrefs.getInteger(Keys.gridSize, 2)
 
     fun alwaysShowSeeker() = rxPrefs.getBoolean("always_show_seeker", false)
 
