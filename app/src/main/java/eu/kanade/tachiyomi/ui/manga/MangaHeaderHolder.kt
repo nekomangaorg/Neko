@@ -238,6 +238,7 @@ class MangaHeaderHolder(
             height = adapter.delegate.topCoverHeight()
         }
 
+        manga_status.visibleIf(manga.status != 0)
         manga_status.text = (itemView.context.getString(
             when (manga.status) {
                 SManga.ONGOING -> R.string.ongoing
