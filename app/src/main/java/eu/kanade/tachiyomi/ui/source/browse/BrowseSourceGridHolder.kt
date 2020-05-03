@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.source.browse
 
+import android.app.Activity
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -61,6 +62,7 @@ class BrowseSourceGridHolder(
     }
 
     override fun setImage(manga: Manga) {
+        if ((view.context as? Activity)?.isDestroyed == true) return
         if (manga.thumbnail_url == null)
             Glide.with(view.context).clear(cover_thumbnail)
         else {
