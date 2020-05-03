@@ -188,12 +188,7 @@ fun View.applyWindowInsetsForRootController(bottomNav: View) {
                 viewTreeObserver.removeOnGlobalLayoutListener(this)
                 setOnApplyWindowInsetsListener { view, insets ->
                     view.updateLayoutParams<FrameLayout.LayoutParams> {
-                        val attrsArray = intArrayOf(android.R.attr.actionBarSize)
-                        val array = view.context.obtainStyledAttributes(attrsArray)
-                        // topMargin = insets.systemWindowInsetTop + array
-                        // .getDimensionPixelSize(0, 0)
                         bottomMargin = bottomNav.height
-                        array.recycle()
                     }
                     insets
                 }
