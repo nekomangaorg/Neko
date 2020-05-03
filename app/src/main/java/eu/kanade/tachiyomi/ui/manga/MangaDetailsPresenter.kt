@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.database.models.Track
+import eu.kanade.tachiyomi.data.database.models.scanlatorList
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.download.model.DownloadQueue
@@ -23,6 +24,7 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.SChapter
+import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
 import eu.kanade.tachiyomi.ui.manga.external.ExternalItem
 import eu.kanade.tachiyomi.ui.manga.track.TrackItem
@@ -76,6 +78,11 @@ class MangaDetailsPresenter(
     var chapters: List<ChapterItem> = emptyList()
         private set
 
+    var allChapterScanlators: List<String> = emptyList()
+        private set
+
+    var filteredScanlators: List<String> = emptyList()
+
     var headerItem = MangaHeaderItem(manga, controller.fromCatalogue)
     var tabletChapterHeaderItem: MangaHeaderItem? = null
 
@@ -97,6 +104,9 @@ class MangaDetailsPresenter(
             controller.updateHeader()
             refreshAll()
         } else {
+            manga.scanlator_filter?.let {
+                filteredScanlators = it.split(",").toList()
+            }
             updateChapters()
             controller.updateChapters(this.chapters)
         }
@@ -126,6 +136,9 @@ class MangaDetailsPresenter(
     private suspend fun getChapters() {
         val chapters = db.getChapters(manga).executeOnIO().map { it.toModel() }
 
+        //update all scanlators
+        updateScanlators(chapters)
+
         // Find downloaded chapters
         setDownloadedChapters(chapters)
 
@@ -133,9 +146,29 @@ class MangaDetailsPresenter(
         this.chapters = applyChapterFilters(chapters)
     }
 
+    private fun updateScanlators(chapters: List<ChapterItem>) {
+        allChapterScanlators = chapters.flatMap { it -> it.chapter.scanlatorList() }.distinct().sorted()
+        if (filteredScanlators.isEmpty()) {
+            filteredScanlators = allChapterScanlators
+        }
+    }
+
+    fun filterScanlatorsClicked(selectedScanlators: List<String>) {
+        filteredScanlators = allChapterScanlators.filter { selectedScanlators.contains(it) }
+        if (filteredScanlators.size == allChapterScanlators.size) {
+            manga.scanlator_filter = null
+        } else {
+            manga.scanlator_filter = filteredScanlators.joinToString(",")
+        }
+        asyncUpdateMangaAndChapters(true)
+    }
+
     private fun updateChapters(fetchedChapters: List<Chapter>? = null) {
         val chapters =
             (fetchedChapters ?: db.getChapters(manga).executeAsBlocking()).map { it.toModel() }
+
+        //update all scanlators
+        updateScanlators(chapters)
 
         // Find downloaded chapters
         setDownloadedChapters(chapters)
@@ -240,6 +273,18 @@ class MangaDetailsPresenter(
         if (onlyBookmarked()) {
             chapters = chapters.filter { it.bookmark }
         }
+
+        chapters = chapters.filter {
+            if (it.scanlator == null) {
+                false
+            } else {
+                val chapterScanlators = MdUtil.getScanlators(it.scanlator!!)
+                filteredScanlators.any {
+                    chapterScanlators.contains(it)
+                }
+            }
+        }
+
         val sortFunction: (Chapter, Chapter) -> Int = when (manga.sorting) {
             Manga.SORTING_SOURCE -> when (sortDescending()) {
                 true -> { c1, c2 -> c1.source_order.compareTo(c2.source_order) }
@@ -562,6 +607,20 @@ class MangaDetailsPresenter(
         asyncUpdateMangaAndChapters()
     }
 
+    fun setScanlatorFilter(selectedScanlators: MutableList<String>?) {
+        if (!selectedScanlators.isNullOrEmpty()) {
+            chapters.filter {
+                val scanlatorString = it.chapter.scanlator
+                var found = false
+                if (!scanlatorString.isNullOrBlank()) {
+                    found = MdUtil.getScanlators(scanlatorString)
+                        .any { group -> selectedScanlators.contains(group) }
+                }
+                found
+            }.toList()
+        }
+    }
+
     /**
      * Removes all filters and requests an UI update.
      */
@@ -578,7 +637,10 @@ class MangaDetailsPresenter(
 
     private fun asyncUpdateMangaAndChapters(justChapters: Boolean = false) {
         scope.launch {
-            if (!justChapters) db.updateFlags(manga).executeOnIO()
+            if (!justChapters) {
+                db.updateFlags(manga).executeOnIO()
+                db.updateScanlatorFilterFlag(manga).executeOnIO()
+            }
             updateChapters()
             withContext(Dispatchers.Main) { controller.updateChapters(chapters) }
         }

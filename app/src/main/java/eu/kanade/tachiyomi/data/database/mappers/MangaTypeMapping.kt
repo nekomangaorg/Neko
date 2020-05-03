@@ -28,6 +28,7 @@ import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_LANG_FLAG
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_LAST_UPDATE
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_MANGA_UPDATES_ID
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_MY_ANIME_LIST_ID
+import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_SCANLATOR_FILTER_FLAG
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_SOURCE
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_STATUS
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_THUMBNAIL_URL
@@ -38,22 +39,22 @@ import eu.kanade.tachiyomi.data.database.tables.MangaTable.TABLE
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 
 class MangaTypeMapping : SQLiteTypeMapping<Manga>(
-        MangaPutResolver(),
-        MangaGetResolver(),
-        MangaDeleteResolver()
+    MangaPutResolver(),
+    MangaGetResolver(),
+    MangaDeleteResolver()
 )
 
 class MangaPutResolver : DefaultPutResolver<Manga>() {
 
     override fun mapToInsertQuery(obj: Manga) = InsertQuery.builder()
-            .table(TABLE)
-            .build()
+        .table(TABLE)
+        .build()
 
     override fun mapToUpdateQuery(obj: Manga) = UpdateQuery.builder()
-            .table(TABLE)
-            .where("$COL_ID = ?")
-            .whereArgs(obj.id)
-            .build()
+        .table(TABLE)
+        .where("$COL_ID = ?")
+        .whereArgs(obj.id)
+        .build()
 
     override fun mapToContentValues(obj: Manga) = ContentValues(15).apply {
         put(COL_ID, obj.id)
@@ -80,6 +81,7 @@ class MangaPutResolver : DefaultPutResolver<Manga>() {
         put(COL_MY_ANIME_LIST_ID, obj.my_anime_list_id)
         put(COL_MANGA_UPDATES_ID, obj.manga_updates_id)
         put(COL_ANIME_PLANET_ID, obj.anime_planet_id)
+        put(COL_SCANLATOR_FILTER_FLAG, obj.scanlator_filter)
     }
 }
 
@@ -107,6 +109,7 @@ interface BaseMangaGetResolver {
         my_anime_list_id = cursor.getString(cursor.getColumnIndex(COL_MY_ANIME_LIST_ID))
         manga_updates_id = cursor.getString(cursor.getColumnIndex(COL_MANGA_UPDATES_ID))
         anime_planet_id = cursor.getString(cursor.getColumnIndex(COL_ANIME_PLANET_ID))
+        scanlator_filter = cursor.getString(cursor.getColumnIndex(COL_SCANLATOR_FILTER_FLAG))
         follow_status =
             cursor.getInt(cursor.getColumnIndex(COL_FOLLOW_STATUS)).let { FollowStatus.fromInt(it) }
     }
@@ -122,8 +125,8 @@ open class MangaGetResolver : DefaultGetResolver<Manga>(), BaseMangaGetResolver 
 class MangaDeleteResolver : DefaultDeleteResolver<Manga>() {
 
     override fun mapToDeleteQuery(obj: Manga) = DeleteQuery.builder()
-            .table(TABLE)
-            .where("$COL_ID = ?")
-            .whereArgs(obj.id)
-            .build()
+        .table(TABLE)
+        .where("$COL_ID = ?")
+        .whereArgs(obj.id)
+        .build()
 }

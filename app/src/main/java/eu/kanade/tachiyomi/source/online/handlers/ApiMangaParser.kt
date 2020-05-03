@@ -197,7 +197,7 @@ class ApiMangaParser(val lang: String) {
             scanlatorName.add(it)
         }
 
-        chapter.scanlator = MdUtil.cleanString(scanlatorName.joinToString(" & "))
+        chapter.scanlator = MdUtil.cleanString(MdUtil.getScanlatorString(scanlatorName))
 
         return chapter
     }

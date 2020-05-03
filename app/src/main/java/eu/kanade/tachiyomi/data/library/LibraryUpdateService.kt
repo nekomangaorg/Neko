@@ -36,6 +36,7 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
+import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.lang.chop
@@ -240,7 +241,7 @@ class LibraryUpdateService(
             stopSelf(startId)
         }
 
-        if(target == Target.CHAPTERS) listener?.onUpdateManga(LibraryManga())
+        if (target == Target.CHAPTERS) listener?.onUpdateManga(LibraryManga())
 
         job = GlobalScope.launch(handler) {
             when (target) {
@@ -286,7 +287,7 @@ class LibraryUpdateService(
 
     private suspend fun updateMangaChapters(
         manga: LibraryManga,
-        progess: Int,
+        progress: Int,
         shouldDownload: Boolean
     ):
         Boolean {
@@ -295,7 +296,7 @@ class LibraryUpdateService(
             if (job?.isCancelled == true) {
                 throw java.lang.Exception("Job was cancelled")
             }
-            showProgressNotification(manga, progess, mangaToUpdate.size)
+            showProgressNotification(manga, progress, mangaToUpdate.size)
             val source = sourceManager.getMangadex()
             val details = source.fetchMangaAndChapterDetails(manga)
 
@@ -323,7 +324,12 @@ class LibraryUpdateService(
                 val newChapters = syncChaptersWithSource(db, fetchedChapters, manga, source)
                 if (newChapters.first.isNotEmpty()) {
                     if (shouldDownload) {
-                        downloadChapters(manga, newChapters.first.sortedBy { it.chapter_number })
+                        var chaptersToDl = newChapters.first.sortedBy { it.chapter_number }
+                        if (manga.scanlator_filter != null) {
+                            val scanlatorsToDownload = MdUtil.getScanlators(manga.scanlator_filter!!)
+                            chaptersToDl = chaptersToDl.filter { scanlatorsToDownload.contains(it.scanlator) }
+                        }
+                        downloadChapters(manga, chaptersToDl)
                         hasDownloads = true
                     }
                     newUpdates[manga] =

@@ -54,6 +54,8 @@ object MangaTable {
 
     const val COL_ANIME_PLANET_ID = "anime_planet_id"
 
+    const val COL_SCANLATOR_FILTER_FLAG = "scanlator_filter_flag"
+
     val createTableQuery: String
         get() = """CREATE TABLE $TABLE(
             $COL_ID INTEGER NOT NULL PRIMARY KEY,
@@ -78,6 +80,7 @@ object MangaTable {
             $COL_MY_ANIME_LIST_ID TEXT,
             $COL_ANIME_PLANET_ID TEXT,
             $COL_MANGA_UPDATES_ID TEXT,
+            $COL_SCANLATOR_FILTER_FLAG TEXT,
             $COL_FOLLOW_STATUS INTEGER
             )"""
 
@@ -86,7 +89,7 @@ object MangaTable {
 
     val createLibraryIndexQuery: String
         get() = "CREATE INDEX library_${COL_FAVORITE}_index ON $TABLE($COL_FAVORITE) " +
-                "WHERE $COL_FAVORITE = 1"
+            "WHERE $COL_FAVORITE = 1"
 
     val addDateAddedCol: String
         get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_DATE_ADDED} LONG DEFAULT 0"
@@ -111,4 +114,7 @@ object MangaTable {
 
     val addAnimePlanetIdCol: String
         get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_ANIME_PLANET_ID} TEXT DEFAULT NULL"
+
+    val addScanlatorFilterFlagCol: String
+        get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_SCANLATOR_FILTER_FLAG} TEXT DEFAULT NULL"
 }

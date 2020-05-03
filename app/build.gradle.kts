@@ -207,6 +207,8 @@ dependencies {
     implementation("com.github.florent37:viewtooltip:1.2.2")
     implementation("com.getkeepsafe.taptargetview:taptargetview:1.13.0")
 
+    implementation("com.github.AnuraganuPunalur:Multi-Selection-Spinner-Android:1.0")
+
 // Conductor
     implementation("com.bluelinelabs:conductor:2.1.5")
     implementation("com.bluelinelabs:conductor-support:2.1.5") {

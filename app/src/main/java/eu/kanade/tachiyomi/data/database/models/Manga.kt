@@ -30,6 +30,8 @@ interface Manga : SManga {
 
     var chapter_flags: Int
 
+    var scanlator_filter: String?
+
     fun setChapterOrder(order: Int) {
         setFlags(order, SORT_MASK)
         setFlags(SORT_LOCAL, SORT_SELF_MASK)

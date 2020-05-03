@@ -55,9 +55,12 @@ open class MangaImpl : Manga {
 
     override var anime_planet_id: String? = null
 
+    override var scanlator_filter: String? = null
+
     override fun copyFrom(other: SManga) {
         if (other is MangaImpl && (other as MangaImpl)::title.isInitialized &&
-            !other.title.isBlank() && other.title != title) {
+            !other.title.isBlank() && other.title != title
+        ) {
             val oldTitle = title
             title = other.title
             val db: DownloadManager by injectLazy()

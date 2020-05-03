@@ -4,6 +4,9 @@ import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CompoundButton
+import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.list.listItemsMultiChoice
+import com.anurag.multiselectionspinner.MultiSelectionSpinnerDialog
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import eu.kanade.tachiyomi.R
@@ -19,7 +22,7 @@ import kotlinx.android.synthetic.main.chapter_sort_bottom_sheet.*
 import kotlin.math.max
 
 class ChaptersSortBottomSheet(controller: MangaDetailsController) : BottomSheetDialog
-    (controller.activity!!, R.style.BottomSheetDialogTheme) {
+    (controller.activity!!, R.style.BottomSheetDialogTheme), MultiSelectionSpinnerDialog.OnMultiSpinnerSelectionListener {
 
     val activity = controller.activity!!
 
@@ -95,19 +98,27 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) : BottomSheetD
             show_download.isChecked || show_bookmark.isChecked)
 
         var defPref = presenter.globalSort()
-        sort_group.check(if (presenter.manga.sortDescending(defPref)) R.id.sort_newest else
-            R.id.sort_oldest)
+        sort_group.check(
+            if (presenter.manga.sortDescending(defPref)) R.id.sort_newest else
+                R.id.sort_oldest
+        )
 
         hide_titles.isChecked = presenter.manga.displayMode != Manga.DISPLAY_NAME
-        sort_method_group.check(if (presenter.manga.sorting == Manga.SORTING_SOURCE) R.id.sort_by_source else
-            R.id.sort_by_number)
+        sort_method_group.check(
+            if (presenter.manga.sorting == Manga.SORTING_SOURCE) R.id.sort_by_source else
+                R.id.sort_by_number
+        )
 
-        set_as_default_sort.visInvisIf(defPref != presenter.manga.sortDescending() &&
-        presenter.manga.usesLocalSort())
+        set_as_default_sort.visInvisIf(
+            defPref != presenter.manga.sortDescending() &&
+                presenter.manga.usesLocalSort()
+        )
         sort_group.setOnCheckedChangeListener { _, checkedId ->
             presenter.setSortOrder(checkedId == R.id.sort_newest)
-            set_as_default_sort.visInvisIf(defPref != presenter.manga.sortDescending() &&
-                presenter.manga.usesLocalSort())
+            set_as_default_sort.visInvisIf(
+                defPref != presenter.manga.sortDescending() &&
+                    presenter.manga.usesLocalSort()
+            )
         }
 
         set_as_default_sort.setOnClickListener {
@@ -130,6 +141,24 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) : BottomSheetD
         show_unread.setOnCheckedChangeListener(::checkedFilter)
         show_download.setOnCheckedChangeListener(::checkedFilter)
         show_bookmark.setOnCheckedChangeListener(::checkedFilter)
+
+        val scanlators = presenter.allChapterScanlators
+        val preselected = presenter.filteredScanlators.map { scanlators.indexOf(it) }
+
+
+        filter_groups_button.setOnClickListener {
+            MaterialDialog(activity!!)
+                .title(R.string.filter_groups)
+                .listItemsMultiChoice(
+                    items = scanlators,
+                    initialSelection = preselected.toIntArray(),
+                    allowEmptySelection = false
+                ) { _, selections, _ ->
+                    val selected = selections.map { scanlators[it] }
+                    presenter.filterScanlatorsClicked(selected)
+                }
+                .positiveButton(android.R.string.ok).show()
+        }
     }
 
     private fun checkedFilter(checkBox: CompoundButton, isChecked: Boolean) {
@@ -145,8 +174,13 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) : BottomSheetD
                 else if (show_unread == checkBox) show_read.isChecked = false
             }
         } else if (!show_read.isChecked && !show_unread.isChecked &&
-            !show_download.isChecked && !show_bookmark.isChecked) {
+            !show_download.isChecked && !show_bookmark.isChecked
+        ) {
             show_all.isChecked = true
         }
+    }
+
+    override fun OnMultiSpinnerItemSelected(chosenItems: MutableList<String>?) {
+        presenter.setScanlatorFilter(chosenItems)
     }
 }

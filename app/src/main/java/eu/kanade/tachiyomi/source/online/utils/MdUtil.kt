@@ -13,6 +13,8 @@ class MdUtil {
         const val followsAllApi = "/api/?type=manga_follows"
         const val followsMangaApi = "/api/?type=manga_follows&manga_id="
 
+        const val scanlatorSeparator = " & "
+
         val englishDescriptionTags = listOf(
             "[b][u]English:[/u][/b]",
             "[b][u]English[/u][/b]",
@@ -68,9 +70,9 @@ class MdUtil {
         // will change from large to thumbnail size images if needed
         fun convertThumbUrlIfNeeded(thumbUrl: String, lowQuality: Boolean): String {
             if (lowQuality) {
-                return thumbUrl.replace(".large.",".thumb.")
+                return thumbUrl.replace(".large.", ".thumb.")
             }
-            return thumbUrl.replace(".thumb.",".large.")
+            return thumbUrl.replace(".thumb.", ".large.")
         }
 
         // Get the ID from the manga url
@@ -126,6 +128,14 @@ class MdUtil {
                 return attr
             }
             return baseUrl + attr
+        }
+
+        fun getScanlators(scanlators: String): List<String> {
+            return scanlators.split(scanlatorSeparator)
+        }
+
+        fun getScanlatorString(scanlators: List<String>): String {
+            return scanlators.joinToString(scanlatorSeparator)
         }
     }
 }

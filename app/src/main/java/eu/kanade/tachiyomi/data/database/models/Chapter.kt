@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.data.database.models
 
 import eu.kanade.tachiyomi.source.model.SChapter
+import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import java.io.Serializable
 
 interface Chapter : SChapter, Serializable {
@@ -30,4 +31,9 @@ interface Chapter : SChapter, Serializable {
             chapter_number = -1f
         }
     }
+}
+
+fun Chapter.scanlatorList(): List<String> {
+    this.scanlator ?: return emptyList()
+    return MdUtil.getScanlators(this.scanlator!!)
 }

@@ -279,7 +279,7 @@ class PreferencesHelper(val context: Context) {
 
     fun shownSimilarTutorial() = flowPrefs.getBoolean("shown_similar_tutorial", false)
 
-    fun skipFiltered() = prefs.getBoolean(Keys.skipFiltered, false)
+    fun skipFiltered() = prefs.getBoolean(Keys.skipFiltered, true)
 
     fun similarEnabled() = prefs.getBoolean(Keys.similarEnabled, false)
 
