@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
+import android.os.Handler
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.Menu
@@ -42,6 +43,8 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.library.LibraryServiceListener
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
+import eu.kanade.tachiyomi.data.notification.NotificationReceiver
+import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
@@ -461,6 +464,10 @@ class LibraryController(
         LibraryUpdateService.start(view.context, category)
         snack = view.snack(R.string.updating_library) {
             anchorView = filter_bottom_sheet
+            setAction(R.string.cancel) {
+                LibraryUpdateService.stop(context)
+                Handler().post { NotificationReceiver.dismissNotification(context, Notifications.ID_LIBRARY_PROGRESS) }
+            }
         }
     }
 
@@ -912,6 +919,10 @@ class LibraryController(
             ), Snackbar.LENGTH_LONG
         ) {
             anchorView = filter_bottom_sheet
+            setAction(R.string.cancel) {
+                LibraryUpdateService.stop(context)
+                Handler().post { NotificationReceiver.dismissNotification(context, Notifications.ID_LIBRARY_PROGRESS) }
+            }
         }
         if (!inQueue) LibraryUpdateService.start(view!!.context, category)
         return true
