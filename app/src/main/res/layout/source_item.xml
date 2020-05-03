@@ -10,7 +10,6 @@
         android:id="@+id/right_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/red_error"
         android:visibility="gone">
 
         <com.google.android.material.textview.MaterialTextView
@@ -30,8 +29,7 @@
     <FrameLayout
         android:id="@+id/left_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/red_error">
+        android:layout_height="match_parent">
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/close_left"
