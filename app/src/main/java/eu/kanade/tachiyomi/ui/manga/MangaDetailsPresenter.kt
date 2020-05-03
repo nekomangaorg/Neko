@@ -445,15 +445,14 @@ class MangaDetailsPresenter(
             }
             isLoading = false
             if (chapterError == null) withContext(Dispatchers.Main) { controller.updateChapters(this@MangaDetailsPresenter.chapters) }
-            else {
+            if (chapterError != null) {
                 withContext(Dispatchers.Main) {
                     controller.showError(
-                        trimException(mangaError!!)
+                        trimException(chapterError!!)
                     )
                 }
                 return@launch
-            }
-            if (mangaError != null) withContext(Dispatchers.Main) {
+            } else if (mangaError != null) withContext(Dispatchers.Main) {
                 controller.showError(
                     trimException(mangaError!!)
                 )
