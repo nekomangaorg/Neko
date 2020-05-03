@@ -86,6 +86,9 @@ class MangaHeaderHolder(
                 adapter.delegate.copyToClipboard(title.text.toString(), R.string.title)
                 true
             }
+            manga_author.setOnClickListener {
+                manga_author.text?.let { adapter.delegate.globalSearch(it.toString()) }
+            }
             manga_author.setOnLongClickListener {
                 adapter.delegate.copyToClipboard(manga_author.text.toString(), R.string.author)
                 true
