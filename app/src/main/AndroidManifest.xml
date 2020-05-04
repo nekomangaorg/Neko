@@ -92,6 +92,23 @@
                     android:scheme="https"
                     android:host="www.mangadex.cc"
                     android:pathPattern="/manga/..*" />
+
+                <data
+                    android:scheme="https"
+                    android:host="www.mangadex.org"
+                    android:pathPattern="/title/..*" />
+                <data
+                    android:scheme="https"
+                    android:host="mangadex.org"
+                    android:pathPattern="/title/..*" />
+                <data
+                    android:scheme="https"
+                    android:host="www.mangadex.cc"
+                    android:pathPattern="/title/..*" />
+                <data
+                    android:scheme="https"
+                    android:host="www.mangadex.cc"
+                    android:pathPattern="/title/..*" />
             </intent-filter>
 
 
