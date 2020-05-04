@@ -116,7 +116,8 @@ class LibraryController(
 
     private var libraryLayout: Int = preferences.libraryLayout().getOrDefault()
 
-    private var singleCategory: Boolean = false
+    var singleCategory: Boolean = false
+        private set
 
     /**
      * Library search query.
