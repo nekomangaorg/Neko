@@ -518,6 +518,13 @@ class LibraryController(
         }
     }
 
+    override fun onChangeEnded(handler: ControllerChangeHandler, type: ControllerChangeType) {
+        super.onChangeEnded(handler, type)
+        if (!type.isEnter) {
+            activity?.dropdown?.gone()
+        }
+    }
+
     override fun onActivityResumed(activity: Activity) {
         super.onActivityResumed(activity)
         if (view == null) return
