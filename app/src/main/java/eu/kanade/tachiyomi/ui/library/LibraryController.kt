@@ -545,7 +545,7 @@ class LibraryController(
 
     override fun onDestroyView(view: View) {
         LibraryUpdateService.removeListener(this)
-        actionMode = null
+        destroyActionModeIfNeeded()
         super.onDestroyView(view)
     }
 
