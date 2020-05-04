@@ -353,7 +353,6 @@ class BackupRestoreService : Service() {
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .setAutoCancel(false)
-            .setColor(ContextCompat.getColor(this, R.color.colorAccent))
             .addAction(
                 R.drawable.ic_clear_grey_24dp_img,
                 getString(android.R.string.cancel),
@@ -444,7 +443,6 @@ class BackupRestoreService : Service() {
             .setStyle(NotificationCompat.BigTextStyle().bigText(restoreString))
             .setSmallIcon(R.drawable.ic_neko_notification)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setColor(ContextCompat.getColor(this, R.color.colorAccent))
         if (errors.size > 0 && !path.isNullOrEmpty() && !file.isNullOrEmpty()) {
             resultNotification.addAction(
                 R.drawable.ic_clear_grey_24dp_img, getString(

@@ -12,7 +12,6 @@ import android.os.PowerManager
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.GROUP_ALERT_SUMMARY
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.signature.ObjectKey
 import eu.kanade.tachiyomi.R
@@ -115,7 +114,6 @@ class LibraryUpdateService(
             .setLargeIcon(notificationBitmap)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
-            .setColor(ContextCompat.getColor(this, R.color.colorAccent))
             .addAction(
                 R.drawable.ic_clear_grey_24dp_img,
                 getString(android.R.string.cancel),
@@ -464,7 +462,6 @@ class LibraryUpdateService(
                 }
                 setGroupAlertBehavior(GROUP_ALERT_SUMMARY)
                 setContentTitle(manga.title)
-                color = ContextCompat.getColor(this@LibraryUpdateService, R.color.colorAccent)
                 val chaptersNames = if (chapterNames.size > 5) {
                     "${chapterNames.take(4).joinToString("\n")}, " +
                         resources.getQuantityString(
@@ -507,7 +504,6 @@ class LibraryUpdateService(
                     setSmallIcon(R.drawable.ic_neko_notification)
                     setLargeIcon(notificationBitmap)
                     setContentTitle(getString(R.string.new_chapters_found))
-                    color = ContextCompat.getColor(applicationContext, R.color.colorAccent)
                     if (updates.size > 1) {
                         setContentText(
                             resources.getQuantityString(
