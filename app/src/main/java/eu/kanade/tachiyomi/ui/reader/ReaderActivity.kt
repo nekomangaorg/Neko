@@ -457,6 +457,14 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
         viewer = newViewer
         viewer_container.addView(newViewer.getView())
 
+        viewer_container.setBackgroundColor(
+            if (viewer is WebtoonViewer) {
+                Color.BLACK
+            } else {
+                getResourceColor(android.R.attr.colorBackground)
+            }
+        )
+
         toolbar.title = manga.title
 
         page_seekbar.isRTL = newViewer is R2LPagerViewer
