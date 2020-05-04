@@ -184,16 +184,16 @@ class LibraryHeaderItem(
                     updateButton.gone()
                 }
                 LibraryUpdateService.categoryInQueue(category.id) -> {
-                    expandImage.visibleIf(adapter.headerItems.size > 1)
+                    expandImage.visibleIf(!adapter.isSingleCategory)
                     checkboxImage.gone()
                     catProgress.visible()
                     updateButton.invisible()
                 }
                 else -> {
-                    expandImage.visibleIf(adapter.headerItems.size > 1)
+                    expandImage.visibleIf(!adapter.isSingleCategory)
                     catProgress.gone()
                     checkboxImage.gone()
-                    updateButton.visInvisIf(category.id ?: 0 > -1 && adapter.headerItems.size > 1)
+                    updateButton.visInvisIf(category.id ?: 0 > -1 && !adapter.isSingleCategory)
                 }
             }
         }
