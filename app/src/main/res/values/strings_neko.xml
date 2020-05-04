@@ -48,6 +48,12 @@
     <string name="similar">Similar manga</string>
     <string name="similar_settings">Similar Manga Settings</string>
     <string name="similar_screen">Show similar manga</string>
+    <string name="similar_manually_update">Pull latest database</string>
+    <string name="similar_manually_toast">Starting manual update</string>
+    <string name="similar_manually_update_message">
+        Download the latest similar manga database.
+        This is around 20mb in size and is updated daily.
+    </string>
     <string name="similar_update_fequency">Similar update frequency</string>
     <string name="similar_loading_percent">Updating similar manga (%1$d / %2$d updated)</string>
     <string name="similar_loading_complete">Updating similar manga complete</string>
