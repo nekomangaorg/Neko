@@ -141,10 +141,10 @@ class MangaHeaderHolder(
         )
         else manga_genres_tags.setTags(emptyList())
 
-        if (manga.author == manga.artist || manga.artist.isNullOrBlank()) manga_author.text =
-            manga.author?.trim()
-        else {
-            manga_author.text = "${manga.author?.trim()}, ${manga.artist}"
+        if (manga.author == manga.artist || manga.artist.isNullOrBlank()) {
+            manga_author.text = manga.author?.trim()
+        } else {
+            manga_author.text = listOfNotNull(manga.author?.trim(), manga.artist?.trim()).joinToString(", ")
         }
         manga_summary.text =
             if (manga.description.isNullOrBlank()) itemView.context.getString(R.string.no_description)
