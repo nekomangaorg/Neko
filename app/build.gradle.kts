@@ -36,8 +36,8 @@ android {
         minSdkVersion(24)
         targetSdkVersion(29)
         applicationId = "tachiyomi.mangadex"
-        versionCode = 55
-        versionName = "2.0.2"
+        versionCode = 56
+        versionName = "2.0.3"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
         setProperty("archivesBaseName", "Neko")
@@ -129,8 +129,8 @@ dependencies {
 
     //Chucker
     val chuckerVersion = "3.2.0"
-    debugImplementation ("com.github.ChuckerTeam.Chucker:library:$chuckerVersion")
-    releaseImplementation ("com.github.ChuckerTeam.Chucker:library-no-op:$chuckerVersion")
+    debugImplementation("com.github.ChuckerTeam.Chucker:library:$chuckerVersion")
+    releaseImplementation("com.github.ChuckerTeam.Chucker:library-no-op:$chuckerVersion")
 
 // REST
     val retrofitVersion = "2.7.2"

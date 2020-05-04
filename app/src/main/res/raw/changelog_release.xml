@@ -2,6 +2,21 @@
 <changelog bulletedList="true">
     <changelogversion
         changeDate=""
+        versionName="v2.0.3">
+        <changelogtext>The long requested filter by groups is now available in the chapter fitler sheet. It won't download these filtered ones but they are counted on unread badges currently
+        </changelogtext>
+        <changelogtext>By default now skip filtered chapters is enabled</changelogtext>
+        <changelogtext>cleaned up similar manga settings and gave more options on time domains for update</changelogtext>
+        <changelogtext>Switch categories by tapping the library title to show category backdrop</changelogtext>
+        <changelogtext>Now an option to show only 1 category at a time</changelogtext>
+        <changelogtext>XS and XL grid sizes</changelogtext>
+        <changelogtext>redid list view to be more compact</changelogtext>
+        <changelogtext>removed green from the notification icons</changelogtext>
+        <changelogtext>improved readability of settings in dark/black theme</changelogtext>
+        <changelogtext>bug fixes</changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
         versionName="v2.0.2">
         <changelogtext>fix anilist login</changelogtext>
     </changelogversion>
