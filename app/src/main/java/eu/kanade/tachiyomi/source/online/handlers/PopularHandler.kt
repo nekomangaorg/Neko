@@ -22,10 +22,10 @@ class PopularHandler(val client: OkHttpClient, private val headers: Headers) {
 
     fun fetchPopularManga(page: Int): Observable<MangasPage> {
         return client.newCall(popularMangaRequest(page))
-                .asObservableSuccess()
-                .map { response ->
-                    popularMangaParse(response)
-                }
+            .asObservableSuccess()
+            .map { response ->
+                popularMangaParse(response)
+            }
     }
 
     private fun popularMangaRequest(page: Int): Request {
@@ -56,14 +56,15 @@ class PopularHandler(val client: OkHttpClient, private val headers: Headers) {
         // For our image, the file endings are not very consistent
         // Thus we should try to parse the full image from the website
         // If we can't find it then we will construct a guess of the image url
+
         element.select("div.large_logo").first().let {
             val elementImg = it.selectFirst("img")
-            if(elementImg != null) {
-                val urlClean = MdUtil.removeTimeParamUrl(elementImg.absUrl("src"))
-                manga.thumbnail_url = MdUtil.convertThumbUrlIfNeeded(urlClean, preferences.lowQualityCovers())
-            } else {
-                manga.thumbnail_url = MdUtil.formThumbUrl(manga.url, preferences.lowQualityCovers())
-            }
+            /*  if (elementImg != null) {
+                  val urlClean = MdUtil.removeTimeParamUrl(elementImg.absUrl("src"))
+                  manga.thumbnail_url = MdUtil.convertThumbUrlIfNeeded(urlClean, preferences.lowQualityCovers())
+              } else {*/
+            manga.thumbnail_url = MdUtil.formThumbUrl(manga.url, preferences.lowQualityCovers())
+            //  }
         }
         return manga
     }
