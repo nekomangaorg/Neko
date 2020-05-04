@@ -173,14 +173,21 @@ class LibraryController(
                 setActiveCategory()
                 if (presenter.categories.size > 1 && dy != 0) {
                     val headerItem = getHeader() ?: return
-                    val view = fast_scroller?.getChildAt(0) ?: return
+                    val view = fast_scroller ?: return
+
+                    val height = if (view.childCount > 0) {
+                        view.height - (view.getChildAt(0)?.paddingTop ?: 0) -
+                            (view.getChildAt(view.childCount - 1)?.paddingBottom ?: 0)
+                    } else {
+                        view.height
+                    }
                     val index = adapter.headerItems.indexOf(headerItem)
                     textAnim?.cancel()
                     textAnim = text_view_m.animate().alpha(0f).setDuration(250L).setStartDelay(2000)
                     textAnim?.start()
 
                     // fastScroll height * indicator position - center text - fastScroll padding
-                    text_view_m.translationY = view.height *
+                    text_view_m.translationY = height *
                         (index.toFloat() / (adapter.headerItems.size + 1))
                     -text_view_m.height / 2 + 16.dpToPx
                     text_view_m.translationX = 45f.dpToPxEnd
