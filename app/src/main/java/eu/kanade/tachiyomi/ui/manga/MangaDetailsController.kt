@@ -11,7 +11,6 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
-import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Rect
@@ -19,7 +18,6 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
-import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -30,12 +28,10 @@ import android.view.ViewPropertyAnimator
 import android.view.WindowInsets
 import android.view.animation.DecelerateInterpolator
 import android.view.inputmethod.InputMethodManager
-import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.PopupMenu
 import androidx.appcompat.widget.SearchView
-import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -101,9 +97,7 @@ import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.system.launchUI
-import eu.kanade.tachiyomi.util.system.pxToDp
 import eu.kanade.tachiyomi.util.system.toast
-import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.getText
 import eu.kanade.tachiyomi.util.view.hide
 import eu.kanade.tachiyomi.util.view.requestPermissionsSafe
@@ -182,11 +176,6 @@ class MangaDetailsController : BaseController,
     var chapterPopupMenu: Pair<Int, PopupMenu>? = null
     private var similarTooltip: ViewTooltip? = null
 
-    // Tablet Layout
-    var isTablet = false
-    var tabletRecycler: RecyclerView? = null
-    private var tabletAdapter: MangaDetailsAdapter? = null
-
     private var query = ""
     private var adapter: MangaDetailsAdapter? = null
 
@@ -198,7 +187,7 @@ class MangaDetailsController : BaseController,
     var headerHeight = 0
 
     override fun getTitle(): String? {
-        return if (toolbarIsColored && !isTablet) manga?.title else null
+        return null
     }
 
     override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
@@ -210,7 +199,6 @@ class MangaDetailsController : BaseController,
         super.onViewCreated(view)
         coverColor = null
 
-        setTabletMode(view)
         setRecycler(view)
         setPaletteColor()
         setFastScroller()
@@ -227,31 +215,6 @@ class MangaDetailsController : BaseController,
         adapter = null
         trackingBottomSheet = null
         super.onDestroyView(view)
-    }
-
-    /** Check if device is tablet, and create a second recycler to hold the details header if so */
-    private fun setTabletMode(view: View) {
-        isTablet = isTabletSize()
-        if (isTablet) {
-            tabletRecycler = RecyclerView(view.context)
-            linear_recycler_layout.addView(tabletRecycler, 0)
-            tabletRecycler?.updateLayoutParams<LinearLayout.LayoutParams> {
-                weight = 0.4f
-                height = ViewGroup.LayoutParams.MATCH_PARENT
-                width = ViewGroup.LayoutParams.MATCH_PARENT
-            }
-            tabletRecycler?.clipToPadding = false
-            tabletAdapter = MangaDetailsAdapter(this)
-            tabletRecycler?.adapter = tabletAdapter
-            tabletRecycler?.layoutManager = LinearLayoutManager(view.context)
-            val divider = View(view.context)
-            divider.setBackgroundColor(ContextCompat.getColor(view.context, R.color.divider))
-            linear_recycler_layout.addView(divider, 1)
-            divider.updateLayoutParams<LinearLayout.LayoutParams> {
-                height = ViewGroup.LayoutParams.MATCH_PARENT
-                width = 1.dpToPx
-            }
-        }
     }
 
     /** Set adapter, insets, and scroll listener for recycler view */
@@ -274,27 +237,19 @@ class MangaDetailsController : BaseController,
         swipe_refresh.setDistanceToTriggerSync(70.dpToPx)
         activity!!.appbar.elevation = 0f
 
-        if (isTablet) {
-            recycler.doOnApplyWindowInsets { _, insets, _ ->
-                setInsets(insets, appbarHeight, offset)
-            }
-        } else {
-            scrollViewWith(recycler, padBottom = true, customPadding = true, afterInsets = { insets ->
-                setInsets(insets, appbarHeight, offset)
-            }, liftOnScroll = {
-                colorToolbar(it)
-            })
-        }
+        scrollViewWith(recycler, padBottom = true, customPadding = true, afterInsets = { insets ->
+            setInsets(insets, appbarHeight, offset)
+        }, liftOnScroll = {
+            colorToolbar(it)
+        })
 
         recycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
-                if (!isTablet) {
-                    val atTop = !recycler.canScrollVertically(-1)
-                    val tY = getHeader()?.backdrop?.translationY ?: 0f
-                    getHeader()?.backdrop?.translationY = max(0f, tY + dy * 0.25f)
-                    if (atTop) getHeader()?.backdrop?.translationY = 0f
-                }
+                val atTop = !recycler.canScrollVertically(-1)
+                val tY = getHeader()?.backdrop?.translationY ?: 0f
+                getHeader()?.backdrop?.translationY = max(0f, tY + dy * 0.25f)
+                if (atTop) getHeader()?.backdrop?.translationY = 0f
             }
 
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
@@ -317,11 +272,9 @@ class MangaDetailsController : BaseController,
 
     private fun setInsets(insets: WindowInsets, appbarHeight: Int, offset: Int) {
         recycler?.updatePaddingRelative(bottom = insets.systemWindowInsetBottom)
-        tabletRecycler?.updatePaddingRelative(bottom = insets.systemWindowInsetBottom)
         headerHeight = appbarHeight + insets.systemWindowInsetTop
         swipe_refresh.setProgressViewOffset(false, (-40).dpToPx, headerHeight + offset)
         // 1dp extra to line up chapter header and manga header
-        if (isTablet) recycler.updatePaddingRelative(top = headerHeight + 1.dpToPx)
         getHeader()?.setTopHeight(headerHeight)
         fast_scroll_layout.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             topMargin = headerHeight
@@ -363,9 +316,7 @@ class MangaDetailsController : BaseController,
                 (recycler.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
                     itemPosition, headerHeight
                 )
-                if (!isTablet) {
-                    colorToolbar(itemPosition > 0, false)
-                }
+                colorToolbar(itemPosition > 0, false)
             }
         }
     }
@@ -492,31 +443,6 @@ class MangaDetailsController : BaseController,
         )
     }
 
-    private fun isTabletSize(): Boolean {
-        val activity = activity ?: return false
-        if ((activity.resources.configuration.screenLayout and Configuration
-                .SCREENLAYOUT_SIZE_MASK) < Configuration.SCREENLAYOUT_SIZE_LARGE
-        )
-            return false
-        val displayMetrics = DisplayMetrics()
-        activity.windowManager?.defaultDisplay?.getMetrics(displayMetrics)
-        return displayMetrics.widthPixels.pxToDp >= 720
-    }
-
-    fun hasTabletHeight(): Boolean {
-        val activity = activity ?: return false
-        if ((activity.resources.configuration.screenLayout and Configuration
-                .SCREENLAYOUT_SIZE_MASK) < Configuration.SCREENLAYOUT_SIZE_LARGE
-        ) return false
-        val displayMetrics = DisplayMetrics()
-        activity.windowManager?.defaultDisplay?.getMetrics(displayMetrics)
-        return displayMetrics.heightPixels.pxToDp >= 720
-    }
-
-    fun showSimilarToopTip() {
-        getHeader()?.showSimilarToolTip(activity)
-    }
-
     //endregion
 
     //region Lifecycle methods
@@ -555,7 +481,8 @@ class MangaDetailsController : BaseController,
                 R.attr.colorSecondary
             ) ?: Color.BLACK
             if (router.backstackSize > 0 &&
-                router.backstack.last().controller() !is MangaDetailsController) {
+                router.backstack.last().controller() !is MangaDetailsController
+            ) {
                 (activity as? MainActivity)?.appbar?.setBackgroundColor(colorSecondary)
                 (activity as? MainActivity)?.toolbar?.setBackgroundColor(colorSecondary)
 
@@ -632,8 +559,7 @@ class MangaDetailsController : BaseController,
     }
 
     private fun getHeader(): MangaHeaderHolder? {
-        return if (isTablet) tabletRecycler?.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder
-        else recycler.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder
+        return recycler.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder
     }
 
     fun updateHeader() {
@@ -661,12 +587,7 @@ class MangaDetailsController : BaseController,
     }
 
     private fun addMangaHeader() {
-        if (tabletAdapter?.scrollableHeaders?.isEmpty() == true) {
-            tabletAdapter?.removeAllScrollableHeaders()
-            tabletAdapter?.addScrollableHeader(presenter.headerItem)
-            adapter?.removeAllScrollableHeaders()
-            adapter?.addScrollableHeader(presenter.tabletChapterHeaderItem!!)
-        } else if (!isTablet && adapter?.scrollableHeaders?.isEmpty() == true) {
+        if (adapter?.scrollableHeaders?.isEmpty() == true) {
             adapter?.removeAllScrollableHeaders()
             adapter?.addScrollableHeader(presenter.headerItem)
         }
@@ -852,10 +773,8 @@ class MangaDetailsController : BaseController,
 
         setOnQueryTextChangeListener(searchView) {
             query = it ?: ""
-            if (!isTablet) {
-                if (query.isNotEmpty()) getHeader()?.collapse()
-                else getHeader()?.expand()
-            }
+            if (query.isNotEmpty()) getHeader()?.collapse()
+            else getHeader()?.expand()
 
             adapter?.setFilter(query)
             adapter?.performFilter()

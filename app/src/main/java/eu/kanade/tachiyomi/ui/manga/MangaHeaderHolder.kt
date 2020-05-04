@@ -35,8 +35,7 @@ import java.util.Locale
 class MangaHeaderHolder(
     private val view: View,
     private val adapter: MangaDetailsAdapter,
-    startExpanded: Boolean,
-    isTablet: Boolean = false
+    startExpanded: Boolean
 ) : BaseFlexibleViewHolder(view, adapter) {
 
     private var showReadingButton = true
@@ -94,7 +93,6 @@ class MangaHeaderHolder(
 
             if (startExpanded) expandDesc()
             else collapseDesc()
-            if (isTablet) chapter_layout.gone()
         } else {
             filter_button.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 marginEnd = 12.dpToPx
