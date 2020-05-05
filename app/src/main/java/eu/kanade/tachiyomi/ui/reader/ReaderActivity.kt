@@ -57,8 +57,11 @@ import eu.kanade.tachiyomi.util.system.hasSideNavBar
 import eu.kanade.tachiyomi.util.system.isBottomTappable
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
+import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.gone
+import eu.kanade.tachiyomi.util.view.hide
+import eu.kanade.tachiyomi.util.view.isExpanded
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
@@ -272,8 +275,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
             else -> return super.onOptionsItemSelected(item)
         }
         bottomSheet?.show()
-        if (chapters_bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) {
-            chapters_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
+        if (chapters_bottom_sheet.sheetBehavior.isExpanded()) {
+            chapters_bottom_sheet.sheetBehavior?.collapse()
         }
         return true
     }
@@ -283,8 +286,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
      * delegated to the presenter.
      */
     override fun onBackPressed() {
-        if (chapters_bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) {
-            chapters_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
+        if (chapters_bottom_sheet.sheetBehavior.isExpanded()) {
+            chapters_bottom_sheet.sheetBehavior?.collapse()
             return
         }
         presenter.onBackPressed()
@@ -336,8 +339,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
         // Set initial visibility
         setMenuVisibility(menuVisible)
         chapters_bottom_sheet.sheetBehavior?.isHideable = !menuVisible
-        if (!menuVisible) chapters_bottom_sheet.sheetBehavior?.state =
-            BottomSheetBehavior.STATE_HIDDEN
+        if (!menuVisible) chapters_bottom_sheet.sheetBehavior?.hide()
         val peek = chapters_bottom_sheet.sheetBehavior?.peekHeight ?: 30.dpToPx
         reader_layout.doOnApplyWindowInsets { v, insets, _ ->
             sheetManageNavColor = when {
@@ -386,11 +388,11 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
             systemUi?.show()
             appbar.visible()
 
-            if (chapters_bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) {
+            if (chapters_bottom_sheet.sheetBehavior.isExpanded()) {
                 chapters_bottom_sheet.sheetBehavior?.isHideable = false
             }
-            if (chapters_bottom_sheet.sheetBehavior?.state != BottomSheetBehavior.STATE_EXPANDED && sheetManageNavColor) {
-                window.navigationBarColor = Color.TRANSPARENT // getResourceColor(R.attr.colorPrimaryDark)
+            if (!chapters_bottom_sheet.sheetBehavior.isExpanded() && sheetManageNavColor) {
+                window.navigationBarColor = Color.TRANSPARENT
             }
             if (animate) {
                 if (!menuStickyVisible) {
@@ -402,7 +404,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
                     })
                     appbar.startAnimation(toolbarAnimation)
                 }
-                BottomSheetBehavior.from(chapters_bottom_sheet).state = BottomSheetBehavior.STATE_COLLAPSED
+                chapters_bottom_sheet.sheetBehavior?.collapse()
             }
         } else {
             systemUi?.hide()
@@ -416,8 +418,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
                 })
                 appbar.startAnimation(toolbarAnimation)
                 BottomSheetBehavior.from(chapters_bottom_sheet).isHideable = true
-                BottomSheetBehavior.from(chapters_bottom_sheet).state =
-                    BottomSheetBehavior.STATE_HIDDEN
+                chapters_bottom_sheet.sheetBehavior?.hide()
             } else {
                 appbar.gone()
             }
@@ -553,8 +554,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
             if (config?.showNewChapter == false) {
                 systemUi?.show()
             }
-        } else if (chapters_bottom_sheet.shouldCollaspe && chapters_bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) {
-            chapters_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
+        } else if (chapters_bottom_sheet.shouldCollaspe && chapters_bottom_sheet.sheetBehavior.isExpanded()) {
+            chapters_bottom_sheet.sheetBehavior?.collapse()
         }
         if (chapters_bottom_sheet.selectedChapterId != page.chapter.chapter.id) {
             chapters_bottom_sheet.refreshList()
@@ -572,8 +573,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
      */
     fun onPageLongTap(page: ReaderPage) {
         ReaderPageSheet(this, page).show()
-        if (chapters_bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) {
-            chapters_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
+        if (chapters_bottom_sheet.sheetBehavior.isExpanded()) {
+            chapters_bottom_sheet.sheetBehavior?.collapse()
         }
     }
 

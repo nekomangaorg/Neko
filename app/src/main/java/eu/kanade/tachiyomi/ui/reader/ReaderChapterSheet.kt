@@ -17,6 +17,9 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.view.collapse
+import eu.kanade.tachiyomi.util.view.expand
+import eu.kanade.tachiyomi.util.view.isExpanded
 import kotlinx.android.synthetic.main.reader_chapters_sheet.view.*
 import kotlin.math.max
 import kotlin.math.min
@@ -39,18 +42,15 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
 
         sheetBehavior = BottomSheetBehavior.from(this)
         chapters_button.setOnClickListener {
-            if (sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) {
-                sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
+            if (sheetBehavior.isExpanded()) {
+                sheetBehavior?.collapse()
             } else {
-                sheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
+                sheetBehavior?.expand()
             }
         }
 
         post {
-            chapter_recycler.alpha = when (sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) {
-                true -> 1f
-                false -> 0f
-            }
+            chapter_recycler.alpha = if (sheetBehavior.isExpanded()) 1f else 0f
         }
 
         sheetBehavior?.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
@@ -112,7 +112,7 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
         })
 
         backgroundTintList = ColorStateList.valueOf(
-            if (sheetBehavior?.state != BottomSheetBehavior.STATE_EXPANDED) primary
+            if (!sheetBehavior.isExpanded()) primary
             else fullPrimary
         )
 

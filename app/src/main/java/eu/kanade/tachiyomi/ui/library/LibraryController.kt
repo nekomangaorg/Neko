@@ -28,7 +28,6 @@ import com.afollestad.materialdialogs.list.listItemsSingleChoice
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
 import com.github.florent37.viewtooltip.ViewTooltip
-import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.reddit.indicatorfastscroll.FastScrollItemIndicator
@@ -61,9 +60,13 @@ import eu.kanade.tachiyomi.util.system.dpToPxEnd
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.applyWindowInsetsForRootController
+import eu.kanade.tachiyomi.util.view.collapse
+import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.util.view.getItemView
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.hide
+import eu.kanade.tachiyomi.util.view.isExpanded
+import eu.kanade.tachiyomi.util.view.isHidden
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.setBackground
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
@@ -161,10 +164,10 @@ class LibraryController(
             val notAtTop = recycler.canScrollVertically(-1)
             if (notAtTop != elevate) elevateFunc(notAtTop)
             val order = getCategoryOrder()
-            if (filter_bottom_sheet.sheetBehavior?.state != BottomSheetBehavior.STATE_HIDDEN) {
+            if (!filter_bottom_sheet.sheetBehavior.isHidden()) {
                 scrollDistance += abs(dy)
                 if (scrollDistance > scrollDistanceTilHidden) {
-                    filter_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_HIDDEN
+                    filter_bottom_sheet.sheetBehavior?.hide()
                     scrollDistance = 0f
                 }
             } else scrollDistance = 0f
@@ -1009,9 +1012,8 @@ class LibraryController(
     override fun showSheet() {
         closeTip()
         when {
-            filter_bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_HIDDEN -> filter_bottom_sheet.sheetBehavior?.state =
-                BottomSheetBehavior.STATE_COLLAPSED
-            filter_bottom_sheet.sheetBehavior?.state != BottomSheetBehavior.STATE_EXPANDED -> filter_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
+            filter_bottom_sheet.sheetBehavior.isHidden() -> filter_bottom_sheet.sheetBehavior?.collapse()
+            !filter_bottom_sheet.sheetBehavior.isExpanded() -> filter_bottom_sheet.sheetBehavior?.expand()
             else -> DisplayBottomSheet(this).show()
         }
     }
@@ -1019,22 +1021,17 @@ class LibraryController(
     override fun toggleSheet() {
         closeTip()
         when {
-            filter_bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_HIDDEN -> filter_bottom_sheet.sheetBehavior?.state =
-                BottomSheetBehavior.STATE_COLLAPSED
-            filter_bottom_sheet.sheetBehavior?.state != BottomSheetBehavior.STATE_EXPANDED -> filter_bottom_sheet.sheetBehavior?.state =
-                BottomSheetBehavior.STATE_EXPANDED
-            filter_bottom_sheet.sheetBehavior?.isHideable == true -> filter_bottom_sheet.sheetBehavior?.state =
-                BottomSheetBehavior.STATE_HIDDEN
-            else -> filter_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
+            filter_bottom_sheet.sheetBehavior.isHidden() -> filter_bottom_sheet.sheetBehavior?.collapse()
+            !filter_bottom_sheet.sheetBehavior.isExpanded() -> filter_bottom_sheet.sheetBehavior?.expand()
+            else -> filter_bottom_sheet.sheetBehavior?.hide()
         }
     }
 
     override fun sheetIsExpanded(): Boolean = false
 
     override fun handleSheetBack(): Boolean {
-        val sheetBehavior = BottomSheetBehavior.from(filter_bottom_sheet)
-        if (sheetBehavior.state != BottomSheetBehavior.STATE_COLLAPSED && sheetBehavior.state != BottomSheetBehavior.STATE_HIDDEN) {
-            sheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+        if (filter_bottom_sheet.sheetBehavior.isExpanded()) {
+            filter_bottom_sheet.sheetBehavior?.collapse()
             return true
         }
         return false

@@ -18,7 +18,10 @@ import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.ui.source.SourceController
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
+import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
+import eu.kanade.tachiyomi.util.view.expand
+import eu.kanade.tachiyomi.util.view.isExpanded
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import kotlinx.android.synthetic.main.extensions_bottom_sheet.view.*
@@ -72,11 +75,11 @@ ExtensionAdapter.OnButtonClickListener,
             }
         }
         sheet_layout.setOnClickListener {
-            if (sheetBehavior?.state != BottomSheetBehavior.STATE_EXPANDED) {
-                sheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
+            if (!sheetBehavior.isExpanded()) {
+                sheetBehavior?.expand()
                 fetchOnlineExtensionsIfNeeded()
             } else {
-                sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
+                sheetBehavior?.collapse()
             }
         }
         presenter.getExtensionUpdateCount()

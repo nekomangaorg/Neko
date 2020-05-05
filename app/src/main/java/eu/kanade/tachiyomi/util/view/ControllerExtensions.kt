@@ -3,13 +3,11 @@ package eu.kanade.tachiyomi.util.view
 import android.animation.ValueAnimator
 import android.content.Context
 import android.content.pm.PackageManager
-import android.os.Build
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.WindowInsets
 import android.view.inputmethod.InputMethodManager
-import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
 import androidx.core.math.MathUtils
@@ -57,7 +55,6 @@ fun Controller.setOnQueryTextChangeListener(
     })
 }
 
-@RequiresApi(Build.VERSION_CODES.N_MR1)
 fun Controller.scrollViewWith(
     recycler: RecyclerView,
     padBottom: Boolean = false,
@@ -81,11 +78,10 @@ fun Controller.scrollViewWith(
         }
     }
     val randomTag = Random.nextLong()
-    var headerHeight = 0
     var lastY = 0f
     var fakeToolbarView: View? = null
     recycler.doOnApplyWindowInsets { view, insets, _ ->
-        headerHeight = insets.systemWindowInsetTop + appBarHeight
+        val headerHeight = insets.systemWindowInsetTop + appBarHeight
         if (!customPadding) view.updatePaddingRelative(
             top = headerHeight,
             bottom = if (padBottom) insets.systemWindowInsetBottom else view.paddingBottom
