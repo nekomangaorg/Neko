@@ -60,11 +60,10 @@ import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.dpToPxEnd
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.applyWindowInsetsForRootController
-import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.getItemView
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.hide
-import eu.kanade.tachiyomi.util.view.marginTop
+import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.setBackground
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import eu.kanade.tachiyomi.util.view.setStartTranslationX
@@ -243,12 +242,6 @@ class LibraryController(
         fast_scroller.setStartTranslationX(!alwaysShowScroller)
         fast_scroller.setBackground(!alwaysShowScroller)
 
-        show_all.isChecked = preferences.showAllCategories().get()
-        show_all.setOnCheckedChangeListener { _, isChecked ->
-            preferences.showAllCategories().set(isChecked)
-            presenter.getLibrary()
-        }
-
         adapter = LibraryCategoryAdapter(this)
         adapter.expandItemsAtStartUp()
         adapter.isRecursiveCollapse = true
@@ -311,7 +304,15 @@ class LibraryController(
                 appbar?.y = 0f
                 recycler.suppressLayout(true)
                 (recycler.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
-                    itemPosition, 0
+                    itemPosition, if (adapter.isSingleCategory) {
+                        0
+                    } else {
+                        if (itemPosition == 0) {
+                            0
+                        } else {
+                            (-40).dpToPx
+                        }
+                    }
                 )
                 recycler.suppressLayout(false)
             }
@@ -329,25 +330,18 @@ class LibraryController(
             scrollToHeader(it)
             showCategories(false)
         }
-        swipe_refresh.setDistanceToTriggerSync(150.dpToPx)
-        val marginTop = category_layout.marginTop
-        recycler.doOnApplyWindowInsets { recyclerView, insets, _ ->
-            recyclerView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                topMargin = marginTop + insets.systemWindowInsetTop
-            }
+        category_recycler.onShowAllClicked = { isChecked ->
+            preferences.showAllCategories().set(isChecked)
+            presenter.getLibrary()
+        }
+        scrollViewWith(recycler, swipeRefreshLayout = swipe_refresh, afterInsets = { insets ->
             category_layout?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                topMargin = marginTop + insets.systemWindowInsetTop
-            }
-            recycler_cover?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                topMargin = marginTop + insets.systemWindowInsetTop
+                topMargin = recycler?.paddingTop ?: 0
             }
             fast_scroller?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 topMargin = insets.systemWindowInsetTop
             }
-            swipe_refresh?.setProgressViewOffset(
-                true, (marginTop + insets.systemWindowInsetTop) + (-60).dpToPx, marginTop + insets.systemWindowInsetTop + 10.dpToPx
-            )
-        }
+        })
 
         swipe_refresh.setOnRefreshListener {
             swipe_refresh.isRefreshing = false
@@ -604,11 +598,16 @@ class LibraryController(
     private fun showCategories(show: Boolean) {
         recycler_cover.isClickable = show
         recycler_cover.isFocusable = show
-        val translateY = if (show) category_layout.height.toFloat() + 12f.dpToPx else 0f
+        val translateY = if (show) {
+            category_layout.height.toFloat() + recycler.paddingTop
+        } else {
+            0f
+        }
         recycler.animate().translationY(translateY).start()
         recycler_cover.animate().translationY(translateY).start()
         recycler_cover.animate().alpha(if (show) 0.75f else 0f).start()
         if (show) {
+            activity?.appbar?.y = 0f
             elevateFunc(false)
             activity?.dropdown?.setImageResource(R.drawable.ic_arrow_drop_up_24dp)
         } else {

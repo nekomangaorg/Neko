@@ -96,7 +96,7 @@ fun Controller.scrollViewWith(
         elevate = el
         if (liftOnScroll != null) {
             liftOnScroll.invoke(el)
-        } else {
+        } else if (recycler.translationY == 0f) {
             elevationAnim?.cancel()
             elevationAnim = ValueAnimator.ofFloat(
                 activity!!.appbar.elevation, if (el) 15f else 0f
@@ -158,7 +158,9 @@ fun Controller.scrollViewWith(
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
             super.onScrolled(recyclerView, dx, dy)
             if (router?.backstack?.lastOrNull()
-                    ?.controller() == this@scrollViewWith && statusBarHeight > -1 && activity != null && activity!!.appbar.height > 0
+                    ?.controller() == this@scrollViewWith && statusBarHeight > -1 &&
+                activity != null && activity!!.appbar.height > 0 &&
+                recycler.translationY == 0f
             ) {
                 if (!recycler.canScrollVertically(-1)) {
                     val shortAnimationDuration = resources?.getInteger(
@@ -185,7 +187,9 @@ fun Controller.scrollViewWith(
             super.onScrollStateChanged(recyclerView, newState)
             if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                 if (router?.backstack?.lastOrNull()
-                        ?.controller() == this@scrollViewWith && statusBarHeight > -1 && activity != null && activity!!.appbar.height > 0
+                        ?.controller() == this@scrollViewWith && statusBarHeight > -1 &&
+                    activity != null && activity!!.appbar.height > 0 &&
+                    recycler.translationY == 0f
                 ) {
                     val halfWay = abs((-activity!!.appbar.height.toFloat()) / 2)
                     val shortAnimationDuration = resources?.getInteger(
