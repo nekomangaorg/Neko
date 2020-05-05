@@ -172,7 +172,7 @@ class LibraryController(
                 preferences.lastUsedCategory().set(order)
                 activeCategory = order
                 setActiveCategory()
-                if (presenter.categories.size > 1 && dy != 0) {
+                if (presenter.categories.size > 1 && dy != 0 && recyclerView.translationY == 0f) {
                     val headerItem = getHeader() ?: return
                     val view = fast_scroller ?: return
 
@@ -334,7 +334,7 @@ class LibraryController(
         }
         category_recycler.onCategoryClicked = {
             scrollToHeader(it)
-            showCategories(false)
+            showCategories(show = false, scroll = false)
         }
         category_recycler.onShowAllClicked = { isChecked ->
             preferences.showAllCategories().set(isChecked)
@@ -601,15 +601,29 @@ class LibraryController(
         }
     }
 
-    private fun showCategories(show: Boolean) {
+    private fun showCategories(show: Boolean, scroll: Boolean = true) {
         recycler_cover.isClickable = show
         recycler_cover.isFocusable = show
-        val translateY = if (show) {
-            category_layout.height.toFloat() + recycler.paddingTop
-        } else {
-            0f
-        }
+        val full = category_layout.height.toFloat() + recycler.paddingTop
+        val translateY = if (show) full else 0f
         recycler.animate().translationY(translateY).start()
+        if (scroll) {
+            // Smooth scroll the recycler to hide the hidden content blocked by the app bar
+            ValueAnimator.ofInt(recycler.translationY.roundToInt(), translateY.roundToInt()).apply {
+                var start = 0f
+                var last = recycler.translationY.roundToInt()
+                val distance = abs(recycler.translationY.roundToInt() - translateY.roundToInt())
+                addUpdateListener {
+                    val diff = abs(it.animatedValue as Int - last)
+                    last = it.animatedValue as Int
+                    start += diff.toFloat() / distance * recycler.paddingTop.toFloat()
+                    if (start > 1) {
+                        recycler.scrollBy(0, start.toInt() * if (show) 1 else -1)
+                        start %= 1
+                    }
+                }
+            }.start()
+        }
         recycler_cover.animate().translationY(translateY).start()
         recycler_cover.animate().alpha(if (show) 0.75f else 0f).start()
         if (show) {
