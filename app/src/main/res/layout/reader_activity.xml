@@ -6,34 +6,28 @@
     android:layout_height="match_parent"
     android:gravity="center">
 
+
     <FrameLayout
-        android:id="@+id/reader_container"
+        android:id="@+id/viewer_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent" />
 
-        <FrameLayout
-            android:id="@+id/viewer_container"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+    <ProgressBar
+        android:id="@+id/please_wait"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_gravity="center"
+        android:visibility="gone"
+        tools:visibility="visible" />
 
-        <ProgressBar
-            android:id="@+id/please_wait"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:layout_gravity="center"
-            android:visibility="gone"
-            tools:visibility="visible" />
-
-        <eu.kanade.tachiyomi.ui.reader.PageIndicatorTextView
-            android:id="@+id/page_number"
-            style="@style/TextAppearance.Regular.Caption"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|center_horizontal"
-            android:padding="4dp"
-            android:textStyle="bold" />
-
-    </FrameLayout>
+    <eu.kanade.tachiyomi.ui.reader.PageIndicatorTextView
+        android:id="@+id/page_number"
+        style="@style/TextAppearance.Regular.Caption"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:padding="4dp"
+        android:textStyle="bold" />
 
     <eu.kanade.tachiyomi.ui.reader.ReaderColorFilterView
         android:id="@+id/color_overlay"

@@ -50,6 +50,8 @@ import eu.kanade.tachiyomi.util.lang.plusAssign
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.GLUtil
 import eu.kanade.tachiyomi.util.system.ThemeUtil
+import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.system.getBottomGestureInsets
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.hasSideNavBar
 import eu.kanade.tachiyomi.util.system.isBottomTappable
@@ -59,6 +61,7 @@ import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
+import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.widget.SimpleAnimationListener
 import eu.kanade.tachiyomi.widget.SimpleSeekBarListener
@@ -335,6 +338,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
         chapters_bottom_sheet.sheetBehavior?.isHideable = !menuVisible
         if (!menuVisible) chapters_bottom_sheet.sheetBehavior?.state =
             BottomSheetBehavior.STATE_HIDDEN
+        val peek = chapters_bottom_sheet.sheetBehavior?.peekHeight ?: 30.dpToPx
         reader_layout.doOnApplyWindowInsets { v, insets, _ ->
             sheetManageNavColor = when {
                 insets.isBottomTappable() -> {
@@ -361,7 +365,11 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
             chapters_bottom_sheet.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 leftMargin = insets.systemWindowInsetLeft
                 rightMargin = insets.systemWindowInsetRight
+                height = 280.dpToPx + insets.systemWindowInsetBottom
             }
+            chapters_bottom_sheet.sheetBehavior?.peekHeight = peek + insets.getBottomGestureInsets()
+            chapter_recycler.updatePaddingRelative(bottom = insets.systemWindowInsetBottom)
+            viewer_container.requestLayout()
         }
     }
 
@@ -372,6 +380,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
     private fun setMenuVisibility(visible: Boolean, animate: Boolean = true) {
         menuVisible = visible
         if (visible) coroutine?.cancel()
+        viewer_container.requestLayout()
         if (visible) {
             snackbar?.dismiss()
             systemUi?.show()
