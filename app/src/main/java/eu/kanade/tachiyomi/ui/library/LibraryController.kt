@@ -303,19 +303,24 @@ class LibraryController(
                     }
                 }
                 appbar?.y = 0f
-                recycler.suppressLayout(true)
-                (recycler.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
-                    itemPosition, if (adapter.isSingleCategory) {
-                        0
-                    } else {
-                        if (itemPosition == 0) {
+                val item = adapter.getItem(itemPosition)
+                if (item is LibraryHeaderItem) {
+                    scrollToHeader(item.category.order)
+                } else {
+                    recycler.suppressLayout(true)
+                    (recycler.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
+                        itemPosition, if (adapter.isSingleCategory) {
                             0
                         } else {
-                            (-40).dpToPx
+                            if (itemPosition == 0) {
+                                0
+                            } else {
+                                (-40).dpToPx
+                            }
                         }
-                    }
-                )
-                recycler.suppressLayout(false)
+                    )
+                    recycler.suppressLayout(false)
+                }
             }
         }
         recycler.addOnScrollListener(scrollListener)
@@ -653,8 +658,13 @@ class LibraryController(
             val appbarOffset = if (appbar?.y ?: 0f > -20) 0 else (appbar?.y?.plus(
                 view?.rootWindowInsets?.systemWindowInsetTop ?: 0
             ) ?: 0f).roundToInt() + 30.dpToPx
+            val previousHeader = adapter.getItem(adapter.indexOf(pos - 1)) as? LibraryHeaderItem
             (recycler.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
-                headerPosition, (if (headerPosition == 0) 0 else (-32).dpToPx) + appbarOffset
+                headerPosition, (when {
+                    headerPosition == 0 -> 0
+                    previousHeader?.category?.isHidden == true -> (-3).dpToPx
+                    else -> (-32).dpToPx
+                }) + appbarOffset
             )
             recycler.suppressLayout(false)
         }
