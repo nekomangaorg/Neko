@@ -15,7 +15,11 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.view.collapse
+import eu.kanade.tachiyomi.util.view.hide
 import eu.kanade.tachiyomi.util.view.inflate
+import eu.kanade.tachiyomi.util.view.isExpanded
+import eu.kanade.tachiyomi.util.view.isHidden
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.visibleIf
 import kotlinx.android.synthetic.main.filter_bottom_sheet.view.*
@@ -92,7 +96,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             }
         })
         if (preferences.hideFiltersAtStart().getOrDefault()) {
-            sheetBehavior?.state = BottomSheetBehavior.STATE_HIDDEN
+            sheetBehavior?.hide()
         }
         hide_filters.isChecked = preferences.hideFiltersAtStart().getOrDefault()
         hide_filters.setOnCheckedChangeListener { _, isChecked ->
@@ -105,9 +109,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         }
 
         val activeFilters = hasActiveFiltersFromPref()
-        if (activeFilters && sheetBehavior?.state == BottomSheetBehavior.STATE_HIDDEN &&
-            sheetBehavior?.skipCollapsed == false)
-            sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
+        if (activeFilters && sheetBehavior.isHidden() && sheetBehavior?.skipCollapsed == false)
+            sheetBehavior?.collapse()
 
         post {
             updateRootPadding(
@@ -117,7 +120,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                     else -> 0f
                 }
             )
-            shadow.alpha = if (sheetBehavior?.state == BottomSheetBehavior.STATE_HIDDEN) 0f else 1f
+            shadow.alpha = if (sheetBehavior.isHidden()) 0f else 1f
         }
 
         createTags()
@@ -151,7 +154,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         val minHeight = sheetBehavior?.peekHeight ?: 0
         val maxHeight = height
         val trueProgress = progress
-            ?: if (sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) 1f else 0f
+            ?: if (sheetBehavior.isExpanded()) 1f else 0f
         val percent = (trueProgress * 100).roundToInt()
         val value = (percent * (maxHeight - minHeight) / 100) + minHeight
         val height = context.resources.getDimensionPixelSize(R.dimen.rounder_radius)

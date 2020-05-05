@@ -13,6 +13,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.util.lang.plusAssign
 import eu.kanade.tachiyomi.util.system.hasSideNavBar
+import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.util.view.setBottomEdge
 import eu.kanade.tachiyomi.util.view.setEdgeToEdge
 import eu.kanade.tachiyomi.widget.IgnoreFirstSpinnerListener
@@ -157,7 +158,7 @@ class ReaderColorFilterSheet(activity: ReaderActivity) : BottomSheetDialog
     override fun onStart() {
         super.onStart()
         sheetBehavior?.skipCollapsed = true
-        sheetBehavior?.state = BottomSheetBehavior.STATE_EXPANDED
+        sheetBehavior?.expand()
     }
 
     override fun onDetachedFromWindow() {

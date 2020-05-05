@@ -13,6 +13,8 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.view.expand
+import eu.kanade.tachiyomi.util.view.isCollapsed
 import eu.kanade.tachiyomi.util.view.setBottomEdge
 import eu.kanade.tachiyomi.util.view.setEdgeToEdge
 import eu.kanade.tachiyomi.util.view.visibleIf
@@ -55,7 +57,7 @@ class DisplayBottomSheet(private val controller: LibraryController) : BottomShee
     override fun onStart() {
         super.onStart()
         sheetBehavior.skipCollapsed = true
-        sheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+        sheetBehavior.expand()
     }
 
     /**
@@ -77,7 +79,7 @@ class DisplayBottomSheet(private val controller: LibraryController) : BottomShee
     private fun initGeneralPreferences() {
         display_group.bindToPreference(preferences.libraryLayout()) {
             controller.reattachAdapter()
-            if (sheetBehavior.state == BottomSheetBehavior.STATE_COLLAPSED)
+            if (sheetBehavior.isCollapsed())
                 dismiss()
         }
         uniform_grid.bindToPreference(preferences.uniformGrid()) {
