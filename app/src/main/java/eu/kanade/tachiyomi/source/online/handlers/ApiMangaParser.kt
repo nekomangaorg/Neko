@@ -73,23 +73,34 @@ class ApiMangaParser(val lang: String) {
         if (serializer.chapter.isNullOrEmpty() || serializer.manga.last_chapter.isNullOrEmpty()) {
             return false
         }
-        val finalChapterNumber = serializer.manga.last_chapter
-
-        val foundMatch = serializer.chapter.entries
+        val finalChapterNumber = serializer.manga.last_chapter!!
+        val langOnlyChapters = serializer.chapter.entries
             .filter { it.value.lang_code == lang }
-            .filter {
-                isOneShot(it.value, finalChapterNumber) ||
-                    it.value.chapter == finalChapterNumber
-            }.firstOrNull()
+        if (finalChapterNumber == "0") {
+            langOnlyChapters.first().let {
+                if (isOneShot(it.value, finalChapterNumber)) {
+                    return true
+                }
+            }
+        }
 
-        return foundMatch != null
+        //remove non whole and duplicate chapters
+        val filteredChapters = langOnlyChapters
+            .filter {
+                it.value.chapter?.let { chapterNumber ->
+                    if (chapterNumber.isNotBlank() && chapterNumber.contains(".").not()) {
+                        return@filter true
+                    }
+                }
+                return@filter false
+            }.distinctBy { it.value.chapter }
+
+        return filteredChapters.size.toString() == finalChapterNumber
     }
 
     private fun isOneShot(chapter: ChapterSerializer, finalChapterNumber: String): Boolean {
-        return chapter.title.equals(
-            "oneshot",
-            true
-        ) || (chapter.chapter.isNullOrEmpty() && finalChapterNumber == "0")
+        return chapter.title.equals("oneshot", true) ||
+            ((chapter.chapter.isNullOrEmpty() || chapter.chapter == "0") && finalChapterNumber == "0")
     }
 
     private fun parseStatus(status: Int) = when (status) {

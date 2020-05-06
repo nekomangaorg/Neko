@@ -13,7 +13,7 @@ class MdUtil {
         const val followsAllApi = "/api/?type=manga_follows"
         const val followsMangaApi = "/api/?type=manga_follows&manga_id="
 
-        const val scanlatorSeparator = " & "
+        private const val scanlatorSeparator = " & "
 
         val englishDescriptionTags = listOf(
             "[b][u]English:[/u][/b]",
@@ -69,7 +69,7 @@ class MdUtil {
             }
             return cdnUrl + "/images/manga/" + getMangaId(mangaUrl) + ext
         }
-        
+
         // Get the ID from the manga url
         fun getMangaId(url: String): String {
             val lastSection = url.trimEnd('/').substringAfterLast("/")
