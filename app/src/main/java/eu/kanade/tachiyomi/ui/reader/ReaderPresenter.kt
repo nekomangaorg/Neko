@@ -11,6 +11,7 @@ import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.database.models.isWebtoon
+import eu.kanade.tachiyomi.data.database.models.scanlatorList
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
@@ -19,6 +20,7 @@ import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
+import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
 import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
 import eu.kanade.tachiyomi.ui.reader.loader.ChapterLoader
@@ -100,6 +102,7 @@ class ReaderPresenter(
 
         val chaptersForReader =
             if (preferences.skipRead() || preferences.skipFiltered()) {
+                val listValidScanlators = MdUtil.getScanlators(manga.scanlator_filter.orEmpty())
                 val list = dbChapters
                     .filter {
                         if (preferences.skipRead() && it.read) {
@@ -110,12 +113,12 @@ class ReaderPresenter(
                                 (manga.readFilter == Manga.SHOW_UNREAD && it.read) ||
                                 (manga.downloadedFilter == Manga.SHOW_DOWNLOADED &&
                                     !downloadManager.isChapterDownloaded(it, manga)) ||
-                                (manga.bookmarkedFilter == Manga.SHOW_BOOKMARKED && !it.bookmark)
+                                (manga.bookmarkedFilter == Manga.SHOW_BOOKMARKED && !it.bookmark) ||
+                                (listValidScanlators.isNotEmpty() && it.scanlatorList().none { group -> listValidScanlators.contains(group) })
                             ) {
                                 return@filter false
                             }
                         }
-
                         true
                     }
                     .toMutableList()

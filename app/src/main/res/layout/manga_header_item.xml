@@ -156,86 +156,86 @@
         android:scrollbars="none">
 
         <LinearLayout
-        android:id="@+id/button_layout"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="14dp"
-        android:orientation="horizontal"
-        app:layout_constraintBottom_toTopOf="@id/manga_summary_label"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/bottom_line">
-
-        <ImageView
-            android:id="@+id/favorite_button"
-            android:layout_width="wrap_content"
+            android:id="@+id/button_layout"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginStart="6dp"
-            android:layout_marginEnd="6dp"
-            android:padding="5dp"
-            android:background="@drawable/round_ripple"
-            android:tooltipText="@string/add_to_library"
-            tools:background="@color/md_black_1000"
-            tools:src="@drawable/ic_open_in_webview_white_24dp" />
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="14dp"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toTopOf="@id/manga_summary_label"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/bottom_line">
 
-        <com.mikepenz.iconics.view.IconicsImageView
-            android:id="@+id/track_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginStart="6dp"
-            android:layout_marginEnd="6dp"
-            android:padding="5dp"
-            android:tooltipText="@string/tracking"
-            app:iiv_icon="gmf_art_track"
-            app:iiv_size="28dp"
-            style="@style/Neko.Iconics"
-            tools:background="@color/md_black_1000" />
+            <ImageView
+                android:id="@+id/favorite_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginStart="6dp"
+                android:layout_marginEnd="6dp"
+                android:padding="5dp"
+                android:background="@drawable/round_ripple"
+                android:tooltipText="@string/add_to_library"
+                tools:background="@color/md_black_1000"
+                tools:src="@drawable/ic_open_in_webview_white_24dp" />
 
-        <com.mikepenz.iconics.view.IconicsImageView
-            android:id="@+id/similar_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginStart="6dp"
-            android:layout_marginEnd="6dp"
-            android:padding="5dp"
-            app:iiv_icon="gmf_account_tree"
-            style="@style/Neko.Iconics"
-            android:tooltipText="@string/similar"
-            tools:background="@color/md_black_1000" />
+            <com.mikepenz.iconics.view.IconicsImageView
+                android:id="@+id/track_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginStart="6dp"
+                android:layout_marginEnd="6dp"
+                android:padding="5dp"
+                android:tooltipText="@string/tracking"
+                app:iiv_icon="gmf_art_track"
+                app:iiv_size="28dp"
+                style="@style/Neko.Iconics"
+                tools:background="@color/md_black_1000" />
 
-        <com.mikepenz.iconics.view.IconicsImageView
-            android:id="@+id/webview_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginStart="6dp"
-            android:layout_marginEnd="6dp"
-            android:contentDescription="@string/open_external"
-            android:padding="5dp"
-            app:iiv_icon="cmd_web"
-            style="@style/Neko.Iconics"
-            android:tooltipText="@string/open_external"
-            tools:background="@color/md_black_1000" />
+            <com.mikepenz.iconics.view.IconicsImageView
+                android:id="@+id/similar_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginStart="6dp"
+                android:layout_marginEnd="6dp"
+                android:padding="5dp"
+                app:iiv_icon="gmf_account_tree"
+                style="@style/Neko.Iconics"
+                android:tooltipText="@string/similar"
+                tools:background="@color/md_black_1000" />
 
-        <com.mikepenz.iconics.view.IconicsImageView
-            android:id="@+id/share_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginStart="6dp"
-            android:layout_marginEnd="6dp"
-            android:contentDescription="@string/share"
-            android:padding="5dp"
-            app:iiv_icon="gmf_share"
-            style="@style/Neko.Iconics"
-            android:tooltipText="@string/share"
-            tools:background="@color/md_black_1000" />
+            <com.mikepenz.iconics.view.IconicsImageView
+                android:id="@+id/webview_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginStart="6dp"
+                android:layout_marginEnd="6dp"
+                android:contentDescription="@string/open_external"
+                android:padding="5dp"
+                app:iiv_icon="cmd_web"
+                style="@style/Neko.Iconics"
+                android:tooltipText="@string/open_external"
+                tools:background="@color/md_black_1000" />
 
-    </LinearLayout>
+            <com.mikepenz.iconics.view.IconicsImageView
+                android:id="@+id/share_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginStart="6dp"
+                android:layout_marginEnd="6dp"
+                android:contentDescription="@string/share"
+                android:padding="5dp"
+                app:iiv_icon="gmf_share"
+                style="@style/Neko.Iconics"
+                android:tooltipText="@string/share"
+                tools:background="@color/md_black_1000" />
+
+        </LinearLayout>
     </HorizontalScrollView>
 
     <com.google.android.material.textview.MaterialTextView
@@ -435,6 +435,6 @@
             app:layout_constraintEnd_toStartOf="@id/filter_button"
             app:layout_constraintStart_toEndOf="@+id/chapters_title"
             app:layout_constraintTop_toTopOf="@id/filter_button"
-            tools:text="Read, Unread, Bookmarked, Downloaded, All" />
+            tools:text="Read, Groups, Unread, Bookmarked, Downloaded, All" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
