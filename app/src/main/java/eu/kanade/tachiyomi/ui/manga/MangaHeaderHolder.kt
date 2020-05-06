@@ -231,7 +231,7 @@ class MangaHeaderHolder(
                 else -> R.string.unknown
             }
         ))
-
+        // manga_missing_chapters.visibleIf(manga.status == SManga.CANCELLED || manga.status == SManga.PUBLICATION_COMPLETE)
 
         manga_lang_flag.visibility = View.VISIBLE
         when (manga.lang_flag?.toLowerCase(Locale.US)) {

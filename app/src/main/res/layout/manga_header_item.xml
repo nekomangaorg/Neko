@@ -124,6 +124,21 @@
         app:layout_constraintStart_toStartOf="@id/title"
         app:layout_constraintTop_toBottomOf="@+id/manga_author" />
 
+    <TextView
+        android:id="@+id/manga_missing_chapters"
+        style="@style/Neko.Subtitle1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="16dp"
+        android:text="@string/missing_chapters"
+        android:textIsSelectable="false"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@id/title"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@+id/manga_status" />
+
+
     <ImageView
         android:id="@+id/manga_lang_flag"
         android:layout_width="0dp"
@@ -132,7 +147,7 @@
         android:layout_marginTop="8dp"
         app:layout_constraintStart_toStartOf="@id/title"
         tools:src="@drawable/ic_flag_japan"
-        app:layout_constraintTop_toBottomOf="@id/manga_status" />
+        app:layout_constraintTop_toBottomOf="@id/manga_missing_chapters" />
 
     <androidx.constraintlayout.widget.Barrier
         android:id="@+id/bottom_line"
