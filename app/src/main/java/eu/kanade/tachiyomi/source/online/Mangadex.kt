@@ -157,13 +157,6 @@ open class Mangadex(
         return FollowsHandler(clientBuilder(), headers).updateReadingProgress(track)
     }
 
-    override suspend fun fetchTrackingInfo(manga: SManga): Track {
-        if (!isLogged()) {
-            throw Exception("Not Logged in")
-        }
-        return FollowsHandler(clientBuilder(), headers).fetchTrackingInfo(manga)
-    }
-
     override suspend fun fetchTrackingInfo(url: String): Track {
         if (!isLogged()) {
             throw Exception("Not Logged in")

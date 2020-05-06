@@ -25,30 +25,29 @@ abstract class TrackService(val id: Int) {
 
     abstract fun getLogoColor(): Int
 
-    open fun getStatusList(): List<Int> = throw Exception("Not used")
+    abstract fun getStatusList(): List<Int>
 
-    open fun isCompletedStatus(index: Int): Boolean = throw Exception("Not used")
+    abstract fun isCompletedStatus(index: Int): Boolean
 
-    open fun getStatus(status: Int): String = throw Exception("Not used")
+    abstract fun getStatus(status: Int): String
 
-    open fun getScoreList(): List<String> = throw Exception("Not used")
+    abstract fun getScoreList(): List<String>
 
     open fun indexToScore(index: Int): Float {
         return index.toFloat()
     }
 
-    open fun displayScore(track: Track): String = throw Exception("Not used")
+    abstract fun displayScore(track: Track): String
 
-    open suspend fun update(track: Track): Track = throw Exception("Not used")
+    abstract suspend fun update(track: Track): Track
 
-    open suspend fun bind(track: Track): Track = throw Exception("Not used")
+    abstract suspend fun bind(track: Track): Track
 
-    open suspend fun search(query: String): List<TrackSearch> = throw Exception("Not used")
+    abstract suspend fun search(query: String): List<TrackSearch>
 
-    open suspend fun refresh(track: Track): Track = throw Exception("Not used")
+    abstract suspend fun refresh(track: Track): Track
 
-    open suspend fun login(username: String, password: String): Boolean =
-        throw Exception("Not used")
+    abstract suspend fun login(username: String, password: String): Boolean
 
     open fun isMdList() = false
 
@@ -59,7 +58,7 @@ abstract class TrackService(val id: Int) {
 
     open val isLogged: Boolean
         get() = getUsername().isNotEmpty() &&
-                getPassword().isNotEmpty()
+            getPassword().isNotEmpty()
 
     fun getUsername() = preferences.trackUsername(this)!!
 

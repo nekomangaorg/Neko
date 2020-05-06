@@ -5,8 +5,11 @@ import android.content.Context
 import android.graphics.Color
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
+import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
+import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
+import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
@@ -76,6 +79,23 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
         track.library_id = remoteTrack.library_id
         return update(track)
     }
+
+    override suspend fun refresh(track: Track): Track {
+        TODO("Not yet implemented")
+    }
+
+    fun createInitialTracker(manga: Manga): Track {
+        val track = Track.create(TrackManager.MDLIST)
+        track.manga_id = manga.id!!
+        track.status = FollowStatus.UNFOLLOWED.int
+        track.tracking_url = MdUtil.baseUrl + manga.url
+        track.title = manga.title
+        return track
+    }
+
+    override suspend fun search(query: String): List<TrackSearch> = throw Exception("not used")
+
+    override suspend fun login(username: String, password: String): Boolean = throw Exception("not used")
 
     @SuppressLint("MissingSuperCall")
     override fun logout() = throw Exception("not used")

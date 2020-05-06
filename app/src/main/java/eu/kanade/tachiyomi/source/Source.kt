@@ -73,11 +73,6 @@ interface Source {
     /**
      * Get a MdList Track of the manga
      */
-    suspend fun fetchTrackingInfo(manga: SManga): Track
-
-    /**
-     * Get a MdList Track of the manga
-     */
     suspend fun fetchTrackingInfo(url: String): Track
 
     /**

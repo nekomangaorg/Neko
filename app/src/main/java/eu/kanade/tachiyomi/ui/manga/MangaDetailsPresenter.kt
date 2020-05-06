@@ -762,10 +762,8 @@ class MangaDetailsPresenter(
     // Tracking
     private fun fetchTrackings() {
         scope.launch {
-            registerTracking(
-                tracks.find { it.sync_id == trackManager.mdList.id },
-                trackManager.mdList
-            )
+            registerMdListOnFirstAccess()
+
             trackList = loggedServices.map { service ->
                 TrackItem(tracks.find { it.sync_id == service.id }, service)
             }
@@ -823,8 +821,6 @@ class MangaDetailsPresenter(
     }
 
     fun registerTracking(item: Track?, service: TrackService) {
-        initialRegisterMdList(service)
-
         if (item != null) {
             item.manga_id = manga.id!!
 
@@ -851,19 +847,14 @@ class MangaDetailsPresenter(
     }
 
     /**
-     * If this is mdlist check ti see if it needs to be registered initially
+     * Register Mdlist tracker for first time
      */
-    private fun initialRegisterMdList(service: TrackService) {
-        if (service.isMdList()) {
-            val mdTrackCount = tracks.filter { it.sync_id == TrackManager.MDLIST }.count()
-            if (mdTrackCount == 0) {
-                scope.launch {
-                    withContext(Dispatchers.IO) {
-                        val track = source.fetchTrackingInfo(manga)
-                        track.manga_id = manga.id!!
-                        db.insertTrack(track).executeAsBlocking()
-                        refreshTracking()
-                    }
+    private fun registerMdListOnFirstAccess() {
+        if (tracks.filter { it.sync_id == TrackManager.MDLIST }.count() == 0) {
+            scope.launch {
+                withContext(Dispatchers.IO) {
+                    val track = trackManager.mdList.createInitialTracker(manga)
+                    db.insertTrack(track).executeAsBlocking()
                 }
             }
         }
