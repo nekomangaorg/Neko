@@ -53,19 +53,9 @@ class PopularHandler(val client: OkHttpClient, private val headers: Headers) {
             manga.setUrlWithoutDomain(url)
             manga.title = it.text().trim()
         }
-        // For our image, the file endings are not very consistent
-        // Thus we should try to parse the full image from the website
-        // If we can't find it then we will construct a guess of the image url
 
-        element.select("div.large_logo").first().let {
-            val elementImg = it.selectFirst("img")
-            /*  if (elementImg != null) {
-                  val urlClean = MdUtil.removeTimeParamUrl(elementImg.absUrl("src"))
-                  manga.thumbnail_url = MdUtil.convertThumbUrlIfNeeded(urlClean, preferences.lowQualityCovers())
-              } else {*/
-            manga.thumbnail_url = MdUtil.formThumbUrl(manga.url, preferences.lowQualityCovers())
-            //  }
-        }
+        manga.thumbnail_url = MdUtil.formThumbUrl(manga.url, preferences.lowQualityCovers())
+
         return manga
     }
 
