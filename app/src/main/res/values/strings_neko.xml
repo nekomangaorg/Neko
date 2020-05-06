@@ -31,6 +31,7 @@
     <string name="tap_to_show_similar_manga">Tap here to show similar manga</string>
     <string name="filter_groups">Filter Scanlator Groups</string>
     <string name="scanlator_groups">Scanlator groups</string>
+    <string name="remove_group_filter">Remove group filters</string>
 
 
     <!-- Follows -->

@@ -142,11 +142,11 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) : BottomSheetD
         show_download.setOnCheckedChangeListener(::checkedFilter)
         show_bookmark.setOnCheckedChangeListener(::checkedFilter)
 
-        val scanlators = presenter.allChapterScanlators
-        val preselected = presenter.filteredScanlators.map { scanlators.indexOf(it) }
-
 
         filter_groups_button.setOnClickListener {
+            val scanlators = presenter.allChapterScanlators
+            val preselected = presenter.filteredScanlators.map { scanlators.indexOf(it) }
+
             MaterialDialog(activity!!)
                 .title(R.string.filter_groups)
                 .listItemsMultiChoice(
@@ -157,7 +157,11 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) : BottomSheetD
                     val selected = selections.map { scanlators[it] }
                     presenter.filterScanlatorsClicked(selected)
                 }
-                .positiveButton(android.R.string.ok).show()
+                .negativeButton(R.string.remove_group_filter) {
+                    presenter.filterScanlatorsClicked(scanlators)
+                }
+                .positiveButton(android.R.string.ok)
+                .show()
         }
     }
 
