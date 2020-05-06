@@ -96,7 +96,7 @@ class ApiMangaParser(val lang: String) {
             if (result == 0) return null
             return result.toString()
         }
-        return "1"
+        return null
     }
 
     private fun filterChapterForChecking(serializer: ApiMangaSerializer): List<Map.Entry<String, ChapterSerializer>> {
