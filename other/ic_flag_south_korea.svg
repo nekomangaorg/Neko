@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   version="1.1"
+   id="svg2"
+   viewBox="-36 -24 72 48"
+   height="600"
+   width="900">
+  <metadata
+     id="metadata30">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title>Flag of South Korea</dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs28" />
+  <title
+     id="title4">Flag of South Korea</title>
+  <g
+     id="g4158">
+    <rect
+       fill="#fff"
+       x="-36"
+       y="-24"
+       width="72"
+       height="48"
+       id="rect6" />
+    <g
+       transform="rotate(-56.3099325)"
+       id="g8">
+      <!--arctan(-3/2)-->
+      <g
+         id="b2">
+        <path
+           id="b"
+           d="M-6-25H6M-6-22H6M-6-19H6"
+           stroke="#000"
+           stroke-width="2" />
+        <use
+           xlink:href="#b"
+           y="44"
+           id="use12" />
+      </g>
+      <path
+         stroke="#fff"
+         stroke-width="1"
+         d="M0,17v10"
+         id="path14" />
+      <circle
+         fill="#cd2e3a"
+         r="12"
+         id="circle16" />
+      <path
+         fill="#0047a0"
+         d="M0-12A6,6 0 0 0 0,0A6,6 0 0 1 0,12A12,12 0 0,1 0-12Z"
+         id="path18" />
+    </g>
+    <g
+       transform="rotate(-123.6900675)"
+       id="g20">
+      <use
+         xlink:href="#b2"
+         id="use22" />
+      <path
+         stroke="#fff"
+         stroke-width="1"
+         d="M0-23.5v3M0,17v3.5M0,23.5v3"
+         id="path24" />
+    </g>
+  </g>
+</svg>
