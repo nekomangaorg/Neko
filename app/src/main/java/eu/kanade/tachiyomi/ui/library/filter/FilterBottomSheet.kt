@@ -48,7 +48,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
     private lateinit var unread: FilterTagGroup
 
-    private lateinit var unreadProgress: FilterTagGroup
+    private lateinit var allUnread: FilterTagGroup
 
     private lateinit var completed: FilterTagGroup
 
@@ -188,10 +188,10 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         completed.setup(this, R.string.completed, R.string.ongoing)
 
         unread = inflate(R.layout.filter_buttons) as FilterTagGroup
-        unread.setup(this, R.string.unread, R.string.read)
+        unread.setup(this, R.string.not_started, R.string.in_progress, R.string.read)
 
-        unreadProgress = inflate(R.layout.filter_buttons) as FilterTagGroup
-        unreadProgress.setup(this, R.string.not_started, R.string.in_progress)
+        allUnread = inflate(R.layout.filter_buttons) as FilterTagGroup
+        allUnread.setup(this, R.string.all_unread)
 
         tracked = inflate(R.layout.filter_buttons) as FilterTagGroup
         tracked.setup(this, R.string.tracked, R.string.not_tracked)
@@ -235,14 +235,13 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                 hide_categories.visibleIf(showCategoriesCheckBox)
                 downloaded.setState(preferences.filterDownloaded())
                 completed.setState(preferences.filterCompleted())
-                val unreadP = preferences.filterUnread().getOrDefault() - 1
-                if (unreadP > 1) {
-                    unread.state = 0
-                    unreadProgress.state = unreadP - 2
-                    if (!filterItems.contains(unreadProgress))
-                        filterItems.add(unreadProgress)
-                } else {
-                    unread.state = unreadP
+                val unreadP = preferences.filterUnread().getOrDefault()
+                if (unreadP == STATE_INCLUDE) {
+                    allUnread.state = 0
+                    if (!filterItems.contains(allUnread))
+                        filterItems.add(allUnread)
+                } else if (unreadP > 0) {
+                    unread.state = if (unreadP in 3..4) unreadP - 3 else 2
                 }
                 tracked.setState(preferences.filterTracked())
                 mangaType?.setState(preferences.filterMangaType())
@@ -280,13 +279,16 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                     FILTER_TRACKER = view.nameOf(index) ?: ""
                     null
                 }
-                unreadProgress -> {
-                    preferences.filterUnread().set(
-                        if (index > -1) index + 3 else 1)
+                unread -> {
+                    preferences.filterUnread().set(if (index in 0..1) index + 3 else 2)
+                    null
+                }
+                allUnread -> {
+                    preferences.filterUnread().set(index + 1)
+                    if (index != 0) unread.reset()
                     null
                 }
                 downloaded -> preferences.filterDownloaded()
-                unread -> preferences.filterUnread()
                 completed -> preferences.filterCompleted()
                 tracked -> preferences.filterTracked()
                 mangaType -> preferences.filterMangaType()
@@ -294,14 +296,22 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             }?.set(index + 1)
             onGroupClicked(ACTION_FILTER)
         }
-        if (unread.state == 0 && unreadProgress.parent == null) {
+        if (allUnread.state == 0 && unread.parent != null) {
+            filter_layout.removeView(unread)
+            filterItems.remove(unread)
+        } else if (allUnread.state != 0 && unread.parent == null) {
+            filter_layout.addView(unread, 0)
+            filterItems.add(0, unread)
+            filter_layout.removeView(allUnread)
+            filterItems.remove(allUnread)
+        } else if (unread.state in 0..1 && allUnread.parent == null) {
             val unreadIndex = filter_layout.indexOfChild(unread) + 1
-            filter_layout.addView(unreadProgress, unreadIndex)
-            filterItems.add(unreadIndex, unreadProgress)
-        } else if (unread.state != 0 && unreadProgress.parent != null) {
-            filter_layout.removeView(unreadProgress)
-            unreadProgress.reset()
-            filterItems.remove(unreadProgress)
+            filter_layout.addView(allUnread, unreadIndex)
+            filterItems.add(unreadIndex, allUnread)
+        } else if (unread.state != 0 && allUnread.parent != null) {
+            filter_layout.removeView(allUnread)
+            allUnread.reset()
+            filterItems.remove(allUnread)
         }
         if (tracked.isActivated && trackers != null && trackers?.parent == null) {
             filter_layout.addView(trackers)
@@ -313,10 +323,11 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             filterItems.remove(trackers!!)
         }
         val hasFilters = hasActiveFilters()
-        if (hasFilters && clearButton.parent == null)
+        if (hasFilters && clearButton.parent == null) {
             filter_layout.addView(clearButton, 0)
-        else if (!hasFilters && clearButton.parent != null)
+        } else if (!hasFilters && clearButton.parent != null) {
             filter_layout.removeView(clearButton)
+        }
     }
 
     private fun clearFilters() {
@@ -330,13 +341,16 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         val transition = androidx.transition.AutoTransition()
         transition.duration = 150
         androidx.transition.TransitionManager.beginDelayedTransition(filter_layout, transition)
+        if (!filterItems.contains(unread)) {
+            filterItems.add(0, unread)
+        }
         filterItems.forEach {
             it.reset()
         }
         trackers?.let {
             filterItems.remove(it)
         }
-        filterItems.remove(unreadProgress)
+        filterItems.remove(allUnread)
         reSortViews()
         onGroupClicked(ACTION_FILTER)
     }
@@ -359,6 +373,11 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         const val ACTION_FILTER = 1
         const val ACTION_HIDE_FILTER_TIP = 2
         const val ACTION_DISPLAY = 3
+
+        const val STATE_IGNORE = 0
+        const val STATE_INCLUDE = 1
+        const val STATE_EXCLUDE = 2
+
         var FILTER_TRACKER = ""
             private set
     }
