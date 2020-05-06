@@ -185,10 +185,8 @@ class ApiMangaParser(val lang: String) {
         if (chapterName.isEmpty()) {
             chapterName.add("Oneshot")
         }
-        if ((status == 2 || status == 3) && (isOneShot(
-                networkChapter,
-                finalChapterNumber
-            ) || networkChapter.chapter == finalChapterNumber)
+        if ((finalChapterNumber == "0" && status == 2 || status == 3 && isOneShot(networkChapter, finalChapterNumber)) ||
+            networkChapter.chapter == finalChapterNumber
         ) {
             chapterName.add("[END]")
         }
