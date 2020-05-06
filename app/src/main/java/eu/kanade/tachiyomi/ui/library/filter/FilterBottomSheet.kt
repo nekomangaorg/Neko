@@ -280,7 +280,13 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                     null
                 }
                 unread -> {
-                    preferences.filterUnread().set(if (index in 0..1) index + 3 else 2)
+                    preferences.filterUnread().set(
+                        when (index) {
+                            in 0..1 -> index + 3
+                            2 -> 2
+                            else -> 0
+                        }
+                    )
                     null
                 }
                 allUnread -> {
