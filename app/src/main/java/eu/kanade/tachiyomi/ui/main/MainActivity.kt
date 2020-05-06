@@ -591,8 +591,8 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
 
     companion object {
 
-        private const val SWIPE_THRESHOLD = 100
-        private const val SWIPE_VELOCITY_THRESHOLD = 100
+        const val SWIPE_THRESHOLD = 100
+        const val SWIPE_VELOCITY_THRESHOLD = 100
 
         // Shortcut actions
         const val SHORTCUT_LIBRARY = "eu.kanade.tachiyomi.SHOW_LIBRARY"

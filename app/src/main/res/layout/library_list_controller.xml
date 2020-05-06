@@ -37,7 +37,7 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"/>
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <View
                     android:layout_width="match_parent"
@@ -114,6 +114,17 @@
         app:layout_anchor="@id/filter_bottom_sheet"
         app:layout_anchorGravity="top" />
 
+    <FrameLayout
+        android:id="@+id/category_hopper_frame"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|center"
+        app:layout_anchor="@id/filter_bottom_sheet"
+        app:layout_anchorGravity="top|center">
+
+        <include layout="@layout/rounded_category_hopper" />
+
+    </FrameLayout>
     <!-- Adding bottom sheet after main content -->
     <include layout="@layout/filter_bottom_sheet" />
 

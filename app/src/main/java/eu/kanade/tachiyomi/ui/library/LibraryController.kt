@@ -7,6 +7,7 @@ import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.util.TypedValue
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -18,6 +19,8 @@ import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.SearchView
+import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.view.GestureDetectorCompat
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -82,6 +85,7 @@ import kotlinx.android.synthetic.main.filter_bottom_sheet.*
 import kotlinx.android.synthetic.main.library_grid_recycler.*
 import kotlinx.android.synthetic.main.library_list_controller.*
 import kotlinx.android.synthetic.main.main_activity.*
+import kotlinx.android.synthetic.main.rounded_category_hopper.*
 import kotlinx.coroutines.delay
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -90,7 +94,7 @@ import kotlin.math.roundToInt
 
 class LibraryController(
     bundle: Bundle? = null,
-    private val preferences: PreferencesHelper = Injekt.get()
+    val preferences: PreferencesHelper = Injekt.get()
 ) : BaseController(bundle),
     ActionMode.Callback,
     ChangeMangaCategoriesDialog.Listener,
@@ -108,6 +112,9 @@ class LibraryController(
      * Position of the active category.
      */
     private var activeCategory: Int = preferences.lastUsedCategory().getOrDefault()
+        set(value) {
+            field = value
+        }
 
     private var justStarted = true
 
@@ -164,6 +171,21 @@ class LibraryController(
             val notAtTop = recycler.canScrollVertically(-1)
             if (notAtTop != elevate) elevateFunc(notAtTop)
             val order = getCategoryOrder()
+            if (!recycler_cover.isClickable) {
+                category_hopper_frame.translationY += dy
+                category_hopper_frame.translationY =
+                    category_hopper_frame.translationY.coerceIn(0f, 60f.dpToPx)
+                up_category.alpha = if (!recycler.canScrollVertically(-1)) {
+                    0.25f
+                } else {
+                    1f
+                }
+                down_category.alpha = if (!recycler.canScrollVertically(1)) {
+                    0.25f
+                } else {
+                    1f
+                }
+            }
             if (!filter_bottom_sheet.sheetBehavior.isHidden()) {
                 scrollDistance += abs(dy)
                 if (scrollDistance > scrollDistanceTilHidden) {
@@ -180,8 +202,8 @@ class LibraryController(
                     val view = fast_scroller ?: return
 
                     val height = if (view.childCount > 0) {
-                        view.height - (view.getChildAt(0)?.paddingTop ?: 0) -
-                            (view.getChildAt(view.childCount - 1)?.paddingBottom ?: 0)
+                        view.height - (view.getChildAt(0)?.paddingTop
+                            ?: 0) - (view.getChildAt(view.childCount - 1)?.paddingBottom ?: 0)
                     } else {
                         view.height
                     }
@@ -191,9 +213,9 @@ class LibraryController(
                     textAnim?.start()
 
                     // fastScroll height * indicator position - center text - fastScroll padding
-                    text_view_m.translationY = height *
-                        (index.toFloat() / (adapter.headerItems.size + 1))
-                    - text_view_m.height / 2 + 16.dpToPx
+                    text_view_m.translationY =
+                        height * (index.toFloat() / (adapter.headerItems.size + 1))
+                    -text_view_m.height / 2 + 16.dpToPx
                     text_view_m.translationX = 45f.dpToPxEnd
                     text_view_m.alpha = 1f
                     text_view_m.text = headerItem.category.name
@@ -213,6 +235,15 @@ class LibraryController(
                 }
                 RecyclerView.SCROLL_STATE_IDLE -> {
                     scrollAnim = fast_scroller?.hide()
+                    val shortAnimationDuration = resources?.getInteger(
+                        android.R.integer.config_shortAnimTime
+                    ) ?: 0
+                    if (!recycler_cover.isClickable) {
+                        category_hopper_frame.animate().translationY(
+                            if (category_hopper_frame.translationY > 30f.dpToPx) 60f.dpToPx
+                            else 0f
+                        ).setDuration(shortAnimationDuration.toLong()).start()
+                    }
                 }
             }
         }
@@ -264,9 +295,12 @@ class LibraryController(
         recycler.adapter = adapter
         fast_scroller.setupWithRecyclerView(recycler, { position ->
             val letter = adapter.getSectionText(position)
-            if (!singleCategory && presenter.showAllCategories &&
-                !adapter.isHeader(adapter.getItem(position)) &&
-                position != adapter.itemCount - 1) null
+            if (!singleCategory && presenter.showAllCategories && !adapter.isHeader(
+                    adapter.getItem(
+                        position
+                    )
+                ) && position != adapter.itemCount - 1
+            ) null
             else if (letter != null) FastScrollItemIndicator.Text(letter)
             else FastScrollItemIndicator.Icon(R.drawable.ic_star_24dp)
         })
@@ -336,6 +370,7 @@ class LibraryController(
             showCategories(false)
         }
         category_recycler.onCategoryClicked = {
+            recycler.itemAnimator = null
             scrollToHeader(it)
             showCategories(show = false, scroll = false)
         }
@@ -343,6 +378,60 @@ class LibraryController(
             preferences.showAllCategories().set(isChecked)
             presenter.getLibrary()
         }
+
+        category_hopper_frame.gone()
+        down_category.setOnClickListener {
+            val position = getVisibleHeader() ?: return@setOnClickListener
+            val newOffset = adapter.headerItems.indexOf(position) + 1
+            if (newOffset < presenter.categories.size) {
+                val newOrder = (adapter.headerItems[newOffset] as LibraryHeaderItem).category.order
+                scrollToHeader(newOrder)
+            } else {
+                recycler.scrollToPosition(adapter.itemCount - 1)
+            }
+        }
+        up_category.setOnClickListener {
+            val position = getVisibleHeader() ?: return@setOnClickListener
+            val newOffset = adapter.headerItems.indexOf(position) - 1
+            if (newOffset > -1) {
+                val newOrder = (adapter.headerItems[newOffset] as LibraryHeaderItem).category.order
+                scrollToHeader(newOrder)
+            } else {
+                recycler.scrollToPosition(0)
+            }
+        }
+        down_category.setOnLongClickListener {
+            recycler.scrollToPosition(adapter.itemCount - 1)
+            true
+        }
+        up_category.setOnLongClickListener {
+            recycler.scrollToPosition(0)
+            true
+        }
+        category_button.setOnClickListener {
+            showCategories(!recycler_cover.isClickable)
+        }
+
+        category_button.setOnLongClickListener {
+            activity?.toolbar?.menu?.performIdentifierAction(R.id.action_search, 0)
+            true
+        }
+
+        category_hopper_frame.updateLayoutParams<CoordinatorLayout.LayoutParams> {
+            anchorGravity = Gravity.TOP or when (preferences.hopperGravity().get()) {
+                0 -> Gravity.LEFT
+                2 -> Gravity.RIGHT
+                else -> Gravity.CENTER
+            }
+        }
+
+        val gestureDetector = GestureDetectorCompat(activity, LibraryGestureDetector(this))
+        listOf(category_hopper_layout, up_category, down_category, category_button).forEach {
+            it.setOnTouchListener { _, event ->
+                gestureDetector.onTouchEvent(event)
+            }
+        }
+
         scrollViewWith(recycler, swipeRefreshLayout = swipe_refresh, afterInsets = { insets ->
             category_layout?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 topMargin = recycler?.paddingTop ?: 0
@@ -432,6 +521,22 @@ class LibraryController(
                 is LibraryHeaderItem -> return item
                 is LibraryItem -> return item.header
             }
+        }
+        return null
+    }
+
+    private fun getVisibleHeader(): LibraryHeaderItem? {
+        val position =
+            (recycler.layoutManager as LinearLayoutManager).findFirstCompletelyVisibleItemPosition()
+        when (val item = adapter.getItem(position)) {
+            is LibraryHeaderItem -> return item
+            is LibraryItem -> return item.header
+        }
+        val fPosition =
+            (recycler.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+        when (val item = adapter.getItem(fPosition)) {
+            is LibraryHeaderItem -> return item
+            is LibraryItem -> return item.header
         }
         return null
     }
@@ -589,6 +694,7 @@ class LibraryController(
                 }
             }
         }
+        category_hopper_frame.visibleIf(!singleCategory)
         adapter.isLongPressDragEnabled = canDrag()
         category_recycler.setCategories(presenter.categories)
         setActiveCategory()
@@ -610,6 +716,7 @@ class LibraryController(
         val full = category_layout.height.toFloat() + recycler.paddingTop
         val translateY = if (show) full else 0f
         recycler.animate().translationY(translateY).start()
+        category_hopper_frame.animate().translationY(translateY).start()
         if (scroll) {
             // Smooth scroll the recycler to hide the hidden content blocked by the app bar
             ValueAnimator.ofInt(recycler.translationY.roundToInt(), translateY.roundToInt()).apply {
@@ -661,7 +768,6 @@ class LibraryController(
 
     private fun scrollToHeader(pos: Int) {
         if (!presenter.showAllCategories) {
-            recycler.itemAnimator = null
             presenter.switchSection(pos)
             activeCategory = pos
             setActiveCategory()
@@ -1030,6 +1136,10 @@ class LibraryController(
     override fun sheetIsExpanded(): Boolean = false
 
     override fun handleSheetBack(): Boolean {
+        if (recycler_cover.isClickable) {
+            showCategories(false)
+            return true
+        }
         if (filter_bottom_sheet.sheetBehavior.isExpanded()) {
             filter_bottom_sheet.sheetBehavior?.collapse()
             return true
