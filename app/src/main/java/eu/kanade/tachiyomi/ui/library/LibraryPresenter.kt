@@ -179,22 +179,27 @@ class LibraryPresenter(
 
         val filterTrackers = FilterBottomSheet.FILTER_TRACKER
 
+        val filtersOff = filterDownloaded == 0 && filterUnread == 0 && filterCompleted == 0 && filterTracked == 0 && filterMangaType == 0
         return items.filter f@{ item ->
             if (item.manga.status == -1) {
-                return@f sectionedLibraryItems[item.manga.category]?.any {
-                    matchesFilters(
-                        it,
-                        filterDownloaded,
-                        filterUnread,
-                        filterCompleted,
-                        filterTracked,
-                        filterMangaType,
-                        filterTrackers
-                    )
-                } ?: false
+                val subItems = sectionedLibraryItems[item.manga.category]
+                if (subItems.isNullOrEmpty()) return@f filtersOff
+                else {
+                    return@f subItems.any {
+                        matchesFilters(
+                            it,
+                            filterDownloaded,
+                            filterUnread,
+                            filterCompleted,
+                            filterTracked,
+                            filterMangaType,
+                            filterTrackers
+                        )
+                    }
+                }
             } else if (item.manga.isBlank()) {
                 return@f if (showAllCategories) {
-                    filterDownloaded == 0 && filterUnread == 0 && filterCompleted == 0 && filterTracked == 0 && filterMangaType == 0
+                    filtersOff
                 } else {
                     true
                 }
