@@ -44,14 +44,12 @@ import androidx.transition.TransitionSet
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.checkbox.checkBoxPrompt
 import com.afollestad.materialdialogs.checkbox.isCheckPromptChecked
-import com.afollestad.materialdialogs.list.listItems
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import com.bumptech.glide.signature.ObjectKey
-import com.github.florent37.viewtooltip.ViewTooltip
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.reddit.indicatorfastscroll.FastScrollItemIndicator
@@ -174,7 +172,6 @@ class MangaDetailsController : BaseController,
     private var textAnim: ViewPropertyAnimator? = null
     private var scrollAnim: ViewPropertyAnimator? = null
     var chapterPopupMenu: Pair<Int, PopupMenu>? = null
-    private var similarTooltip: ViewTooltip? = null
 
     private var query = ""
     private var adapter: MangaDetailsAdapter? = null
@@ -441,6 +438,10 @@ class MangaDetailsController : BaseController,
             activity?.window?.statusBarColor
                 ?: Color.TRANSPARENT
         )
+    }
+
+    fun showSimilarToopTip() {
+        getHeader()?.showSimilarToolTip(activity)
     }
 
     //endregion

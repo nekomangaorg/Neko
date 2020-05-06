@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Neko.Iconics" parent="">
+        <item name="iiv_size">24dp</item>
+        <item name="iiv_color">?attr/colorAccent</item>
+        <item name="iiv_checked_color">?attr/colorAccent</item>
+        <item name="iiv_unchecked_color">?attr/colorAccent</item>
+        <item name="iiv_checked_size">24dp</item>
+        <item name="iiv_unchecked_size">24dp</item>
+        <item name="android:background">@drawable/round_ripple</item>
+    </style>
+
+    <style name="Neko.Preference" parent="PreferenceThemeOverlay">
+        <item name="fontFamily">@font/metropolis_medium</item>
+        <item name="android:textColorSecondary">@color/text_color_high_emphasis</item>
+    </style>
+
+    <style name="Neko.Button" parent="Theme.Widget.Button"></style>
+
+    <style name="Neko.Button.TextButton" parent="Theme.Widget.Button.TextButton">
+        <item name="fontFamily">@font/metropolis_medium</item>
+    </style>
+
+    <style name="Neko.Button.RoundedOutline" parent="Theme.Widget.Button.RoundedOutline">
+        <item name="strokeColor">?attr/colorAccent</item>
+        <item name="android:letterSpacing">-0.02</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="fontFamily">@font/metropolis_medium</item>
+    </style>
+</resources>

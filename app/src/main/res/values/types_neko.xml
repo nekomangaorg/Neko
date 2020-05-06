@@ -93,20 +93,6 @@
         <!--Your custom type style here-->
     </style>
 
-    <style name="Neko.Button" parent="Theme.Widget.Button"></style>
-
-    <style name="Neko.Button.TextButton" parent="Theme.Widget.Button.TextButton">
-        <item name="fontFamily">@font/metropolis_medium</item>
-    </style>
-
-    <style name="Neko.Button.RoundedOutline" parent="Theme.Widget.Button.RoundedOutline">
-        <item name="strokeColor">?attr/colorAccent</item>
-        <item name="android:letterSpacing">-0.02</item>
-        <item name="android:textAllCaps">true</item>
-        <item name="fontFamily">@font/metropolis_medium</item>
-    </style>
-
-
     <style name="Neko.Caption" parent="TextAppearance.MaterialComponents.Caption">
         <item name="fontFamily">@font/metropolis_medium</item>
         <item name="android:textColor">@color/text_color_hint</item>
