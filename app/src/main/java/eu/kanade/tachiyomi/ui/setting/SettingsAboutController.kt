@@ -7,7 +7,6 @@ import android.os.Bundle
 import androidx.preference.PreferenceScreen
 import com.afollestad.materialdialogs.MaterialDialog
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
-import com.google.firebase.crashlytics.FirebaseCrashlytics
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -52,16 +51,6 @@ class SettingsAboutController : SettingsController() {
 
     override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
         titleRes = R.string.about
-
-        switchPreference {
-            key = "acra.enable"
-            titleRes = R.string.send_crash_report
-            summaryRes = R.string.helps_fix_bugs
-            defaultValue = true
-            onClick {
-                FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(isEnabled)
-            }
-        }
 
         preference {
             titleRes = R.string.website
