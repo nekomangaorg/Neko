@@ -34,7 +34,6 @@ import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.invisible
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
-import eu.kanade.tachiyomi.util.view.visInvisIf
 import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.util.view.visibleIf
 import kotlinx.android.synthetic.main.library_category_header_item.*
@@ -193,7 +192,7 @@ class LibraryHeaderItem(
                     expandImage.visibleIf(!adapter.isSingleCategory)
                     catProgress.gone()
                     checkboxImage.gone()
-                    updateButton.visInvisIf(category.id ?: 0 > -1 && !adapter.isSingleCategory)
+                    updateButton.visibleIf(category.id ?: 0 > -1 && !adapter.isSingleCategory)
                 }
             }
         }
