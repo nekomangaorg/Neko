@@ -646,6 +646,7 @@ class MangaDetailsPresenter(
         filtersId.add(if (onlyUnread()) R.string.unread else null)
         filtersId.add(if (onlyDownloaded()) R.string.downloaded else null)
         filtersId.add(if (onlyBookmarked()) R.string.bookmarked else null)
+        filtersId.add(if (filteredScanlators.isNotEmpty()) R.string.scanlator_groups else null)
         return filtersId.filterNotNull().joinToString(", ") { preferences.context.getString(it) }
     }
 
