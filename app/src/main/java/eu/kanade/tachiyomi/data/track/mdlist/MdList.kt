@@ -64,6 +64,9 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
                     track.status = FollowStatus.COMPLETED.int
                 }
                 mdex.updateReadingProgress(track)
+            } else if (track.last_chapter_read != 0) {
+                //When followStatus has been changed to unfollowed 0 out read chapters since dex does
+                track.last_chapter_read = 0
             }
             db.insertTrack(track).executeAsBlocking()
             track
@@ -76,12 +79,14 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
     override suspend fun bind(track: Track): Track {
         val remoteTrack = mdex.fetchTrackingInfo(track.tracking_url)
         track.copyPersonalFrom(remoteTrack)
-        track.library_id = remoteTrack.library_id
         return update(track)
     }
 
     override suspend fun refresh(track: Track): Track {
-        TODO("Not yet implemented")
+        val remoteTrack = mdex.fetchTrackingInfo(track.tracking_url)
+        track.copyPersonalFrom(remoteTrack)
+        track.total_chapters = remoteTrack.total_chapters
+        return track
     }
 
     fun createInitialTracker(manga: Manga): Track {

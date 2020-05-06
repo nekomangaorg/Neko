@@ -45,7 +45,7 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) : Bott
         sheetBehavior.peekHeight = 380.dpToPx + height
 
         sheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
-            override fun onSlide(bottomSheet: View, progress: Float) { }
+            override fun onSlide(bottomSheet: View, progress: Float) {}
 
             override fun onStateChanged(p0: View, state: Int) {
                 if (state == BottomSheetBehavior.STATE_EXPANDED) {
@@ -118,7 +118,6 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) : Bott
 
     override fun onSetClick(position: Int) {
         val item = adapter?.getItem(position) ?: return
-        item.service.isMdList() ?: return
 
         TrackSearchDialog(this, item.service, item.track != null).showDialog(
             controller.router,
