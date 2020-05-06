@@ -38,11 +38,13 @@
 
             <ProgressBar
                 android:id="@+id/progress"
+                android:indeterminateTint="@color/neko_green"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:padding="4dp"
-                android:visibility="gone" />
+                android:visibility="gone"
+                tools:visibility="visible" />
 
         </FrameLayout>
 

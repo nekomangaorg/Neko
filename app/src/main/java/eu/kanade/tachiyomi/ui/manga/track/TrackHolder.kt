@@ -61,6 +61,5 @@ class TrackHolder(view: View, adapter: TrackAdapter) : BaseViewHolder(view) {
 
     fun setProgress(enabled: Boolean) {
         progress.visibleIf(enabled)
-        track_logo.visibleIf(!enabled)
     }
 }
