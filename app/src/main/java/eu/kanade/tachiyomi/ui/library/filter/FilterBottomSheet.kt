@@ -191,7 +191,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         unread.setup(this, R.string.not_started, R.string.in_progress, R.string.read)
 
         allUnread = inflate(R.layout.filter_buttons) as FilterTagGroup
-        allUnread.setup(this, R.string.all_unread)
+        allUnread.setup(this, R.string.unread)
 
         tracked = inflate(R.layout.filter_buttons) as FilterTagGroup
         tracked.setup(this, R.string.tracked, R.string.not_tracked)
