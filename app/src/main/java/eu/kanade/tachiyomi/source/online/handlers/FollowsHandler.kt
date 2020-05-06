@@ -27,6 +27,7 @@ import okhttp3.Response
 import rx.Observable
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
+import kotlin.math.floor
 
 class FollowsHandler(val client: OkHttpClient, val headers: Headers) {
 
@@ -76,7 +77,7 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers) {
             val follow = result.first()
             track.status = follow.follow_type
             if (result[0].chapter.isNotBlank()) {
-                track.last_chapter_read = follow.chapter.toInt()
+                track.last_chapter_read = floor(follow.chapter.toFloat()).toInt()
             }
             track.tracking_url = MdUtil.baseUrl + follow.manga_id.toString()
             track.title = follow.title
