@@ -56,6 +56,8 @@ object MangaTable {
 
     const val COL_SCANLATOR_FILTER_FLAG = "scanlator_filter_flag"
 
+    const val COL_MISSING_CHAPTERS = "missing_chapters"
+
     val createTableQuery: String
         get() = """CREATE TABLE $TABLE(
             $COL_ID INTEGER NOT NULL PRIMARY KEY,
@@ -81,6 +83,7 @@ object MangaTable {
             $COL_ANIME_PLANET_ID TEXT,
             $COL_MANGA_UPDATES_ID TEXT,
             $COL_SCANLATOR_FILTER_FLAG TEXT,
+            $COL_MISSING_CHAPTERS TEXT,
             $COL_FOLLOW_STATUS INTEGER
             )"""
 
@@ -117,4 +120,7 @@ object MangaTable {
 
     val addScanlatorFilterFlagCol: String
         get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_SCANLATOR_FILTER_FLAG} TEXT DEFAULT NULL"
+
+    val addMissingChaptersCol: String
+        get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_MISSING_CHAPTERS} TEXT DEFAULT NULL"
 }

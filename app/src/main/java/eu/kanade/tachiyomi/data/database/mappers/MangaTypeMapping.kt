@@ -27,6 +27,7 @@ import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_KITSU_ID
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_LANG_FLAG
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_LAST_UPDATE
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_MANGA_UPDATES_ID
+import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_MISSING_CHAPTERS
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_MY_ANIME_LIST_ID
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_SCANLATOR_FILTER_FLAG
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_SOURCE
@@ -82,6 +83,7 @@ class MangaPutResolver : DefaultPutResolver<Manga>() {
         put(COL_MANGA_UPDATES_ID, obj.manga_updates_id)
         put(COL_ANIME_PLANET_ID, obj.anime_planet_id)
         put(COL_SCANLATOR_FILTER_FLAG, obj.scanlator_filter)
+        put(COL_MISSING_CHAPTERS, obj.missing_chapters)
     }
 }
 
@@ -110,6 +112,7 @@ interface BaseMangaGetResolver {
         manga_updates_id = cursor.getString(cursor.getColumnIndex(COL_MANGA_UPDATES_ID))
         anime_planet_id = cursor.getString(cursor.getColumnIndex(COL_ANIME_PLANET_ID))
         scanlator_filter = cursor.getString(cursor.getColumnIndex(COL_SCANLATOR_FILTER_FLAG))
+        missing_chapters = cursor.getString(cursor.getColumnIndex(COL_MISSING_CHAPTERS))
         follow_status =
             cursor.getInt(cursor.getColumnIndex(COL_FOLLOW_STATUS)).let { FollowStatus.fromInt(it) }
     }

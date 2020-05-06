@@ -38,6 +38,8 @@ interface SManga : Serializable {
 
     var anime_planet_id: String?
 
+    var missing_chapters: String?
+
     fun copyFrom(other: SManga) {
         if (other.author != null)
             author = other.author
@@ -74,6 +76,8 @@ interface SManga : Serializable {
 
         if (other.manga_updates_id != null)
             manga_updates_id = other.manga_updates_id
+
+        missing_chapters = other.missing_chapters
 
         status = other.status
 

@@ -57,6 +57,8 @@ open class MangaImpl : Manga {
 
     override var scanlator_filter: String? = null
 
+    override var missing_chapters: String? = null
+    
     override fun copyFrom(other: SManga) {
         if (other is MangaImpl && (other as MangaImpl)::title.isInitialized &&
             !other.title.isBlank() && other.title != title

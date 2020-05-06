@@ -39,13 +39,16 @@ class ApiMangaParser(val lang: String) {
                 it.mu?.let { manga.manga_updates_id = it }
                 it.ap?.let { manga.anime_planet_id = it }
             }
+            val filteredChapters = filterChapterForChecking(networkApiManga)
 
             val tempStatus = parseStatus(networkManga.status)
             val publishedOrCancelled =
                 tempStatus == SManga.PUBLICATION_COMPLETE || tempStatus == SManga.CANCELLED
-            if (publishedOrCancelled && isMangaCompleted(networkApiManga)) {
+            if (publishedOrCancelled && isMangaCompleted(networkApiManga, filteredChapters)) {
                 manga.status = SManga.COMPLETED
+                manga.missing_chapters = null
             } else {
+                manga.missing_chapters = getMissingChapterCount(filteredChapters)
                 manga.status = tempStatus
             }
 
@@ -69,23 +72,37 @@ class ApiMangaParser(val lang: String) {
      * If chapter title is oneshot or a chapter exists which matches the last chapter in the required language
      * return manga is complete
      */
-    private fun isMangaCompleted(serializer: ApiMangaSerializer): Boolean {
+    private fun isMangaCompleted(
+        serializer: ApiMangaSerializer,
+        filteredChapters: List<Map.Entry<String, ChapterSerializer>>
+    ): Boolean {
         if (serializer.chapter.isNullOrEmpty() || serializer.manga.last_chapter.isNullOrEmpty()) {
             return false
         }
         val finalChapterNumber = serializer.manga.last_chapter!!
-        val langOnlyChapters = serializer.chapter.entries
-            .filter { it.value.lang_code == lang }
         if (finalChapterNumber == "0") {
-            langOnlyChapters.first().let {
+            filteredChapters.first().let {
                 if (isOneShot(it.value, finalChapterNumber)) {
                     return true
                 }
             }
         }
+        return filteredChapters.size.toString() == finalChapterNumber
+    }
 
-        //remove non whole and duplicate chapters
-        val filteredChapters = langOnlyChapters
+    private fun getMissingChapterCount(filteredChapters: List<Map.Entry<String, ChapterSerializer>>): String? {
+        filteredChapters.firstOrNull()?.value?.chapter?.let {
+            val result = it.toInt() - filteredChapters.size
+            if (result == 0) return null
+            return result.toString()
+        }
+        return "1"
+    }
+
+    private fun filterChapterForChecking(serializer: ApiMangaSerializer): List<Map.Entry<String, ChapterSerializer>> {
+
+        val filteredChapters = serializer.chapter!!.entries
+            .filter { it.value.lang_code == lang }
             .filter {
                 it.value.chapter?.let { chapterNumber ->
                     if (chapterNumber.isNotBlank() && chapterNumber.contains(".").not()) {
@@ -94,8 +111,7 @@ class ApiMangaParser(val lang: String) {
                 }
                 return@filter false
             }.distinctBy { it.value.chapter }
-
-        return filteredChapters.size.toString() == finalChapterNumber
+        return filteredChapters
     }
 
     private fun isOneShot(chapter: ChapterSerializer, finalChapterNumber: String): Boolean {

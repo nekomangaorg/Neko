@@ -19,7 +19,7 @@
     <string name="hiatus">Hiatus</string>
     <string name="cancelled">Cancelled</string>
     <string name="publication_complete">Publication Complete</string>
-    <string name="missing_chapters">Note: There are missing chapters</string>
+    <string name="missing_chapters">Around %1$s missing chapters</string>
 
     <!--Browse -->
     <string name="random_manga">Random Manga</string>
