@@ -16,11 +16,11 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet
-import eu.kanade.tachiyomi.util.lang.removeArticles
-import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet.Companion.STATE_EXCLUDE
 import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet.Companion.STATE_IGNORE
 import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet.Companion.STATE_INCLUDE
+import eu.kanade.tachiyomi.util.lang.removeArticles
+import eu.kanade.tachiyomi.util.system.executeOnIO
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -110,7 +110,21 @@ class LibraryPresenter(
         preferences.lastUsedCategory().set(order)
         val category = categories.find { it.order == order }?.id ?: return
         currentCategory = category
-        view.onNextLibraryUpdate(sectionedLibraryItems[currentCategory] ?: emptyList())
+        view.onNextLibraryUpdate(
+            sectionedLibraryItems[currentCategory] ?: blankItem()
+        )
+    }
+
+    private fun blankItem(id: Int = currentCategory): List<LibraryItem> {
+        return listOf(
+            LibraryItem(
+                LibraryManga.createBlank(id), LibraryHeaderItem(
+                    { getCategory(id) },
+                    id,
+                    preferences.alwaysShowSeeker()
+                )
+            )
+        )
     }
 
     fun restoreLibrary() {
@@ -124,7 +138,7 @@ class LibraryPresenter(
         }
         view.onNextLibraryUpdate(
             if (!show) sectionedLibraryItems[currentCategory]
-                ?: sectionedLibraryItems[categories.first().id] ?: emptyList()
+                ?: sectionedLibraryItems[categories.first().id] ?: blankItem()
             else libraryItems, true
         )
     }
@@ -141,7 +155,7 @@ class LibraryPresenter(
         withContext(Dispatchers.Main) {
             view.onNextLibraryUpdate(
                 if (!show) sectionedLibraryItems[currentCategory]
-                ?: sectionedLibraryItems[categories.first().id] ?: emptyList()
+                ?: sectionedLibraryItems[categories.first().id] ?: blankItem()
                 else libraryItems, freshStart
             )
         }
@@ -168,15 +182,32 @@ class LibraryPresenter(
         return items.filter f@{ item ->
             if (item.manga.status == -1) {
                 return@f sectionedLibraryItems[item.manga.category]?.any {
-                    matchesFilters(it, filterDownloaded, filterUnread, filterCompleted,
-                        filterTracked, filterMangaType, filterTrackers)
+                    matchesFilters(
+                        it,
+                        filterDownloaded,
+                        filterUnread,
+                        filterCompleted,
+                        filterTracked,
+                        filterMangaType,
+                        filterTrackers
+                    )
                 } ?: false
             } else if (item.manga.isBlank()) {
-                return@f filterDownloaded == 0 && filterUnread == 0 && filterCompleted == 0 &&
-                    filterTracked == 0 && filterMangaType == 0
+                return@f if (showAllCategories) {
+                    filterDownloaded == 0 && filterUnread == 0 && filterCompleted == 0 && filterTracked == 0 && filterMangaType == 0
+                } else {
+                    true
+                }
             }
-            matchesFilters(item, filterDownloaded, filterUnread, filterCompleted, filterTracked,
-                filterMangaType, filterTrackers)
+            matchesFilters(
+                item,
+                filterDownloaded,
+                filterUnread,
+                filterCompleted,
+                filterTracked,
+                filterMangaType,
+                filterTrackers
+            )
         }
     }
 

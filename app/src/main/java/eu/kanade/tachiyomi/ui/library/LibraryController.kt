@@ -175,16 +175,8 @@ class LibraryController(
                 category_hopper_frame.translationY += dy
                 category_hopper_frame.translationY =
                     category_hopper_frame.translationY.coerceIn(0f, 60f.dpToPx)
-                up_category.alpha = if (!recycler.canScrollVertically(-1)) {
-                    0.25f
-                } else {
-                    1f
-                }
-                down_category.alpha = if (!recycler.canScrollVertically(1)) {
-                    0.25f
-                } else {
-                    1f
-                }
+                up_category.alpha = if (isAtTop()) 0.25f else 1f
+                down_category.alpha = if (isAtBottom()) 0.25f else 1f
             }
             if (!filter_bottom_sheet.sheetBehavior.isHidden()) {
                 scrollDistance += abs(dy)
@@ -246,6 +238,22 @@ class LibraryController(
                     }
                 }
             }
+        }
+    }
+
+    fun isAtTop(): Boolean {
+        return if (presenter.showAllCategories) {
+            getVisibleHeader() == adapter.headerItems.firstOrNull()
+        } else {
+            getVisibleHeader()?.category?.id == presenter.categories.firstOrNull()?.id
+        }
+    }
+
+    fun isAtBottom(): Boolean {
+        return if (presenter.showAllCategories) {
+            getVisibleHeader() == adapter.headerItems.lastOrNull()
+        } else {
+            getVisibleHeader()?.category?.id == presenter.categories.lastOrNull()?.id
         }
     }
 
@@ -381,24 +389,10 @@ class LibraryController(
 
         category_hopper_frame.gone()
         down_category.setOnClickListener {
-            val position = getVisibleHeader() ?: return@setOnClickListener
-            val newOffset = adapter.headerItems.indexOf(position) + 1
-            if (newOffset < presenter.categories.size) {
-                val newOrder = (adapter.headerItems[newOffset] as LibraryHeaderItem).category.order
-                scrollToHeader(newOrder)
-            } else {
-                recycler.scrollToPosition(adapter.itemCount - 1)
-            }
+            jumpToNextCategory(true)
         }
         up_category.setOnClickListener {
-            val position = getVisibleHeader() ?: return@setOnClickListener
-            val newOffset = adapter.headerItems.indexOf(position) - 1
-            if (newOffset > -1) {
-                val newOrder = (adapter.headerItems[newOffset] as LibraryHeaderItem).category.order
-                scrollToHeader(newOrder)
-            } else {
-                recycler.scrollToPosition(0)
-            }
+            jumpToNextCategory(false)
         }
         down_category.setOnLongClickListener {
             recycler.scrollToPosition(adapter.itemCount - 1)
@@ -503,6 +497,37 @@ class LibraryController(
         } else {
             recycler_layout.alpha = 0f
             presenter.getLibrary()
+        }
+    }
+
+    private fun jumpToNextCategory(next: Boolean) {
+        val category = getVisibleHeader() ?: return
+        if (presenter.showAllCategories) {
+            val newOffset = adapter.headerItems.indexOf(category) + (if (next) 1 else -1)
+            if (if (!next) {
+                    newOffset > -1
+                } else {
+                    newOffset < adapter.headerItems.size
+                }) {
+                val newOrder =
+                    (adapter.headerItems[newOffset] as LibraryHeaderItem).category.order
+                scrollToHeader(newOrder)
+            } else {
+                recycler.scrollToPosition(if (next) adapter.itemCount - 1 else 0)
+            }
+        } else {
+            val newOffset =
+                presenter.categories.indexOfFirst { presenter.currentCategory == it.id } +
+                    (if (next) 1 else -1)
+            if (if (!next) {
+                    newOffset > -1
+                } else {
+                    newOffset < presenter.categories.size
+                }
+            ) {
+                val newOrder = presenter.categories[newOffset].order
+                scrollToHeader(newOrder)
+            }
         }
     }
 
