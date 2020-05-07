@@ -396,6 +396,7 @@ class MangaDetailsPresenter(
             }
 
             val networkManga = nManga.await()
+            val mangaWasInitalized = manga.initialized
             if (networkManga != null) {
                 manga.copyFrom(networkManga)
                 manga.initialized = true
@@ -412,7 +413,7 @@ class MangaDetailsPresenter(
                     val downloadNew = preferences.downloadNew().getOrDefault()
                     val categoriesToDownload =
                         preferences.downloadNewCategories().getOrDefault().map(String::toInt)
-                    val shouldDownload = !controller.fromCatalogue &&
+                    val shouldDownload = !controller.fromCatalogue && mangaWasInitalized
                         (downloadNew && (categoriesToDownload.isEmpty() || getMangaCategoryIds().any { it in categoriesToDownload }))
                     if (shouldDownload) {
                         downloadChapters(newChapters.first.sortedBy { it.chapter_number }
