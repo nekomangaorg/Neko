@@ -66,6 +66,7 @@
     <TextView
         android:id="@+id/category_title"
         style="@style/TextAppearance.MaterialComponents.Headline6"
+        android:textColor="?android:textColorPrimary"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingStart="0dp"
@@ -79,7 +80,7 @@
         android:gravity="center|start"
         android:inputType="none"
         android:maxLines="2"
-        android:textSize="22sp"
+        android:textSize="18sp"
         app:layout_constrainedWidth="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/space"
