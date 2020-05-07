@@ -797,6 +797,15 @@ class LibraryPresenter(
         getLibrary()
     }
 
+    fun toggleAllCategoryVisibility() {
+        if (preferences.collapsedCategories().getOrDefault().isEmpty()) {
+            preferences.collapsedCategories().set(categories.map { it.id.toString() }.toMutableSet())
+        } else {
+            preferences.collapsedCategories().set(mutableSetOf())
+        }
+        getLibrary()
+    }
+
     /** sync selectd manga to mangadex follows */
     fun syncMangaToDex(mangaList: List<Manga>) {
         scope.launch {

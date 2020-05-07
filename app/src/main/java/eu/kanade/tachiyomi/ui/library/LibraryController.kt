@@ -482,6 +482,7 @@ class LibraryController(
                 FilterBottomSheet.ACTION_FILTER -> onFilterChanged()
                 FilterBottomSheet.ACTION_HIDE_FILTER_TIP -> showFilterTip()
                 FilterBottomSheet.ACTION_DISPLAY -> DisplayBottomSheet(this).show()
+                FilterBottomSheet.ACTION_EXPAND_COLLAPSE_ALL -> presenter.toggleAllCategoryVisibility()
             }
         }
 
@@ -721,6 +722,7 @@ class LibraryController(
         category_hopper_frame.visibleIf(!singleCategory)
         adapter.isLongPressDragEnabled = canDrag()
         category_recycler.setCategories(presenter.categories)
+        filter_bottom_sheet.setExpandText(preferences.collapsedCategories().getOrDefault().isNotEmpty())
         setActiveCategory()
         if (onRoot) {
             activity?.toolbar?.setOnClickListener {
