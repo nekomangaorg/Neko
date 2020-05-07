@@ -51,12 +51,6 @@
 
             <include layout="@layout/library_grid_recycler" />
 
-            <View
-                android:id="@+id/recycler_cover"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:alpha="0"
-                android:background="?android:colorBackground" />
         </FrameLayout>
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
@@ -120,9 +114,12 @@
         android:layout_height="wrap_content"
         android:layout_gravity="top|center"
         app:layout_anchor="@id/filter_bottom_sheet"
+        android:visibility="gone"
         app:layout_anchorGravity="top|center">
 
-        <include layout="@layout/rounded_category_hopper" />
+        <include
+            layout="@layout/rounded_category_hopper"
+            android:visibility="gone" />
 
     </FrameLayout>
     <!-- Adding bottom sheet after main content -->
@@ -135,4 +132,13 @@
         android:layout_gravity="bottom"
         android:alpha="0.25"
         android:background="@drawable/shape_gradient_top_shadow" />
+
+    <View
+        android:id="@+id/recycler_cover"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:alpha="0"
+        android:background="?android:colorBackground"
+        app:layout_anchor="@+id/progress"
+        app:layout_anchorGravity="center" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
