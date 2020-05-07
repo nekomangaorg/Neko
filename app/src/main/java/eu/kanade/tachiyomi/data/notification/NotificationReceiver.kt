@@ -68,6 +68,12 @@ class NotificationReceiver : BroadcastReceiver() {
             ACTION_CANCEL_LIBRARY_UPDATE -> cancelLibraryUpdate(context)
             ACTION_CANCEL_SIMILAR_UPDATE -> cancelSimilarUpdate(context)
             ACTION_CANCEL_RESTORE -> cancelRestoreUpdate(context)
+            // Share backup file
+            ACTION_SHARE_BACKUP ->
+                shareBackup(
+                    context, intent.getParcelableExtra(EXTRA_URI),
+                    intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
+                )
             // Open reader activity
             ACTION_OPEN_CHAPTER -> {
                 openChapter(context, intent.getLongExtra(EXTRA_MANGA_ID, -1),
@@ -112,6 +118,25 @@ class NotificationReceiver : BroadcastReceiver() {
             type = "image/*"
         }
         // Close Navigation Shade
+    }
+
+    /**
+     * Called to start share intent to share backup file
+     *
+     * @param context context of application
+     * @param path path of file
+     * @param notificationId id of notification
+     */
+    private fun shareBackup(context: Context, uri: Uri, notificationId: Int) {
+        val sendIntent = Intent(Intent.ACTION_SEND).apply {
+            putExtra(Intent.EXTRA_STREAM, uri)
+            type = "application/json"
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
+        }
+        // Dismiss notification
+        dismissNotification(context, notificationId)
+        // Launch share activity
+        context.startActivity(sendIntent)
     }
 
     /**
@@ -217,6 +242,9 @@ class NotificationReceiver : BroadcastReceiver() {
         // Called to delete image.
         private const val ACTION_DELETE_IMAGE = "$ID.$NAME.DELETE_IMAGE"
 
+        // Called to launch send intent.
+        private const val ACTION_SHARE_BACKUP = "$ID.$NAME.SEND_BACKUP"
+
         // Called to cancel library update.
         private const val ACTION_CANCEL_LIBRARY_UPDATE = "$ID.$NAME.CANCEL_LIBRARY_UPDATE"
 
@@ -246,6 +274,9 @@ class NotificationReceiver : BroadcastReceiver() {
 
         // Called to dismiss notification.
         private const val ACTION_DISMISS_NOTIFICATION = "$ID.$NAME.ACTION_DISMISS_NOTIFICATION"
+
+        // Value containing uri.
+        private const val EXTRA_URI = "$ID.$NAME.URI"
 
         // Value containing notification id.
         private const val EXTRA_NOTIFICATION_ID = "$ID.$NAME.NOTIFICATION_ID"
@@ -478,6 +509,23 @@ class NotificationReceiver : BroadcastReceiver() {
         internal fun cancelSimilarUpdatePendingBroadcast(context: Context): PendingIntent {
             val intent = Intent(context, NotificationReceiver::class.java).apply {
                 action = ACTION_CANCEL_SIMILAR_UPDATE
+            }
+            return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        }
+
+        /**
+         * Returns [PendingIntent] that starts a share activity for a backup file.
+         *
+         * @param context context of application
+         * @param uri uri of backup file
+         * @param notificationId id of notification
+         * @return [PendingIntent]
+         */
+        internal fun shareBackupPendingBroadcast(context: Context, uri: Uri, notificationId: Int): PendingIntent {
+            val intent = Intent(context, NotificationReceiver::class.java).apply {
+                action = ACTION_SHARE_BACKUP
+                putExtra(EXTRA_URI, uri)
+                putExtra(EXTRA_NOTIFICATION_ID, notificationId)
             }
             return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
         }

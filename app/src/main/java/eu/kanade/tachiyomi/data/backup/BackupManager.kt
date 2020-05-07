@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.data.backup
 
 import android.content.Context
-import android.content.Intent
 import android.net.Uri
 import com.github.salomonbrys.kotson.fromJson
 import com.github.salomonbrys.kotson.registerTypeAdapter
@@ -25,6 +24,7 @@ import eu.kanade.tachiyomi.data.backup.models.Backup
 import eu.kanade.tachiyomi.data.backup.models.Backup.CATEGORIES
 import eu.kanade.tachiyomi.data.backup.models.Backup.CHAPTERS
 import eu.kanade.tachiyomi.data.backup.models.Backup.CURRENT_VERSION
+import eu.kanade.tachiyomi.data.backup.models.Backup.EXTENSIONS
 import eu.kanade.tachiyomi.data.backup.models.Backup.HISTORY
 import eu.kanade.tachiyomi.data.backup.models.Backup.MANGA
 import eu.kanade.tachiyomi.data.backup.models.Backup.TRACK
@@ -50,7 +50,6 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
-import eu.kanade.tachiyomi.util.system.sendLocalBroadcast
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import rx.Observable
@@ -119,7 +118,7 @@ class BackupManager(val context: Context, version: Int = CURRENT_VERSION) {
      * @param uri path of Uri
      * @param isJob backup called from job
      */
-    fun createBackup(uri: Uri, flags: Int, isJob: Boolean) {
+    fun createBackup(uri: Uri, flags: Int, isJob: Boolean): String? {
         // Create root object
         val root = JsonObject()
 
@@ -129,8 +128,11 @@ class BackupManager(val context: Context, version: Int = CURRENT_VERSION) {
         // Create category array
         val categoryEntries = JsonArray()
 
+        // Create extension ID/name mapping
+        val extensionEntries = JsonArray()
+
         // Add value's to root
-        root[Backup.VERSION] = Backup.CURRENT_VERSION
+        root[Backup.VERSION] = CURRENT_VERSION
         root[Backup.MANGAS] = mangaEntries
         root[CATEGORIES] = categoryEntries
 
@@ -172,6 +174,8 @@ class BackupManager(val context: Context, version: Int = CURRENT_VERSION) {
                 newFile.openOutputStream().bufferedWriter().use {
                     parser.toJson(root, it)
                 }
+
+                return newFile.uri.toString()
             } else {
                 val file = UniFile.fromUri(context, uri)
                         ?: throw Exception("Couldn't create backup file")
@@ -179,23 +183,11 @@ class BackupManager(val context: Context, version: Int = CURRENT_VERSION) {
                     parser.toJson(root, it)
                 }
 
-                // Show completed dialog
-                val intent = Intent(BackupConst.INTENT_FILTER).apply {
-                    putExtra(BackupConst.ACTION, BackupConst.ACTION_BACKUP_COMPLETED_DIALOG)
-                    putExtra(BackupConst.EXTRA_URI, file.uri.toString())
-                }
-                context.sendLocalBroadcast(intent)
+                return file.uri.toString()
             }
         } catch (e: Exception) {
             Timber.e(e)
-            if (!isJob) {
-                // Show error dialog
-                val intent = Intent(BackupConst.INTENT_FILTER).apply {
-                    putExtra(BackupConst.ACTION, BackupConst.ACTION_ERROR_BACKUP_DIALOG)
-                    putExtra(BackupConst.EXTRA_ERROR_MESSAGE, e.message)
-                }
-                context.sendLocalBroadcast(intent)
-            }
+            throw e
         }
     }
 

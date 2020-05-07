@@ -158,6 +158,22 @@ val Resources.isLTR
     get() = configuration.layoutDirection == View.LAYOUT_DIRECTION_LTR
 
 /**
+ * Helper method to create a notification builder.
+ *
+ * @param id the channel id.
+ * @param block the function that will execute inside the builder.
+ * @return a notification to be displayed or updated.
+ */
+fun Context.notificationBuilder(channelId: String, block: (NotificationCompat.Builder.() -> Unit)? = null): NotificationCompat.Builder {
+    val builder = NotificationCompat.Builder(this, channelId)
+        .setColor(ContextCompat.getColor(this, R.color.colorAccent))
+    if (block != null) {
+        builder.block()
+    }
+    return builder
+}
+
+/**
  * Property to get the notification manager from the context.
  */
 val Context.notificationManager: NotificationManager

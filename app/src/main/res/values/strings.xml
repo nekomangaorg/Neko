@@ -476,13 +476,14 @@
     <string name="service">Service</string>
     <string name="backup_frequency">Backup frequency</string>
     <string name="max_auto_backups">Max automatic backups</string>
+    <string name="backup_failed">Backup failed</string>
     <string name="backup_created">Backup created</string>
     <string name="restore_completed">Restore completed</string>
     <string name="restore_error">Restore error</string>
     <string name="restore_completed_content">%1$s Manga Restored. %2$s errors found</string>
     <string name="restore_content_skipped">%1$d skipped</string>
     <string name="restore_message">Restore uses the network to fetch data, carrier costs may apply.\n\nMake sure you have installed all necessary extensions and are logged in to sources and tracking services before restoring.</string>
-    <string name="file_saved_at_">File saved at %1$s</string>
+    <string name="creating_backup">Creating backup</string>
     <string name="what_should_backup">What do you want to backup?</string>
     <string name="restoring_backup">Restoring backup</string>
     <string name="restoring_progress">Restoring (%1$d/%2$d)</string>

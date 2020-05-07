@@ -42,7 +42,7 @@ object Notifications {
     /**
      * Notification channel and ids used for backup and restore.
      */
-    const val CHANNEL_RESTORE = "backup_restore_channel"
+    const val CHANNEL_BACKUP_RESTORE = "backup_restore_channel"
     const val ID_RESTORE_PROGRESS = -401
     const val ID_RESTORE_COMPLETE = -402
     const val ID_RESTORE_ERROR = -403
@@ -80,15 +80,15 @@ object Notifications {
             setShowBadge(false)
         },
             NotificationChannel(
-                CHANNEL_NEW_CHAPTERS,
-                context.getString(R.string.new_chapters),
-                NotificationManager.IMPORTANCE_DEFAULT
-            ), NotificationChannel(
-                CHANNEL_RESTORE,
-                context.getString(R.string.restoring_backup),
-                NotificationManager.IMPORTANCE_LOW
-            ).apply {
-                setShowBadge(false)
+            CHANNEL_NEW_CHAPTERS,
+            context.getString(R.string.new_chapters),
+            NotificationManager.IMPORTANCE_DEFAULT
+        ), NotificationChannel(
+                CHANNEL_BACKUP_RESTORE,
+            context.getString(R.string.restoring_backup),
+            NotificationManager.IMPORTANCE_LOW
+        ).apply {
+            setShowBadge(false)
             },
             NotificationChannel(
                 CHANNEL_SIMILAR,
