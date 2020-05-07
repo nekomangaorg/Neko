@@ -64,6 +64,7 @@
             </HorizontalScrollView>
 
             <LinearLayout
+                android:id="@+id/first_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
@@ -89,16 +90,35 @@
                     app:iconTint="?android:attr/textColorPrimary" />
             </LinearLayout>
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/view_options"
-                style="@style/Theme.Widget.Button.TextButton"
+            <LinearLayout
+                android:id="@+id/second_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
-                android:text="@string/display_options"
-                android:textColor="?android:attr/textColorPrimary"
-                app:icon="@drawable/ic_tune_white_24dp"
-                app:iconTint="?android:attr/textColorPrimary" />
+                android:orientation="horizontal">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/view_options"
+                    style="@style/Theme.Widget.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/display_options"
+                    android:textColor="?android:attr/textColorPrimary"
+                    app:icon="@drawable/ic_tune_white_24dp"
+                    app:iconTint="?android:attr/textColorPrimary" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/reorder_filters"
+                    style="@style/Theme.Widget.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:text="@string/reorder_filters"
+                    android:textColor="?android:attr/textColorPrimary"
+                    app:icon="@drawable/ic_swap_vert_24dp"
+                    app:iconTint="?android:attr/textColorPrimary" />
+
+            </LinearLayout>
         </LinearLayout>
 
         <ImageView
