@@ -100,8 +100,8 @@ class ApiMangaParser(val lang: String) {
     }
 
     private fun filterChapterForChecking(serializer: ApiMangaSerializer): List<Map.Entry<String, ChapterSerializer>> {
-
-        val filteredChapters = serializer.chapter!!.entries
+        serializer.chapter ?: return emptyList()
+        val filteredChapters = serializer.chapter.entries
             .filter { it.value.lang_code == lang }
             .filter {
                 it.value.chapter?.let { chapterNumber ->

@@ -92,6 +92,7 @@ class MangaDetailsPresenter(
         downloadManager.addListener(this)
         LibraryUpdateService.setListener(this)
         tracks = db.getTracks(manga).executeAsBlocking()
+
         if (!manga.initialized) {
             isLoading = true
             controller.setRefresh(true)
@@ -763,10 +764,11 @@ class MangaDetailsPresenter(
     // Tracking
     private fun fetchTrackings() {
         scope.launch {
-            registerMdListOnFirstAccess()
-
-            trackList = loggedServices.map { service ->
-                TrackItem(tracks.find { it.sync_id == service.id }, service)
+            withContext(Dispatchers.IO) {
+                registerMdListOnFirstAccess()
+                trackList = loggedServices.map { service ->
+                    TrackItem(tracks.find { it.sync_id == service.id }, service)
+                }
             }
         }
     }
@@ -854,14 +856,11 @@ class MangaDetailsPresenter(
     /**
      * Register Mdlist tracker for first time
      */
-    private fun registerMdListOnFirstAccess() {
+    private suspend fun registerMdListOnFirstAccess() {
         if (tracks.filter { it.sync_id == TrackManager.MDLIST }.count() == 0) {
-            scope.launch {
-                withContext(Dispatchers.IO) {
-                    val track = trackManager.mdList.createInitialTracker(manga)
-                    db.insertTrack(track).executeAsBlocking()
-                }
-            }
+            val track = trackManager.mdList.createInitialTracker(manga)
+            db.insertTrack(track).executeAsBlocking()
+            tracks = db.getTracks(manga).executeAsBlocking()
         }
     }
 
