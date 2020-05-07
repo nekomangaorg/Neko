@@ -38,6 +38,7 @@ class MdUtil {
             "[b] [u] Spanish / Espa & ntilde; ol: [/ u] [/ b]",
             "[Espa&ntilde;ol]:",
             "[b] Spanish: [/ b]",
+            "[b][u]Espa&ntilde;ol / Spanish:[/b]",
             "[b][u]Italian / Italiano[/u][/b]",
             "[b]Polish / polski[/b]",
             "[b][u]Polish / Polski:[/u][/b]",
