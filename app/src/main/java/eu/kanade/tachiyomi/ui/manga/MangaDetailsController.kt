@@ -94,6 +94,7 @@ import eu.kanade.tachiyomi.util.system.ThemeUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.isInNightMode
+import eu.kanade.tachiyomi.util.system.isOnline
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.getText
@@ -513,6 +514,14 @@ class MangaDetailsController : BaseController,
     }
     //endregion
 
+    fun isNotOnline(showSnackbar: Boolean = true): Boolean {
+        if (activity == null || !activity!!.isOnline()) {
+            if (showSnackbar) view?.snack(R.string.no_network_connection)
+            return true
+        }
+        return false
+    }
+
     fun showError(message: String) {
         swipe_refresh?.isRefreshing = presenter.isLoading
         view?.snack(message)
@@ -597,7 +606,8 @@ class MangaDetailsController : BaseController,
     fun refreshAdapter() = adapter?.notifyDataSetChanged()
 
     override fun onItemClick(view: View?, position: Int): Boolean {
-        val chapter = (adapter?.getItem(position) as? ChapterItem)?.chapter ?: return false
+        val chapterItem = (adapter?.getItem(position) as? ChapterItem) ?: return false
+        val chapter = chapterItem.chapter
         if (actionMode != null) {
             if (startingDLChapterPos == null) {
                 adapter?.addSelection(position)
@@ -627,6 +637,7 @@ class MangaDetailsController : BaseController,
             return false
         }
         openChapter(chapter)
+
         return false
     }
 
@@ -848,7 +859,8 @@ class MangaDetailsController : BaseController,
     }
 
     fun openInWebView(url: String) {
-        externalBottomSheet?.hide()
+        externalBottomSheet?.dismiss()
+        if (isNotOnline()) return
         val activity = activity ?: return
         val intent = WebViewActivity.newIntent(
             activity.applicationContext, presenter.source.id, url, presenter.manga

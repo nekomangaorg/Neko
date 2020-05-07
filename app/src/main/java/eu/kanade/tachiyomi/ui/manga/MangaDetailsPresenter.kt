@@ -106,7 +106,7 @@ class MangaDetailsPresenter(
         }
         fetchExternalLinks()
         fetchTrackings()
-        refreshTrackers()
+        refreshTrackers(false)
         similarToolTip()
     }
 
@@ -421,6 +421,7 @@ class MangaDetailsPresenter(
 
     /** Refresh Manga Info and Chapter List (not tracking) */
     fun refreshAll() {
+        if (controller.isNotOnline()) return
         scope.launch {
             isLoading = true
             var mangaError: java.lang.Exception? = null
@@ -786,36 +787,40 @@ class MangaDetailsPresenter(
         withContext(Dispatchers.Main) { controller.refreshTracking(trackList) }
     }
 
-    fun refreshTrackers() {
-        scope.launch {
-            trackList.filter { it.track != null }.map { item ->
-                withContext(Dispatchers.IO) {
-                    val trackItem = try {
-                        item.service.refresh(item.track!!)
-                    } catch (e: Exception) {
-                        trackError(e)
-                        null
+    fun refreshTrackers(showOfflineSnack: Boolean = false) {
+        if (controller.isNotOnline(showOfflineSnack)) {
+            scope.launch {
+                trackList.filter { it.track != null }.map { item ->
+                    withContext(Dispatchers.IO) {
+                        val trackItem = try {
+                            item.service.refresh(item.track!!)
+                        } catch (e: Exception) {
+                            trackError(e)
+                            null
+                        }
+                        if (trackItem != null) {
+                            db.insertTrack(trackItem).executeAsBlocking()
+                            trackItem
+                        } else item.track
                     }
-                    if (trackItem != null) {
-                        db.insertTrack(trackItem).executeAsBlocking()
-                        trackItem
-                    } else item.track
                 }
+                refreshTracking()
             }
-            refreshTracking()
         }
     }
 
     fun trackSearch(query: String, service: TrackService) {
-        scope.launch(Dispatchers.IO) {
-            val results = try {
-                service.search(query)
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) { controller.trackSearchError(e) }
-                null
-            }
-            if (!results.isNullOrEmpty()) {
-                withContext(Dispatchers.Main) { controller.onTrackSearchResults(results) }
+        if (controller.isNotOnline()) {
+            scope.launch(Dispatchers.IO) {
+                val results = try {
+                    service.search(query)
+                } catch (e: Exception) {
+                    withContext(Dispatchers.Main) { controller.trackSearchError(e) }
+                    null
+                }
+                if (!results.isNullOrEmpty()) {
+                    withContext(Dispatchers.Main) { controller.onTrackSearchResults(results) }
+                }
             }
         }
     }
