@@ -22,7 +22,7 @@
     <string name="missing_chapters">%1$s missing chapters</string>
 
     <!--Browse -->
-    <string name="random_manga">Random Manga</string>
+    <string name="random_manga">Random manga</string>
 
     <!-- Manga Details-->
     <string name="open_external">Open external links</string>
