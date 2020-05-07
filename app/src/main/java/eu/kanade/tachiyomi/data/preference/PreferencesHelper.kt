@@ -265,6 +265,8 @@ class PreferencesHelper(val context: Context) {
 
     fun hopperGravity() = flowPrefs.getInt("hopper_gravity", 1)
 
+    fun filterOrder() = flowPrefs.getString("filter_order", "rudcmt")
+
     // Tutorial preferences
     fun shownFilterTutorial() = flowPrefs.getBoolean("shown_filter_tutorial", false)
 

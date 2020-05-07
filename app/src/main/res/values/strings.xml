@@ -117,6 +117,10 @@
     <string name="show_all_categories">Show all categories</string>
     <string name="expand_all_categories">Expand all categories</string>
     <string name="collapse_all_categories">Collapse all categories</string>
+    <string name="reorder_filters">Reorder filters</string>
+
+    <string name="read_progress">Read progress</string>
+    <string name="series_type">Series type</string>
 
     <!-- Library Sort -->
     <string name="sort_by_">Sort by: %1$s</string>
