@@ -18,7 +18,7 @@
 
         <!-- No margin, use padding at the handle -->
         <com.google.android.material.textview.MaterialTextView
-            android:elevation="10dp"
+            android:elevation="5dp"
             android:id="@+id/fast_scroller_bubble"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

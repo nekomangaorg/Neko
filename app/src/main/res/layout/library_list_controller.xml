@@ -88,7 +88,7 @@
         app:layout_anchorGravity="top" />
 
     <com.google.android.material.textview.MaterialTextView
-        android:elevation="10dp"
+        android:elevation="5dp"
         android:id="@+id/jumper_category_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -97,7 +97,7 @@
         android:gravity="center"
         android:paddingStart="12dp"
         android:paddingEnd="12dp"
-        android:layout_marginBottom="12dp"
+        android:layout_marginBottom="8dp"
         android:layout_gravity="start|center"
         app:layout_anchorGravity="start|center"
         android:paddingTop="8dp"
@@ -113,7 +113,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="top|center"
-        android:elevation="11dp"
+        android:elevation="6dp"
         app:layout_anchor="@id/filter_bottom_sheet"
         app:layout_anchorGravity="top|center">
 
