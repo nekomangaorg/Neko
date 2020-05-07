@@ -54,11 +54,8 @@
             <eu.kanade.tachiyomi.ui.library.MaterialFastScroll
                 android:id="@+id/fast_scroller"
                 android:layout_width="match_parent"
-                app:fastScrollerAutoHideEnabled="true"
-                app:fastScrollerAutoHideDelayInMillis="1000"
-                app:fastScrollerBubbleEnabled="true"
-                app:fastScrollerIgnoreTouchesOutsideHandle="true"
-                android:layout_height="match_parent"/>
+                android:layout_height="match_parent"
+                app:fastScrollerBubbleEnabled="true" />
 
             <View
                 android:id="@+id/recycler_cover"
@@ -88,25 +85,16 @@
         app:layout_anchorGravity="top" />
 
     <com.google.android.material.textview.MaterialTextView
-        android:elevation="5dp"
+        style="@style/FloatingTextView"
         android:id="@+id/jumper_category_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_anchor="@id/category_hopper_frame"
-        android:background="@drawable/bubble_drawable"
-        android:gravity="center"
-        android:paddingStart="12dp"
-        android:paddingEnd="12dp"
-        android:layout_marginBottom="8dp"
         android:layout_gravity="start|center"
-        app:layout_anchorGravity="start|center"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp"
+        android:layout_marginBottom="8dp"
         android:alpha="0.0"
-        android:textColor="?actionBarTintColor"
-        android:textSize="15sp"
-        tools:alpha="1"
-        tools:text="Category and a long one"/>
+        android:gravity="center"
+        app:layout_anchor="@id/category_hopper_frame"
+        app:layout_anchorGravity="start|center"
+        tools:text="Category and a long one"
+        tools:alpha="1" />
 
     <FrameLayout
         android:id="@+id/category_hopper_frame"
