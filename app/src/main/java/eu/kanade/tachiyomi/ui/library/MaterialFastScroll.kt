@@ -14,6 +14,8 @@ class MaterialFastScroll @JvmOverloads constructor(context: Context, attrs: Attr
         setViewsToUse(
             R.layout.material_fastscroll, R.id.fast_scroller_bubble, R.id.fast_scroller_handle
         )
+        autoHideEnabled = true
+        ignoreTouchesOutsideHandle = true
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
@@ -23,7 +25,9 @@ class MaterialFastScroll @JvmOverloads constructor(context: Context, attrs: Attr
 
     override fun setBubbleAndHandlePosition(y: Float) {
         super.setBubbleAndHandlePosition(y)
-        bubble.y = handle.y - bubble.height / 2f + handle.height / 2f
-        bubble.translationX = (-45f).dpToPxEnd
+        if (bubbleEnabled) {
+            bubble.y = handle.y - bubble.height / 2f + handle.height / 2f
+            bubble.translationX = (-45f).dpToPxEnd
+        }
     }
 }

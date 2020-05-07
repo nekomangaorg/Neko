@@ -18,20 +18,11 @@
 
         <!-- No margin, use padding at the handle -->
         <com.google.android.material.textview.MaterialTextView
-            android:elevation="5dp"
+            style="@style/FloatingTextView"
             android:id="@+id/fast_scroller_bubble"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:layout_gravity="end|center_vertical"
             android:layout_toStartOf="@+id/fast_scroller_handle"
-            android:background="@drawable/bubble_drawable"
             android:gravity="center"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"
-            android:textColor="?actionBarTintColor"
-            android:textSize="15sp"
             android:visibility="gone"
             tools:text="A"
             tools:visibility="visible"/>
