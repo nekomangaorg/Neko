@@ -15,7 +15,6 @@ import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
-import eu.kanade.tachiyomi.util.view.hide
 import eu.kanade.tachiyomi.util.view.setEdgeToEdge
 import kotlinx.android.synthetic.main.tracking_bottom_sheet.*
 import timber.log.Timber
@@ -109,7 +108,7 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) : Bott
         override fun onLogoClick(position: Int) {
         val track = adapter?.getItem(position)?.track ?: return
         if (controller.isNotOnline()) {
-            sheetBehavior.hide()
+            dismiss()
             return
         }
 
@@ -124,7 +123,7 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) : Bott
     override fun onSetClick(position: Int) {
         val item = adapter?.getItem(position) ?: return
         if (controller.isNotOnline()) {
-            sheetBehavior.hide()
+            dismiss()
             return
         }
 
