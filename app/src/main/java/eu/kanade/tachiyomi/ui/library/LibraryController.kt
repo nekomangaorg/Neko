@@ -486,10 +486,6 @@ class LibraryController(
             }
         }
 
-        // pad the recycler if the filter bottom sheet is visible
-        val height = view.context.resources.getDimensionPixelSize(R.dimen.rounder_radius) + 4.dpToPx
-        recycler.updatePaddingRelative(bottom = height)
-
         presenter.onRestore()
         if (presenter.libraryItems.isNotEmpty()) {
             presenter.restoreLibrary()
@@ -613,6 +609,7 @@ class LibraryController(
     }
 
     private fun setRecyclerLayout() {
+        recycler.updatePaddingRelative(bottom = 50.dpToPx)
         if (libraryLayout == 0) {
             recycler.spanCount = 1
             recycler.updatePaddingRelative(
