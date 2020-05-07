@@ -114,8 +114,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         if (context.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             second_layout.removeView(view_options)
             second_layout.removeView(reorder_filters)
-            first_layout.addView(view_options)
             first_layout.addView(reorder_filters)
+            first_layout.addView(view_options)
             second_layout.gone()
         }
 
@@ -412,24 +412,6 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             }?.set(index + 1)
             onGroupClicked(ACTION_FILTER)
         }
-        if (view == unread) {
-            if (index >= 0) {
-                filter_layout.removeView(unreadProgress)
-                filterItems.remove(unreadProgress)
-            } else {
-                filter_layout.addView(unreadProgress, indexOf(unreadProgress) + addForClear())
-                filterItems.add(indexOf(unreadProgress), unreadProgress)
-            }
-        } else if (view == unreadProgress) {
-            if (index >= 0) {
-                filter_layout.removeView(unread)
-                filterItems.remove(unread)
-            } else {
-                filter_layout.addView(unread, indexOf(unread) + addForClear())
-                filterItems.add(indexOf(unread), unread)
-            }
-        }
-
         if (tracked?.isActivated == true && trackers != null && trackers?.parent == null) {
             filter_layout.addView(trackers, filterItems.indexOf(tracked!!) + 1)
             filterItems.add(filterItems.indexOf(tracked!!) + 1, trackers!!)
