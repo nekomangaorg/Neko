@@ -5,7 +5,6 @@ import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
 import android.provider.Settings
@@ -63,7 +62,7 @@ class SettingsAdvancedController : SettingsController() {
                 FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(isEnabled)
             }
         }
-        
+
         preference {
             key = CLEAR_CACHE_KEY
             titleRes = R.string.clear_chapter_cache
@@ -103,32 +102,31 @@ class SettingsAdvancedController : SettingsController() {
 
             onClick { LibraryUpdateService.start(context, target = Target.TRACKING) }
         }
-        preference {
-            titleRes = R.string.clean_up_downloaded_chapters
+        /* preference {
+             titleRes = R.string.clean_up_downloaded_chapters
 
-            summaryRes = R.string.delete_unused_chapters
+             summaryRes = R.string.delete_unused_chapters
 
-            onClick { cleanupDownloads() }
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val pm = context.getSystemService(Context.POWER_SERVICE) as? PowerManager?
-            if (pm != null) preference {
-                titleRes = R.string.disable_battery_optimization
-                summaryRes = R.string.disable_if_issues_with_updating
+             onClick { cleanupDownloads() }
+         }*/
+        val pm = context.getSystemService(Context.POWER_SERVICE) as? PowerManager?
+        if (pm != null) preference {
+            titleRes = R.string.disable_battery_optimization
+            summaryRes = R.string.disable_if_issues_with_updating
 
-                onClick {
-                    val packageName: String = context.packageName
-                    if (!pm.isIgnoringBatteryOptimizations(packageName)) {
-                        val intent = Intent().apply {
-                            action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
-                            data = Uri.parse("package:$packageName")
-                        }
-                        startActivity(intent)
-                    } else {
-                        context.toast(R.string.battery_optimization_disabled)
+            onClick {
+                val packageName: String = context.packageName
+                if (!pm.isIgnoringBatteryOptimizations(packageName)) {
+                    val intent = Intent().apply {
+                        action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+                        data = Uri.parse("package:$packageName")
                     }
+                    startActivity(intent)
+                } else {
+                    context.toast(R.string.battery_optimization_disabled)
                 }
             }
+
         }
     }
 
