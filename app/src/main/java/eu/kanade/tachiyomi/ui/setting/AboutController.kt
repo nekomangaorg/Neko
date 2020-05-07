@@ -31,7 +31,7 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.TimeZone
 
-class SettingsAboutController : SettingsController() {
+class AboutController : SettingsController() {
 
     /**
      * Checks for new releases
@@ -165,17 +165,17 @@ class SettingsAboutController : SettingsController() {
 
         override fun onCreateDialog(savedViewState: Bundle?): Dialog {
             return MaterialDialog(activity!!)
-                .title(R.string.new_version_available)
-                .message(text = args.getString(BODY_KEY) ?: "")
-                .positiveButton(R.string.download) {
-                    val appContext = applicationContext
-                    if (appContext != null) {
-                        // Start download
-                        val url = args.getString(URL_KEY) ?: ""
-                        UpdaterService.downloadUpdate(appContext, url)
+                    .title(R.string.new_version_available)
+                    .message(text = args.getString(BODY_KEY) ?: "")
+                    .positiveButton(R.string.download) {
+                        val appContext = applicationContext
+                        if (appContext != null) {
+                            // Start download
+                            val url = args.getString(URL_KEY) ?: ""
+                            UpdaterService.start(appContext, url)
+                        }
                     }
-                }
-                .negativeButton(R.string.ignore)
+                    .negativeButton(R.string.ignore)
         }
 
         private companion object {

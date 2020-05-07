@@ -74,7 +74,7 @@ class SettingsMainController : SettingsController() {
         preference {
             iconDrawable = context.iconicsDrawable(MaterialDesignDx.Icon.gmf_info, size = size)
             titleRes = R.string.about
-            onClick { navigateTo(SettingsAboutController()) }
+            onClick { navigateTo(AboutController()) }
         }
     }
 
