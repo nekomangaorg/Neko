@@ -78,7 +78,7 @@
     <string name="confirm_category_deletion_message">Manga in this category will moved into the
         default category.</string>
     <string name="already_in_category">Manga already in category</string>
-    <string name="add_category">Add category</string>
+    <string name="add_categories">Add categories</string>
     <string name="edit_categories">Edit categories</string>
     <string name="manage_category">Manage category</string>
     <string name="rename_category">Rename category</string>
@@ -152,6 +152,7 @@
     <string name="show_count">Show count</string>
     <string name="tap_library_to_show_filters">Tap the Library icon to show filters</string>
     <string name="display_as">Display as</string>
+    <string name="more_library_settings">More library settings</string>
 
     <!-- Library update service notifications -->
     <string name="new_chapters_found">New chapters found</string>
