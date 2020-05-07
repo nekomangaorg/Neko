@@ -93,7 +93,7 @@ class ApiMangaParser(val lang: String) {
     private fun getMissingChapterCount(filteredChapters: List<Map.Entry<String, ChapterSerializer>>): String? {
         filteredChapters.firstOrNull()?.value?.chapter?.let {
             val result = it.toInt() - filteredChapters.size
-            if (result == 0) return null
+            if (result < 0) return null
             return result.toString()
         }
         return null
