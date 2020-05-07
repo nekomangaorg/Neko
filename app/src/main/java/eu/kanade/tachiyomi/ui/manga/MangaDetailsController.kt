@@ -455,7 +455,7 @@ class MangaDetailsController : BaseController,
         presenter.fetchChapters(refreshTracker == null)
         if (refreshTracker != null) {
             trackingBottomSheet?.refreshItem(refreshTracker ?: 0)
-            presenter.refreshTrackers()
+            presenter.refreshTracking()
             refreshTracker = null
         }
         val isCurrentController = router?.backstack?.lastOrNull()?.controller() ==
@@ -797,7 +797,7 @@ class MangaDetailsController : BaseController,
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.action_refresh_tracking -> presenter.refreshTrackers()
+            R.id.action_refresh_tracking -> presenter.refreshTracking(true)
             R.id.action_mark_all_as_read -> {
                 MaterialDialog(view!!.context).message(R.string.mark_all_chapters_as_read)
                     .positiveButton(R.string.mark_as_read) {
