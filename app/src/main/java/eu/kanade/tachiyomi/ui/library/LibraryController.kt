@@ -602,7 +602,8 @@ class LibraryController(
         val view = view ?: return
         LibraryUpdateService.start(view.context, category)
         snack = view.snack(R.string.updating_library) {
-            anchorView = filter_bottom_sheet
+            anchorView = category_hopper_frame
+            view.elevation = 15f.dpToPx
             setAction(R.string.cancel) {
                 LibraryUpdateService.stop(context)
                 Handler().post { NotificationReceiver.dismissNotification(context, Notifications.ID_LIBRARY_PROGRESS) }
@@ -1051,7 +1052,8 @@ class LibraryController(
             if (presenter.mangaIsInCategory(item.manga, newHeader?.category?.id)) {
                 adapter.moveItem(position, lastItemPosition!!)
                 snack = view?.snack(R.string.already_in_category) {
-                    anchorView = filter_bottom_sheet
+                    anchorView = category_hopper_frame
+                    view.elevation = 15f.dpToPx
                 }
                 return
             }
@@ -1074,7 +1076,8 @@ class LibraryController(
         snack = view?.snack(
             resources!!.getString(R.string.moved_to_, category.name)
         ) {
-            anchorView = filter_bottom_sheet
+            anchorView = category_hopper_frame
+            view.elevation = 15f.dpToPx
             setAction(R.string.undo) {
                 manga.category = category.id!!
                 presenter.moveMangaToCategory(manga, oldCatId, mangaIds)
@@ -1095,7 +1098,8 @@ class LibraryController(
                 }, category.name
             ), Snackbar.LENGTH_LONG
         ) {
-            anchorView = filter_bottom_sheet
+            anchorView = category_hopper_frame
+            view.elevation = 15f.dpToPx
             setAction(R.string.cancel) {
                 LibraryUpdateService.stop(context)
                 Handler().post { NotificationReceiver.dismissNotification(context, Notifications.ID_LIBRARY_PROGRESS) }
@@ -1270,7 +1274,8 @@ class LibraryController(
         snack = view?.snack(
             activity?.getString(R.string.removed_from_library) ?: "", Snackbar.LENGTH_INDEFINITE
         ) {
-            anchorView = filter_bottom_sheet
+            anchorView = category_hopper_frame
+            view.elevation = 15f.dpToPx
             var undoing = false
             setAction(R.string.undo) {
                 presenter.reAddMangas(mangas)
