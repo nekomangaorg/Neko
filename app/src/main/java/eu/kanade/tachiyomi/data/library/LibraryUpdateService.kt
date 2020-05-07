@@ -383,8 +383,8 @@ class LibraryUpdateService(
                 val service = trackManager.getService(track.sync_id)
                 if (service != null && service in loggedServices) {
                     try {
-                        service.refresh(track)
-                        db.insertTrack(track).executeAsBlocking()
+                        val newTrack = service.refresh(track)
+                        db.insertTrack(newTrack).executeAsBlocking()
                     } catch (e: Exception) {
                         Timber.e(e)
                     }
