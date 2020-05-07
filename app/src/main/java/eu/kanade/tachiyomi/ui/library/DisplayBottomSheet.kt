@@ -85,9 +85,6 @@ class DisplayBottomSheet(private val controller: LibraryController) : BottomShee
         uniform_grid.bindToPreference(preferences.uniformGrid()) {
             controller.reattachAdapter()
         }
-        autohide_seeker.bindToPreference(preferences.alwaysShowSeeker()) {
-            controller.updateShowScrollbar(autohide_seeker.isChecked)
-        }
         grid_size_toggle_group.bindToPreference(preferences.gridSize()) {
             controller.reattachAdapter()
         }

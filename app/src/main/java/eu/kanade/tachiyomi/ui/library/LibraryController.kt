@@ -33,8 +33,6 @@ import com.bluelinelabs.conductor.ControllerChangeType
 import com.github.florent37.viewtooltip.ViewTooltip
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
-import com.reddit.indicatorfastscroll.FastScrollItemIndicator
-import com.reddit.indicatorfastscroll.FastScrollerView
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.SelectableAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
@@ -59,7 +57,6 @@ import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.migration.manga.design.PreMigrationController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.system.dpToPx
-import eu.kanade.tachiyomi.util.system.dpToPxEnd
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.applyWindowInsetsForRootController
@@ -71,11 +68,8 @@ import eu.kanade.tachiyomi.util.view.hide
 import eu.kanade.tachiyomi.util.view.isExpanded
 import eu.kanade.tachiyomi.util.view.isHidden
 import eu.kanade.tachiyomi.util.view.scrollViewWith
-import eu.kanade.tachiyomi.util.view.setBackground
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
-import eu.kanade.tachiyomi.util.view.setStartTranslationX
 import eu.kanade.tachiyomi.util.view.setStyle
-import eu.kanade.tachiyomi.util.view.show
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
@@ -156,11 +150,24 @@ class LibraryController(
     private val scrollDistanceTilHidden = 1000.dpToPx
 
     private var textAnim: ViewPropertyAnimator? = null
-    private var scrollAnim: ViewPropertyAnimator? = null
-    private var alwaysShowScroller: Boolean = preferences.alwaysShowSeeker().getOrDefault()
+    var hopperGravity: Int = preferences.hopperGravity().get()
+        set(value) {
+            field = value
+            if (category_hopper_frame == null) return
+            jumper_category_text.updateLayoutParams<CoordinatorLayout.LayoutParams> {
+                anchorGravity = when (value) {
+                    0 -> Gravity.RIGHT or Gravity.CENTER_VERTICAL
+                    2 -> Gravity.LEFT or Gravity.CENTER_VERTICAL
+                    else -> Gravity.TOP or Gravity.CENTER_HORIZONTAL
+                }
+                gravity = anchorGravity
+            }
+        }
+
     private var filterTooltip: ViewTooltip? = null
     private var elevationAnim: ValueAnimator? = null
     private var elevate = false
+
     override fun getTitle(): String? {
         return view?.context?.getString(R.string.library)
     }
@@ -191,42 +198,18 @@ class LibraryController(
                 setActiveCategory()
                 if (presenter.categories.size > 1 && dy != 0 && recyclerView.translationY == 0f) {
                     val headerItem = getHeader() ?: return
-                    val view = fast_scroller ?: return
-
-                    val height = if (view.childCount > 0) {
-                        view.height - (view.getChildAt(0)?.paddingTop
-                            ?: 0) - (view.getChildAt(view.childCount - 1)?.paddingBottom ?: 0)
-                    } else {
-                        view.height
-                    }
-                    val index = adapter.headerItems.indexOf(headerItem)
-                    textAnim?.cancel()
-                    textAnim = text_view_m.animate().alpha(0f).setDuration(250L).setStartDelay(2000)
-                    textAnim?.start()
-
-                    // fastScroll height * indicator position - center text - fastScroll padding
-                    text_view_m.translationY =
-                        height * (index.toFloat() / (adapter.headerItems.size + 1))
-                    -text_view_m.height / 2 + 16.dpToPx
-                    text_view_m.translationX = 45f.dpToPxEnd
-                    text_view_m.alpha = 1f
-                    text_view_m.text = headerItem.category.name
+                    showCategoryText(headerItem.category.name)
                 }
             }
         }
 
         override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
             super.onScrollStateChanged(recyclerView, newState)
-            if (alwaysShowScroller) return
             when (newState) {
                 RecyclerView.SCROLL_STATE_DRAGGING -> {
-                    scrollAnim?.cancel()
-                    if (fast_scroller?.translationX != 0f) {
-                        fast_scroller?.show()
-                    }
+                    fast_scroller.showScrollbar()
                 }
                 RecyclerView.SCROLL_STATE_IDLE -> {
-                    scrollAnim = fast_scroller?.hide()
                     val shortAnimationDuration = resources?.getInteger(
                         android.R.integer.config_shortAnimTime
                     ) ?: 0
@@ -241,9 +224,17 @@ class LibraryController(
         }
     }
 
+    fun showCategoryText(name: String) {
+        textAnim?.cancel()
+        textAnim = jumper_category_text.animate().alpha(0f).setDuration(250L).setStartDelay(2000)
+        textAnim?.start()
+        jumper_category_text.alpha = 1f
+        jumper_category_text.text = name
+    }
+
     fun isAtTop(): Boolean {
         return if (presenter.showAllCategories) {
-            getVisibleHeader() == adapter.headerItems.firstOrNull()
+            !recycler.canScrollVertically(-1)
         } else {
             getVisibleHeader()?.category?.id == presenter.categories.firstOrNull()?.id
         }
@@ -251,7 +242,7 @@ class LibraryController(
 
     fun isAtBottom(): Boolean {
         return if (presenter.showAllCategories) {
-            getVisibleHeader() == adapter.headerItems.lastOrNull()
+            !recycler.canScrollVertically(1)
         } else {
             getVisibleHeader()?.category?.id == presenter.categories.lastOrNull()?.id
         }
@@ -283,13 +274,10 @@ class LibraryController(
         super.onViewCreated(view)
         view.applyWindowInsetsForRootController(activity!!.bottom_nav)
         if (!::presenter.isInitialized) presenter = LibraryPresenter(this)
-        fast_scroller.setStartTranslationX(!alwaysShowScroller)
-        fast_scroller.setBackground(!alwaysShowScroller)
 
         adapter = LibraryCategoryAdapter(this)
-        adapter.expandItemsAtStartUp()
-        adapter.isRecursiveCollapse = true
         setRecyclerLayout()
+
         recycler.manager.spanSizeLookup = (object : GridLayoutManager.SpanSizeLookup() {
             override fun getSpanSize(position: Int): Int {
                 if (libraryLayout == 0) return 1
@@ -301,73 +289,12 @@ class LibraryController(
         })
         recycler.setHasFixedSize(true)
         recycler.adapter = adapter
-        fast_scroller.setupWithRecyclerView(recycler, { position ->
-            val letter = adapter.getSectionText(position)
-            if (!singleCategory && presenter.showAllCategories && !adapter.isHeader(
-                    adapter.getItem(
-                        position
-                    )
-                ) && position != adapter.itemCount - 1
-            ) null
-            else if (letter != null) FastScrollItemIndicator.Text(letter)
-            else FastScrollItemIndicator.Icon(R.drawable.ic_star_24dp)
-        })
-        fast_scroller.useDefaultScroller = false
-        fast_scroller.itemIndicatorSelectedCallbacks += object :
-            FastScrollerView.ItemIndicatorSelectedCallback {
-            override fun onItemIndicatorSelected(
-                indicator: FastScrollItemIndicator,
-                indicatorCenterY: Int,
-                itemPosition: Int
-            ) {
-                fast_scroller.translationX = 0f
-                if (!alwaysShowScroller) {
-                    scrollAnim?.cancel()
-                    scrollAnim = fast_scroller.hide(2000)
-                }
 
-                textAnim?.cancel()
-                textAnim = text_view_m.animate().alpha(0f).setDuration(250L).setStartDelay(2000)
-                textAnim?.start()
-
-                text_view_m.translationY = indicatorCenterY.toFloat() - text_view_m.height / 2
-                text_view_m.translationX = 0f
-                text_view_m.alpha = 1f
-                text_view_m.text = adapter.onCreateBubbleText(itemPosition)
-                val appbar = activity?.appbar
-
-                if (singleCategory) {
-                    val order = when (val item = adapter.getItem(itemPosition)) {
-                        is LibraryHeaderItem -> item
-                        is LibraryItem -> item.header
-                        else -> null
-                    }?.category?.order
-                    if (order != null) {
-                        activeCategory = order
-                        preferences.lastUsedCategory().set(order)
-                    }
-                }
-                appbar?.y = 0f
-                val item = adapter.getItem(itemPosition)
-                if (item is LibraryHeaderItem) {
-                    scrollToHeader(item.category.order)
-                } else {
-                    recycler.suppressLayout(true)
-                    (recycler.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
-                        itemPosition, if (adapter.isSingleCategory) {
-                            0
-                        } else {
-                            if (itemPosition == 0) {
-                                0
-                            } else {
-                                (-40).dpToPx
-                            }
-                        }
-                    )
-                    recycler.suppressLayout(false)
-                }
-            }
+        fast_scroller.addOnScrollStateChangeListener {
+            swipe_refresh.isEnabled = !it
         }
+
+        adapter.fastScroller = fast_scroller
         recycler.addOnScrollListener(scrollListener)
 
         val tv = TypedValue()
@@ -418,6 +345,7 @@ class LibraryController(
                 else -> Gravity.CENTER
             }
         }
+        hopperGravity = preferences.hopperGravity().get()
 
         val gestureDetector = GestureDetectorCompat(activity, LibraryGestureDetector(this))
         listOf(category_hopper_layout, up_category, down_category, category_button).forEach {
@@ -430,9 +358,9 @@ class LibraryController(
             category_layout?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 topMargin = recycler?.paddingTop ?: 0
             }
-            fast_scroller?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                topMargin = insets.systemWindowInsetTop
-            }
+//            fast_scroller?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+//                topMargin = insets.systemWindowInsetTop
+//            }
         })
 
         swipe_refresh.setOnRefreshListener {
@@ -509,9 +437,10 @@ class LibraryController(
                 } else {
                     newOffset < adapter.headerItems.size
                 }) {
-                val newOrder =
-                    (adapter.headerItems[newOffset] as LibraryHeaderItem).category.order
+                val newCategory = (adapter.headerItems[newOffset] as LibraryHeaderItem).category
+                val newOrder = newCategory.order
                 scrollToHeader(newOrder)
+                showCategoryText(newCategory.name)
             } else {
                 recycler.scrollToPosition(if (next) adapter.itemCount - 1 else 0)
             }
@@ -525,8 +454,10 @@ class LibraryController(
                     newOffset < presenter.categories.size
                 }
             ) {
-                val newOrder = presenter.categories[newOffset].order
+                val newCategory = presenter.categories[newOffset]
+                val newOrder = newCategory.order
                 scrollToHeader(newOrder)
+                showCategoryText(newCategory.name)
             }
         }
     }
@@ -586,16 +517,6 @@ class LibraryController(
         return order
     }
 
-    fun updateShowScrollbar(show: Boolean) {
-        alwaysShowScroller = show
-        fast_scroller?.setBackground(!show)
-        if (libraryLayout == 0) reattachAdapter()
-        scrollAnim?.cancel()
-        if (show) fast_scroller?.translationX = 0f
-        else scrollAnim = fast_scroller?.hide()
-        setRecyclerLayout()
-    }
-
     override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
         return inflater.inflate(R.layout.library_list_controller, container, false)
     }
@@ -627,8 +548,8 @@ class LibraryController(
                 else -> .75f
             }
             recycler.updatePaddingRelative(
-                start = (if (alwaysShowScroller) 2 else 5).dpToPx,
-                end = (if (alwaysShowScroller) 12 else 5).dpToPx
+                start = 5.dpToPx,
+                end = 5.dpToPx
             )
         }
     }
@@ -684,7 +605,7 @@ class LibraryController(
     }
 
     fun onNextLibraryUpdate(mangaMap: List<LibraryItem>, freshStart: Boolean = false) {
-        val view = view ?: return
+        view ?: return
         destroyActionModeIfNeeded()
         if (mangaMap.isNotEmpty()) {
             empty_view?.hide()
@@ -712,12 +633,6 @@ class LibraryController(
         } else recycler_layout.alpha = 1f
         if (justStarted && freshStart) {
             scrollToHeader(activeCategory)
-            if (!alwaysShowScroller) {
-                fast_scroller?.show(false)
-                view.post {
-                    scrollAnim = fast_scroller?.hide(2000)
-                }
-            }
         }
         category_hopper_frame.visibleIf(!singleCategory)
         adapter.isLongPressDragEnabled = canDrag()

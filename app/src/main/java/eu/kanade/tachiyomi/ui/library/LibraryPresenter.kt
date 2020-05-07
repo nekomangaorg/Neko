@@ -118,11 +118,7 @@ class LibraryPresenter(
     private fun blankItem(id: Int = currentCategory): List<LibraryItem> {
         return listOf(
             LibraryItem(
-                LibraryManga.createBlank(id), LibraryHeaderItem(
-                    { getCategory(id) },
-                    id,
-                    preferences.alwaysShowSeeker()
-                )
+                LibraryManga.createBlank(id), LibraryHeaderItem({ getCategory(id) }, id)
             )
         )
     }
@@ -499,7 +495,6 @@ class LibraryPresenter(
         val categories = db.getCategories().executeAsBlocking().toMutableList()
         val showCategories = !preferences.hideCategories().getOrDefault()
         var libraryManga = db.getLibraryMangas().executeAsBlocking()
-        val seekPref = preferences.alwaysShowSeeker()
         val showAll = showAllCategories
         if (!showCategories) libraryManga = libraryManga.distinctBy { it.id }
         val categoryAll = Category.createAll(
@@ -507,13 +502,13 @@ class LibraryPresenter(
             preferences.librarySortingMode().getOrDefault(),
             preferences.librarySortingAscending().getOrDefault()
         )
-        val catItemAll = LibraryHeaderItem({ categoryAll }, -1, seekPref)
+        val catItemAll = LibraryHeaderItem({ categoryAll }, -1)
         val categorySet = mutableSetOf<Int>()
         val headerItems = (categories.mapNotNull { category ->
             val id = category.id
             if (id == null) null
-            else id to LibraryHeaderItem({ getCategory(id) }, id, seekPref)
-        } + (-1 to catItemAll) + (0 to LibraryHeaderItem({ getCategory(0) }, 0, seekPref))).toMap()
+            else id to LibraryHeaderItem({ getCategory(id) }, id)
+        } + (-1 to catItemAll) + (0 to LibraryHeaderItem({ getCategory(0) }, 0))).toMap()
         val items = libraryManga.mapNotNull {
             val headerItem = (if (!showCategories) catItemAll
             else headerItems[it.category]) ?: return@mapNotNull null
