@@ -2,6 +2,23 @@
 <changelog bulletedList="true">
     <changelogversion
         changeDate=""
+        versionName="v2.0.4">
+        <changelogtext>manga details now snack bars when there is no internet and you access things requiring internet</changelogtext>
+        <changelogtext>add missing chapter count on details view</changelogtext>
+        <changelogtext>fix bug where [END] was showing oneshots where there were more chapters</changelogtext>
+        <changelogtext>fix bug where completed manga was being marked wrong in some ocassions</changelogtext>
+        <changelogtext>cleaned up handling of mdlist and fixed a few bugs related to it</changelogtext>
+        <changelogtext>Add button undo filter selection in filter group</changelogtext>
+        <changelogtext>fix chapters not skipping when filtered by group</changelogtext>
+        <changelogtext>add indicator that groups filter is enabled</changelogtext>
+        <changelogtext>Fixed bug with follows having decimal</changelogtext>
+        <changelogtext>Material category hopper</changelogtext>
+        <changelogtext>remove tablet interface</changelogtext>
+        <changelogtext>General upstream bug fixes</changelogtext>
+
+    </changelogversion>
+    <changelogversion
+        changeDate=""
         versionName="v2.0.3">
         <changelogtext>The long requested filter by groups is now available in the chapter fitler sheet. It won't download these filtered ones but they are counted on unread badges currently
         </changelogtext>
