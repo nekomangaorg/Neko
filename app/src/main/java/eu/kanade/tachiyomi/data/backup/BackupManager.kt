@@ -136,20 +136,33 @@ class BackupManager(val context: Context, version: Int = CURRENT_VERSION) {
         root[Backup.VERSION] = CURRENT_VERSION
         root[Backup.MANGAS] = mangaEntries
         root[CATEGORIES] = categoryEntries
+        root[EXTENSIONS] = extensionEntries
 
         databaseHelper.inTransaction {
             // Get manga from database
             val mangas = getFavoriteManga()
 
+            val extensions: MutableSet<String> = mutableSetOf()
+
             // Backup library manga and its dependencies
             mangas.forEach { manga ->
                 mangaEntries.add(backupMangaObject(manga, flags))
+
+                // Maintain set of extensions/sources used (excludes local source)
+                if (manga.source != 0L) {
+                    sourceManager.get(manga.source)?.let {
+                        extensions.add("${manga.source}:${it.name}")
+                    }
+                }
             }
 
             // Backup categories
             if ((flags and BACKUP_CATEGORY_MASK) == BACKUP_CATEGORY) {
                 backupCategories(categoryEntries)
             }
+
+            // Backup extension ID/name mapping
+            backupExtensionInfo(extensionEntries, extensions)
         }
 
         try {
@@ -189,6 +202,12 @@ class BackupManager(val context: Context, version: Int = CURRENT_VERSION) {
         } catch (e: Exception) {
             Timber.e(e)
             throw e
+        }
+    }
+
+    private fun backupExtensionInfo(root: JsonArray, extensions: Set<String>) {
+        extensions.sorted().forEach {
+            root.add(it)
         }
     }
 
