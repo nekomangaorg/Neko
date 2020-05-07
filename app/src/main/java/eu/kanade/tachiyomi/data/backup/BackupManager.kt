@@ -327,6 +327,21 @@ class BackupManager(val context: Context, version: Int = CURRENT_VERSION) {
     }
 
     /**
+     * Restore extensions list from json and map them
+     */
+    internal fun getExtensionsMap(extensions: JsonArray): Map<String, String> {
+        val extensionsList = parser.fromJson<List<String>>(extensions)
+        return extensionsList.mapNotNull {
+            val split = it.split(":")
+            if (split.size == 2) {
+                split.first() to split.last()
+            } else {
+                null
+            }
+        }.toMap()
+    }
+
+    /**
      * Restore the categories from Json
      *
      * @param jsonCategories array containing categories
