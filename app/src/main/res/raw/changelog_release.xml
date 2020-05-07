@@ -2,6 +2,11 @@
 <changelog bulletedList="true">
     <changelogversion
         changeDate=""
+        versionName="v2.0.5">
+        <changelogtext>minor bug fixes see 2.0.4 for more changes</changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
         versionName="v2.0.4">
         <changelogtext>manga details now snack bars when there is no internet and you access things requiring internet</changelogtext>
         <changelogtext>add missing chapter count on details view</changelogtext>
