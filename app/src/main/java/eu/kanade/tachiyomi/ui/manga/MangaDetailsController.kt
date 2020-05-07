@@ -457,7 +457,7 @@ class MangaDetailsController : BaseController,
         presenter.fetchChapters(refreshTracker == null)
         if (refreshTracker != null) {
             trackingBottomSheet?.refreshItem(refreshTracker ?: 0)
-            presenter.refreshTrackers()
+            presenter.refreshTracking()
             refreshTracker = null
         }
         val isCurrentController = router?.backstack?.lastOrNull()?.controller() ==
@@ -839,7 +839,7 @@ class MangaDetailsController : BaseController,
                 }
             }
             R.id.action_open_in_web_view -> openInWebView()
-            R.id.action_refresh_tracking -> presenter.refreshTrackers(true)
+            R.id.action_refresh_tracking -> presenter.refreshTracking(true)
             R.id.action_migrate ->
                 if (!isNotOnline()) {
                     PreMigrationController.navigateToMigration(

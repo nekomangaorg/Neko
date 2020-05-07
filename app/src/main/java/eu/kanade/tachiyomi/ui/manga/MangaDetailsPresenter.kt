@@ -37,6 +37,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -92,8 +93,8 @@ class MangaDetailsPresenter(
             updateChapters()
             controller.updateChapters(this.chapters)
         }
-        fetchTrackings()
-        refreshTrackers(false)
+        setTrackItems()
+        refreshTracking(false)
     }
 
     fun onDestroy() {
@@ -108,7 +109,7 @@ class MangaDetailsPresenter(
     fun fetchChapters(andTracking: Boolean = true) {
         scope.launch {
             getChapters()
-            if (andTracking) refreshTracking()
+            if (andTracking) fetchTracks()
             withContext(Dispatchers.Main) { controller.updateChapters(chapters) }
         }
     }
@@ -749,7 +750,7 @@ class MangaDetailsPresenter(
     fun hasTrackers(): Boolean = loggedServices.isNotEmpty()
 
     // Tracking
-    private fun fetchTrackings() {
+    private fun setTrackItems() {
         scope.launch {
             trackList = loggedServices.map { service ->
                 TrackItem(tracks.find { it.sync_id == service.id }, service)
@@ -757,7 +758,7 @@ class MangaDetailsPresenter(
         }
     }
 
-    private suspend fun refreshTracking() {
+    private suspend fun fetchTracks() {
         tracks = withContext(Dispatchers.IO) { db.getTracks(manga).executeAsBlocking() }
         trackList = loggedServices.map { service ->
             TrackItem(tracks.find { it.sync_id == service.id }, service)
@@ -765,11 +766,11 @@ class MangaDetailsPresenter(
         withContext(Dispatchers.Main) { controller.refreshTracking(trackList) }
     }
 
-    fun refreshTrackers(showOfflineSnack: Boolean = false) {
-        if (controller.isNotOnline(showOfflineSnack)) {
+    fun refreshTracking(showOfflineSnack: Boolean = false) {
+        if (!controller.isNotOnline(showOfflineSnack)) {
             scope.launch {
-                trackList.filter { it.track != null }.map { item ->
-                    withContext(Dispatchers.IO) {
+                val asyncList = trackList.filter { it.track != null }.map { item ->
+                    async(Dispatchers.IO) {
                         val trackItem = try {
                             item.service.refresh(item.track!!)
                         } catch (e: Exception) {
@@ -782,7 +783,8 @@ class MangaDetailsPresenter(
                         } else item.track
                     }
                 }
-                refreshTracking()
+                asyncList.awaitAll()
+                fetchTracks()
             }
         }
     }
@@ -817,14 +819,14 @@ class MangaDetailsPresenter(
                 withContext(Dispatchers.IO) {
                     if (binding != null) db.insertTrack(binding).executeAsBlocking()
                 }
-                refreshTracking()
+                fetchTracks()
             }
         } else {
             scope.launch {
                 withContext(Dispatchers.IO) {
                     db.deleteTrackForManga(manga, service).executeAsBlocking()
                 }
-                refreshTracking()
+                fetchTracks()
             }
         }
     }
@@ -839,7 +841,7 @@ class MangaDetailsPresenter(
             }
             if (binding != null) {
                 withContext(Dispatchers.IO) { db.insertTrack(binding).executeAsBlocking() }
-                refreshTracking()
+                fetchTracks()
             } else trackRefreshDone()
         }
     }
