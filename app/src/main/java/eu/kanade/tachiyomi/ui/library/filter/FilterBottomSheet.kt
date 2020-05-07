@@ -98,11 +98,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         if (preferences.hideFiltersAtStart().getOrDefault()) {
             sheetBehavior?.hide()
         }
-        hide_filters.isChecked = preferences.hideFiltersAtStart().getOrDefault()
-        hide_filters.setOnCheckedChangeListener { _, isChecked ->
-            preferences.hideFiltersAtStart().set(isChecked)
-            if (isChecked)
-                onGroupClicked(ACTION_HIDE_FILTER_TIP)
+        expand_categories.setOnClickListener {
+            onGroupClicked(ACTION_EXPAND_COLLAPSE_ALL)
         }
         view_options.setOnClickListener {
             onGroupClicked(ACTION_DISPLAY)
@@ -125,6 +122,23 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
         createTags()
         clearButton.setOnClickListener { clearFilters() }
+    }
+
+    fun setExpandText(expand: Boolean) {
+        expand_categories.setText(
+            if (expand) {
+                R.string.expand_all_categories
+            } else {
+                R.string.collapse_all_categories
+            }
+        )
+        expand_categories.setIconResource(
+            if (expand) {
+                R.drawable.ic_expand_less_24dp
+            } else {
+                R.drawable.ic_expand_more_24dp
+            }
+        )
     }
 
     private fun stateChanged(state: Int) {
@@ -379,6 +393,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         const val ACTION_FILTER = 1
         const val ACTION_HIDE_FILTER_TIP = 2
         const val ACTION_DISPLAY = 3
+        const val ACTION_EXPAND_COLLAPSE_ALL = 4
 
         const val STATE_IGNORE = 0
         const val STATE_INCLUDE = 1

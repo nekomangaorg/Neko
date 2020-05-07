@@ -789,6 +789,15 @@ class LibraryPresenter(
         getLibrary()
     }
 
+    fun toggleAllCategoryVisibility() {
+        if (preferences.collapsedCategories().getOrDefault().isEmpty()) {
+            preferences.collapsedCategories().set(categories.map { it.id.toString() }.toMutableSet())
+        } else {
+            preferences.collapsedCategories().set(mutableSetOf())
+        }
+        getLibrary()
+    }
+
     companion object {
         private var lastLibraryItems: List<LibraryItem>? = null
         private var lastCategories: List<Category>? = null

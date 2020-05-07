@@ -6,9 +6,9 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/bottom_sheet_rounded_background"
+    android:elevation="12dp"
     android:orientation="vertical"
     app:behavior_peekHeight="60dp"
-    android:elevation="12dp"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -76,24 +76,28 @@
                     android:layout_marginEnd="20dp"
                     android:text="@string/hide_categories" />
 
+
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/view_options"
+                    android:id="@+id/expand_categories"
                     style="@style/Theme.Widget.Button.TextButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/display_options"
+                    android:text="@string/expand_all_categories"
                     android:textColor="?android:attr/textColorPrimary"
-                    app:icon="@drawable/ic_tune_white_24dp"
+                    app:icon="@drawable/ic_expand_more_24dp"
                     app:iconTint="?android:attr/textColorPrimary" />
-
-                <com.google.android.material.checkbox.MaterialCheckBox
-                    android:id="@+id/hide_filters"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="20dp"
-                    android:text="@string/start_with_filters_hidden"
-                    android:visibility="gone" />
             </LinearLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/view_options"
+                style="@style/Theme.Widget.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:text="@string/display_options"
+                android:textColor="?android:attr/textColorPrimary"
+                app:icon="@drawable/ic_tune_white_24dp"
+                app:iconTint="?android:attr/textColorPrimary" />
         </LinearLayout>
 
         <ImageView
