@@ -79,7 +79,7 @@
         android:gravity="center|start"
         android:inputType="none"
         android:maxLines="2"
-        android:textSize="22sp"
+        android:textSize="18sp"
         app:layout_constrainedWidth="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/space"
