@@ -335,7 +335,7 @@ class BackupRestoreService : Service() {
      * keep a partially constructed progress notification for resuse
      */
     private val progressNotification by lazy {
-        NotificationCompat.Builder(this, Notifications.CHANNEL_RESTORE)
+        NotificationCompat.Builder(this, Notifications.CHANNEL_BACKUP_RESTORE)
                 .setContentTitle(getString(R.string.app_name))
                 .setSmallIcon(R.drawable.ic_tachi)
                 .setOngoing(true)
@@ -392,7 +392,7 @@ class BackupRestoreService : Service() {
 
         val restoreString = content.joinToString("\n")
 
-        val resultNotification = NotificationCompat.Builder(this, Notifications.CHANNEL_RESTORE)
+        val resultNotification = NotificationCompat.Builder(this, Notifications.CHANNEL_BACKUP_RESTORE)
                 .setContentTitle(getString(R.string.restore_completed))
                 .setContentText(restoreString)
                 .setStyle(NotificationCompat.BigTextStyle().bigText(restoreString))
@@ -410,7 +410,7 @@ class BackupRestoreService : Service() {
      *
      */
     private fun showErrorNotification(errorMessage: String) {
-        val resultNotification = NotificationCompat.Builder(this, Notifications.CHANNEL_RESTORE)
+        val resultNotification = NotificationCompat.Builder(this, Notifications.CHANNEL_BACKUP_RESTORE)
                 .setContentTitle(getString(R.string.restore_error))
                 .setContentText(errorMessage)
                 .setSmallIcon(R.drawable.ic_error_grey)
