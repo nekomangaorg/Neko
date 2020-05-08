@@ -120,7 +120,7 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
                 if (!preferences.hideCategories().getOrDefault()) item.category.name
                 else recyclerView.context.getString(R.string.top)
             is LibraryItem -> {
-                val text = if (item.manga.isBlank()) ""
+                val text = if (item.manga.isBlank()) return item.header?.category?.name.orEmpty()
                 else when (getSort(position)) {
                     LibrarySort.DRAG_AND_DROP -> {
                         if (!preferences.hideCategories().getOrDefault()) {
