@@ -396,12 +396,10 @@ class ReaderPresenter(
      * Saves this [chapter] progress (last read page and whether it's read).
      */
     private fun saveChapterProgress(chapter: ReaderChapter) {
-        val dbChapter = db.getChapter(chapter.chapter.id!!).executeAsBlocking()
-        chapter.chapter.bookmark = dbChapter!!.bookmark
-        db.updateChapterProgress(chapter.chapter).asRxCompletable()
-            .onErrorComplete()
-            .subscribeOn(Schedulers.io())
-            .subscribe()
+        db.getChapter(chapter.chapter.id!!).executeAsBlocking()?.let { dbChapter ->
+            chapter.chapter.bookmark = dbChapter.bookmark
+        }
+        db.updateChapterProgress(chapter.chapter).executeAsBlocking()
     }
 
     /**
