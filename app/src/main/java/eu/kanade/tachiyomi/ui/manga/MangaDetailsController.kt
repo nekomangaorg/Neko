@@ -269,7 +269,8 @@ class MangaDetailsController : BaseController,
     }
 
     private fun setInsets(insets: WindowInsets, appbarHeight: Int, offset: Int) {
-        recycler?.updatePaddingRelative(bottom = insets.systemWindowInsetBottom)
+        val recycler = recycler ?: return
+        recycler.updatePaddingRelative(bottom = insets.systemWindowInsetBottom)
         headerHeight = appbarHeight + insets.systemWindowInsetTop
         swipe_refresh.setProgressViewOffset(false, (-40).dpToPx, headerHeight + offset)
         // 1dp extra to line up chapter header and manga header
