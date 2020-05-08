@@ -207,6 +207,9 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
         }
 
         chapters_bottom_sheet.setup(this)
+        if (ThemeUtil.isBlueTheme(preferences.theme())) {
+            chapter_recycler.setBackgroundColor(getResourceColor(android.R.attr.colorBackground))
+        }
         config = ReaderConfig()
         initializeMenu()
     }
