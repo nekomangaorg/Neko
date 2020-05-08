@@ -32,7 +32,7 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
     lateinit var presenter: ReaderPresenter
     var adapter: FastAdapter<ReaderChapterItem>? = null
     private val itemAdapter = ItemAdapter<ReaderChapterItem>()
-    var shouldCollaspe = true
+    var shouldCollapse = true
     var selectedChapterId = -1L
 
     fun setup(activity: ReaderActivity) {
@@ -68,7 +68,7 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
 
             override fun onStateChanged(p0: View, state: Int) {
                 if (state == BottomSheetBehavior.STATE_COLLAPSED) {
-                    shouldCollaspe = true
+                    shouldCollapse = true
                     sheetBehavior?.isHideable = false
                     (chapter_recycler.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
                         adapter?.getPosition(presenter.getCurrentChapter()?.chapter?.id ?: 0L) ?: 0,
@@ -86,7 +86,7 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
         chapter_recycler.adapter = adapter
         adapter?.onClickListener = { _, _, item, _ ->
             if (item.chapter.id != presenter.getCurrentChapter()?.chapter?.id) {
-                shouldCollaspe = false
+                shouldCollapse = false
                 presenter.loadChapter(item.chapter)
             }
             true
