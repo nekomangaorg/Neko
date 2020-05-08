@@ -115,8 +115,6 @@ object PreferenceKeys {
 
     const val uniformGrid = "uniform_grid"
 
-    const val libraryAsSingleList = "library_as_single_list"
-
     const val lang = "app_language"
 
     const val dateFormat = "app_date_format"
@@ -147,8 +145,6 @@ object PreferenceKeys {
 
     const val skipFiltered = "skip_hidden"
 
-    const val marginRatioWebtoon = "margin_ratio_webtoon_new"
-
     const val similarEnabled = "pref_related_show_tab_key"
 
     const val similarUpdateInterval = "related_update_interval"
@@ -160,8 +156,6 @@ object PreferenceKeys {
     const val imageServer = "image_server"
 
     const val lowQualityCovers = "low_quality_covers"
-
-    const val useNonLoggedNetwork = "non_logged_in_network"
 
     @Deprecated("Use the preferences of the source")
     fun sourceUsername(sourceId: Long) = "pref_source_username_$sourceId"

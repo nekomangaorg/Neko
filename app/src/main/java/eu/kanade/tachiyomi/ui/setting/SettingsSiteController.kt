@@ -65,11 +65,6 @@ class SettingsSiteController : SettingsController(), MangadexLoginDialog.Listene
             titleRes = R.string.low_quality_covers
             defaultValue = false
         }
-        switchPreference {
-            key = PreferenceKeys.useNonLoggedNetwork
-            titleRes = R.string.use_non_logged_in_network
-            defaultValue = false
-        }
 
         preference {
             titleRes = R.string.sync_follows_to_library

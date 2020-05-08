@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.source.online.handlers
 
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
@@ -10,12 +9,9 @@ import org.json.JSONArray
 import rx.Observable
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import uy.kohesive.injekt.injectLazy
 
 class SimilarHandler {
-
-    private val preferences: PreferencesHelper by injectLazy()
-
+    
     /**
      * fetch our similar mangas
      */
