@@ -101,10 +101,10 @@ fun Controller.scrollViewWith(
         } else if (recycler.translationY == 0f) {
             elevationAnim?.cancel()
             elevationAnim = ValueAnimator.ofFloat(
-                activity!!.appbar.elevation, if (el) 15f else 0f
+                activity?.appbar?.elevation ?: 0f, if (el) 15f else 0f
             )
             elevationAnim?.addUpdateListener { valueAnimator ->
-                activity!!.appbar.elevation = valueAnimator.animatedValue as Float
+                activity?.appbar?.elevation = valueAnimator.animatedValue as Float
             }
             elevationAnim?.start()
         }
