@@ -173,7 +173,7 @@ class ApiMangaParser(val lang: String) {
         status: Int
     ): SChapter {
         val chapter = SChapter.create()
-        chapter.url = MdUtil.apiChapter + chapterId
+        chapter.url = MdUtil.apiChapter + chapterId + MdUtil.apiChapterSuffix
         val chapterName = mutableListOf<String>()
         // Build chapter name
 

@@ -10,6 +10,7 @@ class MdUtil {
         const val randMangaPage = "/manga/"
         const val apiManga = "/api/manga/"
         const val apiChapter = "/api/chapter/"
+        const val apiChapterSuffix = "?mark_read=0"
         const val followsAllApi = "/api/?type=manga_follows"
         const val followsMangaApi = "/api/?type=manga_follows&manga_id="
 

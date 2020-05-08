@@ -142,11 +142,7 @@ open class Mangadex(
     override fun fetchPageList(chapter: SChapter): Observable<List<Page>> {
         val imageServer = preferences.imageServer().takeIf { it in SERVER_PREF_ENTRY_VALUES }
             ?: SERVER_PREF_ENTRY_VALUES.first()
-
-        val correctClientToUse =
-            if (preferences.useNonLoggedNetwork()) nonLoggedInClientBuilder() else clientBuilder()
-
-        return PageHandler(correctClientToUse, headers, imageServer).fetchPageList(chapter)
+        return PageHandler(clientBuilder(), headers, imageServer).fetchPageList(chapter)
     }
 
     override suspend fun fetchAllFollows(): List<SManga> {
