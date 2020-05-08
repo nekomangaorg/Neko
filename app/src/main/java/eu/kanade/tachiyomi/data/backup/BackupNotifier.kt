@@ -7,25 +7,24 @@ import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.util.system.contextCompatColor
 import eu.kanade.tachiyomi.util.system.notificationBuilder
 import eu.kanade.tachiyomi.util.system.notificationManager
-import uy.kohesive.injekt.injectLazy
 
 internal class BackupNotifier(private val context: Context) {
-
-    private val preferences: PreferencesHelper by injectLazy()
-
+    
     private val progressNotificationBuilder = context.notificationBuilder(Notifications.CHANNEL_BACKUP_RESTORE) {
         setLargeIcon(BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher))
-        setSmallIcon(R.drawable.ic_tachi)
+        setSmallIcon(R.drawable.ic_neko_notification)
         setAutoCancel(false)
+        color = context.contextCompatColor(R.color.neko_green_darker)
         setOngoing(true)
     }
 
     private val completeNotificationBuilder = context.notificationBuilder(Notifications.CHANNEL_BACKUP_RESTORE) {
         setLargeIcon(BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher))
-        setSmallIcon(R.drawable.ic_tachi)
+        setSmallIcon(R.drawable.ic_neko_notification)
+        color = context.contextCompatColor(R.color.neko_green_darker)
         setAutoCancel(false)
     }
 

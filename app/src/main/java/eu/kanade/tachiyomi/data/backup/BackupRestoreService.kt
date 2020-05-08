@@ -35,6 +35,7 @@ import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.util.lang.chop
 import eu.kanade.tachiyomi.util.storage.getUriCompat
+import eu.kanade.tachiyomi.util.system.contextCompatColor
 import eu.kanade.tachiyomi.util.system.isServiceRunning
 import eu.kanade.tachiyomi.util.system.notificationManager
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -351,7 +352,7 @@ class BackupRestoreService : Service() {
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .setAutoCancel(false)
-            .setColor(ContextCompat.getColor(this, R.color.colorAccent))
+            .setColor(this.contextCompatColor(R.color.neko_green_darker))
             .addAction(R.drawable.ic_clear_grey_24dp_img, getString(android.R.string.cancel), cancelIntent)
     }
 
@@ -370,12 +371,18 @@ class BackupRestoreService : Service() {
      * @param total the total progress.
      */
     private fun showProgressNotification(current: Int, total: Int, title: String) {
-        notificationManager.notify(Notifications.ID_RESTORE_PROGRESS, progressNotification
+        notificationManager.notify(
+            Notifications.ID_RESTORE_PROGRESS, progressNotification
                 .setContentTitle(title.chop(30))
-                .setContentText(getString(R.string.restoring_progress, restoreProgress,
-                    totalAmount))
+                .setContentText(
+                    getString(
+                        R.string.restoring_progress, restoreProgress,
+                        totalAmount
+                    )
+                )
                 .setProgress(total, current, false)
-                .build())
+                .build()
+        )
     }
 
     /**
@@ -431,6 +438,7 @@ class BackupRestoreService : Service() {
             .setContentText(restoreString)
             .setStyle(NotificationCompat.BigTextStyle().bigText(restoreString))
             .setSmallIcon(R.drawable.ic_neko_notification)
+            .setColor(this.contextCompatColor(R.color.neko_green_darker))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
         if (errors.size > 0 && !path.isNullOrEmpty() && !file.isNullOrEmpty()) {
             resultNotification.addAction(
@@ -474,7 +482,7 @@ class BackupRestoreService : Service() {
          * @return true if the service is running, false otherwise.
          */
         fun isRunning(context: Context): Boolean =
-                context.isServiceRunning(BackupRestoreService::class.java)
+            context.isServiceRunning(BackupRestoreService::class.java)
 
         /**
          * Starts a service to restore a backup from Json

@@ -39,6 +39,8 @@ import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.lang.chop
+import eu.kanade.tachiyomi.util.system.contextCompatColor
+import eu.kanade.tachiyomi.util.system.customize
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.notification
 import eu.kanade.tachiyomi.util.system.notificationManager
@@ -109,10 +111,10 @@ class LibraryUpdateService(
      */
     private val progressNotification by lazy {
         NotificationCompat.Builder(this, Notifications.CHANNEL_LIBRARY)
-            .setContentTitle(getString(R.string.neko_app_name))
-            .setSmallIcon(R.drawable.ic_refresh_white_24dp_img)
+            .customize(
+                this, getString(R.string.neko_app_name), R.drawable.ic_refresh_white_24dp_img, true
+            )
             .setLargeIcon(notificationBitmap)
-            .setOngoing(true)
             .setOnlyAlertOnce(true)
             .addAction(
                 R.drawable.ic_clear_grey_24dp_img,
@@ -462,6 +464,7 @@ class LibraryUpdateService(
                 }
                 setGroupAlertBehavior(GROUP_ALERT_SUMMARY)
                 setContentTitle(manga.title)
+                color = this@LibraryUpdateService.contextCompatColor(R.color.neko_green_darker)
                 val chaptersNames = if (chapterNames.size > 5) {
                     "${chapterNames.take(4).joinToString("\n")}, " +
                         resources.getQuantityString(
@@ -502,6 +505,7 @@ class LibraryUpdateService(
                 Notifications.ID_NEW_CHAPTERS,
                 notification(Notifications.CHANNEL_NEW_CHAPTERS) {
                     setSmallIcon(R.drawable.ic_neko_notification)
+                    color = this@LibraryUpdateService.contextCompatColor(R.color.neko_green_darker)
                     setLargeIcon(notificationBitmap)
                     setContentTitle(getString(R.string.new_chapters_found))
                     if (updates.size > 1) {

@@ -46,7 +46,7 @@ class DisplayBottomSheet(private val controller: LibraryController) : BottomShee
         sheetBehavior.peekHeight = 220.dpToPx + height
 
         sheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
-            override fun onSlide(bottomSheet: View, progress: Float) { }
+            override fun onSlide(bottomSheet: View, progress: Float) {}
 
             override fun onStateChanged(p0: View, state: Int) {
                 if (state == BottomSheetBehavior.STATE_EXPANDED) {
@@ -85,9 +85,6 @@ class DisplayBottomSheet(private val controller: LibraryController) : BottomShee
         }
         uniform_grid.bindToPreference(preferences.uniformGrid()) {
             controller.reattachAdapter()
-        }
-        autohide_seeker.bindToPreference(preferences.alwaysShowSeeker()) {
-            controller.updateShowScrollbar(autohide_seeker.isChecked)
         }
         grid_size_toggle_group.bindToPreference(preferences.gridSize()) {
             controller.reattachAdapter()
