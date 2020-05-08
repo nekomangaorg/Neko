@@ -281,6 +281,8 @@ class PreferencesHelper(val context: Context) {
 
     fun shownLongPressCategoryTutorial() = flowPrefs.getBoolean("shown_long_press_category", false)
 
+    fun shownHopperSwipeTutorial() = flowPrefs.getBoolean("shown_hopper_swipe", false)
+
     fun shownSimilarTutorial() = flowPrefs.getBoolean("shown_similar_tutorial", false)
 
     fun skipFiltered() = prefs.getBoolean(Keys.skipFiltered, true)
