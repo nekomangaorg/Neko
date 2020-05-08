@@ -555,13 +555,13 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
             if (config?.showNewChapter == false) {
                 systemUi?.show()
             }
-        } else if (chapters_bottom_sheet.shouldCollaspe && chapters_bottom_sheet.sheetBehavior.isExpanded()) {
+        } else if (chapters_bottom_sheet.shouldCollapse && chapters_bottom_sheet.sheetBehavior.isExpanded()) {
             chapters_bottom_sheet.sheetBehavior?.collapse()
         }
         if (chapters_bottom_sheet.selectedChapterId != page.chapter.chapter.id) {
             chapters_bottom_sheet.refreshList()
         }
-        chapters_bottom_sheet.shouldCollaspe = true
+        chapters_bottom_sheet.shouldCollapse = true
 
         // Set seekbar progress
         page_seekbar.max = pages.lastIndex
