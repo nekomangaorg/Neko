@@ -27,6 +27,7 @@ import eu.kanade.tachiyomi.util.view.hide
 import eu.kanade.tachiyomi.util.view.inflate
 import eu.kanade.tachiyomi.util.view.isExpanded
 import eu.kanade.tachiyomi.util.view.isHidden
+import eu.kanade.tachiyomi.util.view.isVisible
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.visibleIf
 import kotlinx.android.synthetic.main.filter_bottom_sheet.view.*
@@ -427,6 +428,14 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         } else if (!hasFilters && clearButton.parent != null) {
             filter_layout.removeView(clearButton)
         }
+    }
+
+    fun updateButtons(showHideCategories: Boolean, showExpand: Boolean) {
+        hide_categories.visibleIf(showHideCategories)
+        expand_categories.visibleIf(showExpand)
+        first_layout.visibleIf(
+            hide_categories.isVisible() || expand_categories.isVisible() || !second_layout.isVisible()
+        )
     }
 
     private fun clearFilters() {
