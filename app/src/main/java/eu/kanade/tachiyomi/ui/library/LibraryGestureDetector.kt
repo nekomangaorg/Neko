@@ -26,18 +26,17 @@ class LibraryGestureDetector(private val controller: LibraryController) : Gestur
         var result = false
         val diffY = e2.y - e1.y
         val diffX = e2.x - e1.x
-        if (abs(diffX) <= abs(diffY) &&
-            abs(diffY) > MainActivity.SWIPE_THRESHOLD &&
-            abs(velocityY) > MainActivity.SWIPE_VELOCITY_THRESHOLD) {
+        if (abs(diffX) <= abs(diffY) && abs(diffY) > MainActivity.SWIPE_THRESHOLD && abs(velocityY) > MainActivity.SWIPE_VELOCITY_THRESHOLD) {
             if (diffY <= 0) {
                 controller.showSheet()
             } else {
                 controller.filter_bottom_sheet.sheetBehavior?.hide()
             }
             result = true
-        } else if (abs(diffX) >= abs(diffY) &&
-            abs(diffX) > MainActivity.SWIPE_THRESHOLD &&
-            abs(velocityX) > MainActivity.SWIPE_VELOCITY_THRESHOLD) {
+        } else if (abs(diffX) >= abs(diffY) && abs(diffX) > MainActivity.SWIPE_THRESHOLD && abs(
+                velocityX
+            ) > MainActivity.SWIPE_VELOCITY_THRESHOLD
+        ) {
             // val transition = androidx.transition.AutoTransition()
             // transition.duration = 150
 
@@ -57,15 +56,18 @@ class LibraryGestureDetector(private val controller: LibraryController) : Gestur
                 }
             } else {
                 controller.category_hopper_frame.updateLayoutParams<CoordinatorLayout.LayoutParams> {
-                    anchorGravity = Gravity.TOP or
-                        Gravity.TOP or (if (anchorGravity == Gravity.TOP or Gravity.LEFT) {
-                        controller.preferences.hopperGravity().set(1)
-                        Gravity.CENTER
-                    } else {
-                        controller.preferences.hopperGravity().set(2)
-                        Gravity.RIGHT
-                    })
+                    anchorGravity =
+                        Gravity.TOP or Gravity.TOP or (if (anchorGravity == Gravity.TOP or Gravity.LEFT) {
+                            controller.preferences.hopperGravity().set(1)
+                            Gravity.CENTER
+                        } else {
+                            controller.preferences.hopperGravity().set(2)
+                            Gravity.RIGHT
+                        })
                 }
+            }
+            if (!controller.hasMovedHopper) {
+                controller.preferences.shownHopperSwipeTutorial().set(true)
             }
             controller.hopperGravity = controller.preferences.hopperGravity().get()
             result = true

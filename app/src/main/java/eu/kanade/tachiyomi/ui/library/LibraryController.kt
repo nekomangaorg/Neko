@@ -1,5 +1,7 @@
 package eu.kanade.tachiyomi.ui.library
 
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.app.Activity
 import android.content.Context
@@ -75,6 +77,7 @@ import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.visibleIf
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
+import eu.kanade.tachiyomi.widget.EndAnimatorListener
 import kotlinx.android.synthetic.main.filter_bottom_sheet.*
 import kotlinx.android.synthetic.main.library_grid_recycler.*
 import kotlinx.android.synthetic.main.library_list_controller.*
@@ -85,6 +88,8 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import kotlin.math.abs
 import kotlin.math.roundToInt
+import kotlin.random.Random
+import kotlin.random.nextInt
 
 class LibraryController(
     bundle: Bundle? = null,
@@ -106,9 +111,6 @@ class LibraryController(
      * Position of the active category.
      */
     private var activeCategory: Int = preferences.lastUsedCategory().getOrDefault()
-        set(value) {
-            field = value
-        }
 
     private var justStarted = true
 
@@ -148,7 +150,6 @@ class LibraryController(
 
     private var scrollDistance = 0f
     private val scrollDistanceTilHidden = 1000.dpToPx
-
     private var textAnim: ViewPropertyAnimator? = null
     var hopperGravity: Int = preferences.hopperGravity().get()
         set(value) {
@@ -165,6 +166,8 @@ class LibraryController(
         }
 
     private var filterTooltip: ViewTooltip? = null
+    private var isAnimatingHopper: Boolean? = null
+    var hasMovedHopper = preferences.shownHopperSwipeTutorial().get()
     private var elevationAnim: ValueAnimator? = null
     private var elevate = false
 
@@ -178,7 +181,7 @@ class LibraryController(
             val notAtTop = recycler.canScrollVertically(-1)
             if (notAtTop != elevate) elevateFunc(notAtTop)
             val order = getCategoryOrder()
-            if (!recycler_cover.isClickable) {
+            if (!recycler_cover.isClickable && isAnimatingHopper != true) {
                 category_hopper_frame.translationY += dy
                 category_hopper_frame.translationY =
                     category_hopper_frame.translationY.coerceIn(0f, 60f.dpToPx)
@@ -338,14 +341,19 @@ class LibraryController(
             true
         }
 
+        val gravityPref = if (!hasMovedHopper) {
+            Random.nextInt(0..2)
+        } else {
+            preferences.hopperGravity().get()
+        }
         category_hopper_frame.updateLayoutParams<CoordinatorLayout.LayoutParams> {
-            anchorGravity = Gravity.TOP or when (preferences.hopperGravity().get()) {
+            anchorGravity = Gravity.TOP or when (gravityPref) {
                 0 -> Gravity.LEFT
                 2 -> Gravity.RIGHT
                 else -> Gravity.CENTER
             }
         }
-        hopperGravity = preferences.hopperGravity().get()
+        hopperGravity = gravityPref
 
         val gestureDetector = GestureDetectorCompat(activity, LibraryGestureDetector(this))
         listOf(category_hopper_layout, up_category, down_category, category_button).forEach {
@@ -358,9 +366,6 @@ class LibraryController(
             category_layout?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 topMargin = recycler?.paddingTop ?: 0
             }
-//            fast_scroller?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-//                topMargin = insets.systemWindowInsetTop
-//            }
         })
 
         swipe_refresh.setOnRefreshListener {
@@ -647,7 +652,34 @@ class LibraryController(
                     showCategories(recycler.translationY == 0f)
                 }
             }
+            if (!hasMovedHopper && isAnimatingHopper == null) {
+                showSlideAnimation()
+            }
         }
+    }
+
+    private fun showSlideAnimation() {
+        isAnimatingHopper = true
+        val slide = 25f.dpToPx
+        val animatorSet = AnimatorSet()
+        val animations = listOf(
+            slideAnimation(0f, slide, 200),
+            slideAnimation(slide, -slide),
+            slideAnimation(-slide, slide),
+            slideAnimation(slide, -slide),
+            slideAnimation(-slide, 0f, 233)
+        )
+        animatorSet.playSequentially(animations)
+        animatorSet.startDelay = 1250
+        animatorSet.addListener(EndAnimatorListener {
+            isAnimatingHopper = false
+        })
+        animatorSet.start()
+    }
+
+    private fun slideAnimation(from: Float, to: Float, duration: Long = 400): ObjectAnimator {
+        return ObjectAnimator.ofFloat(category_hopper_frame, View.TRANSLATION_X, from, to)
+            .setDuration(duration)
     }
 
     private fun showCategories(show: Boolean, scroll: Boolean = true) {
