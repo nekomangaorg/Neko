@@ -37,9 +37,6 @@ class LibraryItem(
     var unreadType = 2
     var chapterCount = -1
 
-    private val showFastScroll: Boolean
-        get() = preferences.alwaysShowSeeker().getOrDefault()
-
     private val uniformSize: Boolean
         get() = preferences.uniformGrid().getOrDefault()
 
@@ -62,7 +59,7 @@ class LibraryItem(
             val libraryLayout = libraryLayout
             val isFixedSize = uniformSize
             if (libraryLayout == 0 || manga.isBlank()) {
-                LibraryListHolder(view, adapter as LibraryCategoryAdapter, showFastScroll)
+                LibraryListHolder(view, adapter as LibraryCategoryAdapter)
             } else {
                 view.apply {
                     val coverHeight = (parent.itemWidth / 3f * 4f).toInt()
@@ -70,7 +67,8 @@ class LibraryItem(
                         gradient.layoutParams = FrameLayout.LayoutParams(
                             FrameLayout.LayoutParams.MATCH_PARENT,
                             (coverHeight * 0.66f).toInt(),
-                            Gravity.BOTTOM)
+                            Gravity.BOTTOM
+                        )
                         card.updateLayoutParams<ConstraintLayout.LayoutParams> {
                             bottomMargin = 6.dpToPx
                         }
@@ -107,7 +105,7 @@ class LibraryItem(
                 )
             }
         } else {
-            LibraryListHolder(view, adapter as LibraryCategoryAdapter, showFastScroll)
+            LibraryListHolder(view, adapter as LibraryCategoryAdapter)
         }
     }
 
@@ -164,7 +162,8 @@ class LibraryItem(
             } == null
         else
             genres?.find {
-                it.trim().toLowerCase() == tag.toLowerCase() } != null
+                it.trim().toLowerCase() == tag.toLowerCase()
+            } != null
     }
 
     override fun equals(other: Any?): Boolean {

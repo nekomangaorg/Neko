@@ -303,6 +303,15 @@ class BackupRestoreService : Service() {
      * @param tracks list containing tracks from restore file.
      */
     private suspend fun trackingFetch(manga: Manga, tracks: List<Track>) {
+        //add mdlist tracker backup has it missing
+        if (tracks.isEmpty() || !tracks.any { it.sync_id == trackManager.mdList.id }) {
+            val tracks = db.getTracks(manga).executeAsBlocking()
+            if (tracks.isEmpty() || !tracks.any { it.sync_id == trackManager.mdList.id }) {
+                val track = trackManager.mdList.createInitialTracker(manga)
+                db.insertTrack(track).executeAsBlocking()
+            }
+        }
+
         tracks.forEach { track ->
             val service = trackManager.getService(track.sync_id)
             if (service != null && service.isLogged) {

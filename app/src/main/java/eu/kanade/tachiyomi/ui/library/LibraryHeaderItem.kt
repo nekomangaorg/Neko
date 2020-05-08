@@ -8,7 +8,6 @@ import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
 import android.util.TypedValue
 import android.view.View
-import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -17,7 +16,6 @@ import androidx.appcompat.widget.PopupMenu
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
-import com.f2prateek.rx.preferences.Preference
 import com.github.florent37.viewtooltip.ViewTooltip
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.SelectableAdapter
@@ -27,7 +25,6 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
@@ -42,8 +39,7 @@ import uy.kohesive.injekt.api.get
 
 class LibraryHeaderItem(
     private val categoryF: (Int) -> Category,
-    private val catId: Int,
-    private val showFastScroll: Preference<Boolean>
+    private val catId: Int
 ) :
     AbstractHeaderItem<LibraryHeaderItem.Holder>() {
 
@@ -55,7 +51,7 @@ class LibraryHeaderItem(
         view: View,
         adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>
     ): Holder {
-        return Holder(view, adapter as LibraryCategoryAdapter, showFastScroll.getOrDefault())
+        return Holder(view, adapter as LibraryCategoryAdapter)
     }
 
     override fun bindViewHolder(
@@ -90,7 +86,7 @@ class LibraryHeaderItem(
         return -(category.id!!)
     }
 
-    class Holder(val view: View, private val adapter: LibraryCategoryAdapter, padEnd: Boolean) :
+    class Holder(val view: View, private val adapter: LibraryCategoryAdapter) :
         BaseFlexibleViewHolder(view, adapter, true) {
 
         private val sectionText: TextView = view.findViewById(R.id.category_title)
@@ -101,9 +97,6 @@ class LibraryHeaderItem(
         private val catProgress: ProgressBar = view.findViewById(R.id.cat_progress)
 
         init {
-            sortText.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                marginEnd = (if (padEnd && adapter.recyclerView.paddingEnd == 0) 12 else 2).dpToPx
-            }
             category_header_layout.setOnClickListener { toggleCategory() }
             updateButton.setOnClickListener { addCategoryToUpdate() }
             sectionText.setOnLongClickListener {
@@ -168,7 +161,8 @@ class LibraryHeaderItem(
             sortText.setText(category.sortRes())
             expandImage.setImageResource(
                 if (category.isHidden) R.drawable.ic_expand_more_24dp
-                else R.drawable.ic_expand_less_24dp)
+                else R.drawable.ic_expand_less_24dp
+            )
             when {
                 adapter.mode == SelectableAdapter.Mode.MULTI -> {
                     checkboxImage.visible()
@@ -214,7 +208,8 @@ class LibraryHeaderItem(
             // Inflate our menu resource into the PopupMenu's Menu
             popup.menuInflater.inflate(
                 if (category.id == -1) R.menu.main_sort
-                else R.menu.cat_sort, popup.menu)
+                else R.menu.cat_sort, popup.menu
+            )
 
             // Set a listener so we are notified if a menu item is clicked
             popup.setOnMenuItemClickListener { menuItem ->
@@ -237,9 +232,9 @@ class LibraryHeaderItem(
             )
 
             if (category.id == -1)
-            popup.menu.findItem(R.id.action_drag_and_drop).title = contentView.context.getString(
-                R.string.category
-            )
+                popup.menu.findItem(R.id.action_drag_and_drop).title = contentView.context.getString(
+                    R.string.category
+                )
 
             if (sortingMode != null && popup.menu is MenuBuilder) {
                 val m = popup.menu as MenuBuilder
@@ -253,7 +248,8 @@ class LibraryHeaderItem(
                     sortingMode == LibrarySort.DRAG_AND_DROP -> R.drawable.ic_check_white_24dp
                     if (sortingMode == LibrarySort.DATE_ADDED ||
                         sortingMode == LibrarySort.LATEST_CHAPTER ||
-                        sortingMode == LibrarySort.LAST_READ) !isAscending else isAscending ->
+                        sortingMode == LibrarySort.LAST_READ
+                    ) !isAscending else isAscending ->
                         R.drawable.ic_arrow_down_white_24dp
                     else -> R.drawable.ic_arrow_up_white_24dp
                 }

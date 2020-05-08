@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.library
 
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
@@ -122,11 +121,7 @@ class LibraryPresenter(
     private fun blankItem(id: Int = currentCategory): List<LibraryItem> {
         return listOf(
             LibraryItem(
-                LibraryManga.createBlank(id), LibraryHeaderItem(
-                    { getCategory(id) },
-                    id,
-                    preferences.alwaysShowSeeker()
-                )
+                LibraryManga.createBlank(id), LibraryHeaderItem({ getCategory(id) }, id)
             )
         )
     }
@@ -159,7 +154,7 @@ class LibraryPresenter(
         withContext(Dispatchers.Main) {
             view.onNextLibraryUpdate(
                 if (!show) sectionedLibraryItems[currentCategory]
-                ?: sectionedLibraryItems[categories.first().id] ?: blankItem()
+                    ?: sectionedLibraryItems[categories.first().id] ?: blankItem()
                 else libraryItems, freshStart
             )
         }
@@ -347,8 +342,10 @@ class LibraryPresenter(
                     val manga2LastRead = lastReadManga[i2.manga.id!!] ?: lastReadManga.size
                     manga1LastRead.compareTo(manga2LastRead)
                 }
-                sortingMode == LibrarySort.LATEST_CHAPTER -> i2.manga.last_update.compareTo(i1
-                    .manga.last_update)
+                sortingMode == LibrarySort.LATEST_CHAPTER -> i2.manga.last_update.compareTo(
+                    i1
+                        .manga.last_update
+                )
                 sortingMode == LibrarySort.UNREAD ->
                     when {
                         i1.manga.unread == i2.manga.unread -> 0
@@ -502,7 +499,6 @@ class LibraryPresenter(
         val categories = db.getCategories().executeAsBlocking().toMutableList()
         val showCategories = !preferences.hideCategories().getOrDefault()
         var libraryManga = db.getLibraryMangas().executeAsBlocking()
-        val seekPref = preferences.alwaysShowSeeker()
         val showAll = showAllCategories
         if (!showCategories) libraryManga = libraryManga.distinctBy { it.id }
         val categoryAll = Category.createAll(
@@ -510,13 +506,13 @@ class LibraryPresenter(
             preferences.librarySortingMode().getOrDefault(),
             preferences.librarySortingAscending().getOrDefault()
         )
-        val catItemAll = LibraryHeaderItem({ categoryAll }, -1, seekPref)
+        val catItemAll = LibraryHeaderItem({ categoryAll }, -1)
         val categorySet = mutableSetOf<Int>()
         val headerItems = (categories.mapNotNull { category ->
             val id = category.id
             if (id == null) null
-            else id to LibraryHeaderItem({ getCategory(id) }, id, seekPref)
-        } + (-1 to catItemAll) + (0 to LibraryHeaderItem({ getCategory(0) }, 0, seekPref))).toMap()
+            else id to LibraryHeaderItem({ getCategory(id) }, id)
+        } + (-1 to catItemAll) + (0 to LibraryHeaderItem({ getCategory(0) }, 0))).toMap()
         val items = libraryManga.mapNotNull {
             val headerItem = (if (!showCategories) catItemAll
             else headerItems[it.category]) ?: return@mapNotNull null
@@ -533,7 +529,8 @@ class LibraryPresenter(
             categories.forEach { category ->
                 val catId = category.id ?: return@forEach
                 if (catId > 0 && !categorySet.contains(catId) &&
-                    (catId !in categoriesHidden || !showAll)) {
+                    (catId !in categoriesHidden || !showAll)
+                ) {
                     val headerItem = headerItems[catId]
                     if (headerItem != null) items.add(
                         LibraryItem(LibraryManga.createBlank(catId), headerItem)
@@ -625,8 +622,8 @@ class LibraryPresenter(
     fun getCommonCategories(mangas: List<Manga>): Collection<Category> {
         if (mangas.isEmpty()) return emptyList()
         return mangas.toSet()
-                .map { db.getCategoriesForManga(it).executeAsBlocking() }
-                .reduce { set1: Iterable<Category>, set2 -> set1.intersect(set2).toMutableList() }
+            .map { db.getCategoriesForManga(it).executeAsBlocking() }
+            .reduce { set1: Iterable<Category>, set2 -> set1.intersect(set2).toMutableList() }
     }
 
     /**
@@ -757,8 +754,8 @@ class LibraryPresenter(
             val categories =
                 if (catId == 0) emptyList()
                 else
-                db.getCategoriesForManga(manga).executeOnIO()
-                .filter { it.id != oldCatId } + listOf(category)
+                    db.getCategoriesForManga(manga).executeOnIO()
+                        .filter { it.id != oldCatId } + listOf(category)
 
             for (cat in categories) {
                 mc.add(MangaCategory.create(manga, cat))

@@ -318,6 +318,15 @@ class LibraryUpdateService(
 
             manga.copyFrom(details.first)
             db.insertManga(manga).executeAsBlocking()
+            //add mdlist tracker if manga in library has it missing
+            val tracks = db.getTracks(manga).executeAsBlocking()
+            if (tracks.isEmpty() || !tracks.any { it.sync_id == trackManager.mdList.id }) {
+                val tracks = db.getTracks(manga).executeAsBlocking()
+                if (tracks.isEmpty() || !tracks.any { it.sync_id == trackManager.mdList.id }) {
+                    val track = trackManager.mdList.createInitialTracker(manga)
+                    db.insertTrack(track).executeAsBlocking()
+                }
+            }
 
             val fetchedChapters = details.second
             if (fetchedChapters.isNotEmpty()) {

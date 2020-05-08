@@ -465,7 +465,7 @@ class MangaDetailsPresenter(
                     val categoriesToDownload =
                         preferences.downloadNewCategories().getOrDefault().map(String::toInt)
                     val shouldDownload = !controller.fromCatalogue && mangaWasInitalized
-                        (downloadNew && (categoriesToDownload.isEmpty() || getMangaCategoryIds().any { it in categoriesToDownload }))
+                    (downloadNew && (categoriesToDownload.isEmpty() || getMangaCategoryIds().any { it in categoriesToDownload }))
                     if (shouldDownload) {
                         downloadChapters(newChapters.first.sortedBy { it.chapter_number }
                             .map { it.toModel() })
@@ -766,11 +766,8 @@ class MangaDetailsPresenter(
     // Tracking
     private fun setTrackItems() {
         scope.launch {
-            withContext(Dispatchers.IO) {
-                registerMdListOnFirstAccess()
-                trackList = loggedServices.map { service ->
-                    TrackItem(tracks.find { it.sync_id == service.id }, service)
-                }
+            trackList = loggedServices.map { service ->
+                TrackItem(tracks.find { it.sync_id == service.id }, service)
             }
         }
     }
@@ -853,17 +850,6 @@ class MangaDetailsPresenter(
                 }
                 fetchTracks()
             }
-        }
-    }
-
-    /**
-     * Register Mdlist tracker for first time
-     */
-    private suspend fun registerMdListOnFirstAccess() {
-        if (tracks.filter { it.sync_id == TrackManager.MDLIST }.count() == 0) {
-            val track = trackManager.mdList.createInitialTracker(manga)
-            db.insertTrack(track).executeAsBlocking()
-            tracks = db.getTracks(manga).executeAsBlocking()
         }
     }
 
