@@ -640,6 +640,10 @@ class LibraryController(
             scrollToHeader(activeCategory)
         }
         category_hopper_frame.visibleIf(!singleCategory)
+        filter_bottom_sheet.updateButtons(
+            showHideCategories = presenter.allCategories.size > 1,
+            showExpand = !singleCategory && presenter.showAllCategories
+        )
         adapter.isLongPressDragEnabled = canDrag()
         category_recycler.setCategories(presenter.categories)
         filter_bottom_sheet.setExpandText(preferences.collapsedCategories().getOrDefault().isNotEmpty())
