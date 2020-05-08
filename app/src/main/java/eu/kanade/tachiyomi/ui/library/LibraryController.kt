@@ -184,7 +184,7 @@ class LibraryController(
             if (!recycler_cover.isClickable && isAnimatingHopper != true) {
                 category_hopper_frame.translationY += dy
                 category_hopper_frame.translationY =
-                    category_hopper_frame.translationY.coerceIn(0f, 60f.dpToPx)
+                    category_hopper_frame.translationY.coerceIn(0f, 50f.dpToPx)
                 up_category.alpha = if (isAtTop()) 0.25f else 1f
                 down_category.alpha = if (isAtBottom()) 0.25f else 1f
             }
@@ -218,7 +218,7 @@ class LibraryController(
                     ) ?: 0
                     if (!recycler_cover.isClickable) {
                         category_hopper_frame.animate().translationY(
-                            if (category_hopper_frame.translationY > 30f.dpToPx) 60f.dpToPx
+                            if (category_hopper_frame.translationY > 25f.dpToPx) 50f.dpToPx
                             else 0f
                         ).setDuration(shortAnimationDuration.toLong()).start()
                     }
@@ -364,6 +364,9 @@ class LibraryController(
 
         scrollViewWith(recycler, swipeRefreshLayout = swipe_refresh, afterInsets = { insets ->
             category_layout?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                topMargin = recycler?.paddingTop ?: 0
+            }
+            fast_scroller?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 topMargin = recycler?.paddingTop ?: 0
             }
         })
