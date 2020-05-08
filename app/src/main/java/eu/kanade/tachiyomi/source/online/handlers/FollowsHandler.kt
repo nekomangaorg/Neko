@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
 import eu.kanade.tachiyomi.data.database.models.Track
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.POST
@@ -26,12 +25,9 @@ import okhttp3.Request
 import okhttp3.Response
 import rx.Observable
 import timber.log.Timber
-import uy.kohesive.injekt.injectLazy
 import kotlin.math.floor
 
 class FollowsHandler(val client: OkHttpClient, val headers: Headers) {
-
-    private val preferences: PreferencesHelper by injectLazy()
 
     /**
      * fetch follows by page

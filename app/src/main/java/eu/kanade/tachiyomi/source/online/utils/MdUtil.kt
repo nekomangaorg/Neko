@@ -133,6 +133,7 @@ class MdUtil {
         }
 
         fun getScanlators(scanlators: String): List<String> {
+            if (scanlators.isBlank()) return emptyList()
             return scanlators.split(scanlatorSeparator)
         }
 

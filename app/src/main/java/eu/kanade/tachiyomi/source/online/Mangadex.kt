@@ -38,9 +38,6 @@ open class Mangadex(
 
     private fun clientBuilder(): OkHttpClient = clientBuilder(preferences.r18()!!.toInt())
 
-    private fun nonLoggedInClientBuilder(): OkHttpClient =
-        clientBuilder(preferences.r18()!!.toInt(), network.nonLoggedInClient)
-
     private fun clientBuilder(
         r18Toggle: Int,
         okHttpClient: OkHttpClient = network.client

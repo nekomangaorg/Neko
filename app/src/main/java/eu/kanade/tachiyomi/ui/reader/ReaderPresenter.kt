@@ -4,7 +4,6 @@ import android.app.Application
 import android.os.Bundle
 import android.os.Environment
 import com.jakewharton.rxrelay.BehaviorRelay
-import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.History
@@ -54,7 +53,6 @@ class ReaderPresenter(
     private val db: DatabaseHelper = Injekt.get(),
     private val sourceManager: SourceManager = Injekt.get(),
     private val downloadManager: DownloadManager = Injekt.get(),
-    private val coverCache: CoverCache = Injekt.get(),
     private val preferences: PreferencesHelper = Injekt.get()
 ) : BasePresenter<ReaderActivity>() {
 
@@ -101,34 +99,9 @@ class ReaderPresenter(
             ?: error("Requested chapter of id $chapterId not found in chapter list")
 
         val chaptersForReader =
-            if (preferences.skipRead() || preferences.skipFiltered()) {
-                val listValidScanlators = MdUtil.getScanlators(manga.scanlator_filter.orEmpty())
-                val list = dbChapters
-                    .filter {
-                        if (preferences.skipRead() && it.read) {
-                            return@filter false
-                        } else if (preferences.skipFiltered()) {
-                            if (
-                                (manga.readFilter == Manga.SHOW_READ && !it.read) ||
-                                (manga.readFilter == Manga.SHOW_UNREAD && it.read) ||
-                                (manga.downloadedFilter == Manga.SHOW_DOWNLOADED &&
-                                    !downloadManager.isChapterDownloaded(it, manga)) ||
-                                (manga.bookmarkedFilter == Manga.SHOW_BOOKMARKED && !it.bookmark) ||
-                                (listValidScanlators.isNotEmpty() && it.scanlatorList().none { group -> listValidScanlators.contains(group) })
-                            ) {
-                                return@filter false
-                            }
-                        }
-                        true
-                    }
-                    .toMutableList()
-                val find = list.find { it.id == chapterId }
-                if (find == null) {
-                    list.add(selectedChapter)
-                }
-                list
-            } else {
-                dbChapters
+            when (preferences.skipRead() || preferences.skipFiltered()) {
+                true -> getFilteredChapters(dbChapters, manga)
+                false -> dbChapters
             }
 
         when (manga.sorting) {
@@ -136,6 +109,39 @@ class ReaderPresenter(
             Manga.SORTING_NUMBER -> ChapterLoadByNumber().get(chaptersForReader, selectedChapter)
             else -> error("Unknown sorting method")
         }.map(::ReaderChapter)
+    }
+
+    private fun getFilteredChapters(dbChapters: List<ChapterItem>, manga: Manga): List<Chapter> {
+        var filteredChapters = dbChapters
+        if (preferences.skipRead()) {
+            filteredChapters = filteredChapters.filter { it.read }
+        }
+        if (preferences.skipFiltered()) {
+            val readEnabled = manga.readFilter == Manga.SHOW_READ
+            val unreadEnabled = manga.readFilter == Manga.SHOW_UNREAD
+            val downloadEnabled = manga.downloadedFilter == Manga.SHOW_DOWNLOADED
+            val bookmarkEnabled = manga.bookmarkedFilter == Manga.SHOW_BOOKMARKED
+            val listValidScanlators = MdUtil.getScanlators(manga.scanlator_filter.orEmpty())
+            val scanlatorEnabled = listValidScanlators.isNotEmpty()
+
+            filteredChapters = filteredChapters.filter {
+                //return if showAll
+                if (!readEnabled && !unreadEnabled && !downloadEnabled && !bookmarkEnabled && listValidScanlators.isEmpty()) {
+                    return@filter true
+                }
+                if (readEnabled && it.read.not() ||
+                    (unreadEnabled && it.read) ||
+                    (bookmarkEnabled && it.bookmark.not()) ||
+                    (downloadEnabled && !downloadManager.isChapterDownloaded(it, manga, true)) ||
+                    (scanlatorEnabled && it.scanlatorList().none { group -> listValidScanlators.contains(group) })
+                ) {
+                    return@filter false
+                }
+
+                return@filter true
+            }
+        }
+        return filteredChapters
     }
 
     var chapterItems = emptyList<ReaderChapterItem>()

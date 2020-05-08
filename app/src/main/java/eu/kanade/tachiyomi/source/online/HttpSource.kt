@@ -69,7 +69,9 @@ abstract class HttpSource : Source {
     /**
      * Default network client for doing requests.
      */
-    val client: OkHttpClient = network.client.newBuilder().build()
+    val client: OkHttpClient = network.client
+
+    val nonRateLimitedClient = network.nonRateLimitedClient
 
     /**
      * Headers builder for request.
@@ -97,11 +99,11 @@ abstract class HttpSource : Source {
      */
     open fun fetchImageUrl(page: Page): Observable<String> {
         if (page.imageUrl!!.contains("mangaplus", true)) {
-            return MangaPlusHandler(client).client.newCall(GET(page.imageUrl!!, headers))
+            return MangaPlusHandler(nonRateLimitedClient).client.newCall(GET(page.imageUrl!!, headers))
                 .asObservableSuccess()
                 .map { "" }
         }
-        return client.newCall(GET(page.imageUrl!!, headers))
+        return nonRateLimitedClient.newCall(GET(page.imageUrl!!))
             .asObservableSuccess()
             .map { "" }
     }
@@ -113,10 +115,10 @@ abstract class HttpSource : Source {
      */
     fun fetchImage(page: Page): Observable<Response> {
         if (page.imageUrl!!.contains("mangaplus", true)) {
-            return MangaPlusHandler(client).client.newCall(GET(page.imageUrl!!, headers))
+            return MangaPlusHandler(nonRateLimitedClient).client.newCall(GET(page.imageUrl!!, headers))
                 .asObservableSuccess()
         }
-        return client.newCallWithProgress(GET(page.imageUrl!!, headers), page)
+        return nonRateLimitedClient.newCallWithProgress(GET(page.imageUrl!!), page)
             .asObservableSuccess()
     }
 

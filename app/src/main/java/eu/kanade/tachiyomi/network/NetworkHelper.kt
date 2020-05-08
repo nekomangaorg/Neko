@@ -2,14 +2,14 @@ package eu.kanade.tachiyomi.network
 
 import android.content.Context
 import android.os.SystemClock
-import eu.kanade.tachiyomi.BuildConfig
-import java.io.File
-import java.util.concurrent.TimeUnit
 import com.chuckerteam.chucker.api.ChuckerInterceptor
+import eu.kanade.tachiyomi.BuildConfig
 import okhttp3.Cache
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import java.io.File
+import java.util.concurrent.TimeUnit
 
 class NetworkHelper(context: Context) {
 
@@ -51,13 +51,13 @@ class NetworkHelper(context: Context) {
         it.proceed(it.request())
     }
 
-    val nonLoggedInClient = {
+    val nonRateLimitedClient = {
         val builder = OkHttpClient.Builder()
-                .connectTimeout(10, TimeUnit.SECONDS)
-                .readTimeout(30, TimeUnit.SECONDS)
+            .connectTimeout(20, TimeUnit.SECONDS)
+            .readTimeout(60, TimeUnit.SECONDS)
             .cache(Cache(cacheDir, cacheSize))
             .addInterceptor(ChuckerInterceptor(context))
-                .addNetworkInterceptor(rateLimitInterceptor)
+            .cookieJar(cookieManager)
         if (BuildConfig.DEBUG) {
             val httpLoggingInterceptor = HttpLoggingInterceptor()
             builder.addInterceptor(httpLoggingInterceptor.apply { httpLoggingInterceptor.level = HttpLoggingInterceptor.Level.BODY })
@@ -66,5 +66,5 @@ class NetworkHelper(context: Context) {
         builder.build()
     }()
 
-    val client = nonLoggedInClient.newBuilder().cookieJar(cookieManager).build()
+    val client = nonRateLimitedClient.newBuilder().addNetworkInterceptor(rateLimitInterceptor).build()
 }
