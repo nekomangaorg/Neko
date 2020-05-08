@@ -80,14 +80,15 @@ class ApiMangaParser(val lang: String) {
             return false
         }
         val finalChapterNumber = serializer.manga.last_chapter!!
-        if (finalChapterNumber == "0") {
-            filteredChapters.first().let {
+        if (MdUtil.validOneShotFinalChapters.contains(finalChapterNumber)) {
+            filteredChapters.firstOrNull()?.let {
                 if (isOneShot(it.value, finalChapterNumber)) {
                     return true
                 }
             }
         }
-        return filteredChapters.size.toString() == finalChapterNumber
+        val removeOneshots = filteredChapters.filter { !it.value.chapter.isNullOrBlank() }
+        return removeOneshots.size.toString() == finalChapterNumber
     }
 
     private fun getMissingChapterCount(filteredChapters: List<Map.Entry<String, ChapterSerializer>>): String? {
@@ -105,7 +106,7 @@ class ApiMangaParser(val lang: String) {
             .filter { it.value.lang_code == lang }
             .filter {
                 it.value.chapter?.let { chapterNumber ->
-                    if (chapterNumber.isNotBlank() && chapterNumber.contains(".").not()) {
+                    if (chapterNumber.contains(".").not()) {
                         return@filter true
                     }
                 }
@@ -116,7 +117,7 @@ class ApiMangaParser(val lang: String) {
 
     private fun isOneShot(chapter: ChapterSerializer, finalChapterNumber: String): Boolean {
         return chapter.title.equals("oneshot", true) ||
-            ((chapter.chapter.isNullOrEmpty() || chapter.chapter == "0") && finalChapterNumber == "0")
+            ((chapter.chapter.isNullOrEmpty() || chapter.chapter == "0") && MdUtil.validOneShotFinalChapters.contains(finalChapterNumber))
     }
 
     private fun parseStatus(status: Int) = when (status) {

@@ -16,6 +16,8 @@ class MdUtil {
 
         private const val scanlatorSeparator = " & "
 
+        val validOneShotFinalChapters = listOf("0", "1")
+
         val englishDescriptionTags = listOf(
             "[b][u]English:[/u][/b]",
             "[b][u]English[/u][/b]",
@@ -40,9 +42,11 @@ class MdUtil {
             "[Espa&ntilde;ol]:",
             "[b] Spanish: [/ b]",
             "[b][u]Espa&ntilde;ol / Spanish:[/b]",
+            "[hr][b][u]Espa&ntilde;ol / Spanish:[/b]",
             "[b][u]Italian / Italiano[/u][/b]",
             "[b]Polish / polski[/b]",
             "[b][u]Polish / Polski:[/u][/b]",
+            "[b][u]Polish / Polski[/u][/b]",
             "[b][u]Portuguese (BR) / Portugu&ecirc;s (BR)[/u][/b]",
             "[b]Portuguese (BR) / Portugu&ecirc;s (BR)[/b]",
             "[b][u]Português / Portuguese[/u][/b]",
