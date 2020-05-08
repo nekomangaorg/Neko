@@ -151,17 +151,19 @@ class SourceController : NucleusController<SourcePresenter>(),
             }
 
             override fun onStateChanged(p0: View, state: Int) {
-                val ext_bottom_sheet = ext_bottom_sheet ?: return
-                if (state == BottomSheetBehavior.STATE_EXPANDED) activity?.appbar?.y = 0f
+                val extBottomSheet = ext_bottom_sheet ?: return
+                if (state == BottomSheetBehavior.STATE_EXPANDED) {
+                    activity?.appbar?.y = 0f
+                }
                 if (state == BottomSheetBehavior.STATE_EXPANDED ||
                     state == BottomSheetBehavior.STATE_COLLAPSED) {
-                    sheet_layout.alpha =
+                    sheet_layout?.alpha =
                         if (state == BottomSheetBehavior.STATE_COLLAPSED) 1f else 0f
                     showingExtensions = state == BottomSheetBehavior.STATE_EXPANDED
                     setTitle()
                     if (state == BottomSheetBehavior.STATE_EXPANDED)
-                        ext_bottom_sheet.fetchOnlineExtensionsIfNeeded()
-                    else ext_bottom_sheet.shouldCallApi = true
+                        extBottomSheet.fetchOnlineExtensionsIfNeeded()
+                    else extBottomSheet.shouldCallApi = true
                     activity?.invalidateOptionsMenu()
                 }
 
