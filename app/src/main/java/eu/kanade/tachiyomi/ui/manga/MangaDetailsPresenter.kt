@@ -69,7 +69,7 @@ class MangaDetailsPresenter(
 
     private val trackManager: TrackManager by lazy { Injekt.get<TrackManager>() }
 
-    private val loggedServices by lazy { trackManager.services.filter { it.isLogged } }
+    private val loggedServices by lazy { trackManager.services.filter { it.isLogged || it.isMdList() } }
     var tracks = emptyList<Track>()
 
     var trackList: List<TrackItem> = emptyList()
@@ -100,6 +100,7 @@ class MangaDetailsPresenter(
             controller.updateHeader()
             refreshAll()
         } else {
+            //add mdlist tracker if doesnt exist
             manga.scanlator_filter?.let {
                 filteredScanlators = it.split(",").toList()
             }
@@ -765,10 +766,8 @@ class MangaDetailsPresenter(
 
     // Tracking
     private fun setTrackItems() {
-        scope.launch {
-            trackList = loggedServices.map { service ->
-                TrackItem(tracks.find { it.sync_id == service.id }, service)
-            }
+        trackList = loggedServices.map { service ->
+            TrackItem(tracks.find { it.sync_id == service.id }, service)
         }
     }
 
@@ -791,6 +790,12 @@ class MangaDetailsPresenter(
     fun refreshTracking(showOfflineSnack: Boolean = false) {
         if (!controller.isNotOnline(showOfflineSnack)) {
             scope.launch {
+                if (tracks.isEmpty() || !tracks.any { it.sync_id == trackManager.mdList.id }) {
+                    val track = trackManager.mdList.createInitialTracker(manga)
+                    db.insertTrack(track).executeAsBlocking()
+                    tracks = db.getTracks(manga).executeAsBlocking()
+                    setTrackItems()
+                }
                 val asyncList = trackList.filter { it.track != null }.map { item ->
                     async(Dispatchers.IO) {
                         val trackItem = try {

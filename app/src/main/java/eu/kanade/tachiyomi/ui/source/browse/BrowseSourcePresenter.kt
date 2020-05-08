@@ -10,7 +10,6 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Filter
 import eu.kanade.tachiyomi.source.model.FilterList
@@ -51,8 +50,7 @@ open class BrowseSourcePresenter(
     sourceManager: SourceManager = Injekt.get(),
     private val db: DatabaseHelper = Injekt.get(),
     private val prefs: PreferencesHelper = Injekt.get(),
-    private val coverCache: CoverCache = Injekt.get(),
-    private val trackManager: TrackManager = Injekt.get()
+    private val coverCache: CoverCache = Injekt.get()
 ) : BasePresenter<BrowseSourceController>() {
 
     /**
@@ -242,12 +240,6 @@ open class BrowseSourcePresenter(
             val result = db.insertManga(newManga).executeAsBlocking()
             newManga.id = result.insertedId()
             localManga = newManga
-        }
-        //add mdlist tracker immediately so you dont have to during mangadetails
-        val tracks = db.getTracks(localManga).executeAsBlocking()
-        if (tracks.isEmpty() || !tracks.any { it.sync_id == trackManager.mdList.id }) {
-            val track = trackManager.mdList.createInitialTracker(localManga)
-            db.insertTrack(track).executeAsBlocking()
         }
 
         return localManga
