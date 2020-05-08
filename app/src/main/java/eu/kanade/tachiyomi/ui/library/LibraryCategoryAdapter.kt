@@ -8,12 +8,10 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
+import eu.kanade.tachiyomi.util.lang.chop
 import eu.kanade.tachiyomi.util.lang.removeArticles
 import eu.kanade.tachiyomi.util.system.timeSpanFromNow
 import uy.kohesive.injekt.injectLazy
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Date
 import java.util.Locale
 
 /**
@@ -108,6 +106,16 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
         return if (letter.isLetter()) getFirstChar(name) else "#"
     }
 
+    private fun getFirstChar(string: String): String {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            val chars = string.codePoints().toArray().firstOrNull() ?: return ""
+            val char = Character.toChars(chars)
+            return String(char).toUpperCase(Locale.US)
+        } else {
+            return string.toCharArray().firstOrNull()?.toString()?.toUpperCase(Locale.US) ?: ""
+        }
+    }
+
     override fun onCreateBubbleText(position: Int): String {
         val preferences: PreferencesHelper by injectLazy()
         val db: DatabaseHelper by injectLazy()
@@ -117,16 +125,14 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
                 if (!preferences.hideCategories().getOrDefault()) item.category.name
                 else recyclerView.context.getString(R.string.top)
             is LibraryItem -> {
-                if (!isSingleCategory) {
-                    item.header?.category?.name.orEmpty()
-                } else if (item.manga.isBlank()) ""
-                else when (getSort()) {
+                val text = if (item.manga.isBlank()) ""
+                else when (getSort(position)) {
                     LibrarySort.DRAG_AND_DROP -> {
                         if (!preferences.hideCategories().getOrDefault()) {
                             val title = item.manga.title
                             if (preferences.removeArticles().getOrDefault())
-                                getFirstChar(title.removeArticles())
-                            else getFirstChar(title)
+                                title.removeArticles().chop(15)
+                            else title.take(10)
                         } else {
                             val category = db.getCategoriesForManga(item.manga)
                                 .executeAsBlocking().firstOrNull()?.name
@@ -142,18 +148,18 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
                     }
                     LibrarySort.UNREAD -> {
                         val unread = item.manga.unread
-                        if (unread > 0) unread.toString()
+                        if (unread > 0) recyclerView.context.getString(R.string._unread, unread)
                         else recyclerView.context.getString(R.string.read)
                     }
                     LibrarySort.TOTAL -> {
                         val total = item.chapterCount
-                        if (total > 0) total.toString()
+                        if (total > 0) recyclerView.resources.getQuantityString(R.plurals
+                            .chapters, total, total)
                         else "N/A"
                     }
                     LibrarySort.LATEST_CHAPTER -> {
                         val lastUpdate = item.manga.last_update
                         if (lastUpdate > 0) lastUpdate.timeSpanFromNow
-                        // getShortDate(Date(lastUpdate))
                         else "N/A"
                     }
                     LibrarySort.DATE_ADDED -> {
@@ -169,60 +175,32 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
                         getFirstLetter(title)
                     }
                 }
+                if (isSingleCategory) {
+                    text
+                } else {
+                    item.header?.category?.name.orEmpty() + ": " + text
+                }
             }
             else -> ""
         }
     }
 
-    private fun getSort(): Int {
+    private fun getSort(position: Int? = null): Int {
         val preferences: PreferencesHelper by injectLazy()
-        return if (!preferences.showAllCategories().get() && !preferences.hideCategories().getOrDefault()) {
+        return if (position != null) {
+            val header = (getItem(position) as? LibraryItem)?.header
+            if (header != null) {
+                header.category.sortingMode() ?: LibrarySort.DRAG_AND_DROP
+            } else {
+                LibrarySort.DRAG_AND_DROP
+            }
+        } else if (!preferences.showAllCategories().get() && !preferences.hideCategories()
+                .getOrDefault()
+        ) {
             controller.presenter.getCurrentCategory()?.sortingMode() ?: LibrarySort.DRAG_AND_DROP
         } else {
             preferences.librarySortingMode().getOrDefault()
         }
-    }
-
-    private fun getFirstChar(string: String): String {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            val chars = string.codePoints().toArray().firstOrNull() ?: return ""
-            val char = Character.toChars(chars)
-            return String(char).toUpperCase(Locale.US)
-        } else {
-            return string.toCharArray().firstOrNull()?.toString()?.toUpperCase(Locale.US) ?: ""
-        }
-    }
-
-    private fun getShortRange(value: Int): String {
-        return when (value) {
-            1 -> "1"
-            2 -> "2"
-            3 -> "3"
-            4 -> "4"
-            5 -> "5"
-            in 6..10 -> "6"
-            in 11..50 -> "10"
-            in 51..100 -> "50"
-            in 101..500 -> "1+"
-            in 499..899 -> "4+"
-            in 901..Int.MAX_VALUE -> "9+"
-            else -> "0"
-        }
-    }
-
-    private fun getShorterDate(date: Date): String {
-        val cal = Calendar.getInstance()
-        cal.time = Date()
-
-        val yearNow = cal.get(Calendar.YEAR)
-        val cal2 = Calendar.getInstance()
-        cal2.time = date
-        val yearThen = cal2.get(Calendar.YEAR)
-
-        return if (yearNow == yearThen)
-            SimpleDateFormat("M", Locale.getDefault()).format(date)
-        else
-            SimpleDateFormat("''yy", Locale.getDefault()).format(date)
     }
 
     interface LibraryListener {
