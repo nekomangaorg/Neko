@@ -758,7 +758,7 @@ class LibraryController(
                 headerPosition, (when {
                     headerPosition == 0 -> 0
                     previousHeader?.category?.isHidden == true -> (-3).dpToPx
-                    else -> (-32).dpToPx
+                    else -> (-30).dpToPx
                 }) + appbarOffset
             )
             recycler.suppressLayout(false)
