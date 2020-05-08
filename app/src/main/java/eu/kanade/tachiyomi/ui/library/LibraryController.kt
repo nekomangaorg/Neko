@@ -58,6 +58,7 @@ import eu.kanade.tachiyomi.ui.main.RootSearchInterface
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.migration.manga.design.PreMigrationController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
+import eu.kanade.tachiyomi.ui.source.global_search.SourceSearchController
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
@@ -145,6 +146,7 @@ class LibraryController(
         private set
 
     private var observeLater: Boolean = false
+    var searchItem = SearchGlobalItem()
 
     var snack: Snackbar? = null
 
@@ -285,9 +287,11 @@ class LibraryController(
             override fun getSpanSize(position: Int): Int {
                 if (libraryLayout == 0) return 1
                 val item = this@LibraryController.adapter.getItem(position)
-                return if (item is LibraryHeaderItem) recycler.manager.spanCount
-                else if (item is LibraryItem && item.manga.isBlank()) recycler.manager.spanCount
-                else 1
+                return if (item is LibraryHeaderItem || item is SearchGlobalItem || (item is LibraryItem && item.manga.isBlank())) {
+                    recycler.manager.spanCount
+                } else {
+                    1
+                }
             }
         })
         recycler.setHasFixedSize(true)
@@ -799,6 +803,15 @@ class LibraryController(
 
     fun search(query: String?): Boolean {
         this.query = query ?: ""
+        if (this.query.isNotBlank() && adapter.scrollableHeaders.isEmpty()) {
+            searchItem.string = this.query
+            adapter.addScrollableHeader(searchItem)
+        } else if (this.query.isNotBlank()) {
+            searchItem.string = this.query
+            (recycler.findViewHolderForAdapterPosition(0) as? SearchGlobalItem.Holder)?.bind(this.query)
+        } else if (this.query.isBlank() && adapter.scrollableHeaders.isNotEmpty()) {
+            adapter.removeAllScrollableHeaders()
+        }
         adapter.setFilter(query)
         adapter.performFilter()
         return true
@@ -915,7 +928,7 @@ class LibraryController(
      * @param position the position of the element clicked.
      */
     override fun onItemLongClick(position: Int) {
-        if (adapter.getItem(position) is LibraryHeaderItem) return
+        if (adapter.getItem(position) !is LibraryItem) return
         createActionModeIfNeeded()
         when {
             lastClickPosition == -1 -> setSelection(position)
@@ -928,6 +941,10 @@ class LibraryController(
             else -> setSelection(position)
         }
         lastClickPosition = position
+    }
+
+    override fun globalSearch(query: String) {
+        router.pushController(SourceSearchController(query).withFadeTransaction())
     }
 
     override fun onActionStateChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {

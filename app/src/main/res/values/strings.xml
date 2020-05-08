@@ -119,6 +119,7 @@
     <string name="collapse_all_categories">Collapse all categories</string>
     <string name="reorder_filters">Reorder filters</string>
     <string name="_unread">%d unread</string>
+    <string name="search_globally">Search \"%1$s\" globally</string>
 
     <string name="read_progress">Read progress</string>
     <string name="series_type">Series type</string>
