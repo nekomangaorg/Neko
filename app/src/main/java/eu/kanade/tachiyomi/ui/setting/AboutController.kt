@@ -17,6 +17,7 @@ import eu.kanade.tachiyomi.data.updater.UpdaterService
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.main.ChangelogDialogController
 import eu.kanade.tachiyomi.util.lang.toTimestampString
+import eu.kanade.tachiyomi.util.system.isOnline
 import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -102,7 +103,13 @@ class AboutController : SettingsController() {
                 else BuildConfig.VERSION_NAME
 
                 if (isUpdaterEnabled) {
-                    onClick { checkVersion() }
+                    onClick {
+                        if (activity!!.isOnline()) {
+                            checkVersion()
+                        } else {
+                            activity!!.toast(R.string.no_network_connection)
+                        }
+                    }
                 }
             }
             preference {
@@ -134,8 +141,10 @@ class AboutController : SettingsController() {
             val result = try {
                 updateChecker.checkForUpdate()
             } catch (error: Exception) {
-                activity?.toast(error.message)
-                Timber.e(error)
+                withContext(Dispatchers.Main) {
+                    activity?.toast(error.message)
+                    Timber.e(error)
+                }
             }
             when (result) {
                 is UpdateResult.NewUpdate<*> -> {
