@@ -453,7 +453,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
                             else -> R.string.left_to_right_viewer
                         }
                     ).toLowerCase(Locale.getDefault())
-                ), 8000
+                ), 4000
             ) {
                 if (mangaViewer != WEBTOON) setAction(R.string.use_default) {
                     presenter.setMangaViewer(0)
