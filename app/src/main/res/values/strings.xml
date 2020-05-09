@@ -537,6 +537,9 @@
         <item quantity="one">Cleanup done. Removed %d folder</item>
         <item quantity="other">Cleanup done. Removed %d folders</item>
     </plurals>
+    <string name="clean_up_cached_covers">Clean up cached covers</string>
+    <string name="delete_old_covers_in_library">Delete old and unused cached covers of
+        manga in your library that has been updated</string>
 
     <!-- About section -->
     <string name="version">Version</string>
@@ -653,6 +656,7 @@
     <string name="create">Create</string>
     <string name="default_value">Default</string>
     <string name="delete">Delete</string>
+    <string name="deleted_">Deleted: %1$s</string>
     <string name="display">Display</string>
     <string name="drag_handle">Drag handle</string>
     <string name="edit">Edit</string>
