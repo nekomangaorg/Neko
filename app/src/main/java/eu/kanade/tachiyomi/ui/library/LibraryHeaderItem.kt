@@ -165,8 +165,8 @@ class LibraryHeaderItem(
             )
             when {
                 adapter.mode == SelectableAdapter.Mode.MULTI -> {
-                    checkboxImage.visible()
-                    expandImage.invisible()
+                    checkboxImage.visibleIf(!category.isHidden)
+                    expandImage.visibleIf(category.isHidden && !adapter.isSingleCategory)
                     updateButton.gone()
                     catProgress.gone()
                     setSelection()
