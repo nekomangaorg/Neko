@@ -268,14 +268,12 @@ class MangaHeaderHolder(
         manga_genres_tags.visibleIf(shouldHide)
     }
 
-    fun updateCover(manga: Manga, cover: Drawable? = null) {
-        if (adapter.delegate.coverColor() == null) return
-        GlideApp.with(view.context).load(cover ?: manga)
-            .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+    fun updateCover(manga: Manga, force: Boolean = false) {
+        if (!manga.initialized || (adapter.delegate.coverColor() == null && manga.favorite && !force)) return
+        GlideApp.with(view.context).load(manga).diskCacheStrategy(DiskCacheStrategy.RESOURCE)
             .signature(ObjectKey(MangaImpl.getLastCoverFetch(manga.id!!).toString()))
             .into(manga_cover)
-        GlideApp.with(view.context).load(cover ?: manga)
-            .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+        GlideApp.with(view.context).load(manga).diskCacheStrategy(DiskCacheStrategy.RESOURCE)
             .signature(ObjectKey(MangaImpl.getLastCoverFetch(manga.id!!).toString())).centerCrop()
             .transition(DrawableTransitionOptions.withCrossFade()).into(backdrop)
     }
