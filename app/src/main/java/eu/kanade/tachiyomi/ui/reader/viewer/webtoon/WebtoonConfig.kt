@@ -16,11 +16,18 @@ class WebtoonConfig(preferences: PreferencesHelper = Injekt.get()) : ViewerConfi
     var sidePadding = 0
         private set
 
+    var disableZoom = false
+        private set
+    var zoomPropertyChangedListener: ((Boolean) -> Unit)? = null
+
     init {
         preferences.cropBordersWebtoon()
             .register({ imageCropBorders = it }, { imagePropertyChangedListener?.invoke() })
 
         preferences.webtoonSidePadding()
             .register({ sidePadding = it }, { imagePropertyChangedListener?.invoke() })
+
+        preferences.webtoonDisableZoom()
+            .register({ disableZoom = it }, { zoomPropertyChangedListener?.invoke(it) })
     }
 }

@@ -280,6 +280,7 @@
     <!-- Reader settings -->
     <string name="fullscreen">Fullscreen</string>
     <string name="page_transitions">Page transitions</string>
+    <string name="disable_zoom">Disable zoom</string>
     <string name="double_tap_anim_speed">Double tap animation speed</string>
     <string name="show_page_number">Show page number</string>
     <string name="true_32bit_color">32-bit color</string>
