@@ -9,16 +9,16 @@ import android.view.ViewGroup
 import android.widget.CompoundButton
 import android.widget.Spinner
 import androidx.annotation.ArrayRes
-import com.f2prateek.rx.preferences.Preference
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.tfcporciuncula.flow.Preference
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.hasSideNavBar
+import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.setBottomEdge
 import eu.kanade.tachiyomi.util.view.setEdgeToEdge
@@ -54,7 +54,7 @@ class ReaderSettingsSheet(private val activity: ReaderActivity) :
         )
         window?.navigationBarColor = Color.TRANSPARENT
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
-            preferences.readerTheme().getOrDefault() == 0 &&
+            !context.isInNightMode() &&
             !activity.window.decorView.rootWindowInsets.hasSideNavBar()
         ) {
             window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
@@ -156,7 +156,7 @@ class ReaderSettingsSheet(private val activity: ReaderActivity) :
      * Binds a checkbox or switch view with a boolean preference.
      */
     private fun CompoundButton.bindToPreference(pref: Preference<Boolean>) {
-        isChecked = pref.getOrDefault()
+        isChecked = pref.get()
         setOnCheckedChangeListener { _, isChecked -> pref.set(isChecked) }
     }
 
@@ -170,7 +170,7 @@ class ReaderSettingsSheet(private val activity: ReaderActivity) :
         onItemSelectedListener = IgnoreFirstSpinnerListener { position ->
             pref.set(position + offset)
         }
-        setSelection(pref.getOrDefault() - offset, false)
+        setSelection(pref.get() - offset, false)
     }
 
     /**
@@ -181,8 +181,8 @@ class ReaderSettingsSheet(private val activity: ReaderActivity) :
     private fun Spinner.bindToIntPreference(pref: Preference<Int>, @ArrayRes intValuesResource: Int) {
         val intValues = resources.getStringArray(intValuesResource).map { it.toIntOrNull() }
         onItemSelectedListener = IgnoreFirstSpinnerListener { position ->
-            pref.set(intValues[position])
+            pref.set(intValues[position] ?: 0)
         }
-        setSelection(intValues.indexOf(pref.getOrDefault()), false)
+        setSelection(intValues.indexOf(pref.get()), false)
     }
 }

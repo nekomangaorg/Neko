@@ -61,51 +61,51 @@ class PreferencesHelper(val context: Context) {
 
     fun theme() = prefs.getInt(Keys.theme, 5)
 
-    fun rotation() = rxPrefs.getInteger(Keys.rotation, 1)
+    fun rotation() = flowPrefs.getInt(Keys.rotation, 1)
 
-    fun pageTransitions() = rxPrefs.getBoolean(Keys.enableTransitions, true)
+    fun pageTransitions() = flowPrefs.getBoolean(Keys.enableTransitions, true)
 
-    fun doubleTapAnimSpeed() = rxPrefs.getInteger(Keys.doubleTapAnimationSpeed, 500)
+    fun doubleTapAnimSpeed() = flowPrefs.getInt(Keys.doubleTapAnimationSpeed, 500)
 
-    fun showPageNumber() = rxPrefs.getBoolean(Keys.showPageNumber, true)
+    fun showPageNumber() = flowPrefs.getBoolean(Keys.showPageNumber, true)
 
-    fun trueColor() = rxPrefs.getBoolean(Keys.trueColor, false)
+    fun trueColor() = flowPrefs.getBoolean(Keys.trueColor, false)
 
-    fun fullscreen() = rxPrefs.getBoolean(Keys.fullscreen, true)
+    fun fullscreen() = flowPrefs.getBoolean(Keys.fullscreen, true)
 
-    fun keepScreenOn() = rxPrefs.getBoolean(Keys.keepScreenOn, true)
+    fun keepScreenOn() = flowPrefs.getBoolean(Keys.keepScreenOn, true)
 
-    fun customBrightness() = rxPrefs.getBoolean(Keys.customBrightness, false)
+    fun customBrightness() = flowPrefs.getBoolean(Keys.customBrightness, false)
 
-    fun customBrightnessValue() = rxPrefs.getInteger(Keys.customBrightnessValue, 0)
+    fun customBrightnessValue() = flowPrefs.getInt(Keys.customBrightnessValue, 0)
 
-    fun colorFilter() = rxPrefs.getBoolean(Keys.colorFilter, false)
+    fun colorFilter() = flowPrefs.getBoolean(Keys.colorFilter, false)
 
-    fun colorFilterValue() = rxPrefs.getInteger(Keys.colorFilterValue, 0)
+    fun colorFilterValue() = flowPrefs.getInt(Keys.colorFilterValue, 0)
 
-    fun colorFilterMode() = rxPrefs.getInteger(Keys.colorFilterMode, 0)
+    fun colorFilterMode() = flowPrefs.getInt(Keys.colorFilterMode, 0)
 
     fun defaultViewer() = prefs.getInt(Keys.defaultViewer, 1)
 
-    fun imageScaleType() = rxPrefs.getInteger(Keys.imageScaleType, 1)
+    fun imageScaleType() = flowPrefs.getInt(Keys.imageScaleType, 1)
 
-    fun zoomStart() = rxPrefs.getInteger(Keys.zoomStart, 1)
+    fun zoomStart() = flowPrefs.getInt(Keys.zoomStart, 1)
 
-    fun readerTheme() = rxPrefs.getInteger(Keys.readerTheme, 2)
+    fun readerTheme() = flowPrefs.getInt(Keys.readerTheme, 2)
 
-    fun cropBorders() = rxPrefs.getBoolean(Keys.cropBorders, false)
+    fun cropBorders() = flowPrefs.getBoolean(Keys.cropBorders, false)
 
-    fun cropBordersWebtoon() = rxPrefs.getBoolean(Keys.cropBordersWebtoon, false)
+    fun cropBordersWebtoon() = flowPrefs.getBoolean(Keys.cropBordersWebtoon, false)
 
-    fun webtoonSidePadding() = rxPrefs.getInteger(Keys.webtoonSidePadding, 0)
+    fun webtoonSidePadding() = flowPrefs.getInt(Keys.webtoonSidePadding, 0)
 
-    fun readWithTapping() = rxPrefs.getBoolean(Keys.readWithTapping, true)
+    fun readWithTapping() = flowPrefs.getBoolean(Keys.readWithTapping, true)
 
-    fun readWithLongTap() = rxPrefs.getBoolean(Keys.readWithLongTap, true)
+    fun readWithLongTap() = flowPrefs.getBoolean(Keys.readWithLongTap, true)
 
-    fun readWithVolumeKeys() = rxPrefs.getBoolean(Keys.readWithVolumeKeys, false)
+    fun readWithVolumeKeys() = flowPrefs.getBoolean(Keys.readWithVolumeKeys, false)
 
-    fun readWithVolumeKeysInverted() = rxPrefs.getBoolean(Keys.readWithVolumeKeysInverted, false)
+    fun readWithVolumeKeysInverted() = flowPrefs.getBoolean(Keys.readWithVolumeKeysInverted, false)
 
     fun updateOnlyNonCompleted() = prefs.getBoolean(Keys.updateOnlyNonCompleted, false)
 
@@ -257,7 +257,7 @@ class PreferencesHelper(val context: Context) {
 
     fun hideFiltersAtStart() = rxPrefs.getBoolean("hide_filters_at_start", false)
 
-    fun alwaysShowChapterTransition() = rxPrefs.getBoolean(Keys.alwaysShowChapterTransition, true)
+    fun alwaysShowChapterTransition() = flowPrefs.getBoolean(Keys.alwaysShowChapterTransition, true)
 
     fun deleteRemovedChapters() = flowPrefs.getInt(Keys.deleteRemovedChapters, 0)
 
