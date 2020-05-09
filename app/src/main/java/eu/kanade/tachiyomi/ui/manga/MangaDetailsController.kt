@@ -368,8 +368,9 @@ class MangaDetailsController : BaseController,
     /** Get the color of the manga cover based on the current theme */
     fun setPaletteColor() {
         val view = view ?: return
+        coverColor = null
         GlideApp.with(view.context).load(manga)
-            .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+            .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
             .signature(ObjectKey(MangaImpl.getLastCoverFetch(manga!!.id!!).toString()))
             .into(object : CustomTarget<Drawable>() {
                 override fun onResourceReady(
@@ -390,6 +391,7 @@ class MangaDetailsController : BaseController,
                         }
                         coverColor = backDropColor
                         getHeader()?.setBackDrop(backDropColor)
+                        getHeader()?.updateCover(presenter.manga, resource)
                         if (toolbarIsColored) {
                             val translucentColor = ColorUtils.setAlphaComponent(backDropColor, 175)
                             (activity as MainActivity).toolbar.setBackgroundColor(translucentColor)

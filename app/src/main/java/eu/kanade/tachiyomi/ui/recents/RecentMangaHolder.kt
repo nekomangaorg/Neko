@@ -71,7 +71,7 @@ class RecentMangaHolder(
             )
         }
         GlideApp.with(itemView.context).load(item.mch.manga).diskCacheStrategy(DiskCacheStrategy
-            .AUTOMATIC)
+            .RESOURCE)
             .signature(ObjectKey(MangaImpl.getLastCoverFetch(item.mch.manga.id!!).toString())).into(cover_thumbnail)
         notifyStatus(
             if (adapter.isSelected(adapterPosition)) Download.CHECKED else item.status,

@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.manga
 import android.annotation.SuppressLint
 import android.content.res.ColorStateList
 import android.graphics.Color
+import android.graphics.drawable.Drawable
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -255,12 +256,7 @@ class MangaHeaderHolder(
         }
 
         if (!manga.initialized) return
-        GlideApp.with(view.context).load(manga).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-            .signature(ObjectKey(MangaImpl.getLastCoverFetch(manga.id!!).toString()))
-            .into(manga_cover)
-        GlideApp.with(view.context).load(manga).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-            .signature(ObjectKey(MangaImpl.getLastCoverFetch(manga.id!!).toString())).centerCrop()
-            .transition(DrawableTransitionOptions.withCrossFade()).into(backdrop)
+        updateCover(manga)
     }
 
     private fun MaterialButton.checked(checked: Boolean) {
@@ -310,6 +306,18 @@ class MangaHeaderHolder(
             less_button.gone()
             manga_genres_tags.gone()
         }
+    }
+
+    fun updateCover(manga: Manga, cover: Drawable? = null) {
+        if (adapter.delegate.coverColor() == null) return
+        GlideApp.with(view.context).load(cover ?: manga)
+            .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+            .signature(ObjectKey(MangaImpl.getLastCoverFetch(manga.id!!).toString()))
+            .into(manga_cover)
+        GlideApp.with(view.context).load(cover ?: manga)
+            .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+            .signature(ObjectKey(MangaImpl.getLastCoverFetch(manga.id!!).toString())).centerCrop()
+            .transition(DrawableTransitionOptions.withCrossFade()).into(backdrop)
     }
 
     fun expand() {
