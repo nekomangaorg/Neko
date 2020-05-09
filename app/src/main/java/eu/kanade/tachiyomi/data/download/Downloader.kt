@@ -463,7 +463,10 @@ class Downloader(
      * @param dirname the real (non temporary) directory name of the download.
      */
     private fun ensureSuccessfulDownload(
-        download: Download, mangaDir: UniFile, tmpDir: UniFile, dirname: String
+        download: Download,
+        mangaDir: UniFile,
+        tmpDir: UniFile,
+        dirname: String
     ) {
 
         // Ensure that the chapter folder has all the images.
