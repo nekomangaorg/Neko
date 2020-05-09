@@ -29,6 +29,7 @@ import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.library.AddToLibraryCategoriesDialog
 import eu.kanade.tachiyomi.ui.main.MainActivity
+import eu.kanade.tachiyomi.ui.main.RootSearchInterface
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.similar.FollowsController
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
@@ -62,7 +63,8 @@ open class BrowseSourceController(bundle: Bundle) :
     FlexibleAdapter.OnItemClickListener,
     FlexibleAdapter.OnItemLongClickListener,
     FlexibleAdapter.EndlessScrollListener,
-    AddToLibraryCategoriesDialog.Listener {
+    AddToLibraryCategoriesDialog.Listener,
+    RootSearchInterface {
 
     constructor(
         source: Source,
@@ -222,46 +224,10 @@ open class BrowseSourceController(bundle: Bundle) :
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        if (bundle?.getBoolean(APPLY_INSET) == true) {
-            (activity as? MainActivity)?.hideNavigationIcon()
-        } else {
+        if (bundle?.getBoolean(APPLY_INSET) != true) {
             (activity as? MainActivity)?.showNavigationArrow()
         }
         inflater.inflate(R.menu.browse_source, menu)
-
-        // Initialize search menu
-        val searchItem = menu.findItem(R.id.action_search)
-        val searchView = searchItem.actionView as SearchView
-
-        val query = presenter.query
-        if (!query.isBlank()) {
-            searchItem.expandActionView()
-            searchView.setQuery(query, true)
-            searchView.clearFocus()
-        }
-
-        val searchEventsObservable = searchView.queryTextChangeEvents()
-            .skip(1)
-            .filter { router.backstack.lastOrNull()?.controller() == this@BrowseSourceController }
-            .share()
-        val writingObservable = searchEventsObservable
-            .filter { !it.isSubmitted }
-            .debounce(1250, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
-        val submitObservable = searchEventsObservable
-            .filter { it.isSubmitted }
-
-        searchViewSubscription?.unsubscribe()
-        searchViewSubscription = Observable.merge(writingObservable, submitObservable)
-            .map { it.queryText().toString() }
-            .subscribeUntilDestroy { searchWithQuery(it) }
-
-        searchItem.fixExpand(
-            onExpand = { invalidateMenuOnExpand() },
-            onCollapse = {
-                searchWithQuery("")
-                true
-            }
-        )
 
         // Show next display mode
         menu.findItem(R.id.action_display_mode).apply {
@@ -635,6 +601,44 @@ open class BrowseSourceController(bundle: Bundle) :
             presenter.changeMangaFavorite(manga)
             adapter?.notifyItemChanged(position)
         }
+    }
+
+    override fun expandSearch() {
+        // Initialize search menu
+        val searchItem = activity?.toolbar?.menu?.findItem(R.id.action_search)!!
+        val searchView = searchItem.actionView as SearchView
+
+        val query = presenter.query
+        if (!query.isBlank()) {
+            searchItem.expandActionView()
+            searchView.setQuery(query, true)
+            searchView.clearFocus()
+        } else {
+            searchItem.expandActionView()
+        }
+
+        val searchEventsObservable = searchView.queryTextChangeEvents()
+            .skip(1)
+            .filter { router.backstack.lastOrNull()?.controller() == this@BrowseSourceController }
+            .share()
+        val writingObservable = searchEventsObservable
+            .filter { !it.isSubmitted }
+            .debounce(1250, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
+        val submitObservable = searchEventsObservable
+            .filter { it.isSubmitted }
+
+        searchViewSubscription?.unsubscribe()
+        searchViewSubscription = Observable.merge(writingObservable, submitObservable)
+            .map { it.queryText().toString() }
+            .subscribeUntilDestroy { searchWithQuery(it) }
+
+        searchItem.fixExpand(
+            onExpand = { invalidateMenuOnExpand() },
+            onCollapse = {
+                searchWithQuery("")
+                true
+            }
+        )
     }
 
     protected companion object {

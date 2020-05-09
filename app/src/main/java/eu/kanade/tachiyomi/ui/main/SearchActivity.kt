@@ -18,7 +18,7 @@ class SearchActivity : MainActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        toolbar?.navigationIcon = drawerArrow
+        toolbar?.navigationIcon = backArrow
         toolbar?.setNavigationOnClickListener {
             popToRoot()
         }
@@ -50,8 +50,7 @@ class SearchActivity : MainActivity() {
         if (from is DialogController || to is DialogController) {
             return
         }
-        toolbar.navigationIcon = drawerArrow
-        drawerArrow?.progress = 1f
+        toolbar.navigationIcon = backArrow
 
         bottom_nav.gone()
     }

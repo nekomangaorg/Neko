@@ -17,8 +17,6 @@ import android.view.ViewGroup
 import android.view.WindowInsets
 import android.view.WindowManager
 import android.webkit.WebView
-import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
-import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.GestureDetectorCompat
 import com.bluelinelabs.conductor.Conductor
@@ -30,6 +28,7 @@ import com.bluelinelabs.conductor.changehandler.FadeChangeHandler
 import com.getkeepsafe.taptargetview.TapTarget
 import com.getkeepsafe.taptargetview.TapTargetView
 import com.google.android.material.snackbar.Snackbar
+import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.Migrations
 import eu.kanade.tachiyomi.R
@@ -55,6 +54,7 @@ import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
 import eu.kanade.tachiyomi.util.system.contextCompatDrawable
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.hasSideNavBar
+import eu.kanade.tachiyomi.util.system.iconicsDrawableActionbar
 import eu.kanade.tachiyomi.util.system.isBottomTappable
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
@@ -80,7 +80,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
 
     val source: Source by lazy { Injekt.get<SourceManager>().getMangadex() }
 
-    var drawerArrow: DrawerArrowDrawable? = null
+    var backArrow: Drawable? = null
         private set
     private var searchDrawable: Drawable? = null
     private var dismissDrawable: Drawable? = null
@@ -107,8 +107,6 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
         extraViewForUndo = extraViewToCheck
     }
 
-    lateinit var tabAnimator: TabsAnimator
-
     override fun onCreate(savedInstanceState: Bundle?) {
         // Create a webview before extensions do or else they will break night mode theme
         // https://stackoverflow.com/questions/54191883
@@ -131,14 +129,9 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
 
         setSupportActionBar(toolbar)
 
-        drawerArrow = DrawerArrowDrawable(this)
-        drawerArrow?.color = getResourceColor(R.attr.actionBarTintColor)
-        searchDrawable = ContextCompat.getDrawable(
-            this, R.drawable.ic_search_white_24dp
-        )
-        dismissDrawable = ContextCompat.getDrawable(
-            this, R.drawable.ic_close_white_24dp
-        )
+        backArrow = this.iconicsDrawableActionbar(MaterialDesignDx.Icon.gmf_arrow_back)
+        searchDrawable = this.iconicsDrawableActionbar(MaterialDesignDx.Icon.gmf_search)
+        dismissDrawable = this.iconicsDrawableActionbar(MaterialDesignDx.Icon.gmf_close)
 
         var continueSwitchingTabs = false
         bottom_nav.getItemView(R.id.nav_library)?.setOnLongClickListener {
@@ -268,7 +261,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
 
         syncActivityViewWithController(router.backstack.lastOrNull()?.controller())
 
-        toolbar.navigationIcon = if (router.backstackSize > 1) drawerArrow else searchDrawable
+        toolbar.navigationIcon = if (router.backstackSize > 1) backArrow else searchDrawable
         (router.backstack.lastOrNull()?.controller() as? BaseController)?.setTitle()
         (router.backstack.lastOrNull()?.controller() as? SettingsController)?.setTitle()
 
@@ -285,11 +278,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
     }
 
     fun showNavigationArrow() {
-        toolbar.navigationIcon = drawerArrow
-    }
-
-    fun hideNavigationIcon() {
-        toolbar.navigationIcon = null
+        toolbar.navigationIcon = backArrow
     }
 
     private fun setNavBarColor(insets: WindowInsets?) {
@@ -394,7 +383,6 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
     }
 
     fun setBrowseRoot() {
-        toolbar.navigationIcon = null
         setRoot(BrowseSourceController(source), R.id.nav_browse)
     }
 
@@ -511,7 +499,6 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
         } else {
             showNavigationArrow()
         }
-        drawerArrow?.progress = 1f
 
         bottom_nav.visibility = if (!hideBottomNav) View.VISIBLE else bottom_nav.visibility
         animationSet?.cancel()

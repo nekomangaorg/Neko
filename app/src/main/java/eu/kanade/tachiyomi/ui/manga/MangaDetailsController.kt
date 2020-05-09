@@ -416,7 +416,7 @@ class MangaDetailsController : BaseController,
                 else R.attr.actionBarTintColor
             ) ?: Color.BLACK
             activity.toolbar.setTitleTextColor(iconPrimary)
-            activity.drawerArrow?.color = iconPrimary
+            activity.backArrow?.setTint(iconPrimary)
             activity.toolbar.overflowIcon?.setTint(iconPrimary)
             if (forThis) activity.main_content.systemUiVisibility =
                 activity.main_content.systemUiVisibility.or(

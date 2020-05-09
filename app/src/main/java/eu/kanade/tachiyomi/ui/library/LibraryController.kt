@@ -69,11 +69,8 @@ import eu.kanade.tachiyomi.util.view.hide
 import eu.kanade.tachiyomi.util.view.isExpanded
 import eu.kanade.tachiyomi.util.view.isHidden
 import eu.kanade.tachiyomi.util.view.scrollViewWith
-import eu.kanade.tachiyomi.util.view.setBackground
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
-import eu.kanade.tachiyomi.util.view.setStartTranslationX
 import eu.kanade.tachiyomi.util.view.setStyle
-import eu.kanade.tachiyomi.util.view.show
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
@@ -442,7 +439,8 @@ class LibraryController(
                     newOffset > -1
                 } else {
                     newOffset < adapter.headerItems.size
-                }) {
+                }
+            ) {
                 val newCategory = (adapter.headerItems[newOffset] as LibraryHeaderItem).category
                 val newOrder = newCategory.order
                 scrollToHeader(newOrder)
@@ -626,9 +624,9 @@ class LibraryController(
         }
         adapter.setItems(mangaMap)
         if (recycler.itemAnimator == null)
-        recycler.post {
-            recycler.itemAnimator = DefaultItemAnimator()
-        }
+            recycler.post {
+                recycler.itemAnimator = DefaultItemAnimator()
+            }
         singleCategory = presenter.categories.size <= 1
         if (onRoot) {
             activity?.dropdown?.visibleIf(!singleCategory)
@@ -1134,7 +1132,6 @@ class LibraryController(
     //region Toolbar options methods
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.library, menu)
-
         val searchItem = menu.findItem(R.id.action_search)
         val searchView = searchItem.actionView as SearchView
         searchView.queryHint = resources?.getString(R.string.library_search_hint)

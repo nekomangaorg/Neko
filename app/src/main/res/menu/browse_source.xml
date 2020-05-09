@@ -3,11 +3,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".CatalogueListActivity">
 
+    <!--Only needed because the navigation search uses this id -->
     <item
         android:id="@+id/action_search"
-        android:icon="@drawable/ic_search_white_24dp"
         android:title="@string/search"
         app:actionViewClass="androidx.appcompat.widget.SearchView"
+        android:visible="false"
         app:showAsAction="collapseActionView|ifRoom" />
 
     <item
@@ -19,13 +20,12 @@
         android:id="@+id/action_open_in_web_view"
         android:icon="@drawable/ic_open_in_webview_white_24dp"
         android:title="@string/open_in_webview"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="never" />
 
     <item
         android:id="@+id/action_settings"
         android:icon="@drawable/ic_settings_white_24dp"
         android:title="@string/settings"
-        app:showAsAction="never"
-        />
+        app:showAsAction="never" />
 
 </menu>

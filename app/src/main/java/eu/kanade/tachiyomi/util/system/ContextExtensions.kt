@@ -134,6 +134,11 @@ fun Context.iconicsDrawable(icon: IIcon, size: Int = 24, color: Int = R.attr.col
     }
 }
 
+@SuppressLint("ResourceType")
+fun Context.iconicsDrawableActionbar(icon: IIcon, size: Int = 17, color: Int = R.attr.actionBarTintColor, attributeColor: Boolean = true): IconicsDrawable {
+    return this.iconicsDrawable(icon, size, color, attributeColor)
+}
+
 /**
  * Converts to dp.
  */
