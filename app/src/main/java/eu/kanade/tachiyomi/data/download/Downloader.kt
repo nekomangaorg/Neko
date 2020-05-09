@@ -196,16 +196,7 @@ class Downloader(
         subscriptions.clear()
 
         subscriptions += downloadsRelay.concatMapIterable { it }
-            // Concurrently download from 5 different sources
-            .groupBy { it.source }
-            .flatMap(
-                { bySource ->
-                    bySource.concatMap { download ->
-                        downloadChapter(download).subscribeOn(Schedulers.io())
-                    }
-                },
-                5
-            )
+            .flatMap({ downloadChapter(it).subscribeOn(Schedulers.io()) }, 2)
             .onBackpressureBuffer()
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
@@ -287,28 +278,28 @@ class Downloader(
         val pageListObservable = if (download.pages == null) {
             // Pull page list from network and add them to download object
             download.source.fetchPageList(download.chapter).doOnNext { pages ->
-                    if (pages.isEmpty()) {
-                        throw Exception("Page list is empty")
-                    }
-                    download.pages = pages
+                if (pages.isEmpty()) {
+                    throw Exception("Page list is empty")
                 }
+                download.pages = pages
+            }
         } else {
             // Or if the page list already exists, start from the file
             Observable.just(download.pages!!)
         }
 
         pageListObservable.doOnNext { _ ->
-                // Delete all temporary (unfinished) files
-                tmpDir.listFiles()?.filter { it.name!!.endsWith(".tmp") }?.forEach { it.delete() }
+            // Delete all temporary (unfinished) files
+            tmpDir.listFiles()?.filter { it.name!!.endsWith(".tmp") }?.forEach { it.delete() }
 
-                download.downloadedImages = 0
-                download.status = Download.DOWNLOADING
-            }
+            download.downloadedImages = 0
+            download.status = Download.DOWNLOADING
+        }
             // Get all the URLs to the source images, fetch pages if necessary
-                .flatMap { Observable.from(it)  }
+            .flatMap { Observable.from(it) }
             // Start downloading images, consider we can have downloaded images already
             // Concurrently do 5 pages at a time
-            .flatMap({ page -> getOrDownloadImage(page, download, tmpDir) }, 5)
+            .flatMap({ page -> getOrDownloadImage(page, download, tmpDir) }, 8)
             // Do when page is downloaded.
             .doOnNext { notifier.onProgressChange(download) }.toList().map { _ -> download }
             // Do after download completes

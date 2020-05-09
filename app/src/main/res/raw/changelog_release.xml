@@ -6,14 +6,14 @@
         <changelogtext>New category hopper</changelogtext>
         <changelogtext>New material fast scroll bar</changelogtext>
         <changelogtext>Downloads are now faster</changelogtext>
+        <changelogtext>Download 2 chapters at once now</changelogtext>
         <changelogtext>Removed workaround option to not mark as read as api was changed and its not needed anymore</changelogtext>
         <changelogtext></changelogtext>
         <changelogtext></changelogtext>
         <changelogtext></changelogtext>
-        <changelogtext></changelogtext>
-        <changelogtext></changelogtext>
-        <changelogtext></changelogtext>
-        <changelogtext>neko specific bug fixes</changelogtext>
+        <changelogtext>Oneshot bug fix</changelogtext>
+        <changelogtext>Missing pages fix</changelogtext>
+        <changelogtext>2FA not showing fixed</changelogtext>
         <changelogtext>upstream bug fixes</changelogtext>
     </changelogversion>
     <changelogversion
