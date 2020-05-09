@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.ui.manga
 import android.annotation.SuppressLint
 import android.content.res.ColorStateList
 import android.graphics.Color
-import android.graphics.drawable.Drawable
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -308,14 +307,12 @@ class MangaHeaderHolder(
         }
     }
 
-    fun updateCover(manga: Manga, cover: Drawable? = null) {
-        if (adapter.delegate.coverColor() == null) return
-        GlideApp.with(view.context).load(cover ?: manga)
-            .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+    fun updateCover(manga: Manga, force: Boolean = false) {
+        if (!manga.initialized || (adapter.delegate.coverColor() == null && manga.favorite && !force)) return
+        GlideApp.with(view.context).load(manga).diskCacheStrategy(DiskCacheStrategy.RESOURCE)
             .signature(ObjectKey(MangaImpl.getLastCoverFetch(manga.id!!).toString()))
             .into(manga_cover)
-        GlideApp.with(view.context).load(cover ?: manga)
-            .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+        GlideApp.with(view.context).load(manga).diskCacheStrategy(DiskCacheStrategy.RESOURCE)
             .signature(ObjectKey(MangaImpl.getLastCoverFetch(manga.id!!).toString())).centerCrop()
             .transition(DrawableTransitionOptions.withCrossFade()).into(backdrop)
     }
