@@ -21,7 +21,7 @@ class RecentMangaHolder(
 ) : BaseChapterHolder(view, adapter) {
 
     init {
-        cover_thumbnail?.setOnClickListener { adapter.delegate.onCoverClick(adapterPosition) }
+        card_layout?.setOnClickListener { adapter.delegate.onCoverClick(adapterPosition) }
     }
 
     fun bind(recentsType: Int) {
