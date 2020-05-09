@@ -15,7 +15,6 @@ import androidx.core.app.NotificationManagerCompat
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.signature.ObjectKey
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.backup.models.Backup.CHAPTERS
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
@@ -54,7 +53,6 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
-import kotlinx.coroutines.withContext
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -123,7 +121,7 @@ class LibraryUpdateService(
     // Boolean to determine if DownloadManager has downloads
     private var hasDownloads = false
 
-    private val requestSemaphore = Semaphore(5)
+    private var requestSemaphore = Semaphore(1)
 
     // For updates delete removed chapters if not preference is set as well
     private val deleteRemoved by lazy {
@@ -286,13 +284,12 @@ class LibraryUpdateService(
             Timber.e(exception)
             stopSelf(startId)
         }
+        if (target == Target.CHAPTERS) {
+            listener?.onUpdateManga(LibraryManga())
+        }
         job = GlobalScope.launch(handler) {
             when (target) {
-                Target.CHAPTERS -> {
-                    listener?.onUpdateManga(LibraryManga())
-                    updateChaptersJob(mangaToAdd)
-                }
-                Target.DETAILS -> updateDetails(mangaToAdd)
+                Target.CHAPTERS -> updateChaptersJob(mangaToAdd)
                 Target.SYNC_FOLLOWS -> syncFollows()
                 else -> updateTrackings(mangaToAdd)
             }
@@ -305,7 +302,11 @@ class LibraryUpdateService(
         // Initialize the variables holding the progress of the updates.
 
         mangaToUpdate.addAll(mangaToAdd)
-        mangaToUpdateMap.putAll(mangaToAdd.groupBy { it.source })
+
+        updateMangaMap(mangaToAdd)
+
+        requestSemaphore = Semaphore(mangaToUpdateMap.keys.size)
+
         coroutineScope {
             jobCount.andIncrement
             val list = mangaToUpdateMap.keys.map { source ->
@@ -322,16 +323,22 @@ class LibraryUpdateService(
         }
     }
 
+    private fun updateMangaMap(mangaToAdd: List<LibraryManga>) {
+        val chunked = mangaToAdd.chunked(mangaToAdd.size.div(5))
+        for (x in chunked.indices) {
+            mangaToUpdateMap[x.toLong()] = chunked[x]
+        }
+    }
+
     private suspend fun finishUpdates() {
         if (jobCount.get() != 0) return
         if (newUpdates.isNotEmpty()) {
             showResultNotification(newUpdates)
-        if (downloadNew && hasDownloads) {
+            if (downloadNew && hasDownloads) {
                 DownloadService.start(this)
             }
         }
         cancelProgressNotification()
-
     }
 
     private suspend fun updateMangaInSource(
@@ -446,48 +453,6 @@ class LibraryUpdateService(
         // We don't want to start downloading while the library is updating, because websites
         // may don't like it and they could ban the user.
         downloadManager.downloadChapters(manga, dbChapters, false)
-    }
-
-    /**
-     * Method that updates the details of the given list of manga. It's called in a background
-     * thread, so it's safe to do heavy operations or network calls here.
-     *
-     * @param mangaToUpdate the list to update
-     */
-    suspend fun updateDetails(mangaToUpdate: List<LibraryManga>) = coroutineScope {
-        // Initialize the variables holding the progress of the updates.
-        val count = AtomicInteger(0)
-        val asyncList = mangaToUpdate.groupBy { it.source }.values.map { list ->
-            async {
-                requestSemaphore.withPermit {
-                    list.forEach { manga ->
-                        if (job?.isCancelled == true) {
-                            return@async
-                        }
-                        val source = sourceManager.get(manga.source) as? HttpSource ?: return@async
-                        showProgressNotification(manga, count.andIncrement, mangaToUpdate.size)
-
-                        val networkManga = try {
-                            source.fetchMangaDetailsAsync(manga)
-                        } catch (e: java.lang.Exception) {
-                            Timber.e(e)
-                            null
-                        }
-                        if (networkManga != null) {
-                            val thumbnailUrl = manga.thumbnail_url
-                            manga.copyFrom(networkManga)
-                            manga.initialized = true
-                            db.insertManga(manga).executeAsBlocking()
-                            if (thumbnailUrl != networkManga.thumbnail_url && !manga.hasCustomCover()) {
-                                MangaImpl.setLastCoverFetch(manga.id!!, Date().time)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        asyncList.awaitAll()
-        cancelProgressNotification()
     }
 
     /**
