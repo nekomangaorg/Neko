@@ -15,6 +15,7 @@ import androidx.core.app.NotificationManagerCompat
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.signature.ObjectKey
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.backup.models.Backup.CHAPTERS
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
@@ -47,7 +48,16 @@ import eu.kanade.tachiyomi.util.system.notificationManager
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
+import kotlinx.coroutines.withContext
+import rx.Observable
+import rx.Subscription
+import rx.schedulers.Schedulers
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -96,10 +106,27 @@ class LibraryUpdateService(
 
     private val mangaToUpdate = mutableListOf<LibraryManga>()
 
+    private val mangaToUpdateMap = mutableMapOf<Long, List<LibraryManga>>()
+
     private val categoryIds = mutableSetOf<Int>()
 
     // List containing new updates
     private val newUpdates = mutableMapOf<LibraryManga, Array<Chapter>>()
+
+    val count = AtomicInteger(0)
+    val jobCount = AtomicInteger(0)
+
+    // List containing categories that get included in downloads.
+    private val categoriesToDownload =
+        preferences.downloadNewCategories().getOrDefault().map(String::toInt)
+
+    // Boolean to determine if user wants to automatically download new chapters.
+    private val downloadNew: Boolean = preferences.downloadNew().getOrDefault()
+
+    // Boolean to determine if DownloadManager has downloads
+    private var hasDownloads = false
+
+    private val requestSemaphore = Semaphore(5)
 
     // For updates delete removed chapters if not preference is set as well
     private val deleteRemoved by lazy {
@@ -124,8 +151,33 @@ class LibraryUpdateService(
     }
 
     private fun addManga(mangaToAdd: List<LibraryManga>) {
-        for (manga in mangaToAdd) {
-            if (mangaToUpdate.none { it.id == manga.id }) mangaToUpdate.add(manga)
+        val distinctManga = mangaToAdd.filter { it !in mangaToUpdate }
+        mangaToUpdate.addAll(distinctManga)
+        distinctManga.groupBy { it.source }.forEach {
+            // if added queue items is a new source not in the async list or an async list has
+            // finished running
+            if (mangaToUpdateMap[it.key].isNullOrEmpty()) {
+                mangaToUpdateMap[it.key] = it.value
+                jobCount.andIncrement
+                val handler = CoroutineExceptionHandler { _, exception ->
+                    Timber.e(exception)
+                }
+                GlobalScope.launch(handler) {
+                    val hasDLs = requestSemaphore.withPermit {
+                        updateMangaInSource(
+                            it.key, downloadNew, categoriesToDownload
+                        )
+                    }
+                    hasDownloads = hasDownloads || hasDLs
+                    jobCount.andDecrement
+                    if (job?.isCancelled != false) {
+                        finishUpdates()
+                    }
+                }
+            } else {
+                val list = mangaToUpdateMap[it.key] ?: emptyList()
+                mangaToUpdateMap[it.key] = (list + it.value)
+            }
         }
     }
 
@@ -254,28 +306,27 @@ class LibraryUpdateService(
     }
 
     private suspend fun updateChaptersJob(mangaToAdd: List<LibraryManga>) {
-
-        // List containing categories that get included in downloads.
-        val categoriesToDownload =
-            preferences.downloadNewCategories().getOrDefault().map(String::toInt)
-        // Boolean to determine if user wants to automatically download new chapters.
-        val downloadNew = preferences.downloadNew().getOrDefault()
-        // Boolean to determine if DownloadManager has downloads
-        var hasDownloads = false
         // Initialize the variables holding the progress of the updates.
-        var count = 0
 
         mangaToUpdate.addAll(mangaToAdd)
-        while (count < mangaToUpdate.size) {
-            val shouldDownload = (downloadNew && (categoriesToDownload.isEmpty() ||
-                mangaToUpdate[count].category in categoriesToDownload ||
-                db.getCategoriesForManga(mangaToUpdate[count]).executeOnIO()
-                    .any { (it.id ?: -1) in categoriesToDownload }))
-            if (updateMangaChapters(mangaToUpdate[count], count, shouldDownload)) {
-                hasDownloads = true
+        mangaToUpdateMap.putAll(mangaToAdd.groupBy { it.source })
+        coroutineScope {
+            jobCount.andIncrement
+            val list = mangaToUpdateMap.keys.map { source ->
+                async {
+                    requestSemaphore.withPermit {
+                        updateMangaInSource(source, downloadNew, categoriesToDownload)
+                    }
+                }
             }
-            count++
+            val results = list.awaitAll()
+            hasDownloads = hasDownloads || results.any { it }
+            jobCount.andDecrement
+            finishUpdates()
         }
+    }
+
+    private fun finishUpdates() {
         if (newUpdates.isNotEmpty()) {
             showResultNotification(newUpdates)
             if (downloadNew && hasDownloads) {
@@ -283,6 +334,32 @@ class LibraryUpdateService(
             }
         }
         cancelProgressNotification()
+
+    }
+
+    private suspend fun updateMangaInSource(
+        source: Long,
+        downloadNew: Boolean,
+        categoriesToDownload: List<Int>
+    ): Boolean {
+        if (mangaToUpdateMap[source] == null) return false
+        var count = 0
+        var hasDownloads = false
+        while (count < mangaToUpdateMap[source]!!.size) {
+            val shouldDownload =
+                (downloadNew && (categoriesToDownload.isEmpty() || mangaToUpdateMap[source]!![count].category in categoriesToDownload || db.getCategoriesForManga(
+                    mangaToUpdateMap[source]!![count]
+                ).executeOnIO().any { (it.id ?: -1) in categoriesToDownload }))
+            if (updateMangaChapters(
+                    mangaToUpdateMap[source]!![count], this.count.andIncrement, shouldDownload
+                )
+            ) {
+                hasDownloads = true
+            }
+            count++
+        }
+        mangaToUpdateMap[source] = emptyList()
+        return hasDownloads
     }
 
     private suspend fun updateMangaChapters(
