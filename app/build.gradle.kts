@@ -107,9 +107,11 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics:17.4.0")
     implementation("com.google.firebase:firebase-crashlytics:17.0.0")
 
-    val lifecycleVersion = "2.1.0"
+    val lifecycleVersion = "2.2.0"
     implementation("androidx.lifecycle:lifecycle-extensions:$lifecycleVersion")
     implementation("androidx.lifecycle:lifecycle-common-java8:$lifecycleVersion")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
+
 
 // ReactiveX
     implementation("io.reactivex:rxandroid:1.2.1")
