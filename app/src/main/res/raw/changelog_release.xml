@@ -2,6 +2,22 @@
 <changelog bulletedList="true">
     <changelogversion
         changeDate=""
+        versionName="v2.0.6">
+        <changelogtext>New category hopper</changelogtext>
+        <changelogtext>New material fast scroll bar</changelogtext>
+        <changelogtext>Downloads are now faster</changelogtext>
+        <changelogtext>Removed workaround option to not mark as read as api was changed and its not needed anymore</changelogtext>
+        <changelogtext></changelogtext>
+        <changelogtext></changelogtext>
+        <changelogtext></changelogtext>
+        <changelogtext></changelogtext>
+        <changelogtext></changelogtext>
+        <changelogtext></changelogtext>
+        <changelogtext>neko specific bug fixes</changelogtext>
+        <changelogtext>upstream bug fixes</changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
         versionName="v2.0.5">
         <changelogtext>minor bug fixes see 2.0.4 for more changes</changelogtext>
     </changelogversion>
