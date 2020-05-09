@@ -15,6 +15,12 @@ import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.widget.SimpleTextWatcher
 import kotlinx.android.synthetic.main.pref_account_login.view.*
+import kotlinx.android.synthetic.main.pref_account_login.view.login
+import kotlinx.android.synthetic.main.pref_account_login.view.password
+import kotlinx.android.synthetic.main.pref_account_login.view.show_password
+import kotlinx.android.synthetic.main.pref_account_login.view.username
+import kotlinx.android.synthetic.main.pref_account_login.view.username_label
+import kotlinx.android.synthetic.main.pref_site_login.view.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -67,6 +73,16 @@ abstract class LoginDialogPreference(
 
             login.setMode(ActionProcessButton.Mode.ENDLESS)
             login.setOnClickListener { checkLogin() }
+
+            two_factor_check?.setOnCheckedChangeListener { _, isChecked ->
+                if (isChecked) {
+                    two_factor_edit.visibility = View.VISIBLE
+                    two_factor_static.visibility = View.VISIBLE
+                } else {
+                    two_factor_edit.visibility = View.GONE
+                    two_factor_static.visibility = View.GONE
+                }
+            }
 
             setCredentialsOnView(this)
 
