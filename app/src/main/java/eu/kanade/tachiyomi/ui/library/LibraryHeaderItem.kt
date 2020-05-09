@@ -164,8 +164,8 @@ class LibraryHeaderItem(
                 else R.drawable.ic_expand_less_24dp)
             when {
                 adapter.mode == SelectableAdapter.Mode.MULTI -> {
-                    checkboxImage.visible()
-                    expandImage.invisible()
+                    checkboxImage.visibleIf(!category.isHidden)
+                    expandImage.visibleIf(category.isHidden && !adapter.isSingleCategory)
                     updateButton.gone()
                     catProgress.gone()
                     setSelection()
