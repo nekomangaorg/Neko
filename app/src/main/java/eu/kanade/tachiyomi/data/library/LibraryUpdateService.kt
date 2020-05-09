@@ -207,6 +207,10 @@ class LibraryUpdateService(
          */
         fun stop(context: Context) {
             instance?.job?.cancel()
+            GlobalScope.launch {
+                instance?.jobCount?.set(0)
+                instance?.finishUpdates()
+            }
             context.stopService(Intent(context, LibraryUpdateService::class.java))
         }
 
@@ -241,9 +245,7 @@ class LibraryUpdateService(
                     }
                     hasDownloads = hasDownloads || hasDLs
                     jobCount.andDecrement
-                    if (job?.isCancelled != false) {
-                        finishUpdates()
-                    }
+                    finishUpdates()
                 }
             } else {
                 val list = mangaToUpdateMap[it.key] ?: emptyList()
@@ -362,7 +364,7 @@ class LibraryUpdateService(
         }
         job = GlobalScope.launch(handler) {
             when (target) {
-                Target.CHAPTERS ->updateChaptersJob(mangaToAdd)
+                Target.CHAPTERS -> updateChaptersJob(mangaToAdd)
                 Target.DETAILS -> updateDetails(mangaToAdd)
                 else -> updateTrackings(mangaToAdd)
             }
@@ -406,6 +408,7 @@ class LibraryUpdateService(
             } else if (downloadNew && hasDownloads) {
                 DownloadService.start(this)
             }
+            newUpdates.clear()
         }
         cancelProgressNotification()
     }
