@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.ui.manga
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.graphics.drawable.Drawable
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -277,28 +276,27 @@ class MangaHeaderHolder(
             .signature(ObjectKey(MangaImpl.getLastCoverFetch(manga.id!!).toString())).centerCrop()
             .transition(DrawableTransitionOptions.withCrossFade()).into(backdrop)
     }
-}
 
-fun expand() {
-    sub_item_group.visible()
-    if (!showMoreButton) more_button_group.gone()
-    else {
-        if (manga_summary.maxLines != Integer.MAX_VALUE) more_button_group.visible()
+    fun expand() {
+        sub_item_group.visible()
+        if (!showMoreButton) more_button_group.gone()
         else {
-            less_button.visible()
-            manga_genres_tags.visible()
+            if (manga_summary.maxLines != Integer.MAX_VALUE) more_button_group.visible()
+            else {
+                less_button.visible()
+                manga_genres_tags.visible()
+            }
         }
+        start_reading_button.visibleIf(showReadingButton)
     }
-    start_reading_button.visibleIf(showReadingButton)
-}
 
-fun showSimilarToolTip(activity: Activity?) {
-    val act = activity ?: return
-    SimilarToolTip(activity, view.context, similar_button)
-}
+    fun showSimilarToolTip(activity: Activity?) {
+        val act = activity ?: return
+        SimilarToolTip(activity, view.context, similar_button)
+    }
 
-override fun onLongClick(view: View?): Boolean {
-    super.onLongClick(view)
-    return false
-}
+    override fun onLongClick(view: View?): Boolean {
+        super.onLongClick(view)
+        return false
+    }
 }
