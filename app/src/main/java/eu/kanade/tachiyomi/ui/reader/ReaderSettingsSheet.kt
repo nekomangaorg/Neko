@@ -92,8 +92,7 @@ class ReaderSettingsSheet(private val activity: ReaderActivity) :
             is WebtoonViewer -> initWebtoonPreferences()
         }
 
-        setBottomEdge(page_transitions, activity)
-        setBottomEdge(webtoon_side_padding, activity)
+        setBottomEdge(constraint_layout, activity)
 
         close_button.setOnClickListener {
             dismiss()
