@@ -403,6 +403,7 @@ class MangaDetailsPresenter(
                 manga.initialized = true
                 db.insertManga(manga).executeAsBlocking()
                 if (thumbnailUrl != networkManga.thumbnail_url && !manga.hasCustomCover()) {
+                    coverCache.deleteFromCache(thumbnailUrl)
                     MangaImpl.setLastCoverFetch(manga.id!!, Date().time)
                     withContext(Dispatchers.Main) { controller.setPaletteColor() }
                 }
