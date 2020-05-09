@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.manga
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.graphics.drawable.Drawable
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -89,8 +90,6 @@ class MangaHeaderHolder(
             }
             manga_cover.setOnClickListener { adapter.delegate.zoomImageFromThumb(cover_card) }
             track_button.setOnClickListener { adapter.delegate.showTrackingSheet() }
-            webview_button.setOnClickListener { adapter.delegate.showExternalSheet() }
-
             if (startExpanded) expandDesc()
             else collapseDesc()
         } else {
@@ -107,6 +106,7 @@ class MangaHeaderHolder(
             manga_genres_tags.visible()
             less_button.visible()
             more_button_group.gone()
+            title.maxLines = Integer.MAX_VALUE
         }
     }
 
@@ -117,6 +117,7 @@ class MangaHeaderHolder(
         manga_genres_tags.gone()
         less_button.gone()
         more_button_group.visible()
+        title.maxLines = 4
         adapter.recyclerView.post {
             adapter.delegate.updateScroll()
         }
@@ -245,12 +246,7 @@ class MangaHeaderHolder(
         filters_text.text = presenter.currentFilters()
 
         if (!manga.initialized) return
-        GlideApp.with(view.context).load(manga).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-            .signature(ObjectKey(MangaImpl.getLastCoverFetch(manga.id!!).toString()))
-            .into(manga_cover)
-        GlideApp.with(view.context).load(manga).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-            .signature(ObjectKey(MangaImpl.getLastCoverFetch(manga.id!!).toString())).centerCrop()
-            .transition(DrawableTransitionOptions.withCrossFade()).into(backdrop)
+        updateCover(manga)
     }
 
     fun setTopHeight(newHeight: Int) {
@@ -272,26 +268,39 @@ class MangaHeaderHolder(
         manga_genres_tags.visibleIf(shouldHide)
     }
 
-    fun expand() {
-        sub_item_group.visible()
-        if (!showMoreButton) more_button_group.gone()
+    fun updateCover(manga: Manga, cover: Drawable? = null) {
+        if (adapter.delegate.coverColor() == null) return
+        GlideApp.with(view.context).load(cover ?: manga)
+            .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+            .signature(ObjectKey(MangaImpl.getLastCoverFetch(manga.id!!).toString()))
+            .into(manga_cover)
+        GlideApp.with(view.context).load(cover ?: manga)
+            .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+            .signature(ObjectKey(MangaImpl.getLastCoverFetch(manga.id!!).toString())).centerCrop()
+            .transition(DrawableTransitionOptions.withCrossFade()).into(backdrop)
+    }
+}
+
+fun expand() {
+    sub_item_group.visible()
+    if (!showMoreButton) more_button_group.gone()
+    else {
+        if (manga_summary.maxLines != Integer.MAX_VALUE) more_button_group.visible()
         else {
-            if (manga_summary.maxLines != Integer.MAX_VALUE) more_button_group.visible()
-            else {
-                less_button.visible()
-                manga_genres_tags.visible()
-            }
+            less_button.visible()
+            manga_genres_tags.visible()
         }
-        start_reading_button.visibleIf(showReadingButton)
     }
+    start_reading_button.visibleIf(showReadingButton)
+}
 
-    fun showSimilarToolTip(activity: Activity?) {
-        val act = activity ?: return
-        SimilarToolTip(activity, view.context, similar_button)
-    }
+fun showSimilarToolTip(activity: Activity?) {
+    val act = activity ?: return
+    SimilarToolTip(activity, view.context, similar_button)
+}
 
-    override fun onLongClick(view: View?): Boolean {
-        super.onLongClick(view)
-        return false
-    }
+override fun onLongClick(view: View?): Boolean {
+    super.onLongClick(view)
+    return false
+}
 }
