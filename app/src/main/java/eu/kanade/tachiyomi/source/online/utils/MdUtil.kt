@@ -61,7 +61,9 @@ class MdUtil {
             "[b][u]French / Fran&ccedil;ais[/u][/b]",
             "[b][u]Turkish / T&uuml;rk&ccedil;e[/u][/b]",
             "[hr][u][b]Turkish/T&uuml;rk&ccedil;e[/b][/u]",
+            "[b][u]Chinese[/u][/b]",
             "[b][u]Arabic / العربية[/u][/b]",
+            "[b][u]Vietnamese[/u][/b]",
             "[hr][b]Links:[/b]",
             "Links:",
             "[b]External Links :[/b]"
