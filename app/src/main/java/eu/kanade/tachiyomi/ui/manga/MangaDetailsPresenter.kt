@@ -53,7 +53,7 @@ class MangaDetailsPresenter(
     val manga: Manga,
     val source: Source,
     val preferences: PreferencesHelper = Injekt.get(),
-    private val coverCache: CoverCache = Injekt.get(),
+    val coverCache: CoverCache = Injekt.get(),
     private val db: DatabaseHelper = Injekt.get(),
     private val downloadManager: DownloadManager = Injekt.get()
 ) : DownloadQueue.DownloadListener, LibraryServiceListener {

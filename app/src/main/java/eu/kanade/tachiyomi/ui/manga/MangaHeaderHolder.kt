@@ -268,13 +268,22 @@ class MangaHeaderHolder(
     }
 
     fun updateCover(manga: Manga, force: Boolean = false) {
-        if (!manga.initialized || (adapter.delegate.coverColor() == null && manga.favorite && !force)) return
+        if (!isCached(manga)) return
         GlideApp.with(view.context).load(manga).diskCacheStrategy(DiskCacheStrategy.RESOURCE)
             .signature(ObjectKey(MangaImpl.getLastCoverFetch(manga.id!!).toString()))
             .into(manga_cover)
         GlideApp.with(view.context).load(manga).diskCacheStrategy(DiskCacheStrategy.RESOURCE)
             .signature(ObjectKey(MangaImpl.getLastCoverFetch(manga.id!!).toString())).centerCrop()
             .transition(DrawableTransitionOptions.withCrossFade()).into(backdrop)
+    }
+
+    private fun isCached(manga: Manga): Boolean {
+        val coverCache = adapter.delegate.mangaPresenter().coverCache
+        manga.thumbnail_url?.let {
+            return if (manga.favorite) coverCache.getCoverFile(it).exists()
+            else true
+        }
+        return manga.initialized
     }
 
     fun expand() {
