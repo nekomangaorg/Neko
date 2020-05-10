@@ -68,16 +68,17 @@ interface Manga : SManga {
             genre?.split(",")?.map { it.trim().toLowerCase(Locale.US) } ?: return TYPE_MANGA
         return if (currentTags.any { tag -> tag.startsWith("japanese") || isMangaTag(tag) }) {
             TYPE_MANGA
-        } else if (currentTags.any { tag -> tag.startsWith("english") || isComicTag(tag) } ||
-            isComicSource(sourceName)) {
+        } else if (currentTags.any { tag -> tag.startsWith("english") || isComicTag(tag) } || isComicSource(
+                sourceName
+            )) {
             TYPE_COMIC
         } else if (currentTags.any { tag ->
                 tag.startsWith("chinese") || isManhuaTag(tag)
             } || sourceName.contains("manhua", true)) {
             TYPE_MANHUA
         } else if (currentTags.any { tag -> isManhwaTag(tag) } || isWebtoonSource(sourceName)) {
-             TYPE_MANHWA
-         } else if (currentTags.any { tag -> tag.startsWith("webtoon") }) {
+            TYPE_MANHWA
+        } else if (currentTags.any { tag -> tag.startsWith("webtoon") }) {
             TYPE_WEBTOON
         } else {
             TYPE_MANGA
