@@ -3,9 +3,12 @@ package eu.kanade.tachiyomi.ui.library
 import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
+import androidx.recyclerview.widget.RecyclerView
 import eu.davidea.fastscroller.FastScroller
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.system.dpToPxEnd
+import eu.kanade.tachiyomi.util.view.marginTop
+import kotlin.math.abs
 
 class MaterialFastScroll @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     FastScroller(context, attrs) {
@@ -16,6 +19,7 @@ class MaterialFastScroll @JvmOverloads constructor(context: Context, attrs: Attr
         )
         autoHideEnabled = true
         ignoreTouchesOutsideHandle = true
+        updateScrollListener()
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
@@ -28,6 +32,24 @@ class MaterialFastScroll @JvmOverloads constructor(context: Context, attrs: Attr
         if (bubbleEnabled) {
             bubble.y = handle.y - bubble.height / 2f + handle.height / 2f
             bubble.translationX = (-45f).dpToPxEnd
+        }
+    }
+
+    private fun updateScrollListener() {
+        onScrollListener = object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                if (!isEnabled || bubble == null || handle.isSelected) return
+                val verticalScrollOffset = recyclerView.computeVerticalScrollOffset()
+                val verticalScrollRange = recyclerView.computeVerticalScrollRange() - marginTop
+                val proportion =
+                    verticalScrollOffset.toFloat() / (verticalScrollRange - height).toFloat()
+                setBubbleAndHandlePosition(height * proportion)
+                // If scroll amount is small, don't show it
+                if (minimumScrollThreshold == 0 || dy == 0 || abs(dy) > minimumScrollThreshold || scrollbarAnimator.isAnimating) {
+                    showScrollbar()
+                    if (autoHideEnabled) hideScrollbar()
+                }
+            }
         }
     }
 }

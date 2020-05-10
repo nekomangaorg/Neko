@@ -19,14 +19,14 @@ class MangaDetailsAdapter(
 
     val hasShownSwipeTut
         get() = preferences.shownChapterSwipeTutorial()
-    
+
     var items: List<ChapterItem> = emptyList()
 
     val delegate: MangaDetailsInterface = controller
     val presenter = controller.presenter
 
     val decimalFormat = DecimalFormat("#.###", DecimalFormatSymbols()
-        .apply { decimalSeparator = '.' })
+            .apply { decimalSeparator = '.' })
 
     fun setChapters(items: List<ChapterItem>?) {
         this.items = items ?: emptyList()
@@ -46,10 +46,8 @@ class MangaDetailsAdapter(
         if (s.isNullOrBlank()) {
             updateDataSet(items)
         } else {
-            updateDataSet(items.filter {
-                it.name.contains(s, true) ||
-                    it.scanlator?.contains(s, true) == true
-            })
+            updateDataSet(items.filter { it.name.contains(s, true) ||
+                it.scanlator?.contains(s, true) == true })
         }
     }
 
@@ -61,55 +59,33 @@ class MangaDetailsAdapter(
         }
     }
 
-    fun getSectionText(position: Int): String? {
-        val chapter = getItem(position) as? ChapterItem ?: return null
-        if (position == itemCount - 1) return "-"
-        return when (presenter.scrollType) {
-            MangaDetailsPresenter.MULTIPLE_VOLUMES, MangaDetailsPresenter.MULTIPLE_SEASONS ->
-                presenter.getGroupNumber(chapter)?.toString() ?: "*"
-            MangaDetailsPresenter.HUNDREDS_OF_CHAPTERS ->
-                if (chapter.chapter_number < 0) "*"
-                else (chapter.chapter_number / 100).toInt().toString()
-            MangaDetailsPresenter.TENS_OF_CHAPTERS ->
-                if (chapter.chapter_number < 0) "*"
-                else (chapter.chapter_number / 10).toInt().toString()
-            else -> null
-        }
-    }
-
-    fun getFullText(position: Int): String {
+    override fun onCreateBubbleText(position: Int): String {
         val chapter =
             getItem(position) as? ChapterItem ?: return recyclerView.context.getString(R.string.top)
-        if (position == itemCount - 1) return recyclerView.context.getString(R.string.bottom)
         return when (val scrollType = presenter.scrollType) {
             MangaDetailsPresenter.MULTIPLE_VOLUMES, MangaDetailsPresenter.MULTIPLE_SEASONS -> {
                 val volume = presenter.getGroupNumber(chapter)
-                if (volume != null) recyclerView.context.getString(
-                    if (scrollType == MangaDetailsPresenter.MULTIPLE_SEASONS) R.string.season_
-                    else R.string.volume_, volume
-                )
-                else recyclerView.context.getString(R.string.unknown)
+                if (volume != null) {
+                    recyclerView.context.getString(
+                        if (scrollType == MangaDetailsPresenter.MULTIPLE_SEASONS) R.string.season_
+                        else R.string.volume_, volume
+                    )
+                } else {
+                    recyclerView.context.getString(R.string.unknown)
+                }
             }
-            MangaDetailsPresenter.HUNDREDS_OF_CHAPTERS -> recyclerView.context.getString(
-                R.string.chapters_, get100sRange(
-                    chapter.chapter_number
-                )
-            )
             MangaDetailsPresenter.TENS_OF_CHAPTERS -> recyclerView.context.getString(
                 R.string.chapters_, get10sRange(
                     chapter.chapter_number
                 )
             )
-            else -> recyclerView.context.getString(R.string.unknown)
-        }
-    }
-
-    private fun get100sRange(value: Float): String {
-        val number = value.toInt()
-        return if (number < 100) "0-99"
-        else {
-            val hundred = number / 100
-            "${hundred}00-${hundred}99"
+            else -> if (chapter.chapter_number > 0) {
+                recyclerView.context.getString(
+                    R.string.chapter_, decimalFormat.format(chapter.chapter_number)
+                )
+            } else {
+                chapter.name
+            }
         }
     }
 
