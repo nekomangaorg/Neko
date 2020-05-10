@@ -893,6 +893,7 @@ class LibraryController(
     }
 
     override fun canDrag(): Boolean {
+        filter_bottom_sheet ?: return false
         val filterOff =
             !filter_bottom_sheet.hasActiveFilters() && !preferences.hideCategories().getOrDefault()
         return filterOff && adapter.mode != SelectableAdapter.Mode.MULTI
