@@ -30,7 +30,7 @@ import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.RootSearchInterface
 import eu.kanade.tachiyomi.ui.setting.SettingsSourcesController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
-import eu.kanade.tachiyomi.ui.source.global_search.SourceSearchController
+import eu.kanade.tachiyomi.ui.source.global_search.GlobalSearchController
 import eu.kanade.tachiyomi.ui.source.latest.LatestUpdatesController
 import eu.kanade.tachiyomi.util.view.applyWindowInsetsForRootController
 import eu.kanade.tachiyomi.util.view.collapse
@@ -333,7 +333,7 @@ class SourceController : NucleusController<SourcePresenter>(),
     }
 
     private fun performGlobalSearch(query: String) {
-        router.pushController(SourceSearchController(query).withFadeTransaction())
+        router.pushController(GlobalSearchController(query).withFadeTransaction())
     }
 
     /**

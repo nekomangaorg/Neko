@@ -9,7 +9,7 @@ import eu.kanade.tachiyomi.util.view.visibleIf
 import eu.kanade.tachiyomi.widget.StateImageViewTarget
 import kotlinx.android.synthetic.main.source_global_search_controller_card_item.*
 
-class SourceSearchCardHolder(view: View, adapter: SourceSearchCardAdapter) :
+class GlobalSearchMangaHolder(view: View, adapter: GlobalSearchCardAdapter) :
     BaseFlexibleViewHolder(view, adapter) {
 
     init {

@@ -88,7 +88,7 @@ import eu.kanade.tachiyomi.ui.migration.manga.design.PreMigrationController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.ui.source.SourceController
-import eu.kanade.tachiyomi.ui.source.global_search.SourceSearchController
+import eu.kanade.tachiyomi.ui.source.global_search.GlobalSearchController
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.ThemeUtil
@@ -1011,7 +1011,7 @@ class MangaDetailsController : BaseController,
 
     override fun globalSearch(text: String) {
         if (isNotOnline()) return
-        router.pushController(SourceSearchController(text).withFadeTransaction())
+        router.pushController(GlobalSearchController(text).withFadeTransaction())
     }
 
     override fun showChapterFilter() {
