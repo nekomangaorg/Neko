@@ -7,6 +7,8 @@ import nucleus.view.NucleusAppCompatActivity
 
 abstract class BaseRxActivity<P : BasePresenter<*>> : NucleusAppCompatActivity<P>() {
 
+    val scope = lifecycleScope
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         SecureActivityDelegate.setSecure(this)
