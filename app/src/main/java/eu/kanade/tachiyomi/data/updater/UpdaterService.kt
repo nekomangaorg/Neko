@@ -21,9 +21,9 @@ import eu.kanade.tachiyomi.util.system.isServiceRunning
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import java.io.File
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
+import java.io.File
 
 class UpdaterService : Service() {
 
@@ -40,7 +40,7 @@ class UpdaterService : Service() {
         super.onCreate()
         notifier = UpdaterNotifier(this)
 
-        startForeground(Notifications.ID_UPDATER, notifier.onDownloadStarted(getString(R.string.app_name)).build())
+        startForeground(Notifications.ID_UPDATER, notifier.onDownloadStarted(getString(R.string.neko_app_name)).build())
 
         wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).newWakeLock(
             PowerManager.PARTIAL_WAKE_LOCK, "${javaClass.name}:WakeLock"
@@ -57,7 +57,7 @@ class UpdaterService : Service() {
         if (intent == null) return START_NOT_STICKY
 
         val url = intent.getStringExtra(EXTRA_DOWNLOAD_URL) ?: return START_NOT_STICKY
-        val title = intent.getStringExtra(EXTRA_DOWNLOAD_TITLE) ?: getString(R.string.app_name)
+        val title = intent.getStringExtra(EXTRA_DOWNLOAD_TITLE) ?: getString(R.string.neko_app_name)
 
         GlobalScope.launch(Dispatchers.IO) {
             downloadApk(title, url)
@@ -149,7 +149,7 @@ class UpdaterService : Service() {
          * @param context the application context.
          * @param url the url to the new update.
          */
-        fun start(context: Context, url: String, title: String = context.getString(R.string.app_name)) {
+        fun start(context: Context, url: String, title: String = context.getString(R.string.neko_app_name)) {
             if (!isRunning(context)) {
                 val intent = Intent(context, UpdaterService::class.java).apply {
                     putExtra(EXTRA_DOWNLOAD_TITLE, title)
