@@ -71,6 +71,7 @@ import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import eu.kanade.tachiyomi.widget.EndAnimatorListener
 import eu.kanade.tachiyomi.widget.preference.MangadexLoginDialog
 import kotlinx.android.synthetic.main.main_activity.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -78,6 +79,8 @@ import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
+import java.util.Date
+import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 
 open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLoginDialog.Listener {

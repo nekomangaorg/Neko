@@ -3,17 +3,23 @@
     <changelogversion
         changeDate=""
         versionName="v2.0.6">
-        <changelogtext>New category hopper</changelogtext>
-        <changelogtext>New material fast scroll bar</changelogtext>
-        <changelogtext>Downloads are now faster</changelogtext>
-        <changelogtext>Download 2 chapters at once now</changelogtext>
+        <changelogtext>New category hopper to navigate categories instead of old fast scroller</changelogtext>
+        <changelogtext>Hopper can be moved left and right on screen</changelogtext>
+        <changelogtext>New (old) material fast scroll bar</changelogtext>
+        <changelogtext>Option to reorder filters in filter bar</changelogtext>
+        <changelogtext>Collapse or expand all categories buttons</changelogtext>
+        <changelogtext>App update is now a foreground activity</changelogtext>
+        <changelogtext>fast scroller now in downloads screen</changelogtext>
+        <changelogtext>Downloading a chapter now downloads multiple pages at once</changelogtext>
+        <changelogtext>Downloading now downloads 2 chapters at once</changelogtext>
+        <changelogtext>Library updates now check up to 5 manga at once to improve overall speed</changelogtext>
+        <changelogtext>Fixed Missing pages fix</changelogtext>
         <changelogtext>Removed workaround option to not mark as read as api was changed and its not needed anymore</changelogtext>
-        <changelogtext></changelogtext>
-        <changelogtext></changelogtext>
-        <changelogtext></changelogtext>
-        <changelogtext>Oneshot bug fix</changelogtext>
-        <changelogtext>Missing pages fix</changelogtext>
-        <changelogtext>2FA not showing fixed</changelogtext>
+        <changelogtext>Updated wording in scanlators filter group dialog</changelogtext>
+        <changelogtext>Fixed skipped filtered not always working correctly</changelogtext>
+        <changelogtext>Fixed Oneshot bug fix</changelogtext>
+        <changelogtext>Fixed Missing pages fix</changelogtext>
+        <changelogtext>Fixed 2FA not showing fixed</changelogtext>
         <changelogtext>upstream bug fixes</changelogtext>
     </changelogversion>
     <changelogversion
