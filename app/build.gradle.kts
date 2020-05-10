@@ -112,7 +112,6 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-common-java8:$lifecycleVersion")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
 
-
 // ReactiveX
     implementation("io.reactivex:rxandroid:1.2.1")
     implementation("io.reactivex:rxjava:1.3.8")
@@ -206,7 +205,6 @@ dependencies {
     implementation("com.afollestad.material-dialogs:input:3.1.1")
     implementation("me.zhanghai.android.systemuihelper:library:1.0.0")
     implementation("com.nightlynexus.viewstatepageradapter:viewstatepageradapter:1.1.0")
-    implementation("com.github.mthli:Slice:v1.2")
 
     implementation("com.github.kizitonwose:AndroidTagGroup:1.6.0")
     implementation("com.github.chrisbanes:PhotoView:2.3.0")

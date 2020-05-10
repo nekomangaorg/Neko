@@ -148,7 +148,7 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) : BottomSheetD
             val preselected = presenter.filteredScanlators.map { scanlators.indexOf(it) }
 
             MaterialDialog(activity!!)
-                .title(R.string.filter_groups)
+                .title(R.string.filter_groups_title)
                 .listItemsMultiChoice(
                     items = scanlators,
                     initialSelection = preselected.toIntArray(),
@@ -157,7 +157,7 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) : BottomSheetD
                     val selected = selections.map { scanlators[it] }
                     presenter.filterScanlatorsClicked(selected)
                 }
-                .negativeButton(R.string.remove_group_filter) {
+                .negativeButton(R.string.reset_group_filter) {
                     presenter.filterScanlatorsClicked(scanlators)
                 }
                 .positiveButton(android.R.string.ok)
