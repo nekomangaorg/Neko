@@ -114,7 +114,7 @@ class ReaderPresenter(
     private fun getFilteredChapters(dbChapters: List<ChapterItem>, manga: Manga): List<Chapter> {
         var filteredChapters = dbChapters
         if (preferences.skipRead()) {
-            filteredChapters = filteredChapters.filter { it.read }
+            filteredChapters = filteredChapters.filter { !it.read }
         }
         if (preferences.skipFiltered()) {
             val readEnabled = manga.readFilter == Manga.SHOW_READ
