@@ -547,11 +547,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
         // Set seekbar page number
         page_text.text = "${page.number} / ${pages.size}"
 
-        if (newChapter) {
-            if (config?.showNewChapter == false) {
-                systemUi?.show()
-            }
-        } else if (chapters_bottom_sheet.shouldCollapse && chapters_bottom_sheet.sheetBehavior.isExpanded()) {
+        if (!newChapter && chapters_bottom_sheet.shouldCollapse && chapters_bottom_sheet
+            .sheetBehavior.isExpanded()) {
             chapters_bottom_sheet.sheetBehavior?.collapse()
         }
         if (chapters_bottom_sheet.selectedChapterId != page.chapter.chapter.id) {
