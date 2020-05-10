@@ -422,27 +422,21 @@ class MangaDetailsPresenter(
         if (controller.isNotOnline()) return
         scope.launch {
             isLoading = true
-            var mangaError: java.lang.Exception? = null
-            var chapterError: java.lang.Exception? = null
-            val chapters = async(Dispatchers.IO) {
-                try {
-                    source.fetchChapterList(manga)
-                } catch (e: Exception) {
-                    chapterError = e
-                    emptyList<SChapter>()
-                } ?: emptyList()
-            }
+
+            var errorFromNetwork: java.lang.Exception? = null
             val thumbnailUrl = manga.thumbnail_url
-            val nManga = async(Dispatchers.IO) {
+
+            val nPair = async(Dispatchers.IO) {
                 try {
-                    source.fetchMangaDetails(manga)
-                } catch (e: java.lang.Exception) {
-                    mangaError = e
-                    null
+                    source.fetchMangaAndChapterDetails(manga)
+                } catch (e: Exception) {
+                    errorFromNetwork = e
+                    Pair(null, emptyList<SChapter>())
                 }
             }
 
-            val networkManga = nManga.await()
+            val networkPair = nPair.await()
+            val networkManga = networkPair.first
             val mangaWasInitalized = manga.initialized
             if (networkManga != null) {
                 manga.copyFrom(networkManga)
@@ -454,7 +448,7 @@ class MangaDetailsPresenter(
                     withContext(Dispatchers.Main) { controller.setPaletteColor() }
                 }
             }
-            val finChapters = chapters.await()
+            val finChapters = networkPair.second
             if (finChapters.isNotEmpty()) {
                 val newChapters = syncChaptersWithSource(db, finChapters, manga, source)
                 if (newChapters.first.isNotEmpty()) {
@@ -484,18 +478,14 @@ class MangaDetailsPresenter(
                 withContext(Dispatchers.IO) { updateChapters() }
             }
             isLoading = false
-            if (chapterError == null) withContext(Dispatchers.Main) { controller.updateChapters(this@MangaDetailsPresenter.chapters) }
-            if (chapterError != null) {
+            if (errorFromNetwork == null) {
+                withContext(Dispatchers.Main) { controller.updateChapters(this@MangaDetailsPresenter.chapters) }
+            } else {
                 withContext(Dispatchers.Main) {
                     controller.showError(
-                        trimException(chapterError!!)
+                        trimException(errorFromNetwork!!)
                     )
                 }
-                return@launch
-            } else if (mangaError != null) withContext(Dispatchers.Main) {
-                controller.showError(
-                    trimException(mangaError!!)
-                )
             }
         }
     }
