@@ -253,6 +253,8 @@ class PreferencesHelper(val context: Context) {
 
     fun lastExtCheck() = rxPrefs.getLong("last_ext_check", 0)
 
+    fun lastAppCheck() = flowPrefs.getLong("last_app_check", 0)
+
     fun unreadBadgeType() = rxPrefs.getInteger("unread_badge_type", 2)
 
     fun hideStartReadingButton() = rxPrefs.getBoolean("hide_reading_button", false)
