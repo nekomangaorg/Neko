@@ -102,11 +102,13 @@ open class SourceSearchPresenter(
     protected open fun getEnabledSources(): List<CatalogueSource> {
         val languages = preferencesHelper.enabledLanguages().getOrDefault()
         val hiddenCatalogues = preferencesHelper.hiddenSources().getOrDefault()
+        val pinnedCatalogues = preferencesHelper.pinnedCatalogues().getOrDefault()
 
         return sourceManager.getCatalogueSources()
             .filter { it.lang in languages }
             .filterNot { it.id.toString() in hiddenCatalogues }
             .sortedBy { "(${it.lang}) ${it.name}" }
+            .sortedBy { it.id.toString() !in pinnedCatalogues }
     }
 
     private fun getSourcesToQuery(): List<CatalogueSource> {
