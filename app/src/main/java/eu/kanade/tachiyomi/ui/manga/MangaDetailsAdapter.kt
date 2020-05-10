@@ -71,7 +71,7 @@ class MangaDetailsAdapter(
                         else R.string.volume_, volume
                     )
                 } else {
-                    recyclerView.context.getString(R.string.unknown)
+                    getChapterName(chapter)
                 }
             }
             MangaDetailsPresenter.TENS_OF_CHAPTERS -> recyclerView.context.getString(
@@ -79,13 +79,17 @@ class MangaDetailsAdapter(
                     chapter.chapter_number
                 )
             )
-            else -> if (chapter.chapter_number > 0) {
-                recyclerView.context.getString(
-                    R.string.chapter_, decimalFormat.format(chapter.chapter_number)
-                )
-            } else {
-                chapter.name
-            }
+            else -> getChapterName(chapter)
+        }
+    }
+
+    private fun getChapterName(item: ChapterItem): String {
+        return if (item.chapter_number > 0) {
+            recyclerView.context.getString(
+                R.string.chapter_, decimalFormat.format(item.chapter_number)
+            )
+        } else {
+            item.name
         }
     }
 

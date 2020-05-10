@@ -29,7 +29,7 @@
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <eu.kanade.tachiyomi.ui.library.MaterialFastScroll
-        android:id="@+id/fast_scroller2"
+        android:id="@+id/fast_scroller"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:fastScrollerBubbleEnabled="true" />

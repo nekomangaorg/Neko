@@ -199,7 +199,10 @@ class MangaDetailsController : BaseController,
 
         setRecycler(view)
         setPaletteColor()
-        adapter?.fastScroller = fast_scroller2
+        adapter?.fastScroller = fast_scroller
+        fast_scroller.addOnScrollStateChangeListener {
+            activity?.appbar?.y = 0f
+        }
 
         presenter.onCreate()
         swipe_refresh.isRefreshing = presenter.isLoading
@@ -264,10 +267,11 @@ class MangaDetailsController : BaseController,
         swipe_refresh.setProgressViewOffset(false, (-40).dpToPx, headerHeight + offset)
         // 1dp extra to line up chapter header and manga header
         getHeader()?.setTopHeight(headerHeight)
-        fast_scroller2.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+        fast_scroller.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             topMargin = headerHeight
             bottomMargin = insets.systemWindowInsetBottom
         }
+        fast_scroller.scrollOffset = headerHeight
     }
 
     /** Set the toolbar to fully transparent or colored and translucent */
