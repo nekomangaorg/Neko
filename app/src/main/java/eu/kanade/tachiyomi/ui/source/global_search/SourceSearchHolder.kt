@@ -52,7 +52,8 @@ class SourceSearchHolder(view: View, val adapter: SourceSearchAdapter) :
             }
             results.isEmpty() -> {
                 progress.gone()
-                hideHolder()
+                no_results.visible()
+                source_card.gone()
             }
             else -> {
                 progress.gone()
@@ -92,12 +93,7 @@ class SourceSearchHolder(view: View, val adapter: SourceSearchAdapter) :
     }
 
     private fun showHolder() {
-        title.visible()
         source_card.visible()
-    }
-
-    private fun hideHolder() {
-        title.gone()
-        source_card.gone()
+        no_results.gone()
     }
 }
