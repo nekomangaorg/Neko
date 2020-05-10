@@ -251,7 +251,6 @@ class MangaDetailsPresenter(
         scrollType = when {
             hasMultipleVolumes(chapters) -> MULTIPLE_VOLUMES
             hasMultipleSeasons(chapters) -> MULTIPLE_SEASONS
-            hasHundredsOfChapters(chapters) -> HUNDREDS_OF_CHAPTERS
             hasTensOfChapters(chapters) -> TENS_OF_CHAPTERS
             else -> 0
         }
@@ -283,7 +282,7 @@ class MangaDetailsPresenter(
             val volNum = getVolumeNumber(it)
             if (volNum != null) {
                 volumeSet.add(volNum)
-                if (volumeSet.size >= 3) return true
+                if (volumeSet.size >= 2) return true
             }
         }
         return false
@@ -295,18 +294,14 @@ class MangaDetailsPresenter(
             val volNum = getSeasonNumber(it)
             if (volNum != null) {
                 volumeSet.add(volNum)
-                if (volumeSet.size >= 3) return true
+                if (volumeSet.size >= 2) return true
             }
         }
         return false
     }
 
-    private fun hasHundredsOfChapters(chapters: List<ChapterItem>): Boolean {
-        return chapters.size > 300
-    }
-
     private fun hasTensOfChapters(chapters: List<ChapterItem>): Boolean {
-        return chapters.size in 21..300
+        return chapters.size > 20
     }
 
     /**
@@ -878,7 +873,6 @@ class MangaDetailsPresenter(
     companion object {
         const val MULTIPLE_VOLUMES = 1
         const val TENS_OF_CHAPTERS = 2
-        const val HUNDREDS_OF_CHAPTERS = 3
-        const val MULTIPLE_SEASONS = 4
+        const val MULTIPLE_SEASONS = 3
     }
 }

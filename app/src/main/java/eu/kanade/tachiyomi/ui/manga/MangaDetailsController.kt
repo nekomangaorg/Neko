@@ -53,8 +53,6 @@ import com.bumptech.glide.request.transition.Transition
 import com.bumptech.glide.signature.ObjectKey
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
-import com.reddit.indicatorfastscroll.FastScrollItemIndicator
-import com.reddit.indicatorfastscroll.FastScrollerView
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.SelectableAdapter
 import eu.kanade.tachiyomi.R
@@ -101,14 +99,10 @@ import eu.kanade.tachiyomi.util.system.isOnline
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.getText
-import eu.kanade.tachiyomi.util.view.hide
 import eu.kanade.tachiyomi.util.view.requestPermissionsSafe
 import eu.kanade.tachiyomi.util.view.scrollViewWith
-import eu.kanade.tachiyomi.util.view.setBackground
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
-import eu.kanade.tachiyomi.util.view.setStartTranslationX
 import eu.kanade.tachiyomi.util.view.setStyle
-import eu.kanade.tachiyomi.util.view.show
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
@@ -205,7 +199,7 @@ class MangaDetailsController : BaseController,
 
         setRecycler(view)
         setPaletteColor()
-        setFastScroller()
+        adapter?.fastScroller = fast_scroller2
 
         presenter.onCreate()
         swipe_refresh.isRefreshing = presenter.isLoading
@@ -259,17 +253,6 @@ class MangaDetailsController : BaseController,
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 val atTop = !recycler.canScrollVertically(-1)
                 if (atTop) getHeader()?.backdrop?.translationY = 0f
-                when (newState) {
-                    RecyclerView.SCROLL_STATE_DRAGGING -> {
-                        scrollAnim?.cancel()
-                        if (fast_scroller.translationX != 0f) {
-                            showFastScroller()
-                        }
-                    }
-                    RecyclerView.SCROLL_STATE_IDLE -> {
-                        scrollAnim = fast_scroller.hide()
-                    }
-                }
             }
         })
     }
@@ -281,48 +264,9 @@ class MangaDetailsController : BaseController,
         swipe_refresh.setProgressViewOffset(false, (-40).dpToPx, headerHeight + offset)
         // 1dp extra to line up chapter header and manga header
         getHeader()?.setTopHeight(headerHeight)
-        fast_scroll_layout.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+        fast_scroller2.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             topMargin = headerHeight
             bottomMargin = insets.systemWindowInsetBottom
-        }
-    }
-
-    private fun setFastScroller() {
-        fast_scroller.setStartTranslationX(true)
-        fast_scroller.setBackground(true)
-        fast_scroller.setupWithRecyclerView(recycler, { position ->
-            val letter = adapter?.getSectionText(position)
-            when {
-                presenter.scrollType == 0 -> null
-                letter != null -> FastScrollItemIndicator.Text(letter)
-                else -> FastScrollItemIndicator.Icon(R.drawable.ic_star_24dp)
-            }
-        })
-        fast_scroller.useDefaultScroller = false
-        fast_scroller.itemIndicatorSelectedCallbacks += object :
-            FastScrollerView.ItemIndicatorSelectedCallback {
-            override fun onItemIndicatorSelected(
-                indicator: FastScrollItemIndicator,
-                indicatorCenterY: Int,
-                itemPosition: Int
-            ) {
-                scrollAnim?.cancel()
-                scrollAnim = fast_scroller.hide(2000)
-
-                textAnim?.cancel()
-                textAnim = text_view_m.animate().alpha(0f).setDuration(250L).setStartDelay(1000)
-                textAnim?.start()
-
-                text_view_m.translationY = indicatorCenterY.toFloat() - text_view_m.height / 2
-                text_view_m.alpha = 1f
-                text_view_m.text = adapter?.getFullText(itemPosition)
-                val appbar = activity?.appbar
-                appbar?.y = 0f
-                (recycler.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
-                    itemPosition, headerHeight
-                )
-                colorToolbar(itemPosition > 0, false)
-            }
         }
     }
 
@@ -592,12 +536,6 @@ class MangaDetailsController : BaseController,
         adapter?.setChapters(chapters)
         addMangaHeader()
         activity?.invalidateOptionsMenu()
-    }
-
-    private fun showFastScroller(animate: Boolean = true) {
-        if (presenter.scrollType != 0) {
-            fast_scroller.show(animate)
-        }
     }
 
     private fun addMangaHeader() {
