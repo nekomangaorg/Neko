@@ -36,8 +36,8 @@ android {
         minSdkVersion(24)
         targetSdkVersion(29)
         applicationId = "tachiyomi.mangadex"
-        versionCode = 59
-        versionName = "2.0.6"
+        versionCode = 60
+        versionName = "2.0.6.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
         setProperty("archivesBaseName", "Neko")

@@ -2,6 +2,12 @@
 <changelog bulletedList="true">
     <changelogversion
         changeDate=""
+        versionName="v2.0.6.1">
+        <changelogtext>Fixed skip read not working</changelogtext>
+        <changelogtext>See below 2.0.6</changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
         versionName="v2.0.6">
         <changelogtext>New category hopper to navigate categories instead of old fast scroller</changelogtext>
         <changelogtext>Hopper can be moved left and right on screen</changelogtext>
