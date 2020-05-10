@@ -344,7 +344,7 @@ class MangaDetailsController : BaseController,
                             activity?.window?.statusBarColor = translucentColor
                         }
                     }
-                    getHeader()?.updateCover(presenter.manga, true)
+                    getHeader()?.updateCover(presenter.manga)
                 }
 
                 override fun onLoadCleared(placeholder: Drawable?) {}

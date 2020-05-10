@@ -307,7 +307,7 @@ class MangaHeaderHolder(
         }
     }
 
-    fun updateCover(manga: Manga, force: Boolean = false) {
+    fun updateCover(manga: Manga) {
         if (!isCached(manga)) return
         GlideApp.with(view.context).load(manga).diskCacheStrategy(DiskCacheStrategy.RESOURCE)
             .signature(ObjectKey(MangaImpl.getLastCoverFetch(manga.id!!).toString()))
@@ -318,6 +318,7 @@ class MangaHeaderHolder(
     }
 
     private fun isCached(manga: Manga): Boolean {
+        if (manga.source == LocalSource.ID) return true
         val coverCache = adapter.delegate.mangaPresenter().coverCache
         manga.thumbnail_url?.let {
             return if (manga.favorite) coverCache.getCoverFile(it).exists()
