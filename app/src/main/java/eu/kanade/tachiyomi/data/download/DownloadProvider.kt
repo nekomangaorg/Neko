@@ -15,6 +15,7 @@ import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
+import java.util.Locale
 
 /**
  * This class is used to provide the directories where the downloads should be saved.
@@ -132,6 +133,7 @@ class DownloadProvider(private val context: Context) {
     }
 
     fun renameMangaFolder(from: String, to: String, sourceId: Long) {
+        if (from.toLowerCase(Locale.getDefault()) == to.toLowerCase(Locale.getDefault())) return
         val sourceManager by injectLazy<SourceManager>()
         val source = sourceManager.get(sourceId) ?: return
         val sourceDir = findSourceDir(source)
