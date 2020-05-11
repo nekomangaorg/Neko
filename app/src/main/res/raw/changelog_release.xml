@@ -2,7 +2,13 @@
 <changelog bulletedList="true">
     <changelogversion
         changeDate=""
-        versionName="v2.0.6.1">
+        versionName="v2.0.8">
+        <changelogtext>Hot fix to fix downloads</changelogtext>
+        <changelogtext>See below for other changes</changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
+        versionName="v2.0.7">
         <changelogtext>Fixed skip read not working</changelogtext>
         <changelogtext>See below 2.0.6</changelogtext>
     </changelogversion>
