@@ -254,7 +254,7 @@ class MangaDetailsController : BaseController,
             }
 
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                val atTop = !recycler.canScrollVertically(-1)
+                val atTop = recycler?.canScrollVertically(-1) == false
                 if (atTop) getHeader()?.backdrop?.translationY = 0f
             }
         })
@@ -521,7 +521,7 @@ class MangaDetailsController : BaseController,
     }
 
     private fun getHeader(): MangaHeaderHolder? {
-        return recycler.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder
+        return recycler?.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder
     }
 
     fun updateHeader() {
