@@ -90,7 +90,7 @@ class MdUtil {
             }
         }
 
-        fun getChapterId(url: String) = url.trimEnd('/').substringAfterLast("/")
+        fun getChapterId(url: String) = url.removeLast("/").removeLast(apiChapterSuffix).substringAfterLast("/")
 
         // creates the manga url from the browse for the api
         fun modifyMangaUrl(url: String): String =
