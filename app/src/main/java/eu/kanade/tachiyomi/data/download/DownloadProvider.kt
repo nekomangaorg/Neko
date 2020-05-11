@@ -11,6 +11,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
@@ -196,7 +197,7 @@ class DownloadProvider(private val context: Context) {
      * @param chapter the chapter to query.
      */
     fun getChapterDirName(chapter: Chapter): String {
-        return DiskUtil.buildValidFilename(chapter.name + " - " + chapter.url.substringAfterLast("/"))
+        return DiskUtil.buildValidFilename(chapter.name + " - " + MdUtil.getChapterId(chapter.url))
     }
 
     fun getJ2kChapterName(chapter: Chapter): String {
