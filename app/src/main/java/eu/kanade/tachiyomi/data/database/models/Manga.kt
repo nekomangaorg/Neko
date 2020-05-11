@@ -32,6 +32,8 @@ interface Manga : SManga {
 
     var scanlator_filter: String?
 
+    fun isBlank() = id == Long.MIN_VALUE
+
     fun setChapterOrder(order: Int) {
         setFlags(order, SORT_MASK)
         setFlags(SORT_LOCAL, SORT_SELF_MASK)

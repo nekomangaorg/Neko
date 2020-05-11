@@ -284,9 +284,11 @@ class LibraryController(
             override fun getSpanSize(position: Int): Int {
                 if (libraryLayout == 0) return 1
                 val item = this@LibraryController.adapter.getItem(position)
-                return if (item is LibraryHeaderItem) recycler.manager.spanCount
-                else if (item is LibraryItem && item.manga.isBlank()) recycler.manager.spanCount
-                else 1
+                return if (item is LibraryHeaderItem || item is SearchGlobalItem || (item is LibraryItem && item.manga.isBlank())) {
+                    recycler?.manager?.spanCount ?: 1
+                } else {
+                    1
+                }
             }
         })
         recycler.setHasFixedSize(true)
@@ -815,6 +817,7 @@ class LibraryController(
     }
 
     private fun setSelection(manga: Manga, selected: Boolean) {
+        if (manga.isBlank()) return
         val currentMode = adapter.mode
         if (selected) {
             if (selectedMangas.add(manga)) {
@@ -916,7 +919,7 @@ class LibraryController(
      * @param position the position of the element clicked.
      */
     override fun onItemLongClick(position: Int) {
-        if (adapter.getItem(position) is LibraryHeaderItem) return
+        if (adapter.getItem(position) !is LibraryItem) return
         createActionModeIfNeeded()
         when {
             lastClickPosition == -1 -> setSelection(position)
