@@ -125,7 +125,8 @@ class LibraryPresenter(
 
     fun restoreLibrary() {
         val items = libraryItems
-        val show = showAllCategories || preferences.hideCategories().getOrDefault()
+        val show = showAllCategories || preferences.hideCategories().getOrDefault() ||
+            categories.size == 1
         if (!show) {
             sectionedLibraryItems = items.groupBy { it.manga.category }.toMutableMap()
             if (currentCategory == -1) currentCategory = categories.find {
@@ -141,8 +142,9 @@ class LibraryPresenter(
 
     private suspend fun sectionLibrary(items: List<LibraryItem>, freshStart: Boolean = false) {
         libraryItems = items
-        val show = showAllCategories || preferences.hideCategories().getOrDefault()
-        if (!show) {
+        val showAll = showAllCategories || preferences.hideCategories().getOrDefault() ||
+            categories.size == 1
+        if (!showAll) {
             sectionedLibraryItems = items.groupBy { it.manga.category }.toMutableMap()
             if (currentCategory == -1) currentCategory = categories.find {
                 it.order == preferences.lastUsedCategory().getOrDefault()
@@ -150,7 +152,7 @@ class LibraryPresenter(
         }
         withContext(Dispatchers.Main) {
             view.onNextLibraryUpdate(
-                if (!show) sectionedLibraryItems[currentCategory]
+                if (!showAll) sectionedLibraryItems[currentCategory]
                 ?: sectionedLibraryItems[categories.first().id] ?: blankItem()
                 else libraryItems, freshStart
             )
@@ -530,7 +532,7 @@ class LibraryPresenter(
                     if (headerItem != null) items.add(
                         LibraryItem(LibraryManga.createBlank(catId), headerItem)
                     )
-                } else if (catId in categoriesHidden && showAll) {
+                } else if (catId in categoriesHidden && showAll && categories.size > 1) {
                     val mangaToRemove = items.filter { it.manga.category == catId }
                     val mergedTitle = mangaToRemove.joinToString("-") {
                         it.manga.title + "-" + it.manga.author
