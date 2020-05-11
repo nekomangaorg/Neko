@@ -27,6 +27,8 @@ interface Manga : SManga {
 
     var hide_title: Boolean
 
+    fun isBlank() = id == Long.MIN_VALUE
+
     fun setChapterOrder(order: Int) {
         setFlags(order, SORT_MASK)
         setFlags(SORT_LOCAL, SORT_SELF_MASK)

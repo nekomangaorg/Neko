@@ -289,7 +289,7 @@ class LibraryController(
                 if (libraryLayout == 0) return 1
                 val item = this@LibraryController.adapter.getItem(position)
                 return if (item is LibraryHeaderItem || item is SearchGlobalItem || (item is LibraryItem && item.manga.isBlank())) {
-                    recycler.manager.spanCount
+                    recycler?.manager?.spanCount ?: 1
                 } else {
                     1
                 }
@@ -829,6 +829,7 @@ class LibraryController(
     }
 
     private fun setSelection(manga: Manga, selected: Boolean) {
+        if (manga.isBlank()) return
         val currentMode = adapter.mode
         if (selected) {
             if (selectedMangas.add(manga)) {
