@@ -84,7 +84,9 @@ class MangaDetailsPresenter(
         downloadManager.addListener(this)
         LibraryUpdateService.setListener(this)
         tracks = db.getTracks(manga).executeAsBlocking()
-        if (!manga.initialized) {
+        if (manga.source == LocalSource.ID) {
+            refreshAll()
+        } else if (!manga.initialized) {
             isLoading = true
             controller.setRefresh(true)
             controller.updateHeader()
@@ -368,7 +370,7 @@ class MangaDetailsPresenter(
 
     /** Refresh Manga Info and Chapter List (not tracking) */
     fun refreshAll() {
-        if (controller.isNotOnline()) return
+        if (controller.isNotOnline() && manga.source != LocalSource.ID) return
         scope.launch {
             isLoading = true
             var mangaError: java.lang.Exception? = null
