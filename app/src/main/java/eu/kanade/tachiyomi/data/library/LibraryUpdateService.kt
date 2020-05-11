@@ -40,6 +40,7 @@ import eu.kanade.tachiyomi.util.lang.chop
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.notification
 import eu.kanade.tachiyomi.util.system.notificationManager
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -238,10 +239,14 @@ class LibraryUpdateService(
                     Timber.e(exception)
                 }
                 GlobalScope.launch(handler) {
-                    val hasDLs = requestSemaphore.withPermit {
-                        updateMangaInSource(
-                            it.key, downloadNew, categoriesToDownload
-                        )
+                    val hasDLs = try {
+                        requestSemaphore.withPermit {
+                            updateMangaInSource(
+                                it.key, downloadNew, categoriesToDownload
+                            )
+                        }
+                    } catch (e: Exception) {
+                        false
                     }
                     hasDownloads = hasDownloads || hasDLs
                     jobCount.andDecrement
@@ -447,7 +452,7 @@ class LibraryUpdateService(
         try {
             var hasDownloads = false
             if (job?.isCancelled == true) {
-                throw java.lang.Exception("Job was cancelled")
+                return false
             }
             showProgressNotification(manga, progress, mangaToUpdate.size)
             val source = sourceManager.get(manga.source) as? HttpSource ?: return false
@@ -478,7 +483,9 @@ class LibraryUpdateService(
             }
             return hasDownloads
         } catch (e: Exception) {
-            Timber.e("Failed updating: ${manga.title}: $e")
+            if (e !is CancellationException) {
+                Timber.e("Failed updating: ${manga.title}: $e")
+            }
             return false
         }
     }
