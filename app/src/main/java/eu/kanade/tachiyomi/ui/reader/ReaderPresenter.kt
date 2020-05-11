@@ -329,14 +329,17 @@ class ReaderPresenter(
     fun loadChapter(chapter: Chapter) {
         val loader = loader ?: return
 
-        Timber.d("Loading adjacent ${chapter.url}")
+        viewerChaptersRelay.value?.currChapter?.let(::onChapterChanged)
+
+        Timber.d("Loading ${chapter.url}")
 
         activeChapterSubscription?.unsubscribe()
         activeChapterSubscription = getLoadObservable(loader, ReaderChapter(chapter))
             .doOnSubscribe { isLoadingAdjacentChapterRelay.call(true) }
             .doOnUnsubscribe { isLoadingAdjacentChapterRelay.call(false) }
             .subscribeFirst({ view, _ ->
-                view.moveToPageIndex(0)
+                val lastPage = if (chapter.pages_left <= 1) 0 else chapter.last_page_read
+                view.moveToPageIndex(lastPage)
                 view.refreshChapters()
             }, { _, _ ->
                 // Ignore onError event, viewers handle that state
@@ -392,7 +395,7 @@ class ReaderPresenter(
 
         if (selectedChapter != currentChapters.currChapter) {
             Timber.d("Setting ${selectedChapter.chapter.url} as active")
-            onChapterChanged(currentChapters.currChapter, selectedChapter)
+            onChapterChanged(currentChapters.currChapter)
             loadNewChapter(selectedChapter)
             return true
         }
@@ -403,7 +406,7 @@ class ReaderPresenter(
      * Called when a chapter changed from [fromChapter] to [toChapter]. It updates [fromChapter]
      * on the database.
      */
-    private fun onChapterChanged(fromChapter: ReaderChapter, toChapter: ReaderChapter) {
+    private fun onChapterChanged(fromChapter: ReaderChapter) {
         saveChapterProgress(fromChapter)
         saveChapterHistory(fromChapter)
     }
