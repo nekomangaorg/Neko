@@ -177,10 +177,11 @@ class LibraryController(
     private var scrollListener = object : RecyclerView.OnScrollListener() {
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
             super.onScrolled(recyclerView, dx, dy)
+            val recyclerCover = recycler_cover ?: return
             val notAtTop = recycler.canScrollVertically(-1)
             if (notAtTop != elevate) elevateFunc(notAtTop)
             val order = getCategoryOrder()
-            if (!recycler_cover.isClickable && isAnimatingHopper != true) {
+            if (!recyclerCover.isClickable && isAnimatingHopper != true) {
                 category_hopper_frame.translationY += dy
                 category_hopper_frame.translationY =
                     category_hopper_frame.translationY.coerceIn(0f, 50f.dpToPx)

@@ -143,6 +143,7 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
         dl_bottom_sheet.sheetBehavior?.addBottomSheetCallback(object :
             BottomSheetBehavior.BottomSheetCallback() {
             override fun onSlide(bottomSheet: View, progress: Float) {
+                val shadow2 = shadow2 ?: return
                 shadow2.alpha = (1 - abs(progress)) * 0.25f
                 shadow.alpha = (1 - abs(progress)) * 0.5f
                 if (progress >= 0) activity?.appbar?.elevation = max(

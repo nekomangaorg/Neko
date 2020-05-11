@@ -119,7 +119,7 @@ fun Controller.scrollViewWith(
             if (changeType.isEnter) {
                 elevateFunc(elevate)
                 if (fakeToolbarView?.parent != null) {
-                    val parent = recycler.parent as ViewGroup
+                    val parent = recycler.parent as? ViewGroup ?: return
                     parent.removeView(fakeToolbarView)
                     fakeToolbarView = null
                 }
@@ -136,12 +136,12 @@ fun Controller.scrollViewWith(
                 if (!customPadding && lastY == 0f && router.backstack.lastOrNull()
                         ?.controller() is MangaDetailsController
                 ) {
+                    val parent = recycler.parent as? ViewGroup ?: return
                     val v = View(activity)
                     fakeToolbarView = v
-                    val parent = recycler?.parent as ViewGroup
-                    parent?.addView(v, parent.indexOfChild(recycler) + 1)
+                    parent.addView(v, parent.indexOfChild(recycler) + 1)
                     val params = fakeToolbarView?.layoutParams
-                    params?.height = recycler?.paddingTop
+                    params?.height = recycler.paddingTop
                     params?.width = MATCH_PARENT
                     v.setBackgroundColor(v.context.getResourceColor(R.attr.colorSecondary))
                     v.layoutParams = params
@@ -174,8 +174,7 @@ fun Controller.scrollViewWith(
                         activity!!.appbar.y, -activity!!.appbar.height.toFloat(), 0f
                     )
                     if ((activity!!.appbar.y <= -activity!!.appbar.height.toFloat() ||
-                            dy == 0 && activity!!.appbar.y == 0f) && !elevate
-                    )
+                            dy == 0 && activity!!.appbar.y == 0f) && !elevate)
                         elevateFunc(true)
                     lastY = activity!!.appbar.y
                 }
