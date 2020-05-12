@@ -10,6 +10,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.util.lang.chop
 import eu.kanade.tachiyomi.util.lang.removeArticles
+import eu.kanade.tachiyomi.util.system.isLTR
 import eu.kanade.tachiyomi.util.system.timeSpanFromNow
 import uy.kohesive.injekt.injectLazy
 import java.util.Locale
@@ -189,10 +190,10 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
                         getFirstLetter(title)
                     }
                 }
-                if (isSingleCategory) {
-                    text
-                } else {
-                    item.header?.category?.name.orEmpty() + ": " + text
+                when {
+                    isSingleCategory -> text
+                    recyclerView.resources.isLTR -> text + " - " + item.header?.category?.name.orEmpty()
+                    else -> item.header?.category?.name.orEmpty() + " - " + text
                 }
             }
             else -> ""
