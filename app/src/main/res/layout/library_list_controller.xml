@@ -51,12 +51,6 @@
 
             <include layout="@layout/library_grid_recycler" />
 
-            <eu.kanade.tachiyomi.ui.library.MaterialFastScroll
-                android:id="@+id/fast_scroller"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                app:fastScrollerBubbleEnabled="true" />
-
             <View
                 android:id="@+id/recycler_cover"
                 android:layout_width="match_parent"
@@ -66,6 +60,12 @@
         </FrameLayout>
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <eu.kanade.tachiyomi.ui.library.MaterialFastScroll
+        android:id="@+id/fast_scroller"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:fastScrollerBubbleEnabled="true" />
 
     <eu.kanade.tachiyomi.widget.EmptyView
         android:id="@+id/empty_view"

@@ -298,10 +298,6 @@ class LibraryController(
         recycler.setHasFixedSize(true)
         recycler.adapter = adapter
 
-        fast_scroller.addOnScrollStateChangeListener {
-            swipe_refresh.isEnabled = !it
-        }
-
         adapter.fastScroller = fast_scroller
         recycler.addOnScrollListener(scrollListener)
 
