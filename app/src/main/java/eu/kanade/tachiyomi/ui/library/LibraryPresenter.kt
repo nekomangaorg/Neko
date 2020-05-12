@@ -332,7 +332,7 @@ class LibraryPresenter(
                 i1.chapterCount = -1
                 i2.chapterCount = -1
             }
-            val compare = when {
+            when {
                 sortingMode == LibrarySort.DRAG_AND_DROP || useDnD ->
                     sortCategory(i1, i2, lastReadManga)
                 sortingMode == LibrarySort.ALPHA -> sortAlphabetical(i1, i2)
@@ -364,10 +364,6 @@ class LibraryPresenter(
                 }
                 else -> 0
             }
-            if (compare == 0) {
-                if (ascending) sortAlphabetical(i1, i2)
-                else sortAlphabetical(i2, i1)
-            } else compare
         }
 
         val comparator = if (ascending || useDnD)
@@ -422,7 +418,7 @@ class LibraryPresenter(
             }
             i1.chapterCount = -1
             i2.chapterCount = -1
-            val compare = when {
+            when {
                 category.mangaSort != null -> {
                     var sort = when (category.sortingMode()) {
                         LibrarySort.ALPHA -> sortAlphabetical(i1, i2)
@@ -465,10 +461,6 @@ class LibraryPresenter(
                 }
                 else -> 0
             }
-            if (compare == 0) {
-                if (category.isAscending()) sortAlphabetical(i1, i2)
-                else sortAlphabetical(i2, i1)
-            } else compare
         } else {
             val category = allCategories.find { it.id == i1.manga.category }?.order ?: -1
             val category2 = allCategories.find { it.id == i2.manga.category }?.order ?: -1
