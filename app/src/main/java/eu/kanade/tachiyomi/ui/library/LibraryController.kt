@@ -239,7 +239,7 @@ class LibraryController(
         return if (presenter.showAllCategories) {
             !recycler.canScrollVertically(-1)
         } else {
-            getVisibleHeader()?.category?.id == presenter.categories.firstOrNull()?.id
+            getVisibleHeader()?.category?.order == presenter.categories.minBy { it.order }?.order
         }
     }
 
@@ -247,7 +247,7 @@ class LibraryController(
         return if (presenter.showAllCategories) {
             !recycler.canScrollVertically(1)
         } else {
-            getVisibleHeader()?.category?.id == presenter.categories.lastOrNull()?.id
+            getVisibleHeader()?.category?.order == presenter.categories.maxBy { it.order }?.order
         }
     }
 
@@ -772,6 +772,7 @@ class LibraryController(
 
     private fun onRefresh() {
         activity?.invalidateOptionsMenu()
+        showCategories(false)
         presenter.getLibrary()
         destroyActionModeIfNeeded()
     }

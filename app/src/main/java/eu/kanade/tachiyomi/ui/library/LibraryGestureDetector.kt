@@ -33,16 +33,10 @@ class LibraryGestureDetector(private val controller: LibraryController) : Gestur
                 controller.filter_bottom_sheet.sheetBehavior?.hide()
             }
             result = true
-        } else if (abs(diffX) >= abs(diffY) && abs(diffX) > MainActivity.SWIPE_THRESHOLD && abs(
+        } else if (abs(diffX) >= abs(diffY) && abs(diffX) > MainActivity.SWIPE_THRESHOLD * 3 && abs(
                 velocityX
             ) > MainActivity.SWIPE_VELOCITY_THRESHOLD
         ) {
-            // val transition = androidx.transition.AutoTransition()
-            // transition.duration = 150
-
-            androidx.transition.TransitionManager.beginDelayedTransition(
-                controller.library_layout
-            )
             if (diffX <= 0) {
                 controller.category_hopper_frame.updateLayoutParams<CoordinatorLayout.LayoutParams> {
                     anchorGravity =
