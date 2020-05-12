@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.library
 import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
+import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
@@ -15,18 +16,59 @@ import kotlin.math.abs
 class MaterialFastScroll @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     FastScroller(context, attrs) {
 
+    var canScroll = false
+    var startY = 0f
     var scrollOffset = 0
     init {
         setViewsToUse(
             R.layout.material_fastscroll, R.id.fast_scroller_bubble, R.id.fast_scroller_handle
         )
         autoHideEnabled = true
-        ignoreTouchesOutsideHandle = true
+        ignoreTouchesOutsideHandle = false
         updateScrollListener()
     }
 
+    // Overriding to force a distance moved before scrolling
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        if (isHidden) return false
+        if (recyclerView.computeVerticalScrollRange() <= recyclerView.computeVerticalScrollExtent()) {
+            return super.onTouchEvent(event)
+        }
+
+        when (event.action) {
+            MotionEvent.ACTION_DOWN -> {
+                if (event.x < handle.x - ViewCompat.getPaddingStart(handle)) return false
+                val y = event.y
+                startY = event.y
+                if (canScroll) {
+                    handle.isSelected = true
+                    notifyScrollStateChange(true)
+                    showBubble()
+                    showScrollbar()
+                    setBubbleAndHandlePosition(y)
+                    setRecyclerViewPosition(y)
+                }
+                return true
+            }
+            MotionEvent.ACTION_MOVE -> {
+                val y = event.y
+                if (!canScroll && abs(y - startY) > 10) {
+                    canScroll = true
+                    handle.isSelected = true
+                    notifyScrollStateChange(true)
+                    showBubble()
+                    showScrollbar()
+                }
+                if (canScroll) {
+                    setBubbleAndHandlePosition(y)
+                    setRecyclerViewPosition(y)
+                }
+                return true
+            }
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                startY = 0f
+                canScroll = false
+            }
+        }
         return super.onTouchEvent(event)
     }
 

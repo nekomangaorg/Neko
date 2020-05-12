@@ -32,7 +32,7 @@
             android:maxLines="5"
             android:visibility="gone"
             app:layout_constraintHorizontal_bias="1.0"
-            tools:text="sdfs fas d fsA"
+            tools:text="Tool tip text"
             tools:visibility="visible"/>
 
         <!-- Padding is here to have better grab -->
@@ -45,7 +45,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:paddingStart="6dp"
+            android:paddingStart="2dp"
             android:paddingEnd="4dp"
             android:src="@drawable/thumb_drawable"/>
 
