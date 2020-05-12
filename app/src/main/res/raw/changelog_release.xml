@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <changelog bulletedList="true">
+    <changelogversion versionName="v1.0.5" changeDate="">
+        <changelogtext>When jumping to chapters while reading, your last read page will be saved</changelogtext>
+        <changelogtext>Option to hide category hopper</changelogtext>
+        <changelogtext>Fixed vpns and miui devices not working</changelogtext>
+        <changelogtext>Other minor fixes as well</changelogtext>
+    </changelogversion>
+	
     <changelogversion versionName="v1.0.4" changeDate="">
         <changelogtext>Fixed local covers</changelogtext>
         <changelogtext>Toolbar no longer shows when transitioning chapters with transition
