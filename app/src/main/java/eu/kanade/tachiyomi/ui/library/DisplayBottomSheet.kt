@@ -86,6 +86,9 @@ class DisplayBottomSheet(private val controller: LibraryController) : BottomShee
         show_all.bindToPreference(preferences.showAllCategories()) {
             controller.presenter.getLibrary()
         }
+        hide_hopper.bindToPreference(preferences.hideHopper()) {
+            controller.hideHopper(it)
+        }
         uniform_grid.bindToPreference(preferences.uniformGrid()) {
             controller.reattachAdapter()
         }
@@ -122,11 +125,15 @@ class DisplayBottomSheet(private val controller: LibraryController) : BottomShee
     /**
      * Binds a checkbox or switch view with a boolean preference.
      */
-    private fun CompoundButton.bindToPreference(pref: com.tfcporciuncula.flow.Preference<Boolean>, block: (() -> Unit)? = null) {
+    private fun CompoundButton.bindToPreference(
+        pref: com.tfcporciuncula.flow
+.Preference<Boolean>,
+        block: ((Boolean) -> Unit)? = null
+    ) {
         isChecked = pref.get()
         setOnCheckedChangeListener { _, isChecked ->
             pref.set(isChecked)
-            block?.invoke()
+            block?.invoke(isChecked)
         }
     }
 

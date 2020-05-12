@@ -70,6 +70,7 @@ import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.hide
 import eu.kanade.tachiyomi.util.view.isExpanded
 import eu.kanade.tachiyomi.util.view.isHidden
+import eu.kanade.tachiyomi.util.view.isVisible
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import eu.kanade.tachiyomi.util.view.setStyle
@@ -347,6 +348,7 @@ class LibraryController(
         } else {
             preferences.hopperGravity().get()
         }
+        hideHopper(preferences.hideHopper().get())
         category_hopper_frame.updateLayoutParams<CoordinatorLayout.LayoutParams> {
             anchorGravity = Gravity.TOP or when (gravityPref) {
                 0 -> Gravity.LEFT
@@ -432,6 +434,11 @@ class LibraryController(
             recycler_layout.alpha = 0f
             presenter.getLibrary()
         }
+    }
+
+    fun hideHopper(hide: Boolean) {
+        category_hopper_frame.visibleIf(!hide)
+        jumper_category_text.visibleIf(!hide)
     }
 
     private fun jumpToNextCategory(next: Boolean) {
@@ -527,11 +534,19 @@ class LibraryController(
         return inflater.inflate(R.layout.library_list_controller, container, false)
     }
 
+    private fun anchorView(): View? {
+        return if (category_hopper_frame.isVisible()) {
+            category_hopper_frame
+        } else {
+            filter_bottom_sheet
+        }
+    }
+
     private fun updateLibrary(category: Category? = null) {
         val view = view ?: return
         LibraryUpdateService.start(view.context, category)
         snack = view.snack(R.string.updating_library) {
-            anchorView = category_hopper_frame
+            anchorView = anchorView()
             view.elevation = 15f.dpToPx
             setAction(R.string.cancel) {
                 LibraryUpdateService.stop(context)
@@ -642,7 +657,7 @@ class LibraryController(
         if (justStarted && freshStart) {
             scrollToHeader(activeCategory)
         }
-        category_hopper_frame.visibleIf(!singleCategory)
+        category_hopper_frame.visibleIf(!singleCategory && !preferences.hideHopper().get())
         filter_bottom_sheet.updateButtons(
             showHideCategories = presenter.allCategories.size > 1,
             showExpand = !singleCategory && presenter.showAllCategories
@@ -1024,7 +1039,7 @@ class LibraryController(
             if (presenter.mangaIsInCategory(item.manga, newHeader?.category?.id)) {
                 adapter.moveItem(position, lastItemPosition!!)
                 snack = view?.snack(R.string.already_in_category) {
-                    anchorView = category_hopper_frame
+                    anchorView = anchorView()
                     view.elevation = 15f.dpToPx
                 }
                 return
@@ -1048,7 +1063,7 @@ class LibraryController(
         snack = view?.snack(
             resources!!.getString(R.string.moved_to_, category.name)
         ) {
-            anchorView = category_hopper_frame
+            anchorView = anchorView()
             view.elevation = 15f.dpToPx
             setAction(R.string.undo) {
                 manga.category = category.id!!
@@ -1070,7 +1085,7 @@ class LibraryController(
                 }, category.name
             ), Snackbar.LENGTH_LONG
         ) {
-            anchorView = category_hopper_frame
+            anchorView = anchorView()
             view.elevation = 15f.dpToPx
             setAction(R.string.cancel) {
                 LibraryUpdateService.stop(context)
@@ -1246,7 +1261,7 @@ class LibraryController(
         snack = view?.snack(
             activity?.getString(R.string.removed_from_library) ?: "", Snackbar.LENGTH_INDEFINITE
         ) {
-            anchorView = category_hopper_frame
+            anchorView = anchorView()
             view.elevation = 15f.dpToPx
             var undoing = false
             setAction(R.string.undo) {
