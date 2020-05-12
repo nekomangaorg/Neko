@@ -274,6 +274,8 @@ class PreferencesHelper(val context: Context) {
 
     fun filterOrder() = flowPrefs.getString("filter_order", "rudcmt")
 
+    fun hideHopper() = flowPrefs.getBoolean("hide_hopper", false)
+
     // Tutorial preferences
     fun shownFilterTutorial() = flowPrefs.getBoolean("shown_filter_tutorial", false)
 
