@@ -45,7 +45,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:paddingStart="2dp"
+            android:paddingStart="4dp"
             android:paddingEnd="4dp"
             android:src="@drawable/thumb_drawable"/>
 
