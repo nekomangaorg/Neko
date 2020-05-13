@@ -284,7 +284,7 @@ class LibraryController(
             override fun getSpanSize(position: Int): Int {
                 if (libraryLayout == 0) return 1
                 val item = this@LibraryController.adapter.getItem(position)
-                return if (item is LibraryHeaderItem || item is SearchGlobalItem || (item is LibraryItem && item.manga.isBlank())) {
+                return if (item is LibraryHeaderItem || (item is LibraryItem && item.manga.isBlank())) {
                     recycler?.manager?.spanCount ?: 1
                 } else {
                     1
