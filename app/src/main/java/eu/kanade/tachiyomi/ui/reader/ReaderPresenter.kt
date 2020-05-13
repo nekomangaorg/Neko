@@ -100,7 +100,7 @@ class ReaderPresenter(
 
         val chaptersForReader =
             when (preferences.skipRead() || preferences.skipFiltered()) {
-                true -> getFilteredChapters(dbChapters, manga)
+                true -> getFilteredChapters(dbChapters, manga, selectedChapter)
                 false -> dbChapters
             }
 
@@ -111,10 +111,20 @@ class ReaderPresenter(
         }.map(::ReaderChapter)
     }
 
-    private fun getFilteredChapters(dbChapters: List<ChapterItem>, manga: Manga): List<Chapter> {
+    private fun getFilteredChapters(
+        dbChapters: List<ChapterItem>,
+        manga: Manga,
+        selectedChapter: ChapterItem
+    ): List<Chapter> {
         var filteredChapters = dbChapters
         if (preferences.skipRead()) {
             filteredChapters = filteredChapters.filter { !it.read }
+            val find = filteredChapters.find { it.id == chapterId }
+            if (find == null) {
+                val mutableList = filteredChapters.toMutableList()
+                mutableList.add(selectedChapter)
+                filteredChapters = mutableList.toList()
+            }
         }
         if (preferences.skipFiltered()) {
             val readEnabled = manga.readFilter == Manga.SHOW_READ
