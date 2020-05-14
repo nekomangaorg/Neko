@@ -209,6 +209,7 @@ class LibraryController(
 
         override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
             super.onScrollStateChanged(recyclerView, newState)
+            val recyclerCover = recycler_cover ?: return
             when (newState) {
                 RecyclerView.SCROLL_STATE_DRAGGING -> {
                     fast_scroller.showScrollbar()
@@ -217,7 +218,7 @@ class LibraryController(
                     val shortAnimationDuration = resources?.getInteger(
                         android.R.integer.config_shortAnimTime
                     ) ?: 0
-                    if (!recycler_cover.isClickable) {
+                    if (!recyclerCover.isClickable) {
                         category_hopper_frame.animate().translationY(
                             if (category_hopper_frame.translationY > 25f.dpToPx) 50f.dpToPx
                             else 0f
@@ -621,6 +622,7 @@ class LibraryController(
     override fun onDestroyView(view: View) {
         LibraryUpdateService.removeListener(this)
         destroyActionModeIfNeeded()
+        recycler.removeOnScrollListener(scrollListener)
         super.onDestroyView(view)
     }
 
