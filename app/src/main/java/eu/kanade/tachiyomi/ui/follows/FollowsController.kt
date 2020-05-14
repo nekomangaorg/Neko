@@ -39,4 +39,8 @@ class FollowsController(bundle: Bundle) : BrowseSourceController(bundle) {
         menu.findItem(R.id.action_search).isVisible = false
         menu.findItem(R.id.action_open_in_web_view).isVisible = false
     }
+
+    override fun expandSearch() {
+        activity?.onBackPressed()
+    }
 }

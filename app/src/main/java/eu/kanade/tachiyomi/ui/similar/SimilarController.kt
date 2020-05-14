@@ -59,4 +59,8 @@ class SimilarController(bundle: Bundle) : BrowseSourceController(bundle) {
             "No Similar Manga found"
         )
     }
+
+    override fun expandSearch() {
+        activity?.onBackPressed()
+    }
 }
