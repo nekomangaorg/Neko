@@ -49,6 +49,7 @@ class DownloadProvider(private val context: Context) {
      * @param manga the manga to query.
      * @param source the source of the manga.
      */
+    @Synchronized
     internal fun getMangaDir(manga: Manga, source: Source): UniFile {
         try {
             return downloadsDir.createDirectory(getSourceDirName(source))
@@ -179,6 +180,7 @@ class DownloadProvider(private val context: Context) {
      * @param source the source to query.
      */
     fun getSourceDirName(source: Source): String {
+        Timber.d("source dir name %s", source.toString())
         return source.toString()
     }
 
