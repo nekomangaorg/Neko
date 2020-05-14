@@ -133,6 +133,19 @@ dependencies {
     debugImplementation("com.github.ChuckerTeam.Chucker:library:$chuckerVersion")
     releaseImplementation("com.github.ChuckerTeam.Chucker:library-no-op:$chuckerVersion")
 
+    debugImplementation("com.willowtreeapps.hyperion:hyperion-core:0.9.27")
+    debugImplementation("com.willowtreeapps.hyperion:hyperion-timber:0.9.27")
+    debugImplementation("com.willowtreeapps.hyperion:hyperion-core:0.9.27")
+    debugImplementation("com.willowtreeapps.hyperion:hyperion-attr:0.9.27")
+    debugImplementation("com.willowtreeapps.hyperion:hyperion-build-config:0.9.27")
+    debugImplementation("com.willowtreeapps.hyperion:hyperion-crash:0.9.27")
+    debugImplementation("com.willowtreeapps.hyperion:hyperion-disk:0.9.27")
+    debugImplementation("com.willowtreeapps.hyperion:hyperion-geiger-counter:0.9.27")
+    debugImplementation("com.willowtreeapps.hyperion:hyperion-measurement:0.9.27")
+    debugImplementation("com.willowtreeapps.hyperion:hyperion-phoenix:0.9.27")
+    debugImplementation("com.willowtreeapps.hyperion:hyperion-recorder:0.9.27")
+    debugImplementation("com.willowtreeapps.hyperion:hyperion-shared-preferences:0.9.27")
+
 // REST
     val retrofitVersion = "2.7.2"
     implementation("com.squareup.retrofit2:retrofit:$retrofitVersion")
