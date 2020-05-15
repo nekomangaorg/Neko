@@ -513,7 +513,7 @@ class LibraryController(
             (recycler.layoutManager as LinearLayoutManager).findFirstCompletelyVisibleItemPosition()
         var order = when (val item = adapter.getItem(position)) {
             is LibraryHeaderItem -> item.category.order
-            is LibraryItem -> presenter.categories.find { it.id == item.manga.category }?.order
+            is LibraryItem -> item.header.category.order
             else -> null
         }
         if (order == null) {
@@ -521,7 +521,7 @@ class LibraryController(
                 (recycler.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
             order = when (val item = adapter.getItem(fPosition)) {
                 is LibraryHeaderItem -> item.category.order
-                is LibraryItem -> presenter.categories.find { it.id == item.manga.category }?.order
+                is LibraryItem -> item.header.category.order
                 else -> null
             }
         }
