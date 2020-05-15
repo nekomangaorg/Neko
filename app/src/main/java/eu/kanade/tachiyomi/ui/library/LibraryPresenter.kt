@@ -145,7 +145,7 @@ class LibraryPresenter(
         val showAll = showAllCategories || preferences.hideCategories().getOrDefault() ||
             categories.size == 1
         if (!showAll) {
-            sectionedLibraryItems = items.groupBy { it.manga.category }.toMutableMap()
+            sectionedLibraryItems = items.groupBy { it.header.category.id ?: 0 }.toMutableMap()
             if (currentCategory == -1) currentCategory = categories.find {
                 it.order == preferences.lastUsedCategory().getOrDefault()
             }?.id ?: 0
@@ -408,9 +408,10 @@ class LibraryPresenter(
         i2: LibraryItem,
         lastReadManga: Map<Long, Int>
     ): Int {
-        return if (i1.manga.category == i2.manga.category) {
-            val category = allCategories.find { it.id == i1.manga.category } ?: return 0
-            if (category.mangaOrder.isNullOrEmpty() && category.mangaSort == null) {
+        return if (i1.header.category.id == i2.header.category.id) {
+            val category = i1.header.category
+            if (!category.isDynamic &&
+                category.mangaOrder.isNullOrEmpty() && category.mangaSort == null) {
                 category.changeSortTo(preferences.librarySortingMode().getOrDefault())
                 if (category.id == 0) preferences.defaultMangaOrder()
                     .set(category.mangaSort.toString())
@@ -465,8 +466,8 @@ class LibraryPresenter(
                 sortAlphabetical(i1, i2)
             } else compare
         } else {
-            val category = allCategories.find { it.id == i1.manga.category }?.order ?: -1
-            val category2 = allCategories.find { it.id == i2.manga.category }?.order ?: -1
+            val category = i1.header.category.order
+            val category2 = i2.header.category.order
             category.compareTo(category2)
         }
     }
