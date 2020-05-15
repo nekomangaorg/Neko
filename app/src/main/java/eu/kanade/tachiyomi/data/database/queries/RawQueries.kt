@@ -12,7 +12,7 @@ import eu.kanade.tachiyomi.data.database.tables.MangaTable as Manga
 val libraryQuery = """
     SELECT M.*, COALESCE(MC.${MangaCategory.COL_CATEGORY_ID}, 0) AS ${Manga.COL_CATEGORY}
     FROM (
-        SELECT ${Manga.TABLE}.*, COALESCE(C.unread, 0) AS ${Manga.COL_UNREAD}
+        SELECT ${Manga.TABLE}.*, COALESCE(C.unread, 0) AS ${Manga.COL_UNREAD}, COALESCE(R.hasread, 0) AS ${Manga.COL_HAS_READ}
         FROM ${Manga.TABLE}
         LEFT JOIN (
             SELECT ${Chapter.COL_MANGA_ID}, COUNT(*) AS unread
@@ -21,28 +21,14 @@ val libraryQuery = """
             GROUP BY ${Chapter.COL_MANGA_ID}
         ) AS C
         ON ${Manga.COL_ID} = C.${Chapter.COL_MANGA_ID}
+        LEFT JOIN (
+            SELECT ${Chapter.COL_MANGA_ID}, COUNT(*) AS hasread
+            FROM ${Chapter.TABLE}
+            WHERE ${Chapter.COL_READ} = 1
+            GROUP BY ${Chapter.COL_MANGA_ID}
+        ) AS R
+        ON ${Manga.COL_ID} = R.${Chapter.COL_MANGA_ID}
         WHERE ${Manga.COL_FAVORITE} = 1
-        GROUP BY ${Manga.COL_ID}
-        ORDER BY ${Manga.COL_TITLE}
-    ) AS M
-    LEFT JOIN (
-        SELECT * FROM ${MangaCategory.TABLE}) AS MC
-        ON MC.${MangaCategory.COL_MANGA_ID} = M.${Manga.COL_ID}
-"""
-
-fun getLibraryMangaQuery(id: Long) = """
-    SELECT M.*, COALESCE(MC.${MangaCategory.COL_CATEGORY_ID}, 0) AS ${Manga.COL_CATEGORY}
-    FROM (
-        SELECT ${Manga.TABLE}.*, COALESCE(C.unread, 0) AS ${Manga.COL_UNREAD}
-        FROM ${Manga.TABLE}
-        LEFT JOIN (
-            SELECT ${Chapter.COL_MANGA_ID}, COUNT(*) AS unread
-            FROM ${Chapter.TABLE}
-            WHERE ${Chapter.COL_READ} = 0
-            GROUP BY ${Chapter.COL_MANGA_ID}
-        ) AS C
-        ON ${Manga.COL_ID} = C.${Chapter.COL_MANGA_ID}
-        WHERE ${Manga.COL_FAVORITE} = 1 AND ${Manga.COL_ID} = $id
         GROUP BY ${Manga.COL_ID}
         ORDER BY ${Manga.COL_TITLE}
     ) AS M

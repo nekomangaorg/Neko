@@ -227,12 +227,8 @@ class LibraryPresenter(
         if (filterUnread == STATE_EXCLUDE && item.manga.unread > 0) return false
 
         // Filter for unread chapters
-        if (filterUnread == 3 && (item.manga.unread == 0 || db.getChapters(item.manga)
-                .executeAsBlocking().size != item.manga.unread)
-        ) return false
-        if (filterUnread == 4 && (item.manga.unread == 0 || db.getChapters(item.manga)
-                .executeAsBlocking().size == item.manga.unread)
-        ) return false
+        if (filterUnread == 3 && !(item.manga.unread > 0 && !item.manga.hasRead)) return false
+        if (filterUnread == 4 && !(item.manga.unread > 0 && item.manga.hasRead)) return false
 
         if (filterMangaType > 0) {
             if (if (filterMangaType == Manga.TYPE_MANHWA) (filterMangaType != item.manga.mangaType() && filterMangaType != Manga.TYPE_WEBTOON)
@@ -654,21 +650,7 @@ class LibraryPresenter(
 
     /** Called when Library Service updates a manga, update the item as well */
     fun updateManga(manga: LibraryManga) {
-        scope.launch {
-            val rawMap = allLibraryItems
-            val currentMap = libraryItems
-            val id = manga.id ?: return@launch
-            val dbManga = db.getLibraryManga(id).executeOnIO() ?: return@launch
-            arrayOf(rawMap, currentMap).forEach { map ->
-                map.forEach { item ->
-                    if (item.manga.id == dbManga.id) {
-                        item.manga.last_update = dbManga.last_update
-                        item.manga.unread = dbManga.unread
-                    }
-                }
-            }
-            getLibrary()
-        }
+        getLibrary()
     }
 
     /** Undo the removal of the manga once in library */

@@ -36,6 +36,8 @@ object MangaTable {
 
     const val COL_UNREAD = "unread"
 
+    const val COL_HAS_READ = "has_read"
+
     const val COL_CATEGORY = "category"
 
     const val COL_HIDE_TITLE = "hideTitle"

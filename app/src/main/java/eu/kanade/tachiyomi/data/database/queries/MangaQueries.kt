@@ -37,15 +37,6 @@ interface MangaQueries : DbProvider {
             .withGetResolver(LibraryMangaGetResolver.INSTANCE)
             .prepare()
 
-    fun getLibraryManga(id: Long) = db.get()
-        .`object`(LibraryManga::class.java)
-        .withQuery(RawQuery.builder()
-            .query(getLibraryMangaQuery(id))
-            .observesTables(MangaTable.TABLE, ChapterTable.TABLE, MangaCategoryTable.TABLE, CategoryTable.TABLE)
-            .build())
-        .withGetResolver(LibraryMangaGetResolver.INSTANCE)
-        .prepare()
-
     fun getFavoriteMangas() = db.get()
             .listOfObjects(Manga::class.java)
             .withQuery(Query.builder()
