@@ -6,7 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.net.Uri
-import android.os.Build
+import android.os.Environment
 import com.jakewharton.rxrelay.PublishRelay
 import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.extension.model.InstallStep
@@ -63,28 +63,28 @@ internal class ExtensionInstaller(private val context: Context) {
         // Register the receiver after removing (and unregistering) the previous download
         downloadReceiver.register()
 
-        val request = DownloadManager.Request(Uri.parse(url))
-                .setTitle(extension.name)
-                .setMimeType(APK_MIME)
-                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+        val downloadUri = Uri.parse(url)
+        val request = DownloadManager.Request(downloadUri)
+            .setTitle(extension.name)
+            .setMimeType(APK_MIME)
+            .setDestinationInExternalFilesDir(context, Environment.DIRECTORY_DOWNLOADS, downloadUri.lastPathSegment)
+            .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
 
         val id = downloadManager.enqueue(request)
         activeDownloads[pkgName] = id
 
         downloadsRelay.filter { it.first == id }
-                .map { it.second }
-                // Poll download status
-                .mergeWith(pollStatus(id))
-                // Force an error if the download takes more than 3 minutes
-                .mergeWith(Observable.timer(3, TimeUnit.MINUTES).map { InstallStep.Error })
-                // Stop when the application is installed or errors
-                .takeUntil { it.isCompleted() }
-                // Always notify on main thread
-                .observeOn(AndroidSchedulers.mainThread())
-                // Always remove the download when unsubscribed
-                .doOnUnsubscribe {
-                    deleteDownload(pkgName)
-                }
+            .map { it.second }
+            // Poll download status
+            .mergeWith(pollStatus(id))
+            // Force an error if the download takes more than 3 minutes
+            .mergeWith(Observable.timer(3, TimeUnit.MINUTES).map { InstallStep.Error })
+            // Stop when the application is installed or errors
+            .takeUntil { it.isCompleted() }
+            // Always notify on main thread
+            .observeOn(AndroidSchedulers.mainThread())
+            // Always remove the download when unsubscribed
+            .doOnUnsubscribe { deleteDownload(pkgName) }
     }
 
     /**
@@ -97,25 +97,28 @@ internal class ExtensionInstaller(private val context: Context) {
         val query = DownloadManager.Query().setFilterById(id)
 
         return Observable.interval(0, 1, TimeUnit.SECONDS)
-                // Get the current download status
-                .map {
-                    downloadManager.query(query).use { cursor ->
-                        cursor.moveToFirst()
-                        cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS))
-                    }
+            // Get the current download status
+            .map {
+                downloadManager.query(query).use { cursor ->
+                    cursor.moveToFirst()
+                    cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS))
                 }
-                // Ignore duplicate results
-                .distinctUntilChanged()
-                // Stop polling when the download fails or finishes
-                .takeUntil { it == DownloadManager.STATUS_SUCCESSFUL || it == DownloadManager.STATUS_FAILED }
-                // Map to our model
-                .flatMap { status ->
-                    when (status) {
-                        DownloadManager.STATUS_PENDING -> Observable.just(InstallStep.Pending)
-                        DownloadManager.STATUS_RUNNING -> Observable.just(InstallStep.Downloading)
-                        else -> Observable.empty()
-                    }
+            }
+            // Ignore duplicate results
+            .distinctUntilChanged()
+            // Stop polling when the download fails or finishes
+            .takeUntil { it == DownloadManager.STATUS_SUCCESSFUL || it == DownloadManager.STATUS_FAILED }
+            // Map to our model
+            .flatMap { status ->
+                when (status) {
+                    DownloadManager.STATUS_PENDING -> Observable.just(InstallStep.Pending)
+                    DownloadManager.STATUS_RUNNING -> Observable.just(InstallStep.Downloading)
+                    else -> Observable.empty()
                 }
+            }
+            .doOnError {
+                Timber.e(it)
+            }
     }
 
     /**
@@ -125,9 +128,9 @@ internal class ExtensionInstaller(private val context: Context) {
      */
     fun installApk(downloadId: Long, uri: Uri) {
         val intent = Intent(context, ExtensionInstallActivity::class.java)
-                .setDataAndType(uri, APK_MIME)
-                .putExtra(EXTRA_DOWNLOAD_ID, downloadId)
-                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            .setDataAndType(uri, APK_MIME)
+            .putExtra(EXTRA_DOWNLOAD_ID, downloadId)
+            .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION)
 
         context.startActivity(intent)
     }
@@ -161,7 +164,7 @@ internal class ExtensionInstaller(private val context: Context) {
      *
      * @param pkgName The package name of the download to delete.
      */
-    fun deleteDownload(pkgName: String) {
+    private fun deleteDownload(pkgName: String) {
         val downloadId = activeDownloads.remove(pkgName)
         if (downloadId != null) {
             downloadManager.remove(downloadId)
@@ -223,20 +226,15 @@ internal class ExtensionInstaller(private val context: Context) {
                 return
             }
 
-            // Due to a bug in Android versions prior to N, the installer can't open files that do
-            // not contain the extension in the path, even if you specify the correct MIME.
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-                val query = DownloadManager.Query().setFilterById(id)
-                downloadManager.query(query).use { cursor ->
-                    if (cursor.moveToFirst()) {
-                        @Suppress("DEPRECATION")
-                        val uriCompat = File(cursor.getString(cursor.getColumnIndex(
-                                DownloadManager.COLUMN_LOCAL_FILENAME))).getUriCompat(context)
-                        installApk(id, uriCompat)
-                    }
+            val query = DownloadManager.Query().setFilterById(id)
+            downloadManager.query(query).use { cursor ->
+                if (cursor.moveToFirst()) {
+                    val localUri = cursor.getString(
+                        cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI)
+                    ).removePrefix(FILE_SCHEME)
+
+                    installApk(id, File(localUri).getUriCompat(context))
                 }
-            } else {
-                installApk(id, uri)
             }
         }
     }
@@ -244,5 +242,6 @@ internal class ExtensionInstaller(private val context: Context) {
     companion object {
         const val APK_MIME = "application/vnd.android.package-archive"
         const val EXTRA_DOWNLOAD_ID = "ExtensionInstaller.extra.DOWNLOAD_ID"
+        const val FILE_SCHEME = "file://"
     }
 }
