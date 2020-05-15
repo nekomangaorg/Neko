@@ -6,6 +6,8 @@ class LibraryManga : MangaImpl() {
 
     var category: Int = 0
 
+    var hasRead: Boolean = false
+
     companion object {
         fun createBlank(categoryId: Int): LibraryManga = LibraryManga().apply {
             title = ""
