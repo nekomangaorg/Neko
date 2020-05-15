@@ -651,7 +651,9 @@ class LibraryPresenter(
 
     /** Called when Library Service updates a manga, update the item as well */
     fun updateManga(manga: LibraryManga) {
-        getLibrary()
+        scope.launch {
+            getLibrary()
+        }
     }
 
     /** Undo the removal of the manga once in library */
