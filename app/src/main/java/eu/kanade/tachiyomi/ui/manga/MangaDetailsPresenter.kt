@@ -10,7 +10,6 @@ import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
-import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.database.models.scanlatorList
 import eu.kanade.tachiyomi.data.download.DownloadManager
@@ -417,6 +416,12 @@ class MangaDetailsPresenter(
         if (update) controller.updateChapters(this.chapters)
     }
 
+    fun refreshMangaFromDb(): Manga {
+        val dbManga = db.getManga(manga.id!!).executeAsBlocking()
+        manga.copyFrom(dbManga!!)
+        return dbManga
+    }
+
     /** Refresh Manga Info and Chapter List (not tracking) */
     fun refreshAll() {
         if (controller.isNotOnline()) return
@@ -443,9 +448,11 @@ class MangaDetailsPresenter(
                 manga.initialized = true
                 db.insertManga(manga).executeAsBlocking()
                 if (thumbnailUrl != networkManga.thumbnail_url) {
-                    coverCache.deleteFromCache(thumbnailUrl)
-                    MangaImpl.setLastCoverFetch(manga.id!!, Date().time)
-                    withContext(Dispatchers.Main) { controller.setPaletteColor() }
+                    coverCache.deleteFromCache(manga, false)
+                    manga.thumbnail_url = networkManga.thumbnail_url
+                    withContext(Dispatchers.Main) {
+                        forceUpdateCovers()
+                    }
                 }
             }
             fetchExternalLinks()
@@ -697,7 +704,7 @@ class MangaDetailsPresenter(
     }
 
     fun confirmDeletion() {
-        coverCache.deleteFromCache(manga.thumbnail_url)
+        coverCache.deleteFromCache(manga)
         db.resetMangaInfo(manga).executeAsBlocking()
         downloadManager.deleteManga(manga, source)
         asyncUpdateMangaAndChapters(true)

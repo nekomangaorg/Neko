@@ -6,6 +6,11 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.ColorUtils
+import coil.api.clear
+import coil.api.loadAny
+import com.google.android.material.button.MaterialButton
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.signature.ObjectKey
@@ -14,8 +19,6 @@ import com.mikepenz.iconics.typeface.library.community.material.CommunityMateria
 import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.database.models.MangaImpl
-import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.system.dpToPx
@@ -267,21 +270,17 @@ class MangaHeaderHolder(
         manga_genres_tags.visibleIf(shouldHide)
     }
 
-    fun updateCover(manga: Manga, force: Boolean = false) {
-        if (!isCached(manga)) return
-        GlideApp.with(view.context).load(manga).diskCacheStrategy(DiskCacheStrategy.RESOURCE)
-            .signature(ObjectKey(MangaImpl.getLastCoverFetch(manga.id!!).toString()))
-            .into(manga_cover)
-        GlideApp.with(view.context).load(manga).diskCacheStrategy(DiskCacheStrategy.RESOURCE)
-            .signature(ObjectKey(MangaImpl.getLastCoverFetch(manga.id!!).toString())).centerCrop()
-            .transition(DrawableTransitionOptions.withCrossFade()).into(backdrop)
+    fun updateCover(manga: Manga, forceUpdate: Boolean = false) {
+        if (!isCached(manga) && !forceUpdate) return
+        manga_cover.clear()
+        backdrop.clear()
+        manga_cover.loadAny(manga)
+        backdrop.loadAny(manga)
     }
 
     private fun isCached(manga: Manga): Boolean {
-        val coverCache = adapter.delegate.mangaPresenter().coverCache
         manga.thumbnail_url?.let {
-            return if (manga.favorite) coverCache.getCoverFile(it).exists()
-            else true
+            return adapter.delegate.mangaPresenter().coverCache.getCoverFile(manga).exists()
         }
         return manga.initialized
     }

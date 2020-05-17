@@ -11,11 +11,9 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Rect
 import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -24,7 +22,6 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewPropertyAnimator
 import android.view.WindowInsets
 import android.view.animation.DecelerateInterpolator
 import android.view.inputmethod.InputMethodManager
@@ -41,15 +38,15 @@ import androidx.transition.ChangeBounds
 import androidx.transition.ChangeImageTransform
 import androidx.transition.TransitionManager
 import androidx.transition.TransitionSet
+import coil.Coil
+import coil.api.clear
+import coil.api.loadAny
+import coil.request.LoadRequest
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.checkbox.checkBoxPrompt
 import com.afollestad.materialdialogs.checkbox.isCheckPromptChecked
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
-import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.request.target.CustomTarget
-import com.bumptech.glide.request.transition.Transition
-import com.bumptech.glide.signature.ObjectKey
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import eu.davidea.flexibleadapter.FlexibleAdapter
@@ -59,10 +56,8 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.download.model.Download
-import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.source.Source
@@ -159,13 +154,10 @@ class MangaDetailsController : BaseController,
     var toolbarIsColored = false
     private var snack: Snackbar? = null
     val fromCatalogue = args.getBoolean(FROM_CATALOGUE_EXTRA, false)
-    var coverDrawable: Drawable? = null
     private var trackingBottomSheet: TrackingBottomSheet? = null
     private var startingDLChapterPos: Int? = null
     private var externalBottomSheet: ExternalBottomSheet? = null
     var refreshTracker: Int? = null
-    private var textAnim: ViewPropertyAnimator? = null
-    private var scrollAnim: ViewPropertyAnimator? = null
     var chapterPopupMenu: Pair<Int, PopupMenu>? = null
 
     private var query = ""
@@ -307,42 +299,39 @@ class MangaDetailsController : BaseController,
         }
     }
 
-    /** Get the color of the manga cover based on the current theme */
+    /** Get the color of the manga cover*/
     fun setPaletteColor() {
         val view = view ?: return
         coverColor = null
-        GlideApp.with(view.context).load(manga).diskCacheStrategy(DiskCacheStrategy.RESOURCE)
-            .signature(ObjectKey(MangaImpl.getLastCoverFetch(manga!!.id!!).toString()))
-            .into(object : CustomTarget<Drawable>() {
-                override fun onResourceReady(
-                    resource: Drawable,
-                    transition: Transition<in Drawable>?
-                ) {
-                    coverDrawable = resource
-                    val bitmapCover = resource as? BitmapDrawable ?: return
-                    Palette.from(bitmapCover.bitmap).generate {
-                        if (recycler == null || it == null) return@generate
-                        val colorBack = view.context.getResourceColor(
-                            android.R.attr.colorBackground
-                        )
-                        val backDropColor = if (!view.context.isInNightMode()) {
-                            it.getLightVibrantColor(colorBack)
-                        } else {
-                            it.getDarkVibrantColor(colorBack)
-                        }
-                        coverColor = backDropColor
-                        getHeader()?.setBackDrop(backDropColor)
-                        if (toolbarIsColored) {
-                            val translucentColor = ColorUtils.setAlphaComponent(backDropColor, 175)
-                            (activity as MainActivity).toolbar.setBackgroundColor(translucentColor)
-                            activity?.window?.statusBarColor = translucentColor
-                        }
-                    }
-                    getHeader()?.updateCover(presenter.manga, true)
-                }
 
-                override fun onLoadCleared(placeholder: Drawable?) {}
-            })
+        val request = LoadRequest.Builder(view.context).data(manga).allowHardware(false)
+            .target { drawable ->
+                val bitmap = (drawable as BitmapDrawable).bitmap
+                // Generate the Palette on a background thread.
+                Palette.from(bitmap).generate {
+                    if (recycler == null || it == null) return@generate
+                    val colorBack = view.context.getResourceColor(
+                        android.R.attr.colorBackground
+                    )
+                    // this makes the color more consistent regardless of theme
+                    val backDropColor = ColorUtils.blendARGB(it.getVibrantColor(colorBack), colorBack, .35f)
+
+                    coverColor = backDropColor
+                    getHeader()?.setBackDrop(backDropColor)
+                    if (toolbarIsColored) {
+                        val translucentColor = ColorUtils.setAlphaComponent(backDropColor, 175)
+                        (activity as MainActivity).toolbar.setBackgroundColor(translucentColor)
+                        activity?.window?.statusBarColor = translucentColor
+                    }
+                }
+            }.build()
+        Coil.imageLoader(view.context).execute(request)
+    }
+
+    fun resetCovers() {
+        manga_cover_full.clear()
+        manga_cover_full.loadAny(manga)
+        getHeader()?.updateCover(manga!!, true)
     }
 
     /** Set toolbar theme for themes that are inverted (ie. light blue theme) */
@@ -402,12 +391,15 @@ class MangaDetailsController : BaseController,
         super.onActivityResumed(activity)
         presenter.isLockedFromSearch = SecureActivityDelegate.shouldBeLocked()
         presenter.headerItem.isLocked = presenter.isLockedFromSearch
+        manga!!.thumbnail_url = presenter.refreshMangaFromDb().thumbnail_url
         presenter.fetchChapters(refreshTracker == null)
         if (refreshTracker != null) {
             trackingBottomSheet?.refreshItem(refreshTracker ?: 0)
             presenter.refreshTracking()
             refreshTracker = null
         }
+        // reset the covers and palette cause user might have set a custom cover
+        presenter.forceUpdateCovers(false)
         val isCurrentController = router?.backstack?.lastOrNull()?.controller() ==
             this
         if (isCurrentController) {
@@ -760,20 +752,16 @@ class MangaDetailsController : BaseController,
     //endregion
 
     override fun prepareToShareManga() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && coverDrawable != null)
-            GlideApp.with(activity!!).asBitmap().load(presenter.manga).into(object :
-                CustomTarget<Bitmap>() {
-                override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
-                    presenter.shareManga(resource)
-                }
-
-                override fun onLoadCleared(placeholder: Drawable?) {}
-
-                override fun onLoadFailed(errorDrawable: Drawable?) {
-                    shareManga()
-                }
-            })
-        else shareManga()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val request = LoadRequest.Builder(activity!!).data(manga).target(onError = {
+                shareManga()
+            }, onSuccess = {
+                presenter.shareManga((it as BitmapDrawable).bitmap)
+            }).build()
+            Coil.imageLoader(activity!!).execute(request)
+        } else {
+            shareManga()
+        }
     }
 
     fun shareManga(cover: File? = null) {
@@ -1195,10 +1183,9 @@ class MangaDetailsController : BaseController,
         currentAnimator?.cancel()
 
         // Load the high-resolution "zoomed-in" image.
+        manga_cover_full?.loadAny(manga)
         val expandedImageView = manga_cover_full ?: return
         val fullBackdrop = full_backdrop
-        val image = coverDrawable ?: return
-        expandedImageView.setImageDrawable(image)
 
         // Hide the thumbnail and show the zoomed-in view. When the animation
         // begins, it will position the zoomed-in view in the place of the

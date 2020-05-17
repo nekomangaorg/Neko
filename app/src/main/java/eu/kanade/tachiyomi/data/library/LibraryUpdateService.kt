@@ -6,25 +6,26 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
+import android.graphics.drawable.BitmapDrawable
 import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.GROUP_ALERT_SUMMARY
 import androidx.core.app.NotificationManagerCompat
-import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.signature.ObjectKey
+import androidx.core.content.ContextCompat
+import coil.Coil
+import coil.request.CachePolicy
+import coil.request.LoadRequest
+import coil.transform.CircleCropTransformation
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadService
-import eu.kanade.tachiyomi.data.glide.GlideApp
 import eu.kanade.tachiyomi.data.library.LibraryUpdateRanker.rankingScheme
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService.Companion.start
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
@@ -58,7 +59,6 @@ import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.ArrayList
-import java.util.Date
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -75,8 +75,7 @@ class LibraryUpdateService(
     val sourceManager: SourceManager = Injekt.get(),
     val preferences: PreferencesHelper = Injekt.get(),
     val downloadManager: DownloadManager = Injekt.get(),
-    private val trackManager: TrackManager = Injekt.get(),
-    private val coverCache: CoverCache = Injekt.get()
+    val trackManager: TrackManager = Injekt.get()
 ) : Service() {
 
     /**
@@ -270,15 +269,12 @@ class LibraryUpdateService(
         if (intent == null) return START_NOT_STICKY
         val target = intent.getSerializableExtra(KEY_TARGET) as? Target ?: return START_NOT_STICKY
 
-        // Unsubscribe from any previous subscription if needed.
         instance = this
 
         val selectedScheme = preferences.libraryUpdatePrioritization().getOrDefault()
         val mangaList = getMangaToUpdate(intent, target).sortedWith(rankingScheme[selectedScheme])
         // Update favorite manga. Destroy service when completed or in case of an error.
-
         launchTarget(target, mangaList, startId)
-
         return START_REDELIVER_INTENT
     }
 
@@ -395,16 +391,11 @@ class LibraryUpdateService(
             // note: we preload the covers here so we can view everything offline if they change
             if (!details.first.thumbnail_url.isNullOrEmpty()) {
                 // clear the old url from the cache
-                coverCache.deleteFromCache(manga.thumbnail_url)
-                // download the glide image cache (used in library and manga info)
-                // the coverCache should be auto populated if we preload into glide
-                manga.thumbnail_url = details.first.thumbnail_url
-                MangaImpl.setLastCoverFetch(manga.id!!, Date().time)
-                GlideApp.with(this@LibraryUpdateService)
-                    .load(manga)
-                    .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
-                    .signature(ObjectKey(MangaImpl.getLastCoverFetch(manga.id!!).toString()))
-                    .preload()
+                val request = LoadRequest.Builder(this@LibraryUpdateService)
+                    .data(manga)
+                    .memoryCachePolicy(CachePolicy.DISABLED)
+                    .build()
+                Coil.imageLoader(this@LibraryUpdateService).execute(request)
             }
 
             manga.copyFrom(details.first)
@@ -558,10 +549,10 @@ class LibraryUpdateService(
             notifications.add(Pair(notification(Notifications.CHANNEL_NEW_CHAPTERS) {
                 setSmallIcon(R.drawable.ic_neko_notification)
                 try {
-                    val icon = GlideApp.with(this@LibraryUpdateService)
-                        .asBitmap().load(manga).dontTransform().centerCrop().circleCrop()
-                        .override(256, 256).submit().get()
-                    setLargeIcon(icon)
+                    val request = LoadRequest.Builder(this@LibraryUpdateService).data(manga)
+                        .transformations(CircleCropTransformation()).size(width = 256, height = 256)
+                        .target { drawable -> setLargeIcon((drawable as BitmapDrawable).bitmap) }.build()
+                    Coil.imageLoader(this@LibraryUpdateService).execute(request)
                 } catch (e: Exception) {
                 }
                 setGroupAlertBehavior(GROUP_ALERT_SUMMARY)

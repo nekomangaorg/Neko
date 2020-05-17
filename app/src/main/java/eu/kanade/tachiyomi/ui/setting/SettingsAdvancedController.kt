@@ -70,12 +70,15 @@ class SettingsAdvancedController : SettingsController() {
 
             onClick { clearChapterCache() }
         }
-        preference {
-            key = CLEAR_CACHE_IMAGES_KEY
-            titleRes = R.string.clear_image_cache
-            summary = context.getString(R.string.used_, getChapterCacheSize())
 
-            onClick { clearImageCache() }
+        preference {
+            titleRes = R.string.clean_up_cached_covers
+            summary = context.getString(R.string.delete_old_covers_in_library_used_, coverCache.getChapterCacheSize())
+
+            onClick {
+                context.toast(R.string.starting_cleanup)
+                coverCache.deleteOldCovers()
+            }
         }
         preference {
             titleRes = R.string.clear_cookies
@@ -108,6 +111,9 @@ class SettingsAdvancedController : SettingsController() {
              summaryRes = R.string.delete_unused_chapters
 
              onClick { cleanupDownloads() }
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
          }*/
         val pm = context.getSystemService(Context.POWER_SERVICE) as? PowerManager?
         if (pm != null) preference {

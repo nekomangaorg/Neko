@@ -73,8 +73,8 @@ android {
     }
 
     compileOptions {
-        setSourceCompatibility(1.8)
-        setTargetCompatibility(1.8)
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
     kotlinOptions {
         jvmTarget = "1.8"
@@ -112,7 +112,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-common-java8:$lifecycleVersion")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
 
-// ReactiveX
+    // ReactiveX
     implementation("io.reactivex:rxandroid:1.2.1")
     implementation("io.reactivex:rxjava:1.3.8")
     implementation("com.jakewharton.rxrelay:rxrelay:1.2.0")
@@ -133,6 +133,7 @@ dependencies {
     debugImplementation("com.github.ChuckerTeam.Chucker:library:$chuckerVersion")
     releaseImplementation("com.github.ChuckerTeam.Chucker:library-no-op:$chuckerVersion")
 
+    //hyperion
     debugImplementation("com.willowtreeapps.hyperion:hyperion-core:0.9.27")
     debugImplementation("com.willowtreeapps.hyperion:hyperion-timber:0.9.27")
     debugImplementation("com.willowtreeapps.hyperion:hyperion-core:0.9.27")
@@ -196,11 +197,11 @@ dependencies {
 // Dependency injection
     implementation("com.github.inorichi.injekt:injekt-core:65b0440")
 
-// Image library
-    val glideVersion = "4.11.0"
-    implementation("com.github.bumptech.glide:glide:$glideVersion")
-    implementation("com.github.bumptech.glide:okhttp3-integration:$glideVersion")
-    kapt("com.github.bumptech.glide:compiler:$glideVersion")
+    // Image library
+    val coilVersion = "0.10.1"
+    implementation("io.coil-kt:coil:$coilVersion")
+    implementation("io.coil-kt:coil-gif:$coilVersion")
+    implementation("io.coil-kt:coil-svg:$coilVersion")
 
 // Logging
     implementation("com.jakewharton.timber:timber:4.7.1")
@@ -224,8 +225,6 @@ dependencies {
     implementation("com.github.carlosesco:DirectionalViewPager:a844dbca0a")
     implementation("com.github.florent37:viewtooltip:1.2.2")
     implementation("com.getkeepsafe.taptargetview:taptargetview:1.13.0")
-
-    implementation("com.github.AnuraganuPunalur:Multi-Selection-Spinner-Android:1.0")
 
 // Conductor
     implementation("com.bluelinelabs:conductor:2.1.5")

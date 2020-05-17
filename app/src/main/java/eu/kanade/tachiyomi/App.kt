@@ -10,6 +10,7 @@ import androidx.multidex.MultiDex
 import com.mikepenz.iconics.Iconics
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
+import eu.kanade.tachiyomi.data.download.coil.CoilSetup
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
@@ -17,6 +18,7 @@ import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.InjektScope
+import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 import uy.kohesive.injekt.registry.default.DefaultRegistrar
 
@@ -29,6 +31,7 @@ open class App : Application(), LifecycleObserver {
         Injekt = InjektScope(DefaultRegistrar())
         Injekt.importModule(AppModule(this))
 
+        CoilSetup(this)
         setupNotificationChannels()
 
         Iconics.init(applicationContext)

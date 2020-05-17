@@ -10,9 +10,11 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
+import eu.kanade.tachiyomi.util.storage.DiskUtil
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.Locale
+import kotlin.random.Random
 
 interface Manga : SManga {
 
@@ -116,6 +118,10 @@ interface Manga : SManga {
             sourceName.contains("cyanide", true) ||
             sourceName.contains("xkcd", true) ||
             sourceName.contains("tapastic", true)
+    }
+
+    fun key(): String {
+        return DiskUtil.hashKeyForDisk(thumbnail_url.orEmpty())
     }
 
     fun getExternalLinks(): List<ExternalLink> {

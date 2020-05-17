@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">Tachiyomi</string>
+    <string name="app_name" translatable="false">Neko</string>
 
     <!--Models-->
     <string name="name">Name</string>
@@ -489,7 +489,7 @@
     <string name="backup_created">Backup created</string>
     <string name="restore_completed">Restore completed</string>
     <string name="restore_error">Restore error</string>
-    <string name="restore_completed_content">%1$s Manga Restored. %2$s errors found</string>
+    <string name="restore_completed_content">%1$s Restored. %2$s errors found</string>
     <string name="restore_content_skipped">%1$d skipped</string>
     <string name="restore_message">Restore uses the network to fetch data, carrier costs may apply.\n\nMake sure you have installed all necessary extensions and are logged in to sources and tracking services before restoring.</string>
     <string name="creating_backup">Creating backup</string>
@@ -537,6 +537,9 @@
         <item quantity="one">Cleanup done. Removed %d folder</item>
         <item quantity="other">Cleanup done. Removed %d folders</item>
     </plurals>
+    <string name="clean_up_cached_covers">Clean up cached covers</string>
+    <string name="delete_old_covers_in_library_used_">Delete old and unused cached covers of
+        manga in your library that has been updated.\nCurrently using: %1$s</string>
 
     <!-- About section -->
     <string name="version">Version</string>
@@ -655,6 +658,7 @@
     <string name="create">Create</string>
     <string name="default_value">Default</string>
     <string name="delete">Delete</string>
+    <string name="deleted_">Deleted: %1$s</string>
     <string name="display">Display</string>
     <string name="drag_handle">Drag handle</string>
     <string name="edit">Edit</string>
