@@ -29,6 +29,6 @@ class PageHandler(val client: OkHttpClient, val headers: Headers, private val im
     }
 
     private fun pageListRequest(chapter: SChapter): Request {
-        return GET("${MdUtil.baseUrl}${chapter.url}${MdUtil.apiChapterSuffix}?server=$imageServer", headers)
+        return GET("${MdUtil.baseUrl}${chapter.url}${MdUtil.apiChapterSuffix}&server=$imageServer", headers)
     }
 }
