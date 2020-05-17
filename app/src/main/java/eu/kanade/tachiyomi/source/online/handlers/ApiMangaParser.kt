@@ -106,6 +106,9 @@ class ApiMangaParser(val lang: String) {
             .filter { it.value.lang_code == lang }
             .filter {
                 it.value.chapter?.let { chapterNumber ->
+                    if (chapterNumber.isBlank()) {
+                        return@filter false
+                    }
                     if (chapterNumber.contains(".").not()) {
                         return@filter true
                     }
@@ -202,10 +205,10 @@ class ApiMangaParser(val lang: String) {
         if (chapterName.isEmpty()) {
             chapterName.add("Oneshot")
         }
-        if ((finalChapterNumber == "0" && status == 2 || status == 3 && isOneShot(networkChapter, finalChapterNumber)) ||
-            networkChapter.chapter == finalChapterNumber
-        ) {
-            chapterName.add("[END]")
+        if ((status == 2 || status == 3)) {
+            if (isOneShot(networkChapter, finalChapterNumber) || networkChapter.chapter == finalChapterNumber && chapter.chapter_title.contains("prologue", true)) {
+                chapterName.add("[END]")
+            }
         }
 
         chapter.name = MdUtil.cleanString(chapterName.joinToString(" "))
