@@ -2,6 +2,16 @@
 <changelog bulletedList="true">
     <changelogversion
         changeDate=""
+        versionName="v2.0.9">
+        <changelogtext>Fix restore not restoring chapters status</changelogtext>
+        <changelogtext>Fix external links not showing for non library manga</changelogtext>
+        <changelogtext>More general bug fixes specific to Neko</changelogtext>
+        <changelogtext>Fix restore not restoring chapters status</changelogtext>
+
+        <changelogtext>Upstream bug fixes</changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
         versionName="v2.0.8">
         <changelogtext>Hot fix to fix downloads</changelogtext>
         <changelogtext>See below for other changes</changelogtext>
