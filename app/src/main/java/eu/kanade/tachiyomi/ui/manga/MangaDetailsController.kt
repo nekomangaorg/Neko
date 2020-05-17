@@ -515,6 +515,7 @@ class MangaDetailsController : BaseController,
     }
 
     fun updateChapters(chapters: List<ChapterItem>) {
+        view ?: return
         swipe_refresh?.isRefreshing = presenter.isLoading
         if (presenter.chapters.isEmpty() && fromCatalogue && !presenter.hasRequested) {
             launchUI { swipe_refresh?.isRefreshing = true }
@@ -522,7 +523,7 @@ class MangaDetailsController : BaseController,
         }
         adapter?.setChapters(chapters)
         addMangaHeader()
-        colorToolbar(recycler.canScrollVertically(-1))
+        colorToolbar(recycler?.canScrollVertically(-1) == true)
         activity?.invalidateOptionsMenu()
     }
 
