@@ -304,15 +304,17 @@ class BackupRestoreService : Service() {
      */
     private suspend fun trackingFetch(manga: Manga, tracks: List<Track>) {
         //add mdlist tracker backup has it missing
-        if (tracks.isEmpty() || !tracks.any { it.sync_id == trackManager.mdList.id }) {
-            val tracks = db.getTracks(manga).executeAsBlocking()
-            if (tracks.isEmpty() || !tracks.any { it.sync_id == trackManager.mdList.id }) {
-                val track = trackManager.mdList.createInitialTracker(manga)
-                db.insertTrack(track).executeAsBlocking()
-            }
+
+        val validTracks = tracks.filter { it.sync_id == TrackManager.MYANIMELIST || it.sync_id == TrackManager.ANILIST || it.sync_id == TrackManager.KITSU }
+
+
+        if (validTracks.isEmpty()) {
+            //always create an mdlist tracker
+            val track = trackManager.mdList.createInitialTracker(manga)
+            db.insertTrack(track).executeAsBlocking()
         }
 
-        tracks.forEach { track ->
+        validTracks.forEach { track ->
             val service = trackManager.getService(track.sync_id)
             if (service != null && service.isLogged) {
                 try {
