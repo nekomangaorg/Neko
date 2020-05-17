@@ -21,6 +21,7 @@ import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_TAG
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_TRACK_STATUS
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import eu.kanade.tachiyomi.ui.library.LibraryGroup.UNGROUPED
 import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet
 import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet.Companion.STATE_EXCLUDE
 import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet.Companion.STATE_IGNORE
@@ -83,6 +84,9 @@ class LibraryPresenter(
     val showAllCategories
         get() = preferences.showAllCategories().get()
 
+    val libraryIsGrouped
+        get() = groupType != UNGROUPED
+
     /** Save the current list to speed up loading later */
     fun onDestroy() {
         lastLibraryItems = libraryItems
@@ -135,7 +139,7 @@ class LibraryPresenter(
 
     fun restoreLibrary() {
         val items = libraryItems
-        val show = showAllCategories || preferences.hideCategories().getOrDefault() ||
+        val show = showAllCategories || !libraryIsGrouped ||
             categories.size == 1
         if (!show) {
             sectionedLibraryItems = items.groupBy { it.manga.category }.toMutableMap()
@@ -152,7 +156,7 @@ class LibraryPresenter(
 
     private suspend fun sectionLibrary(items: List<LibraryItem>, freshStart: Boolean = false) {
         libraryItems = items
-        val showAll = showAllCategories || preferences.hideCategories().getOrDefault() ||
+        val showAll = showAllCategories || !libraryIsGrouped ||
             categories.size == 1
         if (!showAll) {
             sectionedLibraryItems = items.groupBy { it.header.category.id ?: 0 }.toMutableMap()
@@ -431,14 +435,13 @@ class LibraryPresenter(
     private fun getLibraryFromDB(): List<LibraryItem> {
         removeArticles = preferences.removeArticles().getOrDefault()
         val categories = db.getCategories().executeAsBlocking().toMutableList()
-        val showCategories = !preferences.hideCategories().getOrDefault()
         var libraryManga = db.getLibraryMangas().executeAsBlocking()
         val showAll = showAllCategories
-        if (groupType <= BY_DEFAULT || !showCategories) {
+        if (groupType <= BY_DEFAULT || !libraryIsGrouped) {
             libraryManga = libraryManga.distinctBy { it.id }
         }
 
-        val items = if (groupType <= BY_DEFAULT || !showCategories) {
+        val items = if (groupType <= BY_DEFAULT || !libraryIsGrouped) {
             val categoryAll = Category.createAll(
                 context,
                 preferences.librarySortingMode().getOrDefault(),
@@ -453,7 +456,7 @@ class LibraryPresenter(
             } + (-1 to catItemAll) + (0 to LibraryHeaderItem({ getCategory(0) }, 0))).toMap()
 
             val items = libraryManga.mapNotNull {
-                val headerItem = (if (!showCategories) catItemAll
+                val headerItem = (if (!libraryIsGrouped) catItemAll
                 else headerItems[it.category]) ?: return@mapNotNull null
                 categorySet.add(it.category)
                 LibraryItem(it, headerItem)
@@ -464,7 +467,7 @@ class LibraryPresenter(
             }.toMutableSet()
 
             if (categorySet.contains(0)) categories.add(0, createDefaultCategory())
-            if (showCategories) {
+            if (libraryIsGrouped) {
                 categories.forEach { category ->
                     val catId = category.id ?: return@forEach
                     if (catId > 0 && !categorySet.contains(catId) && (catId !in categoriesHidden ||
@@ -491,7 +494,7 @@ class LibraryPresenter(
             categories.forEach {
                 it.isHidden = it.id in categoriesHidden && showAll && categories.size > 1
             }
-            this.categories = if (!showCategories) {
+            this.categories = if (!libraryIsGrouped) {
                 arrayListOf(categoryAll)
             } else {
                 categories
@@ -499,8 +502,8 @@ class LibraryPresenter(
 
             items
         } else {
-            val (items, categories) = getCustomMangaItems(libraryManga)
-            this.categories = categories
+            val (items, customCategories) = getCustomMangaItems(libraryManga)
+            this.categories = customCategories
             items
         }
 

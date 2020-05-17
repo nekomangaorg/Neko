@@ -70,14 +70,16 @@
                 android:layout_marginStart="10dp"
                 android:orientation="horizontal">
 
-                <com.google.android.material.checkbox.MaterialCheckBox
-                    android:id="@+id/hide_categories"
-                    android:buttonTint="@color/textColorPrimary"
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/group_by"
+                    style="@style/Theme.Widget.Button.TextButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="20dp"
-                    android:text="@string/hide_categories" />
-
+                    android:layout_marginEnd="10dp"
+                    android:text="@string/group_library_by"
+                    android:textColor="?android:attr/textColorPrimary"
+                    app:icon="@drawable/ic_label_outline_white_24dp"
+                    app:iconTint="?android:attr/textColorPrimary" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/expand_categories"
@@ -89,18 +91,6 @@
                     app:icon="@drawable/ic_expand_more_24dp"
                     app:iconTint="?android:attr/textColorPrimary" />
             </LinearLayout>
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/group_by"
-                style="@style/Theme.Widget.Button.TextButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginEnd="10dp"
-                android:text="@string/group_library_by"
-                android:textColor="?android:attr/textColorPrimary"
-                app:icon="@drawable/ic_label_outline_white_24dp"
-                app:iconTint="?android:attr/textColorPrimary" />
 
             <LinearLayout
                 android:id="@+id/second_layout"
@@ -139,7 +129,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
-            android:alpha="0.7"
+            android:alpha="0.25"
             android:contentDescription="@string/drag_handle"
             android:src="@drawable/draggable_pill"
             android:tint="?android:attr/textColorPrimary"
