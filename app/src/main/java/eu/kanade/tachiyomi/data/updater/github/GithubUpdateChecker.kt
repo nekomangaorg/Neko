@@ -11,7 +11,6 @@ class GithubUpdateChecker : UpdateChecker() {
 
     override suspend fun checkForUpdate(): UpdateResult {
         val release = service.getLatestVersion()
-        val newVersion = release.version.replace("[^\\d.]".toRegex(), "")
         // Check if latest version is different from current version
         return if (Version(release.version).isHigherThan(BuildConfig.VERSION_NAME)) {
             GithubUpdateResult.NewUpdate(release)
