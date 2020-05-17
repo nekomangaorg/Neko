@@ -57,6 +57,7 @@ class MdUtil {
             "[hr][B][PTBR][/B]",
             "French - Français:",
             "R&eacute;sume Fran&ccedil;ais :[spoiler]",
+            "R&eacute;sum&eacute; Fran&ccedil;ais",
             "[b][u]French[/u][/b]",
             "[b][u]French / Fran&ccedil;ais[/u][/b]",
             "[b][u]Turkish / T&uuml;rk&ccedil;e[/u][/b]",
