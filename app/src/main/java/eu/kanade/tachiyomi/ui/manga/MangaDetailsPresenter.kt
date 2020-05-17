@@ -448,6 +448,7 @@ class MangaDetailsPresenter(
                     withContext(Dispatchers.Main) { controller.setPaletteColor() }
                 }
             }
+            fetchExternalLinks()
             val finChapters = networkPair.second
             if (finChapters.isNotEmpty()) {
                 val newChapters = syncChaptersWithSource(db, finChapters, manga, source)
