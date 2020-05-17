@@ -261,6 +261,9 @@ dependencies {
     // Text distance
     implementation("info.debatty:java-string-similarity:1.2.1")
 
+    //  version comparison
+    implementation("com.g00fy2:versioncompare:1.3.4")
+
     implementation("com.google.android.gms:play-services-oss-licenses:17.0.0")
 }
 
