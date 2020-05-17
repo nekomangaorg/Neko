@@ -5,7 +5,7 @@ import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.SChapter
-import eu.kanade.tachiyomi.source.online.HttpSource
+import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import java.util.Date
 import java.util.TreeSet
 
@@ -47,16 +47,15 @@ fun syncChaptersWithSource(
     val toChange = mutableListOf<Chapter>()
 
     for (sourceChapter in sourceChapters) {
-        val dbChapter = dbChapters.find { it.url == sourceChapter.url }
+        val dbChapter = dbChapters.find {
+            (it.mangadex_chapter_id.isNotBlank() && it.mangadex_chapter_id == sourceChapter.mangadex_chapter_id)
+                || MdUtil.getChapterId(it.url) == sourceChapter.mangadex_chapter_id
+        }
 
         // Add the chapter if not in db already, or update if the metadata changed.
         if (dbChapter == null) {
             toAdd.add(sourceChapter)
         } else {
-            // this forces metadata update for the main viewable things in the chapter list
-            if (source is HttpSource) {
-                source.prepareNewChapter(sourceChapter, manga)
-            }
 
             ChapterRecognition.parseChapterNumber(sourceChapter, manga)
 
@@ -68,6 +67,7 @@ fun syncChaptersWithSource(
                 dbChapter.chapter_title = sourceChapter.chapter_title
                 dbChapter.date_upload = sourceChapter.date_upload
                 dbChapter.chapter_number = sourceChapter.chapter_number
+                dbChapter.mangadex_chapter_id = sourceChapter.mangadex_chapter_id
                 toChange.add(dbChapter)
             }
         }
@@ -75,16 +75,14 @@ fun syncChaptersWithSource(
 
     // Recognize number for new chapters.
     toAdd.forEach {
-        if (source is HttpSource) {
-            source.prepareNewChapter(it, manga)
-        }
         ChapterRecognition.parseChapterNumber(it, manga)
     }
 
     // Chapters from the db not in the source.
     val toDelete = dbChapters.filterNot { dbChapter ->
         sourceChapters.any { sourceChapter ->
-            dbChapter.url == sourceChapter.url
+            dbChapter.mangadex_chapter_id == sourceChapter.mangadex_chapter_id ||
+                dbChapter.url == sourceChapter.url
         }
     }
 
@@ -163,5 +161,6 @@ private fun shouldUpdateDbChapter(dbChapter: Chapter, sourceChapter: SChapter): 
         dbChapter.chapter_number != sourceChapter.chapter_number ||
         dbChapter.vol != sourceChapter.vol ||
         dbChapter.chapter_title != sourceChapter.chapter_title ||
-        dbChapter.chapter_txt != dbChapter.chapter_txt
+        dbChapter.chapter_txt != sourceChapter.chapter_txt ||
+        dbChapter.mangadex_chapter_id != sourceChapter.mangadex_chapter_id
 }

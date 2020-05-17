@@ -48,6 +48,7 @@ import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -237,8 +238,9 @@ class BackupManager(val context: Context, version: Int = CURRENT_VERSION) {
 
         // Check if user wants track information in backup
         if (options and BACKUP_TRACK_MASK == BACKUP_TRACK) {
-            val tracks = databaseHelper.getTracks(manga).executeAsBlocking()
+            var tracks = databaseHelper.getTracks(manga).executeAsBlocking()
             if (tracks.isNotEmpty()) {
+                tracks = tracks.filterNot { it.sync_id == TrackManager.MDLIST }
                 entry[TRACK] = parser.toJsonTree(tracks)
             }
         }
@@ -299,7 +301,10 @@ class BackupManager(val context: Context, version: Int = CURRENT_VERSION) {
             val syncChaptersWithSource =
                 syncChaptersWithSource(databaseHelper, fetchChapters, manga, source)
             if (syncChaptersWithSource.first.isNotEmpty()) {
-                chapters.forEach { it.manga_id = manga.id }
+                chapters.forEach {
+                    it.manga_id = manga.id
+                    it.mangadex_chapter_id = MdUtil.getChapterId(it.url)
+                }
                 insertChapters(chapters)
             }
         }

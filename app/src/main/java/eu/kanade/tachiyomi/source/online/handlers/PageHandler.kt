@@ -15,20 +15,20 @@ class PageHandler(val client: OkHttpClient, val headers: Headers, private val im
     fun fetchPageList(chapter: SChapter): Observable<List<Page>> {
         if (chapter.scanlator.equals("MangaPlus")) {
             return client.newCall(pageListRequest(chapter))
-                    .asObservableSuccess()
-                    .map { response ->
-                        val chapterId = ApiChapterParser().externalParse(response)
-                        MangaPlusHandler(client).fetchPageList(chapterId)
-                    }
-        }
-        return client.newCall(pageListRequest(chapter))
                 .asObservableSuccess()
                 .map { response ->
-                    ApiChapterParser().pageListParse(response)
+                    val chapterId = ApiChapterParser().externalParse(response)
+                    MangaPlusHandler(client).fetchPageList(chapterId)
                 }
+        }
+        return client.newCall(pageListRequest(chapter))
+            .asObservableSuccess()
+            .map { response ->
+                ApiChapterParser().pageListParse(response)
+            }
     }
 
     private fun pageListRequest(chapter: SChapter): Request {
-        return GET("${MdUtil.baseUrl}${chapter.url}?server=$imageServer", headers)
+        return GET("${MdUtil.baseUrl}${chapter.url}${MdUtil.apiChapterSuffix}?server=$imageServer", headers)
     }
 }

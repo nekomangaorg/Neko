@@ -34,12 +34,14 @@ class ChapterImpl : Chapter {
 
     override var source_order: Int = 0
 
+    override var mangadex_chapter_id: String = ""
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || javaClass != other.javaClass) return false
 
         val chapter = other as Chapter
-        return url == chapter.url
+        return mangadex_chapter_id == chapter.mangadex_chapter_id
     }
 
     override fun hashCode(): Int {

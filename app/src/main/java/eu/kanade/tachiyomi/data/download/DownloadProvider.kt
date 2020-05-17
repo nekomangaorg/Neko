@@ -199,7 +199,8 @@ class DownloadProvider(private val context: Context) {
      * @param chapter the chapter to query.
      */
     fun getChapterDirName(chapter: Chapter): String {
-        return DiskUtil.buildValidFilename(chapter.name + " - " + MdUtil.getChapterId(chapter.url))
+        val chapterId = if (chapter.mangadex_chapter_id.isNotBlank()) chapter.mangadex_chapter_id else MdUtil.getChapterId(chapter.url)
+        return DiskUtil.buildValidFilename(chapter.name + " - " + chapterId)
     }
 
     fun getJ2kChapterName(chapter: Chapter): String {

@@ -7,7 +7,6 @@ import eu.kanade.tachiyomi.network.newCallWithProgress
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.Page
-import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.handlers.MangaPlusHandler
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
@@ -121,17 +120,7 @@ abstract class HttpSource : Source {
         return nonRateLimitedClient.newCallWithProgress(GET(page.imageUrl!!), page)
             .asObservableSuccess()
     }
-
-    /**
-     * Called before inserting a new chapter into database. Use it if you need to override chapter
-     * fields, like the title or the chapter number. Do not change anything to [manga].
-     *
-     * @param chapter the chapter to be added.
-     * @param manga the manga of the chapter.
-     */
-    open fun prepareNewChapter(chapter: SChapter, manga: SManga) {
-    }
-
+    
     /**
      * Returns the list of filters for the source.
      */

@@ -174,7 +174,7 @@ class ApiMangaParser(val lang: String) {
         status: Int
     ): SChapter {
         val chapter = SChapter.create()
-        chapter.url = MdUtil.apiChapter + chapterId + MdUtil.apiChapterSuffix
+        chapter.url = MdUtil.apiChapter + chapterId
         val chapterName = mutableListOf<String>()
         // Build chapter name
 
@@ -224,6 +224,8 @@ class ApiMangaParser(val lang: String) {
         }
 
         chapter.scanlator = MdUtil.cleanString(MdUtil.getScanlatorString(scanlatorName))
+
+        chapter.mangadex_chapter_id = MdUtil.getChapterId(chapter.url)
 
         return chapter
     }
