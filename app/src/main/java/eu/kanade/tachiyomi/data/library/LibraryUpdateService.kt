@@ -16,6 +16,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import coil.Coil
 import coil.request.CachePolicy
+import coil.request.GetRequest
 import coil.request.LoadRequest
 import coil.transform.CircleCropTransformation
 import eu.kanade.tachiyomi.R
@@ -540,7 +541,7 @@ class LibraryUpdateService(
      *
      * @param updates a list of manga with new updates.
      */
-    private fun showResultNotification(updates: Map<LibraryManga, Array<Chapter>>) {
+    private suspend fun showResultNotification(updates: Map<LibraryManga, Array<Chapter>>) {
         val notifications = ArrayList<Pair<Notification, Int>>()
         updates.forEach {
             val manga = it.key
@@ -549,10 +550,16 @@ class LibraryUpdateService(
             notifications.add(Pair(notification(Notifications.CHANNEL_NEW_CHAPTERS) {
                 setSmallIcon(R.drawable.ic_neko_notification)
                 try {
-                    val request = LoadRequest.Builder(this@LibraryUpdateService).data(manga)
+
+                    val request = GetRequest.Builder(this@LibraryUpdateService).data(manga)
+                        .networkCachePolicy(CachePolicy.DISABLED)
                         .transformations(CircleCropTransformation()).size(width = 256, height = 256)
-                        .target { drawable -> setLargeIcon((drawable as BitmapDrawable).bitmap) }.build()
-                    Coil.imageLoader(this@LibraryUpdateService).execute(request)
+                        .build()
+
+                    Coil.imageLoader(this@LibraryUpdateService)
+                        .execute(request).drawable?.let { drawable ->
+                            setLargeIcon((drawable as BitmapDrawable).bitmap)
+                        }
                 } catch (e: Exception) {
                 }
                 setGroupAlertBehavior(GROUP_ALERT_SUMMARY)
