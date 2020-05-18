@@ -911,7 +911,7 @@ class LibraryController(
             if (changedMode) {
                 adapter.notifyItemChanged(it)
             } else {
-                (recycler.findViewHolderForAdapterPosition(it) as? LibraryHeaderItem.Holder)?.setSelection()
+                (recycler.findViewHolderForAdapterPosition(it) as? LibraryHeaderHolder)?.setSelection()
             }
         }
     }
