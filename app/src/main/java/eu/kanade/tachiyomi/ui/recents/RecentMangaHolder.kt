@@ -35,7 +35,7 @@ class RecentMangaHolder(
     fun bind(item: RecentMangaItem) {
         title.apply {
             text = item.chapter.name
-            setTextColor(ChapterUtil.chapterColor(context, item))
+            ChapterUtil.setTextViewForChapter(this, item)
         }
         subtitle.apply {
             text = item.mch.manga.title
