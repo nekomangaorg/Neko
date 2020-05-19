@@ -173,6 +173,7 @@ class LibraryController(
     private var filterTooltip: ViewTooltip? = null
     private var isAnimatingHopper: Boolean? = null
     var hasMovedHopper = preferences.shownHopperSwipeTutorial().get()
+    private var shouldScrollToTop = false
     private lateinit var elevateAppBar: ((Boolean) -> Unit)
 
     override fun getTitle(): String? {
@@ -450,7 +451,7 @@ class LibraryController(
                     ) { _, item ->
                         preferences.groupLibraryBy().set(item)
                         presenter.groupType = item
-                        recycler?.scrollToPosition(0)
+                        shouldScrollToTop = true
                         presenter.getLibrary()
                         true
                     }.show()
@@ -694,6 +695,10 @@ class LibraryController(
         category_recycler.setCategories(presenter.categories)
         filter_bottom_sheet.setExpandText(preferences.collapsedCategories().getOrDefault().isNotEmpty())
         setActiveCategory()
+        if (shouldScrollToTop) {
+            recycler.scrollToPosition(0)
+            shouldScrollToTop = false
+        }
         if (onRoot) {
             activity?.toolbar?.setOnClickListener {
                 val recycler = recycler ?: return@setOnClickListener
@@ -777,7 +782,7 @@ class LibraryController(
             presenter.switchSection(pos)
             activeCategory = pos
             setActiveCategory()
-            recycler.scrollToPosition(0)
+            shouldScrollToTop = true
             return
         }
         val headerPosition = adapter.indexOf(pos)
