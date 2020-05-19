@@ -418,7 +418,7 @@ class LibraryController(
             createActionModeIfNeeded()
         }
 
-        filter_bottom_sheet.onCreate(recycler_layout)
+        filter_bottom_sheet.onCreate(this)
 
         filter_bottom_sheet.onGroupClicked = {
             when (it) {
