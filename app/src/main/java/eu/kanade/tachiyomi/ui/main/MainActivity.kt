@@ -8,6 +8,7 @@ import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
 import android.provider.Settings
 import android.view.GestureDetector
 import android.view.MenuItem
@@ -151,6 +152,10 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
                 LibraryUpdateService.start(this)
                 main_content.snack(R.string.updating_library) {
                     anchorView = bottom_nav
+                    setAction(R.string.cancel) {
+                        LibraryUpdateService.stop(context)
+                        Handler().post { NotificationReceiver.dismissNotification(context, Notifications.ID_LIBRARY_PROGRESS) }
+                    }
                 }
             }
             true
