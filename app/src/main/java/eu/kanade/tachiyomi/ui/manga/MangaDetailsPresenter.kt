@@ -15,6 +15,7 @@ import eu.kanade.tachiyomi.data.database.models.scanlatorList
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.download.model.DownloadQueue
+import eu.kanade.tachiyomi.data.library.CustomMangaManager
 import eu.kanade.tachiyomi.data.library.LibraryServiceListener
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -29,6 +30,7 @@ import eu.kanade.tachiyomi.ui.manga.external.ExternalItem
 import eu.kanade.tachiyomi.ui.manga.track.TrackItem
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
+import eu.kanade.tachiyomi.util.lang.trimOrNull
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import kotlinx.coroutines.CoroutineScope
@@ -42,6 +44,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import uy.kohesive.injekt.injectLazy
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
@@ -58,6 +61,8 @@ class MangaDetailsPresenter(
 ) : DownloadQueue.DownloadListener, LibraryServiceListener {
 
     private var scope = CoroutineScope(Job() + Dispatchers.Default)
+
+    private val customMangaManager: CustomMangaManager by injectLazy()
 
     var isLockedFromSearch = false
     var hasRequested = false
@@ -446,14 +451,14 @@ class MangaDetailsPresenter(
             if (networkManga != null) {
                 manga.copyFrom(networkManga)
                 manga.initialized = true
-                db.insertManga(manga).executeAsBlocking()
+
                 if (thumbnailUrl != networkManga.thumbnail_url) {
-                    coverCache.deleteFromCache(manga, false)
-                    manga.thumbnail_url = networkManga.thumbnail_url
+                    coverCache.deleteFromCache(thumbnailUrl)
                     withContext(Dispatchers.Main) {
-                        forceUpdateCovers()
+                        controller.setPaletteColor()
                     }
                 }
+                db.insertManga(manga).executeAsBlocking()
             }
             fetchExternalLinks()
             val finChapters = networkPair.second
@@ -496,7 +501,6 @@ class MangaDetailsPresenter(
                 }
             }
         }
-    }
 
     /**
      * Requests an updated list of chapters from the source.
@@ -707,6 +711,7 @@ class MangaDetailsPresenter(
         coverCache.deleteFromCache(manga)
         db.resetMangaInfo(manga).executeAsBlocking()
         downloadManager.deleteManga(manga, source)
+        customMangaManager.saveMangaInfo(CustomMangaManager.MangaJson(manga.id!!))
         asyncUpdateMangaAndChapters(true)
     }
 

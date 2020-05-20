@@ -11,9 +11,6 @@ import androidx.core.graphics.ColorUtils
 import coil.api.loadAny
 import coil.request.CachePolicy
 import com.google.android.material.button.MaterialButton
-import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
-import com.bumptech.glide.signature.ObjectKey
 import com.mikepenz.iconics.typeface.IIcon
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
@@ -138,7 +135,7 @@ class MangaHeaderHolder(
         title.text = manga.title
 
         if (manga.genre.isNullOrBlank().not()) manga_genres_tags.setTags(
-            manga.genre?.split(", ")?.map(String::trim)
+            manga.genre?.split(",")?.map(String::trim)
         )
         else manga_genres_tags.setTags(emptyList())
 
@@ -283,13 +280,6 @@ class MangaHeaderHolder(
             error(drawable)
             if (manga.favorite) networkCachePolicy(CachePolicy.DISABLED)
         })
-    }
-
-    private fun isCached(manga: Manga): Boolean {
-        manga.thumbnail_url?.let {
-            return adapter.delegate.mangaPresenter().coverCache.getCoverFile(manga).exists()
-        }
-        return manga.initialized
     }
 
     fun expand() {

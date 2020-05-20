@@ -301,7 +301,7 @@ class MangaDetailsController : BaseController,
     fun setPaletteColor() {
         val view = view ?: return
 
-        val request = LoadRequest.Builder(view.context).data(manga).allowHardware(false)
+        val request = LoadRequest.Builder(view.context).data(presenter.manga).allowHardware(false)
             .target { drawable ->
                 val bitmap = (drawable as BitmapDrawable).bitmap
                 // Generate the Palette on a background thread.
@@ -391,8 +391,8 @@ class MangaDetailsController : BaseController,
             presenter.refreshTracking()
             refreshTracker = null
         }
-        // reset the covers and palette cause user might have set a custom cover
-        presenter.forceUpdateCovers(false)
+        // fetch cover again in case the user set a new cover while reading
+        setPaletteColor()
         val isCurrentController = router?.backstack?.lastOrNull()?.controller() ==
             this
         if (isCurrentController) {

@@ -20,6 +20,7 @@ import coil.request.GetRequest
 import coil.request.LoadRequest
 import coil.transform.CircleCropTransformation
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Chapter
@@ -73,6 +74,7 @@ import java.util.concurrent.atomic.AtomicInteger
  */
 class LibraryUpdateService(
     val db: DatabaseHelper = Injekt.get(),
+    val coverCache: CoverCache = Injekt.get(),
     val sourceManager: SourceManager = Injekt.get(),
     val preferences: PreferencesHelper = Injekt.get(),
     val downloadManager: DownloadManager = Injekt.get(),
@@ -390,16 +392,17 @@ class LibraryUpdateService(
 
             // delete cover cache image if the thumbnail from network is not empty
             // note: we preload the covers here so we can view everything offline if they change
-            if (!details.first.thumbnail_url.isNullOrEmpty()) {
-                // clear the old url from the cache
-                val request = LoadRequest.Builder(this@LibraryUpdateService)
-                    .data(manga)
-                    .memoryCachePolicy(CachePolicy.DISABLED)
-                    .build()
+            val thumbnailUrl = manga.thumbnail_url
+            manga.copyFrom(details.first)
+            manga.initialized = true
+            if (thumbnailUrl != manga.thumbnail_url) {
+                coverCache.deleteFromCache(thumbnailUrl)
+                // load new covers in background
+                val request =
+                    LoadRequest.Builder(this@LibraryUpdateService).data(manga)
+                        .memoryCachePolicy(CachePolicy.DISABLED).build()
                 Coil.imageLoader(this@LibraryUpdateService).execute(request)
             }
-
-            manga.copyFrom(details.first)
             db.insertManga(manga).executeAsBlocking()
             //add mdlist tracker if manga in library has it missing
             val tracks = db.getTracks(manga).executeAsBlocking()

@@ -2,10 +2,10 @@ package eu.kanade.tachiyomi.data.database.models
 
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadProvider
+import eu.kanade.tachiyomi.data.library.CustomMangaManager
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import uy.kohesive.injekt.injectLazy
-import kotlin.collections.set
 
 open class MangaImpl : Manga {
 
@@ -15,15 +15,34 @@ open class MangaImpl : Manga {
 
     override lateinit var url: String
 
-    override lateinit var title: String
+    private val customMangaManager: CustomMangaManager by injectLazy()
 
-    override var artist: String? = null
+    override var title: String
+        get() = if (favorite) {
+            val customTitle = customMangaManager.getManga(this)?.title
+            if (customTitle.isNullOrBlank()) ogTitle else customTitle
+        } else {
+            ogTitle
+        }
+        set(value) {
+            ogTitle = value
+        }
 
-    override var author: String? = null
+    override var author: String?
+        get() = if (favorite) customMangaManager.getManga(this)?.author ?: ogAuthor else ogAuthor
+        set(value) { ogAuthor = value }
 
-    override var description: String? = null
+    override var artist: String?
+        get() = if (favorite) customMangaManager.getManga(this)?.artist ?: ogArtist else ogArtist
+        set(value) { ogArtist = value }
 
-    override var genre: String? = null
+    override var description: String?
+        get() = if (favorite) customMangaManager.getManga(this)?.description ?: ogDesc else ogDesc
+        set(value) { ogDesc = value }
+
+    override var genre: String?
+        get() = if (favorite) customMangaManager.getManga(this)?.genre ?: ogGenre else ogGenre
+        set(value) { ogGenre = value }
 
     override var status: Int = 0
 
@@ -40,6 +59,17 @@ open class MangaImpl : Manga {
     override var chapter_flags: Int = 0
 
     override var date_added: Long = 0
+
+    lateinit var ogTitle: String
+        private set
+    var ogAuthor: String? = null
+        private set
+    var ogArtist: String? = null
+        private set
+    var ogDesc: String? = null
+        private set
+    var ogGenre: String? = null
+        private set
 
     override var follow_status: FollowStatus? = null
 
@@ -58,16 +88,15 @@ open class MangaImpl : Manga {
     override var scanlator_filter: String? = null
 
     override var missing_chapters: String? = null
-    
+
     override fun copyFrom(other: SManga) {
-        if (other is MangaImpl && (other as MangaImpl)::title.isInitialized &&
-            !other.title.isBlank() && other.title != title
-        ) {
-            val oldTitle = title
-            title = other.title
+        if (other is MangaImpl && other::ogTitle.isInitialized &&
+            !other.title.isBlank() && other.ogTitle != ogTitle) {
+            val oldTitle = ogTitle
+            title = other.ogTitle
             val db: DownloadManager by injectLazy()
             val provider = DownloadProvider(db.context)
-            provider.renameMangaFolder(oldTitle, title, source)
+            provider.renameMangaFolder(oldTitle, ogTitle, source)
         }
         super.copyFrom(other)
     }
@@ -82,7 +111,7 @@ open class MangaImpl : Manga {
     }
 
     override fun hashCode(): Int {
-        if (::url.isInitialized) return url.hashCode()
-        else return (id ?: 0L).hashCode()
+        return if (::url.isInitialized) url.hashCode()
+        else (id ?: 0L).hashCode()
     }
 }

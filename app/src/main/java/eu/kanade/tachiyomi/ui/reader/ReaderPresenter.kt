@@ -4,6 +4,7 @@ import android.app.Application
 import android.os.Bundle
 import android.os.Environment
 import com.jakewharton.rxrelay.BehaviorRelay
+import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.History
@@ -53,6 +54,7 @@ class ReaderPresenter(
     private val db: DatabaseHelper = Injekt.get(),
     private val sourceManager: SourceManager = Injekt.get(),
     private val downloadManager: DownloadManager = Injekt.get(),
+    private val coverCache: CoverCache = Injekt.get(),
     private val preferences: PreferencesHelper = Injekt.get()
 ) : BasePresenter<ReaderActivity>() {
 
@@ -235,10 +237,8 @@ class ReaderPresenter(
                     else -> it.source_order.toFloat()
                 }
             }.map {
-                ReaderChapterItem(
-                    it, manga, it.id ==
-                        getCurrentChapter()?.chapter?.id ?: chapterId
-                )
+                ReaderChapterItem(it, manga, it.id ==
+                    getCurrentChapter()?.chapter?.id ?: chapterId)
             }
             if (!manga.sortDescending(preferences.chaptersDescAsDefault().getOrDefault()))
                 list.reversed()

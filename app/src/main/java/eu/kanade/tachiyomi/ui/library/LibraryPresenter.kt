@@ -38,6 +38,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.ArrayList
 import java.util.Comparator
+import java.util.Locale
 
 /**
  * Presenter of [LibraryController].
@@ -863,6 +864,25 @@ class LibraryPresenter(
             withContext(Dispatchers.IO) {
                 mangaList.forEach {
                     source.updateFollowStatus(MdUtil.getMangaId(it.url), FollowStatus.READING)
+                }
+            }
+        }
+
+        fun updateCustoms() {
+            val db: DatabaseHelper = Injekt.get()
+            val cc: CoverCache = Injekt.get()
+            db.inTransaction {
+                val libraryManga = db.getLibraryMangas().executeAsBlocking()
+                libraryManga.forEach { manga ->
+                    if (manga.thumbnail_url?.startsWith("custom", ignoreCase = true) == true) {
+                        val file = cc.getCoverFile(manga)
+                        if (file.exists()) {
+                            file.renameTo(cc.getCustomCoverFile(manga))
+                        }
+                        manga.thumbnail_url =
+                            manga.thumbnail_url!!.toLowerCase(Locale.ROOT).substringAfter("custom-")
+                        db.insertManga(manga).executeAsBlocking()
+                    }
                 }
             }
         }

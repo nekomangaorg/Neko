@@ -38,6 +38,9 @@ object Migrations {
                 BackupCreatorJob.setupTask()
                 SimilarUpdateJob.setupTask(true)
             }
+            if (oldVersion < 66) {
+                LibraryPresenter.updateCustoms()
+            }
             return true
         }
         return false

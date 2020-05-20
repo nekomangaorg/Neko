@@ -14,7 +14,6 @@ import eu.kanade.tachiyomi.util.storage.DiskUtil
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.Locale
-import kotlin.random.Random
 
 interface Manga : SManga {
 
