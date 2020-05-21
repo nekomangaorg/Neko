@@ -263,6 +263,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
 
                 syncActivityViewWithController(to, from, isPush)
                 appbar.y = 0f
+                snackBar?.dismiss()
             }
 
             override fun onChangeCompleted(
