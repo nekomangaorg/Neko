@@ -3,8 +3,8 @@ package eu.kanade.tachiyomi.ui.library
 import android.view.View
 import android.view.ViewGroup
 import coil.api.clear
-import coil.api.loadAny
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.download.coil.loadLibraryManga
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
@@ -79,7 +79,7 @@ class LibraryListHolder(
             cover_thumbnail.clear()
         } else {
             val id = item.manga.id ?: return
-            cover_thumbnail.loadAny(item.manga)
+            cover_thumbnail.loadLibraryManga(item.manga)
         }
     }
 

@@ -62,7 +62,7 @@ class MangaFetcher : Fetcher<Manga> {
             return fileLoader(customCoverFile)
         }
         val coverFile = coverCache.getCoverFile(manga)
-        if (coverFile.exists()) {
+        if (coverFile.exists() && options.diskCachePolicy.readEnabled) {
             return fileLoader(coverFile)
         }
         if (!manga.favorite) {
