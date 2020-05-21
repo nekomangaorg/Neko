@@ -206,7 +206,7 @@
                 android:layout_marginEnd="6dp"
                 android:contentDescription="@string/share"
                 android:padding="5dp"
-                android:src="@drawable/ic_share_white_24dp"
+                android:src="@drawable/ic_share_24dp"
                 android:tooltipText="@string/share" />
         </LinearLayout>
     </HorizontalScrollView>

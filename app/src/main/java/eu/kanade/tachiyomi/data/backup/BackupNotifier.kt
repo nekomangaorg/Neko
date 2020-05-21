@@ -73,7 +73,7 @@ internal class BackupNotifier(private val context: Context) {
             }
 
             addAction(
-                R.drawable.ic_share_grey_24dp,
+                R.drawable.ic_share_24dp,
                 context.getString(R.string.share),
                 NotificationReceiver.shareBackupPendingBroadcast(context, unifile.uri, Notifications.ID_BACKUP_COMPLETE)
             )

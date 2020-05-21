@@ -75,11 +75,11 @@ internal class UpdaterNotifier(private val context: Context) {
             setProgress(0, 0, false)
             // Install action
             setContentIntent(NotificationHandler.installApkPendingActivity(context, uri))
-            addAction(R.drawable.ic_system_update_grey_24dp_img,
+            addAction(R.drawable.ic_system_update_24dp,
                     context.getString(R.string.install),
                     NotificationHandler.installApkPendingActivity(context, uri))
             // Cancel action
-            addAction(R.drawable.ic_clear_grey_24dp_img,
+            addAction(R.drawable.ic_close_24dp,
                     context.getString(R.string.cancel),
                     NotificationReceiver.dismissNotificationPendingBroadcast(context, Notifications.ID_UPDATER))
         }
@@ -99,11 +99,11 @@ internal class UpdaterNotifier(private val context: Context) {
             setProgress(0, 0, false)
             color = ContextCompat.getColor(context, R.color.colorAccent)
             // Retry action
-            addAction(R.drawable.ic_refresh_grey_24dp_img,
+            addAction(R.drawable.ic_refresh_24dp,
                     context.getString(R.string.retry),
                     UpdaterService.downloadApkPendingService(context, url))
             // Cancel action
-            addAction(R.drawable.ic_clear_grey_24dp_img,
+            addAction(R.drawable.ic_close_24dp,
                     context.getString(R.string.cancel),
                     NotificationReceiver.dismissNotificationPendingBroadcast(context, Notifications.ID_UPDATER))
         }
