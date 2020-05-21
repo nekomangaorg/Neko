@@ -303,13 +303,12 @@ class BackupRestoreService : Service() {
      * @param tracks list containing tracks from restore file.
      */
     private suspend fun trackingFetch(manga: Manga, tracks: List<Track>) {
-        //add mdlist tracker backup has it missing
+        // add mdlist tracker backup has it missing
 
         val validTracks = tracks.filter { it.sync_id == TrackManager.MYANIMELIST || it.sync_id == TrackManager.ANILIST || it.sync_id == TrackManager.KITSU }
 
-
         if (validTracks.isEmpty()) {
-            //always create an mdlist tracker
+            // always create an mdlist tracker
             val track = trackManager.mdList.createInitialTracker(manga)
             db.insertTrack(track).executeAsBlocking()
         }
@@ -364,7 +363,7 @@ class BackupRestoreService : Service() {
             .setOnlyAlertOnce(true)
             .setAutoCancel(false)
             .setColor(this.contextCompatColor(R.color.neko_green_darker))
-            .addAction(R.drawable.ic_clear_grey_24dp_img, getString(android.R.string.cancel), cancelIntent)
+            .addAction(R.drawable.ic_close_24dp, getString(android.R.string.cancel), cancelIntent)
     }
 
     /**
@@ -452,8 +451,12 @@ class BackupRestoreService : Service() {
             .setColor(this.contextCompatColor(R.color.neko_green_darker))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
         if (errors.size > 0 && !path.isNullOrEmpty() && !file.isNullOrEmpty()) {
-            resultNotification.addAction(R.drawable.ic_close_24dp, getString(R.string
-                .view_all_errors), getErrorLogIntent(path, file))
+            resultNotification.addAction(
+                R.drawable.ic_close_24dp, getString(
+                    R.string
+                        .view_all_errors
+                ), getErrorLogIntent(path, file)
+            )
         }
         notificationManager.notify(Notifications.ID_RESTORE_COMPLETE, resultNotification.build())
     }
@@ -465,7 +468,7 @@ class BackupRestoreService : Service() {
         val resultNotification = NotificationCompat.Builder(this, Notifications.CHANNEL_BACKUP_RESTORE)
             .setContentTitle(getString(R.string.restore_error))
             .setContentText(errorMessage)
-                .setSmallIcon(R.drawable.ic_error_24dp)
+            .setSmallIcon(R.drawable.ic_error_24dp)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setColor(ContextCompat.getColor(this, R.color.md_red_500))
         notificationManager.notify(Notifications.ID_RESTORE_ERROR, resultNotification.build())

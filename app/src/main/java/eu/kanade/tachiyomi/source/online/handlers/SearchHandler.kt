@@ -175,7 +175,7 @@ class SearchHandler(val client: OkHttpClient, private val headers: Headers, val 
         }
 
         manga.thumbnail_url = MdUtil.formThumbUrl(manga.url, preferences.lowQualityCovers())
-        
+
         return manga
     }
 

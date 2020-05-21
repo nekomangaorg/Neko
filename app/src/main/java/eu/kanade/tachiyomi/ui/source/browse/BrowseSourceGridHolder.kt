@@ -53,7 +53,6 @@ class BrowseSourceGridHolder(
         when (isFollows) {
             true -> badge_view.setStatus(manga.follow_status!!, manga.favorite)
             false -> badge_view.setInLibrary(manga.favorite)
-
         }
 
         // Update the cover.

@@ -41,6 +41,8 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
     override fun getStatus(status: Int): String =
         context.resources.getStringArray(R.array.follows_options).asList()[status]
 
+    override fun getGlobalStatus(status: Int): String = getStatus(status)
+
     override fun getScoreList() = IntRange(0, 10).map(Int::toString)
 
     override fun displayScore(track: Track) = track.score.toInt().toString()
@@ -65,7 +67,7 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
                 }
                 mdex.updateReadingProgress(track)
             } else if (track.last_chapter_read != 0) {
-                //When followStatus has been changed to unfollowed 0 out read chapters since dex does
+                // When followStatus has been changed to unfollowed 0 out read chapters since dex does
                 track.last_chapter_read = 0
             }
             db.insertTrack(track).executeAsBlocking()

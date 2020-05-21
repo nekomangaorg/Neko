@@ -15,12 +15,11 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.HttpSource
-import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_DEFAULT
-import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_SOURCE
-import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_TAG
-import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_TRACK_STATUS
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_DEFAULT
+import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_TAG
+import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_TRACK_STATUS
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.UNGROUPED
 import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet
 import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet.Companion.STATE_EXCLUDE
@@ -38,7 +37,6 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.ArrayList
 import java.util.Comparator
-import java.util.Locale
 
 /**
  * Presenter of [LibraryController].
@@ -56,7 +54,7 @@ class LibraryPresenter(
 
     private val context = preferences.context
 
-    private val loggedServices by lazy { Injekt.get<TrackManager>().services.filter { it.isLogged } }
+    private val loggedServices by lazy { Injekt.get<TrackManager>().services.filter { it.isLogged || it.isMdList() } }
 
     var groupType = preferences.groupLibraryBy().get()
 
@@ -168,7 +166,7 @@ class LibraryPresenter(
         withContext(Dispatchers.Main) {
             view.onNextLibraryUpdate(
                 if (!showAll) sectionedLibraryItems[currentCategory]
-                ?: sectionedLibraryItems[categories.first().id] ?: blankItem()
+                    ?: sectionedLibraryItems[categories.first().id] ?: blankItem()
                 else libraryItems, freshStart
             )
         }
@@ -475,7 +473,8 @@ class LibraryPresenter(
                 categories.forEach { category ->
                     val catId = category.id ?: return@forEach
                     if (catId > 0 && !categorySet.contains(catId) && (catId !in categoriesHidden ||
-                            !showAll)) {
+                            !showAll)
+                    ) {
                         val headerItem = headerItems[catId]
                         if (headerItem != null) items.add(
                             LibraryItem(LibraryManga.createBlank(catId), headerItem)
@@ -569,10 +568,6 @@ class LibraryPresenter(
                     }()
                     listOf(LibraryItem(manga, makeOrGetHeader(status)))
                 }
-                BY_SOURCE -> {
-                    val source = sourceManager.getOrStub(manga.source)
-                    listOf(LibraryItem(manga, makeOrGetHeader("${source.name}◘•◘${source.id}")))
-                }
                 else -> listOf(LibraryItem(manga, makeOrGetHeader(mapStatus(manga.status))))
             }
         }.flatten()
@@ -595,18 +590,21 @@ class LibraryPresenter(
                 mapTrackingOrder(it.name)
             } else {
                 it.name
-            } }
+            }
+        }
         headers.forEachIndexed { index, category -> category.order = index }
         return items to headers
     }
 
     private fun mapStatus(status: Int): String {
-        return context.getString(when (status) {
-            SManga.LICENSED -> R.string.licensed
-            SManga.ONGOING -> R.string.ongoing
-            SManga.COMPLETED -> R.string.completed
-            else -> R.string.unknown
-        })
+        return context.getString(
+            when (status) {
+                SManga.LICENSED -> R.string.licensed
+                SManga.ONGOING -> R.string.ongoing
+                SManga.COMPLETED -> R.string.completed
+                else -> R.string.unknown
+            }
+        )
     }
 
     private fun mapTrackingOrder(status: String): String {
@@ -684,8 +682,8 @@ class LibraryPresenter(
     fun getCommonCategories(mangas: List<Manga>): Collection<Category> {
         if (mangas.isEmpty()) return emptyList()
         return mangas.toSet()
-                .map { db.getCategoriesForManga(it).executeAsBlocking() }
-                .reduce { set1: Iterable<Category>, set2 -> set1.intersect(set2).toMutableList() }
+            .map { db.getCategoriesForManga(it).executeAsBlocking() }
+            .reduce { set1: Iterable<Category>, set2 -> set1.intersect(set2).toMutableList() }
     }
 
     /**
@@ -809,8 +807,8 @@ class LibraryPresenter(
             val categories =
                 if (catId == 0) emptyList()
                 else
-                db.getCategoriesForManga(manga).executeOnIO()
-                .filter { it.id != oldCatId } + listOf(category)
+                    db.getCategoriesForManga(manga).executeOnIO()
+                        .filter { it.id != oldCatId } + listOf(category)
 
             for (cat in categories) {
                 mc.add(MangaCategory.create(manga, cat))
@@ -864,25 +862,6 @@ class LibraryPresenter(
             withContext(Dispatchers.IO) {
                 mangaList.forEach {
                     source.updateFollowStatus(MdUtil.getMangaId(it.url), FollowStatus.READING)
-                }
-            }
-        }
-
-        fun updateCustoms() {
-            val db: DatabaseHelper = Injekt.get()
-            val cc: CoverCache = Injekt.get()
-            db.inTransaction {
-                val libraryManga = db.getLibraryMangas().executeAsBlocking()
-                libraryManga.forEach { manga ->
-                    if (manga.thumbnail_url?.startsWith("custom", ignoreCase = true) == true) {
-                        val file = cc.getCoverFile(manga)
-                        if (file.exists()) {
-                            file.renameTo(cc.getCustomCoverFile(manga))
-                        }
-                        manga.thumbnail_url =
-                            manga.thumbnail_url!!.toLowerCase(Locale.ROOT).substringAfter("custom-")
-                        db.insertManga(manga).executeAsBlocking()
-                    }
                 }
             }
         }

@@ -11,7 +11,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 class SimilarHandler {
-    
+
     /**
      * fetch our similar mangas
      */

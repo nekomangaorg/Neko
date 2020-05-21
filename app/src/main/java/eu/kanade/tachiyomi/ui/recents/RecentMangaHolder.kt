@@ -8,7 +8,6 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.ui.manga.chapter.BaseChapterHolder
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.system.timeSpanFromNow
-import eu.kanade.tachiyomi.util.view.visibleIf
 import kotlinx.android.synthetic.main.download_button.*
 import kotlinx.android.synthetic.main.recent_manga_item.*
 

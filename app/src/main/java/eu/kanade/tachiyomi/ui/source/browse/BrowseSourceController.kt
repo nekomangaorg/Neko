@@ -396,7 +396,6 @@ open class BrowseSourceController(bundle: Bundle) :
             actions += EmptyView.Action(R.string.retry, retryAction)
             actions += EmptyView.Action(R.string.open_in_webview, View.OnClickListener { openInWebView() })
 
-
             empty_view.show(
                 CommunityMaterial.Icon.cmd_compass_off,
                 message,

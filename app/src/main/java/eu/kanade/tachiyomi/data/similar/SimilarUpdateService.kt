@@ -62,7 +62,7 @@ class SimilarUpdateService(
             )
             .setAutoCancel(true)
             .addAction(
-                R.drawable.ic_clear_grey_24dp_img,
+                R.drawable.ic_close_24dp,
                 getString(android.R.string.cancel),
                 cancelIntent
             )

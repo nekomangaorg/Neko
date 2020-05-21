@@ -6,7 +6,6 @@ import android.view.ViewGroup
 import android.widget.CompoundButton
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.list.listItemsMultiChoice
-import com.anurag.multiselectionspinner.MultiSelectionSpinnerDialog
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import eu.kanade.tachiyomi.R
@@ -22,7 +21,7 @@ import kotlinx.android.synthetic.main.chapter_sort_bottom_sheet.*
 import kotlin.math.max
 
 class ChaptersSortBottomSheet(controller: MangaDetailsController) : BottomSheetDialog
-    (controller.activity!!, R.style.BottomSheetDialogTheme), MultiSelectionSpinnerDialog.OnMultiSpinnerSelectionListener {
+    (controller.activity!!, R.style.BottomSheetDialogTheme) {
 
     val activity = controller.activity!!
 
@@ -142,7 +141,6 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) : BottomSheetD
         show_download.setOnCheckedChangeListener(::checkedFilter)
         show_bookmark.setOnCheckedChangeListener(::checkedFilter)
 
-
         filter_groups_button.setOnClickListener {
             val scanlators = presenter.allChapterScanlators
             val preselected = presenter.filteredScanlators.map { scanlators.indexOf(it) }
@@ -182,9 +180,5 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) : BottomSheetD
         ) {
             show_all.isChecked = true
         }
-    }
-
-    override fun OnMultiSpinnerItemSelected(chosenItems: MutableList<String>?) {
-        presenter.setScanlatorFilter(chosenItems)
     }
 }

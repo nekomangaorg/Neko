@@ -17,10 +17,10 @@ import coil.transform.CircleCropTransformation
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
-import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.lang.chop
 import eu.kanade.tachiyomi.util.system.notification
@@ -69,7 +69,7 @@ class LibraryUpdateNotifier(private val context: Context) {
      * @param current the current progress.
      * @param total the total progress.
      */
-    fun showProgressNotification(manga: Manga, current: Int, total: Int) {
+    fun showProgressNotification(manga: SManga, current: Int, total: Int) {
         val title = manga.title
 
         context.notificationManager.notify(
@@ -103,7 +103,7 @@ class LibraryUpdateNotifier(private val context: Context) {
                         }
                     )
                 )
-                setSmallIcon(R.drawable.ic_tachi)
+                setSmallIcon(R.drawable.ic_neko_notification)
                 addAction(
                     R.drawable.nnf_ic_file_folder,
                     context.getString(R.string.view_all_errors),
@@ -126,7 +126,7 @@ class LibraryUpdateNotifier(private val context: Context) {
             val chapters = it.value
             val chapterNames = chapters.map { chapter -> chapter.name }
             notifications.add(Pair(context.notification(Notifications.CHANNEL_NEW_CHAPTERS) {
-                setSmallIcon(R.drawable.ic_tachi)
+                setSmallIcon(R.drawable.ic_neko_notification)
                 try {
                     val request = GetRequest.Builder(context).data(manga)
                         .networkCachePolicy(CachePolicy.DISABLED)
@@ -137,7 +137,8 @@ class LibraryUpdateNotifier(private val context: Context) {
                         .execute(request).drawable?.let { drawable ->
                             setLargeIcon((drawable as BitmapDrawable).bitmap)
                         }
-                } catch (e: Exception) { }
+                } catch (e: Exception) {
+                }
                 setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_SUMMARY)
                 setContentTitle(manga.title)
                 color = ContextCompat.getColor(context, R.color.colorAccent)
@@ -181,7 +182,7 @@ class LibraryUpdateNotifier(private val context: Context) {
             notify(
                 Notifications.ID_NEW_CHAPTERS,
                 context.notification(Notifications.CHANNEL_NEW_CHAPTERS) {
-                    setSmallIcon(R.drawable.ic_tachi)
+                    setSmallIcon(R.drawable.ic_neko_notification)
                     setLargeIcon(notificationBitmap)
                     setContentTitle(context.getString(R.string.new_chapters_found))
                     color = ContextCompat.getColor(context, R.color.colorAccent)

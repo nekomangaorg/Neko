@@ -15,7 +15,6 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.source.icon
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
@@ -87,13 +86,6 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
 
         if (category.isAlone) sectionText.text = ""
         else sectionText.text = category.name
-        if (category.sourceId != null) {
-            val icon = adapter.sourceManager.get(category.sourceId!!)?.icon()
-            icon?.setBounds(0, 0, 32.dpToPx, 32.dpToPx)
-            sectionText.setCompoundDrawablesRelative(icon, null, null, null)
-        } else {
-            sectionText.setCompoundDrawablesRelative(null, null, null, null)
-        }
 
         val isAscending = category.isAscending()
         val sortingMode = category.sortingMode()
@@ -107,7 +99,8 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
         sortText.setText(category.sortRes())
         expandImage.setImageResource(
             if (category.isHidden) R.drawable.ic_expand_more_24dp
-            else R.drawable.ic_expand_less_24dp)
+            else R.drawable.ic_expand_less_24dp
+        )
         when {
             adapter.mode == SelectableAdapter.Mode.MULTI -> {
                 checkboxImage.visibleIf(!category.isHidden)
@@ -206,7 +199,8 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
         sortingMode == LibrarySort.DRAG_AND_DROP -> R.drawable.ic_check_24dp
         if (sortingMode == LibrarySort.DATE_ADDED ||
             sortingMode == LibrarySort.LATEST_CHAPTER ||
-            sortingMode == LibrarySort.LAST_READ) !isAscending else isAscending ->
+            sortingMode == LibrarySort.LAST_READ
+        ) !isAscending else isAscending ->
             R.drawable.ic_arrow_downward_24dp
         else -> R.drawable.ic_arrow_upward_24dp
     }

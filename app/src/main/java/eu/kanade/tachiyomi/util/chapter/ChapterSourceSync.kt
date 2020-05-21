@@ -48,8 +48,8 @@ fun syncChaptersWithSource(
 
     for (sourceChapter in sourceChapters) {
         val dbChapter = dbChapters.find {
-            (it.mangadex_chapter_id.isNotBlank() && it.mangadex_chapter_id == sourceChapter.mangadex_chapter_id)
-                || MdUtil.getChapterId(it.url) == sourceChapter.mangadex_chapter_id
+            (it.mangadex_chapter_id.isNotBlank() && it.mangadex_chapter_id == sourceChapter.mangadex_chapter_id) ||
+                MdUtil.getChapterId(it.url) == sourceChapter.mangadex_chapter_id
         }
 
         // Add the chapter if not in db already, or update if the metadata changed.

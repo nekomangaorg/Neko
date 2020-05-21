@@ -20,7 +20,7 @@ interface SChapter : Serializable {
 
     var scanlator: String?
 
-    //chapter id from mangadex
+    // chapter id from mangadex
     var mangadex_chapter_id: String
 
     fun copyFrom(other: SChapter) {

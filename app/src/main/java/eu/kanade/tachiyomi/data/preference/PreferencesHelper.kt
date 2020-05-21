@@ -278,9 +278,7 @@ class PreferencesHelper(val context: Context) {
     fun groupLibraryBy() = flowPrefs.getInt("group_library_by", 0)
 
     fun showCategoryInTitle() = flowPrefs.getBoolean("category_in_title", false)
-
-    fun onlySearchPinned() = flowPrefs.getBoolean(Keys.onlySearchPinned, true)
-
+    
     fun showLibraryUpdateErrors() = prefs.getBoolean(Keys.showLibraryUpdateErrors, false)
 
     // Tutorial preferences
@@ -305,7 +303,7 @@ class PreferencesHelper(val context: Context) {
     fun similarUpdateInterval() = rxPrefs.getInteger(Keys.similarUpdateInterval, 3)
 
     fun lowQualityCovers() = prefs.getBoolean(Keys.lowQualityCovers, false)
-    
+
     fun r18() = prefs.getString(Keys.showR18, "0")
 
     fun imageServer() = prefs.getString(Keys.imageServer, Mangadex.SERVER_PREF_ENTRY_VALUES.first())

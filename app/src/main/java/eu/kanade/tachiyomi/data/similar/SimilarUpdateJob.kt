@@ -69,6 +69,5 @@ class SimilarUpdateJob(private val context: Context, workerParams: WorkerParamet
         fun doWorkNow() {
             WorkManager.getInstance().enqueue(OneTimeWorkRequestBuilder<SimilarUpdateJob>().build())
         }
-
     }
 }

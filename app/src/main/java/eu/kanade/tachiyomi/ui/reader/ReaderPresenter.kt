@@ -137,7 +137,7 @@ class ReaderPresenter(
             val scanlatorEnabled = listValidScanlators.isNotEmpty()
 
             filteredChapters = filteredChapters.filter {
-                //return if showAll
+                // return if showAll
                 if (!readEnabled && !unreadEnabled && !downloadEnabled && !bookmarkEnabled && listValidScanlators.isEmpty()) {
                     return@filter true
                 }

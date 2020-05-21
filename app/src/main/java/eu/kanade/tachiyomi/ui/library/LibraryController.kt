@@ -52,7 +52,6 @@ import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.category.ManageCategoryDialog
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_DEFAULT
-import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_SOURCE
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_STATUS
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_TAG
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_TRACK_STATUS
@@ -428,7 +427,7 @@ class LibraryController(
                 FilterBottomSheet.ACTION_DISPLAY -> DisplayBottomSheet(this).show()
                 FilterBottomSheet.ACTION_EXPAND_COLLAPSE_ALL -> presenter.toggleAllCategoryVisibility()
                 FilterBottomSheet.ACTION_GROUP_BY -> {
-                    val groupItems = mutableListOf(BY_DEFAULT, BY_TAG, BY_SOURCE, BY_STATUS)
+                    val groupItems = mutableListOf(BY_DEFAULT, BY_TAG, BY_STATUS)
                     if (presenter.isLoggedIntoTracking) {
                         groupItems.add(BY_TRACK_STATUS)
                     }
@@ -713,9 +712,9 @@ class LibraryController(
         }
         adapter.setItems(mangaMap)
         if (recycler.itemAnimator == null)
-        recycler.post {
-            recycler.itemAnimator = DefaultItemAnimator()
-        }
+            recycler.post {
+                recycler.itemAnimator = DefaultItemAnimator()
+            }
         singleCategory = presenter.categories.size <= 1
         showDropdown()
         progress.gone()
@@ -881,15 +880,6 @@ class LibraryController(
 
     fun search(query: String?): Boolean {
         this.query = query ?: ""
-        if (this.query.isNotBlank() && adapter.scrollableHeaders.isEmpty()) {
-            searchItem.string = this.query
-            adapter.addScrollableHeader(searchItem)
-        } else if (this.query.isNotBlank()) {
-            searchItem.string = this.query
-            (recycler.findViewHolderForAdapterPosition(0) as? SearchGlobalItem.Holder)?.bind(this.query)
-        } else if (this.query.isBlank() && adapter.scrollableHeaders.isNotEmpty()) {
-            adapter.removeAllScrollableHeaders()
-        }
         adapter.setFilter(query)
         adapter.performFilter()
         return true

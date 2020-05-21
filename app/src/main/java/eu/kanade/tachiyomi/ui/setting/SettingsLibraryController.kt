@@ -152,7 +152,6 @@ class SettingsLibraryController : SettingsController() {
                 entryRange = 0..1
                 defaultValue = -1
             }
-
         }
     }
 }

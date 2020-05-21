@@ -218,7 +218,7 @@ class DownloadProvider(private val context: Context) {
     fun getValidChapterDirNames(chapter: Chapter): List<String> {
         return listOf(
             getChapterDirName(chapter),
-            //chater names from j2k
+            // chater names from j2k
             getJ2kChapterName(chapter),
             // Legacy chapter directory name used in v0.8.4 and before
             DiskUtil.buildValidFilename(chapter.name)

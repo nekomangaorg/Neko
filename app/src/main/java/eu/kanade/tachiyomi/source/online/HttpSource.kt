@@ -120,7 +120,7 @@ abstract class HttpSource : Source {
         return nonRateLimitedClient.newCallWithProgress(GET(page.imageUrl!!), page)
             .asObservableSuccess()
     }
-    
+
     /**
      * Returns the list of filters for the source.
      */
