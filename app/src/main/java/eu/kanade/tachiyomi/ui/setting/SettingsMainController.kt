@@ -52,7 +52,6 @@ class SettingsMainController : SettingsController() {
 
         preference {
             iconDrawable = context.iconicsDrawable(MaterialDesignDx.Icon.gmf_sync, size = size)
-
             titleRes = R.string.tracking
             onClick { navigateTo(SettingsTrackingController()) }
         }
