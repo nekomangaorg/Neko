@@ -70,9 +70,8 @@ class CategoryRecyclerView @JvmOverloads constructor(
     }
 
     override fun onMeasure(widthSpec: Int, heightSpec: Int) {
-        val recyclerView = (parent as ViewGroup)
-        val mainView = (parent.parent.parent.parent as ViewGroup)
-        val top = recyclerView.marginTop
+        val mainView = (parent.parent.parent as ViewGroup)
+        val top = marginTop
         val parent = mainView.measuredHeight - top - 100.dpToPx
         val heightS = if (parent > 0) {
             MeasureSpec.makeMeasureSpec(parent, MeasureSpec.AT_MOST)

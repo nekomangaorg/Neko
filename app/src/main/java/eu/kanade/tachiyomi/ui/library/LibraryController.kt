@@ -354,7 +354,7 @@ class LibraryController(
 
         elevateAppBar =
             scrollViewWith(recycler, swipeRefreshLayout = swipe_refresh, afterInsets = { insets ->
-                category_layout?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                category_recycler?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                     topMargin = recycler?.paddingTop ?: 0
                 }
                 fast_scroller?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
@@ -798,15 +798,16 @@ class LibraryController(
     private fun showCategories(show: Boolean) {
         recycler_cover.isClickable = show
         recycler_cover.isFocusable = show
-        val full = category_layout.height.toFloat() + recycler.paddingTop
+        val full = category_recycler.height.toFloat() + recycler.paddingTop
         val translateY = if (show) full else 0f
         recycler.animate().translationY(translateY).start()
         category_hopper_frame.animate().translationY(translateY).start()
-        recycler_shadow.animate().translationY(translateY + 12.dpToPx).start()
+        recycler_shadow.animate().translationY(translateY - 8.dpToPx).start()
         recycler_cover.animate().translationY(translateY).start()
         recycler_cover.animate().alpha(if (show) 0.75f else 0f).start()
         recycler.suppressLayout(show)
         activity?.toolbar?.showDropdown(!show)
+        swipe_refresh.isEnabled = !show
         setTitle()
         if (show) {
             category_recycler.scrollToCategory(activeCategory)

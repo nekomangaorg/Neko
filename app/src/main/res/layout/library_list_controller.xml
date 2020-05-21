@@ -17,32 +17,19 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <FrameLayout
             android:id="@+id/recycler_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/category_layout"
+            <eu.kanade.tachiyomi.ui.library.category.CategoryRecyclerView
+                android:id="@+id/category_recycler"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="?actionBarSize"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
-
-                <eu.kanade.tachiyomi.ui.library.category.CategoryRecyclerView
-                    android:id="@+id/category_recycler"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:clipToPadding="false"
-                    android:paddingBottom="4dp"
-                    android:scrollbars="vertical"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
+                android:clipToPadding="false"
+                android:paddingBottom="4dp"
+                android:scrollbars="vertical" />
 
             <View
                 android:id="@+id/recycler_shadow"
@@ -55,12 +42,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent" />
 
-            <include
-                layout="@layout/library_grid_recycler"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+            <include layout="@layout/library_grid_recycler" />
 
             <View
                 android:id="@+id/recycler_cover"
@@ -68,12 +50,8 @@
                 android:layout_height="match_parent"
                 android:alpha="0"
                 android:background="@drawable/bottom_sheet_rounded_background"
-                android:backgroundTint="?android:textColorPrimaryInverse"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
+                android:backgroundTint="?android:textColorPrimaryInverse" />
+        </FrameLayout>
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
