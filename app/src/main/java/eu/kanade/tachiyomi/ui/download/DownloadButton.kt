@@ -30,7 +30,7 @@ class DownloadButton @JvmOverloads constructor(context: Context, attrs: Attribut
     private val borderCircle = ContextCompat.getDrawable(context,
         R.drawable.border_circle)?.mutate()
     private val downloadDrawable = ContextCompat.getDrawable(context,
-        R.drawable.ic_arrow_down_24dp)?.mutate()
+        R.drawable.ic_arrow_downward_24dp)?.mutate()
     private val checkDrawable = ContextCompat.getDrawable(context,
         R.drawable.ic_check_24dp)?.mutate()
     private var isAnimating = false
