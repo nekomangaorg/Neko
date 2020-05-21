@@ -257,6 +257,21 @@ class ReaderPresenter(
     }
 
     /**
+     * Removes all filters and requests an UI update.
+     */
+    fun setFilters(read: Boolean, unread: Boolean, downloaded: Boolean, bookmarked: Boolean) {
+        val manga = manga ?: return
+        manga.readFilter = when {
+            read -> Manga.SHOW_READ
+            unread -> Manga.SHOW_UNREAD
+            else -> Manga.SHOW_ALL
+        }
+        manga.downloadedFilter = if (downloaded) Manga.SHOW_DOWNLOADED else Manga.SHOW_ALL
+        manga.bookmarkedFilter = if (bookmarked) Manga.SHOW_BOOKMARKED else Manga.SHOW_ALL
+        db.updateFlags(manga).executeAsBlocking()
+    }
+
+    /**
      * Initializes this presenter with the given [manga] and [initialChapterId]. This method will
      * set the chapter loader, view subscriptions and trigger an initial load.
      */
