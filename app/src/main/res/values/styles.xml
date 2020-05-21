@@ -248,13 +248,19 @@
         <item name="android:textColor">?colorAccent</item>
     </style>
 
+    <style name="Theme.Widget.ImageBorderless" parent="Widget.AppCompat.ImageButton">
+        <item name="android:background">?selectableItemBackgroundBorderless</item>
+        <item name="android:tint">?colorAccent</item>
+        <item name="rippleColor">@color/fullRippleColor</item>
+    </style>
+
     <style name="Theme.Widget.CustomImageButton">
         <item name="android:background">@drawable/round_ripple</item>
         <item name="android:clickable">true</item>
         <item name="android:focusable">true</item>
         <item name="android:tint">?colorAccent</item>
     </style>
-    
+
     <!--===-->
     <!--OLD-->
     <!--===-->

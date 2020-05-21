@@ -154,21 +154,21 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:clipToPadding="false"
+        android:requiresFadingEdge="horizontal"
+        android:scrollbars="none"
         app:layout_constraintBottom_toTopOf="@id/manga_summary_label"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/bottom_line"
-        android:requiresFadingEdge="horizontal"
-        android:scrollbars="none">
+        app:layout_constraintTop_toBottomOf="@id/bottom_line">
 
         <LinearLayout
             android:id="@+id/button_layout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="14dp"
+            android:orientation="horizontal"
             android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:orientation="horizontal">
+            android:paddingEnd="16dp">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/favorite_button"

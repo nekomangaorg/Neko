@@ -18,12 +18,13 @@
         android:clickable="true"
         android:focusable="true">
 
-        <ImageView
+        <ImageButton
             android:id="@+id/up_category"
-            style="@style/Theme.Widget.CustomImageButton"
+            style="@style/Theme.Widget.ImageBorderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="6dp"
+            android:contentDescription="@string/previous"
             android:padding="8dp"
             android:src="@drawable/ic_expand_less_24dp"
             android:tint="@android:color/white"
@@ -32,11 +33,12 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <ImageView
+        <ImageButton
             android:id="@+id/category_button"
-            style="@style/Theme.Widget.CustomImageButton"
+            style="@style/Theme.Widget.ImageBorderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:contentDescription="@string/categories"
             android:padding="8dp"
             android:src="@drawable/ic_label_outline_24dp"
             android:tint="@android:color/white"
@@ -45,12 +47,13 @@
             app:layout_constraintStart_toEndOf="@id/up_category"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <ImageView
+        <ImageButton
             android:id="@+id/down_category"
-            style="@style/Theme.Widget.CustomImageButton"
+            style="@style/Theme.Widget.ImageBorderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="6dp"
+            android:contentDescription="@string/next"
             android:padding="8dp"
             android:src="@drawable/ic_expand_more_24dp"
             android:tint="@android:color/white"

@@ -118,9 +118,9 @@
         app:layout_constraintTop_toTopOf="@id/category_title"
         tools:text="Drag and Drop" />
 
-    <ImageView
+    <ImageButton
         android:id="@+id/update_button"
-        style="@style/Theme.Widget.CustomImageButton"
+        style="@style/Theme.Widget.ImageBorderless"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="6dp"

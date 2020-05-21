@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -18,9 +17,9 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_gravity="end|center"
-            android:gravity="center"
             android:layout_marginEnd="21dp"
             android:contentDescription="@string/cancel"
+            android:gravity="center"
             android:src="@drawable/ic_close_24dp"
             android:text="@string/hide"
             android:textColor="@color/md_white_1000" />
@@ -67,10 +66,10 @@
             android:id="@+id/title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:ellipsize="end"
             android:maxLines="1"
             android:paddingStart="0dp"
             android:paddingEnd="8dp"
-            android:ellipsize="end"
             android:textColor="?android:textColorPrimary"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/source_latest"
@@ -81,28 +80,29 @@
         <com.google.android.material.button.MaterialButton
             android:id="@+id/source_latest"
             style="@style/Theme.Widget.Button.TextButton"
-            android:textColor="?colorAccent"
-            android:layout_marginEnd="4dp"
-            android:textAllCaps="false"
             android:layout_width="wrap_content"
-            android:letterSpacing="0.0"
-            android:text="@string/latest"
-            android:minWidth="50dp"
             android:layout_height="match_parent"
-            app:layout_constraintEnd_toStartOf="@id/source_pin"/>
+            android:layout_marginEnd="4dp"
+            android:letterSpacing="0.0"
+            android:minWidth="50dp"
+            android:text="@string/latest"
+            android:textAllCaps="false"
+            android:textColor="?colorAccent"
+            app:layout_constraintEnd_toStartOf="@id/source_pin" />
 
         <ImageButton
             android:id="@+id/source_pin"
-            android:layout_marginEnd="8dp"
-            style="@style/Theme.Widget.CustomImageButton"
-            android:src="@drawable/ic_pin_24dp"
+            style="@style/Theme.Widget.ImageBorderless"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_margin="10dp"
+            android:layout_marginEnd="8dp"
+            android:src="@drawable/ic_pin_24dp"
+            android:tint="?colorAccent"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintDimensionRatio="1:1"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </FrameLayout>
