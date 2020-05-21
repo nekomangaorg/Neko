@@ -26,6 +26,10 @@ class DateItem(val date: Date, val addedString: Boolean = false) : AbstractHeade
         holder.bind(this)
     }
 
+    override fun isSwipeable(): Boolean {
+        return false
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other is DateItem) {
