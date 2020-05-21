@@ -219,6 +219,8 @@ class PreferencesHelper(val context: Context) {
 
     fun skipRead() = prefs.getBoolean(Keys.skipRead, false)
 
+    fun skipFiltered() = prefs.getBoolean(Keys.skipFiltered, true)
+
     fun useBiometrics() = rxPrefs.getBoolean(Keys.useBiometrics, false)
 
     fun lockAfter() = rxPrefs.getInteger(Keys.lockAfter, 0)

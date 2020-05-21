@@ -92,6 +92,11 @@ class SettingsReaderController : SettingsController() {
                 defaultValue = false
             }
             switchPreference {
+                key = Keys.skipFiltered
+                titleRes = R.string.skip_filtered_chapters
+                defaultValue = true
+            }
+            switchPreference {
                 key = Keys.alwaysShowChapterTransition
                 titleRes = R.string.always_show_chapter_transition
                 summaryRes = R.string.if_disabled_transition_will_skip

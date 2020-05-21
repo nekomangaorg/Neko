@@ -96,8 +96,29 @@ class ReaderPresenter(
             ?: error("Requested chapter of id $chapterId not found in chapter list")
 
         val chaptersForReader =
-            if (preferences.skipRead()) {
-                val list = dbChapters.filter { !it.read }.toMutableList()
+            if (preferences.skipRead() || preferences.skipFiltered()) {
+                val list = dbChapters
+                    .filter {
+                        if (preferences.skipRead() && it.read) {
+                            return@filter false
+                        } else if (preferences.skipFiltered()) {
+                            if (
+                                (manga.readFilter == Manga.SHOW_READ && !it.read) ||
+                                (manga.readFilter == Manga.SHOW_UNREAD && it.read) ||
+                                (
+                                    manga.downloadedFilter == Manga.SHOW_DOWNLOADED &&
+                                        !downloadManager.isChapterDownloaded(it, manga)
+                                    ) ||
+                                (manga.bookmarkedFilter == Manga.SHOW_BOOKMARKED && !it.bookmark)
+                            ) {
+                                return@filter false
+                            }
+                        }
+
+                        true
+                    }
+                    .toMutableList()
+
                 val find = list.find { it.id == chapterId }
                 if (find == null) {
                     list.add(selectedChapter)
@@ -189,7 +210,20 @@ class ReaderPresenter(
     suspend fun getChapters(): List<ReaderChapterItem> {
         val manga = manga ?: return emptyList()
         chapterItems = withContext(Dispatchers.IO) {
-            val list = db.getChapters(manga).executeOnIO().sortedBy {
+            val list = db.getChapters(manga).executeOnIO().filter {
+                if (preferences.skipFiltered()) {
+                    if ((manga.readFilter == Manga.SHOW_READ && !it.read) ||
+                        (manga.readFilter == Manga.SHOW_UNREAD && it.read) ||
+                        (manga.downloadedFilter == Manga.SHOW_DOWNLOADED &&
+                            !downloadManager.isChapterDownloaded(it, manga)) ||
+                        (manga.bookmarkedFilter == Manga.SHOW_BOOKMARKED && !it.bookmark)) {
+                        return@filter false
+                    }
+                    true
+                } else {
+                    true
+                }
+            }.sortedBy {
                 when (manga.sorting) {
                     Manga.SORTING_NUMBER -> it.chapter_number
                     else -> it.source_order.toFloat()

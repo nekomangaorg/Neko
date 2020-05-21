@@ -14,9 +14,9 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/topbar_layout"
         android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:clickable="true"
-        android:focusable="true"
-        android:layout_height="wrap_content">
+        android:focusable="true">
 
         <ImageView
             android:id="@+id/pill"

@@ -129,6 +129,8 @@ object PreferenceKeys {
 
     const val skipRead = "skip_read"
 
+    const val skipFiltered = "skip_filtered"
+
     const val downloadBadge = "display_download_badge"
 
     const val useBiometrics = "use_biometrics"
