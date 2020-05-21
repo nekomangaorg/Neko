@@ -107,7 +107,7 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
         extension_prefs_recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
 
         if (screen.preferenceCount == 0) {
-            extension_prefs_empty_view.show(R.drawable.ic_no_settings,
+            extension_prefs_empty_view.show(R.drawable.ic_no_settings_24dp,
                     R.string.empty_preferences_for_extension)
         }
     }

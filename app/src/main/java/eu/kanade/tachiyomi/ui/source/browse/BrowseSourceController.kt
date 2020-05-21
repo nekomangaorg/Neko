@@ -415,7 +415,8 @@ open class BrowseSourceController(bundle: Bundle) :
             }
 
             empty_view.show(
-                if (presenter.source is HttpSource) R.drawable.ic_browse_24dp else R.drawable.ic_local_library_24dp,
+                if (presenter.source is HttpSource) R.drawable.ic_browse_off_24dp
+                else R.drawable.ic_local_library_24dp,
                 message,
                 actions
             )
