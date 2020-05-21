@@ -92,7 +92,7 @@ class PreMigrationController(bundle: Bundle? = null) : BaseController(bundle), F
     override fun startMigration(extraParam: String?) {
         val listOfSources = adapter?.items?.filter {
             it.sourceEnabled
-        }?.joinToString("/") { it.source.id.toString() }
+        }?.joinToString("/") { it.source.id.toString() } ?: ""
         prefs.migrationSources().set(listOfSources)
 
         router.replaceTopController(
@@ -130,7 +130,7 @@ class PreMigrationController(bundle: Bundle? = null) : BaseController(bundle), F
      */
     private fun getEnabledSources(): List<HttpSource> {
         val languages = prefs.enabledLanguages().getOrDefault()
-        val sourcesSaved = prefs.migrationSources().getOrDefault().split("/")
+        val sourcesSaved = prefs.migrationSources().get().split("/")
         var sources = sourceManager.getCatalogueSources()
             .filterIsInstance<HttpSource>()
             .filter { it.lang in languages }
@@ -145,7 +145,7 @@ class PreMigrationController(bundle: Bundle? = null) : BaseController(bundle), F
     }
 
     fun isEnabled(id: String): Boolean {
-        val sourcesSaved = prefs.migrationSources().getOrDefault()
+        val sourcesSaved = prefs.migrationSources().get()
         val hiddenCatalogues = prefs.hiddenSources().getOrDefault()
         return if (sourcesSaved.isEmpty()) id !in hiddenCatalogues
         else sourcesSaved.split("/").contains(id)

@@ -104,11 +104,16 @@ open class GlobalSearchPresenter(
         val hiddenCatalogues = preferencesHelper.hiddenSources().getOrDefault()
         val pinnedCatalogues = preferencesHelper.pinnedCatalogues().getOrDefault()
 
-        return sourceManager.getCatalogueSources()
+        val list = sourceManager.getCatalogueSources()
             .filter { it.lang in languages }
             .filterNot { it.id.toString() in hiddenCatalogues }
             .sortedBy { "(${it.lang}) ${it.name}" }
-            .sortedBy { it.id.toString() !in pinnedCatalogues }
+
+        return if (preferencesHelper.onlySearchPinned().get()) {
+            list.filter { it.id.toString() in pinnedCatalogues }
+        } else {
+            list.sortedBy { it.id.toString() !in pinnedCatalogues }
+        }
     }
 
     private fun getSourcesToQuery(): List<CatalogueSource> {

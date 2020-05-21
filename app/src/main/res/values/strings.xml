@@ -181,8 +181,6 @@
     <string name="sort_by_ignoring_articles">Sort by ignoring articles</string>
     <string name="when_sorting_ignore_articles">When sorting alphabetically, sort ignoring
         articles (a, an, the) at the start of manga titles</string>
-    <string name="use_last_saved_migration_preferences">Use last saved pre-migration preferences
-    and sources to mass migrate</string>
     <string name="categories_to_include_in_global_update">Categories to include in global update</string>
     <string name="include_in_global_update">Include in global update</string>
     <string name="auto_refresh_covers">Automatically refresh covers</string>
@@ -241,7 +239,6 @@
     <!-- Extensions -->
     <string name="extensions">Extensions</string>
     <string name="extension_updates">Extension Updates</string>
-    <string name="notify_extension_updates">Notify when extension updates are available</string>
     <string name="extension_info">Extension info</string>
     <string name="details">Details</string>
     <string name="obsolete">Obsolete</string>
@@ -546,6 +543,22 @@
     <string name="clean_up_cached_covers">Clean up cached covers</string>
     <string name="delete_old_covers_in_library_used_">Delete old and unused cached covers of
         manga in your library that has been updated.\nCurrently using: %1$s</string>
+
+    <!-- Browse Settings -->
+    <string name="pref_global_search">Global search</string>
+    <string name="check_for_extension_updates">Check for extension updates</string>
+    <string name="only_search_pinned_when">Only search pinned sources</string>
+    <string name="match_pinned_sources">Match pinned sources</string>
+    <string name="match_enabled_sources">Match enabled sources</string>
+    <string name="only_enable_pinned_for_migration">Only enable your pinned sources for
+        migration</string>
+    <string name="only_enable_enabled_for_migration">Only enable your currently enabled sources for
+        migration</string>
+    <string name="use_last_saved_migration_preferences">Use last saved pre-migration preferences
+    and sources to mass migrate</string>
+    <string name="migration_sources_set">Migration sources set</string>
+    <string name="you_can_migrate_in_library">You can also migrate by selecting manga in your
+        library</string>
 
     <!-- About section -->
     <string name="version">Version</string>

@@ -12,12 +12,4 @@
         android:title="@string/search"
         app:actionViewClass="androidx.appcompat.widget.SearchView"
         app:showAsAction="collapseActionView|ifRoom" />
-
-    <item
-        android:id="@+id/action_auto_check"
-        android:title="@string/notify_extension_updates"
-        android:icon="@drawable/ic_sync_black_24dp"
-        android:visible="false"
-        android:checkable="true"
-        app:showAsAction="never"/>
 </menu>

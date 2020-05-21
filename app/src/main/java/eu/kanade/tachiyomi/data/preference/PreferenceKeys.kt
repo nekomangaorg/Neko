@@ -109,6 +109,8 @@ object PreferenceKeys {
 
     const val automaticExtUpdates = "automatic_ext_updates"
 
+    const val onlySearchPinned = "only_search_pinned"
+
     const val downloadNew = "download_new"
 
     const val downloadNewCategories = "download_new_categories"

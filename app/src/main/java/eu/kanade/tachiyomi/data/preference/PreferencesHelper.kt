@@ -233,7 +233,8 @@ class PreferencesHelper(val context: Context) {
 
     fun trustedSignatures() = rxPrefs.getStringSet("trusted_signatures", emptySet())
 
-    fun migrationSources() = rxPrefs.getString("migrate_sources", "")
+    // using string instead of set so it is ordered
+    fun migrationSources() = flowPrefs.getString("migrate_sources", "")
 
     fun useSourceWithMost() = rxPrefs.getBoolean("use_source_with_most", false)
 
@@ -274,6 +275,8 @@ class PreferencesHelper(val context: Context) {
     fun groupLibraryBy() = flowPrefs.getInt("group_library_by", 0)
 
     fun showCategoryInTitle() = flowPrefs.getBoolean("category_in_title", false)
+
+    fun onlySearchPinned() = flowPrefs.getBoolean(Keys.onlySearchPinned, true)
 
     // Tutorial preferences
     fun shownFilterTutorial() = flowPrefs.getBoolean("shown_filter_tutorial", false)

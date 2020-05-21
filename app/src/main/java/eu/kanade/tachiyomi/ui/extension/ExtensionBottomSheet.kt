@@ -3,17 +3,11 @@ package eu.kanade.tachiyomi.ui.extension
 import android.content.Context
 import android.util.AttributeSet
 import android.view.View
-import android.widget.CheckBox
-import android.widget.CompoundButton
 import android.widget.LinearLayout
-import com.f2prateek.rx.preferences.Preference
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import eu.davidea.flexibleadapter.FlexibleAdapter
-import eu.davidea.flexibleadapter.items.AbstractHeaderItem
 import eu.davidea.flexibleadapter.items.IFlexible
-import eu.davidea.viewholders.FlexibleViewHolder
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.ui.source.SourceController
 import eu.kanade.tachiyomi.util.system.getResourceColor
@@ -34,7 +28,6 @@ ExtensionAdapter.OnButtonClickListener,
     ExtensionTrustDialog.Listener {
 
     var sheetBehavior: BottomSheetBehavior<*>? = null
-    private lateinit var autoCheckItem: AutoCheckItem
 
     var shouldCallApi = false
 
@@ -51,7 +44,6 @@ ExtensionAdapter.OnButtonClickListener,
 
     fun onCreate(controller: SourceController) {
         // Initialize adapter, scroll listener and recycler views
-        autoCheckItem = AutoCheckItem(presenter.getAutoCheckPref())
         adapter = ExtensionAdapter(this)
         sheetBehavior = BottomSheetBehavior.from(this)
         // Create recycler and set adapter.
@@ -166,15 +158,6 @@ ExtensionAdapter.OnButtonClickListener,
             adapter?.updateDataSet(extensions)
         }
         updateExtTitle()
-        setLastUsedSource()
-    }
-
-    /**
-     * Called to set the last used catalogue at the top of the view.
-     */
-    private fun setLastUsedSource() {
-        adapter?.removeAllScrollableHeaders()
-        adapter?.addScrollableHeader(autoCheckItem)
     }
 
     fun downloadUpdate(item: ExtensionItem) {
@@ -187,57 +170,5 @@ ExtensionAdapter.OnButtonClickListener,
 
     override fun uninstallExtension(pkgName: String) {
         presenter.uninstallExtension(pkgName)
-    }
-}
-
-class AutoCheckItem(private val autoCheck: Preference<Boolean>) : AbstractHeaderItem<AutoCheckItem.AutoCheckHolder>() {
-
-    override fun getLayoutRes(): Int {
-        return R.layout.auto_ext_checkbox
-    }
-
-    override fun createViewHolder(
-        view: View,
-        adapter: FlexibleAdapter<IFlexible<*>>
-    ): AutoCheckHolder {
-        return AutoCheckHolder(view, adapter, autoCheck)
-    }
-
-    override fun bindViewHolder(
-        adapter: FlexibleAdapter<IFlexible<*>>,
-        holder: AutoCheckHolder,
-        position: Int,
-        payloads: MutableList<Any?>?
-    ) {
-        // holder.bind(autoCheck.getOrDefault())
-    }
-
-    override fun equals(other: Any?): Boolean {
-        return (this === other)
-    }
-
-    override fun hashCode(): Int {
-        return -1
-    }
-
-    class AutoCheckHolder(
-        val view: View,
-        private val adapter: FlexibleAdapter<IFlexible<*>>,
-        autoCheck: Preference<Boolean>
-    ) :
-        FlexibleViewHolder(view, adapter, true) {
-        private val autoCheckbox: CheckBox = view.findViewById(R.id.auto_checkbox)
-
-        init {
-            autoCheckbox.bindToPreference(autoCheck)
-        }
-
-        /**
-         * Binds a checkbox or switch view with a boolean preference.
-         */
-        private fun CompoundButton.bindToPreference(pref: Preference<Boolean>) {
-            isChecked = pref.getOrDefault()
-            setOnCheckedChangeListener { _, isChecked -> pref.set(isChecked) }
-        }
     }
 }

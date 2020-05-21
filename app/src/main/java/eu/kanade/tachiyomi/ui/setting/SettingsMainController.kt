@@ -7,7 +7,6 @@ import androidx.preference.PreferenceScreen
 import com.bluelinelabs.conductor.Controller
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.ui.migration.MigrationController
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
@@ -48,10 +47,10 @@ class SettingsMainController : SettingsController() {
             onClick { navigateTo(SettingsDownloadController()) }
         }
         preference {
-            iconRes = R.drawable.ic_swap_calls_white_24dp
+            iconRes = R.drawable.ic_browse_24dp
             iconTint = tintColor
-            titleRes = R.string.source_migration
-            onClick { navigateTo(MigrationController()) }
+            titleRes = R.string.sources
+            onClick { navigateTo(SettingsBrowseController()) }
         }
         preference {
             iconRes = R.drawable.ic_sync_black_24dp
