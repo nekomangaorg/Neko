@@ -119,6 +119,8 @@ object PreferenceKeys {
 
     const val lang = "app_language"
 
+    const val langToShow = "mangadex_languages"
+
     const val dateFormat = "app_date_format"
 
     const val defaultCategory = "default_category"

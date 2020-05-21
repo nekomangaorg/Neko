@@ -11,7 +11,7 @@ import com.tfcporciuncula.flow.FlowSharedPreferences
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.source.Source
-import eu.kanade.tachiyomi.source.online.Mangadex
+import eu.kanade.tachiyomi.source.online.MangaDex
 import java.io.File
 import java.text.DateFormat
 import java.text.SimpleDateFormat
@@ -218,6 +218,8 @@ class PreferencesHelper(val context: Context) {
 
     fun lang() = prefs.getString(Keys.lang, "")
 
+    fun langsToShow() = flowPrefs.getString(Keys.langToShow, "gb")
+
     fun defaultCategory() = prefs.getInt(Keys.defaultCategory, -1)
 
     fun skipRead() = prefs.getBoolean(Keys.skipRead, false)
@@ -278,7 +280,7 @@ class PreferencesHelper(val context: Context) {
     fun groupLibraryBy() = flowPrefs.getInt("group_library_by", 0)
 
     fun showCategoryInTitle() = flowPrefs.getBoolean("category_in_title", false)
-    
+
     fun showLibraryUpdateErrors() = prefs.getBoolean(Keys.showLibraryUpdateErrors, false)
 
     // Tutorial preferences
@@ -306,5 +308,5 @@ class PreferencesHelper(val context: Context) {
 
     fun r18() = prefs.getString(Keys.showR18, "0")
 
-    fun imageServer() = prefs.getString(Keys.imageServer, Mangadex.SERVER_PREF_ENTRY_VALUES.first())
+    fun imageServer() = prefs.getString(Keys.imageServer, MangaDex.SERVER_PREF_ENTRY_VALUES.first())
 }

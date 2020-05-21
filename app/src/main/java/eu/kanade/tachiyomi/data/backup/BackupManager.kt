@@ -299,7 +299,7 @@ class BackupManager(val context: Context, version: Int = CURRENT_VERSION) {
         withContext(Dispatchers.IO) {
             val fetchChapters = source.fetchChapterList(manga)
             val syncChaptersWithSource =
-                syncChaptersWithSource(databaseHelper, fetchChapters, manga, source)
+                syncChaptersWithSource(databaseHelper, fetchChapters, manga)
             if (syncChaptersWithSource.first.isNotEmpty()) {
                 chapters.forEach {
                     it.manga_id = manga.id

@@ -19,7 +19,7 @@ import org.jsoup.nodes.Element
 import rx.Observable
 import uy.kohesive.injekt.injectLazy
 
-class SearchHandler(val client: OkHttpClient, private val headers: Headers, val lang: String) {
+class SearchHandler(val client: OkHttpClient, private val headers: Headers, val langs: List<String>) {
 
     private val preferences: PreferencesHelper by injectLazy()
 
@@ -29,7 +29,7 @@ class SearchHandler(val client: OkHttpClient, private val headers: Headers, val 
             client.newCall(searchMangaByIdRequest(realQuery))
                 .asObservableSuccess()
                 .map { response ->
-                    val details = ApiMangaParser(lang).mangaDetailsParse(response)
+                    val details = ApiMangaParser(langs).mangaDetailsParse(response)
                     details.url = "/manga/$realQuery/"
                     MangasPage(listOf(details), false)
                 }

@@ -1,13 +1,20 @@
 package eu.kanade.tachiyomi.ui.setting
 
+import android.app.Dialog
+import android.os.Bundle
 import androidx.preference.PreferenceScreen
+import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.list.listItemsMultiChoice
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
-import eu.kanade.tachiyomi.source.online.Mangadex
+import eu.kanade.tachiyomi.source.online.MangaDex
+import eu.kanade.tachiyomi.source.online.utils.MdLang
+import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.widget.preference.MangadexLoginDialog
 import eu.kanade.tachiyomi.widget.preference.MangadexLogoutDialog
 import eu.kanade.tachiyomi.widget.preference.SiteLoginPreference
@@ -40,6 +47,15 @@ class SettingsSiteController : SettingsController(), MangadexLoginDialog.Listene
 
         preferenceScreen.addPreference(sourcePreference)
 
+        preference {
+            titleRes = R.string.show_languages
+            onClick {
+                val ctrl = SettingsSiteController.ChooseLanguagesDialog(preferences)
+                ctrl.targetController = this@SettingsSiteController
+                ctrl.showDialog(router)
+            }
+        }
+
         listPreference(activity) {
             key = PreferenceKeys.showR18
             titleRes = R.string.show_r18_title
@@ -55,8 +71,8 @@ class SettingsSiteController : SettingsController(), MangadexLoginDialog.Listene
         listPreference(activity) {
             key = PreferenceKeys.imageServer
             titleRes = R.string.image_server
-            entries = Mangadex.SERVER_PREF_ENTRIES
-            entryValues = Mangadex.SERVER_PREF_ENTRY_VALUES
+            entries = MangaDex.SERVER_PREF_ENTRIES
+            entryValues = MangaDex.SERVER_PREF_ENTRY_VALUES
             summary = "%s"
         }
 
@@ -91,5 +107,36 @@ class SettingsSiteController : SettingsController(), MangadexLoginDialog.Listene
 
     private fun getSourceKey(sourceId: Long): String {
         return "source_$sourceId"
+    }
+
+    class ChooseLanguagesDialog() : DialogController() {
+
+        constructor(preferences: PreferencesHelper) : this() {
+            this.preferences = preferences
+        }
+
+        var preferences: PreferencesHelper? = null
+
+        override fun onCreateDialog(savedViewState: Bundle?): Dialog {
+            val activity = activity!!
+
+            val options = MdLang.values().map { Pair(it.dexLang, it.name) }
+            val initialLangs = preferences!!.langsToShow().get().split(",")
+                .map { lang -> options.indexOfFirst { it.first.equals(lang) } }.toIntArray()
+
+            return MaterialDialog(activity)
+                .title(R.string.show_languages)
+                .listItemsMultiChoice(
+                    items = options.map { it.second },
+                    initialSelection = initialLangs
+                ) { _, selections, _ ->
+                    val selected = selections.map { options[it].first }
+                    preferences!!.langsToShow().set(selected.joinToString(","))
+                }
+                .positiveButton(android.R.string.ok) {
+
+                }
+                .negativeButton(android.R.string.cancel)
+        }
     }
 }

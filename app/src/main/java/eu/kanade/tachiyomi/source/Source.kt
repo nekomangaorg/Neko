@@ -26,11 +26,6 @@ interface Source {
     val name: String
 
     /**
-     * An ISO 639-1 compliant language code (two letters in lower case).
-     */
-    val lang: String
-
-    /**
      * Returns an observable containing a page with a list of manga.
      *
      * @param page the page number to retrieve.

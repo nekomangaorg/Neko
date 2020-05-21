@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.util.chapter
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import java.util.Date
@@ -21,13 +20,8 @@ import java.util.TreeSet
 fun syncChaptersWithSource(
     db: DatabaseHelper,
     rawSourceChapters: List<SChapter>,
-    manga: Manga,
-    source: Source
+    manga: Manga
 ): Pair<List<Chapter>, List<Chapter>> {
-
-    if (rawSourceChapters.isEmpty()) {
-        throw Exception("No chapters found")
-    }
 
     // Chapters from db.
     val dbChapters = db.getChapters(manga).executeAsBlocking()

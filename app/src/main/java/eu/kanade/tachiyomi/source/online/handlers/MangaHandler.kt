@@ -13,60 +13,62 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import rx.Observable
 
-class MangaHandler(val client: OkHttpClient, val headers: Headers, val lang: String) {
+class MangaHandler(val client: OkHttpClient, val headers: Headers, val langs: List<String>) {
 
     suspend fun fetchMangaAndChapterDetails(manga: SManga): Pair<SManga, List<SChapter>> {
         return withContext(Dispatchers.IO) {
             val response = client.newCall(apiRequest(manga)).execute()
-            val parser = ApiMangaParser(lang)
+            val parser = ApiMangaParser(langs)
 
             val jsonData = response.body!!.string()
 
             val detailsManga = parser.mangaDetailsParse(jsonData)
             detailsManga.apply { initialized = true }
             val chapterList = parser.chapterListParse(jsonData)
-            Pair(detailsManga,
-                    chapterList)
+            Pair(
+                detailsManga,
+                chapterList
+            )
         }
     }
 
     suspend fun fetchMangaDetails(manga: SManga): SManga {
         return withContext(Dispatchers.IO) {
             val response = client.newCall(apiRequest(manga)).execute()
-            ApiMangaParser(lang).mangaDetailsParse(response).apply { initialized = true }
+            ApiMangaParser(langs).mangaDetailsParse(response).apply { initialized = true }
         }
     }
 
     fun fetchMangaDetailsObservable(manga: SManga): Observable<SManga> {
         return client.newCall(apiRequest(manga))
-                .asObservableSuccess()
-                .map { response ->
-                    ApiMangaParser(lang).mangaDetailsParse(response).apply { initialized = true }
-                }
+            .asObservableSuccess()
+            .map { response ->
+                ApiMangaParser(langs).mangaDetailsParse(response).apply { initialized = true }
+            }
     }
 
     fun fetchChapterListObservable(manga: SManga): Observable<List<SChapter>> {
         return client.newCall(apiRequest(manga))
-                .asObservableSuccess()
-                .map { response ->
+            .asObservableSuccess()
+            .map { response ->
 
-                    ApiMangaParser(lang).chapterListParse(response)
-                }
+                ApiMangaParser(langs).chapterListParse(response)
+            }
     }
 
     suspend fun fetchChapterList(manga: SManga): List<SChapter> {
         return withContext(Dispatchers.IO) {
             val response = client.newCall(apiRequest(manga)).execute()
-            ApiMangaParser(lang).chapterListParse(response)
+            ApiMangaParser(langs).chapterListParse(response)
         }
     }
 
     fun fetchRandomMangaId(): Observable<String> {
         return client.newCall(randomMangaRequest())
-                .asObservableSuccess()
-                .map { response ->
-                    ApiMangaParser(lang).randomMangaIdParse(response)
-                }
+            .asObservableSuccess()
+            .map { response ->
+                ApiMangaParser(langs).randomMangaIdParse(response)
+            }
     }
 
     private fun randomMangaRequest(): Request {

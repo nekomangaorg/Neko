@@ -38,7 +38,7 @@ object Migrations {
                 BackupCreatorJob.setupTask()
                 SimilarUpdateJob.setupTask(true)
             }
-           
+
             return true
         }
         return false

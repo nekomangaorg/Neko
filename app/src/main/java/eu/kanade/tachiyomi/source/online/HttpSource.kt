@@ -54,7 +54,7 @@ abstract class HttpSource : Source {
      * Note the generated id sets the sign bit to 0.
      */
     override val id by lazy {
-        val key = "${name.toLowerCase()}/$lang/$versionId"
+        val key = "${name.toLowerCase()}/en/$versionId"
         val bytes = MessageDigest.getInstance("MD5").digest(key.toByteArray())
         (0..7).map { bytes[it].toLong() and 0xff shl 8 * (7 - it) }
             .reduce(Long::or) and Long.MAX_VALUE
@@ -83,7 +83,7 @@ abstract class HttpSource : Source {
     /**
      * Visible name of the source.
      */
-    override fun toString() = "$name (${lang.toUpperCase()})"
+    override fun toString() = name
 
     // used to get the manga url instead of the api manga url
     open fun mangaDetailsRequest(manga: SManga): Request {

@@ -461,34 +461,34 @@ class MangaDetailsPresenter(
             }
             fetchExternalLinks()
             val finChapters = networkPair.second
-            if (finChapters.isNotEmpty()) {
-                val newChapters = syncChaptersWithSource(db, finChapters, manga, source)
-                if (newChapters.first.isNotEmpty()) {
-                    val downloadNew = preferences.downloadNew().getOrDefault()
-                    if (downloadNew && !controller.fromCatalogue && mangaWasInitalized) {
-                        val categoriesToDownload = preferences.downloadNewCategories().getOrDefault().map(String::toInt)
-                        val shouldDownload = categoriesToDownload.isEmpty() || getMangaCategoryIds().any { it in categoriesToDownload }
-                        if (shouldDownload) {
-                            downloadChapters(newChapters.first.sortedBy { it.chapter_number }
-                                .map { it.toModel() })
-                        }
+
+            val newChapters = syncChaptersWithSource(db, finChapters, manga)
+            if (newChapters.first.isNotEmpty()) {
+                val downloadNew = preferences.downloadNew().getOrDefault()
+                if (downloadNew && !controller.fromCatalogue && mangaWasInitalized) {
+                    val categoriesToDownload = preferences.downloadNewCategories().getOrDefault().map(String::toInt)
+                    val shouldDownload = categoriesToDownload.isEmpty() || getMangaCategoryIds().any { it in categoriesToDownload }
+                    if (shouldDownload) {
+                        downloadChapters(newChapters.first.sortedBy { it.chapter_number }
+                            .map { it.toModel() })
                     }
                 }
-                if (newChapters.second.isNotEmpty()) {
-                    val removedChaptersId = newChapters.second.map { it.id }
-                    val removedChapters = this@MangaDetailsPresenter.chapters.filter {
-                        it.id in removedChaptersId && it.isDownloaded
-                    }
-                    if (removedChapters.isNotEmpty()) {
-                        withContext(Dispatchers.Main) {
-                            controller.showChaptersRemovedPopup(
-                                removedChapters
-                            )
-                        }
-                    }
-                }
-                withContext(Dispatchers.IO) { updateChapters() }
             }
+            if (newChapters.second.isNotEmpty()) {
+                val removedChaptersId = newChapters.second.map { it.id }
+                val removedChapters = this@MangaDetailsPresenter.chapters.filter {
+                    it.id in removedChaptersId && it.isDownloaded
+                }
+                if (removedChapters.isNotEmpty()) {
+                    withContext(Dispatchers.Main) {
+                        controller.showChaptersRemovedPopup(
+                            removedChapters
+                        )
+                    }
+                }
+            }
+            withContext(Dispatchers.IO) { updateChapters() }
+
             isLoading = false
             if (errorFromNetwork == null) {
                 withContext(Dispatchers.Main) { controller.updateChapters(this@MangaDetailsPresenter.chapters) }
@@ -518,7 +518,7 @@ class MangaDetailsPresenter(
             } ?: listOf()
             isLoading = false
             try {
-                syncChaptersWithSource(db, chapters, manga, source)
+                syncChaptersWithSource(db, chapters, manga)
 
                 updateChapters()
                 withContext(Dispatchers.Main) { controller.updateChapters(this@MangaDetailsPresenter.chapters) }

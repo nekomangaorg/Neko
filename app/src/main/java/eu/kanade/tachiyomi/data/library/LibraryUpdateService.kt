@@ -382,7 +382,7 @@ class LibraryUpdateService(
 
             val fetchedChapters = details.second
             if (fetchedChapters.isNotEmpty()) {
-                val newChapters = syncChaptersWithSource(db, fetchedChapters, manga, source)
+                val newChapters = syncChaptersWithSource(db, fetchedChapters, manga)
                 if (newChapters.first.isNotEmpty()) {
                     if (shouldDownload) {
                         var chaptersToDl = newChapters.first.sortedBy { it.chapter_number }

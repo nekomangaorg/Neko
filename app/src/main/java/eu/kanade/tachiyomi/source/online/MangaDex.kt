@@ -28,11 +28,7 @@ import uy.kohesive.injekt.injectLazy
 import java.net.URLEncoder
 import kotlin.collections.set
 
-open class Mangadex(
-    override val lang: String,
-    private val internalLang: String,
-    private val langCode: Int
-) : HttpSource() {
+open class MangaDex() : HttpSource() {
 
     private val preferences: PreferencesHelper by injectLazy()
 
@@ -47,15 +43,14 @@ open class Mangadex(
             val newReq = chain
                 .request()
                 .newBuilder()
-                .header("Cookie", "$originalCookies; ${cookiesHeader(r18Toggle, langCode)}")
+                .header("Cookie", "$originalCookies; ${cookiesHeader(r18Toggle)}")
                 .build()
             chain.proceed(newReq)
         }.build()
 
-    private fun cookiesHeader(r18Toggle: Int, langCode: Int): String {
+    private fun cookiesHeader(r18Toggle: Int): String {
         val cookies = mutableMapOf<String, String>()
         cookies["mangadex_h_toggle"] = r18Toggle.toString()
-        cookies["mangadex_filter_langs"] = langCode.toString()
         return buildCookies(cookies)
     }
 
@@ -85,7 +80,7 @@ open class Mangadex(
     }
 
     fun fetchRandomMangaId(): Observable<String> {
-        return MangaHandler(clientBuilder(), headers, internalLang).fetchRandomMangaId()
+        return MangaHandler(clientBuilder(), headers, getLangsToShow()).fetchRandomMangaId()
     }
 
     override fun fetchPopularManga(page: Int): Observable<MangasPage> {
@@ -97,7 +92,7 @@ open class Mangadex(
         query: String,
         filters: FilterList
     ): Observable<MangasPage> {
-        return SearchHandler(buildR18Client(filters), headers, internalLang).fetchSearchManga(
+        return SearchHandler(buildR18Client(filters), headers, getLangsToShow()).fetchSearchManga(
             page,
             query,
             filters
@@ -109,17 +104,17 @@ open class Mangadex(
     }
 
     override fun fetchMangaDetailsObservable(manga: SManga): Observable<SManga> {
-        return MangaHandler(clientBuilder(), headers, internalLang).fetchMangaDetailsObservable(
+        return MangaHandler(clientBuilder(), headers, getLangsToShow()).fetchMangaDetailsObservable(
             manga
         )
     }
 
     override suspend fun fetchMangaDetails(manga: SManga): SManga {
-        return MangaHandler(clientBuilder(), headers, internalLang).fetchMangaDetails(manga)
+        return MangaHandler(clientBuilder(), headers, getLangsToShow()).fetchMangaDetails(manga)
     }
 
     override suspend fun fetchMangaAndChapterDetails(manga: SManga): Pair<SManga, List<SChapter>> {
-        return MangaHandler(clientBuilder(), headers, internalLang).fetchMangaAndChapterDetails(
+        return MangaHandler(clientBuilder(), headers, getLangsToShow()).fetchMangaAndChapterDetails(
             manga
         )
     }
@@ -128,12 +123,12 @@ open class Mangadex(
         return MangaHandler(
             clientBuilder(),
             headers,
-            internalLang
+            getLangsToShow()
         ).fetchChapterListObservable(manga)
     }
 
     override suspend fun fetchChapterList(manga: SManga): List<SChapter> {
-        return MangaHandler(clientBuilder(), headers, internalLang).fetchChapterList(manga)
+        return MangaHandler(clientBuilder(), headers, getLangsToShow()).fetchChapterList(manga)
     }
 
     override fun fetchPageList(chapter: SChapter): Observable<List<Page>> {
@@ -220,6 +215,8 @@ open class Mangadex(
             false
         }
     }
+
+    fun getLangsToShow() = preferences.langsToShow().get().split(",")
 
     override fun getFilterList(): FilterList {
         return FilterHandler().getFilterList()

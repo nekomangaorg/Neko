@@ -12,7 +12,7 @@ import org.jsoup.Jsoup
 import timber.log.Timber
 import java.util.Date
 
-class ApiMangaParser(val lang: String) {
+class ApiMangaParser(val langs: List<String>) {
     fun mangaDetailsParse(response: Response): SManga {
         return mangaDetailsParse(response.body!!.string())
     }
@@ -106,7 +106,7 @@ class ApiMangaParser(val lang: String) {
     private fun filterChapterForChecking(serializer: ApiMangaSerializer): List<Map.Entry<String, ChapterSerializer>> {
         serializer.chapter ?: return emptyList()
         val filteredChapters = serializer.chapter.entries
-            .filter { it.value.lang_code == lang }
+            .filter { langs.contains(it.value.lang_code) }
             .filter {
                 it.value.chapter?.let { chapterNumber ->
                     if (chapterNumber.isBlank()) {
@@ -165,7 +165,7 @@ class ApiMangaParser(val lang: String) {
         // Skip chapters that don't match the desired language, or are future releases
 
         networkChapters.forEach {
-            if (it.value.lang_code == lang && (it.value.timestamp * 1000) <= now) {
+            if (langs.contains(it.value.lang_code) && (it.value.timestamp * 1000) <= now) {
                 chapters.add(mapChapter(it.key, it.value, finalChapterNumber, status))
             }
         }

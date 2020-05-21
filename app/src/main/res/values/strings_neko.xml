@@ -85,6 +85,7 @@
     <string name="show_r18_show">show only R18+</string>
     <string name="show_r18_no">Show No R18+</string>
     <string name="show_r18_all">Show all</string>
+    <string name="show_languages">Choose languages to show</string>
     <string name="sync_follows_to_library">Sync Mangadex manga into Neko</string>
     <string name="sync_follows_to_library_summary">Pulls reading/rereading manga from Mangadex into your Neko library</string>
     <string name="low_quality_covers">Use low quality thumbnails</string>
