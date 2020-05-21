@@ -452,12 +452,8 @@ class BackupRestoreService : Service() {
             .setColor(this.contextCompatColor(R.color.neko_green_darker))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
         if (errors.size > 0 && !path.isNullOrEmpty() && !file.isNullOrEmpty()) {
-            resultNotification.addAction(
-                R.drawable.ic_clear_grey_24dp_img, getString(
-                    R.string
-                        .view_all_errors
-                ), getErrorLogIntent(path, file)
-            )
+            resultNotification.addAction(R.drawable.ic_close_24dp, getString(R.string
+                .view_all_errors), getErrorLogIntent(path, file))
         }
         notificationManager.notify(Notifications.ID_RESTORE_COMPLETE, resultNotification.build())
     }

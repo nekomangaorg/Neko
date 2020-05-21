@@ -78,7 +78,7 @@ internal class DownloadNotifier(private val context: Context) {
                 setContentIntent(NotificationHandler.openDownloadManagerPendingActivity(context))
                 isDownloading = true
                 // Pause action
-                addAction(R.drawable.ic_av_pause_grey_24dp_img,
+                addAction(R.drawable.ic_pause_24dp,
                     context.getString(R.string.pause),
                     NotificationReceiver.pauseDownloadsPendingBroadcast(context))
             }
@@ -125,7 +125,7 @@ internal class DownloadNotifier(private val context: Context) {
                 setContentIntent(NotificationHandler.openDownloadManagerPendingActivity(context))
                 isDownloading = true
                 // Pause action
-                addAction(R.drawable.ic_av_pause_grey_24dp_img,
+                addAction(R.drawable.ic_pause_24dp,
                         context.getString(R.string.pause),
                         NotificationReceiver.pauseDownloadsPendingBroadcast(context))
             }
@@ -150,7 +150,7 @@ internal class DownloadNotifier(private val context: Context) {
         with(notification) {
             setContentTitle(context.getString(R.string.paused))
             setContentText(context.getString(R.string.download_paused))
-            setSmallIcon(R.drawable.ic_av_pause_grey_24dp_img)
+            setSmallIcon(R.drawable.ic_pause_24dp)
             setAutoCancel(false)
             setProgress(0, 0, false)
             clearActions()
@@ -158,13 +158,13 @@ internal class DownloadNotifier(private val context: Context) {
             setContentIntent(NotificationHandler.openDownloadManagerPendingActivity(context))
             // Resume action
             addAction(
-                R.drawable.ic_av_play_arrow_grey_img,
+                R.drawable.ic_play_arrow_24dp,
                 context.getString(R.string.resume),
                 NotificationReceiver.resumeDownloadsPendingBroadcast(context)
             )
             // Clear action
             addAction(
-                R.drawable.ic_clear_grey_24dp_img,
+                R.drawable.ic_close_24dp,
                 context.getString(R.string.cancel_all),
                 NotificationReceiver.clearDownloadsPendingBroadcast(context)
             )

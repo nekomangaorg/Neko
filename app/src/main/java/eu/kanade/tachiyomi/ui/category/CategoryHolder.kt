@@ -80,7 +80,7 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleVie
             if (!createCategory) {
                 reorder.setImageDrawable(
                     ContextCompat.getDrawable(
-                        itemView.context, R.drawable.ic_delete_white_24dp
+                        itemView.context, R.drawable.ic_delete_24dp
                     )
                 )
                 reorder.setOnClickListener {

@@ -166,7 +166,7 @@ class LibraryUpdateNotifier(private val context: Context) {
                     )
                 )
                 addAction(
-                    R.drawable.ic_book_white_24dp, context.getString(R.string.view_chapters),
+                    R.drawable.ic_book_24dp, context.getString(R.string.view_chapters),
                     NotificationReceiver.openChapterPendingActivity(
                         context,
                         manga, Notifications.ID_NEW_CHAPTERS
