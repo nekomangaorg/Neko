@@ -143,6 +143,8 @@ object PreferenceKeys {
 
     const val updateOnRefresh = "update_on_refresh"
 
+    const val showLibraryUpdateErrors = "show_library_update_errors"
+
     const val alwaysShowChapterTransition = "always_show_chapter_transition"
 
     const val skipFiltered = "skip_hidden"
