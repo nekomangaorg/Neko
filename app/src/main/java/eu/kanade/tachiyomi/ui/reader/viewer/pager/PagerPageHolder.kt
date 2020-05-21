@@ -4,8 +4,8 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.graphics.PointF
-import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.view.GestureDetector
@@ -107,6 +107,10 @@ class PagerPageHolder(
     init {
         addView(progressBar)
         observeStatus()
+        setBackgroundColor(when (val theme = viewer.config.readerTheme) {
+            3 -> Color.TRANSPARENT
+            else -> ThemeUtil.readerBackgroundColor(theme)
+        })
     }
 
     /**
@@ -255,7 +259,7 @@ class PagerPageHolder(
                                 context
                             )) {
                             imageView.setImage(ImageSource.inputStream(openStream!!))
-                            background = page.bg
+                            imageView.background = page.bg
                         }
                         // if the user switches to automatic when pages are already cached, the bg needs to be loaded
                         else {
@@ -273,16 +277,12 @@ class PagerPageHolder(
                     } else {
                         val imageView = initSubsamplingImageView()
                         imageView.setImage(ImageSource.inputStream(openStream!!))
-                        background = ColorDrawable(ThemeUtil.readerBackgroundColor(viewer.config.readerTheme))
                     }
                 } else {
                     val imageView = initImageView()
                     imageView.setImage(openStream!!)
                     if (viewer.config.readerTheme >= 2 && page.bg != null) {
-                        background = page.bg
-                    } else if (viewer.config.readerTheme < 2) {
-                        background =
-                            ColorDrawable(ThemeUtil.readerBackgroundColor(viewer.config.readerTheme))
+                        imageView.background = page.bg
                     }
                 }
             }
