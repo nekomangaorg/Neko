@@ -5,6 +5,7 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.handlers.serializers.ApiMangaSerializer
 import eu.kanade.tachiyomi.source.online.handlers.serializers.ChapterSerializer
+import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import kotlinx.serialization.json.Json
 import okhttp3.Response
@@ -164,9 +165,11 @@ class ApiMangaParser(val langs: List<String>) {
 
         // Skip chapters that don't match the desired language, or are future releases
 
+        val chapLangs = MdLang.values().filter { langs.contains(it.dexLang) }
+
         networkChapters.forEach {
             if (langs.contains(it.value.lang_code) && (it.value.timestamp * 1000) <= now) {
-                chapters.add(mapChapter(it.key, it.value, finalChapterNumber, status))
+                chapters.add(mapChapter(it.key, it.value, finalChapterNumber, status, chapLangs))
             }
         }
 
@@ -177,7 +180,8 @@ class ApiMangaParser(val langs: List<String>) {
         chapterId: String,
         networkChapter: ChapterSerializer,
         finalChapterNumber: String,
-        status: Int
+        status: Int,
+        chapLangs: List<MdLang>
     ): SChapter {
         val chapter = SChapter.create()
         chapter.url = MdUtil.apiChapter + chapterId
@@ -232,6 +236,8 @@ class ApiMangaParser(val langs: List<String>) {
         chapter.scanlator = MdUtil.cleanString(MdUtil.getScanlatorString(scanlatorName))
 
         chapter.mangadex_chapter_id = MdUtil.getChapterId(chapter.url)
+
+        chapter.language = chapLangs.firstOrNull { it.dexLang.equals(networkChapter.lang_code) }?.name
 
         return chapter
     }

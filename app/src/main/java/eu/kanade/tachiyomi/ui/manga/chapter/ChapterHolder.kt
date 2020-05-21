@@ -64,6 +64,16 @@ class ChapterHolder(
 
         chapter.scanlator?.isNotBlank()?.let { statuses.add(chapter.scanlator!!) }
 
+        if (chapter.language.isNullOrBlank() || chapter.language.equals("english", true)) {
+            chapter_language.gone()
+        } else {
+            chapter_language.visible()
+            chapter_language.text = chapter.language
+            ChapterUtil.setTextViewForChapter(
+                chapter_language, item, showBookmark = false, hideStatus = isLocked
+            )
+        }
+
         if (front_view.translationX == 0f) {
             read.setImageResource(
                 if (item.read) R.drawable.ic_eye_off_24dp else R.drawable.ic_eye_24dp

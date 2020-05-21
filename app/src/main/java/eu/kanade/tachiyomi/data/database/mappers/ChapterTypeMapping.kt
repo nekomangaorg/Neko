@@ -18,6 +18,7 @@ import eu.kanade.tachiyomi.data.database.tables.ChapterTable.COL_CHP_TXT
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable.COL_DATE_FETCH
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable.COL_DATE_UPLOAD
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable.COL_ID
+import eu.kanade.tachiyomi.data.database.tables.ChapterTable.COL_LANGUAGE
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable.COL_LAST_PAGE_READ
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable.COL_MANGADEX_CHAPTER_ID
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable.COL_MANGA_ID
@@ -66,6 +67,7 @@ class ChapterPutResolver : DefaultPutResolver<Chapter>() {
         put(COL_CHAPTER_NUMBER, obj.chapter_number)
         put(COL_SOURCE_ORDER, obj.source_order)
         put(COL_MANGADEX_CHAPTER_ID, obj.mangadex_chapter_id)
+        put(COL_LANGUAGE, obj.language)
     }
 }
 
@@ -89,6 +91,7 @@ class ChapterGetResolver : DefaultGetResolver<Chapter>() {
         chapter_number = cursor.getFloat(cursor.getColumnIndex(COL_CHAPTER_NUMBER))
         source_order = cursor.getInt(cursor.getColumnIndex(COL_SOURCE_ORDER))
         mangadex_chapter_id = cursor.getString(cursor.getColumnIndex(COL_MANGADEX_CHAPTER_ID))
+        language = cursor.getString(cursor.getColumnIndex(COL_LANGUAGE))
     }
 }
 

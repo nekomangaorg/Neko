@@ -20,6 +20,8 @@ interface SChapter : Serializable {
 
     var scanlator: String?
 
+    var language: String?
+
     // chapter id from mangadex
     var mangadex_chapter_id: String
 
@@ -33,6 +35,7 @@ interface SChapter : Serializable {
         chapter_number = other.chapter_number
         scanlator = other.scanlator
         mangadex_chapter_id = other.mangadex_chapter_id
+        language = other.language
     }
 
     companion object {

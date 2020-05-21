@@ -80,7 +80,7 @@
     <style name="Neko.Condensed" parent="TextAppearance.MaterialComponents.Headline6">
         <item name="fontFamily">@font/metropolis_regular</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
-        <item name="android:textSize">13sp</item>
+        <item name="android:textSize">14sp</item>
         <item name="android:letterSpacing">-.023</item>
         <!--Your custom type style here-->
     </style>

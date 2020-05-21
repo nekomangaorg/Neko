@@ -62,6 +62,7 @@ fun syncChaptersWithSource(
                 dbChapter.date_upload = sourceChapter.date_upload
                 dbChapter.chapter_number = sourceChapter.chapter_number
                 dbChapter.mangadex_chapter_id = sourceChapter.mangadex_chapter_id
+                dbChapter.language = sourceChapter.language
                 toChange.add(dbChapter)
             }
         }
@@ -156,5 +157,6 @@ private fun shouldUpdateDbChapter(dbChapter: Chapter, sourceChapter: SChapter): 
         dbChapter.vol != sourceChapter.vol ||
         dbChapter.chapter_title != sourceChapter.chapter_title ||
         dbChapter.chapter_txt != sourceChapter.chapter_txt ||
-        dbChapter.mangadex_chapter_id != sourceChapter.mangadex_chapter_id
+        dbChapter.mangadex_chapter_id != sourceChapter.mangadex_chapter_id ||
+        dbChapter.language != sourceChapter.language
 }

@@ -34,6 +34,8 @@ class ChapterImpl : Chapter {
 
     override var source_order: Int = 0
 
+    override var language: String? = null
+
     override var mangadex_chapter_id: String = ""
 
     override fun equals(other: Any?): Boolean {
