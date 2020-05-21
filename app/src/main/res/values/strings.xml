@@ -302,6 +302,7 @@
     <string name="burn_darken">Burn / Darken</string>
     <string name="keep_screen_on">Keep screen on</string>
     <string name="skip_read_chapters">Skip chapters marked read</string>
+    <string name="skip_filtered_chapters">Skip filtered chapters</string>
     <string name="navigation">Navigation</string>
     <string name="volume_keys">Volume keys</string>
     <string name="invert_volume_keys">Invert volume keys</string>
