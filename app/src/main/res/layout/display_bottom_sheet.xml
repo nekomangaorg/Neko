@@ -233,6 +233,6 @@
         android:clickable="true"
         android:contentDescription="@string/close"
         android:focusable="true"
-        android:src="@drawable/ic_close_white_24dp"
+        android:src="@drawable/ic_close_24dp"
         android:tint="@color/gray_button" />
 </FrameLayout>

@@ -21,7 +21,7 @@
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorSecondary"
             android:theme="?attr/actionBarTheme"
-            app:navigationIcon="@drawable/ic_close_white_24dp"
+            app:navigationIcon="@drawable/ic_close_24dp"
             app:layout_scrollFlags="scroll|enterAlways|snap" />
 
     </com.google.android.material.appbar.AppBarLayout>

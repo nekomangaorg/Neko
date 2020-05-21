@@ -127,7 +127,7 @@
         android:clickable="true"
         android:focusable="true"
         android:padding="4dp"
-        android:src="@drawable/ic_refresh_white_24dp"
+        android:src="@drawable/ic_refresh_24dp"
         android:tint="@color/gray_button"
         android:tooltipText="@string/update"
         app:layout_constraintBottom_toBottomOf="@id/category_title"
