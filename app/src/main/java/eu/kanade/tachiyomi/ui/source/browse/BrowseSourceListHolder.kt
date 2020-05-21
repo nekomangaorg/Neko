@@ -9,6 +9,7 @@ import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.potentialAltThumbnail
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.widget.CoverViewTarget
 import kotlinx.android.synthetic.main.manga_list_item.*
@@ -22,7 +23,7 @@ import kotlinx.android.synthetic.main.manga_list_item.*
  * @constructor creates a new catalogue holder.
  */
 class BrowseSourceListHolder(private val view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>) :
-        BrowseSourceHolder(view, adapter) {
+    BrowseSourceHolder(view, adapter) {
 
     /**
      * Method called from [CatalogueAdapter.onBindViewHolder]. It updates the data for this
@@ -48,7 +49,7 @@ class BrowseSourceListHolder(private val view: View, adapter: FlexibleAdapter<IF
         } else {
             val id = manga.id ?: return
             val request = LoadRequest.Builder(view.context).data(manga)
-                .target(CoverViewTarget(cover_thumbnail)).build()
+                .target(CoverViewTarget(cover_thumbnail, errorUrl = manga.potentialAltThumbnail())).build()
             Coil.imageLoader(view.context).execute(request)
         }
     }
