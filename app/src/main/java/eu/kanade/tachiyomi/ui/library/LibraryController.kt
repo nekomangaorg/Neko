@@ -797,6 +797,7 @@ class LibraryController(
         val translateY = if (show) full else 0f
         recycler.animate().translationY(translateY).start()
         category_hopper_frame.animate().translationY(translateY).start()
+        recycler_shadow.animate().translationY(translateY + 12.dpToPx).start()
         recycler_cover.animate().translationY(translateY).start()
         recycler_cover.animate().alpha(if (show) 0.75f else 0f).start()
         recycler.suppressLayout(show)
