@@ -17,7 +17,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_drag_handle_black_24dp" />
+        app:srcCompat="@drawable/ic_drag_handle_24dp" />
 
 
     <ImageView
@@ -25,7 +25,7 @@
         android:layout_width="24dp"
         android:layout_height="match_parent"
         android:tint="@color/gray_button"
-        android:src="@drawable/ic_label_outline_white_24dp"
+        android:src="@drawable/ic_label_outline_24dp"
         app:layout_constraintBottom_toBottomOf="parent"
         android:layout_marginEnd="6dp"
         app:layout_constraintStart_toEndOf="@+id/reorder"
@@ -38,7 +38,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="12dp"
-        android:src="@drawable/ic_edit_white_24dp"
+        android:src="@drawable/ic_edit_24dp"
         android:tint="@color/gray_button"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

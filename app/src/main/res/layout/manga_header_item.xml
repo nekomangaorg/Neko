@@ -181,7 +181,7 @@
                 style="@style/Theme.Widget.Button.RoundedOutline"
                 android:layout_marginStart="6dp"
                 android:text="@string/tracking"
-                app:icon="@drawable/ic_sync_black_24dp" />
+                app:icon="@drawable/ic_sync_24dp" />
 
             <ImageView
                 android:id="@+id/webview_button"
@@ -193,7 +193,7 @@
                 android:layout_marginEnd="6dp"
                 android:contentDescription="@string/open_in_webview"
                 android:padding="5dp"
-                android:src="@drawable/ic_open_in_webview_white_24dp"
+                android:src="@drawable/ic_open_in_webview_24dp"
                 android:tooltipText="@string/open_in_webview" />
 
             <ImageView
@@ -381,7 +381,7 @@
             android:layout_marginEnd="12dp"
             android:background="@null"
             android:padding="5dp"
-            android:src="@drawable/ic_filter_list_white_24dp"
+            android:src="@drawable/ic_filter_list_24dp"
             android:tint="?colorAccent"
             app:layout_constraintBottom_toBottomOf="@id/chapters_title"
             app:layout_constraintEnd_toEndOf="parent"

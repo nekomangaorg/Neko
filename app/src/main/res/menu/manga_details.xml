@@ -4,14 +4,14 @@
 
     <item
         android:id="@+id/action_search"
-        android:icon="@drawable/ic_search_white_24dp"
+        android:icon="@drawable/ic_search_24dp"
         android:title="@string/search"
         app:actionViewClass="androidx.appcompat.widget.SearchView"
         app:showAsAction="collapseActionView|ifRoom" />
 
     <item
         android:id="@+id/action_download"
-        android:icon="@drawable/ic_file_download_white_24dp"
+        android:icon="@drawable/ic_file_download_24dp"
         android:title="@string/download"
         app:showAsAction="ifRoom">
         <menu>
@@ -35,7 +35,7 @@
 
     <item
         android:id="@+id/action_mark_all_as_read"
-        android:icon="@drawable/ic_done_all_white_24dp"
+        android:icon="@drawable/ic_done_all_24dp"
         android:title="@string/mark_all_as_read"
         app:showAsAction="ifRoom" />
 
@@ -68,13 +68,13 @@
     </item>
     <item
         android:id="@+id/action_edit"
-        android:icon="@drawable/ic_edit_white_24dp"
+        android:icon="@drawable/ic_edit_24dp"
         android:title="@string/edit"
         app:showAsAction="never" />
 
     <item
         android:id="@+id/action_migrate"
-        android:icon="@drawable/ic_swap_calls_white_24dp"
+        android:icon="@drawable/ic_swap_calls_24dp"
         android:title="@string/migrate"
         app:showAsAction="never" />
 

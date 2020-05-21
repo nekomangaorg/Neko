@@ -169,7 +169,7 @@ class MangaHeaderHolder(
         with(favorite_button) {
             icon = ContextCompat.getDrawable(
                 itemView.context, when {
-                    item.isLocked -> R.drawable.ic_lock_white_24dp
+                    item.isLocked -> R.drawable.ic_lock_24dp
                     manga.favorite -> R.drawable.ic_heart_24dp
                     else -> R.drawable.ic_heart_outline_24dp
                 }
@@ -199,7 +199,7 @@ class MangaHeaderHolder(
 
             icon = ContextCompat.getDrawable(
                 itemView.context,
-                if (tracked) R.drawable.ic_check_white_24dp else R.drawable.ic_sync_black_24dp
+                if (tracked) R.drawable.ic_check_24dp else R.drawable.ic_sync_24dp
             )
             checked(tracked)
         }
@@ -291,7 +291,7 @@ class MangaHeaderHolder(
 
             icon = ContextCompat.getDrawable(
                 itemView.context, if (tracked) R.drawable
-                    .ic_check_white_24dp else R.drawable.ic_sync_black_24dp
+                    .ic_check_24dp else R.drawable.ic_sync_24dp
             )
             checked(tracked)
         }

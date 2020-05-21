@@ -28,7 +28,7 @@
         android:id="@+id/fab"
         style="@style/Theme.Widget.FAB"
         android:text="@string/filter"
-        app:icon="@drawable/ic_filter_list_white_24dp"/>
+        app:icon="@drawable/ic_filter_list_24dp"/>
 
     <eu.kanade.tachiyomi.widget.EmptyView
         android:id="@+id/empty_view"

@@ -26,10 +26,10 @@ object LibraryGroup {
         return when (type) {
             BY_STATUS -> R.drawable.ic_progress_clock_24dp
             BY_TAG -> R.drawable.ic_style_24dp
-            BY_TRACK_STATUS -> R.drawable.ic_sync_black_24dp
+            BY_TRACK_STATUS -> R.drawable.ic_sync_24dp
             BY_SOURCE -> R.drawable.ic_browse_24dp
             UNGROUPED -> R.drawable.ic_ungroup_24dp
-            else -> R.drawable.ic_label_outline_white_24dp
+            else -> R.drawable.ic_label_outline_24dp
         }
     }
 }

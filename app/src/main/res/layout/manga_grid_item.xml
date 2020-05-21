@@ -60,7 +60,7 @@
                     android:background="@drawable/round_play_background"
                     android:contentDescription="@string/start_reading"
                     android:padding="6dp"
-                    android:src="@drawable/ic_start_reading_white_24dp"
+                    android:src="@drawable/ic_start_reading_24dp"
                     android:tint="@android:color/white" />
 
             </FrameLayout>

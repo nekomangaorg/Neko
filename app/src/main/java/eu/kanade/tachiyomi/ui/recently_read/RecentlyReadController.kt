@@ -16,9 +16,9 @@ import eu.kanade.tachiyomi.data.backup.BackupRestoreService
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
-import eu.kanade.tachiyomi.ui.source.browse.ProgressItem
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
+import eu.kanade.tachiyomi.ui.source.browse.ProgressItem
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
@@ -128,7 +128,7 @@ class RecentlyReadController(bundle: Bundle? = null) : BaseController(bundle),
         if (size > 0) {
             empty_view?.hide()
         } else {
-            empty_view.show(R.drawable.ic_history_white_128dp, R.string
+            empty_view.show(R.drawable.ic_history_24dp, R.string
                 .no_recently_read_manga)
         }
     }

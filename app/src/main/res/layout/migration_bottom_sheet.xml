@@ -152,7 +152,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="10dp"
-        android:src="@drawable/ic_arrow_forward_white_24dp"
+        android:src="@drawable/ic_arrow_forward_24dp"
         app:layout_anchor="@id/constraint_layout"
         app:layout_anchorGravity="bottom|end"
         app:layout_constraintBottom_toBottomOf="@id/fab_guider"

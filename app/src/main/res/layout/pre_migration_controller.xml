@@ -23,7 +23,7 @@
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
         style="@style/Theme.Widget.FAB"
-        android:src="@drawable/ic_arrow_forward_white_24dp"
+        android:src="@drawable/ic_arrow_forward_24dp"
         app:layout_anchor="@id/recycler"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />

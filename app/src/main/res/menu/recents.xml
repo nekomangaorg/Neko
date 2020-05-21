@@ -4,14 +4,14 @@
     tools:context=".MainActivity">
     <item
         android:id="@+id/action_search"
-        android:icon="@drawable/ic_search_white_24dp"
+        android:icon="@drawable/ic_search_24dp"
         android:title="@string/search"
         android:visible="false"
         app:actionViewClass="androidx.appcompat.widget.SearchView"
         app:showAsAction="ifRoom|collapseActionView" />
     <item
         android:id="@+id/action_filter"
-        android:icon="@drawable/ic_filter_list_white_24dp"
+        android:icon="@drawable/ic_filter_list_24dp"
         android:title="@string/filter"
         app:showAsAction="ifRoom">
         <menu>
@@ -33,7 +33,7 @@
     </item>
     <item
         android:id="@+id/action_settings"
-        android:icon="@drawable/ic_settings_white_24dp"
+        android:icon="@drawable/ic_settings_24dp"
         android:title="@string/settings"
         app:showAsAction="ifRoom" />
 </menu>

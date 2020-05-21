@@ -31,5 +31,5 @@
         android:tint="@color/colorAccent"
         android:visibility="invisible"
         tools:visibility="visible"
-        android:src="@drawable/ic_arrow_up_white_24dp" />
+        android:src="@drawable/ic_arrow_up_24dp" />
 </LinearLayout>

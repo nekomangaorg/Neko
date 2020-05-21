@@ -145,7 +145,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         drawerArrow = DrawerArrowDrawable(this)
         drawerArrow?.color = getResourceColor(R.attr.actionBarTintColor)
         searchDrawable = ContextCompat.getDrawable(
-            this, R.drawable.ic_search_white_24dp
+            this, R.drawable.ic_search_24dp
         )
         dismissDrawable = ContextCompat.getDrawable(
             this, R.drawable.ic_close_24dp

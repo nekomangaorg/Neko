@@ -453,7 +453,7 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
 
         if (adapter?.itemCount == 1) {
             menuMigrate.icon = VectorDrawableCompat.create(
-                resources!!, R.drawable.ic_done_white_24dp, null
+                resources!!, R.drawable.ic_done_24dp, null
             )
         }
 

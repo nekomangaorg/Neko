@@ -5,7 +5,7 @@
 
     <item android:id="@+id/action_move_to_category"
           android:title="@string/move_to_categories"
-          android:icon="@drawable/ic_label_white_24dp"
+          android:icon="@drawable/ic_label_24dp"
           app:showAsAction="ifRoom"/>
 
     <item android:id="@+id/action_delete"
@@ -15,7 +15,7 @@
 
     <item
         android:id="@+id/action_migrate"
-        android:icon="@drawable/ic_swap_calls_white_24dp"
+        android:icon="@drawable/ic_swap_calls_24dp"
         android:title="@string/source_migration"
         app:showAsAction="ifRoom" />
 

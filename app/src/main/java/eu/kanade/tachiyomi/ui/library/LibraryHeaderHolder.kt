@@ -98,9 +98,9 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
         val isAscending = category.isAscending()
         val sortingMode = category.sortingMode()
         val sortDrawable = when {
-            sortingMode == LibrarySort.DRAG_AND_DROP || sortingMode == null -> R.drawable.ic_sort_white_24dp
-            if (sortingMode == LibrarySort.DATE_ADDED || sortingMode == LibrarySort.LATEST_CHAPTER || sortingMode == LibrarySort.LAST_READ) !isAscending else isAscending -> R.drawable.ic_arrow_down_white_24dp
-            else -> R.drawable.ic_arrow_up_white_24dp
+            sortingMode == LibrarySort.DRAG_AND_DROP || sortingMode == null -> R.drawable.ic_sort_24dp
+            if (sortingMode == LibrarySort.DATE_ADDED || sortingMode == LibrarySort.LATEST_CHAPTER || sortingMode == LibrarySort.LAST_READ) !isAscending else isAscending -> R.drawable.ic_arrow_down_24dp
+            else -> R.drawable.ic_arrow_up_24dp
         }
 
         sortText.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, sortDrawable, 0)
@@ -175,7 +175,7 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
                 items.add(
                     MaterialMenuSheet.MenuSheetItem(
                         LibrarySort.DRAG_AND_DROP,
-                        R.drawable.ic_label_outline_white_24dp,
+                        R.drawable.ic_label_outline_24dp,
                         R.string.category
                     )
                 )
@@ -203,12 +203,12 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
     }
 
     private fun getSortRes(sortingMode: Int?, isAscending: Boolean): Int = when {
-        sortingMode == LibrarySort.DRAG_AND_DROP -> R.drawable.ic_check_white_24dp
+        sortingMode == LibrarySort.DRAG_AND_DROP -> R.drawable.ic_check_24dp
         if (sortingMode == LibrarySort.DATE_ADDED ||
             sortingMode == LibrarySort.LATEST_CHAPTER ||
             sortingMode == LibrarySort.LAST_READ) !isAscending else isAscending ->
-            R.drawable.ic_arrow_down_white_24dp
-        else -> R.drawable.ic_arrow_up_white_24dp
+            R.drawable.ic_arrow_down_24dp
+        else -> R.drawable.ic_arrow_up_24dp
     }
 
     private fun onCatSortClicked(category: Category, menuId: Int?) {
@@ -246,7 +246,7 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
         val allSelected = adapter.libraryListener.allSelected(adapterPosition)
         val drawable = ContextCompat.getDrawable(
             contentView.context,
-            if (allSelected) R.drawable.ic_check_circle_white_24dp else R.drawable.ic_radio_button_unchecked_white_24dp
+            if (allSelected) R.drawable.ic_check_circle_24dp else R.drawable.ic_radio_button_unchecked_24dp
         )
         val tintedDrawable = drawable?.mutate()
         tintedDrawable?.setTint(

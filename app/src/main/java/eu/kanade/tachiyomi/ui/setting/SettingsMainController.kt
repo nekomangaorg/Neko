@@ -23,7 +23,7 @@ class SettingsMainController : SettingsController() {
         val tintColor = context.getResourceColor(R.attr.colorAccent)
 
         preference {
-            iconRes = R.drawable.ic_tune_white_24dp
+            iconRes = R.drawable.ic_tune_24dp
             iconTint = tintColor
             titleRes = R.string.general
             onClick { navigateTo(SettingsGeneralController()) }
@@ -41,7 +41,7 @@ class SettingsMainController : SettingsController() {
             onClick { navigateTo(SettingsReaderController()) }
         }
         preference {
-            iconRes = R.drawable.ic_file_download_black_24dp
+            iconRes = R.drawable.ic_file_download_24dp
             iconTint = tintColor
             titleRes = R.string.downloads
             onClick { navigateTo(SettingsDownloadController()) }
@@ -53,25 +53,25 @@ class SettingsMainController : SettingsController() {
             onClick { navigateTo(SettingsBrowseController()) }
         }
         preference {
-            iconRes = R.drawable.ic_sync_black_24dp
+            iconRes = R.drawable.ic_sync_24dp
             iconTint = tintColor
             titleRes = R.string.tracking
             onClick { navigateTo(SettingsTrackingController()) }
         }
         preference {
-            iconRes = R.drawable.ic_backup_black_24dp
+            iconRes = R.drawable.ic_backup_24dp
             iconTint = tintColor
             titleRes = R.string.backup
             onClick { navigateTo(SettingsBackupController()) }
         }
         preference {
-            iconRes = R.drawable.ic_code_black_24dp
+            iconRes = R.drawable.ic_code_24dp
             iconTint = tintColor
             titleRes = R.string.advanced
             onClick { navigateTo(SettingsAdvancedController()) }
         }
         preference {
-            iconRes = R.drawable.ic_info_black_24dp
+            iconRes = R.drawable.ic_info_24dp
             iconTint = tintColor
             titleRes = R.string.about
             onClick { navigateTo(AboutController()) }
