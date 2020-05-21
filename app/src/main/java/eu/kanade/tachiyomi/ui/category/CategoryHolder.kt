@@ -52,7 +52,7 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleVie
         if (createCategory) {
             title.setTextColor(ContextCompat.getColor(itemView.context, R.color.text_color_hint))
             regularDrawable = ContextCompat.getDrawable(itemView.context, R.drawable
-                .ic_add_white_24dp)
+                .ic_add_24dp)
             image.gone()
             edit_button.setImageDrawable(null)
             edit_text.setText("")
@@ -60,7 +60,7 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleVie
         } else {
             title.setTextColor(ContextCompat.getColor(itemView.context, R.color.textColorPrimary))
             regularDrawable = ContextCompat.getDrawable(itemView.context, R.drawable
-                .ic_drag_handle_black_24dp)
+                .ic_drag_handle_24dp)
             image.visible()
             edit_text.setText(title.text)
         }
@@ -74,7 +74,7 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleVie
             edit_text.inputType = InputType.TYPE_TEXT_FLAG_AUTO_CORRECT
             edit_text.requestFocus()
             edit_text.selectAll()
-            edit_button.setImageDrawable(ContextCompat.getDrawable(itemView.context, R.drawable.ic_check_white_24dp))
+            edit_button.setImageDrawable(ContextCompat.getDrawable(itemView.context, R.drawable.ic_check_24dp))
             edit_button.drawable.mutate().setTint(itemView.context.getResourceColor(R.attr.colorAccent))
             showKeyboard()
             if (!createCategory) {
@@ -90,7 +90,7 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleVie
         } else {
             if (!createCategory) {
                 setDragHandleView(reorder)
-                edit_button.setImageDrawable(ContextCompat.getDrawable(itemView.context, R.drawable.ic_edit_white_24dp))
+                edit_button.setImageDrawable(ContextCompat.getDrawable(itemView.context, R.drawable.ic_edit_24dp))
             } else {
                 edit_button.setImageDrawable(null)
                 reorder.setOnTouchListener { _, _ -> true }

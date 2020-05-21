@@ -60,7 +60,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_drag_handle_black_24dp" />
+            app:srcCompat="@drawable/ic_drag_handle_24dp" />
 
         <TextView
             android:id="@+id/title"
@@ -130,7 +130,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_more_vert_black_24dp" />
+            app:srcCompat="@drawable/ic_more_vert_24dp" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </FrameLayout>

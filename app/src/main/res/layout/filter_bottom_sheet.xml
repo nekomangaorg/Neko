@@ -78,7 +78,7 @@
                     android:layout_marginEnd="10dp"
                     android:text="@string/group_library_by"
                     android:textColor="?android:attr/textColorPrimary"
-                    app:icon="@drawable/ic_label_outline_white_24dp"
+                    app:icon="@drawable/ic_label_outline_24dp"
                     app:iconTint="?android:attr/textColorPrimary" />
 
                 <com.google.android.material.button.MaterialButton
@@ -118,7 +118,7 @@
                     android:layout_marginStart="10dp"
                     android:text="@string/display_options"
                     android:textColor="?android:attr/textColorPrimary"
-                    app:icon="@drawable/ic_tune_white_24dp"
+                    app:icon="@drawable/ic_tune_24dp"
                     app:iconTint="?android:attr/textColorPrimary" />
 
             </LinearLayout>

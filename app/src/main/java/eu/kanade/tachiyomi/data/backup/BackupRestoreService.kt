@@ -465,7 +465,7 @@ class BackupRestoreService : Service() {
         val resultNotification = NotificationCompat.Builder(this, Notifications.CHANNEL_BACKUP_RESTORE)
             .setContentTitle(getString(R.string.restore_error))
             .setContentText(errorMessage)
-            .setSmallIcon(R.drawable.ic_error_grey)
+                .setSmallIcon(R.drawable.ic_error_24dp)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setColor(ContextCompat.getColor(this, R.color.md_red_500))
         notificationManager.notify(Notifications.ID_RESTORE_ERROR, resultNotification.build())

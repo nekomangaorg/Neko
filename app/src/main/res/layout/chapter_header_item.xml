@@ -34,7 +34,7 @@
         android:layout_marginEnd="20dp"
         android:background="@null"
         android:padding="5dp"
-        android:src="@drawable/ic_filter_list_white_24dp"
+        android:src="@drawable/ic_filter_list_24dp"
         android:tint="?colorAccent"
         app:layout_constraintBottom_toBottomOf="@id/chapters_title"
         app:layout_constraintEnd_toEndOf="parent"

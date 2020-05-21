@@ -161,7 +161,7 @@ class RecentChaptersController(bundle: Bundle? = null) : BaseController(bundle),
         if (size > 0) {
             empty_view?.hide()
         } else {
-            empty_view?.show(R.drawable.ic_update_black_128dp, R.string.no_recent_chapters)
+            empty_view?.show(R.drawable.ic_update_24dp, R.string.no_recent_chapters)
         }
     }
 

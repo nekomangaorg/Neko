@@ -17,38 +17,22 @@ class DownloadButton @JvmOverloads constructor(context: Context, attrs: Attribut
     FrameLayout(context, attrs) {
 
     private val activeColor = context.getResourceColor(R.attr.colorAccent)
-    private val progressBGColor = ContextCompat.getColor(
-        context,
-        R.color.divider
-    )
-    private val disabledColor = ContextCompat.getColor(
-        context,
-        R.color.material_on_surface_disabled
-    )
-    private val downloadedColor = ContextCompat.getColor(
-        context,
-        R.color.download
-    )
-    private val errorColor = ContextCompat.getColor(
-        context,
-        R.color.red_error
-    )
-    private val filledCircle = ContextCompat.getDrawable(
-        context,
-        R.drawable.filled_circle
-    )?.mutate()
-    private val borderCircle = ContextCompat.getDrawable(
-        context,
-        R.drawable.border_circle
-    )?.mutate()
-    private val downloadDrawable = ContextCompat.getDrawable(
-        context,
-        R.drawable.ic_arrow_down_white_24dp
-    )?.mutate()
-    private val checkDrawable = ContextCompat.getDrawable(
-        context,
-        R.drawable.ic_check_white_24dp
-    )?.mutate()
+    private val progressBGColor = ContextCompat.getColor(context,
+        R.color.divider)
+    private val disabledColor = ContextCompat.getColor(context,
+        R.color.material_on_surface_disabled)
+    private val downloadedColor = ContextCompat.getColor(context,
+        R.color.download)
+    private val errorColor = ContextCompat.getColor(context,
+        R.color.red_error)
+    private val filledCircle = ContextCompat.getDrawable(context,
+        R.drawable.filled_circle)?.mutate()
+    private val borderCircle = ContextCompat.getDrawable(context,
+        R.drawable.border_circle)?.mutate()
+    private val downloadDrawable = ContextCompat.getDrawable(context,
+        R.drawable.ic_arrow_down_24dp)?.mutate()
+    private val checkDrawable = ContextCompat.getDrawable(context,
+        R.drawable.ic_check_24dp)?.mutate()
     private var isAnimating = false
     private var iconAnimation: ObjectAnimator? = null
 

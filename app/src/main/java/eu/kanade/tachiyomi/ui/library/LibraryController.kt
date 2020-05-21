@@ -706,7 +706,7 @@ class LibraryController(
             empty_view?.hide()
         } else {
             empty_view?.show(
-                R.drawable.ic_book_black_128dp,
+                R.drawable.ic_book_24dp,
                 if (filter_bottom_sheet.hasActiveFilters()) R.string.no_matches_for_filters
                 else R.string.library_is_empty_add_from_browse
             )

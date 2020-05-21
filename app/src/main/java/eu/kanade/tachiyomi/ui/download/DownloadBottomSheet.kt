@@ -161,7 +161,7 @@ class DownloadBottomSheet @JvmOverloads constructor(
         setBottomSheet()
         if (presenter.downloadQueue.isEmpty()) {
             empty_view?.show(
-                R.drawable.ic_file_download_black_128dp,
+                R.drawable.ic_file_download_24dp,
                 R.string.nothing_is_downloading)
         } else {
             empty_view?.hide()

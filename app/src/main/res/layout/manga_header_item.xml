@@ -193,7 +193,7 @@
                 android:background="@drawable/round_ripple"
                 android:tooltipText="@string/add_to_library"
                 tools:background="@color/md_black_1000"
-                tools:src="@drawable/ic_open_in_webview_white_24dp" />
+                tools:src="@drawable/ic_open_in_webview_24dp" />
 
             <com.mikepenz.iconics.view.IconicsImageView
                 android:id="@+id/track_button"
@@ -427,7 +427,7 @@
             android:layout_marginEnd="12dp"
             android:background="@null"
             android:padding="5dp"
-            android:src="@drawable/ic_filter_list_white_24dp"
+            android:src="@drawable/ic_filter_list_24dp"
             android:tint="?colorAccent"
             app:layout_constraintBottom_toBottomOf="@id/chapters_title"
             app:layout_constraintEnd_toEndOf="parent"

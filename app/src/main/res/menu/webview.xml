@@ -3,13 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/action_web_back"
-        android:icon="@drawable/ic_arrow_back_white_24dp"
+        android:icon="@drawable/ic_arrow_back_24dp"
         android:title="@string/back"
         app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/action_web_forward"
-        android:icon="@drawable/ic_arrow_forward_white_24dp"
+        android:icon="@drawable/ic_arrow_forward_24dp"
         android:title="@string/forward"
         app:showAsAction="ifRoom" />
 

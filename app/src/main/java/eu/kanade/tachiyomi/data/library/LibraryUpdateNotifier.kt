@@ -159,7 +159,7 @@ class LibraryUpdateNotifier(private val context: Context) {
                     )
                 )
                 addAction(
-                    R.drawable.ic_glasses_black_24dp, context.getString(R.string.mark_as_read),
+                    R.drawable.ic_eye_24dp, context.getString(R.string.mark_as_read),
                     NotificationReceiver.markAsReadPendingBroadcast(
                         context,
                         manga, chapters, Notifications.ID_NEW_CHAPTERS
