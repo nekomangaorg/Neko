@@ -44,7 +44,6 @@
         </activity>
         <activity
             android:name=".ui.main.SearchActivity"
-            android:launchMode="singleInstance"
             android:theme="@style/Theme.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
