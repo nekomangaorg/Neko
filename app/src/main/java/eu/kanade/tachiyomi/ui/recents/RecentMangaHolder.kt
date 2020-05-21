@@ -71,6 +71,11 @@ class RecentMangaHolder(
             if (adapter.isSelected(adapterPosition)) Download.CHECKED else item.status,
             item.progress
         )
+        resetFrontView()
+    }
+
+    private fun resetFrontView() {
+        if (front_view.translationX != 0f) itemView.post { adapter.notifyItemChanged(adapterPosition) }
     }
 
     override fun onLongClick(view: View?): Boolean {
