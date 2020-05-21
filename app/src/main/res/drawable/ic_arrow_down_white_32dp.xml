@@ -2,8 +2,7 @@
         android:width="32dp"
         android:height="32dp"
         android:viewportHeight="32"
-        android:viewportWidth="32"
-        android:tint="?attr/actionBarTintColor">
+        android:viewportWidth="32">
     <group
         android:scaleX="0.8"
         android:scaleY="0.8"
