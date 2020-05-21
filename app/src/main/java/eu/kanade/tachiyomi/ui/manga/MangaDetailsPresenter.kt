@@ -454,9 +454,9 @@ class MangaDetailsPresenter(
 
                 if (thumbnailUrl != networkManga.thumbnail_url) {
                     coverCache.deleteFromCache(thumbnailUrl)
-                    withContext(Dispatchers.Main) {
-                        controller.setPaletteColor()
-                    }
+                }
+                withContext(Dispatchers.Main) {
+                    controller.setPaletteColor()
                 }
                 db.insertManga(manga).executeAsBlocking()
             }

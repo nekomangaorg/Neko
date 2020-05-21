@@ -4,9 +4,9 @@ import android.app.Activity
 import android.view.View
 import androidx.core.content.ContextCompat
 import coil.api.clear
-import coil.api.loadAny
 import coil.transform.CircleCropTransformation
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.download.coil.loadLibraryManga
 import eu.kanade.tachiyomi.ui.manga.chapter.BaseChapterHolder
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.system.getResourceColor
@@ -73,7 +73,7 @@ class RecentChapterHolder(private val view: View, private val adapter: RecentCha
         // Set cover
         if ((view.context as? Activity)?.isDestroyed != true) {
             manga_cover.clear()
-            manga_cover.loadAny(item.manga) {
+            manga_cover.loadLibraryManga(item.manga) {
                 transformations(CircleCropTransformation())
             }
         }

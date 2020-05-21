@@ -302,7 +302,7 @@ class MangaDetailsController : BaseController,
         val view = view ?: return
 
         val request = LoadRequest.Builder(view.context).data(presenter.manga).allowHardware(false)
-            .target { drawable ->
+            .target(onSuccess = { drawable ->
                 val bitmap = (drawable as BitmapDrawable).bitmap
                 // Generate the Palette on a background thread.
                 Palette.from(bitmap).generate {
@@ -311,7 +311,8 @@ class MangaDetailsController : BaseController,
                         android.R.attr.colorBackground
                     )
                     // this makes the color more consistent regardless of theme
-                    val backDropColor = ColorUtils.blendARGB(it.getVibrantColor(colorBack), colorBack, .35f)
+                    val backDropColor =
+                        ColorUtils.blendARGB(it.getVibrantColor(colorBack), colorBack, .35f)
 
                     coverColor = backDropColor
                     getHeader()?.setBackDrop(backDropColor)
@@ -323,7 +324,13 @@ class MangaDetailsController : BaseController,
                 }
                 manga_cover_full.setImageDrawable(drawable)
                 getHeader()?.updateCover(manga!!)
-            }.build()
+            }, onError = {
+                val file = presenter.coverCache.getCoverFile(manga!!)
+                if (file.exists()) {
+                    file.delete()
+                    setPaletteColor()
+                }
+            }).build()
         Coil.imageLoader(view.context).execute(request)
     }
 
