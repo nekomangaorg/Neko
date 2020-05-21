@@ -70,7 +70,7 @@ class SettingsBrowseController : SettingsController() {
                         (preferences.pinnedCatalogues().get() ?: emptySet()).joinToString("/")
                     preferences.migrationSources().set(pinnedSources)
                     (activity as? MainActivity)?.setUndoSnackBar(view?.snack(
-                        R.string.migration_sources_set
+                        R.string.migration_sources_changed
                     ) {
                         setAction(R.string.undo) {
                             preferences.migrationSources().set(ogSources)
@@ -92,7 +92,9 @@ class SettingsBrowseController : SettingsController() {
                             .sortedBy { "(${it.lang}) ${it.name}" }
                             .joinToString("/") { it.id.toString() }
                     preferences.migrationSources().set(enabledSources)
-                    (activity as? MainActivity)?.setUndoSnackBar(view?.snack(R.string.migration_sources_set) {
+                    (activity as? MainActivity)?.setUndoSnackBar(view?.snack(
+                        R.string.migration_sources_changed
+                    ) {
                         setAction(R.string.undo) {
                             preferences.migrationSources().set(ogSources)
                         }

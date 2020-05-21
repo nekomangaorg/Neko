@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.reader.loader
 
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.source.LocalSource
@@ -84,7 +85,7 @@ class ChapterLoader(
                     is LocalSource.Format.Epub -> EpubPageLoader(format.file)
                 }
             }
-            else -> error("Loader not implemented")
+            else -> error(downloadManager.context.getString(R.string.source_not_installed))
         }
     }
 }
