@@ -584,7 +584,7 @@ class LibraryController(
             is LibraryHeaderItem -> return item
             is LibraryItem -> return item.header
         }
-        return null
+        return adapter.headerItems.firstOrNull() as? LibraryHeaderItem
     }
 
     private fun getCategoryOrder(): Int? {
