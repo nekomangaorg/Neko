@@ -117,6 +117,7 @@ class LibraryController(
      * Position of the active category.
      */
     private var activeCategory: Int = preferences.lastUsedCategory().getOrDefault()
+    private var lastUsedCategory: Int = preferences.lastUsedCategory().getOrDefault()
 
     private var justStarted = true
 
@@ -212,6 +213,11 @@ class LibraryController(
                     showCategoryText(currentCategory.name)
                 }
             }
+            val savedCurrentCategory = getHeader(true)?.category ?: return
+            if (savedCurrentCategory.order != lastUsedCategory) {
+                lastUsedCategory = savedCurrentCategory.order
+                preferences.lastUsedCategory().set(savedCurrentCategory.order)
+            }
         }
 
         override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
@@ -237,7 +243,6 @@ class LibraryController(
     }
 
     fun saveActiveCategory(category: Category) {
-        preferences.lastUsedCategory().set(category.order)
         activeCategory = category.order
         val headerItem = getHeader() ?: return
         header_title.text = headerItem.category.name
@@ -511,13 +516,16 @@ class LibraryController(
     private fun jumpToNextCategory(next: Boolean) {
         val category = getVisibleHeader() ?: return
         if (presenter.showAllCategories) {
-            val newOffset = adapter.headerItems.indexOf(category) + (if (next) 1 else -1)
-            if (if (!next) {
-                    newOffset > -1
-                } else {
-                    newOffset < adapter.headerItems.size
+            if (!next) {
+                val fPosition =
+                    (recycler.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+                if (fPosition != adapter.currentItems.indexOf(category)) {
+                    scrollToHeader(category.category.order)
+                    return
                 }
-            ) {
+            }
+            val newOffset = adapter.headerItems.indexOf(category) + (if (next) 1 else -1)
+            if (if (!next) newOffset > -1 else newOffset < adapter.headerItems.size) {
                 val newCategory = (adapter.headerItems[newOffset] as LibraryHeaderItem).category
                 val newOrder = newCategory.order
                 scrollToHeader(newOrder)
@@ -543,9 +551,12 @@ class LibraryController(
         }
     }
 
-    private fun getHeader(): LibraryHeaderItem? {
-        val position =
+    private fun getHeader(firstCompletelyVisible: Boolean = false): LibraryHeaderItem? {
+        val position = if (firstCompletelyVisible) {
             (recycler.layoutManager as LinearLayoutManager).findFirstCompletelyVisibleItemPosition()
+        } else {
+            -1
+        }
         if (position > 0) {
             when (val item = adapter.getItem(position)) {
                 is LibraryHeaderItem -> return item
@@ -563,12 +574,6 @@ class LibraryController(
     }
 
     private fun getVisibleHeader(): LibraryHeaderItem? {
-        val position =
-            (recycler.layoutManager as LinearLayoutManager).findFirstCompletelyVisibleItemPosition()
-        when (val item = adapter.getItem(position)) {
-            is LibraryHeaderItem -> return item
-            is LibraryItem -> return item.header
-        }
         val fPosition =
             (recycler.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
         when (val item = adapter.getItem(fPosition)) {
@@ -708,9 +713,9 @@ class LibraryController(
         }
         adapter.setItems(mangaMap)
         if (recycler.itemAnimator == null)
-            recycler.post {
-                recycler.itemAnimator = DefaultItemAnimator()
-            }
+        recycler.post {
+            recycler.itemAnimator = DefaultItemAnimator()
+        }
         singleCategory = presenter.categories.size <= 1
         showDropdown()
         progress.gone()
@@ -875,6 +880,15 @@ class LibraryController(
 
     fun search(query: String?): Boolean {
         this.query = query ?: ""
+        if (this.query.isNotBlank() && adapter.scrollableHeaders.isEmpty()) {
+            searchItem.string = this.query
+            adapter.addScrollableHeader(searchItem)
+        } else if (this.query.isNotBlank()) {
+            searchItem.string = this.query
+            (recycler.findViewHolderForAdapterPosition(0) as? SearchGlobalItem.Holder)?.bind(this.query)
+        } else if (this.query.isBlank() && adapter.scrollableHeaders.isNotEmpty()) {
+            adapter.removeAllScrollableHeaders()
+        }
         adapter.setFilter(query)
         adapter.performFilter()
         return true
