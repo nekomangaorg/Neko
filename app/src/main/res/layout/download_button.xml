@@ -45,5 +45,5 @@
         android:layout_height="30dp"
         android:background="@drawable/round_ripple"
         android:padding="5dp"
-        android:src="@drawable/ic_arrow_down_24dp" />
+        android:src="@drawable/ic_arrow_downward_24dp" />
 </eu.kanade.tachiyomi.ui.download.DownloadButton>

@@ -99,8 +99,8 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
         val sortingMode = category.sortingMode()
         val sortDrawable = when {
             sortingMode == LibrarySort.DRAG_AND_DROP || sortingMode == null -> R.drawable.ic_sort_24dp
-            if (sortingMode == LibrarySort.DATE_ADDED || sortingMode == LibrarySort.LATEST_CHAPTER || sortingMode == LibrarySort.LAST_READ) !isAscending else isAscending -> R.drawable.ic_arrow_down_24dp
-            else -> R.drawable.ic_arrow_up_24dp
+            if (sortingMode == LibrarySort.DATE_ADDED || sortingMode == LibrarySort.LATEST_CHAPTER || sortingMode == LibrarySort.LAST_READ) !isAscending else isAscending -> R.drawable.ic_arrow_downward_24dp
+            else -> R.drawable.ic_arrow_upward_24dp
         }
 
         sortText.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, sortDrawable, 0)
@@ -207,8 +207,8 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
         if (sortingMode == LibrarySort.DATE_ADDED ||
             sortingMode == LibrarySort.LATEST_CHAPTER ||
             sortingMode == LibrarySort.LAST_READ) !isAscending else isAscending ->
-            R.drawable.ic_arrow_down_24dp
-        else -> R.drawable.ic_arrow_up_24dp
+            R.drawable.ic_arrow_downward_24dp
+        else -> R.drawable.ic_arrow_upward_24dp
     }
 
     private fun onCatSortClicked(category: Category, menuId: Int?) {
