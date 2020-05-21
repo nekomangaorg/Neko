@@ -170,6 +170,10 @@
         <item quantity="one">and %1$d more chapter</item>
         <item quantity="other">and %1$d more chapters</item>
     </plurals>
+    <plurals name="notification_update_failed">
+        <item quantity="one">1 update failed</item>
+        <item quantity="other">%1$d updates failed</item>
+    </plurals>
 
     <!-- Library settings -->
     <string name="library_update_frequency">Library update frequency</string>
@@ -186,6 +190,7 @@
     <string name="auto_refresh_covers">Automatically refresh covers</string>
     <string name="auto_refresh_covers_summary">Refresh covers in library as well
         when updating library</string>
+    <string name="show_notification_error">Show a notification for errors</string>
 
     <!-- Recents -->
     <string name="recents">Recents</string>

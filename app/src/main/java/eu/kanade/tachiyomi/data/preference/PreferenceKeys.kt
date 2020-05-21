@@ -121,8 +121,6 @@ object PreferenceKeys {
 
     const val uniformGrid = "uniform_grid"
 
-    const val libraryAsSingleList = "library_as_single_list"
-
     const val lang = "app_language"
 
     const val dateFormat = "app_date_format"
@@ -148,6 +146,8 @@ object PreferenceKeys {
     const val refreshCoversToo = "refresh_covers_too"
 
     const val updateOnRefresh = "update_on_refresh"
+
+    const val showLibraryUpdateErrors = "show_library_update_errors"
 
     const val alwaysShowChapterTransition = "always_show_chapter_transition"
 
