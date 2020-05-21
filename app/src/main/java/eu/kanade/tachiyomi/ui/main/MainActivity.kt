@@ -132,7 +132,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
         super.onCreate(savedInstanceState)
 
         // Do not let the launcher create a new activity http://stackoverflow.com/questions/16283079
-        if (!isTaskRoot) {
+        if (!isTaskRoot && this !is SearchActivity) {
             finish()
             return
         }
