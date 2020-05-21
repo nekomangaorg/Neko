@@ -148,7 +148,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             this, R.drawable.ic_search_white_24dp
         )
         dismissDrawable = ContextCompat.getDrawable(
-            this, R.drawable.ic_close_white_24dp
+            this, R.drawable.ic_close_24dp
         )
 
         var continueSwitchingTabs = false

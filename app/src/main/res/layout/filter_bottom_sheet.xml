@@ -57,7 +57,7 @@
                         android:contentDescription="@string/clear"
                         android:focusable="true"
                         android:padding="3dp"
-                        android:src="@drawable/ic_close_white_24dp"
+                        android:src="@drawable/ic_close_24dp"
                         android:tint="@color/gray_button" />
 
                 </LinearLayout>

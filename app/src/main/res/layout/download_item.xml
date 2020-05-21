@@ -20,7 +20,7 @@
             android:layout_gravity="end|center"
             android:contentDescription="@string/cancel"
             android:layout_marginEnd="21dp"
-            android:src="@drawable/ic_close_white_24dp" />
+            android:src="@drawable/ic_close_24dp" />
     </FrameLayout>
 
     <FrameLayout
@@ -38,7 +38,7 @@
             android:layout_gravity="start|center"
             android:layout_marginStart="21dp"
             android:tint="@color/md_white_1000"
-            android:src="@drawable/ic_close_white_24dp" />
+            android:src="@drawable/ic_close_24dp" />
     </FrameLayout>
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"

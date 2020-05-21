@@ -69,5 +69,5 @@
         app:layout_constraintEnd_toEndOf="@+id/migration_menu"
         app:layout_constraintStart_toStartOf="@+id/migration_menu"
         app:layout_constraintTop_toTopOf="@+id/migration_menu"
-        app:srcCompat="@drawable/ic_close_white_24dp" />
+        app:srcCompat="@drawable/ic_close_24dp" />
 </androidx.constraintlayout.widget.ConstraintLayout>
