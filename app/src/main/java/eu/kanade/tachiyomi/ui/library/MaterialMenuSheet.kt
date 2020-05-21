@@ -56,6 +56,9 @@ class MaterialMenuSheet(
             val view =
                 activity.layoutInflater.inflate(R.layout.menu_sheet_item, null) as ViewGroup
             val textView = view.getChildAt(0) as MaterialTextView
+            if (index == 0 && title == null) {
+                view.setBackgroundResource(R.drawable.rounded_item_background)
+            }
             with(view) {
                 id = item.id
                 menu_layout.addView(this)

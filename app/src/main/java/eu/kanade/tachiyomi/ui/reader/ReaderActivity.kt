@@ -23,6 +23,7 @@ import android.view.animation.AnimationUtils
 import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.graphics.ColorUtils
+import com.afollestad.materialdialogs.MaterialDialog
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -34,7 +35,12 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.base.activity.BaseRxActivity
+import eu.kanade.tachiyomi.ui.library.MaterialMenuSheet
+import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.AddToLibraryFirst
+import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.Error
+import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.Success
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
@@ -566,7 +572,25 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
      * actions to perform is shown.
      */
     fun onPageLongTap(page: ReaderPage) {
-        ReaderPageSheet(this, page).show()
+        val items = listOf(
+            MaterialMenuSheet.MenuSheetItem(
+                0, R.drawable.ic_photo_24dp, R.string.set_as_cover
+            ),
+            MaterialMenuSheet.MenuSheetItem(
+                1, R.drawable.ic_share_24dp, R.string.share
+            ),
+            MaterialMenuSheet.MenuSheetItem(
+                2, R.drawable.ic_save_24dp, R.string.save
+            )
+        )
+        MaterialMenuSheet(this, items) { _, item ->
+            when (item) {
+                0 -> setAsCover(page)
+                1 -> shareImage(page)
+                2 -> saveImage(page)
+            }
+            true
+        }.show()
         if (chapters_bottom_sheet.sheetBehavior.isExpanded()) {
             chapters_bottom_sheet.sheetBehavior?.collapse()
         }
@@ -654,7 +678,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
                         setMenuVisibility(false)
                     }
                 }
-                if (sheetManageNavColor) window.navigationBarColor = getResourceColor(R.attr.colorPrimary)
+                if (sheetManageNavColor) window.navigationBarColor = getResourceColor(R.attr.colorSecondary)
                 appbar.visible()
                 val toolbarAnimation = AnimationUtils.loadAnimation(this, R.anim.enter_from_top)
                 toolbarAnimation.setAnimationListener(object : SimpleAnimationListener() {
