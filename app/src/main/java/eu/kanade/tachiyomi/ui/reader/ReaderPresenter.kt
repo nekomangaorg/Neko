@@ -18,6 +18,7 @@ import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
+import eu.kanade.tachiyomi.ui.reader.chapter.ReaderChapterItem
 import eu.kanade.tachiyomi.ui.reader.loader.ChapterLoader
 import eu.kanade.tachiyomi.ui.reader.loader.DownloadPageLoader
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
@@ -229,14 +230,30 @@ class ReaderPresenter(
                     else -> it.source_order.toFloat()
                 }
             }.map {
-                ReaderChapterItem(it, manga, it.id ==
-                    getCurrentChapter()?.chapter?.id ?: chapterId)
+                ReaderChapterItem(
+                    it, manga, it.id == getCurrentChapter()?.chapter?.id ?: chapterId
+                )
             }
             if (!manga.sortDescending(preferences.chaptersDescAsDefault().getOrDefault()))
                 list.reversed()
             else list
         }
         return chapterItems
+    }
+
+    /**
+     * Removes all filters and requests an UI update.
+     */
+    fun setFilters(read: Boolean, unread: Boolean, downloaded: Boolean, bookmarked: Boolean) {
+        val manga = manga ?: return
+        manga.readFilter = when {
+            read -> Manga.SHOW_READ
+            unread -> Manga.SHOW_UNREAD
+            else -> Manga.SHOW_ALL
+        }
+        manga.downloadedFilter = if (downloaded) Manga.SHOW_DOWNLOADED else Manga.SHOW_ALL
+        manga.bookmarkedFilter = if (bookmarked) Manga.SHOW_BOOKMARKED else Manga.SHOW_ALL
+        db.updateFlags(manga).executeAsBlocking()
     }
 
     /**

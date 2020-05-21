@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.ui.manga.chapter
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
-import android.widget.CompoundButton
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import eu.kanade.tachiyomi.R
@@ -15,6 +14,7 @@ import eu.kanade.tachiyomi.util.view.setBottomEdge
 import eu.kanade.tachiyomi.util.view.setEdgeToEdge
 import eu.kanade.tachiyomi.util.view.visInvisIf
 import eu.kanade.tachiyomi.util.view.visibleIf
+import kotlinx.android.synthetic.main.chapter_filter_layout.*
 import kotlinx.android.synthetic.main.chapter_sort_bottom_sheet.*
 import kotlin.math.max
 
@@ -86,13 +86,7 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) : BottomSheetD
     }
 
     private fun initGeneralPreferences() {
-        show_read.isChecked = presenter.onlyRead()
-        show_unread.isChecked = presenter.onlyUnread()
-        show_download.isChecked = presenter.onlyDownloaded()
-        show_bookmark.isChecked = presenter.onlyBookmarked()
-
-        show_all.isChecked = !(show_read.isChecked || show_unread.isChecked ||
-            show_download.isChecked || show_bookmark.isChecked)
+        chapter_filter_layout.setCheckboxes(presenter.manga)
 
         var defPref = presenter.globalSort()
         sort_group.check(if (presenter.manga.sortDescending(defPref)) R.id.sort_newest else
@@ -123,30 +117,6 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) : BottomSheetD
 
         hide_titles.setOnCheckedChangeListener { _, isChecked ->
             presenter.hideTitle(isChecked)
-        }
-
-        show_all.setOnCheckedChangeListener(::checkedFilter)
-        show_read.setOnCheckedChangeListener(::checkedFilter)
-        show_unread.setOnCheckedChangeListener(::checkedFilter)
-        show_download.setOnCheckedChangeListener(::checkedFilter)
-        show_bookmark.setOnCheckedChangeListener(::checkedFilter)
-    }
-
-    private fun checkedFilter(checkBox: CompoundButton, isChecked: Boolean) {
-        if (isChecked) {
-            if (show_all == checkBox) {
-                show_read.isChecked = false
-                show_unread.isChecked = false
-                show_download.isChecked = false
-                show_bookmark.isChecked = false
-            } else {
-                show_all.isChecked = false
-                if (show_read == checkBox) show_unread.isChecked = false
-                else if (show_unread == checkBox) show_read.isChecked = false
-            }
-        } else if (!show_read.isChecked && !show_unread.isChecked &&
-            !show_download.isChecked && !show_bookmark.isChecked) {
-            show_all.isChecked = true
         }
     }
 }

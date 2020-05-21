@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.reader
+package eu.kanade.tachiyomi.ui.reader.chapter
 
 import android.graphics.Typeface
 import android.view.View

@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.reader
+package eu.kanade.tachiyomi.ui.reader.chapter
 
 import android.content.Context
 import android.content.res.ColorStateList
@@ -14,12 +14,16 @@ import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.adapters.ItemAdapter
 import com.mikepenz.fastadapter.listeners.ClickEventHook
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.ui.reader.ReaderActivity
+import eu.kanade.tachiyomi.ui.reader.ReaderPresenter
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.util.view.isExpanded
+import eu.kanade.tachiyomi.util.view.visInvisIf
+import eu.kanade.tachiyomi.util.view.visibleIf
 import kotlinx.android.synthetic.main.reader_chapters_sheet.view.*
 import kotlin.math.max
 import kotlin.math.min
@@ -49,6 +53,10 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
             }
         }
 
+        filter_button.setOnClickListener {
+            ChapterFilterSheet(activity, presenter.manga!!).show()
+        }
+
         post {
             chapter_recycler.alpha = if (sheetBehavior.isExpanded()) 1f else 0f
         }
@@ -57,6 +65,10 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
             override fun onSlide(bottomSheet: View, progress: Float) {
                 pill.alpha = (1 - max(0f, progress)) * 0.25f
                 val trueProgress = max(progress, 0f)
+                chapters_button.alpha = 1 - trueProgress
+                filter_button.alpha = trueProgress
+                filter_button.visibleIf(filter_button.alpha > 0)
+                chapters_button.visInvisIf(chapters_button.alpha > 0)
                 backgroundTintList =
                     ColorStateList.valueOf(lerpColor(primary, fullPrimary, trueProgress))
                 chapter_recycler.alpha = trueProgress
@@ -74,11 +86,17 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                         adapter?.getPosition(presenter.getCurrentChapter()?.chapter?.id ?: 0L) ?: 0,
                         chapter_recycler.height / 2 - 30.dpToPx
                     )
+                    chapters_button.alpha = 1f
+                    filter_button.alpha = 0f
                 }
                 if (state == BottomSheetBehavior.STATE_EXPANDED) {
                     chapter_recycler.alpha = 1f
+                    chapters_button.alpha = 0f
+                    filter_button.alpha = 1f
                     if (activity.sheetManageNavColor) activity.window.navigationBarColor = primary
                 }
+                filter_button.visibleIf(state != BottomSheetBehavior.STATE_COLLAPSED)
+                chapters_button.visInvisIf(state != BottomSheetBehavior.STATE_EXPANDED)
             }
         })
 
