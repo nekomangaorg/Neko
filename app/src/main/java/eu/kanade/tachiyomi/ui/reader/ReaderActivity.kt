@@ -23,6 +23,7 @@ import android.view.animation.AnimationUtils
 import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.graphics.ColorUtils
+import com.afollestad.materialdialogs.MaterialDialog
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -33,7 +34,9 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.base.activity.BaseRxActivity
+import eu.kanade.tachiyomi.ui.library.MaterialMenuSheet
 import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.AddToLibraryFirst
 import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.Error
 import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.Success
@@ -568,7 +571,25 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
      * actions to perform is shown.
      */
     fun onPageLongTap(page: ReaderPage) {
-        ReaderPageSheet(this, page).show()
+        val items = listOf(
+            MaterialMenuSheet.MenuSheetItem(
+                0, R.drawable.ic_photo_24dp, R.string.set_as_cover
+            ),
+            MaterialMenuSheet.MenuSheetItem(
+                1, R.drawable.ic_share_24dp, R.string.share
+            ),
+            MaterialMenuSheet.MenuSheetItem(
+                2, R.drawable.ic_save_24dp, R.string.save
+            )
+        )
+        MaterialMenuSheet(this, items) { _, item ->
+            when (item) {
+                0 -> setAsCover(page)
+                1 -> shareImage(page)
+                2 -> saveImage(page)
+            }
+            true
+        }.show()
         if (chapters_bottom_sheet.sheetBehavior.isExpanded()) {
             chapters_bottom_sheet.sheetBehavior?.collapse()
         }
@@ -605,6 +626,18 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
      */
     fun shareImage(page: ReaderPage) {
         presenter.shareImage(page)
+    }
+
+    fun setCover(page: ReaderPage) {
+        if (page.status != Page.READY) return
+
+        MaterialDialog(this)
+            .title(R.string.use_image_as_cover)
+            .positiveButton(android.R.string.yes) {
+                setAsCover(page)
+            }
+            .negativeButton(android.R.string.no)
+            .show()
     }
 
     /**
