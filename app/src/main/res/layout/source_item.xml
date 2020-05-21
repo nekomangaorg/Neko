@@ -86,7 +86,8 @@
             android:textAllCaps="false"
             android:layout_width="wrap_content"
             android:letterSpacing="0.0"
-            android:text="@string/view_latest"
+            android:text="@string/latest"
+            android:minWidth="50dp"
             android:layout_height="match_parent"
             app:layout_constraintEnd_toStartOf="@id/source_pin"/>
 
