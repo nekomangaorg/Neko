@@ -11,11 +11,8 @@ class SourceHolder(view: View, val adapter: SourceAdapter) :
         BaseFlexibleViewHolder(view, adapter) {
 
     init {
-        migration_auto.setOnClickListener {
-            adapter.autoClickListener?.onAutoClick(adapterPosition)
-        }
-        migration_select.setOnClickListener {
-            adapter.selectClickListener?.onSelectClick(adapterPosition)
+        migration_all.setOnClickListener {
+            adapter.allClickListener?.onAllClick(adapterPosition)
         }
     }
 

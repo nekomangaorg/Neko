@@ -42,7 +42,7 @@ class SelectionHeader : AbstractHeaderItem<SelectionHeader.Holder>() {
 
     class Holder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>) : BaseFlexibleViewHolder(view, adapter) {
         init {
-            title.text = view.context.getString(R.string.select_a_source_to_migrate_from)
+            title.text = view.context.getString(R.string.select_a_source_then_item_to_migrate)
         }
     }
 

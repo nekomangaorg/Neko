@@ -36,26 +36,15 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@+id/edit_button"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/migration_auto"
+            app:layout_constraintEnd_toStartOf="@+id/migration_all"
             tools:text="Source title"/>
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/migration_auto"
+            android:id="@+id/migration_all"
             style="@style/Theme.Widget.Button.Borderless.Small"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/auto"
-            app:layout_constraintEnd_toStartOf="@id/migration_select"
-            android:layout_marginEnd="12dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/migration_select"
-            style="@style/Theme.Widget.Button.Borderless.Small"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/select"
+            android:text="@string/all"
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginEnd="12dp"
             app:layout_constraintBottom_toBottomOf="parent"

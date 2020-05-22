@@ -24,8 +24,7 @@ import uy.kohesive.injekt.api.get
 
 class MigrationController : NucleusController<MigrationPresenter>(),
         FlexibleAdapter.OnItemClickListener,
-        SourceAdapter.OnSelectClickListener,
-        SourceAdapter.OnAutoClickListener,
+        SourceAdapter.OnAllClickListener,
         MigrationInterface {
 
     private var adapter: FlexibleAdapter<IFlexible<*>>? = null
@@ -115,11 +114,7 @@ class MigrationController : NucleusController<MigrationPresenter>(),
         return false
     }
 
-    override fun onSelectClick(position: Int) {
-        onItemClick(view, position)
-    }
-
-    override fun onAutoClick(position: Int) {
+    override fun onAllClick(position: Int) {
         val item = adapter?.getItem(position) as? SourceItem ?: return
 
         launchUI {

@@ -426,7 +426,8 @@
     <string name="source_migration">Source migration</string>
     <string name="migration">Migration</string>
     <string name="skip_pre_migration">Skip pre-migration</string>
-    <string name="select_a_source_to_migrate_from">Select a source to migrate from</string>
+    <string name="select_a_source_then_item_to_migrate">Select a source, then select an item to
+        migrate</string>
     <string name="data_to_include_in_migration">Data to include in migration</string>
     <string name="search_parameter_eg">Search parameter (e.g. language:english)</string>
     <string name="include_extra_search_parameter">Include extra search parameter when searching</string>

@@ -17,7 +17,7 @@ class MangaHolder(
     fun bind(item: MangaItem) {
         // Update the title of the manga.
         title.text = item.manga.title
-        subtitle.text = item.manga.author?.trim()
+        subtitle.text = ""
 
         // Update the cover.
         cover_thumbnail.clear()

@@ -15,34 +15,15 @@ class SourceAdapter(val controller: SourceController) :
         setDisplayHeadersAtStartUp(true)
     }
 
-    /**
-     * Listener for browse item clicks.
-     */
-    val browseClickListener: OnBrowseClickListener = controller
-
-    /**
-     * Listener for latest item clicks.
-     */
-    val latestClickListener: OnLatestClickListener = controller
+    val sourceListener: SourceListener = controller
 
     override fun onItemSwiped(position: Int, direction: Int) {
         super.onItemSwiped(position, direction)
         controller.hideCatalogue(position)
     }
 
-    /**
-     * Listener which should be called when user clicks browse.
-     * Note: Should only be handled by [SourceController]
-     */
-    interface OnBrowseClickListener {
-        fun onBrowseClick(position: Int)
-    }
-
-    /**
-     * Listener which should be called when user clicks latest.
-     * Note: Should only be handled by [SourceController]
-     */
-    interface OnLatestClickListener {
+    interface SourceListener {
+        fun onPinClick(position: Int)
         fun onLatestClick(position: Int)
     }
 }

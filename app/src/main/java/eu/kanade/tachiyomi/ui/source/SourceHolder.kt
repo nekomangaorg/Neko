@@ -14,19 +14,12 @@ import kotlinx.android.synthetic.main.source_item.*
 class SourceHolder(view: View, val adapter: SourceAdapter) :
         BaseFlexibleViewHolder(view, adapter) {
 
-    /*override val slice = Slice(card).apply {
-        setColor(adapter.cardBackground)
-    }
-
-    override val viewToSlice: View
-        get() = card*/
-
     init {
         source_pin.setOnClickListener {
-            adapter.browseClickListener.onBrowseClick(adapterPosition)
+            adapter.sourceListener.onPinClick(adapterPosition)
         }
         source_latest.setOnClickListener {
-            adapter.latestClickListener.onLatestClick(adapterPosition)
+            adapter.sourceListener.onLatestClick(adapterPosition)
         }
     }
 

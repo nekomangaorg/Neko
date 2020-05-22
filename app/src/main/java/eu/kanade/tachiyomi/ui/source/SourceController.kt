@@ -53,15 +53,14 @@ import kotlin.math.max
 /**
  * This controller shows and manages the different catalogues enabled by the user.
  * This controller should only handle UI actions, IO actions should be done by [SourcePresenter]
- * [SourceAdapter.OnBrowseClickListener] call function data on browse item click.
+ * [SourceAdapter.SourceListener] call function data on browse item click.
  * [SourceAdapter.OnLatestClickListener] call function data on latest item click
  */
 class SourceController : NucleusController<SourcePresenter>(),
         FlexibleAdapter.OnItemClickListener,
-        SourceAdapter.OnBrowseClickListener,
+        SourceAdapter.SourceListener,
         RootSearchInterface,
-        BottomSheetController,
-        SourceAdapter.OnLatestClickListener {
+        BottomSheetController {
 
     /**
      * Application preferences.
@@ -260,7 +259,7 @@ class SourceController : NucleusController<SourcePresenter>(),
     /**
      * Called when browse is clicked in [SourceAdapter]
      */
-    override fun onBrowseClick(position: Int) {
+    override fun onPinClick(position: Int) {
         val item = adapter?.getItem(position) as? SourceItem ?: return
         val isPinned = item.isPinned ?: item.header?.code?.equals(SourcePresenter.PINNED_KEY)
         ?: false

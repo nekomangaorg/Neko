@@ -22,7 +22,6 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0">
 
-
         <ImageView
             android:id="@+id/cover_thumbnail"
             android:layout_width="@dimen/material_layout_avatar"
@@ -34,6 +33,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+            android:scaleType="centerCrop"
             tools:background="?android:attr/colorBackground"
             tools:ignore="ContentDescription"
             tools:src="@mipmap/ic_launcher" />
