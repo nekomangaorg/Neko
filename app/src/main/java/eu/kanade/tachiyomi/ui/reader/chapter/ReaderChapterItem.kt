@@ -52,7 +52,6 @@ class ReaderChapterItem(val chapter: Chapter, val manga: Manga, val isCurrent: B
 
             val typeface = if (item.isCurrent) ResourcesCompat.getFont(itemView.context, R.font.metropolis_bold_italic) else null
 
-            ChapterUtil.setTextViewForChapter(chapterTitle, item)
             chapterTitle.text = when (manga.displayMode) {
                 Manga.DISPLAY_NUMBER -> {
                     val number = item.decimalFormat.format(item.chapter_number.toDouble())
