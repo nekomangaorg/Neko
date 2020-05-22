@@ -232,8 +232,8 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
     }
 
     fun setPadding(sheetIsHidden: Boolean) {
-        recycler.updatePaddingRelative(bottom = if (sheetIsHidden) 0 else 20.dpToPx)
-        recycler.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+        recycler?.updatePaddingRelative(bottom = if (sheetIsHidden) 0 else 20.dpToPx)
+        recycler?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             bottomMargin = if (sheetIsHidden) 0 else 30.dpToPx
         }
     }
