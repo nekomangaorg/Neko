@@ -45,7 +45,6 @@ class ReaderChapterItem(val chapter: Chapter, val manga: Manga, val isCurrent: B
 
             val chapterColor = ChapterUtil.chapterColor(itemView.context, item.chapter)
 
-            ChapterUtil.setTextViewForChapter(chapterTitle, item)
             chapterTitle.text = when (manga.displayMode) {
                 Manga.DISPLAY_NUMBER -> {
                     val number = item.decimalFormat.format(item.chapter_number.toDouble())
@@ -67,6 +66,7 @@ class ReaderChapterItem(val chapter: Chapter, val manga: Manga, val isCurrent: B
             }
 
             // match color of the chapter title
+            chapterTitle.setTextColor(chapterColor)
             chapterSubtitle.setTextColor(chapterColor)
 
             bookmarkImage.setImageResource(
