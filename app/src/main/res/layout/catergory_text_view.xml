@@ -12,5 +12,5 @@
     android:paddingEnd="0dp"
     android:paddingBottom="8dp"
     android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
-    android:textSize="16sp"
+    android:textSize="15sp"
     tools:text="@string/categories" />
