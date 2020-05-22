@@ -22,6 +22,9 @@ fun String.removeArticles(): String {
     }
 }
 
+val String.sqLite:String
+    get() = replace("'", "''")
+
 fun String.trimOrNull(): String? {
     val trimmed = trim()
     return if (trimmed.isBlank()) null else trimmed
