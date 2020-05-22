@@ -688,7 +688,7 @@ class ReaderPresenter(
         }
         return true
     }
-
+    
     /**
      * Enqueues this [chapter] to be deleted when [deletePendingChapters] is called. The download
      * manager handles persisting it across process deaths.

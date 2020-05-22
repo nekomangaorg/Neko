@@ -46,7 +46,7 @@
             app:srcCompat="@drawable/ic_format_list_numbered_24dp" />
 
         <ImageButton
-            android:id="@+id/filter_button"
+            android:id="@+id/comment_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="?selectableItemBackgroundBorderless"
@@ -57,8 +57,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            android:alpha="0.0"
-            app:srcCompat="@drawable/ic_filter_list_24dp" />
+            android:alpha="0.0" />
 
         <eu.kanade.tachiyomi.ui.reader.ReaderSeekBar
             android:id="@+id/page_seekbar"

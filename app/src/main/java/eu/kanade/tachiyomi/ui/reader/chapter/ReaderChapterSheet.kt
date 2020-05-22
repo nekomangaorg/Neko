@@ -13,11 +13,13 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.adapters.ItemAdapter
 import com.mikepenz.fastadapter.listeners.ClickEventHook
+import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.reader.ReaderPresenter
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.system.iconicsDrawableActionbar
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.expand
@@ -53,8 +55,11 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
             }
         }
 
-        filter_button.setOnClickListener {
-            ChapterFilterSheet(activity, presenter.manga!!).show()
+        comment_button.setImageDrawable(context.iconicsDrawableActionbar(MaterialDesignDx.Icon.gmf_comment))
+
+        comment_button.setOnClickListener {
+            activity.openComments()
+
         }
 
         post {
@@ -66,8 +71,8 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                 pill.alpha = (1 - max(0f, progress)) * 0.25f
                 val trueProgress = max(progress, 0f)
                 chapters_button.alpha = 1 - trueProgress
-                filter_button.alpha = trueProgress
-                filter_button.visibleIf(filter_button.alpha > 0)
+                comment_button.alpha = trueProgress
+                comment_button.visibleIf(comment_button.alpha > 0)
                 chapters_button.visInvisIf(chapters_button.alpha > 0)
                 backgroundTintList =
                     ColorStateList.valueOf(lerpColor(primary, fullPrimary, trueProgress))
@@ -87,15 +92,15 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                         chapter_recycler.height / 2 - 30.dpToPx
                     )
                     chapters_button.alpha = 1f
-                    filter_button.alpha = 0f
+                    comment_button.alpha = 0f
                 }
                 if (state == BottomSheetBehavior.STATE_EXPANDED) {
                     chapter_recycler.alpha = 1f
                     chapters_button.alpha = 0f
-                    filter_button.alpha = 1f
+                    comment_button.alpha = 1f
                     if (activity.sheetManageNavColor) activity.window.navigationBarColor = primary
                 }
-                filter_button.visibleIf(state != BottomSheetBehavior.STATE_COLLAPSED)
+                comment_button.visibleIf(state != BottomSheetBehavior.STATE_COLLAPSED)
                 chapters_button.visInvisIf(state != BottomSheetBehavior.STATE_EXPANDED)
             }
         })

@@ -46,9 +46,11 @@ class ReaderChapterItem(val chapter: Chapter, val manga: Manga, val isCurrent: B
         override fun bindView(item: ReaderChapterItem, payloads: List<Any>) {
             val manga = item.manga
 
-            val chapterColor = ChapterUtil.chapterColor(itemView.context, item.chapter)
+            val chapterColor =
+                if (item.isCurrent) itemView.context.getColor(R.color.neko_green_darker)
+                else ChapterUtil.chapterColor(itemView.context, item.chapter)
 
-            val typeface = if (item.isCurrent) ResourcesCompat.getFont(itemView.context, R.font.metropolis_bold) else null
+            val typeface = if (item.isCurrent) ResourcesCompat.getFont(itemView.context, R.font.metropolis_bold_italic) else null
 
             ChapterUtil.setTextViewForChapter(chapterTitle, item)
             chapterTitle.text = when (manga.displayMode) {
@@ -70,12 +72,8 @@ class ReaderChapterItem(val chapter: Chapter, val manga: Manga, val isCurrent: B
                 chapterLanguage.text = item.chapter.language
             }
 
-
-            chapterTitle.setTypeface(typeface)
-            chapterSubtitle.setTypeface(typeface)
-            chapterLanguage.setTypeface(typeface)
-
             // match color of the chapter title
+            chapterTitle.setTextColor(chapterColor)
             chapterSubtitle.setTextColor(chapterColor)
             chapterLanguage.setTextColor(chapterColor)
 
@@ -88,6 +86,9 @@ class ReaderChapterItem(val chapter: Chapter, val manga: Manga, val isCurrent: B
 
             DrawableCompat.setTint(bookmarkImage.drawable, drawableColor)
 
+            chapterTitle.setTypeface(typeface)
+            chapterSubtitle.setTypeface(typeface)
+            chapterLanguage.setTypeface(typeface)
             chapterSubtitle.text = statuses.joinToString(" • ")
         }
 

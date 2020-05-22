@@ -34,6 +34,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.activity.BaseRxActivity
 import eu.kanade.tachiyomi.ui.library.MaterialMenuSheet
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
@@ -44,6 +45,7 @@ import eu.kanade.tachiyomi.ui.reader.viewer.pager.L2RPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.R2LPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.VerticalPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
+import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.GLUtil
 import eu.kanade.tachiyomi.util.system.ThemeUtil
@@ -660,6 +662,16 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
                 Timber.e(result.error)
             }
         }
+    }
+
+    fun openComments() {
+        val currentChapter = presenter.getCurrentChapter()
+        currentChapter ?: return
+
+        val url = MdUtil.baseUrl + "/chapter/" + MdUtil.getChapterId(currentChapter.chapter.url) + "/comments"
+        val intent =
+            WebViewActivity.newIntent(this, presenter.manga!!.source, url, currentChapter.chapter.name)
+        startActivity(intent)
     }
 
     override fun onVisibilityChange(visible: Boolean) {
