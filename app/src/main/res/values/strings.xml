@@ -431,7 +431,8 @@
     <string name="use_most_chapters">Use source with the most chapters (slower)</string>
     <string name="use_first_source">Use first source with alternative</string>
     <string name="skip_this_step_next_time">Skip this step next time</string>
-    <string name="to_show_again_setting_library">To show this screen again, go to Settings -> Library.</string>
+    <string name="to_show_again_setting_sources">To show this screen again, go to Settings ->
+        Sources.</string>
     <string name="latest_">Latest: %1$s</string>
     <string name="migrating_to">migrating to</string>
     <string name="dont_migrate">Don\'t migrate</string>
