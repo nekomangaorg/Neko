@@ -1,10 +1,10 @@
 package eu.kanade.tachiyomi.ui.reader.chapter
 
-import android.graphics.Typeface
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.items.AbstractItem
@@ -12,6 +12,8 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
+import eu.kanade.tachiyomi.util.view.gone
+import eu.kanade.tachiyomi.util.view.visible
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 
@@ -37,6 +39,7 @@ class ReaderChapterItem(val chapter: Chapter, val manga: Manga, val isCurrent: B
     class ViewHolder(view: View) : FastAdapter.ViewHolder<ReaderChapterItem>(view) {
         private var chapterTitle: TextView = view.findViewById(R.id.chapter_title)
         private var chapterSubtitle: TextView = view.findViewById(R.id.chapter_scanlator)
+        private var chapterLanguage: TextView = view.findViewById(R.id.chapter_language)
         var bookmarkButton: FrameLayout = view.findViewById(R.id.bookmark_layout)
         private var bookmarkImage: ImageView = view.findViewById(R.id.bookmark_image)
 
@@ -44,6 +47,8 @@ class ReaderChapterItem(val chapter: Chapter, val manga: Manga, val isCurrent: B
             val manga = item.manga
 
             val chapterColor = ChapterUtil.chapterColor(itemView.context, item.chapter)
+
+            val typeface = if (item.isCurrent) ResourcesCompat.getFont(itemView.context, R.font.metropolis_bold) else null
 
             ChapterUtil.setTextViewForChapter(chapterTitle, item)
             chapterTitle.text = when (manga.displayMode) {
@@ -58,16 +63,21 @@ class ReaderChapterItem(val chapter: Chapter, val manga: Manga, val isCurrent: B
             ChapterUtil.relativeDate(item)?.let { statuses.add(it) }
             item.scanlator?.isNotBlank()?.let { statuses.add(item.scanlator!!) }
 
-            if (item.isCurrent) {
-                chapterTitle.setTypeface(null, Typeface.BOLD_ITALIC)
-                chapterSubtitle.setTypeface(null, Typeface.BOLD_ITALIC)
+            if (item.chapter.language.isNullOrBlank() || item.chapter.language.equals("english", true)) {
+                chapterLanguage.gone()
             } else {
-                chapterTitle.setTypeface(null, Typeface.NORMAL)
-                chapterSubtitle.setTypeface(null, Typeface.NORMAL)
+                chapterLanguage.visible()
+                chapterLanguage.text = item.chapter.language
             }
+
+
+            chapterTitle.setTypeface(typeface)
+            chapterSubtitle.setTypeface(typeface)
+            chapterLanguage.setTypeface(typeface)
 
             // match color of the chapter title
             chapterSubtitle.setTextColor(chapterColor)
+            chapterLanguage.setTextColor(chapterColor)
 
             bookmarkImage.setImageResource(
                 if (item.bookmark) R.drawable.ic_bookmark_24dp
@@ -84,6 +94,7 @@ class ReaderChapterItem(val chapter: Chapter, val manga: Manga, val isCurrent: B
         override fun unbindView(item: ReaderChapterItem) {
             chapterTitle.text = null
             chapterSubtitle.text = null
+            chapterLanguage.text = null
         }
     }
 }

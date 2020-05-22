@@ -76,6 +76,17 @@ class SettingsSiteController : SettingsController(), MangadexLoginDialog.Listene
             summary = "%s"
         }
 
+        listPreference(activity) {
+            key = PreferenceKeys.dataSaver
+            titleRes = R.string.data_saver
+            entriesRes = arrayOf(
+                R.string.data_saver_disabled,
+                R.string.data_saver_enabled
+            )
+            entryValues = listOf("0", "1")
+            defaultValue = "0"
+        }
+
         switchPreference {
             key = PreferenceKeys.lowQualityCovers
             titleRes = R.string.low_quality_covers

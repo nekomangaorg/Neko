@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.asJsoup
 import eu.kanade.tachiyomi.util.site.setUrlWithoutDomain
+import okhttp3.CacheControl
 import okhttp3.Headers
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -29,7 +30,7 @@ class PopularHandler(val client: OkHttpClient, private val headers: Headers) {
     }
 
     private fun popularMangaRequest(page: Int): Request {
-        return GET("${MdUtil.baseUrl}/titles/0/$page/", headers)
+        return GET("${MdUtil.baseUrl}/titles/0/$page/", headers, CacheControl.FORCE_NETWORK)
     }
 
     private fun popularMangaParse(response: Response): MangasPage {

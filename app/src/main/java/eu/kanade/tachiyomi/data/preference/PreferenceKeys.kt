@@ -150,7 +150,7 @@ object PreferenceKeys {
     const val showLibraryUpdateErrors = "show_library_update_errors"
 
     const val alwaysShowChapterTransition = "always_show_chapter_transition"
-    
+
     const val similarEnabled = "pref_related_show_tab_key"
 
     const val similarUpdateInterval = "related_update_interval"
@@ -162,6 +162,8 @@ object PreferenceKeys {
     const val imageServer = "image_server"
 
     const val lowQualityCovers = "low_quality_covers"
+
+    const val dataSaver = "data_saver"
 
     @Deprecated("Use the preferences of the source")
     fun sourceUsername(sourceId: Long) = "pref_source_username_$sourceId"

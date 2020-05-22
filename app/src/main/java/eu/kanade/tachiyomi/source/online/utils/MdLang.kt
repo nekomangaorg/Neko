@@ -29,7 +29,7 @@ enum class MdLang(val lang: String, val dexLang: String, val langId: Int) {
     Turkish("tr", "tr", 26),
     Indonesian("id", "id", 27),
     Korean("ko", "kr", 28),
-    SpanishLATAM("es-419", "mx", 29),
+    SpanishLTAM("es-419", "mx", 29),
     Persian("fa", "ir", 30),
     Malay("ms", "my", 31),
     Thai("th", "th", 32),
@@ -38,8 +38,8 @@ enum class MdLang(val lang: String, val dexLang: String, val langId: Int) {
     ChineseTraditional("zh-Hant", "hk", 35),
     Ukrainian("uk", "ua", 36),
     Burmese("my", "mm", 37),
-    Hebrew("lt", "il", 38),
-    Hindi("lt", "in", 39),
-    Other("lt", " ", 40),
-    Norwegian("lt", "no", 41)
+    Lithuanian("lt", "il", 38),
+    Hebrew("he", "il", 39),
+    Hindi("hi", "in", 40),
+    Norwegian("no", "no", 42)
 }
