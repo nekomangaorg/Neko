@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.data.database.resolvers.HistoryLastReadPutResolver
 import eu.kanade.tachiyomi.data.database.resolvers.MangaChapterHistoryGetResolver
 import eu.kanade.tachiyomi.data.database.tables.HistoryTable
 import eu.kanade.tachiyomi.data.database.tables.MangaTable
+import eu.kanade.tachiyomi.util.lang.sqLite
 import java.util.Date
 
 interface HistoryQueries : DbProvider {
@@ -27,7 +28,7 @@ interface HistoryQueries : DbProvider {
     fun getRecentManga(date: Date, offset: Int = 0, search: String = "") = db.get()
             .listOfObjects(MangaChapterHistory::class.java)
             .withQuery(RawQuery.builder()
-                    .query(getRecentMangasQuery(offset, search))
+                    .query(getRecentMangasQuery(offset, search.sqLite))
                     .args(date.time)
                     .observesTables(HistoryTable.TABLE)
                     .build())
@@ -42,7 +43,7 @@ interface HistoryQueries : DbProvider {
     fun getRecentlyAdded(date: Date, search: String = "", endless: Boolean) = db.get()
         .listOfObjects(MangaChapterHistory::class.java)
         .withQuery(RawQuery.builder()
-            .query(getRecentAdditionsQuery(search, endless))
+            .query(getRecentAdditionsQuery(search.sqLite, endless))
             .args(date.time)
             .observesTables(MangaTable.TABLE)
             .build())
@@ -57,7 +58,7 @@ interface HistoryQueries : DbProvider {
     fun getRecentMangaLimit(date: Date, limit: Int = 0, search: String = "") = db.get()
         .listOfObjects(MangaChapterHistory::class.java)
         .withQuery(RawQuery.builder()
-            .query(getRecentMangasLimitQuery(limit, search))
+            .query(getRecentMangasLimitQuery(limit, search.sqLite))
             .args(date.time)
             .observesTables(HistoryTable.TABLE)
             .build())
@@ -72,7 +73,7 @@ interface HistoryQueries : DbProvider {
     fun getRecentsWithUnread(date: Date, search: String = "", endless: Boolean) = db.get()
         .listOfObjects(MangaChapterHistory::class.java)
         .withQuery(RawQuery.builder()
-            .query(getRecentReadWithUnreadChapters(search, endless))
+            .query(getRecentReadWithUnreadChapters(search.sqLite, endless))
             .args(date.time)
             .observesTables(HistoryTable.TABLE)
             .build())
