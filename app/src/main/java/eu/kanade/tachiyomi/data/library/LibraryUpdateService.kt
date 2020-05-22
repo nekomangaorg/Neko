@@ -271,8 +271,13 @@ class LibraryUpdateService(
             jobCount.andIncrement
             val list = mangaToUpdateMap.keys.map { source ->
                 async {
-                    requestSemaphore.withPermit {
-                        updateMangaInSource(source, downloadNew, categoriesToDownload)
+                    try {
+                        requestSemaphore.withPermit {
+                            updateMangaInSource(source, downloadNew, categoriesToDownload)
+                        }
+                    } catch (e: Exception) {
+                        Timber.e(e)
+                        false
                     }
                 }
             }
