@@ -55,6 +55,11 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) : Bott
         })
     }
 
+    override fun show() {
+        super.show()
+        sheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+    }
+
     override fun onStart() {
         super.onStart()
         sheetBehavior.skipCollapsed = true
@@ -105,7 +110,7 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) : Bott
         activity.toast(error.message)
     }
 
-        override fun onLogoClick(position: Int) {
+    override fun onLogoClick(position: Int) {
         val track = adapter?.getItem(position)?.track ?: return
         if (controller.isNotOnline()) {
             dismiss()
