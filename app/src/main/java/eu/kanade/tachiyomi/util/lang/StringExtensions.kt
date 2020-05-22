@@ -22,7 +22,7 @@ fun String.removeArticles(): String {
     }
 }
 
-val String.sqLite:String
+val String.sqLite: String
     get() = replace("'", "''")
 
 fun String.trimOrNull(): String? {
