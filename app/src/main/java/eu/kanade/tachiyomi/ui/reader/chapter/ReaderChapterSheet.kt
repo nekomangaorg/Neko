@@ -53,8 +53,8 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
             }
         }
 
-        filter_button.setOnClickListener {
-            ChapterFilterSheet(activity, presenter.manga!!).show()
+        webview_button.setOnClickListener {
+            activity.openMangaInBrowser()
         }
 
         post {
@@ -66,8 +66,8 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                 pill.alpha = (1 - max(0f, progress)) * 0.25f
                 val trueProgress = max(progress, 0f)
                 chapters_button.alpha = 1 - trueProgress
-                filter_button.alpha = trueProgress
-                filter_button.visibleIf(filter_button.alpha > 0)
+                webview_button.alpha = trueProgress
+                webview_button.visibleIf(webview_button.alpha > 0)
                 chapters_button.visInvisIf(chapters_button.alpha > 0)
                 backgroundTintList =
                     ColorStateList.valueOf(lerpColor(primary, fullPrimary, trueProgress))
@@ -87,15 +87,15 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                         chapter_recycler.height / 2 - 30.dpToPx
                     )
                     chapters_button.alpha = 1f
-                    filter_button.alpha = 0f
+                    webview_button.alpha = 0f
                 }
                 if (state == BottomSheetBehavior.STATE_EXPANDED) {
                     chapter_recycler.alpha = 1f
                     chapters_button.alpha = 0f
-                    filter_button.alpha = 1f
+                    webview_button.alpha = 1f
                     if (activity.sheetManageNavColor) activity.window.navigationBarColor = primary
                 }
-                filter_button.visibleIf(state != BottomSheetBehavior.STATE_COLLAPSED)
+                webview_button.visibleIf(state != BottomSheetBehavior.STATE_COLLAPSED)
                 chapters_button.visInvisIf(state != BottomSheetBehavior.STATE_EXPANDED)
             }
         })

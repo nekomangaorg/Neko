@@ -48,6 +48,7 @@ import eu.kanade.tachiyomi.ui.reader.viewer.pager.L2RPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.R2LPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.VerticalPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
+import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.GLUtil
 import eu.kanade.tachiyomi.util.system.ThemeUtil
@@ -743,6 +744,20 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
                     WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER
             }
         }
+    }
+
+    fun openMangaInBrowser() {
+        val source = presenter.getSource() ?: return
+        val url = try {
+            source.mangaDetailsRequest(presenter.manga!!).url.toString()
+        } catch (e: Exception) {
+            return
+        }
+
+        val intent = WebViewActivity.newIntent(
+            applicationContext, source.id, url, presenter.manga!!.title
+        )
+        startActivity(intent)
     }
 
     /**

@@ -17,6 +17,7 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Page
+import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
 import eu.kanade.tachiyomi.ui.reader.chapter.ReaderChapterItem
 import eu.kanade.tachiyomi.ui.reader.loader.ChapterLoader
@@ -451,6 +452,8 @@ class ReaderPresenter(
     fun getCurrentChapter(): ReaderChapter? {
         return viewerChaptersRelay.value?.currChapter
     }
+
+    fun getSource() = sourceManager.getOrStub(manga!!.source) as? HttpSource
 
     /**
      * Returns the viewer position used by this manga or the default one.
