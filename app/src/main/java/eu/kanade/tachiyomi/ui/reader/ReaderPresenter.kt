@@ -30,7 +30,6 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.system.ImageUtil
-import eu.kanade.tachiyomi.util.system.executeOnIO
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -95,7 +94,7 @@ class ReaderPresenter(
      */
     private val chapterList by lazy {
         val manga = manga!!
-        val dbChapters = db.getChapters(manga).executeAsBlocking().map { ChapterItem(it, manga) }
+        val dbChapters = db.getChapters(manga).executeAsBlocking()
 
         val selectedChapter = dbChapters.find { it.id == chapterId }
             ?: error("Requested chapter of id $chapterId not found in chapter list")
@@ -114,9 +113,9 @@ class ReaderPresenter(
     }
 
     private fun getFilteredChapters(
-        dbChapters: List<ChapterItem>,
+        dbChapters: List<Chapter>,
         manga: Manga,
-        selectedChapter: ChapterItem
+        selectedChapter: Chapter?
     ): List<Chapter> {
         var filteredChapters = dbChapters
         if (preferences.skipRead()) {
@@ -124,7 +123,7 @@ class ReaderPresenter(
             val find = filteredChapters.find { it.id == chapterId }
             if (find == null) {
                 val mutableList = filteredChapters.toMutableList()
-                mutableList.add(selectedChapter)
+                selectedChapter?.let { mutableList.add(it) }
                 filteredChapters = mutableList.toList()
             }
         }
@@ -231,14 +230,24 @@ class ReaderPresenter(
     suspend fun getChapters(): List<ReaderChapterItem> {
         val manga = manga ?: return emptyList()
         chapterItems = withContext(Dispatchers.IO) {
-            val list = db.getChapters(manga).executeOnIO().sortedBy {
+
+            val dbChapters = db.getChapters(manga).executeAsBlocking().map { ChapterItem(it, manga) }
+            val chaptersForReader =
+                when (preferences.skipRead() || preferences.skipFiltered()) {
+                    true -> getFilteredChapters(dbChapters, manga, null)
+                    false -> dbChapters
+                }
+
+            val list = chaptersForReader.sortedBy {
                 when (manga.sorting) {
                     Manga.SORTING_NUMBER -> it.chapter_number
                     else -> it.source_order.toFloat()
                 }
             }.map {
-                ReaderChapterItem(it, manga, it.id ==
-                    getCurrentChapter()?.chapter?.id ?: chapterId)
+                ReaderChapterItem(
+                    it, manga, it.id ==
+                        getCurrentChapter()?.chapter?.id ?: chapterId
+                )
             }
             if (!manga.sortDescending(preferences.chaptersDescAsDefault().getOrDefault()))
                 list.reversed()

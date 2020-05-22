@@ -297,9 +297,7 @@ class PreferencesHelper(val context: Context) {
     fun shownHopperSwipeTutorial() = flowPrefs.getBoolean("shown_hopper_swipe", false)
 
     fun shownSimilarTutorial() = flowPrefs.getBoolean("shown_similar_tutorial", false)
-
-    fun skipFiltered() = prefs.getBoolean(Keys.skipFiltered, true)
-
+    
     fun similarEnabled() = prefs.getBoolean(Keys.similarEnabled, false)
 
     fun similarOnlyOverWifi() = prefs.getBoolean(Keys.similarOnlyOverWifi, true)

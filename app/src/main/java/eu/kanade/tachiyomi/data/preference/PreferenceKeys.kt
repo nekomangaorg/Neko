@@ -150,9 +150,7 @@ object PreferenceKeys {
     const val showLibraryUpdateErrors = "show_library_update_errors"
 
     const val alwaysShowChapterTransition = "always_show_chapter_transition"
-
-    const val skipFiltered = "skip_hidden"
-
+    
     const val similarEnabled = "pref_related_show_tab_key"
 
     const val similarUpdateInterval = "related_update_interval"
