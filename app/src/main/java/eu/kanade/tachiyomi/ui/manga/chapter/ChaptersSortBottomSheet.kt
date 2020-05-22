@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.ui.manga.chapter
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
-import android.widget.CompoundButton
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.list.listItemsMultiChoice
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -92,19 +91,27 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) : BottomSheetD
         chapter_filter_layout.setCheckboxes(presenter.manga)
 
         var defPref = presenter.globalSort()
-        sort_group.check(if (presenter.manga.sortDescending(defPref)) R.id.sort_newest else
-            R.id.sort_oldest)
+        sort_group.check(
+            if (presenter.manga.sortDescending(defPref)) R.id.sort_newest else
+                R.id.sort_oldest
+        )
 
         hide_titles.isChecked = presenter.manga.displayMode != Manga.DISPLAY_NAME
-        sort_method_group.check(if (presenter.manga.sorting == Manga.SORTING_SOURCE) R.id.sort_by_source else
-            R.id.sort_by_number)
+        sort_method_group.check(
+            if (presenter.manga.sorting == Manga.SORTING_SOURCE) R.id.sort_by_source else
+                R.id.sort_by_number
+        )
 
-        set_as_default_sort.visInvisIf(defPref != presenter.manga.sortDescending() &&
-        presenter.manga.usesLocalSort())
+        set_as_default_sort.visInvisIf(
+            defPref != presenter.manga.sortDescending() &&
+                presenter.manga.usesLocalSort()
+        )
         sort_group.setOnCheckedChangeListener { _, checkedId ->
             presenter.setSortOrder(checkedId == R.id.sort_newest)
-            set_as_default_sort.visInvisIf(defPref != presenter.manga.sortDescending() &&
-                presenter.manga.usesLocalSort())
+            set_as_default_sort.visInvisIf(
+                defPref != presenter.manga.sortDescending() &&
+                    presenter.manga.usesLocalSort()
+            )
         }
 
         set_as_default_sort.setOnClickListener {
@@ -120,6 +127,27 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) : BottomSheetD
 
         hide_titles.setOnCheckedChangeListener { _, isChecked ->
             presenter.hideTitle(isChecked)
+        }
+
+        filter_groups_button.setOnClickListener {
+            val scanlators = presenter.allChapterScanlators
+            val preselected = presenter.filteredScanlators.map { scanlators.indexOf(it) }
+
+            MaterialDialog(activity!!)
+                .title(R.string.filter_groups_title)
+                .listItemsMultiChoice(
+                    items = scanlators,
+                    initialSelection = preselected.toIntArray(),
+                    allowEmptySelection = false
+                ) { _, selections, _ ->
+                    val selected = selections.map { scanlators[it] }
+                    presenter.filterScanlatorsClicked(selected)
+                }
+                .negativeButton(R.string.reset_group_filter) {
+                    presenter.filterScanlatorsClicked(scanlators)
+                }
+                .positiveButton(android.R.string.ok)
+                .show()
         }
     }
 }
