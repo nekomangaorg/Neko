@@ -4,8 +4,10 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.util.system.executeOnIO
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.Injekt
@@ -22,6 +24,8 @@ class CategoryPresenter(
 
     private val context = preferences.context
 
+    private var scope = CoroutineScope(Job() + Dispatchers.Default)
+
     /**
      * List containing categories.
      */
@@ -34,7 +38,7 @@ class CategoryPresenter(
         if (categories.isNotEmpty()) {
             controller.setCategories(categories.map(::CategoryItem))
         }
-        GlobalScope.launch(Dispatchers.IO) {
+        scope.launch(Dispatchers.IO) {
             categories.clear()
             categories.add(newCategory())
             categories.addAll(db.getCategories().executeAsBlocking())
@@ -98,13 +102,16 @@ class CategoryPresenter(
      * @param categories The list of categories to reorder.
      */
     fun reorderCategories(categories: List<Category>) {
-        categories.forEachIndexed { i, category ->
-            if (category.order != CREATE_CATEGORY_ORDER)
-                category.order = i - 1
+        scope.launch {
+            categories.forEachIndexed { i, category ->
+                if (category.order != CREATE_CATEGORY_ORDER) category.order = i - 1
+            }
+            db.insertCategories(categories.filter { it.order != CREATE_CATEGORY_ORDER }).executeOnIO()
+            this@CategoryPresenter.categories = categories.sortedBy { it.order }.toMutableList()
+            withContext(Dispatchers.Main) {
+                controller.setCategories(this@CategoryPresenter.categories.map(::CategoryItem))
+            }
         }
-        db.insertCategories(categories.filter { it.order != CREATE_CATEGORY_ORDER }).executeAsBlocking()
-        this.categories = categories.sortedBy { it.order }.toMutableList()
-        controller.setCategories(categories.map(::CategoryItem))
     }
 
     /**

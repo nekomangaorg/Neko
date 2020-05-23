@@ -15,7 +15,7 @@ import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.category.CategoryPresenter.Companion.CREATE_CATEGORY_ORDER
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.system.toast
-import eu.kanade.tachiyomi.util.view.scrollViewWith
+import eu.kanade.tachiyomi.util.view.liftAppbarWith
 import eu.kanade.tachiyomi.util.view.snack
 import kotlinx.android.synthetic.main.categories_controller.*
 
@@ -66,7 +66,7 @@ class CategoryController(bundle: Bundle? = null) : BaseController(bundle),
      */
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
-        scrollViewWith(recycler, padBottom = true)
+        liftAppbarWith(recycler)
 
         adapter = CategoryAdapter(this@CategoryController)
         recycler.layoutManager = LinearLayoutManager(view.context)

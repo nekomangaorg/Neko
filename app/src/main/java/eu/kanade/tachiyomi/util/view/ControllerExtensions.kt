@@ -55,6 +55,37 @@ fun Controller.setOnQueryTextChangeListener(
     })
 }
 
+fun Controller.liftAppbarWith(recycler: RecyclerView) {
+    view?.applyWindowInsetsForController()
+    recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
+
+    var elevationAnim: ValueAnimator? = null
+    var elevate = false
+    val elevateFunc: (Boolean) -> Unit = { el ->
+        elevate = el
+        elevationAnim?.cancel()
+        elevationAnim = ValueAnimator.ofFloat(
+            activity?.appbar?.elevation ?: 0f, if (el) 15f else 0f
+        )
+        elevationAnim?.addUpdateListener { valueAnimator ->
+            activity?.appbar?.elevation = valueAnimator.animatedValue as Float
+        }
+        elevationAnim?.start()
+    }
+    elevateFunc(recycler.canScrollVertically(-1))
+    recycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+            super.onScrolled(recyclerView, dx, dy)
+            if (router?.backstack?.lastOrNull()
+                    ?.controller() == this@liftAppbarWith && activity != null
+            ) {
+                val notAtTop = recycler.canScrollVertically(-1)
+                if (notAtTop != elevate) elevateFunc(notAtTop)
+            }
+        }
+    })
+}
+
 fun Controller.scrollViewWith(
     recycler: RecyclerView,
     padBottom: Boolean = false,
