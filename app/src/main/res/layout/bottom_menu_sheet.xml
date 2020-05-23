@@ -9,7 +9,7 @@
     app:layout_constraintVertical_chainStyle="packed"
     android:backgroundTint="?android:attr/colorBackground">
 
-    <androidx.core.widget.NestedScrollView
+    <eu.kanade.tachiyomi.ui.base.MaxHeightScrollView
         android:id="@+id/menu_scroll_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -25,7 +25,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical" />
-    </androidx.core.widget.NestedScrollView>
+    </eu.kanade.tachiyomi.ui.base.MaxHeightScrollView>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/title_layout"
@@ -60,6 +60,7 @@
             tools:text="Title Text" />
 
         <View
+            android:id="@+id/bottom_divider"
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="@color/divider"

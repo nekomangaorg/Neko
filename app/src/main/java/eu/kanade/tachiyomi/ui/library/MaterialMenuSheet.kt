@@ -36,6 +36,7 @@ class MaterialMenuSheet(
     items: List<MenuSheetItem>,
     title: String? = null,
     selectedId: Int? = null,
+    maxHeight: Int? = null,
     onMenuItemClicked: (MaterialMenuSheet, Int) -> Boolean
 ) :
     BottomSheetDialog
@@ -49,6 +50,10 @@ class MaterialMenuSheet(
         setEdgeToEdge(activity, view)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !context.isInNightMode() && !activity.window.decorView.rootWindowInsets.hasSideNavBar()) {
             window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+        }
+        maxHeight?.let {
+            menu_scroll_view.maxHeight = it
+            menu_scroll_view.requestLayout()
         }
 
         var currentIndex: Int? = null
@@ -76,6 +81,9 @@ class MaterialMenuSheet(
                     setText(item.textRes)
                 }
                 setCompoundDrawablesRelativeWithIntrinsicBounds(item.drawable, 0, 0, 0)
+                if (item.drawable == 0) {
+                    textSize = 14f
+                }
                 if (item.id == selectedId) {
                     currentIndex = index
                     setTextColorRes(R.color.colorAccent)
@@ -103,23 +111,27 @@ class MaterialMenuSheet(
             }
         }
 
-        var isNotElevated = false
+        var isElevated = false
         var elevationAnimator: ValueAnimator? = null
+
+        fun elevate(elevate: Boolean) {
+            elevationAnimator?.cancel()
+            isElevated = elevate
+            elevationAnimator?.cancel()
+            elevationAnimator = ObjectAnimator.ofFloat(
+                title_layout, "elevation", title_layout.elevation, if (elevate) 10f else 0f
+            )
+            ObjectAnimator.ofFloat(
+                bottom_divider, "alpha", bottom_divider.alpha, if (elevate) 0f else 1f
+            ).start()
+            elevationAnimator?.start()
+        }
+        elevate(menu_scroll_view.canScrollVertically(-1))
         if (title_layout.isVisible()) {
             menu_scroll_view.setOnScrollChangeListener { _: View?, _: Int, _: Int, _: Int, _: Int ->
-                val atTop = !menu_scroll_view.canScrollVertically(-1)
-                if (atTop != isNotElevated) {
-                    elevationAnimator?.cancel()
-                    isNotElevated = atTop
-                    elevationAnimator?.cancel()
-                    elevationAnimator = ObjectAnimator.ofFloat(
-                        title_layout,
-                        "elevation",
-                        title_layout.elevation,
-                        if (atTop) 0f else 10f.dpToPx
-                    )
-                    elevationAnimator?.duration = 100
-                    elevationAnimator?.start()
+                val notAtTop = menu_scroll_view.canScrollVertically(-1)
+                if (notAtTop != isElevated) {
+                    elevate(notAtTop)
                 }
             }
         }
