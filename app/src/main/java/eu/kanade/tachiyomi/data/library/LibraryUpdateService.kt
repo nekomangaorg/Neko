@@ -133,6 +133,11 @@ class LibraryUpdateService(
         const val KEY_TARGET = "target"
 
         /**
+         * Key for list of manga to be updated. (For dynamic categories)
+         */
+        const val KEY_MANGAS = "mangas"
+
+        /**
          * Returns the status of the service.
          *
          * @return true if the service is running, false otherwise.
@@ -149,12 +154,21 @@ class LibraryUpdateService(
          * @param category a specific category to update, or null for global update.
          * @param target defines what should be updated.
          */
-        fun start(context: Context, category: Category? = null, target: Target = Target.CHAPTERS) {
+        fun start(
+            context: Context,
+            category: Category? = null,
+            target: Target = Target.CHAPTERS,
+            mangaToUse: List<LibraryManga>? = null
+        ) {
             if (!isRunning()) {
                 val intent = Intent(context, LibraryUpdateService::class.java).apply {
                     putExtra(KEY_TARGET, target)
                     category?.id?.let { id ->
                         putExtra(KEY_CATEGORY, id)
+                        if (mangaToUse != null) putExtra(
+                            KEY_MANGAS,
+                            mangaToUse.mapNotNull { it.id }.toLongArray()
+                        )
                     }
                 }
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
@@ -164,7 +178,8 @@ class LibraryUpdateService(
                 }
             } else {
                 if (target == Target.CHAPTERS) category?.id?.let {
-                    instance?.addCategory(it)
+                    if (mangaToUse != null) instance?.addMangaToQueue(it, mangaToUse)
+                    else instance?.addCategory(it)
                 }
             }
         }
@@ -225,6 +240,13 @@ class LibraryUpdateService(
                 mangaToUpdateMap[it.key] = (list + it.value)
             }
         }
+    }
+
+    private fun addMangaToQueue(categoryId: Int, manga: List<LibraryManga>) {
+        val selectedScheme = preferences.libraryUpdatePrioritization().getOrDefault()
+        val mangas = manga.sortedWith(rankingScheme[selectedScheme])
+        categoryIds.add(categoryId)
+        addManga(mangas)
     }
 
     private fun addCategory(categoryId: Int) {
@@ -322,7 +344,18 @@ class LibraryUpdateService(
         instance = this
 
         val selectedScheme = preferences.libraryUpdatePrioritization().getOrDefault()
-        val mangaList = getMangaToUpdate(intent, target).sortedWith(rankingScheme[selectedScheme])
+        val savedMangasList = intent.getLongArrayExtra(KEY_MANGAS)?.asList()
+
+        val mangaList = (if (savedMangasList != null) {
+            val mangas = db.getLibraryMangas().executeAsBlocking().filter {
+                it.id in savedMangasList
+            }.distinctBy { it.id }
+            val categoryId = intent.getIntExtra(KEY_CATEGORY, -1)
+            if (categoryId > -1) categoryIds.add(categoryId)
+            mangas
+        } else {
+            getMangaToUpdate(intent, target)
+        }).sortedWith(rankingScheme[selectedScheme])
         // Update favorite manga. Destroy service when completed or in case of an error.
         launchTarget(target, mangaList, startId)
         return START_REDELIVER_INTENT

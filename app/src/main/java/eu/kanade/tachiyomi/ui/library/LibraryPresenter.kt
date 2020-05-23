@@ -152,6 +152,11 @@ class LibraryPresenter(
         )
     }
 
+    fun getMangaInCategories(catId: Int?): List<LibraryManga>? {
+        catId ?: return null
+        return allLibraryItems.filter { it.header.category.id == catId }.map { it.manga }
+    }
+
     private suspend fun sectionLibrary(items: List<LibraryItem>, freshStart: Boolean = false) {
         libraryItems = items
         val showAll = showAllCategories || !libraryIsGrouped ||
