@@ -27,11 +27,11 @@ import eu.kanade.tachiyomi.source.model.Filter
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
+import eu.kanade.tachiyomi.ui.follows.FollowsController
 import eu.kanade.tachiyomi.ui.library.AddToLibraryCategoriesDialog
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.RootSearchInterface
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
-import eu.kanade.tachiyomi.ui.similar.FollowsController
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.system.connectivityManager
 import eu.kanade.tachiyomi.util.system.dpToPx
@@ -304,6 +304,7 @@ open class BrowseSourceController(bundle: Bundle) :
             val newFilters = presenter.source.getFilterList()
             presenter.sourceFilters = newFilters
             sheet.setFilters(presenter.filterItems)
+            sheet.dismiss()
         }
 
         sheet.onRandomClicked = {
@@ -312,6 +313,7 @@ open class BrowseSourceController(bundle: Bundle) :
             adapter?.clear()
             presenter.searchRandomManga()
         }
+
         sheet.onFollowsClicked = {
             sheet.dismiss()
             adapter?.clear()

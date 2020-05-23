@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.manga.similar
+package eu.kanade.tachiyomi.ui.follows
 
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.MangasPage

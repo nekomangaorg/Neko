@@ -48,7 +48,7 @@ class SourceSearchSheet(activity: Activity) :
     var onResetClicked = {}
 
     var onRandomClicked = {}
-
+    
     var onFollowsClicked = {}
 
     init {
@@ -59,6 +59,7 @@ class SourceSearchSheet(activity: Activity) :
         reset_btn.setOnClickListener { onResetClicked() }
         follows_btn.setOnClickListener { onFollowsClicked() }
         random_manga_btn.setOnClickListener { onRandomClicked() }
+
 
         sheetBehavior = BottomSheetBehavior.from(view.parent as ViewGroup)
         sheetBehavior.skipCollapsed = true

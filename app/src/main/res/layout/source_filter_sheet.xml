@@ -63,7 +63,7 @@
             android:layout_width="wrap_content"
             android:textColor="?attr/tabBarIconColor"
             android:layout_height="match_parent"
-            android:text="@string/search"
+            android:text="@string/apply"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -95,6 +95,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/follows_btn"

@@ -1,10 +1,9 @@
-package eu.kanade.tachiyomi.ui.similar
+package eu.kanade.tachiyomi.ui.follows
 
 import android.os.Bundle
 import android.view.Menu
 import android.view.View
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.ui.manga.similar.FollowsPresenter
 import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseSourcePresenter
 import eu.kanade.tachiyomi.util.view.gone

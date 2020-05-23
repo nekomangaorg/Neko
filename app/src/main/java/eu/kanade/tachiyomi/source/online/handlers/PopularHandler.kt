@@ -17,6 +17,9 @@ import org.jsoup.nodes.Element
 import rx.Observable
 import uy.kohesive.injekt.injectLazy
 
+/**
+ * Returns the latest manga from the updates url since it actually respects the users settings
+ */
 class PopularHandler(val client: OkHttpClient, private val headers: Headers) {
 
     private val preferences: PreferencesHelper by injectLazy()
@@ -30,7 +33,7 @@ class PopularHandler(val client: OkHttpClient, private val headers: Headers) {
     }
 
     private fun popularMangaRequest(page: Int): Request {
-        return GET("${MdUtil.baseUrl}/titles/0/$page/", headers, CacheControl.FORCE_NETWORK)
+        return GET("${MdUtil.baseUrl}/updates/$page/", headers, CacheControl.FORCE_NETWORK)
     }
 
     private fun popularMangaParse(response: Response): MangasPage {
@@ -61,7 +64,7 @@ class PopularHandler(val client: OkHttpClient, private val headers: Headers) {
     }
 
     companion object {
-        const val popularMangaSelector = "div.manga-entry"
+        const val popularMangaSelector = "tr a.manga_title"
         const val popularMangaNextPageSelector = ".pagination li:not(.disabled) span[title*=last page]:not(disabled)"
     }
 }

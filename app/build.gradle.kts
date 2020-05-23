@@ -169,8 +169,8 @@ dependencies {
     implementation("org.jsoup:jsoup:1.13.1")
 
 //Icons
-    implementation("com.mikepenz:iconics-core:5.0.3@aar")
-    implementation("com.mikepenz:iconics-views:5.0.3@aar")
+    implementation("com.mikepenz:iconics-core:5.0.3")
+    implementation("com.mikepenz:iconics-views:5.0.3")
     implementation("com.mikepenz:community-material-typeface:5.0.45.1-kotlin@aar")
     implementation("com.mikepenz:material-design-icons-dx-typeface:5.0.1.0-kotlin@aar")
 

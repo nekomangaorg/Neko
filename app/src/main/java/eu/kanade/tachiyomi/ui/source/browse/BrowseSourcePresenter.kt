@@ -158,7 +158,7 @@ open class BrowseSourcePresenter(
         pagerSubscription?.let { remove(it) }
         pagerSubscription = pager.results()
             .observeOn(Schedulers.io())
-            .map { it.first to it.second.map { networkToLocalManga(it, sourceId, isFollows) } }
+            .map { it.first to it.second.map { networkToLocalManga(it, sourceId) } }
             .doOnNext { initializeMangas(it.second) }
             .map { it.first to it.second.map { BrowseSourceItem(it, browseAsList, sourceListType, isFollows) } }
             .observeOn(AndroidSchedulers.mainThread())
@@ -232,7 +232,7 @@ open class BrowseSourcePresenter(
      * @param sManga the manga from the source.
      * @return a manga from the database.
      */
-    private fun networkToLocalManga(sManga: SManga, sourceId: Long, isFollows: Boolean = false): Manga {
+    private fun networkToLocalManga(sManga: SManga, sourceId: Long): Manga {
         var localManga = db.getManga(sManga.url, sourceId).executeAsBlocking()
         if (localManga == null || isFollows) {
             val newManga = Manga.create(sManga.url, sManga.title, sourceId)
