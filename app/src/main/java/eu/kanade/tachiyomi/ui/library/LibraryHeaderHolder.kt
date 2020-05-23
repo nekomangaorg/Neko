@@ -42,10 +42,11 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
         category_header_layout.setOnClickListener { toggleCategory() }
         updateButton.setOnClickListener { addCategoryToUpdate() }
         sectionText.setOnLongClickListener {
+            val category = (adapter.getItem(adapterPosition) as? LibraryHeaderItem)?.category
             adapter.libraryListener.manageCategory(adapterPosition)
-            true
+            category?.isDynamic == false
         }
-        sectionText.setOnClickListener { adapter.libraryListener.openCategoriesBackdrop() }
+        sectionText.setOnClickListener { toggleCategory() }
         sortText.setOnClickListener { it.post { showCatSortOptions() } }
         checkboxImage.setOnClickListener { selectAll() }
         updateButton.drawable.mutate()
@@ -84,6 +85,14 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
             }).dpToPx
         }
         val category = item.category
+
+        if (category.isDynamic) {
+            category_header_layout.background = null
+            sectionText.background = null
+        } else {
+            category_header_layout.setBackgroundResource(R.drawable.list_item_selector)
+            sectionText.setBackgroundResource(R.drawable.square_ripple)
+        }
 
         if (category.isAlone) sectionText.text = ""
         else sectionText.text = category.name
