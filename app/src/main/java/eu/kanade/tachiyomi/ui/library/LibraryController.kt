@@ -476,7 +476,19 @@ class LibraryController(
             true
         }
         category_button.setOnClickListener {
-            showCategories(!recycler_cover.isClickable)
+            val items = presenter.categories.map { category ->
+                MaterialMenuSheet.MenuSheetItem(category.order, text = category.name)
+            }
+            MaterialMenuSheet(
+                activity!!,
+                items,
+                it.context.getString(R.string.jump_to_category),
+                activeCategory,
+                300.dpToPx
+            ) { _, item ->
+                scrollToHeader(item)
+                true
+            }.show()
         }
 
         category_button.setOnLongClickListener {

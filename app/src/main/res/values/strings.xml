@@ -90,6 +90,7 @@
     <string name="category_with_name_exists">A category with that name already exists!</string>
     <string name="category_deleted">Category deleted</string>
     <string name="long_press_category">Press and hold to edit a category</string>
+    <string name="jump_to_category">Jump to category</string>
 
     <!-- Updates -->
     <string name="update">Update</string>
