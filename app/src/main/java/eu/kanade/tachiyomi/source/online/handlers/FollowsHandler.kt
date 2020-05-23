@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
 import eu.kanade.tachiyomi.data.database.models.Track
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.POST
@@ -27,7 +28,7 @@ import rx.Observable
 import timber.log.Timber
 import kotlin.math.floor
 
-class FollowsHandler(val client: OkHttpClient, val headers: Headers) {
+class FollowsHandler(val client: OkHttpClient, val headers: Headers, val preferences: PreferencesHelper) {
 
     /**
      * fetch follows by page
@@ -51,8 +52,9 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers) {
         if (followsPageResult.result.isEmpty()) {
             return MangasPage(mutableListOf(), false)
         }
+        val lowQualityCovers = preferences.lowQualityCovers()
         val follows = followsPageResult.result.map {
-            followFromElement(it)
+            followFromElement(it, lowQualityCovers)
         }
 
         return MangasPage(follows, true)
@@ -95,12 +97,12 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers) {
     /**
      * Parse result element  to manga
      */
-    private fun followFromElement(result: Result): SManga {
+    private fun followFromElement(result: Result, lowQualityCovers: Boolean): SManga {
         val manga = SManga.create()
         manga.title = MdUtil.cleanString(result.title)
         manga.url = "/manga/${result.manga_id}/"
         manga.follow_status = FollowStatus.fromInt(result.follow_type)
-        manga.initialized = false
+        manga.thumbnail_url = MdUtil.formThumbUrl(manga.url, lowQualityCovers)
         return manga
     }
 

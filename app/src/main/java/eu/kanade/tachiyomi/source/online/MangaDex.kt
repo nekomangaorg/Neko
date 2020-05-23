@@ -76,7 +76,7 @@ open class MangaDex() : HttpSource() {
     }
 
     override suspend fun updateFollowStatus(mangaID: String, followStatus: FollowStatus): Boolean {
-        return FollowsHandler(clientBuilder(), headers).updateFollowStatus(mangaID, followStatus)
+        return FollowsHandler(clientBuilder(), headers, preferences).updateFollowStatus(mangaID, followStatus)
     }
 
     fun fetchRandomMangaId(): Observable<String> {
@@ -100,7 +100,7 @@ open class MangaDex() : HttpSource() {
     }
 
     override fun fetchFollows(page: Int): Observable<MangasPage> {
-        return FollowsHandler(clientBuilder(), headers).fetchFollows(page)
+        return FollowsHandler(clientBuilder(), headers, preferences).fetchFollows(page)
     }
 
     override fun fetchMangaDetailsObservable(manga: SManga): Observable<SManga> {
@@ -139,22 +139,22 @@ open class MangaDex() : HttpSource() {
     }
 
     override suspend fun fetchAllFollows(): List<SManga> {
-        return FollowsHandler(clientBuilder(), headers).fetchAllFollows()
+        return FollowsHandler(clientBuilder(), headers, preferences).fetchAllFollows()
     }
 
     override suspend fun updateReadingProgress(track: Track): Boolean {
-        return FollowsHandler(clientBuilder(), headers).updateReadingProgress(track)
+        return FollowsHandler(clientBuilder(), headers, preferences).updateReadingProgress(track)
     }
 
     override suspend fun fetchTrackingInfo(url: String): Track {
         if (!isLogged()) {
             throw Exception("Not Logged in")
         }
-        return FollowsHandler(clientBuilder(), headers).fetchTrackingInfo(url)
+        return FollowsHandler(clientBuilder(), headers, preferences).fetchTrackingInfo(url)
     }
 
-    override fun fetchMangaSimilarObservable(page: Int, manga: Manga): Observable<MangasPage> {
-        return SimilarHandler().fetchSimilar(manga)
+    override fun fetchMangaSimilarObservable(manga: Manga): Observable<MangasPage> {
+        return SimilarHandler(preferences).fetchSimilar(manga)
     }
 
     override fun isLogged(): Boolean {

@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.source.online.handlers
 
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
@@ -10,7 +11,7 @@ import rx.Observable
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class SimilarHandler {
+class SimilarHandler(val preferences: PreferencesHelper) {
 
     /**
      * fetch our similar mangas
@@ -19,6 +20,8 @@ class SimilarHandler {
 
         // Parse the Mangadex id from the URL
         val mangaid = MdUtil.getMangaId(manga.url).toLong()
+
+        val lowQualityCovers = preferences.lowQualityCovers()
 
         // Get our current database
         val db = Injekt.get<DatabaseHelper>()
@@ -40,7 +43,7 @@ class SimilarHandler {
             val id = similarMangaIds.getLong(i)
             matchedManga.title = similarMangaTitles.getString(i)
             matchedManga.url = "/manga/$id/"
-            matchedManga.initialized = false
+            manga.thumbnail_url = MdUtil.formThumbUrl(manga.url, lowQualityCovers)
             similarMangas.add(matchedManga)
         }
 

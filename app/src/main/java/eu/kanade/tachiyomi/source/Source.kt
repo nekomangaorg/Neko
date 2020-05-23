@@ -95,7 +95,7 @@ interface Source {
      * @param page the page number to retrieve.
      * @param manga the manga to update.
      */
-    fun fetchMangaSimilarObservable(page: Int, manga: Manga): Observable<MangasPage>
+    fun fetchMangaSimilarObservable(manga: Manga): Observable<MangasPage>
 
     /**
      * Returns a updated details for a manga and the chapter list

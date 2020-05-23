@@ -15,7 +15,7 @@ import rx.schedulers.Schedulers
 class SimilarPager(val manga: Manga, val source: Source) : Pager() {
 
     override fun requestNext(): Observable<MangasPage> {
-        return source.fetchMangaSimilarObservable(currentPage, manga)
+        return source.fetchMangaSimilarObservable(manga)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .doOnNext {
