@@ -55,7 +55,8 @@ class ReaderPresenter(
     private val sourceManager: SourceManager = Injekt.get(),
     private val downloadManager: DownloadManager = Injekt.get(),
     private val coverCache: CoverCache = Injekt.get(),
-    private val preferences: PreferencesHelper = Injekt.get()
+    private val preferences: PreferencesHelper = Injekt.get(),
+    private val readerChapterFilter: ReaderChapterFilter = Injekt.get()
 ) : BasePresenter<ReaderActivity>() {
 
     /**
@@ -100,60 +101,14 @@ class ReaderPresenter(
         val selectedChapter = dbChapters.find { it.id == chapterId }
             ?: error("Requested chapter of id $chapterId not found in chapter list")
 
-        val chaptersForReader =
-            when (preferences.skipRead() || preferences.skipFiltered()) {
-                true -> getFilteredChapters(dbChapters, manga, selectedChapter)
-                false -> dbChapters
-            }
+        val chaptersForReader = readerChapterFilter
+            .filterChapter(dbChapters, manga, chapterId, selectedChapter)
 
         when (manga.sorting) {
             Manga.SORTING_SOURCE -> ChapterLoadBySource().get(chaptersForReader)
             Manga.SORTING_NUMBER -> ChapterLoadByNumber().get(chaptersForReader, selectedChapter)
             else -> error("Unknown sorting method")
         }.map(::ReaderChapter)
-    }
-
-    private fun getFilteredChapters(
-        dbChapters: List<Chapter>,
-        manga: Manga,
-        selectedChapter: Chapter?
-    ): List<Chapter> {
-        var filteredChapters = dbChapters
-        if (preferences.skipRead()) {
-            filteredChapters = filteredChapters.filter { !it.read }
-            val find = filteredChapters.find { it.id == chapterId }
-            if (find == null) {
-                val mutableList = filteredChapters.toMutableList()
-                selectedChapter?.let { mutableList.add(it) }
-                filteredChapters = mutableList.toList()
-            }
-        }
-        if (preferences.skipFiltered()) {
-            val readEnabled = manga.readFilter == Manga.SHOW_READ
-            val unreadEnabled = manga.readFilter == Manga.SHOW_UNREAD
-            val downloadEnabled = manga.downloadedFilter == Manga.SHOW_DOWNLOADED
-            val bookmarkEnabled = manga.bookmarkedFilter == Manga.SHOW_BOOKMARKED
-            val listValidScanlators = MdUtil.getScanlators(manga.scanlator_filter.orEmpty())
-            val scanlatorEnabled = listValidScanlators.isNotEmpty()
-
-            filteredChapters = filteredChapters.filter {
-                // return if showAll
-                if (!readEnabled && !unreadEnabled && !downloadEnabled && !bookmarkEnabled && listValidScanlators.isEmpty()) {
-                    return@filter true
-                }
-                if (readEnabled && it.read.not() ||
-                    (unreadEnabled && it.read) ||
-                    (bookmarkEnabled && it.bookmark.not()) ||
-                    (downloadEnabled && !downloadManager.isChapterDownloaded(it, manga, true)) ||
-                    (scanlatorEnabled && it.scanlatorList().none { group -> listValidScanlators.contains(group) })
-                ) {
-                    return@filter false
-                }
-
-                return@filter true
-            }
-        }
-        return filteredChapters
     }
 
     var chapterItems = emptyList<ReaderChapterItem>()
@@ -231,29 +186,26 @@ class ReaderPresenter(
     suspend fun getChapters(): List<ReaderChapterItem> {
         val manga = manga ?: return emptyList()
         chapterItems = withContext(Dispatchers.IO) {
-
-            val dbChapters = db.getChapters(manga).executeAsBlocking().map { ChapterItem(it, manga) }
-            val chaptersForReader =
-                when (preferences.skipRead() || preferences.skipFiltered()) {
-                    true -> getFilteredChapters(dbChapters, manga, null)
-                    false -> dbChapters
+            val dbChapters = db.getChapters(manga).executeAsBlocking()
+            val list = readerChapterFilter
+                .filterChapter(dbChapters, manga, -1L, null)
+                .sortedBy {
+                    when (manga.sorting) {
+                        Manga.SORTING_NUMBER -> it.chapter_number
+                        else -> it.source_order.toFloat()
+                    }
+                }.map {
+                    ReaderChapterItem(
+                    it, manga, it.id == getCurrentChapter()?.chapter?.id ?: chapterId
+                    )
                 }
-
-            val list = chaptersForReader.sortedBy {
-                when (manga.sorting) {
-                    Manga.SORTING_NUMBER -> it.chapter_number
-                    else -> it.source_order.toFloat()
-                }
-            }.map {
-                ReaderChapterItem(
-                    it, manga, it.id ==
-                        getCurrentChapter()?.chapter?.id ?: chapterId
-                )
-            }
-            if (!manga.sortDescending(preferences.chaptersDescAsDefault().getOrDefault()))
+            if (!manga.sortDescending(preferences.chaptersDescAsDefault().getOrDefault())) {
                 list.reversed()
-            else list
+            } else {
+                list
+            }
         }
+
         return chapterItems
     }
 
@@ -688,7 +640,7 @@ class ReaderPresenter(
         }
         return true
     }
-    
+
     /**
      * Enqueues this [chapter] to be deleted when [deletePendingChapters] is called. The download
      * manager handles persisting it across process deaths.
