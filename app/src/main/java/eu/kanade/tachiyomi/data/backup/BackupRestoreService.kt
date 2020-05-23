@@ -324,7 +324,7 @@ class BackupRestoreService : Service() {
                     errors.add("${manga.title} - ${e.message}")
                 }
             } else {
-                errors.add("${manga.title} - ${service?.name} not logged in")
+                errors.add("${manga.title} - ${getString(R.string.not_logged_into_, service?.name)}")
                 val notLoggedIn = getString(R.string.not_logged_into_, service?.name)
                 trackingErrors.add(notLoggedIn)
             }
