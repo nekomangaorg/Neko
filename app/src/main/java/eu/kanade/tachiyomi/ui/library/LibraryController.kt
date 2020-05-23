@@ -804,7 +804,11 @@ class LibraryController(
         recycler_cover.isFocusable = show
         val full = category_recycler.height.toFloat() + recycler.paddingTop
         val translateY = if (show) full else 0f
-        recycler.animate().translationY(translateY).start()
+        recycler.animate().translationY(translateY).apply {
+            setUpdateListener {
+                activity?.appbar?.y = 0f
+            }
+        }.start()
         category_hopper_frame.animate().translationY(translateY).start()
         recycler_shadow.animate().translationY(translateY - 8.dpToPx).start()
         recycler_cover.animate().translationY(translateY).start()
