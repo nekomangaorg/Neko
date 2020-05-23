@@ -12,7 +12,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.potentialAltThumbnail
 import eu.kanade.tachiyomi.ui.library.LibraryCategoryAdapter
 import eu.kanade.tachiyomi.util.view.gone
-import eu.kanade.tachiyomi.widget.CoverViewTarget
+import eu.kanade.tachiyomi.data.image.coil.CoverViewTarget
 import kotlinx.android.synthetic.main.manga_grid_item.*
 import kotlinx.android.synthetic.main.unread_download_badge.*
 
