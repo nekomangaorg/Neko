@@ -16,6 +16,7 @@ import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.icon
+import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
@@ -182,14 +183,10 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
             }
             val sortingMode = category.sortingMode()
             val sheet = MaterialMenuSheet(
-                activity,
-                items,
-                activity.getString(R.string.sort_by),
-                sortingMode
+                activity, items, activity.getString(R.string.sort_by), sortingMode
             ) { sheet, item ->
                 onCatSortClicked(category, item)
-                val nCategory =
-                    (adapter.getItem(adapterPosition) as? LibraryHeaderItem)?.category
+                val nCategory = (adapter.getItem(adapterPosition) as? LibraryHeaderItem)?.category
                 val isAscending = nCategory?.isAscending() ?: false
                 val drawableRes = getSortRes(item, isAscending)
                 sheet.setDrawable(item, drawableRes)

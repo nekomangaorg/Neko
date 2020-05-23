@@ -67,7 +67,7 @@
             android:clipToPadding="false"
             tools:listitem="@layout/extension_card_header" />
 
-        <eu.kanade.tachiyomi.ui.library.MaterialFastScroll
+        <eu.kanade.tachiyomi.ui.base.MaterialFastScroll
             android:id="@+id/fast_scroller"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

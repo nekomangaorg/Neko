@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.library
+package eu.kanade.tachiyomi.ui.base
 
 import android.content.Context
 import android.util.AttributeSet

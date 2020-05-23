@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.library
+package eu.kanade.tachiyomi.ui.base
 
 import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
