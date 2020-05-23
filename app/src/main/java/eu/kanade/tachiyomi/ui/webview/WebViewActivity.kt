@@ -17,12 +17,16 @@ import android.webkit.WebView
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.graphics.ColorUtils
+import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
+import com.mikepenz.iconics.utils.colorInt
+import com.mikepenz.iconics.utils.inflateWithIconics
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
 import eu.kanade.tachiyomi.util.system.WebViewClientCompat
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.system.iconicsDrawableMedium
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.toast
@@ -98,8 +102,12 @@ class WebViewActivity : BaseActivity() {
             refreshPage()
         }
 
-        window.statusBarColor = ColorUtils.setAlphaComponent(getResourceColor(R.attr
-            .colorSecondary), 255)
+        window.statusBarColor = ColorUtils.setAlphaComponent(
+            getResourceColor(
+                R.attr
+                    .colorSecondary
+            ), 255
+        )
 
         content.setOnApplyWindowInsetsListener { v, insets ->
             // if pure white theme on a device that does not support dark status bar
@@ -113,13 +121,16 @@ class WebViewActivity : BaseActivity() {
             }
             // if the android q+ device has gesture nav, transparent nav bar
             else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
-                (v.rootWindowInsets.systemWindowInsetBottom != v.rootWindowInsets.tappableElementInsets.bottom)) {
+                (v.rootWindowInsets.systemWindowInsetBottom != v.rootWindowInsets.tappableElementInsets.bottom)
+            ) {
                 getColor(android.R.color.transparent)
             } else {
                 getResourceColor(android.R.attr.colorBackground)
             }
-            v.setPadding(insets.systemWindowInsetLeft, insets.systemWindowInsetTop,
-                insets.systemWindowInsetRight, 0)
+            v.setPadding(
+                insets.systemWindowInsetLeft, insets.systemWindowInsetTop,
+                insets.systemWindowInsetRight, 0
+            )
             if (Build.VERSION.SDK_INT >= 26 && !isInNightMode()) {
                 content.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
             }
@@ -183,6 +194,7 @@ class WebViewActivity : BaseActivity() {
             webview.restoreState(bundle)
         }
     }
+
     private fun refreshPage() {
         swipe_refresh.isRefreshing = true
         webview.reload()
@@ -191,8 +203,12 @@ class WebViewActivity : BaseActivity() {
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         val lightMode = !isInNightMode()
-        window.statusBarColor = ColorUtils.setAlphaComponent(getResourceColor(R.attr
-            .colorSecondary), 255)
+        window.statusBarColor = ColorUtils.setAlphaComponent(
+            getResourceColor(
+                R.attr
+                    .colorSecondary
+            ), 255
+        )
         toolbar.setBackgroundColor(getResourceColor(R.attr.colorSecondary))
         toolbar.popupTheme = if (lightMode) R.style.ThemeOverlay_MaterialComponents else R
             .style.ThemeOverlay_MaterialComponents_Dark
@@ -208,11 +224,13 @@ class WebViewActivity : BaseActivity() {
             window.navigationBarColor = getResourceColor(android.R.attr.colorBackground)
 
         web_linear_layout.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
-                    View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
-                    View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
+            View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && lightMode) {
-            web_linear_layout.systemUiVisibility = web_linear_layout.systemUiVisibility.or(View
-                .SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR)
+            web_linear_layout.systemUiVisibility = web_linear_layout.systemUiVisibility.or(
+                View
+                    .SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+            )
         }
         val typedValue = TypedValue()
         theme.resolveAttribute(android.R.attr.windowLightStatusBar, typedValue, true)
@@ -230,7 +248,7 @@ class WebViewActivity : BaseActivity() {
      * Called when the options menu of the toolbar is being created. It adds our custom menu.
      */
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.webview, menu)
+        menuInflater.inflateWithIconics(this, R.menu.webview, menu)
         return true
     }
 
@@ -244,8 +262,13 @@ class WebViewActivity : BaseActivity() {
         forwardItem?.isVisible = hasHistory
         val tintColor = getResourceColor(R.attr.actionBarTintColor)
         val translucentWhite = ColorUtils.setAlphaComponent(tintColor, 127)
-        backItem.icon?.setTint(if (webview.canGoBack()) tintColor else translucentWhite)
-        forwardItem?.icon?.setTint(if (webview.canGoForward()) tintColor else translucentWhite)
+
+        val backwardColor = if (webview.canGoBack()) tintColor else translucentWhite
+        backItem?.icon = this.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_arrow_back).apply { colorInt = backwardColor }
+
+        val forwardColor = if (webview.canGoForward()) tintColor else translucentWhite
+        forwardItem?.icon = this.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_arrow_forward).apply { colorInt = backwardColor }
+
         return super.onPrepareOptionsMenu(menu)
     }
 

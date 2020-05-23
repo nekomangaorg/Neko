@@ -27,7 +27,8 @@ import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.snackbar.Snackbar
-import com.mikepenz.iconics.utils.IconicsMenuInflaterUtil
+import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
+import com.mikepenz.iconics.utils.inflateWithIconics
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -53,6 +54,7 @@ import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getBottomGestureInsets
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.hasSideNavBar
+import eu.kanade.tachiyomi.util.system.iconicsDrawableMedium
 import eu.kanade.tachiyomi.util.system.isBottomTappable
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
@@ -259,7 +261,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
      * Called when the options menu of the toolbar is being created. It adds our custom menu.
      */
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        IconicsMenuInflaterUtil.inflate(menuInflater, this, R.menu.reader, menu)
+        menuInflater.inflateWithIconics(this, R.menu.reader, menu)
         return true
     }
 
@@ -323,6 +325,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
         appbar.setBackgroundColor(primaryColor)
         window.statusBarColor = Color.TRANSPARENT
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        toolbar.setNavigationIcon(this.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_arrow_back))
         toolbar.setNavigationOnClickListener {
             onBackPressed()
         }
@@ -724,7 +727,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
             }
         }
     }
-    
+
     /**
      * Class that handles the user preferences of the reader.
      */
