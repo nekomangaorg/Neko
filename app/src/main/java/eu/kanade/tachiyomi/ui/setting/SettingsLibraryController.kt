@@ -19,7 +19,7 @@ class SettingsLibraryController : SettingsController() {
     override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
         titleRes = R.string.library
         preferenceCategory {
-            titleRes = R.string.display
+            titleRes = R.string.general
             switchPreference {
                 key = Keys.removeArticles
                 titleRes = R.string.sort_by_ignoring_articles
