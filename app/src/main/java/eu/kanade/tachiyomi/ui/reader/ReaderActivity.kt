@@ -37,7 +37,10 @@ import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.activity.BaseRxActivity
-import eu.kanade.tachiyomi.ui.library.MaterialMenuSheet
+import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
+import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.AddToLibraryFirst
+import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.Error
+import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.Success
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
@@ -574,9 +577,6 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
      */
     fun onPageLongTap(page: ReaderPage) {
         val items = listOf(
-            MaterialMenuSheet.MenuSheetItem(
-                0, R.drawable.ic_photo_24dp, R.string.set_as_cover
-            ),
             MaterialMenuSheet.MenuSheetItem(
                 0, R.drawable.ic_share_24dp, R.string.share
             ),
