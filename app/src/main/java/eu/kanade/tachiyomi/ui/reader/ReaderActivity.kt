@@ -389,7 +389,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
         if (visible) {
             snackbar?.dismiss()
             systemUi?.show()
-            appbar.visible()
+            reader_menu.visible()
 
             if (chapters_bottom_sheet.sheetBehavior.isExpanded()) {
                 chapters_bottom_sheet.sheetBehavior?.isHideable = false
@@ -416,14 +416,14 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
                 val toolbarAnimation = AnimationUtils.loadAnimation(this, R.anim.exit_to_top)
                 toolbarAnimation.setAnimationListener(object : SimpleAnimationListener() {
                     override fun onAnimationEnd(animation: Animation) {
-                        appbar.gone()
+                        reader_menu.gone()
                     }
                 })
                 appbar.startAnimation(toolbarAnimation)
                 BottomSheetBehavior.from(chapters_bottom_sheet).isHideable = true
                 chapters_bottom_sheet.sheetBehavior?.hide()
             } else {
-                appbar.gone()
+                reader_menu.gone()
             }
         }
         menuStickyVisible = false
@@ -713,7 +713,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
                     }
                 }
                 if (sheetManageNavColor) window.navigationBarColor = getResourceColor(R.attr.colorSecondary)
-                appbar.visible()
+                reader_menu.visible()
                 val toolbarAnimation = AnimationUtils.loadAnimation(this, R.anim.enter_from_top)
                 toolbarAnimation.setAnimationListener(object : SimpleAnimationListener() {
                     override fun onAnimationStart(animation: Animation) {
