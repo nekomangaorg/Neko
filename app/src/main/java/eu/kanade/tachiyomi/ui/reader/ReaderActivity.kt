@@ -630,9 +630,15 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
      * Called from the presenter when a page is ready to be shared. It shows Android's default
      * sharing tool.
      */
-    fun onShareImageResult(file: File) {
+    fun onShareImageResult(file: File, page: ReaderPage) {
+        val manga = presenter.manga ?: return
+        val chapter = page.chapter.chapter
+
+        val text = "${manga.title}: ${chapter.name}, ${getString(R.string.page_, page.number)}"
+
         val stream = file.getUriCompat(this)
         val intent = Intent(Intent.ACTION_SEND).apply {
+            putExtra(Intent.EXTRA_TEXT, text)
             putExtra(Intent.EXTRA_STREAM, stream)
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
             clipData = ClipData.newRawUri(null, stream)

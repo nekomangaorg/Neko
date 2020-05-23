@@ -266,7 +266,7 @@
     <string name="set_as_cover">Set as cover</string>
     <string name="set_as_default_for_all">Set as default for all</string>
     <string name="cover_updated">Cover updated</string>
-    <string name="page_">Page: %1$d</string>
+    <string name="page_">Page %1$d</string>
     <string name="next_chapter_not_found">Next chapter not found</string>
     <string name="decode_image_error">The image could not be decoded</string>
     <string name="use_image_as_cover">Use this image as cover art?</string>
