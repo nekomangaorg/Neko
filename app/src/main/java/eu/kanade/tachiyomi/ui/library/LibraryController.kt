@@ -600,26 +600,6 @@ class LibraryController(
         return adapter.headerItems.firstOrNull() as? LibraryHeaderItem
     }
 
-    private fun getCategoryOrder(): Int? {
-        val position =
-            (recycler.layoutManager as LinearLayoutManager).findFirstCompletelyVisibleItemPosition()
-        var order = when (val item = adapter.getItem(position)) {
-            is LibraryHeaderItem -> item.category.order
-            is LibraryItem -> item.header.category.order
-            else -> null
-        }
-        if (order == null) {
-            val fPosition =
-                (recycler.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
-            order = when (val item = adapter.getItem(fPosition)) {
-                is LibraryHeaderItem -> item.category.order
-                is LibraryItem -> item.header.category.order
-                else -> null
-            }
-        }
-        return order
-    }
-
     override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
         return inflater.inflate(R.layout.library_list_controller, container, false)
     }
@@ -1154,8 +1134,6 @@ class LibraryController(
             }
         }
     }
-
-    override fun openCategoriesBackdrop() = showCategories(true)
 
     override fun updateCategory(position: Int): Boolean {
         val category = (adapter.getItem(position) as? LibraryHeaderItem)?.category ?: return false
