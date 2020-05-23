@@ -141,7 +141,8 @@ interface Manga : SManga {
             sourceName.contains("dilbert", true) ||
             sourceName.contains("cyanide", true) ||
             sourceName.contains("xkcd", true) ||
-            sourceName.contains("tapas", true)
+            sourceName.contains("tapas", true) ||
+            sourceName.contains("ComicExtra", true)
     }
 
     fun key(): String {
