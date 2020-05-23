@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.extension
 
-import android.app.Application
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
@@ -73,7 +72,7 @@ class ExtensionBottomPresenter(
 
     @Synchronized
     private fun toItems(tuple: ExtensionTuple): List<ExtensionItem> {
-        val context = Injekt.get<Application>()
+        val context = bottomSheet.context
         val activeLangs = preferences.enabledLanguages().getOrDefault()
 
         val (installed, untrusted, available) = tuple

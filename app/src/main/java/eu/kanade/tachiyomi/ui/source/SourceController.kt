@@ -90,8 +90,8 @@ class SourceController : NucleusController<SourcePresenter>(),
 
     override fun getTitle(): String? {
         return if (showingExtensions)
-            applicationContext?.getString(R.string.extensions)
-        else applicationContext?.getString(R.string.sources)
+            view?.context?.getString(R.string.extensions)
+        else view?.context?.getString(R.string.sources)
     }
 
     override fun createPresenter(): SourcePresenter {
@@ -304,7 +304,7 @@ class SourceController : NucleusController<SourcePresenter>(),
             val searchView = searchItem.actionView as SearchView
 
             // Change hint to show global search.
-            searchView.queryHint = applicationContext?.getString(R.string.search_extensions)
+            searchView.queryHint = view?.context?.getString(R.string.search_extensions)
 
             // Create query listener which opens the global search view.
             setOnQueryTextChangeListener(searchView) {
@@ -321,7 +321,7 @@ class SourceController : NucleusController<SourcePresenter>(),
             val searchView = searchItem.actionView as SearchView
 
             // Change hint to show global search.
-            searchView.queryHint = applicationContext?.getString(R.string.global_search)
+            searchView.queryHint = view?.context?.getString(R.string.global_search)
 
             // Create query listener which opens the global search view.
             setOnQueryTextChangeListener(searchView, true) {

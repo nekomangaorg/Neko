@@ -107,7 +107,7 @@ class MigrationProcessHolder(
                     } else {
                         migration_manga_card_to.progress.gone()
                         migration_manga_card_to.title.text =
-                            view.context.applicationContext.getString(R.string.no_alternatives_found)
+                            view.context.getString(R.string.no_alternatives_found)
                     }
                     migration_menu.visible()
                     skip_manga.gone()
