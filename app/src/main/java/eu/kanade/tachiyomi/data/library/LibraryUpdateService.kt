@@ -117,96 +117,118 @@ class LibraryUpdateService(
         TRACKING // Tracking metadata
     }
 
-    companion object {
+    /**
+     * Method called when the service receives an intent.
+     *
+     * @param intent the start intent from.
+     * @param flags the flags of the command.
+     * @param startId the start id of this command.
+     * @return the start value of the command.
+     */
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if (intent == null) return START_NOT_STICKY
+        val target = intent.getSerializableExtra(KEY_TARGET) as? Target ?: return START_NOT_STICKY
 
-        /**
-         * Key for category to update.
-         */
-        const val KEY_CATEGORY = "category"
+        instance = this
 
-        fun categoryInQueue(id: Int?) = instance?.categoryIds?.contains(id) ?: false
-        private var instance: LibraryUpdateService? = null
+        val selectedScheme = preferences.libraryUpdatePrioritization().getOrDefault()
+        val savedMangasList = intent.getLongArrayExtra(KEY_MANGAS)?.asList()
 
-        /**
-         * Key that defines what should be updated.
-         */
-        const val KEY_TARGET = "target"
+        val mangaList = (if (savedMangasList != null) {
+            val mangas = db.getLibraryMangas().executeAsBlocking().filter {
+                it.id in savedMangasList
+            }.distinctBy { it.id }
+            val categoryId = intent.getIntExtra(KEY_CATEGORY, -1)
+            if (categoryId > -1) categoryIds.add(categoryId)
+            mangas
+        } else {
+            getMangaToUpdate(intent, target)
+        }).sortedWith(rankingScheme[selectedScheme])
+        // Update favorite manga. Destroy service when completed or in case of an error.
+        launchTarget(target, mangaList, startId)
+        return START_REDELIVER_INTENT
+    }
 
-        /**
-         * Key for list of manga to be updated. (For dynamic categories)
-         */
-        const val KEY_MANGAS = "mangas"
+    /**
+     * Method called when the service is created. It injects dagger dependencies and acquire
+     * the wake lock.
+     */
+    override fun onCreate() {
+        super.onCreate()
+        notifier = LibraryUpdateNotifier(this)
+        wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).newWakeLock(
+            PowerManager.PARTIAL_WAKE_LOCK, "LibraryUpdateService:WakeLock"
+        )
+        wakeLock.acquire(TimeUnit.MINUTES.toMillis(30))
+        startForeground(Notifications.ID_LIBRARY_PROGRESS, notifier.progressNotificationBuilder.build())
+    }
 
-        /**
-         * Returns the status of the service.
-         *
-         * @return true if the service is running, false otherwise.
-         */
-        fun isRunning(): Boolean {
-            return instance != null
+    /**
+     * Method called when the service is destroyed. It cancels jobs and releases the wake lock.
+     */
+    override fun onDestroy() {
+        job?.cancel()
+        if (instance == this)
+            instance = null
+        if (wakeLock.isHeld) {
+            wakeLock.release()
         }
+        listener?.onUpdateManga(LibraryManga())
+        super.onDestroy()
+    }
 
-        /**
-         * Starts the service. It will be started only if there isn't another instance already
-         * running.
-         *
-         * @param context the application context.
-         * @param category a specific category to update, or null for global update.
-         * @param target defines what should be updated.
-         */
-        fun start(
-            context: Context,
-            category: Category? = null,
-            target: Target = Target.CHAPTERS,
-            mangaToUse: List<LibraryManga>? = null
-        ) {
-            if (!isRunning()) {
-                val intent = Intent(context, LibraryUpdateService::class.java).apply {
-                    putExtra(KEY_TARGET, target)
-                    category?.id?.let { id ->
-                        putExtra(KEY_CATEGORY, id)
-                        if (mangaToUse != null) putExtra(
-                            KEY_MANGAS,
-                            mangaToUse.mapNotNull { it.id }.toLongArray()
-                        )
-                    }
-                }
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-                    context.startService(intent)
-                } else {
-                    context.startForegroundService(intent)
-                }
+    private fun getMangaToUpdate(intent: Intent, target: Target): List<LibraryManga> {
+        val categoryId = intent.getIntExtra(KEY_CATEGORY, -1)
+        return getMangaToUpdate(categoryId, target)
+    }
+
+    /**
+     * Returns the list of manga to be updated.
+     *
+     * @param intent the update intent.
+     * @param target the target to update.
+     * @return a list of manga to update
+     */
+    private fun getMangaToUpdate(categoryId: Int, target: Target): List<LibraryManga> {
+        var listToUpdate = if (categoryId != -1) {
+            categoryIds.add(categoryId)
+            db.getLibraryMangas().executeAsBlocking().filter { it.category == categoryId }
+        } else {
+            val categoriesToUpdate =
+                preferences.libraryUpdateCategories().getOrDefault().map(String::toInt)
+            if (categoriesToUpdate.isNotEmpty()) {
+                categoryIds.addAll(categoriesToUpdate)
+                db.getLibraryMangas().executeAsBlocking()
+                    .filter { it.category in categoriesToUpdate }.distinctBy { it.id }
             } else {
-                if (target == Target.CHAPTERS) category?.id?.let {
-                    if (mangaToUse != null) instance?.addMangaToQueue(it, mangaToUse)
-                    else instance?.addCategory(it)
-                }
+                categoryIds.addAll(db.getCategories().executeAsBlocking().mapNotNull { it.id } + 0)
+                db.getLibraryMangas().executeAsBlocking().distinctBy { it.id }
+            }
+        }
+        if (target == Target.CHAPTERS && preferences.updateOnlyNonCompleted()) {
+            listToUpdate = listToUpdate.filter { it.status != SManga.COMPLETED }
+        }
+
+        return listToUpdate
+    }
+
+    private fun launchTarget(target: Target, mangaToAdd: List<LibraryManga>, startId: Int) {
+        val handler = CoroutineExceptionHandler { _, exception ->
+            Timber.e(exception)
+            stopSelf(startId)
+        }
+        if (target == Target.CHAPTERS) {
+            listener?.onUpdateManga(LibraryManga())
+        }
+        job = GlobalScope.launch(handler) {
+            when (target) {
+                Target.CHAPTERS -> updateChaptersJob(mangaToAdd)
+                Target.DETAILS -> updateDetails(mangaToAdd)
+                else -> updateTrackings(mangaToAdd)
             }
         }
 
-        /**
-         * Stops the service.
-         *
-         * @param context the application context.
-         */
-        fun stop(context: Context) {
-            instance?.job?.cancel()
-            GlobalScope.launch {
-                instance?.jobCount?.set(0)
-                instance?.finishUpdates()
-            }
-            context.stopService(Intent(context, LibraryUpdateService::class.java))
-        }
-
-        private var listener: LibraryServiceListener? = null
-
-        fun setListener(listener: LibraryServiceListener) {
-            this.listener = listener
-        }
-
-        fun removeListener(listener: LibraryServiceListener) {
-            if (this.listener == listener) this.listener = null
-        }
+        job?.invokeOnCompletion { stopSelf(startId) }
     }
 
     private fun addManga(mangaToAdd: List<LibraryManga>) {
@@ -260,124 +282,10 @@ class LibraryUpdateService(
     }
 
     /**
-     * Returns the list of manga to be updated.
-     *
-     * @param intent the update intent.
-     * @param target the target to update.
-     * @return a list of manga to update
-     */
-    private fun getMangaToUpdate(categoryId: Int, target: Target): List<LibraryManga> {
-        var listToUpdate = if (categoryId != -1) {
-            categoryIds.add(categoryId)
-            db.getLibraryMangas().executeAsBlocking().filter { it.category == categoryId }
-        } else {
-            val categoriesToUpdate =
-                preferences.libraryUpdateCategories().getOrDefault().map(String::toInt)
-            if (categoriesToUpdate.isNotEmpty()) {
-                categoryIds.addAll(categoriesToUpdate)
-                db.getLibraryMangas().executeAsBlocking()
-                    .filter { it.category in categoriesToUpdate }.distinctBy { it.id }
-            } else {
-                categoryIds.addAll(db.getCategories().executeAsBlocking().mapNotNull { it.id } + 0)
-                db.getLibraryMangas().executeAsBlocking().distinctBy { it.id }
-            }
-        }
-        if (target == Target.CHAPTERS && preferences.updateOnlyNonCompleted()) {
-            listToUpdate = listToUpdate.filter { it.status != SManga.COMPLETED }
-        }
-
-        return listToUpdate
-    }
-
-    private fun getMangaToUpdate(intent: Intent, target: Target): List<LibraryManga> {
-        val categoryId = intent.getIntExtra(KEY_CATEGORY, -1)
-        return getMangaToUpdate(categoryId, target)
-    }
-
-    /**
-     * Method called when the service is created. It injects dagger dependencies and acquire
-     * the wake lock.
-     */
-    override fun onCreate() {
-        super.onCreate()
-        notifier = LibraryUpdateNotifier(this)
-        wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).newWakeLock(
-            PowerManager.PARTIAL_WAKE_LOCK, "LibraryUpdateService:WakeLock"
-        )
-        wakeLock.acquire(TimeUnit.MINUTES.toMillis(30))
-        startForeground(Notifications.ID_LIBRARY_PROGRESS, notifier.progressNotificationBuilder.build())
-    }
-
-    /**
-     * Method called when the service is destroyed. It cancels jobs and releases the wake lock.
-     */
-    override fun onDestroy() {
-        job?.cancel()
-        if (instance == this)
-            instance = null
-        if (wakeLock.isHeld) {
-            wakeLock.release()
-        }
-        listener?.onUpdateManga(LibraryManga())
-        super.onDestroy()
-    }
-
-    /**
      * This method needs to be implemented, but it's not used/needed.
      */
     override fun onBind(intent: Intent): IBinder? {
         return null
-    }
-
-    /**
-     * Method called when the service receives an intent.
-     *
-     * @param intent the start intent from.
-     * @param flags the flags of the command.
-     * @param startId the start id of this command.
-     * @return the start value of the command.
-     */
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (intent == null) return START_NOT_STICKY
-        val target = intent.getSerializableExtra(KEY_TARGET) as? Target ?: return START_NOT_STICKY
-
-        instance = this
-
-        val selectedScheme = preferences.libraryUpdatePrioritization().getOrDefault()
-        val savedMangasList = intent.getLongArrayExtra(KEY_MANGAS)?.asList()
-
-        val mangaList = (if (savedMangasList != null) {
-            val mangas = db.getLibraryMangas().executeAsBlocking().filter {
-                it.id in savedMangasList
-            }.distinctBy { it.id }
-            val categoryId = intent.getIntExtra(KEY_CATEGORY, -1)
-            if (categoryId > -1) categoryIds.add(categoryId)
-            mangas
-        } else {
-            getMangaToUpdate(intent, target)
-        }).sortedWith(rankingScheme[selectedScheme])
-        // Update favorite manga. Destroy service when completed or in case of an error.
-        launchTarget(target, mangaList, startId)
-        return START_REDELIVER_INTENT
-    }
-
-    private fun launchTarget(target: Target, mangaToAdd: List<LibraryManga>, startId: Int) {
-        val handler = CoroutineExceptionHandler { _, exception ->
-            Timber.e(exception)
-            stopSelf(startId)
-        }
-        if (target == Target.CHAPTERS) {
-            listener?.onUpdateManga(LibraryManga())
-        }
-        job = GlobalScope.launch(handler) {
-            when (target) {
-                Target.CHAPTERS -> updateChaptersJob(mangaToAdd)
-                Target.DETAILS -> updateDetails(mangaToAdd)
-                else -> updateTrackings(mangaToAdd)
-            }
-        }
-
-        job?.invokeOnCompletion { stopSelf(startId) }
     }
 
     private suspend fun updateChaptersJob(mangaToAdd: List<LibraryManga>) {
@@ -613,6 +521,98 @@ class LibraryUpdateService(
             // Empty
         }
         return File("")
+    }
+
+    companion object {
+
+        /**
+         * Key for category to update.
+         */
+        const val KEY_CATEGORY = "category"
+
+        fun categoryInQueue(id: Int?) = instance?.categoryIds?.contains(id) ?: false
+        private var instance: LibraryUpdateService? = null
+
+        /**
+         * Key that defines what should be updated.
+         */
+        const val KEY_TARGET = "target"
+
+        /**
+         * Key for list of manga to be updated. (For dynamic categories)
+         */
+        const val KEY_MANGAS = "mangas"
+
+        /**
+         * Returns the status of the service.
+         *
+         * @return true if the service is running, false otherwise.
+         */
+        fun isRunning(): Boolean {
+            return instance != null
+        }
+
+        /**
+         * Starts the service. It will be started only if there isn't another instance already
+         * running.
+         *
+         * @param context the application context.
+         * @param category a specific category to update, or null for global update.
+         * @param target defines what should be updated.
+         */
+        fun start(
+            context: Context,
+            category: Category? = null,
+            target: Target = Target.CHAPTERS,
+            mangaToUse: List<LibraryManga>? = null
+        ) {
+            if (!isRunning()) {
+                val intent = Intent(context, LibraryUpdateService::class.java).apply {
+                    putExtra(KEY_TARGET, target)
+                    category?.id?.let { id ->
+                        putExtra(KEY_CATEGORY, id)
+                        if (mangaToUse != null) putExtra(
+                            KEY_MANGAS,
+                            mangaToUse.mapNotNull { it.id }.toLongArray()
+                        )
+                    }
+                }
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                    context.startService(intent)
+                } else {
+                    context.startForegroundService(intent)
+                }
+            } else {
+                if (target == Target.CHAPTERS) category?.id?.let {
+                    if (mangaToUse != null) instance?.addMangaToQueue(it, mangaToUse)
+                    else instance?.addCategory(it)
+                }
+            }
+        }
+
+        /**
+         * Stops the service.
+         *
+         * @param context the application context.
+         */
+        fun stop(context: Context) {
+            instance?.job?.cancel()
+            GlobalScope.launch {
+                instance?.jobCount?.set(0)
+                instance?.finishUpdates()
+            }
+            context.stopService(Intent(context, LibraryUpdateService::class.java))
+        }
+
+        private var listener: LibraryServiceListener? = null
+
+        fun setListener(listener: LibraryServiceListener) {
+            this.listener = listener
+        }
+
+        fun removeListener(listener: LibraryServiceListener) {
+            if (this.listener == listener) this.listener = null
+        }
     }
 }
 
