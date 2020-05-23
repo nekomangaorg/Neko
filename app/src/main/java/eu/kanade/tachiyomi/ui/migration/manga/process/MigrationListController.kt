@@ -38,7 +38,7 @@ import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
-import eu.kanade.tachiyomi.util.view.applyWindowInsetsForController
+import eu.kanade.tachiyomi.util.view.liftAppbarWith
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import kotlinx.android.synthetic.main.migration_list_controller.*
 import kotlinx.coroutines.CancellationException
@@ -95,7 +95,7 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
     override fun onViewCreated(view: View) {
 
         super.onViewCreated(view)
-        view.applyWindowInsetsForController()
+        liftAppbarWith(recycler)
         setTitle()
         val config = this.config ?: return
 

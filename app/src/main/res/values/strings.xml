@@ -423,7 +423,7 @@
     <string name="add_tracking">Add tracking</string>
 
     <!-- Migration -->
-    <string name="select_target_sources">Select target sources</string>
+    <string name="select_sources">Select sources</string>
     <string name="source_migration">Source migration</string>
     <string name="migration">Migration</string>
     <string name="skip_pre_migration">Skip pre-migration</string>
@@ -738,6 +738,7 @@
     <string name="save">Save</string>
     <string name="search">Search</string>
     <string name="select_all">Select all</string>
+    <string name="select_none">Select none</string>
     <string name="share">Share</string>
     <string name="sort">Sort</string>
     <string name="sort_and_filter">Sort &amp; Filter</string>
