@@ -6,11 +6,8 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.content.ContextCompat
-import androidx.core.graphics.ColorUtils
 import coil.api.loadAny
 import coil.request.CachePolicy
-import com.google.android.material.button.MaterialButton
 import com.mikepenz.iconics.typeface.IIcon
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
@@ -21,6 +18,7 @@ import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.iconicsDrawable
+import eu.kanade.tachiyomi.util.system.iconicsDrawableLarge
 import eu.kanade.tachiyomi.util.system.isLTR
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.isVisible
@@ -170,7 +168,7 @@ class MangaHeaderHolder(
                 item.manga.favorite -> CommunityMaterial.Icon2.cmd_heart as IIcon
                 else -> CommunityMaterial.Icon2.cmd_heart_outline as IIcon
             }
-            setImageDrawable(context.iconicsDrawable(icon))
+            setImageDrawable(context.iconicsDrawableLarge(icon))
         }
         true_backdrop.setBackgroundColor(
             adapter.delegate.coverColor()
@@ -185,14 +183,14 @@ class MangaHeaderHolder(
 
         with(similar_button) {
             visibleIf(presenter.similarEnabled())
-            setImageDrawable(context.iconicsDrawable(MaterialDesignDx.Icon.gmf_account_tree))
+            setImageDrawable(context.iconicsDrawableLarge(MaterialDesignDx.Icon.gmf_account_tree))
         }
 
         with(webview_button) {
-            setImageDrawable(context.iconicsDrawable(CommunityMaterial.Icon2.cmd_web))
+            setImageDrawable(context.iconicsDrawableLarge(CommunityMaterial.Icon2.cmd_web))
         }
         with(share_button) {
-            setImageDrawable(context.iconicsDrawable(MaterialDesignDx.Icon.gmf_share))
+            setImageDrawable(context.iconicsDrawableLarge(MaterialDesignDx.Icon.gmf_share))
         }
 
         with(start_reading_button) {

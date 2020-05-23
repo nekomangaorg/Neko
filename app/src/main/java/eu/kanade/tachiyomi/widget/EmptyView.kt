@@ -9,7 +9,7 @@ import com.google.android.material.button.MaterialButton
 import com.mikepenz.iconics.typeface.IIcon
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.system.getResourceColor
-import eu.kanade.tachiyomi.util.system.iconicsDrawable
+import eu.kanade.tachiyomi.util.system.iconicsDrawableLarge
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.setVectorCompat
 import eu.kanade.tachiyomi.util.view.visible
@@ -72,7 +72,7 @@ class EmptyView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
      */
     fun show(icon: IIcon, message: String, actions: List<Action>? = null) {
         image_view.setImageDrawable(
-            context.iconicsDrawable(
+            context.iconicsDrawableLarge(
                 icon, color = android.R.attr.textColorHint
             )
         )

@@ -125,7 +125,17 @@ fun Context.contextCompatDrawable(@DrawableRes resource: Int): Drawable? {
  * @param resource the attribute.
  */
 @SuppressLint("ResourceType")
-fun Context.iconicsDrawable(icon: IIcon, size: Int = 24, color: Int = R.attr.colorAccent, attributeColor: Boolean = true): IconicsDrawable {
+fun Context.iconicsDrawableLarge(icon: IIcon, size: Int = 24, color: Int = R.attr.colorAccent, attributeColor: Boolean = true): IconicsDrawable {
+    return this.iconicsDrawable(icon, size, color, attributeColor)
+}
+
+@SuppressLint("ResourceType")
+fun Context.iconicsDrawableMedium(icon: IIcon, size: Int = 18, color: Int = R.attr.actionBarTintColor, attributeColor: Boolean = true): IconicsDrawable {
+    return this.iconicsDrawable(icon, size, color, attributeColor)
+}
+
+@SuppressLint("ResourceType")
+fun Context.iconicsDrawable(icon: IIcon, size: Int = 15, color: Int = R.attr.colorAccent, attributeColor: Boolean = true): IconicsDrawable {
     return IconicsDrawable(this, icon).apply {
         sizeDp = size
         colorInt = when {
@@ -133,11 +143,6 @@ fun Context.iconicsDrawable(icon: IIcon, size: Int = 24, color: Int = R.attr.col
             else -> contextCompatColor(color)
         }
     }
-}
-
-@SuppressLint("ResourceType")
-fun Context.iconicsDrawableActionbar(icon: IIcon, size: Int = 17, color: Int = R.attr.actionBarTintColor, attributeColor: Boolean = true): IconicsDrawable {
-    return this.iconicsDrawable(icon, size, color, attributeColor)
 }
 
 /**

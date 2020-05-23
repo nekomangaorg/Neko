@@ -60,7 +60,7 @@ import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
 import eu.kanade.tachiyomi.util.system.contextCompatDrawable
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.hasSideNavBar
-import eu.kanade.tachiyomi.util.system.iconicsDrawableActionbar
+import eu.kanade.tachiyomi.util.system.iconicsDrawableMedium
 import eu.kanade.tachiyomi.util.system.isBottomTappable
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
@@ -143,9 +143,9 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
 
         setSupportActionBar(toolbar)
 
-        backArrow = this.iconicsDrawableActionbar(MaterialDesignDx.Icon.gmf_arrow_back)
-        searchDrawable = this.iconicsDrawableActionbar(MaterialDesignDx.Icon.gmf_search)
-        dismissDrawable = this.iconicsDrawableActionbar(MaterialDesignDx.Icon.gmf_close)
+        backArrow = this.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_arrow_back)
+        searchDrawable = this.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_search)
+        dismissDrawable = this.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_close)
 
         var continueSwitchingTabs = false
         bottom_nav.getItemView(R.id.nav_library)?.setOnLongClickListener {

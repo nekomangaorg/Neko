@@ -19,7 +19,7 @@ import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.reader.ReaderPresenter
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
-import eu.kanade.tachiyomi.util.system.iconicsDrawableActionbar
+import eu.kanade.tachiyomi.util.system.iconicsDrawableMedium
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.expand
@@ -55,7 +55,7 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
             }
         }
 
-        comment_button.setImageDrawable(context.iconicsDrawableActionbar(MaterialDesignDx.Icon.gmf_comment))
+        comment_button.setImageDrawable(context.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_comment))
 
         comment_button.setOnClickListener {
             activity.openComments()

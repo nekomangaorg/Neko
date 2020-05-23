@@ -9,7 +9,7 @@ import com.mikepenz.iconics.typeface.library.community.material.CommunityMateria
 import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.util.system.iconicsDrawable
+import eu.kanade.tachiyomi.util.system.iconicsDrawableMedium
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 
@@ -25,53 +25,53 @@ class SettingsMainController : SettingsController() {
         val size = 18
 
         preference {
-            iconDrawable = context.iconicsDrawable(MaterialDesignDx.Icon.gmf_tune, size = size)
+            iconDrawable = context.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_tune)
             titleRes = R.string.general
             onClick { navigateTo(SettingsGeneralController()) }
         }
         preference {
-            iconDrawable = context.iconicsDrawable(MaterialDesignDx.Icon.gmf_book, size = size)
+            iconDrawable = context.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_book)
             titleRes = R.string.library
             onClick { navigateTo(SettingsLibraryController()) }
         }
         preference {
-            iconDrawable = context.iconicsDrawable(CommunityMaterial.Icon.cmd_google_chrome, size = size)
+            iconDrawable = context.iconicsDrawableMedium(CommunityMaterial.Icon.cmd_google_chrome)
             titleRes = R.string.site_specific_settings
             onClick { navigateTo(SettingsSiteController()) }
         }
         preference {
-            iconDrawable = context.iconicsDrawable(MaterialDesignDx.Icon.gmf_chrome_reader_mode, size = size)
+            iconDrawable = context.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_chrome_reader_mode)
             titleRes = R.string.reader
             onClick { navigateTo(SettingsReaderController()) }
         }
         preference {
-            iconDrawable = context.iconicsDrawable(MaterialDesignDx.Icon.gmf_file_download, size = size)
+            iconDrawable = context.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_file_download)
             titleRes = R.string.downloads
             onClick { navigateTo(SettingsDownloadController()) }
         }
 
         preference {
-            iconDrawable = context.iconicsDrawable(MaterialDesignDx.Icon.gmf_sync, size = size)
+            iconDrawable = context.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_sync)
             titleRes = R.string.tracking
             onClick { navigateTo(SettingsTrackingController()) }
         }
         preference {
-            iconDrawable = context.iconicsDrawable(CommunityMaterial.Icon.cmd_chart_histogram, size = size)
+            iconDrawable = context.iconicsDrawableMedium(CommunityMaterial.Icon.cmd_chart_histogram)
             titleRes = R.string.similar
             onClick { navigateTo(SettingsSimilarController()) }
         }
         preference {
-            iconDrawable = context.iconicsDrawable(MaterialDesignDx.Icon.gmf_backup, size = size)
+            iconDrawable = context.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_backup)
             titleRes = R.string.backup
             onClick { navigateTo(SettingsBackupController()) }
         }
         preference {
-            iconDrawable = context.iconicsDrawable(MaterialDesignDx.Icon.gmf_code, size = size)
+            iconDrawable = context.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_code)
             titleRes = R.string.advanced
             onClick { navigateTo(SettingsAdvancedController()) }
         }
         preference {
-            iconDrawable = context.iconicsDrawable(MaterialDesignDx.Icon.gmf_info, size = size)
+            iconDrawable = context.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_info)
             titleRes = R.string.about
             onClick { navigateTo(AboutController()) }
         }
