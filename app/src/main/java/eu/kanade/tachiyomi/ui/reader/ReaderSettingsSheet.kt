@@ -87,9 +87,9 @@ class ReaderSettingsSheet(private val activity: ReaderActivity) :
 
         initGeneralPreferences()
 
-        when (activity.viewer) {
+        when (val view = activity.viewer) {
             is PagerViewer -> initPagerPreferences()
-            is WebtoonViewer -> initWebtoonPreferences()
+            is WebtoonViewer -> initWebtoonPreferences(view.hasMargins)
         }
 
         setBottomEdge(constraint_layout, activity)
@@ -115,7 +115,7 @@ class ReaderSettingsSheet(private val activity: ReaderActivity) :
 
             val mangaViewer = activity.presenter.getMangaViewer()
             if (mangaViewer == ReaderActivity.WEBTOON || mangaViewer == ReaderActivity.VERTICAL_PLUS) {
-                initWebtoonPreferences()
+                initWebtoonPreferences(mangaViewer == ReaderActivity.VERTICAL_PLUS)
             } else {
                 initPagerPreferences()
             }
@@ -145,10 +145,10 @@ class ReaderSettingsSheet(private val activity: ReaderActivity) :
     /**
      * Init the preferences for the webtoon reader.
      */
-    private fun initWebtoonPreferences() {
+    private fun initWebtoonPreferences(hasMargins: Boolean) {
         webtoon_prefs_group.visible()
         pager_prefs_group.gone()
-        crop_borders_webtoon.bindToPreference(preferences.cropBordersWebtoon())
+        crop_borders_webtoon.bindToPreference(if (hasMargins) preferences.cropBorders() else preferences.cropBordersWebtoon())
         webtoon_side_padding.bindToIntPreference(preferences.webtoonSidePadding(), R.array.webtoon_side_padding_values)
         webtoon_disable_zoom.bindToPreference(preferences.webtoonDisableZoom())
     }
@@ -157,6 +157,7 @@ class ReaderSettingsSheet(private val activity: ReaderActivity) :
      * Binds a checkbox or switch view with a boolean preference.
      */
     private fun CompoundButton.bindToPreference(pref: Preference<Boolean>) {
+        setOnCheckedChangeListener(null)
         isChecked = pref.get()
         setOnCheckedChangeListener { _, isChecked -> pref.set(isChecked) }
     }

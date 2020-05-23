@@ -10,7 +10,10 @@ import uy.kohesive.injekt.api.get
  */
 class WebtoonConfig(preferences: PreferencesHelper = Injekt.get()) : ViewerConfig(preferences) {
 
-    var imageCropBorders = false
+    var webtoonCropBorders = false
+        private set
+
+    var verticalCropBorders = false
         private set
 
     var sidePadding = 0
@@ -22,7 +25,10 @@ class WebtoonConfig(preferences: PreferencesHelper = Injekt.get()) : ViewerConfi
 
     init {
         preferences.cropBordersWebtoon()
-            .register({ imageCropBorders = it }, { imagePropertyChangedListener?.invoke() })
+            .register({ webtoonCropBorders = it }, { imagePropertyChangedListener?.invoke() })
+
+        preferences.cropBorders()
+            .register({ verticalCropBorders = it }, { imagePropertyChangedListener?.invoke() })
 
         preferences.webtoonSidePadding()
             .register({ sidePadding = it }, { imagePropertyChangedListener?.invoke() })

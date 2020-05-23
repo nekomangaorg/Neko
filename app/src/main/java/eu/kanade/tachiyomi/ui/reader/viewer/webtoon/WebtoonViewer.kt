@@ -22,7 +22,7 @@ import kotlin.math.min
 /**
  * Implementation of a [BaseViewer] to display pages with a [RecyclerView].
  */
-class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = true) : BaseViewer {
+class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = false) : BaseViewer {
 
     /**
      * Recycler view used by this viewer.

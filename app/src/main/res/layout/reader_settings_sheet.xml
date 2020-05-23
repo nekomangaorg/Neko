@@ -280,7 +280,7 @@
                 android:layout_height="wrap_content"
                 android:visibility="gone"
                 app:constraint_referenced_ids="pager_prefs,scale_type,scale_type_text,
-                zoom_start_text,zoom_start,crop_borders,page_transitions,background_color,background_color_label"
+                zoom_start_text,zoom_start,crop_borders,page_transitions,background_color,background_color_label,background_color_label,background_color"
                 tools:visibility="visible" />
 
             <androidx.constraintlayout.widget.Group

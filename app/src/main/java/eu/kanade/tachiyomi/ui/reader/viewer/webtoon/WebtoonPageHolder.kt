@@ -127,7 +127,7 @@ class WebtoonPageHolder(
             marginEnd = margin.toInt()
             marginStart = margin.toInt()
         }
-        if (!viewer.isContinuous) {
+        if (viewer.hasMargins) {
             frame.updatePaddingRelative(bottom = 15.dpToPx)
         }
     }
@@ -359,7 +359,7 @@ class WebtoonPageHolder(
             setMinimumScaleType(SubsamplingScaleImageView.SCALE_TYPE_FIT_WIDTH)
             setMinimumDpi(90)
             setMinimumTileDpi(180)
-            setCropBorders(config.imageCropBorders)
+            setCropBorders(if (viewer.hasMargins) config.verticalCropBorders else config.webtoonCropBorders)
             setOnImageEventListener(object : SubsamplingScaleImageView.DefaultOnImageEventListener() {
                 override fun onReady() {
                     onImageDecoded()
