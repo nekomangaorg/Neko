@@ -724,21 +724,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
             }
         }
     }
-
-    fun openMangaInBrowser() {
-        val source = presenter.getSource() ?: return
-        val url = try {
-            source.mangaDetailsRequest(presenter.manga!!).url.toString()
-        } catch (e: Exception) {
-            return
-        }
-
-        val intent = WebViewActivity.newIntent(
-            applicationContext, source.id, url, presenter.manga!!.title
-        )
-        startActivity(intent)
-    }
-
+    
     /**
      * Class that handles the user preferences of the reader.
      */
