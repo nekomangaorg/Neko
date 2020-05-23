@@ -151,8 +151,10 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
 
                 val result = try {
                     CoroutineScope(manga.migrationJob).async {
-                        val validSources = sources.filter {
-                            it.id != mangaSource.id
+                        val validSources = if (sources.size == 1) {
+                            sources
+                        } else {
+                            sources.filter { it.id != mangaSource.id }
                         }
                         if (useSourceWithMost) {
                             val sourceSemaphore = Semaphore(3)
@@ -162,15 +164,14 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
                                 async {
                                     sourceSemaphore.withPermit {
                                         try {
-                                            /* val searchResult = if (useSmartSearch) {
-                                                 smartSearchEngine.smartSearch(source, mangaObj.title)
-                                             } else {*/
                                             val searchResult = smartSearchEngine.normalSearch(
                                                     source,
                                                     mangaObj.title
                                                 )
 
-                                            if (searchResult != null) {
+                                            if (searchResult != null &&
+                                                !(searchResult.url == mangaObj.url &&
+                                                    source.id == mangaObj.source)) {
                                                 val localManga =
                                                     smartSearchEngine.networkToLocalManga(
                                                         searchResult,
@@ -321,9 +322,18 @@ class MigrationListController(bundle: Bundle? = null) : BaseController(bundle),
         when (item.itemId) {
             R.id.action_search_manually -> {
                 launchUI {
-                    val manga = adapter?.getItem(position) ?: return@launchUI
+                    val manga = adapter?.getItem(position)?.manga?.manga() ?: return@launchUI
                     selectedPosition = position
-                    val searchController = SearchController(manga.manga.manga())
+                    val sources = preferences.migrationSources().get().split("/").mapNotNull {
+                        val value = it.toLongOrNull() ?: return@mapNotNull null
+                        sourceManager.get(value) as? CatalogueSource
+                    }
+                    val validSources = if (sources.size == 1) {
+                        sources
+                    } else {
+                        sources.filter { it.id != manga.source }
+                    }
+                    val searchController = SearchController(manga, validSources)
                     searchController.targetController = this@MigrationListController
                     router.pushController(searchController.withFadeTransaction())
                 }

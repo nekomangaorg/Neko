@@ -2,14 +2,15 @@ package eu.kanade.tachiyomi.ui.migration
 
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.CatalogueSource
-import eu.kanade.tachiyomi.ui.source.global_search.GlobalSearchMangaItem
 import eu.kanade.tachiyomi.ui.source.global_search.GlobalSearchItem
+import eu.kanade.tachiyomi.ui.source.global_search.GlobalSearchMangaItem
 import eu.kanade.tachiyomi.ui.source.global_search.GlobalSearchPresenter
 
 class SearchPresenter(
     initialQuery: String? = "",
-    private val manga: Manga
-) : GlobalSearchPresenter(initialQuery) {
+    private val manga: Manga,
+    sources: List<CatalogueSource>? = null
+) : GlobalSearchPresenter(initialQuery, sourcesToUse = sources) {
 
     override fun getEnabledSources(): List<CatalogueSource> {
         // Put the source of the selected manga at the top

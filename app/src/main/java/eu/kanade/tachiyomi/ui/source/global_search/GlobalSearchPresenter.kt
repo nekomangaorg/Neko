@@ -35,6 +35,7 @@ import uy.kohesive.injekt.injectLazy
 open class GlobalSearchPresenter(
     private val initialQuery: String? = "",
     private val initialExtensionFilter: String? = null,
+    private val sourcesToUse: List<CatalogueSource>? = null,
     val sourceManager: SourceManager = Injekt.get(),
     val db: DatabaseHelper = Injekt.get(),
     private val preferencesHelper: PreferencesHelper = Injekt.get()
@@ -117,6 +118,7 @@ open class GlobalSearchPresenter(
     }
 
     private fun getSourcesToQuery(): List<CatalogueSource> {
+        if (sourcesToUse != null) return sourcesToUse
         val filter = extensionFilter
         val enabledSources = getEnabledSources()
         if (filter.isNullOrEmpty()) {

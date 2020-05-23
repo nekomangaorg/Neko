@@ -13,17 +13,19 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
+import eu.kanade.tachiyomi.source.CatalogueSource
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
-import eu.kanade.tachiyomi.ui.source.global_search.GlobalSearchController
-import eu.kanade.tachiyomi.ui.source.global_search.GlobalSearchPresenter
 import eu.kanade.tachiyomi.ui.main.BottomNavBarInterface
 import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationListController
+import eu.kanade.tachiyomi.ui.source.global_search.GlobalSearchController
+import eu.kanade.tachiyomi.ui.source.global_search.GlobalSearchPresenter
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import uy.kohesive.injekt.injectLazy
 
 class SearchController(
-    private var manga: Manga? = null
+    private var manga: Manga? = null,
+    private var sources: List<CatalogueSource>? = null
 ) : GlobalSearchController(manga?.title), BottomNavBarInterface {
 
     private var newManga: Manga? = null
@@ -45,7 +47,7 @@ class SearchController(
     }
 
     override fun createPresenter(): GlobalSearchPresenter {
-        return SearchPresenter(initialQuery, manga!!)
+        return SearchPresenter(initialQuery, manga!!, sources = sources)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
