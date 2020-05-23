@@ -138,6 +138,13 @@ class LibraryUpdateService(
         }
     }
 
+    private fun addMangaToQueue(categoryId: Int, manga: List<LibraryManga>) {
+        val selectedScheme = preferences.libraryUpdatePrioritization().getOrDefault()
+        val mangas = manga.sortedWith(rankingScheme[selectedScheme])
+        categoryIds.add(categoryId)
+        addManga(mangas)
+    }
+
     private fun addCategory(categoryId: Int) {
         val selectedScheme = preferences.libraryUpdatePrioritization().getOrDefault()
         val mangas =
@@ -233,7 +240,18 @@ class LibraryUpdateService(
         instance = this
 
         val selectedScheme = preferences.libraryUpdatePrioritization().getOrDefault()
-        val mangaList = getMangaToUpdate(intent, target).sortedWith(rankingScheme[selectedScheme])
+        val savedMangasList = intent.getLongArrayExtra(KEY_MANGAS)?.asList()
+
+        val mangaList = (if (savedMangasList != null) {
+            val mangas = db.getLibraryMangas().executeAsBlocking().filter {
+                it.id in savedMangasList
+            }.distinctBy { it.id }
+            val categoryId = intent.getIntExtra(KEY_CATEGORY, -1)
+            if (categoryId > -1) categoryIds.add(categoryId)
+            mangas
+        } else {
+            getMangaToUpdate(intent, target)
+        }).sortedWith(rankingScheme[selectedScheme])
         // Update favorite manga. Destroy service when completed or in case of an error.
         launchTarget(target, mangaList, startId)
         return START_REDELIVER_INTENT

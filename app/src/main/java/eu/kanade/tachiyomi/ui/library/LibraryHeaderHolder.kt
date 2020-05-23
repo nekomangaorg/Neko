@@ -109,20 +109,20 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
                 catProgress.gone()
                 setSelection()
             }
-            category.isDynamic -> {
+            category.id ?: -1 < 0 -> {
                 expandImage.gone()
                 checkboxImage.gone()
                 catProgress.gone()
                 updateButton.gone()
             }
             LibraryUpdateService.categoryInQueue(category.id) -> {
-                expandImage.visibleIf(!adapter.isSingleCategory)
+                expandImage.visibleIf(!adapter.isSingleCategory && !category.isDynamic)
                 checkboxImage.gone()
                 catProgress.visible()
                 updateButton.invisible()
             }
             else -> {
-                expandImage.visibleIf(!adapter.isSingleCategory)
+                expandImage.visibleIf(!adapter.isSingleCategory && !category.isDynamic)
                 catProgress.gone()
                 checkboxImage.gone()
                 updateButton.visibleIf(!adapter.isSingleCategory)

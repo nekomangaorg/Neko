@@ -1122,8 +1122,8 @@ class LibraryController(
 
     override fun openCategoriesBackdrop() = showCategories(true)
 
-    override fun updateCategory(catId: Int): Boolean {
-        val category = (adapter.getItem(catId) as? LibraryHeaderItem)?.category ?: return false
+    override fun updateCategory(position: Int): Boolean {
+        val category = (adapter.getItem(position) as? LibraryHeaderItem)?.category ?: return false
         val inQueue = LibraryUpdateService.categoryInQueue(category.id)
         snack?.dismiss()
         snack = view?.snack(
@@ -1139,10 +1139,19 @@ class LibraryController(
             view.elevation = 15f.dpToPx
             setAction(R.string.cancel) {
                 LibraryUpdateService.stop(context)
-                Handler().post { NotificationReceiver.dismissNotification(context, Notifications.ID_LIBRARY_PROGRESS) }
+                Handler().post {
+                    NotificationReceiver.dismissNotification(
+                        context,
+                        Notifications.ID_LIBRARY_PROGRESS
+                    )
+                }
             }
         }
-        if (!inQueue) LibraryUpdateService.start(view!!.context, category)
+        if (!inQueue) LibraryUpdateService.start(
+            view!!.context, category, mangaToUse = if (category.isDynamic) {
+                presenter.getMangaInCategories(category.id)
+            } else null
+        )
         return true
     }
 
