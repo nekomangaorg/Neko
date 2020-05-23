@@ -517,7 +517,7 @@ class LibraryPresenter(
 
         this.allCategories = categories
 
-        hashCategories = HashMap(this.categories.mapNotNull {
+        hashCategories = HashMap(this.categories.map {
             it.id!! to it
         }.toMap())
 
@@ -539,7 +539,7 @@ class LibraryPresenter(
             }
         }
 
-        val items = libraryManga.mapNotNull { manga ->
+        val items = libraryManga.map { manga ->
             when (groupType) {
                 BY_TAG -> {
                     val tags = if (manga.genre.isNullOrBlank()) {
@@ -840,7 +840,7 @@ class LibraryPresenter(
     }
 
     fun toggleCategoryVisibility(categoryId: Int) {
-        if (categoryId <= -1 || categories.find { it.id == categoryId }?.isDynamic == true) return
+        if (categories.find { it.id == categoryId }?.isDynamic == true) return
         val categoriesHidden = preferences.collapsedCategories().getOrDefault().mapNotNull {
             it.toIntOrNull()
         }.toMutableSet()
@@ -854,7 +854,7 @@ class LibraryPresenter(
 
     fun toggleAllCategoryVisibility() {
         if (preferences.collapsedCategories().getOrDefault().isEmpty()) {
-            preferences.collapsedCategories().set(categories.map { it.id.toString() }.toMutableSet())
+            preferences.collapsedCategories().set(allCategories.map { it.id.toString() }.toMutableSet())
         } else {
             preferences.collapsedCategories().set(mutableSetOf())
         }
