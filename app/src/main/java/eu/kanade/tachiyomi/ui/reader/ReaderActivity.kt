@@ -35,8 +35,8 @@ import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.Page
-import eu.kanade.tachiyomi.ui.base.activity.BaseRxActivity
 import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
+import eu.kanade.tachiyomi.ui.base.activity.BaseRxActivity
 import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.AddToLibraryFirst
 import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.Error
 import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.Success
@@ -585,7 +585,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
         )
         MaterialMenuSheet(this, items) { _, item ->
             when (item) {
-                0 -> setAsCover(page)
+                0 -> showSetCoverPrompt(page)
                 1 -> shareImage(page)
                 2 -> saveImage(page)
             }
@@ -629,7 +629,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
         presenter.shareImage(page)
     }
 
-    fun setCover(page: ReaderPage) {
+    fun showSetCoverPrompt(page: ReaderPage) {
         if (page.status != Page.READY) return
 
         MaterialDialog(this)
