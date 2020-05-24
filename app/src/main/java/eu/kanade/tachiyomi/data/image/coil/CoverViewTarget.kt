@@ -5,6 +5,7 @@ import android.view.View
 import android.widget.ImageView
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import coil.Coil
+import coil.request.CachePolicy
 import coil.request.LoadRequest
 import coil.target.ImageViewTarget
 import eu.kanade.tachiyomi.R
@@ -29,7 +30,7 @@ class CoverViewTarget(
             vector?.setTint(view.context.getResourceColor(android.R.attr.textColorSecondary))
             view.setImageDrawable(vector)
         } else {
-            val request = LoadRequest.Builder(view.context).data(errorUrl)
+            val request = LoadRequest.Builder(view.context).data(errorUrl).memoryCachePolicy(CachePolicy.ENABLED)
                 .target(CoverViewTarget(view, progress)).build()
             Coil.imageLoader(view.context).execute(request)
         }
