@@ -67,6 +67,7 @@ class MdUtil {
             "[b][u]Arabic / العربية[/u][/b]",
             "[b][u]Vietnamese[/u][/b]",
             "[hr][b]Links:[/b]",
+            "[b]Link[/b]",
             "Links:",
             "[b]External Links :[/b]"
 
