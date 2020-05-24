@@ -52,7 +52,7 @@ class MaterialMenuSheet(
             window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
         }
         maxHeight?.let {
-            menu_scroll_view.maxHeight = it
+            menu_scroll_view.maxHeight = it + activity.window.decorView.rootWindowInsets.systemWindowInsetBottom
             menu_scroll_view.requestLayout()
         }
 
