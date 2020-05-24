@@ -49,6 +49,7 @@ class MdUtil {
             "[b][u]Polish / Polski[/u][/b]",
             "[b][u]Portuguese (BR) / Portugu&ecirc;s (BR)[/u][/b]",
             "[b]Portuguese (BR) / Portugu&ecirc;s (BR)[/b]",
+            "[u][b]Portuguese / Portugu&ecirc;s:[/b][/u]",
             "[b][u]Português / Portuguese[/u][/b]",
             "[b][u]Portuguese / Portugu[/u][/b]",
             "[b][u]Portuguese / Portugu&ecirc;s:[/u][/b]",
