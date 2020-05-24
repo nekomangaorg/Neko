@@ -43,7 +43,7 @@ class SimilarHandler(val preferences: PreferencesHelper) {
             val id = similarMangaIds.getLong(i)
             matchedManga.title = similarMangaTitles.getString(i)
             matchedManga.url = "/manga/$id/"
-            manga.thumbnail_url = MdUtil.formThumbUrl(manga.url, lowQualityCovers)
+            matchedManga.thumbnail_url = MdUtil.formThumbUrl(matchedManga.url, lowQualityCovers)
             similarMangas.add(matchedManga)
         }
 
