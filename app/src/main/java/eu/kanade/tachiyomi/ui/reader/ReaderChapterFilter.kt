@@ -6,25 +6,22 @@ import eu.kanade.tachiyomi.data.database.models.scanlatorList
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
 
 /**
  * This class filters chapters for the reader based on the user enabled preferences and filters
  */
 class ReaderChapterFilter(
-    private val downloadManager: DownloadManager = Injekt.get(),
-    private val preferences: PreferencesHelper = Injekt.get()
+    private val downloadManager: DownloadManager,
+    private val preferences: PreferencesHelper
 ) {
 
     fun filterChapter(
         dbChapters: List<Chapter>,
         manga: Manga,
-        chapterId: Long,
-        selectedChapter: Chapter?
+        selectedChapter: Chapter? = null
     ): List<Chapter> {
 
-        // if neither preference is enabled dont even filter
+        // if neither preference is enabled don't even filter
         if (!preferences.skipRead() && !preferences.skipFiltered()) {
             return dbChapters
         }
@@ -32,15 +29,6 @@ class ReaderChapterFilter(
         var filteredChapters = dbChapters
         if (preferences.skipRead()) {
             filteredChapters = filteredChapters.filter { !it.read }
-            // add the selected chapter to the list in case it was read and user clicked it
-            if (chapterId != -1L) {
-                val find = filteredChapters.find { it.id == chapterId }
-                if (find == null) {
-                    val mutableList = filteredChapters.toMutableList()
-                    selectedChapter?.let { mutableList.add(it) }
-                    filteredChapters = mutableList.toList()
-                }
-            }
         }
         if (preferences.skipFiltered()) {
             val readEnabled = manga.readFilter == Manga.SHOW_READ
@@ -64,6 +52,16 @@ class ReaderChapterFilter(
                     }
                     return@filter true
                 }
+            }
+        }
+
+        // add the selected chapter to the list in case it was filtered out
+        if (selectedChapter?.id != null) {
+            val find = filteredChapters.find { it.id == selectedChapter.id }
+            if (find == null) {
+                val mutableList = filteredChapters.toMutableList()
+                mutableList.add(selectedChapter)
+                filteredChapters = mutableList.toList()
             }
         }
         return filteredChapters
