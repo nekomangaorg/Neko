@@ -2,6 +2,29 @@
 <changelog bulletedList="true">
     <changelogversion
         changeDate=""
+        versionName="v2.0.11">
+        <changelogtext>Added ability to read and view other languages. Enable in site settings</changelogtext>
+        <changelogtext>Added option to enable data-save. Enable in site settings</changelogtext>
+        <changelogtext>Added option to open a chapter comments from inside reader</changelogtext>
+        <changelogtext>Compressed similar manga download to half the size when updating</changelogtext>
+        <changelogtext>Adjusted browse screen to show the latest and respect the users mangadex profile language setting</changelogtext>
+        <changelogtext>Adjust similar and follows pages to be faster</changelogtext>
+        <changelogtext>Adjust HQ covers to fail to the low quality thumb if the url guess was wrong</changelogtext>
+        <changelogtext>Adjust in reader chapters sheet to stand out more for current chapter</changelogtext>
+        <changelogtext>Adjust in reader chapters sheet to follow filters when skip filtered is enabled</changelogtext>
+        <changelogtext>Fixed a bug where side loaded downloads could be deleted on accident</changelogtext>
+        <changelogtext>general Neko bug fixes</changelogtext>
+        <changelogtext>Upstream changes that include..</changelogtext>
+        <changelogtext>Mini category sheet when you press the category button in hopper</changelogtext>
+        <changelogtext>Dynamic categories: Group your library by sources, tags, and more</changelogtext>
+        <changelogtext>Option to show list of errors when updating library</changelogtext>
+        <changelogtext>Manga details colored background is now consistent between light and dark themes</changelogtext>
+        <changelogtext>New framework used for caching library covers</changelogtext>
+        <changelogtext>Option to always show the category header</changelogtext>
+        <changelogtext>Upstream bug fixes</changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
         versionName="v2.0.10">
         <changelogtext>Fix chapter download url mistakenly marking chapters read</changelogtext>
     </changelogversion>
