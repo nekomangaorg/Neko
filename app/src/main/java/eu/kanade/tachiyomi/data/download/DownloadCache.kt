@@ -93,10 +93,12 @@ class DownloadCache(
 
         if (forceCheckFolder) {
 
-            val mangaDir = provider.findMangaDir(manga, sourceManager.getMangadex())
+            val source = sourceManager.get(manga.source) ?: return 0
+            val mangaDir = provider.findMangaDir(manga, source)
 
             if (mangaDir != null) {
-                val listFiles = mangaDir.listFiles { dir, filename -> !filename.endsWith(Downloader.TMP_DIR_SUFFIX) }
+                val listFiles =
+                    mangaDir.listFiles { _, filename -> !filename.endsWith(Downloader.TMP_DIR_SUFFIX) }
                 if (!listFiles.isNullOrEmpty()) {
                     return listFiles.size
                 }
