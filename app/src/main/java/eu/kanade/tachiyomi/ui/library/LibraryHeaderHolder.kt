@@ -95,7 +95,7 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
             sectionText.setBackgroundResource(R.drawable.square_ripple)
         }
 
-        if (category.isAlone) sectionText.text = ""
+        if (category.isAlone && !category.isDynamic) sectionText.text = ""
         else sectionText.text = category.name
         if (category.sourceId != null) {
             val icon = adapter.sourceManager.get(category.sourceId!!)?.icon()
