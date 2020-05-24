@@ -278,7 +278,7 @@ class PreferencesHelper(val context: Context) {
 
     fun showCategoryInTitle() = flowPrefs.getBoolean("category_in_title", false)
 
-    fun onlySearchPinned() = flowPrefs.getBoolean(Keys.onlySearchPinned, true)
+    fun onlySearchPinned() = flowPrefs.getBoolean(Keys.onlySearchPinned, false)
 
     fun showLibraryUpdateErrors() = prefs.getBoolean(Keys.showLibraryUpdateErrors, false)
 
