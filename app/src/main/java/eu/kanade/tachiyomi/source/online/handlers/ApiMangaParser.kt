@@ -106,7 +106,7 @@ class ApiMangaParser(val langs: List<String>) {
 
     private fun filterChapterForChecking(serializer: ApiMangaSerializer): List<Map.Entry<String, ChapterSerializer>> {
         serializer.chapter ?: return emptyList()
-        val filteredChapters = serializer.chapter.entries
+        return serializer.chapter.entries
             .filter { langs.contains(it.value.lang_code) }
             .filter {
                 it.value.chapter?.let { chapterNumber ->
@@ -117,7 +117,6 @@ class ApiMangaParser(val langs: List<String>) {
                 }
                 return@filter false
             }.distinctBy { it.value.chapter }
-        return filteredChapters
     }
 
     private fun isOneShot(chapter: ChapterSerializer, finalChapterNumber: String): Boolean {
