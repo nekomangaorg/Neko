@@ -2,8 +2,10 @@ package eu.kanade.tachiyomi.ui.reader
 
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.scanlatorList
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -45,6 +47,8 @@ class ReaderChapterFilter(
             val unreadEnabled = manga.readFilter == Manga.SHOW_UNREAD
             val downloadEnabled = manga.downloadedFilter == Manga.SHOW_DOWNLOADED
             val bookmarkEnabled = manga.bookmarkedFilter == Manga.SHOW_BOOKMARKED
+            val listValidScanlators = MdUtil.getScanlators(manga.scanlator_filter.orEmpty())
+            val scanlatorEnabled = listValidScanlators.isNotEmpty()
 
             // if none of the filters are enabled skip the filtering of them
             if (readEnabled || unreadEnabled || downloadEnabled || bookmarkEnabled) {
@@ -53,7 +57,8 @@ class ReaderChapterFilter(
                     if (readEnabled && it.read.not() ||
                         (unreadEnabled && it.read) ||
                         (bookmarkEnabled && it.bookmark.not()) ||
-                        (downloadEnabled && downloadManager.isChapterDownloaded(it, manga).not())
+                        (downloadEnabled && downloadManager.isChapterDownloaded(it, manga).not()) ||
+                        (scanlatorEnabled && it.scanlatorList().none { group -> listValidScanlators.contains(group) })
                     ) {
                         return@filter false
                     }
