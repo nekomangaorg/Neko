@@ -182,7 +182,6 @@
     <string name="only_update_ongoing">Nur fortlaufende Manga aktualisieren</string>
     <string name="sort_by_ignoring_articles">Englische Artikel beim Sortieren ignorieren</string>
     <string name="when_sorting_ignore_articles">Wenn alphabetisch sortiert wird, dann werden englische Artikel (a, an, the) am Anfang des Mangatitels ignoriert</string>
-    <string name="use_last_saved_migration_preferences">Zuletzt gespeicherte Vor-Migrierungseinstellungen und Quellen nutzen für Massenmigrierung</string>
     <string name="categories_to_include_in_global_update">Einzuschließende Kategorien in globaler Aktualisierung</string>
     <string name="include_in_global_update">In globaler Aktualisierung einschließen</string>
     <string name="auto_refresh_covers">Vorschaubilder automatisch aktualisieren</string>
@@ -237,8 +236,6 @@
 
     <!-- Extensions -->
     <string name="extensions">Erweiterungen</string>
-    <string name="extension_info">Erweiterungsinformationen</string>
-    <string name="notify_extension_updates">Benachrichtigen wenn eine Erweiterungsaktualisierung verfügbar ist</string>
     <string name="extension_info">Erweiterungsinfo</string>
     <string name="details">Details</string>
     <string name="obsolete">Veraltet</string>
@@ -702,7 +699,6 @@
     <string name="options">Optionen</string>
     <string name="pause">Pause</string>
     <string name="picture_saved">Bild gespeichert</string>
-    <string name="pin">Pin</string>
     <string name="pin">Anpinnen</string>
     <string name="refresh">Aktualisieren</string>
     <string name="refreshing">Aktualisiere</string>
