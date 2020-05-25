@@ -82,6 +82,8 @@ import nucleus.factory.RequiresPresenter
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 import java.io.File
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
 import java.util.Locale
 import kotlin.math.abs
 
@@ -634,7 +636,13 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
         val manga = presenter.manga ?: return
         val chapter = page.chapter.chapter
 
-        val text = "${manga.title}: ${chapter.name}, ${getString(R.string.page_, page.number)}"
+        val decimalFormat =
+            DecimalFormat("#.###", DecimalFormatSymbols().apply { decimalSeparator = '.' })
+
+        val text = "${manga.title}: ${getString(
+            R.string.chapter_,
+            decimalFormat.format(chapter.chapter_number)
+        )}, ${getString(R.string.page_, page.number)}"
 
         val stream = file.getUriCompat(this)
         val intent = Intent(Intent.ACTION_SEND).apply {
