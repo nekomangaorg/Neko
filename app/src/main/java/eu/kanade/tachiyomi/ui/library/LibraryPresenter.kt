@@ -66,8 +66,6 @@ class LibraryPresenter(
     var categories: List<Category> = emptyList()
         private set
 
-    var hashCategories: HashMap<Int, Category> = hashMapOf()
-
     var removeArticles: Boolean = preferences.removeArticles().getOrDefault()
 
     /** All categories of the library, in case they are hidden because of hide categories is on */
@@ -415,7 +413,7 @@ class LibraryPresenter(
      * @param categoryId id of the categoty to get
      */
     private fun getCategory(categoryId: Int): Category {
-        val category = hashCategories[categoryId] ?: createDefaultCategory()
+        val category = categories.find { categoryId == it.id } ?: createDefaultCategory()
         category.isAlone = categories.size <= 1
         return category
     }
@@ -515,10 +513,6 @@ class LibraryPresenter(
         }
 
         this.allCategories = categories
-
-        hashCategories = HashMap(this.categories.map {
-            it.id!! to it
-        }.toMap())
 
         return items
     }
