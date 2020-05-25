@@ -310,5 +310,5 @@ class PreferencesHelper(val context: Context) {
 
     fun imageServer() = prefs.getString(Keys.imageServer, MangaDex.SERVER_PREF_ENTRY_VALUES.first())
 
-    fun dataSaver() = prefs.getString(Keys.dataSaver, "0")
+    fun dataSaver() = prefs.getBoolean(Keys.dataSaver, false)
 }

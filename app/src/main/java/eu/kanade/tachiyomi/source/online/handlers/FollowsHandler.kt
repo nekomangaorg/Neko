@@ -45,14 +45,15 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
      * Parse follows api to manga page
      * used when multiple follows
      */
-    private fun followsParseMangaPage(response: Response): MangasPage {
+    private fun followsParseMangaPage(response: Response, forceHd: Boolean = false): MangasPage {
         val followsPageResult =
             Json.nonstrict.parse(FollowsPageResult.serializer(), response.body!!.string())
 
         if (followsPageResult.result.isEmpty()) {
             return MangasPage(mutableListOf(), false)
         }
-        val lowQualityCovers = preferences.lowQualityCovers()
+        val lowQualityCovers = if (forceHd) false else preferences.lowQualityCovers()
+
         val follows = followsPageResult.result.map {
             followFromElement(it, lowQualityCovers)
         }
@@ -161,13 +162,13 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
     /**
      * fetch all manga from all possible pages
      */
-    suspend fun fetchAllFollows(): List<SManga> {
+    suspend fun fetchAllFollows(forceHd: Boolean): List<SManga> {
         return withContext(Dispatchers.IO) {
             val listManga = mutableListOf<SManga>()
             loop@ for (i in 1..10000) {
                 val response = client.newCall(followsListRequest(i))
                     .execute()
-                val mangasPage = followsParseMangaPage(response)
+                val mangasPage = followsParseMangaPage(response, forceHd)
 
                 if (mangasPage.mangas.isNotEmpty()) {
                     listManga.addAll(mangasPage.mangas)

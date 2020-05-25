@@ -134,12 +134,15 @@ open class MangaDex() : HttpSource() {
     override fun fetchPageList(chapter: SChapter): Observable<List<Page>> {
         val imageServer = preferences.imageServer().takeIf { it in SERVER_PREF_ENTRY_VALUES }
             ?: SERVER_PREF_ENTRY_VALUES.first()
-        val dataSaver = preferences.dataSaver()
+        val dataSaver = when (preferences.dataSaver()) {
+            true -> "1"
+            false -> "0"
+        }
         return PageHandler(clientBuilder(), headers, imageServer, dataSaver).fetchPageList(chapter)
     }
 
-    override suspend fun fetchAllFollows(): List<SManga> {
-        return FollowsHandler(clientBuilder(), headers, preferences).fetchAllFollows()
+    override suspend fun fetchAllFollows(forceHd: Boolean): List<SManga> {
+        return FollowsHandler(clientBuilder(), headers, preferences).fetchAllFollows(forceHd)
     }
 
     override suspend fun updateReadingProgress(track: Track): Boolean {

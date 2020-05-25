@@ -163,7 +163,7 @@ object PreferenceKeys {
 
     const val lowQualityCovers = "low_quality_covers"
 
-    const val dataSaver = "data_saver"
+    const val dataSaver = "data_saver_bool"
 
     @Deprecated("Use the preferences of the source")
     fun sourceUsername(sourceId: Long) = "pref_source_username_$sourceId"

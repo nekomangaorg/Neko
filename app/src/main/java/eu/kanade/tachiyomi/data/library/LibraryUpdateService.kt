@@ -483,7 +483,7 @@ class LibraryUpdateService(
      */
     private suspend fun syncFollows() {
         val count = AtomicInteger(0)
-        val listManga = sourceManager.getMangadex().fetchAllFollows()
+        val listManga = sourceManager.getMangadex().fetchAllFollows(true)
         // filter all follows from Mangadex and only add reading or rereading manga to library
         listManga.filter { it ->
             it.follow_status == FollowStatus.RE_READING || it.follow_status == FollowStatus.READING

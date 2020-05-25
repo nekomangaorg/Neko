@@ -53,7 +53,7 @@ interface Source {
      *
      * @param SManga all smanga found for user
      */
-    suspend fun fetchAllFollows(): List<SManga>
+    suspend fun fetchAllFollows(forceHd: Boolean = false): List<SManga>
 
     /**
      * Updates reading status
