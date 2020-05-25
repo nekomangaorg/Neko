@@ -152,6 +152,12 @@ class SettingsLibraryController : SettingsController() {
                 entryRange = 0..1
                 defaultValue = -1
             }
+
+            switchPreference {
+                key = Keys.showLibraryUpdateErrors
+                titleRes = R.string.show_notification_error
+                defaultValue = true
+            }
         }
     }
 }
