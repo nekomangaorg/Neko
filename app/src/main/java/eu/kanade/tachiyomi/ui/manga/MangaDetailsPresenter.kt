@@ -158,7 +158,7 @@ class MangaDetailsPresenter(
         if (filteredScanlators.size == allChapterScanlators.size) {
             manga.scanlator_filter = null
         } else {
-            manga.scanlator_filter = filteredScanlators.joinToString(",")
+            manga.scanlator_filter = MdUtil.getScanlatorString(filteredScanlators)
         }
         asyncUpdateMangaAndChapters(true)
     }
