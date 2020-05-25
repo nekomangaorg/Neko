@@ -105,7 +105,7 @@ class MangaDetailsPresenter(
         } else {
             //add mdlist tracker if doesnt exist
             manga.scanlator_filter?.let {
-                filteredScanlators = it.split(",").toList()
+                filteredScanlators = MdUtil.getScanlators(it)
             }
             updateChapters()
             controller.updateChapters(this.chapters)

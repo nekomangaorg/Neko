@@ -2,6 +2,11 @@
 <changelog bulletedList="true">
     <changelogversion
         changeDate=""
+        versionName="v2.0.13">
+        <changelogtext>Fix bug where having multiple scanlators was not being persistented correctly after exiting app</changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
         versionName="v2.0.12">
         <changelogtext>Fix bug with multiple scanlators not being filtered correctly (enable all scanlators then disable again if its not working)</changelogtext>
         <changelogtext>Switch data saver to a switch (Must re-enable if you were using previously)</changelogtext>
