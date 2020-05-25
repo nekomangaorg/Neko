@@ -719,8 +719,8 @@ class LibraryController(
         if (justStarted && freshStart) {
             scrollToHeader(activeCategory)
         }
-        recycler.post {
-            elevateAppBar(recycler.canScrollVertically(-1))
+        recycler?.post {
+            elevateAppBar(recycler?.canScrollVertically(-1) == true)
             setActiveCategory()
         }
 

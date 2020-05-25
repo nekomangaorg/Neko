@@ -159,7 +159,7 @@ class LibraryPresenter(
     private suspend fun sectionLibrary(items: List<LibraryItem>, freshStart: Boolean = false) {
         libraryItems = items
         val showAll = showAllCategories || !libraryIsGrouped ||
-            categories.size == 1
+            categories.size <= 1
         if (!showAll) {
             sectionedLibraryItems = items.groupBy { it.header.category.id ?: 0 }.toMutableMap()
             if (currentCategory == -1) currentCategory = categories.find {
