@@ -3,7 +3,7 @@
     <changelogversion
         changeDate=""
         versionName="v2.0.12">
-        <changelogtext>Fix bug with multiple scanaltors not being filtered correctly (enable all scanlators then disable again if its not working)</changelogtext>
+        <changelogtext>Fix bug with multiple scanlators not being filtered correctly (enable all scanlators then disable again if its not working)</changelogtext>
         <changelogtext>Switch data saver to a switch (Must re-enable if you were using previously)</changelogtext>
         <changelogtext>Syncing follows to library from dex now uses HQ covers</changelogtext>
         <changelogtext>Added setting to show/hide library update errors notification</changelogtext>
