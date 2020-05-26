@@ -104,7 +104,7 @@ class PreferencesHelper(val context: Context) {
 
     fun webtoonSidePadding() = flowPrefs.getInt(Keys.webtoonSidePadding, 0)
 
-    fun webtoonDisableZoom() = flowPrefs.getBoolean(Keys.webtoonDisableZoom, false)
+    fun webtoonEnableZoomOut() = flowPrefs.getBoolean(Keys.webtoonEnableZoomOut, false)
 
     fun readWithTapping() = flowPrefs.getBoolean(Keys.readWithTapping, true)
 
