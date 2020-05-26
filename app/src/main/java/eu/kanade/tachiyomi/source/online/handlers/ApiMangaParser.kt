@@ -110,7 +110,7 @@ class ApiMangaParser(val langs: List<String>) {
             .filter { langs.contains(it.value.lang_code) }
             .filter {
                 it.value.chapter?.let { chapterNumber ->
-                    if (chapterNumber.isBlank() || chapterNumber.contains("-") || chapterNumber.contains(".")) {
+                    if (chapterNumber.toIntOrNull() == null) {
                         return@filter false
                     }
                     return@filter true
