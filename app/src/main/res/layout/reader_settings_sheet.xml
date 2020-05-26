@@ -264,11 +264,11 @@
                 app:layout_constraintTop_toBottomOf="@id/crop_borders_webtoon" />
 
             <com.google.android.material.switchmaterial.SwitchMaterial
-                android:id="@+id/webtoon_disable_zoom"
+                android:id="@+id/webtoon_enable_zoom_out"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="@string/disable_zoom"
+                android:text="@string/enable_zoom_out"
                 android:textColor="?android:attr/textColorSecondary"
                 app:layout_constraintTop_toBottomOf="@id/webtoon_side_padding" />
 
@@ -289,7 +289,7 @@
                 android:layout_height="wrap_content"
                 android:visibility="gone"
                 app:constraint_referenced_ids="webtoon_prefs,crop_borders_webtoon,
-                webtoon_side_padding_text,webtoon_side_padding,webtoon_disable_zoom" />
+                webtoon_side_padding_text,webtoon_side_padding,webtoon_enable_zoom_out" />
 
             <androidx.constraintlayout.widget.Guideline
                 android:id="@+id/bottom_line"

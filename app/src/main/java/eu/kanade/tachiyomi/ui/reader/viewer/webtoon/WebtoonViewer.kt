@@ -124,7 +124,7 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
         }
 
         config.zoomPropertyChangedListener = {
-            frame.disableZoom = it
+            frame.enableZoomOut = it
         }
 
         frame.layoutParams = ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT)

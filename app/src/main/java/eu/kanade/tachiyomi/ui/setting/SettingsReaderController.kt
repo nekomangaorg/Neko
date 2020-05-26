@@ -163,6 +163,12 @@ class SettingsReaderController : SettingsController() {
                 entryValues = listOf(0, 10, 15, 20, 25)
                 defaultValue = "0"
             }
+
+            switchPreference {
+                key = Keys.webtoonEnableZoomOut
+                titleRes = R.string.enable_zoom_out
+                defaultValue = false
+            }
         }
         preferenceCategory {
             titleRes = R.string.navigation

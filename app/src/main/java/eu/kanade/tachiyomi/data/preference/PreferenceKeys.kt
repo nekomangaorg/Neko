@@ -53,7 +53,7 @@ object PreferenceKeys {
 
     const val webtoonSidePadding = "webtoon_side_padding"
 
-    const val webtoonDisableZoom = "webtoon_disable_zoom"
+    const val webtoonEnableZoomOut = "webtoon_enable_zoom_out"
 
     const val updateOnlyNonCompleted = "pref_update_only_non_completed_key"
 

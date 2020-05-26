@@ -150,7 +150,7 @@ class ReaderSettingsSheet(private val activity: ReaderActivity) :
         pager_prefs_group.gone()
         crop_borders_webtoon.bindToPreference(if (hasMargins) preferences.cropBorders() else preferences.cropBordersWebtoon())
         webtoon_side_padding.bindToIntPreference(preferences.webtoonSidePadding(), R.array.webtoon_side_padding_values)
-        webtoon_disable_zoom.bindToPreference(preferences.webtoonDisableZoom())
+        webtoon_enable_zoom_out.bindToPreference(preferences.webtoonEnableZoomOut())
     }
 
     /**
