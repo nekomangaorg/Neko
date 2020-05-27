@@ -26,9 +26,9 @@ open class App : Application(), LifecycleObserver {
     override fun onCreate() {
         super.onCreate()
         if (BuildConfig.DEBUG) {
-            Timber.plant(Timber.DebugTree())
+            Timber.plant(DebugTree())
         } else {
-            Timber.plant(CrashReportingTree())
+            Timber.plant(ReleaseTree())
         }
         Injekt = InjektScope(DefaultRegistrar())
         Injekt.importModule(AppModule(this))
