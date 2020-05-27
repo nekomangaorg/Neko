@@ -33,6 +33,17 @@ class SearchHandler(val client: OkHttpClient, private val headers: Headers, val 
                     details.url = "/manga/$realQuery/"
                     MangasPage(listOf(details), false)
                 }
+        } else if (query.startsWith(PREFIX_GROUP_SEARCH)) {
+            val realQuery = query.removePrefix(PREFIX_GROUP_SEARCH)
+            client.newCall(searchMangaByGroupRequest(realQuery))
+                .asObservableSuccess()
+                .map { response ->
+                    response.asJsoup().select(groupSelector).firstOrNull()?.attr("abs:href")
+                        ?.let {
+                            searchMangaParse(client.newCall(GET("$it/manga/0", headers)).execute())
+                        }
+                        ?: MangasPage(emptyList(), false)
+                }
         } else {
             client.newCall(searchMangaRequest(page, query, filters))
                 .asObservableSuccess()
@@ -183,11 +194,17 @@ class SearchHandler(val client: OkHttpClient, private val headers: Headers, val 
         return GET(MdUtil.baseUrl + MdUtil.apiManga + id, headers, CacheControl.FORCE_NETWORK)
     }
 
+    private fun searchMangaByGroupRequest(group: String): Request {
+        return GET(MdUtil.groupSearchUrl + group, headers, CacheControl.FORCE_NETWORK)
+    }
+
     companion object {
         const val PREFIX_ID_SEARCH = "id:"
+        const val PREFIX_GROUP_SEARCH = "group:"
         val WHITESPACE_REGEX = "\\s".toRegex()
         const val searchMangaNextPageSelector =
             ".pagination li:not(.disabled) span[title*=last page]:not(disabled)"
         const val searchMangaSelector = "div.manga-entry"
+        const val groupSelector = ".table > tbody:nth-child(2) > tr:nth-child(1) > td:nth-child(2) > a"
     }
 }
