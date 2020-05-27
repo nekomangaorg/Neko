@@ -46,15 +46,23 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
      * used when multiple follows
      */
     private fun followsParseMangaPage(response: Response, forceHd: Boolean = false): MangasPage {
-        val followsPageResult =
-            Json.nonstrict.parse(FollowsPageResult.serializer(), response.body!!.string())
 
-        if (followsPageResult.result.isEmpty()) {
+        var followsPageResult: FollowsPageResult? = null
+
+        try {
+            followsPageResult = Json.nonstrict.parse(FollowsPageResult.serializer(), response.body!!.string())
+        } catch (e: Exception) {
+            Timber.e(e, "error parsing follows")
+        }
+        val empty = followsPageResult?.result?.isEmpty()
+
+
+        if (empty == null || empty.not()) {
             return MangasPage(mutableListOf(), false)
         }
         val lowQualityCovers = if (forceHd) false else preferences.lowQualityCovers()
 
-        val follows = followsPageResult.result.map {
+        val follows = followsPageResult!!.result.map {
             followFromElement(it, lowQualityCovers)
         }
 
