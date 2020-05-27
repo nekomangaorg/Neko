@@ -66,11 +66,16 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
      */
 
     private fun followStatusParse(response: Response): Track {
-        val followsPageResult =
-            Json.nonstrict.parse(FollowsPageResult.serializer(), response.body!!.string())
+        var followsPageResult: FollowsPageResult? = null
+
+        try {
+            followsPageResult = Json.nonstrict.parse(FollowsPageResult.serializer(), response.body!!.string())
+        } catch (e: Exception) {
+            Timber.e(e, "error parsing follows")
+        }
         val track = Track.create(TrackManager.MDLIST)
-        val result = followsPageResult.result
-        if (result.isEmpty()) {
+        val result = followsPageResult?.result
+        if (result.isNullOrEmpty()) {
             track.status = FollowStatus.UNFOLLOWED.int
         } else {
             val follow = result.first()
