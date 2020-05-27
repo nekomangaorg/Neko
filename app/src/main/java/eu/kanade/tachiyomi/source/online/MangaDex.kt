@@ -127,6 +127,10 @@ open class MangaDex() : HttpSource() {
         ).fetchChapterListObservable(manga)
     }
 
+    suspend fun getMangaIdFromChapterId(urlChapterId: String): Int {
+        return MangaHandler(clientBuilder(), headers, getLangsToShow()).getMangaIdFromChapterId(urlChapterId)
+    }
+
     override suspend fun fetchChapterList(manga: SManga): List<SChapter> {
         return MangaHandler(clientBuilder(), headers, getLangsToShow()).fetchChapterList(manga)
     }

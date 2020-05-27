@@ -32,6 +32,14 @@ class MangaHandler(val client: OkHttpClient, val headers: Headers, val langs: Li
         }
     }
 
+    suspend fun getMangaIdFromChapterId(urlChapterId: String): Int {
+        return withContext(Dispatchers.IO) {
+            val request = GET(MdUtil.baseUrl + MdUtil.apiChapter + urlChapterId + MdUtil.apiChapterSuffix, headers, CacheControl.FORCE_NETWORK)
+            val response = client.newCall(request).execute()
+            ApiMangaParser(langs).chapterParseForMangaId(response)
+        }
+    }
+
     suspend fun fetchMangaDetails(manga: SManga): SManga {
         return withContext(Dispatchers.IO) {
             val response = client.newCall(apiRequest(manga)).execute()

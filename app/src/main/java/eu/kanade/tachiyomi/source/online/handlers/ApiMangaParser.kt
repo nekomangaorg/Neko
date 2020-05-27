@@ -1,5 +1,9 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
+import android.util.JsonReader
+import com.github.salomonbrys.kotson.nullInt
+import com.github.salomonbrys.kotson.obj
+import com.google.gson.JsonParser
 import eu.kanade.tachiyomi.network.consumeBody
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
@@ -171,6 +175,22 @@ class ApiMangaParser(val langs: List<String>) {
         }
 
         return chapters
+    }
+
+    fun chapterParseForMangaId(response: Response): Int {
+        try {
+            if (response.code != 200) throw Exception("HTTP error ${response.code}")
+            val body = response.body?.string().orEmpty()
+            if (body.isEmpty()) {
+                throw Exception("Null Response")
+            }
+
+            val jsonObject = JsonParser.parseString(body).obj
+            return jsonObject["manga_id"]?.nullInt ?: throw Exception("No manga associated with chapter")
+        } catch (e: Exception) {
+            Timber.e(e)
+            throw e
+        }
     }
 
     private fun mapChapter(

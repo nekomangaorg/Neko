@@ -38,6 +38,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
 import eu.kanade.tachiyomi.ui.base.activity.BaseRxActivity
+import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
@@ -57,6 +58,7 @@ import eu.kanade.tachiyomi.util.system.hasSideNavBar
 import eu.kanade.tachiyomi.util.system.iconicsDrawableMedium
 import eu.kanade.tachiyomi.util.system.isBottomTappable
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
@@ -71,12 +73,15 @@ import eu.kanade.tachiyomi.widget.SimpleAnimationListener
 import eu.kanade.tachiyomi.widget.SimpleSeekBarListener
 import kotlinx.android.synthetic.main.reader_activity.*
 import kotlinx.android.synthetic.main.reader_chapters_sheet.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.sample
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import me.zhanghai.android.systemuihelper.SystemUiHelper
 import nucleus.factory.RequiresPresenter
 import timber.log.Timber
@@ -125,6 +130,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
 
     private var coroutine: Job? = null
 
+    var fromUrl = false
+
     /**
      * System UI helper to hide status & navigation bar on all different API levels.
      */
@@ -151,6 +158,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
     private var progressDialog: ProgressDialog? = null
 
     private var snackbar: Snackbar? = null
+
+    var intentPageNumber:Int? = null
 
     companion object {
         @Suppress("unused")
@@ -191,17 +200,21 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
             true -> reader_layout.systemUiVisibility.or(systemUiFlag)
             false -> reader_layout.systemUiVisibility.rem(systemUiFlag)
         }
-
         if (presenter.needsInit()) {
-            val manga = intent.extras!!.getLong("manga", -1)
-            val chapter = intent.extras!!.getLong("chapter", -1)
-            if (manga == -1L || chapter == -1L) {
-                finish()
-                return
-            }
-            NotificationReceiver.dismissNotification(this, manga.hashCode(), Notifications.ID_NEW_CHAPTERS)
+            fromUrl = handleIntentAction(intent)
+            if (!fromUrl) {
+                val manga = intent.extras!!.getLong("manga", -1)
+                val chapter = intent.extras!!.getLong("chapter", -1)
+                if (manga == -1L || chapter == -1L) {
+                    finish()
+                    return
+                }
+                NotificationReceiver.dismissNotification(this, manga.hashCode(), Notifications.ID_NEW_CHAPTERS)
 
-            presenter.init(manga, chapter)
+                presenter.init(manga, chapter)
+            } else {
+                please_wait.visible()
+            }
         }
 
         if (savedInstanceState != null) {
@@ -285,6 +298,19 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
         return true
     }
 
+    fun popToMain() {
+        presenter.onBackPressed()
+        if (fromUrl) {
+            val intent = Intent(this, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            }
+            startActivity(intent)
+            finishAfterTransition()
+        } else {
+            finish()
+        }
+    }
+
     /**
      * Called when the user clicks the back key or the button on the toolbar. The call is
      * delegated to the presenter.
@@ -295,7 +321,12 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
             return
         }
         presenter.onBackPressed()
-        super.onBackPressed()
+        if (fromUrl) {
+            finish()
+        } else {
+            super.onBackPressed()
+
+        }
     }
 
     /**
@@ -329,7 +360,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         toolbar.setNavigationIcon(this.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_arrow_back))
         toolbar.setNavigationOnClickListener {
-            onBackPressed()
+            popToMain()
         }
 
         // Init listeners on bottom menu
@@ -384,7 +415,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
      * Sets the visibility of the menu according to [visible] and with an optional parameter to
      * [animate] the views.
      */
-    private fun setMenuVisibility(visible: Boolean, animate: Boolean = true) {
+    private fun setMenuVisibility(visible: Boolean, animate: Boolean = true, force:Boolean = false) {
         menuVisible = visible
         if (visible) coroutine?.cancel()
         viewer_container.requestLayout()
@@ -497,6 +528,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
     fun setChapters(viewerChapters: ViewerChapters) {
         please_wait.gone()
         viewer?.setChapters(viewerChapters)
+        intentPageNumber?.let { moveToPageIndex(it) }
+        intentPageNumber = null
         toolbar.subtitle = viewerChapters.currChapter.chapter.name
     }
 
@@ -731,6 +764,36 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
                     WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER
             }
         }
+    }
+
+    private fun handleIntentAction(intent: Intent): Boolean {
+        val pathSegments = intent.data?.pathSegments
+        if (pathSegments != null && pathSegments.size > 1) {
+            Timber.e(pathSegments[0])
+            val id = pathSegments[1]
+            val secondary = pathSegments.getOrNull(2)
+            if (secondary == "comments") {
+                if (openInBrowser(intent.data!!.toString(), true)) {
+                    finishAfterTransition()
+                    return true
+                }
+            }
+            else if (!id.isNullOrBlank()) {
+                intentPageNumber = secondary?.toIntOrNull()?.minus(1)
+                setMenuVisibility(visible = false, animate = true, force = true)
+                scope.launch(Dispatchers.IO) {
+                    try {
+                        presenter.loadChapterURL(id)
+                    } catch (e: Exception) {
+                        withContext(Dispatchers.Main) {
+                            setInitialChapterError(e)
+                        }
+                    }
+                }
+                return true
+            }
+        }
+        return false
     }
 
     /**
