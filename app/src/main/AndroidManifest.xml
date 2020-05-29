@@ -42,7 +42,31 @@
         </activity>
         <activity
             android:name=".ui.reader.ReaderActivity"
-            android:theme="@style/Theme.Tachiyomi" />
+            android:theme="@style/Theme.Splash" >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:scheme="https"
+                    android:host="www.mangadex.org"
+                    android:pathPattern="/chapter/..*" />
+                <data
+                    android:scheme="https"
+                    android:host="mangadex.org"
+                    android:pathPattern="/chapter/..*" />
+                <data
+                    android:scheme="https"
+                    android:host="www.mangadex.cc"
+                    android:pathPattern="/chapter/..*" />
+                <data
+                    android:scheme="https"
+                    android:host="mangadex.cc"
+                    android:pathPattern="/chapter/..*" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".ui.webview.WebViewActivity"
             android:configChanges="uiMode|orientation|screenSize" />

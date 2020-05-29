@@ -9,6 +9,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.content.pm.ResolveInfo
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.graphics.drawable.Drawable
@@ -24,6 +25,7 @@ import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.browser.customtabs.CustomTabsIntent
+import androidx.browser.customtabs.CustomTabsService.ACTION_CUSTOM_TABS_CONNECTION
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.mikepenz.iconics.IconicsDrawable
@@ -255,16 +257,45 @@ fun Context.isServiceRunning(serviceClass: Class<*>): Boolean {
 /**
  * Opens a URL in a custom tab.
  */
-fun Context.openInBrowser(url: String) {
+fun Context.openInBrowser(url: String, forceBrowser: Boolean = false): Boolean {
     try {
         val parsedUrl = Uri.parse(url)
         val intent = CustomTabsIntent.Builder()
             .setToolbarColor(getResourceColor(R.attr.colorPrimaryVariant))
             .build()
+        if (forceBrowser) {
+            val packages = getCustomTabsPackages().maxBy { it.preferredOrder }
+            val processName = packages?.activityInfo?.processName ?: return false
+            intent.intent.`package` = processName
+        }
         intent.launchUrl(this, parsedUrl)
+        return true
     } catch (e: Exception) {
         toast(e.message)
+        return false
     }
+}
+
+/**
+ * Returns a list of packages that support Custom Tabs.
+ */
+fun Context.getCustomTabsPackages(): ArrayList<ResolveInfo> {
+    val pm = packageManager
+    // Get default VIEW intent handler.
+    val activityIntent = Intent(Intent.ACTION_VIEW, Uri.parse("http://www.example.com"))
+    // Get all apps that can handle VIEW intents.
+    val resolvedActivityList = pm.queryIntentActivities(activityIntent, 0)
+    val packagesSupportingCustomTabs = ArrayList<ResolveInfo>()
+    for (info in resolvedActivityList) {
+        val serviceIntent = Intent()
+        serviceIntent.action = ACTION_CUSTOM_TABS_CONNECTION
+        serviceIntent.setPackage(info.activityInfo.packageName)
+        // Check if this package also resolves the Custom Tabs service.
+        if (pm.resolveService(serviceIntent, 0) != null) {
+            packagesSupportingCustomTabs.add(info)
+        }
+    }
+    return packagesSupportingCustomTabs
 }
 
 fun Context.isInNightMode(): Boolean {

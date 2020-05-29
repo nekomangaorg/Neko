@@ -10,11 +10,7 @@ import java.security.MessageDigest
 open class SourceManager {
 
     // private val sourcesMap = mutableMapOf<Long, Source>()
-    private val source: Source
-
-    init {
-        source = MangaDex()
-    }
+    private val source: MangaDex = MangaDex()
 
     open fun get(sourceKey: Long): Source? {
         return source

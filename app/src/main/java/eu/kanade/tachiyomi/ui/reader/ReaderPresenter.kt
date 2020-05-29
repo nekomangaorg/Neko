@@ -9,9 +9,9 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.database.models.isWebtoon
-import eu.kanade.tachiyomi.data.database.models.scanlatorList
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
@@ -22,15 +22,16 @@ import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
-import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
 import eu.kanade.tachiyomi.ui.reader.chapter.ReaderChapterItem
 import eu.kanade.tachiyomi.ui.reader.loader.ChapterLoader
 import eu.kanade.tachiyomi.ui.reader.loader.DownloadPageLoader
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
+import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.system.ImageUtil
+import eu.kanade.tachiyomi.util.system.executeOnIO
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -44,7 +45,7 @@ import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File
-import java.util.Date
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 /**
@@ -285,6 +286,42 @@ class ReaderPresenter(
 
                 viewerChaptersRelay.call(newChapters)
             }
+    }
+
+    suspend fun loadChapterURL(urlChapterId: String) {
+        val dbChapter = db.getChapter(MdUtil.apiChapter + urlChapterId).executeOnIO()
+        if (dbChapter?.manga_id != null) {
+            val dbManga = db.getManga(dbChapter.manga_id!!).executeOnIO()
+            if (dbManga != null) {
+                withContext(Dispatchers.Main) {
+                    init(dbManga, dbChapter.id!!)
+                }
+                return
+            }
+        }
+        val mangaDex = sourceManager.getMangadex()
+        val mangaId = mangaDex.getMangaIdFromChapterId(urlChapterId)
+        val url = "/manga/${mangaId}/"
+        val dbManga = db.getMangadexManga(url).executeOnIO()
+        val manga = dbManga ?: (MangaImpl().apply {
+            this.url = url
+            title = ""
+        })
+        val (networkManga, chapters) = mangaDex.fetchMangaAndChapterDetails(manga)
+        manga.copyFrom(networkManga)
+        val id = db.insertManga(manga).executeOnIO().insertedId()
+        manga.id = id
+        if (chapters.isNotEmpty()) {
+            val (newChapters, _) = syncChaptersWithSource(db, chapters, manga)
+            val currentChapter = newChapters.find { it.url == MdUtil.apiChapter + urlChapterId }
+            if (currentChapter?.id != null) {
+                withContext(Dispatchers.Main) {
+                    init(manga, currentChapter.id!!)
+                }
+            } else {
+                throw Exception("Chapter not found")
+            }
+        }
     }
 
     /**
