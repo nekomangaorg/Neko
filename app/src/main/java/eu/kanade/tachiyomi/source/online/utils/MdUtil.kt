@@ -29,9 +29,10 @@ class MdUtil {
         val descriptionLanguages = listOf(
             "[b][u]Russian / Русский[/u][/b]",
             "[b] [u] Russian / Русский [/ u] [/ b]",
-            "[hr][u][b]Russian / Русский:[/b][/u]",
             "[u][b]Russian / Русский:[/b][/u]",
-            "[hr][b][u]Russian / Русский:[/u][/b]",
+            "[u][b]Russian / Русский:[/b][/u]",
+            "[u]Russian:[/u]",
+            "[b][u]Russian / Русский:[/u][/b]",
             "[b][u]Russian/Русский:[/u][/b]",
             "[b][u]Русский[/u][/b]",
             "Russian / Русский",
@@ -39,19 +40,20 @@ class MdUtil {
             "[b][u]German / Deutsch[/u][/b]",
             "German/Deutsch:",
             "[b][u]Espa&ntilde;ol / Spanish:[/u][/b]",
-            "[hr][u][b]Spanish / Espa&ntilde;ol:[/b][/u]",
+            "[u][b]Spanish / Espa&ntilde;ol:[/b][/u]",
             "[b] [u] Spanish / Espa & ntilde; ol: [/ u] [/ b]",
             "[b][u]Spanish / Espa&ntilde;ol:[/u][/b]",
             "[Espa&ntilde;ol]:",
             "[b] Spanish: [/ b]",
             "[b][u]Espa&ntilde;ol / Spanish:[/b]",
-            "[hr][b][u]Espa&ntilde;ol / Spanish:[/b]",
+            "[b][u]Espa&ntilde;ol / Spanish:[/b]",
             "[b][u]Italian / Italiano[/u][/b]",
             "Pasta-Pizza-Mandolino/Italiano",
             "[b]Polish / polski[/b]",
             "[b][u]Polish / Polski:[/u][/b]",
             "[b][u]Polish / Polski[/u][/b]",
             "[b][u]Polish Summary / Polski Opis[/u][/b]",
+            "[b][u]Polski[/u][/b]",
             "[b][u]Portuguese (BR) / Portugu&ecirc;s (BR)[/u][/b]",
             "[b]Portuguese (BR) / Portugu&ecirc;s (BR)[/b]",
             "[u][b]Portuguese / Portugu&ecirc;s:[/b][/u]",
@@ -61,7 +63,7 @@ class MdUtil {
             "[b][u]Portugu&ecirc;s[/u][/b]",
             "[b] Portuguese (BR) / Portugu & ecirc; s (BR): [/ b]",
             "[b][u]Portuguese (BR) / Portugu&ecirc;s (BR):[/u][/b] ",
-            "[hr][B][PTBR][/B]",
+            "[B][PTBR][/B]",
             "R&eacute;sume Fran&ccedil;ais :[spoiler]",
             "R&eacute;sum&eacute; Fran&ccedil;ais",
             "[b][u]French[/u][/b]",
@@ -69,12 +71,12 @@ class MdUtil {
             "b][u]Fran&ccedil;ais[/u][/b]",
             "French - Français:",
             "[b][u]Turkish / T&uuml;rk&ccedil;e[/u][/b]",
-            "[hr][u][b]Turkish/T&uuml;rk&ccedil;e[/b][/u]",
+            "[u][b]Turkish/T&uuml;rk&ccedil;e[/b][/u]",
             "[b][u]Chinese[/u][/b]",
             "[b][u]Arabic / العربية[/u][/b]",
             "[b][u]العربية[/u][/b]",
             "[b][u]Vietnamese[/u][/b]",
-            "[hr][b]Links:[/b]",
+            "[b]Links:[/b]",
             "[b]Link[/b]",
             "Links:",
             "[b]External Links :[/b]"
@@ -117,6 +119,8 @@ class MdUtil {
                 .replace("[/list]", "")
                 .replace("[*]", "")
                 .replace("[hr]", "")
+                .replace("[u]", "")
+                .replace("[/u]", "")
 
             // Recursively remove nested bbcode
             while (bbRegex.containsMatchIn(intermediate)) {
