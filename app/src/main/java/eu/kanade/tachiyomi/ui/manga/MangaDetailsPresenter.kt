@@ -24,6 +24,7 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.SChapter
+import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
 import eu.kanade.tachiyomi.ui.manga.external.ExternalItem
@@ -103,7 +104,6 @@ class MangaDetailsPresenter(
             controller.updateHeader()
             refreshAll()
         } else {
-            //add mdlist tracker if doesnt exist
             manga.scanlator_filter?.let {
                 filteredScanlators = MdUtil.getScanlators(it)
             }
@@ -804,6 +804,13 @@ class MangaDetailsPresenter(
                             null
                         }
                         if (trackItem != null) {
+
+                            if (item.service.isMdList() && manga.status == SManga.COMPLETED && trackItem.total_chapters == 0) {
+                                chapters.firstOrNull { it.name.contains("[END]") }?.let {
+                                    trackItem.total_chapters = it.chapter.chapter_number.toInt()
+                                }
+                            }
+
                             db.insertTrack(trackItem).executeAsBlocking()
                             trackItem
                         } else item.track

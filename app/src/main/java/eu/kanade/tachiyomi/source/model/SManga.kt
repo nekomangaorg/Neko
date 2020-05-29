@@ -54,7 +54,7 @@ interface SManga : Serializable {
     var anime_planet_id: String?
 
     var missing_chapters: String?
-
+    
     fun copyFrom(other: SManga) {
         if (other.author != null)
             author = other.originalAuthor
