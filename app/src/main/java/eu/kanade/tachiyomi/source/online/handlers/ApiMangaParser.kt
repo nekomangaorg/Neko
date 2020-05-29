@@ -163,12 +163,9 @@ class ApiMangaParser(val langs: List<String>) {
         // Skip chapters that don't match the desired language, or are future releases
 
         val chapLangs = MdLang.values().filter { langs.contains(it.dexLang) }
+        networkChapters.filter { langs.contains(it.value.lang_code) && (it.value.timestamp * 1000) <= now }
+            .mapTo(chapters) { mapChapter(it.key, it.value, finalChapterNumber, status, chapLangs, networkChapters.size) }
 
-        networkChapters.forEach {
-            if (langs.contains(it.value.lang_code) && (it.value.timestamp * 1000) <= now) {
-                chapters.add(mapChapter(it.key, it.value, finalChapterNumber, status, chapLangs))
-            }
-        }
 
         return chapters
     }
@@ -178,7 +175,8 @@ class ApiMangaParser(val langs: List<String>) {
         networkChapter: ChapterSerializer,
         finalChapterNumber: String,
         status: Int,
-        chapLangs: List<MdLang>
+        chapLangs: List<MdLang>,
+        totalChapterCount: Int
     ): SChapter {
         val chapter = SChapter.create()
         chapter.url = MdUtil.apiChapter + chapterId
@@ -210,7 +208,9 @@ class ApiMangaParser(val langs: List<String>) {
             chapterName.add("Oneshot")
         }
         if ((status == 2 || status == 3)) {
-            if (isOneShot(networkChapter, finalChapterNumber) || networkChapter.chapter == finalChapterNumber && chapter.chapter_title.contains("prologue", true)) {
+            if ((isOneShot(networkChapter, finalChapterNumber) && totalChapterCount == 1) ||
+                networkChapter.chapter == finalChapterNumber
+            ) {
                 chapterName.add("[END]")
             }
         }
