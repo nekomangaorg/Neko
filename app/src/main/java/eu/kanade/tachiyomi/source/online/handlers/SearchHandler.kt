@@ -98,7 +98,7 @@ class SearchHandler(val client: OkHttpClient, private val headers: Headers, val 
                 is FilterHandler.OriginalLanguage -> {
                     if (filter.state != 0) {
                         val number: String =
-                            FilterHandler.sourceLang.first { it -> it.first == filter.values[filter.state] }
+                            FilterHandler.sourceLang().first { it -> it.first == filter.values[filter.state] }
                                 .second
                         url.addQueryParameter("lang_id", number)
                     }
@@ -147,15 +147,16 @@ class SearchHandler(val client: OkHttpClient, private val headers: Headers, val 
                 }
                 is FilterHandler.SortFilter -> {
                     if (filter.state != null) {
+                        val sortables = FilterHandler.sortables()
                         if (filter.state!!.ascending) {
                             url.addQueryParameter(
                                 "s",
-                                FilterHandler.sortables[filter.state!!.index].second.toString()
+                                sortables[filter.state!!.index].second.toString()
                             )
                         } else {
                             url.addQueryParameter(
                                 "s",
-                                FilterHandler.sortables[filter.state!!.index].third.toString()
+                                sortables[filter.state!!.index].third.toString()
                             )
                         }
                     }

@@ -21,42 +21,44 @@ class FilterHandler {
 
     class SortFilter : Filter.Sort(
         "Sort",
-        sortables.map { it.first }.toTypedArray(),
+        sortables().map { it.first }.toTypedArray(),
         Selection(0, false)
     )
 
-    class OriginalLanguage : Filter.Select<String>("Original Language", sourceLang.map { it.first }.toTypedArray())
+    class OriginalLanguage : Filter.Select<String>("Original Language", sourceLang().map { it.first }.toTypedArray())
 
     fun getFilterList() = FilterList(
         TextField("Author", "author"),
         TextField("Artist", "artist"),
         R18(),
         SortFilter(),
-        DemographicList(demographics),
-        PublicationStatusList(publicationStatus),
+        DemographicList(demographics()),
+        PublicationStatusList(publicationStatus()),
         OriginalLanguage(),
-        ContentList(contentType),
-        FormatList(formats),
-        GenreList(genre),
-        ThemeList(themes),
+        ContentList(contentType()),
+        FormatList(formats()),
+        GenreList(genre()),
+        ThemeList(themes()),
         TagInclusionMode(),
         TagExclusionMode()
     )
 
     companion object {
-        val demographics = listOf(
+        fun demographics() = listOf(
             Switch("1", "Shounen"),
             Switch("2", "Shoujo"),
             Switch("3", "Seinen"),
             Switch("4", "Josei")
         )
-        val publicationStatus = listOf(
+
+        fun publicationStatus() = listOf(
             Switch("1", "Ongoing"),
             Switch("2", "Completed"),
             Switch("3", "Cancelled"),
             Switch("4", "Hiatus")
         )
-        val sortables = listOf(
+
+        fun sortables() = listOf(
             Triple("Update date", 1, 0),
             Triple("Alphabetically", 2, 3),
             Triple("Number of comments", 4, 5),
@@ -65,7 +67,7 @@ class FilterHandler {
             Triple("Follows", 10, 11)
         )
 
-        val sourceLang = listOf(
+        fun sourceLang() = listOf(
             Pair("All", "0"),
             Pair("Japanese", "2"),
             Pair("English", "1"),
@@ -81,14 +83,14 @@ class FilterHandler {
             Pair("Filipino", "34")
         )
 
-        val contentType = listOf(
+        fun contentType() = listOf(
             Tag("9", "Ecchi"),
             Tag("32", "Smut"),
             Tag("49", "Gore"),
             Tag("50", "Sexual Violence")
         ).sortedWith(compareBy { it.name })
 
-        val formats = listOf(
+        fun formats() = listOf(
             Tag("1", "4-koma"),
             Tag("4", "Award Winning"),
             Tag("7", "Doujinshi"),
@@ -103,7 +105,7 @@ class FilterHandler {
             Tag("48", "Fan Colored")
         ).sortedWith(compareBy { it.name })
 
-        val genre = listOf(
+        fun genre() = listOf(
             Tag("2", "Action"),
             Tag("3", "Adventure"),
             Tag("5", "Comedy"),
@@ -133,7 +135,7 @@ class FilterHandler {
             Tag("56", "Wuxia")
         ).sortedWith(compareBy { it.name })
 
-        val themes = listOf(
+        fun themes() = listOf(
             Tag("6", "Cooking"),
             Tag("11", "Gyaru"),
             Tag("12", "Harem"),
@@ -172,6 +174,6 @@ class FilterHandler {
             Tag("84", "Mafia")
         ).sortedWith(compareBy { it.name })
 
-        val allTypes = (contentType + formats + genre + themes).map { it.id to it.name }.toMap()
+        val allTypes = (contentType() + formats() + genre() + themes()).map { it.id to it.name }.toMap()
     }
 }

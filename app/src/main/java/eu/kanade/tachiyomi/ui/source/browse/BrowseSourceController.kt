@@ -292,7 +292,6 @@ open class BrowseSourceController(bundle: Bundle) :
                 }
             }
             if (!matches) {
-                val allDefault = presenter.sourceFilters == presenter.source.getFilterList()
                 showProgressBar()
                 adapter?.clear()
                 presenter.setSourceFilter(presenter.sourceFilters)
@@ -302,9 +301,11 @@ open class BrowseSourceController(bundle: Bundle) :
         sheet.onResetClicked = {
             presenter.appliedFilters = FilterList()
             val newFilters = presenter.source.getFilterList()
-            presenter.sourceFilters = newFilters
             sheet.setFilters(presenter.filterItems)
             sheet.dismiss()
+            presenter.sourceFilters = newFilters
+            adapter?.clear()
+            presenter.setSourceFilter(FilterList())
         }
 
         sheet.onRandomClicked = {
