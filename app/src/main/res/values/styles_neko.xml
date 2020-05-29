@@ -28,4 +28,13 @@
         <item name="android:textAllCaps">true</item>
         <item name="fontFamily">@font/metropolis_medium</item>
     </style>
+
+
+    <style name="Neko.NumberPicker" parent="NumberPicker.EditTextStyle">
+        <item name="android:textAppearance">@style/Neko.Headline5</item>
+    </style>
+
+    <style name="Neko.NumberPicker.Tooltip" parent="NumberPicker.ToolTipStyle">
+        <item name="android:textAppearance">@style/Neko.Headline5</item>
+    </style>
 </resources>
