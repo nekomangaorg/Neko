@@ -8,7 +8,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.os.EnvironmentCompat
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.util.lang.Hash
-import timber.log.Timber
 import java.io.File
 
 object DiskUtil {
@@ -99,7 +98,6 @@ object DiskUtil {
         }
         // Even though vfat allows 255 UCS-2 chars, we might eventually write to
         // ext4 through a FUSE layer, so use that limit minus 15 reserved characters.
-        Timber.d("build valid file name %s", sb.toString().take(240))
         return sb.toString().take(240)
     }
 
