@@ -1232,12 +1232,11 @@ class LibraryController(
         }
 
         setOnQueryTextChangeListener(searchView) { search(it) }
-        searchItem.fixExpand(onExpand = { invalidateMenuOnExpand() })
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.action_search -> expandActionViewFromInteraction = true
+            R.id.action_search -> item.expandActionView()
             R.id.action_display_options -> DisplayBottomSheet(this).show()
             else -> return super.onOptionsItemSelected(item)
         }

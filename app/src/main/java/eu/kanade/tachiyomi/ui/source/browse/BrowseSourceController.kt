@@ -239,17 +239,10 @@ open class BrowseSourceController(bundle: Bundle) :
             setIcon(icon)
         }
     }
-
-    override fun onPrepareOptionsMenu(menu: Menu) {
-        super.onPrepareOptionsMenu(menu)
-
-        val isHttpSource = presenter.source is HttpSource
-        menu.findItem(R.id.action_open_in_web_view).isVisible = isHttpSource
-    }
-
+    
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.action_search -> expandActionViewFromInteraction = true
+            R.id.action_search -> item.expandActionView()
             R.id.action_display_mode -> swapDisplayMode()
             R.id.action_open_in_web_view -> openInWebView()
             else -> return super.onOptionsItemSelected(item)
@@ -634,14 +627,6 @@ open class BrowseSourceController(bundle: Bundle) :
         searchViewSubscription = Observable.merge(writingObservable, submitObservable)
             .map { it.queryText().toString() }.filter { it != SearchHandler.PREFIX_GROUP_SEARCH && it != SearchHandler.PREFIX_ID_SEARCH }
             .subscribeUntilDestroy { searchWithQuery(it) }
-
-        searchItem.fixExpand(
-            onExpand = { invalidateMenuOnExpand() },
-            onCollapse = {
-                searchWithQuery("")
-                true
-            }
-        )
     }
 
     protected companion object {

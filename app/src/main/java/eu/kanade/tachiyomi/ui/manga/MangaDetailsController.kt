@@ -730,7 +730,6 @@ class MangaDetailsController : BaseController,
             adapter?.performFilter()
             true
         }
-        searchItem.fixExpand(onExpand = { invalidateMenuOnExpand() })
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
