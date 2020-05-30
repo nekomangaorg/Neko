@@ -26,6 +26,7 @@ import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.Filter
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.online.HttpSource
+import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.follows.FollowsController
 import eu.kanade.tachiyomi.ui.library.AddToLibraryCategoriesDialog
@@ -631,7 +632,7 @@ open class BrowseSourceController(bundle: Bundle) :
 
         searchViewSubscription?.unsubscribe()
         searchViewSubscription = Observable.merge(writingObservable, submitObservable)
-            .map { it.queryText().toString() }
+            .map { it.queryText().toString() }.filter { it != SearchHandler.PREFIX_GROUP_SEARCH && it != SearchHandler.PREFIX_ID_SEARCH }
             .subscribeUntilDestroy { searchWithQuery(it) }
 
         searchItem.fixExpand(

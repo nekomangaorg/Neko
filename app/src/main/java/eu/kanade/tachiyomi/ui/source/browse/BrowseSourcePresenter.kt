@@ -14,7 +14,6 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Filter
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
 import eu.kanade.tachiyomi.ui.source.filter.CheckboxItem
@@ -56,7 +55,7 @@ open class BrowseSourcePresenter(
     /**
      * Selected source.
      */
-    val source = sourceManager.get(sourceId)!!
+    val source = sourceManager.getMangadex()
 
     var filtersChanged = false
 
@@ -413,7 +412,7 @@ open class BrowseSourcePresenter(
      * Search for manga based off of a random manga id by utilizing the [query] and the [restartPager].
      */
     fun searchRandomManga() {
-        (source as? MangaDex)?.apply {
+        source.apply {
             fetchRandomMangaId()
                 .observeOn(Schedulers.io())
                 .subscribeOn(Schedulers.io())
