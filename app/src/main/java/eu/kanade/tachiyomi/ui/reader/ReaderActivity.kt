@@ -558,8 +558,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
         // Set seekbar page number
         page_text.text = "${page.number} / ${pages.size}"
 
-        if (!newChapter && chapters_bottom_sheet.shouldCollapse && chapters_bottom_sheet
-            .sheetBehavior.isExpanded()) {
+        if (!newChapter && chapters_bottom_sheet.shouldCollapse && chapters_bottom_sheet.sheetBehavior.isExpanded()) {
             chapters_bottom_sheet.sheetBehavior?.collapse()
         }
         if (chapters_bottom_sheet.selectedChapterId != page.chapter.chapter.id) {
@@ -580,11 +579,9 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
         val items = listOf(
             MaterialMenuSheet.MenuSheetItem(
                 0, R.drawable.ic_photo_24dp, R.string.set_as_cover
-            ),
-            MaterialMenuSheet.MenuSheetItem(
+            ), MaterialMenuSheet.MenuSheetItem(
                 1, R.drawable.ic_share_24dp, R.string.share
-            ),
-            MaterialMenuSheet.MenuSheetItem(
+            ), MaterialMenuSheet.MenuSheetItem(
                 2, R.drawable.ic_save_24dp, R.string.save
             )
         )
@@ -637,13 +634,10 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
     fun showSetCoverPrompt(page: ReaderPage) {
         if (page.status != Page.READY) return
 
-        MaterialDialog(this)
-            .title(R.string.use_image_as_cover)
+        MaterialDialog(this).title(R.string.use_image_as_cover)
             .positiveButton(android.R.string.yes) {
                 setAsCover(page)
-            }
-            .negativeButton(android.R.string.no)
-            .show()
+            }.negativeButton(android.R.string.no).show()
     }
 
     /**
@@ -658,8 +652,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
             DecimalFormat("#.###", DecimalFormatSymbols().apply { decimalSeparator = '.' })
 
         val text = "${manga.title}: ${getString(
-            R.string.chapter_,
-            decimalFormat.format(chapter.chapter_number)
+            R.string.chapter_, decimalFormat.format(chapter.chapter_number)
         )}, ${getString(R.string.page_, page.number)}"
 
         val stream = file.getUriCompat(this)
@@ -729,7 +722,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
                         setMenuVisibility(false)
                     }
                 }
-                if (sheetManageNavColor) window.navigationBarColor = getResourceColor(R.attr.colorSecondary)
+                if (sheetManageNavColor) window.navigationBarColor =
+                    getResourceColor(R.attr.colorSecondary)
                 reader_menu.visible()
                 val toolbarAnimation = AnimationUtils.loadAnimation(this, R.anim.enter_from_top)
                 toolbarAnimation.setAnimationListener(object : SimpleAnimationListener() {
