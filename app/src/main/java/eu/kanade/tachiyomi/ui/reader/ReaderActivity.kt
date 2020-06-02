@@ -35,6 +35,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
 import eu.kanade.tachiyomi.ui.base.activity.BaseRxActivity
+import eu.kanade.tachiyomi.ui.main.SearchActivity
 import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.AddToLibraryFirst
 import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.Error
 import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.Success
@@ -325,6 +326,13 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         toolbar.setNavigationOnClickListener {
             onBackPressed()
+        }
+
+        toolbar.setOnClickListener {
+            presenter.manga?.id?.let { id ->
+                SearchActivity.openMangaIntent(this, id)
+                startActivity(intent)
+            }
         }
 
         // Init listeners on bottom menu
