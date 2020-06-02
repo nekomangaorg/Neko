@@ -330,7 +330,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
 
         toolbar.setOnClickListener {
             presenter.manga?.id?.let { id ->
-                SearchActivity.openMangaIntent(this, id)
+                val intent = SearchActivity.openMangaIntent(this, id)
                 startActivity(intent)
             }
         }
