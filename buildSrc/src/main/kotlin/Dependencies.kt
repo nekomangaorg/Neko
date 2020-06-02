@@ -33,7 +33,7 @@ object BuildPluginsVersion {
     const val KOTLIN_SERIALIZATION = "org.jetbrains.kotlin:kotlin-serialization:$KOTLIN"
     const val GOOGLE_SERVICES = "com.google.gms:google-services:4.3.3"
 
-    const val KOTLINTER = "2.3.1"
+    const val KOTLINTER = "2.3.2"
     const val OSS_LICENSE = "com.google.android.gms:oss-licenses-plugin:0.10.2"
     const val VERSIONS_PLUGIN = "0.28.0"
 }
