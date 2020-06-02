@@ -37,6 +37,7 @@ import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
 import eu.kanade.tachiyomi.ui.base.activity.BaseRxActivity
 import eu.kanade.tachiyomi.ui.main.MainActivity
+import eu.kanade.tachiyomi.ui.main.SearchActivity
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
@@ -157,7 +158,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
 
     private var snackbar: Snackbar? = null
 
-    var intentPageNumber:Int? = null
+    var intentPageNumber: Int? = null
 
     companion object {
         @Suppress("unused")
@@ -323,7 +324,6 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
             finish()
         } else {
             super.onBackPressed()
-
         }
     }
 
@@ -359,6 +359,13 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
         toolbar.setNavigationIcon(this.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_arrow_back))
         toolbar.setNavigationOnClickListener {
             popToMain()
+        }
+
+        toolbar.setOnClickListener {
+            presenter.manga?.id?.let { id ->
+                SearchActivity.openMangaIntent(this, id)
+                startActivity(intent)
+            }
         }
 
         // Init listeners on bottom menu
@@ -413,7 +420,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
      * Sets the visibility of the menu according to [visible] and with an optional parameter to
      * [animate] the views.
      */
-    private fun setMenuVisibility(visible: Boolean, animate: Boolean = true, force:Boolean = false) {
+    private fun setMenuVisibility(visible: Boolean, animate: Boolean = true, force: Boolean = false) {
         menuVisible = visible
         if (visible) coroutine?.cancel()
         viewer_container.requestLayout()
@@ -775,8 +782,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
                     finishAfterTransition()
                     return true
                 }
-            }
-            else if (!id.isNullOrBlank()) {
+            } else if (!id.isNullOrBlank()) {
                 intentPageNumber = secondary?.toIntOrNull()?.minus(1)
                 setMenuVisibility(visible = false, animate = true, force = true)
                 scope.launch(Dispatchers.IO) {
