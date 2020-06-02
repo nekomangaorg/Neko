@@ -11,6 +11,8 @@ import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
+import eu.kanade.tachiyomi.data.notification.NotificationReceiver
+import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackManager
@@ -230,6 +232,10 @@ class ReaderPresenter(
 
         this.manga = manga
         if (chapterId == -1L) chapterId = initialChapterId
+
+        NotificationReceiver.dismissNotification(
+            preferences.context, manga.id!!.hashCode(), Notifications.ID_NEW_CHAPTERS
+        )
 
         val source = sourceManager.getOrStub(manga.source)
         loader = ChapterLoader(downloadManager, manga, source)

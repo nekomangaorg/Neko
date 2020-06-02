@@ -31,8 +31,6 @@ import com.google.android.material.snackbar.Snackbar
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.notification.NotificationReceiver
-import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
@@ -161,8 +159,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
         const val WEBTOON = 4
         const val VERTICAL_PLUS = 5
 
-        fun newIntent(context: Context, manga: Manga, chapter: Chapter):
-            Intent {
+        fun newIntent(context: Context, manga: Manga, chapter: Chapter): Intent {
             val intent = Intent(context, ReaderActivity::class.java)
             intent.putExtra("manga", manga.id)
             intent.putExtra("chapter", chapter.id)
@@ -200,8 +197,6 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
                 finish()
                 return
             }
-            NotificationReceiver.dismissNotification(this, manga.hashCode(), Notifications.ID_NEW_CHAPTERS)
-
             presenter.init(manga, chapter)
         }
 
