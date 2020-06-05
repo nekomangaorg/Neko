@@ -1,5 +1,4 @@
 object Versions {
-    const val ACRA = "4.9.2"
     const val CHUCKER = "3.2.0"
     const val COIL = "0.10.1"
     const val COROUTINES = "1.3.5"
@@ -31,9 +30,8 @@ object BuildPluginsVersion {
     const val ANDROID_EXTENSIONS = "org.jetbrains.kotlin:kotlin-android-extensions:$KOTLIN"
     const val KOTLIN_GRADLE = "org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN"
     const val KOTLIN_SERIALIZATION = "org.jetbrains.kotlin:kotlin-serialization:$KOTLIN"
+    const val KOTLINTER = "org.jmailen.gradle:kotlinter-gradle:2.3.2"
     const val GOOGLE_SERVICES = "com.google.gms:google-services:4.3.3"
-
-    const val KOTLINTER = "2.3.2"
     const val OSS_LICENSE = "com.google.android.gms:oss-licenses-plugin:0.10.2"
     const val VERSIONS_PLUGIN = "0.28.0"
 }

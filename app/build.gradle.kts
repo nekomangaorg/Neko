@@ -11,6 +11,7 @@ plugins {
     kotlin("kapt")
     id("org.jetbrains.kotlin.plugin.serialization")
     id("com.google.firebase.crashlytics")
+    id("org.jmailen.kotlinter")
     id("com.google.gms.google-services") apply false
 
 }

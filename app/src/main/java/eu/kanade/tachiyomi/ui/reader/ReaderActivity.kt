@@ -32,8 +32,6 @@ import com.mikepenz.iconics.utils.inflateWithIconics
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.notification.NotificationReceiver
-import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
@@ -210,8 +208,6 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
                     finish()
                     return
                 }
-                NotificationReceiver.dismissNotification(this, manga.hashCode(), Notifications.ID_NEW_CHAPTERS)
-
                 presenter.init(manga, chapter)
             } else {
                 please_wait.visible()
@@ -365,8 +361,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
 
         toolbar.setOnClickListener {
             presenter.manga?.id?.let { id ->
-                SearchActivity.openMangaIntent(this, id)
-                startActivity(intent)
+                val searchIntent = SearchActivity.openMangaIntent(this, id)
+                startActivity(searchIntent)
             }
         }
 

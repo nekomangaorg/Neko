@@ -1,7 +1,6 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 plugins {
     id("com.github.ben-manes.versions") version BuildPluginsVersion.VERSIONS_PLUGIN
-    id("org.jmailen.kotlinter") version BuildPluginsVersion.KOTLINTER
 }
 
 buildscript {
@@ -13,6 +12,7 @@ buildscript {
         classpath(BuildPluginsVersion.ANDROID_EXTENSIONS)
         classpath(BuildPluginsVersion.KOTLIN_GRADLE)
         classpath(BuildPluginsVersion.KOTLIN_SERIALIZATION)
+        classpath(BuildPluginsVersion.KOTLINTER)
     }
 }
 
