@@ -10,7 +10,7 @@ object Versions {
     const val OSS_LICENSE = "17.0.0"
     const val RETROFIT = "2.7.2"
     const val ROBO_ELECTRIC = "3.1.4"
-    const val RX_BINDING ="1.0.1"
+    const val RX_BINDING = "1.0.1"
     const val TIMBER = "4.7.1"
     const val WORKMANAGER = "2.3.3"
 }
@@ -18,17 +18,22 @@ object Versions {
 object AndroidVersions {
     const val BUILD_TOOL = "29.0.3"
     const val COMPILE_SDK = 29
-    const val MIN_SDK = 23
+    const val MIN_SDK = 24
     const val TARGET_SDK = 29
     const val VERSION_CODE = 66
-    const val VERSION_NAME = "1.0.7"
+    const val VERSION_NAME = "2.0.13"
 }
 
 object BuildPluginsVersion {
-    const val AGP = "4.0.0"
-    const val GOOGLE_SERVICES = "4.3.3"
     const val KOTLIN = "1.3.72"
+    const val AGP = "com.android.tools.build:gradle:4.0.0"
+    const val FIREBASE = "com.google.firebase:firebase-crashlytics-gradle:2.0.0"
+    const val ANDROID_EXTENSIONS = "org.jetbrains.kotlin:kotlin-android-extensions:$KOTLIN"
+    const val KOTLIN_GRADLE = "org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN"
+    const val KOTLIN_SERIALIZATION = "org.jetbrains.kotlin:kotlin-serialization:$KOTLIN"
+    const val GOOGLE_SERVICES = "com.google.gms:google-services:4.3.3"
+
     const val KOTLINTER = "2.3.1"
-    const val OSS_LICENSE = "0.10.2"
+    const val OSS_LICENSE = "com.google.android.gms:oss-licenses-plugin:0.10.2"
     const val VERSIONS_PLUGIN = "0.28.0"
 }
