@@ -601,6 +601,9 @@ class LibraryPresenter(
                 SManga.LICENSED -> R.string.licensed
                 SManga.ONGOING -> R.string.ongoing
                 SManga.COMPLETED -> R.string.completed
+                SManga.CANCELLED -> R.string.cancelled
+                SManga.HIATUS -> R.string.hiatus
+                SManga.PUBLICATION_COMPLETE -> R.string.publication_complete
                 else -> R.string.unknown
             }
         )
