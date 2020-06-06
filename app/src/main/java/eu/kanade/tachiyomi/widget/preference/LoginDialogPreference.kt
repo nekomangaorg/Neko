@@ -2,18 +2,14 @@ package eu.kanade.tachiyomi.widget.preference
 
 import android.app.Dialog
 import android.os.Bundle
-import android.text.method.PasswordTransformationMethod
 import android.view.View
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.customview.customView
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
-import com.dd.processbutton.iml.ActionProcessButton
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
-import eu.kanade.tachiyomi.util.view.visible
-import eu.kanade.tachiyomi.widget.SimpleTextWatcher
 import kotlinx.android.synthetic.main.pref_account_login.view.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -42,7 +38,6 @@ abstract class LoginDialogPreference(
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
         val dialog = MaterialDialog(activity!!).apply {
             customView(R.layout.pref_account_login, scrollable = false)
-            positiveButton(android.R.string.cancel)
         }
 
         onViewCreated(dialog.view)
@@ -50,40 +45,18 @@ abstract class LoginDialogPreference(
         return dialog
     }
 
-    open fun logout() {}
-
     fun onViewCreated(view: View) {
         v = view.apply {
-            show_password.setOnCheckedChangeListener { _, isChecked ->
-                if (isChecked)
-                    password.transformationMethod = null
-                else
-                    password.transformationMethod = PasswordTransformationMethod()
-            }
 
             if (!usernameLabel.isNullOrEmpty()) {
-                username_label.text = usernameLabel
+                username_input.hint = usernameLabel
             }
 
-            login.setMode(ActionProcessButton.Mode.ENDLESS)
-            login.setOnClickListener { checkLogin() }
+            login.setOnClickListener {
+                checkLogin()
+            }
 
             setCredentialsOnView(this)
-
-            if (canLogout && !username.text.isNullOrEmpty()) {
-                logout.visible()
-                logout.setOnClickListener { logout() }
-            }
-
-            show_password.isEnabled = password.text.isNullOrEmpty()
-
-            password.addTextChangedListener(object : SimpleTextWatcher() {
-                override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-                    if (s.isEmpty()) {
-                        show_password.isEnabled = true
-                    }
-                }
-            })
         }
     }
 

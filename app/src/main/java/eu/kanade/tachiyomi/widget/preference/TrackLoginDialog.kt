@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.widget.preference
 
 import android.os.Bundle
 import android.view.View
+import br.com.simplepass.loadingbutton.animatedDrawables.ProgressType
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
@@ -18,8 +19,6 @@ class TrackLoginDialog(usernameLabel: String? = null, bundle: Bundle? = null) :
 
     override var canLogout = true
 
-    constructor(service: TrackService) : this(service, null)
-
     constructor(service: TrackService, usernameLabel: String?) :
         this(usernameLabel, Bundle().apply { putInt("key", service.id) })
 
@@ -32,13 +31,18 @@ class TrackLoginDialog(usernameLabel: String? = null, bundle: Bundle? = null) :
     override fun checkLogin() {
 
         v?.apply {
-            if (username.text.isEmpty() || password.text.isEmpty())
+            login.apply {
+                progressType = ProgressType.INDETERMINATE
+                startAnimation()
+            }
+            if (username.text.isNullOrBlank() || password.text.isNullOrBlank()) {
+                errorResult()
+                context.toast(R.string.username_must_not_be_blank)
                 return
+            }
 
-            login.progress = 1
             val user = username.text.toString()
             val pass = password.text.toString()
-
             scope.launch {
                 try {
                     val result = service.login(user, pass)
@@ -58,24 +62,18 @@ class TrackLoginDialog(usernameLabel: String? = null, bundle: Bundle? = null) :
 
     private fun errorResult() {
         v?.apply {
-            login.progress = -1
-            login.setText(R.string.unknown_error)
-        }
-    }
-
-    override fun logout() {
-        if (service.isLogged) {
-            service.logout()
-            activity?.toast(R.string.successfully_logged_out)
+            login.revertAnimation {
+                login.text = activity!!.getText(R.string.unknown_error)
+            }
         }
     }
 
     override fun onDialogClosed() {
         super.onDialogClosed()
-        (targetController as? Listener)?.trackDialogClosed(service)
+        (targetController as? Listener)?.trackLoginDialogClosed(service)
     }
 
     interface Listener {
-        fun trackDialogClosed(service: TrackService)
+        fun trackLoginDialogClosed(service: TrackService)
     }
 }

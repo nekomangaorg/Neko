@@ -421,6 +421,8 @@
     <string name="url_not_set_click_again">Manga URL not set, please click title and select manga again</string>
     <string name="refresh_tracking">Refresh tracking</string>
     <string name="add_tracking">Add tracking</string>
+    <string name="remove_tracking">Remove tracking from app</string>
+    <string name="remove_tracking_from_">Also remove from %1$s</string>
 
     <!-- Migration -->
     <string name="select_sources">Select sources</string>
@@ -582,7 +584,7 @@
     <string name="website">Website</string>
     <string name="open_source_licenses">Open source licenses</string>
 
-    <!-- Login dialog -->
+    <!-- Login/Logout dialog -->
     <string name="log_in_to_">Log in to %1$s</string>
     <string name="username">Username</string>
     <string name="email">Email address</string>
@@ -590,7 +592,11 @@
     <string name="show_password">Show password</string>
     <string name="login">Login</string>
     <string name="logout">Logout</string>
+    <string name="logout_from_">Logout from %1$s?</string>
+
     <string name="successfully_logged_in">Successfully logged in</string>
+    <string name="username_must_not_be_blank">Username or password cannot be blank</string>
+
     <string name="successfully_logged_out">You are now logged out</string>
     <string name="could_not_log_in">Could not log in</string>
 
