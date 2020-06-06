@@ -11,8 +11,10 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import okio.Buffer
 import org.json.JSONObject
+import timber.log.Timber
 
-class MyAnimeListInterceptor(private val myanimelist: MyAnimeList) : Interceptor {
+class
+MyAnimeListInterceptor(private val myanimelist: MyAnimeList) : Interceptor {
 
     val scope = CoroutineScope(Job() + Dispatchers.Main)
 
@@ -21,7 +23,18 @@ class MyAnimeListInterceptor(private val myanimelist: MyAnimeList) : Interceptor
             myanimelist.ensureLoggedIn()
         }
         val request = chain.request()
-        return chain.proceed(updateRequest(request))
+        var response = chain.proceed(updateRequest(request))
+
+        if (response.code == 400) {
+            scope.launch {
+                myanimelist.refreshLogin()
+            }
+            Timber.d("intercept continue")
+            response.close()
+            response = chain.proceed(updateRequest(request))
+        }
+
+        return response
     }
 
     private fun updateRequest(request: Request): Request {
