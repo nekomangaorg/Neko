@@ -121,9 +121,6 @@ class MaterialMenuSheet(
             elevationAnimator = ObjectAnimator.ofFloat(
                 title_layout, "elevation", title_layout.elevation, if (elevate) 10f else 0f
             )
-            ObjectAnimator.ofFloat(
-                bottom_divider, "alpha", bottom_divider.alpha, if (elevate) 0f else 1f
-            ).start()
             elevationAnimator?.start()
         }
         elevate(menu_scroll_view.canScrollVertically(-1))
