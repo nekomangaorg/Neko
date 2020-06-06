@@ -64,6 +64,8 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
 
         post {
             chapter_recycler.alpha = if (sheetBehavior.isExpanded()) 1f else 0f
+            chapter_recycler.isClickable = sheetBehavior.isExpanded()
+            chapter_recycler.isFocusable = sheetBehavior.isExpanded()
         }
 
         sheetBehavior?.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
@@ -100,6 +102,8 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                     comment_button.alpha = 1f
                     if (activity.sheetManageNavColor) activity.window.navigationBarColor = primary
                 }
+                chapter_recycler.isClickable = state == BottomSheetBehavior.STATE_EXPANDED
+                chapter_recycler.isFocusable = state == BottomSheetBehavior.STATE_EXPANDED
                 comment_button.visibleIf(state != BottomSheetBehavior.STATE_COLLAPSED)
                 chapters_button.visInvisIf(state != BottomSheetBehavior.STATE_EXPANDED)
             }
@@ -108,11 +112,15 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
         adapter = FastAdapter.with(itemAdapter)
         chapter_recycler.adapter = adapter
         adapter?.onClickListener = { _, _, item, _ ->
-            if (item.chapter.id != presenter.getCurrentChapter()?.chapter?.id) {
-                shouldCollapse = false
-                presenter.loadChapter(item.chapter)
+            if (!sheetBehavior.isExpanded()) {
+                false
+            } else {
+                if (item.chapter.id != presenter.getCurrentChapter()?.chapter?.id) {
+                    shouldCollapse = false
+                    presenter.loadChapter(item.chapter)
+                }
+                true
             }
-            true
         }
         adapter?.addEventHook(object : ClickEventHook<ReaderChapterItem>() {
             override fun onBind(viewHolder: RecyclerView.ViewHolder): View? {
