@@ -22,7 +22,6 @@ import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
-import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.Filter
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.online.HttpSource
@@ -68,13 +67,11 @@ open class BrowseSourceController(bundle: Bundle) :
     RootSearchInterface {
 
     constructor(
-        source: Source,
         searchQuery: String? = null,
         applyInset: Boolean = true,
         deepLink: Boolean = false
     ) : this(Bundle().apply
     {
-        putLong(SOURCE_ID_KEY, source.id)
         putBoolean(APPLY_INSET, applyInset)
         putBoolean(DEEP_LINK, deepLink)
 
@@ -82,8 +79,7 @@ open class BrowseSourceController(bundle: Bundle) :
             putString(SEARCH_QUERY_KEY, searchQuery)
     })
 
-    constructor(source: Source, applyInset: Boolean = true) : this(Bundle().apply {
-        putLong(SOURCE_ID_KEY, source.id)
+    constructor(applyInset: Boolean = true) : this(Bundle().apply {
         putBoolean(APPLY_INSET, applyInset)
     })
 
@@ -126,7 +122,7 @@ open class BrowseSourceController(bundle: Bundle) :
     }
 
     override fun createPresenter(): BrowseSourcePresenter {
-        return BrowseSourcePresenter(args.getLong(SOURCE_ID_KEY), args.getString(SEARCH_QUERY_KEY) ?: "", args.getBoolean(DEEP_LINK))
+        return BrowseSourcePresenter(args.getString(SEARCH_QUERY_KEY) ?: "", args.getBoolean(DEEP_LINK))
     }
 
     override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
@@ -137,7 +133,7 @@ open class BrowseSourceController(bundle: Bundle) :
         super.onViewCreated(view)
 
         if (presenter.source.isLogged().not()) {
-            view?.snack("You must be logged it.  please login")
+            view.snack("You must be logged it.  please login")
         }
         if (bundle?.getBoolean(APPLY_INSET) == true) {
             view.applyWindowInsetsForRootController(activity!!.bottom_nav)
@@ -239,7 +235,7 @@ open class BrowseSourceController(bundle: Bundle) :
             setIcon(icon)
         }
     }
-    
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_search -> item.expandActionView()
@@ -312,7 +308,7 @@ open class BrowseSourceController(bundle: Bundle) :
         sheet.onFollowsClicked = {
             sheet.dismiss()
             adapter?.clear()
-            router.pushController(FollowsController(args.getLong(SOURCE_ID_KEY)).withFadeTransaction())
+            router.pushController(FollowsController().withFadeTransaction())
         }
         sheet.show()
     }

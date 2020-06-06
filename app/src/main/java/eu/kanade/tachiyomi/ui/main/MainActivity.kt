@@ -426,7 +426,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
     }
 
     fun setBrowseRoot() {
-        setRoot(BrowseSourceController(source), R.id.nav_browse)
+        setRoot(BrowseSourceController(), R.id.nav_browse)
     }
 
     protected open fun handleIntentAction(intent: Intent): Boolean {

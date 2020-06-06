@@ -43,9 +43,8 @@ import java.util.Date
  * Presenter of [BrowseSourceController].
  */
 open class BrowseSourcePresenter(
-    sourceId: Long,
     var query: String = "",
-    var isDeepLink: Boolean = false,
+    private var isDeepLink: Boolean = false,
     sourceManager: SourceManager = Injekt.get(),
     private val db: DatabaseHelper = Injekt.get(),
     private val prefs: PreferencesHelper = Injekt.get(),
@@ -233,7 +232,7 @@ open class BrowseSourcePresenter(
      */
     private fun networkToLocalManga(sManga: SManga, sourceId: Long): Manga {
         var localManga = db.getManga(sManga.url, sourceId).executeAsBlocking()
-        if (localManga == null || isFollows) {
+        if (localManga == null) {
             val newManga = Manga.create(sManga.url, sManga.title, sourceId)
             newManga.copyFrom(sManga)
             val result = db.insertManga(newManga).executeAsBlocking()

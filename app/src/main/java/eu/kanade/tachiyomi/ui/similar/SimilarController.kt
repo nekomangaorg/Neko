@@ -33,7 +33,7 @@ class SimilarController(bundle: Bundle) : BrowseSourceController(bundle) {
     }
 
     override fun createPresenter(): BrowseSourcePresenter {
-        return SimilarPresenter(this.manga!!, args.getLong(SOURCE_ID_KEY))
+        return SimilarPresenter(this.manga!!)
     }
 
     override fun onViewCreated(view: View) {

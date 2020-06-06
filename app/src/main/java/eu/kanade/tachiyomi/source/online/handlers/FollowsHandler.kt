@@ -57,7 +57,7 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
         val empty = followsPageResult?.result?.isEmpty()
 
 
-        if (empty == null || empty.not()) {
+        if (empty == null || empty) {
             return MangasPage(mutableListOf(), false)
         }
         val lowQualityCovers = if (forceHd) false else preferences.lowQualityCovers()

@@ -25,12 +25,9 @@ class SimilarHandler(val preferences: PreferencesHelper) {
 
         // Get our current database
         val db = Injekt.get<DatabaseHelper>()
-        val similarMangaDb = db.getSimilar(mangaid).executeAsBlocking()
+        val similarMangaDb = db.getSimilar(mangaid).executeAsBlocking() ?: return Observable.just(MangasPage(mutableListOf(), false))
 
         // Check if we have a result
-        if (similarMangaDb == null) {
-            return Observable.just(MangasPage(mutableListOf(), false))
-        }
 
         // Loop through and create a manga for each match
         // Note: we say this is not initialized so the browser presenter can load it

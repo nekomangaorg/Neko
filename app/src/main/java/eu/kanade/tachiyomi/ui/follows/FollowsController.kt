@@ -14,14 +14,13 @@ import kotlinx.android.synthetic.main.browse_source_controller.*
  */
 class FollowsController(bundle: Bundle) : BrowseSourceController(bundle) {
 
-    constructor(sourceId: Long) : this(Bundle().apply {
-        putLong(SOURCE_ID_KEY, sourceId)
+    constructor() : this(Bundle().apply {
         putBoolean(APPLY_INSET, false)
         putBoolean(FOLLOWS, true)
     })
 
     override fun createPresenter(): BrowseSourcePresenter {
-        return FollowsPresenter(args.getLong(SOURCE_ID_KEY))
+        return FollowsPresenter()
     }
 
     override fun getTitle(): String? {

@@ -7,7 +7,7 @@ import eu.kanade.tachiyomi.ui.source.browse.Pager
 /**
  * Presenter of [SimilarController]. Inherit BrowseSourcePresenter.
  */
-class FollowsPresenter(sourceId: Long) : BrowseSourcePresenter(sourceId) {
+class FollowsPresenter : BrowseSourcePresenter() {
 
     override fun createPager(query: String, filters: FilterList): Pager {
         isFollows = true

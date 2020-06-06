@@ -75,7 +75,7 @@ class SearchActivity : MainActivity() {
                 // Get the search query provided in extras, and if not null, perform a global search with it.
                 val query = intent.getStringExtra(SearchManager.QUERY)
                 if (query != null && query.isNotEmpty()) {
-                    router.replaceTopController(BrowseSourceController(source, query).withFadeTransaction())
+                    router.replaceTopController(BrowseSourceController(query).withFadeTransaction())
                 }
             }
             INTENT_SEARCH -> {
@@ -88,7 +88,7 @@ class SearchActivity : MainActivity() {
                             router.popToRoot()
                         }
                         val query = "${SearchHandler.PREFIX_ID_SEARCH}$id"
-                        router.replaceTopController(BrowseSourceController(source, query, true, true).withFadeTransaction())
+                        router.replaceTopController(BrowseSourceController(query, true, true).withFadeTransaction())
                     }
                 }
             }

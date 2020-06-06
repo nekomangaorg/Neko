@@ -8,12 +8,12 @@ import eu.kanade.tachiyomi.ui.source.browse.Pager
 /**
  * Presenter of [SimilarController]. Inherit BrowseSourcePresenter.
  */
-class SimilarPresenter(sourceId: Long) : BrowseSourcePresenter(sourceId) {
+class SimilarPresenter() : BrowseSourcePresenter() {
 
     var manga: Manga? = null
         private set
 
-    constructor(manga: Manga, sourceId: Long) : this(sourceId) {
+    constructor(manga: Manga) : this() {
         this.manga = manga
     }
 
