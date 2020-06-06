@@ -11,7 +11,6 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import okio.Buffer
 import org.json.JSONObject
-import timber.log.Timber
 
 class
 MyAnimeListInterceptor(private val myanimelist: MyAnimeList) : Interceptor {
@@ -29,7 +28,6 @@ MyAnimeListInterceptor(private val myanimelist: MyAnimeList) : Interceptor {
             scope.launch {
                 myanimelist.refreshLogin()
             }
-            Timber.d("intercept continue")
             response.close()
             response = chain.proceed(updateRequest(request))
         }
