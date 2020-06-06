@@ -102,13 +102,11 @@ class SettingsAdvancedController : SettingsController() {
 
             onClick { LibraryUpdateService.start(context, target = Target.TRACKING) }
         }
-        preference {
-            titleRes = R.string.clean_up_downloaded_chapters
-
-            summaryRes = R.string.delete_unused_chapters
-
-            onClick { cleanupDownloads() }
-        }
+        /*  preference {
+              titleRes = R.string.clean_up_downloaded_chapters
+              summaryRes = R.string.delete_unused_chapters
+              onClick { cleanupDownloads() }
+          }*/
 
         val pm = context.getSystemService(Context.POWER_SERVICE) as? PowerManager?
         if (pm != null) preference {
