@@ -23,6 +23,7 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import org.jsoup.parser.Parser
+import timber.log.Timber
 
 class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListInterceptor) {
 
@@ -69,6 +70,16 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
     suspend fun updateLibManga(track: Track): Track {
         authClient.newCall(POST(url = updateUrl(), body = mangaPostPayload(track))).await()
         return track
+    }
+
+    suspend fun remove(track: Track): Boolean {
+        try {
+            authClient.newCall(POST(url = removeUrl(track.media_id))).await()
+            return true
+        } catch (e: Exception) {
+            Timber.w(e)
+        }
+        return false
     }
 
     suspend fun findLibManga(track: Track): Track? {
@@ -187,6 +198,9 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
 
         private fun updateUrl() =
             Uri.parse(baseModifyListUrl).buildUpon().appendPath("edit.json").toString()
+
+        private fun removeUrl(mediaId: Int) = Uri.parse(baseModifyListUrl).buildUpon().appendPath(mediaId.toString())
+            .appendPath("delete").toString()
 
         private fun addUrl() =
             Uri.parse(baseModifyListUrl).buildUpon().appendPath("add.json").toString()

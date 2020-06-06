@@ -1,6 +1,6 @@
 object Versions {
     const val CHUCKER = "3.2.0"
-    const val COIL = "0.10.1"
+    const val COIL = "0.11.0"
     const val COROUTINES = "1.3.5"
     const val FASTADAPTER = "5.0.0"
     const val HYPERION = "0.9.27"
