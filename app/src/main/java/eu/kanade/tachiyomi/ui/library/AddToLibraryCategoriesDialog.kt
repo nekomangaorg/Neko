@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.library
 import android.app.Dialog
 import android.os.Bundle
 import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.callbacks.onCancel
 import com.afollestad.materialdialogs.list.listItemsMultiChoice
 import com.bluelinelabs.conductor.Controller
 import eu.kanade.tachiyomi.R
@@ -52,7 +53,10 @@ class AddToLibraryCategoriesDialog<T>(bundle: Bundle? = null) :
             }
             .positiveButton(android.R.string.ok)
             .negativeButton(android.R.string.cancel) {
-                    (targetController as? Listener)?.addToLibraryCancelled(manga, position)
+                (targetController as? Listener)?.addToLibraryCancelled(manga, position)
+            }
+            .onCancel {
+                (targetController as? Listener)?.addToLibraryCancelled(manga, position)
             }
     }
 
