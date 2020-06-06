@@ -142,7 +142,7 @@ class LocalSource(private val context: Context) : CatalogueSource {
     override fun fetchMangaDetails(manga: SManga): Observable<SManga> {
         val baseDirs = getBaseDirectories(context)
         baseDirs.mapNotNull { File(it, manga.url).listFiles()?.toList() }
-            .flatten().filter { it.extension.equals("json") }.firstOrNull()?.apply {
+            .flatten().filter { it.extension == "json" }.firstOrNull()?.apply {
                 val json = Gson().fromJson(
                     Scanner(this).useDelimiter("\\Z").next(),
                     JsonObject::class.java
@@ -185,7 +185,8 @@ class LocalSource(private val context: Context) : CatalogueSource {
             it.exists()
         } ?: return
         val gson = GsonBuilder().setPrettyPrinting().create()
-        val file = File(directory, "info.json")
+        val existingFileName = directory.listFiles()?.find { it.extension == "json" }?.name
+        val file = File(directory, existingFileName ?: "info.json")
         file.writeText(gson.toJson(manga.toJson()))
     }
 
