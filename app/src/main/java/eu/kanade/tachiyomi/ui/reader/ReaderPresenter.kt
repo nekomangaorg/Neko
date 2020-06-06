@@ -391,6 +391,8 @@ class ReaderPresenter(
         saveChapterHistory(fromChapter)
     }
 
+    fun saveProgress() = getCurrentChapter()?.let { onChapterChanged(it) }
+
     /**
      * Saves this [chapter] progress (last read page and whether it's read).
      */
