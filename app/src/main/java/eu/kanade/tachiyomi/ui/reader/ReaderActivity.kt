@@ -524,6 +524,11 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
         please_wait.startAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_in_long))
     }
 
+    override fun onPause() {
+        presenter.saveProgress()
+        super.onPause()
+    }
+
     /**
      * Called from the presenter whenever a new [viewerChapters] have been set. It delegates the
      * method to the current viewer, but also set the subtitle on the toolbar.
