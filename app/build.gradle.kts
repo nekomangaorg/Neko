@@ -4,13 +4,13 @@ import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
 plugins {
-    id("com.android.application") version BuildPluginsVersion.AGP
-    id("com.google.android.gms.oss-licenses-plugin") version BuildPluginsVersion.OSS_LICENSE
-    kotlin("android") version BuildPluginsVersion.KOTLIN
-    kotlin("android.extensions") version BuildPluginsVersion.KOTLIN
-    kotlin("kapt") version BuildPluginsVersion.KOTLIN
-    id("com.google.gms.google-services") version BuildPluginsVersion.GOOGLE_SERVICES apply false
-    id("org.jmailen.kotlinter") version BuildPluginsVersion.KOTLINTER
+    id("com.android.application")
+    id("com.google.android.gms.oss-licenses-plugin")
+    kotlin("android")
+    kotlin("android.extensions")
+    kotlin("kapt")
+    id("com.google.gms.google-services") apply false
+    id("org.jmailen.kotlinter")
 }
 
 fun getBuildTime() = DateTimeFormatter.ISO_DATE_TIME.format(LocalDateTime.now(ZoneOffset.UTC))
