@@ -5,6 +5,7 @@ import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
@@ -1282,7 +1283,7 @@ class LibraryController(
         val count = selectedMangas.size
         // Destroy action mode if there are no items selected.
         val shareItem = menu.findItem(R.id.action_share)
-        shareItem.isVisible = selectedMangas.any { it.source != LocalSource.ID }
+        shareItem.isVisible = selectedMangas.isNotEmpty()
         if (count == 0) destroyActionModeIfNeeded()
         else mode.title = resources?.getString(R.string.selected_, count)
         return false
