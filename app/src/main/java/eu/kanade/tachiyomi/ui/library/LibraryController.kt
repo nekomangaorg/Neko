@@ -1281,6 +1281,8 @@ class LibraryController(
     override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
         val count = selectedMangas.size
         // Destroy action mode if there are no items selected.
+        val shareItem = menu.findItem(R.id.action_share)
+        shareItem.isVisible = selectedMangas.any { it.source != LocalSource.ID }
         if (count == 0) destroyActionModeIfNeeded()
         else mode.title = resources?.getString(R.string.selected_, count)
         return false
@@ -1290,6 +1292,7 @@ class LibraryController(
     override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_move_to_category -> showChangeMangaCategoriesDialog()
+            R.id.action_share -> shareManga()
             R.id.action_delete -> {
                 MaterialDialog(activity!!).message(R.string.remove_from_library_question)
                     .positiveButton(R.string.remove) {
@@ -1304,6 +1307,19 @@ class LibraryController(
             else -> return false
         }
         return true
+    }
+
+    private fun shareManga() {
+        val context = view?.context ?: return
+        val mangas = selectedMangas.toList()
+        val urlList = presenter.getMangaUrls(mangas)
+        if (urlList.isEmpty()) return
+        val urls = presenter.getMangaUrls(mangas).joinToString("\n")
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/*"
+            putExtra(Intent.EXTRA_TEXT, urls)
+        }
+        startActivity(Intent.createChooser(intent, context.getString(R.string.share)))
     }
 
     private fun deleteMangasFromLibrary() {
