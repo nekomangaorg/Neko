@@ -41,6 +41,8 @@ class TrackHolder(view: View, adapter: TrackAdapter) : BaseViewHolder(view) {
                 isClickable = item.service.isMdList().not()
             }
 
+            track_remove.visibleIf(item.service.isMdList().not())
+
             with(track_chapters) {
                 text = when {
                     track.total_chapters > 0 && track.last_chapter_read == track.total_chapters -> context.getString(

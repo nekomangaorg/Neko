@@ -77,18 +77,20 @@
                 app:layout_constraintTop_toTopOf="parent"
                 tools:text="Tracking name that is really long so i can see the padding" />
 
-            <ImageView
+            <com.mikepenz.iconics.view.IconicsImageView
                 android:id="@+id/track_remove"
                 style="@style/Theme.Widget.CustomImageButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
                 android:layout_marginStart="2dp"
                 android:layout_marginEnd="4dp"
+                app:iiv_padding="2dp"
+                app:iiv_icon="cmd_close_circle"
                 android:contentDescription="@string/open_in_webview"
-                android:src="@drawable/ic_close_circle_24dp"
-                android:tint="@color/text_color_secondary"
+                app:iiv_color="@color/text_color_secondary"
                 android:tooltipText="@string/remove_tracking"
                 app:layout_constraintBottom_toBottomOf="parent"
+                tools:background="@color/neko_green"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
