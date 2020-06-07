@@ -685,6 +685,13 @@ class LibraryPresenter(
                 .reduce { set1: Iterable<Category>, set2 -> set1.intersect(set2).toMutableList() }
     }
 
+    fun getMangaUrls(mangas: List<Manga>): List<String> {
+        return mangas.mapNotNull { manga ->
+            val source = sourceManager.get(manga.source) as? HttpSource ?: return@mapNotNull null
+            source.mangaDetailsRequest(manga).url.toString()
+        }
+    }
+
     /**
      * Remove the selected manga from the library.
      *

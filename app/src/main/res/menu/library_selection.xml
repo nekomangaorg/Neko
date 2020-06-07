@@ -1,17 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-      xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <item android:id="@+id/action_move_to_category"
-          android:title="@string/move_to_categories"
-          android:icon="@drawable/ic_label_24dp"
-          app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/action_move_to_category"
+        android:icon="@drawable/ic_label_24dp"
+        android:title="@string/move_to_categories"
+        app:showAsAction="ifRoom" />
 
-    <item android:id="@+id/action_delete"
-        android:title="@string/remove"
+    <item
+        android:id="@+id/action_delete"
         android:icon="@drawable/ic_delete_24dp"
-        app:showAsAction="ifRoom"/>
+        android:title="@string/remove"
+        app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/action_migrate"
@@ -19,4 +21,9 @@
         android:title="@string/source_migration"
         app:showAsAction="ifRoom" />
 
+    <item
+        android:id="@+id/action_share"
+        android:icon="@drawable/ic_share_24dp"
+        android:title="@string/share"
+        app:showAsAction="ifRoom" />
 </menu>
