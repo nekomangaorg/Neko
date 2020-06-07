@@ -36,6 +36,7 @@ import com.bluelinelabs.conductor.ControllerChangeType
 import com.github.florent37.viewtooltip.ViewTooltip
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
+import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.SelectableAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
@@ -699,7 +700,7 @@ class LibraryController(
             empty_view?.hide()
         } else {
             empty_view?.show(
-                R.drawable.ic_heart_off_24dp,
+                CommunityMaterial.Icon2.cmd_heart_off,
                 if (filter_bottom_sheet.hasActiveFilters()) R.string.no_matches_for_filters
                 else R.string.library_is_empty_add_from_browse
             )
