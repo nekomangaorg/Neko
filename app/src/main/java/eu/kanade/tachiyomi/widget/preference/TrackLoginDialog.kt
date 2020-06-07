@@ -41,6 +41,8 @@ class TrackLoginDialog(usernameLabel: String? = null, bundle: Bundle? = null) :
                 return
             }
 
+            dialog?.setCancelable(false)
+            dialog?.setCanceledOnTouchOutside(false)
             val user = username.text.toString()
             val pass = password.text.toString()
             scope.launch {
@@ -62,6 +64,8 @@ class TrackLoginDialog(usernameLabel: String? = null, bundle: Bundle? = null) :
 
     private fun errorResult() {
         v?.apply {
+            dialog?.setCancelable(true)
+            dialog?.setCanceledOnTouchOutside(true)
             login.revertAnimation {
                 login.text = activity!!.getText(R.string.unknown_error)
             }

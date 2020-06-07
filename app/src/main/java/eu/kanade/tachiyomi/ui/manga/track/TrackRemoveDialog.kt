@@ -36,19 +36,22 @@ class TrackRemoveDialog<T> : DialogController
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
         val item = item
 
-        val dialog = MaterialDialog(activity!!)
-            .title(R.string.remove_tracking)
+        val dialog = MaterialDialog(activity!!).title(R.string.remove_tracking)
             .negativeButton(android.R.string.cancel)
 
         if (item.service.canRemoveFromService()) {
             dialog.checkBoxPrompt(
                 text = activity!!.getString(
                     R.string.remove_tracking_from_, item.service.name
-                ), onToggle = null
-            ).positiveButton(android.R.string.ok) { listener.removeTracker(item, it.isCheckPromptChecked()) }
+                ), isCheckedDefault = true, onToggle = null
+            ).positiveButton(R.string.remove) {
+                listener.removeTracker(
+                    item, it.isCheckPromptChecked()
+                )
+            }
             dialog.getCheckBoxPrompt().textSize = 16f
         } else {
-            dialog.positiveButton(android.R.string.ok) { listener.removeTracker(item, false) }
+            dialog.positiveButton(R.string.remove) { listener.removeTracker(item, false) }
         }
 
         return dialog
