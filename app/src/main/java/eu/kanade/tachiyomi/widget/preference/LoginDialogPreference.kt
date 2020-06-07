@@ -11,10 +11,6 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import kotlinx.android.synthetic.main.pref_account_login.view.login
-import kotlinx.android.synthetic.main.pref_account_login.view.password
-import kotlinx.android.synthetic.main.pref_account_login.view.show_password
-import kotlinx.android.synthetic.main.pref_account_login.view.username
-import kotlinx.android.synthetic.main.pref_account_login.view.username_label
 import kotlinx.android.synthetic.main.pref_site_login.view.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -63,11 +59,9 @@ abstract class LoginDialogPreference(
 
             two_factor_check?.setOnCheckedChangeListener { _, isChecked ->
                 if (isChecked) {
-                    two_factor_edit.visibility = View.VISIBLE
-                    two_factor_static.visibility = View.VISIBLE
+                    two_factor_holder.visibility = View.VISIBLE
                 } else {
-                    two_factor_edit.visibility = View.GONE
-                    two_factor_static.visibility = View.GONE
+                    two_factor_holder.visibility = View.GONE
                 }
             }
 

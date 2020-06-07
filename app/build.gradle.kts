@@ -213,7 +213,6 @@ dependencies {
     implementation("com.afollestad.material-dialogs:input:3.1.1")
     implementation("me.zhanghai.android.systemuihelper:library:1.0.0")
     implementation("com.nightlynexus.viewstatepageradapter:viewstatepageradapter:1.1.0")
-
     implementation("com.github.sephiroth74:NumberSlidingPicker:v1.0.3")
 
     implementation("com.github.kizitonwose:AndroidTagGroup:1.6.0")

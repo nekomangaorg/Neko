@@ -4,16 +4,13 @@ import android.app.Activity
 import android.app.Dialog
 import android.os.Bundle
 import android.view.View
+import br.com.simplepass.loadingbutton.animatedDrawables.ProgressType
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.customview.customView
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.util.system.toast
-import kotlinx.android.synthetic.main.pref_account_login.view.dialog_title
-import kotlinx.android.synthetic.main.pref_account_login.view.login
-import kotlinx.android.synthetic.main.pref_account_login.view.password
-import kotlinx.android.synthetic.main.pref_account_login.view.username
 import kotlinx.android.synthetic.main.pref_site_login.view.*
 import kotlinx.coroutines.launch
 import uy.kohesive.injekt.Injekt
@@ -33,10 +30,6 @@ class MangadexLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
         val dialog = MaterialDialog(activity!!).apply {
             customView(R.layout.pref_site_login, scrollable = false)
-            positiveButton(android.R.string.cancel)
-            if (canLogout) {
-                negativeButton(R.string.logout) { logout() }
-            }
         }
 
         onViewCreated(dialog.view)
@@ -53,11 +46,18 @@ class MangadexLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle
     override fun checkLogin() {
 
         v?.apply {
-            if (username.text.isEmpty() || password.text.isEmpty())
-                return
 
-            login.progress = 1
-            source
+            login.apply {
+                progressType = ProgressType.INDETERMINATE
+                startAnimation()
+            }
+
+            if (username.text.isNullOrBlank() || password.text.isNullOrBlank() || (two_factor_check.isChecked && two_factor_edit.text.isNullOrBlank())) {
+                errorResult()
+                context.toast(R.string.fields_cannot_be_blank)
+                return
+            }
+
             scope.launch {
                 try {
                     val result = source.login(
@@ -74,20 +74,21 @@ class MangadexLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle
                         )
                         context.toast(R.string.successfully_logged_in)
                     } else {
-                        errorResult(this@apply)
+                        errorResult()
                     }
                 } catch (error: Exception) {
-                    errorResult(this@apply)
+                    errorResult()
                     error.message?.let { context.toast(it) }
                 }
             }
         }
     }
 
-    fun errorResult(view: View?) {
+    private fun errorResult() {
         v?.apply {
-            login.progress = -1
-            login.setText(R.string.unknown_error)
+            login.revertAnimation {
+                login.text = activity!!.getText(R.string.unknown_error)
+            }
         }
     }
 

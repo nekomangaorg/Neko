@@ -3,100 +3,91 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="24dp">
 
     <TextView
         android:id="@+id/dialog_title"
+        style="@style/TextAppearance.MaterialComponents.Headline6"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:textSize="16sp"
-        android:textStyle="bold" />
+        tools:text="Log in to MangaDex" />
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginBottom="24dp"
-        android:layout_marginTop="6dp"
-        android:background="@color/divider" />
 
-    <TextView
-        android:id="@+id/username_label"
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/username_input"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/username" />
+        android:layout_marginTop="15dp"
+        android:hint="@string/username"
+        app:boxStrokeColor="@color/colorAccent"
+        app:hintTextColor="@color/colorAccent">
 
-    <EditText
-        android:id="@+id/username"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/username"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </com.google.android.material.textfield.TextInputLayout>
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="@string/password" />
-
-    <EditText
-        android:id="@+id/password"
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="textPassword" />
+        android:layout_marginTop="12dp"
+        android:hint="@string/password"
+        app:boxStrokeColor="@color/colorAccent"
+        app:endIconMode="password_toggle"
+        app:hintTextColor="@color/colorAccent">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <CheckBox
-            android:id="@+id/show_password"
-            android:layout_width="0dp"
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/password"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:layout_weight="1.0"
-            android:text="@string/show_password" />
+            android:inputType="textPassword" />
+    </com.google.android.material.textfield.TextInputLayout>
 
-        <CheckBox
-            android:id="@+id/two_factor_check"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:layout_weight="1.0"
-            android:text="@string/two_factor" />
-    </LinearLayout>
-
-    <TextView
-        android:id="@+id/two_factor_static"
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/two_factor_holder"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:hint="@string/two_factor"
+        app:boxStrokeColor="@color/colorAccent"
+        app:hintTextColor="@color/colorAccent"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/two_factor_edit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textNoSuggestions" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.checkbox.MaterialCheckBox
+        android:id="@+id/two_factor_check"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:visibility="gone"
-        tools:visibility="visible"
         android:text="@string/two_factor" />
 
-    <EditText
-        android:id="@+id/two_factor_edit"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:visibility="gone"
-        tools:visibility="visible" />
-
-
-    <com.dd.processbutton.iml.ActionProcessButton
+    <br.com.simplepass.loadingbutton.customViews.CircularProgressButton
         android:id="@+id/login"
+        style="@style/Theme.Widget.Button.Primary"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_height="55dp"
+        android:layout_gravity="center"
+        android:scaleType="fitCenter"
         android:text="@string/login"
-        android:textColor="@android:color/white"
-        app:pb_colorNormal="@color/neko_green_darker"
-        app:pb_colorProgress="@color/neko_green"
-        app:pb_textComplete="@string/successfully_logged_in"
-        app:pb_textError="@string/could_not_log_in" />
-
+        android:textSize="16sp"
+        app:finalCornerAngle="50dp"
+        app:initialCornerAngle="2dp"
+        app:spinning_bar_color="@color/md_white_1000"
+        app:spinning_bar_padding="6dp"
+        app:spinning_bar_width="3dp" />
 
 </LinearLayout>

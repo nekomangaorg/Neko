@@ -101,6 +101,7 @@
 
     <!-- Login dialog -->
     <string name="two_factor">2FA Code</string>
+    <string name="fields_cannot_be_blank">Fields cannot be blank</string>
 
 
 </resources>
