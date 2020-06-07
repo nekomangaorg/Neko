@@ -58,6 +58,9 @@ class MangadexLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle
                 return
             }
 
+            dialog?.setCancelable(false)
+            dialog?.setCanceledOnTouchOutside(false)
+
             scope.launch {
                 try {
                     val result = source.login(
@@ -86,6 +89,8 @@ class MangadexLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle
 
     private fun errorResult() {
         v?.apply {
+            dialog?.setCancelable(true)
+            dialog?.setCanceledOnTouchOutside(true)
             login.revertAnimation {
                 login.text = activity!!.getText(R.string.unknown_error)
             }
