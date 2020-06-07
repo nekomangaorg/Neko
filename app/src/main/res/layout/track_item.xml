@@ -67,31 +67,29 @@
                 android:maxLines="1"
                 android:paddingStart="16dp"
                 android:paddingTop="16dp"
-                android:paddingEnd="8dp"
+                android:paddingEnd="30dp"
                 android:paddingBottom="16dp"
                 android:text="@string/title"
                 android:textSize="14sp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/track_remove"
+                app:layout_constraintEnd_toEndOf="@id/status_container"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                tools:text="dfdffggjdfigjssdfgidfjgidgjdifgjfdgifdjgid" />
+                tools:text="Tracking name that is really long so i can see the padding" />
 
             <ImageView
                 android:id="@+id/track_remove"
                 style="@style/Theme.Widget.CustomImageButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:contentDescription="@string/open_in_webview"
-                android:src="@drawable/ic_close_circle_24dp"
                 android:layout_marginStart="2dp"
                 android:layout_marginEnd="4dp"
+                android:contentDescription="@string/open_in_webview"
+                android:src="@drawable/ic_close_circle_24dp"
                 android:tint="@color/text_color_secondary"
                 android:tooltipText="@string/remove_tracking"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="@id/status_container"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toEndOf="@id/track_title"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
