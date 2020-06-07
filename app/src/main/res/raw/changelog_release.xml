@@ -2,6 +2,31 @@
 <changelog bulletedList="true">
     <changelogversion
         changeDate=""
+        versionName="v2.0.14">
+        <changelogtext>New: MangaDex chapter urls are now deeplinked and can be opened in app</changelogtext>
+        <changelogtext>New: Clicking the title bar in the reader can open the manga info screen</changelogtext>
+        <changelogtext>New: you can now search for a specific group by searching group:mygroup i want to find</changelogtext>
+        <changelogtext>New: number picker in the chapter tracker. you can click the button, the number, or hold and drag the arrows to increase/decrease chapter count</changelogtext>
+        <changelogtext>New: improved login/logout screens and made them more material2</changelogtext>
+        <changelogtext>New: improved the tracker search dialog making it more material</changelogtext>
+        <changelogtext>New: added ability to remove manga from the remote tracker when removing from tracker</changelogtext>
+        <changelogtext>Fix: Mal bug with not updating tracker in certain instances</changelogtext>
+        <changelogtext>Fix: in Library badge not showing in my follows</changelogtext>
+        <changelogtext>Fix: Added missing manga statuses in the group by filter</changelogtext>
+        <changelogtext>Fix: reset filter not clearing all filters</changelogtext>
+        <changelogtext>Fix: end tags showing incorrectly at times</changelogtext>
+        <changelogtext>Fix: cleaned up more descriptions</changelogtext>
+        <changelogtext>Note: Disabled clean up old chapters in advanced settings as it was causing some chapters to be deleted that shouldnt</changelogtext>
+        <changelogtext>Upstream changes which include</changelogtext>
+        <changelogtext>Changed disable zoom to enable zoom out</changelogtext>
+        <changelogtext>New: add ability to share multiple manga in library</changelogtext>
+        <changelogtext>Using chapter number instead of title when sharing pages</changelogtext>
+        <changelogtext>Neko Bug fixes</changelogtext>
+        <changelogtext>Upstream bug fixes</changelogtext>
+
+    </changelogversion>
+    <changelogversion
+        changeDate=""
         versionName="v2.0.13">
         <changelogtext>Fix bug where having multiple scanlators was not being persistented correctly after exiting app</changelogtext>
     </changelogversion>
