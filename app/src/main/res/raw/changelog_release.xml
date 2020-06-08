@@ -2,7 +2,8 @@
 <changelog bulletedList="true">
     <changelogversion
         changeDate=""
-        versionName="v2.0.15">
+        versionName="v2.0.15.1">
+        <changelogtext>Add option in advanced settings to enable debug</changelogtext>
         <changelogtext>Fix a bug preventing a chapters from opening</changelogtext>
     </changelogversion>
     <changelogversion

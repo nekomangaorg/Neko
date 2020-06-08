@@ -309,15 +309,19 @@ class ReaderPresenter(
         val mangaId = mangaDex.getMangaIdFromChapterId(urlChapterId)
         val url = "/manga/${mangaId}/"
         val dbManga = db.getMangadexManga(url).executeAsBlocking()
-        val manga = dbManga ?: (MangaImpl().apply {
+        val tempManga = dbManga ?: (MangaImpl().apply {
             this.url = url
             title = ""
         })
-        val (networkManga, chapters) = mangaDex.fetchMangaAndChapterDetails(manga)
+        val (networkManga, chapters) = mangaDex.fetchMangaAndChapterDetails(tempManga)
 
-        manga.copyFrom(networkManga)
-        val id = db.insertManga(manga).executeAsBlocking().insertedId()
-        manga.id = id
+        tempManga.copyFrom(networkManga)
+        tempManga.title = networkManga.title
+        
+        db.insertManga(tempManga).executeAsBlocking()
+        val manga = db.getMangadexManga(tempManga.url).executeAsBlocking()!!
+
+        Timber.d("tempManga id ${tempManga.id}")
         Timber.d("Manga id ${manga.id}")
 
         if (chapters.isNotEmpty()) {
