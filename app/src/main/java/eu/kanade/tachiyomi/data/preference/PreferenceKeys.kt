@@ -165,6 +165,8 @@ object PreferenceKeys {
 
     const val dataSaver = "data_saver_bool"
 
+    const val debugLogger = "debug_logger"
+
     @Deprecated("Use the preferences of the source")
     fun sourceUsername(sourceId: Long) = "pref_source_username_$sourceId"
 

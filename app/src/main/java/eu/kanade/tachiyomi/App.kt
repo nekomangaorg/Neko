@@ -7,11 +7,13 @@ import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.multidex.MultiDex
+import androidx.preference.PreferenceManager
 import com.mikepenz.iconics.Iconics
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
 import eu.kanade.tachiyomi.data.image.coil.CoilSetup
 import eu.kanade.tachiyomi.data.notification.Notifications
+import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
@@ -25,11 +27,14 @@ open class App : Application(), LifecycleObserver {
 
     override fun onCreate() {
         super.onCreate()
-        if (BuildConfig.DEBUG) {
+        if (BuildConfig.DEBUG || PreferenceManager.getDefaultSharedPreferences(this).getBoolean(PreferenceKeys.debugLogger, false)) {
             Timber.plant(DebugTree())
-        } else {
+        }
+
+        if (!BuildConfig.DEBUG) {
             Timber.plant(ReleaseTree())
         }
+        
         Injekt = InjektScope(DefaultRegistrar())
         Injekt.importModule(AppModule(this))
 

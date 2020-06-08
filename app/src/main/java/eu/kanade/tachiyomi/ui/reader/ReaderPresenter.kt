@@ -314,8 +314,12 @@ class ReaderPresenter(
             title = ""
         })
         val (networkManga, chapters) = mangaDex.fetchMangaAndChapterDetails(manga)
+
         manga.copyFrom(networkManga)
-        db.insertManga(manga).executeAsBlocking()
+        val id = db.insertManga(manga).executeAsBlocking().insertedId()
+        manga.id = id
+        Timber.d("Manga id ${manga.id}")
+
         if (chapters.isNotEmpty()) {
             val (newChapters, _) = syncChaptersWithSource(db, chapters, manga)
             val currentChapter = newChapters.find { it.url == MdUtil.apiChapter + urlChapterId }

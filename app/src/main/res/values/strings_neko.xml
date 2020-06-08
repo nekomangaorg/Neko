@@ -98,6 +98,8 @@
 
     <!-- Advanced Settings -->
     <string name="clear_image_cache">Clear image cover cache</string>
+    <string name="enable_debug_logs">Enable debug logger</string>
+
 
     <!-- Login dialog -->
     <string name="two_factor">2FA Code</string>

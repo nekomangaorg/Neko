@@ -12,6 +12,8 @@ import android.widget.Toast
 import androidx.preference.PreferenceScreen
 import com.afollestad.materialdialogs.MaterialDialog
 import com.google.firebase.crashlytics.FirebaseCrashlytics
+import eu.kanade.tachiyomi.BuildConfig
+import eu.kanade.tachiyomi.DebugTree
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.ChapterCache
 import eu.kanade.tachiyomi.data.cache.CoverCache
@@ -19,6 +21,7 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService.Target
+import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
@@ -32,6 +35,7 @@ import kotlinx.coroutines.launch
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
+import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -107,6 +111,22 @@ class SettingsAdvancedController : SettingsController() {
               summaryRes = R.string.delete_unused_chapters
               onClick { cleanupDownloads() }
           }*/
+
+        if (!BuildConfig.DEBUG) {
+            switchPreference {
+                key = PreferenceKeys.debugLogger
+                titleRes = R.string.enable_debug_logs
+                defaultValue = false
+                setOnPreferenceClickListener { it ->
+                    if (it.isEnabled) {
+                        Timber.plant(DebugTree())
+                    } else {
+                        Timber.uproot(DebugTree())
+                    }
+                    true
+                }
+            }
+        }
 
         val pm = context.getSystemService(Context.POWER_SERVICE) as? PowerManager?
         if (pm != null) preference {
