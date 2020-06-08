@@ -47,7 +47,7 @@ import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File
-import java.util.*
+import java.util.Date
 import java.util.concurrent.TimeUnit
 
 /**
@@ -193,16 +193,16 @@ class ReaderPresenter(
             val dbChapters = db.getChapters(manga).executeAsBlocking()
             val list =
                 readerChapterFilter.filterChapter(dbChapters, manga, getCurrentChapter()?.chapter)
-                .sortedBy {
-                    when (manga.sorting) {
-                        Manga.SORTING_NUMBER -> it.chapter_number
-                        else -> it.source_order.toFloat()
+                    .sortedBy {
+                        when (manga.sorting) {
+                            Manga.SORTING_NUMBER -> it.chapter_number
+                            else -> it.source_order.toFloat()
+                        }
+                    }.map {
+                        ReaderChapterItem(
+                            it, manga, it.id == getCurrentChapter()?.chapter?.id ?: chapterId
+                        )
                     }
-                }.map {
-                    ReaderChapterItem(
-                    it, manga, it.id == getCurrentChapter()?.chapter?.id ?: chapterId
-                    )
-                }
             if (!manga.sortDescending(preferences.chaptersDescAsDefault().getOrDefault())) {
                 list.reversed()
             } else {
@@ -297,7 +297,7 @@ class ReaderPresenter(
     suspend fun loadChapterURL(urlChapterId: String) {
         val dbChapter = db.getChapter(MdUtil.apiChapter + urlChapterId).executeOnIO()
         if (dbChapter?.manga_id != null) {
-            val dbManga = db.getManga(dbChapter.manga_id!!).executeOnIO()
+            val dbManga = db.getManga(dbChapter.manga_id!!).executeAsBlocking()
             if (dbManga != null) {
                 withContext(Dispatchers.Main) {
                     init(dbManga, dbChapter.id!!)
@@ -308,15 +308,14 @@ class ReaderPresenter(
         val mangaDex = sourceManager.getMangadex()
         val mangaId = mangaDex.getMangaIdFromChapterId(urlChapterId)
         val url = "/manga/${mangaId}/"
-        val dbManga = db.getMangadexManga(url).executeOnIO()
+        val dbManga = db.getMangadexManga(url).executeAsBlocking()
         val manga = dbManga ?: (MangaImpl().apply {
             this.url = url
             title = ""
         })
         val (networkManga, chapters) = mangaDex.fetchMangaAndChapterDetails(manga)
         manga.copyFrom(networkManga)
-        val id = db.insertManga(manga).executeOnIO().insertedId()
-        manga.id = id
+        db.insertManga(manga).executeAsBlocking()
         if (chapters.isNotEmpty()) {
             val (newChapters, _) = syncChaptersWithSource(db, chapters, manga)
             val currentChapter = newChapters.find { it.url == MdUtil.apiChapter + urlChapterId }

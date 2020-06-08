@@ -204,7 +204,10 @@ class LibraryUpdateNotifier(private val context: Context) {
                                     })
                             )
                         } else {
-                            setContentText(updates.keys.first().title.chop(45))
+                            val firstOrNull = updates.keys.firstOrNull()
+                            firstOrNull?.apply {
+                                setContentText(this.title.chop(45))
+                            }
                         }
                         priority = NotificationCompat.PRIORITY_HIGH
                         setGroup(Notifications.GROUP_NEW_CHAPTERS)
