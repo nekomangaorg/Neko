@@ -2,6 +2,11 @@
 <changelog bulletedList="true">
     <changelogversion
         changeDate=""
+        versionName="v2.0.15">
+        <changelogtext>Fix a bug preventing a chapters from opening</changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
         versionName="v2.0.14">
         <changelogtext>New: MangaDex chapter urls are now deeplinked and can be opened in app</changelogtext>
         <changelogtext>New: Clicking the title bar in the reader can open the manga info screen</changelogtext>
