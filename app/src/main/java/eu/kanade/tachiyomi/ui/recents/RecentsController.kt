@@ -214,7 +214,7 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
         swipe_refresh?.isRefreshing = refresh
     }
 
-    override fun onItemMove(fromPosition: Int, toPosition: Int) { }
+    override fun onItemMove(fromPosition: Int, toPosition: Int) {}
 
     override fun shouldMoveItem(fromPosition: Int, toPosition: Int) = true
 
@@ -224,7 +224,7 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
     }
 
     override fun handleSheetBack(): Boolean {
-        if (dl_bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) {
+        if (dl_bottom_sheet?.sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) {
             dl_bottom_sheet.dismiss()
             return true
         }
@@ -281,7 +281,8 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
     private fun refreshItem(chapterId: Long) {
         val recentItemPos = adapter.currentItems.indexOfFirst {
             it is RecentMangaItem &&
-            it.mch.chapter.id == chapterId }
+                it.mch.chapter.id == chapterId
+        }
         if (recentItemPos > -1) adapter.notifyItemChanged(recentItemPos)
     }
 
@@ -457,12 +458,14 @@ class RecentsController(bundle: Bundle? = null) : BaseController(bundle),
         when (item.itemId) {
             R.id.action_group_all, R.id.action_ungroup_all, R.id.action_only_history,
             R.id.action_only_updates -> {
-                presenter.toggleGroupRecents(when (item.itemId) {
-                R.id.action_ungroup_all -> 1
-                R.id.action_only_history -> 2
-                R.id.action_only_updates -> 3
-                    else -> 0
-                })
+                presenter.toggleGroupRecents(
+                    when (item.itemId) {
+                        R.id.action_ungroup_all -> 1
+                        R.id.action_only_history -> 2
+                        R.id.action_only_updates -> 3
+                        else -> 0
+                    }
+                )
                 if (item.itemId == R.id.action_only_history)
                     activity?.toast(R.string.press_and_hold_to_reset_history, Toast.LENGTH_LONG)
                 activity?.invalidateOptionsMenu()
