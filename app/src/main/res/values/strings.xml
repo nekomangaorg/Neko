@@ -109,7 +109,7 @@
     <string name="selected_">Selected: %1$d</string>
     <string name="local">Local</string>
     <string name="remove_from_library_question">Remove from library?</string>
-    <string name="library_search_hint">Search title, tags, source</string>
+    <string name="library_search_hint">Search title, tags</string>
     <string name="library_is_empty_add_from_browse">Your library is empty, add series to your
         library from the browse tab.</string>
     <string name="no_matches_for_filters">No matches found for your current filters</string>

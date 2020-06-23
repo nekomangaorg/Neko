@@ -91,32 +91,17 @@ interface Manga : SManga {
         return if (currentTags?.any
             { tag ->
                 tag == "long strip" || tag == "manhwa" || tag.contains("webtoon")
-            } == true || isWebtoonSource(sourceName)
+            } == true
         )
             ReaderActivity.WEBTOON
         else if (currentTags?.any
             { tag ->
                 tag == "chinese" || tag == "manhua" ||
                     tag.startsWith("english") || tag == "comic"
-            } == true || (isComicSource(sourceName) && !sourceName.contains("tapas", true)) ||
-            sourceName.contains("manhua", true)
+            } == true
         )
             ReaderActivity.LEFT_TO_RIGHT
         else 0
-    }
-
-    fun isWebtoonSource(sourceName: String): Boolean {
-        return sourceName.contains("webtoon", true) ||
-            sourceName.contains("manwha", true) ||
-            sourceName.contains("toonily", true)
-    }
-
-    fun isComicSource(sourceName: String): Boolean {
-        return sourceName.contains("gunnerkrigg", true) ||
-            sourceName.contains("dilbert", true) ||
-            sourceName.contains("cyanide", true) ||
-            sourceName.contains("xkcd", true) ||
-            sourceName.contains("tapas", true)
     }
 
     fun key(): String {
