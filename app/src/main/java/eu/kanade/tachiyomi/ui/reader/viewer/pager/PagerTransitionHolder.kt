@@ -2,8 +2,11 @@ package eu.kanade.tachiyomi.ui.reader.viewer.pager
 
 import android.annotation.SuppressLint
 import android.graphics.Typeface
+import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.Spanned
+import android.text.style.DynamicDrawableSpan
+import android.text.style.ImageSpan
 import android.text.style.StyleSpan
 import android.view.Gravity
 import android.view.View
@@ -14,10 +17,12 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.widget.AppCompatTextView
+import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.system.iconicsDrawableMedium
 import eu.kanade.tachiyomi.widget.ViewPagerAdapter
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
@@ -102,7 +107,23 @@ class PagerTransitionHolder(
                 append("\n${nextChapter.chapter.name}\n\n")
             }
         } else {
-            context.getString(R.string.theres_no_next_chapter)
+            val d = context.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_account_tree)
+
+            SpannableStringBuilder().apply {
+                append(context.getString(R.string.theres_no_next_chapter))
+                append("\n\n")
+                append(context.getString(R.string.try_similar))
+                append("   ")
+                val finalSize = length
+                setSpan(
+                    ImageSpan(d, DynamicDrawableSpan.ALIGN_BOTTOM),
+                    finalSize - 1,
+                    finalSize,
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+                append("\n")
+                append(context.getString(R.string.try_similar_after_click))
+            }
         }
 
         if (nextChapter != null) {
@@ -146,7 +167,8 @@ class PagerTransitionHolder(
             .subscribe { state ->
                 pagesContainer.removeAllViews()
                 when (state) {
-                    is ReaderChapter.State.Wait -> {}
+                    is ReaderChapter.State.Wait -> {
+                    }
                     is ReaderChapter.State.Loading -> setLoading()
                     is ReaderChapter.State.Error -> setError(state.error)
                     is ReaderChapter.State.Loaded -> setLoaded()

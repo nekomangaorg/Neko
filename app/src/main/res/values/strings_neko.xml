@@ -37,6 +37,10 @@
     <string name="scanlator_groups">Scanlator groups</string>
     <string name="reset_group_filter">Reset to all</string>
 
+    <!-- Reader -->
+    <string name="try_similar">Don\'t forget to try looking for \nSimilar Manga. Click the </string>
+    <string name="try_similar_after_click">icon on the manga info screen</string>
+
 
     <!-- Follows -->
     <string name="follows">My follows</string>
