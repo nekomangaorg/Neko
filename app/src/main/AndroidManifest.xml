@@ -26,8 +26,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:label="@string/neko_app_name"
         android:largeHeap="true"
-        android:theme="@style/Theme.Tachiyomi"
-        android:networkSecurityConfig="@xml/network_security_config">
+        android:theme="@style/Theme.Tachiyomi">
         <activity
             android:name=".ui.main.MainActivity"
             android:windowSoftInputMode="adjustPan"
@@ -36,11 +35,13 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <meta-data android:name="android.app.searchable" android:resource="@xml/searchable"/>
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable" />
         </activity>
         <activity
             android:name=".ui.reader.ReaderActivity"
-            android:theme="@style/Theme.Splash" >
+            android:theme="@style/Theme.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
