@@ -458,7 +458,8 @@ class MangaDetailsPresenter(
                 manga.copyFrom(networkManga)
                 manga.initialized = true
 
-                if (thumbnailUrl != networkManga.thumbnail_url) {
+                //force new cover if it exists
+                if (networkManga.thumbnail_url != null) {
                     coverCache.deleteFromCache(thumbnailUrl)
                 }
                 withContext(Dispatchers.Main) {
