@@ -8,7 +8,7 @@ import timber.log.Timber
 data class ReaderChapter(val chapter: Chapter) {
 
     var state: State =
-            State.Wait
+        State.Wait
         set(value) {
             field = value
             stateRelay.call(value)
@@ -42,6 +42,10 @@ data class ReaderChapter(val chapter: Chapter) {
             pageLoader = null
             state = State.Wait
         }
+    }
+
+    fun urlAndName(): String {
+        return this.chapter.url + " - " + this.chapter.name
     }
 
     sealed class State {

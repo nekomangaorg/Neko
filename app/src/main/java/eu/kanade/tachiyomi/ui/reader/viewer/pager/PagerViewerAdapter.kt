@@ -24,6 +24,7 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
         private set
 
     var currentChapter: ReaderChapter? = null
+
     /**
      * Updates this adapter with the given [chapters]. It handles setting a few pages of the
      * next/previous chapter to allow seamless transitions and inverting the pages if the viewer
@@ -31,6 +32,10 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
      */
     fun setChapters(chapters: ViewerChapters, forceTransition: Boolean) {
         val newItems = mutableListOf<Any>()
+
+        Timber.d("ViewerChapter previous chapter %s", chapters.prevChapter?.urlAndName())
+        Timber.d("ViewerChapter current chapter %s", chapters.currChapter.urlAndName())
+        Timber.d("ViewerChapter next chapter %s", chapters.nextChapter?.urlAndName())
 
         // Add previous chapter pages and transition.
         if (chapters.prevChapter != null) {
@@ -109,7 +114,7 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
             if (position != -1) {
                 return position
             } else {
-                Timber.d("Position for ${view.item} not found")
+                Timber.d("Position for %s not found", view.item)
             }
         }
         return POSITION_NONE

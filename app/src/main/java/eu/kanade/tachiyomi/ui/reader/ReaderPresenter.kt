@@ -4,6 +4,7 @@ import android.app.Application
 import android.os.Bundle
 import android.os.Environment
 import com.jakewharton.rxrelay.BehaviorRelay
+import eu.kanade.tachiyomi.DebugTree
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
@@ -106,12 +107,16 @@ class ReaderPresenter(
 
         val chaptersForReader =
             readerChapterFilter.filterChapter(dbChapters, manga, selectedChapter)
-
+        Timber.d("--chapter list--")
         when (manga.sorting) {
             Manga.SORTING_SOURCE -> ChapterLoadBySource().get(chaptersForReader)
             Manga.SORTING_NUMBER -> ChapterLoadByNumber().get(chaptersForReader, selectedChapter)
             else -> error("Unknown sorting method")
-        }.map(::ReaderChapter)
+        }.map { it ->
+            Timber.d(it.name)
+            ReaderChapter(it)
+        }
+
     }
 
     var chapterItems = emptyList<ReaderChapterItem>()
@@ -208,23 +213,11 @@ class ReaderPresenter(
                 list
             }
         }
-
-        return chapterItems
-    }
-
-    /**
-     * Removes all filters and requests an UI update.
-     */
-    fun setFilters(read: Boolean, unread: Boolean, downloaded: Boolean, bookmarked: Boolean) {
-        val manga = manga ?: return
-        manga.readFilter = when {
-            read -> Manga.SHOW_READ
-            unread -> Manga.SHOW_UNREAD
-            else -> Manga.SHOW_ALL
+        if (Timber.asTree() is DebugTree) {
+            Timber.d("chapter items")
+            chapterItems.forEach { Timber.d(it.chapter.name) }
         }
-        manga.downloadedFilter = if (downloaded) Manga.SHOW_DOWNLOADED else Manga.SHOW_ALL
-        manga.bookmarkedFilter = if (bookmarked) Manga.SHOW_BOOKMARKED else Manga.SHOW_ALL
-        db.updateFlags(manga).executeAsBlocking()
+        return chapterItems
     }
 
     /**
@@ -283,11 +276,25 @@ class ReaderPresenter(
             })
             .observeOn(AndroidSchedulers.mainThread())
             .doOnNext { newChapters ->
+
                 val oldChapters = viewerChaptersRelay.value
+
+                Timber.d("loadObservable oldChapters previousChapter %s", oldChapters?.prevChapter?.urlAndName())
+                Timber.d("loadObservable oldChapters currentChapter %s", oldChapters?.currChapter?.urlAndName())
+                Timber.d("loadObservable oldChapters nextChapter %s", oldChapters?.nextChapter?.urlAndName())
+
+                Timber.d("loadObservable newChapters previousChapter %s", newChapters?.prevChapter?.urlAndName())
+                Timber.d("loadObservable newChapters currentChapter %s", newChapters?.currChapter?.urlAndName())
+                Timber.d("loadObservable newChapters nextChapter %s", newChapters?.nextChapter?.urlAndName())
 
                 // Add new references first to avoid unnecessary recycling
                 newChapters.ref()
                 oldChapters?.unref()
+
+                Timber.d("loadObservable newChapters afterRef previousChapter %s", newChapters.prevChapter?.urlAndName())
+                Timber.d("loadObservable newChapters afterRef currentChapter %s", newChapters.currChapter.urlAndName())
+                Timber.d("loadObservable newChapters afterRef nextChapter %s", newChapters.nextChapter?.urlAndName())
+
 
                 viewerChaptersRelay.call(newChapters)
             }
@@ -343,7 +350,7 @@ class ReaderPresenter(
     private fun loadNewChapter(chapter: ReaderChapter) {
         val loader = loader ?: return
 
-        Timber.d("Loading ${chapter.chapter.url}")
+        Timber.d("loadNewChapter Loading %s - %s", chapter.chapter.url, chapter.chapter.name)
 
         activeChapterSubscription?.unsubscribe()
         activeChapterSubscription = getLoadObservable(loader, chapter)
@@ -387,7 +394,7 @@ class ReaderPresenter(
             return
         }
 
-        Timber.d("Preloading ${chapter.chapter.url}")
+        Timber.d("Preloading %s - %s", chapter.chapter.url, chapter.chapter.name)
 
         val loader = loader ?: return
 

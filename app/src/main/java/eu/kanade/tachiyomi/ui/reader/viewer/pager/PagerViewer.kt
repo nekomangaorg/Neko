@@ -58,6 +58,9 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
             field = value
             if (value) {
                 awaitingIdleViewerChapters?.let {
+                    Timber.d("isIdle previousChapter %s", it.prevChapter?.urlAndName())
+                    Timber.d("isIdle currentChapter %s", it.currChapter.urlAndName())
+                    Timber.d("isIdle nextChaptter %s", it.nextChapter?.urlAndName())
                     setChaptersInternal(it)
                     awaitingIdleViewerChapters = null
                 }
@@ -157,12 +160,14 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
         activity.onPageSelected(page)
 
         val pages = page.chapter.pages ?: return
-        Timber.d("onReaderPageSelected: ${page.number}/${pages.size}")
+        Timber.d("onReaderPageSelected: %s/%s", page.number, pages.size)
         // Preload next chapter once we're within the last 5 pages of the current chapter
         val inPreloadRange = pages.size - page.number < 5
         if (inPreloadRange && allowPreload && page.chapter == adapter.currentChapter) {
-            Timber.d("Request preload next chapter because we're at page ${page.number} of ${pages.size}")
+            Timber.d("Request preload next chapter because we're at page %s of %s", page.number, pages.size)
+            Timber.d("Current chapter %s", adapter.currentChapter?.urlAndName())
             adapter.nextTransition?.to?.let {
+                Timber.d("Next preload chapter %s", adapter.nextTransition?.to?.urlAndName())
                 activity.requestPreloadChapter(it)
             }
         }
@@ -173,7 +178,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
      * preload of the destination chapter of the transition.
      */
     private fun onTransitionSelected(transition: ChapterTransition) {
-        Timber.d("onTransitionSelected: $transition")
+        Timber.d("onTransitionSelected: %s", transition)
         val toChapter = transition.to
         if (toChapter != null) {
             Timber.d("Request preload destination chapter because we're on the transition")
@@ -201,8 +206,10 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
      */
     private fun setChaptersInternal(chapters: ViewerChapters) {
         Timber.d("setChaptersInternal")
-        val forceTransition = config.alwaysShowChapterTransition || adapter.items.getOrNull(pager
-            .currentItem) is ChapterTransition
+        val forceTransition = config.alwaysShowChapterTransition || adapter.items.getOrNull(
+            pager
+                .currentItem
+        ) is ChapterTransition
         adapter.setChapters(chapters, forceTransition)
 
         // Layout the pager once a chapter is being set
@@ -218,7 +225,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
      * Tells this viewer to move to the given [page].
      */
     override fun moveToPage(page: ReaderPage) {
-        Timber.d("moveToPage ${page.number}")
+        Timber.d("moveToPage %s", page.number)
         val position = adapter.items.indexOf(page)
         if (position != -1) {
             val currentPosition = pager.currentItem
@@ -228,7 +235,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
                 onPageChange(position)
             }
         } else {
-            Timber.d("Page $page not found in adapter")
+            Timber.d("Page %s not found in adapter", page)
         }
     }
 
