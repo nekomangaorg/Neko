@@ -19,8 +19,10 @@ object DiskUtil {
     fun getDirectorySize(f: File): Long {
         var size: Long = 0
         if (f.isDirectory) {
-            for (file in f.listFiles()) {
-                size += getDirectorySize(file)
+            f.listFiles()?.let {
+                for (file in it) {
+                    size += getDirectorySize(file)
+                }
             }
         } else {
             size = f.length()
