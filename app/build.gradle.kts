@@ -105,7 +105,7 @@ dependencies {
 
     implementation("com.google.firebase:firebase-core:17.4.3")
     implementation("com.google.firebase:firebase-analytics:17.4.3")
-    implementation("com.google.firebase:firebase-crashlytics:17.0.1")
+    implementation("com.google.firebase:firebase-crashlytics:17.1.0")
 
     val lifecycleVersion = "2.2.0"
     implementation("androidx.lifecycle:lifecycle-extensions:$lifecycleVersion")
