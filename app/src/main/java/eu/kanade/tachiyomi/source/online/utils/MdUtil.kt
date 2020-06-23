@@ -14,8 +14,10 @@ class MdUtil {
         const val groupSearchUrl = "$baseUrl/groups/0/1/"
         const val followsAllApi = "/api/?type=manga_follows"
         const val followsMangaApi = "/api/?type=manga_follows&manga_id="
+        const val coversApi = "/api/index.php?type=covers&id="
 
-        private const val scanlatorSeparator = " & "
+        private const
+        val scanlatorSeparator = " & "
 
         val validOneShotFinalChapters = listOf("0", "1")
 

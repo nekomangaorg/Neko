@@ -10,6 +10,7 @@ import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.online.handlers.CoverHandler
 import eu.kanade.tachiyomi.source.online.handlers.FilterHandler
 import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
 import eu.kanade.tachiyomi.source.online.handlers.MangaHandler
@@ -110,13 +111,24 @@ open class MangaDex() : HttpSource() {
     }
 
     override suspend fun fetchMangaDetails(manga: SManga): SManga {
-        return MangaHandler(clientBuilder(), headers, getLangsToShow()).fetchMangaDetails(manga)
+        val manga = MangaHandler(clientBuilder(), headers, getLangsToShow()).fetchMangaDetails(manga)
+        if (preferences.forceLatestCovers()) {
+            val cover = getLatestCoverUrl(manga)
+            manga.thumbnail_url = cover
+        }
+        return manga
     }
 
     override suspend fun fetchMangaAndChapterDetails(manga: SManga): Pair<SManga, List<SChapter>> {
-        return MangaHandler(clientBuilder(), headers, getLangsToShow()).fetchMangaAndChapterDetails(
+        val pair = MangaHandler(clientBuilder(), headers, getLangsToShow()).fetchMangaAndChapterDetails(
             manga
         )
+        if (preferences.forceLatestCovers()) {
+            val cover = getLatestCoverUrl(manga)
+            pair.first.thumbnail_url = cover
+        }
+
+        return pair
     }
 
     override fun fetchChapterListObservable(manga: SManga): Observable<List<SChapter>> {
@@ -162,6 +174,18 @@ open class MangaDex() : HttpSource() {
 
     override fun fetchMangaSimilarObservable(manga: Manga): Observable<MangasPage> {
         return SimilarHandler(preferences).fetchSimilar(manga)
+    }
+
+    override suspend fun getLatestCoverUrl(manga: SManga): String {
+        val covers = getAllCovers(manga)
+        if (covers.isEmpty()) {
+            return manga.thumbnail_url!!
+        }
+        return getAllCovers(manga).last()
+    }
+
+    override suspend fun getAllCovers(manga: SManga): List<String> {
+        return CoverHandler(clientBuilder(), headers).getCovers(manga)
     }
 
     override fun isLogged(): Boolean {

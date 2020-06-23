@@ -94,8 +94,10 @@
     <string name="sync_follows_to_library">Sync Mangadex manga into Neko</string>
     <string name="sync_follows_to_library_summary">Pulls reading/rereading manga from Mangadex into your Neko library</string>
     <string name="low_quality_covers">Use low quality thumbnails</string>
-    <string name="use_non_logged_in_network">Do not mark website chapters read</string>
+    <string name="use_latest_cover">Use latest uploaded cover</string>
+    <string name="use_latest_cover_summary">When enabled, it uses the latest uploaded manga cover under the /covers url instead of using the normal/original cover</string>
 
+    would be my suggestion
     <!-- Advanced Settings -->
     <string name="clear_image_cache">Clear image cover cache</string>
     <string name="enable_debug_logs">Enable debug logger</string>

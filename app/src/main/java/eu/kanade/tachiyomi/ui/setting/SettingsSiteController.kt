@@ -88,6 +88,13 @@ class SettingsSiteController : SettingsController(), MangadexLoginDialog.Listene
             defaultValue = false
         }
 
+        switchPreference {
+            key = PreferenceKeys.forceLatestCovers
+            titleRes = R.string.use_latest_cover
+            summaryRes = R.string.use_latest_cover_summary
+            defaultValue = false
+        }
+
         preference {
             titleRes = R.string.sync_follows_to_library
             summaryRes = R.string.sync_follows_to_library_summary

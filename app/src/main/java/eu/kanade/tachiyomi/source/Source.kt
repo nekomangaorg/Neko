@@ -118,6 +118,10 @@ interface Source {
      */
     suspend fun fetchChapterList(manga: SManga): List<SChapter>
 
+    suspend fun getLatestCoverUrl(manga: SManga): String
+
+    suspend fun getAllCovers(manga: SManga): List<String>
+
     /**
      * Returns an observable with the list of pages a chapter has.
      *
