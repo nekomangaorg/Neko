@@ -46,7 +46,7 @@ open class BrowseSourcePresenter(
     var query: String = "",
     private var isDeepLink: Boolean = false,
     sourceManager: SourceManager = Injekt.get(),
-    private val db: DatabaseHelper = Injekt.get(),
+    val db: DatabaseHelper = Injekt.get(),
     private val prefs: PreferencesHelper = Injekt.get(),
     private val coverCache: CoverCache = Injekt.get()
 ) : BasePresenter<BrowseSourceController>() {

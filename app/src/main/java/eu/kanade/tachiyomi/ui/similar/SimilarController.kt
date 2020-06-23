@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.similar
 
+import android.app.Activity
 import android.os.Bundle
 import android.view.Menu
 import android.view.View
@@ -18,27 +19,27 @@ import kotlinx.android.synthetic.main.browse_source_controller.*
  */
 class SimilarController(bundle: Bundle) : BrowseSourceController(bundle) {
 
-    var manga: Manga? = null
-        private set
-
     constructor(manga: Manga, source: Source) : this(Bundle().apply {
+        putLong(MANGA_ID, manga.id!!)
         putLong(SOURCE_ID_KEY, source.id)
         putBoolean(APPLY_INSET, false)
-    }) {
-        this.manga = manga
-    }
+    })
 
     override fun getTitle(): String? {
         return view?.context?.getString(R.string.similar)
     }
 
     override fun createPresenter(): BrowseSourcePresenter {
-        return SimilarPresenter(this.manga!!)
+        return SimilarPresenter(bundle!!.getLong(MANGA_ID))
     }
 
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
         fab.gone()
+    }
+
+    override fun onActivityPaused(activity: Activity) {
+        super.onActivityPaused(activity)
     }
 
     override fun onPrepareOptionsMenu(menu: Menu) {

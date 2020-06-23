@@ -627,6 +627,7 @@ open class BrowseSourceController(bundle: Bundle) :
 
     protected companion object {
         const val SOURCE_ID_KEY = "sourceId"
+        const val MANGA_ID = "mangaId"
         const val SEARCH_QUERY_KEY = "searchQuery"
         const val APPLY_INSET = "applyInset"
         const val DEEP_LINK = "deepLink"

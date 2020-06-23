@@ -8,16 +8,12 @@ import eu.kanade.tachiyomi.ui.source.browse.Pager
 /**
  * Presenter of [SimilarController]. Inherit BrowseSourcePresenter.
  */
-class SimilarPresenter() : BrowseSourcePresenter() {
+class SimilarPresenter(val mangaId: Long) : BrowseSourcePresenter() {
 
     var manga: Manga? = null
-        private set
-
-    constructor(manga: Manga) : this() {
-        this.manga = manga
-    }
-
+    
     override fun createPager(query: String, filters: FilterList): Pager {
+        this.manga = db.getManga(mangaId).executeAsBlocking()
         return SimilarPager(this.manga!!, source)
     }
 }
