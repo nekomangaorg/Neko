@@ -384,7 +384,7 @@ class LibraryUpdateService(
             val thumbnailUrl = manga.thumbnail_url
             manga.copyFrom(details.first)
             manga.initialized = true
-            if (thumbnailUrl != manga.thumbnail_url) {
+            if (manga.thumbnail_url != null) {
                 coverCache.deleteFromCache(thumbnailUrl)
                 // load new covers in background
                 val request =

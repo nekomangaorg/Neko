@@ -299,7 +299,7 @@ class Downloader(
             .flatMap { Observable.from(it) }
             // Start downloading images, consider we can have downloaded images already
             // Concurrently do 5 pages at a time
-            .flatMap({ page -> getOrDownloadImage(page, download, tmpDir) }, 5)
+            .flatMap({ page -> getOrDownloadImage(page, download, tmpDir) }, 8)
             // Do when page is downloaded.
             .doOnNext { notifier.onProgressChange(download) }.toList().map { _ -> download }
             // Do after download completes
