@@ -312,7 +312,7 @@ class LibraryUpdateService(
                 mangaToUpdateMap[manga.index.toLong()] = listOf(manga.value)
             }
         } else {
-            val chunked = mangaToAdd.chunked(mangaToAdd.size.div(5))
+            val chunked = mangaToAdd.chunked(mangaToAdd.size.div(2))
             for (x in chunked.indices) {
                 mangaToUpdateMap[x.toLong()] = chunked[x]
             }
