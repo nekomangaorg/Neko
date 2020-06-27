@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
-import android.util.JsonReader
 import com.github.salomonbrys.kotson.nullInt
 import com.github.salomonbrys.kotson.obj
 import com.google.gson.JsonParser
@@ -16,6 +15,7 @@ import okhttp3.Response
 import org.jsoup.Jsoup
 import timber.log.Timber
 import java.util.Date
+import kotlin.math.floor
 
 class ApiMangaParser(val langs: List<String>) {
     fun mangaDetailsParse(response: Response): SManga {
@@ -93,7 +93,7 @@ class ApiMangaParser(val langs: List<String>) {
             }
         }
         val removeOneshots = filteredChapters.filter { !it.value.chapter.isNullOrBlank() }
-        return removeOneshots.size.toString() == finalChapterNumber
+        return removeOneshots.size.toString() == floor(finalChapterNumber.toDouble()).toInt().toString()
     }
 
     private fun getMissingChapterCount(filteredChapters: List<Map.Entry<String, ChapterSerializer>>): String? {

@@ -23,10 +23,10 @@ class MangaHandler(val client: OkHttpClient, val headers: Headers, val langs: Li
             val jsonData = response.body!!.string()
 
             val detailsManga = parser.mangaDetailsParse(jsonData)
-            detailsManga.apply { initialized = true }
+            manga.copyFrom(detailsManga)
             val chapterList = parser.chapterListParse(jsonData)
             Pair(
-                detailsManga,
+                manga,
                 chapterList
             )
         }

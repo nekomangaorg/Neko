@@ -124,7 +124,7 @@ open class MangaDex() : HttpSource() {
             manga
         )
         if (preferences.forceLatestCovers()) {
-            val cover = getLatestCoverUrl(manga)
+            val cover = getLatestCoverUrl(pair.first)
             pair.first.thumbnail_url = cover
         }
 
