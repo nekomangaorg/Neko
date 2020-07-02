@@ -2,6 +2,12 @@
 <changelog bulletedList="true">
     <changelogversion
         changeDate=""
+        versionName="v2.0.15.4">
+        <changelogtext>Fix: missing debug log</changelogtext>
+        <changelogtext>New: Dialog for similar manga for new users</changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
         versionName="v2.0.15.3">
         <changelogtext>New: Added average rating from X users to manga info screen</changelogtext>
         <changelogtext>New: Debug log now writes to file when enabled. Only enable when you need to send logs</changelogtext>

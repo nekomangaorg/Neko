@@ -755,7 +755,7 @@ class MangaDetailsPresenter(
     fun isTracked(): Boolean =
         loggedServices.any { service -> tracks.any { it.sync_id == service.id } }
 
-    fun similarEnabled(): Boolean = preferences.similarEnabled()
+    fun similarEnabled(): Boolean = preferences.similarEnabled().get()
 
     // Tracking
     private fun setTrackItems() {

@@ -29,7 +29,7 @@ class SimilarUpdateJob(private val context: Context, workerParams: WorkerParamet
         fun setupTask(skipInitial: Boolean = false) {
 
             val preferences = Injekt.get<PreferencesHelper>()
-            val enabled = preferences.similarEnabled()
+            val enabled = preferences.similarEnabled().get()
             val interval = preferences.similarUpdateInterval().getOrDefault()
             if (enabled) {
 
