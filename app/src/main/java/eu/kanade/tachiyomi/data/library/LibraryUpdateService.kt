@@ -15,6 +15,7 @@ import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.scanlatorList
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.library.LibraryUpdateRanker.rankingScheme
@@ -405,12 +406,26 @@ class LibraryUpdateService(
 
             val fetchedChapters = details.second
             if (fetchedChapters.isNotEmpty()) {
+                val originalChapters = db.getChapters(manga).executeAsBlocking()
                 val newChapters = syncChaptersWithSource(db, fetchedChapters, manga)
                 if (newChapters.first.isNotEmpty()) {
                     if (shouldDownload) {
                         var chaptersToDl = newChapters.first.sortedBy { it.chapter_number }
                         if (manga.scanlator_filter != null) {
-                            val scanlatorsToDownload = MdUtil.getScanlators(manga.scanlator_filter!!)
+
+                            val originalScanlators = originalChapters.flatMap { it.scanlatorList() }.distinct().sorted()
+                            val newScanlators = newChapters.first.flatMap { it.scanlatorList() }.distinct().sorted()
+
+                            val results = newScanlators.filter { !originalScanlators.contains(it) }
+
+                            val scanlatorsToDownload = MdUtil.getScanlators(manga.scanlator_filter!!).toMutableList()
+
+                            if (results.isNotEmpty()) {
+                                scanlatorsToDownload.addAll(results)
+                                manga.scanlator_filter = MdUtil.getScanlatorString(scanlatorsToDownload)
+                                db.insertManga(manga).executeAsBlocking()
+                            }
+
                             chaptersToDl = chaptersToDl.filter { scanlatorsToDownload.contains(it.scanlator) }
                         }
                         downloadChapters(manga, chaptersToDl)

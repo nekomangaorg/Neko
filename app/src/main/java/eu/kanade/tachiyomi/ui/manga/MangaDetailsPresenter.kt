@@ -612,20 +612,6 @@ class MangaDetailsPresenter(
         asyncUpdateMangaAndChapters()
     }
 
-    fun setScanlatorFilter(selectedScanlators: MutableList<String>?) {
-        if (!selectedScanlators.isNullOrEmpty()) {
-            chapters.filter {
-                val scanlatorString = it.chapter.scanlator
-                var found = false
-                if (!scanlatorString.isNullOrBlank()) {
-                    found = MdUtil.getScanlators(scanlatorString)
-                        .any { group -> selectedScanlators.contains(group) }
-                }
-                found
-            }.toList()
-        }
-    }
-
     /**
      * Removes all filters and requests an UI update.
      */
