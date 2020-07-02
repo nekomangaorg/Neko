@@ -124,8 +124,43 @@
         app:layout_constraintStart_toStartOf="@id/title"
         app:layout_constraintTop_toBottomOf="@+id/manga_author" />
 
+    <com.mikepenz.iconics.view.IconicsTextView
+        android:id="@+id/manga_rating"
+        style="@style/Neko.Subtitle1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="16dp"
+        android:textIsSelectable="false"
+        app:layout_constraintStart_toStartOf="@id/title"
+        android:visibility="gone"
+        tools:visibility="visible"
+        tools:text="rating 4.82"
+        app:iiv_start_color="?android:attr/textColorSecondary"
+        app:iiv_start_size="15dp"
+        app:iiv_start_icon="gmf_bar_chart"
+        app:layout_constraintTop_toBottomOf="@+id/manga_status" />
+
+    <com.mikepenz.iconics.view.IconicsTextView
+        android:id="@+id/manga_users"
+        style="@style/Neko.Subtitle1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:paddingStart="8dp"
+        android:layout_marginEnd="16dp"
+        android:textIsSelectable="false"
+        app:layout_constraintStart_toEndOf="@id/manga_rating"
+        android:visibility="gone"
+        tools:visibility="visible"
+        tools:text="user 4.82"
+        app:iiv_start_color="?android:attr/textColorSecondary"
+        app:iiv_start_size="15dp"
+        app:iiv_start_icon="gmf_person"
+        app:layout_constraintTop_toBottomOf="@+id/manga_status" />
+
     <com.google.android.material.textview.MaterialTextView
-    android:id="@+id/manga_missing_chapters"
+        android:id="@+id/manga_missing_chapters"
         style="@style/Neko.Subtitle1"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -136,7 +171,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@id/title"
         android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@+id/manga_status" />
+        tools:visibility="visible"
+        app:layout_constraintTop_toBottomOf="@+id/manga_rating" />
 
 
     <ImageView

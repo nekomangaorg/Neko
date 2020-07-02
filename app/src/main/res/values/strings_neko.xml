@@ -19,7 +19,6 @@
     <string name="hiatus">Hiatus</string>
     <string name="cancelled">Cancelled</string>
     <string name="publication_complete">Publication Complete</string>
-    <string name="missing_chapters">%1$s missing chapters</string>
 
     <!--Browse -->
     <string name="random_manga">Random</string>
@@ -36,6 +35,8 @@
     <string name="filter_groups_title">Scanlator groups to show</string>
     <string name="scanlator_groups">Scanlator groups</string>
     <string name="reset_group_filter">Reset to all</string>
+
+    <string name="missing_chapters">%1$s missing chapters</string>
 
     <!-- Reader -->
     <string name="try_similar">Don\'t forget to try looking for \nSimilar Manga. Click the </string>

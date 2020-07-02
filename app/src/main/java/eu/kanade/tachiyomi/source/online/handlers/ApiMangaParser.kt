@@ -37,6 +37,10 @@ class ApiMangaParser(val langs: List<String>) {
             manga.artist = MdUtil.cleanString(networkManga.artist)
             manga.lang_flag = networkManga.lang_flag
 
+            networkManga.rating?.let {
+                manga.rating = it.bayesian ?: it.mean
+                manga.users = it.users
+            }
             networkManga.links?.let {
                 it.al?.let { manga.anilist_id = it }
                 it.kt?.let { manga.kitsu_id = it }

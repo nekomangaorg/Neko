@@ -229,7 +229,15 @@ class MangaHeaderHolder(
                 else -> R.string.unknown
             }
         ))
+
+        manga_rating.visibleIf(manga.rating != null)
+        manga_rating.text = "  " + manga.rating
+
+        manga_users.visibleIf(manga.users != null)
+        manga_users.text = "  " + manga.users
+
         manga_missing_chapters.visibleIf(manga.missing_chapters != null)
+
         manga_missing_chapters.text = itemView.context.getString(R.string.missing_chapters, manga.missing_chapters)
 
         manga_lang_flag.visibility = View.VISIBLE

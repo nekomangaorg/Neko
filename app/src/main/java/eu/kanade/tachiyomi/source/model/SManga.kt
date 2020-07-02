@@ -55,6 +55,10 @@ interface SManga : Serializable {
 
     var missing_chapters: String?
 
+    var rating: String?
+
+    var users: String?
+
     fun copyFrom(other: SManga) {
 
         if (other.author != null)
@@ -92,6 +96,12 @@ interface SManga : Serializable {
 
         if (other.manga_updates_id != null)
             manga_updates_id = other.manga_updates_id
+
+        if (other.rating != null)
+            rating = other.rating
+
+        if (other.users != null)
+            users = other.users
 
         missing_chapters = other.missing_chapters
 

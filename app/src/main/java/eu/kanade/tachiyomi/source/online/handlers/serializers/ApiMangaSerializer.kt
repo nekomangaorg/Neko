@@ -21,6 +21,7 @@ data class MangaSerializer(
     val lang_name: String,
     val last_chapter: String? = null,
     val links: LinksSerializer? = null,
+    val rating: RatingSerializer? = null,
     val status: Int,
     val title: String
 )
@@ -35,6 +36,13 @@ data class LinksSerializer(
     val mal: String? = null,
     val mu: String? = null,
     val raw: String? = null
+)
+
+@Serializable
+data class RatingSerializer(
+    val bayesian: String? = null,
+    val mean: String? = null,
+    val users: String? = null
 )
 
 @Serializable

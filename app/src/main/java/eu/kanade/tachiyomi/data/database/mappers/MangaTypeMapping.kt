@@ -29,12 +29,14 @@ import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_LAST_UPDATE
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_MANGA_UPDATES_ID
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_MISSING_CHAPTERS
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_MY_ANIME_LIST_ID
+import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_RATING
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_SCANLATOR_FILTER_FLAG
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_SOURCE
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_STATUS
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_THUMBNAIL_URL
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_TITLE
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_URL
+import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_USERS
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_VIEWER
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.TABLE
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
@@ -84,6 +86,9 @@ class MangaPutResolver : DefaultPutResolver<Manga>() {
         put(COL_ANIME_PLANET_ID, obj.anime_planet_id)
         put(COL_SCANLATOR_FILTER_FLAG, obj.scanlator_filter)
         put(COL_MISSING_CHAPTERS, obj.missing_chapters)
+        put(COL_RATING, obj.rating)
+        put(COL_USERS, obj.users)
+
     }
 }
 
@@ -113,6 +118,8 @@ interface BaseMangaGetResolver {
         anime_planet_id = cursor.getString(cursor.getColumnIndex(COL_ANIME_PLANET_ID))
         scanlator_filter = cursor.getString(cursor.getColumnIndex(COL_SCANLATOR_FILTER_FLAG))
         missing_chapters = cursor.getString(cursor.getColumnIndex(COL_MISSING_CHAPTERS))
+        rating = cursor.getString(cursor.getColumnIndex(COL_RATING))
+        users = cursor.getString(cursor.getColumnIndex(COL_USERS))
         follow_status =
             cursor.getInt(cursor.getColumnIndex(COL_FOLLOW_STATUS)).let { FollowStatus.fromInt(it) }
     }

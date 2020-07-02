@@ -60,6 +60,10 @@ object MangaTable {
 
     const val COL_MISSING_CHAPTERS = "missing_chapters"
 
+    const val COL_RATING = "rating"
+
+    const val COL_USERS = "users"
+
     val createTableQuery: String
         get() = """CREATE TABLE $TABLE(
             $COL_ID INTEGER NOT NULL PRIMARY KEY,
@@ -86,6 +90,8 @@ object MangaTable {
             $COL_MANGA_UPDATES_ID TEXT,
             $COL_SCANLATOR_FILTER_FLAG TEXT,
             $COL_MISSING_CHAPTERS TEXT,
+            $COL_RATING TEXT,
+            $COL_USERS TEXT,
             $COL_FOLLOW_STATUS INTEGER
             )"""
 
@@ -125,4 +131,10 @@ object MangaTable {
 
     val addMissingChaptersCol: String
         get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_MISSING_CHAPTERS} TEXT DEFAULT NULL"
+
+    val addRatingCol: String
+        get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_RATING} TEXT DEFAULT NULL"
+
+    val addUsersCol: String
+        get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_USERS} TEXT DEFAULT NULL"
 }

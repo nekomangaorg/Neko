@@ -30,19 +30,27 @@ open class MangaImpl : Manga {
 
     override var author: String?
         get() = if (favorite) customMangaManager.getManga(this)?.author ?: ogAuthor else ogAuthor
-        set(value) { ogAuthor = value }
+        set(value) {
+            ogAuthor = value
+        }
 
     override var artist: String?
         get() = if (favorite) customMangaManager.getManga(this)?.artist ?: ogArtist else ogArtist
-        set(value) { ogArtist = value }
+        set(value) {
+            ogArtist = value
+        }
 
     override var description: String?
         get() = if (favorite) customMangaManager.getManga(this)?.description ?: ogDesc else ogDesc
-        set(value) { ogDesc = value }
+        set(value) {
+            ogDesc = value
+        }
 
     override var genre: String?
         get() = if (favorite) customMangaManager.getManga(this)?.genre ?: ogGenre else ogGenre
-        set(value) { ogGenre = value }
+        set(value) {
+            ogGenre = value
+        }
 
     override var status: Int = 0
 
@@ -89,9 +97,14 @@ open class MangaImpl : Manga {
 
     override var missing_chapters: String? = null
 
+    override var rating: String? = null
+
+    override var users: String? = null
+
     override fun copyFrom(other: SManga) {
         if (other is MangaImpl && other::ogTitle.isInitialized &&
-            !other.title.isBlank() && other.ogTitle != ogTitle) {
+            !other.title.isBlank() && other.ogTitle != ogTitle
+        ) {
             val oldTitle = ogTitle
             title = other.ogTitle
             val db: DownloadManager by injectLazy()

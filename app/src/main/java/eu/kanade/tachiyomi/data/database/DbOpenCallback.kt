@@ -21,7 +21,7 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
         /**
          * Version of the database.
          */
-        const val DATABASE_VERSION = 18
+        const val DATABASE_VERSION = 20
     }
 
     override fun onCreate(db: SupportSQLiteDatabase) = with(db) {
@@ -80,6 +80,11 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
         }
         if (oldVersion < 18) {
             db.execSQL(ChapterTable.addLanguage)
+        }
+
+        if (oldVersion < 19) {
+            db.execSQL(MangaTable.addRatingCol)
+            db.execSQL(MangaTable.addUsersCol)
         }
     }
 
