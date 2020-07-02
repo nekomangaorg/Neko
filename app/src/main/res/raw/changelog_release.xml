@@ -8,6 +8,8 @@
         <changelogtext>Fix: Complete status not working when last chapter was a .5</changelogtext>
         <changelogtext>Fix: Covers not showing in library notification</changelogtext>
         <changelogtext>Fix: a new scanlation group added to series now automatically is enabled</changelogtext>
+        <changelogtext>Fix: Added missing recommendations suggest text in webtoon reader</changelogtext>
+        <changelogtext>Fix: R18 filter not always working</changelogtext>
     </changelogversion>
     <changelogversion
         changeDate=""

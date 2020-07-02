@@ -175,7 +175,7 @@ class SearchHandler(val client: OkHttpClient, private val headers: Headers, val 
             urlToUse += "&tags=" + tags.joinToString(",")
         }
 
-        return GET(urlToUse, headers)
+        return GET(urlToUse, headers, CacheControl.FORCE_NETWORK)
     }
 
     private fun searchMangaFromElement(element: Element): SManga {
