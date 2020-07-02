@@ -4,6 +4,7 @@
         changeDate=""
         versionName="v2.0.15.3">
         <changelogtext>New: Added average rating from X users to manga info screen</changelogtext>
+        <changelogtext>New: Debug log now writes to file when enabled. Only enable when you need to send logs</changelogtext>
         <changelogtext>Fix: Bug where latest chapter option sometimes didn't load a chapter</changelogtext>
         <changelogtext>Fix: Complete status not working when last chapter was a .5</changelogtext>
         <changelogtext>Fix: Covers not showing in library notification</changelogtext>
