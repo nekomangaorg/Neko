@@ -106,6 +106,7 @@
     <!-- Advanced Settings -->
     <string name="clear_image_cache">Clear image cover cache</string>
     <string name="enable_debug_logs">Enable debug logger</string>
+    <string name="enable_debug_logs_summary">Writes to documents/neko-logs/neko.log \n make sure to disable after retrieving file, so the folder gets deleted</string>
 
 
     <!-- Login dialog -->

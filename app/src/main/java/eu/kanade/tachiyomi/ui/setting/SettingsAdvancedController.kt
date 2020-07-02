@@ -14,6 +14,7 @@ import com.afollestad.materialdialogs.MaterialDialog
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.DebugTree
+import eu.kanade.tachiyomi.FileDebugTree
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.ChapterCache
 import eu.kanade.tachiyomi.data.cache.CoverCache
@@ -112,16 +113,20 @@ class SettingsAdvancedController : SettingsController() {
               onClick { cleanupDownloads() }
           }*/
 
-        if (!BuildConfig.DEBUG) {
+        if (BuildConfig.DEBUG) {
             switchPreference {
                 key = PreferenceKeys.debugLogger
                 titleRes = R.string.enable_debug_logs
+                summaryRes = R.string.enable_debug_logs_summary
                 defaultValue = false
                 setOnPreferenceClickListener { it ->
                     if (it.isEnabled) {
-                        Timber.plant(DebugTree())
+                        Timber.plant(FileDebugTree())
                     } else {
+                        val fileDebugTree = FileDebugTree();
+                        Timber.uproot(fileDebugTree)
                         Timber.uproot(DebugTree())
+                        fileDebugTree.cleanup()
                     }
                     true
                 }
