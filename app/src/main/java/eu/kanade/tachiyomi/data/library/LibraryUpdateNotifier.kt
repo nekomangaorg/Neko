@@ -12,7 +12,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import coil.Coil
 import coil.request.CachePolicy
-import coil.request.LoadRequest
+import coil.request.GetRequest
 import coil.transform.CircleCropTransformation
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
@@ -119,7 +119,7 @@ class LibraryUpdateNotifier(private val context: Context) {
      *
      * @param updates a list of manga with new updates.
      */
-    fun showResultNotification(updates: Map<LibraryManga, Array<Chapter>>) {
+    suspend fun showResultNotification(updates: Map<LibraryManga, Array<Chapter>>) {
         val notifications = ArrayList<Pair<Notification, Int>>()
         updates.forEach {
             val manga = it.key
@@ -128,14 +128,14 @@ class LibraryUpdateNotifier(private val context: Context) {
             notifications.add(Pair(context.notification(Notifications.CHANNEL_NEW_CHAPTERS) {
                 setSmallIcon(R.drawable.ic_neko_notification)
                 try {
-                    val request = LoadRequest.Builder(context).data(manga)
+                    val request = GetRequest.Builder(context).data(manga)
                         .networkCachePolicy(CachePolicy.DISABLED)
                         .transformations(CircleCropTransformation()).size(width = ICON_SIZE, height = ICON_SIZE)
-                        .target { drawable ->
-                            this.setLargeIcon((drawable as BitmapDrawable).bitmap)
-                        }
                         .build()
-                    Coil.execute(request)
+                    Coil.imageLoader(context)
+                        .execute(request).drawable?.let { drawable ->
+                            setLargeIcon((drawable as BitmapDrawable).bitmap)
+                        }
                 } catch (e: Exception) {
                 }
                 setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_SUMMARY)
@@ -143,12 +143,12 @@ class LibraryUpdateNotifier(private val context: Context) {
                 color = ContextCompat.getColor(context, R.color.colorAccent)
                 val chaptersNames = if (chapterNames.size > MAX_CHAPTERS) {
                     "${chapterNames.take(MAX_CHAPTERS - 1)
-                        .joinToString("\n")}, " + context.resources.getQuantityString(
+                        .joinToString(", ")}, " + context.resources.getQuantityString(
                         R.plurals.notification_and_n_more,
                         (chapterNames.size - (MAX_CHAPTERS - 1)),
                         (chapterNames.size - (MAX_CHAPTERS - 1))
                     )
-                } else chapterNames.joinToString("\n")
+                } else chapterNames.joinToString(", ")
                 setContentText(chaptersNames)
                 setStyle(NotificationCompat.BigTextStyle().bigText(chaptersNames))
                 priority = NotificationCompat.PRIORITY_HIGH
