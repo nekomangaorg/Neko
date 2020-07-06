@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.SystemClock
 import com.chuckerteam.chucker.api.ChuckerInterceptor
 import eu.kanade.tachiyomi.BuildConfig
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import okhttp3.Cache
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -11,7 +12,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import java.io.File
 import java.util.concurrent.TimeUnit
 
-class NetworkHelper(context: Context) {
+class NetworkHelper(val context: Context, val preferencesHelper: PreferencesHelper) {
 
     private val cacheDir = File(context.cacheDir, "network_cache")
 
@@ -51,20 +52,30 @@ class NetworkHelper(context: Context) {
         it.proceed(it.request())
     }
 
-    val nonRateLimitedClient = {
+    private fun buildNonRateLimitedClient(): OkHttpClient {
         val builder = OkHttpClient.Builder()
             .connectTimeout(20, TimeUnit.SECONDS)
             .readTimeout(60, TimeUnit.SECONDS)
             .cache(Cache(cacheDir, cacheSize))
             .addInterceptor(ChuckerInterceptor(context))
             .cookieJar(cookieManager)
-        if (BuildConfig.DEBUG) {
+        if (BuildConfig.DEBUG || preferencesHelper.debugLogEnabled()) {
             val httpLoggingInterceptor = HttpLoggingInterceptor()
             builder.addInterceptor(httpLoggingInterceptor.apply { httpLoggingInterceptor.level = HttpLoggingInterceptor.Level.BODY })
         }
+        return builder.build()
+    }
 
-        builder.build()
-    }()
+    private fun buildRateLimitedClient(): OkHttpClient {
+        return nonRateLimitedClient.newBuilder().addNetworkInterceptor(rateLimitInterceptor).build()
+    }
 
-    val client = nonRateLimitedClient.newBuilder().addNetworkInterceptor(rateLimitInterceptor).build()
+    fun rebuildClients() {
+        nonRateLimitedClient = buildNonRateLimitedClient()
+        client = nonRateLimitedClient.newBuilder().addNetworkInterceptor(rateLimitInterceptor).build()
+    }
+
+    var nonRateLimitedClient = buildNonRateLimitedClient()
+
+    var client = buildRateLimitedClient()
 }

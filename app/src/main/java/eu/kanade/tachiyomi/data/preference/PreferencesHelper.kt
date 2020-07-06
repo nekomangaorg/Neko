@@ -315,4 +315,6 @@ class PreferencesHelper(val context: Context) {
     fun dataSaver() = prefs.getBoolean(Keys.dataSaver, false)
 
     fun forceLatestCovers() = prefs.getBoolean(Keys.forceLatestCovers, false)
+
+    fun debugLogEnabled() = prefs.getBoolean(Keys.debugLogger, false)
 }

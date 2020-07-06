@@ -126,6 +126,7 @@ class SettingsAdvancedController : SettingsController() {
                     Timber.uproot(DebugTree())
                     fileDebugTree.cleanup()
                 }
+                network.rebuildClients()
                 true
             }
         }
