@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
+import okhttp3.Response
 import rx.Observable
 
 /**
@@ -128,6 +129,8 @@ interface Source {
      * @param chapter the chapter.
      */
     fun fetchPageList(chapter: SChapter): Observable<List<Page>>
+
+    fun fetchImage(page: Page): Observable<Response>
 
     fun isLogged(): Boolean
 

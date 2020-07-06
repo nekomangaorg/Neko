@@ -3,8 +3,12 @@ package eu.kanade.tachiyomi.source.online
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.POST
 import eu.kanade.tachiyomi.network.POSTWithCookie
+import eu.kanade.tachiyomi.network.asObservable
+import eu.kanade.tachiyomi.network.asObservableSuccess
+import eu.kanade.tachiyomi.network.newCallWithProgress
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.model.Page
@@ -14,16 +18,24 @@ import eu.kanade.tachiyomi.source.online.handlers.CoverHandler
 import eu.kanade.tachiyomi.source.online.handlers.FilterHandler
 import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
 import eu.kanade.tachiyomi.source.online.handlers.MangaHandler
+import eu.kanade.tachiyomi.source.online.handlers.MangaPlusHandler
 import eu.kanade.tachiyomi.source.online.handlers.PageHandler
 import eu.kanade.tachiyomi.source.online.handlers.PopularHandler
 import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
 import eu.kanade.tachiyomi.source.online.handlers.SimilarHandler
+import eu.kanade.tachiyomi.source.online.handlers.serializers.ImageReportResult
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
+import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.ImplicitReflectionSerializer
+import kotlinx.serialization.json.Json
 import okhttp3.FormBody
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
+import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.Response
 import rx.Observable
 import uy.kohesive.injekt.injectLazy
 import java.net.URLEncoder
@@ -32,6 +44,8 @@ import kotlin.collections.set
 open class MangaDex() : HttpSource() {
 
     private val preferences: PreferencesHelper by injectLazy()
+
+    private val json: Json by injectLazy()
 
     private fun clientBuilder(): OkHttpClient = clientBuilder(preferences.r18()!!.toInt())
 
@@ -155,6 +169,38 @@ open class MangaDex() : HttpSource() {
             false -> "0"
         }
         return PageHandler(clientBuilder(), headers, imageServer, dataSaver).fetchPageList(chapter)
+    }
+
+    @OptIn(ImplicitReflectionSerializer::class)
+    override fun fetchImage(page: Page): Observable<Response> {
+        if (page.imageUrl!!.contains("mangaplus", true)) {
+            return MangaPlusHandler(nonRateLimitedClient).client.newCall(GET(page.imageUrl!!, headers))
+                .asObservableSuccess()
+        } else {
+            return nonRateLimitedClient.newCallWithProgress(GET(page.imageUrl!!), page).asObservable().doOnNext { response ->
+
+                val byteSize = response.peekBody(Long.MAX_VALUE).bytes().size
+                val result = ImageReportResult(
+                    page.imageUrl!!, response.isSuccessful, byteSize
+                )
+
+                val jsonString = json.stringify(ImageReportResult.serializer(), result)
+
+                val postResult = clientBuilder().newCall(
+                    POST(
+                        MdUtil.reportUrl,
+                        headers,
+                        jsonString.toRequestBody("application/json".toMediaType())
+                    )
+                )
+                //postResult.execute()
+
+                if (!response.isSuccessful) {
+                    response.close()
+                    throw Exception("HTTP error ${response.code}")
+                }
+            }
+        }
     }
 
     override suspend fun fetchAllFollows(forceHd: Boolean): List<SManga> {

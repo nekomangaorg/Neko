@@ -9,10 +9,13 @@ import okhttp3.Cache
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import uy.kohesive.injekt.injectLazy
 import java.io.File
 import java.util.concurrent.TimeUnit
 
-class NetworkHelper(val context: Context, val preferencesHelper: PreferencesHelper) {
+class NetworkHelper(val context: Context) {
+
+    private val preferencesHelper: PreferencesHelper by injectLazy()
 
     private val cacheDir = File(context.cacheDir, "network_cache")
 

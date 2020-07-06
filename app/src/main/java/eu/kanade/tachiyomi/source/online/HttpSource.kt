@@ -2,18 +2,14 @@ package eu.kanade.tachiyomi.source.online
 
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.NetworkHelper
-import eu.kanade.tachiyomi.network.asObservableSuccess
-import eu.kanade.tachiyomi.network.newCallWithProgress
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.online.handlers.MangaPlusHandler
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import okhttp3.Headers
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.Response
 import rx.Observable
 import uy.kohesive.injekt.injectLazy
 import java.security.MessageDigest
@@ -78,6 +74,7 @@ abstract class HttpSource : Source {
     protected fun headersBuilder() = Headers.Builder().apply {
         add("User-Agent", "Tachiyomi " + System.getProperty("http.agent"))
         add("X-Requested-With", "XMLHttpRequest")
+        add("Referer", MdUtil.baseUrl)
     }
 
     /**
@@ -97,28 +94,7 @@ abstract class HttpSource : Source {
      * @param page the page whose source image has to be fetched.
      */
     open fun fetchImageUrl(page: Page): Observable<String> {
-        if (page.imageUrl!!.contains("mangaplus", true)) {
-            return MangaPlusHandler(nonRateLimitedClient).client.newCall(GET(page.imageUrl!!, headers))
-                .asObservableSuccess()
-                .map { "" }
-        }
-        return nonRateLimitedClient.newCall(GET(page.imageUrl!!))
-            .asObservableSuccess()
-            .map { "" }
-    }
-
-    /**
-     * Returns an observable with the response of the source image.
-     *
-     * @param page the page whose source image has to be downloaded.
-     */
-    fun fetchImage(page: Page): Observable<Response> {
-        if (page.imageUrl!!.contains("mangaplus", true)) {
-            return MangaPlusHandler(nonRateLimitedClient).client.newCall(GET(page.imageUrl!!, headers))
-                .asObservableSuccess()
-        }
-        return nonRateLimitedClient.newCallWithProgress(GET(page.imageUrl!!), page)
-            .asObservableSuccess()
+        return Observable.just("")
     }
 
     /**

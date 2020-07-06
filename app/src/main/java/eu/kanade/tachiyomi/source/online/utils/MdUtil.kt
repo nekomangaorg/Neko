@@ -15,6 +15,7 @@ class MdUtil {
         const val followsAllApi = "/api/?type=manga_follows"
         const val followsMangaApi = "/api/?type=manga_follows&manga_id="
         const val coversApi = "/api/index.php?type=covers&id="
+        const val reportUrl = "https://api.mangadex.network/report"
 
         private const
         val scanlatorSeparator = " & "
