@@ -10,11 +10,12 @@ import android.os.PowerManager
 import android.provider.Settings
 import android.widget.Toast
 import androidx.preference.PreferenceScreen
+import androidx.preference.SwitchPreferenceCompat
 import com.afollestad.materialdialogs.MaterialDialog
 import com.google.firebase.crashlytics.FirebaseCrashlytics
-import eu.kanade.tachiyomi.DebugTree
 import eu.kanade.tachiyomi.FileDebugTree
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.ReleaseTree
 import eu.kanade.tachiyomi.data.cache.ChapterCache
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -117,14 +118,15 @@ class SettingsAdvancedController : SettingsController() {
             titleRes = R.string.enable_debug_logs
             summaryRes = R.string.enable_debug_logs_summary
             defaultValue = false
+
             setOnPreferenceClickListener { it ->
-                if (it.isEnabled) {
+                it as SwitchPreferenceCompat
+                if (it.isChecked) {
                     Timber.plant(FileDebugTree())
                 } else {
-                    val fileDebugTree = FileDebugTree();
-                    Timber.uproot(fileDebugTree)
-                    Timber.uproot(DebugTree())
-                    fileDebugTree.cleanup()
+                    Timber.uprootAll()
+                    Timber.plant(ReleaseTree())
+                    FileDebugTree().cleanup()
                 }
                 network.rebuildClients()
                 true

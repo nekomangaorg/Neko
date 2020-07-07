@@ -44,6 +44,7 @@ class FileDebugTree() : Timber.DebugTree() {
     }
 
     fun cleanup() {
+        Timber.d("clean up and delete folder %s", directory.name)
         directory.deleteRecursively()
     }
 }
