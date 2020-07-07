@@ -129,7 +129,7 @@ class DownloadCache(
 
         val sourceDirs = getDirectoryFromPreference().listFiles().orEmpty()
             .associate { it.name to SourceDirectory(it) }.mapNotNullKeys { entry ->
-                onlineSources.find { provider.getSourceDirName(it) == entry.key }?.id
+                onlineSources.find { provider.getSourceDirName(it).toLowerCase() == entry.key?.toLowerCase() }?.id
             }
 
         val db: DatabaseHelper by injectLazy()
