@@ -1,5 +1,8 @@
 package eu.kanade.tachiyomi.source.online.utils
 
+import kotlinx.serialization.UnstableDefault
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonConfiguration
 import org.jsoup.parser.Parser
 
 class MdUtil {
@@ -16,6 +19,15 @@ class MdUtil {
         const val followsMangaApi = "/api/?type=manga_follows&manga_id="
         const val coversApi = "/api/index.php?type=covers&id="
         const val reportUrl = "https://api.mangadex.network/report"
+
+        @OptIn(UnstableDefault::class)
+        val jsonParser =
+            Json(
+                JsonConfiguration(
+                    isLenient = true, ignoreUnknownKeys = true, serializeSpecialFloatingPointValues = true,
+                    useArrayPolymorphism = true, prettyPrint = true
+                )
+            )
 
         private const
         val scanlatorSeparator = " & "

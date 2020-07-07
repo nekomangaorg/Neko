@@ -14,8 +14,6 @@ import eu.kanade.tachiyomi.source.SourceManager
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.UnstableDefault
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonConfiguration
 import uy.kohesive.injekt.api.InjektModule
 import uy.kohesive.injekt.api.InjektRegistrar
 import uy.kohesive.injekt.api.addSingleton
@@ -38,14 +36,6 @@ class AppModule(val app: Application) : InjektModule {
         addSingletonFactory { CoverCache(app) }
 
         addSingletonFactory { NetworkHelper(app) }
-
-        addSingletonFactory {
-            val config = JsonConfiguration(
-                isLenient = true, ignoreUnknownKeys = true, serializeSpecialFloatingPointValues = true,
-                useArrayPolymorphism = true, prettyPrint = true
-            )
-            Json(config)
-        }
 
         addSingletonFactory { SourceManager() }
 

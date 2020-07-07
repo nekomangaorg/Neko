@@ -16,7 +16,6 @@ import eu.kanade.tachiyomi.source.online.utils.MdUtil.Companion.baseUrl
 import eu.kanade.tachiyomi.source.online.utils.MdUtil.Companion.getMangaId
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.json.Json
 import okhttp3.CacheControl
 import okhttp3.FormBody
 import okhttp3.Headers
@@ -50,7 +49,7 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
         var followsPageResult: FollowsPageResult? = null
 
         try {
-            followsPageResult = Json.nonstrict.parse(FollowsPageResult.serializer(), response.body!!.string())
+            followsPageResult = MdUtil.jsonParser.parse(FollowsPageResult.serializer(), response.body!!.string())
         } catch (e: Exception) {
             Timber.e(e, "error parsing follows")
         }
@@ -77,7 +76,7 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
         var followsPageResult: FollowsPageResult? = null
 
         try {
-            followsPageResult = Json.nonstrict.parse(FollowsPageResult.serializer(), response.body!!.string())
+            followsPageResult = MdUtil.jsonParser.parse(FollowsPageResult.serializer(), response.body!!.string())
         } catch (e: Exception) {
             Timber.e(e, "error parsing follows")
         }

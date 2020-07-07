@@ -29,7 +29,6 @@ import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.ImplicitReflectionSerializer
-import kotlinx.serialization.json.Json
 import okhttp3.FormBody
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.MediaType.Companion.toMediaType
@@ -44,8 +43,6 @@ import kotlin.collections.set
 open class MangaDex() : HttpSource() {
 
     private val preferences: PreferencesHelper by injectLazy()
-
-    private val json: Json by injectLazy()
 
     private fun clientBuilder(): OkHttpClient = clientBuilder(preferences.r18()!!.toInt())
 
@@ -184,7 +181,7 @@ open class MangaDex() : HttpSource() {
                     page.imageUrl!!, response.isSuccessful, byteSize
                 )
 
-                val jsonString = json.stringify(ImageReportResult.serializer(), result)
+                val jsonString = MdUtil.jsonParser.stringify(ImageReportResult.serializer(), result)
 
                 val postResult = clientBuilder().newCall(
                     POST(
