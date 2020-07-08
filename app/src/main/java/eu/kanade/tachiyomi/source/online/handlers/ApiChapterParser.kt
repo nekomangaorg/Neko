@@ -3,13 +3,13 @@ package eu.kanade.tachiyomi.source.online.handlers
 import com.github.salomonbrys.kotson.string
 import com.google.gson.JsonParser
 import eu.kanade.tachiyomi.source.model.Page
-import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import okhttp3.Response
+import java.util.Date
 
 class ApiChapterParser {
     fun pageListParse(response: Response): List<Page> {
         val jsonData = response.body!!.string()
-        val json = JsonParser().parse(jsonData).asJsonObject
+        val json = JsonParser.parseString(jsonData).asJsonObject
 
         val pages = mutableListOf<Page>()
 
@@ -18,8 +18,8 @@ class ApiChapterParser {
         val server = json.get("server").string
 
         pageArray.forEach {
-            val url = "$server$hash/${it.asString}"
-            pages.add(Page(pages.size, "", MdUtil.getImageUrl(url)))
+            val url = "$hash/${it.asString}"
+            pages.add(Page(pages.size, "$server,${response.request.url},${Date().time}", url))
         }
 
         return pages
@@ -27,7 +27,7 @@ class ApiChapterParser {
 
     fun externalParse(response: Response): String {
         val jsonData = response.body!!.string()
-        val json = JsonParser().parse(jsonData).asJsonObject
+        val json = JsonParser.parseString(jsonData).asJsonObject
         val external = json.get("external").string
         return external.substringAfterLast("/")
     }

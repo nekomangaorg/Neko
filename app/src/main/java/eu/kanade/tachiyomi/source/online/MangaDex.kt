@@ -1,5 +1,7 @@
 package eu.kanade.tachiyomi.source.online
 
+import com.github.salomonbrys.kotson.string
+import com.google.gson.JsonParser
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -29,20 +31,26 @@ import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.ImplicitReflectionSerializer
+import okhttp3.CacheControl
 import okhttp3.FormBody
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
+import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import rx.Observable
+import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 import java.net.URLEncoder
+import java.util.Date
 import kotlin.collections.set
 
 open class MangaDex() : HttpSource() {
 
     private val preferences: PreferencesHelper by injectLazy()
+
+    private val tokenTracker = hashMapOf<String, Long>()
 
     private fun clientBuilder(): OkHttpClient = clientBuilder(preferences.r18()!!.toInt())
 
@@ -174,7 +182,7 @@ open class MangaDex() : HttpSource() {
             return MangaPlusHandler(nonRateLimitedClient).client.newCall(GET(page.imageUrl!!, headers))
                 .asObservableSuccess()
         } else {
-            return nonRateLimitedClient.newCallWithProgress(GET(page.imageUrl!!), page).asObservable().doOnNext { response ->
+            return nonRateLimitedClient.newCallWithProgress(imageRequest(page), page).asObservable().doOnNext { response ->
 
                 val byteSize = response.peekBody(Long.MAX_VALUE).bytes().size
                 val result = ImageReportResult(
@@ -198,6 +206,37 @@ open class MangaDex() : HttpSource() {
                 }
             }
         }
+    }
+
+    fun imageRequest(page: Page): Request {
+        val url = when {
+            // Legacy
+            page.url.isEmpty() -> page.imageUrl!!
+            // Some images are hosted elsewhere
+            !page.url.startsWith("http") -> baseUrl + page.url.substringBefore(",") + page.imageUrl
+            // New chapters on MD servers
+            page.url.startsWith(MdUtil.imageUrl) -> page.url.substringBefore(",") + page.imageUrl
+            // MD@Home token handling
+            else -> {
+                val tokenLifespan = 5 * 60 * 1000
+                val data = page.url.split(",")
+                var tokenedServer = data[0]
+                if (Date().time - data[2].toLong() > tokenLifespan) {
+                    val tokenRequestUrl = data[1]
+                    val cacheControl = if (Date().time - (tokenTracker[tokenRequestUrl] ?: 0) > tokenLifespan) {
+                        tokenTracker[tokenRequestUrl] = Date().time
+                        CacheControl.FORCE_NETWORK
+                    } else {
+                        CacheControl.FORCE_CACHE
+                    }
+                    val jsonData = client.newCall(GET(tokenRequestUrl, headers, cacheControl)).execute().body!!.string()
+                    tokenedServer = JsonParser.parseString(jsonData).asJsonObject.get("server").string
+                    Timber.d("esco new token %s", tokenedServer)
+                }
+                tokenedServer + page.imageUrl
+            }
+        }
+        return GET(url, headers)
     }
 
     override suspend fun fetchAllFollows(forceHd: Boolean): List<SManga> {

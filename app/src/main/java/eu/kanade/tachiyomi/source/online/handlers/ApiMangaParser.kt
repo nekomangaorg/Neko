@@ -10,17 +10,13 @@ import eu.kanade.tachiyomi.source.online.handlers.serializers.ApiMangaSerializer
 import eu.kanade.tachiyomi.source.online.handlers.serializers.ChapterSerializer
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
-import kotlinx.serialization.json.Json
 import okhttp3.Response
 import org.jsoup.Jsoup
 import timber.log.Timber
-import uy.kohesive.injekt.injectLazy
 import java.util.Date
 import kotlin.math.floor
 
 class ApiMangaParser(val langs: List<String>) {
-
-    val json: Json by injectLazy()
 
     fun mangaDetailsParse(response: Response): SManga {
         return mangaDetailsParse(response.body!!.string())
@@ -32,7 +28,7 @@ class ApiMangaParser(val langs: List<String>) {
     fun mangaDetailsParse(jsonData: String): SManga {
         try {
             val manga = SManga.create()
-            val networkApiManga = json.parse(ApiMangaSerializer.serializer(), jsonData)
+            val networkApiManga = MdUtil.jsonParser.parse(ApiMangaSerializer.serializer(), jsonData)
             val networkManga = networkApiManga.manga
             manga.title = MdUtil.cleanString(networkManga.title)
             manga.thumbnail_url = MdUtil.cdnUrl + MdUtil.removeTimeParamUrl(networkManga.cover_url)

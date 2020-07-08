@@ -19,6 +19,7 @@ class MdUtil {
         const val followsMangaApi = "/api/?type=manga_follows&manga_id="
         const val coversApi = "/api/index.php?type=covers&id="
         const val reportUrl = "https://api.mangadex.network/report"
+        const val imageUrl = "$baseUrl/data"
 
         @OptIn(UnstableDefault::class)
         val jsonParser =
