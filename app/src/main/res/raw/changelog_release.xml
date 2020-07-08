@@ -2,6 +2,14 @@
 <changelog bulletedList="true">
     <changelogversion
         changeDate=""
+        versionName="v2.0.15.5">
+        <changelogtext>Fix: Streaming chapters would stop loading due MD@Home change by MangaDex</changelogtext>
+        <changelogtext>Fix: Debug File Logger actually deletes the file after disabling</changelogtext>
+        <changelogtext>Fix: Allow to use device login instead of biometrics</changelogtext>
+        <changelogtext>Update: Debug File logger now shows network debug logs</changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
         versionName="v2.0.15.4">
         <changelogtext>Fix: missing debug log</changelogtext>
         <changelogtext>New: Dialog for similar manga for new users</changelogtext>
