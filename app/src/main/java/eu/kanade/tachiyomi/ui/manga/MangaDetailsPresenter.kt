@@ -24,7 +24,6 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
@@ -822,12 +821,16 @@ class MangaDetailsPresenter(
     fun mergeSearch(query: String) {
         if (!controller.isNotOnline()) {
             scope.launch(Dispatchers.IO) {
-                val results = try {
-                    sourceManager.getMangadex().fetchSearchManga(1, query, FilterList(emptyList())).toBlocking().single().mangas
-                } catch (e: Exception) {
-                    withContext(Dispatchers.Main) { controller.trackSearchError(e) }
-                    null
+                val result = async {
+                    try {
+                        sourceManager.getMergeSource().searchManga(query)
+                    } catch (e: Exception) {
+                        withContext(Dispatchers.Main) { controller.trackSearchError(e) }
+                        null
+                    }
                 }
+              
+                val results = result.await()
                 if (!results.isNullOrEmpty()) {
                     withContext(Dispatchers.Main) { controller.onMergeSearchResults(results) }
                 } else {
