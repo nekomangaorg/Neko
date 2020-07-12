@@ -23,6 +23,8 @@ import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.source.Source
+import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
@@ -57,7 +59,8 @@ class MangaDetailsPresenter(
     val preferences: PreferencesHelper = Injekt.get(),
     val coverCache: CoverCache = Injekt.get(),
     private val db: DatabaseHelper = Injekt.get(),
-    private val downloadManager: DownloadManager = Injekt.get()
+    private val downloadManager: DownloadManager = Injekt.get(),
+    private val sourceManager: SourceManager = Injekt.get()
 ) : DownloadQueue.DownloadListener, LibraryServiceListener {
 
     private var scope = CoroutineScope(Job() + Dispatchers.Default)
@@ -812,6 +815,32 @@ class MangaDetailsPresenter(
                 }
                 asyncList.awaitAll()
                 fetchTracks()
+            }
+        }
+    }
+
+    fun mergeSearch(query: String) {
+        if (!controller.isNotOnline()) {
+            scope.launch(Dispatchers.IO) {
+                val results = try {
+                    sourceManager.getMangadex().fetchSearchManga(1, query, FilterList(emptyList())).toBlocking().single().mangas
+                } catch (e: Exception) {
+                    withContext(Dispatchers.Main) { controller.trackSearchError(e) }
+                    null
+                }
+                if (!results.isNullOrEmpty()) {
+                    withContext(Dispatchers.Main) { controller.onMergeSearchResults(results) }
+                } else {
+                    withContext(Dispatchers.Main) {
+                        controller.trackSearchError(
+                            Exception(
+                                preferences.context.getString(
+                                    R.string.no_results_found
+                                )
+                            )
+                        )
+                    }
+                }
             }
         }
     }

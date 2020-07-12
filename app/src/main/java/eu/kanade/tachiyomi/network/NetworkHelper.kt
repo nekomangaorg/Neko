@@ -75,10 +75,20 @@ class NetworkHelper(val context: Context) {
 
     fun rebuildClients() {
         nonRateLimitedClient = buildNonRateLimitedClient()
-        client = nonRateLimitedClient.newBuilder().addNetworkInterceptor(rateLimitInterceptor).build()
+        client = buildRateLimitedClient()
+        cloudFlareClient = buildCloudFlareClient()
+    }
+
+    fun buildCloudFlareClient(): OkHttpClient {
+        return nonRateLimitedClient.newBuilder()
+            .addInterceptor(UserAgentInterceptor())
+            .addInterceptor(CloudflareInterceptor(context))
+            .build()
     }
 
     var nonRateLimitedClient = buildNonRateLimitedClient()
+
+    var cloudFlareClient = buildCloudFlareClient()
 
     var client = buildRateLimitedClient()
 }

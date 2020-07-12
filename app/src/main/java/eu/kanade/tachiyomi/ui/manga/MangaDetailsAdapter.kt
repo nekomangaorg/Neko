@@ -26,7 +26,7 @@ class MangaDetailsAdapter(
     val presenter = controller.presenter
 
     val decimalFormat = DecimalFormat("#.###", DecimalFormatSymbols()
-            .apply { decimalSeparator = '.' })
+        .apply { decimalSeparator = '.' })
 
     fun setChapters(items: List<ChapterItem>?) {
         this.items = items ?: emptyList()
@@ -46,8 +46,10 @@ class MangaDetailsAdapter(
         if (s.isNullOrBlank()) {
             updateDataSet(items)
         } else {
-            updateDataSet(items.filter { it.name.contains(s, true) ||
-                it.scanlator?.contains(s, true) == true })
+            updateDataSet(items.filter {
+                it.name.contains(s, true) ||
+                    it.scanlator?.contains(s, true) == true
+            })
         }
     }
 
@@ -109,6 +111,7 @@ class MangaDetailsAdapter(
         fun mangaPresenter(): MangaDetailsPresenter
         fun prepareToShareManga()
         fun openSimilar()
+        fun openMerge()
         fun startDownloadRange(position: Int)
         fun readNextChapter()
         fun topCoverHeight(): Int

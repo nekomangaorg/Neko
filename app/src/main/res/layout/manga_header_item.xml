@@ -256,6 +256,20 @@
                 tools:background="@color/md_black_1000" />
 
             <com.mikepenz.iconics.view.IconicsImageView
+                android:id="@+id/merge_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginStart="6dp"
+                android:layout_marginEnd="6dp"
+                android:contentDescription="@string/share"
+                android:padding="5dp"
+                app:iiv_icon="gmf_merge_type"
+                style="@style/Neko.Iconics"
+                android:tooltipText="@string/share"
+                tools:background="@color/md_black_1000" />
+
+            <com.mikepenz.iconics.view.IconicsImageView
                 android:id="@+id/webview_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

@@ -60,6 +60,7 @@ import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
@@ -74,6 +75,7 @@ import eu.kanade.tachiyomi.ui.manga.chapter.ChapterHolder
 import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
 import eu.kanade.tachiyomi.ui.manga.chapter.ChaptersSortBottomSheet
 import eu.kanade.tachiyomi.ui.manga.external.ExternalBottomSheet
+import eu.kanade.tachiyomi.ui.manga.merge.MergeSearchDialog
 import eu.kanade.tachiyomi.ui.manga.track.TrackItem
 import eu.kanade.tachiyomi.ui.manga.track.TrackingBottomSheet
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
@@ -153,6 +155,7 @@ class MangaDetailsController : BaseController,
     private var snack: Snackbar? = null
     val fromCatalogue = args.getBoolean(FROM_CATALOGUE_EXTRA, false)
     private var trackingBottomSheet: TrackingBottomSheet? = null
+    private var mergeSearchDialog: MergeSearchDialog? = null
     private var startingDLChapterPos: Int? = null
     private var externalBottomSheet: ExternalBottomSheet? = null
     var refreshTracker: Int? = null
@@ -199,6 +202,7 @@ class MangaDetailsController : BaseController,
         presenter.onDestroy()
         adapter = null
         trackingBottomSheet = null
+        mergeSearchDialog = null
         super.onDestroyView(view)
     }
 
@@ -791,6 +795,11 @@ class MangaDetailsController : BaseController,
         router.pushController(SimilarController(manga!!, source!!).withFadeTransaction())
     }
 
+    override fun openMerge() {
+        mergeSearchDialog = MergeSearchDialog(this)
+        mergeSearchDialog!!.showDialog(router, MergeSearchDialog.TAG)
+    }
+
     fun openInWebView(url: String) {
         externalBottomSheet?.dismiss()
         if (isNotOnline()) return
@@ -1098,6 +1107,10 @@ class MangaDetailsController : BaseController,
 
     fun onTrackSearchResults(results: List<TrackSearch>) {
         trackingBottomSheet?.onSearchResults(results)
+    }
+
+    fun onMergeSearchResults(results: List<SManga>) {
+        mergeSearchDialog?.onSearchResults(results)
     }
 
     fun trackRefreshDone() {
