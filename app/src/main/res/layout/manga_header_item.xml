@@ -250,8 +250,10 @@
                 android:layout_marginStart="6dp"
                 android:layout_marginEnd="6dp"
                 android:padding="5dp"
+                android:visibility="gone"
                 app:iiv_icon="gmf_account_tree"
                 style="@style/Neko.Iconics"
+                tools:visibility="visible"
                 android:tooltipText="@string/similar"
                 tools:background="@color/md_black_1000" />
 
@@ -264,9 +266,11 @@
                 android:layout_marginEnd="6dp"
                 android:contentDescription="@string/share"
                 android:padding="5dp"
+                android:visibility="gone"
                 app:iiv_icon="gmf_merge_type"
                 style="@style/Neko.Iconics"
-                android:tooltipText="@string/share"
+                tools:visibility="visible"
+                android:tooltipText="@string/merge_other"
                 tools:background="@color/md_black_1000" />
 
             <com.mikepenz.iconics.view.IconicsImageView

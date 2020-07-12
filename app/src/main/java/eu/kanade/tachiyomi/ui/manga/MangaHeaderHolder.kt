@@ -68,6 +68,7 @@ class MangaHeaderHolder(
             }
             webview_button.setOnClickListener { adapter.delegate.showExternalSheet() }
             similar_button.setOnClickListener { adapter.delegate.openSimilar() }
+
             merge_button.setOnClickListener { adapter.delegate.openMerge() }
 
             share_button.setOnClickListener { adapter.delegate.prepareToShareManga() }
@@ -186,6 +187,11 @@ class MangaHeaderHolder(
         with(similar_button) {
             visibleIf(presenter.similarEnabled())
             setImageDrawable(context.iconicsDrawableLarge(MaterialDesignDx.Icon.gmf_account_tree))
+        }
+
+        with(merge_button) {
+            visibleIf(manga.status != SManga.COMPLETED)
+            setImageDrawable(context.iconicsDrawableLarge(MaterialDesignDx.Icon.gmf_merge_type))
         }
 
         with(webview_button) {

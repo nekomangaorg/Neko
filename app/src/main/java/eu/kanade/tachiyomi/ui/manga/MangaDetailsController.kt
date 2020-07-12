@@ -1113,6 +1113,11 @@ class MangaDetailsController : BaseController,
         mergeSearchDialog?.onSearchResults(results)
     }
 
+    fun onMergeSearchError(error: Exception) {
+        Timber.e(error)
+        mergeSearchDialog?.onSearchResultsError()
+    }
+
     fun trackRefreshDone() {
         trackingBottomSheet?.onRefreshDone()
     }
@@ -1126,6 +1131,7 @@ class MangaDetailsController : BaseController,
         Timber.e(error)
         trackingBottomSheet?.onSearchResultsError(error)
     }
+
     //endregion
 
     //region Action mode methods

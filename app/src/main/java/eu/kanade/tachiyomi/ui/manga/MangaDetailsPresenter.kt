@@ -825,17 +825,17 @@ class MangaDetailsPresenter(
                     try {
                         sourceManager.getMergeSource().searchManga(query)
                     } catch (e: Exception) {
-                        withContext(Dispatchers.Main) { controller.trackSearchError(e) }
+                        withContext(Dispatchers.Main) { controller.onMergeSearchError(e) }
                         null
                     }
                 }
-              
+
                 val results = result.await()
                 if (!results.isNullOrEmpty()) {
                     withContext(Dispatchers.Main) { controller.onMergeSearchResults(results) }
                 } else {
                     withContext(Dispatchers.Main) {
-                        controller.trackSearchError(
+                        controller.onMergeSearchError(
                             Exception(
                                 preferences.context.getString(
                                     R.string.no_results_found

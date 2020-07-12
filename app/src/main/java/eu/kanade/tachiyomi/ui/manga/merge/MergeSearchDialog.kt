@@ -14,7 +14,6 @@ import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsPresenter
 import eu.kanade.tachiyomi.util.lang.plusAssign
 import kotlinx.android.synthetic.main.merge_search_dialog.view.*
-import kotlinx.android.synthetic.main.track_search_dialog.view.progress
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.subscriptions.CompositeSubscription
@@ -123,7 +122,7 @@ class MergeSearchDialog : DialogController {
 
     fun onSearchResultsError() {
         val view = dialogView ?: return
-        view.progress.visibility = View.VISIBLE
+        view.progress.visibility = View.INVISIBLE
         view.merge_search_list.visibility = View.INVISIBLE
         adapter?.setItems(emptyList())
     }
