@@ -130,7 +130,7 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) : BottomSheetD
         }
 
         filter_groups_button.setOnClickListener {
-            val scanlators = presenter.allChapterScanlators
+            val scanlators = presenter.allChapterScanlators.toList()
             val preselected = presenter.filteredScanlators.map { scanlators.indexOf(it) }
 
             MaterialDialog(activity!!)

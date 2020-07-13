@@ -170,11 +170,11 @@ class MdUtil {
 
         fun getScanlators(scanlators: String): List<String> {
             if (scanlators.isBlank()) return emptyList()
-            return scanlators.split(scanlatorSeparator)
+            return scanlators.split(scanlatorSeparator).distinct()
         }
 
-        fun getScanlatorString(scanlators: List<String>): String {
-            return scanlators.joinToString(scanlatorSeparator)
+        fun getScanlatorString(scanlators: Set<String>): String {
+            return scanlators.toList().sorted().joinToString(scanlatorSeparator)
         }
     }
 }

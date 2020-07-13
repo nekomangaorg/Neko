@@ -4,6 +4,7 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.model.SChapter
+import eu.kanade.tachiyomi.source.online.MergeSource
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import java.util.Date
 import java.util.TreeSet
@@ -25,8 +26,24 @@ fun syncChaptersWithSource(
 
     // Chapters from db.
     val dbChapters = db.getChapters(manga).executeAsBlocking()
+    var copyOfRawSource = rawSourceChapters.toList()
+    if (manga.mergeMangaUrl != null) {
+        val dexChapters = copyOfRawSource.filter { it.scanlator != MergeSource.name }.toMutableList()
+        val mergedChapters = copyOfRawSource.filter { it.scanlator == MergeSource.name }
+        mergedChapters.forEach { it ->
+            val chapterNumber = (it.name.substringAfter("Chapter ").toInt()).toString()
 
-    val sourceChapters = rawSourceChapters.mapIndexed { i, sChapter ->
+            val chapterNumberBefore = (chapterNumber.toInt() - 1).toString()
+            val exists = dexChapters.find { it.chapter_txt.endsWith("Ch.$chapterNumber") }
+            if (exists == null) {
+                val index = dexChapters.indexOfFirst { dex -> dex.chapter_txt.endsWith(chapterNumberBefore) }
+                dexChapters.add(index + 1, it)
+            }
+        }
+        copyOfRawSource = dexChapters.toList()
+    }
+
+    val sourceChapters = copyOfRawSource.mapIndexed { i, sChapter ->
         Chapter.create().apply {
             copyFrom(sChapter)
             manga_id = manga.id

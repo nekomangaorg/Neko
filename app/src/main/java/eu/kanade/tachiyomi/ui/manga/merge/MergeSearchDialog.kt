@@ -80,6 +80,8 @@ class MergeSearchDialog : DialogController {
 
     private fun MangaItem(position: Int) {
         selectedItem = adapter?.getItem(position)
+        presenter.attachMergeManga(selectedItem)
+        presenter.refreshAll()
         dismissDialog()
     }
 

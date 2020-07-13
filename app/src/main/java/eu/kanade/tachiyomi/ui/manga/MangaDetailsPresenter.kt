@@ -85,10 +85,10 @@ class MangaDetailsPresenter(
     var chapters: List<ChapterItem> = emptyList()
         private set
 
-    var allChapterScanlators: List<String> = emptyList()
+    var allChapterScanlators: Set<String> = emptySet()
         private set
 
-    var filteredScanlators: List<String> = emptyList()
+    var filteredScanlators: Set<String> = emptySet()
 
     var headerItem = MangaHeaderItem(manga, controller.fromCatalogue)
 
@@ -110,7 +110,7 @@ class MangaDetailsPresenter(
                 isLoading = true
                 withContext(Dispatchers.IO) {
                     manga.scanlator_filter?.let {
-                        filteredScanlators = MdUtil.getScanlators(it)
+                        filteredScanlators = MdUtil.getScanlators(it).toSet()
                     }
                     updateChapters()
                     isLoading = false
@@ -156,14 +156,31 @@ class MangaDetailsPresenter(
     }
 
     private fun updateScanlators(chapters: List<ChapterItem>) {
-        allChapterScanlators = chapters.flatMap { it -> it.chapter.scanlatorList() }.distinct().sorted()
+        val newChapterScanlators = chapters.flatMap { it -> it.chapter.scanlatorList() }.toSet()
+        val mutableAllChapters = mutableSetOf<String>()
         if (filteredScanlators.isEmpty()) {
-            filteredScanlators = allChapterScanlators
+            filteredScanlators = newChapterScanlators
+        } else if ((newChapterScanlators != allChapterScanlators)) {
+            val filtered = filteredScanlators.toMutableSet()
+            newChapterScanlators.minus(allChapterScanlators.toSet()).forEach { it ->
+                mutableAllChapters.add(it)
+                filtered.add(it)
+            }
+            filteredScanlators = filtered.toSet()
+            manga.scanlator_filter = MdUtil.getScanlatorString(filteredScanlators)
+            db.insertManga(manga).executeAsBlocking()
         }
+
+        mutableAllChapters.addAll(allChapterScanlators)
+        allChapterScanlators = mutableAllChapters.toSet()
     }
 
     fun filterScanlatorsClicked(selectedScanlators: List<String>) {
-        filteredScanlators = allChapterScanlators.filter { selectedScanlators.contains(it) }
+
+        allChapterScanlators.filter { selectedScanlators.contains(it) }.toSet()
+
+        filteredScanlators = allChapterScanlators.filter { selectedScanlators.contains(it) }.toSet()
+
         if (filteredScanlators.size == allChapterScanlators.size) {
             manga.scanlator_filter = null
         } else {
@@ -435,6 +452,11 @@ class MangaDetailsPresenter(
         return dbManga
     }
 
+    fun attachMergeManga(mergeManga: SManga?) {
+        manga.mergeMangaUrl = mergeManga?.url
+        db.insertManga(manga)
+    }
+
     /** Refresh Manga Info and Chapter List (not tracking) */
     fun refreshAll() {
         if (controller.isNotOnline()) return
@@ -446,7 +468,15 @@ class MangaDetailsPresenter(
 
             val nPair = async(Dispatchers.IO) {
                 try {
-                    source.fetchMangaAndChapterDetails(manga)
+                    val result = source.fetchMangaAndChapterDetails(manga)
+                    if (manga.mergeMangaUrl != null) {
+                        val otherChapters = sourceManager.getMergeSource().fetchChapters(manga.mergeMangaUrl!!)
+                        val list = result.second.toMutableList()
+                        list.addAll(otherChapters)
+                        Pair(result.first, list.toList())
+                    } else {
+                        result
+                    }
                 } catch (e: Exception) {
                     errorFromNetwork = e
                     Pair(null, emptyList<SChapter>())
@@ -501,7 +531,10 @@ class MangaDetailsPresenter(
 
             isLoading = false
             if (errorFromNetwork == null) {
-                withContext(Dispatchers.Main) { controller.updateChapters(this@MangaDetailsPresenter.chapters) }
+                withContext(Dispatchers.Main) {
+                    updateScanlators(this@MangaDetailsPresenter.chapters)
+                    controller.updateChapters(this@MangaDetailsPresenter.chapters)
+                }
             } else {
                 withContext(Dispatchers.Main) {
                     controller.showError(
