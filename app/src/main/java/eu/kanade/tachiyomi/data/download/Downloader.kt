@@ -278,10 +278,10 @@ class Downloader(
      */
     private fun downloadChapter(download: Download): Observable<Download> = Observable.defer {
         val chapterDirname = provider.getChapterDirName(download.chapter)
-        val mangaDir = provider.getMangaDir(download.manga, download.source)
+        val mangaDir = provider.getMangaDir(download.manga, sourceManager.getMangadex())
         val tmpDir = mangaDir.createDirectory(chapterDirname + TMP_DIR_SUFFIX)
 
-        val pagesToDownload = if (download.source is MergeSource) 2 else 8
+        val pagesToDownload = if (download.source is MergeSource) 4 else 8
 
         val pageListObservable = if (download.pages == null) {
             // Pull page list from network and add them to download object
@@ -306,7 +306,6 @@ class Downloader(
             // Get all the URLs to the source images, fetch pages if necessary
             .flatMap { Observable.from(it) }
             // Start downloading images, consider we can have downloaded images already
-            // Concurrently do 5 pages at a time
             .flatMap({ page -> getOrDownloadImage(page, download, tmpDir) }, pagesToDownload)
             // Do when page is downloaded.
             .doOnNext { notifier.onProgressChange(download) }.toList().map { _ -> download }
