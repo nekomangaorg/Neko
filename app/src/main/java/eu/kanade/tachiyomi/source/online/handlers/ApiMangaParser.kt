@@ -218,7 +218,6 @@ class ApiMangaParser(val langs: List<String>) {
             chapterName.add(chp)
             chapter.chapter_txt = chp
         }
-
         if (!networkChapter.title.isNullOrBlank()) {
             if (chapterName.isNotEmpty()) {
                 chapterName.add("-")

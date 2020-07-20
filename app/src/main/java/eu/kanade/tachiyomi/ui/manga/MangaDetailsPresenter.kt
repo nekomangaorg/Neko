@@ -26,6 +26,7 @@ import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
 import eu.kanade.tachiyomi.ui.manga.external.ExternalItem
@@ -311,16 +312,9 @@ class MangaDetailsPresenter(
             }
         }
 
-        val sortFunction: (Chapter, Chapter) -> Int = when (manga.sorting) {
-            Manga.SORTING_SOURCE -> when (sortDescending()) {
-                true -> { c1, c2 -> c1.source_order.compareTo(c2.source_order) }
-                false -> { c1, c2 -> c2.source_order.compareTo(c1.source_order) }
-            }
-            Manga.SORTING_NUMBER -> when (sortDescending()) {
-                true -> { c1, c2 -> c2.chapter_number.compareTo(c1.chapter_number) }
-                false -> { c1, c2 -> c1.chapter_number.compareTo(c2.chapter_number) }
-            }
-            else -> { c1, c2 -> c1.source_order.compareTo(c2.source_order) }
+        val sortFunction: (Chapter, Chapter) -> Int = when (sortDescending()) {
+            true -> { c1, c2 -> c2.chapter_number.compareTo(c1.chapter_number) }
+            false -> { c1, c2 -> c1.chapter_number.compareTo(c2.chapter_number) }
         }
         chapters = chapters.sortedWith(Comparator(sortFunction))
         getScrollType(chapters)
@@ -452,8 +446,23 @@ class MangaDetailsPresenter(
         return dbManga
     }
 
+    fun removeMerged() {
+        scope.launch {
+            withContext(Dispatchers.IO) {
+                manga.mergeMangaUrl = null
+                manga.setChapterOrder(Manga.SORTING_SOURCE)
+                db.insertManga(manga)
+                val dbChapters = db.getChapters(manga).executeAsBlocking()
+                val mergedChapters = dbChapters.filter { it.isMergedChapter() }
+                db.deleteChapters(mergedChapters).executeAsBlocking()
+                refreshAll()
+            }
+        }
+    }
+
     fun attachMergeManga(mergeManga: SManga?) {
         manga.mergeMangaUrl = mergeManga?.url
+        manga.setChapterOrder(Manga.SORTING_NUMBER)
         db.insertManga(manga)
     }
 

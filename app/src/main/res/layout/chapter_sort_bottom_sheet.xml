@@ -73,18 +73,19 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/filter_groups_button"
-                style="@style/Neko.Button.TextButton"
+                style="@style/Neko.Button.RoundedOutline"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
                 android:layout_marginStart="12dp"
                 android:background="@color/background"
                 android:layout_marginEnd="12dp"
-                android:textAlignment="viewStart"
+                android:textAlignment="center"
                 android:text="@string/filter_groups" />
 
             <com.google.android.material.textview.MaterialTextView
-                style="@style/Neko.Headline6"
+                style="@style/Neko.Body1.Medium"
+                android:textSize="14sp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"

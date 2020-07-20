@@ -796,8 +796,18 @@ class MangaDetailsController : BaseController,
     }
 
     override fun openMerge() {
-        mergeSearchDialog = MergeSearchDialog(this)
-        mergeSearchDialog!!.showDialog(router, MergeSearchDialog.TAG)
+        val context = view?.context ?: return
+        if (presenter.manga.mergeMangaUrl != null) {
+            MaterialDialog(context).show {
+                title(text = "Remove merged Manga?")
+                positiveButton(android.R.string.yes) {
+                    presenter.removeMerged()
+                }
+            }
+        } else {
+            mergeSearchDialog = MergeSearchDialog(this)
+            mergeSearchDialog!!.showDialog(router, MergeSearchDialog.TAG)
+        }
     }
 
     fun openInWebView(url: String) {

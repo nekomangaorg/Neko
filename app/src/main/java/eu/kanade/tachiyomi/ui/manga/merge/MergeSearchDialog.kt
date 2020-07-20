@@ -7,12 +7,15 @@ import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.customview.customView
 import com.jakewharton.rxbinding.widget.itemClicks
 import com.jakewharton.rxbinding.widget.textChanges
+import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsPresenter
 import eu.kanade.tachiyomi.util.lang.plusAssign
+import eu.kanade.tachiyomi.util.view.gone
+import eu.kanade.tachiyomi.util.view.visible
 import kotlinx.android.synthetic.main.merge_search_dialog.view.*
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
@@ -118,15 +121,27 @@ class MergeSearchDialog : DialogController {
         selectedItem = null
         val view = dialogView ?: return
         view.progress.visibility = View.INVISIBLE
-        view.merge_search_list.visibility = View.VISIBLE
-        adapter?.setItems(results)
+        if (results.isEmpty()) {
+            noResults(view)
+        } else {
+            view.empty_view.gone()
+            view.merge_search_list.visible()
+            adapter?.setItems(results)
+        }
+    }
+
+    fun noResults(view: View) {
+        view.merge_search_list.gone()
+        view.empty_view.visible()
+        view.empty_view.showMedium(
+            CommunityMaterial.Icon.cmd_compass_off, view.context.getString(R.string.no_results_found)
+        )
     }
 
     fun onSearchResultsError() {
         val view = dialogView ?: return
         view.progress.visibility = View.INVISIBLE
-        view.merge_search_list.visibility = View.INVISIBLE
-        adapter?.setItems(emptyList())
+        noResults(view)
     }
 
     companion object {

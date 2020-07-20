@@ -11,10 +11,14 @@ import coil.request.CachePolicy
 import com.mikepenz.iconics.typeface.IIcon
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
+import com.mikepenz.iconics.utils.colorInt
+import com.mikepenz.iconics.utils.contourColorInt
+import com.mikepenz.iconics.utils.sizeDp
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
+import eu.kanade.tachiyomi.util.system.contextCompatColor
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.iconicsDrawable
@@ -191,7 +195,14 @@ class MangaHeaderHolder(
 
         with(merge_button) {
             visibleIf(manga.status != SManga.COMPLETED)
-            setImageDrawable(context.iconicsDrawableLarge(MaterialDesignDx.Icon.gmf_merge_type))
+            val iconics = context.iconicsDrawableLarge(MaterialDesignDx.Icon.gmf_merge_type)
+            if (presenter.manga.mergeMangaUrl == null) {
+                iconics.colorInt = context.contextCompatColor(android.R.color.transparent)
+                iconics.contourColorInt = context.getResourceColor(R.attr.colorAccent)
+                iconics.contourWidthPx = 5
+                iconics.sizeDp = 28
+            }
+            setImageDrawable(iconics)
         }
 
         with(webview_button) {

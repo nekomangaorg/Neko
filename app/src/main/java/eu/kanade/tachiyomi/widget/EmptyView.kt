@@ -9,7 +9,7 @@ import com.google.android.material.button.MaterialButton
 import com.mikepenz.iconics.typeface.IIcon
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.system.getResourceColor
-import eu.kanade.tachiyomi.util.system.iconicsDrawableLarge
+import eu.kanade.tachiyomi.util.system.iconicsDrawable
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.setVectorCompat
 import eu.kanade.tachiyomi.util.view.visible
@@ -78,12 +78,27 @@ class EmptyView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
      * @param drawable icon of information view
      * @param textResource text of information view
      */
-    fun show(icon: IIcon, message: String, actions: List<Action>? = null) {
+
+    fun showMedium(icon: IIcon, message: String, actions: List<Action>? = null) {
         image_view.setImageDrawable(
-            context.iconicsDrawableLarge(
-                icon, color = android.R.attr.textColorHint
+            context.iconicsDrawable(
+                icon, color = android.R.attr.textColorHint,
+                size = 48
             )
         )
+        iconicsAfter(icon, message, actions)
+    }
+
+    fun show(icon: IIcon, message: String, actions: List<Action>? = null) {
+        image_view.setImageDrawable(
+            context.iconicsDrawable(
+                icon, color = android.R.attr.textColorHint, size = 128
+            )
+        )
+        iconicsAfter(icon, message, actions)
+    }
+
+    fun iconicsAfter(icon: IIcon, message: String, actions: List<Action>? = null) {
         text_label.text = message
 
         actions_container.removeAllViews()

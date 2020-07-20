@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.source.model
 
+import eu.kanade.tachiyomi.source.online.MergeSource
 import java.io.Serializable
 
 interface SChapter : Serializable {
@@ -44,3 +45,6 @@ interface SChapter : Serializable {
         }
     }
 }
+
+fun SChapter.isMergedChapter() = this.scanlator?.equals(MergeSource.name) ?: false
+
