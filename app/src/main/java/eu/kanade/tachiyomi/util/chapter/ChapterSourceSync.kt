@@ -32,8 +32,19 @@ fun syncChaptersWithSource(
     if (manga.mergeMangaUrl != null) {
         val dexChapters = copyOfRawSource.filter { !it.isMergedChapter() }.toMutableList()
         val mergedChapters = copyOfRawSource.filter { it.isMergedChapter() }
+
+        val allVol1 = dexChapters.all { it.getVolumeNum().toIntOrNull() == 1 }
+        val allNull = mergedChapters.all { it.getVolumeNum().toIntOrNull() == null }
+
+
         mergedChapters.forEach { it ->
-            val exists = dexChapters.filter { dex -> it.getVolumeNum().toIntOrNull() == dex.getVolumeNum().toIntOrNull() }
+            val exists = dexChapters.filter { dex ->
+                if (allVol1 && allNull) {
+                    true
+                } else {
+                    it.getVolumeNum().toIntOrNull() == dex.getVolumeNum().toIntOrNull()
+                }
+            }
                 .find { dex -> dex.getChapterNum().toIntOrNull() == it.getChapterNum().toIntOrNull() }
             if (exists == null) {
                 dexChapters.add(it)

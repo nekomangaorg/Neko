@@ -474,8 +474,9 @@ class MangaDetailsPresenter(
     /** Refresh Manga Info and Chapter List (not tracking) */
     fun refreshAll() {
         if (controller.isNotOnline()) return
+        isLoading = true
+        controller.setRefresh(isLoading)
         scope.launch {
-            isLoading = true
 
             var errorFromNetwork: java.lang.Exception? = null
             val thumbnailUrl = manga.thumbnail_url

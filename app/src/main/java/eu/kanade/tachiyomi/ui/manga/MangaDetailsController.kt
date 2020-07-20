@@ -61,6 +61,7 @@ import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
@@ -592,6 +593,11 @@ class MangaDetailsController : BaseController,
 
         // Inflate our menu resource into the PopupMenu's Menu
         popup.menuInflater.inflate(R.menu.chapter_single, popup.menu)
+        if (!item.chapter.isMergedChapter()) {
+            popup.menu.findItem(R.id.action_view_comments).isVisible = true
+        }
+
+
 
         popup.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {

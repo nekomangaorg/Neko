@@ -83,9 +83,9 @@ class MergeSearchDialog : DialogController {
 
     private fun MangaItem(position: Int) {
         selectedItem = adapter?.getItem(position)
+        dismissDialog()
         presenter.attachMergeManga(selectedItem)
         presenter.refreshAll()
-        dismissDialog()
     }
 
     override fun onDestroyView(view: View) {
