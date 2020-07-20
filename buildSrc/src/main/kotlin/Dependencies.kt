@@ -25,7 +25,7 @@ object AndroidVersions {
 
 object BuildPluginsVersion {
     const val KOTLIN = "1.3.72"
-    const val AGP = "com.android.tools.build:gradle:4.0.0"
+    const val AGP = "com.android.tools.build:gradle:4.0.1"
     const val FIREBASE = "com.google.firebase:firebase-crashlytics-gradle:2.0.0"
     const val ANDROID_EXTENSIONS = "org.jetbrains.kotlin:kotlin-android-extensions:$KOTLIN"
     const val KOTLIN_GRADLE = "org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN"
