@@ -13,7 +13,9 @@ import eu.kanade.tachiyomi.data.download.model.DownloadQueue
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Page
+import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.HttpSource
+import eu.kanade.tachiyomi.source.online.MergeSource
 import eu.kanade.tachiyomi.util.lang.RetryWithDelay
 import eu.kanade.tachiyomi.util.lang.plusAssign
 import eu.kanade.tachiyomi.util.storage.DiskUtil
@@ -230,13 +232,14 @@ class Downloader(
      * @param autoStart whether to start the downloader after enqueing the chapters.
      */
     fun queueChapters(manga: Manga, chapters: List<Chapter>, autoStart: Boolean) = launchUI {
-        val source = sourceManager.get(manga.source) as? HttpSource ?: return@launchUI
+        val mangadexSource = sourceManager.getMangadex()
+        val mergedSource = sourceManager.getMergeSource()
         val wasEmpty = queue.isEmpty()
         // Called in background thread, the operation can be slow with SAF.
         val chaptersWithoutDir = async {
             chapters
                 // Filter out those already downloaded.
-                .filter { provider.findChapterDir(it, manga, source) == null }
+                .filter { provider.findChapterDir(it, manga, mangadexSource) == null }
                 // Add chapters to queue from the start.
                 .sortedByDescending { it.source_order }
         }
@@ -246,7 +249,10 @@ class Downloader(
             // Filter out those already enqueued.
             .filter { chapter -> queue.none { it.chapter.id == chapter.id } }
             // Create a download for each one.
-            .map { Download(source, manga, it) }
+            .map {
+                val source = if (it.isMergedChapter()) mergedSource else mangadexSource
+                Download(source, manga, it)
+            }
 
         if (chaptersToQueue.isNotEmpty()) {
             queue.addAll(chaptersToQueue)
@@ -272,8 +278,10 @@ class Downloader(
      */
     private fun downloadChapter(download: Download): Observable<Download> = Observable.defer {
         val chapterDirname = provider.getChapterDirName(download.chapter)
-        val mangaDir = provider.getMangaDir(download.manga, download.source)
+        val mangaDir = provider.getMangaDir(download.manga, sourceManager.getMangadex())
         val tmpDir = mangaDir.createDirectory(chapterDirname + TMP_DIR_SUFFIX)
+
+        val pagesToDownload = if (download.source is MergeSource) 4 else 8
 
         val pageListObservable = if (download.pages == null) {
             // Pull page list from network and add them to download object
@@ -298,14 +306,14 @@ class Downloader(
             // Get all the URLs to the source images, fetch pages if necessary
             .flatMap { Observable.from(it) }
             // Start downloading images, consider we can have downloaded images already
-            // Concurrently do 5 pages at a time
-            .flatMap({ page -> getOrDownloadImage(page, download, tmpDir) }, 8)
+            .flatMap({ page -> getOrDownloadImage(page, download, tmpDir) }, pagesToDownload)
             // Do when page is downloaded.
             .doOnNext { notifier.onProgressChange(download) }.toList().map { _ -> download }
             // Do after download completes
             .doOnNext { ensureSuccessfulDownload(download, mangaDir, tmpDir, chapterDirname) }
             // If the page list threw, it will resume here
             .onErrorReturn { error ->
+                Timber.e(error)
                 download.status = Download.ERROR
                 notifier.onError(error.message, download.chapter.name)
                 download

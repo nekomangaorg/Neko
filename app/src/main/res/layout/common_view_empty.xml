@@ -9,9 +9,9 @@
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/image_view"
-        android:layout_width="128dp"
-        android:layout_height="128dp"
-        tools:src="@drawable/ic_file_download_24dp"/>
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:src="@drawable/ic_file_download_24dp" />
 
     <TextView
         android:id="@+id/text_label"

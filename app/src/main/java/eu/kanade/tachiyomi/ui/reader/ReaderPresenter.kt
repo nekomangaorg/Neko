@@ -234,8 +234,7 @@ class ReaderPresenter(
             preferences.context, manga.id!!.hashCode(), Notifications.ID_NEW_CHAPTERS
         )
 
-        val source = sourceManager.getMangadex()
-        loader = ChapterLoader(downloadManager, manga, source)
+        loader = ChapterLoader(downloadManager, manga, sourceManager)
 
         Observable.just(manga).subscribeLatestCache(ReaderActivity::setManga)
         viewerChaptersRelay.subscribeLatestCache(ReaderActivity::setChapters)

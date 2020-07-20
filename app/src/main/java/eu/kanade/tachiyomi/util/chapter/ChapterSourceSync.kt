@@ -4,6 +4,9 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.model.SChapter
+import eu.kanade.tachiyomi.source.model.getChapterNum
+import eu.kanade.tachiyomi.source.model.getVolumeNum
+import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import java.util.Date
 import java.util.TreeSet
@@ -25,8 +28,37 @@ fun syncChaptersWithSource(
 
     // Chapters from db.
     val dbChapters = db.getChapters(manga).executeAsBlocking()
+    var copyOfRawSource = rawSourceChapters.toList()
+    if (manga.mergeMangaUrl != null) {
+        val dexChapters = copyOfRawSource.filter { !it.isMergedChapter() }.toMutableList()
+        val mergedChapters = copyOfRawSource.filter { it.isMergedChapter() }
 
-    val sourceChapters = rawSourceChapters.mapIndexed { i, sChapter ->
+        val allVol1 = dexChapters.all { it.getVolumeNum().toIntOrNull() == 1 }
+        val allNull = mergedChapters.all { it.getVolumeNum().toIntOrNull() == null }
+
+
+        mergedChapters.forEach { it ->
+            val exists = dexChapters.filter { dex ->
+                if (allVol1 && allNull) {
+                    true
+                } else {
+                    it.getVolumeNum().toIntOrNull() == dex.getVolumeNum().toIntOrNull()
+                }
+            }
+                .find { dex -> dex.getChapterNum().toIntOrNull() == it.getChapterNum().toIntOrNull() }
+            if (exists == null) {
+                dexChapters.add(it)
+            }
+        }
+        dexChapters.sortWith(compareByDescending<SChapter>
+        { it.getVolumeNum().toIntOrNull() }.thenByDescending {
+            it.getChapterNum().toIntOrNull()
+        }
+        )
+        copyOfRawSource = dexChapters.toList()
+    }
+
+    val sourceChapters = copyOfRawSource.mapIndexed { i, sChapter ->
         Chapter.create().apply {
             copyFrom(sChapter)
             manga_id = manga.id
@@ -42,8 +74,15 @@ fun syncChaptersWithSource(
 
     for (sourceChapter in sourceChapters) {
         val dbChapter = dbChapters.find {
-            (it.mangadex_chapter_id.isNotBlank() && it.mangadex_chapter_id == sourceChapter.mangadex_chapter_id) ||
-                MdUtil.getChapterId(it.url) == sourceChapter.mangadex_chapter_id
+            if (sourceChapter.isMergedChapter() && it.isMergedChapter()) {
+                it.url == sourceChapter.url
+            } else if (sourceChapter.isMergedChapter().not() && it.isMergedChapter().not()) {
+                (it.mangadex_chapter_id.isNotBlank() && it.mangadex_chapter_id == sourceChapter.mangadex_chapter_id) ||
+                    MdUtil.getChapterId(it.url) == sourceChapter.mangadex_chapter_id
+            } else {
+                false
+            }
+
         }
 
         // Add the chapter if not in db already, or update if the metadata changed.
@@ -82,6 +121,7 @@ fun syncChaptersWithSource(
     }
 
     // Return if there's nothing to add, delete or change, avoiding unnecessary db transactions.
+
     if (toAdd.isEmpty() && toDelete.isEmpty() && toChange.isEmpty()) {
         val newestDate = dbChapters.maxBy { it.date_upload }?.date_upload ?: 0L
         if (newestDate != 0L && newestDate != manga.last_update) {

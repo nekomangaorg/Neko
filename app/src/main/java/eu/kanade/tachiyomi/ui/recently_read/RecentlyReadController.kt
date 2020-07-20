@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.backup.BackupRestoreService
@@ -33,16 +34,17 @@ import kotlinx.android.synthetic.main.recently_read_controller.*
  * UI related actions should be called from here.
  */
 class RecentlyReadController(bundle: Bundle? = null) : BaseController(bundle),
-        FlexibleAdapter.OnUpdateListener,
-        FlexibleAdapter.EndlessScrollListener,
-        RecentlyReadAdapter.OnRemoveClickListener,
-        RecentlyReadAdapter.OnResumeClickListener,
-        RecentlyReadAdapter.OnCoverClickListener,
-        RemoveHistoryDialog.Listener {
+    FlexibleAdapter.OnUpdateListener,
+    FlexibleAdapter.EndlessScrollListener,
+    RecentlyReadAdapter.OnRemoveClickListener,
+    RecentlyReadAdapter.OnResumeClickListener,
+    RecentlyReadAdapter.OnCoverClickListener,
+    RemoveHistoryDialog.Listener {
 
     init {
         setHasOptionsMenu(true)
     }
+
     /**
      * Adapter containing the recent manga.
      */
@@ -105,6 +107,7 @@ class RecentlyReadController(bundle: Bundle? = null) : BaseController(bundle),
             observeLater = false
         }
     }
+
     /**
      * Populate adapter with chapters
      *
@@ -128,8 +131,10 @@ class RecentlyReadController(bundle: Bundle? = null) : BaseController(bundle),
         if (size > 0) {
             empty_view?.hide()
         } else {
-            empty_view.show(R.drawable.ic_history_24dp, R.string
-                .no_recently_read_manga)
+            empty_view.show(
+                CommunityMaterial.Icon2.cmd_history, R.string
+                    .no_recently_read_manga
+            )
         }
     }
 
@@ -151,7 +156,7 @@ class RecentlyReadController(bundle: Bundle? = null) : BaseController(bundle),
         presenter.requestNext(query)
     }
 
-    override fun noMoreLoad(newItemsSize: Int) { }
+    override fun noMoreLoad(newItemsSize: Int) {}
 
     override fun onResumeClick(position: Int) {
         val activity = activity ?: return
@@ -187,6 +192,7 @@ class RecentlyReadController(bundle: Bundle? = null) : BaseController(bundle),
             presenter.removeFromHistory(history)
         }
     }
+
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.recently_read, menu)
         val searchItem = menu.findItem(R.id.action_search)

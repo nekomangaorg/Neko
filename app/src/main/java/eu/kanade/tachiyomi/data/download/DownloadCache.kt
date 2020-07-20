@@ -69,7 +69,7 @@ class DownloadCache(
      */
     fun isChapterDownloaded(chapter: Chapter, manga: Manga, skipCache: Boolean): Boolean {
         if (skipCache) {
-            val source = sourceManager.get(manga.source) ?: return false
+            val source = sourceManager.getMangadex()
             return provider.findChapterDir(chapter, manga, source) != null
         }
 
@@ -212,20 +212,7 @@ class DownloadCache(
             }
         }
     }
-
-/*fun renameFolder(from: String, to: String, source: Long) {
-    val sourceDir = rootDir.files[source] ?: return
-    val list = sourceDir.files.toMutableMap()
-    val mangaFiles = sourceDir.files[DiskUtil.buildValidFilename(from)] ?: return
-    val newFile = UniFile.fromFile(File(sourceDir.dir.filePath + "/" + DiskUtil
-        .buildValidFilename(to))) ?: return
-    val newDir = MangaDirectory(newFile)
-    newDir.files = mangaFiles.files
-    list.remove(DiskUtil.buildValidFilename(from))
-    list[to] = newDir
-    sourceDir.files = list
-}*/
-
+    
     /**
      * Removes a manga that has been deleted from this cache.
      *

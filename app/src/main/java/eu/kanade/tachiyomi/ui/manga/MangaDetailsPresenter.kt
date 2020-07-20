@@ -23,8 +23,10 @@ import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.source.Source
+import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
 import eu.kanade.tachiyomi.ui.manga.external.ExternalItem
@@ -57,7 +59,8 @@ class MangaDetailsPresenter(
     val preferences: PreferencesHelper = Injekt.get(),
     val coverCache: CoverCache = Injekt.get(),
     private val db: DatabaseHelper = Injekt.get(),
-    private val downloadManager: DownloadManager = Injekt.get()
+    private val downloadManager: DownloadManager = Injekt.get(),
+    private val sourceManager: SourceManager = Injekt.get()
 ) : DownloadQueue.DownloadListener, LibraryServiceListener {
 
     private var scope = CoroutineScope(Job() + Dispatchers.Default)
@@ -83,10 +86,10 @@ class MangaDetailsPresenter(
     var chapters: List<ChapterItem> = emptyList()
         private set
 
-    var allChapterScanlators: List<String> = emptyList()
+    var allChapterScanlators: Set<String> = emptySet()
         private set
 
-    var filteredScanlators: List<String> = emptyList()
+    var filteredScanlators: Set<String> = emptySet()
 
     var headerItem = MangaHeaderItem(manga, controller.fromCatalogue)
 
@@ -108,7 +111,7 @@ class MangaDetailsPresenter(
                 isLoading = true
                 withContext(Dispatchers.IO) {
                     manga.scanlator_filter?.let {
-                        filteredScanlators = MdUtil.getScanlators(it)
+                        filteredScanlators = MdUtil.getScanlators(it).toSet()
                     }
                     updateChapters()
                     isLoading = false
@@ -154,14 +157,31 @@ class MangaDetailsPresenter(
     }
 
     private fun updateScanlators(chapters: List<ChapterItem>) {
-        allChapterScanlators = chapters.flatMap { it -> it.chapter.scanlatorList() }.distinct().sorted()
+        val newChapterScanlators = chapters.flatMap { it -> it.chapter.scanlatorList() }.toSet()
+        val mutableAllChapters = mutableSetOf<String>()
         if (filteredScanlators.isEmpty()) {
-            filteredScanlators = allChapterScanlators
+            filteredScanlators = newChapterScanlators
+        } else if ((newChapterScanlators != allChapterScanlators)) {
+            val filtered = filteredScanlators.toMutableSet()
+            newChapterScanlators.minus(allChapterScanlators.toSet()).forEach { it ->
+                mutableAllChapters.add(it)
+                filtered.add(it)
+            }
+            filteredScanlators = filtered.toSet()
+            manga.scanlator_filter = MdUtil.getScanlatorString(filteredScanlators)
+            db.insertManga(manga).executeAsBlocking()
         }
+
+        mutableAllChapters.addAll(allChapterScanlators)
+        allChapterScanlators = mutableAllChapters.toSet()
     }
 
     fun filterScanlatorsClicked(selectedScanlators: List<String>) {
-        filteredScanlators = allChapterScanlators.filter { selectedScanlators.contains(it) }
+
+        allChapterScanlators.filter { selectedScanlators.contains(it) }.toSet()
+
+        filteredScanlators = allChapterScanlators.filter { selectedScanlators.contains(it) }.toSet()
+
         if (filteredScanlators.size == allChapterScanlators.size) {
             manga.scanlator_filter = null
         } else {
@@ -433,18 +453,45 @@ class MangaDetailsPresenter(
         return dbManga
     }
 
+    fun removeMerged() {
+        scope.launch {
+            withContext(Dispatchers.IO) {
+                manga.mergeMangaUrl = null
+                db.insertManga(manga)
+                val dbChapters = db.getChapters(manga).executeAsBlocking()
+                val mergedChapters = dbChapters.filter { it.isMergedChapter() }
+                db.deleteChapters(mergedChapters).executeAsBlocking()
+                refreshAll()
+            }
+        }
+    }
+
+    fun attachMergeManga(mergeManga: SManga?) {
+        manga.mergeMangaUrl = mergeManga?.url
+        db.insertManga(manga)
+    }
+
     /** Refresh Manga Info and Chapter List (not tracking) */
     fun refreshAll() {
         if (controller.isNotOnline()) return
+        isLoading = true
+        controller.setRefresh(isLoading)
         scope.launch {
-            isLoading = true
 
             var errorFromNetwork: java.lang.Exception? = null
             val thumbnailUrl = manga.thumbnail_url
 
             val nPair = async(Dispatchers.IO) {
                 try {
-                    source.fetchMangaAndChapterDetails(manga)
+                    val result = source.fetchMangaAndChapterDetails(manga)
+                    if (manga.mergeMangaUrl != null) {
+                        val otherChapters = sourceManager.getMergeSource().fetchChapters(manga.mergeMangaUrl!!)
+                        val list = result.second.toMutableList()
+                        list.addAll(otherChapters)
+                        Pair(result.first, list.toList())
+                    } else {
+                        result
+                    }
                 } catch (e: Exception) {
                     errorFromNetwork = e
                     Pair(null, emptyList<SChapter>())
@@ -465,7 +512,7 @@ class MangaDetailsPresenter(
                 withContext(Dispatchers.Main) {
                     controller.setPaletteColor()
                 }
-                db.insertManga(manga).executeAsBlocking()
+                db.insertManga(manga).executeOnIO()
             }
             fetchExternalLinks()
             val finChapters = networkPair.second
@@ -496,10 +543,21 @@ class MangaDetailsPresenter(
                 }
             }
             withContext(Dispatchers.IO) { updateChapters() }
+            withContext(Dispatchers.IO) {
+                val missingChapters = MdUtil.getMissingChapterCount(db.getChapters(manga).executeAsBlocking(), manga.status)
+                if (missingChapters != manga.missing_chapters) {
+                    manga.missing_chapters = missingChapters
+                    db.insertManga(manga).executeOnIO()
+                }
+            }
+
 
             isLoading = false
             if (errorFromNetwork == null) {
-                withContext(Dispatchers.Main) { controller.updateChapters(this@MangaDetailsPresenter.chapters) }
+                withContext(Dispatchers.Main) {
+                    updateScanlators(this@MangaDetailsPresenter.chapters)
+                    controller.updateChapters(this@MangaDetailsPresenter.chapters)
+                }
             } else {
                 withContext(Dispatchers.Main) {
                     controller.showError(
@@ -812,6 +870,36 @@ class MangaDetailsPresenter(
                 }
                 asyncList.awaitAll()
                 fetchTracks()
+            }
+        }
+    }
+
+    fun mergeSearch(query: String) {
+        if (!controller.isNotOnline()) {
+            scope.launch(Dispatchers.IO) {
+                val result = async {
+                    try {
+                        sourceManager.getMergeSource().searchManga(query)
+                    } catch (e: Exception) {
+                        withContext(Dispatchers.Main) { controller.onMergeSearchError(e) }
+                        null
+                    }
+                }
+
+                val results = result.await()
+                if (!results.isNullOrEmpty()) {
+                    withContext(Dispatchers.Main) { controller.onMergeSearchResults(results) }
+                } else {
+                    withContext(Dispatchers.Main) {
+                        controller.onMergeSearchError(
+                            Exception(
+                                preferences.context.getString(
+                                    R.string.no_results_found
+                                )
+                            )
+                        )
+                    }
+                }
             }
         }
     }

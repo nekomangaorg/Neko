@@ -74,6 +74,7 @@
     <color name="neko_green">#3DDA83</color>
     <color name="neko_green_complementary">#aa206c</color>
     <color name="neko_green_darker">#20aa5e</color>
+    <color name="gold">#D4AF37</color>
 
     <color name="neko_outrun_primary">#2E2157</color>
     <color name="neko_outrun_primary_variant">#241734</color>

@@ -11,10 +11,14 @@ import coil.request.CachePolicy
 import com.mikepenz.iconics.typeface.IIcon
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
+import com.mikepenz.iconics.utils.colorInt
+import com.mikepenz.iconics.utils.contourColorInt
+import com.mikepenz.iconics.utils.sizeDp
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
+import eu.kanade.tachiyomi.util.system.contextCompatColor
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.iconicsDrawable
@@ -68,6 +72,9 @@ class MangaHeaderHolder(
             }
             webview_button.setOnClickListener { adapter.delegate.showExternalSheet() }
             similar_button.setOnClickListener { adapter.delegate.openSimilar() }
+
+            merge_button.setOnClickListener { adapter.delegate.openMerge() }
+
             share_button.setOnClickListener { adapter.delegate.prepareToShareManga() }
             favorite_button.setOnClickListener {
                 adapter.delegate.favoriteManga(false)
@@ -186,6 +193,18 @@ class MangaHeaderHolder(
             setImageDrawable(context.iconicsDrawableLarge(MaterialDesignDx.Icon.gmf_account_tree))
         }
 
+        with(merge_button) {
+            visibleIf(manga.status != SManga.COMPLETED)
+            val iconics = context.iconicsDrawableLarge(MaterialDesignDx.Icon.gmf_merge_type)
+            if (presenter.manga.mergeMangaUrl == null) {
+                iconics.colorInt = context.contextCompatColor(android.R.color.transparent)
+                iconics.contourColorInt = context.getResourceColor(R.attr.colorAccent)
+                iconics.contourWidthPx = 5
+                iconics.sizeDp = 28
+            }
+            setImageDrawable(iconics)
+        }
+
         with(webview_button) {
             setImageDrawable(context.iconicsDrawableLarge(CommunityMaterial.Icon2.cmd_web))
         }
@@ -200,7 +219,11 @@ class MangaHeaderHolder(
             isEnabled = (nextChapter != null)
             text = if (nextChapter != null) {
                 val readTxt =
-                    listOf(nextChapter.chapter.vol, nextChapter.chapter.chapter_txt).joinToString(" ")
+                    if (nextChapter.chapter.vol.isEmpty() && nextChapter.chapter.chapter_txt.isEmpty()) {
+                        nextChapter.chapter.name
+                    } else {
+                        listOf(nextChapter.chapter.vol, nextChapter.chapter.chapter_txt).joinToString(" ")
+                    }
                 resources.getString(
                     if (nextChapter.last_page_read > 0) R.string.continue_reading_
                     else R.string.start_reading_, readTxt

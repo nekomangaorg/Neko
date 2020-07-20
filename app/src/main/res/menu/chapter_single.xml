@@ -3,5 +3,6 @@
           android:title="@string/mark_previous_as_read"/>
     <item
         android:id="@+id/action_view_comments"
+        android:visible="false"
         android:title="@string/view_comments"/>
 </menu>

@@ -218,7 +218,6 @@ class ApiMangaParser(val langs: List<String>) {
             chapterName.add(chp)
             chapter.chapter_txt = chp
         }
-
         if (!networkChapter.title.isNullOrBlank()) {
             if (chapterName.isNotEmpty()) {
                 chapterName.add("-")
@@ -242,7 +241,7 @@ class ApiMangaParser(val langs: List<String>) {
         chapter.name = MdUtil.cleanString(chapterName.joinToString(" "))
         // Convert from unix time
         chapter.date_upload = networkChapter.timestamp * 1000
-        val scanlatorName = mutableListOf<String>()
+        val scanlatorName = mutableSetOf<String>()
 
         networkChapter.group_name?.let {
             scanlatorName.add(it)

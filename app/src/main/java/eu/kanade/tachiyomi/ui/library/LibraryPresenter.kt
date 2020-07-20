@@ -705,7 +705,6 @@ class LibraryPresenter(
             // Create a set of the list
             val mangaToDelete = mangas.distinctBy { it.id }
             mangaToDelete.forEach { it.favorite = false }
-
             db.insertMangas(mangaToDelete).executeOnIO()
             getLibrary()
         }

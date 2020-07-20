@@ -59,6 +59,8 @@ interface SManga : Serializable {
 
     var users: String?
 
+    var mergeMangaUrl: String?
+
     fun copyFrom(other: SManga) {
 
         if (other.author != null)

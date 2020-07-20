@@ -413,12 +413,12 @@ class LibraryUpdateService(
                         var chaptersToDl = newChapters.first.sortedBy { it.chapter_number }
                         if (manga.scanlator_filter != null) {
 
-                            val originalScanlators = originalChapters.flatMap { it.scanlatorList() }.distinct().sorted()
-                            val newScanlators = newChapters.first.flatMap { it.scanlatorList() }.distinct().sorted()
+                            val originalScanlators = originalChapters.flatMap { it.scanlatorList() }.distinct()
+                            val newScanlators = newChapters.first.flatMap { it.scanlatorList() }.distinct()
 
                             val results = newScanlators.filter { !originalScanlators.contains(it) }
 
-                            val scanlatorsToDownload = MdUtil.getScanlators(manga.scanlator_filter!!).toMutableList()
+                            val scanlatorsToDownload = MdUtil.getScanlators(manga.scanlator_filter!!).toMutableSet()
 
                             if (results.isNotEmpty()) {
                                 scanlatorsToDownload.addAll(results)

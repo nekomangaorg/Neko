@@ -27,6 +27,7 @@ import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_KITSU_ID
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_LANG_FLAG
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_LAST_UPDATE
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_MANGA_UPDATES_ID
+import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_MERGE_MANGA_URL
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_MISSING_CHAPTERS
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_MY_ANIME_LIST_ID
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_RATING
@@ -88,6 +89,7 @@ class MangaPutResolver : DefaultPutResolver<Manga>() {
         put(COL_MISSING_CHAPTERS, obj.missing_chapters)
         put(COL_RATING, obj.rating)
         put(COL_USERS, obj.users)
+        put(COL_MERGE_MANGA_URL, obj.mergeMangaUrl)
 
     }
 }
@@ -120,6 +122,7 @@ interface BaseMangaGetResolver {
         missing_chapters = cursor.getString(cursor.getColumnIndex(COL_MISSING_CHAPTERS))
         rating = cursor.getString(cursor.getColumnIndex(COL_RATING))
         users = cursor.getString(cursor.getColumnIndex(COL_USERS))
+        mergeMangaUrl = cursor.getString(cursor.getColumnIndex(COL_MERGE_MANGA_URL))
         follow_status =
             cursor.getInt(cursor.getColumnIndex(COL_FOLLOW_STATUS)).let { FollowStatus.fromInt(it) }
     }

@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.source
 
 import eu.kanade.tachiyomi.source.online.MangaDex
+import eu.kanade.tachiyomi.source.online.MergeSource
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import java.security.MessageDigest
 
@@ -12,6 +13,8 @@ open class SourceManager {
     // private val sourcesMap = mutableMapOf<Long, Source>()
     private val source: MangaDex = MangaDex()
 
+    private val mergeSource = MergeSource()
+
     open fun get(sourceKey: Long): Source? {
         return source
     }
@@ -21,6 +24,8 @@ open class SourceManager {
     }
 
     fun getMangadex() = source
+
+    fun getMergeSource() = mergeSource
 
     companion object {
 

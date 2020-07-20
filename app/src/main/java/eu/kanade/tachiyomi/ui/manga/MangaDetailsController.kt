@@ -60,6 +60,8 @@ import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
@@ -74,6 +76,7 @@ import eu.kanade.tachiyomi.ui.manga.chapter.ChapterHolder
 import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
 import eu.kanade.tachiyomi.ui.manga.chapter.ChaptersSortBottomSheet
 import eu.kanade.tachiyomi.ui.manga.external.ExternalBottomSheet
+import eu.kanade.tachiyomi.ui.manga.merge.MergeSearchDialog
 import eu.kanade.tachiyomi.ui.manga.track.TrackItem
 import eu.kanade.tachiyomi.ui.manga.track.TrackingBottomSheet
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
@@ -153,6 +156,7 @@ class MangaDetailsController : BaseController,
     private var snack: Snackbar? = null
     val fromCatalogue = args.getBoolean(FROM_CATALOGUE_EXTRA, false)
     private var trackingBottomSheet: TrackingBottomSheet? = null
+    private var mergeSearchDialog: MergeSearchDialog? = null
     private var startingDLChapterPos: Int? = null
     private var externalBottomSheet: ExternalBottomSheet? = null
     var refreshTracker: Int? = null
@@ -199,6 +203,7 @@ class MangaDetailsController : BaseController,
         presenter.onDestroy()
         adapter = null
         trackingBottomSheet = null
+        mergeSearchDialog = null
         super.onDestroyView(view)
     }
 
@@ -588,6 +593,11 @@ class MangaDetailsController : BaseController,
 
         // Inflate our menu resource into the PopupMenu's Menu
         popup.menuInflater.inflate(R.menu.chapter_single, popup.menu)
+        if (!item.chapter.isMergedChapter()) {
+            popup.menu.findItem(R.id.action_view_comments).isVisible = true
+        }
+
+
 
         popup.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
@@ -789,6 +799,21 @@ class MangaDetailsController : BaseController,
 
     override fun openSimilar() {
         router.pushController(SimilarController(manga!!, source!!).withFadeTransaction())
+    }
+
+    override fun openMerge() {
+        val context = view?.context ?: return
+        if (presenter.manga.mergeMangaUrl != null) {
+            MaterialDialog(context).show {
+                title(text = "Remove merged Manga?")
+                positiveButton(android.R.string.yes) {
+                    presenter.removeMerged()
+                }
+            }
+        } else {
+            mergeSearchDialog = MergeSearchDialog(this)
+            mergeSearchDialog!!.showDialog(router, MergeSearchDialog.TAG)
+        }
     }
 
     fun openInWebView(url: String) {
@@ -1100,6 +1125,15 @@ class MangaDetailsController : BaseController,
         trackingBottomSheet?.onSearchResults(results)
     }
 
+    fun onMergeSearchResults(results: List<SManga>) {
+        mergeSearchDialog?.onSearchResults(results)
+    }
+
+    fun onMergeSearchError(error: Exception) {
+        Timber.e(error)
+        mergeSearchDialog?.onSearchResultsError()
+    }
+
     fun trackRefreshDone() {
         trackingBottomSheet?.onRefreshDone()
     }
@@ -1113,6 +1147,7 @@ class MangaDetailsController : BaseController,
         Timber.e(error)
         trackingBottomSheet?.onSearchResultsError(error)
     }
+
     //endregion
 
     //region Action mode methods
