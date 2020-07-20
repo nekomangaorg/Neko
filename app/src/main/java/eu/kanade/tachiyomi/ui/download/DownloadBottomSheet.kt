@@ -7,6 +7,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.LinearLayout
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.download.model.Download
@@ -161,8 +162,9 @@ class DownloadBottomSheet @JvmOverloads constructor(
         setBottomSheet()
         if (presenter.downloadQueue.isEmpty()) {
             empty_view?.show(
-                R.drawable.ic_download_off_24dp,
-                R.string.nothing_is_downloading)
+                CommunityMaterial.Icon.cmd_download_off,
+                R.string.nothing_is_downloading
+            )
         } else {
             empty_view?.hide()
         }

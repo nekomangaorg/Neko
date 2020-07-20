@@ -6,7 +6,7 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.source.online.HttpSource
+import eu.kanade.tachiyomi.source.model.isMergedChapter
 import uy.kohesive.injekt.injectLazy
 
 /**
@@ -80,9 +80,9 @@ class DownloadStore(
      */
     fun restore(): List<Download> {
         val objs = preferences.all
-                .mapNotNull { it.value as? String }
-                .mapNotNull { deserialize(it) }
-                .sortedBy { it.order }
+            .mapNotNull { it.value as? String }
+            .mapNotNull { deserialize(it) }
+            .sortedBy { it.order }
 
         val downloads = mutableListOf<Download>()
         if (objs.isNotEmpty()) {
@@ -91,8 +91,8 @@ class DownloadStore(
                 val manga = cachedManga.getOrPut(mangaId) {
                     db.getManga(mangaId).executeAsBlocking()
                 } ?: continue
-                val source = sourceManager.get(manga.source) as? HttpSource ?: continue
                 val chapter = db.getChapter(chapterId).executeAsBlocking() ?: continue
+                val source = if (chapter.isMergedChapter()) sourceManager.getMergeSource() else sourceManager.getMangadex()
                 downloads.add(Download(source, manga, chapter))
             }
         }

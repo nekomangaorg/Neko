@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
+import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.DownloadService
@@ -161,11 +162,11 @@ class RecentChaptersController(bundle: Bundle? = null) : BaseController(bundle),
         if (size > 0) {
             empty_view?.hide()
         } else {
-            empty_view?.show(R.drawable.ic_update_24dp, R.string.no_recent_chapters)
+            empty_view?.show(CommunityMaterial.Icon2.cmd_update, R.string.no_recent_chapters)
         }
     }
 
-    override fun onItemMove(fromPosition: Int, toPosition: Int) { }
+    override fun onItemMove(fromPosition: Int, toPosition: Int) {}
     override fun shouldMoveItem(fromPosition: Int, toPosition: Int) = true
 
     override fun onActionStateChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {

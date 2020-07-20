@@ -34,7 +34,7 @@ abstract class HttpSource : Source {
     /**
      * Base url of the website without the trailing slash, like: http://mysite.com
      */
-    val baseUrl = MdUtil.baseUrl
+    open val baseUrl = MdUtil.baseUrl
 
     override val name = "MangaDex"
 
@@ -59,12 +59,12 @@ abstract class HttpSource : Source {
     /**
      * Headers used for requests.
      */
-    val headers: Headers by lazy { headersBuilder().build() }
+    open val headers: Headers by lazy { headersBuilder().build() }
 
     /**
      * Default network client for doing requests.
      */
-    val client: OkHttpClient = network.client
+    open val client: OkHttpClient = network.client
 
     val nonRateLimitedClient = network.nonRateLimitedClient
 
