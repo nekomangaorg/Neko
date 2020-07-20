@@ -130,7 +130,7 @@ class MergeSearchDialog : DialogController {
         }
     }
 
-    fun noResults(view: View) {
+    private fun noResults(view: View) {
         view.merge_search_list.gone()
         view.empty_view.visible()
         view.empty_view.showMedium(
