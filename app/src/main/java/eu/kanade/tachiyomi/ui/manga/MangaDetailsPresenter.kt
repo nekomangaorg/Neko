@@ -312,9 +312,16 @@ class MangaDetailsPresenter(
             }
         }
 
-        val sortFunction: (Chapter, Chapter) -> Int = when (sortDescending()) {
-            true -> { c1, c2 -> c2.chapter_number.compareTo(c1.chapter_number) }
-            false -> { c1, c2 -> c1.chapter_number.compareTo(c2.chapter_number) }
+        val sortFunction: (Chapter, Chapter) -> Int = when (manga.sorting) {
+            Manga.SORTING_SOURCE -> when (sortDescending()) {
+                true -> { c1, c2 -> c1.source_order.compareTo(c2.source_order) }
+                false -> { c1, c2 -> c2.source_order.compareTo(c1.source_order) }
+            }
+            Manga.SORTING_NUMBER -> when (sortDescending()) {
+                true -> { c1, c2 -> c2.chapter_number.compareTo(c1.chapter_number) }
+                false -> { c1, c2 -> c1.chapter_number.compareTo(c2.chapter_number) }
+            }
+            else -> { c1, c2 -> c1.source_order.compareTo(c2.source_order) }
         }
         chapters = chapters.sortedWith(Comparator(sortFunction))
         getScrollType(chapters)
@@ -450,7 +457,6 @@ class MangaDetailsPresenter(
         scope.launch {
             withContext(Dispatchers.IO) {
                 manga.mergeMangaUrl = null
-                manga.setChapterOrder(Manga.SORTING_SOURCE)
                 db.insertManga(manga)
                 val dbChapters = db.getChapters(manga).executeAsBlocking()
                 val mergedChapters = dbChapters.filter { it.isMergedChapter() }
@@ -462,7 +468,6 @@ class MangaDetailsPresenter(
 
     fun attachMergeManga(mergeManga: SManga?) {
         manga.mergeMangaUrl = mergeManga?.url
-        manga.setChapterOrder(Manga.SORTING_NUMBER)
         db.insertManga(manga)
     }
 
@@ -506,7 +511,7 @@ class MangaDetailsPresenter(
                 withContext(Dispatchers.Main) {
                     controller.setPaletteColor()
                 }
-                db.insertManga(manga).executeAsBlocking()
+                db.insertManga(manga).executeOnIO()
             }
             fetchExternalLinks()
             val finChapters = networkPair.second
@@ -537,6 +542,14 @@ class MangaDetailsPresenter(
                 }
             }
             withContext(Dispatchers.IO) { updateChapters() }
+            withContext(Dispatchers.IO) {
+                val missingChapters = MdUtil.getMissingChapterCount(db.getChapters(manga).executeAsBlocking(), manga.status)
+                if (missingChapters != manga.missing_chapters) {
+                    manga.missing_chapters = missingChapters
+                    db.insertManga(manga).executeOnIO()
+                }
+            }
+
 
             isLoading = false
             if (errorFromNetwork == null) {

@@ -76,6 +76,13 @@ class MergeSource {
                 val indexChapter = json["Chapter"].string
                 SChapter.create().apply {
                     name = json["ChapterName"].nullString.let { if (it.isNullOrEmpty()) "${json["Type"].string} ${chapterImage(indexChapter)}" else it }
+
+                    val season = name.substringBefore(" - Chapter", "")
+                    if (season.isNotEmpty()) {
+                        vol = season.substring(1)
+                    }
+                    chapter_txt = name.substringAfter("Chapter ")
+
                     url = "$baseUrl/read-online/" + response.request.url.toString().substringAfter("/manga/") + chapterURLEncode(indexChapter)
                     date_upload = try {
                         dateFormat.parse(json["Date"].string.substringBefore(" "))?.time ?: 0

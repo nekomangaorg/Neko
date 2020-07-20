@@ -4,6 +4,8 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.model.SChapter
+import eu.kanade.tachiyomi.source.model.getChapterNum
+import eu.kanade.tachiyomi.source.model.getVolumeNum
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import java.util.Date
@@ -31,12 +33,17 @@ fun syncChaptersWithSource(
         val dexChapters = copyOfRawSource.filter { !it.isMergedChapter() }.toMutableList()
         val mergedChapters = copyOfRawSource.filter { it.isMergedChapter() }
         mergedChapters.forEach { it ->
-            val chapterNumber = (it.name.substringAfter(" ").toInt()).toString()
-            val exists = dexChapters.find { it.chapter_txt.endsWith("Ch.$chapterNumber") }
+            val exists = dexChapters.filter { dex -> it.getVolumeNum().toIntOrNull() == dex.getVolumeNum().toIntOrNull() }
+                .find { dex -> dex.getChapterNum().toIntOrNull() == it.getChapterNum().toIntOrNull() }
             if (exists == null) {
                 dexChapters.add(it)
             }
         }
+        dexChapters.sortWith(compareByDescending<SChapter>
+        { it.getVolumeNum().toIntOrNull() }.thenByDescending {
+            it.getChapterNum().toIntOrNull()
+        }
+        )
         copyOfRawSource = dexChapters.toList()
     }
 
@@ -103,6 +110,7 @@ fun syncChaptersWithSource(
     }
 
     // Return if there's nothing to add, delete or change, avoiding unnecessary db transactions.
+
     if (toAdd.isEmpty() && toDelete.isEmpty() && toChange.isEmpty()) {
         val newestDate = dbChapters.maxBy { it.date_upload }?.date_upload ?: 0L
         if (newestDate != 0L && newestDate != manga.last_update) {

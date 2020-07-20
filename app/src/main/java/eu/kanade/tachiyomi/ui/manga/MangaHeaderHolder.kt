@@ -219,7 +219,11 @@ class MangaHeaderHolder(
             isEnabled = (nextChapter != null)
             text = if (nextChapter != null) {
                 val readTxt =
-                    listOf(nextChapter.chapter.vol, nextChapter.chapter.chapter_txt).joinToString(" ")
+                    if (nextChapter.chapter.vol.isEmpty() && nextChapter.chapter.chapter_txt.isEmpty()) {
+                        nextChapter.chapter.name
+                    } else {
+                        listOf(nextChapter.chapter.vol, nextChapter.chapter.chapter_txt).joinToString(" ")
+                    }
                 resources.getString(
                     if (nextChapter.last_page_read > 0) R.string.continue_reading_
                     else R.string.start_reading_, readTxt

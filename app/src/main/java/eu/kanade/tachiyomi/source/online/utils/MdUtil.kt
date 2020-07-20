@@ -1,9 +1,12 @@
 package eu.kanade.tachiyomi.source.online.utils
 
+import eu.kanade.tachiyomi.source.model.SChapter
+import eu.kanade.tachiyomi.source.model.SManga
 import kotlinx.serialization.UnstableDefault
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
 import org.jsoup.parser.Parser
+import kotlin.math.floor
 
 class MdUtil {
 
@@ -175,6 +178,26 @@ class MdUtil {
 
         fun getScanlatorString(scanlators: Set<String>): String {
             return scanlators.toList().sorted().joinToString(scanlatorSeparator)
+        }
+
+        fun getMissingChapterCount(chapters: List<SChapter>, mangaStatus: Int): String? {
+            if (mangaStatus == SManga.COMPLETED) return null
+
+            val remove0ChaptersFromCount = chapters.distinctBy {
+                if (it.chapter_txt.isNotEmpty()) {
+                    it.vol + it.chapter_txt
+                } else {
+                    it.name
+                }
+            }.sortedByDescending { it.chapter_number }
+
+            remove0ChaptersFromCount.firstOrNull()?.let {
+                val chpNumber = it.chapter_number
+                val result = floor(chpNumber).toInt() - remove0ChaptersFromCount.size
+                if (result <= 0) return null
+                return result.toString()
+            }
+            return null
         }
     }
 }

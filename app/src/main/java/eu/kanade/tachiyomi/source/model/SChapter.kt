@@ -48,3 +48,24 @@ interface SChapter : Serializable {
 
 fun SChapter.isMergedChapter() = this.scanlator?.equals(MergeSource.name) ?: false
 
+fun SChapter.getChapterNum(): String {
+    return if (this.isMergedChapter()) {
+        chapter_txt
+    } else {
+        if (this.name.contains("oneshot", true)) {
+            "0"
+        } else {
+            chapter_txt.substringAfter("Ch.")
+        }
+    }
+}
+
+fun SChapter.getVolumeNum(): String {
+    return if (this.isMergedChapter()) {
+        vol
+    } else {
+        vol.substringAfter("Vol.")
+    }
+}
+
+
