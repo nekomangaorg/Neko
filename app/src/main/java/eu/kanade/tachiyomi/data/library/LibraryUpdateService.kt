@@ -422,7 +422,7 @@ class LibraryUpdateService(
 
                             if (results.isNotEmpty()) {
                                 scanlatorsToDownload.addAll(results)
-                                manga.scanlator_filter = MdUtil.getScanlatorString(scanlatorsToDownload)
+                                manga.scanlator_filter = null
                                 db.insertManga(manga).executeAsBlocking()
                             }
 

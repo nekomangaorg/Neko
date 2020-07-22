@@ -39,7 +39,7 @@ class ReaderChapterFilter(
             val scanlatorEnabled = listValidScanlators.isNotEmpty()
 
             // if none of the filters are enabled skip the filtering of them
-            if (readEnabled || unreadEnabled || downloadEnabled || bookmarkEnabled) {
+            if (readEnabled || unreadEnabled || downloadEnabled || bookmarkEnabled || scanlatorEnabled) {
 
                 filteredChapters = filteredChapters.filter {
                     if (readEnabled && it.read.not() ||

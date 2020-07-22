@@ -49,6 +49,7 @@ import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.SelectableAdapter
+import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
@@ -58,8 +59,6 @@ import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
-import eu.kanade.tachiyomi.source.Source
-import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.HttpSource
@@ -120,23 +119,19 @@ class MangaDetailsController : BaseController,
     AddToLibraryCategoriesDialog.Listener {
 
     constructor(
-        manga: Manga?,
+        manga: Manga,
         fromCatalogue: Boolean = false,
         update: Boolean = false
     ) : super(Bundle().apply {
-        putLong(MANGA_EXTRA, manga?.id ?: 0)
+        putLong(MANGA_EXTRA, manga.id ?: 0)
         putBoolean(FROM_CATALOGUE_EXTRA, fromCatalogue)
         putBoolean(UPDATE_EXTRA, update)
     }) {
-        this.manga = manga
-        if (manga != null) {
-            source = Injekt.get<SourceManager>().getMangadex()
-        }
-        presenter = MangaDetailsPresenter(this, manga!!, source!!)
+        presenter = MangaDetailsPresenter(this, manga)
     }
 
     constructor(mangaId: Long) : this(
-        Injekt.get<DatabaseHelper>().getManga(mangaId).executeAsBlocking()
+        Injekt.get<DatabaseHelper>().getManga(mangaId).executeAsBlocking()!!
     )
 
     constructor(bundle: Bundle) : this(bundle.getLong(MANGA_EXTRA)) {
@@ -147,8 +142,6 @@ class MangaDetailsController : BaseController,
         )
     }
 
-    private var manga: Manga? = null
-    private var source: Source? = null
     var colorAnimator: ValueAnimator? = null
     val presenter: MangaDetailsPresenter
     var coverColor: Int? = null
@@ -328,9 +321,9 @@ class MangaDetailsController : BaseController,
                     }
                 }
                 manga_cover_full.setImageDrawable(drawable)
-                getHeader()?.updateCover(manga!!)
+                getHeader()?.updateCover(presenter.manga)
             }, onError = {
-                val file = presenter.coverCache.getCoverFile(manga!!)
+                val file = presenter.coverCache.getCoverFile(presenter.manga)
                 if (file.exists()) {
                     file.delete()
                     setPaletteColor()
@@ -396,7 +389,7 @@ class MangaDetailsController : BaseController,
         super.onActivityResumed(activity)
         presenter.isLockedFromSearch = SecureActivityDelegate.shouldBeLocked()
         presenter.headerItem.isLocked = presenter.isLockedFromSearch
-        manga!!.thumbnail_url = presenter.refreshMangaFromDb().thumbnail_url
+        presenter.manga!!.thumbnail_url = presenter.refreshMangaFromDb().thumbnail_url
         presenter.fetchChapters(refreshTracker == null)
         if (refreshTracker != null) {
             trackingBottomSheet?.refreshItem(refreshTracker ?: 0)
@@ -700,7 +693,13 @@ class MangaDetailsController : BaseController,
 
     private fun openChapter(chapter: Chapter) {
         val activity = activity ?: return
-        val intent = ReaderActivity.newIntent(activity, manga!!, chapter)
+        if (BuildConfig.DEBUG || presenter.preferences.debugLogEnabled()) {
+            Timber.d("-- Chapter List Before Reader --")
+            for (chapter in presenter.chapters) {
+                Timber.d(chapter.chapterLog())
+            }
+        }
+        val intent = ReaderActivity.newIntent(activity, presenter.manga, chapter)
         startActivity(intent)
     }
 
@@ -764,7 +763,7 @@ class MangaDetailsController : BaseController,
 
     override fun prepareToShareManga() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            val request = LoadRequest.Builder(activity!!).data(manga).target(onError = {
+            val request = LoadRequest.Builder(activity!!).data(presenter.manga).target(onError = {
                 shareManga()
             }, onSuccess = {
                 presenter.shareManga((it as BitmapDrawable).bitmap)
@@ -798,7 +797,7 @@ class MangaDetailsController : BaseController,
     }
 
     override fun openSimilar() {
-        router.pushController(SimilarController(manga!!, source!!).withFadeTransaction())
+        router.pushController(SimilarController(presenter.manga, presenter.source).withFadeTransaction())
     }
 
     override fun openMerge() {

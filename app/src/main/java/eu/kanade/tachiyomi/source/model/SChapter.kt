@@ -26,6 +26,10 @@ interface SChapter : Serializable {
     // chapter id from mangadex
     var mangadex_chapter_id: String
 
+    fun chapterLog(): String {
+        return "$name - $scanlator"
+    }
+
     fun copyFrom(other: SChapter) {
         name = other.name
         vol = other.vol
@@ -48,23 +52,23 @@ interface SChapter : Serializable {
 
 fun SChapter.isMergedChapter() = this.scanlator?.equals(MergeSource.name) ?: false
 
-fun SChapter.getChapterNum(): String {
+fun SChapter.getChapterNum(): Int? {
     return if (this.isMergedChapter()) {
-        chapter_txt
+        chapter_txt.toIntOrNull()
     } else {
         if (this.name.contains("oneshot", true)) {
-            "0"
+            0
         } else {
-            chapter_txt.substringAfter("Ch.")
+            chapter_txt.substringAfter("Ch.").toIntOrNull()
         }
     }
 }
 
-fun SChapter.getVolumeNum(): String {
+fun SChapter.getVolumeNum(): Int? {
     return if (this.isMergedChapter()) {
-        vol
+        vol.toIntOrNull()
     } else {
-        vol.substringAfter("Vol.")
+        vol.substringAfter("Vol.").toIntOrNull()
     }
 }
 
