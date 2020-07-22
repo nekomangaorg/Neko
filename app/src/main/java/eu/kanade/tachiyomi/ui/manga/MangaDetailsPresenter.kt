@@ -26,6 +26,7 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.isMergedChapter
+import eu.kanade.tachiyomi.source.online.MergeSource
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
 import eu.kanade.tachiyomi.ui.manga.external.ExternalItem
@@ -455,6 +456,9 @@ class MangaDetailsPresenter(
 
     fun attachMergeManga(mergeManga: SManga?) {
         manga.mergeMangaUrl = mergeManga?.url
+        val tempSet = filteredScanlators.toMutableSet()
+        tempSet.add(MergeSource.name)
+        filteredScanlators = tempSet
         db.insertManga(manga)
     }
 

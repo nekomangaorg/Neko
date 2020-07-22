@@ -33,29 +33,28 @@ fun syncChaptersWithSource(
         val dexChapters = copyOfRawSource.filter { !it.isMergedChapter() }.toMutableList()
         val mergedChapters = copyOfRawSource.filter { it.isMergedChapter() }
 
-        val allVol1 = dexChapters.all { it.getVolumeNum().toIntOrNull() == 1 }
-        val allNull = mergedChapters.all { it.getVolumeNum().toIntOrNull() == null }
+        val allVol1 = dexChapters.all { it.getVolumeNum() == 1 }
+        val allNull = mergedChapters.all { it.getVolumeNum() == null }
 
 
         mergedChapters.forEach { it ->
             val exists = dexChapters.filter { dex ->
-                if (allVol1 && allNull) {
-                    true
-                } else {
-                    it.getVolumeNum().toIntOrNull() == dex.getVolumeNum().toIntOrNull()
+                when (allVol1 && allNull) {
+                    true -> true
+                    false -> it.getVolumeNum() == dex.getVolumeNum()
                 }
             }
-                .find { dex -> dex.getChapterNum().toIntOrNull() == it.getChapterNum().toIntOrNull() }
+                .find { dex -> dex.getChapterNum() == it.getChapterNum() }
             if (exists == null) {
                 dexChapters.add(it)
             }
         }
-        dexChapters.sortWith(compareByDescending<SChapter>
-        { it.getVolumeNum().toIntOrNull() }.thenByDescending {
-            it.getChapterNum().toIntOrNull()
+        val sorter = when (allNull && allVol1) {
+            true -> compareByDescending { it.getChapterNum() }
+            false -> compareByDescending<SChapter> { it.getVolumeNum() }.thenByDescending { it.getChapterNum() }
         }
-        )
-        copyOfRawSource = dexChapters.toList()
+
+        copyOfRawSource = dexChapters.sortedWith(sorter)
     }
 
     val sourceChapters = copyOfRawSource.mapIndexed { i, sChapter ->
@@ -118,17 +117,6 @@ fun syncChaptersWithSource(
             dbChapter.mangadex_chapter_id == sourceChapter.mangadex_chapter_id ||
                 dbChapter.url == sourceChapter.url
         }
-    }
-
-    // Return if there's nothing to add, delete or change, avoiding unnecessary db transactions.
-
-    if (toAdd.isEmpty() && toDelete.isEmpty() && toChange.isEmpty()) {
-        val newestDate = dbChapters.maxBy { it.date_upload }?.date_upload ?: 0L
-        if (newestDate != 0L && newestDate != manga.last_update) {
-            manga.last_update = newestDate
-            db.updateLastUpdated(manga).executeAsBlocking()
-        }
-        return Pair(emptyList(), emptyList())
     }
 
     val readded = mutableListOf<Chapter>()
