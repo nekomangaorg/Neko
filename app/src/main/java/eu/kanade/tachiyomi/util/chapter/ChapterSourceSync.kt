@@ -29,7 +29,7 @@ fun syncChaptersWithSource(
     // Chapters from db.
     val dbChapters = db.getChapters(manga).executeAsBlocking()
     var copyOfRawSource = rawSourceChapters.toList()
-    if (manga.mergeMangaUrl != null) {
+    if (manga.merge_manga_url != null) {
         val dexChapters = copyOfRawSource.filter { !it.isMergedChapter() }.toMutableList()
         val mergedChapters = copyOfRawSource.filter { it.isMergedChapter() }
 

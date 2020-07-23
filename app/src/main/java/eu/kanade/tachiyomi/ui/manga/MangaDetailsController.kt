@@ -802,7 +802,7 @@ class MangaDetailsController : BaseController,
 
     override fun openMerge() {
         val context = view?.context ?: return
-        if (presenter.manga.mergeMangaUrl != null) {
+        if (presenter.manga.merge_manga_url != null) {
             MaterialDialog(context).show {
                 title(text = "Remove merged Manga?")
                 positiveButton(android.R.string.yes) {

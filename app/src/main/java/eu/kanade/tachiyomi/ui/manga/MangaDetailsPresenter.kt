@@ -68,7 +68,7 @@ class MangaDetailsPresenter(
 
     val source = sourceManager.getMangadex()
 
-    private var hasMergeChapters = manga.mergeMangaUrl != null
+    private var hasMergeChapters = manga.merge_manga_url != null
 
     var isLockedFromSearch = false
     var hasRequested = false
@@ -446,18 +446,27 @@ class MangaDetailsPresenter(
     fun removeMerged() {
         scope.launch {
             withContext(Dispatchers.IO) {
-                manga.mergeMangaUrl = null
+                manga.merge_manga_url = null
+                hasMergeChapters = false
                 db.insertManga(manga)
                 val dbChapters = db.getChapters(manga).executeAsBlocking()
                 val mergedChapters = dbChapters.filter { it.isMergedChapter() }
+                val nonMergedChapters = dbChapters.filter { !it.isMergedChapter() }
+                downloadManager.deleteChapters(mergedChapters, manga, sourceManager.getMangadex())
                 db.deleteChapters(mergedChapters).executeAsBlocking()
+                allChapterScanlators = nonMergedChapters.flatMap { it -> it.scanlatorList() }.toSet()
+                if (filteredScanlators.isNotEmpty()) {
+                    val newSet = filteredScanlators.toMutableSet()
+                    newSet.remove(sourceManager.getMergeSource().name)
+                    filteredScanlators = newSet.toSet()
+                }
                 refreshAll()
             }
         }
     }
 
     fun attachMergeManga(mergeManga: SManga?) {
-        manga.mergeMangaUrl = mergeManga?.url
+        manga.merge_manga_url = mergeManga?.url
         val tempSet = filteredScanlators.toMutableSet()
         tempSet.add(MergeSource.name)
         filteredScanlators = tempSet
@@ -479,8 +488,8 @@ class MangaDetailsPresenter(
             val nPair = async(Dispatchers.IO) {
                 try {
                     val result = source.fetchMangaAndChapterDetails(manga)
-                    if (manga.mergeMangaUrl != null) {
-                        val otherChapters = sourceManager.getMergeSource().fetchChapters(manga.mergeMangaUrl!!)
+                    if (manga.merge_manga_url != null) {
+                        val otherChapters = sourceManager.getMergeSource().fetchChapters(manga.merge_manga_url!!)
                         val list = result.second.toMutableList()
                         list.addAll(otherChapters)
                         Pair(result.first, list.toList())
@@ -516,7 +525,7 @@ class MangaDetailsPresenter(
             if (newChapters.first.isNotEmpty()) {
                 val downloadNew = preferences.downloadNew().getOrDefault()
                 if (downloadNew && !controller.fromCatalogue && mangaWasInitalized) {
-                    if (!hasMergeChapters && manga.mergeMangaUrl != null) {
+                    if (!hasMergeChapters && manga.merge_manga_url != null) {
                         hasMergeChapters = true
                     } else {
                         val categoriesToDownload = preferences.downloadNewCategories().getOrDefault().map(String::toInt)
@@ -855,10 +864,8 @@ class MangaDetailsPresenter(
                         }
                         if (trackItem != null) {
 
-                            if (item.service.isMdList() && manga.status == SManga.COMPLETED && trackItem.total_chapters == 0) {
-                                chapters.firstOrNull { it.name.contains("[END]") }?.let {
-                                    trackItem.total_chapters = it.chapter.chapter_number.toInt()
-                                }
+                            if (item.service.isMdList() && trackItem.total_chapters == 0 && manga.last_chapter_number != null) {
+                                trackItem.total_chapters = manga.last_chapter_number!!
                             }
 
                             db.insertTrack(trackItem).executeAsBlocking()

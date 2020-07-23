@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.data.database.mappers
 
 import android.content.ContentValues
 import android.database.Cursor
+import androidx.core.database.getIntOrNull
 import com.pushtorefresh.storio.sqlite.SQLiteTypeMapping
 import com.pushtorefresh.storio.sqlite.operations.delete.DefaultDeleteResolver
 import com.pushtorefresh.storio.sqlite.operations.get.DefaultGetResolver
@@ -26,6 +27,7 @@ import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_INITIALIZED
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_KITSU_ID
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_LANG_FLAG
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_LAST_UPDATE
+import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_MANGA_LAST_CHAPTER
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_MANGA_UPDATES_ID
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_MERGE_MANGA_URL
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_MISSING_CHAPTERS
@@ -89,7 +91,8 @@ class MangaPutResolver : DefaultPutResolver<Manga>() {
         put(COL_MISSING_CHAPTERS, obj.missing_chapters)
         put(COL_RATING, obj.rating)
         put(COL_USERS, obj.users)
-        put(COL_MERGE_MANGA_URL, obj.mergeMangaUrl)
+        put(COL_MERGE_MANGA_URL, obj.merge_manga_url)
+        put(COL_MANGA_LAST_CHAPTER, obj.last_chapter_number)
 
     }
 }
@@ -122,7 +125,8 @@ interface BaseMangaGetResolver {
         missing_chapters = cursor.getString(cursor.getColumnIndex(COL_MISSING_CHAPTERS))
         rating = cursor.getString(cursor.getColumnIndex(COL_RATING))
         users = cursor.getString(cursor.getColumnIndex(COL_USERS))
-        mergeMangaUrl = cursor.getString(cursor.getColumnIndex(COL_MERGE_MANGA_URL))
+        merge_manga_url = cursor.getString(cursor.getColumnIndex(COL_MERGE_MANGA_URL))
+        last_chapter_number = cursor.getIntOrNull(cursor.getColumnIndex(COL_MANGA_LAST_CHAPTER))
         follow_status =
             cursor.getInt(cursor.getColumnIndex(COL_FOLLOW_STATUS)).let { FollowStatus.fromInt(it) }
     }

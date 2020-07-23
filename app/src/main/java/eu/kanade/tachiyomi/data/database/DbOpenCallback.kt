@@ -88,6 +88,7 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
         }
         if (oldVersion < 21) {
             db.execSQL(MangaTable.addMergeMangaCol)
+            db.execSQL(MangaTable.addMangaLastChapter)
         }
     }
 

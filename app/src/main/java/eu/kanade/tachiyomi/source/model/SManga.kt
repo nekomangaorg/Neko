@@ -59,7 +59,9 @@ interface SManga : Serializable {
 
     var users: String?
 
-    var mergeMangaUrl: String?
+    var merge_manga_url: String?
+
+    var last_chapter_number: Int?
 
     fun copyFrom(other: SManga) {
 
@@ -104,6 +106,10 @@ interface SManga : Serializable {
 
         if (other.users != null)
             users = other.users
+
+        if (other.last_chapter_number != null) {
+            last_chapter_number = other.last_chapter_number
+        }
 
         missing_chapters = other.missing_chapters
 

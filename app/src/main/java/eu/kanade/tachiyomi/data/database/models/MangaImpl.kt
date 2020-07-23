@@ -101,7 +101,9 @@ open class MangaImpl : Manga {
 
     override var users: String? = null
 
-    override var mergeMangaUrl: String? = null
+    override var merge_manga_url: String? = null
+
+    override var last_chapter_number: Int? = null
 
     override fun copyFrom(other: SManga) {
         if (other is MangaImpl && other::ogTitle.isInitialized &&

@@ -36,6 +36,11 @@ class ApiMangaParser(val langs: List<String>) {
             manga.author = MdUtil.cleanString(networkManga.author)
             manga.artist = MdUtil.cleanString(networkManga.artist)
             manga.lang_flag = networkManga.lang_flag
+            val lastChapter = networkManga.last_chapter?.toFloatOrNull()
+            lastChapter?.let {
+                manga.last_chapter_number = floor(it).toInt()
+            }
+
 
             networkManga.rating?.let {
                 manga.rating = it.bayesian ?: it.mean

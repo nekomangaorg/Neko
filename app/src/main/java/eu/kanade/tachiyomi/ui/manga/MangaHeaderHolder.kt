@@ -196,7 +196,7 @@ class MangaHeaderHolder(
         with(merge_button) {
             visibleIf(manga.status != SManga.COMPLETED)
             val iconics = context.iconicsDrawableLarge(MaterialDesignDx.Icon.gmf_merge_type)
-            if (presenter.manga.mergeMangaUrl == null) {
+            if (presenter.manga.merge_manga_url == null) {
                 iconics.colorInt = context.contextCompatColor(android.R.color.transparent)
                 iconics.contourColorInt = context.getResourceColor(R.attr.colorAccent)
                 iconics.contourWidthPx = 5
