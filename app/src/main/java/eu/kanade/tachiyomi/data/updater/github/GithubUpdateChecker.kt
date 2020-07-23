@@ -10,6 +10,9 @@ class GithubUpdateChecker : UpdateChecker() {
     private val service: GithubService = GithubService.create()
 
     override suspend fun checkForUpdate(): UpdateResult {
+        if (BuildConfig.DEBUG) {
+            return GithubUpdateResult.NoNewUpdate()
+        }
         val release = service.getLatestVersion()
         // Check if latest version is different from current version
         return if (Version(release.version).isHigherThan(BuildConfig.VERSION_NAME)) {
