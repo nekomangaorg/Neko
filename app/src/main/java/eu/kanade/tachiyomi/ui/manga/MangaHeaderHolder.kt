@@ -199,7 +199,7 @@ class MangaHeaderHolder(
             if (presenter.manga.merge_manga_url == null) {
                 iconics.colorInt = context.contextCompatColor(android.R.color.transparent)
                 iconics.contourColorInt = context.getResourceColor(R.attr.colorAccent)
-                iconics.contourWidthPx = 5
+                iconics.contourWidthPx = 6
                 iconics.sizeDp = 28
             }
             setImageDrawable(iconics)
