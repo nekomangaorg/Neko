@@ -864,7 +864,7 @@ class MangaDetailsPresenter(
                         }
                         if (trackItem != null) {
 
-                            if (item.service.isMdList() && trackItem.total_chapters == 0 && manga.last_chapter_number != null) {
+                            if (item.service.isMdList() && trackItem.total_chapters == 0 && manga.last_chapter_number != null && manga.last_chapter_number != 0) {
                                 trackItem.total_chapters = manga.last_chapter_number!!
                             }
 
