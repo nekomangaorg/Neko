@@ -114,9 +114,26 @@ fun syncChaptersWithSource(
     // Chapters from the db not in the source.
     val toDelete = dbChapters.filterNot { dbChapter ->
         sourceChapters.any { sourceChapter ->
-            dbChapter.mangadex_chapter_id == sourceChapter.mangadex_chapter_id ||
+
+            if (sourceChapter.isMergedChapter() && dbChapter.isMergedChapter()) {
                 dbChapter.url == sourceChapter.url
+            } else if (sourceChapter.isMergedChapter().not() && dbChapter.isMergedChapter().not()) {
+                (dbChapter.mangadex_chapter_id.isNotBlank() && dbChapter.mangadex_chapter_id == sourceChapter.mangadex_chapter_id) ||
+                    MdUtil.getChapterId(dbChapter.url) == sourceChapter.mangadex_chapter_id
+            } else {
+                false
+            }
         }
+    }
+
+    // Return if there's nothing to add, delete or change, avoiding unnecessary db transactions.
+    if (toAdd.isEmpty() && toDelete.isEmpty() && toChange.isEmpty()) {
+        val newestDate = dbChapters.maxBy { it.date_upload }?.date_upload ?: 0L
+        if (newestDate != 0L && newestDate != manga.last_update) {
+            manga.last_update = newestDate
+            db.updateLastUpdated(manga).executeAsBlocking()
+        }
+        return Pair(emptyList(), emptyList())
     }
 
     val readded = mutableListOf<Chapter>()

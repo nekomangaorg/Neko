@@ -90,6 +90,7 @@ class MergeSource : HttpSource() {
                     chapter_txt = name.substringAfter("Chapter ")
 
                     url = "/read-online/" + response.request.url.toString().substringAfter("/manga/") + chapterURLEncode(indexChapter)
+                    mangadex_chapter_id = url.substringAfter("/read-online/")
                     date_upload = try {
                         json["Date"].nullString?.let { dateFormat.parse("$it +0600")?.time } ?: 0
                     } catch (_: Exception) {

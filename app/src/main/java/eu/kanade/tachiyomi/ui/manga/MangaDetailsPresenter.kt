@@ -68,6 +68,8 @@ class MangaDetailsPresenter(
 
     val source = sourceManager.getMangadex()
 
+    private var hasMergeChapters = manga.mergeMangaUrl != null
+
     var isLockedFromSearch = false
     var hasRequested = false
     var isLoading = false
@@ -514,11 +516,15 @@ class MangaDetailsPresenter(
             if (newChapters.first.isNotEmpty()) {
                 val downloadNew = preferences.downloadNew().getOrDefault()
                 if (downloadNew && !controller.fromCatalogue && mangaWasInitalized) {
-                    val categoriesToDownload = preferences.downloadNewCategories().getOrDefault().map(String::toInt)
-                    val shouldDownload = categoriesToDownload.isEmpty() || getMangaCategoryIds().any { it in categoriesToDownload }
-                    if (shouldDownload) {
-                        downloadChapters(newChapters.first.sortedBy { it.chapter_number }
-                            .map { it.toModel() })
+                    if (!hasMergeChapters && manga.mergeMangaUrl != null) {
+                        hasMergeChapters = true
+                    } else {
+                        val categoriesToDownload = preferences.downloadNewCategories().getOrDefault().map(String::toInt)
+                        val shouldDownload = categoriesToDownload.isEmpty() || getMangaCategoryIds().any { it in categoriesToDownload }
+                        if (shouldDownload) {
+                            downloadChapters(newChapters.first.sortedBy { it.chapter_number }
+                                .map { it.toModel() })
+                        }
                     }
                 }
             }
