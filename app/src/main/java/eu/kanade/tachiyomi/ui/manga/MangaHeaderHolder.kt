@@ -126,14 +126,7 @@ class MangaHeaderHolder(
             adapter.delegate.updateScroll()
         }
     }
-
-    fun bindChapters() {
-        val presenter = adapter.delegate.mangaPresenter()
-        val count = presenter.chapters.size
-        chapters_title.text = itemView.resources.getQuantityString(R.plurals.chapters, count, count)
-        filters_text.text = presenter.currentFilters()
-    }
-
+    
     @SuppressLint("SetTextI18n")
     fun bind(item: MangaHeaderItem, manga: Manga) {
         val presenter = adapter.delegate.mangaPresenter()
