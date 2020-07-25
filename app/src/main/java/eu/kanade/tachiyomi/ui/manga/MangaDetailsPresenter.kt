@@ -110,18 +110,11 @@ class MangaDetailsPresenter(
             controller.updateHeader()
             refreshAll()
         } else {
-            scope.launch {
-                isLoading = true
-                withContext(Dispatchers.IO) {
-                    manga.scanlator_filter?.let {
-                        filteredScanlators = MdUtil.getScanlators(it).toSet()
-                    }
-                    updateChapters()
-                    isLoading = false
-                }
-
-                withContext(Dispatchers.Main) { controller.updateChapters(this@MangaDetailsPresenter.chapters) }
+            manga.scanlator_filter?.let {
+                filteredScanlators = MdUtil.getScanlators(it).toSet()
             }
+            updateChapters()
+            controller.updateChapters(this.chapters)
         }
         fetchExternalLinks()
         setTrackItems()
