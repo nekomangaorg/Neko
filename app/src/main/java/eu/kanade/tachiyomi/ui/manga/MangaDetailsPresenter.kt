@@ -116,8 +116,11 @@ class MangaDetailsPresenter(
                     manga.scanlator_filter?.let {
                         filteredScanlators = MdUtil.getScanlators(it).toSet()
                     }
-                    updateChapters(updateUi = true)
+                    updateChapters()
+                    isLoading = false
                 }
+
+                withContext(Dispatchers.Main) { controller.updateChapters(this@MangaDetailsPresenter.chapters) }
             }
         }
         fetchExternalLinks()
@@ -144,11 +147,9 @@ class MangaDetailsPresenter(
     }
 
     private suspend fun getChapters() {
-
         val chapters = db.getChapters(manga).executeOnIO().map { it.toModel() }
 
         //update all scanlators
-
         updateScanlators(chapters)
 
         // Find downloaded chapters
@@ -179,25 +180,18 @@ class MangaDetailsPresenter(
         asyncUpdateMangaAndChapters()
     }
 
-    private fun updateChapters(fetchedChapters: List<Chapter>? = null, updateUi: Boolean = false) {
+    private fun updateChapters(fetchedChapters: List<Chapter>? = null) {
+        val chapters =
+            (fetchedChapters ?: db.getChapters(manga).executeAsBlocking()).map { it.toModel() }
+
         //update all scanlators
-        scope.launch {
-            withContext(Dispatchers.IO) {
-                val chapters =
-                    (fetchedChapters ?: db.getChapters(manga).executeAsBlocking()).map { it.toModel() }
-                updateScanlators(chapters)
-                // Find downloaded chapters
-                setDownloadedChapters(chapters)
-                val afterFilterChapters = applyChapterFilters(chapters)
-                if (updateUi) {
-                    withContext(Dispatchers.Main) {
-                        this@MangaDetailsPresenter.chapters = afterFilterChapters
-                        isLoading = false
-                        controller.updateChapters(this@MangaDetailsPresenter.chapters)
-                    }
-                }
-            }
-        }
+        updateScanlators(chapters)
+
+        // Find downloaded chapters
+        setDownloadedChapters(chapters)
+
+        // Store the last emission
+        this.chapters = applyChapterFilters(chapters)
     }
 
     /**
@@ -599,7 +593,9 @@ class MangaDetailsPresenter(
             isLoading = false
             try {
                 syncChaptersWithSource(db, chapters, manga)
-                updateChapters(updateUi = true)
+
+                updateChapters()
+                withContext(Dispatchers.Main) { controller.updateChapters(this@MangaDetailsPresenter.chapters) }
             } catch (e: java.lang.Exception) {
                 withContext(Dispatchers.Main) {
                     controller.showError(trimException(e))
@@ -701,7 +697,8 @@ class MangaDetailsPresenter(
             if (!justChapters) {
                 db.insertManga(manga).executeAsBlocking()
             }
-            updateChapters(updateUi = true)
+            updateChapters()
+            withContext(Dispatchers.Main) { controller.updateChapters(chapters) }
         }
     }
 
@@ -834,10 +831,8 @@ class MangaDetailsPresenter(
 
     private fun fetchExternalLinks() {
         scope.launch {
-            withContext(Dispatchers.IO) {
-                externalLinksList = manga.getExternalLinks().map { external ->
-                    ExternalItem(external)
-                }
+            externalLinksList = manga.getExternalLinks().map { external ->
+                ExternalItem(external)
             }
         }
     }
