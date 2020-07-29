@@ -56,9 +56,14 @@ fun syncChaptersWithSource(
                     } else {
                     }
                 } else {
-                    dexMap!![sChapter.getVolumeNum()]?.let {
-                        if (it.contains(chpNum).not()) {
-                            dexChapters.add(sChapter)
+                    val volume = dexMap!![sChapter.getVolumeNum()]
+                    if (volume == null) {
+                        dexChapters.add(sChapter)
+                    } else {
+                        dexMap!![sChapter.getVolumeNum()]?.let {
+                            if (it.contains(chpNum).not()) {
+                                dexChapters.add(sChapter)
+                            }
                         }
                     }
                 }
@@ -69,7 +74,7 @@ fun syncChaptersWithSource(
             false -> compareByDescending<SChapter> { it.getVolumeNum() }.thenByDescending { it.getChapterNum() }
         }
 
-        copyOfRawSource = dexChapters.sortedWith(compareByDescending<SChapter> { it.getChapterNum() })
+        copyOfRawSource = dexChapters.sortedWith(sorter)
     }
 
     val sourceChapters = copyOfRawSource.mapIndexed { i, sChapter ->
