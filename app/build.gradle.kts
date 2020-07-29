@@ -124,7 +124,9 @@ dependencies {
 
     // Network client
     implementation("com.squareup.okhttp3:okhttp:${Versions.OKHTTP}")
-    implementation("com.squareup.okhttp3:logging-interceptor:${Versions.OKHTTP}")
+    implementation("com.github.ihsanbal:LoggingInterceptor:3.1.0") {
+        exclude("org.json", "json")
+    }
     implementation("com.squareup.okio:okio:2.6.0")
 
     // Chucker
@@ -166,7 +168,7 @@ dependencies {
     // HTML parser
     implementation("org.jsoup:jsoup:1.13.1")
 
-//Icons
+    //Icons
     implementation("com.mikepenz:iconics-core:5.0.3")
     implementation("com.mikepenz:iconics-views:5.0.3")
     implementation("com.mikepenz:community-material-typeface:5.0.45.1-kotlin@aar")

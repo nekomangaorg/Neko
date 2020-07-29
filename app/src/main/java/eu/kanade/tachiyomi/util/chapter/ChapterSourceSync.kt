@@ -7,7 +7,6 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.getChapterNum
 import eu.kanade.tachiyomi.source.model.getVolumeNum
 import eu.kanade.tachiyomi.source.model.isMergedChapter
-import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import java.util.Date
 import java.util.TreeSet
 
@@ -28,6 +27,7 @@ fun syncChaptersWithSource(
 
     // Chapters from db.
     val dbChapters = db.getChapters(manga).executeAsBlocking()
+    val dbChapterById = dbChapters.groupByTo(destination = HashMap(), keySelector = { it.mangadex_chapter_id }, valueTransform = { it })
     var copyOfRawSource = rawSourceChapters.toList()
     if (manga.merge_manga_url != null) {
         val partition = copyOfRawSource.partition { !it.isMergedChapter() }
@@ -91,24 +91,16 @@ fun syncChaptersWithSource(
     // Chapters whose metadata have changed.
     val toChange = mutableListOf<Chapter>()
 
-    for (sourceChapter in sourceChapters) {
-        val dbChapter = dbChapters.find {
-            if (sourceChapter.isMergedChapter() && it.isMergedChapter()) {
-                it.url == sourceChapter.url
-            } else if (sourceChapter.isMergedChapter().not() && it.isMergedChapter().not()) {
-                (it.mangadex_chapter_id.isNotBlank() && it.mangadex_chapter_id == sourceChapter.mangadex_chapter_id) ||
-                    MdUtil.getChapterId(it.url) == sourceChapter.mangadex_chapter_id
-            } else {
-                false
-            }
 
-        }
+
+    for (sourceChapter in sourceChapters) {
+        val dbChapters = dbChapterById.get(sourceChapter.mangadex_chapter_id)
 
         // Add the chapter if not in db already, or update if the metadata changed.
-        if (dbChapter == null) {
+        if (dbChapters == null) {
             toAdd.add(sourceChapter)
         } else {
-
+            val dbChapter = dbChapters.first()
             ChapterRecognition.parseChapterNumber(sourceChapter, manga)
 
             if (shouldUpdateDbChapter(dbChapter, sourceChapter)) {
@@ -134,15 +126,7 @@ fun syncChaptersWithSource(
     // Chapters from the db not in the source.
     val toDelete = dbChapters.filterNot { dbChapter ->
         sourceChapters.any { sourceChapter ->
-
-            if (sourceChapter.isMergedChapter() && dbChapter.isMergedChapter()) {
-                dbChapter.url == sourceChapter.url
-            } else if (sourceChapter.isMergedChapter().not() && dbChapter.isMergedChapter().not()) {
-                (dbChapter.mangadex_chapter_id.isNotBlank() && dbChapter.mangadex_chapter_id == sourceChapter.mangadex_chapter_id) ||
-                    MdUtil.getChapterId(dbChapter.url) == sourceChapter.mangadex_chapter_id
-            } else {
-                false
-            }
+            dbChapter.mangadex_chapter_id == sourceChapter.mangadex_chapter_id
         }
     }
 

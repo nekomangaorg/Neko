@@ -2,13 +2,15 @@ package eu.kanade.tachiyomi.network
 
 import android.content.Context
 import android.os.SystemClock
+import android.util.Log.VERBOSE
 import com.chuckerteam.chucker.api.ChuckerInterceptor
+import com.ihsanbal.logging.Level
+import com.ihsanbal.logging.LoggingInterceptor
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import okhttp3.Cache
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import uy.kohesive.injekt.injectLazy
 import java.io.File
 import java.util.concurrent.TimeUnit
@@ -63,8 +65,8 @@ class NetworkHelper(val context: Context) {
             .addInterceptor(ChuckerInterceptor(context))
             .cookieJar(cookieManager)
         if (BuildConfig.DEBUG || preferencesHelper.debugLogEnabled()) {
-            val httpLoggingInterceptor = HttpLoggingInterceptor()
-            builder.addInterceptor(httpLoggingInterceptor.apply { httpLoggingInterceptor.level = HttpLoggingInterceptor.Level.BODY })
+            val httpLoggingInterceptor = LoggingInterceptor.Builder().setLevel(Level.BODY).log(VERBOSE).build()
+            builder.addInterceptor(httpLoggingInterceptor)
         }
         return builder.build()
     }
