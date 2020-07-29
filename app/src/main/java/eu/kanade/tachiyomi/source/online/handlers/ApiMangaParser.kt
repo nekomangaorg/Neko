@@ -41,7 +41,6 @@ class ApiMangaParser(val langs: List<String>) {
                 manga.last_chapter_number = floor(it).toInt()
             }
 
-
             networkManga.rating?.let {
                 manga.rating = it.bayesian ?: it.mean
                 manga.users = it.users
@@ -90,7 +89,7 @@ class ApiMangaParser(val langs: List<String>) {
         serializer: ApiMangaSerializer,
         filteredChapters: List<Map.Entry<String, ChapterSerializer>>
     ): Boolean {
-        if (serializer.chapter.isNullOrEmpty() || serializer.manga.last_chapter.isNullOrEmpty()) {
+        if (filteredChapters.isEmpty() || serializer.manga.last_chapter.isNullOrEmpty()) {
             return false
         }
         val finalChapterNumber = serializer.manga.last_chapter!!
