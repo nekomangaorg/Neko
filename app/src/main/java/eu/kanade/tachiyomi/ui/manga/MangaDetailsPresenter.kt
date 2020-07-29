@@ -161,6 +161,13 @@ class MangaDetailsPresenter(
 
     private fun updateScanlators(chapters: List<ChapterItem>) {
         allChapterScanlators = chapters.flatMap { it -> it.chapter.scanlatorList() }.toSet()
+        if (filteredScanlators.contains(MergeSource.name) && !allChapterScanlators.contains(MergeSource.name)) {
+            val tempSet = filteredScanlators.toMutableSet()
+            tempSet.remove(MergeSource.name)
+            filteredScanlators = tempSet.toSet()
+            manga.scanlator_filter = MdUtil.getScanlatorString(filteredScanlators)
+            db.insertManga(manga)
+        }
         if (filteredScanlators.isEmpty()) {
             filteredScanlators = allChapterScanlators
         }
@@ -470,6 +477,7 @@ class MangaDetailsPresenter(
         val tempSet = filteredScanlators.toMutableSet()
         tempSet.add(MergeSource.name)
         filteredScanlators = tempSet
+        manga.scanlator_filter = MdUtil.getScanlatorString(filteredScanlators)
         db.insertManga(manga)
     }
 
@@ -550,28 +558,28 @@ class MangaDetailsPresenter(
                     }
                 }
             }
-            withContext(Dispatchers.IO) { updateChapters() }
+
+
             withContext(Dispatchers.IO) {
-                val missingChapters = MdUtil.getMissingChapterCount(db.getChapters(manga).executeAsBlocking(), manga.status)
+                val allChaps = db.getChapters(manga).executeAsBlocking()
+                updateScanlators(allChaps.map { it.toModel() })
+                val missingChapters = MdUtil.getMissingChapterCount(allChaps, manga.status)
                 if (missingChapters != manga.missing_chapters) {
                     manga.missing_chapters = missingChapters
                     db.insertManga(manga).executeOnIO()
                 }
             }
-
-
-            isLoading = false
-            if (errorFromNetwork == null) {
+            withContext(Dispatchers.IO) {
+                updateChapters()
                 withContext(Dispatchers.Main) {
-                    updateScanlators(this@MangaDetailsPresenter.chapters)
-                    controller.updateChapters(this@MangaDetailsPresenter.chapters)
+                    isLoading = false
+                    if (errorFromNetwork == null) {
+                        controller.updateChapters(this@MangaDetailsPresenter.chapters)
+                    } else {
+                        controller.showError(trimException(errorFromNetwork!!))
+                    }
                 }
-            } else {
-                withContext(Dispatchers.Main) {
-                    controller.showError(
-                        trimException(errorFromNetwork!!)
-                    )
-                }
+
             }
         }
     }
