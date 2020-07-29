@@ -27,7 +27,7 @@ fun syncChaptersWithSource(
 
     // Chapters from db.
     val dbChapters = db.getChapters(manga).executeAsBlocking()
-    val dbChapterById = dbChapters.groupByTo(destination = HashMap(), keySelector = { it.mangadex_chapter_id }, valueTransform = { it })
+    val dbChapterByUrl = dbChapters.groupByTo(destination = HashMap(), keySelector = { it.url }, valueTransform = { it })
     var copyOfRawSource = rawSourceChapters.toList()
     if (manga.merge_manga_url != null) {
         val partition = copyOfRawSource.partition { !it.isMergedChapter() }
@@ -94,7 +94,7 @@ fun syncChaptersWithSource(
 
 
     for (sourceChapter in sourceChapters) {
-        val dbChapters = dbChapterById.get(sourceChapter.mangadex_chapter_id)
+        val dbChapters = dbChapterByUrl.get(sourceChapter.url)
 
         // Add the chapter if not in db already, or update if the metadata changed.
         if (dbChapters == null) {
