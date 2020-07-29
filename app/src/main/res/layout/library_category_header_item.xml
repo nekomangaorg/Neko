@@ -38,7 +38,6 @@
         android:layout_width="14dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:alpha="0.5"
         android:contentDescription="@string/select_all"
         android:src="@drawable/ic_expand_less_24dp"
         android:tint="?android:textColorPrimary"
