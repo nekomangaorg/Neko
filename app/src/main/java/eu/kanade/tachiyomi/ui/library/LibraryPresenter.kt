@@ -264,7 +264,13 @@ class LibraryPresenter(
             val tracks = db.getTracks(item.manga).executeAsBlocking()
 
             val hasTrack = loggedServices.any { service ->
-                tracks.any { it.sync_id == service.id }
+                tracks.any {
+                    if (service.isMdList() && it.status == FollowStatus.UNFOLLOWED.int) {
+                        false
+                    } else {
+                        it.sync_id == service.id
+                    }
+                }
             }
             val service = if (filterTrackers.isNotEmpty()) loggedServices.find {
                 it.name == filterTrackers
