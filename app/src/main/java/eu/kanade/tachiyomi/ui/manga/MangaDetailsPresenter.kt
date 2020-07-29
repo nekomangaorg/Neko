@@ -44,6 +44,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -491,20 +492,28 @@ class MangaDetailsPresenter(
             }
 
             var errorFromNetwork: java.lang.Exception? = null
+            var errorFromMerged: java.lang.Exception? = null
             val thumbnailUrl = manga.thumbnail_url
 
             val nPair = async(Dispatchers.IO) {
                 try {
                     val result = source.fetchMangaAndChapterDetails(manga)
                     if (manga.merge_manga_url != null) {
-                        val otherChapters = sourceManager.getMergeSource().fetchChapters(manga.merge_manga_url!!)
-                        val list = result.second.toMutableList()
-                        list.addAll(otherChapters)
-                        Pair(result.first, list.toList())
+                        try {
+                            val otherChapters = sourceManager.getMergeSource().fetchChapters(manga.merge_manga_url!!)
+                            val list = result.second.toMutableList()
+                            list.addAll(otherChapters)
+                            Pair(result.first, list.toList())
+                        } catch (e: Exception) {
+                            Timber.e(e, "error with mergedsource")
+                            errorFromMerged = e
+                            result
+                        }
                     } else {
                         result
                     }
                 } catch (e: Exception) {
+                    Timber.e(e, "error with mangadex")
                     errorFromNetwork = e
                     Pair(null, emptyList<SChapter>())
                 }
@@ -573,10 +582,14 @@ class MangaDetailsPresenter(
                 updateChapters()
                 withContext(Dispatchers.Main) {
                     isLoading = false
+
                     if (errorFromNetwork == null) {
                         controller.updateChapters(this@MangaDetailsPresenter.chapters)
                     } else {
-                        controller.showError(trimException(errorFromNetwork!!))
+                        controller.showError("MangaDex error: " + trimException(errorFromNetwork!!))
+                    }
+                    if (errorFromMerged != null) {
+                        controller.showError("MergedSource error: " + trimException(errorFromMerged!!))
                     }
                 }
 
