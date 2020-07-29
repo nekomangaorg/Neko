@@ -30,31 +30,46 @@ fun syncChaptersWithSource(
     val dbChapters = db.getChapters(manga).executeAsBlocking()
     var copyOfRawSource = rawSourceChapters.toList()
     if (manga.merge_manga_url != null) {
-        val dexChapters = copyOfRawSource.filter { !it.isMergedChapter() }.toMutableList()
-        val mergedChapters = copyOfRawSource.filter { it.isMergedChapter() }
+        val partition = copyOfRawSource.partition { !it.isMergedChapter() }
+        val dexChapters = partition.first.toMutableList()
+        val mergedChapters = partition.second
 
-        val allVol1 = dexChapters.all { it.getVolumeNum() == 1 }
-        val allNull = mergedChapters.all { it.getVolumeNum() == null }
+        val isManga = "jp" == manga.lang_flag
 
+        var dexSet: HashSet<Int>? = null
+        if (isManga) {
+            dexSet = dexChapters.map { it.getChapterNum()!! }.toHashSet()
+        }
+        var dexMap: Map<Int?, List<Int>>? = null
+        var only1VolNoVol: Boolean = false
 
-        mergedChapters.forEach { it ->
-            val exists = dexChapters.filter { dex ->
-                when (allVol1 && allNull) {
-                    true -> true
-                    false -> it.getVolumeNum() == dex.getVolumeNum()
+        if (isManga.not()) {
+            dexMap = dexChapters.groupBy(keySelector = { it.getVolumeNum() }, valueTransform = { it.getChapterNum()!! })
+            only1VolNoVol = dexChapters.all { it.getVolumeNum() == 1 } && mergedChapters.all { it.getVolumeNum() == null }
+        }
+
+        mergedChapters.forEach { sChapter ->
+            sChapter.getChapterNum()?.let { chpNum ->
+                if (isManga || only1VolNoVol) {
+                    if (!dexSet!!.contains(chpNum)) {
+                        dexChapters.add(sChapter)
+                    } else {
+                    }
+                } else {
+                    dexMap!![sChapter.getVolumeNum()]?.let {
+                        if (it.contains(chpNum).not()) {
+                            dexChapters.add(sChapter)
+                        }
+                    }
                 }
             }
-                .find { dex -> dex.getChapterNum() == it.getChapterNum() }
-            if (exists == null) {
-                dexChapters.add(it)
-            }
         }
-        val sorter = when (allNull && allVol1) {
+        val sorter = when (isManga || only1VolNoVol) {
             true -> compareByDescending { it.getChapterNum() }
             false -> compareByDescending<SChapter> { it.getVolumeNum() }.thenByDescending { it.getChapterNum() }
         }
 
-        copyOfRawSource = dexChapters.sortedWith(sorter)
+        copyOfRawSource = dexChapters.sortedWith(compareByDescending<SChapter> { it.getChapterNum() })
     }
 
     val sourceChapters = copyOfRawSource.mapIndexed { i, sChapter ->
@@ -126,6 +141,9 @@ fun syncChaptersWithSource(
         }
     }
 
+    // Fix order in source.
+    db.fixChaptersSourceOrder(sourceChapters).executeAsBlocking()
+
     // Return if there's nothing to add, delete or change, avoiding unnecessary db transactions.
     if (toAdd.isEmpty() && toDelete.isEmpty() && toChange.isEmpty()) {
         val newestDate = dbChapters.maxBy { it.date_upload }?.date_upload ?: 0L
@@ -176,9 +194,6 @@ fun syncChaptersWithSource(
         if (toChange.isNotEmpty()) {
             db.insertChapters(toChange).executeAsBlocking()
         }
-
-        // Fix order in source.
-        db.fixChaptersSourceOrder(sourceChapters).executeAsBlocking()
 
         // Set this manga as updated since chapters were changed
         val newestChapter = db.getChapters(manga).executeAsBlocking().maxBy { it.date_upload }

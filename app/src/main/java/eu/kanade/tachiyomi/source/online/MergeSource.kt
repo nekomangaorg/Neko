@@ -28,6 +28,7 @@ import rx.Observable
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.concurrent.TimeUnit
+import kotlin.math.floor
 
 class MergeSource : HttpSource() {
     override val name = "Merged Chapter"
@@ -87,7 +88,14 @@ class MergeSource : HttpSource() {
                     if (season.isNotEmpty()) {
                         vol = season.substring(1)
                     }
-                    chapter_txt = name.substringAfter("Chapter ")
+                    val splitName = name.substringAfter(" - Chapter").split(" ")
+                    for (split in splitName) {
+                        var splitFloat = split.toFloatOrNull()
+                        if (splitFloat != null) {
+                            chapter_txt = floor(splitFloat).toString()
+                            break
+                        }
+                    }
 
                     url = "/read-online/" + response.request.url.toString().substringAfter("/manga/") + chapterURLEncode(indexChapter)
                     mangadex_chapter_id = url.substringAfter("/read-online/")
