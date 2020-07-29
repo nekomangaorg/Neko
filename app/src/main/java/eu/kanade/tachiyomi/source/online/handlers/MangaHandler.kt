@@ -12,6 +12,7 @@ import okhttp3.Headers
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import rx.Observable
+import timber.log.Timber
 
 class MangaHandler(val client: OkHttpClient, val headers: Headers, val langs: List<String>) {
 
@@ -21,6 +22,10 @@ class MangaHandler(val client: OkHttpClient, val headers: Headers, val langs: Li
             val parser = ApiMangaParser(langs)
 
             val jsonData = response.body!!.string()
+            if (response.code != 200) {
+                Timber.e("error from mangadex with response code ${response.code} \n body: \n$jsonData")
+                throw Exception("Error from MangaDex Response code ${response.code} ")
+            }
 
             val detailsManga = parser.mangaDetailsParse(jsonData)
             manga.copyFrom(detailsManga)
