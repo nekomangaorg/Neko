@@ -1283,6 +1283,8 @@ class LibraryController(
     override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
         val count = selectedMangas.size
         // Destroy action mode if there are no items selected.
+        val categoryItem = menu.findItem(R.id.action_move_to_category)
+        categoryItem.isVisible = presenter.categories.size > 1
         val shareItem = menu.findItem(R.id.action_share)
         shareItem.isVisible = selectedMangas.isNotEmpty()
         if (count == 0) destroyActionModeIfNeeded()
