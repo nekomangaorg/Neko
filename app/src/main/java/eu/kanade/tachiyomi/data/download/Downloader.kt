@@ -133,7 +133,7 @@ class Downloader(
                     notifier.onDownloadPaused()
                 }
             } else {
-                notifier.dismiss()
+                notifier.downloadFinished()
             }
         }
     }
