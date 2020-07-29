@@ -379,6 +379,15 @@ class LibraryUpdateService(
             notifier.showProgressNotification(manga, progress, mangaToUpdate.size)
             val source = sourceManager.getMangadex()
             val details = source.fetchMangaAndChapterDetails(manga)
+            var fetchedChapters = details.second.toMutableList()
+            manga.merge_manga_url?.let {
+                try {
+                    val chapters = sourceManager.getMergeSource().fetchChapters(it)
+                    fetchedChapters.addAll(chapters)
+                } catch (e: Exception) {
+                    Timber.e(e, "Error with mergedsource")
+                }
+            }
 
             // delete cover cache image if the thumbnail from network is not empty
             // note: we preload the covers here so we can view everything offline if they change
@@ -404,7 +413,6 @@ class LibraryUpdateService(
                 }
             }
 
-            val fetchedChapters = details.second
             if (fetchedChapters.isNotEmpty()) {
                 val originalChapters = db.getChapters(manga).executeAsBlocking()
                 val newChapters = syncChaptersWithSource(db, fetchedChapters, manga)
