@@ -146,7 +146,6 @@ open class MangaDex() : HttpSource() {
         val pair = MangaHandler(clientBuilder(), headers, getLangsToShow()).fetchMangaAndChapterDetails(
             manga
         )
-
         try {
             if (preferences.forceLatestCovers()) {
                 val cover = getLatestCoverUrl(pair.first)

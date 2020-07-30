@@ -39,71 +39,70 @@ class MdUtil {
         val validOneShotFinalChapters = listOf("0", "1")
 
         val englishDescriptionTags = listOf(
-            "[b][u]English:[/u][/b]",
-            "[b][u]English[/u][/b]",
+            "[b][u]English:",
+            "[b][u]English",
             "[English]:",
             "[B][ENG][/B]"
         )
 
         val descriptionLanguages = listOf(
-            "[b][u]Russian / Русский[/u][/b]",
-            "[b] [u] Russian / Русский [/ u] [/ b]",
-            "[u][b]Russian / Русский:[/b][/u]",
-            "[u][b]Russian / Русский:[/b][/u]",
-            "[u]Russian:[/u]",
+            "[b][u]Russian / Русский",
+            "[b] [u] Russian / Русский",
+            "[u][b]Russian / Русский",
+            "[u][b]Russian / Русский",
+            "[u]Russian",
+            "[b][u]Russian",
             "[RUS]",
-            "[b][u]Russian / Русский:[/u][/b]",
-            "[b][u]Russian/Русский:[/u][/b]",
-            "[b][u]Русский[/u][/b]",
+            "[b][u]Russian / Русский",
+            "[b][u]Russian/Русский:",
+            "[b][u]Русский",
             "Russian / Русский",
             "RUS:",
-            "[b][u]German / Deutsch[/u][/b]",
+            "[b][u]German / Deutsch",
             "German/Deutsch:",
-            "[b][u]Espa&ntilde;ol / Spanish:[/u][/b]",
-            "[u][b]Spanish / Espa&ntilde;ol:[/b][/u]",
-            "[b] [u] Spanish / Espa & ntilde; ol: [/ u] [/ b]",
-            "[b][u]Spanish / Espa&ntilde;ol:[/u][/b]",
+            "[b][u]Espa&ntilde;ol / Spanish",
+            "[u][b]Spanish / Espa&ntilde;ol",
+            "[b] [u] Spanish / Espa & ntilde; ol",
+            "[b][u]Spanish / Espa&ntilde;ol",
+            "[b][u]Spanish",
             "[Espa&ntilde;ol]:",
             "[b] Spanish: [/ b]",
-            "[b][u]Espa&ntilde;ol / Spanish:[/b]",
-            "[b][u]Espa&ntilde;ol / Spanish:[/b]",
-            "[b][u]Italian / Italiano[/u][/b]",
+            "[b][u]Espa&ntilde;ol / Spanish",
+            "[b][u]Italian / Italiano",
             "Pasta-Pizza-Mandolino/Italiano",
-            "[b]Polish / polski[/b]",
-            "[b][u]Polish / Polski:[/u][/b]",
-            "[b][u]Polish / Polski[/u][/b]",
-            "[b][u]Polish Summary / Polski Opis[/u][/b]",
-            "[b][u]Polski[/u][/b]",
-            "[b][u]Portuguese (BR) / Portugu&ecirc;s (BR)[/u][/b]",
-            "[b]Portuguese (BR) / Portugu&ecirc;s (BR)[/b]",
-            "[u][b]Portuguese / Portugu&ecirc;s:[/b][/u]",
-            "[b][u]Português / Portuguese[/u][/b]",
-            "[b][u]Portuguese / Portugu[/u][/b]",
-            "[b][u]Portuguese / Portugu&ecirc;s:[/u][/b]",
-            "[b][u]Portugu&ecirc;s[/u][/b]",
-            "[b] Portuguese (BR) / Portugu & ecirc; s (BR): [/ b]",
-            "[b][u]Portuguese (BR) / Portugu&ecirc;s (BR):[/u][/b] ",
-            "[B][PTBR][/B]",
-            "R&eacute;sume Fran&ccedil;ais :[spoiler]",
+            "[b]Polish / polski",
+            "[b][u]Polish / Polski",
+            "[b][u]Polish Summary / Polski Opis",
+            "[b][u]Polski",
+            "[b][u]Portuguese (BR) / Portugu&ecirc;s",
+            "[b]Portuguese (BR) / Portugu&ecirc;s",
+            "[u][b]Portuguese / Portugu&ecirc;s",
+            "[b][u]Português / Portuguese",
+            "[b][u]Portuguese / Portugu",
+            "[b][u]Portuguese / Portugu&ecirc;s",
+            "[b][u]Portugu&ecirc;s",
+            "[b] Portuguese (BR) / Portugu & ecirc;",
+            "[b][u]Portuguese (BR) / Portugu&ecirc;",
+            "[B][PTBR]",
+            "R&eacute;sume Fran&ccedil;ais",
             "R&eacute;sum&eacute; Fran&ccedil;ais",
-            "[b][u]French[/u][/b]",
-            "[b][u]French / Fran&ccedil;ais[/u][/b]",
-            "[u][b]French / Fran&ccedil;ais :[/b][/u]",
-            "b][u]Fran&ccedil;ais[/u][/b]",
+            "[b][u]French",
+            "[b][u]French / Fran&ccedil;ais",
+            "[u][b]French / Fran&ccedil;ais",
+            "b][u]Fran&ccedil;ais",
             "[hr]Fr:",
             "French - Français:",
-            "[b][u]Turkish / T&uuml;rk&ccedil;e[/u][/b]",
-            "[u][b]Turkish/T&uuml;rk&ccedil;e[/b][/u]",
-            "[b][u]Chinese[/u][/b]",
-            "[b][u]Arabic / العربية[/u][/b]",
-            "[b][u]العربية[/u][/b]",
+            "[b][u]Turkish / T&uuml;rk&ccedil;e",
+            "[u][b]Turkish/T&uuml;rk&ccedil;e",
+            "[b][u]Chinese",
+            "[b][u]Arabic / العربية",
+            "[b][u]العربية",
             "[hr]TH",
-            "[b][u]Vietnamese[/u][/b]",
-            "[b]Links:[/b]",
+            "[b][u]Vietnamese",
+            "[b]Links:",
             "[b]Link[/b]",
             "Links:",
-            "[b]External Links :[/b]"
-
+            "[b]External Links"
         )
 
         // guess the thumbnail url is .jpg  this has a ~80% success rate
@@ -138,12 +137,14 @@ class MdUtil {
         fun cleanString(string: String): String {
             val bbRegex = """\[(\w+)[^]]*](.*?)\[/\1]""".toRegex()
             var intermediate = string
-                .replace("[list]", "")
-                .replace("[/list]", "")
+                .replace("[list]", "", true)
+                .replace("[/list]", "", true)
                 .replace("[*]", "")
-                .replace("[hr]", "")
-                .replace("[u]", "")
-                .replace("[/u]", "")
+                .replace("[hr]", "", true)
+                .replace("[u]", "", true)
+                .replace("[/u]", "", true)
+                .replace("[b]", "", true)
+                .replace("[u]", "", true)
 
             // Recursively remove nested bbcode
             while (bbRegex.containsMatchIn(intermediate)) {
