@@ -61,7 +61,6 @@ class ApiMangaParser(val langs: List<String>) {
                 manga.status = SManga.COMPLETED
                 manga.missing_chapters = null
             } else {
-                manga.missing_chapters = getMissingChapterCount(filteredChapters)
                 manga.status = tempStatus
             }
 
@@ -103,19 +102,7 @@ class ApiMangaParser(val langs: List<String>) {
         val removeOneshots = filteredChapters.filter { !it.value.chapter.isNullOrBlank() }
         return removeOneshots.size.toString() == floor(finalChapterNumber.toDouble()).toInt().toString()
     }
-
-    private fun getMissingChapterCount(filteredChapters: List<Map.Entry<String, ChapterSerializer>>): String? {
-
-        val remove0ChaptersFromCount = filteredChapters.filter { it.value?.chapter?.toInt() != 0 }
-
-        remove0ChaptersFromCount.firstOrNull()?.value?.chapter?.let {
-            val result = it.toInt() - remove0ChaptersFromCount.size
-            if (result <= 0) return null
-            return result.toString()
-        }
-        return null
-    }
-
+    
     private fun filterChapterForChecking(serializer: ApiMangaSerializer): List<Map.Entry<String, ChapterSerializer>> {
         serializer.chapter ?: return emptyList()
         return serializer.chapter.entries

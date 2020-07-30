@@ -416,6 +416,9 @@ class LibraryUpdateService(
             if (fetchedChapters.isNotEmpty()) {
                 val originalChapters = db.getChapters(manga).executeAsBlocking()
                 val newChapters = syncChaptersWithSource(db, fetchedChapters, manga)
+
+                manga.missing_chapters = updateMissingChapterCount(manga).missing_chapters
+
                 if (newChapters.first.isNotEmpty()) {
                     if (shouldDownload) {
                         var chaptersToDl = newChapters.first.sortedBy { it.chapter_number }
@@ -453,6 +456,8 @@ class LibraryUpdateService(
                 if (newChapters.first.size + newChapters.second.size > 0) listener?.onUpdateManga(
                     manga
                 )
+            } else {
+                updateMissingChapterCount(manga)
             }
             return hasDownloads
         } catch (e: Exception) {
@@ -462,6 +467,16 @@ class LibraryUpdateService(
             }
             return false
         }
+    }
+
+    private suspend fun updateMissingChapterCount(manga: LibraryManga): LibraryManga {
+        val allChaps = db.getChapters(manga).executeAsBlocking()
+        val missingChapters = MdUtil.getMissingChapterCount(allChaps, manga.status)
+        if (missingChapters != manga.missing_chapters) {
+            manga.missing_chapters = missingChapters
+            db.insertManga(manga).executeOnIO()
+        }
+        return manga
     }
 
     private fun downloadChapters(manga: Manga, chapters: List<Chapter>) {
