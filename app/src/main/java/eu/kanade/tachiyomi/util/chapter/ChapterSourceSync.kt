@@ -106,6 +106,7 @@ fun syncChaptersWithSource(
         }
 
         // Add the chapter if not in db already, or update if the metadata changed.
+
         if (dbChapter == null) {
             toAdd.add(sourceChapter)
         } else {
@@ -133,17 +134,18 @@ fun syncChaptersWithSource(
     }
 
     // Chapters from the db not in the source.
-    val toDelete = dbChapters.filterNot { dbChapter ->
+    var toDelete = dbChapters.filterNot { dbChapter ->
         sourceChapters.any { sourceChapter ->
             dbChapter.mangadex_chapter_id == sourceChapter.mangadex_chapter_id
         }
     }
 
     val dupes = dbChapters.groupBy { it.url }.filter { it.value.size > 1 }.map {
-        it.value.filter { !it.read }.firstOrNull() ?: it.value.first()
-    }
+        it.value.firstOrNull { !it.read } ?: it.value.first()
+    }.toMutableList()
     if (dupes.isNotEmpty()) {
-        db.deleteChapters(dupes)
+        dupes.addAll(toDelete)
+        toDelete = dupes.toList()
     }
 
     // Fix order in source.
