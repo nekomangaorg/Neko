@@ -1,7 +1,7 @@
 object Versions {
     const val CHUCKER = "3.2.0"
     const val COIL = "0.11.0"
-    const val COROUTINES = "1.3.5"
+    const val COROUTINES = "1.3.6"
     const val FASTADAPTER = "5.0.0"
     const val HYPERION = "0.9.27"
     const val NUCLEUS = "3.0.0"
@@ -19,7 +19,7 @@ object AndroidVersions {
     const val COMPILE_SDK = 29
     const val MIN_SDK = 24
     const val TARGET_SDK = 29
-    const val VERSION_CODE = 74
+    const val VERSION_CODE = 75
     const val VERSION_NAME = "2.1.0"
 }
 
