@@ -3,13 +3,14 @@
     <changelogversion
         changeDate=""
         versionName="v2.1.0">
-        <changelogtext></changelogtext>
-        <changelogtext></changelogtext>
-        <changelogtext></changelogtext>
-        <changelogtext></changelogtext>
-        <changelogtext></changelogtext>
-        <changelogtext></changelogtext>
-        <changelogtext></changelogtext>
+        <changelogtext>New: Ability to merge chapters from an external source. This button shows in manga info only when a manga is not complete in MangaDex</changelogtext>
+        <changelogtext>New: When all downloads are completed a notification will pop up now, that leads to the download page</changelogtext>
+        <changelogtext>Fix: Optimize opening manga and interacting with large chapters</changelogtext>
+        <changelogtext>Fix: Scanlator filter bug fixes</changelogtext>
+        <changelogtext>Fix: Bug where no chapters in language was causing completed status when it was completed in another language</changelogtext>
+        <changelogtext>Fix: Filter by tracking now counts MDList Unfollowed as not tracked</changelogtext>
+        <changelogtext>Fix: Adjust color of the filter text to make it stand out a little more</changelogtext>
+        <changelogtext>Fix: other bug fixes</changelogtext>
     </changelogversion>
     <changelogversion
         changeDate=""
