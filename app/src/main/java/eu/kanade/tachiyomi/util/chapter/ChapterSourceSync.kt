@@ -44,9 +44,9 @@ fun syncChaptersWithSource(
             only1VolNoVol = dexChapters.all { it.getVolumeNum() == 1 } && mergedChapters.all { it.getVolumeNum() == null }
         }
 
-        var dexSet: HashSet<Int>? = null
+        var dexSet: HashSet<Int?>? = null
         if (isManga || only1VolNoVol) {
-            dexSet = dexChapters.map { it.getChapterNum()!! }.toHashSet()
+            dexSet = dexChapters.map { it.getChapterNum() }.toHashSet()
         }
 
         mergedChapters.forEach { sChapter ->
@@ -137,6 +137,13 @@ fun syncChaptersWithSource(
         sourceChapters.any { sourceChapter ->
             dbChapter.mangadex_chapter_id == sourceChapter.mangadex_chapter_id
         }
+    }
+
+    val dupes = dbChapters.groupBy { it.url }.filter { it.value.size > 1 }.map {
+        it.value.filter { !it.read }.firstOrNull() ?: it.value.first()
+    }
+    if (dupes.isNotEmpty()) {
+        db.deleteChapters(dupes)
     }
 
     // Fix order in source.
