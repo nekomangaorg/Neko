@@ -87,7 +87,7 @@
                 app:iiv_padding="2dp"
                 app:iiv_icon="cmd_close_circle"
                 android:contentDescription="@string/open_in_webview"
-                app:iiv_color="@color/text_color_secondary"
+                app:iiv_color="@color/colorAccent"
                 android:tooltipText="@string/remove_tracking"
                 app:layout_constraintBottom_toBottomOf="parent"
                 tools:background="@color/neko_green"

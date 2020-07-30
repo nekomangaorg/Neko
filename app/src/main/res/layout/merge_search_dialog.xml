@@ -7,16 +7,12 @@
     android:orientation="vertical">
 
     <com.google.android.material.textfield.TextInputLayout
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        style="@style/Neko.TextInputLayout.OutlineBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
-        android:hint="@string/title"
-        app:boxStrokeColor="@color/colorAccent"
-        app:endIconMode="clear_text"
-        app:hintEnabled="false"
-        app:hintTextColor="@color/colorAccent">
+        android:hint="@string/title">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/merge_search"

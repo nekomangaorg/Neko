@@ -37,4 +37,17 @@
     <style name="Neko.NumberPicker.Tooltip" parent="NumberPicker.ToolTipStyle">
         <item name="android:textAppearance">@style/Neko.Headline5</item>
     </style>
+
+    <style name="cursor" parent="ThemeOverlay.MaterialComponents.TextInputEditText.OutlinedBox">
+        <item name="colorControlActivated">@color/colorAccent</item>
+    </style>
+
+    <style name="Neko.TextInputLayout.OutlineBox" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="android:theme">@style/cursor</item>
+        <item name="boxStrokeColor">@color/colorAccent</item>
+        <item name="endIconMode">clear_text</item>
+        <item name="hintTextColor">@color/colorAccent</item>
+        <item name="endIconTint">@color/colorAccent</item>
+    </style>
+
 </resources>

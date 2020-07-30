@@ -18,13 +18,11 @@
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/username_input"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        style="@style/Neko.TextInputLayout.OutlineBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
-        android:hint="@string/username"
-        app:boxStrokeColor="@color/colorAccent"
-        app:hintTextColor="@color/colorAccent">
+        android:hint="@string/username">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/username"
@@ -33,14 +31,12 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        style="@style/Neko.TextInputLayout.OutlineBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
         android:hint="@string/password"
-        app:boxStrokeColor="@color/colorAccent"
-        app:endIconMode="password_toggle"
-        app:hintTextColor="@color/colorAccent">
+        app:endIconMode="password_toggle">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/password"
@@ -51,13 +47,11 @@
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/two_factor_holder"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        style="@style/Neko.TextInputLayout.OutlineBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
         android:hint="@string/two_factor"
-        app:boxStrokeColor="@color/colorAccent"
-        app:hintTextColor="@color/colorAccent"
         android:visibility="gone"
         tools:visibility="visible">
 
