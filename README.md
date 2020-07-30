@@ -26,15 +26,18 @@ Need info? Check the [Wiki](https://github.com/CarlosEsco/Neko/wiki)
 <img src="./.github/readme-images/screenshots.png" align="center" height="350" />
 
 ## About:
-This is a <a href="https://mangadex.org/">Mangadex</a> specific fork of <a href="https://github.com/inorichi/tachiyomi">Tachiyomi</a> and <a href="https://github.com/Jays2Kings/tachiyomiJ2K">TachiyomiJ2K</a>. This contains features specific to Mangadex
+This is a <a href="https://mangadex.org/">MangaDex</a> specific fork of <a href="https://github.com/inorichi/tachiyomi">Tachiyomi</a> and <a href="https://github.com/Jays2Kings/tachiyomiJ2K">TachiyomiJ2K</a>. This contains features specific to Mangadex
  that those versions cannot offer. It also features almost every feature that J2K has except for other sources, and local sources.
- Note: This fork is Android 7+
+ Note: This fork is for Android 7+
 
 ## Specific features:
 - Supports native login to MangaDex and supports 2FA
 - MDList support as a tracker
-- Similar Manga recommendations when enabled in settings
+- Similar Manga Recommendations
 - Manually sync of Manga to and from Mangadex follows list
+- Filter by Group in chapter list
+- Look at an additional source for missing chapters not hosted on MangaDex
+- And many more
 
 
 ## Download
@@ -43,6 +46,7 @@ Get the app from our [releases page](https://github.com/CarlosEsco/Neko/releases
 ## Thanks
 - <a href="https://github.com/inorichi">Inorichi</a> for making the original Tachiyomi
 - <a href="https://github.com/Jays2Kings">Jays2Kings</a> for the wonderful new ui of J2K
+- <a href="https://github.com/goldbattle">GoldBattle for all the similar manga logic
 
 ## License
 
