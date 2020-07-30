@@ -129,11 +129,15 @@ open class MangaDex() : HttpSource() {
         )
     }
 
-    override suspend fun fetchMangaDetails(manga: SManga): SManga {
-        val manga = MangaHandler(clientBuilder(), headers, getLangsToShow()).fetchMangaDetails(manga)
-        if (preferences.forceLatestCovers()) {
-            val cover = getLatestCoverUrl(manga)
-            manga.thumbnail_url = cover
+    override suspend fun fetchMangaDetails(originalManga: SManga): SManga {
+        val manga = MangaHandler(clientBuilder(), headers, getLangsToShow()).fetchMangaDetails(originalManga)
+        try {
+            if (preferences.forceLatestCovers()) {
+                val cover = getLatestCoverUrl(manga)
+                manga.thumbnail_url = cover
+            }
+        } catch (e: Exception) {
+            Timber.e(e, "exception getting latest covers")
         }
         return manga
     }
@@ -142,9 +146,14 @@ open class MangaDex() : HttpSource() {
         val pair = MangaHandler(clientBuilder(), headers, getLangsToShow()).fetchMangaAndChapterDetails(
             manga
         )
-        if (preferences.forceLatestCovers()) {
-            val cover = getLatestCoverUrl(pair.first)
-            pair.first.thumbnail_url = cover
+
+        try {
+            if (preferences.forceLatestCovers()) {
+                val cover = getLatestCoverUrl(pair.first)
+                pair.first.thumbnail_url = cover
+            }
+        } catch (e: Exception) {
+            Timber.e(e, "exception getting latest covers")
         }
 
         return pair
