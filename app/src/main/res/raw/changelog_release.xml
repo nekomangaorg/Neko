@@ -2,6 +2,11 @@
 <changelog bulletedList="true">
     <changelogversion
         changeDate=""
+        versionName="v2.1.1.1">
+        <changelogtext>Bug fixes see below for major changes</changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
         versionName="v2.1.0">
         <changelogtext>New: Ability to merge chapters from an external source. This button shows in manga info only when a manga is not complete in MangaDex</changelogtext>
         <changelogtext>New: When all downloads are completed a notification will pop up now, that leads to the download page</changelogtext>
