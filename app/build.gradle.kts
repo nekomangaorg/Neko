@@ -87,7 +87,7 @@ androidExtensions {
 
 dependencies {
     // Modified dependencies
-    implementation("com.github.tachiyomiorg:subsampling-scale-image-view:ac0dae7")
+    implementation("com.github.tachiyomiorg:subsampling-scale-image-view:bff2806")
     // Android support library
     implementation("androidx.appcompat:appcompat:1.1.0")
     implementation("androidx.cardview:cardview:1.0.0")
