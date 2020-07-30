@@ -14,6 +14,7 @@ import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.util.asJsoup
+import info.debatty.java.stringsimilarity.Levenshtein
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.Response
@@ -38,7 +39,11 @@ class MergeSource : ReducedHttpSource() {
                 val response = client.newCall(GET("$baseUrl/search/", headers)).execute()
                 directory = gson.fromJson<JsonArray>(directoryFromResponse(response))
             }
-            val results = directory!!.filter { it["s"].string.contains(query, ignoreCase = true) }
+            val textDistance = Levenshtein()
+
+            val results = directory!!.map { Pair(textDistance.distance(it["s"].string, query), it) }
+                .filter { it.first < 10 }.sortedBy { it.first }.map { it.second }
+
             return@withContext if (results.isNotEmpty()) {
                 parseMangaList(results)
             } else {
