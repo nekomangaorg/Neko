@@ -121,6 +121,8 @@ class SettingsAdvancedController : SettingsController() {
 
             setOnPreferenceClickListener { it ->
                 it as SwitchPreferenceCompat
+                network.rebuildClients()
+
                 if (it.isChecked) {
                     Timber.plant(FileDebugTree())
                 } else {
@@ -128,7 +130,6 @@ class SettingsAdvancedController : SettingsController() {
                     Timber.plant(ReleaseTree())
                     FileDebugTree().cleanup()
                 }
-                network.rebuildClients()
                 true
             }
         }
