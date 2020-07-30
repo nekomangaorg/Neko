@@ -120,7 +120,7 @@ dependencies {
     implementation("com.github.pwittchen:reactivenetwork:0.13.0")
 
     // Coroutines
-    implementation("com.github.tfcporciuncula:flow-preferences:1.1.1")
+    implementation("com.github.tfcporciuncula:flow-preferences:1.3.0")
 
     // Network client
     implementation("com.squareup.okhttp3:okhttp:${Versions.OKHTTP}")
