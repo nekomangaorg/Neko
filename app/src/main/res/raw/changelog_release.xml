@@ -6,7 +6,7 @@
         <changelogtext>Fix: Missing chapter count being reset for merged manga on library update</changelogtext>
         <changelogtext>Fix: Clean more descriptions</changelogtext>
         <changelogtext>Fix: Add automatic de duplicate of database entries</changelogtext>
-        <changelogtext>Fix: Crash when MangaDex chapter was missing chapter number</changelogtext>
+        <changelogtext>Fix: Crash when MangaDex chapter was missing chapter number when attempting to merge</changelogtext>
         <changelogtext>Fix: Restore not working when latest covers enabled</changelogtext>
         <changelogtext>Fix: Wrong color cursor on Dark theme for edit text boxes</changelogtext>
     </changelogversion>
