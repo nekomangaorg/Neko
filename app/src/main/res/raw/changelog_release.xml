@@ -2,6 +2,11 @@
 <changelog bulletedList="true">
     <changelogversion
         changeDate=""
+        versionName="v2.1.1.2">
+        <changelogtext>Hot fix 2 electric boogaloo</changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
         versionName="v2.1.1.1">
         <changelogtext>Bug fixes see below for major changes</changelogtext>
     </changelogversion>
