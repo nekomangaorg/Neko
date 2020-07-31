@@ -36,11 +36,11 @@ fun syncChaptersWithSource(
 
         val isManga = "jp" == manga.lang_flag
 
-        var dexMap: Map<Int?, List<Int>>? = null
+        var dexMap: Map<Int?, List<Int?>>? = null
         var only1VolNoVol: Boolean = false
 
         if (isManga.not()) {
-            dexMap = dexChapters.groupBy(keySelector = { it.getVolumeNum() }, valueTransform = { it.getChapterNum()!! })
+            dexMap = dexChapters.groupBy(keySelector = { it.getVolumeNum() }, valueTransform = { it.getChapterNum() })
             only1VolNoVol = dexChapters.all { it.getVolumeNum() == 1 } && mergedChapters.all { it.getVolumeNum() == null }
         }
 
