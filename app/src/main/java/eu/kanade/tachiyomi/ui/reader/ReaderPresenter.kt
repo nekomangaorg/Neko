@@ -29,6 +29,7 @@ import eu.kanade.tachiyomi.ui.reader.loader.ChapterLoader
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
+import eu.kanade.tachiyomi.util.chapter.ChapterFilter
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.system.ImageUtil
@@ -56,10 +57,10 @@ class ReaderPresenter(
     private val db: DatabaseHelper = Injekt.get(),
     private val sourceManager: SourceManager = Injekt.get(),
     private val downloadManager: DownloadManager = Injekt.get(),
-    private val preferences: PreferencesHelper = Injekt.get()
-) : BasePresenter<ReaderActivity>() {
+    private val preferences: PreferencesHelper = Injekt.get(),
+    private val chapterFilter: ChapterFilter = Injekt.get()
 
-    private val readerChapterFilter = ReaderChapterFilter(downloadManager, preferences)
+) : BasePresenter<ReaderActivity>() {
 
     /**
      * The manga loaded in the reader. It can be null when instantiated for a short time.
@@ -104,7 +105,7 @@ class ReaderPresenter(
             ?: error("Requested chapter of id $chapterId not found in chapter list")
 
         val chaptersForReader =
-            readerChapterFilter.filterChapter(dbChapters, manga, selectedChapter)
+            chapterFilter.filterChaptersForReader(dbChapters, manga, selectedChapter)
         Timber.d("--chapter list--")
         when (manga.sorting) {
             Manga.SORTING_SOURCE -> ChapterLoadBySource().get(chaptersForReader)
@@ -194,7 +195,7 @@ class ReaderPresenter(
         chapterItems = withContext(Dispatchers.IO) {
             val dbChapters = db.getChapters(manga).executeAsBlocking()
             val list =
-                readerChapterFilter.filterChapter(dbChapters, manga, getCurrentChapter()?.chapter)
+                chapterFilter.filterChaptersForReader(dbChapters, manga, getCurrentChapter()?.chapter)
                     .sortedBy {
                         when (manga.sorting) {
                             Manga.SORTING_NUMBER -> it.chapter_number

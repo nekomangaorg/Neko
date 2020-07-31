@@ -32,6 +32,8 @@ import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
 import eu.kanade.tachiyomi.ui.manga.external.ExternalItem
 import eu.kanade.tachiyomi.ui.manga.track.TrackItem
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
+import eu.kanade.tachiyomi.util.chapter.ChapterFilter
+import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.system.executeOnIO
@@ -60,7 +62,8 @@ class MangaDetailsPresenter(
     val coverCache: CoverCache = Injekt.get(),
     private val db: DatabaseHelper = Injekt.get(),
     private val downloadManager: DownloadManager = Injekt.get(),
-    private val sourceManager: SourceManager = Injekt.get()
+    private val sourceManager: SourceManager = Injekt.get(),
+    private val chapterFilter: ChapterFilter = Injekt.get()
 ) : DownloadQueue.DownloadListener, LibraryServiceListener {
 
     private var scope = CoroutineScope(Job() + Dispatchers.Default)
@@ -75,8 +78,6 @@ class MangaDetailsPresenter(
     var hasRequested = false
     var isLoading = false
     var scrollType = 0
-    private val volumeRegex = Regex("""(vol|volume)\.? *([0-9]+)?""", RegexOption.IGNORE_CASE)
-    private val seasonRegex = Regex("""(Season |S)([0-9]+)?""")
 
     private val trackManager: TrackManager by lazy { Injekt.get<TrackManager>() }
 
@@ -286,29 +287,8 @@ class MangaDetailsPresenter(
     private fun applyChapterFilters(chapterList: List<ChapterItem>): List<ChapterItem> {
         if (isLockedFromSearch)
             return chapterList
-        var chapters = chapterList
-        if (onlyUnread()) {
-            chapters = chapters.filter { !it.read }
-        } else if (onlyRead()) {
-            chapters = chapters.filter { it.read }
-        }
-        if (onlyDownloaded()) {
-            chapters = chapters.filter { it.isDownloaded }
-        }
-        if (onlyBookmarked()) {
-            chapters = chapters.filter { it.bookmark }
-        }
 
-        chapters = chapters.filter {
-            if (it.chapter.scanlator == null) {
-                false
-            } else {
-                val chapterScanlators = MdUtil.getScanlators(it.chapter.scanlator!!)
-                filteredScanlators.any {
-                    chapterScanlators.contains(it)
-                }
-            }
-        }
+        val chapters = chapterFilter.filterChapters(chapterList, manga) as List<ChapterItem>
 
         val sortFunction: (Chapter, Chapter) -> Int = when (manga.sorting) {
             Manga.SORTING_SOURCE -> when (sortDescending()) {
@@ -321,66 +301,18 @@ class MangaDetailsPresenter(
             }
             else -> { c1, c2 -> c1.source_order.compareTo(c2.source_order) }
         }
-        chapters = chapters.sortedWith(Comparator(sortFunction))
-        getScrollType(chapters)
-        return chapters
+        val sortedChapters = chapters.sortedWith(Comparator(sortFunction))
+        getScrollType(sortedChapters)
+        return sortedChapters
     }
 
     private fun getScrollType(chapters: List<ChapterItem>) {
         scrollType = when {
-            hasMultipleVolumes(chapters) -> MULTIPLE_VOLUMES
-            hasMultipleSeasons(chapters) -> MULTIPLE_SEASONS
-            hasTensOfChapters(chapters) -> TENS_OF_CHAPTERS
+            ChapterUtil.hasMultipleVolumes(chapters) -> MULTIPLE_VOLUMES
+            ChapterUtil.hasMultipleSeasons(chapters) -> MULTIPLE_SEASONS
+            ChapterUtil.hasTensOfChapters(chapters) -> TENS_OF_CHAPTERS
             else -> 0
         }
-    }
-
-    fun getGroupNumber(chapter: ChapterItem): Int? {
-        val groups = volumeRegex.find(chapter.name)?.groups
-        if (groups != null) return groups[2]?.value?.toIntOrNull()
-        val seasonGroups = seasonRegex.find(chapter.name)?.groups
-        if (seasonGroups != null) return seasonGroups[2]?.value?.toIntOrNull()
-        return null
-    }
-
-    private fun getVolumeNumber(chapter: ChapterItem): Int? {
-        val groups = volumeRegex.find(chapter.name)?.groups
-        if (groups != null) return groups[2]?.value?.toIntOrNull()
-        return null
-    }
-
-    private fun getSeasonNumber(chapter: ChapterItem): Int? {
-        val groups = seasonRegex.find(chapter.name)?.groups
-        if (groups != null) return groups[2]?.value?.toIntOrNull()
-        return null
-    }
-
-    private fun hasMultipleVolumes(chapters: List<ChapterItem>): Boolean {
-        val volumeSet = mutableSetOf<Int>()
-        chapters.forEach {
-            val volNum = getVolumeNumber(it)
-            if (volNum != null) {
-                volumeSet.add(volNum)
-                if (volumeSet.size >= 2) return true
-            }
-        }
-        return false
-    }
-
-    private fun hasMultipleSeasons(chapters: List<ChapterItem>): Boolean {
-        val volumeSet = mutableSetOf<Int>()
-        chapters.forEach {
-            val volNum = getSeasonNumber(it)
-            if (volNum != null) {
-                volumeSet.add(volNum)
-                if (volumeSet.size >= 2) return true
-            }
-        }
-        return false
-    }
-
-    private fun hasTensOfChapters(chapters: List<ChapterItem>): Boolean {
-        return chapters.size > 20
     }
 
     /**
