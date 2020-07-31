@@ -255,26 +255,6 @@ class MangaDetailsPresenter(
     }
 
     /**
-     * Whether the display only downloaded filter is enabled.
-     */
-    fun onlyDownloaded() = manga.downloadedFilter == Manga.SHOW_DOWNLOADED
-
-    /**
-     * Whether the display only downloaded filter is enabled.
-     */
-    fun onlyBookmarked() = manga.bookmarkedFilter == Manga.SHOW_BOOKMARKED
-
-    /**
-     * Whether the display only unread filter is enabled.
-     */
-    fun onlyUnread() = manga.readFilter == Manga.SHOW_UNREAD
-
-    /**
-     * Whether the display only read filter is enabled.
-     */
-    fun onlyRead() = manga.readFilter == Manga.SHOW_READ
-
-    /**
      * Whether the sorting method is descending or ascending.
      */
     fun sortDescending() = manga.sortDescending(globalSort())
@@ -654,13 +634,13 @@ class MangaDetailsPresenter(
             withContext(Dispatchers.Main) { controller.updateChapters(chapters) }
         }
     }
-
+    
     fun currentFilters(): String {
         val filtersId = mutableListOf<Int?>()
-        filtersId.add(if (onlyRead()) R.string.read else null)
-        filtersId.add(if (onlyUnread()) R.string.unread else null)
-        filtersId.add(if (onlyDownloaded()) R.string.downloaded else null)
-        filtersId.add(if (onlyBookmarked()) R.string.bookmarked else null)
+        filtersId.add(if (manga.readFilter == Manga.SHOW_REA) R.string.read else null)
+        filtersId.add(if (manga.readFilter == Manga.SHOW_UNREAD) R.string.unread else null)
+        filtersId.add(if (manga.downloadedFilter == Manga.SHOW_DOWNLOADED) R.string.downloaded else null)
+        filtersId.add(if (manga.bookmarkedFilter == Manga.SHOW_BOOKMARKED) R.string.bookmarked else null)
         filtersId.add(if (filteredScanlators.size != allChapterScanlators.size) R.string.scanlator_groups else null)
         return filtersId.filterNotNull().joinToString(", ") { preferences.context.getString(it) }
     }
