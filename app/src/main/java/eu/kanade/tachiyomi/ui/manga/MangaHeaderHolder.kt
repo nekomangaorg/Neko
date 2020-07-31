@@ -17,6 +17,7 @@ import com.mikepenz.iconics.utils.sizeDp
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.system.contextCompatColor
 import eu.kanade.tachiyomi.util.system.dpToPx
@@ -126,7 +127,7 @@ class MangaHeaderHolder(
             adapter.delegate.updateScroll()
         }
     }
-    
+
     @SuppressLint("SetTextI18n")
     fun bind(item: MangaHeaderItem, manga: Manga) {
         val presenter = adapter.delegate.mangaPresenter()
@@ -212,7 +213,7 @@ class MangaHeaderHolder(
             isEnabled = (nextChapter != null)
             text = if (nextChapter != null) {
                 val readTxt =
-                    if (nextChapter.chapter.vol.isEmpty() && nextChapter.chapter.chapter_txt.isEmpty()) {
+                    if (nextChapter.isMergedChapter() || (nextChapter.chapter.vol.isEmpty() && nextChapter.chapter.chapter_txt.isEmpty())) {
                         nextChapter.chapter.name
                     } else {
                         listOf(nextChapter.chapter.vol, nextChapter.chapter.chapter_txt).joinToString(" ")
