@@ -634,10 +634,10 @@ class MangaDetailsPresenter(
             withContext(Dispatchers.Main) { controller.updateChapters(chapters) }
         }
     }
-    
+
     fun currentFilters(): String {
         val filtersId = mutableListOf<Int?>()
-        filtersId.add(if (manga.readFilter == Manga.SHOW_REA) R.string.read else null)
+        filtersId.add(if (manga.readFilter == Manga.SHOW_READ) R.string.read else null)
         filtersId.add(if (manga.readFilter == Manga.SHOW_UNREAD) R.string.unread else null)
         filtersId.add(if (manga.downloadedFilter == Manga.SHOW_DOWNLOADED) R.string.downloaded else null)
         filtersId.add(if (manga.bookmarkedFilter == Manga.SHOW_BOOKMARKED) R.string.bookmarked else null)

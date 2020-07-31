@@ -113,6 +113,27 @@ internal class DownloadNotifier(private val context: Context) {
     }
 
     /**
+     *  This function shows a notification to inform download tasks are done.
+     */
+    fun downloadFinished() {
+        // Create notification
+        with(notification) {
+            setContentTitle(context.getString(R.string.download_title))
+            setContentText(context.getString(R.string.download_completed))
+            setSmallIcon(android.R.drawable.stat_sys_download_done)
+            clearActions()
+            setAutoCancel(true)
+            setContentIntent(NotificationHandler.openDownloadManagerPendingActivity(context))
+            setProgress(0, 0, false)
+        }
+        notification.show(Notifications.ID_DOWNLOAD_CHAPTER_COMPLETE)
+
+        // Reset states to default
+        errorThrown = false
+        isDownloading = false
+    }
+
+    /**
      * Called when download progress changes.
      *
      * @param download download object containing download information.

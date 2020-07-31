@@ -157,7 +157,7 @@ class DownloadManager(val context: Context) {
      * @return an observable containing the list of pages from the chapter.
      */
     fun buildPageList(source: Source, manga: Manga, chapter: Chapter): Observable<List<Page>> {
-        return buildPageList(provider.findChapterDir(chapter, manga, source))
+        return buildPageList(provider.findChapterDir(chapter, manga, sourceManager.getMangadex()))
     }
 
     /**
@@ -285,7 +285,7 @@ class DownloadManager(val context: Context) {
     fun deleteManga(manga: Manga, source: Source) {
         downloader.clearQueue(manga, true)
         queue.remove(manga)
-        provider.findMangaDir(manga, source)?.delete()
+        provider.findMangaDir(manga, sourceManager.getMangadex())?.delete()
         cache.removeManga(manga)
     }
 
