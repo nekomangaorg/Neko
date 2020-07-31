@@ -4,8 +4,6 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.model.SChapter
-import eu.kanade.tachiyomi.source.model.getChapterNum
-import eu.kanade.tachiyomi.source.model.getVolumeNum
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import java.util.Date
@@ -28,57 +26,9 @@ fun syncChaptersWithSource(
 
     // Chapters from db.
     val dbChapters = db.getChapters(manga).executeAsBlocking()
-    var copyOfRawSource = rawSourceChapters.toList()
-    if (manga.merge_manga_url != null) {
-        val partition = copyOfRawSource.partition { !it.isMergedChapter() }
-        val dexChapters = partition.first.toMutableList()
-        val mergedChapters = partition.second
+    val dedupedChapters = deduplicateChapters(dbChapters, rawSourceChapters, manga)
 
-        val isManga = "jp" == manga.lang_flag
-
-        var dexMap: Map<Int?, List<Int?>>? = null
-        var only1VolNoVol: Boolean = false
-
-        if (isManga.not()) {
-            dexMap = dexChapters.groupBy(keySelector = { it.getVolumeNum() }, valueTransform = { it.getChapterNum() })
-            only1VolNoVol = dexChapters.all { it.getVolumeNum() == 1 } && mergedChapters.all { it.getVolumeNum() == null }
-        }
-
-        var dexSet: HashSet<Int?>? = null
-        if (isManga || only1VolNoVol) {
-            dexSet = dexChapters.map { it.getChapterNum() }.toHashSet()
-        }
-
-        mergedChapters.forEach { sChapter ->
-            sChapter.getChapterNum()?.let { chpNum ->
-                if (isManga || only1VolNoVol) {
-                    if (!dexSet!!.contains(chpNum)) {
-                        dexChapters.add(sChapter)
-                    } else {
-                    }
-                } else {
-                    val volume = dexMap!![sChapter.getVolumeNum()]
-                    if (volume == null) {
-                        dexChapters.add(sChapter)
-                    } else {
-                        dexMap!![sChapter.getVolumeNum()]?.let {
-                            if (it.contains(chpNum).not()) {
-                                dexChapters.add(sChapter)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        val sorter = when (isManga || only1VolNoVol) {
-            true -> compareByDescending { it.getChapterNum() }
-            false -> compareByDescending<SChapter> { it.getVolumeNum() }.thenByDescending { it.getChapterNum() }
-        }
-
-        copyOfRawSource = dexChapters.sortedWith(sorter)
-    }
-
-    val sourceChapters = copyOfRawSource.mapIndexed { i, sChapter ->
+    val sourceChapters = dedupedChapters.mapIndexed { i, sChapter ->
         Chapter.create().apply {
             copyFrom(sChapter)
             manga_id = manga.id
