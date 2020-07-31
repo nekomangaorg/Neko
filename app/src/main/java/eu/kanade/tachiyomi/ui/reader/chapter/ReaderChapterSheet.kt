@@ -54,7 +54,6 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                 sheetBehavior?.expand()
             }
         }
-
         comment_button.setImageDrawable(context.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_comment))
 
         comment_button.setOnClickListener {

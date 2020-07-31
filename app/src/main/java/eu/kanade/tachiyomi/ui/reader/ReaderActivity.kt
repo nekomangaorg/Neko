@@ -21,6 +21,7 @@ import android.view.WindowManager
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.SeekBar
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.graphics.ColorUtils
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
@@ -33,6 +34,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
 import eu.kanade.tachiyomi.ui.base.activity.BaseRxActivity
@@ -723,10 +725,14 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
         val currentChapter = presenter.getCurrentChapter()
         currentChapter ?: return
 
-        val url = MdUtil.baseUrl + "/chapter/" + MdUtil.getChapterId(currentChapter.chapter.url) + "/comments"
-        val intent =
-            WebViewActivity.newIntent(this, presenter.manga!!.source, url, currentChapter.chapter.name)
-        startActivity(intent)
+        if (currentChapter.chapter.isMergedChapter()) {
+            toast(R.string.comments_unavailable, duration = Toast.LENGTH_SHORT)
+        } else {
+            val url = MdUtil.baseUrl + "/chapter/" + MdUtil.getChapterId(currentChapter.chapter.url) + "/comments"
+            val intent =
+                WebViewActivity.newIntent(this, presenter.manga!!.source, url, currentChapter.chapter.name)
+            startActivity(intent)
+        }
     }
 
     override fun onVisibilityChange(visible: Boolean) {
