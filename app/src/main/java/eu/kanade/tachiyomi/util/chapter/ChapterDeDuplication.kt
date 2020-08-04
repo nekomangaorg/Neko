@@ -2,9 +2,8 @@ package eu.kanade.tachiyomi.util.chapter
 
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.model.SChapter
-import eu.kanade.tachiyomi.source.model.getChapterNum
-import eu.kanade.tachiyomi.source.model.getVolumeNum
 import eu.kanade.tachiyomi.source.model.isMergedChapter
+import kotlin.math.floor
 
 /**This method dedupes merged manga chapters.  If the manga is not merged then it just returns the direct Dex chapter list
  * The follow fringe cases won't be deduped
@@ -25,28 +24,28 @@ fun deduplicateChapters(dbChapters: List<SChapter>, sourceChapters: List<SChapte
     var only1VolNoVol: Boolean = false
 
     if (isManga.not()) {
-        dexMap = dexChapters.groupBy(keySelector = { it.getVolumeNum() }, valueTransform = { it.getChapterNum() })
-        only1VolNoVol = dexChapters.all { it.getVolumeNum() == 1 } && mergedChapters.all { it.getVolumeNum() == null }
+        dexMap = dexChapters.groupBy(keySelector = { getVolumeNum(it) }, valueTransform = { getChapterNumInt(it) })
+        only1VolNoVol = dexChapters.all { getVolumeNum(it) == 1 } && mergedChapters.all { getVolumeNum(it) == null }
     }
 
     var dexSet: HashSet<Int?>? = null
     if (isManga || only1VolNoVol) {
-        dexSet = dexChapters.map { it.getChapterNum() }.toHashSet()
+        dexSet = dexChapters.map { getChapterNumInt(it) }.toHashSet()
     }
 
     mergedChapters.forEach { sChapter ->
-        sChapter.getChapterNum()?.let { chpNum ->
+        getChapterNumInt(sChapter)?.let { chpNum ->
             if (isManga || only1VolNoVol) {
                 if (!dexSet!!.contains(chpNum)) {
                     dexChapters.add(sChapter)
                 } else {
                 }
             } else {
-                val volume = dexMap!![sChapter.getVolumeNum()]
+                val volume = dexMap!![getVolumeNum(sChapter)]
                 if (volume == null) {
                     dexChapters.add(sChapter)
                 } else {
-                    dexMap!![sChapter.getVolumeNum()]?.let {
+                    dexMap!![getVolumeNum(sChapter)]?.let {
                         if (it.contains(chpNum).not()) {
                             dexChapters.add(sChapter)
                         }
@@ -56,9 +55,38 @@ fun deduplicateChapters(dbChapters: List<SChapter>, sourceChapters: List<SChapte
         }
     }
     val sorter = when (isManga || only1VolNoVol) {
-        true -> compareByDescending { it.getChapterNum() }
-        false -> compareByDescending<SChapter> { it.getVolumeNum() }.thenByDescending { it.getChapterNum() }
+        true -> compareByDescending { getChapterNum(it) }
+        false -> compareByDescending<SChapter> { getVolumeNum(it) }.thenByDescending { getChapterNum(it) }
     }
 
     return dexChapters.sortedWith(sorter)
+}
+
+fun getChapterNum(chapter: SChapter): Float? {
+    val float = if (chapter.isMergedChapter()) {
+        chapter.chapter_txt.toFloatOrNull()
+    } else {
+        if (chapter.name.contains("oneshot", true)) {
+            0f
+        } else {
+            chapter.chapter_txt.substringAfter("Ch.").toFloatOrNull()
+        }
+    }
+    return float ?: return null
+}
+
+fun getChapterNumInt(chapter: SChapter): Int? {
+    val float = getChapterNum(chapter)
+    return when (float != null) {
+        true -> floor(float).toInt()
+        else -> null
+    }
+}
+
+fun getVolumeNum(chapter: SChapter): Int? {
+    return if (chapter.isMergedChapter()) {
+        chapter.vol.toIntOrNull()
+    } else {
+        chapter.vol.substringAfter("Vol.").toIntOrNull()
+    }
 }

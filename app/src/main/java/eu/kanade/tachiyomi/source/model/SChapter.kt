@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.source.model
 
 import eu.kanade.tachiyomi.source.online.MergeSource
 import java.io.Serializable
-import kotlin.math.floor
 
 interface SChapter : Serializable {
 
@@ -53,26 +52,5 @@ interface SChapter : Serializable {
 
 fun SChapter.isMergedChapter() = this.scanlator?.equals(MergeSource.name) ?: false
 
-fun SChapter.getChapterNum(): Int? {
-    val float = if (this.isMergedChapter()) {
-        chapter_txt.toFloatOrNull()
-    } else {
-        if (this.name.contains("oneshot", true)) {
-            0f
-        } else {
-            chapter_txt.substringAfter("Ch.").toFloatOrNull()
-        }
-    }
-    float ?: return null
-    return floor(float).toInt()
-}
-
-fun SChapter.getVolumeNum(): Int? {
-    return if (this.isMergedChapter()) {
-        vol.toIntOrNull()
-    } else {
-        vol.substringAfter("Vol.").toIntOrNull()
-    }
-}
 
 

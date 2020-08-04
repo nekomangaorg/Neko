@@ -21,7 +21,6 @@ import okhttp3.Response
 import rx.Observable
 import java.text.SimpleDateFormat
 import java.util.Locale
-import kotlin.math.floor
 
 class MergeSource : ReducedHttpSource() {
     override val name = "Merged Chapter"
@@ -81,7 +80,7 @@ class MergeSource : ReducedHttpSource() {
                     for (split in splitName) {
                         var splitFloat = split.toFloatOrNull()
                         if (splitFloat != null) {
-                            chapter_txt = floor(splitFloat).toString()
+                            chapter_txt = splitFloat.toString()
                             break
                         }
                     }
