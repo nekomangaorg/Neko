@@ -11,6 +11,7 @@ import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Page
 import rx.Observable
+import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 
 /**
@@ -259,17 +260,20 @@ class DownloadManager(val context: Context) {
      * @param manga the manga of the chapters.
      * @param source the source of the chapters.
      */
-    fun cleanupChapters(allChapters: List<Chapter>, manga: Manga, source: Source): Int {
+    fun cleanupChapters(allChapters: List<Chapter>, manga: Manga, source: Source, removeRead: Boolean = true): Int {
         var cleaned = 0
         val filesWithNoChapter = provider.findUnmatchedChapterDirs(allChapters, manga, source)
         cleaned += filesWithNoChapter.size
         cache.removeFolders(filesWithNoChapter.mapNotNull { it.name }, manga)
         filesWithNoChapter.forEach { it.delete() }
-        val readChapters = allChapters.filter { it.read }
-        val readChapterDirs = provider.findChapterDirs(readChapters, manga, source)
-        readChapterDirs.forEach { it.delete() }
-        cleaned += readChapterDirs.size
-        cache.removeChapters(readChapters, manga)
+        if (removeRead) {
+            val readChapters = allChapters.filter { it.read }
+            val readChapterDirs = provider.findChapterDirs(readChapters, manga, source)
+            readChapterDirs.forEach { it.delete() }
+            cleaned += readChapterDirs.size
+            cache.removeChapters(readChapters, manga)
+        }
+
         if (cache.getDownloadCount(manga) == 0) {
             provider.findChapterDirs(allChapters, manga, source).firstOrNull()?.parentFile?.delete() // Delete manga directory if empty
         }
@@ -307,6 +311,27 @@ class DownloadManager(val context: Context) {
         for ((manga, chapters) in pendingChapters) {
             val source = sourceManager.get(manga.source) ?: continue
             deleteChapters(chapters, manga, source)
+        }
+    }
+
+    /**
+     * Renames an already downloaded chapter
+     *
+     * @param manga the manga of the chapter.
+     * @param oldChapter the existing chapter with the old name.
+     * @param newChapter the target chapter with the new name.
+     */
+    fun renameChapter(manga: Manga, oldChapter: Chapter, newChapter: Chapter) {
+        val oldName = provider.getChapterDirName(oldChapter)
+        val newName = provider.getChapterDirName(newChapter)
+        val mangaDir = provider.getMangaDir(manga, sourceManager.getMangadex())
+
+        val oldFolder = mangaDir.findFile(oldName)
+        if (oldFolder?.renameTo(newName) == true) {
+            cache.removeChapters(listOf(oldChapter), manga)
+            cache.addChapter(newName, mangaDir, manga)
+        } else {
+            Timber.e("Could not rename downloaded chapter: %s.", oldName)
         }
     }
 
