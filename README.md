@@ -9,21 +9,25 @@
 
 <p align="center">A Free, Open source unofficial manga reader for MangaDex</p>
 
+<p align="center">
+  Need info? Check the <a href="https://github.com/CarlosEsco/Neko/wiki">Wiki</a>
+  | Create an  <a href="https://github.com/CarlosEsco/Neko/issues/new/choose">issue</a>
+  | Check the <a href="https://github.com/CarlosEsco/Neko/projects/1">Project Board</a>
+</p>
+ <p align="center">
+    <a href="https://github.com/CarlosEsco/Neko/releases/latest"><img src="https://img.shields.io/github/release/CarlosEsco/Neko.svg?maxAge=3600&style=for-the-badge&label=download"/></a>
+    <img src="https://img.shields.io/github/workflow/status/carlosesco/neko/Android%20CI?style=for-the-badge" />
+    <img src="https://img.shields.io/github/stars/CarlosEsco/Neko.svg?style=for-the-badge" />
+    <a href="https://discord.gg/tachiyomi"><img src="https://img.shields.io/discord/349436576037732353.svg?style=for-the-badge"/></a>
 
-Need info? Check the [Wiki](https://github.com/CarlosEsco/Neko/wiki)
- | or [Create an issue](https://github.com/CarlosEsco/Neko/issues/new/choose)
- | For [Feature Request](https://github.com/CarlosEsco/Neko/issues/new?assignees=&labels=Feature+Request&template=feature_request.md&title=%5BFeature+Request%5D)
- | Check [our project Board](https://github.com/CarlosEsco/Neko/projects/1)
- 
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/carlosesco/neko/Android%20CI?style=for-the-badge) 
- [![Release](https://img.shields.io/github/release/CarlosEsco/Neko.svg?maxAge=3600&style=for-the-badge&label=download)](https://github.com/CarlosEsco/Neko/releases) 
- ![Stars](https://img.shields.io/github/stars/CarlosEsco/Neko.svg?style=for-the-badge)] 
- [![Discord](https://img.shields.io/discord/349436576037732353.svg?style=for-the-badge)](https://discord.gg/tachiyomi)
+ </p>
 
 ---
 
 ## Screenshots:
+<p align="center">
 <img src="./.github/readme-images/screenshots.png" align="center" height="350" />
+</p>
 
 ## About:
 This is a <a href="https://mangadex.org/">MangaDex</a> specific fork of <a href="https://github.com/inorichi/tachiyomi">Tachiyomi</a> and <a href="https://github.com/Jays2Kings/tachiyomiJ2K">TachiyomiJ2K</a>. This contains features specific to Mangadex
