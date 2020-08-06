@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.data.download
 
 import android.content.Context
 import android.net.Uri
+import androidx.core.text.isDigitsOnly
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
@@ -9,6 +10,8 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.source.model.isMergedChapter
+import eu.kanade.tachiyomi.source.online.MergeSource
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -44,7 +47,7 @@ class DownloadCache(
      */
     private var lastRenew = 0L
 
-    private var mangaFiles: MutableMap<Long, MutableSet<String>> = mutableMapOf()
+    private var mangaFiles: MutableMap<Long, Pair<MutableSet<String>, MutableSet<String>>> = mutableMapOf()
 
     init {
         preferences.downloadsDirectory().asObservable().skip(1).subscribe {
@@ -75,10 +78,14 @@ class DownloadCache(
 
         checkRenew()
 
-        val files = mangaFiles[manga.id]?.toHashSet() ?: return false
+        val fileNames = mangaFiles[manga.id]?.first?.toHashSet() ?: return false
+        val mangadexIds = mangaFiles[manga.id]?.second?.toHashSet() ?: return false
+        if (!chapter.isMergedChapter() && chapter.mangadex_chapter_id.isNotEmpty() && chapter.mangadex_chapter_id in mangadexIds) {
+            return true
+        }
         val validChapterDirNames = provider.getValidChapterDirNames(chapter)
         return validChapterDirNames.any {
-            it in files
+            it in fileNames
         }
     }
 
@@ -102,8 +109,19 @@ class DownloadCache(
             }
             return 0
         } else {
-            val files = mangaFiles[manga.id] ?: return 0
-            return files.filter { !it.endsWith(Downloader.TMP_DIR_SUFFIX) }.size
+            mangaFiles[manga.id] ?: return 0
+            val files = mangaFiles[manga.id]!!.first.filter { !it.endsWith(Downloader.TMP_DIR_SUFFIX) }
+            val ids = mangaFiles[manga.id]!!.second
+            var count = files.size
+            files.forEach {
+                if (!it.contains(MergeSource.name)) {
+                    val mangadexId = it.substringAfterLast("- ")
+                    if (mangadexId.isNotBlank() && mangadexId.isDigitsOnly() && !ids.contains(mangadexId)) {
+                        count++
+                    }
+                }
+            }
+            return count
         }
     }
 
@@ -147,8 +165,12 @@ class DownloadCache(
             val trueMangaDirs = mangaDirs.mapNotNull { mangaDir ->
                 val manga = findManga(sourceMangaPair.first, mangaDir.key, sourceValue.key) ?: findManga(sourceMangaPair.second, mangaDir.key, sourceValue.key)
                 val id = manga?.id ?: return@mapNotNull null
-                id to mangaDir.value.files
+
+                val mangadexIds = mangaDir.value.files.map { it.substringAfterLast("- ", "") }.filter { it.isNotEmpty() }.toMutableSet()
+
+                id to Pair(mangaDir.value.files, mangadexIds)
             }.toMap()
+
 
             mangaFiles.putAll(trueMangaDirs)
         }
@@ -175,10 +197,21 @@ class DownloadCache(
 
         val id = manga.id ?: return
         val files = mangaFiles[id]
-        if (files == null) {
-            mangaFiles[id] = mutableSetOf(chapterDirName)
+        val mangadexId = chapterDirName.substringAfterLast("- ")
+
+        val set = if (chapterDirName.contains(MergeSource.name)) {
+            mutableSetOf()
         } else {
-            mangaFiles[id]?.add(chapterDirName)
+            mutableSetOf(mangadexId)
+        }
+
+        if (files == null) {
+            mangaFiles[id] = Pair(mutableSetOf(chapterDirName), set)
+        } else {
+            mangaFiles[id]?.first?.add(chapterDirName)
+            if (!chapterDirName.contains(MergeSource.name)) {
+                mangaFiles[id]?.second?.add(mangadexId)
+            }
         }
     }
 
@@ -191,11 +224,16 @@ class DownloadCache(
     @Synchronized
     fun removeChapters(chapters: List<Chapter>, manga: Manga) {
         val id = manga.id ?: return
+        mangaFiles[id] ?: return
+
         for (chapter in chapters) {
-            val list = provider.getValidChapterDirNames(chapter)
-            list.forEach {
-                if (mangaFiles[id] != null && it in mangaFiles[id]!!) {
-                    mangaFiles[id]?.remove(it)
+            if (!chapter.isMergedChapter()) {
+                mangaFiles[id]!!.second.remove(chapter.mangadex_chapter_id)
+            }
+
+            provider.getValidChapterDirNames(chapter).forEach {
+                if (it in mangaFiles[id]!!.first) {
+                    mangaFiles[id]!!.first.remove(it)
                 }
             }
         }
@@ -205,8 +243,12 @@ class DownloadCache(
         val id = manga.id ?: return
         mangaFiles[id] ?: return
         for (chapter in folders) {
-            if (chapter in mangaFiles[id]!!) {
-                mangaFiles[id]!!.remove(chapter)
+            if (chapter in mangaFiles[id]!!.first) {
+                mangaFiles[id]!!.first.remove(chapter)
+            }
+            if (!chapter.contains(MergeSource.name)) {
+                val mangadexId = chapter.substringAfterLast("- ")
+                mangaFiles[id]!!.second.remove(mangadexId)
             }
         }
     }
@@ -220,14 +262,6 @@ class DownloadCache(
     fun removeManga(manga: Manga) {
         mangaFiles.remove(manga.id)
     }
-
-    /**
-     * Class to store the files under the root downloads directory.
-     */
-    private class RootDirectory(
-        val dir: UniFile,
-        var files: Map<Long, SourceDirectory> = hashMapOf()
-    )
 
     /**
      * Class to store the files under a source directory.

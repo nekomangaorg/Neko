@@ -277,11 +277,8 @@ class Downloader(
      * @param download the chapter to be downloaded.
      */
     private fun downloadChapter(download: Download): Observable<Download> = Observable.defer {
-        val chapterDirname = if (download.chapter.isMergedChapter()) {
-            provider.getJ2kChapterName(download.chapter)
-        } else {
-            provider.getChapterDirName(download.chapter)
-        }
+        val chapterDirname = provider.getChapterDirName(download.chapter)
+
         val mangaDir = provider.getMangaDir(download.manga, sourceManager.getMangadex())
         val tmpDir = mangaDir.createDirectory(chapterDirname + TMP_DIR_SUFFIX)
 

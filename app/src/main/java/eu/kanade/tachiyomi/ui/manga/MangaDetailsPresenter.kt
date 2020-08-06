@@ -210,7 +210,7 @@ class MangaDetailsPresenter(
      */
     private fun setDownloadedChapters(chapters: List<ChapterItem>) {
         for (chapter in chapters) {
-            if (downloadManager.isChapterDownloaded(chapter, manga)) {
+            if (downloadManager.isChapterDownloaded(chapter.chapter, manga)) {
                 chapter.status = Download.DOWNLOADED
             } else if (downloadManager.hasQueue()) {
                 chapter.status = downloadManager.queue.find { it.chapter.id == chapter.id }

@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.data.download
 
 import android.content.Context
 import android.net.Uri
+import androidx.core.text.isDigitsOnly
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -11,6 +12,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import timber.log.Timber
@@ -101,9 +103,29 @@ class DownloadProvider(private val context: Context) {
      */
     fun findChapterDirs(chapters: List<Chapter>, manga: Manga, source: Source): List<UniFile> {
         val mangaDir = findMangaDir(manga, source) ?: return emptyList()
+
+        val idHashSet = chapters.map { it.mangadex_chapter_id }.toHashSet()
+        val chapterNameHashSet = chapters.map { (it as Chapter).name }.toHashSet()
+
+        return mangaDir.listFiles()!!.asList().filter { file ->
+            file.name?.let { fileName ->
+                val mangadexId = fileName.substringAfterLast(" - ", "")
+                if (mangadexId.isNotEmpty() && mangadexId.isDigitsOnly()) {
+                    return@filter idHashSet.contains(mangadexId)
+                } else {
+                    //dont need to check for j2k specific with scanlator because its format is contains file.name
+                    return@filter chapterNameHashSet.contains(file.name!!)
+                }
+            }
+            return@filter false
+        }
+        /*
+
+
+
         return chapters.mapNotNull { chp ->
             getValidChapterDirNames(chp).mapNotNull { mangaDir.findFile(it) }.firstOrNull()
-        }
+        }*/
     }
 
     /**
@@ -153,12 +175,24 @@ class DownloadProvider(private val context: Context) {
         source: Source
     ): List<UniFile> {
         val mangaDir = findMangaDir(manga, source) ?: return emptyList()
-        return mangaDir.listFiles()!!.asList().filter {
-            (chapters.find { chp ->
-                getValidChapterDirNames(chp).any { dir ->
-                    mangaDir.findFile(dir) != null
+        val idHashSet = chapters.map { it.mangadex_chapter_id }.toHashSet()
+        val chapterNameHashSet = chapters.map { (it as Chapter).name }.toHashSet()
+
+        return mangaDir.listFiles()!!.asList().filter { file ->
+            file.name?.let { fileName ->
+                if (fileName.endsWith(Downloader.TMP_DIR_SUFFIX)) {
+                    return@filter true
                 }
-            } == null) || it.name?.endsWith("_tmp") == true
+                val mangadexId = fileName.substringAfterLast(" - ", "")
+                if (mangadexId.isNotEmpty() && mangadexId.isDigitsOnly()) {
+                    return@filter !idHashSet.contains(mangadexId)
+                } else {
+                    //dont need to check for j2k specific with scanlator because its format is contains file.name
+                    return@filter !chapterNameHashSet.contains(file.name!!)
+                }
+            }
+            //everything else is considered true
+            return@filter true
         }
     }
 
@@ -198,8 +232,12 @@ class DownloadProvider(private val context: Context) {
      * @param chapter the chapter to query.
      */
     fun getChapterDirName(chapter: Chapter): String {
-        val chapterId = if (chapter.mangadex_chapter_id.isNotBlank()) chapter.mangadex_chapter_id else MdUtil.getChapterId(chapter.url)
-        return DiskUtil.buildValidFilename(chapter.name + " - " + chapterId)
+        if (chapter.isMergedChapter()) {
+            return getJ2kChapterName(chapter)
+        } else {
+            val chapterId = if (chapter.mangadex_chapter_id.isNotBlank()) chapter.mangadex_chapter_id else MdUtil.getChapterId(chapter.url)
+            return DiskUtil.buildValidFilename(chapter.name + " - " + chapterId)
+        }
     }
 
     fun getJ2kChapterName(chapter: Chapter): String {
