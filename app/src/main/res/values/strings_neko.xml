@@ -75,9 +75,8 @@
     <string name="similar_screen_summary_message">
         This is a feature where one can get manga recommendations.
         This is a recommendation system outside of MangaDex, and works by matching by genres,
-        demographics, content type, themes, and then using term frequency–inverse document frequency (Tfidf) to get the
-        similarity of two manga\'s descriptions. When enabled this file will download immediately!!
-        Then auto download a refreshed file every 3 day. The file is about 15mb in size.
+        demographics, content type, themes, and then using term frequency–inverse document frequency (tf–idf) to get the
+        similarity of two manga\'s descriptions. When enabled this file will download immediately!! The file is about 9 MB in size.
     </string>
     <string name="similar_credit_message">
         For more information and to view the source code:\n%s
@@ -85,7 +84,7 @@
     <string name="similar_ask_to_enable_title">Enable Similar Manga?</string>
     <string name="similar_ask_to_enable">
         Would you like to enable similar manga recommendations?
-        This will download approximately 15mb of data if enabled right now.
+        This will download approximately 9 MB of data if enabled right now.
         You can always enable it in the Settings / Similar manga menu.
     </string>
     <string name="similar_ask_to_enable_yes">Enable</string>
