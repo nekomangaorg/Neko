@@ -25,4 +25,8 @@ class MangaSimilarImpl : MangaSimilar {
     override fun hashCode(): Int {
         return id.hashCode() + manga_id.hashCode()
     }
+
+    companion object {
+        const val DELIMITER = "|*|"
+    }
 }

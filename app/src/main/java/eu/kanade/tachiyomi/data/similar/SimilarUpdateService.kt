@@ -169,8 +169,8 @@ class SimilarUpdateService(
             val similar = MangaSimilarImpl()
             similar.id = index.toLong()
             similar.manga_id = similarFromJson.id.toLong()
-            similar.matched_ids = similarFromJson.similarIds.joinToString(",")
-            similar.matched_titles = similarFromJson.similarTitles.joinToString(",")
+            similar.matched_ids = similarFromJson.similarIds.joinToString(MangaSimilarImpl.DELIMITER)
+            similar.matched_titles = similarFromJson.similarTitles.joinToString(MangaSimilarImpl.DELIMITER)
             return@mapIndexed similar
         }.filterNotNull()
 
