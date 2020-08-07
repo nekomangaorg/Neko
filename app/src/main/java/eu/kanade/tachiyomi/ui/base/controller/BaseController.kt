@@ -11,7 +11,7 @@ import com.bluelinelabs.conductor.ControllerChangeType
 import com.bluelinelabs.conductor.RestoreViewOnCreateController
 import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.*
-import timber.log.Timber
+import com.elvishew.xlog.XLog
 
 abstract class BaseController(bundle: Bundle? = null) : RestoreViewOnCreateController(bundle),
     LayoutContainer {

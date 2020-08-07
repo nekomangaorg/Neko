@@ -53,7 +53,7 @@ import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import rx.Observable
-import timber.log.Timber
+import com.elvishew.xlog.XLog
 import uy.kohesive.injekt.injectLazy
 import kotlin.math.max
 

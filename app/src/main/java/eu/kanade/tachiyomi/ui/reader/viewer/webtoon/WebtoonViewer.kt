@@ -15,7 +15,7 @@ import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.ui.reader.viewer.BaseViewer
 import eu.kanade.tachiyomi.util.view.visible
 import rx.subscriptions.CompositeSubscription
-import timber.log.Timber
+import com.elvishew.xlog.XLog
 import kotlin.math.max
 import kotlin.math.min
 

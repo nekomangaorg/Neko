@@ -23,7 +23,7 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import org.jsoup.parser.Parser
-import timber.log.Timber
+import com.elvishew.xlog.XLog
 
 class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListInterceptor) {
 

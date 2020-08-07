@@ -42,7 +42,7 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import timber.log.Timber
+import com.elvishew.xlog.XLog
 import uy.kohesive.injekt.injectLazy
 import java.io.File
 import java.text.SimpleDateFormat

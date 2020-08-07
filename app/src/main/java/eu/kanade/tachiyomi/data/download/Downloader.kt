@@ -29,7 +29,7 @@ import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 import rx.subscriptions.CompositeSubscription
-import timber.log.Timber
+import com.elvishew.xlog.XLog
 import java.io.File
 
 /**

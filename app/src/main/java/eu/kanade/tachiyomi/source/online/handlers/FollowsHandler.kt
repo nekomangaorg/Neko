@@ -24,7 +24,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import rx.Observable
-import timber.log.Timber
+import com.elvishew.xlog.XLog
 import kotlin.math.floor
 
 class FollowsHandler(val client: OkHttpClient, val headers: Headers, val preferences: PreferencesHelper) {

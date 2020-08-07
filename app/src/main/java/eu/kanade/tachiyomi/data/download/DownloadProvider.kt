@@ -14,7 +14,7 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.storage.DiskUtil
-import timber.log.Timber
+import com.elvishew.xlog.XLog
 import uy.kohesive.injekt.injectLazy
 
 /**

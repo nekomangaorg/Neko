@@ -102,7 +102,7 @@ import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.android.synthetic.main.manga_details_controller.*
 import kotlinx.android.synthetic.main.manga_header_item.*
-import timber.log.Timber
+import com.elvishew.xlog.XLog
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File

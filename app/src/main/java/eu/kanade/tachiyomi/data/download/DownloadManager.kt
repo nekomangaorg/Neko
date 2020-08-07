@@ -11,7 +11,7 @@ import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Page
 import rx.Observable
-import timber.log.Timber
+import com.elvishew.xlog.XLog
 import uy.kohesive.injekt.injectLazy
 
 /**

@@ -19,7 +19,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
-import timber.log.Timber
+import com.elvishew.xlog.XLog
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
 

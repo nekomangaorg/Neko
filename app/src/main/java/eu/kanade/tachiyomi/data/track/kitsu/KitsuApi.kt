@@ -26,7 +26,7 @@ import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
-import timber.log.Timber
+import com.elvishew.xlog.XLog
 
 class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) {
 

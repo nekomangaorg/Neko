@@ -21,7 +21,7 @@ import eu.kanade.tachiyomi.util.system.isServiceRunning
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import timber.log.Timber
+import com.elvishew.xlog.XLog
 import uy.kohesive.injekt.injectLazy
 import java.io.File
 

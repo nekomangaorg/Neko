@@ -85,7 +85,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.zhanghai.android.systemuihelper.SystemUiHelper
 import nucleus.factory.RequiresPresenter
-import timber.log.Timber
+import com.elvishew.xlog.XLog
 import uy.kohesive.injekt.injectLazy
 import java.io.File
 import java.text.DecimalFormat

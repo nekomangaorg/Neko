@@ -12,7 +12,7 @@ import okhttp3.Headers
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import rx.Observable
-import timber.log.Timber
+import com.elvishew.xlog.XLog
 
 class MangaHandler(val client: OkHttpClient, val headers: Headers, val langs: List<String>) {
 

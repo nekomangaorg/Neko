@@ -51,7 +51,7 @@ import kotlinx.android.synthetic.main.main_activity.*
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
-import timber.log.Timber
+import com.elvishew.xlog.XLog
 import uy.kohesive.injekt.injectLazy
 import java.util.concurrent.TimeUnit
 

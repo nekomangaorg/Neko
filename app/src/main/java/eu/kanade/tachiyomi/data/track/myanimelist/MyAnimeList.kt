@@ -8,7 +8,7 @@ import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
-import timber.log.Timber
+import com.elvishew.xlog.XLog
 
 class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
 

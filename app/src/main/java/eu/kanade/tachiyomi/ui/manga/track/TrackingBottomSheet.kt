@@ -17,7 +17,7 @@ import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
 import eu.kanade.tachiyomi.util.view.setEdgeToEdge
 import kotlinx.android.synthetic.main.tracking_bottom_sheet.*
-import timber.log.Timber
+import com.elvishew.xlog.XLog
 
 class TrackingBottomSheet(private val controller: MangaDetailsController) : BottomSheetDialog
     (controller.activity!!, R.style.BottomSheetDialogTheme),

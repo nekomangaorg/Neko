@@ -14,7 +14,7 @@ import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.ui.reader.viewer.BaseViewer
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.visible
-import timber.log.Timber
+import com.elvishew.xlog.XLog
 
 /**
  * Implementation of a [BaseViewer] to display pages with a [ViewPager].

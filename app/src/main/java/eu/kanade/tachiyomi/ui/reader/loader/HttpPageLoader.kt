@@ -16,7 +16,7 @@ import rx.schedulers.Schedulers
 import rx.subjects.PublishSubject
 import rx.subjects.SerializedSubject
 import rx.subscriptions.CompositeSubscription
-import timber.log.Timber
+import com.elvishew.xlog.XLog
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy

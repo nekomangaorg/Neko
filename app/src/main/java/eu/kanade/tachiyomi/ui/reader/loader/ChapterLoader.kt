@@ -10,7 +10,7 @@ import rx.Completable
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
-import timber.log.Timber
+import com.elvishew.xlog.XLog
 
 /**
  * Loader used to retrieve the [PageLoader] for a given chapter.

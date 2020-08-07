@@ -17,7 +17,7 @@ import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import kotlinx.android.synthetic.main.main_activity.*
-import timber.log.Timber
+import com.elvishew.xlog.XLog
 
 class SearchActivity : MainActivity() {
 

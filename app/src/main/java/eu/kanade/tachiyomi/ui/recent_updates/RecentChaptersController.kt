@@ -31,7 +31,7 @@ import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import kotlinx.android.synthetic.main.download_bottom_sheet.*
 import kotlinx.android.synthetic.main.recent_chapters_controller.*
 import kotlinx.android.synthetic.main.recent_chapters_controller.empty_view
-import timber.log.Timber
+import com.elvishew.xlog.XLog
 
 /**
  * Fragment that shows recent chapters.
