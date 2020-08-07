@@ -203,6 +203,7 @@ dependencies {
 
     // Logging
     implementation("com.jakewharton.timber:timber:${Versions.TIMBER}")
+    implementation("com.elvishew:xlog:1.6.1")
 
     // UI
     implementation("com.dmitrymalkovich.android:material-design-dimens:1.4")

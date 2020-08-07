@@ -10,13 +10,10 @@ import android.os.PowerManager
 import android.provider.Settings
 import android.widget.Toast
 import androidx.preference.PreferenceScreen
-import androidx.preference.SwitchPreferenceCompat
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.list.listItemsMultiChoice
 import com.google.firebase.crashlytics.FirebaseCrashlytics
-import eu.kanade.tachiyomi.FileDebugTree
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.ReleaseTree
 import eu.kanade.tachiyomi.data.cache.ChapterCache
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -27,6 +24,7 @@ import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
+import eu.kanade.tachiyomi.util.log.XLogLevel
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.coroutines.Dispatchers
@@ -36,7 +34,6 @@ import kotlinx.coroutines.launch
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
-import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -117,25 +114,17 @@ class SettingsAdvancedController : SettingsController() {
             }
         }
 
-        switchPreference {
-            key = PreferenceKeys.debugLogger
-            titleRes = R.string.enable_debug_logs
-            summaryRes = R.string.enable_debug_logs_summary
-            defaultValue = false
+        intListPreference(activity) {
+            key = PreferenceKeys.logLevel
+            title = "Log level"
 
-            setOnPreferenceClickListener { it ->
-                it as SwitchPreferenceCompat
-                network.rebuildClients()
-
-                if (it.isChecked) {
-                    Timber.plant(FileDebugTree())
-                } else {
-                    Timber.uprootAll()
-                    Timber.plant(ReleaseTree())
-                    FileDebugTree().cleanup()
-                }
-                true
+            entries = XLogLevel.values().map {
+                "${it.name.toLowerCase().capitalize()} (${it.description})"
             }
+            entryValues = XLogLevel.values().indices.toList()
+            defaultValue = "0"
+
+            summary = "Changing this can impact app performance. Force-restart app after changing. Current value: %s"
         }
 
         val pm = context.getSystemService(Context.POWER_SERVICE) as? PowerManager?
