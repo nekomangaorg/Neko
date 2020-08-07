@@ -120,7 +120,7 @@ class SettingsAdvancedController : SettingsController() {
         intListPreference(activity) {
             key = PreferenceKeys.logLevel
             titleRes = R.string.log_level
-            customSummary = context.getString(R.string.log_level_summary) + " Current value: " + XLogLevel.values()[prefs.logLevel()]
+            customSummary = context.getString(R.string.log_level_summary) + "\nCurrent Level: " + XLogLevel.values()[prefs.logLevel()]
             entries = XLogLevel.values().map {
                 "${it.name.toLowerCase().capitalize()} (${it.description})"
             }
