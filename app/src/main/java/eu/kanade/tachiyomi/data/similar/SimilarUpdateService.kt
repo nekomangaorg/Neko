@@ -7,6 +7,8 @@ import android.os.Build
 import android.os.PowerManager
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.text.isDigitsOnly
+import com.squareup.moshi.JsonReader
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.MangaSimilarImpl
@@ -23,10 +25,13 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.json.JSONObject
+import okio.buffer
+import okio.sink
+import okio.source
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.io.File
 import java.util.concurrent.TimeUnit
 
 class SimilarUpdateService(
@@ -130,61 +135,105 @@ class SimilarUpdateService(
      * Method that updates the similar database for manga
      */
     private suspend fun updateSimilar() = withContext(Dispatchers.IO) {
-        val jsonString =
-            SimilarHttpService.create().getSimilarResults().execute().body().toString()
-        val similarPageResult = JSONObject(jsonString)
-        val totalManga = similarPageResult.length()
+
+        val response = SimilarHttpService.create().getSimilarResults().execute()
+        if (!response.isSuccessful) {
+            throw Exception("Error trying to download similar file")
+        }
+        val destinationFile = File(filesDir, "neko-similar.json")
+        val buffer = destinationFile.sink().buffer()
+
+        //write json to file
+        response.body()?.byteStream()?.source()?.use { input ->
+            buffer.use { output ->
+                output.writeAll(input)
+            }
+        }
+
+        val listSimilar = getSimilar(destinationFile)
 
         // Delete the old similar table
         db.deleteAllSimilar().executeAsBlocking()
 
+        val totalManga = listSimilar.size
+
         // Loop through each and insert into the database
-        var counter: Int = 0
-        val batchMultiple = 1000
-        val dataToInsert = mutableListOf<MangaSimilarImpl>()
-        for (key in similarPageResult.keys()) {
 
-            // Check if the service is currently running
-            if (!this.isActive) {
-                break
+        val dataToInsert = listSimilar.mapIndexed { index, similarFromJson ->
+            showProgressNotification(index, totalManga)
+
+            if (similarFromJson.similarIds.size != similarFromJson.similarTitles.size) {
+                return@mapIndexed null
             }
 
-            // Get our two arrays of ids and titles
-            val matchedIds =
-                similarPageResult.getJSONObject(key).getJSONArray("m_ids")
-            val matchedTitles =
-                similarPageResult.getJSONObject(key).getJSONArray("m_titles")
-            if (matchedIds.length() != matchedTitles.length()) {
-                continue
-            }
-
-            // create the implementation and insert
             val similar = MangaSimilarImpl()
-            similar.id = counter.toLong()
-            similar.manga_id = key.toLong()
-            similar.matched_ids = matchedIds.toString()
-            similar.matched_titles = matchedTitles.toString()
-            dataToInsert.add(similar)
+            similar.id = index.toLong()
+            similar.manga_id = similarFromJson.id.toLong()
+            similar.matched_ids = similarFromJson.similarIds.joinToString(",")
+            similar.matched_titles = similarFromJson.similarTitles.joinToString(",")
+            return@mapIndexed similar
+        }.filterNotNull()
 
-            // display to the user
-            counter++
-            showProgressNotification(counter, totalManga)
 
-            // Every batch of manga, insert into the database
-            if (counter % batchMultiple == 0) {
-                db.insertSimilar(dataToInsert).executeAsBlocking()
-                dataToInsert.clear()
-            }
-        }
-
-        // Insert the last bit in the case we are not divisable by 1000
         if (dataToInsert.isNotEmpty()) {
             db.insertSimilar(dataToInsert).executeAsBlocking()
-            dataToInsert.clear()
         }
+        destinationFile.delete()
         cancelProgressNotification()
         showResultNotification(!this.isActive)
     }
+
+    private fun getSimilar(destinationFile: File): List<SimilarFromJson> {
+        val reader = JsonReader.of(destinationFile.source().buffer())
+
+        var processingManga = false
+        var processingTitles = false
+        var mangaId: String? = null
+        var similarIds = mutableListOf<String>()
+        var similarTitles = mutableListOf<String>()
+        var similars = mutableListOf<SimilarFromJson>()
+
+        while (reader.peek() != JsonReader.Token.END_DOCUMENT) {
+            val nextToken = reader.peek()
+
+            if (JsonReader.Token.BEGIN_OBJECT == nextToken) {
+                reader.beginObject();
+            } else if (JsonReader.Token.NAME == nextToken) {
+                val name = reader.nextName()
+                if (!processingManga && name.isDigitsOnly()) {
+                    processingManga = true
+                    //similar add id
+                    mangaId = name
+                } else if (name == "m_titles") {
+                    processingTitles = true
+                }
+            } else if (JsonReader.Token.BEGIN_ARRAY == nextToken) {
+                reader.beginArray()
+            } else if (JsonReader.Token.END_ARRAY == nextToken) {
+                reader.endArray()
+                if (processingTitles) {
+                    processingManga = false
+                    processingTitles = false
+                    similars.add(SimilarFromJson(mangaId!!, similarIds.toList(), similarTitles.toList()))
+                    mangaId = null
+                    similarIds = mutableListOf<String>()
+                    similarTitles = mutableListOf<String>()
+                }
+            } else if (JsonReader.Token.NUMBER.equals(nextToken)) {
+                similarIds.add(reader.nextInt().toString())
+            } else if (JsonReader.Token.STRING.equals(nextToken)) {
+                if (processingTitles) {
+                    similarTitles.add(reader.nextString())
+                }
+            } else if (JsonReader.Token.END_OBJECT.equals(nextToken)) {
+                reader.endObject()
+            }
+        }
+
+        return similars
+    }
+
+    data class SimilarFromJson(val id: String, val similarIds: List<String>, val similarTitles: List<String>)
 
     /**
      * Shows the notification containing the currently updating manga and the progress.
