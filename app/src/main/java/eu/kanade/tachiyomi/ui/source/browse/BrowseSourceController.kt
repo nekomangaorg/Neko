@@ -375,7 +375,7 @@ open class BrowseSourceController(bundle: Bundle) :
      * @param error the error received.
      */
     open fun onAddPageError(error: Throwable) {
-        Timber.e(error)
+        XLog.e(error)
         val adapter = adapter ?: return
         adapter.onLoadMoreComplete(null)
         hideProgressBar()

@@ -146,7 +146,7 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
                 val result = authClient.newCall(request).execute()
                 return@withContext true
             } catch (e: Exception) {
-                Timber.w(e)
+                XLog.w(e)
             }
             return@withContext false
         }

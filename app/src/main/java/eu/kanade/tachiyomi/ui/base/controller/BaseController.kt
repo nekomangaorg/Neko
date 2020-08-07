@@ -23,19 +23,19 @@ abstract class BaseController(bundle: Bundle? = null) : RestoreViewOnCreateContr
             }
 
             override fun preCreateView(controller: Controller) {
-                Timber.d("Create view for ${controller.instance()}")
+                XLog.d("Create view for ${controller.instance()}")
             }
 
             override fun preAttach(controller: Controller, view: View) {
-                Timber.d("Attach view for ${controller.instance()}")
+                XLog.d("Attach view for ${controller.instance()}")
             }
 
             override fun preDetach(controller: Controller, view: View) {
-                Timber.d("Detach view for ${controller.instance()}")
+                XLog.d("Detach view for ${controller.instance()}")
             }
 
             override fun preDestroyView(controller: Controller, view: View) {
-                Timber.d("Destroy view for ${controller.instance()}")
+                XLog.d("Destroy view for ${controller.instance()}")
             }
         })
     }

@@ -548,7 +548,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
      * this case the activity is closed and a toast is shown to the user.
      */
     fun setInitialChapterError(error: Throwable) {
-        Timber.e(error)
+        XLog.e(error)
         finish()
         toast(error.message)
     }
@@ -716,7 +716,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
                 toast(R.string.picture_saved)
             }
             is ReaderPresenter.SaveImageResult.Error -> {
-                Timber.e(result.error)
+                XLog.e(result.error)
             }
         }
     }
@@ -783,7 +783,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
     private fun handleIntentAction(intent: Intent): Boolean {
         val pathSegments = intent.data?.pathSegments
         if (pathSegments != null && pathSegments.size > 1) {
-            Timber.e(pathSegments[0])
+            XLog.e(pathSegments[0])
             val id = pathSegments[1]
             val secondary = pathSegments.getOrNull(2)
             if (secondary == "comments") {

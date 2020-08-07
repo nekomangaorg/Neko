@@ -163,7 +163,7 @@ class BackupRestoreService : Service() {
         // Unsubscribe from any previous subscription if needed.
         job?.cancel()
         val handler = CoroutineExceptionHandler { _, exception ->
-            Timber.e(exception)
+            XLog.e(exception)
             showErrorNotification(exception.message!!)
             stopSelf(startId)
         }
@@ -292,7 +292,7 @@ class BackupRestoreService : Service() {
 
             trackingFetch(manga, tracks)
         } catch (e: Exception) {
-            Timber.e(e)
+            XLog.e(e)
             errors.add("${manga.title} - ${e.message}")
         }
     }
@@ -347,7 +347,7 @@ class BackupRestoreService : Service() {
                 return destFile
             }
         } catch (e: Exception) {
-            Timber.e(e)
+            XLog.e(e)
         }
         return File("")
     }

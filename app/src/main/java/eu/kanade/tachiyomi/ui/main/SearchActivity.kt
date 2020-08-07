@@ -81,7 +81,7 @@ class SearchActivity : MainActivity() {
             INTENT_SEARCH -> {
                 val pathSegments = intent?.data?.pathSegments
                 if (pathSegments != null && pathSegments.size > 1) {
-                    Timber.e(pathSegments[0])
+                    XLog.e(pathSegments[0])
                     val id = pathSegments[1]
                     if (id != null && id.isNotEmpty()) {
                         if (router.backstackSize > 1) {

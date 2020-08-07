@@ -124,11 +124,11 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
     override fun onCreate(savedInstanceState: Bundle?) {
         // Create a webview before extensions do or else they will break night mode theme
         // https://stackoverflow.com/questions/54191883
-        Timber.d("Manually instantiating WebView to avoid night mode issue.")
+        XLog.d("Manually instantiating WebView to avoid night mode issue.")
         try {
             WebView(applicationContext)
         } catch (e: Exception) {
-            Timber.e(e, "Exception when creating webview at start")
+            XLog.e(e, "Exception when creating webview at start")
         }
         super.onCreate(savedInstanceState)
 
@@ -407,7 +407,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
                         }
                     }
                 } catch (error: Exception) {
-                    Timber.e(error)
+                    XLog.e(error)
                 }
             }
         }

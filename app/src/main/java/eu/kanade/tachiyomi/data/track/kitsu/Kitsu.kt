@@ -128,7 +128,7 @@ class Kitsu(private val context: Context, id: Int) : TrackService(id) {
             saveCredentials(username, userId)
             return true
         } catch (e: Exception) {
-            Timber.e(e)
+            XLog.e(e)
             return false
         }
     }

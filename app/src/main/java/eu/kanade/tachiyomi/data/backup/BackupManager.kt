@@ -186,7 +186,7 @@ class BackupManager(val context: Context, version: Int = CURRENT_VERSION) {
                 return file.uri.toString()
             }
         } catch (e: Exception) {
-            Timber.e(e)
+            XLog.e(e)
             throw e
         }
     }

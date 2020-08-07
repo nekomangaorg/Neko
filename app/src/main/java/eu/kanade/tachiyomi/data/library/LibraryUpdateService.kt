@@ -116,7 +116,7 @@ class LibraryUpdateService(
                 mangaToUpdateMap[it.key] = it.value
                 jobCount.andIncrement
                 val handler = CoroutineExceptionHandler { _, exception ->
-                    Timber.e(exception)
+                    XLog.e(exception)
                 }
                 GlobalScope.launch(handler) {
                     val hasDLs = try {
@@ -260,7 +260,7 @@ class LibraryUpdateService(
 
     private fun launchTarget(target: Target, mangaToAdd: List<LibraryManga>, startId: Int) {
         val handler = CoroutineExceptionHandler { _, exception ->
-            Timber.e(exception)
+            XLog.e(exception)
             stopSelf(startId)
         }
         if (target == Target.CHAPTERS) {
@@ -295,7 +295,7 @@ class LibraryUpdateService(
                             updateMangaInSource(source, downloadNew, categoriesToDownload)
                         }
                     } catch (e: Exception) {
-                        Timber.e(e)
+                        XLog.e(e)
                         false
                     }
                 }
@@ -385,7 +385,7 @@ class LibraryUpdateService(
                     val chapters = sourceManager.getMergeSource().fetchChapters(it)
                     fetchedChapters.addAll(chapters)
                 } catch (e: Exception) {
-                    Timber.e(e, "Error with mergedsource")
+                    XLog.e(e, "Error with mergedsource")
                 }
             }
 
@@ -463,7 +463,7 @@ class LibraryUpdateService(
         } catch (e: Exception) {
             if (e !is CancellationException) {
                 failedUpdates[manga] = e.message
-                Timber.e("Failed updating: ${manga.title}: $e")
+                XLog.e("Failed updating: ${manga.title}: $e")
             }
             return false
         }
@@ -508,7 +508,7 @@ class LibraryUpdateService(
                         val newTrack = service.refresh(track)
                         db.insertTrack(newTrack).executeAsBlocking()
                     } catch (e: Exception) {
-                        Timber.e(e)
+                        XLog.e(e)
                     }
                 }
             }

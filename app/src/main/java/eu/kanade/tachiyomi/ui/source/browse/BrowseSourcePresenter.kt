@@ -175,7 +175,7 @@ open class BrowseSourcePresenter(
                 }
                 view.onAddPage(page, mangas)
             }, { _, error ->
-                Timber.e(error)
+                XLog.e(error)
             })
 
         // Request first page.
@@ -238,7 +238,7 @@ open class BrowseSourcePresenter(
                 @Suppress("DEPRECATION")
                 view?.onMangaInitialized(manga)
             }, { error ->
-                Timber.e(error)
+                XLog.e(error)
             })
             .apply { add(this) }
     }

@@ -23,7 +23,7 @@ class MangaHandler(val client: OkHttpClient, val headers: Headers, val langs: Li
 
             val jsonData = response.body!!.string()
             if (response.code != 200) {
-                Timber.e("error from MangaDex with response code ${response.code} \n body: \n$jsonData")
+                XLog.e("error from MangaDex with response code ${response.code} \n body: \n$jsonData")
                 throw Exception("Error from MangaDex Response code ${response.code} ")
             }
 

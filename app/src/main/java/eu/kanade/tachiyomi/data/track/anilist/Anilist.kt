@@ -177,7 +177,7 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
             saveCredentials(currentUser.first.toString(), oauth.access_token)
             true
         } catch (e: Exception) {
-            Timber.e(e)
+            XLog.e(e)
             logout()
             false
         }
@@ -197,7 +197,7 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
         return try {
             gson.fromJson(preferences.trackToken(this).get(), OAuth::class.java)
         } catch (e: Exception) {
-            Timber.e(e)
+            XLog.e(e)
             null
         }
     }

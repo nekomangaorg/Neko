@@ -174,15 +174,15 @@ class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = tr
         activity.onPageSelected(page)
 
         val pages = page.chapter.pages ?: return
-        Timber.d("onReaderPageSelected: ${page.number}/${pages.size}")
+        XLog.d("onReaderPageSelected: ${page.number}/${pages.size}")
         // Preload next chapter once we're within the last 5 pages of the current chapter
         val inPreloadRange = pages.size - page.number < 5
         if (inPreloadRange && allowPreload && page.chapter == adapter.currentChapter) {
-            Timber.d("Request preload next chapter because we're at page ${page.number} of ${pages.size}")
+            XLog.d("Request preload next chapter because we're at page ${page.number} of ${pages.size}")
             val nextItem = adapter.items.getOrNull(adapter.items.size - 1)
             val transitionChapter = (nextItem as? ChapterTransition.Next)?.to ?: (nextItem as?ReaderPage)?.chapter
             if (transitionChapter != null) {
-                Timber.d("Requesting to preload chapter ${transitionChapter.chapter.chapter_number}")
+                XLog.d("Requesting to preload chapter ${transitionChapter.chapter.chapter_number}")
                 activity.requestPreloadChapter(transitionChapter)
             }
         }
@@ -193,10 +193,10 @@ class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = tr
      * preload of the destination chapter of the transition.
      */
     private fun onTransitionSelected(transition: ChapterTransition) {
-        Timber.d("onTransitionSelected: $transition")
+        XLog.d("onTransitionSelected: $transition")
         val toChapter = transition.to
         if (toChapter != null) {
-            Timber.d("Request preload destination chapter because we're on the transition")
+            XLog.d("Request preload destination chapter because we're on the transition")
             activity.requestPreloadChapter(toChapter)
         } else if (transition is ChapterTransition.Next) {
             // No more chapters, show menu because the user is probably going to close the reader
@@ -208,12 +208,12 @@ class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = tr
      * Tells this viewer to set the given [chapters] as active.
      */
     override fun setChapters(chapters: ViewerChapters) {
-        Timber.d("setChapters")
+        XLog.d("setChapters")
         val forceTransition = config.alwaysShowChapterTransition || currentPage is ChapterTransition
         adapter.setChapters(chapters, forceTransition)
 
         if (recycler.visibility == View.GONE) {
-            Timber.d("Recycler first layout")
+            XLog.d("Recycler first layout")
             val pages = chapters.currChapter.pages ?: return
             moveToPage(pages[chapters.currChapter.requestedPage])
             recycler.visible()
@@ -224,12 +224,12 @@ class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = tr
      * Tells this viewer to move to the given [page].
      */
     override fun moveToPage(page: ReaderPage) {
-        Timber.d("moveToPage")
+        XLog.d("moveToPage")
         val position = adapter.items.indexOf(page)
         if (position != -1) {
             recycler.scrollToPosition(position)
         } else {
-            Timber.d("Page $page not found in adapter")
+            XLog.d("Page $page not found in adapter")
         }
     }
 

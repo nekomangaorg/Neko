@@ -56,7 +56,7 @@ class DownloadProvider(private val context: Context) {
             return downloadsDir.createDirectory(getSourceDirName(source))
                 .createDirectory(getMangaDirName(manga))
         } catch (e: Exception) {
-            Timber.e(e)
+            XLog.e(e)
             throw Exception(context.getString(R.string.invalid_download_location))
         }
     }

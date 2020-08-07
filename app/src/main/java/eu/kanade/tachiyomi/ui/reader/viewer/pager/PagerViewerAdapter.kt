@@ -2,12 +2,12 @@ package eu.kanade.tachiyomi.ui.reader.viewer.pager
 
 import android.view.View
 import android.view.ViewGroup
+import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.widget.ViewPagerAdapter
-import timber.log.Timber
 
 /**
  * Pager adapter used by this [viewer] to where [ViewerChapters] updates are posted.
@@ -33,9 +33,9 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
     fun setChapters(chapters: ViewerChapters, forceTransition: Boolean) {
         val newItems = mutableListOf<Any>()
 
-        Timber.d("ViewerChapter previous chapter %s", chapters.prevChapter?.urlAndName())
-        Timber.d("ViewerChapter current chapter %s", chapters.currChapter.urlAndName())
-        Timber.d("ViewerChapter next chapter %s", chapters.nextChapter?.urlAndName())
+        XLog.d("ViewerChapter previous chapter %s", chapters.prevChapter?.urlAndName())
+        XLog.d("ViewerChapter current chapter %s", chapters.currChapter.urlAndName())
+        XLog.d("ViewerChapter next chapter %s", chapters.nextChapter?.urlAndName())
 
         // Add previous chapter pages and transition.
         if (chapters.prevChapter != null) {
@@ -114,7 +114,7 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
             if (position != -1) {
                 return position
             } else {
-                Timber.d("Position for %s not found", view.item)
+                XLog.d("Position for %s not found", view.item)
             }
         }
         return POSITION_NONE

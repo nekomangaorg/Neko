@@ -104,7 +104,7 @@ class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
             saveCredentials(username, password)
             true
         } catch (e: Exception) {
-            Timber.e(e)
+            XLog.e(e)
             logout()
             false
         }
@@ -120,7 +120,7 @@ class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
             saveCSRF(csrf)
             saveCredentials(username, password)
         } catch (e: Exception) {
-            Timber.e(e)
+            XLog.e(e)
             logout()
             throw e
         }

@@ -77,7 +77,7 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
             authClient.newCall(POST(url = removeUrl(track.media_id))).await()
             return true
         } catch (e: Exception) {
-            Timber.w(e)
+            XLog.w(e)
         }
         return false
     }

@@ -104,7 +104,7 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
             rest.deleteLibManga(track.media_id)
             return true
         } catch (e: Exception) {
-            Timber.w(e)
+            XLog.w(e)
         }
         return false
     }

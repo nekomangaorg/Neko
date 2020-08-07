@@ -298,7 +298,7 @@ class DownloadManager(val context: Context) {
                 mangaFolder.delete()
                 cache.removeManga(manga)
             } else {
-                Timber.e("Cache and download folder doesn't match for %s", manga.title)
+                XLog.e("Cache and download folder doesn't match for %s", manga.title)
             }
         }
         return cleaned
@@ -355,7 +355,7 @@ class DownloadManager(val context: Context) {
             cache.removeChapters(listOf(oldChapter), manga)
             cache.addChapter(newName, mangaDir, manga)
         } else {
-            Timber.e("Could not rename downloaded chapter: %s.", oldName)
+            XLog.e("Could not rename downloaded chapter: %s.", oldName)
         }
     }
 

@@ -207,7 +207,7 @@ class Downloader(
                 },
                 { error ->
                     DownloadService.stop(context)
-                    Timber.e(error)
+                    XLog.e(error)
                     notifier.onError(error.message)
                 }
             )
@@ -314,7 +314,7 @@ class Downloader(
             .doOnNext { ensureSuccessfulDownload(download, mangaDir, tmpDir, chapterDirname) }
             // If the page list threw, it will resume here
             .onErrorReturn { error ->
-                Timber.e(error)
+                XLog.e(error)
                 download.status = Download.ERROR
                 notifier.onError(error.message, download.chapter.name)
                 download

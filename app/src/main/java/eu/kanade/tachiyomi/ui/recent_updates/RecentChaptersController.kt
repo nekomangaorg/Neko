@@ -262,6 +262,6 @@ class RecentChaptersController(bundle: Bundle? = null) : BaseController(bundle),
      * @param error error message
      */
     fun onChaptersDeletedError(error: Throwable) {
-        Timber.e(error)
+        XLog.e(error)
     }
 }

@@ -125,7 +125,7 @@ class UpdaterService : Service() {
             }
             notifier.onDownloadFinished(apkFile.getUriCompat(this))
         } catch (error: Exception) {
-            Timber.e(error)
+            XLog.e(error)
             notifier.onDownloadError(url)
         }
     }

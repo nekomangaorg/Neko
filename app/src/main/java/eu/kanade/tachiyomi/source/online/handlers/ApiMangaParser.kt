@@ -75,7 +75,7 @@ class ApiMangaParser(val langs: List<String>) {
 
             return manga
         } catch (e: Exception) {
-            Timber.e(e)
+            XLog.e(e)
             throw e
         }
     }
@@ -180,7 +180,7 @@ class ApiMangaParser(val langs: List<String>) {
             val jsonObject = JsonParser.parseString(body).obj
             return jsonObject["manga_id"]?.nullInt ?: throw Exception("No manga associated with chapter")
         } catch (e: Exception) {
-            Timber.e(e)
+            XLog.e(e)
             throw e
         }
     }

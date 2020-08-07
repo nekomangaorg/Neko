@@ -137,7 +137,7 @@ open class MangaDex() : HttpSource() {
                 manga.thumbnail_url = cover
             }
         } catch (e: Exception) {
-            Timber.e(e, "exception getting latest covers")
+            XLog.e(e, "exception getting latest covers")
         }
         return manga
     }
@@ -152,7 +152,7 @@ open class MangaDex() : HttpSource() {
                 pair.first.thumbnail_url = cover
             }
         } catch (e: Exception) {
-            Timber.e(e, "exception getting latest covers")
+            XLog.e(e, "exception getting latest covers")
         }
 
         return pair
@@ -239,7 +239,7 @@ open class MangaDex() : HttpSource() {
                     }
                     val jsonData = client.newCall(GET(tokenRequestUrl, headers, cacheControl)).execute().body!!.string()
                     tokenedServer = JsonParser.parseString(jsonData).asJsonObject.get("server").string
-                    Timber.d("esco new token %s", tokenedServer)
+                    XLog.d("esco new token %s", tokenedServer)
                 }
                 tokenedServer + page.imageUrl
             }

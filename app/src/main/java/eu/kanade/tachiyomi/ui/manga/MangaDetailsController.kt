@@ -694,9 +694,9 @@ class MangaDetailsController : BaseController,
     private fun openChapter(chapter: Chapter) {
         val activity = activity ?: return
         if (BuildConfig.DEBUG || presenter.preferences.debugLogEnabled()) {
-            Timber.d("-- Chapter List Before Reader --")
+            XLog.d("-- Chapter List Before Reader --")
             for (chapter in presenter.chapters) {
-                Timber.d(chapter.chapterLog())
+                XLog.d(chapter.chapterLog())
             }
         }
         val intent = ReaderActivity.newIntent(activity, presenter.manga, chapter)
@@ -1129,7 +1129,7 @@ class MangaDetailsController : BaseController,
     }
 
     fun onMergeSearchError(error: Exception) {
-        Timber.e(error)
+        XLog.e(error)
         mergeSearchDialog?.onSearchResultsError()
     }
 
@@ -1138,12 +1138,12 @@ class MangaDetailsController : BaseController,
     }
 
     fun trackRefreshError(error: Exception) {
-        Timber.e(error)
+        XLog.e(error)
         trackingBottomSheet?.onRefreshError(error)
     }
 
     fun trackSearchError(error: Exception) {
-        Timber.e(error)
+        XLog.e(error)
         trackingBottomSheet?.onSearchResultsError(error)
     }
 

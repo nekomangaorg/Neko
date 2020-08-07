@@ -118,7 +118,7 @@ class SimilarUpdateService(
         // Unsubscribe from any previous subscription if needed.
         job?.cancel()
         val handler = CoroutineExceptionHandler { _, exception ->
-            Timber.e(exception)
+            XLog.e(exception)
             stopSelf(startId)
             showResultNotification(true)
             cancelProgressNotification()

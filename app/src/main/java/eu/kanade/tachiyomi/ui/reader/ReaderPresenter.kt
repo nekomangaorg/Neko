@@ -105,13 +105,13 @@ class ReaderPresenter(
 
         val chaptersForReader =
             chapterFilter.filterChaptersForReader(dbChapters, manga, selectedChapter)
-        Timber.d("--chapter list--")
+        XLog.d("--chapter list--")
         when (manga.sorting) {
             Manga.SORTING_SOURCE -> ChapterLoadBySource().get(chaptersForReader)
             Manga.SORTING_NUMBER -> ChapterLoadByNumber().get(chaptersForReader, selectedChapter)
             else -> error("Unknown sorting method")
         }.map { it ->
-            Timber.d(it.chapterLog())
+            XLog.d(it.chapterLog())
             ReaderChapter(it)
         }
 
@@ -212,8 +212,8 @@ class ReaderPresenter(
             }
         }
         if (Timber.asTree() is DebugTree) {
-            Timber.d("chapter items")
-            chapterItems.forEach { Timber.d(it.chapter.name) }
+            XLog.d("chapter items")
+            chapterItems.forEach { XLog.d(it.chapter.name) }
         }
         return chapterItems
     }
@@ -276,21 +276,21 @@ class ReaderPresenter(
 
                 val oldChapters = viewerChaptersRelay.value
 
-                Timber.d("loadObservable oldChapters previousChapter %s", oldChapters?.prevChapter?.urlAndName())
-                Timber.d("loadObservable oldChapters currentChapter %s", oldChapters?.currChapter?.urlAndName())
-                Timber.d("loadObservable oldChapters nextChapter %s", oldChapters?.nextChapter?.urlAndName())
+                XLog.d("loadObservable oldChapters previousChapter %s", oldChapters?.prevChapter?.urlAndName())
+                XLog.d("loadObservable oldChapters currentChapter %s", oldChapters?.currChapter?.urlAndName())
+                XLog.d("loadObservable oldChapters nextChapter %s", oldChapters?.nextChapter?.urlAndName())
 
-                Timber.d("loadObservable newChapters previousChapter %s", newChapters?.prevChapter?.urlAndName())
-                Timber.d("loadObservable newChapters currentChapter %s", newChapters?.currChapter?.urlAndName())
-                Timber.d("loadObservable newChapters nextChapter %s", newChapters?.nextChapter?.urlAndName())
+                XLog.d("loadObservable newChapters previousChapter %s", newChapters?.prevChapter?.urlAndName())
+                XLog.d("loadObservable newChapters currentChapter %s", newChapters?.currChapter?.urlAndName())
+                XLog.d("loadObservable newChapters nextChapter %s", newChapters?.nextChapter?.urlAndName())
 
                 // Add new references first to avoid unnecessary recycling
                 newChapters.ref()
                 oldChapters?.unref()
 
-                Timber.d("loadObservable newChapters afterRef previousChapter %s", newChapters.prevChapter?.urlAndName())
-                Timber.d("loadObservable newChapters afterRef currentChapter %s", newChapters.currChapter.urlAndName())
-                Timber.d("loadObservable newChapters afterRef nextChapter %s", newChapters.nextChapter?.urlAndName())
+                XLog.d("loadObservable newChapters afterRef previousChapter %s", newChapters.prevChapter?.urlAndName())
+                XLog.d("loadObservable newChapters afterRef currentChapter %s", newChapters.currChapter.urlAndName())
+                XLog.d("loadObservable newChapters afterRef nextChapter %s", newChapters.nextChapter?.urlAndName())
 
 
                 viewerChaptersRelay.call(newChapters)
@@ -324,8 +324,8 @@ class ReaderPresenter(
         db.insertManga(tempManga).executeAsBlocking()
         val manga = db.getMangadexManga(tempManga.url).executeAsBlocking()!!
 
-        Timber.d("tempManga id ${tempManga.id}")
-        Timber.d("Manga id ${manga.id}")
+        XLog.d("tempManga id ${tempManga.id}")
+        XLog.d("Manga id ${manga.id}")
 
         if (chapters.isNotEmpty()) {
             val (newChapters, _) = syncChaptersWithSource(db, chapters, manga)
@@ -347,7 +347,7 @@ class ReaderPresenter(
     private fun loadNewChapter(chapter: ReaderChapter) {
         val loader = loader ?: return
 
-        Timber.d("loadNewChapter Loading %s - %s", chapter.chapter.url, chapter.chapter.name)
+        XLog.d("loadNewChapter Loading %s - %s", chapter.chapter.url, chapter.chapter.name)
 
         activeChapterSubscription?.unsubscribe()
         activeChapterSubscription = getLoadObservable(loader, chapter)
@@ -362,7 +362,7 @@ class ReaderPresenter(
 
         viewerChaptersRelay.value?.currChapter?.let(::onChapterChanged)
 
-        Timber.d("Loading ${chapter.url}")
+        XLog.d("Loading ${chapter.url}")
 
         activeChapterSubscription?.unsubscribe()
         activeChapterSubscription = getLoadObservable(loader, ReaderChapter(chapter))
@@ -391,7 +391,7 @@ class ReaderPresenter(
             return
         }
 
-        Timber.d("Preloading %s - %s", chapter.chapter.url, chapter.chapter.name)
+        XLog.d("Preloading %s - %s", chapter.chapter.url, chapter.chapter.name)
 
         val loader = loader ?: return
 
@@ -690,7 +690,7 @@ class ReaderPresenter(
                             service!!.update(track)
                             db.insertTrack(track).executeAsBlocking()
                         } catch (e: Exception) {
-                            Timber.e(e)
+                            XLog.e(e)
                         }
                     }
                 }

@@ -122,7 +122,7 @@ class SettingsAdvancedController : SettingsController() {
                 "${it.name.toLowerCase().capitalize()} (${it.description})"
             }
             entryValues = XLogLevel.values().indices.toList()
-            defaultValue = "0"
+            defaultValue = 0
 
             summary = "Changing this can impact app performance. Force-restart app after changing. Current value: %s"
         }

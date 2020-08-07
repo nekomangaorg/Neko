@@ -124,9 +124,6 @@ dependencies {
 
     // Network client
     implementation("com.squareup.okhttp3:okhttp:${Versions.OKHTTP}")
-    implementation("com.github.ihsanbal:LoggingInterceptor:3.1.0") {
-        exclude("org.json", "json")
-    }
     implementation("com.squareup.okio:okio:2.6.0")
 
     // Chucker
@@ -136,7 +133,6 @@ dependencies {
 
     // hyperion
     debugImplementation("com.willowtreeapps.hyperion:hyperion-core:${Versions.HYPERION}")
-    debugImplementation("com.willowtreeapps.hyperion:hyperion-timber:${Versions.HYPERION}")
     debugImplementation("com.willowtreeapps.hyperion:hyperion-core:${Versions.HYPERION}")
     debugImplementation("com.willowtreeapps.hyperion:hyperion-attr:${Versions.HYPERION}")
     debugImplementation("com.willowtreeapps.hyperion:hyperion-build-config:${Versions.HYPERION}")
@@ -202,7 +198,6 @@ dependencies {
     implementation("io.coil-kt:coil-svg:${Versions.COIL}")
 
     // Logging
-    implementation("com.jakewharton.timber:timber:${Versions.TIMBER}")
     implementation("com.elvishew:xlog:1.6.1")
 
     // UI

@@ -58,9 +58,9 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
             field = value
             if (value) {
                 awaitingIdleViewerChapters?.let {
-                    Timber.d("isIdle previousChapter %s", it.prevChapter?.urlAndName())
-                    Timber.d("isIdle currentChapter %s", it.currChapter.urlAndName())
-                    Timber.d("isIdle nextChaptter %s", it.nextChapter?.urlAndName())
+                    XLog.d("isIdle previousChapter %s", it.prevChapter?.urlAndName())
+                    XLog.d("isIdle currentChapter %s", it.currChapter.urlAndName())
+                    XLog.d("isIdle nextChaptter %s", it.nextChapter?.urlAndName())
                     setChaptersInternal(it)
                     awaitingIdleViewerChapters = null
                 }
@@ -160,14 +160,14 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
         activity.onPageSelected(page)
 
         val pages = page.chapter.pages ?: return
-        Timber.d("onReaderPageSelected: %s/%s", page.number, pages.size)
+        XLog.d("onReaderPageSelected: %s/%s", page.number, pages.size)
         // Preload next chapter once we're within the last 5 pages of the current chapter
         val inPreloadRange = pages.size - page.number < 5
         if (inPreloadRange && allowPreload && page.chapter == adapter.currentChapter) {
-            Timber.d("Request preload next chapter because we're at page %s of %s", page.number, pages.size)
-            Timber.d("Current chapter %s", adapter.currentChapter?.urlAndName())
+            XLog.d("Request preload next chapter because we're at page %s of %s", page.number, pages.size)
+            XLog.d("Current chapter %s", adapter.currentChapter?.urlAndName())
             adapter.nextTransition?.to?.let {
-                Timber.d("Next preload chapter %s", adapter.nextTransition?.to?.urlAndName())
+                XLog.d("Next preload chapter %s", adapter.nextTransition?.to?.urlAndName())
                 activity.requestPreloadChapter(it)
             }
         }
@@ -178,10 +178,10 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
      * preload of the destination chapter of the transition.
      */
     private fun onTransitionSelected(transition: ChapterTransition) {
-        Timber.d("onTransitionSelected: %s", transition)
+        XLog.d("onTransitionSelected: %s", transition)
         val toChapter = transition.to
         if (toChapter != null) {
-            Timber.d("Request preload destination chapter because we're on the transition")
+            XLog.d("Request preload destination chapter because we're on the transition")
             activity.requestPreloadChapter(toChapter)
         } else if (transition is ChapterTransition.Next) {
             // No more chapters, show menu because the user is probably going to close the reader
@@ -205,7 +205,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
      * Sets the active [chapters] on this pager.
      */
     private fun setChaptersInternal(chapters: ViewerChapters) {
-        Timber.d("setChaptersInternal")
+        XLog.d("setChaptersInternal")
         val forceTransition = config.alwaysShowChapterTransition || adapter.items.getOrNull(
             pager
                 .currentItem
@@ -214,7 +214,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
 
         // Layout the pager once a chapter is being set
         if (pager.visibility == View.GONE) {
-            Timber.d("Pager first layout")
+            XLog.d("Pager first layout")
             val pages = chapters.currChapter.pages ?: return
             moveToPage(pages[chapters.currChapter.requestedPage])
             pager.visible()
@@ -225,7 +225,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
      * Tells this viewer to move to the given [page].
      */
     override fun moveToPage(page: ReaderPage) {
-        Timber.d("moveToPage %s", page.number)
+        XLog.d("moveToPage %s", page.number)
         val position = adapter.items.indexOf(page)
         if (position != -1) {
             val currentPosition = pager.currentItem
@@ -235,7 +235,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
                 onPageChange(position)
             }
         } else {
-            Timber.d("Page %s not found in adapter", page)
+            XLog.d("Page %s not found in adapter", page)
         }
     }
 

@@ -52,7 +52,7 @@ class HttpPageLoader(
                 .subscribe({
                 }, { error ->
                     if (error !is InterruptedException) {
-                        Timber.e(error)
+                        XLog.e(error)
                     }
                 })
     }

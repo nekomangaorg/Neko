@@ -143,7 +143,7 @@ class AboutController : SettingsController() {
             } catch (error: Exception) {
                 withContext(Dispatchers.Main) {
                     activity?.toast(error.message)
-                    Timber.e(error)
+                    XLog.e(error)
                 }
             }
             when (result) {
