@@ -213,7 +213,6 @@ dependencies {
     implementation("com.nononsenseapps:filepicker:2.5.2")
     implementation("com.afollestad.material-dialogs:core:3.1.1")
     implementation("com.afollestad.material-dialogs:input:3.1.1")
-    implementation("com.afollestad.material-dialogs:bottomsheets:3.1.1")
 
     implementation("me.zhanghai.android.systemuihelper:library:1.0.0")
     implementation("com.nightlynexus.viewstatepageradapter:viewstatepageradapter:1.1.0")
