@@ -4,17 +4,14 @@ import android.content.Context
 import android.os.SystemClock
 import com.chuckerteam.chucker.api.ChuckerInterceptor
 import com.elvishew.xlog.XLog
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import com.google.gson.Gson
 import eu.kanade.tachiyomi.util.log.XLogLevel
 import okhttp3.Cache
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
-import okhttp3.internal.platform.Platform
 import okhttp3.logging.HttpLoggingInterceptor
-import uy.kohesive.injekt.injectLazy
 import java.io.File
 import java.util.concurrent.TimeUnit
-
 
 class NetworkHelper(val context: Context) {
 
@@ -58,18 +55,24 @@ class NetworkHelper(val context: Context) {
 
     private fun buildNonRateLimitedClient(): OkHttpClient {
         val builder = OkHttpClient.Builder()
-                .connectTimeout(20, TimeUnit.SECONDS)
-                .readTimeout(60, TimeUnit.SECONDS)
-                .cache(Cache(cacheDir, cacheSize))
-                .addInterceptor(ChuckerInterceptor(context))
-                .cookieJar(cookieManager)
+            .connectTimeout(20, TimeUnit.SECONDS)
+            .readTimeout(60, TimeUnit.SECONDS)
+            .cache(Cache(cacheDir, cacheSize))
+            .addInterceptor(ChuckerInterceptor(context))
+            .cookieJar(cookieManager)
         if (XLogLevel.shouldLog(XLogLevel.EXTREME)) {
+            val xLogger = XLog.tag("Network").nst().build()
             val logger: HttpLoggingInterceptor.Logger = object : HttpLoggingInterceptor.Logger {
                 override fun log(message: String) {
-                    XLog.d(message)
+                    try {
+                        Gson().fromJson(message, Any::class.java)
+                        XLog.tag("||NEKO-NETWORK-JSON").nst().json(message)
+                    } catch (ex: Exception) {
+                        XLog.tag("||NEKO-NETWORK").nb().nst().d(message)
+                    }
                 }
             }
-            builder.addInterceptor(HttpLoggingInterceptor(logger))
+            builder.addInterceptor(HttpLoggingInterceptor(logger).apply { level = HttpLoggingInterceptor.Level.BODY })
         }
 
         return builder.build()
@@ -79,22 +82,16 @@ class NetworkHelper(val context: Context) {
         return nonRateLimitedClient.newBuilder().addNetworkInterceptor(rateLimitInterceptor).build()
     }
 
-    fun rebuildClients() {
-        nonRateLimitedClient = buildNonRateLimitedClient()
-        client = buildRateLimitedClient()
-        cloudFlareClient = buildCloudFlareClient()
-    }
-
     fun buildCloudFlareClient(): OkHttpClient {
         return nonRateLimitedClient.newBuilder()
-                .addInterceptor(UserAgentInterceptor())
-                .addInterceptor(CloudflareInterceptor(context))
-                .build()
+            .addInterceptor(UserAgentInterceptor())
+            .addInterceptor(CloudflareInterceptor(context))
+            .build()
     }
 
-    var nonRateLimitedClient = buildNonRateLimitedClient()
+    val nonRateLimitedClient = buildNonRateLimitedClient()
 
-    var cloudFlareClient = buildCloudFlareClient()
+    val cloudFlareClient = buildCloudFlareClient()
 
-    var client = buildRateLimitedClient()
+    val client = buildRateLimitedClient()
 }

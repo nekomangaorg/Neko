@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.os.PowerManager
 import android.provider.Settings
 import android.widget.Toast
@@ -13,6 +14,7 @@ import androidx.preference.PreferenceScreen
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.list.listItemsMultiChoice
 import com.google.firebase.crashlytics.FirebaseCrashlytics
+import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.ChapterCache
 import eu.kanade.tachiyomi.data.cache.CoverCache
@@ -37,6 +39,7 @@ import rx.schedulers.Schedulers
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
+import java.io.File
 
 class SettingsAdvancedController : SettingsController() {
 
@@ -116,15 +119,22 @@ class SettingsAdvancedController : SettingsController() {
 
         intListPreference(activity) {
             key = PreferenceKeys.logLevel
-            title = "Log level"
-
+            titleRes = R.string.log_level
+            customSummary = context.getString(R.string.log_level_summary) + " Current value: " + XLogLevel.values()[prefs.logLevel()]
             entries = XLogLevel.values().map {
                 "${it.name.toLowerCase().capitalize()} (${it.description})"
             }
             entryValues = XLogLevel.values().indices.toList()
-            defaultValue = 0
+            defaultValue = if (BuildConfig.DEBUG) 2 else 0
 
-            summary = "Changing this can impact app performance. Force-restart app after changing. Current value: %s"
+            onChange {
+                val logFolder = File(
+                    Environment.getExternalStorageDirectory().absolutePath + File.separator +
+                        context.getString(R.string.app_name),
+                    "logs"
+                )
+                logFolder.deleteRecursively()
+            }
         }
 
         val pm = context.getSystemService(Context.POWER_SERVICE) as? PowerManager?
