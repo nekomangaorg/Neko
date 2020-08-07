@@ -5,30 +5,35 @@
   Neko
   <br>
 </h1>
----
+
 
 <p align="center">A Free, Open source unofficial manga reader for MangaDex</p>
 
----
+<p align="center">
+  Need info? Check the <a href="https://github.com/CarlosEsco/Neko/wiki">Wiki</a>
+  | Create an  <a href="https://github.com/CarlosEsco/Neko/issues/new/choose">issue</a>
+  | Check the <a href="https://github.com/CarlosEsco/Neko/projects/1">Project Board</a>
+</p>
+ <p align="center">
+    <a href="https://github.com/CarlosEsco/Neko/releases/latest"><img src="https://img.shields.io/github/release/CarlosEsco/Neko.svg?maxAge=3600&style=for-the-badge&label=download"/></a>
+    <img src="https://img.shields.io/github/workflow/status/carlosesco/neko/Android%20CI?style=for-the-badge" />
+    <img src="https://img.shields.io/github/stars/CarlosEsco/Neko.svg?style=for-the-badge" />
+    <a href="https://discord.gg/tachiyomi"><img src="https://img.shields.io/discord/349436576037732353.svg?style=for-the-badge"/></a>
 
-Need info? Check the [Wiki](https://github.com/CarlosEsco/Neko/wiki)
- | or [Create an issue](https://github.com/CarlosEsco/Neko/issues/new/choose)
- | For [Feature Request](https://github.com/CarlosEsco/Neko/issues/new?assignees=&labels=Feature+Request&template=feature_request.md&title=%5BFeature+Request%5D)
- | Check [our project Board](https://github.com/CarlosEsco/Neko/projects/1)
- 
- [![release](https://img.shields.io/github/release/CarlosEsco/Neko.svg?maxAge=3600&style=for-the-badge&label=download%20(autoupdate%20included))](https://github.com/CarlosEsco/Neko/releases)
- [![Stars](https://img.shields.io/github/stars/CarlosEsco/Neko.svg?style=for-the-badge)](https://github.com/CarlosEsco/Neko/releases)
- [![GitHub license](https://img.shields.io/github/license/CarlosEsco/Neko.svg?style=for-the-badge)](https://github.com/CarlosEsco/Neko/blob/master/LICENSE)
+ </p>
 
 ---
 
 ## Screenshots:
+<p align="center">
 <img src="./.github/readme-images/screenshots.png" align="center" height="350" />
+</p>
 
 ## About:
 This is a <a href="https://mangadex.org/">MangaDex</a> specific fork of <a href="https://github.com/inorichi/tachiyomi">Tachiyomi</a> and <a href="https://github.com/Jays2Kings/tachiyomiJ2K">TachiyomiJ2K</a>. This contains features specific to Mangadex
- that those versions cannot offer. It also features almost every feature that J2K has except for other sources, and local sources.
- Note: This fork is for Android 7+
+ that those versions cannot offer. It also features almost every feature that J2K has except for other sources,local sources, and editting manga.
+ 
+ **Note**: This fork is for Android 7+
 
 ## Specific features:
 - Supports native login to MangaDex and supports 2FA
@@ -37,6 +42,7 @@ This is a <a href="https://mangadex.org/">MangaDex</a> specific fork of <a href=
 - Manually sync of Manga to and from Mangadex follows list
 - Filter by Group in chapter list
 - Look at an additional source for missing chapters not hosted on MangaDex
+- Ability to attempt to merge missing chapters from MangaDex with another source
 - And many more
 
 
@@ -46,7 +52,7 @@ Get the app from our [releases page](https://github.com/CarlosEsco/Neko/releases
 ## Thanks
 - <a href="https://github.com/inorichi">Inorichi</a> for making the original Tachiyomi
 - <a href="https://github.com/Jays2Kings">Jays2Kings</a> for the wonderful new ui of J2K
-- <a href="https://github.com/goldbattle">GoldBattle for all the similar manga logic
+- <a href="https://github.com/goldbattle">GoldBattle</a> for all the similar manga logic
 
 ## License
 
