@@ -254,18 +254,35 @@ class DownloadManager(val context: Context) {
     }
 
     /**
+     * return the list of all manga folders
+     */
+    fun getMangaFolders(source: Source): List<UniFile> {
+        return provider.findSourceDir(source)?.listFiles()?.toList() ?: emptyList()
+    }
+
+    /**
      * Deletes the directories of chapters that were read or have no match
      *
      * @param chapters the list of chapters to delete.
      * @param manga the manga of the chapters.
      * @param source the source of the chapters.
      */
-    fun cleanupChapters(allChapters: List<Chapter>, manga: Manga, source: Source, removeRead: Boolean = true): Int {
+    fun cleanupChapters(allChapters: List<Chapter>, manga: Manga, source: Source, removeRead: Boolean, removeNonFavorite: Boolean): Int {
         var cleaned = 0
+
+        if (removeNonFavorite && !manga.favorite) {
+            val mangaFolder = provider.getMangaDir(manga, source)
+            cleaned += 1 + (mangaFolder.listFiles()?.size ?: 0)
+            mangaFolder.delete()
+            cache.removeManga(manga)
+            return cleaned
+        }
+
         val filesWithNoChapter = provider.findUnmatchedChapterDirs(allChapters, manga, source)
         cleaned += filesWithNoChapter.size
         cache.removeFolders(filesWithNoChapter.mapNotNull { it.name }, manga)
         filesWithNoChapter.forEach { it.delete() }
+
         if (removeRead) {
             val readChapters = allChapters.filter { it.read }
             val readChapterDirs = provider.findChapterDirs(readChapters, manga, source)
@@ -275,7 +292,14 @@ class DownloadManager(val context: Context) {
         }
 
         if (cache.getDownloadCount(manga) == 0) {
-            provider.findChapterDirs(allChapters, manga, source).firstOrNull()?.parentFile?.delete() // Delete manga directory if empty
+            val mangaFolder = provider.getMangaDir(manga, source)
+            val size = mangaFolder.listFiles()?.size ?: 0
+            if (size == 0) {
+                mangaFolder.delete()
+                cache.removeManga(manga)
+            } else {
+                Timber.e("Cache and download folder doesn't match for %s", manga.title)
+            }
         }
         return cleaned
     }

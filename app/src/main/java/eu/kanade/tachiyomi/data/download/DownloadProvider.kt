@@ -5,7 +5,6 @@ import android.net.Uri
 import androidx.core.text.isDigitsOnly
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -113,7 +112,8 @@ class DownloadProvider(private val context: Context) {
         val mangaDir = findMangaDir(manga, source) ?: return emptyList()
 
         val idHashSet = chapters.map { it.mangadex_chapter_id }.toHashSet()
-        val chapterNameHashSet = chapters.map { (it as Chapter).name }.toHashSet()
+        val chapterNameHashSet = chapters.map { it.name }.toHashSet()
+        val scanalatorNameHashSet = chapters.map { getJ2kChapterName(it) }.toHashSet()
 
         return mangaDir.listFiles()!!.asList().filter { file ->
             file.name?.let { fileName ->
@@ -121,53 +121,15 @@ class DownloadProvider(private val context: Context) {
                 if (mangadexId.isNotEmpty() && mangadexId.isDigitsOnly()) {
                     return@filter idHashSet.contains(mangadexId)
                 } else {
-                    //dont need to check for j2k specific with scanlator because its format is contains file.name
-                    return@filter chapterNameHashSet.contains(file.name!!)
+                    if (scanalatorNameHashSet.contains(fileName)) {
+                        return@filter true
+                    }
+                    val afterScanlatorCheck = fileName.substringAfter("_")
+                    return@filter chapterNameHashSet.contains(fileName) || chapterNameHashSet.contains(afterScanlatorCheck)
                 }
             }
             return@filter false
         }
-        /*
-
-
-
-        return chapters.mapNotNull { chp ->
-            getValidChapterDirNames(chp).mapNotNull { mangaDir.findFile(it) }.firstOrNull()
-        }*/
-    }
-
-    /**
-     * Renames the chapter folders with id's and removes it + null scanlators
-     *
-     * @param chapters the chapters to query.
-     * @param manga the manga of the chapter.
-     * @param source the source of the chapter.
-     */
-    fun renameChapters() {
-        val db by injectLazy<DatabaseHelper>()
-        val sourceManager by injectLazy<SourceManager>()
-        val mangas = db.getLibraryMangas().executeAsBlocking()
-        mangas.forEach sfor@{ manga ->
-            val sourceId = manga.source
-            val source = sourceManager.get(sourceId) ?: return@sfor
-            val mangaDir = findMangaDir(manga, source) ?: return@sfor
-            mangaDir.listFiles()?.forEach {
-                val nameSplit = it.name?.split("_")?.toMutableList() ?: return@sfor
-                if (nameSplit.size > 2 && nameSplit.first().first().isDigit()) {
-                    nameSplit.removeAt(0)
-                    val newName = nameSplit.joinToString("_").removePrefix("null_")
-                    it.renameTo(newName)
-                }
-            }
-        }
-    }
-
-    fun renameMangaFolder(from: String, to: String, sourceId: Long) {
-        val sourceManager by injectLazy<SourceManager>()
-        val source = sourceManager.get(sourceId) ?: return
-        val sourceDir = findSourceDir(source)
-        val mangaDir = sourceDir?.findFile(DiskUtil.buildValidFilename(from))
-        mangaDir?.renameTo(to)
     }
 
     /**
@@ -184,24 +146,36 @@ class DownloadProvider(private val context: Context) {
     ): List<UniFile> {
         val mangaDir = findMangaDir(manga, source) ?: return emptyList()
         val idHashSet = chapters.map { it.mangadex_chapter_id }.toHashSet()
-        val chapterNameHashSet = chapters.map { (it as Chapter).name }.toHashSet()
+        val chapterNameHashSet = chapters.map { it.name }.toHashSet()
+        val scanalatorNameHashSet = chapters.map { getJ2kChapterName(it) }.toHashSet()
 
         return mangaDir.listFiles()!!.asList().filter { file ->
             file.name?.let { fileName ->
                 if (fileName.endsWith(Downloader.TMP_DIR_SUFFIX)) {
                     return@filter true
                 }
-                val mangadexId = fileName.substringAfterLast(" - ", "")
+                val mangadexId = fileName.substringAfterLast("- ", "")
                 if (mangadexId.isNotEmpty() && mangadexId.isDigitsOnly()) {
                     return@filter !idHashSet.contains(mangadexId)
                 } else {
-                    //dont need to check for j2k specific with scanlator because its format is contains file.name
-                    return@filter !chapterNameHashSet.contains(file.name!!)
+                    if (scanalatorNameHashSet.contains(fileName)) {
+                        return@filter false
+                    }
+                    val afterScanlatorCheck = fileName.substringAfter("_")
+                    return@filter !chapterNameHashSet.contains(fileName) && !chapterNameHashSet.contains(afterScanlatorCheck)
                 }
             }
             //everything else is considered true
             return@filter true
         }
+    }
+
+    fun renameMangaFolder(from: String, to: String, sourceId: Long) {
+        val sourceManager by injectLazy<SourceManager>()
+        val source = sourceManager.get(sourceId) ?: return
+        val sourceDir = findSourceDir(source)
+        val mangaDir = sourceDir?.findFile(DiskUtil.buildValidFilename(from))
+        mangaDir?.renameTo(to)
     }
 
     /**

@@ -12,6 +12,7 @@ import android.widget.Toast
 import androidx.preference.PreferenceScreen
 import androidx.preference.SwitchPreferenceCompat
 import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.list.listItemsMultiChoice
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import eu.kanade.tachiyomi.FileDebugTree
 import eu.kanade.tachiyomi.R
@@ -28,7 +29,6 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
-import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
@@ -107,11 +107,15 @@ class SettingsAdvancedController : SettingsController() {
 
             onClick { LibraryUpdateService.start(context, target = Target.TRACKING) }
         }
-        /*  preference {
-              titleRes = R.string.clean_up_downloaded_chapters
-              summaryRes = R.string.delete_unused_chapters
-              onClick { cleanupDownloads() }
-          }*/
+        preference {
+            titleRes = R.string.clean_up_downloaded_chapters
+            summaryRes = R.string.delete_unused_chapters
+            onClick {
+                val ctrl = CleanupDownloadsDialogController()
+                ctrl.targetController = this@SettingsAdvancedController
+                ctrl.showDialog(router)
+            }
+        }
 
         switchPreference {
             key = PreferenceKeys.debugLogger
@@ -154,18 +158,43 @@ class SettingsAdvancedController : SettingsController() {
         }
     }
 
-    private fun cleanupDownloads() {
+    class CleanupDownloadsDialogController() : DialogController() {
+        override fun onCreateDialog(savedViewState: Bundle?): Dialog {
+
+            return MaterialDialog(activity!!).show {
+
+                title(R.string.clean_up_downloaded_chapters)
+                    .listItemsMultiChoice(R.array.clean_up_downloads, disabledIndices = intArrayOf(0), initialSelection = intArrayOf(0, 1, 2)) { dialog, selections, items ->
+                        val deleteRead = selections.contains(1)
+                        val deleteNonFavorite = selections.contains(2)
+                        (targetController as? SettingsAdvancedController)?.cleanupDownloads(deleteRead, deleteNonFavorite)
+                    }
+                positiveButton(android.R.string.ok)
+                negativeButton(android.R.string.cancel)
+            }
+        }
+    }
+
+    private fun cleanupDownloads(removeRead: Boolean, removeNonFavorite: Boolean) {
         if (job?.isActive == true) return
         activity?.toast(R.string.starting_cleanup)
-        job = GlobalScope.launch(Dispatchers.IO, CoroutineStart.DEFAULT) {
-            val mangaList = db.getMangas().executeAsBlocking()
+        job = GlobalScope.launch(Dispatchers.IO) {
             val sourceManager: SourceManager = Injekt.get()
             val downloadManager: DownloadManager = Injekt.get()
             var foldersCleared = 0
-            for (manga in mangaList) {
+            val mangaList = db.getMangas().executeAsBlocking()
+            val source = sourceManager.getMangadex()
+            val mangaFolders = downloadManager.getMangaFolders(source)
+            for (mangaFolder in mangaFolders) {
+                val manga = mangaList.find { it.originalTitle == mangaFolder.name }
+                if (manga == null) {
+                    //download is orphaned delete it
+                    foldersCleared += 1 + (mangaFolder.listFiles()?.size ?: 0)
+                    mangaFolder.delete()
+                    continue
+                }
                 val chapterList = db.getChapters(manga).executeAsBlocking()
-                val source = sourceManager.getMangadex()
-                foldersCleared += downloadManager.cleanupChapters(chapterList, manga, source)
+                foldersCleared += downloadManager.cleanupChapters(chapterList, manga, source, removeRead, removeNonFavorite)
             }
             launchUI {
                 val activity = activity ?: return@launchUI
