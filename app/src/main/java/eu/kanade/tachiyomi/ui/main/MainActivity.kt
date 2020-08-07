@@ -128,7 +128,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
         try {
             WebView(applicationContext)
         } catch (e: Exception) {
-            XLog.e(e, "Exception when creating webview at start")
+            XLog.e("Exception when creating webview at start",e)
         }
         super.onCreate(savedInstanceState)
 

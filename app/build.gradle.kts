@@ -124,6 +124,7 @@ dependencies {
 
     // Network client
     implementation("com.squareup.okhttp3:okhttp:${Versions.OKHTTP}")
+    implementation("com.squareup.okhttp3:logging-interceptor:${Versions.OKHTTP}")
     implementation("com.squareup.okio:okio:2.6.0")
 
     // Chucker

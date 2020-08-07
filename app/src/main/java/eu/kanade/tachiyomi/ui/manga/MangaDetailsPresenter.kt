@@ -417,7 +417,7 @@ class MangaDetailsPresenter(
                             list.addAll(otherChapters)
                             Pair(result.first, list.toList())
                         } catch (e: Exception) {
-                            XLog.e(e, "error with mergedsource")
+                            XLog.e("error with mergedsource",e)
                             errorFromMerged = e
                             result
                         }
@@ -425,7 +425,7 @@ class MangaDetailsPresenter(
                         result
                     }
                 } catch (e: Exception) {
-                    XLog.e(e, "error with mangadex")
+                    XLog.e( "error with mangadex",e)
                     errorFromNetwork = e
                     Pair(null, emptyList<SChapter>())
                 }

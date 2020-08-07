@@ -15,17 +15,19 @@ import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
+import eu.kanade.tachiyomi.util.log.XLogSetup
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.InjektScope
 import uy.kohesive.injekt.injectLazy
 import uy.kohesive.injekt.registry.default.DefaultRegistrar
+import kotlin.time.ExperimentalTime
 
 open class App : Application(), LifecycleObserver {
 
+    @ExperimentalTime
     override fun onCreate() {
         super.onCreate()
-        
-
+        XLogSetup(this)
         Injekt = InjektScope(DefaultRegistrar())
         Injekt.importModule(AppModule(this))
 

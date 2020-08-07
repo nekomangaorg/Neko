@@ -16,49 +16,52 @@ import kotlin.time.ExperimentalTime
 import kotlin.time.days
 
 @ExperimentalTime
-fun XLogSetup(context: Context) {
-    XLogLevel.init(context)
+class XLogSetup(context: Context) {
+    init {
+        XLogLevel.init(context)
 
-    val logLevel = if (XLogLevel.shouldLog(XLogLevel.EXTRA)) {
-        LogLevel.ALL
-    } else {
-        LogLevel.WARN
+        val logLevel = if (XLogLevel.shouldLog(XLogLevel.EXTRA)) {
+            LogLevel.ALL
+        } else {
+            LogLevel.WARN
+        }
+
+        val logConfig = LogConfiguration.Builder()
+                .logLevel(logLevel)
+                .t()
+                .st(2)
+                .nb()
+                .build()
+
+        val printers = mutableListOf<Printer>(AndroidPrinter())
+
+        val logFolder = File(
+                context.filesDir,
+                "logs"
+        )
+
+        printers += FilePrinter
+                .Builder(logFolder.absolutePath)
+                .fileNameGenerator(object : DateFileNameGenerator() {
+                    override fun generateFileName(logLevel: Int, timestamp: Long): String {
+                        return super.generateFileName(logLevel, timestamp) + "-${BuildConfig.BUILD_TYPE}"
+                    }
+                })
+                .cleanStrategy(FileLastModifiedCleanStrategy(7.days.inMilliseconds.toLong()))
+                .backupStrategy(NeverBackupStrategy())
+                .build()
+
+        // Install Crashlytics in prod
+        if (!BuildConfig.DEBUG) {
+            printers += CrashlyticsPrinter(LogLevel.ERROR)
+        }
+
+        XLog.init(
+                logConfig,
+                *printers.toTypedArray()
+        )
+
+        XLog.d("Application booting...")
+
     }
-
-    val logConfig = LogConfiguration.Builder()
-        .logLevel(logLevel)
-        .t()
-        .st(2)
-        .nb()
-        .build()
-
-    val printers = mutableListOf<Printer>(AndroidPrinter())
-
-    val logFolder = File(
-        context.filesDir,
-        "logs"
-    )
-
-    printers += FilePrinter
-        .Builder(logFolder.absolutePath)
-        .fileNameGenerator(object : DateFileNameGenerator() {
-            override fun generateFileName(logLevel: Int, timestamp: Long): String {
-                return super.generateFileName(logLevel, timestamp) + "-${BuildConfig.BUILD_TYPE}"
-            }
-        })
-        .cleanStrategy(FileLastModifiedCleanStrategy(7.days.inMilliseconds.toLong()))
-        .backupStrategy(NeverBackupStrategy())
-        .build()
-
-    // Install Crashlytics in prod
-    if (!BuildConfig.DEBUG) {
-        printers += CrashlyticsPrinter(LogLevel.ERROR)
-    }
-
-    XLog.init(
-        logConfig,
-        *printers.toTypedArray()
-    )
-
-    XLog.d("Application booting...")
 }

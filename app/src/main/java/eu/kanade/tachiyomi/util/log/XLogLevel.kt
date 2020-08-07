@@ -1,7 +1,8 @@
 package eu.kanade.tachiyomi.util.log
 
 import android.content.Context
-import android.preference.PreferenceManager
+import androidx.preference.PreferenceManager
+import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 
 enum class XLogLevel(val description: String) {
@@ -16,7 +17,7 @@ enum class XLogLevel(val description: String) {
 
         fun init(context: Context) {
             curLogLevel = PreferenceManager.getDefaultSharedPreferences(context)
-                .getInt(PreferenceKeys.logLevel, 0)
+                .getInt(PreferenceKeys.logLevel, if(BuildConfig.DEBUG) 2 else 0)
         }
 
         fun shouldLog(requiredLogLevel: XLogLevel): Boolean {

@@ -137,7 +137,7 @@ open class MangaDex() : HttpSource() {
                 manga.thumbnail_url = cover
             }
         } catch (e: Exception) {
-            XLog.e(e, "exception getting latest covers")
+            XLog.e("exception getting latest covers",e)
         }
         return manga
     }
@@ -152,7 +152,7 @@ open class MangaDex() : HttpSource() {
                 pair.first.thumbnail_url = cover
             }
         } catch (e: Exception) {
-            XLog.e(e, "exception getting latest covers")
+            XLog.e("exception getting latest covers",e)
         }
 
         return pair

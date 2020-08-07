@@ -385,7 +385,7 @@ class LibraryUpdateService(
                     val chapters = sourceManager.getMergeSource().fetchChapters(it)
                     fetchedChapters.addAll(chapters)
                 } catch (e: Exception) {
-                    XLog.e(e, "Error with mergedsource")
+                    XLog.e("Error with mergedsource",e)
                 }
             }
 

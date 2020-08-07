@@ -43,6 +43,7 @@ import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 import com.elvishew.xlog.XLog
+import eu.kanade.tachiyomi.util.log.XLogLevel
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File
@@ -211,7 +212,7 @@ class ReaderPresenter(
                 list
             }
         }
-        if (Timber.asTree() is DebugTree) {
+        if (XLogLevel.shouldLog(XLogLevel.EXTRA)) {
             XLog.d("chapter items")
             chapterItems.forEach { XLog.d(it.chapter.name) }
         }

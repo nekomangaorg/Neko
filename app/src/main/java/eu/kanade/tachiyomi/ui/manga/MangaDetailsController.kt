@@ -103,6 +103,7 @@ import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.android.synthetic.main.manga_details_controller.*
 import kotlinx.android.synthetic.main.manga_header_item.*
 import com.elvishew.xlog.XLog
+import eu.kanade.tachiyomi.util.log.XLogLevel
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File
@@ -693,12 +694,11 @@ class MangaDetailsController : BaseController,
 
     private fun openChapter(chapter: Chapter) {
         val activity = activity ?: return
-        if (BuildConfig.DEBUG || presenter.preferences.debugLogEnabled()) {
+        if(XLogLevel.shouldLog(XLogLevel.EXTRA))
             XLog.d("-- Chapter List Before Reader --")
             for (chapter in presenter.chapters) {
                 XLog.d(chapter.chapterLog())
             }
-        }
         val intent = ReaderActivity.newIntent(activity, presenter.manga, chapter)
         startActivity(intent)
     }
