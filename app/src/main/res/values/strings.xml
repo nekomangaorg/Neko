@@ -487,6 +487,7 @@
     <string name="language">Language</string>
     <string name="system_default">System default</string>
     <string name="date_format">Date format</string>
+    <string name="manage_notifications">Manage notifications</string>
     <string name="check_for_updates">Check for updates</string>
     <string name="auto_check_for_app_versions">Automatically check for new app versions</string>
     <string name="secure_screen">Secure screen</string>
@@ -514,6 +515,9 @@
     <string name="what_should_backup">What do you want to backup?</string>
     <string name="restoring_backup">Restoring backup</string>
     <string name="restoring_progress">Restoring (%1$d/%2$d)</string>
+    <string name="backup_restore_progress">Backup restore</string>
+    <string name="backup_restore_complete">Backup restore complete</string>
+    <string name="group_backup_restore">Backup and restore</string>
     <plurals name="sources_missing">
         <item quantity="one">%d source missing</item>
         <item quantity="other">%d sources missing</item>
@@ -629,6 +633,7 @@
         queue. You can also double tap or press and hold for quicker access</string>
 
     <!-- Download Notification -->
+    <string name="group_downloader">Downloads</string>
     <string name="could_not_download_unexpected_error">Could not download chapter due to unexpected error</string>
     <string name="no_wifi_connection">No Wi-Fi connection available</string>
     <string name="no_network_connection">No network connection available</string>

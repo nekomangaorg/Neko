@@ -56,6 +56,7 @@ class DownloadService : Service() {
                 it.downloadStatusChanged(downloading ?: downloadManager.hasQueue())
             }
         }
+
         /**
          * Starts this service.
          *
@@ -118,8 +119,7 @@ class DownloadService : Service() {
      */
     override fun onCreate() {
         super.onCreate()
-        startForeground(Notifications.ID_DOWNLOAD_CHAPTER, getPlaceholderNotification())
-        downloadManager.setPlaceholder()
+        startForeground(Notifications.ID_DOWNLOAD_CHAPTER_PROGRESS, getPlaceholderNotification())
         runningRelay.call(true)
         subscriptions = CompositeSubscription()
         listenDownloaderState()
@@ -159,13 +159,14 @@ class DownloadService : Service() {
      */
     private fun listenNetworkChanges() {
         subscriptions += ReactiveNetwork.observeNetworkConnectivity(applicationContext)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ state -> onNetworkStateChanged(state)
-                }, {
-                    toast(R.string.could_not_download_chapter_can_try_again)
-                    stopSelf()
-                })
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({ state ->
+                onNetworkStateChanged(state)
+            }, {
+                toast(R.string.could_not_download_chapter_can_try_again)
+                stopSelf()
+            })
     }
 
     /**
@@ -186,7 +187,8 @@ class DownloadService : Service() {
             DISCONNECTED -> {
                 downloadManager.stopDownloads(getString(R.string.no_network_connection))
             }
-            else -> { /* Do nothing */ }
+            else -> { /* Do nothing */
+            }
         }
     }
 
@@ -217,7 +219,7 @@ class DownloadService : Service() {
     }
 
     private fun getPlaceholderNotification(): Notification {
-        return NotificationCompat.Builder(this, Notifications.CHANNEL_DOWNLOADER)
+        return NotificationCompat.Builder(this, Notifications.CHANNEL_DOWNLOADER_PROGRESS)
             .setContentTitle(getString(R.string.downloading))
             .build()
     }

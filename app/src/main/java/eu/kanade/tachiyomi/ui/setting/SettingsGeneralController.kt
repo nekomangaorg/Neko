@@ -1,5 +1,8 @@
 package eu.kanade.tachiyomi.ui.setting
 
+import android.content.Intent
+import android.os.Build
+import android.provider.Settings
 import androidx.biometric.BiometricManager
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.BuildConfig
@@ -47,6 +50,18 @@ class SettingsGeneralController : SettingsController() {
             }
             defaultValue = ""
             summary = "%s"
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            preference {
+                titleRes = R.string.manage_notifications
+                onClick {
+                    val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                        putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                    }
+                    startActivity(intent)
+                }
+            }
         }
 
         switchPreference {

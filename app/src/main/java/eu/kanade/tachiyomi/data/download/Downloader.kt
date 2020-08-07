@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.data.download
 
 import android.content.Context
 import android.webkit.MimeTypeMap
+import com.elvishew.xlog.XLog
 import com.hippo.unifile.UniFile
 import com.jakewharton.rxrelay.BehaviorRelay
 import com.jakewharton.rxrelay.PublishRelay
@@ -29,7 +30,6 @@ import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 import rx.subscriptions.CompositeSubscription
-import com.elvishew.xlog.XLog
 import java.io.File
 
 /**
@@ -127,7 +127,7 @@ class Downloader(
         } else {
             if (notifier.paused) {
                 if (queue.isEmpty()) {
-                    notifier.dismiss()
+                    notifier.dismissProgress()
                 } else {
                     notifier.paused = false
                     notifier.onDownloadPaused()
@@ -166,7 +166,7 @@ class Downloader(
                 .forEach { it.status = Download.NOT_DOWNLOADED }
         }
         queue.clear()
-        notifier.dismiss()
+        notifier.dismissProgress()
     }
 
     /**
@@ -185,7 +185,7 @@ class Downloader(
             if (DownloadService.isRunning(context)) DownloadService.stop(context)
             stop()
         }
-        notifier.dismiss()
+        notifier.dismissProgress()
     }
 
     /**
@@ -499,10 +499,6 @@ class Downloader(
         if (areAllDownloadsFinished()) {
             DownloadService.stop(context)
         }
-    }
-
-    fun setPlaceholder() {
-        notifier.setPlaceholder(queue.firstOrNull())
     }
 
     /**

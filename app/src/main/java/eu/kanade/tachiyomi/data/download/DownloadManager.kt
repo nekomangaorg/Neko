@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.data.download
 
 import android.content.Context
+import com.elvishew.xlog.XLog
 import com.hippo.unifile.UniFile
 import com.jakewharton.rxrelay.BehaviorRelay
 import eu.kanade.tachiyomi.data.database.models.Chapter
@@ -11,7 +12,6 @@ import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Page
 import rx.Observable
-import com.elvishew.xlog.XLog
 import uy.kohesive.injekt.injectLazy
 
 /**
@@ -77,11 +77,7 @@ class DownloadManager(val context: Context) {
     fun stopDownloads(reason: String? = null) {
         downloader.stop(reason)
     }
-
-    fun setPlaceholder() {
-        downloader.setPlaceholder()
-    }
-
+    
     /**
      * Tells the downloader to pause downloads.
      */

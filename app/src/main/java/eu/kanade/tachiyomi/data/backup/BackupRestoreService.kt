@@ -10,6 +10,7 @@ import android.os.IBinder
 import android.os.PowerManager
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
+import com.elvishew.xlog.XLog
 import com.github.salomonbrys.kotson.fromJson
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
@@ -42,7 +43,6 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import com.elvishew.xlog.XLog
 import uy.kohesive.injekt.injectLazy
 import java.io.File
 import java.text.SimpleDateFormat
@@ -356,7 +356,7 @@ class BackupRestoreService : Service() {
      * keep a partially constructed progress notification for resuse
      */
     private val progressNotification by lazy {
-        NotificationCompat.Builder(this, Notifications.CHANNEL_BACKUP_RESTORE)
+        NotificationCompat.Builder(this, Notifications.CHANNEL_BACKUP_RESTORE_PROGRESS)
             .setContentTitle(getString(R.string.neko_app_name))
             .setSmallIcon(R.drawable.ic_neko_notification)
             .setOngoing(true)
@@ -443,7 +443,7 @@ class BackupRestoreService : Service() {
 
         val restoreString = content.joinToString("\n")
 
-        val resultNotification = NotificationCompat.Builder(this, Notifications.CHANNEL_BACKUP_RESTORE)
+        val resultNotification = NotificationCompat.Builder(this, Notifications.CHANNEL_BACKUP_RESTORE_COMPLETE)
             .setContentTitle(getString(R.string.restore_completed))
             .setContentText(restoreString)
             .setStyle(NotificationCompat.BigTextStyle().bigText(restoreString))
@@ -465,13 +465,13 @@ class BackupRestoreService : Service() {
      *
      */
     private fun showErrorNotification(errorMessage: String) {
-        val resultNotification = NotificationCompat.Builder(this, Notifications.CHANNEL_BACKUP_RESTORE)
+        val resultNotification = NotificationCompat.Builder(this, Notifications.CHANNEL_BACKUP_RESTORE_ERROR)
             .setContentTitle(getString(R.string.restore_error))
             .setContentText(errorMessage)
             .setSmallIcon(R.drawable.ic_error_24dp)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setColor(ContextCompat.getColor(this, R.color.md_red_500))
-        notificationManager.notify(Notifications.ID_RESTORE_ERROR, resultNotification.build())
+        notificationManager.notify(Notifications.ID_BACKUP_RESTORE_ERROR, resultNotification.build())
     }
 
     /**Get the PendingIntent for the error log

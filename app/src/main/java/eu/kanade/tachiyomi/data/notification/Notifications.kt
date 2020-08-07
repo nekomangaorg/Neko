@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.data.notification
 
 import android.app.NotificationChannel
+import android.app.NotificationChannelGroup
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
@@ -29,9 +30,12 @@ object Notifications {
     /**
      * Notification channel and ids used by the downloader.
      */
-    const val CHANNEL_DOWNLOADER = "downloader_channel"
-    const val ID_DOWNLOAD_CHAPTER = -201
+    private const val GROUP_DOWNLOADER = "group_downloader"
+    const val CHANNEL_DOWNLOADER_PROGRESS = "downloader_progress_channel"
+    const val ID_DOWNLOAD_CHAPTER_PROGRESS = -201
+    const val CHANNEL_DOWNLOADER_ERROR = "downloader_error_channel"
     const val ID_DOWNLOAD_CHAPTER_ERROR = -202
+    const val CHANNEL_DOWNLOADER_COMPLETE = "downloader_complete_channel"
     const val ID_DOWNLOAD_CHAPTER_COMPLETE = -203
 
     /**
@@ -51,12 +55,15 @@ object Notifications {
     /**
      * Notification channel and ids used for backup and restore.
      */
-    const val CHANNEL_BACKUP_RESTORE = "backup_restore_channel"
-    const val ID_RESTORE_PROGRESS = -501
-    const val ID_RESTORE_COMPLETE = -502
-    const val ID_BACKUP_PROGRESS = -502
-    const val ID_BACKUP_COMPLETE = -503
-    const val ID_RESTORE_ERROR = -504
+    private const val GROUP_BACKUP_RESTORE = "group_backup_restore"
+    const val CHANNEL_BACKUP_RESTORE_PROGRESS = "backup_restore_progress_channel"
+    const val ID_BACKUP_PROGRESS = -501
+    const val ID_RESTORE_PROGRESS = -503
+    const val CHANNEL_BACKUP_RESTORE_COMPLETE = "backup_restore_complete_channel"
+    const val ID_BACKUP_COMPLETE = -502
+    const val ID_RESTORE_COMPLETE = -504
+    const val CHANNEL_BACKUP_RESTORE_ERROR = "backup_restore_complete_channel"
+    const val ID_BACKUP_RESTORE_ERROR = -505
 
     /**
      * Creates the notification channels introduced in Android Oreo.
@@ -65,7 +72,11 @@ object Notifications {
      */
     fun createChannels(context: Context) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
-
+        listOf(
+            NotificationChannelGroup(GROUP_BACKUP_RESTORE, context.getString(R.string.group_backup_restore)),
+            NotificationChannelGroup(GROUP_DOWNLOADER, context.getString(R.string.group_downloader))
+        ).forEach(context.notificationManager::createNotificationChannelGroup)
+        
         val channels = listOf(NotificationChannel(
             CHANNEL_COMMON,
             context.getString(R.string.common),
@@ -77,22 +88,52 @@ object Notifications {
         ).apply {
             setShowBadge(false)
         }, NotificationChannel(
-            CHANNEL_DOWNLOADER,
-            context.getString(R.string.downloads),
+            CHANNEL_DOWNLOADER_PROGRESS, context.getString(R.string.downloads),
             NotificationManager.IMPORTANCE_LOW
         ).apply {
+            group = GROUP_DOWNLOADER
             setShowBadge(false)
         },
+            NotificationChannel(
+                CHANNEL_DOWNLOADER_COMPLETE, context.getString(R.string.download_complete),
+                NotificationManager.IMPORTANCE_LOW
+            ).apply {
+                group = GROUP_DOWNLOADER
+                setShowBadge(false)
+            },
+            NotificationChannel(
+                CHANNEL_DOWNLOADER_ERROR, context.getString(R.string.download_error),
+                NotificationManager.IMPORTANCE_LOW
+            ).apply {
+                group = GROUP_DOWNLOADER
+                setShowBadge(false)
+            },
             NotificationChannel(
                 CHANNEL_NEW_CHAPTERS,
                 context.getString(R.string.new_chapters),
                 NotificationManager.IMPORTANCE_DEFAULT
             ), NotificationChannel(
-                CHANNEL_BACKUP_RESTORE,
-                context.getString(R.string.restoring_backup),
+                CHANNEL_BACKUP_RESTORE_PROGRESS, context.getString(R.string.backup_restore_progress),
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
+                group = GROUP_BACKUP_RESTORE
                 setShowBadge(false)
+            },
+            NotificationChannel(
+                CHANNEL_BACKUP_RESTORE_COMPLETE, context.getString(R.string.backup_restore_complete),
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                group = GROUP_BACKUP_RESTORE
+                setShowBadge(false)
+                setSound(null, null)
+            },
+            NotificationChannel(
+                CHANNEL_BACKUP_RESTORE_ERROR, context.getString(R.string.restore_error),
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                group = GROUP_BACKUP_RESTORE
+                setShowBadge(false)
+                setSound(null, null)
             },
             NotificationChannel(
                 CHANNEL_SIMILAR,
@@ -101,8 +142,6 @@ object Notifications {
             ).apply {
                 setShowBadge(false)
             }
-
-        )
-        context.notificationManager.createNotificationChannels(channels)
+        ).forEach(context.notificationManager::createNotificationChannel)
     }
 }

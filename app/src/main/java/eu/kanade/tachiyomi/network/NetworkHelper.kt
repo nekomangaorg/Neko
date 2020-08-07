@@ -61,7 +61,6 @@ class NetworkHelper(val context: Context) {
             .addInterceptor(ChuckerInterceptor(context))
             .cookieJar(cookieManager)
         if (XLogLevel.shouldLog(XLogLevel.EXTREME)) {
-            val xLogger = XLog.tag("Network").nst().build()
             val logger: HttpLoggingInterceptor.Logger = object : HttpLoggingInterceptor.Logger {
                 override fun log(message: String) {
                     try {
