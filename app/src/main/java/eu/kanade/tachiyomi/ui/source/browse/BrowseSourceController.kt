@@ -237,13 +237,12 @@ open class BrowseSourceController(bundle: Bundle) :
 
         // Show toggle library visibility
         menu.findItem(R.id.action_toggle_have_already).apply {
-            val icon = if (presenter.isLibraryVisible)
-                R.drawable.ic_eye_24dp
-            else
-                R.drawable.ic_eye_off_24dp
-            setIcon(icon)
+            title = if (presenter.isLibraryVisible) {
+                activity!!.getString(R.string.hide_library_manga)
+            } else {
+                activity!!.getString(R.string.show_library_manga)
+            }
         }
-
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
