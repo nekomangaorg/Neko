@@ -12,6 +12,11 @@
         app:showAsAction="collapseActionView|ifRoom" />
 
     <item
+        android:id="@+id/action_toggle_have_already"
+        android:title="@string/toggle_have_already"
+        app:showAsAction="ifRoom" />
+
+    <item
         android:id="@+id/action_display_mode"
         android:title="@string/display_as"
         app:showAsAction="ifRoom" />

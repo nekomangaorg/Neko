@@ -65,6 +65,8 @@ object PreferenceKeys {
 
     const val catalogueAsList = "pref_display_catalogue_as_list"
 
+    const val catalogueShowLibrary = "pref_display_catalogue_already_in_library"
+
     const val enabledLanguages = "source_languages"
 
     const val sourcesSort = "sources_sort"

@@ -126,6 +126,8 @@ class PreferencesHelper(val context: Context) {
 
     fun browseAsList() = rxPrefs.getBoolean(Keys.catalogueAsList, false)
 
+    fun browseShowLibrary() = rxPrefs.getBoolean(Keys.catalogueShowLibrary, true)
+
     fun enabledLanguages() = rxPrefs.getStringSet(Keys.enabledLanguages, setOf("en", Locale.getDefault().language))
 
     fun sourceSorting() = rxPrefs.getInteger(Keys.sourcesSort, 0)

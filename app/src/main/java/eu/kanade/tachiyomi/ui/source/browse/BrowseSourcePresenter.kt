@@ -91,7 +91,11 @@ open class BrowseSourcePresenter(
      * Whether the view is in list mode or not.
      */
     var isListMode: Boolean = false
-        private set
+
+    /**
+     * Whether the view shows manga that are already in the library
+     */
+    var isLibraryVisible: Boolean = true
 
     /**
      * Subscription for the pager.
@@ -118,7 +122,10 @@ open class BrowseSourcePresenter(
         }
 
         add(prefs.browseAsList().asObservable()
-            .subscribe { setDisplayMode(it) })
+                .subscribe { setDisplayMode(it) })
+
+        add(prefs.browseShowLibrary().asObservable()
+                .subscribe { setShowLibrary(it) })
 
         restartPager()
     }
@@ -158,7 +165,9 @@ open class BrowseSourcePresenter(
             .observeOn(Schedulers.io())
             .map { it.first to it.second.map { networkToLocalManga(it, sourceId) } }
             .doOnNext { initializeMangas(it.second) }
-            .map { it.first to it.second.map { BrowseSourceItem(it, browseAsList, sourceListType, isFollows) } }
+            .map { it.first to it.second.map { BrowseSourceItem(it, browseAsList, sourceListType, isFollows) }
+                    .filter { isLibraryVisible || !it.manga.favorite }
+            }
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeReplay({ view, (page, mangas) ->
                 if (isDeepLink) {
@@ -204,6 +213,16 @@ open class BrowseSourcePresenter(
     }
 
     /**
+     * Sets the library shown mode.
+     *
+     * @param showLibrary whether mangas in library should be shown
+     */
+    private fun setShowLibrary(showLibrary: Boolean) {
+        isLibraryVisible = showLibrary
+        restartPager()
+    }
+
+    /**
      * Subscribes to the initializer of manga details and updates the view if needed.
      */
     private fun subscribeToMangaInitializer() {
@@ -211,6 +230,7 @@ open class BrowseSourcePresenter(
         initializerSubscription = mangaDetailSubject.observeOn(Schedulers.io())
             .flatMap { Observable.from(it) }
             .filter { it.thumbnail_url == null && !it.initialized }
+            .filter { isLibraryVisible || !it.favorite }
             .concatMap { getMangaDetailsObservable(it) }
             .onBackpressureBuffer()
             .observeOn(AndroidSchedulers.mainThread())
@@ -297,6 +317,13 @@ open class BrowseSourcePresenter(
      */
     fun swapDisplayMode() {
         prefs.browseAsList().set(!isListMode)
+    }
+
+    /**
+     * Changes the active library show mode mode.
+     */
+    fun swapLibraryVisibility() {
+        prefs.browseShowLibrary().set(!isLibraryVisible)
     }
 
     /**

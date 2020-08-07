@@ -234,12 +234,23 @@ open class BrowseSourceController(bundle: Bundle) :
                 R.drawable.ic_view_list_24dp
             setIcon(icon)
         }
+
+        // Show toggle library visibility
+        menu.findItem(R.id.action_toggle_have_already).apply {
+            val icon = if (presenter.isLibraryVisible)
+                R.drawable.ic_eye_24dp
+            else
+                R.drawable.ic_eye_off_24dp
+            setIcon(icon)
+        }
+
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_search -> item.expandActionView()
             R.id.action_display_mode -> swapDisplayMode()
+            R.id.action_toggle_have_already -> swapLibraryVisibility()
             R.id.action_open_in_web_view -> openInWebView()
             else -> return super.onOptionsItemSelected(item)
         }
@@ -464,6 +475,14 @@ open class BrowseSourceController(bundle: Bundle) :
             }
             presenter.initializeMangas(mangas)
         }
+    }
+
+    /**
+     * Toggle if our library is already seen
+     */
+    fun swapLibraryVisibility() {
+        presenter.swapLibraryVisibility()
+        activity?.invalidateOptionsMenu()
     }
 
     /**
