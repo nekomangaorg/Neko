@@ -4,12 +4,15 @@
         changeDate=""
         versionName="v2.1.1.5">
         <changelogtext>NOTICE!!! The process of similar manga has changed please manually pull an update in the similar settings</changelogtext>
-        <changelogtext>New: Made merge source search more lenient</changelogtext>
-        <changelogtext>Fix: Downloads not loading for merged chapters</changelogtext>
-        <changelogtext>Fix: crash when manhua/manhwa from MangaDex had entries without chapter numbers</changelogtext>
-        <changelogtext>Fix: Disabled comments in reader sheet for merged chapters</changelogtext>
-        <changelogtext>Fix: resume button being weird with merged chapters</changelogtext>
-        <changelogtext>Fix: moved around some internal code</changelogtext>
+        <changelogtext>New: Download unread, mark as read, mark as unread from library</changelogtext>
+        <changelogtext>New: tapping Manga description when expanded will collapse it</changelogtext>
+        <changelogtext>New: Ability to hide library manga in browse and similar views</changelogtext>
+        <changelogtext>New: Notification channels have been separated and now you can disable most individual notification in android O+ and there is a setting</changelogtext>
+        <changelogtext>New: Downloads are renamed when the chapter name changes</changelogtext>
+        <changelogtext>New: Downloads for MangaDex are a little smarter and if a folder doesn't match it checks the chapter id on the folder</changelogtext>
+        <changelogtext>Fix: File writing bug for debug logs</changelogtext>
+        <changelogtext>Fix: ReEnable clean downloads and now provide options for what to download</changelogtext>
+        <changelogtext>Fix: other bug fixes</changelogtext>
     </changelogversion>
     <changelogversion
         changeDate=""

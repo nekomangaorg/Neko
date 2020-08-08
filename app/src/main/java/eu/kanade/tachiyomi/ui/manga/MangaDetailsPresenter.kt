@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.manga
 
 import android.app.Application
 import android.graphics.Bitmap
+import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -46,7 +47,6 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import com.elvishew.xlog.XLog
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -303,7 +303,7 @@ class MangaDetailsPresenter(
     }
 
     fun anyRead(): Boolean = chapters.any { it.read }
-    fun hasBookmark(): Boolean = chapters.any { it.bookmark }
+    fun hasBookmarks(): Boolean = chapters.any { it.bookmark }
     fun hasDownloads(): Boolean = chapters.any { it.isDownloaded }
 
     fun getUnreadChaptersSorted() =
@@ -417,7 +417,7 @@ class MangaDetailsPresenter(
                             list.addAll(otherChapters)
                             Pair(result.first, list.toList())
                         } catch (e: Exception) {
-                            XLog.e("error with mergedsource",e)
+                            XLog.e("error with mergedsource", e)
                             errorFromMerged = e
                             result
                         }
@@ -425,7 +425,7 @@ class MangaDetailsPresenter(
                         result
                     }
                 } catch (e: Exception) {
-                    XLog.e( "error with mangadex",e)
+                    XLog.e("error with mangadex", e)
                     errorFromNetwork = e
                     Pair(null, emptyList<SChapter>())
                 }

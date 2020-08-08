@@ -891,7 +891,10 @@ class LibraryPresenter(
                 mangaList.forEach {
                     withContext(Dispatchers.IO) {
                         val chapters = db.getChapters(it).executeAsBlocking()
-                        chapters.forEach { it.read = markRead }
+                        chapters.forEach {
+                            it.read = markRead
+                            it.last_page_read = 0
+                        }
                         db.updateChaptersProgress(chapters).executeAsBlocking()
                         if (markRead && preferences.removeAfterMarkedAsRead()) {
                             downloadManager.deleteChapters(chapters, it, source)

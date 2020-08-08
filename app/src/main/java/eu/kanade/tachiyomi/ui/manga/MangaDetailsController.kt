@@ -45,11 +45,11 @@ import com.afollestad.materialdialogs.checkbox.checkBoxPrompt
 import com.afollestad.materialdialogs.checkbox.isCheckPromptChecked
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
+import com.elvishew.xlog.XLog
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.SelectableAdapter
-import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
@@ -82,6 +82,7 @@ import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.ui.similar.SimilarController
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
+import eu.kanade.tachiyomi.util.log.XLogLevel
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.ThemeUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
@@ -102,8 +103,6 @@ import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.android.synthetic.main.manga_details_controller.*
 import kotlinx.android.synthetic.main.manga_header_item.*
-import com.elvishew.xlog.XLog
-import eu.kanade.tachiyomi.util.log.XLogLevel
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File
@@ -694,11 +693,11 @@ class MangaDetailsController : BaseController,
 
     private fun openChapter(chapter: Chapter) {
         val activity = activity ?: return
-        if(XLogLevel.shouldLog(XLogLevel.EXTRA))
+        if (XLogLevel.shouldLog(XLogLevel.EXTRA))
             XLog.d("-- Chapter List Before Reader --")
-            for (chapter in presenter.chapters) {
-                XLog.d(chapter.chapterLog())
-            }
+        for (chapter in presenter.chapters) {
+            XLog.d(chapter.chapterLog())
+        }
         val intent = ReaderActivity.newIntent(activity, presenter.manga, chapter)
         startActivity(intent)
     }
@@ -714,7 +713,7 @@ class MangaDetailsController : BaseController,
         menu.findItem(R.id.action_remove_downloads).isVisible =
             presenter.hasDownloads() && !presenter.isLockedFromSearch
         menu.findItem(R.id.remove_non_bookmarked).isVisible =
-            presenter.hasBookmark() && !presenter.isLockedFromSearch
+            presenter.hasBookmarks() && !presenter.isLockedFromSearch
         val iconPrimary = view?.context?.getResourceColor(android.R.attr.textColorPrimary)
             ?: Color.BLACK
         menu.findItem(R.id.action_download).icon?.mutate()?.setTint(iconPrimary)
