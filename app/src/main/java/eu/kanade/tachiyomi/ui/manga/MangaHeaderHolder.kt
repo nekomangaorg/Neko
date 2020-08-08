@@ -52,7 +52,13 @@ class MangaHeaderHolder(
                 height = adapter.delegate.topCoverHeight()
             }
             more_button.setOnClickListener { expandDesc() }
-            manga_summary.setOnClickListener { expandDesc() }
+            manga_summary.setOnClickListener {
+                if (more_button_group.visibility == View.VISIBLE) {
+                    expandDesc()
+                } else {
+                    collapseDesc()
+                }
+            }
             manga_summary.setOnLongClickListener {
                 if (manga_summary.isTextSelectable && !adapter.recyclerView.canScrollVertically(-1)) {
                     (adapter.delegate as MangaDetailsController).swipe_refresh.isEnabled = false
@@ -60,8 +66,7 @@ class MangaHeaderHolder(
                 false
             }
             manga_summary.setOnTouchListener { _, event ->
-                if (event.actionMasked == MotionEvent.ACTION_UP) (adapter.delegate as MangaDetailsController).swipe_refresh.isEnabled =
-                    true
+                if (event.action == MotionEvent.ACTION_DOWN) view.requestFocus()
                 false
             }
             if (!itemView.resources.isLTR) {
@@ -117,8 +122,8 @@ class MangaHeaderHolder(
 
     private fun collapseDesc() {
         manga_summary.setTextIsSelectable(false)
+        manga_summary.isClickable = true
         manga_summary.maxLines = 3
-        manga_summary.setOnClickListener { expandDesc() }
         manga_genres_tags.gone()
         less_button.gone()
         more_button_group.visible()
