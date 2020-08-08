@@ -1303,6 +1303,17 @@ class LibraryController(
                         deleteMangasFromLibrary()
                     }.negativeButton(android.R.string.no).show()
             }
+            R.id.action_download_unread -> {
+                presenter.downloadUnread(selectedMangas.toList())
+            }
+            R.id.action_mark_as_read -> {
+                presenter.markReadStatus(selectedMangas.toList(), true)
+                destroyActionModeIfNeeded()
+            }
+            R.id.action_mark_as_unread -> {
+                presenter.markReadStatus(selectedMangas.toList(), false)
+                destroyActionModeIfNeeded()
+            }
             R.id.action_sync_to_dex -> {
                 presenter.syncMangaToDex(selectedMangas.toList())
                 destroyActionModeIfNeeded()

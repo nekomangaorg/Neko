@@ -870,6 +870,36 @@ class LibraryPresenter(
         getLibrary()
     }
 
+    /** download All unread */
+    fun downloadUnread(mangaList: List<Manga>) {
+        scope.launch {
+            withContext(Dispatchers.IO) {
+                mangaList.forEach {
+                    val chapters = db.getChapters(it).executeAsBlocking().filter { !it.read }
+                    downloadManager.downloadChapters(it, chapters)
+                }
+            }
+            if (preferences.downloadBadge().getOrDefault()) {
+                requestDownloadBadgesUpdate()
+            }
+        }
+    }
+
+    fun markReadStatus(mangaList: List<Manga>, markRead: Boolean) {
+        scope.launch {
+            withContext(Dispatchers.IO) {
+                mangaList.forEach {
+                    withContext(Dispatchers.IO) {
+                        val chapters = db.getChapters(it).executeAsBlocking()
+                        chapters.forEach { it.read = markRead }
+                        db.updateChaptersProgress(chapters).executeAsBlocking()
+                    }
+                }
+                getLibrary()
+            }
+        }
+    }
+
     /** sync selectd manga to mangadex follows */
     fun syncMangaToDex(mangaList: List<Manga>) {
         scope.launch {

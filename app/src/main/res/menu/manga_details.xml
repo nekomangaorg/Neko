@@ -36,12 +36,12 @@
     <item
         android:id="@+id/action_mark_all_as_read"
         android:icon="@drawable/ic_done_all_24dp"
-        android:title="@string/mark_all_as_read"
+        android:title="@string/mark_as_read"
         app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/action_mark_all_as_unread"
-        android:title="@string/mark_all_as_unread"
+        android:title="@string/mark_as_unread"
         app:showAsAction="never" />
 
     <item
