@@ -893,6 +893,9 @@ class LibraryPresenter(
                         val chapters = db.getChapters(it).executeAsBlocking()
                         chapters.forEach { it.read = markRead }
                         db.updateChaptersProgress(chapters).executeAsBlocking()
+                        if (markRead && preferences.removeAfterMarkedAsRead()) {
+                            downloadManager.deleteChapters(chapters, it, source)
+                        }
                     }
                 }
                 getLibrary()
