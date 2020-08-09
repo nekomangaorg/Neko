@@ -207,7 +207,7 @@ class MangaDetailsPresenter(
         if (isLockedFromSearch)
             return chapterList
 
-        val chapters = chapterFilter.filterChapters(chapterList, manga) as List<ChapterItem>
+        val chapters = chapterFilter.filterChapters(chapterList, manga)
 
         val sortFunction: (Chapter, Chapter) -> Int = when (manga.sorting) {
             Manga.SORTING_SOURCE -> when (sortDescending()) {
