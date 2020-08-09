@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.Resources
 import android.graphics.Color
-import android.net.Uri
 import android.view.Gravity
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
@@ -452,7 +451,7 @@ class WebtoonPageHolder(
         }
 
         val imageUrl = page?.imageUrl
-        if (imageUrl.orEmpty().startsWith("http")) {
+        if (imageUrl != null && imageUrl.startsWith("http")) {
             AppCompatButton(context).apply {
                 layoutParams = FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
                     setMargins(0, margins, 0, margins)

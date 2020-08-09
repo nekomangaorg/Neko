@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
@@ -175,7 +174,7 @@ class SettingsAdvancedController : SettingsController() {
                 for (mangaFolder in mangaFolders) {
                     val manga = sourceManga.find { downloadProvider.getMangaDirName(it) == mangaFolder.name }
                     if (manga == null) {
-                    //download is orphaned and not even in the db delete it if remove non favorited is enabled
+                    // download is orphaned and not even in the db delete it if remove non favorited is enabled
                         if (removeNonFavorite) {
                             foldersCleared += 1 + (mangaFolder.listFiles()?.size ?: 0)
                             mangaFolder.delete()

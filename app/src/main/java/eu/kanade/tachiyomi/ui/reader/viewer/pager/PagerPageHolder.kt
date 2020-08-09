@@ -7,7 +7,6 @@ import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.PointF
 import android.graphics.drawable.Drawable
-import android.net.Uri
 import android.view.GestureDetector
 import android.view.Gravity
 import android.view.MotionEvent
@@ -459,7 +458,7 @@ class PagerPageHolder(
         }
 
         val imageUrl = page.imageUrl
-        if (imageUrl.orEmpty().startsWith("http", true)) {
+        if (imageUrl != null && imageUrl.startsWith("http", true)) {
             PagerButton(context, viewer).apply {
                 layoutParams = LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
                     setMargins(margins, margins, margins, margins)

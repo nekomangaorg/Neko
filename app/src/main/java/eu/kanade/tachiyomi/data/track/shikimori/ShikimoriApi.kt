@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.data.track.shikimori
 
-import android.net.Uri
 import androidx.core.net.toUri
 import com.github.salomonbrys.kotson.array
 import com.github.salomonbrys.kotson.jsonObject
@@ -103,7 +102,7 @@ class ShikimoriApi(private val client: OkHttpClient, interceptor: ShikimoriInter
                 .appendQueryParameter("target_type", "Manga").build()
             val request = Request.Builder().url(url.toString()).get().build()
 
-            val urlMangas ="$apiUrl/mangas".toUri().buildUpon().appendPath(track.media_id.toString())
+            val urlMangas = "$apiUrl/mangas".toUri().buildUpon().appendPath(track.media_id.toString())
                     .build()
             val requestMangas = Request.Builder().url(urlMangas.toString()).get().build()
 

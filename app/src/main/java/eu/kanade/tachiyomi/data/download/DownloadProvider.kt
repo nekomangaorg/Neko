@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.data.download
 
 import android.content.Context
-import android.net.Uri
 import androidx.core.net.toUri
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.R
@@ -108,7 +107,6 @@ class DownloadProvider(private val context: Context) {
                 }
                 val afterScanlatorCheck = fileName.substringAfter("_")
                 return@filter chapterNameHashSet.contains(fileName) || chapterNameHashSet.contains(afterScanlatorCheck)
-
             }
             return@filter false
         }
@@ -164,21 +162,20 @@ class DownloadProvider(private val context: Context) {
         val chapterNameHashSet = chapters.map { it.name }.toHashSet()
         val scanalatorNameHashSet = chapters.map { getChapterDirName(it) }.toHashSet()
 
-
         return mangaDir.listFiles()!!.asList().filter { file ->
             file.name?.let { fileName ->
                 if (fileName.endsWith(Downloader.TMP_DIR_SUFFIX)) {
                     return@filter true
                 }
-                //check this first because this is the normal name format
+                // check this first because this is the normal name format
                 if (scanalatorNameHashSet.contains(fileName)) {
                     return@filter false
                 }
                 val afterScanlatorCheck = fileName.substringAfter("_")
-                //check both these dont exist because who knows how a chapter name is and it might not trim scanlator correctly
+                // check both these dont exist because who knows how a chapter name is and it might not trim scanlator correctly
                 return@filter !chapterNameHashSet.contains(fileName) && !chapterNameHashSet.contains(afterScanlatorCheck)
             }
-            //everything else is considered true
+            // everything else is considered true
             return@filter true
         }
     }

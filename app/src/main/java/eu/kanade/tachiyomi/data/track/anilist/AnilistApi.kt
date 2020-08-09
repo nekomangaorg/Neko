@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.data.track.anilist
 
-import android.net.Uri
 import androidx.core.net.toUri
 import com.github.salomonbrys.kotson.array
 import com.github.salomonbrys.kotson.get

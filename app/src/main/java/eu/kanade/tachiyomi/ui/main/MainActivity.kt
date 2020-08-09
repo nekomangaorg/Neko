@@ -23,7 +23,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.GestureDetectorCompat
 import androidx.lifecycle.lifecycleScope
-import com.afollestad.materialdialogs.MaterialDialog
 import com.bluelinelabs.conductor.Conductor
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.ControllerChangeHandler

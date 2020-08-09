@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.data.track.myanimelist
 
-import android.net.Uri
 import androidx.core.net.toUri
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackManager
