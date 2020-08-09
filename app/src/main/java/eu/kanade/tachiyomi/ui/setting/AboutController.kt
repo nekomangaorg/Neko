@@ -2,10 +2,11 @@ package eu.kanade.tachiyomi.ui.setting
 
 import android.app.Dialog
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
+import androidx.core.net.toUri
 import androidx.preference.PreferenceScreen
 import com.afollestad.materialdialogs.MaterialDialog
+import com.elvishew.xlog.XLog
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
@@ -24,7 +25,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import com.elvishew.xlog.XLog
 import uy.kohesive.injekt.injectLazy
 import java.text.DateFormat
 import java.text.ParseException
@@ -58,7 +58,7 @@ class AboutController : SettingsController() {
             val url = "https://tachiyomi.org"
             summary = url
             onClick {
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                val intent = Intent(Intent.ACTION_VIEW, url.toUri())
                 startActivity(intent)
             }
         }
@@ -68,7 +68,7 @@ class AboutController : SettingsController() {
             val url = "https://discord.gg/tachiyomi"
             summary = url
             onClick {
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                val intent = Intent(Intent.ACTION_VIEW, url.toUri())
                 startActivity(intent)
             }
         }
@@ -77,7 +77,7 @@ class AboutController : SettingsController() {
             val url = "https://github.com/CarlosEsco/Neko"
             summary = url
             onClick {
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                val intent = Intent(Intent.ACTION_VIEW, url.toUri())
                 startActivity(intent)
             }
         }
@@ -86,13 +86,13 @@ class AboutController : SettingsController() {
                 titleRes = R.string.whats_new
                 onClick {
                     val intent = Intent(
-                        Intent.ACTION_VIEW, Uri.parse(
-                            if (BuildConfig.DEBUG) {
-                                "https://github.com/CarlosEsco/Neko/commits/master"
-                            } else {
-                                "https://github.com/CarlosEsco/Neko/releases/tag/${BuildConfig.VERSION_NAME}"
-                            }
-                        )
+                        Intent.ACTION_VIEW,
+                        if (BuildConfig.DEBUG) {
+                            "https://github.com/CarlosEsco/Neko/commits/master"
+                        } else {
+                            "https://github.com/CarlosEsco/Neko/releases/tag/${BuildConfig.VERSION_NAME}"
+                        }.toUri()
+                    )
                     )
                     startActivity(intent)
                 }
@@ -174,17 +174,17 @@ class AboutController : SettingsController() {
 
         override fun onCreateDialog(savedViewState: Bundle?): Dialog {
             return MaterialDialog(activity!!)
-                    .title(R.string.new_version_available)
-                    .message(text = args.getString(BODY_KEY) ?: "")
-                    .positiveButton(R.string.download) {
-                        val appContext = applicationContext
-                        if (appContext != null) {
-                            // Start download
-                            val url = args.getString(URL_KEY) ?: ""
-                            UpdaterService.start(appContext, url)
-                        }
+                .title(R.string.new_version_available)
+                .message(text = args.getString(BODY_KEY) ?: "")
+                .positiveButton(R.string.download) {
+                    val appContext = applicationContext
+                    if (appContext != null) {
+                        // Start download
+                        val url = args.getString(URL_KEY) ?: ""
+                        UpdaterService.start(appContext, url)
                     }
-                    .negativeButton(R.string.ignore)
+                }
+                .negativeButton(R.string.ignore)
         }
 
         private companion object {

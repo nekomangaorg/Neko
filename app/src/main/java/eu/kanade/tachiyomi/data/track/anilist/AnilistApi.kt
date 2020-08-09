@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.data.track.anilist
 
-import android.net.Uri
+import androidx.core.net.toUri
+import com.elvishew.xlog.XLog
 import com.github.salomonbrys.kotson.array
 import com.github.salomonbrys.kotson.get
 import com.github.salomonbrys.kotson.jsonObject
@@ -19,7 +20,6 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
-import com.elvishew.xlog.XLog
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
 
@@ -232,7 +232,7 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
             return baseMangaUrl + mediaId
         }
 
-        fun authUrl() = Uri.parse("${baseUrl}oauth/authorize").buildUpon()
+        fun authUrl() = "${baseUrl}oauth/authorize".toUri().buildUpon()
             .appendQueryParameter("client_id", clientId)
             .appendQueryParameter("response_type", "token")
             .build()!!

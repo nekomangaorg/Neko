@@ -1,7 +1,7 @@
 package eu.kanade.tachiyomi.ui.setting
 
 import android.content.Intent
-import android.net.Uri
+import androidx.core.net.toUri
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.similar.SimilarUpdateJob
@@ -50,12 +50,12 @@ class SettingsSimilarController : SettingsController() {
             key = Keys.similarUpdateInterval
             titleRes = R.string.similar_update_fequency
             entriesRes = arrayOf(
-                    R.string.manual,
-                    R.string.daily,
-                    R.string.every_2_days,
-                    R.string.every_3_days,
-                    R.string.weekly,
-                    R.string.monthly
+                R.string.manual,
+                R.string.daily,
+                R.string.every_2_days,
+                R.string.every_3_days,
+                R.string.weekly,
+                R.string.monthly
             )
             entryValues = listOf(0, 1, 2, 3, 7, 30)
             defaultValue = 3
@@ -71,7 +71,7 @@ class SettingsSimilarController : SettingsController() {
             val url = "https://github.com/goldbattle/MangadexRecomendations"
             summary = context.resources.getString(R.string.similar_credit_message, url)
             onClick {
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                val intent = Intent(Intent.ACTION_VIEW, url.toUri())
                 startActivity(intent)
             }
             isIconSpaceReserved = true

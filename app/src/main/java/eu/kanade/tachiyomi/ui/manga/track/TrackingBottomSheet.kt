@@ -1,11 +1,12 @@
 package eu.kanade.tachiyomi.ui.manga.track
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.net.toUri
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.elvishew.xlog.XLog
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import eu.kanade.tachiyomi.R
@@ -17,7 +18,6 @@ import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
 import eu.kanade.tachiyomi.util.view.setEdgeToEdge
 import kotlinx.android.synthetic.main.tracking_bottom_sheet.*
-import com.elvishew.xlog.XLog
 
 class TrackingBottomSheet(private val controller: MangaDetailsController) : BottomSheetDialog
     (controller.activity!!, R.style.BottomSheetDialogTheme),
@@ -121,7 +121,7 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) : Bott
         if (track.tracking_url.isBlank()) {
             activity.toast(R.string.url_not_set_click_again)
         } else {
-            activity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(track.tracking_url)))
+            activity.startActivity(Intent(Intent.ACTION_VIEW, track.tracking_url.toUri()))
             controller.refreshTracker = position
         }
     }

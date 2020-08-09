@@ -7,7 +7,6 @@ import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.PointF
 import android.graphics.drawable.Drawable
-import android.net.Uri
 import android.view.GestureDetector
 import android.view.Gravity
 import android.view.MotionEvent
@@ -18,6 +17,7 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.net.toUri
 import coil.api.loadAny
 import coil.request.CachePolicy
 import com.davemorrissey.labs.subscaleview.ImageSource
@@ -107,10 +107,12 @@ class PagerPageHolder(
     init {
         addView(progressBar)
         observeStatus()
-        setBackgroundColor(when (val theme = viewer.config.readerTheme) {
-            3 -> Color.TRANSPARENT
-            else -> ThemeUtil.readerBackgroundColor(theme)
-        })
+        setBackgroundColor(
+            when (val theme = viewer.config.readerTheme) {
+                3 -> Color.TRANSPARENT
+                else -> ThemeUtil.readerBackgroundColor(theme)
+            }
+        )
     }
 
     /**
@@ -257,7 +259,8 @@ class PagerPageHolder(
                         if (page.bg != null && page.bgType == getBGType(
                                 viewer.config.readerTheme,
                                 context
-                            )) {
+                            )
+                        ) {
                             imageView.setImage(ImageSource.inputStream(openStream!!))
                             imageView.background = page.bg
                         }
@@ -295,9 +298,11 @@ class PagerPageHolder(
     private suspend fun setBG(bytesArray: ByteArray): Drawable {
         return withContext(Default) {
             val preferences by injectLazy<PreferencesHelper>()
-            ImageUtil.autoSetBackground(BitmapFactory.decodeByteArray(
-                bytesArray, 0, bytesArray.size
-            ), preferences.readerTheme().get() == 2, context)
+            ImageUtil.autoSetBackground(
+                BitmapFactory.decodeByteArray(
+                    bytesArray, 0, bytesArray.size
+                ), preferences.readerTheme().get() == 2, context
+            )
         }
     }
 
@@ -465,7 +470,7 @@ class PagerPageHolder(
                 }
                 setText(R.string.open_in_browser)
                 setOnClickListener {
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(imageUrl))
+                    val intent = Intent(Intent.ACTION_VIEW, imageUrl.toUri())
                     context.startActivity(intent)
                 }
 
@@ -484,7 +489,7 @@ class PagerPageHolder(
         this.loadAny(stream.readBytes()) {
             memoryCachePolicy(CachePolicy.DISABLED)
             diskCachePolicy(CachePolicy.DISABLED)
-                target(GifViewTarget(this@setImage, progressBar, decodeErrorLayout))
+            target(GifViewTarget(this@setImage, progressBar, decodeErrorLayout))
         }
     }
 

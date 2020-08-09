@@ -15,7 +15,6 @@ import android.content.res.Resources
 import android.graphics.drawable.Drawable
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
-import android.net.Uri
 import android.os.Build
 import android.os.PowerManager
 import android.view.View
@@ -28,6 +27,7 @@ import androidx.browser.customtabs.CustomTabsIntent
 import androidx.browser.customtabs.CustomTabsService.ACTION_CUSTOM_TABS_CONNECTION
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.typeface.IIcon
 import com.mikepenz.iconics.utils.colorInt
@@ -259,7 +259,7 @@ fun Context.isServiceRunning(serviceClass: Class<*>): Boolean {
  */
 fun Context.openInBrowser(url: String, forceBrowser: Boolean = false): Boolean {
     try {
-        val parsedUrl = Uri.parse(url)
+        val parsedUrl = url.toUri()
         val intent = CustomTabsIntent.Builder()
             .setToolbarColor(getResourceColor(R.attr.colorPrimaryVariant))
             .build()
@@ -282,7 +282,7 @@ fun Context.openInBrowser(url: String, forceBrowser: Boolean = false): Boolean {
 fun Context.getCustomTabsPackages(): ArrayList<ResolveInfo> {
     val pm = packageManager
     // Get default VIEW intent handler.
-    val activityIntent = Intent(Intent.ACTION_VIEW, Uri.parse("http://www.example.com"))
+    val activityIntent = Intent(Intent.ACTION_VIEW, "http://www.example.com".toUri())
     // Get all apps that can handle VIEW intents.
     val resolvedActivityList = pm.queryIntentActivities(activityIntent, 0)
     val packagesSupportingCustomTabs = ArrayList<ResolveInfo>()

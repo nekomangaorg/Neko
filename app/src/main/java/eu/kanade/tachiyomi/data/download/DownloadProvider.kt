@@ -1,8 +1,9 @@
 package eu.kanade.tachiyomi.data.download
 
 import android.content.Context
-import android.net.Uri
+import androidx.core.net.toUri
 import androidx.core.text.isDigitsOnly
+import com.elvishew.xlog.XLog
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
@@ -14,7 +15,6 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.storage.DiskUtil
-import com.elvishew.xlog.XLog
 import uy.kohesive.injekt.injectLazy
 
 /**
@@ -34,14 +34,14 @@ class DownloadProvider(private val context: Context) {
      * The root directory for downloads.
      */
     private var downloadsDir = preferences.downloadsDirectory().getOrDefault().let {
-        val dir = UniFile.fromUri(context, Uri.parse(it))
+        val dir = UniFile.fromUri(context, it.toUri())
         DiskUtil.createNoMediaFile(dir, context)
         dir
     }
 
     init {
         preferences.downloadsDirectory().asObservable().skip(1)
-            .subscribe { downloadsDir = UniFile.fromUri(context, Uri.parse(it)) }
+            .subscribe { downloadsDir = UniFile.fromUri(context, it.toUri()) }
     }
 
     /**

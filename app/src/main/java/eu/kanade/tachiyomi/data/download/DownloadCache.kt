@@ -1,7 +1,7 @@
 package eu.kanade.tachiyomi.data.download
 
 import android.content.Context
-import android.net.Uri
+import androidx.core.net.toUri
 import androidx.core.text.isDigitsOnly
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -60,7 +60,7 @@ class DownloadCache(
      */
     private fun getDirectoryFromPreference(): UniFile {
         val dir = preferences.downloadsDirectory().getOrDefault()
-        return UniFile.fromUri(context, Uri.parse(dir))
+        return UniFile.fromUri(context, dir.toUri())
     }
 
     /**

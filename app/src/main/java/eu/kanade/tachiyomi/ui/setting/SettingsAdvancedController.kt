@@ -4,12 +4,12 @@ import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.os.PowerManager
 import android.provider.Settings
 import android.widget.Toast
+import androidx.core.net.toUri
 import androidx.preference.PreferenceScreen
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.list.listItemsMultiChoice
@@ -147,7 +147,7 @@ class SettingsAdvancedController : SettingsController() {
                 if (!pm.isIgnoringBatteryOptimizations(packageName)) {
                     val intent = Intent().apply {
                         action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
-                        data = Uri.parse("package:$packageName")
+                        data = "package:$packageName".toUri()
                     }
                     startActivity(intent)
                 } else {
