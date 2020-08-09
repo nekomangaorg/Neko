@@ -2,6 +2,14 @@
 <changelog bulletedList="true">
     <changelogversion
         changeDate=""
+        versionName="v2.1.2.1">
+        <changelogtext>NOTICE!!! please read the 2.1.2 changelog below</changelogtext>
+        <changelogtext>Fix: Bug where reading a chapter was not deleting it when enabled</changelogtext>
+        <changelogtext>Fix: Clean up downloads in settings mistakenly deleting chapters for manga with special characters in name</changelogtext>
+        <changelogtext>Fix: Similar manga was showing library manga as not in library</changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
         versionName="v2.1.2">
         <changelogtext>NOTICE!!! The process of similar manga has changed please manually pull an update in the similar settings</changelogtext>
         <changelogtext>New: Download unread, mark as read, mark as unread from library</changelogtext>
