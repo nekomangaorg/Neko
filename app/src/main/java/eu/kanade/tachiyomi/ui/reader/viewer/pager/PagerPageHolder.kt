@@ -288,7 +288,9 @@ class PagerPageHolder(
             }
             // Keep the Rx stream alive to close the input stream only when unsubscribed
             .flatMap { Observable.never<Unit>() }
-            .doOnUnsubscribe { openStream?.close() }
+            .doOnUnsubscribe {
+                try { openStream?.close() } catch (e: Exception) {}
+            }
             .subscribe({}, {})
     }
 
