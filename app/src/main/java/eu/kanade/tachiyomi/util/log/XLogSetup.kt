@@ -17,7 +17,7 @@ import java.io.File
 import kotlin.time.ExperimentalTime
 import kotlin.time.days
 
-@ExperimentalTime
+@OptIn(ExperimentalTime::class)
 class XLogSetup(context: Context) {
     init {
         XLogLevel.init(context)

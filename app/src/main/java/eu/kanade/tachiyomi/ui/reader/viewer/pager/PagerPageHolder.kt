@@ -470,7 +470,7 @@ class PagerPageHolder(
                 }
                 setText(R.string.open_in_browser)
                 setOnClickListener {
-                    val intent = Intent(Intent.ACTION_VIEW, imageUrl.toUri())
+                    val intent = Intent(Intent.ACTION_VIEW, imageUrl!!.toUri())
                     context.startActivity(intent)
                 }
 

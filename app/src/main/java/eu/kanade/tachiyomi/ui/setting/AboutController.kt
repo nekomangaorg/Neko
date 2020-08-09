@@ -93,7 +93,6 @@ class AboutController : SettingsController() {
                             "https://github.com/CarlosEsco/Neko/releases/tag/${BuildConfig.VERSION_NAME}"
                         }.toUri()
                     )
-                    )
                     startActivity(intent)
                 }
             }

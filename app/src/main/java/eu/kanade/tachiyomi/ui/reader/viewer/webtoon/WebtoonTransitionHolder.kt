@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.ui.reader.viewer.webtoon
 
 import android.graphics.Color
 import android.graphics.Typeface
-import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.DynamicDrawableSpan
@@ -16,6 +15,8 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.widget.AppCompatButton
 import androidx.appcompat.widget.AppCompatTextView
+import androidx.core.text.bold
+import androidx.core.text.inSpans
 import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
@@ -99,33 +100,21 @@ class WebtoonTransitionHolder(
         val nextChapter = transition.to
 
         textView.text = if (nextChapter != null) {
-            SpannableStringBuilder().apply {
-                append(context.getString(R.string.finished))
-                setSpan(StyleSpan(Typeface.BOLD), 0, length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
-                append("\n${transition.from.chapter.name}\n\n")
-                val currSize = length
-                append(context.getString(R.string.next))
-                setSpan(StyleSpan(Typeface.BOLD), currSize, length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
-                append("\n${nextChapter.chapter.name}\n\n")
-            }
+            SpannableStringBuilder().append(context.getString(R.string.finished))
+                .bold { append("\n${transition.from.chapter.name}\n\n") }
+                .append(context.getString(R.string.next))
+                .bold { append("\n${nextChapter.chapter.name}\n\n") }
         } else {
             val d = context.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_account_tree)
-
-            SpannableStringBuilder().apply {
-                append(context.getString(R.string.theres_no_next_chapter))
-                append("\n\n")
-                append(context.getString(R.string.try_similar))
-                append("   ")
-                val finalSize = length
-                setSpan(
-                    ImageSpan(d, DynamicDrawableSpan.ALIGN_BOTTOM),
-                    finalSize - 1,
-                    finalSize,
-                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                )
-                append("\n")
-                append(context.getString(R.string.try_similar_after_click))
-            }
+            SpannableStringBuilder().append(context.getString(R.string.theres_no_next_chapter))
+                .append("\n\n")
+                .append(context.getString(R.string.try_similar))
+                .append("   ")
+                .inSpans(span = ImageSpan(d, DynamicDrawableSpan.ALIGN_BOTTOM)) {
+                    append("  ")
+                }
+                .append("\n")
+                .append(context.getString(R.string.try_similar_after_click))
         }
 
         if (nextChapter != null) {

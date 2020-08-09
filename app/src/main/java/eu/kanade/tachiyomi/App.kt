@@ -20,11 +20,9 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.InjektScope
 import uy.kohesive.injekt.injectLazy
 import uy.kohesive.injekt.registry.default.DefaultRegistrar
-import kotlin.time.ExperimentalTime
 
 open class App : Application(), LifecycleObserver {
 
-    @ExperimentalTime
     override fun onCreate() {
         super.onCreate()
         XLogSetup(this)
