@@ -26,6 +26,9 @@ import eu.kanade.tachiyomi.util.lang.chop
 import eu.kanade.tachiyomi.util.system.notification
 import eu.kanade.tachiyomi.util.system.notificationBuilder
 import eu.kanade.tachiyomi.util.system.notificationManager
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import okhttp3.internal.toImmutableMap
 import uy.kohesive.injekt.injectLazy
 import java.util.ArrayList
 
@@ -119,7 +122,10 @@ class LibraryUpdateNotifier(private val context: Context) {
      *
      * @param updates a list of manga with new updates.
      */
-    suspend fun showResultNotification(updates: Map<LibraryManga, Array<Chapter>>) {
+    fun showResultNotification(newUpdates: Map<LibraryManga, Array<Chapter>>) {
+        // create a copy of the list since it will be cleared by the time it is used
+        val updates = newUpdates.toImmutableMap()
+        GlobalScope.launch {
         val notifications = ArrayList<Pair<Notification, Int>>()
         updates.forEach {
             val manga = it.key
@@ -217,6 +223,7 @@ class LibraryUpdateNotifier(private val context: Context) {
                 notify(it.second, it.first)
             }
         }
+    }
     }
 
     /**
