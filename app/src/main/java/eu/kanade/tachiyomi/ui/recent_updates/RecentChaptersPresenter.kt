@@ -82,6 +82,15 @@ class RecentChaptersPresenter(
         }
     }
 
+    override fun updateDownloads() {
+        scope.launch {
+            setDownloadedChapters(chapters)
+            withContext(Dispatchers.Main) {
+                controller.onNextRecentChapters(chapters)
+            }
+        }
+    }
+
     override fun onUpdateManga(manga: LibraryManga) {
         getUpdates()
     }

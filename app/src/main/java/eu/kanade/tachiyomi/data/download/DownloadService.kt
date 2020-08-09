@@ -57,6 +57,7 @@ class DownloadService : Service() {
                 it.downloadStatusChanged(downloading ?: downloadManager.hasQueue())
             }
         }
+
         /**
          * Starts this service.
          *

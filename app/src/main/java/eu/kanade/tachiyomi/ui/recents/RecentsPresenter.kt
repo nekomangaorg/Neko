@@ -241,6 +241,15 @@ class RecentsPresenter(
         }
     }
 
+    override fun updateDownloads() {
+        scope.launch {
+            setDownloadedChapters(recentItems)
+            withContext(Dispatchers.Main) {
+                controller.showLists(recentItems)
+            }
+        }
+    }
+
     override fun onUpdateManga(manga: LibraryManga) {
         if (manga.id == null && !LibraryUpdateService.isRunning()) {
             scope.launch(Dispatchers.Main) { controller.setRefreshing(false) }
