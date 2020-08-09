@@ -65,7 +65,7 @@
     <string name="similar_manually_toast">Starting manual update</string>
     <string name="similar_manually_update_message">
         Download the latest similar manga database.
-        This is around 15mb in size and is updated daily.
+        This is around 9MB in size and is updated daily.
     </string>
     <string name="similar_update_fequency">Similar update frequency</string>
     <string name="similar_loading_percent">Updating similar manga (%1$d / %2$d updated)</string>

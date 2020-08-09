@@ -48,42 +48,41 @@ class AboutController : SettingsController() {
      */
     private val scope = CoroutineScope(Job() + Dispatchers.IO)
 
-    private val isUpdaterEnabled = BuildConfig.INCLUDE_UPDATER
-
     override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
         titleRes = R.string.about
 
-        preference {
-            titleRes = R.string.website
-            val url = "https://tachiyomi.org"
-            summary = url
-            onClick {
-                val intent = Intent(Intent.ACTION_VIEW, url.toUri())
-                startActivity(intent)
-            }
-        }
-
-        preference {
-            title = "Discord"
-            val url = "https://discord.gg/tachiyomi"
-            summary = url
-            onClick {
-                val intent = Intent(Intent.ACTION_VIEW, url.toUri())
-                startActivity(intent)
-            }
-        }
-        preference {
-            title = "Github"
-            val url = "https://github.com/CarlosEsco/Neko"
-            summary = url
-            onClick {
-                val intent = Intent(Intent.ACTION_VIEW, url.toUri())
-                startActivity(intent)
-            }
-        }
         preferenceCategory {
             preference {
-                titleRes = R.string.whats_new
+                titleRes = R.string.version
+                summary = if (BuildConfig.DEBUG) "r" + BuildConfig.COMMIT_COUNT
+                else BuildConfig.VERSION_NAME
+            }
+            preference {
+                titleRes = R.string.build_time
+                summary = getFormattedBuildTime()
+            }
+
+            preference {
+                titleRes = R.string.check_for_updates
+
+                onClick {
+                    if (activity!!.isOnline()) {
+                        checkVersion()
+                    } else {
+                        activity!!.toast(R.string.no_network_connection)
+                    }
+                }
+            }
+
+            preference {
+                titleRes = R.string.view_changelog
+                onClick {
+                    ChangelogDialogController().showDialog(router)
+                }
+            }
+
+            preference {
+                titleRes = R.string.view_release_notes
                 onClick {
                     val intent = Intent(
                         Intent.ACTION_VIEW,
@@ -96,29 +95,39 @@ class AboutController : SettingsController() {
                     startActivity(intent)
                 }
             }
-            preference {
-                titleRes = R.string.version
-                summary = if (BuildConfig.DEBUG) "r" + BuildConfig.COMMIT_COUNT
-                else BuildConfig.VERSION_NAME
+        }
 
-                if (isUpdaterEnabled) {
-                    onClick {
-                        if (activity!!.isOnline()) {
-                            checkVersion()
-                        } else {
-                            activity!!.toast(R.string.no_network_connection)
-                        }
-                    }
-                }
-            }
-            preference {
-                titleRes = R.string.build_time
-                summary = getFormattedBuildTime()
 
+        preferenceCategory {
+            preference {
+                titleRes = R.string.website
+                val url = "https://tachiyomi.org/forks/Neko/"
+                summary = url
                 onClick {
-                    ChangelogDialogController().showDialog(router)
+                    val intent = Intent(Intent.ACTION_VIEW, url.toUri())
+                    startActivity(intent)
                 }
             }
+
+            preference {
+                title = "Discord"
+                val url = "https://discord.gg/tachiyomi"
+                summary = url
+                onClick {
+                    val intent = Intent(Intent.ACTION_VIEW, url.toUri())
+                    startActivity(intent)
+                }
+            }
+            preference {
+                title = "Github"
+                val url = "https://github.com/CarlosEsco/Neko"
+                summary = url
+                onClick {
+                    val intent = Intent(Intent.ACTION_VIEW, url.toUri())
+                    startActivity(intent)
+                }
+            }
+
             preference {
                 titleRes = R.string.open_source_licenses
 
