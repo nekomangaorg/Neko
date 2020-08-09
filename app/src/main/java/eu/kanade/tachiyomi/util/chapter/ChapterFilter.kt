@@ -11,15 +11,15 @@ import uy.kohesive.injekt.api.get
 
 class ChapterFilter(val preferences: PreferencesHelper = Injekt.get(), val downloadManager: DownloadManager = Injekt.get()) {
 
-    //filters chapters based on the manga values
-    fun filterChapters(chapters: List<Chapter>, manga: Manga): List<Chapter> {
+    // filters chapters based on the manga values
+    fun <T : Chapter> filterChapters(chapters: List<T>, manga: Manga): List<T> {
         val readEnabled = manga.readFilter == Manga.SHOW_READ
         val unreadEnabled = manga.readFilter == Manga.SHOW_UNREAD
         val downloadEnabled = manga.downloadedFilter == Manga.SHOW_DOWNLOADED
         val bookmarkEnabled = manga.bookmarkedFilter == Manga.SHOW_BOOKMARKED
         val listValidScanlators = MdUtil.getScanlators(manga.scanlator_filter.orEmpty())
         val scanlatorEnabled = listValidScanlators.isNotEmpty()
-        
+
         // if none of the filters are enabled skip the filtering of them
         return if (readEnabled || unreadEnabled || downloadEnabled || bookmarkEnabled || scanlatorEnabled) {
             chapters.filter {
