@@ -8,6 +8,7 @@ import android.os.PowerManager
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.text.isDigitsOnly
+import com.elvishew.xlog.XLog
 import com.squareup.moshi.JsonReader
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -28,7 +29,6 @@ import kotlinx.coroutines.withContext
 import okio.buffer
 import okio.sink
 import okio.source
-import com.elvishew.xlog.XLog
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File
@@ -174,13 +174,14 @@ class SimilarUpdateService(
             return@mapIndexed similar
         }.filterNotNull()
 
+        showProgressNotification(dataToInsert.size, totalManga)
 
         if (dataToInsert.isNotEmpty()) {
             db.insertSimilar(dataToInsert).executeAsBlocking()
         }
         destinationFile.delete()
-        cancelProgressNotification()
         showResultNotification(!this.isActive)
+        cancelProgressNotification()
     }
 
     private fun getSimilar(destinationFile: File): List<SimilarFromJson> {

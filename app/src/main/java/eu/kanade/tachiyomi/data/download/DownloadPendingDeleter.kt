@@ -147,7 +147,8 @@ class DownloadPendingDeleter(context: Context) {
         val id: Long,
         val url: String,
         val name: String,
-        val scanlator: String?
+        val scanlator: String?,
+        val mangadexChapterId: String
     )
 
     /**
@@ -171,7 +172,7 @@ class DownloadPendingDeleter(context: Context) {
      * Returns a chapter entry from a chapter model.
      */
     private fun Chapter.toEntry(): ChapterEntry {
-        return ChapterEntry(id!!, url, name, scanlator)
+        return ChapterEntry(id!!, url, name, scanlator, mangadex_chapter_id)
     }
 
     /**
@@ -192,6 +193,7 @@ class DownloadPendingDeleter(context: Context) {
             it.scanlator = scanlator
             it.url = url
             it.name = name
+            it.mangadex_chapter_id = mangadexChapterId
         }
     }
 }

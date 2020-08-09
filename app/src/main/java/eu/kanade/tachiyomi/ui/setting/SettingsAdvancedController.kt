@@ -186,6 +186,7 @@ class SettingsAdvancedController : SettingsController() {
             val mangaList = db.getMangas().executeAsBlocking()
             val source = sourceManager.getMangadex()
             val mangaFolders = downloadManager.getMangaFolders(source)
+
             for (mangaFolder in mangaFolders) {
                 val manga = mangaList.find { downloadProvider.getMangaDirName(it) == mangaFolder.name }
                 if (manga == null) {
