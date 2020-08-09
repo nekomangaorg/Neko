@@ -9,6 +9,7 @@ import android.os.PowerManager
 import coil.Coil
 import coil.request.CachePolicy
 import coil.request.LoadRequest
+import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
@@ -41,7 +42,6 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
-import com.elvishew.xlog.XLog
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File
@@ -385,7 +385,7 @@ class LibraryUpdateService(
                     val chapters = sourceManager.getMergeSource().fetchChapters(it)
                     fetchedChapters.addAll(chapters)
                 } catch (e: Exception) {
-                    XLog.e("Error with mergedsource",e)
+                    XLog.e("Error with mergedsource", e)
                 }
             }
 
@@ -394,7 +394,7 @@ class LibraryUpdateService(
             val thumbnailUrl = manga.thumbnail_url
             manga.copyFrom(details.first)
             manga.initialized = true
-            if (manga.thumbnail_url != null) {
+            if (manga.thumbnail_url != null && preferences.refreshCoversToo().getOrDefault()) {
                 coverCache.deleteFromCache(thumbnailUrl)
                 // load new covers in background
                 val request =

@@ -189,8 +189,7 @@
     <string name="categories_to_include_in_global_update">Categories to include in global update</string>
     <string name="include_in_global_update">Include in global update</string>
     <string name="auto_refresh_covers">Automatically refresh covers</string>
-    <string name="auto_refresh_covers_summary">Refresh covers in library as well
-        when updating library</string>
+    <string name="auto_refresh_covers_summary">Refresh covers when library updates.  If you want covers to update to match the site this needs to be enabled</string>
     <string name="show_notification_error">Show a notification for errors</string>
 
     <!-- Recents -->

@@ -30,7 +30,7 @@ class XLogSetup(context: Context) {
 
         val logConfig = LogConfiguration.Builder()
             .logLevel(logLevel)
-            .b()
+            .nb()
             .st(2)
             .tag("||NEKO")
             .build()
