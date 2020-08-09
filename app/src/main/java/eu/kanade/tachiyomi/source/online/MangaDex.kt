@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.source.online
 
+import com.elvishew.xlog.XLog
 import com.github.salomonbrys.kotson.string
 import com.google.gson.JsonParser
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -40,7 +41,6 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import rx.Observable
-import com.elvishew.xlog.XLog
 import uy.kohesive.injekt.injectLazy
 import java.net.URLEncoder
 import java.util.Date
@@ -137,7 +137,7 @@ open class MangaDex() : HttpSource() {
                 manga.thumbnail_url = cover
             }
         } catch (e: Exception) {
-            XLog.e("exception getting latest covers",e)
+            XLog.e("exception getting latest covers", e)
         }
         return manga
     }
@@ -152,7 +152,7 @@ open class MangaDex() : HttpSource() {
                 pair.first.thumbnail_url = cover
             }
         } catch (e: Exception) {
-            XLog.e("exception getting latest covers",e)
+            XLog.e("exception getting latest covers", e)
         }
 
         return pair
@@ -239,7 +239,7 @@ open class MangaDex() : HttpSource() {
                     }
                     val jsonData = client.newCall(GET(tokenRequestUrl, headers, cacheControl)).execute().body!!.string()
                     tokenedServer = JsonParser.parseString(jsonData).asJsonObject.get("server").string
-                    XLog.d("esco new token %s", tokenedServer)
+                    XLog.d("new MD@Home token %s", tokenedServer)
                 }
                 tokenedServer + page.imageUrl
             }

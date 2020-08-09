@@ -2,7 +2,7 @@
 <changelog bulletedList="true">
     <changelogversion
         changeDate=""
-        versionName="v2.1.1.5">
+        versionName="v2.1.2">
         <changelogtext>NOTICE!!! The process of similar manga has changed please manually pull an update in the similar settings</changelogtext>
         <changelogtext>New: Download unread, mark as read, mark as unread from library</changelogtext>
         <changelogtext>New: tapping Manga description when expanded will collapse it</changelogtext>
@@ -10,8 +10,9 @@
         <changelogtext>New: Notification channels have been separated and now you can disable most individual notification in android O+ and there is a setting</changelogtext>
         <changelogtext>New: Downloads are renamed when the chapter name changes</changelogtext>
         <changelogtext>New: Downloads for MangaDex are a little smarter and if a folder doesn't match it checks the chapter id on the folder</changelogtext>
-        <changelogtext>Fix: File writing bug for debug logs</changelogtext>
-        <changelogtext>Fix: ReEnable clean downloads and now provide options for what to download</changelogtext>
+        <changelogtext>New: Ability to disable cover refresh on library update</changelogtext>
+        <changelogtext>Change: Changed logging framework</changelogtext>
+        <changelogtext>Change: ReEnable clean downloads and now provide options for what to download</changelogtext>
         <changelogtext>Fix: other bug fixes</changelogtext>
     </changelogversion>
     <changelogversion
