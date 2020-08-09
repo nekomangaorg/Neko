@@ -45,6 +45,10 @@ List<Download> by queue {
         }
     }
 
+    fun updateListeners() {
+        downloadListeners.forEach { it.updateDownloads() }
+    }
+
     fun remove(chapter: Chapter) {
         find { it.chapter.id == chapter.id }?.let { remove(it) }
     }
@@ -138,5 +142,6 @@ List<Download> by queue {
 
     interface DownloadListener {
         fun updateDownload(download: Download)
+        fun updateDownloads()
     }
 }

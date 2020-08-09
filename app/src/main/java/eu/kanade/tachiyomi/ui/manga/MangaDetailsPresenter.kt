@@ -218,6 +218,15 @@ class MangaDetailsPresenter(
         }
     }
 
+    override fun updateDownloads() {
+        scope.launch(Dispatchers.Default) {
+            updateChapters(chapters)
+            withContext(Dispatchers.Main) {
+                controller.updateChapters(chapters)
+            }
+        }
+    }
+
     /**
      * Converts a chapter from the database to an extended model, allowing to store new fields.
      */
@@ -320,12 +329,8 @@ class MangaDetailsPresenter(
      */
     fun deleteChapter(chapter: ChapterItem) {
         downloadManager.deleteChapters(listOf(chapter), manga, source)
-        val downloads = downloadManager.queue.toMutableList()
-        downloads.remove(chapter.download)
-        downloadManager.reorderQueue(downloads)
-
         this.chapters.find { it.id == chapter.id }?.apply {
-            status = Download.NOT_DOWNLOADED
+            status = Download.QUEUE
             download = null
         }
 
@@ -338,10 +343,9 @@ class MangaDetailsPresenter(
      */
     fun deleteChapters(chapters: List<ChapterItem>, update: Boolean = true) {
         downloadManager.deleteChapters(chapters, manga, source)
-
         chapters.forEach { chapter ->
             this.chapters.find { it.id == chapter.id }?.apply {
-                status = Download.NOT_DOWNLOADED
+                status = Download.QUEUE
                 download = null
             }
         }
