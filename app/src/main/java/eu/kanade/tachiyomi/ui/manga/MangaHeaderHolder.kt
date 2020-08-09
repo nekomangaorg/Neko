@@ -175,6 +175,7 @@ class MangaHeaderHolder(
                 else -> CommunityMaterial.Icon2.cmd_heart_outline as IIcon
             }
             setImageDrawable(context.iconicsDrawableLarge(icon))
+                    adapter.delegate.setFavButtonPopup(this)
         }
         true_backdrop.setBackgroundColor(
             adapter.delegate.coverColor()

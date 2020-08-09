@@ -123,6 +123,7 @@ class MangaDetailsAdapter(
         fun zoomImageFromThumb(thumbView: View)
         fun showTrackingSheet()
         fun updateScroll()
+        fun setFavButtonPopup(popupView: View)
         fun showExternalSheet()
     }
 }
