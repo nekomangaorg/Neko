@@ -83,32 +83,25 @@ class MangaDetailsPresenter(
     var headerItem = MangaHeaderItem(manga, controller.fromCatalogue)
 
     fun onCreate() {
-        scope.launch {
-            withContext(Dispatchers.IO) {
-                isLockedFromSearch = SecureActivityDelegate.shouldBeLocked()
-                headerItem.isLocked = isLockedFromSearch
-                downloadManager.addListener(this@MangaDetailsPresenter)
-                LibraryUpdateService.setListener(this@MangaDetailsPresenter)
-                tracks = db.getTracks(manga).executeAsBlocking()
-                if (manga.source == LocalSource.ID) {
-                    refreshAll()
-                } else if (!manga.initialized) {
-                    isLoading = true
-                    withContext(Dispatchers.Main) {
-                        controller.setRefresh(true)
-                        controller.updateHeader()
-                    }
-                    refreshAll()
-                } else {
-                    updateChapters()
-                    withContext(Dispatchers.Main) {
-                        controller.updateChapters(this@MangaDetailsPresenter.chapters)
-                    }
-                }
-                setTrackItems()
-                refreshTracking(false)
-            }
+
+        isLockedFromSearch = SecureActivityDelegate.shouldBeLocked()
+        headerItem.isLocked = isLockedFromSearch
+        downloadManager.addListener(this)
+        LibraryUpdateService.setListener(this)
+        tracks = db.getTracks(manga).executeAsBlocking()
+        if (manga.source == LocalSource.ID) {
+            refreshAll()
+        } else if (!manga.initialized) {
+            isLoading = true
+            controller.setRefresh(true)
+            controller.updateHeader()
+            refreshAll()
+        } else {
+            updateChapters()
+            controller.updateChapters(this.chapters)
         }
+        setTrackItems()
+        refreshTracking(false)
     }
 
     fun onDestroy() {
