@@ -727,6 +727,7 @@
     <string name="mark_as_read">Mark as read</string>
     <string name="mark_as_unread">Mark as unread</string>
     <string name="mark_previous_as_read">Mark previous as read</string>
+    <string name="mark_previous_as_unread">Mark previous as unread</string>
     <string name="more">More</string>
     <string name="move_to_bottom">Move to bottom</string>
     <string name="move_to_top">Move to top</string>

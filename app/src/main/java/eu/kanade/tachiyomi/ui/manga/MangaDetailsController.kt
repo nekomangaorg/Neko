@@ -594,7 +594,8 @@ class MangaDetailsController : BaseController,
 
         popup.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
-                R.id.action_mark_previous_as_read -> markPreviousAsRead(item)
+                R.id.action_mark_previous_as_read -> markPreviousAs(item, true)
+                R.id.action_mark_previous_as_unread -> markPreviousAs(item, false)
                 R.id.action_view_comments -> viewComments(item)
             }
             chapterPopupMenu = null
@@ -624,12 +625,16 @@ class MangaDetailsController : BaseController,
         }
     }
 
-    private fun markPreviousAsRead(chapter: ChapterItem) {
+    private fun markPreviousAs(chapter: ChapterItem, read: Boolean) {
         val adapter = adapter ?: return
         val chapters = if (presenter.sortDescending()) adapter.items.reversed() else adapter.items
         val chapterPos = chapters.indexOf(chapter)
         if (chapterPos != -1) {
-            markAsRead(chapters.take(chapterPos))
+            if (read) {
+                markAsRead(chapters.take(chapterPos))
+            } else {
+                markAsUnread(chapters.take(chapterPos))
+            }
         }
     }
 
