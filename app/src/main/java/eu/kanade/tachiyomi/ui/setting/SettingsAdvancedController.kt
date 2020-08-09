@@ -20,6 +20,7 @@ import eu.kanade.tachiyomi.data.cache.ChapterCache
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.download.DownloadManager
+import eu.kanade.tachiyomi.data.download.DownloadProvider
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService.Target
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys
@@ -180,16 +181,19 @@ class SettingsAdvancedController : SettingsController() {
         job = GlobalScope.launch(Dispatchers.IO) {
             val sourceManager: SourceManager = Injekt.get()
             val downloadManager: DownloadManager = Injekt.get()
+            val downloadProvider = DownloadProvider(activity!!)
             var foldersCleared = 0
             val mangaList = db.getMangas().executeAsBlocking()
             val source = sourceManager.getMangadex()
             val mangaFolders = downloadManager.getMangaFolders(source)
             for (mangaFolder in mangaFolders) {
-                val manga = mangaList.find { it.originalTitle == mangaFolder.name }
+                val manga = mangaList.find { downloadProvider.getMangaDirName(it) == mangaFolder.name }
                 if (manga == null) {
-                    //download is orphaned delete it
-                    foldersCleared += 1 + (mangaFolder.listFiles()?.size ?: 0)
-                    mangaFolder.delete()
+                    //download is orphaned delete it if remove non favorited is enabled
+                    if (removeNonFavorite) {
+                        foldersCleared += 1 + (mangaFolder.listFiles()?.size ?: 0)
+                        mangaFolder.delete()
+                    }
                     continue
                 }
                 val chapterList = db.getChapters(manga).executeAsBlocking()
