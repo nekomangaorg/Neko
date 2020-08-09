@@ -55,8 +55,35 @@
             </intent-filter>
             <meta-data android:name="android.app.searchable" android:resource="@xml/searchable"/>
         </activity>
-        <activity
-            android:name=".ui.reader.ReaderActivity" />
+        <activity android:name=".ui.reader.ReaderActivity"
+            android:theme="@style/Theme.Splash">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="reader.kireicake.com"
+                    android:pathPattern="/read/..*/..*/..*/..*"
+                    android:scheme="https" />
+
+                <data
+                    android:host="jaiminisbox.com"
+                    android:pathPattern="/reader/read/..*/..*/..*/..*"
+                    android:scheme="https" />
+
+                <data
+                    android:host="mangadex.org"
+                    android:pathPattern="/chapter/..*"
+                    android:scheme="https" />
+
+                <data
+                    android:host="mangaplus.shueisha.co.jp"
+                    android:pathPattern="/viewer/..*"
+                    android:scheme="https" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".ui.webview.WebViewActivity"
             android:configChanges="uiMode|orientation|screenSize"/>

@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.reader
 
 import android.app.Application
+import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import com.jakewharton.rxrelay.BehaviorRelay
@@ -27,8 +28,10 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
+import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.system.ImageUtil
+import eu.kanade.tachiyomi.util.system.executeOnIO
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -286,6 +289,68 @@ class ReaderPresenter(
 
                 viewerChaptersRelay.call(newChapters)
             }
+    }
+
+    fun canLoadUrl(uri: Uri): Boolean {
+        val host = uri.host ?: return false
+        val delegatedSource = sourceManager.getDelegatedSource(host) ?: return false
+        return delegatedSource.canOpenUrl(uri)
+    }
+
+    fun intentPageNumber(url: Uri): Int? {
+        val host = url.host ?: return null
+        val delegatedSource = sourceManager.getDelegatedSource(host) ?: error(
+            preferences.context.getString(R.string.source_not_installed)
+        )
+        return delegatedSource.pageNumber(url)?.minus(1)
+    }
+
+    suspend fun loadChapterURL(url: Uri) {
+        val host = url.host ?: return
+        val delegatedSource = sourceManager.getDelegatedSource(host) ?: error(
+            preferences.context.getString(R.string.source_not_installed)
+        )
+        val chapterUrl = delegatedSource.chapterUrl(url)
+        val sourceId = delegatedSource.delegate?.id ?: error(
+            preferences.context.getString(R.string.source_not_installed)
+        )
+        if (chapterUrl != null) {
+            val dbChapter = db.getChapters(chapterUrl).executeOnIO().find {
+                val source = db.getManga(it.manga_id!!).executeOnIO()?.source ?: return@find false
+                if (source == sourceId) {
+                    true
+                } else {
+                    val httpSource = sourceManager.getOrStub(source) as? HttpSource
+                    val host = delegatedSource.domainName
+                    httpSource?.baseUrl?.contains(host) == true
+                }
+            }
+            if (dbChapter?.manga_id != null) {
+                val dbManga = db.getManga(dbChapter.manga_id!!).executeOnIO()
+                if (dbManga != null) {
+                    withContext(Dispatchers.Main) {
+                        init(dbManga, dbChapter.id!!)
+                    }
+                    return
+                }
+            }
+        }
+        val info = delegatedSource.fetchMangaFromChapterUrl(url)
+        if (info != null) {
+            val (chapter, manga, chapters) = info
+            val id = db.insertManga(manga).executeOnIO().insertedId()
+            manga.id = id ?: manga.id
+            chapter.manga_id = manga.id
+            val chapterId = db.insertChapter(chapter).executeOnIO().insertedId() ?: return
+            if (chapters.isNotEmpty()) {
+                syncChaptersWithSource(
+                    db, chapters, manga, delegatedSource.delegate!!
+                )
+            }
+            withContext(Dispatchers.Main) {
+                init(manga, chapterId)
+            }
+        } else error(preferences.context.getString(R.string.unknown_error))
     }
 
     /**
