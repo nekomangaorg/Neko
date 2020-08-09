@@ -35,7 +35,7 @@ class SimilarHandler(val preferences: PreferencesHelper) {
         val similarMangas = similarMangaIds.mapIndexed { index, similarId ->
             SManga.create().apply {
                 title = similarMangaTitles[index]
-                url = "/manga/$similarId"
+                url = "/manga/$similarId/"
                 thumbnail_url = MdUtil.formThumbUrl(url, lowQualityCovers)
             }
         }
