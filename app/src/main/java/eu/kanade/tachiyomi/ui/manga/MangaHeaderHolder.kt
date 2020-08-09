@@ -71,10 +71,6 @@ class MangaHeaderHolder(
             favorite_button.setOnClickListener {
                 adapter.delegate.favoriteManga(false)
             }
-            favorite_button.setOnLongClickListener {
-                adapter.delegate.favoriteManga(true)
-                true
-            }
             title.setOnClickListener {
                 title.text?.let { adapter.delegate.globalSearch(it.toString()) }
             }
@@ -182,6 +178,7 @@ class MangaHeaderHolder(
                 }
             )
             checked(!item.isLocked && manga.favorite)
+            adapter.delegate.setFavButtonPopup(this)
         }
         true_backdrop.setBackgroundColor(
             adapter.delegate.coverColor()

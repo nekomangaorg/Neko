@@ -988,35 +988,69 @@ class MangaDetailsController : BaseController,
         if (isLocked()) return
         val manga = presenter.manga
         val categories = presenter.getCategories()
-        if (longPress && categories.isNotEmpty()) {
-            if (!manga.favorite) {
-                presenter.toggleFavorite()
-                showAddedSnack()
-            }
-            val ids = presenter.getMangaCategoryIds()
-            val preselected = ids.mapNotNull { id ->
-                categories.indexOfFirst { it.id == id }.takeIf { it != -1 }
-            }.toTypedArray()
-
-            ChangeMangaCategoriesDialog(this, listOf(manga), categories, preselected).showDialog(
-                router
-            )
+        if (!manga.favorite) {
+            toggleMangaFavorite()
         } else {
-            if (!manga.favorite) {
-                toggleMangaFavorite()
-            } else {
-                val headerHolder = getHeader() ?: return
-                val popup = PopupMenu(view!!.context, headerHolder.favorite_button)
-                popup.menu.add(R.string.remove_from_library)
-
-                // Set a listener so we are notified if a menu item is clicked
-                popup.setOnMenuItemClickListener {
-                    toggleMangaFavorite()
-                    true
-                }
-                popup.show()
+            val headerHolder = getHeader() ?: return
+            val popup = PopupMenu(view!!.context, headerHolder.favorite_button)
+            popup.menu.add(0, 1, 0, R.string.remove_from_library)
+            if (categories.isNotEmpty()) {
+                popup.menu.add(0, 0, 1, R.string.edit_categories)
             }
+
+            // Set a listener so we are notified if a menu item is clicked
+            popup.setOnMenuItemClickListener { menuItem ->
+                if (menuItem.itemId == 0) {
+                    val ids = presenter.getMangaCategoryIds()
+                    val preselected = ids.mapNotNull { id ->
+                        categories.indexOfFirst { it.id == id }.takeIf { it != -1 }
+                    }.toTypedArray()
+                    ChangeMangaCategoriesDialog(
+                        this, listOf(manga), categories, preselected
+                    ).showDialog(
+                        router
+                    )
+                } else {
+                    toggleMangaFavorite()
+                }
+                true
+            }
+            popup.show()
         }
+    }
+
+    override fun setFavButtonPopup(popupView: View) {
+        if (isLocked()) return
+        val manga = presenter.manga
+        if (!manga.favorite) {
+            popupView.setOnTouchListener(null)
+            return
+        }
+        val popup = PopupMenu(view!!.context, popupView)
+        val categories = presenter.getCategories()
+        popup.menu.add(0, 1, 0, R.string.remove_from_library)
+        if (categories.isNotEmpty()) {
+            popup.menu.add(0, 0, 1, R.string.edit_categories)
+        }
+
+        // Set a listener so we are notified if a menu item is clicked
+        popup.setOnMenuItemClickListener { menuItem ->
+            if (menuItem.itemId == 0) {
+                val ids = presenter.getMangaCategoryIds()
+                val preselected = ids.mapNotNull { id ->
+                    categories.indexOfFirst { it.id == id }.takeIf { it != -1 }
+                }.toTypedArray()
+                ChangeMangaCategoriesDialog(
+                    this, listOf(manga), categories, preselected
+                ).showDialog(
+                    router
+                )
+            } else {
+                toggleMangaFavorite()
+            }
+            true
+        }
+        popupView.setOnTouchListener(popup.dragToOpenListener)
     }
 
     private fun toggleMangaFavorite() {
