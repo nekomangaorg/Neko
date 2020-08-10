@@ -93,22 +93,22 @@ class SettingsAdvancedController : SettingsController() {
                 }
             }
             preference {
-                titleRes = R.string.clear_database
-                summaryRes = R.string.clear_database_summary
-
-                onClick {
-                    val ctrl = ClearDatabaseDialogController()
-                    ctrl.targetController = this@SettingsAdvancedController
-                    ctrl.showDialog(router)
-                }
-            }
-            preference {
                 titleRes = R.string.clean_up_downloaded_chapters
 
                 summaryRes = R.string.delete_unused_chapters
 
                 onClick {
                     val ctrl = CleanupDownloadsDialogController()
+                    ctrl.targetController = this@SettingsAdvancedController
+                    ctrl.showDialog(router)
+                }
+            }
+            preference {
+                titleRes = R.string.clear_database
+                summaryRes = R.string.clear_database_summary
+
+                onClick {
+                    val ctrl = ClearDatabaseDialogController()
                     ctrl.targetController = this@SettingsAdvancedController
                     ctrl.showDialog(router)
                 }
