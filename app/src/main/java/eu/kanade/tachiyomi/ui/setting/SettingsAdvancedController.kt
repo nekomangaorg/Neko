@@ -84,6 +84,15 @@ class SettingsAdvancedController : SettingsController() {
             }
         }
         preference {
+            titleRes = R.string.clean_up_cached_covers_non_library
+            summary = context.getString(R.string.delete_all_covers__not_in_library_used_, coverCache.getOnlineCoverCacheSize())
+
+            onClick {
+                context.toast(R.string.starting_cleanup)
+                coverCache.deleteAllCachedCovers()
+            }
+        }
+        preference {
             titleRes = R.string.clear_cookies
 
             onClick {

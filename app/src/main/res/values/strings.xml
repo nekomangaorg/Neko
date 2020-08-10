@@ -564,6 +564,10 @@
     <string name="clean_up_cached_covers">Clean up cached covers</string>
     <string name="delete_old_covers_in_library_used_">Delete old and unused cached covers of
         manga in your library that has been updated.\nCurrently using: %1$s</string>
+    <string name="clean_up_cached_covers_non_library">Clean up cached covers not in
+        library</string>
+    <string name="delete_all_covers__not_in_library_used_">Delete all covers cached that are
+        not in your library \nCurrently using: %1$s</string>
 
     <!-- Browse Settings -->
     <string name="pref_global_search">Global search</string>
