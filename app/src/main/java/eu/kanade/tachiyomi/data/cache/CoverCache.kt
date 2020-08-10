@@ -60,6 +60,10 @@ class CoverCache(val context: Context) {
         return Formatter.formatFileSize(context, DiskUtil.getDirectorySize(cacheDir))
     }
 
+    fun getOnlineCoverCacheSize(): String {
+        return Formatter.formatFileSize(context, DiskUtil.getDirectorySize(onlineCoverDirectory))
+    }
+
     fun deleteOldCovers() {
         GlobalScope.launch(Dispatchers.Default) {
             val db = Injekt.get<DatabaseHelper>()
@@ -84,6 +88,35 @@ class CoverCache(val context: Context) {
                 )
             }
         }
+    }
+
+    /**
+     * Clear out online covers until its under a certain size
+     */
+    fun deleteAllCachedCovers() {
+        GlobalScope.launch(Dispatchers.IO) {
+            val directory = onlineCoverDirectory
+            val size = DiskUtil.getDirectorySize(directory)
+            if (size <= maxOnlineCacheSize) {
+                return@launch
+            }
+            var deletedSize = 0L
+            val files =
+                directory.listFiles()?.sortedBy { it.lastModified() }?.iterator() ?: return@launch
+            while (files.hasNext()) {
+                val file = files.next()
+                deletedSize += file.length()
+                file.delete()
+            }
+            withContext(Dispatchers.Main) {
+                context.toast(
+                    context.getString(
+                        R.string.deleted_, Formatter.formatFileSize(context, deletedSize)
+                    )
+                )
+            }
+        }
+        lastClean = System.currentTimeMillis()
     }
 
     /**
