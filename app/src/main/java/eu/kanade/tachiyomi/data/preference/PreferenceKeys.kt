@@ -153,13 +153,7 @@ object PreferenceKeys {
 
     const val alwaysShowChapterTransition = "always_show_chapter_transition"
 
-    @Deprecated("Use the preferences of the source")
-    fun sourceUsername(sourceId: Long) = "pref_source_username_$sourceId"
-
-    @Deprecated("Use the preferences of the source")
-    fun sourcePassword(sourceId: Long) = "pref_source_password_$sourceId"
-
-    fun sourceSharedPref(sourceId: Long) = "source_$sourceId"
+    const val enableDoh = "enable_doh"
 
     fun trackUsername(syncId: Int) = "pref_mangasync_username_$syncId"
 

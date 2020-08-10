@@ -21,6 +21,7 @@ import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadProvider
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService.Target
+import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
@@ -71,8 +72,7 @@ class SettingsAdvancedController : SettingsController() {
             preference {
                 titleRes = R.string.clean_up_cached_covers
                 summary = context.getString(
-                    R.string.delete_old_covers_in_library_used_,
-                    coverCache.getChapterCacheSize()
+                    R.string.delete_old_covers_in_library_used_, coverCache.getChapterCacheSize()
                 )
 
                 onClick {
@@ -81,7 +81,7 @@ class SettingsAdvancedController : SettingsController() {
                 }
             }
             preference {
-                titleRes = R.string.clean_up_cached_covers_non_library
+                titleRes = R.string.clear_cached_covers_non_library
                 summary = context.getString(
                     R.string.delete_all_covers__not_in_library_used_,
                     coverCache.getOnlineCoverCacheSize()
@@ -114,6 +114,26 @@ class SettingsAdvancedController : SettingsController() {
                 }
             }
         }
+
+        preferenceCategory {
+            titleRes = R.string.network
+            preference {
+                titleRes = R.string.clear_cookies
+
+                onClick {
+                    network.cookieManager.removeAll()
+                    activity?.toast(R.string.cookies_cleared)
+                }
+            }
+
+            switchPreference {
+                key = PreferenceKeys.enableDoh
+                titleRes = R.string.dns_over_https
+                summaryRes = R.string.requires_app_restart
+                defaultValue = false
+            }
+        }
+
         preferenceCategory {
             titleRes = R.string.library
             preference {
@@ -131,15 +151,6 @@ class SettingsAdvancedController : SettingsController() {
         }
 
         preferenceCategory {
-            preference {
-                titleRes = R.string.clear_cookies
-
-                onClick {
-                    network.cookieManager.removeAll()
-                    activity?.toast(R.string.cookies_cleared)
-                }
-            }
-
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 val pm = context.getSystemService(Context.POWER_SERVICE) as? PowerManager?
                 if (pm != null) preference {

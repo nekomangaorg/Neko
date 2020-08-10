@@ -6,7 +6,7 @@ object Versions {
     const val FASTADAPTER = "5.0.0"
     const val HYPERION = "0.9.27"
     const val NUCLEUS = "3.0.0"
-    const val OKHTTP = "4.5.0"
+    const val OKHTTP = "4.8.1"
     const val OSS_LICENSE = "17.0.0"
     const val RETROFIT = "2.7.2"
     const val ROBO_ELECTRIC = "3.1.4"

@@ -528,6 +528,9 @@
     <!-- Advanced section -->
     <string name="clear_chapter_cache">Clear chapter cache</string>
     <string name="data_management">Data Management</string>
+    <string name="network">Network</string>
+    <string name="dns_over_https" translatable="false">DNS over HTTPS (Cloudflare)</string>
+    <string name="requires_app_restart">Requires app restart to take effect</string>
     <string name="used_">Used: %1$s</string>
     <plurals name="cache_cleared">
         <item quantity="one">Cache cleared. %d file has been deleted</item>
@@ -563,8 +566,7 @@
     <string name="clean_up_cached_covers">Clean up cached covers</string>
     <string name="delete_old_covers_in_library_used_">Delete old and unused cached covers of
         manga in your library that has been updated.\nCurrently using: %1$s</string>
-    <string name="clean_up_cached_covers_non_library">Clean up cached covers not in
-        library</string>
+    <string name="clear_cached_covers_non_library">Clear cached covers not in library</string>
     <string name="delete_all_covers__not_in_library_used_">Delete all covers cached that are
         not in your library \nCurrently using: %1$s</string>
 

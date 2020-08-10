@@ -10,7 +10,6 @@ import com.f2prateek.rx.preferences.RxSharedPreferences
 import com.tfcporciuncula.flow.FlowSharedPreferences
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.track.TrackService
-import eu.kanade.tachiyomi.source.Source
 import java.io.File
 import java.text.DateFormat
 import java.text.SimpleDateFormat
@@ -124,17 +123,6 @@ class PreferencesHelper(val context: Context) {
     fun enabledLanguages() = rxPrefs.getStringSet(Keys.enabledLanguages, setOf("en", Locale.getDefault().language))
 
     fun sourceSorting() = rxPrefs.getInteger(Keys.sourcesSort, 0)
-
-    fun sourceUsername(source: Source) = prefs.getString(Keys.sourceUsername(source.id), "")
-
-    fun sourcePassword(source: Source) = prefs.getString(Keys.sourcePassword(source.id), "")
-
-    fun setSourceCredentials(source: Source, username: String, password: String) {
-        prefs.edit()
-                .putString(Keys.sourceUsername(source.id), username)
-                .putString(Keys.sourcePassword(source.id), password)
-                .apply()
-    }
 
     fun trackUsername(sync: TrackService) = prefs.getString(Keys.trackUsername(sync.id), "")
 
@@ -292,4 +280,6 @@ class PreferencesHelper(val context: Context) {
     fun shownLongPressCategoryTutorial() = flowPrefs.getBoolean("shown_long_press_category", false)
 
     fun shownHopperSwipeTutorial() = flowPrefs.getBoolean("shown_hopper_swipe", false)
+
+    fun enableDoh() = prefs.getBoolean(Keys.enableDoh, false)
 }
