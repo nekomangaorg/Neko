@@ -527,6 +527,7 @@
 
     <!-- Advanced section -->
     <string name="clear_chapter_cache">Clear chapter cache</string>
+    <string name="data_management">Data Management</string>
     <string name="used_">Used: %1$s</string>
     <plurals name="cache_cleared">
         <item quantity="one">Cache cleared. %d file has been deleted</item>

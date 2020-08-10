@@ -58,90 +58,105 @@ class SettingsAdvancedController : SettingsController() {
             summaryRes = R.string.helps_fix_bugs
             defaultValue = true
         }
-        preference {
-            key = CLEAR_CACHE_KEY
-            titleRes = R.string.clear_chapter_cache
-            summary = context.getString(R.string.used_, chapterCache.readableSize)
+        preferenceCategory {
+            titleRes = R.string.data_management
+            preference {
+                key = CLEAR_CACHE_KEY
+                titleRes = R.string.clear_chapter_cache
+                summary = context.getString(R.string.used_, chapterCache.readableSize)
 
-            onClick { clearChapterCache() }
-        }
-
-        preference {
-            titleRes = R.string.clean_up_cached_covers
-            summary = context.getString(R.string.delete_old_covers_in_library_used_, coverCache.getChapterCacheSize())
-
-            onClick {
-                context.toast(R.string.starting_cleanup)
-                coverCache.deleteOldCovers()
+                onClick { clearChapterCache() }
             }
-        }
-        preference {
-            titleRes = R.string.clean_up_cached_covers_non_library
-            summary = context.getString(R.string.delete_all_covers__not_in_library_used_, coverCache.getOnlineCoverCacheSize())
 
-            onClick {
-                context.toast(R.string.starting_cleanup)
-                coverCache.deleteAllCachedCovers()
-            }
-        }
-        preference {
-            titleRes = R.string.clear_cookies
-
-            onClick {
-                network.cookieManager.removeAll()
-                activity?.toast(R.string.cookies_cleared)
-            }
-        }
-        preference {
-            titleRes = R.string.clear_database
-            summaryRes = R.string.clear_database_summary
-
-            onClick {
-                val ctrl = ClearDatabaseDialogController()
-                ctrl.targetController = this@SettingsAdvancedController
-                ctrl.showDialog(router)
-            }
-        }
-        preference {
-            titleRes = R.string.refresh_library_metadata
-            summaryRes = R.string.updates_covers_genres_desc
-
-            onClick { LibraryUpdateService.start(context, target = Target.DETAILS) }
-        }
-        preference {
-            titleRes = R.string.refresh_tracking_metadata
-            summaryRes = R.string.updates_tracking_details
-
-            onClick { LibraryUpdateService.start(context, target = Target.TRACKING) }
-        }
-        preference {
-            titleRes = R.string.clean_up_downloaded_chapters
-
-            summaryRes = R.string.delete_unused_chapters
-
-            onClick {
-                val ctrl = CleanupDownloadsDialogController()
-                ctrl.targetController = this@SettingsAdvancedController
-                ctrl.showDialog(router)
-            }
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val pm = context.getSystemService(Context.POWER_SERVICE) as? PowerManager?
-            if (pm != null) preference {
-                titleRes = R.string.disable_battery_optimization
-                summaryRes = R.string.disable_if_issues_with_updating
+            preference {
+                titleRes = R.string.clean_up_cached_covers
+                summary = context.getString(
+                    R.string.delete_old_covers_in_library_used_,
+                    coverCache.getChapterCacheSize()
+                )
 
                 onClick {
-                    val packageName: String = context.packageName
-                    if (!pm.isIgnoringBatteryOptimizations(packageName)) {
-                        val intent = Intent().apply {
-                            action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
-                            data = "package:$packageName".toUri()
+                    context.toast(R.string.starting_cleanup)
+                    coverCache.deleteOldCovers()
+                }
+            }
+            preference {
+                titleRes = R.string.clean_up_cached_covers_non_library
+                summary = context.getString(
+                    R.string.delete_all_covers__not_in_library_used_,
+                    coverCache.getOnlineCoverCacheSize()
+                )
+
+                onClick {
+                    context.toast(R.string.starting_cleanup)
+                    coverCache.deleteAllCachedCovers()
+                }
+            }
+            preference {
+                titleRes = R.string.clear_database
+                summaryRes = R.string.clear_database_summary
+
+                onClick {
+                    val ctrl = ClearDatabaseDialogController()
+                    ctrl.targetController = this@SettingsAdvancedController
+                    ctrl.showDialog(router)
+                }
+            }
+            preference {
+                titleRes = R.string.clean_up_downloaded_chapters
+
+                summaryRes = R.string.delete_unused_chapters
+
+                onClick {
+                    val ctrl = CleanupDownloadsDialogController()
+                    ctrl.targetController = this@SettingsAdvancedController
+                    ctrl.showDialog(router)
+                }
+            }
+        }
+        preferenceCategory {
+            titleRes = R.string.library
+            preference {
+                titleRes = R.string.refresh_library_metadata
+                summaryRes = R.string.updates_covers_genres_desc
+
+                onClick { LibraryUpdateService.start(context, target = Target.DETAILS) }
+            }
+            preference {
+                titleRes = R.string.refresh_tracking_metadata
+                summaryRes = R.string.updates_tracking_details
+
+                onClick { LibraryUpdateService.start(context, target = Target.TRACKING) }
+            }
+        }
+
+        preferenceCategory {
+            preference {
+                titleRes = R.string.clear_cookies
+
+                onClick {
+                    network.cookieManager.removeAll()
+                    activity?.toast(R.string.cookies_cleared)
+                }
+            }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                val pm = context.getSystemService(Context.POWER_SERVICE) as? PowerManager?
+                if (pm != null) preference {
+                    titleRes = R.string.disable_battery_optimization
+                    summaryRes = R.string.disable_if_issues_with_updating
+
+                    onClick {
+                        val packageName: String = context.packageName
+                        if (!pm.isIgnoringBatteryOptimizations(packageName)) {
+                            val intent = Intent().apply {
+                                action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+                                data = "package:$packageName".toUri()
+                            }
+                            startActivity(intent)
+                        } else {
+                            context.toast(R.string.battery_optimization_disabled)
                         }
-                        startActivity(intent)
-                    } else {
-                        context.toast(R.string.battery_optimization_disabled)
                     }
                 }
             }
