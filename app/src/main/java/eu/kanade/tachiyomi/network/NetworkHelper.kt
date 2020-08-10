@@ -6,14 +6,21 @@ import com.chuckerteam.chucker.api.ChuckerInterceptor
 import com.elvishew.xlog.XLog
 import com.google.gson.Gson
 import eu.kanade.tachiyomi.util.log.XLogLevel
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import okhttp3.Cache
 import okhttp3.Interceptor
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import okhttp3.dnsoverhttps.DnsOverHttps
+import uy.kohesive.injekt.injectLazy
 import java.io.File
 import java.util.concurrent.TimeUnit
+import java.net.InetAddress
 
 class NetworkHelper(val context: Context) {
+
+    private val preferences: PreferencesHelper by injectLazy()
 
     private val cacheDir = File(context.cacheDir, "network_cache")
 
@@ -60,6 +67,27 @@ class NetworkHelper(val context: Context) {
             .cache(Cache(cacheDir, cacheSize))
             .addInterceptor(ChuckerInterceptor(context))
             .cookieJar(cookieManager)
+            .apply {
+                if (preferences.enableDoh()) {
+                    dns(
+                        DnsOverHttps.Builder().client(build())
+                            .url("https://cloudflare-dns.com/dns-query".toHttpUrl())
+                            .bootstrapDnsHosts(
+                                listOf(
+                                    InetAddress.getByName("162.159.36.1"),
+                                    InetAddress.getByName("162.159.46.1"),
+                                    InetAddress.getByName("1.1.1.1"),
+                                    InetAddress.getByName("1.0.0.1"),
+                                    InetAddress.getByName("162.159.132.53"),
+                                    InetAddress.getByName("2606:4700:4700::1111"),
+                                    InetAddress.getByName("2606:4700:4700::1001"),
+                                    InetAddress.getByName("2606:4700:4700::0064"),
+                                    InetAddress.getByName("2606:4700:4700::6400")
+                                )
+                            ).build()
+                    )
+                }
+            }.build()
         if (XLogLevel.shouldLog(XLogLevel.EXTREME)) {
             val logger: HttpLoggingInterceptor.Logger = object : HttpLoggingInterceptor.Logger {
                 override fun log(message: String) {

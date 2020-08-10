@@ -132,17 +132,6 @@ class PreferencesHelper(val context: Context) {
 
     fun sourceSorting() = rxPrefs.getInteger(Keys.sourcesSort, 0)
 
-    fun sourceUsername(source: Source) = prefs.getString(Keys.sourceUsername(source.id), "")
-
-    fun sourcePassword(source: Source) = prefs.getString(Keys.sourcePassword(source.id), "")
-
-    fun setSourceCredentials(source: Source, username: String, password: String) {
-        prefs.edit()
-            .putString(Keys.sourceUsername(source.id), username)
-            .putString(Keys.sourcePassword(source.id), password)
-            .apply()
-    }
-
     fun trackUsername(sync: TrackService) = prefs.getString(Keys.trackUsername(sync.id), "")
 
     fun trackPassword(sync: TrackService) = prefs.getString(Keys.trackPassword(sync.id), "")
@@ -297,6 +286,8 @@ class PreferencesHelper(val context: Context) {
     fun shownLongPressCategoryTutorial() = flowPrefs.getBoolean("shown_long_press_category", false)
 
     fun shownHopperSwipeTutorial() = flowPrefs.getBoolean("shown_hopper_swipe", false)
+
+    fun enableDoh() = prefs.getBoolean(Keys.enableDoh, false)
 
     fun shownSimilarTutorial() = flowPrefs.getBoolean("shown_similar_tutorial", false)
 

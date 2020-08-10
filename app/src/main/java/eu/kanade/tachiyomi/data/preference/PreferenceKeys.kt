@@ -153,6 +153,8 @@ object PreferenceKeys {
 
     const val alwaysShowChapterTransition = "always_show_chapter_transition"
 
+    const val enableDoh = "enable_doh"
+
     const val similarEnabled = "pref_related_show_tab_key"
 
     const val similarUpdateInterval = "related_update_interval"

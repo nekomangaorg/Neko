@@ -77,8 +77,7 @@ class SettingsAdvancedController : SettingsController() {
                 preference {
                     titleRes = R.string.clean_up_cached_covers
                     summary = context.getString(
-                        R.string.delete_old_covers_in_library_used_,
-                        coverCache.getChapterCacheSize()
+                    R.string.delete_old_covers_in_library_used_, coverCache.getChapterCacheSize()
                     )
 
                     onClick {
@@ -87,7 +86,7 @@ class SettingsAdvancedController : SettingsController() {
                     }
                 }
                 preference {
-                    titleRes = R.string.clean_up_cached_covers_non_library
+                titleRes = R.string.clear_cached_covers_non_library
                     summary = context.getString(
                         R.string.delete_all_covers__not_in_library_used_,
                         coverCache.getOnlineCoverCacheSize()
@@ -121,6 +120,32 @@ class SettingsAdvancedController : SettingsController() {
                 }
             }
 
+            preferenceCategory {
+                titleRes = R.string.network
+                preference {
+                    titleRes = R.string.clear_cookies
+
+                    onClick {
+                        network.cookieManager.removeAll()
+                        activity?.toast(R.string.cookies_cleared)
+                    }
+                }
+
+                switchPreference {
+                    key = PreferenceKeys.enableDoh
+                    titleRes = R.string.dns_over_https
+                    summaryRes = R.string.requires_app_restart
+                    defaultValue = false
+                }
+            }
+        preferenceCategory {
+            titleRes = R.string.library
+            preference {
+                titleRes = R.string.refresh_library_metadata
+                summaryRes = R.string.updates_covers_genres_desc
+
+                onClick { LibraryUpdateService.start(context, target = Target.DETAILS) }
+            }
             preference {
                 titleRes = R.string.refresh_tracking_metadata
                 summaryRes = R.string.updates_tracking_details
@@ -130,15 +155,6 @@ class SettingsAdvancedController : SettingsController() {
         }
 
         preferenceCategory {
-            preference {
-                titleRes = R.string.clear_cookies
-
-                onClick {
-                    network.cookieManager.removeAll()
-                    activity?.toast(R.string.cookies_cleared)
-                }
-            }
-
             intListPreference(activity) {
                 key = PreferenceKeys.logLevel
                 titleRes = R.string.log_level
