@@ -19,6 +19,7 @@ import uy.kohesive.injekt.api.get
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
+import java.util.concurrent.TimeUnit
 
 /**
  * Class used to create cover cache.
@@ -33,6 +34,7 @@ class CoverCache(val context: Context) {
     companion object {
         private const val COVERS_DIR = "covers"
         private const val CUSTOM_COVERS_DIR = "covers/custom"
+        private const val ONLINE_COVERS_DIR = "online_covers"
     }
 
     /** Cache directory used for cache management.*/
@@ -40,6 +42,19 @@ class CoverCache(val context: Context) {
 
     /** Cache directory used for custom cover cache management.*/
     private val customCoverCacheDir = getCacheDir(CUSTOM_COVERS_DIR)
+
+    /** Cache directory used for covers not in library management.*/
+    private val onlineCoverDirectory = File(context.cacheDir, ONLINE_COVERS_DIR).also { it.mkdirs() }
+
+    private val maxOnlineCacheSize = 50L * 1024L * 1024L // 50 MB
+
+    private var lastClean = 0L
+
+    /**
+     * The interval after which this cache should be invalidated. 1 hour shouldn't cause major
+     * issues, as the cache is only used for UI feedback.
+     */
+    private val renewInterval = TimeUnit.HOURS.toMillis(1)
 
     fun getChapterCacheSize(): String {
         return Formatter.formatFileSize(context, DiskUtil.getDirectorySize(cacheDir))
@@ -68,6 +83,33 @@ class CoverCache(val context: Context) {
                     )
                 )
             }
+        }
+    }
+
+    /**
+     * Clear out online covers until its under a certain size
+     */
+    fun deleteCachedCovers() {
+        if (lastClean + renewInterval < System.currentTimeMillis()) {
+            GlobalScope.launch(Dispatchers.IO) {
+                val directory = onlineCoverDirectory
+                val size = DiskUtil.getDirectorySize(directory)
+                if (size <= maxOnlineCacheSize) {
+                    return@launch
+                }
+                var deletedSize = 0L
+                val files = directory.listFiles()?.sortedBy { it.lastModified() }?.iterator()
+                    ?: return@launch
+                while (files.hasNext()) {
+                    val file = files.next()
+                    deletedSize += file.length()
+                    file.delete()
+                    if (size - deletedSize <= maxOnlineCacheSize) {
+                        break
+                    }
+                }
+            }
+            lastClean = System.currentTimeMillis()
         }
     }
 
@@ -117,7 +159,15 @@ class CoverCache(val context: Context) {
      * @return cover image.
      */
     fun getCoverFile(manga: Manga): File {
-        return File(cacheDir, manga.key())
+        return if (manga.favorite) {
+            File(cacheDir, manga.key())
+        } else {
+            getOnlineCoverFile(manga)
+        }
+    }
+
+    fun getOnlineCoverFile(manga: Manga): File {
+        return File(onlineCoverDirectory, manga.key())
     }
 
     fun deleteFromCache(name: String?) {

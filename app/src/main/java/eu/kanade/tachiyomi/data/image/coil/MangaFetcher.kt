@@ -27,6 +27,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 import java.io.File
+import java.util.Date
 
 class MangaFetcher : Fetcher<Manga> {
 
@@ -63,29 +64,31 @@ class MangaFetcher : Fetcher<Manga> {
         }
         val coverFile = coverCache.getCoverFile(manga)
         if (coverFile.exists() && options.diskCachePolicy.readEnabled) {
-            return fileLoader(coverFile)
-        }
-        if (!manga.favorite) {
-            val (response, body) = awaitGetCall(manga)
-
-            return SourceResult(
-                source = body.source(),
-                mimeType = getMimeType(manga.thumbnail_url!!, body),
-                dataSource = if (response.cacheResponse != null) DataSource.DISK else DataSource.NETWORK
-            )
-        } else {
-            val (_, body) = awaitGetCall(manga, !options.networkCachePolicy.readEnabled)
-
-            val tmpFile = File(coverFile.absolutePath + "_tmp")
-            body.source().use { input ->
-                tmpFile.sink().buffer().use { output ->
-                    output.writeAll(input)
-                }
+            if (!manga.favorite) {
+                coverFile.setLastModified(Date().time)
             }
-
-            tmpFile.renameTo(coverFile)
             return fileLoader(coverFile)
         }
+        val (_, body) = awaitGetCall(
+            manga, if (manga.favorite) {
+                !options.networkCachePolicy.readEnabled
+            } else {
+                false
+            }
+        )
+
+        val tmpFile = File(coverFile.absolutePath + "_tmp")
+        body.source().use { input ->
+            tmpFile.sink().buffer().use { output ->
+                output.writeAll(input)
+            }
+        }
+
+        tmpFile.renameTo(coverFile)
+        if (manga.favorite) {
+            coverCache.deleteCachedCovers()
+        }
+        return fileLoader(coverFile)
     }
 
     private suspend fun awaitGetCall(manga: Manga, onlyCache: Boolean = false): Pair<Response,
