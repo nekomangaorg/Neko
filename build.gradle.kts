@@ -7,7 +7,7 @@ buildscript {
     dependencies {
         classpath(BuildPluginsVersion.FIREBASE)
         classpath(BuildPluginsVersion.AGP)
-        classpath(BuildPluginsVersion.OSS_LICENSE)
+        classpath("com.mikepenz.aboutlibraries.plugin:aboutlibraries-plugin:8.3.0")
         classpath(BuildPluginsVersion.GOOGLE_SERVICES)
         classpath(BuildPluginsVersion.ANDROID_EXTENSIONS)
         classpath(BuildPluginsVersion.KOTLIN_GRADLE)

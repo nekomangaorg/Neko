@@ -5,7 +5,7 @@ import java.time.format.DateTimeFormatter
 
 plugins {
     id("com.android.application")
-    id("com.google.android.gms.oss-licenses-plugin")
+    id("com.mikepenz.aboutlibraries.plugin")
     kotlin("android")
     kotlin("android.extensions")
     kotlin("kapt")
@@ -256,7 +256,8 @@ dependencies {
     //  version comparison
     implementation("com.g00fy2:versioncompare:1.3.4")
 
-    implementation("com.google.android.gms:play-services-oss-licenses:${Versions.OSS_LICENSE}")
+    implementation("com.mikepenz:aboutlibraries-core:8.3.0")
+    implementation("com.mikepenz:aboutlibraries:8.3.0")
 }
 
 /*tasks.preBuild {

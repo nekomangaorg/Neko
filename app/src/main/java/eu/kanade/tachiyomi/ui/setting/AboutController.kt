@@ -7,7 +7,7 @@ import androidx.core.net.toUri
 import androidx.preference.PreferenceScreen
 import com.afollestad.materialdialogs.MaterialDialog
 import com.elvishew.xlog.XLog
-import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
+import com.mikepenz.aboutlibraries.LibsBuilder
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -132,7 +132,8 @@ class AboutController : SettingsController() {
                 titleRes = R.string.open_source_licenses
 
                 onClick {
-                    startActivity(Intent(activity, OssLicensesMenuActivity::class.java))
+                    LibsBuilder().withFields(R.string::class.java.fields)
+                        .start(activity!!)
                 }
             }
         }
