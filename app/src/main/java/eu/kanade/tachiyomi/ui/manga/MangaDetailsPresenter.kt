@@ -99,36 +99,28 @@ class MangaDetailsPresenter(
     var headerItem = MangaHeaderItem(manga, controller.fromCatalogue)
 
     fun onCreate() {
-        scope.launch {
-            withContext(Dispatchers.IO) {
-                isLockedFromSearch = SecureActivityDelegate.shouldBeLocked()
-                headerItem.isLocked = isLockedFromSearch
-                downloadManager.addListener(this@MangaDetailsPresenter)
-                LibraryUpdateService.setListener(this@MangaDetailsPresenter)
-                tracks = db.getTracks(manga).executeAsBlocking()
+        isLockedFromSearch = SecureActivityDelegate.shouldBeLocked()
+        headerItem.isLocked = isLockedFromSearch
+        downloadManager.addListener(this)
+        LibraryUpdateService.setListener(this)
+        tracks = db.getTracks(manga).executeAsBlocking()
 
-                if (!manga.initialized) {
-                    isLoading = true
-                    withContext(Dispatchers.Main) {
-                        controller.setRefresh(true)
-                        controller.updateHeader()
-                    }
-                    refreshAll()
-                } else {
-                    manga.scanlator_filter?.let {
-                        filteredScanlators = MdUtil.getScanlators(it).toSet()
-                    }
-                    updateChapters()
-                    withContext(Dispatchers.Main) {
-                        controller.updateChapters(this@MangaDetailsPresenter.chapters)
-                    }
-                }
-                fetchExternalLinks()
-                setTrackItems()
-                refreshTracking(false)
-                similarToolTip()
+        if (!manga.initialized) {
+            isLoading = true
+            controller.setRefresh(true)
+            controller.updateHeader()
+            refreshAll()
+        } else {
+            manga.scanlator_filter?.let {
+                filteredScanlators = MdUtil.getScanlators(it).toSet()
             }
+            updateChapters()
+            controller.updateChapters(this.chapters)
         }
+        fetchExternalLinks()
+        setTrackItems()
+        refreshTracking(false)
+        similarToolTip()
     }
 
     fun onDestroy() {
