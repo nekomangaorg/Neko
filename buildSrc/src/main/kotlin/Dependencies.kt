@@ -6,11 +6,9 @@ object Versions {
     const val HYPERION = "0.9.27"
     const val NUCLEUS = "3.0.0"
     const val OKHTTP = "4.8.1"
-    const val OSS_LICENSE = "17.0.0"
     const val RETROFIT = "2.7.2"
     const val ROBO_ELECTRIC = "3.1.4"
     const val RX_BINDING = "1.0.1"
-    const val TIMBER = "4.7.1"
     const val WORKMANAGER = "2.3.3"
 }
 
@@ -32,6 +30,5 @@ object BuildPluginsVersion {
     const val KOTLIN_SERIALIZATION = "org.jetbrains.kotlin:kotlin-serialization:$KOTLIN"
     const val KOTLINTER = "org.jmailen.gradle:kotlinter-gradle:2.3.2"
     const val GOOGLE_SERVICES = "com.google.gms:google-services:4.3.3"
-    const val OSS_LICENSE = "com.google.android.gms:oss-licenses-plugin:0.10.2"
     const val VERSIONS_PLUGIN = "0.28.0"
 }

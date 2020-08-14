@@ -5,18 +5,18 @@ import android.os.SystemClock
 import com.chuckerteam.chucker.api.ChuckerInterceptor
 import com.elvishew.xlog.XLog
 import com.google.gson.Gson
-import eu.kanade.tachiyomi.util.log.XLogLevel
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.util.log.XLogLevel
 import okhttp3.Cache
-import okhttp3.Interceptor
 import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import okhttp3.dnsoverhttps.DnsOverHttps
+import okhttp3.logging.HttpLoggingInterceptor
 import uy.kohesive.injekt.injectLazy
 import java.io.File
-import java.util.concurrent.TimeUnit
 import java.net.InetAddress
+import java.util.concurrent.TimeUnit
 
 class NetworkHelper(val context: Context) {
 
@@ -61,8 +61,8 @@ class NetworkHelper(val context: Context) {
     }
 
     private fun buildNonRateLimitedClient(): OkHttpClient {
-        val builder = OkHttpClient.Builder()
-            .connectTimeout(20, TimeUnit.SECONDS)
+        return OkHttpClient.Builder()
+            .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(60, TimeUnit.SECONDS)
             .cache(Cache(cacheDir, cacheSize))
             .addInterceptor(ChuckerInterceptor(context))
@@ -87,22 +87,21 @@ class NetworkHelper(val context: Context) {
                             ).build()
                     )
                 }
-            }.build()
-        if (XLogLevel.shouldLog(XLogLevel.EXTREME)) {
-            val logger: HttpLoggingInterceptor.Logger = object : HttpLoggingInterceptor.Logger {
-                override fun log(message: String) {
-                    try {
-                        Gson().fromJson(message, Any::class.java)
-                        XLog.tag("||NEKO-NETWORK-JSON").nst().json(message)
-                    } catch (ex: Exception) {
-                        XLog.tag("||NEKO-NETWORK").nb().nst().d(message)
+                if (XLogLevel.shouldLog(XLogLevel.EXTREME)) {
+                    val logger: HttpLoggingInterceptor.Logger = object : HttpLoggingInterceptor.Logger {
+                        override fun log(message: String) {
+                            try {
+                                Gson().fromJson(message, Any::class.java)
+                                XLog.tag("||NEKO-NETWORK-JSON").nst().json(message)
+                            } catch (ex: Exception) {
+                                XLog.tag("||NEKO-NETWORK").nb().nst().d(message)
+                            }
+                        }
                     }
+                    addInterceptor(HttpLoggingInterceptor(logger).apply { level = HttpLoggingInterceptor.Level.BODY })
                 }
-            }
-            builder.addInterceptor(HttpLoggingInterceptor(logger).apply { level = HttpLoggingInterceptor.Level.BODY })
-        }
 
-        return builder.build()
+            }.build()
     }
 
     private fun buildRateLimitedClient(): OkHttpClient {

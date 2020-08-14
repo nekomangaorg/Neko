@@ -125,8 +125,9 @@ dependencies {
 
     // Network client
     implementation("com.squareup.okhttp3:okhttp:${Versions.OKHTTP}")
+    implementation("com.squareup.okhttp3:okhttp-dnsoverhttps:${Versions.OKHTTP}")
     implementation("com.squareup.okhttp3:logging-interceptor:${Versions.OKHTTP}")
-    implementation("com.squareup.okio:okio:2.6.0")
+    implementation("com.squareup.okio:okio:2.7.0")
 
     // Chucker
     val chuckerVersion = "3.2.0"
