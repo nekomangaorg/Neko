@@ -161,12 +161,15 @@ class DownloadService : Service() {
         subscriptions += ReactiveNetwork.observeNetworkConnectivity(applicationContext)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({ state ->
-                onNetworkStateChanged(state)
-            }, {
-                toast(R.string.could_not_download_chapter_can_try_again)
-                stopSelf()
-            })
+            .subscribe(
+                { state ->
+                    onNetworkStateChanged(state)
+                },
+                {
+                    toast(R.string.could_not_download_chapter_can_try_again)
+                    stopSelf()
+                }
+            )
     }
 
     /**

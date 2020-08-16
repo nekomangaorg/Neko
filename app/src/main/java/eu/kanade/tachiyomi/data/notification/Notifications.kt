@@ -76,24 +76,27 @@ object Notifications {
             NotificationChannelGroup(GROUP_BACKUP_RESTORE, context.getString(R.string.group_backup_restore)),
             NotificationChannelGroup(GROUP_DOWNLOADER, context.getString(R.string.group_downloader))
         ).forEach(context.notificationManager::createNotificationChannelGroup)
-        
-        val channels = listOf(NotificationChannel(
-            CHANNEL_COMMON,
-            context.getString(R.string.common),
-            NotificationManager.IMPORTANCE_LOW
-        ), NotificationChannel(
-            CHANNEL_LIBRARY,
-            context.getString(R.string.updating_library),
-            NotificationManager.IMPORTANCE_LOW
-        ).apply {
-            setShowBadge(false)
-        }, NotificationChannel(
-            CHANNEL_DOWNLOADER_PROGRESS, context.getString(R.string.downloads),
-            NotificationManager.IMPORTANCE_LOW
-        ).apply {
-            group = GROUP_DOWNLOADER
-            setShowBadge(false)
-        },
+
+        val channels = listOf(
+            NotificationChannel(
+                CHANNEL_COMMON,
+                context.getString(R.string.common),
+                NotificationManager.IMPORTANCE_LOW
+            ),
+            NotificationChannel(
+                CHANNEL_LIBRARY,
+                context.getString(R.string.updating_library),
+                NotificationManager.IMPORTANCE_LOW
+            ).apply {
+                setShowBadge(false)
+            },
+            NotificationChannel(
+                CHANNEL_DOWNLOADER_PROGRESS, context.getString(R.string.downloads),
+                NotificationManager.IMPORTANCE_LOW
+            ).apply {
+                group = GROUP_DOWNLOADER
+                setShowBadge(false)
+            },
             NotificationChannel(
                 CHANNEL_DOWNLOADER_COMPLETE, context.getString(R.string.download_complete),
                 NotificationManager.IMPORTANCE_LOW
@@ -112,7 +115,8 @@ object Notifications {
                 CHANNEL_NEW_CHAPTERS,
                 context.getString(R.string.new_chapters),
                 NotificationManager.IMPORTANCE_DEFAULT
-            ), NotificationChannel(
+            ),
+            NotificationChannel(
                 CHANNEL_BACKUP_RESTORE_PROGRESS, context.getString(R.string.backup_restore_progress),
                 NotificationManager.IMPORTANCE_LOW
             ).apply {

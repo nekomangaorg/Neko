@@ -97,7 +97,6 @@ class AboutController : SettingsController() {
             }
         }
 
-
         preferenceCategory {
             preference {
                 titleRes = R.string.website
@@ -176,10 +175,12 @@ class AboutController : SettingsController() {
 
     class NewUpdateDialogController(bundle: Bundle? = null) : DialogController(bundle) {
 
-        constructor(body: String, url: String) : this(Bundle().apply {
-            putString(BODY_KEY, body)
-            putString(URL_KEY, url)
-        })
+        constructor(body: String, url: String) : this(
+            Bundle().apply {
+                putString(BODY_KEY, body)
+                putString(URL_KEY, url)
+            }
+        )
 
         override fun onCreateDialog(savedViewState: Bundle?): Dialog {
             return MaterialDialog(activity!!)

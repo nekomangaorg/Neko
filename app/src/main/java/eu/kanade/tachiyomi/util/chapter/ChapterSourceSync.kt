@@ -56,7 +56,6 @@ fun syncChaptersWithSource(
             } else {
                 false
             }
-
         }
 
         // Add the chapter if not in db already, or update if the metadata changed.

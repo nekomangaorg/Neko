@@ -49,9 +49,11 @@ class SettingsReaderController : SettingsController() {
                 key = Keys.doubleTapAnimationSpeed
                 titleRes = R.string.double_tap_anim_speed
                 entries = listOf(
-                    context.getString(R.string.no_animation), context.getString(
+                    context.getString(R.string.no_animation),
+                    context.getString(
                         R.string.fast
-                    ), context.getString(R.string.normal)
+                    ),
+                    context.getString(R.string.normal)
                 )
                 entryValues = listOf(1, 250, 500) // using a value of 0 breaks the image viewer, so
                 // min is 1
@@ -90,7 +92,7 @@ class SettingsReaderController : SettingsController() {
                 titleRes = R.string.skip_read_chapters
                 defaultValue = false
             }
-            
+
             switchPreference {
                 key = Keys.skipFiltered
                 titleRes = R.string.skip_hidden_chapters

@@ -128,7 +128,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
         try {
             WebView(applicationContext)
         } catch (e: Exception) {
-            XLog.e("Exception when creating webview at start",e)
+            XLog.e("Exception when creating webview at start", e)
         }
         super.onCreate(savedInstanceState)
 
@@ -177,9 +177,10 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
             val currentController = router.backstack.lastOrNull()?.controller()
             if (!continueSwitchingTabs && currentController is BottomNavBarInterface) {
                 if (!currentController.canChangeTabs {
-                        continueSwitchingTabs = true
-                        this@MainActivity.bottom_nav.selectedItemId = id
-                    }) return@setOnNavigationItemSelectedListener false
+                    continueSwitchingTabs = true
+                    this@MainActivity.bottom_nav.selectedItemId = id
+                }
+                ) return@setOnNavigationItemSelectedListener false
             }
             continueSwitchingTabs = false
             val currentRoot = router.backstack.firstOrNull()
@@ -365,7 +366,8 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
         ) {
             val recentsItem = bottom_nav.getItemView(R.id.nav_recents) ?: return
             preferences.shownDownloadQueueTutorial().set(true)
-            TapTargetView.showFor(this,
+            TapTargetView.showFor(
+                this,
                 TapTarget.forView(
                     recentsItem,
                     getString(R.string.manage_whats_downloading),
@@ -380,7 +382,8 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
                         super.onTargetClick(view)
                         bottom_nav.selectedItemId = R.id.nav_recents
                     }
-                })
+                }
+            )
         }
     }
 
@@ -516,9 +519,9 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
                 // This way the snackbar will only be dismissed if
                 // the user clicks outside it.
                 if (canDismissSnackBar && !sRect.contains(
-                        ev.x.toInt(),
-                        ev.y.toInt()
-                    ) && (extRect == null || !extRect.contains(ev.x.toInt(), ev.y.toInt()))
+                    ev.x.toInt(),
+                    ev.y.toInt()
+                ) && (extRect == null || !extRect.contains(ev.x.toInt(), ev.y.toInt()))
                 ) {
                     snackBar?.dismiss()
                     snackBar = null
@@ -557,9 +560,11 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
         alphaAnimation.addUpdateListener { valueAnimator ->
             bottom_nav.alpha = valueAnimator.animatedValue as Float
         }
-        alphaAnimation.addListener(EndAnimatorListener {
-            bottom_nav.visibility = if (hideBottomNav) View.GONE else View.VISIBLE
-        })
+        alphaAnimation.addListener(
+            EndAnimatorListener {
+                bottom_nav.visibility = if (hideBottomNav) View.GONE else View.VISIBLE
+            }
+        )
         alphaAnimation.duration = 200
         alphaAnimation.startDelay = 50
         animationSet?.playTogether(alphaAnimation)
@@ -596,8 +601,8 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
                 val sheetRect = Rect()
                 bottom_nav.getGlobalVisibleRect(sheetRect)
                 if (sheetRect.contains(
-                        e1.x.toInt(), e1.y.toInt()
-                    ) && abs(diffY) > Companion.SWIPE_THRESHOLD && abs(velocityY) > Companion.SWIPE_VELOCITY_THRESHOLD && diffY <= 0
+                    e1.x.toInt(), e1.y.toInt()
+                ) && abs(diffY) > Companion.SWIPE_THRESHOLD && abs(velocityY) > Companion.SWIPE_VELOCITY_THRESHOLD && diffY <= 0
                 ) {
                     val bottomSheetController =
                         router.backstack.lastOrNull()?.controller() as? BottomSheetController

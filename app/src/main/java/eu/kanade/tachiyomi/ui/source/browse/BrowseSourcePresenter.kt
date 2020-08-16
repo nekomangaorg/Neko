@@ -121,11 +121,15 @@ open class BrowseSourcePresenter(
             query = savedState.getString(::query.name, "")
         }
 
-        add(prefs.browseAsList().asObservable()
-                .subscribe { setDisplayMode(it) })
+        add(
+            prefs.browseAsList().asObservable()
+                .subscribe { setDisplayMode(it) }
+        )
 
-        add(prefs.browseShowLibrary().asObservable()
-                .subscribe { setShowLibrary(it) })
+        add(
+            prefs.browseShowLibrary().asObservable()
+                .subscribe { setShowLibrary(it) }
+        )
 
         restartPager()
     }
@@ -165,18 +169,22 @@ open class BrowseSourcePresenter(
             .observeOn(Schedulers.io())
             .map { it.first to it.second.map { networkToLocalManga(it, sourceId) } }
             .doOnNext { initializeMangas(it.second) }
-            .map { it.first to it.second.map { BrowseSourceItem(it, browseAsList, sourceListType, isFollows) }
+            .map {
+                it.first to it.second.map { BrowseSourceItem(it, browseAsList, sourceListType, isFollows) }
                     .filter { isLibraryVisible || !it.manga.favorite }
             }
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribeReplay({ view, (page, mangas) ->
-                if (isDeepLink) {
-                    view.goDirectlyForDeepLink(mangas.first().manga)
+            .subscribeReplay(
+                { view, (page, mangas) ->
+                    if (isDeepLink) {
+                        view.goDirectlyForDeepLink(mangas.first().manga)
+                    }
+                    view.onAddPage(page, mangas)
+                },
+                { _, error ->
+                    XLog.e(error)
                 }
-                view.onAddPage(page, mangas)
-            }, { _, error ->
-                XLog.e(error)
-            })
+            )
 
         // Request first page.
         requestNext()
@@ -190,9 +198,12 @@ open class BrowseSourcePresenter(
 
         pageSubscription?.let { remove(it) }
         pageSubscription = Observable.defer { pager.requestNext() }
-            .subscribeFirst({ _, _ ->
-                // Nothing to do when onNext is emitted.
-            }, BrowseSourceController::onAddPageError)
+            .subscribeFirst(
+                { _, _ ->
+                    // Nothing to do when onNext is emitted.
+                },
+                BrowseSourceController::onAddPageError
+            )
     }
 
     /**
@@ -234,12 +245,15 @@ open class BrowseSourcePresenter(
             .concatMap { getMangaDetailsObservable(it) }
             .onBackpressureBuffer()
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({ manga ->
-                @Suppress("DEPRECATION")
-                view?.onMangaInitialized(manga)
-            }, { error ->
-                XLog.e(error)
-            })
+            .subscribe(
+                { manga ->
+                    @Suppress("DEPRECATION")
+                    view?.onMangaInitialized(manga)
+                },
+                { error ->
+                    XLog.e(error)
+                }
+            )
             .apply { add(this) }
     }
 

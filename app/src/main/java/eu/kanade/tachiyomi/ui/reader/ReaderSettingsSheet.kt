@@ -49,7 +49,8 @@ class ReaderSettingsSheet(private val activity: ReaderActivity) :
 
         sheetBehavior = BottomSheetBehavior.from(view.parent as ViewGroup)
         setEdgeToEdge(
-            activity, view, if (context.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE)
+            activity, view,
+            if (context.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE)
                 0 else -1
         )
         window?.navigationBarColor = Color.TRANSPARENT

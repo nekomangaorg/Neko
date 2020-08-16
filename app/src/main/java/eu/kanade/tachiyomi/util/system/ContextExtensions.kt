@@ -132,9 +132,9 @@ fun Context.iconicsDrawableLarge(icon: IIcon, size: Int = 24, color: Int = R.att
 }
 
 @SuppressLint("ResourceType")
-    /**
-     * default tinted to actionbar
-     */
+/**
+ * default tinted to actionbar
+ */
 fun Context.iconicsDrawableMedium(icon: IIcon, size: Int = 18, color: Int = R.attr.actionBarTintColor, attributeColor: Boolean = true): IconicsDrawable {
     return this.iconicsDrawable(icon, size, color, attributeColor)
 }
@@ -167,8 +167,10 @@ val Float.dpToPx: Float
 
 /** Converts to px and takes into account LTR/RTL layout */
 val Float.dpToPxEnd: Float
-    get() = (this * Resources.getSystem().displayMetrics.density *
-        if (Resources.getSystem().isLTR) 1 else -1)
+    get() = (
+        this * Resources.getSystem().displayMetrics.density *
+            if (Resources.getSystem().isLTR) 1 else -1
+        )
 
 val Resources.isLTR
     get() = configuration.layoutDirection == View.LAYOUT_DIRECTION_LTR

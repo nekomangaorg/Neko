@@ -51,10 +51,9 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
         try {
             followsPageResult = MdUtil.jsonParser.parse(FollowsPageResult.serializer(), response.body!!.string())
         } catch (e: Exception) {
-            XLog.e("error parsing follows",e)
+            XLog.e("error parsing follows", e)
         }
         val empty = followsPageResult?.result?.isEmpty()
-
 
         if (empty == null || empty) {
             return MangasPage(mutableListOf(), false)
@@ -78,7 +77,7 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
         try {
             followsPageResult = MdUtil.jsonParser.parse(FollowsPageResult.serializer(), response.body!!.string())
         } catch (e: Exception) {
-            XLog.e("error parsing follows",e)
+            XLog.e("error parsing follows", e)
         }
         val track = Track.create(TrackManager.MDLIST)
         val result = followsPageResult?.result

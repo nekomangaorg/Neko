@@ -33,7 +33,8 @@ import kotlinx.android.synthetic.main.recently_read_controller.*
  * Uses R.layout.fragment_recently_read.
  * UI related actions should be called from here.
  */
-class RecentlyReadController(bundle: Bundle? = null) : BaseController(bundle),
+class RecentlyReadController(bundle: Bundle? = null) :
+    BaseController(bundle),
     FlexibleAdapter.OnUpdateListener,
     FlexibleAdapter.EndlessScrollListener,
     RecentlyReadAdapter.OnRemoveClickListener,
@@ -132,7 +133,8 @@ class RecentlyReadController(bundle: Bundle? = null) : BaseController(bundle),
             empty_view?.hide()
         } else {
             empty_view.show(
-                CommunityMaterial.Icon2.cmd_history, R.string
+                CommunityMaterial.Icon2.cmd_history,
+                R.string
                     .no_recently_read_manga
             )
         }

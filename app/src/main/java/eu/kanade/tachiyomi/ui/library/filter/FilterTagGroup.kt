@@ -16,7 +16,7 @@ import eu.kanade.tachiyomi.util.view.visibleIf
 import kotlinx.android.synthetic.main.filter_buttons.view.*
 
 class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : LinearLayout
-    (context, attrs) {
+(context, attrs) {
 
     private var listener: FilterTagGroupListener? = null
 
@@ -83,7 +83,8 @@ class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: Attribute
 
     private fun toggleButton(index: Int, callBack: Boolean = true) {
         if (index < 0 || itemCount == 0 ||
-            (isActivated && index != buttons.indexOfFirst { it.isActivated }))
+            (isActivated && index != buttons.indexOfFirst { it.isActivated })
+        )
             return
         if (callBack) {
             val transition = androidx.transition.AutoTransition()
@@ -94,8 +95,10 @@ class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: Attribute
         }
         if (itemCount == 1) {
             firstButton.isActivated = !firstButton.isActivated
-            firstButton.setTextColor(if (firstButton.isActivated) Color.WHITE else context
-                .getResourceColor(android.R.attr.textColorPrimary))
+            firstButton.setTextColor(
+                if (firstButton.isActivated) Color.WHITE else context
+                    .getResourceColor(android.R.attr.textColorPrimary)
+            )
             listener?.onFilterClicked(this, if (firstButton.isActivated) index else -1, callBack)
             return
         }
@@ -118,8 +121,10 @@ class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: Attribute
             buttons.forEach { if (it != mainButton) it.gone() }
             separators.forEach { it.gone() }
         }
-        mainButton.setTextColor(if (mainButton.isActivated) Color.WHITE else context
-            .getResourceColor(android.R.attr.textColorPrimary))
+        mainButton.setTextColor(
+            if (mainButton.isActivated) Color.WHITE else context
+                .getResourceColor(android.R.attr.textColorPrimary)
+        )
     }
 }
 

@@ -109,7 +109,8 @@ import java.io.File
 import java.util.Locale
 import kotlin.math.max
 
-class MangaDetailsController : BaseController,
+class MangaDetailsController :
+    BaseController,
     FlexibleAdapter.OnItemClickListener,
     FlexibleAdapter.OnItemLongClickListener,
     ActionMode.Callback,
@@ -122,11 +123,13 @@ class MangaDetailsController : BaseController,
         manga: Manga,
         fromCatalogue: Boolean = false,
         update: Boolean = false
-    ) : super(Bundle().apply {
-        putLong(MANGA_EXTRA, manga.id ?: 0)
-        putBoolean(FROM_CATALOGUE_EXTRA, fromCatalogue)
-        putBoolean(UPDATE_EXTRA, update)
-    }) {
+    ) : super(
+        Bundle().apply {
+            putLong(MANGA_EXTRA, manga.id ?: 0)
+            putBoolean(FROM_CATALOGUE_EXTRA, fromCatalogue)
+            putBoolean(UPDATE_EXTRA, update)
+        }
+    ) {
         presenter = MangaDetailsPresenter(this, manga)
     }
 
@@ -220,11 +223,15 @@ class MangaDetailsController : BaseController,
         swipe_refresh.setDistanceToTriggerSync(70.dpToPx)
         activity!!.appbar.elevation = 0f
 
-        scrollViewWith(recycler, padBottom = true, customPadding = true, afterInsets = { insets ->
-            setInsets(insets, appbarHeight, offset)
-        }, liftOnScroll = {
-            colorToolbar(it)
-        })
+        scrollViewWith(
+            recycler, padBottom = true, customPadding = true,
+            afterInsets = { insets ->
+                setInsets(insets, appbarHeight, offset)
+            },
+            liftOnScroll = {
+                colorToolbar(it)
+            }
+        )
 
         recycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
@@ -300,35 +307,38 @@ class MangaDetailsController : BaseController,
         val view = view ?: return
 
         val request = LoadRequest.Builder(view.context).data(presenter.manga).allowHardware(false)
-            .target(onSuccess = { drawable ->
-                val bitmap = (drawable as BitmapDrawable).bitmap
-                // Generate the Palette on a background thread.
-                Palette.from(bitmap).generate {
-                    if (recycler == null || it == null) return@generate
-                    val colorBack = view.context.getResourceColor(
-                        android.R.attr.colorBackground
-                    )
-                    // this makes the color more consistent regardless of theme
-                    val backDropColor =
-                        ColorUtils.blendARGB(it.getVibrantColor(colorBack), colorBack, .35f)
+            .target(
+                onSuccess = { drawable ->
+                    val bitmap = (drawable as BitmapDrawable).bitmap
+                    // Generate the Palette on a background thread.
+                    Palette.from(bitmap).generate {
+                        if (recycler == null || it == null) return@generate
+                        val colorBack = view.context.getResourceColor(
+                            android.R.attr.colorBackground
+                        )
+                        // this makes the color more consistent regardless of theme
+                        val backDropColor =
+                            ColorUtils.blendARGB(it.getVibrantColor(colorBack), colorBack, .35f)
 
-                    coverColor = backDropColor
-                    getHeader()?.setBackDrop(backDropColor)
-                    if (toolbarIsColored) {
-                        val translucentColor = ColorUtils.setAlphaComponent(backDropColor, 175)
-                        (activity as MainActivity).toolbar.setBackgroundColor(translucentColor)
-                        activity?.window?.statusBarColor = translucentColor
+                        coverColor = backDropColor
+                        getHeader()?.setBackDrop(backDropColor)
+                        if (toolbarIsColored) {
+                            val translucentColor = ColorUtils.setAlphaComponent(backDropColor, 175)
+                            (activity as MainActivity).toolbar.setBackgroundColor(translucentColor)
+                            activity?.window?.statusBarColor = translucentColor
+                        }
+                    }
+                    manga_cover_full.setImageDrawable(drawable)
+                    getHeader()?.updateCover(presenter.manga)
+                },
+                onError = {
+                    val file = presenter.coverCache.getCoverFile(presenter.manga)
+                    if (file.exists()) {
+                        file.delete()
+                        setPaletteColor()
                     }
                 }
-                manga_cover_full.setImageDrawable(drawable)
-                getHeader()?.updateCover(presenter.manga)
-            }, onError = {
-                val file = presenter.coverCache.getCoverFile(presenter.manga)
-                if (file.exists()) {
-                    file.delete()
-                    setPaletteColor()
-                }
-            }).build()
+            ).build()
         Coil.imageLoader(view.context).execute(request)
     }
 
@@ -337,8 +347,8 @@ class MangaDetailsController : BaseController,
         val activity = activity ?: return
         // if the theme is using inverted toolbar color
         if (!activity.isInNightMode() && ThemeUtil.isBlueTheme(
-                presenter.preferences.theme()
-            )
+            presenter.preferences.theme()
+        )
         ) {
             if (forThis) (activity as MainActivity).appbar.context.setTheme(
                 R.style.ThemeOverlay_AppCompat_DayNight_ActionBar
@@ -478,10 +488,12 @@ class MangaDetailsController : BaseController,
             1 -> return
             else -> {
                 MaterialDialog(context).title(R.string.chapters_removed).message(
-                    text = context.resources.getQuantityString(R.plurals.deleted_chapters,
+                    text = context.resources.getQuantityString(
+                        R.plurals.deleted_chapters,
                         deletedChapters.size,
                         deletedChapters.size,
-                        deletedChapters.joinToString("\n") { "${it.name}" })
+                        deletedChapters.joinToString("\n") { "${it.name}" }
+                    )
                 ).positiveButton(R.string.delete) {
                     presenter.deleteChapters(deletedChapters, false)
                     if (it.isCheckPromptChecked()) deleteRemovedPref.set(2)
@@ -590,8 +602,6 @@ class MangaDetailsController : BaseController,
             popup.menu.findItem(R.id.action_view_comments).isVisible = true
         }
 
-
-
         popup.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.action_mark_previous_as_read -> markPreviousAs(item, true)
@@ -646,7 +656,8 @@ class MangaDetailsController : BaseController,
         snack?.dismiss()
         snack = view?.snack(
             if (bookmarked) R.string.removed_bookmark
-            else R.string.bookmarked, Snackbar.LENGTH_INDEFINITE
+            else R.string.bookmarked,
+            Snackbar.LENGTH_INDEFINITE
         ) {
             setAction(R.string.undo) {
                 bookmarkChapters(listOf(item), bookmarked)
@@ -665,7 +676,8 @@ class MangaDetailsController : BaseController,
         snack?.dismiss()
         snack = view?.snack(
             if (read) R.string.marked_as_unread
-            else R.string.marked_as_read, Snackbar.LENGTH_INDEFINITE
+            else R.string.marked_as_read,
+            Snackbar.LENGTH_INDEFINITE
         ) {
             var undoing = false
             setAction(R.string.undo) {
@@ -767,11 +779,14 @@ class MangaDetailsController : BaseController,
 
     override fun prepareToShareManga() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            val request = LoadRequest.Builder(activity!!).data(presenter.manga).target(onError = {
-                shareManga()
-            }, onSuccess = {
-                presenter.shareManga((it as BitmapDrawable).bitmap)
-            }).build()
+            val request = LoadRequest.Builder(activity!!).data(presenter.manga).target(
+                onError = {
+                    shareManga()
+                },
+                onSuccess = {
+                    presenter.shareManga((it as BitmapDrawable).bitmap)
+                }
+            ).build()
             Coil.imageLoader(activity!!).execute(request)
         } else {
             shareManga()
@@ -824,7 +839,8 @@ class MangaDetailsController : BaseController,
         if (isNotOnline()) return
         val activity = activity ?: return
         val intent = WebViewActivity.newIntent(
-            activity.applicationContext, presenter.source.id, url, presenter.manga
+            activity.applicationContext, presenter.source.id, url,
+            presenter.manga
                 .title
         )
         startActivity(intent)
@@ -900,11 +916,14 @@ class MangaDetailsController : BaseController,
         val view = view ?: return
         presenter.downloadChapters(chapters)
         val text = view.context.getString(
-            R.string.add_x_to_library, presenter.manga.mangaType
-                (view.context).toLowerCase(Locale.ROOT)
+            R.string.add_x_to_library,
+            presenter.manga.mangaType
+            (view.context).toLowerCase(Locale.ROOT)
         )
-        if (!presenter.manga.favorite && (snack == null ||
-                snack?.getText() != text)
+        if (!presenter.manga.favorite && (
+            snack == null ||
+                snack?.getText() != text
+            )
         ) {
             snack = view.snack(text, Snackbar.LENGTH_INDEFINITE) {
                 setAction(R.string.add) {
@@ -935,8 +954,8 @@ class MangaDetailsController : BaseController,
         if (item != null) {
             openChapter(item.chapter)
         } else if (snack == null || snack?.getText() != view?.context?.getString(
-                R.string.next_chapter_not_found
-            )
+            R.string.next_chapter_not_found
+        )
         ) {
             snack = view?.snack(R.string.next_chapter_not_found, Snackbar.LENGTH_LONG) {
                 addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {

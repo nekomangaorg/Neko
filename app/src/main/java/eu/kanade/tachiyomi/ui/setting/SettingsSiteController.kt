@@ -21,7 +21,9 @@ import eu.kanade.tachiyomi.widget.preference.SiteLoginPreference
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class SettingsSiteController : SettingsController(), MangadexLoginDialog.Listener,
+class SettingsSiteController :
+    SettingsController(),
+    MangadexLoginDialog.Listener,
     MangadexLogoutDialog.Listener {
 
     private val mdex by lazy { Injekt.get<SourceManager>().getMangadex() as HttpSource }
@@ -147,7 +149,6 @@ class SettingsSiteController : SettingsController(), MangadexLoginDialog.Listene
                     preferences!!.langsToShow().set(selected.joinToString(","))
                 }
                 .positiveButton(android.R.string.ok) {
-
                 }
                 .negativeButton(android.R.string.cancel)
         }

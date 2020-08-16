@@ -49,12 +49,15 @@ class HttpPageLoader(
             .concatMap { source.fetchImageFromCacheThenNet(it) }
             .repeat()
             .subscribeOn(Schedulers.io())
-            .subscribe({
-            }, { error ->
-                if (error !is InterruptedException) {
-                    XLog.e(error)
+            .subscribe(
+                {
+                },
+                { error ->
+                    if (error !is InterruptedException) {
+                        XLog.e(error)
+                    }
                 }
-            })
+            )
     }
 
     /**

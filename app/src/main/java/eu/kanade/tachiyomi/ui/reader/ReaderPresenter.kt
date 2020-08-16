@@ -115,7 +115,6 @@ class ReaderPresenter(
             XLog.d(it.chapterLog())
             ReaderChapter(it)
         }
-
     }
 
     var chapterItems = emptyList<ReaderChapterItem>()
@@ -185,9 +184,12 @@ class ReaderPresenter(
             .first()
             .observeOn(AndroidSchedulers.mainThread())
             .doOnNext { init(it, initialChapterId) }
-            .subscribeFirst({ _, _ ->
-                // Ignore onNext event
-            }, ReaderActivity::setInitialChapterError)
+            .subscribeFirst(
+                { _, _ ->
+                    // Ignore onNext event
+                },
+                ReaderActivity::setInitialChapterError
+            )
     }
 
     suspend fun getChapters(): List<ReaderChapterItem> {
@@ -246,9 +248,12 @@ class ReaderPresenter(
             .flatMap { getLoadObservable(loader!!, it) }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribeFirst({ _, _ ->
-                // Ignore onNext event
-            }, ReaderActivity::setInitialChapterError)
+            .subscribeFirst(
+                { _, _ ->
+                    // Ignore onNext event
+                },
+                ReaderActivity::setInitialChapterError
+            )
     }
 
     /**
@@ -263,15 +268,17 @@ class ReaderPresenter(
         chapter: ReaderChapter
     ): Observable<ViewerChapters> {
         return loader.loadChapter(chapter)
-            .andThen(Observable.fromCallable {
-                val chapterPos = chapterList.indexOf(chapter)
+            .andThen(
+                Observable.fromCallable {
+                    val chapterPos = chapterList.indexOf(chapter)
 
-                ViewerChapters(
-                    chapter,
-                    chapterList.getOrNull(chapterPos - 1),
-                    chapterList.getOrNull(chapterPos + 1)
-                )
-            })
+                    ViewerChapters(
+                        chapter,
+                        chapterList.getOrNull(chapterPos - 1),
+                        chapterList.getOrNull(chapterPos + 1)
+                    )
+                }
+            )
             .observeOn(AndroidSchedulers.mainThread())
             .doOnNext { newChapters ->
 
@@ -293,7 +300,6 @@ class ReaderPresenter(
                 XLog.d("loadObservable newChapters afterRef currentChapter %s", newChapters.currChapter.urlAndName())
                 XLog.d("loadObservable newChapters afterRef nextChapter %s", newChapters.nextChapter?.urlAndName())
 
-
                 viewerChaptersRelay.call(newChapters)
             }
     }
@@ -311,12 +317,14 @@ class ReaderPresenter(
         }
         val mangaDex = sourceManager.getMangadex()
         val mangaId = mangaDex.getMangaIdFromChapterId(urlChapterId)
-        val url = "/manga/${mangaId}/"
+        val url = "/manga/$mangaId/"
         val dbManga = db.getMangadexManga(url).executeAsBlocking()
-        val tempManga = dbManga ?: (MangaImpl().apply {
-            this.url = url
-            title = ""
-        })
+        val tempManga = dbManga ?: (
+            MangaImpl().apply {
+                this.url = url
+                title = ""
+            }
+            )
         val (networkManga, chapters) = mangaDex.fetchMangaAndChapterDetails(tempManga)
 
         tempManga.copyFrom(networkManga)
@@ -369,13 +377,16 @@ class ReaderPresenter(
         activeChapterSubscription = getLoadObservable(loader, ReaderChapter(chapter))
             .doOnSubscribe { isLoadingAdjacentChapterRelay.call(true) }
             .doOnUnsubscribe { isLoadingAdjacentChapterRelay.call(false) }
-            .subscribeFirst({ view, _ ->
-                val lastPage = if (chapter.pages_left <= 1) 0 else chapter.last_page_read
-                view.moveToPageIndex(lastPage)
-                view.refreshChapters()
-            }, { _, _ ->
-                // Ignore onError event, viewers handle that state
-            })
+            .subscribeFirst(
+                { view, _ ->
+                    val lastPage = if (chapter.pages_left <= 1) 0 else chapter.last_page_read
+                    view.moveToPageIndex(lastPage)
+                    view.refreshChapters()
+                },
+                { _, _ ->
+                    // Ignore onError event, viewers handle that state
+                }
+            )
     }
 
     fun toggleBookmark(chapter: Chapter) {

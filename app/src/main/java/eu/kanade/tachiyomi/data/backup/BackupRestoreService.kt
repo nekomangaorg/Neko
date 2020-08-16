@@ -382,7 +382,8 @@ class BackupRestoreService : Service() {
      */
     private fun showProgressNotification(current: Int, total: Int, title: String) {
         notificationManager.notify(
-            Notifications.ID_RESTORE_PROGRESS, progressNotification
+            Notifications.ID_RESTORE_PROGRESS,
+            progressNotification
                 .setContentTitle(title.chop(30))
                 .setContentText(
                     getString(
@@ -412,8 +413,10 @@ class BackupRestoreService : Service() {
 
         content.add(
             getString(
-                R.string.restore_completed_successful, restoreProgress
-                    .toString(), restoreAmount.toString()
+                R.string.restore_completed_successful,
+                restoreProgress
+                    .toString(),
+                restoreAmount.toString()
             )
         )
 
@@ -452,10 +455,12 @@ class BackupRestoreService : Service() {
             .setPriority(NotificationCompat.PRIORITY_HIGH)
         if (errors.size > 0 && !path.isNullOrEmpty() && !file.isNullOrEmpty()) {
             resultNotification.addAction(
-                R.drawable.ic_close_24dp, getString(
+                R.drawable.ic_close_24dp,
+                getString(
                     R.string
                         .view_all_errors
-                ), getErrorLogIntent(path, file)
+                ),
+                getErrorLogIntent(path, file)
             )
         }
         notificationManager.notify(Notifications.ID_RESTORE_COMPLETE, resultNotification.build())

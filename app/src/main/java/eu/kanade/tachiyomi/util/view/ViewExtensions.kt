@@ -271,8 +271,10 @@ fun BottomSheetDialog.setEdgeToEdge(
         .SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
 
     val insets = activity.window.decorView.rootWindowInsets
-    (contentView.parent as View).translationX = (insets.systemWindowInsetLeft - insets
-        .systemWindowInsetRight).toFloat() / 2f
+    (contentView.parent as View).translationX = (
+        insets.systemWindowInsetLeft - insets
+            .systemWindowInsetRight
+        ).toFloat() / 2f
     if (setTopMargin > 0) (contentView.parent as View).updateLayoutParams<ViewGroup.MarginLayoutParams> {
         height = activity.window.decorView.height - insets.systemWindowInsetTop - setTopMargin
     }
@@ -299,7 +301,8 @@ fun MaterialButton.resetStrokeColor() {
         ColorUtils.setAlphaComponent(
             context.getResourceColor(
                 R.attr.colorOnSurface
-            ), 31
+            ),
+            31
         )
     )
 }

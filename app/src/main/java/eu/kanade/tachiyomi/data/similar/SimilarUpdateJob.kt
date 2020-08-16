@@ -39,8 +39,8 @@ class SimilarUpdateJob(private val context: Context, workerParams: WorkerParamet
                 else
                     NetworkType.CONNECTED
                 val constraints = Constraints.Builder()
-                        .setRequiredNetworkType(wifiRestriction)
-                        .build()
+                    .setRequiredNetworkType(wifiRestriction)
+                    .build()
 
                 // If we are not skipping the initial then run it right now
                 // Note that we won't run it if the constraints are not satisfied
@@ -50,8 +50,8 @@ class SimilarUpdateJob(private val context: Context, workerParams: WorkerParamet
 
                 // Finally build the periodic request
                 val request = PeriodicWorkRequestBuilder<SimilarUpdateJob>(
-                        interval.toLong(), TimeUnit.DAYS,
-                        1, TimeUnit.HOURS
+                    interval.toLong(), TimeUnit.DAYS,
+                    1, TimeUnit.HOURS
                 )
                     .addTag(TAG)
                     .setConstraints(constraints)

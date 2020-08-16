@@ -165,7 +165,7 @@ class DownloadProvider(private val context: Context) {
                     return@filter !chapterNameHashSet.contains(fileName) && !chapterNameHashSet.contains(afterScanlatorCheck)
                 }
             }
-            //everything else is considered true
+            // everything else is considered true
             return@filter true
         }
     }

@@ -143,7 +143,7 @@ class SimilarUpdateService(
         val destinationFile = File(filesDir, "neko-similar.json")
         val buffer = destinationFile.sink().buffer()
 
-        //write json to file
+        // write json to file
         response.body()?.byteStream()?.source()?.use { input ->
             buffer.use { output ->
                 output.writeAll(input)
@@ -198,12 +198,12 @@ class SimilarUpdateService(
             val nextToken = reader.peek()
 
             if (JsonReader.Token.BEGIN_OBJECT == nextToken) {
-                reader.beginObject();
+                reader.beginObject()
             } else if (JsonReader.Token.NAME == nextToken) {
                 val name = reader.nextName()
                 if (!processingManga && name.isDigitsOnly()) {
                     processingManga = true
-                    //similar add id
+                    // similar add id
                     mangaId = name
                 } else if (name == "m_titles") {
                     processingTitles = true
@@ -245,7 +245,8 @@ class SimilarUpdateService(
      */
     private fun showProgressNotification(current: Int, total: Int) {
         notificationManager.notify(
-            Notifications.ID_SIMILAR_PROGRESS, progressNotification
+            Notifications.ID_SIMILAR_PROGRESS,
+            progressNotification
                 .setContentTitle(
                     getString(
                         R.string.similar_loading_percent,

@@ -34,30 +34,34 @@ class LibraryGestureDetector(private val controller: LibraryController) : Gestur
             }
             result = true
         } else if (abs(diffX) >= abs(diffY) && abs(diffX) > MainActivity.SWIPE_THRESHOLD * 3 && abs(
-                velocityX
-            ) > MainActivity.SWIPE_VELOCITY_THRESHOLD
+            velocityX
+        ) > MainActivity.SWIPE_VELOCITY_THRESHOLD
         ) {
             if (diffX <= 0) {
                 controller.category_hopper_frame.updateLayoutParams<CoordinatorLayout.LayoutParams> {
                     anchorGravity =
-                        Gravity.TOP or (if (anchorGravity == Gravity.TOP or Gravity.RIGHT) {
+                        Gravity.TOP or (
+                        if (anchorGravity == Gravity.TOP or Gravity.RIGHT) {
                             controller.preferences.hopperGravity().set(1)
                             Gravity.CENTER
                         } else {
                             controller.preferences.hopperGravity().set(0)
                             Gravity.LEFT
-                        })
+                        }
+                        )
                 }
             } else {
                 controller.category_hopper_frame.updateLayoutParams<CoordinatorLayout.LayoutParams> {
                     anchorGravity =
-                        Gravity.TOP or Gravity.TOP or (if (anchorGravity == Gravity.TOP or Gravity.LEFT) {
+                        Gravity.TOP or Gravity.TOP or (
+                        if (anchorGravity == Gravity.TOP or Gravity.LEFT) {
                             controller.preferences.hopperGravity().set(1)
                             Gravity.CENTER
                         } else {
                             controller.preferences.hopperGravity().set(2)
                             Gravity.RIGHT
-                        })
+                        }
+                        )
                 }
             }
             if (!controller.hasMovedHopper) {

@@ -257,9 +257,9 @@ class PagerPageHolder(
                     if (viewer.config.readerTheme >= 2) {
                         val imageView = initSubsamplingImageView()
                         if (page.bg != null && page.bgType == getBGType(
-                                viewer.config.readerTheme,
-                                context
-                            )
+                            viewer.config.readerTheme,
+                            context
+                        )
                         ) {
                             imageView.setImage(ImageSource.inputStream(openStream!!))
                             imageView.background = page.bg
@@ -303,7 +303,8 @@ class PagerPageHolder(
             ImageUtil.autoSetBackground(
                 BitmapFactory.decodeByteArray(
                     bytesArray, 0, bytesArray.size
-                ), preferences.readerTheme().get() == 2, context
+                ),
+                preferences.readerTheme().get() == 2, context
             )
         }
     }

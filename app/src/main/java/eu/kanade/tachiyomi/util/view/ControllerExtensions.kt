@@ -35,7 +35,7 @@ fun Controller.setOnQueryTextChangeListener(
     searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
         override fun onQueryTextChange(newText: String?): Boolean {
             if (!onlyOnSubmit && router.backstack.lastOrNull()
-                    ?.controller() == this@setOnQueryTextChangeListener
+                ?.controller() == this@setOnQueryTextChangeListener
             ) {
                 return f(newText)
             }
@@ -77,7 +77,7 @@ fun Controller.liftAppbarWith(recycler: RecyclerView) {
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
             super.onScrolled(recyclerView, dx, dy)
             if (router?.backstack?.lastOrNull()
-                    ?.controller() == this@liftAppbarWith && activity != null
+                ?.controller() == this@liftAppbarWith && activity != null
             ) {
                 val notAtTop = recycler.canScrollVertically(-1)
                 if (notAtTop != elevate) elevateFunc(notAtTop)
@@ -166,7 +166,7 @@ fun Controller.scrollViewWith(
                 }
             } else {
                 if (!customPadding && lastY == 0f && router.backstack.lastOrNull()
-                        ?.controller() is MangaDetailsController
+                    ?.controller() is MangaDetailsController
                 ) {
                     val parent = recycler.parent as? ViewGroup ?: return
                     val v = View(activity)
@@ -189,7 +189,7 @@ fun Controller.scrollViewWith(
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
             super.onScrolled(recyclerView, dx, dy)
             if (router?.backstack?.lastOrNull()
-                    ?.controller() == this@scrollViewWith && statusBarHeight > -1 &&
+                ?.controller() == this@scrollViewWith && statusBarHeight > -1 &&
                 activity != null && activity!!.appbar.height > 0 &&
                 recycler.translationY == 0f
             ) {
@@ -206,8 +206,13 @@ fun Controller.scrollViewWith(
                     activity!!.appbar.y = MathUtils.clamp(
                         activity!!.appbar.y, -activity!!.appbar.height.toFloat(), 0f
                     )
-                    if (((activity!!.appbar.y <= -activity!!.appbar.height.toFloat() ||
-                            dy == 0 && activity!!.appbar.y == 0f) || dy == 0) && !elevate)
+                    if ((
+                        (
+                            activity!!.appbar.y <= -activity!!.appbar.height.toFloat() ||
+                                dy == 0 && activity!!.appbar.y == 0f
+                            ) || dy == 0
+                        ) && !elevate
+                    )
                         elevateFunc(true)
                     lastY = activity!!.appbar.y
                 }
@@ -218,7 +223,7 @@ fun Controller.scrollViewWith(
             super.onScrollStateChanged(recyclerView, newState)
             if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                 if (router?.backstack?.lastOrNull()
-                        ?.controller() == this@scrollViewWith && statusBarHeight > -1 &&
+                    ?.controller() == this@scrollViewWith && statusBarHeight > -1 &&
                     activity != null && activity!!.appbar.height > 0 &&
                     recycler.translationY == 0f
                 ) {

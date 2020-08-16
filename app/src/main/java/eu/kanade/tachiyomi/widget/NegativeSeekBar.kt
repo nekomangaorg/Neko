@@ -8,7 +8,7 @@ import eu.kanade.tachiyomi.R
 import kotlin.math.abs
 
 class NegativeSeekBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
-        SeekBar(context, attrs) {
+    SeekBar(context, attrs) {
 
     private var minValue: Int = 0
     private var maxValue: Int = 0
@@ -16,8 +16,9 @@ class NegativeSeekBar @JvmOverloads constructor(context: Context, attrs: Attribu
 
     init {
         val styledAttributes = context.obtainStyledAttributes(
-                attrs,
-                R.styleable.NegativeSeekBar, 0, 0)
+            attrs,
+            R.styleable.NegativeSeekBar, 0, 0
+        )
 
         try {
             setMinSeek(styledAttributes.getInt(R.styleable.NegativeSeekBar_min_seek, 0))

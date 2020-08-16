@@ -26,8 +26,11 @@ class MangaDetailsAdapter(
     val delegate: MangaDetailsInterface = controller
     val presenter = controller.presenter
 
-    val decimalFormat = DecimalFormat("#.###", DecimalFormatSymbols()
-        .apply { decimalSeparator = '.' })
+    val decimalFormat = DecimalFormat(
+        "#.###",
+        DecimalFormatSymbols()
+            .apply { decimalSeparator = '.' }
+    )
 
     fun setChapters(items: List<ChapterItem>?) {
         this.items = items ?: emptyList()
@@ -47,10 +50,12 @@ class MangaDetailsAdapter(
         if (s.isNullOrBlank()) {
             updateDataSet(items)
         } else {
-            updateDataSet(items.filter {
-                it.name.contains(s, true) ||
-                    it.scanlator?.contains(s, true) == true
-            })
+            updateDataSet(
+                items.filter {
+                    it.name.contains(s, true) ||
+                        it.scanlator?.contains(s, true) == true
+                }
+            )
         }
     }
 
@@ -71,14 +76,16 @@ class MangaDetailsAdapter(
                 if (volume != null) {
                     recyclerView.context.getString(
                         if (scrollType == MangaDetailsPresenter.MULTIPLE_SEASONS) R.string.season_
-                        else R.string.volume_, volume
+                        else R.string.volume_,
+                        volume
                     )
                 } else {
                     getChapterName(chapter)
                 }
             }
             MangaDetailsPresenter.TENS_OF_CHAPTERS -> recyclerView.context.getString(
-                R.string.chapters_, get10sRange(
+                R.string.chapters_,
+                get10sRange(
                     chapter.chapter_number
                 )
             )

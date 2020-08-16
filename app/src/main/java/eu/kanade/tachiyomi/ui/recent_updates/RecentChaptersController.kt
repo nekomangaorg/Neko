@@ -38,10 +38,13 @@ import com.elvishew.xlog.XLog
  * Uses [R.layout.recent_chapters_controller].
  * UI related actions should be called from here.
  */
-class RecentChaptersController(bundle: Bundle? = null) : BaseController(bundle),
-    FlexibleAdapter.OnItemClickListener, FlexibleAdapter.OnUpdateListener,
+class RecentChaptersController(bundle: Bundle? = null) :
+    BaseController(bundle),
+    FlexibleAdapter.OnItemClickListener,
+    FlexibleAdapter.OnUpdateListener,
     FlexibleAdapter.OnItemMoveListener,
-    RecentChaptersAdapter.OnCoverClickListener, BaseChapterAdapter.DownloadInterface {
+    RecentChaptersAdapter.OnCoverClickListener,
+    BaseChapterAdapter.DownloadInterface {
 
     /**
      * Adapter containing the recent chapters.

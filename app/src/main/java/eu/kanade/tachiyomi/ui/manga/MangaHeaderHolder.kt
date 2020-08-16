@@ -175,7 +175,7 @@ class MangaHeaderHolder(
                 else -> CommunityMaterial.Icon2.cmd_heart_outline as IIcon
             }
             setImageDrawable(context.iconicsDrawableLarge(icon))
-                    adapter.delegate.setFavButtonPopup(this)
+            adapter.delegate.setFavButtonPopup(this)
         }
         true_backdrop.setBackgroundColor(
             adapter.delegate.coverColor()
@@ -226,7 +226,8 @@ class MangaHeaderHolder(
                     }
                 resources.getString(
                     if (nextChapter.last_page_read > 0) R.string.continue_reading_
-                    else R.string.start_reading_, readTxt
+                    else R.string.start_reading_,
+                    readTxt
                 )
             } else {
                 resources.getString(R.string.all_chapters_read)
@@ -241,17 +242,19 @@ class MangaHeaderHolder(
         }
 
         manga_status.visibleIf(manga.status != 0)
-        manga_status.text = (itemView.context.getString(
-            when (manga.status) {
-                SManga.ONGOING -> R.string.ongoing
-                SManga.COMPLETED -> R.string.completed
-                SManga.LICENSED -> R.string.licensed
-                SManga.PUBLICATION_COMPLETE -> R.string.publication_complete
-                SManga.HIATUS -> R.string.hiatus
-                SManga.CANCELLED -> R.string.cancelled
-                else -> R.string.unknown
-            }
-        ))
+        manga_status.text = (
+            itemView.context.getString(
+                when (manga.status) {
+                    SManga.ONGOING -> R.string.ongoing
+                    SManga.COMPLETED -> R.string.completed
+                    SManga.LICENSED -> R.string.licensed
+                    SManga.PUBLICATION_COMPLETE -> R.string.publication_complete
+                    SManga.HIATUS -> R.string.hiatus
+                    SManga.CANCELLED -> R.string.cancelled
+                    else -> R.string.unknown
+                }
+            )
+            )
 
         manga_rating.visibleIf(manga.rating != null)
         manga_rating.text = "  " + manga.rating
@@ -299,16 +302,22 @@ class MangaHeaderHolder(
     fun updateCover(manga: Manga) {
         if (!manga.initialized) return
         val drawable = adapter.controller.manga_cover_full?.drawable
-        manga_cover.loadAny(manga, builder = {
-            placeholder(drawable)
-            error(drawable)
-            if (manga.favorite) networkCachePolicy(CachePolicy.DISABLED)
-        })
-        backdrop.loadAny(manga, builder = {
-            placeholder(drawable)
-            error(drawable)
-            if (manga.favorite) networkCachePolicy(CachePolicy.DISABLED)
-        })
+        manga_cover.loadAny(
+            manga,
+            builder = {
+                placeholder(drawable)
+                error(drawable)
+                if (manga.favorite) networkCachePolicy(CachePolicy.DISABLED)
+            }
+        )
+        backdrop.loadAny(
+            manga,
+            builder = {
+                placeholder(drawable)
+                error(drawable)
+                if (manga.favorite) networkCachePolicy(CachePolicy.DISABLED)
+            }
+        )
     }
 
     fun expand() {

@@ -102,7 +102,7 @@ class ApiMangaParser(val langs: List<String>) {
         val removeOneshots = filteredChapters.filter { !it.value.chapter.isNullOrBlank() }
         return removeOneshots.size.toString() == floor(finalChapterNumber.toDouble()).toInt().toString()
     }
-    
+
     private fun filterChapterForChecking(serializer: ApiMangaSerializer): List<Map.Entry<String, ChapterSerializer>> {
         serializer.chapter ?: return emptyList()
         return serializer.chapter.entries
@@ -164,7 +164,6 @@ class ApiMangaParser(val langs: List<String>) {
         val chapLangs = MdLang.values().filter { langs.contains(it.dexLang) }
         networkChapters.filter { langs.contains(it.value.lang_code) && (it.value.timestamp * 1000) <= now }
             .mapTo(chapters) { mapChapter(it.key, it.value, finalChapterNumber, status, chapLangs, networkChapters.size) }
-
 
         return chapters
     }

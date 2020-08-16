@@ -13,7 +13,8 @@ import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.*
 import com.elvishew.xlog.XLog
 
-abstract class BaseController(bundle: Bundle? = null) : RestoreViewOnCreateController(bundle),
+abstract class BaseController(bundle: Bundle? = null) :
+    RestoreViewOnCreateController(bundle),
     LayoutContainer {
 
     init {
@@ -81,7 +82,7 @@ abstract class BaseController(bundle: Bundle? = null) : RestoreViewOnCreateContr
         }
 
         if (router.backstack.lastOrNull()?.controller() == this)
-            (activity as? AppCompatActivity)?.supportActionBar?.title = getTitle()
+        (activity as? AppCompatActivity)?.supportActionBar?.title = getTitle()
     }
 
     private fun Controller.instance(): String {

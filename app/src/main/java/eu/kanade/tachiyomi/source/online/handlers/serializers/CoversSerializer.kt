@@ -7,4 +7,3 @@ data class CoversResult(
     val covers: List<String> = emptyList(),
     val status: String
 )
-

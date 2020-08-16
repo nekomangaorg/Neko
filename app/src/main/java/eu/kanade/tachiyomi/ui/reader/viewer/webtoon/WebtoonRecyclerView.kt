@@ -183,8 +183,9 @@ open class WebtoonRecyclerView @JvmOverloads constructor(
     fun onScale(scaleFactor: Float) {
         currentScale *= scaleFactor
         currentScale = currentScale.coerceIn(
-                minRate,
-                MAX_SCALE_RATE)
+            minRate,
+            MAX_SCALE_RATE
+        )
 
         setScaleRate(currentScale)
 

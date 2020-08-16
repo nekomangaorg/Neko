@@ -22,10 +22,11 @@ import kotlinx.android.synthetic.main.categories_controller.*
 /**
  * Controller to manage the categories for the users' library.
  */
-class CategoryController(bundle: Bundle? = null) : BaseController(bundle),
-        FlexibleAdapter.OnItemClickListener,
-        FlexibleAdapter.OnItemMoveListener,
-        CategoryAdapter.CategoryItemListener {
+class CategoryController(bundle: Bundle? = null) :
+    BaseController(bundle),
+    FlexibleAdapter.OnItemClickListener,
+    FlexibleAdapter.OnItemMoveListener,
+    CategoryAdapter.CategoryItemListener {
 
     /**
      * Adapter containing category items.

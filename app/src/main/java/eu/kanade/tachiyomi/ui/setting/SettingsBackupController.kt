@@ -223,9 +223,11 @@ class SettingsBackupController : SettingsController() {
     }
 
     class RestoreBackupDialog(bundle: Bundle? = null) : DialogController(bundle) {
-        constructor(uri: Uri) : this(Bundle().apply {
-            putParcelable(KEY_URI, uri)
-        })
+        constructor(uri: Uri) : this(
+            Bundle().apply {
+                putParcelable(KEY_URI, uri)
+            }
+        )
 
         override fun onCreateDialog(savedViewState: Bundle?): Dialog {
             return MaterialDialog(activity!!)

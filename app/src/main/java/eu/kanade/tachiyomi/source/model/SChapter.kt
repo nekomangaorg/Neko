@@ -51,6 +51,3 @@ interface SChapter : Serializable {
 }
 
 fun SChapter.isMergedChapter() = this.scanlator?.equals(MergeSource.name) ?: false
-
-
-

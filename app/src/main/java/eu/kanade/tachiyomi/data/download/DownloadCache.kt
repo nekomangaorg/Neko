@@ -171,7 +171,6 @@ class DownloadCache(
                 id to Pair(mangaDir.value.files, mangadexIds)
             }.toMap()
 
-
             mangaFiles.putAll(trueMangaDirs)
         }
     }

@@ -33,12 +33,15 @@ class CenteredToolbar @JvmOverloads constructor(context: Context, attrs: Attribu
     }
 
     fun showDropdown(down: Boolean = true) {
-        toolbar_title.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_blank_24dp, 0,
-        if (down) {
-            R.drawable.ic_arrow_drop_down_24dp
-        } else {
-            R.drawable.ic_arrow_drop_up_24dp
-        }, 0)
+        toolbar_title.setCompoundDrawablesRelativeWithIntrinsicBounds(
+            R.drawable.ic_blank_24dp, 0,
+            if (down) {
+                R.drawable.ic_arrow_drop_down_24dp
+            } else {
+                R.drawable.ic_arrow_drop_up_24dp
+            },
+            0
+        )
     }
 
     fun hideDropdown() {

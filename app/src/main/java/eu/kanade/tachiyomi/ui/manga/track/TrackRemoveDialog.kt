@@ -19,9 +19,11 @@ class TrackRemoveDialog<T> : DialogController
     private val item: TrackItem
     private lateinit var listener: Listener
 
-    constructor(target: T, item: TrackItem) : super(Bundle().apply {
-        putSerializable(KEY_ITEM_TRACK, item.track)
-    }) {
+    constructor(target: T, item: TrackItem) : super(
+        Bundle().apply {
+            putSerializable(KEY_ITEM_TRACK, item.track)
+        }
+    ) {
         listener = target
         this.item = item
     }
@@ -43,7 +45,8 @@ class TrackRemoveDialog<T> : DialogController
             dialog.checkBoxPrompt(
                 text = activity!!.getString(
                     R.string.remove_tracking_from_, item.service.name
-                ), isCheckedDefault = true, onToggle = null
+                ),
+                isCheckedDefault = true, onToggle = null
             ).positiveButton(R.string.remove) {
                 listener.removeTracker(
                     item, it.isCheckPromptChecked()

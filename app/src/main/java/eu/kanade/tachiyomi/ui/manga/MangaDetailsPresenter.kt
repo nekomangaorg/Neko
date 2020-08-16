@@ -143,7 +143,7 @@ class MangaDetailsPresenter(
     private suspend fun getChapters() {
         val chapters = db.getChapters(manga).executeOnIO().map { it.toModel() }
 
-        //update all scanlators
+        // update all scanlators
         updateScanlators(chapters)
 
         // Find downloaded chapters
@@ -185,7 +185,7 @@ class MangaDetailsPresenter(
         val chapters =
             (fetchedChapters ?: db.getChapters(manga).executeAsBlocking()).map { it.toModel() }
 
-        //update all scanlators
+        // update all scanlators
         updateScanlators(chapters)
 
         // Find downloaded chapters
@@ -434,7 +434,7 @@ class MangaDetailsPresenter(
                 manga.copyFrom(networkManga)
                 manga.initialized = true
 
-                //force new cover if it exists
+                // force new cover if it exists
                 if (networkManga.thumbnail_url != null) {
                     coverCache.deleteFromCache(thumbnailUrl)
                 }
@@ -456,8 +456,10 @@ class MangaDetailsPresenter(
                         val categoriesToDownload = preferences.downloadNewCategories().getOrDefault().map(String::toInt)
                         val shouldDownload = categoriesToDownload.isEmpty() || getMangaCategoryIds().any { it in categoriesToDownload }
                         if (shouldDownload) {
-                            downloadChapters(newChapters.first.sortedBy { it.chapter_number }
-                                .map { it.toModel() })
+                            downloadChapters(
+                                newChapters.first.sortedBy { it.chapter_number }
+                                    .map { it.toModel() }
+                            )
                         }
                     }
                 }
@@ -475,7 +477,6 @@ class MangaDetailsPresenter(
                     }
                 }
             }
-
 
             withContext(Dispatchers.IO) {
                 val allChaps = db.getChapters(manga).executeAsBlocking()
@@ -500,7 +501,6 @@ class MangaDetailsPresenter(
                         controller.showError("MergedSource error: " + trimException(errorFromMerged!!))
                     }
                 }
-
             }
         }
     }
@@ -534,9 +534,11 @@ class MangaDetailsPresenter(
     }
 
     private fun trimException(e: java.lang.Exception): String {
-        return (if (e.message?.contains(": ") == true) e.message?.split(": ")?.drop(1)
-            ?.joinToString(": ")
-        else e.message) ?: preferences.context.getString(R.string.unknown_error)
+        return (
+            if (e.message?.contains(": ") == true) e.message?.split(": ")?.drop(1)
+                ?.joinToString(": ")
+            else e.message
+            ) ?: preferences.context.getString(R.string.unknown_error)
     }
 
     /**

@@ -197,7 +197,7 @@ interface Manga : SManga {
 fun Manga.isWebtoon() = this.genre?.contains("long strip", true) ?: false
 
 fun Manga.potentialAltThumbnail(): String? {
-    //ignore null and already small thumbs
+    // ignore null and already small thumbs
     if (thumbnail_url == null || thumbnail_url!!.contains(".thumb.jpg")) {
         return null
     }

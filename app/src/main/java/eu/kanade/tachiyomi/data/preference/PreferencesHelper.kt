@@ -47,14 +47,16 @@ class PreferencesHelper(val context: Context) {
     private val defaultDownloadsDir = Uri.fromFile(
         File(
             Environment.getExternalStorageDirectory().absolutePath + File.separator +
-                context.getString(R.string.neko_app_name), "downloads"
+                context.getString(R.string.neko_app_name),
+            "downloads"
         )
     )
 
     private val defaultBackupDir = Uri.fromFile(
         File(
             Environment.getExternalStorageDirectory().absolutePath + File.separator +
-                context.getString(R.string.neko_app_name), "backup"
+                context.getString(R.string.neko_app_name),
+            "backup"
         )
     )
 

@@ -135,7 +135,8 @@ class MdUtil {
         fun removeTimeParamUrl(url: String): String = url.substringBeforeLast("?")
 
         fun cleanString(string: String): String {
-            val bbRegex = """\[(\w+)[^]]*](.*?)\[/\1]""".toRegex()
+            val bbRegex =
+                """\[(\w+)[^]]*](.*?)\[/\1]""".toRegex()
             var intermediate = string
                 .replace("[list]", "", true)
                 .replace("[/list]", "", true)

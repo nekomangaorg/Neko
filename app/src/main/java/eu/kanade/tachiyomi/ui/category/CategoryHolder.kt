@@ -97,7 +97,8 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleVie
             edit_text.clearFocus()
             edit_button.drawable?.mutate()?.setTint(
                 ContextCompat.getColor(
-                    itemView.context, R
+                    itemView.context,
+                    R
                         .color.gray_button
                 )
             )
@@ -108,7 +109,7 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleVie
     private fun submitChanges() {
         if (edit_text.visibility == View.VISIBLE) {
             if (adapter.categoryItemListener
-                    .onCategoryRename(adapterPosition, edit_text.text.toString())
+                .onCategoryRename(adapterPosition, edit_text.text.toString())
             ) {
                 isEditing(false)
                 edit_text.inputType = InputType.TYPE_NULL
@@ -124,7 +125,8 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleVie
         val inputMethodManager: InputMethodManager =
             itemView.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         inputMethodManager.showSoftInput(
-            edit_text, WindowManager.LayoutParams
+            edit_text,
+            WindowManager.LayoutParams
                 .SOFT_INPUT_ADJUST_PAN
         )
     }

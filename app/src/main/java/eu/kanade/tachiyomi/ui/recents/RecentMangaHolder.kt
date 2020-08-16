@@ -52,14 +52,15 @@ class RecentMangaHolder(
                 body.context.getString(
                     R.string.read_, item.mch.history.last_read.timeSpanFromNow
                 ) + "\n" + body.context.getString(
-                if (notValidNum) R.string.last_read_ else R.string.last_read_chapter_,
-                if (notValidNum) item.mch.chapter.name else adapter.decimalFormat.format(item.mch.chapter.chapter_number)
-            )
-            item.chapter.pages_left > 0 && !item.chapter.read -> body.context.getString(
-                R.string.read_, item.mch.history.last_read.timeSpanFromNow
-            ) + "\n" + itemView.resources.getQuantityString(
-                R.plurals.pages_left, item.chapter.pages_left, item.chapter.pages_left
-            )
+                    if (notValidNum) R.string.last_read_ else R.string.last_read_chapter_,
+                    if (notValidNum) item.mch.chapter.name else adapter.decimalFormat.format(item.mch.chapter.chapter_number)
+                )
+            item.chapter.pages_left > 0 && !item.chapter.read ->
+                body.context.getString(
+                    R.string.read_, item.mch.history.last_read.timeSpanFromNow
+                ) + "\n" + itemView.resources.getQuantityString(
+                    R.plurals.pages_left, item.chapter.pages_left, item.chapter.pages_left
+                )
             else -> body.context.getString(
                 R.string.read_, item.mch.history.last_read.timeSpanFromNow
             )

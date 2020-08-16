@@ -37,7 +37,8 @@ abstract class LibraryHolder(
                 item.downloadCount == -1 -> -1
                 else -> item.downloadCount
             },
-            showTotal)
+            showTotal
+        )
     }
 
     fun setReadingButton(item: LibraryItem) {

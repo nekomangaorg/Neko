@@ -78,11 +78,13 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
             }
         val shorterMargin = adapter.headerItems.firstOrNull() == item
         sectionText.updateLayoutParams<ConstraintLayout.LayoutParams> {
-            topMargin = (when {
-                shorterMargin -> 2
-                previousIsCollapsed -> 5
-                else -> 32
-            }).dpToPx
+            topMargin = (
+                when {
+                    shorterMargin -> 2
+                    previousIsCollapsed -> 5
+                    else -> 32
+                }
+                ).dpToPx
         }
         val category = item.category
 
@@ -154,21 +156,26 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
             val items = mutableListOf(
                 MaterialMenuSheet.MenuSheetItem(
                     LibrarySort.ALPHA, R.drawable.ic_sort_by_alpha_24dp, R.string.title
-                ), MaterialMenuSheet.MenuSheetItem(
+                ),
+                MaterialMenuSheet.MenuSheetItem(
                     LibrarySort.LAST_READ,
                     R.drawable.ic_recent_read_outline_24dp,
                     R.string.last_read
-                ), MaterialMenuSheet.MenuSheetItem(
+                ),
+                MaterialMenuSheet.MenuSheetItem(
                     LibrarySort.LATEST_CHAPTER,
                     R.drawable.ic_new_releases_24dp,
                     R.string.latest_chapter
-                ), MaterialMenuSheet.MenuSheetItem(
+                ),
+                MaterialMenuSheet.MenuSheetItem(
                     LibrarySort.UNREAD, R.drawable.ic_eye_24dp, R.string.unread
-                ), MaterialMenuSheet.MenuSheetItem(
+                ),
+                MaterialMenuSheet.MenuSheetItem(
                     LibrarySort.TOTAL,
                     R.drawable.ic_sort_by_numeric_24dp,
                     R.string.total_chapters
-                ), MaterialMenuSheet.MenuSheetItem(
+                ),
+                MaterialMenuSheet.MenuSheetItem(
                     LibrarySort.DATE_ADDED,
                     R.drawable.ic_heart_outline_24dp,
                     R.string.date_added
@@ -251,7 +258,8 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
         val tintedDrawable = drawable?.mutate()
         tintedDrawable?.setTint(
             ContextCompat.getColor(
-                contentView.context, if (allSelected) R.color.colorAccent
+                contentView.context,
+                if (allSelected) R.color.colorAccent
                 else R.color.gray_button
             )
         )

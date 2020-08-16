@@ -24,7 +24,7 @@ import kotlinx.android.synthetic.main.display_bottom_sheet.*
 import uy.kohesive.injekt.injectLazy
 
 class DisplayBottomSheet(private val controller: LibraryController) : BottomSheetDialog
-    (controller.activity!!, R.style.BottomSheetDialogTheme) {
+(controller.activity!!, R.style.BottomSheetDialogTheme) {
 
     val activity = controller.activity!!
 
@@ -132,7 +132,7 @@ class DisplayBottomSheet(private val controller: LibraryController) : BottomShee
      */
     private fun CompoundButton.bindToPreference(
         pref: com.tfcporciuncula.flow
-.Preference<Boolean>,
+        .Preference<Boolean>,
         block: ((Boolean) -> Unit)? = null
     ) {
         isChecked = pref.get()

@@ -25,7 +25,8 @@ class SettingsGeneralController : SettingsController() {
             titleRes = R.string.app_theme
             entriesRes = arrayOf(
                 R.string.white_theme, R.string.dark,
-                R.string.black, R.string.system_default_dark, R.string
+                R.string.black, R.string.system_default_dark,
+                R.string
                     .system_default_amoled
             )
             entryValues = listOf(1, 2, 3, 5, 6)

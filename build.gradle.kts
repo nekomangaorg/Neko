@@ -1,22 +1,7 @@
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
 plugins {
-    id("com.github.ben-manes.versions") version BuildPluginsVersion.VERSIONS_PLUGIN
+    id(Plugins.ktLint.name) version Plugins.ktLint.version
+    id(Plugins.gradleVersions.name) version Plugins.gradleVersions.version
 }
-
-buildscript {
-    dependencies {
-        classpath(BuildPluginsVersion.FIREBASE)
-        classpath(BuildPluginsVersion.AGP)
-        classpath("com.mikepenz.aboutlibraries.plugin:aboutlibraries-plugin:8.3.0")
-        classpath(BuildPluginsVersion.GOOGLE_SERVICES)
-        classpath(BuildPluginsVersion.ANDROID_EXTENSIONS)
-        classpath(BuildPluginsVersion.KOTLIN_GRADLE)
-        classpath(BuildPluginsVersion.KOTLIN_SERIALIZATION)
-        classpath(BuildPluginsVersion.KOTLINTER)
-    }
-}
-
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
 allprojects {
     repositories {
         google()
@@ -25,6 +10,55 @@ allprojects {
         maven { setUrl("https://plugins.gradle.org/m2/") }
         jcenter()
     }
+}
+
+subprojects {
+    apply(plugin = Plugins.ktLint.name)
+    ktlint {
+        debug.set(true)
+        verbose.set(true)
+        android.set(false)
+        outputToConsole.set(true)
+        ignoreFailures.set(false)
+        ignoreFailures.set(true)
+        enableExperimentalRules.set(false)
+        reporters {
+            reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.CHECKSTYLE)
+            reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.JSON)
+        }
+        filter {
+            exclude("**/generated/**")
+            include("**/kotlin/**")
+        }
+    }
+}
+
+buildscript {
+    dependencies {
+        classpath(LegacyPluginClassPath.fireBaseCrashlytics)
+        classpath(LegacyPluginClassPath.androidGradlePlugin)
+        classpath(LegacyPluginClassPath.googleServices)
+        classpath(LegacyPluginClassPath.kotlinExtensions)
+        classpath(LegacyPluginClassPath.kotlinPlugin)
+        classpath(LegacyPluginClassPath.aboutLibraries)
+        classpath(LegacyPluginClassPath.kotlinSerializations)
+    }
+    repositories {
+        gradlePluginPortal()
+        google()
+        jcenter()
+    }
+}
+
+tasks.named("dependencyUpdates", com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask::class.java).configure {
+    rejectVersionIf {
+        isNonStable(candidate.version)
+    }
+    // optional parameters
+    checkForGradleUpdate = true
+    outputFormatter = "json"
+    outputDir = "build/dependencyUpdates"
+    reportfileName = "report"
 }
 
 

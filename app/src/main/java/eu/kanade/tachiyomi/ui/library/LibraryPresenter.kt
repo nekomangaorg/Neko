@@ -147,7 +147,8 @@ class LibraryPresenter(
         view.onNextLibraryUpdate(
             if (!show) sectionedLibraryItems[currentCategory]
                 ?: sectionedLibraryItems[categories.first().id] ?: blankItem()
-            else libraryItems, true
+            else libraryItems,
+            true
         )
     }
 
@@ -170,7 +171,8 @@ class LibraryPresenter(
             view.onNextLibraryUpdate(
                 if (!showAll) sectionedLibraryItems[currentCategory]
                     ?: sectionedLibraryItems[categories.first().id] ?: blankItem()
-                else libraryItems, freshStart
+                else libraryItems,
+                freshStart
             )
         }
     }
@@ -248,8 +250,8 @@ class LibraryPresenter(
 
         if (filterMangaType > 0) {
             if (if (filterMangaType == Manga.TYPE_MANHWA) {
-                    (filterMangaType != item.manga.mangaType() && filterMangaType != Manga.TYPE_WEBTOON)
-                } else {
+                (filterMangaType != item.manga.mangaType() && filterMangaType != Manga.TYPE_WEBTOON)
+            } else {
                     filterMangaType != item.manga.mangaType()
                 }
             ) return false
@@ -460,15 +462,19 @@ class LibraryPresenter(
             )
             val catItemAll = LibraryHeaderItem({ categoryAll }, -1)
             val categorySet = mutableSetOf<Int>()
-            val headerItems = (categories.mapNotNull { category ->
-                val id = category.id
-                if (id == null) null
-                else id to LibraryHeaderItem({ getCategory(id) }, id)
-            } + (-1 to catItemAll) + (0 to LibraryHeaderItem({ getCategory(0) }, 0))).toMap()
+            val headerItems = (
+                categories.mapNotNull { category ->
+                    val id = category.id
+                    if (id == null) null
+                    else id to LibraryHeaderItem({ getCategory(id) }, id)
+                } + (-1 to catItemAll) + (0 to LibraryHeaderItem({ getCategory(0) }, 0))
+                ).toMap()
 
             val items = libraryManga.mapNotNull {
-                val headerItem = (if (!libraryIsGrouped) catItemAll
-                else headerItems[it.category]) ?: return@mapNotNull null
+                val headerItem = (
+                    if (!libraryIsGrouped) catItemAll
+                    else headerItems[it.category]
+                    ) ?: return@mapNotNull null
                 categorySet.add(it.category)
                 LibraryItem(it, headerItem)
             }.toMutableList()
@@ -481,8 +487,10 @@ class LibraryPresenter(
             if (libraryIsGrouped) {
                 categories.forEach { category ->
                     val catId = category.id ?: return@forEach
-                    if (catId > 0 && !categorySet.contains(catId) && (catId !in categoriesHidden ||
-                            !showAll)
+                    if (catId > 0 && !categorySet.contains(catId) && (
+                        catId !in categoriesHidden ||
+                            !showAll
+                        )
                     ) {
                         val headerItem = headerItems[catId]
                         if (headerItem != null) items.add(

@@ -80,7 +80,7 @@ class DownloadManager(val context: Context) {
     fun stopDownloads(reason: String? = null) {
         downloader.stop(reason)
     }
-    
+
     /**
      * Tells the downloader to pause downloads.
      */

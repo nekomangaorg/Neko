@@ -58,7 +58,6 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
 
         comment_button.setOnClickListener {
             activity.openComments()
-
         }
 
         post {
@@ -176,8 +175,10 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
     }
 
     fun lerpColorCalc(colorStart: Int, colorEnd: Int, percent: Int): Int {
-        return (min(colorStart, colorEnd) * (100 - percent) + max(
-            colorStart, colorEnd
-        ) * percent) / 100
+        return (
+            min(colorStart, colorEnd) * (100 - percent) + max(
+                colorStart, colorEnd
+            ) * percent
+            ) / 100
     }
 }

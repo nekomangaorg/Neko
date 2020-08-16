@@ -93,7 +93,6 @@ class MangaPutResolver : DefaultPutResolver<Manga>() {
         put(COL_USERS, obj.users)
         put(COL_MERGE_MANGA_URL, obj.merge_manga_url)
         put(COL_MANGA_LAST_CHAPTER, obj.last_chapter_number)
-
     }
 }
 

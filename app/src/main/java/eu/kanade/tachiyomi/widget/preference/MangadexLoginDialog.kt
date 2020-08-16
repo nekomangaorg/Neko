@@ -20,12 +20,14 @@ class MangadexLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle
 
     val source: Source by lazy { Injekt.get<SourceManager>().getMangadex() }
 
-    constructor(source: Source, activity: Activity? = null) : this(Bundle().apply {
-        putLong(
-            "key",
-            source.id
-        )
-    })
+    constructor(source: Source, activity: Activity? = null) : this(
+        Bundle().apply {
+            putLong(
+                "key",
+                source.id
+            )
+        }
+    )
 
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
         val dialog = MaterialDialog(activity!!).apply {

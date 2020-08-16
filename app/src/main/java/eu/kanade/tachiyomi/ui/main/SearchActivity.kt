@@ -52,7 +52,7 @@ class SearchActivity : MainActivity() {
         to: Controller?,
         from: Controller?,
         isPush:
-        Boolean
+            Boolean
     ) {
         if (from is DialogController || to is DialogController) {
             return
@@ -107,7 +107,8 @@ class SearchActivity : MainActivity() {
 
     companion object {
         fun openMangaIntent(context: Context, id: Long) = Intent(
-            context, SearchActivity::class
+            context,
+            SearchActivity::class
                 .java
         )
             .apply {

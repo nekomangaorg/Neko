@@ -19,11 +19,13 @@ import kotlinx.android.synthetic.main.browse_source_controller.*
  */
 class SimilarController(bundle: Bundle) : BrowseSourceController(bundle) {
 
-    constructor(manga: Manga, source: Source) : this(Bundle().apply {
-        putLong(MANGA_ID, manga.id!!)
-        putLong(SOURCE_ID_KEY, source.id)
-        putBoolean(APPLY_INSET, false)
-    })
+    constructor(manga: Manga, source: Source) : this(
+        Bundle().apply {
+            putLong(MANGA_ID, manga.id!!)
+            putLong(SOURCE_ID_KEY, source.id)
+            putBoolean(APPLY_INSET, false)
+        }
+    )
 
     override fun getTitle(): String? {
         return view?.context?.getString(R.string.similar)

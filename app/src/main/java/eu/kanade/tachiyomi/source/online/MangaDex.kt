@@ -206,7 +206,7 @@ open class MangaDex() : HttpSource() {
                         jsonString.toRequestBody("application/json".toMediaType())
                     )
                 )
-                //postResult.execute()
+                // postResult.execute()
 
                 if (!response.isSuccessful) {
                     response.close()

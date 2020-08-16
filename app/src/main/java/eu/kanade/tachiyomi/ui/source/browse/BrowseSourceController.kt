@@ -70,18 +70,22 @@ open class BrowseSourceController(bundle: Bundle) :
         searchQuery: String? = null,
         applyInset: Boolean = true,
         deepLink: Boolean = false
-    ) : this(Bundle().apply
-    {
-        putBoolean(APPLY_INSET, applyInset)
-        putBoolean(DEEP_LINK, deepLink)
+    ) : this(
+        Bundle().apply
+        {
+            putBoolean(APPLY_INSET, applyInset)
+            putBoolean(DEEP_LINK, deepLink)
 
-        if (searchQuery != null)
-            putString(SEARCH_QUERY_KEY, searchQuery)
-    })
+            if (searchQuery != null)
+                putString(SEARCH_QUERY_KEY, searchQuery)
+        }
+    )
 
-    constructor(applyInset: Boolean = true) : this(Bundle().apply {
-        putBoolean(APPLY_INSET, applyInset)
-    })
+    constructor(applyInset: Boolean = true) : this(
+        Bundle().apply {
+            putBoolean(APPLY_INSET, applyInset)
+        }
+    )
 
     /**
      * Preferences helper.
@@ -198,11 +202,14 @@ open class BrowseSourceController(bundle: Bundle) :
         recycler.setHasFixedSize(true)
         recycler.adapter = adapter
 
-        scrollViewWith(recycler, true, afterInsets = { insets ->
-            fab?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                bottomMargin = insets.systemWindowInsetBottom + 16.dpToPx
+        scrollViewWith(
+            recycler, true,
+            afterInsets = { insets ->
+                fab?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    bottomMargin = insets.systemWindowInsetBottom + 16.dpToPx
+                }
             }
-        })
+        )
 
         recycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
@@ -279,8 +286,10 @@ open class BrowseSourceController(bundle: Bundle) :
                 if (filter is List<*>) {
                     for (j in filter.indices) {
                         if (filter[j] !=
-                            ((presenter.sourceFilters[i] as Filter.Group<*>).state[j] as
-                                Filter<*>).state
+                            (
+                                (presenter.sourceFilters[i] as Filter.Group<*>).state[j] as
+                                    Filter<*>
+                                ).state
                         ) {
                             matches = false
                             break
@@ -327,7 +336,8 @@ open class BrowseSourceController(bundle: Bundle) :
         val source = presenter.source as? HttpSource ?: return
         val activity = activity ?: return
         val intent = WebViewActivity.newIntent(
-            activity, source.id, source.baseUrl, presenter
+            activity, source.id, source.baseUrl,
+            presenter
                 .source.name
         )
         startActivity(intent)

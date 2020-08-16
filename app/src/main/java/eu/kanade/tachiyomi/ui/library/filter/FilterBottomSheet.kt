@@ -284,13 +284,15 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                     unreadProgress.state = unreadP - 3
                 }
                 tracked?.setState(preferences.filterTracked())
-                mangaType?.setState(when (preferences.filterMangaType().getOrDefault()) {
-                    Manga.TYPE_MANGA -> context.getString(R.string.manga)
-                    Manga.TYPE_MANHUA -> context.getString(R.string.manhua)
-                    Manga.TYPE_MANHWA -> context.getString(R.string.manhwa)
-                    Manga.TYPE_COMIC -> context.getString(R.string.comic)
-                    else -> ""
-                })
+                mangaType?.setState(
+                    when (preferences.filterMangaType().getOrDefault()) {
+                        Manga.TYPE_MANGA -> context.getString(R.string.manga)
+                        Manga.TYPE_MANHUA -> context.getString(R.string.manhua)
+                        Manga.TYPE_MANHWA -> context.getString(R.string.manhwa)
+                        Manga.TYPE_COMIC -> context.getString(R.string.comic)
+                        else -> ""
+                    }
+                )
                 reorderFilters()
                 reSortViews()
             }
@@ -329,10 +331,10 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         }
         listOfNotNull(unreadProgress, unread, downloaded, completed, mangaType, tracked)
             .forEach {
-            if (!filterItems.contains(it)) {
-                filterItems.add(it)
+                if (!filterItems.contains(it)) {
+                    filterItems.add(it)
+                }
             }
-        }
     }
     private fun indexOf(filterTagGroup: FilterTagGroup): Int {
         charOfFilter(filterTagGroup)?.let {
@@ -361,8 +363,10 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         val recycler = RecyclerView(context)
         if (filterOrder.count() != 6)
             filterOrder = "urdcmt"
-        val adapter = FlexibleAdapter(filterOrder.toCharArray().map(::ManageFilterItem),
-            this, true)
+        val adapter = FlexibleAdapter(
+            filterOrder.toCharArray().map(::ManageFilterItem),
+            this, true
+        )
         recycler.layoutManager = LinearLayoutManager(context)
         recycler.adapter = adapter
         adapter.isHandleDragEnabled = true

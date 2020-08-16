@@ -13,7 +13,8 @@ object SimilarTable {
     const val COL_MANGA_SIMILAR_MATCHED_TITLES = "matched_titles"
 
     val createTableQuery: String
-        get() = """CREATE TABLE $TABLE(
+        get() =
+            """CREATE TABLE $TABLE(
             $COL_ID INTEGER NOT NULL PRIMARY KEY,
             $COL_MANGA_ID INTEGER NOT NULL,
             $COL_MANGA_SIMILAR_MATCHED_IDS TEXT NOT NULL,

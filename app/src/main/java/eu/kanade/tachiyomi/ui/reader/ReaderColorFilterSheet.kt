@@ -31,7 +31,7 @@ import kotlin.math.abs
  * Color filter sheet to toggle custom filter and brightness overlay.
  */
 class ReaderColorFilterSheet(private val activity: ReaderActivity) : BottomSheetDialog
-    (activity, R.style.BottomSheetDialogTheme) {
+(activity, R.style.BottomSheetDialogTheme) {
 
     private val preferences by injectLazy<PreferencesHelper>()
 
@@ -45,7 +45,8 @@ class ReaderColorFilterSheet(private val activity: ReaderActivity) : BottomSheet
         window?.navigationBarColor = Color.TRANSPARENT
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
             !context.isInNightMode() &&
-            !activity.window.decorView.rootWindowInsets.hasSideNavBar())
+            !activity.window.decorView.rootWindowInsets.hasSideNavBar()
+        )
             window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
         setBottomEdge(brightness_seekbar, activity)
 

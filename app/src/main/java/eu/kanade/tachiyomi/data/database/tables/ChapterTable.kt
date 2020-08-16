@@ -41,7 +41,8 @@ object ChapterTable {
     const val COL_LANGUAGE = "language"
 
     val createTableQuery: String
-        get() = """CREATE TABLE $TABLE(
+        get() =
+            """CREATE TABLE $TABLE(
             $COL_ID INTEGER NOT NULL PRIMARY KEY,
             $COL_MANGA_ID INTEGER NOT NULL,
             $COL_URL TEXT NOT NULL,

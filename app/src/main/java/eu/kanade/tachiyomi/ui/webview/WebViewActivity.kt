@@ -106,7 +106,8 @@ class WebViewActivity : BaseActivity() {
             getResourceColor(
                 R.attr
                     .colorSecondary
-            ), 255
+            ),
+            255
         )
 
         content.setOnApplyWindowInsetsListener { v, insets ->
@@ -207,7 +208,8 @@ class WebViewActivity : BaseActivity() {
             getResourceColor(
                 R.attr
                     .colorSecondary
-            ), 255
+            ),
+            255
         )
         toolbar.setBackgroundColor(getResourceColor(R.attr.colorSecondary))
         toolbar.popupTheme = if (lightMode) R.style.ThemeOverlay_MaterialComponents else R

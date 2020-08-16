@@ -98,7 +98,8 @@ import kotlin.math.abs
  * viewers, to which calls from the presenter or UI events are delegated.
  */
 @RequiresPresenter(ReaderPresenter::class)
-class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
+class ReaderActivity :
+    BaseRxActivity<ReaderPresenter>(),
     SystemUiHelper.OnVisibilityChangeListener {
 
     /**
@@ -486,7 +487,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
         if (noDefault && presenter.manga?.viewer!! > 0) {
             snackbar = reader_layout.snack(
                 getString(
-                    R.string.reading_, getString(
+                    R.string.reading_,
+                    getString(
                         when (mangaViewer) {
                             RIGHT_TO_LEFT -> R.string.right_to_left_viewer
                             VERTICAL -> R.string.vertical_viewer
@@ -494,7 +496,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
                             else -> R.string.left_to_right_viewer
                         }
                     ).toLowerCase(Locale.getDefault())
-                ), 4000
+                ),
+                4000
             ) {
                 if (mangaViewer != WEBTOON) setAction(R.string.use_default) {
                     presenter.setMangaViewer(0)
@@ -599,7 +602,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>(),
         page_text.text = "${page.number} / ${pages.size}"
 
         if (!newChapter && chapters_bottom_sheet.shouldCollapse && chapters_bottom_sheet
-                .sheetBehavior.isExpanded()
+            .sheetBehavior.isExpanded()
         ) {
             chapters_bottom_sheet.sheetBehavior?.collapse()
         }

@@ -16,8 +16,10 @@ import eu.kanade.tachiyomi.widget.preference.TrackLogoutDialog
 import uy.kohesive.injekt.injectLazy
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 
-class SettingsTrackingController : SettingsController(),
-    TrackLoginDialog.Listener, TrackLogoutDialog.Listener {
+class SettingsTrackingController :
+    SettingsController(),
+    TrackLoginDialog.Listener,
+    TrackLogoutDialog.Listener {
 
     private val trackManager: TrackManager by injectLazy()
 
@@ -54,17 +56,20 @@ class SettingsTrackingController : SettingsController(),
         service: TrackService,
         block: (@DSL LoginPreference).() -> Unit
     ): LoginPreference {
-        return initThenAdd(LoginPreference(context).apply {
-            key = Keys.trackUsername(service.id)
-            title = service.name
-        }, block)
+        return initThenAdd(
+            LoginPreference(context).apply {
+                key = Keys.trackUsername(service.id)
+                title = service.name
+            },
+            block
+        )
     }
 
     override fun onActivityResumed(activity: Activity) {
         super.onActivityResumed(activity)
         // Manually refresh anilist holder
         updatePreference(trackManager.aniList.id)
-        }
+    }
 
     private fun showDialog(trackService: TrackService, url: Uri? = null, userNameLabel: String? = null) {
         if (trackService.isLogged) {

@@ -69,7 +69,8 @@ object MangaTable {
     const val COL_MANGA_LAST_CHAPTER = "manga_last_chapter"
 
     val createTableQuery: String
-        get() = """CREATE TABLE $TABLE(
+        get() =
+            """CREATE TABLE $TABLE(
             $COL_ID INTEGER NOT NULL PRIMARY KEY,
             $COL_SOURCE INTEGER NOT NULL,
             $COL_URL TEXT NOT NULL,

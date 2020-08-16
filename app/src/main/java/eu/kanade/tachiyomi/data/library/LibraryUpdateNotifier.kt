@@ -126,104 +126,112 @@ class LibraryUpdateNotifier(private val context: Context) {
         // create a copy of the list since it will be cleared by the time it is used
         val updates = newUpdates.toImmutableMap()
         GlobalScope.launch {
-        val notifications = ArrayList<Pair<Notification, Int>>()
-        updates.forEach {
-            val manga = it.key
-            val chapters = it.value
-            val chapterNames = chapters.map { chapter -> chapter.name }
-            notifications.add(Pair(context.notification(Notifications.CHANNEL_NEW_CHAPTERS) {
-                setSmallIcon(R.drawable.ic_neko_notification)
-                try {
-                    val request = GetRequest.Builder(context).data(manga)
-                        .networkCachePolicy(CachePolicy.DISABLED)
-                        .transformations(CircleCropTransformation()).size(width = ICON_SIZE, height = ICON_SIZE)
-                        .build()
-                    Coil.imageLoader(context)
-                        .execute(request).drawable?.let { drawable ->
-                            setLargeIcon((drawable as BitmapDrawable).bitmap)
-                        }
-                } catch (e: Exception) {
-                }
-                setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_SUMMARY)
-                setContentTitle(manga.title)
-                color = ContextCompat.getColor(context, R.color.colorAccent)
-                val chaptersNames = if (chapterNames.size > MAX_CHAPTERS) {
-                    "${chapterNames.take(MAX_CHAPTERS - 1)
-                        .joinToString(", ")}, " + context.resources.getQuantityString(
-                        R.plurals.notification_and_n_more,
-                        (chapterNames.size - (MAX_CHAPTERS - 1)),
-                        (chapterNames.size - (MAX_CHAPTERS - 1))
-                    )
-                } else chapterNames.joinToString(", ")
-                setContentText(chaptersNames)
-                setStyle(NotificationCompat.BigTextStyle().bigText(chaptersNames))
-                priority = NotificationCompat.PRIORITY_HIGH
-                setGroup(Notifications.GROUP_NEW_CHAPTERS)
-                setContentIntent(
-                    NotificationReceiver.openChapterPendingActivity(
-                        context, manga, chapters.first()
-                    )
-                )
-                addAction(
-                    R.drawable.ic_eye_24dp, context.getString(R.string.mark_as_read),
-                    NotificationReceiver.markAsReadPendingBroadcast(
-                        context,
-                        manga, chapters, Notifications.ID_NEW_CHAPTERS
-                    )
-                )
-                addAction(
-                    R.drawable.ic_book_24dp, context.getString(R.string.view_chapters),
-                    NotificationReceiver.openChapterPendingActivity(
-                        context,
-                        manga, Notifications.ID_NEW_CHAPTERS
-                    )
-                )
-                setAutoCancel(true)
-            }, manga.id.hashCode()))
-        }
-
-        NotificationManagerCompat.from(context).apply {
-
-            notify(
-                Notifications.ID_NEW_CHAPTERS,
-                context.notification(Notifications.CHANNEL_NEW_CHAPTERS) {
-                    setSmallIcon(R.drawable.ic_neko_notification)
-                    setLargeIcon(notificationBitmap)
-                    setContentTitle(context.getString(R.string.new_chapters_found))
-                    color = ContextCompat.getColor(context, R.color.colorAccent)
-                    if (updates.size > 1) {
-                        setContentText(
-                            context.resources.getQuantityString(
-                                R.plurals
-                                    .for_n_titles,
-                                updates.size, updates.size
+            val notifications = ArrayList<Pair<Notification, Int>>()
+            updates.forEach {
+                val manga = it.key
+                val chapters = it.value
+                val chapterNames = chapters.map { chapter -> chapter.name }
+                notifications.add(
+                    Pair(
+                        context.notification(Notifications.CHANNEL_NEW_CHAPTERS) {
+                            setSmallIcon(R.drawable.ic_neko_notification)
+                            try {
+                                val request = GetRequest.Builder(context).data(manga)
+                                    .networkCachePolicy(CachePolicy.DISABLED)
+                                    .transformations(CircleCropTransformation()).size(width = ICON_SIZE, height = ICON_SIZE)
+                                    .build()
+                                Coil.imageLoader(context)
+                                    .execute(request).drawable?.let { drawable ->
+                                    setLargeIcon((drawable as BitmapDrawable).bitmap)
+                                }
+                            } catch (e: Exception) {
+                            }
+                            setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_SUMMARY)
+                            setContentTitle(manga.title)
+                            color = ContextCompat.getColor(context, R.color.colorAccent)
+                            val chaptersNames = if (chapterNames.size > MAX_CHAPTERS) {
+                                "${chapterNames.take(MAX_CHAPTERS - 1)
+                                    .joinToString(", ")}, " + context.resources.getQuantityString(
+                                    R.plurals.notification_and_n_more,
+                                    (chapterNames.size - (MAX_CHAPTERS - 1)),
+                                    (chapterNames.size - (MAX_CHAPTERS - 1))
+                                )
+                            } else chapterNames.joinToString(", ")
+                            setContentText(chaptersNames)
+                            setStyle(NotificationCompat.BigTextStyle().bigText(chaptersNames))
+                            priority = NotificationCompat.PRIORITY_HIGH
+                            setGroup(Notifications.GROUP_NEW_CHAPTERS)
+                            setContentIntent(
+                                NotificationReceiver.openChapterPendingActivity(
+                                    context, manga, chapters.first()
+                                )
                             )
-                        )
-                        setStyle(
-                            NotificationCompat.BigTextStyle()
-                                .bigText(updates.keys.joinToString("\n") {
-                                    it.title.chop(45)
-                                })
-                        )
-                    } else {
-                        val firstOrNull = updates.keys.firstOrNull()
-                        firstOrNull?.apply {
-                            setContentText(this.title.chop(45))
-                        }
-                    }
-                    priority = NotificationCompat.PRIORITY_HIGH
-                    setGroup(Notifications.GROUP_NEW_CHAPTERS)
-                    setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_SUMMARY)
-                    setGroupSummary(true)
-                    setContentIntent(getNotificationIntent())
-                    setAutoCancel(true)
-                })
+                            addAction(
+                                R.drawable.ic_eye_24dp, context.getString(R.string.mark_as_read),
+                                NotificationReceiver.markAsReadPendingBroadcast(
+                                    context,
+                                    manga, chapters, Notifications.ID_NEW_CHAPTERS
+                                )
+                            )
+                            addAction(
+                                R.drawable.ic_book_24dp, context.getString(R.string.view_chapters),
+                                NotificationReceiver.openChapterPendingActivity(
+                                    context,
+                                    manga, Notifications.ID_NEW_CHAPTERS
+                                )
+                            )
+                            setAutoCancel(true)
+                        },
+                        manga.id.hashCode()
+                    )
+                )
+            }
 
-            notifications.forEach {
-                notify(it.second, it.first)
+            NotificationManagerCompat.from(context).apply {
+
+                notify(
+                    Notifications.ID_NEW_CHAPTERS,
+                    context.notification(Notifications.CHANNEL_NEW_CHAPTERS) {
+                        setSmallIcon(R.drawable.ic_neko_notification)
+                        setLargeIcon(notificationBitmap)
+                        setContentTitle(context.getString(R.string.new_chapters_found))
+                        color = ContextCompat.getColor(context, R.color.colorAccent)
+                        if (updates.size > 1) {
+                            setContentText(
+                                context.resources.getQuantityString(
+                                    R.plurals
+                                        .for_n_titles,
+                                    updates.size, updates.size
+                                )
+                            )
+                            setStyle(
+                                NotificationCompat.BigTextStyle()
+                                    .bigText(
+                                        updates.keys.joinToString("\n") {
+                                            it.title.chop(45)
+                                        }
+                                    )
+                            )
+                        } else {
+                            val firstOrNull = updates.keys.firstOrNull()
+                            firstOrNull?.apply {
+                                setContentText(this.title.chop(45))
+                            }
+                        }
+                        priority = NotificationCompat.PRIORITY_HIGH
+                        setGroup(Notifications.GROUP_NEW_CHAPTERS)
+                        setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_SUMMARY)
+                        setGroupSummary(true)
+                        setContentIntent(getNotificationIntent())
+                        setAutoCancel(true)
+                    }
+                )
+
+                notifications.forEach {
+                    notify(it.second, it.first)
+                }
             }
         }
-    }
     }
 
     /**

@@ -19,7 +19,8 @@ import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
 import eu.kanade.tachiyomi.util.view.setEdgeToEdge
 import kotlinx.android.synthetic.main.tracking_bottom_sheet.*
 
-class TrackingBottomSheet(private val controller: MangaDetailsController) : BottomSheetDialog
+class TrackingBottomSheet(private val controller: MangaDetailsController) :
+    BottomSheetDialog
     (controller.activity!!, R.style.BottomSheetDialogTheme),
     TrackAdapter.OnClickListener,
     SetTrackStatusDialog.Listener,

@@ -118,9 +118,11 @@ class ChapterHolder(
         val anim3 = slideAnimation(-slide, 0f)
         anim3.startDelay = 750
         animatorSet.playSequentially(anim1, anim2, anim3)
-        animatorSet.addListener(EndAnimatorListener {
-            adapter.hasShownSwipeTut.set(true)
-        })
+        animatorSet.addListener(
+            EndAnimatorListener {
+                adapter.hasShownSwipeTut.set(true)
+            }
+        )
         animatorSet.start()
     }
 

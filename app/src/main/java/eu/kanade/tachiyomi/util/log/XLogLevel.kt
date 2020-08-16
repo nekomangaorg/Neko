@@ -17,7 +17,7 @@ enum class XLogLevel(val description: String) {
 
         fun init(context: Context) {
             curLogLevel = PreferenceManager.getDefaultSharedPreferences(context)
-                .getInt(PreferenceKeys.logLevel, if(BuildConfig.DEBUG) 2 else 0)
+                .getInt(PreferenceKeys.logLevel, if (BuildConfig.DEBUG) 2 else 0)
         }
 
         fun shouldLog(requiredLogLevel: XLogLevel): Boolean {
