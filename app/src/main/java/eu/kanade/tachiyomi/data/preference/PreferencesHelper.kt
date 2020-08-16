@@ -204,6 +204,10 @@ class PreferencesHelper(val context: Context) {
 
     fun filterMangaType() = rxPrefs.getInteger(Keys.filterMangaType, 0)
 
+    fun filterMerged() = rxPrefs.getInteger(Keys.filterMerged, 0)
+
+    fun filterMissingChapters() = rxPrefs.getInteger(Keys.filterMissingChapters, 0)
+
     fun librarySortingMode() = rxPrefs.getInteger(Keys.librarySortingMode, 0)
 
     fun librarySortingAscending() = rxPrefs.getBoolean("library_sorting_ascending", true)

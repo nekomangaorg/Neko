@@ -20,6 +20,13 @@
     <string name="cancelled">Cancelled</string>
     <string name="publication_complete">Publication Complete</string>
 
+    <!-- Library Filter -->
+    <string name="no_missing_chp">No missing chapters</string>
+    <string name="has_missing_chp">Missing chapters</string>
+    <string name="not_merged">Not merged</string>
+    <string name="merged">Merged</string>
+
+
     <!-- Library Sort -->
     <string name="rating">Rating</string>
 

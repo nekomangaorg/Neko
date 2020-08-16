@@ -68,6 +68,10 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
     private lateinit var completed: FilterTagGroup
 
+    private lateinit var merged: FilterTagGroup
+
+    private lateinit var missingChapters: FilterTagGroup
+
     private var tracked: FilterTagGroup? = null
 
     private var trackers: FilterTagGroup? = null
@@ -88,6 +92,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         list.add(completed)
         if (hasTracking)
             tracked?.let { list.add(it) }
+        list.add(merged)
+        list.add(missingChapters)
         list
     }
 
@@ -216,11 +222,14 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
     fun hasActiveFilters() = filterItems.any { it.isActivated }
 
     private fun hasActiveFiltersFromPref(): Boolean {
-        return preferences.filterDownloaded().getOrDefault() > 0 || preferences.filterUnread()
-            .getOrDefault() > 0 || preferences.filterCompleted()
-            .getOrDefault() > 0 || preferences.filterTracked()
-            .getOrDefault() > 0 || preferences.filterMangaType()
-            .getOrDefault() > 0 || FILTER_TRACKER.isNotEmpty()
+        return preferences.filterDownloaded().getOrDefault() > 0 ||
+            preferences.filterUnread().getOrDefault() > 0 ||
+            preferences.filterCompleted().getOrDefault() > 0 ||
+            preferences.filterTracked().getOrDefault() > 0 ||
+            preferences.filterMangaType().getOrDefault() > 0 ||
+            preferences.filterMerged().getOrDefault() > 0 ||
+            preferences.filterMissingChapters().getOrDefault() > 0 ||
+            FILTER_TRACKER.isNotEmpty()
     }
 
     private fun createTags() {
@@ -236,6 +245,12 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
         unread = inflate(R.layout.filter_buttons) as FilterTagGroup
         unread.setup(this, R.string.unread, R.string.read)
+
+        missingChapters = inflate(R.layout.filter_buttons) as FilterTagGroup
+        missingChapters.setup(this, R.string.has_missing_chp, R.string.no_missing_chp)
+
+        merged = inflate(R.layout.filter_buttons) as FilterTagGroup
+        merged.setup(this, R.string.merged, R.string.not_merged)
 
         if (hasTracking) {
             tracked = inflate(R.layout.filter_buttons) as FilterTagGroup
@@ -329,13 +344,14 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                 filterItems.add(it)
             }
         }
-        listOfNotNull(unreadProgress, unread, downloaded, completed, mangaType, tracked)
+        listOfNotNull(unreadProgress, unread, downloaded, completed, mangaType, tracked, missingChapters, merged)
             .forEach {
                 if (!filterItems.contains(it)) {
                     filterItems.add(it)
                 }
             }
     }
+
     private fun indexOf(filterTagGroup: FilterTagGroup): Int {
         charOfFilter(filterTagGroup)?.let {
             return filterOrder.indexOf(it)
@@ -355,6 +371,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             completed -> 'c'
             mangaType -> 'm'
             tracked -> 't'
+            merged -> 'n'
+            missingChapters -> 'o'
             else -> null
         }
     }
@@ -391,6 +409,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             'd' -> downloaded
             'c' -> completed
             'm' -> mangaType
+            'n' -> merged
+            'o' -> missingChapters
             't' -> if (hasTracking) tracked else null
             else -> null
         }
@@ -420,6 +440,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                 downloaded -> preferences.filterDownloaded()
                 completed -> preferences.filterCompleted()
                 tracked -> preferences.filterTracked()
+                merged -> preferences.filterMerged()
+                missingChapters -> preferences.filterMissingChapters()
                 mangaType -> {
                     val newIndex = when (view.nameOf(index)) {
                         context.getString(R.string.manga) -> Manga.TYPE_MANGA
@@ -462,6 +484,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         preferences.filterUnread().set(0)
         preferences.filterCompleted().set(0)
         preferences.filterTracked().set(0)
+        preferences.filterMerged().set(0)
+        preferences.filterMissingChapters().set(0)
         preferences.filterMangaType().set(0)
         FILTER_TRACKER = ""
 

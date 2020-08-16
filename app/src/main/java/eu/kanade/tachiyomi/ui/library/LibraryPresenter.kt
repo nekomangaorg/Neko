@@ -196,7 +196,14 @@ class LibraryPresenter(
 
         val filterTrackers = FilterBottomSheet.FILTER_TRACKER
 
-        val filtersOff = filterDownloaded == 0 && filterUnread == 0 && filterCompleted == 0 && filterTracked == 0 && filterMangaType == 0
+        val filterMerged = preferences.filterMerged().getOrDefault()
+
+        val filterMissingChapters = preferences.filterMissingChapters().getOrDefault()
+
+        val filtersOff = filterDownloaded == 0 && filterUnread == 0 &&
+            filterCompleted == 0 && filterTracked == 0 && filterMangaType == 0 &&
+            filterMerged == 0 && filterMissingChapters == 0
+
         return items.filter f@{ item ->
             if (item.manga.status == -1) {
                 val subItems = sectionedLibraryItems[item.manga.category]
@@ -210,7 +217,9 @@ class LibraryPresenter(
                             filterCompleted,
                             filterTracked,
                             filterMangaType,
-                            filterTrackers
+                            filterTrackers,
+                            filterMerged,
+                            filterMissingChapters
                         )
                     }
                 }
@@ -228,7 +237,9 @@ class LibraryPresenter(
                 filterCompleted,
                 filterTracked,
                 filterMangaType,
-                filterTrackers
+                filterTrackers,
+                filterMerged,
+                filterMissingChapters
             )
         }
     }
@@ -240,7 +251,9 @@ class LibraryPresenter(
         filterCompleted: Int,
         filterTracked: Int,
         filterMangaType: Int,
-        filterTrackers: String
+        filterTrackers: String,
+        filterMerged: Int,
+        filterMissingChapters: Int
     ): Boolean {
         if (filterUnread == STATE_INCLUDE && item.manga.unread == 0) return false
         if (filterUnread == STATE_EXCLUDE && item.manga.unread > 0) return false
@@ -261,6 +274,12 @@ class LibraryPresenter(
         // Filter for completed status of manga
         if (filterCompleted == STATE_INCLUDE && item.manga.status != SManga.COMPLETED) return false
         if (filterCompleted == STATE_EXCLUDE && item.manga.status == SManga.COMPLETED) return false
+
+        if (filterMerged == STATE_INCLUDE && item.manga.merge_manga_url == null) return false
+        if (filterMerged == STATE_EXCLUDE && item.manga.merge_manga_url != null) return false
+
+        if (filterMissingChapters == STATE_INCLUDE && item.manga.missing_chapters == null) return false
+        if (filterMissingChapters == STATE_EXCLUDE && item.manga.missing_chapters != null) return false
 
         // Filter for tracked (or per tracked service)
         if (filterTracked != STATE_IGNORE) {

@@ -105,6 +105,10 @@ object PreferenceKeys {
 
     const val filterMangaType = "pref_filter_manga_type_key"
 
+    const val filterMerged = "pref_filter_merged_key"
+
+    const val filterMissingChapters = "pref_filter_missing_chapters_key"
+
     const val librarySortingMode = "library_sorting_mode"
 
     const val automaticUpdates = "automatic_updates"
