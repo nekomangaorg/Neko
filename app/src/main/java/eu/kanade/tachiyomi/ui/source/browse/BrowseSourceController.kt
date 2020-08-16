@@ -11,6 +11,7 @@ import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.elvishew.xlog.XLog
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.jakewharton.rxbinding.support.v7.widget.queryTextChangeEvents
@@ -51,7 +52,6 @@ import kotlinx.android.synthetic.main.main_activity.*
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
-import com.elvishew.xlog.XLog
 import uy.kohesive.injekt.injectLazy
 import java.util.concurrent.TimeUnit
 

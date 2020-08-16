@@ -14,6 +14,7 @@ import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.util.asJsoup
+import info.debatty.java.stringsimilarity.JaroWinkler
 import info.debatty.java.stringsimilarity.Levenshtein
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -39,14 +40,33 @@ class MergeSource : ReducedHttpSource() {
                 directory = gson.fromJson<JsonArray>(directoryFromResponse(response))
             }
             val textDistance = Levenshtein()
+            val textDistance2 = JaroWinkler()
 
-            val results = directory!!.map { Pair(textDistance.distance(it["s"].string, query), it) }
-                .filter { it.first < 10 }.sortedBy { it.first }.map { it.second }
-
-            return@withContext if (results.isNotEmpty()) {
-                parseMangaList(results)
+            val exactMatch = directory!!.firstOrNull { it["s"].string == query }
+            if (exactMatch != null) {
+                parseMangaList(listOf(exactMatch))
             } else {
-                emptyList()
+                // take results that potentially start the same
+                val results = directory!!.filter {
+                    val title = it["s"].string
+                    val query2 = query.take(7)
+                    (
+                        title.startsWith(query2, true) ||
+                            title.contains(query2, true)
+                        )
+                }.sortedBy { textDistance.distance(query, it["s"].string) }
+
+                // take similar results
+                val results2 = directory!!.map { Pair(textDistance2.distance(it["s"].string, query), it) }
+                    .filter { it.first < 0.3 }.sortedBy { it.first }.map { it.second }
+
+                val combinedResults = results.union(results2)
+
+                return@withContext if (combinedResults.isNotEmpty()) {
+                    parseMangaList(combinedResults.toList())
+                } else {
+                    emptyList()
+                }
             }
         }
     }
