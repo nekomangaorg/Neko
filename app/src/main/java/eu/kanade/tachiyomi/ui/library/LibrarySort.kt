@@ -8,5 +8,6 @@ object LibrarySort {
     const val UNREAD = 3
     const val TOTAL = 4
     const val DATE_ADDED = 5
-    const val DRAG_AND_DROP = 6
+    const val RATING = 6
+    const val DRAG_AND_DROP = 7
 }

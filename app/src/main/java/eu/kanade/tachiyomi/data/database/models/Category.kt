@@ -42,6 +42,7 @@ interface Category : Serializable {
         TOTAL_ASC, TOTAL_DSC -> LibrarySort.TOTAL
         DRAG_AND_DROP -> LibrarySort.DRAG_AND_DROP
         DATE_ADDED_ASC, DATE_ADDED_DSC -> LibrarySort.DATE_ADDED
+        RATING_ASC, RATING_DSC -> LibrarySort.RATING
         else -> null
     }
 
@@ -52,6 +53,7 @@ interface Category : Serializable {
         LAST_READ_ASC, LAST_READ_DSC -> R.string.last_read
         TOTAL_ASC, TOTAL_DSC -> R.string.total_chapters
         DATE_ADDED_ASC, DATE_ADDED_DSC -> R.string.date_added
+        RATING_ASC, RATING_DSC -> R.string.rating
         else -> if (isDynamic) R.string.category else R.string.drag_and_drop
     }
 
@@ -62,6 +64,7 @@ interface Category : Serializable {
         LAST_READ_ASC, LAST_READ_DSC -> 3
         TOTAL_ASC, TOTAL_DSC -> 4
         DATE_ADDED_ASC, DATE_ADDED_DSC -> 5
+        RATING_ASC, RATING_DSC -> 6
         else -> null
     }
 
@@ -73,6 +76,7 @@ interface Category : Serializable {
             LibrarySort.LAST_READ -> LAST_READ_ASC
             LibrarySort.TOTAL -> ALPHA_ASC
             LibrarySort.DATE_ADDED -> DATE_ADDED_ASC
+            LibrarySort.RATING -> RATING_ASC
             else -> ALPHA_ASC
         }
     }
@@ -91,6 +95,8 @@ interface Category : Serializable {
         private const val TOTAL_DSC = 'j'
         private const val DATE_ADDED_ASC = 'k'
         private const val DATE_ADDED_DSC = 'l'
+        private const val RATING_ASC = 'm'
+        private const val RATING_DSC = 'n'
 
         fun create(name: String): Category = CategoryImpl().apply {
             this.name = name
@@ -111,6 +117,7 @@ interface Category : Serializable {
                     LibrarySort.TOTAL -> TOTAL_ASC
                     LibrarySort.DATE_ADDED -> DATE_ADDED_ASC
                     LibrarySort.DRAG_AND_DROP -> DRAG_AND_DROP
+                    LibrarySort.RATING -> RATING_ASC
                     else -> DRAG_AND_DROP
                 }
                 if (mangaSort != DRAG_AND_DROP && !ascending) {

@@ -183,6 +183,17 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
                             "N/A"
                         }
                     }
+                    LibrarySort.RATING -> {
+                        val added = item.manga.rating ?: return ""
+                        val rating = added.toDoubleOrNull()
+                        rating ?: return ""
+
+                        if (rating > 0) {
+                            recyclerView.context.getString(R.string.added_, added)
+                        } else {
+                            "N/A"
+                        }
+                    }
                     else -> {
                         val title = if (preferences.removeArticles().getOrDefault()) {
                             item.manga.title.removeArticles()

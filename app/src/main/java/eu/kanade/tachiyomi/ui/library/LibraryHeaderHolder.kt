@@ -103,7 +103,7 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
         val sortingMode = category.sortingMode()
         val sortDrawable = when {
             sortingMode == LibrarySort.DRAG_AND_DROP || sortingMode == null -> R.drawable.ic_sort_24dp
-            if (sortingMode == LibrarySort.DATE_ADDED || sortingMode == LibrarySort.LATEST_CHAPTER || sortingMode == LibrarySort.LAST_READ) !isAscending else isAscending -> R.drawable.ic_arrow_downward_24dp
+            if (sortingMode == LibrarySort.RATING || sortingMode == LibrarySort.DATE_ADDED || sortingMode == LibrarySort.LATEST_CHAPTER || sortingMode == LibrarySort.LAST_READ) !isAscending else isAscending -> R.drawable.ic_arrow_downward_24dp
             else -> R.drawable.ic_arrow_upward_24dp
         }
 
@@ -179,8 +179,14 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
                     LibrarySort.DATE_ADDED,
                     R.drawable.ic_heart_outline_24dp,
                     R.string.date_added
+                ),
+                MaterialMenuSheet.MenuSheetItem(
+                    LibrarySort.RATING,
+                    R.drawable.ic_poll_24dp,
+                    R.string.rating
                 )
             )
+
             if (category.isDynamic) {
                 items.add(
                     MaterialMenuSheet.MenuSheetItem(
@@ -210,7 +216,8 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
 
     private fun getSortRes(sortingMode: Int?, isAscending: Boolean): Int = when {
         sortingMode == LibrarySort.DRAG_AND_DROP -> R.drawable.ic_check_24dp
-        if (sortingMode == LibrarySort.DATE_ADDED ||
+        if (sortingMode == LibrarySort.RATING ||
+            sortingMode == LibrarySort.DATE_ADDED ||
             sortingMode == LibrarySort.LATEST_CHAPTER ||
             sortingMode == LibrarySort.LAST_READ
         ) !isAscending else isAscending ->
@@ -229,6 +236,7 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
                     adapter.libraryListener.sortCategory(category.id!!, 'D' - 'a' + 1)
                     return
                 }
+                LibrarySort.RATING -> 6
                 LibrarySort.DATE_ADDED -> 5
                 LibrarySort.TOTAL -> 4
                 LibrarySort.LAST_READ -> 3

@@ -20,6 +20,9 @@
     <string name="cancelled">Cancelled</string>
     <string name="publication_complete">Publication Complete</string>
 
+    <!-- Library Sort -->
+    <string name="rating">Rating</string>
+
     <!--Browse -->
     <string name="random_manga">Random</string>
     <string name="apply">Apply</string>
