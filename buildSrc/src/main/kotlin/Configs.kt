@@ -5,8 +5,8 @@ object Configs {
     const val minSdkVersion = 24
     const val targetSdkVersion = 29
     const val testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    const val versionCode = 81
-    const val versionName = "2.1.2.1"
+    const val versionCode = 82
+    const val versionName = "2.1.3"
 }
 
 object LegacyPluginClassPath {

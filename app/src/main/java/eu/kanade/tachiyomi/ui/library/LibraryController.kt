@@ -262,7 +262,7 @@ class LibraryController(
                 presenter.currentCategory == it.id
             }
         }
-        if (currentCategory > -1) {
+        if (currentCategory > -1 && category_recycler != null) {
             category_recycler.setCategories(currentCategory)
             header_title.text = presenter.categories[currentCategory].name
             setTitle()
