@@ -20,21 +20,21 @@ fun deduplicateChapters(dbChapters: List<SChapter>, sourceChapters: List<SChapte
 
     val isManga = "jp" == manga.lang_flag
 
-    var dexMap: Map<Int?, List<Int?>>? = null
+    var dexMap: Map<Int?, List<Float?>>? = null
     var only1VolNoVol: Boolean = false
 
     if (isManga.not()) {
-        dexMap = dexChapters.groupBy(keySelector = { getVolumeNum(it) }, valueTransform = { getChapterNumInt(it) })
+        dexMap = dexChapters.groupBy(keySelector = { getVolumeNum(it) }, valueTransform = { getChapterNum(it) })
         only1VolNoVol = dexChapters.all { getVolumeNum(it) == 1 } && mergedChapters.all { getVolumeNum(it) == null }
     }
 
-    var dexSet: HashSet<Int?>? = null
+    var dexSet: HashSet<Float?>? = null
     if (isManga || only1VolNoVol) {
-        dexSet = dexChapters.map { getChapterNumInt(it) }.toHashSet()
+        dexSet = dexChapters.map { getChapterNum(it) }.toHashSet()
     }
 
     mergedChapters.forEach { sChapter ->
-        getChapterNumInt(sChapter)?.let { chpNum ->
+        getChapterNum(sChapter)?.let { chpNum ->
             if (isManga || only1VolNoVol) {
                 if (!dexSet!!.contains(chpNum)) {
                     dexChapters.add(sChapter)
