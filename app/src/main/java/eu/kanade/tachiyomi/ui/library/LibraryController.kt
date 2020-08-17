@@ -256,7 +256,11 @@ class LibraryController(
 
     private fun setActiveCategory() {
         val currentCategory = presenter.categories.indexOfFirst {
-            if (presenter.showAllCategories) it.order == activeCategory else presenter.currentCategory == it.id
+            if (presenter.showAllCategories) {
+                it.order == activeCategory
+            } else {
+                presenter.currentCategory == it.id
+            }
         }
         if (currentCategory > -1) {
             category_recycler.setCategories(currentCategory)
@@ -565,8 +569,8 @@ class LibraryController(
                 presenter.categories.indexOfFirst { presenter.currentCategory == it.id } +
                     (if (next) 1 else -1)
             if (if (!next) {
-                newOffset > -1
-            } else {
+                    newOffset > -1
+                } else {
                     newOffset < presenter.categories.size
                 }
             ) {
@@ -1036,8 +1040,8 @@ class LibraryController(
         swipe_refresh.isEnabled = actionState != ItemTouchHelper.ACTION_STATE_DRAG
         if (actionState == ItemTouchHelper.ACTION_STATE_DRAG) {
             if (lastItemPosition != null && position != lastItemPosition && lastItem == adapter.getItem(
-                position
-            )
+                    position
+                )
             ) {
                 // because for whatever reason you can repeatedly tap on a currently dragging manga
                 adapter.removeSelection(position)
@@ -1066,9 +1070,9 @@ class LibraryController(
     override fun onItemMove(fromPosition: Int, toPosition: Int) {
         // Because padding a recycler causes it to scroll up we have to scroll it back down... wild
         if ((
-            adapter.getItem(fromPosition) is LibraryItem && adapter.getItem(fromPosition) is
-            LibraryItem
-            ) || adapter.getItem(
+                adapter.getItem(fromPosition) is LibraryItem && adapter.getItem(fromPosition) is
+                    LibraryItem
+                ) || adapter.getItem(
                 fromPosition
             ) == null
         ) {
