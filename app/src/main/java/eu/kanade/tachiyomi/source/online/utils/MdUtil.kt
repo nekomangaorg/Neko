@@ -195,10 +195,15 @@ class MdUtil {
             }.sortedByDescending { it.chapter_number }
 
             remove0ChaptersFromCount.firstOrNull()?.let {
-                val chpNumber = it.chapter_number
-                val result = floor(chpNumber).toInt() - remove0ChaptersFromCount.size
-                if (result <= 0) return null
-                return result.toString()
+                val chpNumber = floor(it.chapter_number).toInt()
+                val allChapters = (1..chpNumber).toMutableSet()
+
+                remove0ChaptersFromCount.forEach {
+                    allChapters.remove(floor(it.chapter_number).toInt())
+                }
+
+                if (allChapters.size <= 0) return null
+                return allChapters.size.toString()
             }
             return null
         }

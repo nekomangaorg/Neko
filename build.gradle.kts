@@ -61,7 +61,6 @@ tasks.named("dependencyUpdates", com.github.benmanes.gradle.versions.updates.Dep
     reportfileName = "report"
 }
 
-
 tasks.register("clean", Delete::class) {
     delete(rootProject.buildDir)
 }
