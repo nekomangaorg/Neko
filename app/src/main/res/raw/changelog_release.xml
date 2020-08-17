@@ -9,7 +9,7 @@
         <changelogtext>New: DNS over HTTPS</changelogtext>
         <changelogtext>New: option to clear non library cover cache</changelogtext>
         <changelogtext>New: menu when you long press favorite in a manga</changelogtext>
-        <changelogtext>Fix: Down arrows on sort now are consistent and mean descending</changelogtext>
+        <changelogtext>Fix: Down arrows on library sort now are consistent and mean descending</changelogtext>
         <changelogtext>Fix: Rotating screen during manga info keeps place on screen</changelogtext>
         <changelogtext>Fix: upstream J2K bug fixes</changelogtext>
         <changelogtext>Fix: Merged Manga search is more accurate</changelogtext>

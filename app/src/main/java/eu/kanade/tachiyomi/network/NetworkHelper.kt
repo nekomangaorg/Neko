@@ -5,6 +5,7 @@ import android.os.SystemClock
 import com.chuckerteam.chucker.api.ChuckerInterceptor
 import com.elvishew.xlog.XLog
 import com.google.gson.Gson
+import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.log.XLogLevel
 import okhttp3.Cache
@@ -63,11 +64,13 @@ class NetworkHelper(val context: Context) {
     private fun buildNonRateLimitedClient(): OkHttpClient {
         return OkHttpClient.Builder()
             .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(60, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
             .cache(Cache(cacheDir, cacheSize))
-            .addInterceptor(ChuckerInterceptor(context))
             .cookieJar(cookieManager)
             .apply {
+                if (BuildConfig.DEBUG) {
+                    addInterceptor(ChuckerInterceptor(context))
+                }
                 if (preferences.enableDoh()) {
                     dns(
                         DnsOverHttps.Builder().client(build())

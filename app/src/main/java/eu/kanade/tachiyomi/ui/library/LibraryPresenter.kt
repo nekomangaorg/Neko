@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.library
 
-import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -380,8 +379,8 @@ class LibraryPresenter(
                             LibrarySort.LATEST_CHAPTER -> i1.manga.last_update.compareTo(i2.manga.last_update)
                             LibrarySort.UNREAD -> when {
                                 i1.manga.unread == i2.manga.unread -> 0
-                                i1.manga.unread == 0 -> if (category.isAscending()) -1 else 1
-                                i2.manga.unread == 0 -> if (category.isAscending()) 1 else -1
+                                i1.manga.unread == 0 -> if (category.isAscending()) 1 else -1
+                                i2.manga.unread == 0 -> if (category.isAscending()) -1 else 1
                                 else -> i2.manga.unread.compareTo(i1.manga.unread)
                             }
                             LibrarySort.LAST_READ -> {
@@ -808,9 +807,7 @@ class LibraryPresenter(
     /** Update a category's sorting */
     fun sortCategory(catId: Int, order: Int) {
         val category = categories.find { catId == it.id } ?: return
-        XLog.d("ESCO $order")
         category.mangaSort = ('a' + (order - 1))
-        XLog.d("ESCO new order ${category.mangaSort}")
         if (catId == -1 || category.isDynamic) {
             val sort = category.sortingMode() ?: LibrarySort.ALPHA
             preferences.librarySortingMode().set(sort)
