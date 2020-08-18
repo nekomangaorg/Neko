@@ -61,10 +61,6 @@ abstract class ReducedHttpSource : HttpSource() {
         TODO("Not yet implemented")
     }
 
-    override suspend fun updateReadingProgress(track: Track): Boolean {
-        TODO("Not yet implemented")
-    }
-
     override suspend fun updateFollowStatus(mangaID: String, followStatus: FollowStatus): Boolean {
         TODO("Not yet implemented")
     }
