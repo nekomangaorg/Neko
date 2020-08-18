@@ -146,13 +146,13 @@ object Libs {
         const val changelog = "com.github.gabrielemariotti.changeloglib:changelog:${Versions.changelog}"
         const val injekt = "com.github.inorichi.injekt:injekt-core:${Versions.injekt}"
         const val stringSimilarity = "info.debatty:java-string-similarity:${Versions.stringSimilarity}"
+        const val versionCompare = "com.g00fy2:versioncompare:${Versions.versionCompare}"
         const val xlog = "com.elvishew:xlog:${Versions.xlog}"
     }
 }
 
 object Versions {
     const val aboutLibraries = "8.3.0"
-    const val acra = "4.9.2"
     const val androidAnnotations = "1.1.0"
     const val androidAppCompat = "1.1.0"
     const val androidBiometrics = "1.0.1"
@@ -217,7 +217,6 @@ object Versions {
     const val rxJava = "1.3.8"
     const val rxPreferences = "1.0.2"
     const val rxRelay = "1.2.0"
-    const val slice = "v1.2"
     const val storioCommon = "8be19de@aar"
     const val storioSqlite = "8be19de@aar"
     const val stringSimilarity = "2.0.0"
@@ -225,8 +224,8 @@ object Versions {
     const val systemUiHelper = "1.0.0"
     const val tagGroup = "1.6.0"
     const val tapTargetView = "1.13.0"
-    const val timber = "4.7.1"
     const val unifile = "e9ee588"
+    const val versionCompare = "1.3.4"
     const val viewStatePagerAdapter = "1.1.0"
     const val viewToolTip = "1.2.2"
     const val xlog = "1.6.1"

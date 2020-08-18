@@ -3,6 +3,11 @@
     <changelogversion
         changeDate=""
         versionName="v2.1.3.1">
+        <changelogtext>Fix: update notification bug for realz</changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
+        versionName="v2.1.3.1">
         <changelogtext>Fix: Updating rating in tracker updates on site now (note there is no current way to pull the rating and no way to reset it please Dex V5 API when)</changelogtext>
         <changelogtext>Fix: cover cache for non library actually being deleted</changelogtext>
         <changelogtext>Fix: unread sorting works again</changelogtext>

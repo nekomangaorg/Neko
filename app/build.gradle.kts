@@ -246,6 +246,7 @@ dependencies {
     implementation(Libs.Util.stringSimilarity)
 
     //  version comparison
+    implementation(Libs.Util.versionCompare)
     implementation(Libs.Util.aboutLibraries)
 }
 
