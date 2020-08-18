@@ -28,7 +28,7 @@
 
 
     <!-- Library Sort -->
-    <string name="rating">Rating</string>
+    <string name="rating">Site rating</string>
 
     <!--Browse -->
     <string name="random_manga">Random</string>

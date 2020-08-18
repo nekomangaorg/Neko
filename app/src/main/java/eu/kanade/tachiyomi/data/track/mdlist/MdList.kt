@@ -11,7 +11,6 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import kotlinx.coroutines.Dispatchers
@@ -21,7 +20,7 @@ import uy.kohesive.injekt.api.get
 
 class MdList(private val context: Context, id: Int) : TrackService(id) {
 
-    private val mdex by lazy { Injekt.get<SourceManager>().getMangadex() as HttpSource }
+    private val mdex by lazy { Injekt.get<SourceManager>().getMangadex() }
     private val db: DatabaseHelper by lazy { Injekt.get<DatabaseHelper>() }
 
     override val name = "MDList"
@@ -43,7 +42,7 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
 
     override fun getGlobalStatus(status: Int): String = getStatus(status)
 
-    override fun getScoreList() = IntRange(0, 10).map(Int::toString)
+    override fun getScoreList() = IntRange(1, 10).map(Int::toString)
 
     override fun displayScore(track: Track) = track.score.toInt().toString()
 
@@ -60,11 +59,17 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
                 db.insertManga(manga).executeAsBlocking()
             }
 
+            if (track.score.toInt() > 0) {
+                mdex.updateRating(track)
+            }
+
             // mangadex wont update chapters if manga is not follows this prevents unneeded network call
+
             if (followStatus != FollowStatus.UNFOLLOWED) {
                 if (track.total_chapters != 0 && track.last_chapter_read == track.total_chapters) {
                     track.status = FollowStatus.COMPLETED.int
                 }
+
                 mdex.updateReadingProgress(track)
             } else if (track.last_chapter_read != 0) {
                 // When followStatus has been changed to unfollowed 0 out read chapters since dex does

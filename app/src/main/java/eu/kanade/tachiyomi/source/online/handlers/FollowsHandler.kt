@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
+import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
@@ -24,7 +25,6 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import rx.Observable
-import com.elvishew.xlog.XLog
 import kotlin.math.floor
 
 class FollowsHandler(val client: OkHttpClient, val headers: Headers, val preferences: PreferencesHelper) {
@@ -159,9 +159,31 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
             XLog.d("chapter to update %s", track.last_chapter_read.toString())
             val response = client.newCall(
                 POST(
-                    "$baseUrl/ajax/actions.ajax.php?function=edit_progress&&id=$mangaID",
+                    "$baseUrl/ajax/actions.ajax.php?function=edit_progress&id=$mangaID",
                     headers,
                     formBody.build()
+                )
+            ).execute()
+
+            val response2 = client.newCall(
+                GET(
+                    "$baseUrl/ajax/actions.ajax.php?function=manga_rating&id=$mangaID&rating=${track.score.toInt()}",
+                    headers
+                )
+            )
+                .execute()
+
+            response.body!!.string().isEmpty()
+        }
+    }
+
+    suspend fun updateRating(track: Track): Boolean {
+        return withContext(Dispatchers.IO) {
+            val mangaID = getMangaId(track.tracking_url)
+            val response = client.newCall(
+                GET(
+                    "$baseUrl/ajax/actions.ajax.php?function=manga_rating&id=$mangaID&rating=${track.score.toInt()}",
+                    headers
                 )
             )
                 .execute()

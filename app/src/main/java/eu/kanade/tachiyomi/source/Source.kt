@@ -57,11 +57,6 @@ interface Source {
     suspend fun fetchAllFollows(forceHd: Boolean = false): List<SManga>
 
     /**
-     * Updates reading status
-     */
-    suspend fun updateReadingProgress(track: Track): Boolean
-
-    /**
      * updates the follow status for a manga
      */
     suspend fun updateFollowStatus(mangaID: String, followStatus: FollowStatus): Boolean

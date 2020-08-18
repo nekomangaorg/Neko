@@ -251,8 +251,12 @@ open class MangaDex() : HttpSource() {
         return FollowsHandler(clientBuilder(), headers, preferences).fetchAllFollows(forceHd)
     }
 
-    override suspend fun updateReadingProgress(track: Track): Boolean {
+    suspend fun updateReadingProgress(track: Track): Boolean {
         return FollowsHandler(clientBuilder(), headers, preferences).updateReadingProgress(track)
+    }
+
+    suspend fun updateRating(track: Track): Boolean {
+        return FollowsHandler(clientBuilder(), headers, preferences).updateRating(track)
     }
 
     override suspend fun fetchTrackingInfo(url: String): Track {
