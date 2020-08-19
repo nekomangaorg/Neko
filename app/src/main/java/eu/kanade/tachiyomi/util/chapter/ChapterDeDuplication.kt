@@ -34,7 +34,18 @@ fun deduplicateChapters(dbChapters: List<SChapter>, sourceChapters: List<SChapte
     }
 
     mergedChapters.forEach { sChapter ->
-        getChapterNum(sChapter)?.let { chpNum ->
+        val chpNum = getChapterNum(sChapter)
+        // if there is no chpNum add it anyways so we dont lose it
+        if (chpNum == null) {
+            when (isManga || only1VolNoVol) {
+                true -> dexChapters.add(sChapter)
+                false -> dexMap!![getVolumeNum(sChapter)]?.let {
+                    if (it.contains(chpNum).not()) {
+                        dexChapters.add(sChapter)
+                    }
+                }
+            }
+        } else {
             if (isManga || only1VolNoVol) {
                 if (!dexSet!!.contains(chpNum)) {
                     dexChapters.add(sChapter)

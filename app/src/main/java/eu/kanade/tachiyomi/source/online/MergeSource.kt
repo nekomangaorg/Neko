@@ -90,18 +90,30 @@ class MergeSource : ReducedHttpSource() {
             return@withContext gson.fromJson<JsonArray>(vmChapters).map { json ->
                 val indexChapter = json["Chapter"].string
                 SChapter.create().apply {
-                    name = json["ChapterName"].nullString.let { if (it.isNullOrEmpty()) "${json["Type"].string} ${chapterImage(indexChapter)}" else it }
 
-                    val season = name.substringBefore(" - Chapter", "")
+                    val type = json["Type"].string
+
+                    name = json["ChapterName"].nullString.let { if (it.isNullOrEmpty()) "$type ${chapterImage(indexChapter)}" else it }
+
+                    val season = name.substringAfter("Volume ", "")
                     if (season.isNotEmpty()) {
-                        vol = season.substring(1)
+                        vol = season.substringBefore(" ")
                     }
-                    val splitName = name.substringAfter(" - Chapter").split(" ")
-                    for (split in splitName) {
-                        var splitFloat = split.toFloatOrNull()
-                        if (splitFloat != null) {
-                            chapter_txt = splitFloat.toString()
-                            break
+
+                    val seasonAnotherWay = name.substringBefore(" - Chapter", "").substringAfter("S")
+
+                    if (seasonAnotherWay.isNotEmpty()) {
+                        vol = seasonAnotherWay
+                    }
+
+                    if (json["Type"].string != "Volume") {
+                        val splitName = name.substringAfter(" - Chapter").split(" ")
+                        for (split in splitName) {
+                            val splitFloat = split.toFloatOrNull()
+                            if (splitFloat != null) {
+                                chapter_txt = splitFloat.toString()
+                                break
+                            }
                         }
                     }
 
