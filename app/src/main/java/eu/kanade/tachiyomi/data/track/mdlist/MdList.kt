@@ -42,7 +42,7 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
 
     override fun getGlobalStatus(status: Int): String = getStatus(status)
 
-    override fun getScoreList() = IntRange(1, 10).map(Int::toString)
+    override fun getScoreList() = IntRange(0, 10).map(Int::toString)
 
     override fun displayScore(track: Track) = track.score.toInt().toString()
 
