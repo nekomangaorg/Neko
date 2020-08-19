@@ -29,7 +29,7 @@ class NetworkHelper(val context: Context) {
 
     val cookieManager = AndroidCookieJar()
 
-    private val requestsPerSecond = 3
+    private val requestsPerSecond = 2
     private val lastRequests = ArrayList<Long>(requestsPerSecond)
     private val rateLimitInterceptor = Interceptor {
         synchronized(this) {

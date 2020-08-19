@@ -36,8 +36,6 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
@@ -284,41 +282,21 @@ class LibraryUpdateService(
 
         mangaToUpdate.addAll(mangaToAdd)
 
-        updateMangaMap(mangaToAdd)
-
-        requestSemaphore = Semaphore(mangaToUpdateMap.keys.size)
+        mangaToUpdateMap.putAll(mangaToAdd.groupBy { it.source })
 
         coroutineScope {
             jobCount.andIncrement
-            val list = mangaToUpdateMap.keys.map { source ->
-                async {
-                    try {
-                        requestSemaphore.withPermit {
-                            updateMangaInSource(source, downloadNew, categoriesToDownload)
-                        }
-                    } catch (e: Exception) {
-                        XLog.e(e)
-                        false
-                    }
+            val results = mangaToUpdateMap.keys.map { source ->
+                try {
+                    updateMangaInSource(source, downloadNew, categoriesToDownload)
+                } catch (e: Exception) {
+                    XLog.e(e)
+                    false
                 }
             }
-            val results = list.awaitAll()
             hasDownloads = hasDownloads || results.any { it }
             jobCount.andDecrement
             finishUpdates()
-        }
-    }
-
-    private fun updateMangaMap(mangaToAdd: List<LibraryManga>) {
-        if (mangaToAdd.size < 5) {
-            for (manga in mangaToAdd.withIndex()) {
-                mangaToUpdateMap[manga.index.toLong()] = listOf(manga.value)
-            }
-        } else {
-            val chunked = mangaToAdd.chunked(mangaToAdd.size.div(2))
-            for (x in chunked.indices) {
-                mangaToUpdateMap[x.toLong()] = chunked[x]
-            }
         }
     }
 
