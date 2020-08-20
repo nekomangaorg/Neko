@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.reader
 import android.app.Application
 import android.os.Bundle
 import android.os.Environment
+import com.elvishew.xlog.XLog
 import com.jakewharton.rxrelay.BehaviorRelay
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
@@ -30,6 +31,7 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
+import eu.kanade.tachiyomi.util.log.XLogLevel
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.executeOnIO
@@ -42,8 +44,6 @@ import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
-import com.elvishew.xlog.XLog
-import eu.kanade.tachiyomi.util.log.XLogLevel
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File
@@ -112,7 +112,7 @@ class ReaderPresenter(
             Manga.SORTING_NUMBER -> ChapterLoadByNumber().get(chaptersForReader, selectedChapter)
             else -> error("Unknown sorting method")
         }.map { it ->
-            XLog.d(it.chapterLog())
+            XLog.d("chapterList lazy ${it.chapterLog()}")
             ReaderChapter(it)
         }
     }
@@ -271,7 +271,13 @@ class ReaderPresenter(
             .andThen(
                 Observable.fromCallable {
                     val chapterPos = chapterList.indexOf(chapter)
-
+                    if (XLogLevel.shouldLog(XLogLevel.EXTRA)) {
+                        XLog.nst().d("ChapterList in loadObservable")
+                        XLog.nst().d("chapter position $chapterPos")
+                        chapterList.forEach {
+                            XLog.nst().d(it.urlAndName())
+                        }
+                    }
                     ViewerChapters(
                         chapter,
                         chapterList.getOrNull(chapterPos - 1),
@@ -284,21 +290,21 @@ class ReaderPresenter(
 
                 val oldChapters = viewerChaptersRelay.value
 
-                XLog.d("loadObservable oldChapters previousChapter %s", oldChapters?.prevChapter?.urlAndName())
-                XLog.d("loadObservable oldChapters currentChapter %s", oldChapters?.currChapter?.urlAndName())
-                XLog.d("loadObservable oldChapters nextChapter %s", oldChapters?.nextChapter?.urlAndName())
+                XLog.nst().d("loadObservable oldChapters previousChapter %s", oldChapters?.prevChapter?.urlAndName())
+                XLog.nst().d("loadObservable oldChapters currentChapter %s", oldChapters?.currChapter?.urlAndName())
+                XLog.nst().d("loadObservable oldChapters nextChapter %s", oldChapters?.nextChapter?.urlAndName())
 
-                XLog.d("loadObservable newChapters previousChapter %s", newChapters?.prevChapter?.urlAndName())
-                XLog.d("loadObservable newChapters currentChapter %s", newChapters?.currChapter?.urlAndName())
-                XLog.d("loadObservable newChapters nextChapter %s", newChapters?.nextChapter?.urlAndName())
+                XLog.nst().d("loadObservable newChapters previousChapter %s", newChapters?.prevChapter?.urlAndName())
+                XLog.nst().d("loadObservable newChapters currentChapter %s", newChapters?.currChapter?.urlAndName())
+                XLog.nst().d("loadObservable newChapters nextChapter %s", newChapters?.nextChapter?.urlAndName())
 
                 // Add new references first to avoid unnecessary recycling
                 newChapters.ref()
                 oldChapters?.unref()
 
-                XLog.d("loadObservable newChapters afterRef previousChapter %s", newChapters.prevChapter?.urlAndName())
-                XLog.d("loadObservable newChapters afterRef currentChapter %s", newChapters.currChapter.urlAndName())
-                XLog.d("loadObservable newChapters afterRef nextChapter %s", newChapters.nextChapter?.urlAndName())
+                XLog.nst().d("loadObservable newChapters afterRef previousChapter %s", newChapters.prevChapter?.urlAndName())
+                XLog.nst().d("loadObservable newChapters afterRef currentChapter %s", newChapters.currChapter.urlAndName())
+                XLog.nst().d("loadObservable newChapters afterRef nextChapter %s", newChapters.nextChapter?.urlAndName())
 
                 viewerChaptersRelay.call(newChapters)
             }
