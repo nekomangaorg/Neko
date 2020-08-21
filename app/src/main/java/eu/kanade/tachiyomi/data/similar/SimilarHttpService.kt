@@ -29,7 +29,7 @@ interface SimilarHttpService {
             // actual builder, which will parse the underlying json file
             val contentType = "application/json".toMediaType()
             val restAdapter = Retrofit.Builder()
-                .baseUrl("https://github.com")
+                .baseUrl("https://raw.githubusercontent.com")
                 .addConverterFactory(Json.asConverterFactory(contentType))
                 .client(
                     Injekt.get<NetworkHelper>().client
@@ -43,6 +43,6 @@ interface SimilarHttpService {
     }
 
     @Streaming
-    @GET("/goldbattle/MangadexRecomendations/releases/download/v1.0.0/mangas_compressed.json.gz")
+    @GET("/goldbattle/MangadexRecomendations/master/output/mangas_compressed.json.gz")
     fun getSimilarResults(): Call<ResponseBody>
 }
