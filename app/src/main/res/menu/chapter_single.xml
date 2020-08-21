@@ -3,6 +3,10 @@
           android:title="@string/mark_previous_as_read"/>
     <item android:id="@+id/action_mark_previous_as_unread"
         android:title="@string/mark_previous_as_unread"/>
+	<item android:id="@+id/action_mark_chapter_as_read"
+		androud:title="@string/mark_chapter_as_read"/>
+	<item android:id="@+id/action_mark_chapter_as_unread"
+		androud:title="@string/mark_chapter_as_unread"/>
     <item
         android:id="@+id/action_view_comments"
         android:visible="false"

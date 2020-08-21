@@ -604,8 +604,10 @@ class MangaDetailsController :
 
         popup.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
-                R.id.action_mark_previous_as_read -> markPreviousAs(item, true)
-                R.id.action_mark_previous_as_unread -> markPreviousAs(item, false)
+                R.id.action_mark_previous_as_read -> markAs(item, true, true)
+                R.id.action_mark_previous_as_unread -> markAs(item, false, true)
+				R.id.action_mark_chapter_as_read -> markAs(item, true, false)
+				R.id.action_mark_chapter_as_unread -> markAs(item, false, false)
                 R.id.action_view_comments -> viewComments(item)
             }
             chapterPopupMenu = null
@@ -634,20 +636,28 @@ class MangaDetailsController :
             chapterPopupMenu = null
         }
     }
-
-    private fun markPreviousAs(chapter: ChapterItem, read: Boolean) {
-        val adapter = adapter ?: return
-        val chapters = if (presenter.sortDescending()) adapter.items.reversed() else adapter.items
-        val chapterPos = chapters.indexOf(chapter)
-        if (chapterPos != -1) {
-            if (read) {
-                markAsRead(chapters.take(chapterPos))
-            } else {
-                markAsUnread(chapters.take(chapterPos))
-            }
-        }
-    }
-
+	
+	private fun markAs(chapter: ChapterItem, read: Boolean, previous: Boolean) {
+		val adapter = adapter ?: return
+		val chapters = if (presenter.sortDescending()) adapter.items.reversed() else adapter.items
+		val chapterPos = chapters.indexOf(chapter)
+		if (chapterPos != -1) {
+			if (read) {
+				if (previous) {
+					markAsRead(chapters.take(chapterPos))
+				} else {
+					markAsRead(chapters.get(chapterPos))
+				}
+			} else {
+				if (previous) {
+					markAsUnread(chapters.take(chapterPos))
+				} else {
+					markAsUnread(chapters.get(chapterPos))
+				}
+			}
+		}
+	}
+	
     fun bookmarkChapter(position: Int) {
         val item = adapter?.getItem(position) as? ChapterItem ?: return
         val chapter = item.chapter
