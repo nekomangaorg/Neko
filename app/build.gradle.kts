@@ -126,7 +126,8 @@ dependencies {
     // Network client
     implementation("com.squareup.okhttp3:okhttp:${Versions.OKHTTP}")
     implementation("com.squareup.okhttp3:logging-interceptor:${Versions.OKHTTP}")
-    implementation("com.squareup.okio:okio:2.6.0")
+    implementation("com.squareup.okhttp3:okhttp-dnsoverhttps:${Versions.OKHTTP}")
+    implementation("com.squareup.okio:okio:2.7.0")
 
     // Chucker
     val chuckerVersion = "3.2.0"
@@ -220,7 +221,7 @@ dependencies {
     implementation("com.bluelinelabs:conductor-support:2.1.5") {
         exclude("group", "com.android.support")
     }
-    implementation("com.github.inorichi:conductor-support-preference:a32c357")
+    implementation("com.github.tachiyomiorg:conductor-support-preference:1.1.1")
 
     // RxBindings
     implementation("com.jakewharton.rxbinding:rxbinding-kotlin:${Versions.RX_BINDING}")
