@@ -119,8 +119,8 @@ open class MangaDex() : HttpSource() {
         )
     }
 
-    override fun fetchFollows(page: Int): Observable<MangasPage> {
-        return FollowsHandler(clientBuilder(), headers, preferences).fetchFollows(page)
+    override fun fetchFollows(): Observable<MangasPage> {
+        return FollowsHandler(clientBuilder(), headers, preferences).fetchFollows()
     }
 
     override fun fetchMangaDetailsObservable(manga: SManga): Observable<SManga> {

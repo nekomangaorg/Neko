@@ -13,7 +13,7 @@ import rx.schedulers.Schedulers
 class FollowsPager(val source: Source) : Pager() {
 
     override fun requestNext(): Observable<MangasPage> {
-        return source.fetchFollows(currentPage)
+        return source.fetchFollows()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .doOnNext { onPageReceived(it) }

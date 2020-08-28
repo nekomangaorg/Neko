@@ -47,7 +47,7 @@ interface Source {
      *
      * @param page the page number to retrieve.
      */
-    fun fetchFollows(page: Int): Observable<MangasPage>
+    fun fetchFollows(): Observable<MangasPage>
 
     /**
      * Returns a list of all Follows retrieved by Coroutines

@@ -20,7 +20,6 @@ import kotlinx.coroutines.withContext
 import okhttp3.CacheControl
 import okhttp3.FormBody
 import okhttp3.Headers
-import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
@@ -32,8 +31,8 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
     /**
      * fetch follows by page
      */
-    fun fetchFollows(page: Int): Observable<MangasPage> {
-        return client.newCall(followsListRequest(page))
+    fun fetchFollows(): Observable<MangasPage> {
+        return client.newCall(followsListRequest())
             .asObservable()
             .map { response ->
                 followsParseMangaPage(response)
@@ -64,7 +63,7 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
             followFromElement(it, lowQualityCovers)
         }
 
-        return MangasPage(follows, true)
+        return MangasPage(follows, false)
     }
 
     /**fetch follow status used when fetching status for 1 manga
@@ -98,12 +97,8 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
     /**build Request for follows page
      *
      */
-    private fun followsListRequest(page: Int): Request {
-
-        val url = "${MdUtil.baseUrl}${MdUtil.followsAllApi}".toHttpUrlOrNull()!!.newBuilder()
-            .addQueryParameter("page", page.toString())
-
-        return GET(url.toString(), headers, CacheControl.FORCE_NETWORK)
+    private fun followsListRequest(): Request {
+        return GET("${MdUtil.baseUrl}${MdUtil.followsAllApi}", headers, CacheControl.FORCE_NETWORK)
     }
 
     /**
@@ -198,22 +193,9 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
     suspend fun fetchAllFollows(forceHd: Boolean): List<SManga> {
         return withContext(Dispatchers.IO) {
             val listManga = mutableListOf<SManga>()
-            loop@ for (i in 1..10000) {
-                val response = client.newCall(followsListRequest(i))
-                    .execute()
-                val mangasPage = followsParseMangaPage(response, forceHd)
-                var shouldBreakLoop = false
-                if (mangasPage.mangas.isNotEmpty()) {
-                    if (listManga.contains(mangasPage.mangas.first())) {
-                        shouldBreakLoop = true
-                    } else {
-                        listManga.addAll(mangasPage.mangas)
-                    }
-                }
-                if (!mangasPage.hasNextPage || shouldBreakLoop) {
-                    break@loop
-                }
-            }
+            val response = client.newCall(followsListRequest()).execute()
+            val mangasPage = followsParseMangaPage(response, forceHd)
+            listManga.addAll(mangasPage.mangas)
             listManga
         }
     }
