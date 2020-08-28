@@ -401,6 +401,7 @@ class MangaDetailsPresenter(
 
             var errorFromNetwork: java.lang.Exception? = null
             var errorFromMerged: java.lang.Exception? = null
+            var error = false
             val thumbnailUrl = manga.thumbnail_url
 
             val nPair = async(Dispatchers.IO) {
@@ -414,6 +415,7 @@ class MangaDetailsPresenter(
                             Pair(result.first, list.toList())
                         } catch (e: Exception) {
                             XLog.e("error with mergedsource", e)
+                            error = true
                             errorFromMerged = e
                             result
                         }
@@ -422,6 +424,7 @@ class MangaDetailsPresenter(
                     }
                 } catch (e: Exception) {
                     XLog.e("error with mangadex", e)
+                    error = true
                     errorFromNetwork = e
                     Pair(null, emptyList<SChapter>())
                 }
@@ -445,35 +448,36 @@ class MangaDetailsPresenter(
             }
             fetchExternalLinks()
             val finChapters = networkPair.second
-
-            val newChapters = syncChaptersWithSource(db, finChapters, manga)
-            if (newChapters.first.isNotEmpty()) {
-                val downloadNew = preferences.downloadNew().getOrDefault()
-                if (downloadNew && !controller.fromCatalogue && mangaWasInitalized) {
-                    if (!hasMergeChapters && manga.merge_manga_url != null) {
-                        hasMergeChapters = true
-                    } else {
-                        val categoriesToDownload = preferences.downloadNewCategories().getOrDefault().map(String::toInt)
-                        val shouldDownload = categoriesToDownload.isEmpty() || getMangaCategoryIds().any { it in categoriesToDownload }
-                        if (shouldDownload) {
-                            downloadChapters(
-                                newChapters.first.sortedBy { it.chapter_number }
-                                    .map { it.toModel() }
-                            )
+            if (!error) {
+                val newChapters = syncChaptersWithSource(db, finChapters, manga)
+                if (newChapters.first.isNotEmpty()) {
+                    val downloadNew = preferences.downloadNew().getOrDefault()
+                    if (downloadNew && !controller.fromCatalogue && mangaWasInitalized) {
+                        if (!hasMergeChapters && manga.merge_manga_url != null) {
+                            hasMergeChapters = true
+                        } else {
+                            val categoriesToDownload = preferences.downloadNewCategories().getOrDefault().map(String::toInt)
+                            val shouldDownload = categoriesToDownload.isEmpty() || getMangaCategoryIds().any { it in categoriesToDownload }
+                            if (shouldDownload) {
+                                downloadChapters(
+                                    newChapters.first.sortedBy { it.chapter_number }
+                                        .map { it.toModel() }
+                                )
+                            }
                         }
                     }
                 }
-            }
-            if (newChapters.second.isNotEmpty()) {
-                val removedChaptersId = newChapters.second.map { it.id }
-                val removedChapters = this@MangaDetailsPresenter.chapters.filter {
-                    it.id in removedChaptersId && it.isDownloaded
-                }
-                if (removedChapters.isNotEmpty()) {
-                    withContext(Dispatchers.Main) {
-                        controller.showChaptersRemovedPopup(
-                            removedChapters
-                        )
+                if (newChapters.second.isNotEmpty()) {
+                    val removedChaptersId = newChapters.second.map { it.id }
+                    val removedChapters = this@MangaDetailsPresenter.chapters.filter {
+                        it.id in removedChaptersId && it.isDownloaded
+                    }
+                    if (removedChapters.isNotEmpty()) {
+                        withContext(Dispatchers.Main) {
+                            controller.showChaptersRemovedPopup(
+                                removedChapters
+                            )
+                        }
                     }
                 }
             }
