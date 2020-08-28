@@ -188,7 +188,7 @@ class MergeSource : ReducedHttpSource() {
             index = "-index-$t"
         }
         val n = e.substring(1, e.length - 1)
-        
+
         var suffix = ""
         val path = e.substring(e.length - 1).toInt()
         if (0 != path) {

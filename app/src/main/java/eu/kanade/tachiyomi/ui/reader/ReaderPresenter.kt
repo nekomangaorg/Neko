@@ -275,7 +275,7 @@ class ReaderPresenter(
                         XLog.nst().d("ChapterList in loadObservable")
                         XLog.nst().d("chapter position $chapterPos")
                         chapterList.forEach {
-                            XLog.nst().d(it.urlAndName())
+                            XLog.nst().d(it.urlAndName() + " source order: " + it.chapter.source_order)
                         }
                     }
                     ViewerChapters(

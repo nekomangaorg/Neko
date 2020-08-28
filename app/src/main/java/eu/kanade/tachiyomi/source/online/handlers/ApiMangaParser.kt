@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
+import com.elvishew.xlog.XLog
 import com.github.salomonbrys.kotson.nullInt
 import com.github.salomonbrys.kotson.obj
 import com.google.gson.JsonParser
@@ -12,7 +13,6 @@ import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import okhttp3.Response
 import org.jsoup.Jsoup
-import com.elvishew.xlog.XLog
 import java.util.Date
 import kotlin.math.floor
 

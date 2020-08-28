@@ -1,9 +1,9 @@
 package eu.kanade.tachiyomi.ui.reader.model
 
+import com.elvishew.xlog.XLog
 import com.jakewharton.rxrelay.BehaviorRelay
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.ui.reader.loader.PageLoader
-import com.elvishew.xlog.XLog
 
 data class ReaderChapter(val chapter: Chapter) {
 
