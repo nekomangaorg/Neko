@@ -202,11 +202,15 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
                 val response = client.newCall(followsListRequest(i))
                     .execute()
                 val mangasPage = followsParseMangaPage(response, forceHd)
-
+                var shouldBreakLoop = false
                 if (mangasPage.mangas.isNotEmpty()) {
-                    listManga.addAll(mangasPage.mangas)
+                    if (listManga.contains(mangasPage.mangas.first())) {
+                        shouldBreakLoop = true
+                    } else {
+                        listManga.addAll(mangasPage.mangas)
+                    }
                 }
-                if (!mangasPage.hasNextPage) {
+                if (!mangasPage.hasNextPage || shouldBreakLoop) {
                     break@loop
                 }
             }

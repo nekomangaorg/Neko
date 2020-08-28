@@ -43,6 +43,7 @@ import kotlinx.coroutines.sync.withPermit
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File
+import java.util.Date
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -521,6 +522,7 @@ class LibraryUpdateService(
                         networkManga.title,
                         sourceManager.getMangadex().id
                     )
+                    dbManga.date_added = Date().time
                 }
 
                 dbManga.copyFrom(networkManga)
