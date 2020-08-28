@@ -188,12 +188,13 @@ class MergeSource : ReducedHttpSource() {
             index = "-index-$t"
         }
         val n = e.substring(1, e.length - 1)
+        
         var suffix = ""
         val path = e.substring(e.length - 1).toInt()
         if (0 != path) {
             suffix = ".$path"
         }
-        return "-chapter-$n$index$suffix.html"
+        return "-chapter-$n$suffix$index.html"
     }
 
     override fun fetchImage(page: Page): Observable<Response> {
