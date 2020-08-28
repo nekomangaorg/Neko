@@ -15,6 +15,7 @@ data class MangaSerializer(
     val author: String,
     val cover_url: String,
     val description: String,
+    val demographic: String,
     val genres: List<Int>,
     val hentai: Int,
     val lang_flag: String,

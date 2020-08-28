@@ -64,8 +64,14 @@ class ApiMangaParser(val langs: List<String>) {
                 manga.status = tempStatus
             }
 
+            val demographic = FilterHandler.demographics().filter { it.id == networkManga.demographic }.firstOrNull()
+
             val genres = networkManga.genres.mapNotNull { FilterHandler.allTypes[it.toString()] }
                 .toMutableList()
+
+            if (demographic != null) {
+                genres.add(0, demographic.name)
+            }
 
             if (networkManga.hentai == 1) {
                 genres.add("Hentai")
