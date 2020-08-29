@@ -18,20 +18,29 @@ import kotlin.math.floor
 
 class ApiMangaParser(val langs: List<String>) {
 
-    fun mangaDetailsParse(response: Response): SManga {
-        return mangaDetailsParse(response.body!!.string())
+    fun mangaDetailsParse(response: Response, forceLatestCover: Boolean): SManga {
+        return mangaDetailsParse(response.body!!.string(), forceLatestCover)
     }
 
     /**
      * Parse the manga details json into manga object
      */
-    fun mangaDetailsParse(jsonData: String): SManga {
+    fun mangaDetailsParse(jsonData: String, forceLatestCover: Boolean): SManga {
         try {
             val manga = SManga.create()
             val networkApiManga = MdUtil.jsonParser.parse(ApiMangaSerializer.serializer(), jsonData)
             val networkManga = networkApiManga.manga
             manga.title = MdUtil.cleanString(networkManga.title)
-            manga.thumbnail_url = MdUtil.cdnUrl + MdUtil.removeTimeParamUrl(networkManga.cover_url)
+
+            val coverList = networkManga.covers
+            manga.thumbnail_url = MdUtil.cdnUrl +
+                if (forceLatestCover && coverList.isNotEmpty()) {
+                    val cover = networkManga
+                    coverList.last()
+                } else {
+                    MdUtil.cdnUrl + MdUtil.removeTimeParamUrl(networkManga.cover_url)
+                }
+
             manga.description = MdUtil.cleanDescription(networkManga.description)
             manga.author = MdUtil.cleanString(networkManga.author)
             manga.artist = MdUtil.cleanString(networkManga.artist)

@@ -92,12 +92,4 @@ abstract class ReducedHttpSource : HttpSource() {
     override suspend fun fetchChapterList(manga: SManga): List<SChapter> {
         TODO("Not yet implemented")
     }
-
-    override suspend fun getLatestCoverUrl(manga: SManga): String {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getAllCovers(manga: SManga): List<String> {
-        TODO("Not yet implemented")
-    }
 }

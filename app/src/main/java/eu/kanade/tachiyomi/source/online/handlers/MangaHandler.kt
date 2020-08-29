@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
+import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.asObservableSuccess
 import eu.kanade.tachiyomi.source.model.SChapter
@@ -12,9 +13,8 @@ import okhttp3.Headers
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import rx.Observable
-import com.elvishew.xlog.XLog
 
-class MangaHandler(val client: OkHttpClient, val headers: Headers, val langs: List<String>) {
+class MangaHandler(val client: OkHttpClient, val headers: Headers, val langs: List<String>, val forceLatestCovers: Boolean = false) {
 
     suspend fun fetchMangaAndChapterDetails(manga: SManga): Pair<SManga, List<SChapter>> {
         return withContext(Dispatchers.IO) {
@@ -27,7 +27,7 @@ class MangaHandler(val client: OkHttpClient, val headers: Headers, val langs: Li
                 throw Exception("Error from MangaDex Response code ${response.code} ")
             }
 
-            val detailsManga = parser.mangaDetailsParse(jsonData)
+            val detailsManga = parser.mangaDetailsParse(jsonData, forceLatestCovers)
             manga.copyFrom(detailsManga)
             val chapterList = parser.chapterListParse(jsonData)
             Pair(
@@ -48,7 +48,7 @@ class MangaHandler(val client: OkHttpClient, val headers: Headers, val langs: Li
     suspend fun fetchMangaDetails(manga: SManga): SManga {
         return withContext(Dispatchers.IO) {
             val response = client.newCall(apiRequest(manga)).execute()
-            ApiMangaParser(langs).mangaDetailsParse(response).apply { initialized = true }
+            ApiMangaParser(langs).mangaDetailsParse(response, forceLatestCovers).apply { initialized = true }
         }
     }
 
@@ -56,7 +56,7 @@ class MangaHandler(val client: OkHttpClient, val headers: Headers, val langs: Li
         return client.newCall(apiRequest(manga))
             .asObservableSuccess()
             .map { response ->
-                ApiMangaParser(langs).mangaDetailsParse(response).apply { initialized = true }
+                ApiMangaParser(langs).mangaDetailsParse(response, forceLatestCovers).apply { initialized = true }
             }
     }
 

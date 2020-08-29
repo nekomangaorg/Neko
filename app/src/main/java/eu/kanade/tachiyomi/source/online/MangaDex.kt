@@ -17,7 +17,6 @@ import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.online.handlers.CoverHandler
 import eu.kanade.tachiyomi.source.online.handlers.FilterHandler
 import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
 import eu.kanade.tachiyomi.source.online.handlers.MangaHandler
@@ -124,37 +123,19 @@ open class MangaDex() : HttpSource() {
     }
 
     override fun fetchMangaDetailsObservable(manga: SManga): Observable<SManga> {
-        return MangaHandler(clientBuilder(), headers, getLangsToShow()).fetchMangaDetailsObservable(
+        return MangaHandler(clientBuilder(), headers, getLangsToShow(), preferences.forceLatestCovers()).fetchMangaDetailsObservable(
             manga
         )
     }
 
-    override suspend fun fetchMangaDetails(originalManga: SManga): SManga {
-        val manga = MangaHandler(clientBuilder(), headers, getLangsToShow()).fetchMangaDetails(originalManga)
-        try {
-            if (preferences.forceLatestCovers()) {
-                val cover = getLatestCoverUrl(manga)
-                manga.thumbnail_url = cover
-            }
-        } catch (e: Exception) {
-            XLog.e("exception getting latest covers", e)
-        }
-        return manga
+    override suspend fun fetchMangaDetails(manga: SManga): SManga {
+        return MangaHandler(clientBuilder(), headers, getLangsToShow(), preferences.forceLatestCovers()).fetchMangaDetails(manga)
     }
 
     override suspend fun fetchMangaAndChapterDetails(manga: SManga): Pair<SManga, List<SChapter>> {
-        val pair = MangaHandler(clientBuilder(), headers, getLangsToShow()).fetchMangaAndChapterDetails(
+        val pair = MangaHandler(clientBuilder(), headers, getLangsToShow(), preferences.forceLatestCovers()).fetchMangaAndChapterDetails(
             manga
         )
-        try {
-            if (preferences.forceLatestCovers()) {
-                val cover = getLatestCoverUrl(pair.first)
-                pair.first.thumbnail_url = cover
-            }
-        } catch (e: Exception) {
-            XLog.e("exception getting latest covers", e)
-        }
-
         return pair
     }
 
@@ -268,18 +249,6 @@ open class MangaDex() : HttpSource() {
 
     override fun fetchMangaSimilarObservable(manga: Manga): Observable<MangasPage> {
         return SimilarHandler(preferences).fetchSimilar(manga)
-    }
-
-    override suspend fun getLatestCoverUrl(manga: SManga): String {
-        val covers = getAllCovers(manga)
-        if (covers.isEmpty()) {
-            return manga.thumbnail_url!!
-        }
-        return getAllCovers(manga).last()
-    }
-
-    override suspend fun getAllCovers(manga: SManga): List<String> {
-        return CoverHandler(clientBuilder(), headers).getCovers(manga)
     }
 
     override fun isLogged(): Boolean {

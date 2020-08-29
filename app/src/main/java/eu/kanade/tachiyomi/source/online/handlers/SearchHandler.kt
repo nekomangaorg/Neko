@@ -29,7 +29,7 @@ class SearchHandler(val client: OkHttpClient, private val headers: Headers, val 
             client.newCall(searchMangaByIdRequest(realQuery))
                 .asObservableSuccess()
                 .map { response ->
-                    val details = ApiMangaParser(langs).mangaDetailsParse(response)
+                    val details = ApiMangaParser(langs).mangaDetailsParse(response, preferences.forceLatestCovers())
                     details.url = "/manga/$realQuery/"
                     MangasPage(listOf(details), false)
                 }
