@@ -35,7 +35,6 @@ class ApiMangaParser(val langs: List<String>) {
             val coverList = networkManga.covers
             manga.thumbnail_url = MdUtil.cdnUrl +
                 if (forceLatestCover && coverList.isNotEmpty()) {
-                    val cover = networkManga
                     coverList.last()
                 } else {
                     MdUtil.removeTimeParamUrl(networkManga.cover_url)

@@ -48,6 +48,13 @@ object ChapterRecognition {
         // Remove comma's from chapter.
         name = name.replace(',', '.')
 
+        val start = name.indexOf("[")
+        val end = name.indexOf("]")
+        // remove
+        if (start >= 0 && end > 0) {
+            name = name.removeRange(start, end)
+        }
+
         // Remove unwanted white spaces.
         unwantedWhiteSpace.findAll(name).let {
             it.forEach { occurrence -> name = name.replace(occurrence.value, occurrence.value.trim()) }
