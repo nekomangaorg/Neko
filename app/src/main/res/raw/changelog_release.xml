@@ -2,6 +2,16 @@
 <changelog bulletedList="true">
     <changelogversion
         changeDate=""
+        versionName="v2.1.3.5">
+        <changelogtext>New: Improved rate limiting some and bumped it back up a little</changelogtext>
+        <changelogtext>New: Removed the extra api call for latest covers</changelogtext>
+        <changelogtext>New: Demographic now shows as the first entry in genre tags</changelogtext>
+        <changelogtext>New: Add Villainess theme tag</changelogtext>
+        <changelogtext>Fix: Json parse error for dot chapters like 14.5 for merged source</changelogtext>
+        <changelogtext>Fix: Sync reading/rereading follows into Neko</changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
         versionName="v2.1.3.4">
         <changelogtext>Fix: adjust where similar json points to</changelogtext>
         <changelogtext>Fix: server errors dont cause chapter lists to delete</changelogtext>
