@@ -146,7 +146,9 @@ object Libs {
         const val changelog = "com.github.gabrielemariotti.changeloglib:changelog:${Versions.changelog}"
         const val injekt = "com.github.inorichi.injekt:injekt-core:${Versions.injekt}"
         const val stringSimilarity = "info.debatty:java-string-similarity:${Versions.stringSimilarity}"
+        const val tokenBucket = "org.isomorphism:token-bucket:${Versions.tokenBucket}"
         const val versionCompare = "com.g00fy2:versioncompare:${Versions.versionCompare}"
+        const val listenableFutureConflictResolve = "com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava"
         const val xlog = "com.elvishew:xlog:${Versions.xlog}"
     }
 }
@@ -224,6 +226,7 @@ object Versions {
     const val systemUiHelper = "1.0.0"
     const val tagGroup = "1.6.0"
     const val tapTargetView = "1.13.0"
+    const val tokenBucket = "1.7"
     const val unifile = "e9ee588"
     const val versionCompare = "1.3.4"
     const val viewStatePagerAdapter = "1.1.0"

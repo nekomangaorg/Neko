@@ -247,6 +247,12 @@ dependencies {
 
     //  version comparison
     implementation(Libs.Util.versionCompare)
+
+    // token bucket
+    implementation(Libs.Util.tokenBucket)
+    // needed to compile with token bucket
+    implementation(Libs.Util.listenableFutureConflictResolve)
+
     implementation(Libs.Util.aboutLibraries)
 }
 

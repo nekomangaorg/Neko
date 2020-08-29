@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.network
 
 import android.content.Context
-import android.os.SystemClock
 import com.chuckerteam.chucker.api.ChuckerInterceptor
 import com.elvishew.xlog.XLog
 import com.google.gson.Gson
@@ -14,6 +13,7 @@ import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.dnsoverhttps.DnsOverHttps
 import okhttp3.logging.HttpLoggingInterceptor
+import org.isomorphism.util.TokenBuckets
 import uy.kohesive.injekt.injectLazy
 import java.io.File
 import java.net.InetAddress
@@ -29,34 +29,11 @@ class NetworkHelper(val context: Context) {
 
     val cookieManager = AndroidCookieJar()
 
-    private val requestsPerSecond = 2
-    private val lastRequests = ArrayList<Long>(requestsPerSecond)
+    private val bucket = TokenBuckets.builder().withCapacity(3)
+        .withFixedIntervalRefillStrategy(3, 1, TimeUnit.SECONDS).build()
+
     private val rateLimitInterceptor = Interceptor {
-        synchronized(this) {
-            val now = SystemClock.elapsedRealtime()
-            val waitTime = if (lastRequests.size < requestsPerSecond) {
-                0
-            } else {
-                val oldestReq = lastRequests[0]
-                val newestReq = lastRequests[requestsPerSecond - 1]
-
-                if (newestReq - oldestReq > 1000) {
-                    0
-                } else {
-                    oldestReq + 1000 - now // Remaining time for the next second
-                }
-            }
-
-            if (lastRequests.size == requestsPerSecond) {
-                lastRequests.removeAt(0)
-            }
-            if (waitTime > 0) {
-                lastRequests.add(now + waitTime)
-                Thread.sleep(waitTime) // Sleep inside synchronized to pause queued requests
-            } else {
-                lastRequests.add(now)
-            }
-        }
+        bucket.consume()
 
         it.proceed(it.request())
     }
