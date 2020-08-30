@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
+import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.asObservableSuccess
@@ -33,6 +34,7 @@ class PopularHandler(val client: OkHttpClient, private val headers: Headers) {
     }
 
     private fun popularMangaRequest(page: Int): Request {
+        XLog.tag("NEKO-LATEST").d("latest manga parse page $page")
         return GET("${MdUtil.baseUrl}/updates/$page/", headers, CacheControl.FORCE_NETWORK)
     }
 
@@ -46,6 +48,7 @@ class PopularHandler(val client: OkHttpClient, private val headers: Headers) {
         val hasNextPage = popularMangaNextPageSelector.let { selector ->
             document.select(selector).first()
         } != null
+        XLog.tag("NEKO-LATEST").d("latest manga parse has next page $hasNextPage")
 
         return MangasPage(mangas, hasNextPage)
     }
