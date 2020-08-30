@@ -236,7 +236,7 @@ class ApiMangaParser(val langs: List<String>) {
         }
         if ((status == 2 || status == 3)) {
             if ((isOneShot(networkChapter, finalChapterNumber) && totalChapterCount == 1) ||
-                networkChapter.chapter == finalChapterNumber
+                networkChapter.chapter == finalChapterNumber && finalChapterNumber.toIntOrNull() != 0
             ) {
                 chapterName.add("[END]")
             }
