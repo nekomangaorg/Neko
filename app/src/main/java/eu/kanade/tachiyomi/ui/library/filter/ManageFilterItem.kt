@@ -90,6 +90,8 @@ class ManageFilterItem(val char: Char) : AbstractFlexibleItem<ManageFilterItem.H
                     'c' -> R.string.status
                     'm' -> R.string.series_type
                     't' -> R.string.tracked
+                    'n' -> R.string.merged
+                    'o' -> R.string.has_missing_chp
                     else -> R.string.unread
                 }
             )

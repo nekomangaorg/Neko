@@ -379,8 +379,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
     fun manageFilterPopup() {
         val recycler = RecyclerView(context)
-        if (filterOrder.count() != 6)
-            filterOrder = "urdcmt"
+        if (filterOrder.count() != 8)
+            filterOrder = "urdcmtno"
         val adapter = FlexibleAdapter(
             filterOrder.toCharArray().map(::ManageFilterItem),
             this, true
